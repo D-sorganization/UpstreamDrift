@@ -31,17 +31,19 @@ program is tracked in
 
 ## Layout
 
-| Path                                                                         | What it is                                                                        |
-| ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| [`proximal_distal_energy_transfer.qmd`](proximal_distal_energy_transfer.qmd) | Master Quarto document (front matter + chapter includes)                          |
-| [`chapters/`](chapters/)                                                     | Chapter source files (`_ch01`–`_ch09`, `_appendices`)                             |
-| [`HAND_PATH_ATTRIBUTION_CONTRACT.md`](HAND_PATH_ATTRIBUTION_CONTRACT.md)     | Canonical source, terminology, and estimand contract for hand-path attribution    |
-| [`references.bib`](references.bib)                                           | Linked bibliography plus a clearly labeled project-originated presentation source |
-| [`figures/`](figures/)                                                       | Figures generated from the recorded analyses (PDF and SVG)                        |
-| [`data/`](data/)                                                             | Recorded experiment outputs with provenance (JSON + NPZ)                          |
-| [`proximal_distal_energy_transfer.tex`](proximal_distal_energy_transfer.tex) | LaTeX generated from the Quarto source (`keep-tex: true`)                         |
-| [`sources/wscg_2024/`](sources/wscg_2024/)                                   | Hash-registered WSCG presentation sources and interpretation boundaries           |
-| [`proximal_distal_energy_transfer.pdf`](proximal_distal_energy_transfer.pdf) | Rendered scientific PDF                                                           |
+| Path                                                                                   | What it is                                                                        |
+| -------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| [`proximal_distal_energy_transfer.qmd`](proximal_distal_energy_transfer.qmd)           | Master Quarto document (front matter + chapter includes)                          |
+| [`chapters/`](chapters/)                                                               | Chapter source files (`_ch01`–`_ch09`, `_appendices`)                             |
+| [`HAND_PATH_ATTRIBUTION_CONTRACT.md`](HAND_PATH_ATTRIBUTION_CONTRACT.md)               | Canonical source, terminology, and estimand contract for hand-path attribution    |
+| [`EVIDENCE_SCHEMA_V2.md`](EVIDENCE_SCHEMA_V2.md)                                       | Falsifiable prediction and named spatial-interface evidence contract              |
+| [`MODEL_COMPLETION_FALSIFICATION_MATRIX.md`](MODEL_COMPLETION_FALSIFICATION_MATRIX.md) | Claim, alternative-explanation, model-discrepancy, and falsifier register         |
+| [`references.bib`](references.bib)                                                     | Linked bibliography plus a clearly labeled project-originated presentation source |
+| [`figures/`](figures/)                                                                 | Figures generated from the recorded analyses (PDF and SVG)                        |
+| [`data/`](data/)                                                                       | Recorded experiment outputs with provenance (JSON + NPZ)                          |
+| [`proximal_distal_energy_transfer.tex`](proximal_distal_energy_transfer.tex)           | LaTeX generated from the Quarto source (`keep-tex: true`)                         |
+| [`sources/wscg_2024/`](sources/wscg_2024/)                                             | Hash-registered WSCG presentation sources and interpretation boundaries           |
+| [`proximal_distal_energy_transfer.pdf`](proximal_distal_energy_transfer.pdf)           | Rendered scientific PDF                                                           |
 
 ## Reproducing Everything
 

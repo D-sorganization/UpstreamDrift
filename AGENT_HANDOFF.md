@@ -1,9 +1,22 @@
 # Agent Handoff — UpstreamDrift
 
-Last updated: 2026-08-10
+Last updated: 2026-08-11
 Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
+
+- **#8426 model-completion and falsification program** — active consolidated
+  branch `integration/proximal-distal-completion`. Phase 0 now defines the
+  versioned, engine-neutral `SpatialWrenchTrajectory`, preregistered prediction
+  and tolerance contracts, a five-hypothesis machine-readable registry, planar
+  v1-to-spatial-v2 migration, and the claim/falsifier/model-discrepancy matrix.
+  Focused TDD covers drift/control and power closure, reference transport,
+  proper-frame invariance, ambiguous interface rejection, preoutcome
+  convergence tolerance calibration, manifest round trips, and lossless planar
+  embedding. Next: complete the local Phase 0 gates, publish its phase PR into
+  this integration branch, then implement the nonsingular forward two-hand
+  constrained rollout. The integration branch—not each phase branch—will
+  eventually target protected `main`.
 
 - **#8458 hand-path drift/control attribution** — consolidated branch
   `feat/hand-path-drift-control-attribution` defines the canonical same-state
