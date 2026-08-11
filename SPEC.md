@@ -39,7 +39,7 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.501 |
+| **Spec Version** | 1.0.502 |
 | **Last Spec Update** | 2026-08-11 |
 
 ## 2. Purpose & Mission
@@ -71,6 +71,15 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-08-11** - Recorded issue #8487 as the truthful tracker for the local
+  launcher-settings decomposition candidate
+  `e63e6908db6a1caa113a57f43a44fc0ecc00dc17`, built from exact draft PR #8486
+  head `624043537a5ab10aa7ef56dc61685a004b872c0c`. Its focused settings tests and
+  changed-file quality gates pass; the wider launcher failures, unrestricted
+  launcher-suite Windows access violation, and remaining oversized
+  `launcher_ui_setup.py` module are parent-identical. The candidate remains
+  unpublished pending independent review and normal protected repository
+  behavior.
 - **2026-08-11** - Decomposed the launcher settings surface from exact draft
   PR #8486 head `624043537a5ab10aa7ef56dc61685a004b872c0c` without changing
   its public dialog/widget contract. Runtime dependency probes and the WSL
@@ -2049,6 +2058,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-11 | 1.0.502 | Registered #8487 as the truthful tracker for local candidate `e63e6908db6a1caa113a57f43a44fc0ecc00dc17`, based on exact draft PR #8486 head `624043537a5ab10aa7ef56dc61685a004b872c0c`. The 44 focused settings contracts and changed-file quality gates pass. The 18 wider launcher failures, unrestricted launcher-suite Windows access violation, and remaining oversized `launcher_ui_setup.py` module are parent-identical. Publication remains gated on independent review and normal protected repository behavior. |
 | 2026-08-11 | 1.0.501 | Decomposed the launcher settings surface from exact draft PR #8486 head `624043537a5ab10aa7ef56dc61685a004b872c0c`: runtime dependency checks and the WSL setup dialog now live in `settings_runtime.py`, while diagnostics, log synchronization, and process-management behavior live in the private `_settings_auxiliary_tabs.py` mixin. Preserved the `SettingsWidget`/`SettingsDialog` constructor, signals, tab constants, controls, methods, and compatibility imports. Reduced `settings_dialog.py` from 2,190 to 1,124 lines; removed its file-size and expired module-size exceptions plus the obsolete `WslScriptDialog._setup_ui` long-function exception without renewal. The remaining global module-size violation is the parent-identical `launcher_ui_setup.py`; accurate open issue tracking is still required before publication because the retired exceptions cite closed or unrelated issues. |
 | 2026-08-11 | 1.0.500 | Decomposed the launcher shared-Tools freshness probe behind a focused, dependency-injected local-Git boundary while preserving `LauncherDiagnostics.check_shared_tools_freshness()` and its result-recording behavior. Reduced `launcher_diagnostics.py` from 1,307 to 1,196 lines and removed its expired module-size exception, active file-size exception, and obsolete long-function exception without renewal or policy widening. The cited #5922 maintainability issue is closed, cited #7341/#7342 are closed and concern different defects, and #8472 is chat-dock-specific, so this slice deliberately does not claim issue completion; accurate open tracking remains a publication prerequisite. Three expired exceptions and four oversized production modules remain explicit module-gate blockers. |
 | 2026-08-11 | 1.0.499 | Completed the local UpstreamDrift portion of #8472's chat-dock compatibility-shell decomposition: moved WebSocket dispatch, terminal-mode mechanics, streaming-state initialization, and collapsed-view mutation into focused `chat._qt.runtime` helpers; retained every historical `ChatDockWidget` method as a thin delegate; and reduced `_chat_dock_widget_qt.py` from 1,490 to 1,150 lines. Removed the chat dock from both file-size exception ledgers without renewing or widening either policy. Focused delegation, terminal-payload, chat behavior, module-truthfulness, lint, type, architecture, and file-size checks cover the new boundaries. Canonical Tools synchronization remains required before refreshing the cross-repository drift hash; that sentinel already fails on the parent for the dock and `models.py`. Four expired exceptions and five oversized production modules remain explicit module-gate blockers. |
