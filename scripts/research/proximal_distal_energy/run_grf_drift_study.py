@@ -196,7 +196,13 @@ def build_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
 
 
 def _save_figure(figure: plt.Figure, output: Path, stem: str) -> None:
-    figure.savefig(output / f"{stem}.svg", bbox_inches="tight", metadata={"Date": None})
+    svg_path = output / f"{stem}.svg"
+    figure.savefig(svg_path, bbox_inches="tight", metadata={"Date": None})
+    svg_text = svg_path.read_text(encoding="utf-8")
+    svg_path.write_text(
+        "\n".join(line.rstrip() for line in svg_text.splitlines()) + "\n",
+        encoding="utf-8",
+    )
     figure.savefig(
         output / f"{stem}.pdf", bbox_inches="tight", metadata={"CreationDate": None}
     )
@@ -212,10 +218,11 @@ def _make_figures(
     fig, axes = plt.subplots(2, 1, figsize=(8.2, 6.3), sharex=True)
     for component, axis in enumerate(axes):
         for name in ("total", "configuration", "velocity", "control", "ztcf", "zvcf"):
+            label = name.upper() if name in {"ztcf", "zvcf"} else name.title()
             axis.plot(
                 phase,
                 arrays[name][:, component],
-                label=name.title(),
+                label=label,
                 color=COLORS[name],
                 linewidth=1.7,
             )
@@ -266,30 +273,30 @@ def _make_figures(
     fig, axis = plt.subplots(figsize=(8.2, 4.7))
     axis.axis("off")
     boxes = (
-        (0.02, "Measured Inputs\nKinematics + Force Plates"),
-        (0.27, "Declared Model\nFrames + Inertials + Contacts"),
-        (0.52, "Pointwise Predictions\nTotal + ZTCF + ZVCF"),
-        (0.77, "Held-Out Tests\nRMSE + Impulse + COP"),
+        (0.12, "Measured Inputs\nKinematics + Force Plates"),
+        (0.38, "Declared Model\nFrames + Inertials + Contacts"),
+        (0.64, "Pointwise Predictions\nTotal + ZTCF + ZVCF"),
+        (0.88, "Held-Out Tests\nRMSE + Impulse + COP"),
     )
     for x, label in boxes:
         axis.text(
             x,
             0.60,
             label,
-            ha="left",
+            ha="center",
             va="center",
-            fontsize=10,
+            fontsize=9.5,
             bbox={
                 "boxstyle": "round,pad=0.5",
                 "facecolor": "#F3F4F6",
                 "edgecolor": "#374151",
             },
         )
-        if x < 0.77:
+        if x < 0.88:
             axis.annotate(
                 "",
-                xy=(x + 0.23, 0.60),
-                xytext=(x + 0.18, 0.60),
+                xy=(x + 0.145, 0.60),
+                xytext=(x + 0.115, 0.60),
                 arrowprops={"arrowstyle": "->", "color": "#374151"},
             )
     axis.text(
