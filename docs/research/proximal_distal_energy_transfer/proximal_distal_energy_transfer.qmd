@@ -95,6 +95,8 @@ format:
 
 {{< include chapters/_ch03_interaction_forces.qmd >}}
 
+{{< include chapters/_ch03b_hand_path_attribution.qmd >}}
+
 {{< include chapters/_ch04_counterfactual_ensemble.qmd >}}
 
 {{< include chapters/_ch05_two_hand_wrench.qmd >}}
