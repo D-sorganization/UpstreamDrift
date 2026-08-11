@@ -39,7 +39,7 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.505 |
+| **Spec Version** | 1.0.506 |
 | **Last Spec Update** | 2026-08-11 |
 
 ## 2. Purpose & Mission
@@ -90,8 +90,12 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   exactly parent-identical. The official repository MyPy wrapper excludes
   `launcher_ui_setup.py`, `_launcher_navigation_ui.py`, and
   `_launcher_top_bar_ui.py`; this validation therefore provides no type-safety
-  evidence for those modules. This candidate remains local and unpublished
-  pending independent review.
+  evidence for those modules. Ready PR
+  [#8492](https://github.com/D-sorganization/UpstreamDrift/pull/8492) publishes
+  reviewed implementation commit
+  `ff7d937ccce767c432c53ef21e2193807ee77fdb` on exact #8489 head
+  `2f664d2beaddf7444b12f90080ae9897aea24fcc`; protected CI, required human
+  approval, parent dependency, and release remain open.
 - **2026-08-11** - Published the independently reviewed launcher-settings
   decomposition as ready PR #8489 at exact head
   `832969ebbd6c58c9892dc16f82638e67a05b20dc`, stacked on unchanged PR #8486
@@ -2086,6 +2090,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-11 | 1.0.506 | Published the twice-reviewed #8490 launcher UI-setup decomposition as ready PR #8492 at exact implementation commit `ff7d937ccce767c432c53ef21e2193807ee77fdb`, stacked on unchanged #8489 head `2f664d2beaddf7444b12f90080ae9897aea24fcc`. The responsive source contract, historical facade runtime seams, explicit MyPy-exclusion disclosure, 11 regression tests, 25 focused tests, and size/architecture/lint gates are green. Protected CI, required human approval, parent dependency, issue closure, and release remain open; no auto-merge is enabled. |
 | 2026-08-11 | 1.0.505 | Repaired the #8490 local candidate after independent review: runtime menu-close and zoom-description builders now dispatch through narrow instance hooks so monkeypatches of the historical `launcher_ui_setup` facade remain effective, while the private mixins retain independent defaults and no import cycle is introduced. Updated the responsive source contract to inspect the extracted search and zoom helper owners without weakening its clipping assertions. The official repository MyPy wrapper excludes the facade and both mixins, so its clean skip is not type-safety evidence. The exact-parent broader failure disclosures remain unchanged. |
 | 2026-08-11 | 1.0.504 | Prepared issue #8490's local launcher UI-setup decomposition from exact PR #8489 head `2f664d2beaddf7444b12f90080ae9897aea24fcc`. Split navigation/sidebar/menu construction into `_launcher_navigation_ui.py` and status/search/runtime/view/zoom construction into `_launcher_top_bar_ui.py`, while preserving `UISetupManager` compatibility exports, historical methods, dynamic launcher rebinding, and monkeypatch seams. Reduced `launcher_ui_setup.py` from 2,263 to 983 lines; removed its file-size and module-size exceptions plus four moved long-function exceptions without renewal. Focused contracts and changed-file gates pass; the 15 broader launcher failures, suite-marker drift, and duplication drift are exact-parent-identical. The candidate remains local pending independent review. |
 | 2026-08-11 | 1.0.503 | Published the independently reviewed launcher-settings decomposition as ready PR #8489 at exact head `832969ebbd6c58c9892dc16f82638e67a05b20dc`, stacked on unchanged PR #8486 head `624043537a5ab10aa7ef56dc61685a004b872c0c`. The independent reviewer found no actionable compatibility, MRO, behavior-parity, or Qt worker-lifecycle regression and reran all 44 focused tests successfully. Protected CI, approval, parent dependency, issue completion, and release state remain unresolved. |

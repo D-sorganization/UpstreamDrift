@@ -5,9 +5,11 @@ Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
 
-- **#8490 launcher UI-setup size slice (local, no publish)** — branch
+- **#8490 launcher UI-setup size slice — ready PR
+  [#8492](https://github.com/D-sorganization/UpstreamDrift/pull/8492)** — branch
   `codex/launcher-ui-setup-decomposition` starts at exact PR #8489 head
-  `2f664d2beaddf7444b12f90080ae9897aea24fcc`. It moves
+  `2f664d2beaddf7444b12f90080ae9897aea24fcc`; reviewed implementation commit
+  `ff7d937ccce767c432c53ef21e2193807ee77fdb` is published. It moves
   sidebar/navigation/menu construction into `_launcher_navigation_ui.py` and
   top-bar status/search/runtime/view/zoom construction plus the historical
   widget types into `_launcher_top_bar_ui.py`. `UISetupManager` keeps all 62
@@ -33,9 +35,12 @@ Update this file with every PR and every push to main.
   `a47813dfc45d70ebf231c1a4fd5a9dd89d9b5931f2fe563c275ed614b4dfa391`;
   the duplication output is 1,571 lines with identical SHA-256
   `73efdb450b2dadcd6261ab27b91d01c7bdf44c2f053e703ceda49bbc24a44fb3`.
-  This candidate has no push or PR and requires independent review before
-  publication. Issue [#8490](https://github.com/D-sorganization/UpstreamDrift/issues/8490)
-  is its truthful open tracker; do not reuse closed #5922 or #7399.
+  Two independent review passes found and then verified closure of the
+  responsive-source, facade-seam, and MyPy-disclosure defects. The ready PR is
+  not released: protected CI, required human approval, and parent #8489 remain
+  open. Issue [#8490](https://github.com/D-sorganization/UpstreamDrift/issues/8490)
+  closes only after an ordinary protected merge; do not reuse closed #5922 or
+  #7399.
 
 - **Launcher-settings size slice — ready PR
   [#8489](https://github.com/D-sorganization/UpstreamDrift/pull/8489)** — branch
