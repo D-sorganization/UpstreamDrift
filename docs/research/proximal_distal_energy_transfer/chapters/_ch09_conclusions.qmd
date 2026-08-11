@@ -40,15 +40,24 @@ remove it exactly; constraint, contact-power, and work--energy residuals close
 under timestep refinement. This transports the mechanism beyond a fixed base
 and rigid club without promoting it to a spatial or physiological result.
 
+The reduced full-body common-state extension resolves implementation transport
+for a narrower spatial estimand. MuJoCo and an independent
+Lagrange--Christoffel formulation agree across 20 coordinates and 61 nonplanar
+states to $2.14\times10^{-11}$ relative error. Reversing the hand moment arm
+reverses the force-generated couple and coincident points remove it exactly.
+Because the forces are prescribed and the state is shared, this supports
+spatial inverse-dynamics and geometry transport but leaves passive forward
+contact explicitly inconclusive.
+
 ## Research Priorities {#sec-future}
 
 The next work should reduce the largest inferential risks in dependency
 order:
 
-1. **Spatial Counterfactual Transport.** Carry the now-executed same-state
-   torque-killswitch from rigid and coupled planar models into a spatial
-   full-body model in two independent engines. Preserve the same
-   force, couple, power, work, and closure observables at every tier.
+1. **Spatial Forward-Contact Counterfactual.** Extend the executed spatial
+   common-state reference with independently solved compliant two-hand contact,
+   then carry the planar same-state torque-killswitch into both forward
+   formulations. Preserve force, couple, power, work, and closure observables.
 2. **Coupled Sensitivity and Constrained Control.** Replace
    one-at-a-time perturbations with a declared multivariable design, add
    activation-rate and history-dependent actuator limits, and compare
@@ -80,3 +89,5 @@ summary is recorded in
 [`data/results_summary.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/results_summary.json),
 and the parameter-sensitivity results are recorded in
 [`data/e1d_parameter_sensitivity.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/e1d_parameter_sensitivity.json).
+The spatial common-state evidence is recorded in
+[`data/spatial_full_body_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json).

@@ -61,12 +61,18 @@ abstract: |
   force-generated couple for 50 ms, the coincident-grip control removes it
   exactly, and work--energy and contact-power identities close under timestep
   refinement. These are planar model-feasibility results, not physiological or
-  human evidence. A common-observable model ladder then
-  carries reference-explicit
-  force, couple, velocity, angular velocity, and power through a third
-  coordinate, prescribed hub motion, two-hand constraint geometry, and proper
-  3-D frame transformations, while explicitly leaving full-body cross-engine
-  dynamics unexecuted. A separate hand-path attribution study evaluates the
+  human evidence. A common-observable model ladder then carries
+  reference-explicit force, couple, velocity, angular velocity, and power
+  through a third coordinate, prescribed hub motion, two-hand constraint
+  geometry, and proper 3-D frame transformations. A reduced full-body
+  extension executes nonplanar common-state inverse dynamics through MuJoCo and
+  an independent Lagrange--Christoffel formulation. Across 20 generalized
+  coordinates and 61 states, the maximum relative discrepancy is
+  $2.14\times10^{-11}$; reversing the hand moment arm reverses a $-4.32$ N m
+  force-generated couple, and coincident hands remove it exactly. Because
+  contact loads are prescribed, passive spatial contact remains inconclusive
+  and forward cross-engine contact remains untested. A separate hand-path
+  attribution study evaluates the
   MacKenzie force-work-per-path-length estimand in an impact-truncated double
   pendulum, a forward-simulated one-arm model, and a mechanically closed
   two-arm local sweep. Drift supplies 101.2% and 103.5% of signed hand-path
@@ -128,6 +134,8 @@ format:
 {{< include chapters/_ch06_shaft_contributions.qmd >}}
 
 {{< include chapters/_ch06b_coupled_base_flex.qmd >}}
+
+{{< include chapters/_ch06c_spatial_cross_formulation.qmd >}}
 
 {{< include chapters/_ch07_model_ladder.qmd >}}
 

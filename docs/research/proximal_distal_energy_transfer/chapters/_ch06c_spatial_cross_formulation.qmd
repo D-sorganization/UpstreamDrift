@@ -1,0 +1,273 @@
+# Spatial Full-Body Common-State Dynamics {#sec-spatial-full-body}
+
+The preceding forward models establish a planar mechanism under increasing
+coupling, but a planar result cannot answer whether the same wrench geometry
+survives out-of-plane motion or whether it is an artifact of one dynamics
+implementation. This chapter executes a spatial comparison at identical
+achieved states. It uses one immutable reduced full-body model definition in
+two independent formulations: native MuJoCo inverse dynamics and a
+Lagrange--Christoffel implementation assembled directly from body Jacobians
+[@todorov2012mujoco; @featherstone2008].
+
+This is a deliberately bounded test. It is a real three-dimensional dynamics
+calculation, not a rotation of planar vectors. The body and club move about all
+three world axes; the club has three translational and three rotational
+coordinates; and the hand forces include out-of-plane components. The two
+formulations evaluate exactly the same position, velocity, acceleration,
+inertias, gravity, and applied action--reaction loads. That common-state design
+isolates dynamics implementation from trajectory divergence.
+
+The hand loads are prescribed. Therefore the experiment can test spatial
+wrench transport, geometry interventions, and inverse-dynamics equivalence. It
+cannot establish that the loads would emerge passively from compliant
+two-hand contact. That distinction controls every claim below.
+
+## Why a Common Model Is Necessary {#sec-spatial-common-model-need}
+
+Names such as “full body” or “humanoid” do not establish model equivalence.
+The available native engine artifacts differ in joint count, floating-base
+representation, lower-body topology, club attachment, and treatment of the
+second hand. Comparing their force histories directly would mix at least four
+effects:
+
+1. numerical implementation;
+2. coordinate and frame conventions;
+3. structural model differences; and
+4. distinct initial conditions or inputs.
+
+No tolerance can make that comparison causal. The present experiment instead
+defines one study-specific tree and generates the MuJoCo representation from
+the same in-memory specification consumed by the independent analytical
+formulation. A SHA-256 digest of the canonical joint, inertia, and attachment
+record is stored for both implementations. The two recorded hashes must be
+identical before an outcome is evaluated.
+
+This common model is a reduced full-body model rather than a subject-specific
+anatomical reconstruction. It contains pelvis and lower-body mass, a spatial
+torso, bilateral three-axis shoulders, elbows, wrists, and a separately moving
+club. Twenty generalized coordinates comprise 14 body coordinates and six
+club coordinates. Thirty-two spherical inertia elements include explicit
+small carrier inertias for otherwise massless compound-joint frames. Those
+carrier masses are present in both formulations and are part of the model
+hash; they are not an engine-specific numerical patch.
+
+![Spatial Full-Body Common State and Two-Hand Force Geometry](figures/fig_spatial_full_body_force_geometry.pdf){#fig-spatial-full-body-geometry width=100%}
+
+@fig-spatial-full-body-geometry shows the achieved state at 0.215 s from two
+views. The lateral club displacement spans 35.0 mm over the registered window,
+and the model axes have rank three. The blue and red arrows are the lead- and
+trail-hand forces on the club. They are prescribed contact loads, not estimates
+of muscle force or measured human hand force.
+
+## Shared Spatial Dynamics Definition {#sec-spatial-dynamics-definition}
+
+Let the generalized state be
+
+$$
+\mathbf q =
+\begin{bmatrix}
+\mathbf q_B & \mathbf r_C & \boldsymbol\eta_C
+\end{bmatrix}^{\mathsf T},
+$$ {#eq-spatial-coordinates}
+
+where $\mathbf q_B\in\mathbb R^{14}$ contains the reduced body coordinates,
+$\mathbf r_C\in\mathbb R^3$ is club-frame translation, and
+$\boldsymbol\eta_C\in\mathbb R^3$ is the ordered club rotation coordinate.
+Every joint is a scalar revolute or prismatic coordinate. This avoids hiding a
+quaternion/Euler remapping inside the engine comparison.
+
+For body $b$ with mass $m_b$, world rotation $\mathbf R_b$, isotropic local
+inertia $\mathbf I_b$, linear COM Jacobian $\mathbf J_{v,b}$, and angular
+Jacobian $\mathbf J_{\omega,b}$, the analytical mass matrix is
+
+$$
+\mathbf M(\mathbf q)=
+\sum_b
+\left(
+m_b\mathbf J_{v,b}^{\mathsf T}\mathbf J_{v,b}
++
+\mathbf J_{\omega,b}^{\mathsf T}
+\mathbf R_b\mathbf I_b\mathbf R_b^{\mathsf T}
+\mathbf J_{\omega,b}
+\right).
+$$ {#eq-spatial-mass-matrix}
+
+The independent bias calculation uses
+
+$$
+\mathbf h(\mathbf q,\dot{\mathbf q})
+=
+\dot{\mathbf M}\dot{\mathbf q}
+-\frac{1}{2}
+\nabla_{\mathbf q}
+\left(\dot{\mathbf q}^{\mathsf T}\mathbf M\dot{\mathbf q}\right)
++\nabla_{\mathbf q}V,
+$$ {#eq-spatial-bias}
+
+with centered finite differences of the mass matrix and an analytical gravity
+gradient. MuJoCo independently compiles the same tree and evaluates its native
+inverse dynamics. Both outputs are normalized to the same required-action
+convention,
+
+$$
+\boldsymbol\tau_{\mathrm{required}}
+=
+\mathbf M\ddot{\mathbf q}
++\mathbf h
+-\mathbf Q_{\mathrm{contact}}.
+$$ {#eq-spatial-required-action}
+
+This normalization matters. MuJoCo's inverse-dynamics output reports inertial
+plus bias generalized force; applied generalized loads are not subtracted from
+that field automatically. The first implementation audit exposed a 26%
+apparent discrepancy when the two sides used different external-load
+conventions. Applying @eq-spatial-required-action explicitly reduced the
+maximum relative discrepancy to $2.14\times10^{-11}$. The preregistered 5%
+relative and 0.75 generalized-force absolute bounds were not changed.
+
+## Two-Hand Wrench and Action--Reaction Contract {#sec-spatial-hand-wrench}
+
+At the declared club reference $O$, the lead and trail forces produce
+
+$$
+\mathbf F_O=\mathbf F_L+\mathbf F_T,
+\qquad
+\mathbf M_O=
+(\mathbf r_L-\mathbf r_O)\times\mathbf F_L
++(\mathbf r_T-\mathbf r_O)\times\mathbf F_T.
+$$ {#eq-spatial-two-hand-wrench}
+
+The complete wrench is
+$\mathcal W_C=[\mathbf F_O^{\mathsf T},\mathbf M_O^{\mathsf T}]^{\mathsf T}$.
+The equal and opposite body-side wrench is
+$\mathcal W_B=-\mathcal W_C$. For a compatible contact twist
+$\mathcal V=[\mathbf v_O^{\mathsf T},\boldsymbol\omega^{\mathsf T}]^{\mathsf T}$,
+
+$$
+\mathcal W_C^{\mathsf T}\mathcal V
++\mathcal W_B^{\mathsf T}\mathcal V=0.
+$$ {#eq-spatial-action-reaction-power}
+
+The recorded maximum residual in @eq-spatial-action-reaction-power is zero to
+stored precision. This checks the common virtual-work convention. It does not
+assert no work at a slipping or compliant biological contact, because the two
+sides would then have different point velocities and contact storage or
+dissipation would require its own state.
+
+The force-generated scalar club couple is the moment projection on the local
+club axis $\hat{\mathbf e}_C$,
+
+$$
+M_F=\hat{\mathbf e}_C^{\mathsf T}\mathbf M_O.
+$$ {#eq-spatial-force-couple}
+
+No direct club torque command is applied. This keeps direct couple and
+force-generated couple separate, but prescribed force is still an external
+input. “Zero direct torque” is therefore not synonymous with “passively
+generated contact force.”
+
+## Registered Interventions and Tolerances {#sec-spatial-interventions}
+
+Three interventions are evaluated at the same achieved state and with the same
+force histories:
+
+- **Registered Geometry:** maintain the declared 0.18 m signed separation of
+  lead and trail contact points;
+- **Reversed Moment Arm:** reverse the signed contact separation without
+  changing either force vector; and
+- **Coincident Hands:** set both force application points to the same reference,
+  which analytically requires the force-generated couple to be zero.
+
+The preferred result is not used to select a tolerance. Before inspecting the
+event-window outcome, the numerical region was fixed at 0.75 absolute
+generalized-force units, 5% relative error, and 4 ms intervention-grid
+alignment error. Because both formulations receive one registered load history,
+this last quantity checks input alignment; it is not a second event detector.
+The
+analytical derivative was evaluated with $2\times10^{-6}$ and $10^{-6}$
+coordinate steps. Their maximum generalized-force difference is
+$1.47\times10^{-9}$, far below the predeclared absolute region.
+
+The experiment is falsified at this tier if any of the following occurs:
+
+1. the two implementations use different model hashes;
+2. the same-state inverse-dynamics residual exceeds either registered bound;
+3. complete action--reaction wrench power does not close;
+4. reversing the moment arm fails to reverse the force-generated couple;
+5. coincident force application points retain a finite force couple; or
+6. the purported spatial trajectory has no out-of-plane motion.
+
+## Executed Results {#sec-spatial-results}
+
+![Independent Inverse-Dynamics Formulations Agree at the Same Spatial State](figures/fig_spatial_cross_formulation_inverse_dynamics.pdf){#fig-spatial-cross-formulation width=100%}
+
+@fig-spatial-cross-formulation overlays three representative generalized actions.
+The curves are visually indistinguishable. Across all 20 coordinates and 61
+event-aligned states, the maximum absolute discrepancy is
+$1.25\times10^{-9}$ and the maximum relative discrepancy is
+$2.14\times10^{-11}$. The registered intervention-grid alignment error is zero
+by construction and is reported separately from the dynamics residual. This result
+supports implementation equivalence for the declared common model and
+same-state inverse-dynamics observable.
+
+It does not show that arbitrary MuJoCo and analytical humanoid models agree.
+The equivalence depends on the identical model digest, joint order, spherical
+inertias, gravity vector, state, and generalized external-load convention.
+Changing any of those inputs creates a new experiment and requires a new
+tolerance record.
+
+![Spatial Interventions Expose Both Support and Remaining Falsifiers](figures/fig_spatial_full_body_falsification.pdf){#fig-spatial-falsification width=100%}
+
+The registered geometry reaches a minimum force-generated couple of
+$-4.32$ N·m and first becomes negative at 0.172 s. Reversing only the signed
+moment arm yields an equal positive response; the maximum sign-reversal
+residual is $8.88\times10^{-16}$ N·m. Collapsing the contact separation makes
+the force-generated couple exactly zero while retaining the total force
+history. These results reject force magnitude alone as an explanation of the
+couple sign in this model.
+
+The intervention is intentionally stronger than a visual pose comparison. It
+holds force vectors and achieved state fixed while changing only the geometric
+lever arm. Consequently, the sign response is attributable to
+@eq-spatial-two-hand-wrench within the declared model. It is not attributable
+to a change in force norm, event timing, solver state, or reference-frame
+rotation.
+
+## Falsifiability Gained and Claims Still Open {#sec-spatial-claim-boundary}
+
+The executed experiment advances the evidence boundary in three ways.
+
+First, the common spatial wrench is now coupled to a nonplanar reduced
+full-body inverse-dynamics calculation. The earlier three-dimensional result
+was only a frame-transformation audit. Here the mass matrix, bias forces,
+gravity, external generalized loads, and body Jacobians change with a genuine
+spatial state.
+
+Second, the same model is evaluated through independent algorithms. Agreement
+therefore tests implementation transport rather than coordinate relabeling.
+The discovered external-load convention error demonstrates why that test has
+scientific value: two individually plausible calculations disagreed until the
+reported estimand was made identical.
+
+Third, the geometry intervention remains exact in the spatial tier. It supports
+the statement that separated force application points can set club-couple sign
+independently of total force magnitude.
+
+Four stronger statements remain open:
+
+- **Passive Contact Origin Is Inconclusive.** The hand forces are inputs. A
+  forward compliant two-hand solve must determine whether equivalent loads
+  emerge after a distal command killswitch.
+- **Forward Cross-Engine Contact Is Untested.** Same-state inverse dynamics
+  removes trajectory divergence by design. Independent forward contact models
+  must still be event-aligned and compared.
+- **Anatomical Magnitude Is Unsupported.** The reduced tree and spherical
+  inertias are not subject-specific anatomy, muscle, or tissue mechanics.
+- **Human Strategy Is Unsupported.** No measured trajectory or force record is
+  held out for validation, and no coaching prescription follows from this
+  mechanism experiment.
+
+The next phase therefore treats identifiability and uncertainty before control
+claims. Parameter compensation can otherwise make a structurally inadequate
+model reproduce one output while assigning the wrong contribution to contact,
+base motion, passive tissue, or actuation.

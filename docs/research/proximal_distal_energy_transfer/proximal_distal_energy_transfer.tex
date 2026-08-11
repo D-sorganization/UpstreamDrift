@@ -328,13 +328,20 @@ planar model-feasibility results, not physiological or human evidence. A
 common-observable model ladder then carries reference-explicit force,
 couple, velocity, angular velocity, and power through a third
 coordinate, prescribed hub motion, two-hand constraint geometry, and
-proper 3-D frame transformations, while explicitly leaving full-body
-cross-engine dynamics unexecuted. A separate hand-path attribution study
-evaluates the MacKenzie force-work-per-path-length estimand in an
-impact-truncated double pendulum, a forward-simulated one-arm model, and
-a mechanically closed two-arm local sweep. Drift supplies 101.2\% and
-103.5\% of signed hand-path force work in the two forward cases because
-the contemporaneous control contribution is slightly opposing; in the
+proper 3-D frame transformations. A reduced full-body extension executes
+nonplanar common-state inverse dynamics through MuJoCo and an
+independent Lagrange--Christoffel formulation. Across 20 generalized
+coordinates and 61 states, the maximum relative discrepancy is
+\(2.14\times10^{-11}\); reversing the hand moment arm reverses a
+\(-4.32\) N m force-generated couple, and coincident hands remove it
+exactly. Because contact loads are prescribed, passive spatial contact
+remains inconclusive and forward cross-engine contact remains untested.
+A separate hand-path attribution study evaluates the MacKenzie
+force-work-per-path-length estimand in an impact-truncated double
+pendulum, a forward-simulated one-arm model, and a mechanically closed
+two-arm local sweep. Drift supplies 101.2\% and 103.5\% of signed
+hand-path force work in the two forward cases because the
+contemporaneous control contribution is slightly opposing; in the
 two-arm sweep, drift and control instead cancel with an index of 0.962.
 Joint- and time-resolved impulse, power, work, force-vector, and
 common/differential-mode results show why a large net hand-path force is
@@ -352,7 +359,7 @@ inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, arc=.35mm, bottomtitle=1mm, colback=white, toptitle=1mm, breakable, left=2mm, coltitle=black, opacitybacktitle=0.6, titlerule=0mm, leftrule=.75mm, toprule=.15mm, colframe=quarto-callout-note-color-frame, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm, opacityback=0, rightrule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, breakable, coltitle=black, opacitybacktitle=0.6, colbacktitle=quarto-callout-note-color!10!white, rightrule=.15mm, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, left=2mm, bottomtitle=1mm, titlerule=0mm, opacityback=0, leftrule=.75mm, colback=white, toptitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, arc=.35mm, toprule=.15mm]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -4281,6 +4288,366 @@ statement only. The next fidelity gate is a spatial full-body experiment
 that preserves the same wrench, intervention, energy, and discrepancy
 observables in two independent dynamics engines.
 
+\chapter{Spatial Full-Body Common-State
+Dynamics}\label{sec-spatial-full-body}
+
+The preceding forward models establish a planar mechanism under
+increasing coupling, but a planar result cannot answer whether the same
+wrench geometry survives out-of-plane motion or whether it is an
+artifact of one dynamics implementation. This chapter executes a spatial
+comparison at identical achieved states. It uses one immutable reduced
+full-body model definition in two independent formulations: native
+MuJoCo inverse dynamics and a Lagrange--Christoffel implementation
+assembled directly from body Jacobians
+(\citeproc{ref-todorov2012mujoco}{Todorov, Erez, and Tassa 2012};
+\citeproc{ref-featherstone2008}{Featherstone 2008}).
+
+This is a deliberately bounded test. It is a real three-dimensional
+dynamics calculation, not a rotation of planar vectors. The body and
+club move about all three world axes; the club has three translational
+and three rotational coordinates; and the hand forces include
+out-of-plane components. The two formulations evaluate exactly the same
+position, velocity, acceleration, inertias, gravity, and applied
+action--reaction loads. That common-state design isolates dynamics
+implementation from trajectory divergence.
+
+The hand loads are prescribed. Therefore the experiment can test spatial
+wrench transport, geometry interventions, and inverse-dynamics
+equivalence. It cannot establish that the loads would emerge passively
+from compliant two-hand contact. That distinction controls every claim
+below.
+
+\section{Why a Common Model Is
+Necessary}\label{sec-spatial-common-model-need}
+
+Names such as ``full body'' or ``humanoid'' do not establish model
+equivalence. The available native engine artifacts differ in joint
+count, floating-base representation, lower-body topology, club
+attachment, and treatment of the second hand. Comparing their force
+histories directly would mix at least four effects:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  numerical implementation;
+\item
+  coordinate and frame conventions;
+\item
+  structural model differences; and
+\item
+  distinct initial conditions or inputs.
+\end{enumerate}
+
+No tolerance can make that comparison causal. The present experiment
+instead defines one study-specific tree and generates the MuJoCo
+representation from the same in-memory specification consumed by the
+independent analytical formulation. A SHA-256 digest of the canonical
+joint, inertia, and attachment record is stored for both
+implementations. The two recorded hashes must be identical before an
+outcome is evaluated.
+
+This common model is a reduced full-body model rather than a
+subject-specific anatomical reconstruction. It contains pelvis and
+lower-body mass, a spatial torso, bilateral three-axis shoulders,
+elbows, wrists, and a separately moving club. Twenty generalized
+coordinates comprise 14 body coordinates and six club coordinates.
+Thirty-two spherical inertia elements include explicit small carrier
+inertias for otherwise massless compound-joint frames. Those carrier
+masses are present in both formulations and are part of the model hash;
+they are not an engine-specific numerical patch.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_spatial_full_body_force_geometry.pdf}
+
+}
+
+\caption{\label{fig-spatial-full-body-geometry}Spatial Full-Body Common
+State and Two-Hand Force Geometry}
+
+\end{figure}%
+
+Figure~\ref{fig-spatial-full-body-geometry} shows the achieved state at
+0.215 s from two views. The lateral club displacement spans 35.0 mm over
+the registered window, and the model axes have rank three. The blue and
+red arrows are the lead- and trail-hand forces on the club. They are
+prescribed contact loads, not estimates of muscle force or measured
+human hand force.
+
+\section{Shared Spatial Dynamics
+Definition}\label{sec-spatial-dynamics-definition}
+
+Let the generalized state be
+
+\begin{equation}\phantomsection\label{eq-spatial-coordinates}{
+\mathbf q =
+\begin{bmatrix}
+\mathbf q_B & \mathbf r_C & \boldsymbol\eta_C
+\end{bmatrix}^{\mathsf T},
+}\end{equation}
+
+where \(\mathbf q_B\in\mathbb R^{14}\) contains the reduced body
+coordinates, \(\mathbf r_C\in\mathbb R^3\) is club-frame translation,
+and \(\boldsymbol\eta_C\in\mathbb R^3\) is the ordered club rotation
+coordinate. Every joint is a scalar revolute or prismatic coordinate.
+This avoids hiding a quaternion/Euler remapping inside the engine
+comparison.
+
+For body \(b\) with mass \(m_b\), world rotation \(\mathbf R_b\),
+isotropic local inertia \(\mathbf I_b\), linear COM Jacobian
+\(\mathbf J_{v,b}\), and angular Jacobian \(\mathbf J_{\omega,b}\), the
+analytical mass matrix is
+
+\begin{equation}\phantomsection\label{eq-spatial-mass-matrix}{
+\mathbf M(\mathbf q)=
+\sum_b
+\left(
+m_b\mathbf J_{v,b}^{\mathsf T}\mathbf J_{v,b}
++
+\mathbf J_{\omega,b}^{\mathsf T}
+\mathbf R_b\mathbf I_b\mathbf R_b^{\mathsf T}
+\mathbf J_{\omega,b}
+\right).
+}\end{equation}
+
+The independent bias calculation uses
+
+\begin{equation}\phantomsection\label{eq-spatial-bias}{
+\mathbf h(\mathbf q,\dot{\mathbf q})
+=
+\dot{\mathbf M}\dot{\mathbf q}
+-\frac{1}{2}
+\nabla_{\mathbf q}
+\left(\dot{\mathbf q}^{\mathsf T}\mathbf M\dot{\mathbf q}\right)
++\nabla_{\mathbf q}V,
+}\end{equation}
+
+with centered finite differences of the mass matrix and an analytical
+gravity gradient. MuJoCo independently compiles the same tree and
+evaluates its native inverse dynamics. Both outputs are normalized to
+the same required-action convention,
+
+\begin{equation}\phantomsection\label{eq-spatial-required-action}{
+\boldsymbol\tau_{\mathrm{required}}
+=
+\mathbf M\ddot{\mathbf q}
++\mathbf h
+-\mathbf Q_{\mathrm{contact}}.
+}\end{equation}
+
+This normalization matters. MuJoCo's inverse-dynamics output reports
+inertial plus bias generalized force; applied generalized loads are not
+subtracted from that field automatically. The first implementation audit
+exposed a 26\% apparent discrepancy when the two sides used different
+external-load conventions. Applying
+Equation~\ref{eq-spatial-required-action} explicitly reduced the maximum
+relative discrepancy to \(2.14\times10^{-11}\). The preregistered 5\%
+relative and 0.75 generalized-force absolute bounds were not changed.
+
+\section{Two-Hand Wrench and Action--Reaction
+Contract}\label{sec-spatial-hand-wrench}
+
+At the declared club reference \(O\), the lead and trail forces produce
+
+\begin{equation}\phantomsection\label{eq-spatial-two-hand-wrench}{
+\mathbf F_O=\mathbf F_L+\mathbf F_T,
+\qquad
+\mathbf M_O=
+(\mathbf r_L-\mathbf r_O)\times\mathbf F_L
++(\mathbf r_T-\mathbf r_O)\times\mathbf F_T.
+}\end{equation}
+
+The complete wrench is
+\(\mathcal W_C=[\mathbf F_O^{\mathsf T},\mathbf M_O^{\mathsf T}]^{\mathsf T}\).
+The equal and opposite body-side wrench is
+\(\mathcal W_B=-\mathcal W_C\). For a compatible contact twist
+\(\mathcal V=[\mathbf v_O^{\mathsf T},\boldsymbol\omega^{\mathsf T}]^{\mathsf T}\),
+
+\begin{equation}\phantomsection\label{eq-spatial-action-reaction-power}{
+\mathcal W_C^{\mathsf T}\mathcal V
++\mathcal W_B^{\mathsf T}\mathcal V=0.
+}\end{equation}
+
+The recorded maximum residual in
+Equation~\ref{eq-spatial-action-reaction-power} is zero to stored
+precision. This checks the common virtual-work convention. It does not
+assert no work at a slipping or compliant biological contact, because
+the two sides would then have different point velocities and contact
+storage or dissipation would require its own state.
+
+The force-generated scalar club couple is the moment projection on the
+local club axis \(\hat{\mathbf e}_C\),
+
+\begin{equation}\phantomsection\label{eq-spatial-force-couple}{
+M_F=\hat{\mathbf e}_C^{\mathsf T}\mathbf M_O.
+}\end{equation}
+
+No direct club torque command is applied. This keeps direct couple and
+force-generated couple separate, but prescribed force is still an
+external input. ``Zero direct torque'' is therefore not synonymous with
+``passively generated contact force.''
+
+\section{Registered Interventions and
+Tolerances}\label{sec-spatial-interventions}
+
+Three interventions are evaluated at the same achieved state and with
+the same force histories:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Registered Geometry:} maintain the declared 0.18 m signed
+  separation of lead and trail contact points;
+\item
+  \textbf{Reversed Moment Arm:} reverse the signed contact separation
+  without changing either force vector; and
+\item
+  \textbf{Coincident Hands:} set both force application points to the
+  same reference, which analytically requires the force-generated couple
+  to be zero.
+\end{itemize}
+
+The preferred result is not used to select a tolerance. Before
+inspecting the event-window outcome, the numerical region was fixed at
+0.75 absolute generalized-force units, 5\% relative error, and 4 ms
+intervention-grid alignment error. Because both formulations receive one
+registered load history, this last quantity checks input alignment; it
+is not a second event detector. The analytical derivative was evaluated
+with \(2\times10^{-6}\) and \(10^{-6}\) coordinate steps. Their maximum
+generalized-force difference is \(1.47\times10^{-9}\), far below the
+predeclared absolute region.
+
+The experiment is falsified at this tier if any of the following occurs:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  the two implementations use different model hashes;
+\item
+  the same-state inverse-dynamics residual exceeds either registered
+  bound;
+\item
+  complete action--reaction wrench power does not close;
+\item
+  reversing the moment arm fails to reverse the force-generated couple;
+\item
+  coincident force application points retain a finite force couple; or
+\item
+  the purported spatial trajectory has no out-of-plane motion.
+\end{enumerate}
+
+\section{Executed Results}\label{sec-spatial-results}
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_spatial_cross_formulation_inverse_dynamics.pdf}
+
+}
+
+\caption{\label{fig-spatial-cross-formulation}Independent
+Inverse-Dynamics Formulations Agree at the Same Spatial State}
+
+\end{figure}%
+
+Figure~\ref{fig-spatial-cross-formulation} overlays three representative
+generalized actions. The curves are visually indistinguishable. Across
+all 20 coordinates and 61 event-aligned states, the maximum absolute
+discrepancy is \(1.25\times10^{-9}\) and the maximum relative
+discrepancy is \(2.14\times10^{-11}\). The registered intervention-grid
+alignment error is zero by construction and is reported separately from
+the dynamics residual. This result supports implementation equivalence
+for the declared common model and same-state inverse-dynamics
+observable.
+
+It does not show that arbitrary MuJoCo and analytical humanoid models
+agree. The equivalence depends on the identical model digest, joint
+order, spherical inertias, gravity vector, state, and generalized
+external-load convention. Changing any of those inputs creates a new
+experiment and requires a new tolerance record.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_spatial_full_body_falsification.pdf}
+
+}
+
+\caption{\label{fig-spatial-falsification}Spatial Interventions Expose
+Both Support and Remaining Falsifiers}
+
+\end{figure}%
+
+The registered geometry reaches a minimum force-generated couple of
+\(-4.32\) N·m and first becomes negative at 0.172 s. Reversing only the
+signed moment arm yields an equal positive response; the maximum
+sign-reversal residual is \(8.88\times10^{-16}\) N·m. Collapsing the
+contact separation makes the force-generated couple exactly zero while
+retaining the total force history. These results reject force magnitude
+alone as an explanation of the couple sign in this model.
+
+The intervention is intentionally stronger than a visual pose
+comparison. It holds force vectors and achieved state fixed while
+changing only the geometric lever arm. Consequently, the sign response
+is attributable to Equation~\ref{eq-spatial-two-hand-wrench} within the
+declared model. It is not attributable to a change in force norm, event
+timing, solver state, or reference-frame rotation.
+
+\section{Falsifiability Gained and Claims Still
+Open}\label{sec-spatial-claim-boundary}
+
+The executed experiment advances the evidence boundary in three ways.
+
+First, the common spatial wrench is now coupled to a nonplanar reduced
+full-body inverse-dynamics calculation. The earlier three-dimensional
+result was only a frame-transformation audit. Here the mass matrix, bias
+forces, gravity, external generalized loads, and body Jacobians change
+with a genuine spatial state.
+
+Second, the same model is evaluated through independent algorithms.
+Agreement therefore tests implementation transport rather than
+coordinate relabeling. The discovered external-load convention error
+demonstrates why that test has scientific value: two individually
+plausible calculations disagreed until the reported estimand was made
+identical.
+
+Third, the geometry intervention remains exact in the spatial tier. It
+supports the statement that separated force application points can set
+club-couple sign independently of total force magnitude.
+
+Four stronger statements remain open:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Passive Contact Origin Is Inconclusive.} The hand forces are
+  inputs. A forward compliant two-hand solve must determine whether
+  equivalent loads emerge after a distal command killswitch.
+\item
+  \textbf{Forward Cross-Engine Contact Is Untested.} Same-state inverse
+  dynamics removes trajectory divergence by design. Independent forward
+  contact models must still be event-aligned and compared.
+\item
+  \textbf{Anatomical Magnitude Is Unsupported.} The reduced tree and
+  spherical inertias are not subject-specific anatomy, muscle, or tissue
+  mechanics.
+\item
+  \textbf{Human Strategy Is Unsupported.} No measured trajectory or
+  force record is held out for validation, and no coaching prescription
+  follows from this mechanism experiment.
+\end{itemize}
+
+The next phase therefore treats identifiability and uncertainty before
+control claims. Parameter compensation can otherwise make a structurally
+inadequate model reproduce one output while assigning the wrong
+contribution to contact, base motion, passive tissue, or actuation.
+
 \chapter{A Common-Observable Ladder Toward Higher-Order
 Models}\label{sec-model-ladder}
 
@@ -4294,7 +4661,10 @@ ladder must preserve the observable while relaxing one structural
 assumption at a time. This chapter therefore carries one common
 interaction record through a three-coordinate chain, a prescribed
 mobile-hub inverse-dynamics comparison, forward rigid- and flexible-club
-two-hand systems, and arbitrary three-dimensional frame rotations.
+two-hand systems, and arbitrary three-dimensional frame rotations. The
+reduced full-body common-state tier in
+Section~\ref{sec-spatial-full-body} then adds nonplanar body and club
+inverse dynamics in two independent formulations.
 
 The common record contains:
 
@@ -4332,14 +4702,14 @@ of Freedom Without Redefining Transfer}
 
 \end{figure}%
 
-Figure~\ref{fig-ladder-schematic} separates executed mechanism tests
-from the remaining full-body dynamics boundary. The rotated 3-D tier is
-a coordinate-frame audit, not an out-of-plane swing simulation. The
-historical mobile-hub tier prescribes hub motion and calculates the
-required reaction change. By contrast,
-Section~\ref{sec-coupled-base-flex} now evolves base translation,
-two-hand reactions, and club flex together. These distinctions are part
-of the result.
+Figure~\ref{fig-ladder-schematic} separates the lower-order mechanism
+tests from the spatial dynamics boundary. The rotated 3-D tier is a
+coordinate-frame audit, not an out-of-plane swing simulation; the later
+common-state tier supplies that nonplanar step. The historical
+mobile-hub tier prescribes hub motion and calculates the required
+reaction change. By contrast, Section~\ref{sec-coupled-base-flex} now
+evolves base translation, two-hand reactions, and club flex together.
+These distinctions are part of the result.
 
 \section{The Common Wrench--Power
 Contract}\label{sec-ladder-common-contract}
@@ -4519,8 +4889,9 @@ moving-base result.
 
 The forward tier is still planar and its base has translation but no
 rotation. Its one torsional flex mode is not a distributed beam.
-Transport to spatial full-body dynamics therefore remains an open test
-rather than an inference.
+Transport to spatial dynamics is therefore evaluated separately in
+Section~\ref{sec-spatial-full-body} rather than inferred from the planar
+result.
 
 \section{Closed-Loop Two-Hand Constraint
 Geometry}\label{sec-ladder-closed-loop}
@@ -4622,6 +4993,29 @@ does not include out-of-plane angular velocity, long-axis club rotation,
 aerodynamic forces, three-dimensional joint motion, or full-body contact
 dynamics. Calling it a ``3-D swing validation'' would be incorrect.
 
+\section{Reduced Full-Body Common-State Inverse
+Dynamics}\label{sec-ladder-spatial-common-state}
+
+The spatial experiment in Section~\ref{sec-spatial-full-body} uses 20
+generalized coordinates, a separately moving six-coordinate club,
+bilateral arms, torso, pelvis, and lower-body mass. It evaluates 61
+identical achieved states through MuJoCo and an independent
+Lagrange--Christoffel formulation. The common model hash, gravity,
+external loads, state, and required-action convention are identical.
+
+The maximum relative generalized-action discrepancy is
+\(2.14\times10^{-11}\). Reversing only the signed hand moment arm
+reverses the \(-4.32\) N·m force-generated couple, and coincident
+application points remove that couple exactly. Unlike the rotated-wrench
+audit, this tier contains out-of-plane motion and state-dependent
+spatial mass and bias terms.
+
+The result remains common-state inverse dynamics with prescribed hand
+loads. It does not solve closed contact, execute a zero-command forward
+branch, or identify passive biological load generation. Those limits
+create a narrower remaining boundary: forward spatial two-hand contact,
+rather than all spatial dynamics, is still open.
+
 \section{What Survives, What Changes, and What Remains
 Open}\label{sec-ladder-discrepancy}
 
@@ -4639,7 +5033,7 @@ Executed Mechanisms and the Remaining Boundary}
 \end{figure}%
 
 The discrepancy matrix in Figure~\ref{fig-ladder-discrepancy-matrix}
-summarizes the evidence boundary. Five statements survive the executed
+summarizes the evidence boundary. Seven statements survive the executed
 tiers:
 
 \begin{enumerate}
@@ -4658,15 +5052,21 @@ tiers:
   mass; and
 \item
   closed-loop constraint rank determines admissible velocity dimension,
-  not contact-force magnitude or couple sign.
+  not contact-force magnitude or couple sign;
+\item
+  nonplanar generalized action is reproducible across the two declared
+  inverse-dynamics formulations; and
+\item
+  reversing spatial contact moment-arm geometry reverses the
+  force-generated club couple while coincident points remove it.
 \end{enumerate}
 
 Other claims do not yet survive because they have not been tested. The
-present analysis does not show that the WSCG negative couple persists in
-a forward two-hand killswitch, that its magnitude is invariant to a
-distributed shaft, or that MuJoCo, Drake, Pinocchio, and OpenSim produce
-matched full-body force histories. Those are separate empirical and
-cross-engine questions.
+present analysis does not show that the negative couple persists in a
+forward spatial two-hand killswitch, that its magnitude is invariant to
+a distributed shaft, or that independently authored native humanoid
+models produce matched force histories. Those are separate
+forward-contact, structural, and empirical questions.
 
 \subsection{Tier-by-Tier
 Interpretation}\label{sec-ladder-tier-interpretation}
@@ -4713,22 +5113,27 @@ an engine comparison is interpreted physically. Passing it establishes
 coordinate consistency only. Out-of-plane dynamics require nonplanar
 states and forces, not merely three stored vector components.
 
-\textbf{Full-Body Cross-Engine Dynamics.} This tier remains open because
-it must match far more than model names. Segment inertias, joint
-topology, actuator histories, gravity direction, damping, constraints,
-numerical stabilization, and event definitions must be aligned. Until
-those inputs and tolerances are recorded, disagreement cannot be
-attributed to a physical mechanism and agreement cannot be called
-validation. The fail-closed status is therefore a scientific result
-about the present evidence boundary, not an implementation shortcoming
-to conceal.
+\textbf{Reduced Full-Body Common-State Dynamics.} This tier aligns the
+model digest, joint order, state, gravity, external loads, and
+inverse-dynamics estimand. It therefore isolates implementation
+transport and executes genuine out-of-plane dynamics. Its agreement is
+not anatomical validation because the model is reduced and its hand
+loads are prescribed.
+
+\textbf{Full-Body Forward Contact.} This tier remains open because it
+must add independently solved two-hand contact, state divergence,
+compliance, and event alignment without changing the observable. Contact
+parameters, stabilization, actuation, and numerical tolerances must be
+registered before the preferred outcome is inspected.
 
 \subsection{Cross-Engine Gate
 Definition}\label{sec-ladder-cross-engine-gate}
 
-A future engine comparison should not begin with visually similar
-motion. Each engine must emit the common record at matching states and
-pass, at minimum:
+The executed common-state comparison did not begin with visually similar
+motion. It required identical model hashes and checked generalized
+action, wrench power, geometry interventions, and event timing. A
+forward comparison must retain those checks and additionally pass, at
+minimum:
 
 \begin{itemize}
 \tightlist
@@ -4749,9 +5154,10 @@ pass, at minimum:
 \end{itemize}
 
 Engine capability is not evidence that the comparison was run. The
-machine-readable discrepancy table therefore marks full-body
-cross-engine dynamics as \texttt{not\_executed}. This fail-closed status
-prevents a lower-order result from silently becoming a full-body claim.
+machine-readable discrepancy table marks reduced full-body common-state
+inverse dynamics as \texttt{executed} and forward spatial contact as
+\texttt{not\_executed}. This split prevents same-state agreement from
+silently becoming a forward contact or anatomical claim.
 
 \section{Strategy Implications Across the
 Ladder}\label{sec-ladder-strategy}
@@ -4796,18 +5202,19 @@ The ladder remains deliberately incomplete:
   the coupled club has one lumped torsional mode rather than a
   distributed spatial beam;
 \item
-  the 3-D audit rotates a planar wrench rather than simulating
-  out-of-plane dynamics; and
+  the reduced full-body tier uses prescribed hand loads and spherical
+  inertia elements rather than solved contact and subject-specific
+  anatomy; and
 \item
-  no full-body engine comparison is represented as complete.
+  no forward spatial contact comparison is represented as complete.
 \end{itemize}
 
-The next decisive test is an event-aligned spatial experiment in two
-independent dynamics engines that emits the same common schema and
-preserves the declared same-state intervention. Failure of force/moment
-balance, power invariance, constraint-rank agreement, or matched-state
-parity at that tier would falsify the claim that the lower-order
-mechanism has been transported correctly.
+The next decisive test is an event-aligned forward spatial experiment
+with independently solved two-hand contact that emits the same common
+schema and supports an exact same-state command-removal branch. Failure
+of force/moment balance, power invariance, contact-rank agreement, or
+matched-event parity at that tier would falsify transport of the
+lower-order passive-persistence claim.
 
 \chapter{Empirical Evidence in Golfers}\label{sec-evidence}
 
@@ -5248,12 +5655,13 @@ software provenance is not evidence for the physical claims.
 
 The implementation includes unit tests for drift-plus-control
 reconstruction, work--energy consistency, deterministic replay, impact
-detection, and headline ordering. Independent simulation backends
-provide a route to cross-engine validation, but the results in this
-document should be read as one validated implementation of one model
-class. Cross-engine agreement would reduce implementation risk; it would
-not remove structural limitations such as the fixed hub, rigid shaft,
-planar motion, or simplified actuators.
+detection, and headline ordering. The reduced full-body common-state
+tier now compares MuJoCo with an independent Lagrange--Christoffel
+implementation generated from one hashed model. That agreement reduces
+implementation risk for the declared inverse-dynamics estimand; it does
+not validate the primary planar model or remove structural limitations
+such as prescribed spatial hand loads, simplified inertias, missing
+forward contact, or simplified actuators.
 
 \chapter{Computational Methods}\label{sec-methods}
 
@@ -5882,8 +6290,11 @@ for a golfer. The specific gaps, each with a tracked remediation:
   rotations (\citeproc{ref-marshall2000}{Marshall and Elliott 2000}) are
   outside the primary 2-DOF model. The forward two-hand and coupled
   moving-base/flexible-club tiers address planar closure, translation,
-  and one lumped flex mode; base rotation, distributed beams, and
-  full-body spatial dynamics remain appropriate staged extensions.
+  and one lumped flex mode; base rotation, distributed beams, and the
+  reduced full-body common-state tier now addresses nonplanar inverse
+  dynamics, while base-ground coupling, distributed beams, and
+  independently solved spatial contact remain appropriate staged
+  extensions.
 \item
   \textbf{Simplified Actuator Models.} E1b shows the S2 ordering
   survives a linear torque-velocity bound on the drives with compressed
@@ -5905,8 +6316,10 @@ for a golfer. The specific gaps, each with a tracked remediation:
   same-state killswitches in the double-pendulum and constrained
   two-hand tiers. The coupled extension now preserves the finite
   negative-couple branch with endogenous base translation and club flex.
-  It does not establish persistence under spatial full-body,
-  compliant-contact, or human dynamics.
+  The spatial common-state tier transports the geometry response across
+  independent inverse-dynamics formulations, but prescribed loads do not
+  establish persistence under spatial compliant contact or human
+  dynamics.
 \item
   \textbf{No Human Data Yet.} The decisive observational test --- wrist
   interface power time courses across skill levels from motion capture
@@ -5990,6 +6403,15 @@ timestep refinement. This transports the mechanism beyond a fixed base
 and rigid club without promoting it to a spatial or physiological
 result.
 
+The reduced full-body common-state extension resolves implementation
+transport for a narrower spatial estimand. MuJoCo and an independent
+Lagrange--Christoffel formulation agree across 20 coordinates and 61
+nonplanar states to \(2.14\times10^{-11}\) relative error. Reversing the
+hand moment arm reverses the force-generated couple and coincident
+points remove it exactly. Because the forces are prescribed and the
+state is shared, this supports spatial inverse-dynamics and geometry
+transport but leaves passive forward contact explicitly inconclusive.
+
 \section{Research Priorities}\label{sec-future}
 
 The next work should reduce the largest inferential risks in dependency
@@ -5999,11 +6421,11 @@ order:
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \textbf{Spatial Counterfactual Transport.} Carry the now-executed
-  same-state torque-killswitch from rigid and coupled planar models into
-  a spatial full-body model in two independent engines. Preserve the
-  same force, couple, power, work, and closure observables at every
-  tier.
+  \textbf{Spatial Forward-Contact Counterfactual.} Extend the executed
+  spatial common-state reference with independently solved compliant
+  two-hand contact, then carry the planar same-state torque-killswitch
+  into both forward formulations. Preserve force, couple, power, work,
+  and closure observables.
 \item
   \textbf{Coupled Sensitivity and Constrained Control.} Replace
   one-at-a-time perturbations with a declared multivariable design, add
@@ -6045,6 +6467,8 @@ The principal summary is recorded in
 \href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/results_summary.json}{\texttt{data/results\_summary.json}},
 and the parameter-sensitivity results are recorded in
 \href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/e1d_parameter_sensitivity.json}{\texttt{data/e1d\_parameter\_sensitivity.json}}.
+The spatial common-state evidence is recorded in
+\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json}{\texttt{data/spatial\_full\_body\_study.json}}.
 
 \chapter{Software and Data Availability}\label{sec-appendix-inventory}
 
@@ -6071,8 +6495,9 @@ The current evidence boundary includes these known limitations:
   The archived two-hand ZTCF remains pointwise along the BASE state
   history. Separate forward rigid-club and coupled
   moving-base/flexible-club models now demonstrate finite zero-command
-  persistence, but spatial and human variants remain open validation
-  steps.
+  persistence. A reduced full-body spatial common-state tier now tests
+  nonplanar inverse dynamics, but passive spatial contact and human
+  variants remain open validation steps.
 \item
   The primary model has two planar links and a fixed hub; torso,
   hub-path, long-axis rotation, and closed-loop arm effects are absent.
@@ -6091,10 +6516,10 @@ The current evidence boundary includes these known limitations:
   No human motion or force data are analyzed; the result is mechanistic
   and model-derived, not a skill-group effect.
 \item
-  The model ladder does not execute full-body cross-engine dynamics. Its
-  3-D tier is a proper-frame transformation audit of a planar trace, and
-  its mobile-hub tier is a prescribed-motion inverse-dynamics
-  comparison.
+  The model ladder now executes reduced full-body common-state inverse
+  dynamics in MuJoCo and an independent Lagrange--Christoffel
+  formulation. The hand loads are prescribed, so independently solved
+  forward two-hand contact is still unexecuted.
 \end{itemize}
 
 \chapter{Reproducibility Guide}\label{sec-appendix-repro}
@@ -6115,6 +6540,7 @@ From the repository root (Python 3.11+ with the project dependencies):
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_mechanism\_ladder\_study}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_forward\_two\_arm\_study}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_moving\_base\_flexible\_study}
+\ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_spatial\_full\_body\_study}
 
 \CommentTok{\# Robustness analyses}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.e1b\_bounded\_torque}
@@ -6130,6 +6556,7 @@ From the repository root (Python 3.11+ with the project dependencies):
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.make\_mechanism\_ladder\_figures}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.make\_forward\_two\_arm\_figures}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.make\_moving\_base\_flexible\_figures}
+\ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.make\_spatial\_full\_body\_figures}
 \BuiltInTok{cd}\NormalTok{ docs/research/proximal\_distal\_energy\_transfer}
 \ExtensionTok{quarto}\NormalTok{ render proximal\_distal\_energy\_transfer.qmd }\AttributeTok{{-}{-}to}\NormalTok{ pdf}
 \BuiltInTok{cd}\NormalTok{ ../../..}
@@ -6656,6 +7083,12 @@ Tinmark, Fredrik, John Hellström, Kjartan Halvorsen, and Alf
 Thorstensson. 2010. {``Elite Golfers' Kinematic Sequence in Full-Swing
 and Partial-Swing Shots.''} \emph{Sports Biomechanics} 9 (4): 236--44.
 \url{https://doi.org/10.1080/14763141.2010.535842}.
+
+\bibitem[\citeproctext]{ref-todorov2012mujoco}
+Todorov, Emanuel, Tom Erez, and Yuval Tassa. 2012. {``{MuJoCo}: A
+Physics Engine for Model-Based Control.''} In \emph{2012 IEEE/RSJ
+International Conference on Intelligent Robots and Systems}, 5026--33.
+\url{https://doi.org/10.1109/IROS.2012.6386109}.
 
 \bibitem[\citeproctext]{ref-vu2016}
 Vu, Van Hoan, Brice Isableu, and Bastien Berret. 2016. {``Adaptive Use

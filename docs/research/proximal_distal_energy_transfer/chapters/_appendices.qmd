@@ -16,8 +16,9 @@ The current evidence boundary includes these known limitations:
   distributions remain necessary before making general persistence claims.
 - The archived two-hand ZTCF remains pointwise along the BASE state history.
   Separate forward rigid-club and coupled moving-base/flexible-club models now
-  demonstrate finite zero-command persistence, but spatial and human variants
-  remain open validation steps.
+  demonstrate finite zero-command persistence. A reduced full-body spatial
+  common-state tier now tests nonplanar inverse dynamics, but passive spatial
+  contact and human variants remain open validation steps.
 - The primary model has two planar links and a fixed hub; torso, hub-path,
   long-axis rotation, and closed-loop arm effects are absent.
 - The shaft extension is a three-coordinate point-mass surrogate with one
@@ -29,9 +30,10 @@ The current evidence boundary includes these known limitations:
   distributions are not estimated.
 - No human motion or force data are analyzed; the result is mechanistic and
   model-derived, not a skill-group effect.
-- The model ladder does not execute full-body cross-engine dynamics. Its 3-D
-  tier is a proper-frame transformation audit of a planar trace, and its
-  mobile-hub tier is a prescribed-motion inverse-dynamics comparison.
+- The model ladder now executes reduced full-body common-state inverse dynamics
+  in MuJoCo and an independent Lagrange--Christoffel formulation. The hand
+  loads are prescribed, so independently solved forward two-hand contact is
+  still unexecuted.
 
 # Reproducibility Guide {#sec-appendix-repro}
 
@@ -50,6 +52,7 @@ python3 -m scripts.research.proximal_distal_energy.run_shaft_contribution_study
 python3 -m scripts.research.proximal_distal_energy.run_mechanism_ladder_study
 python3 -m scripts.research.proximal_distal_energy.run_forward_two_arm_study
 python3 -m scripts.research.proximal_distal_energy.run_moving_base_flexible_study
+python3 -m scripts.research.proximal_distal_energy.run_spatial_full_body_study
 
 # Robustness analyses
 python3 -m scripts.research.proximal_distal_energy.e1b_bounded_torque
@@ -65,6 +68,7 @@ python3 -m scripts.research.proximal_distal_energy.make_shaft_contribution_figur
 python3 -m scripts.research.proximal_distal_energy.make_mechanism_ladder_figures
 python3 -m scripts.research.proximal_distal_energy.make_forward_two_arm_figures
 python3 -m scripts.research.proximal_distal_energy.make_moving_base_flexible_figures
+python3 -m scripts.research.proximal_distal_energy.make_spatial_full_body_figures
 cd docs/research/proximal_distal_energy_transfer
 quarto render proximal_distal_energy_transfer.qmd --to pdf
 cd ../../..

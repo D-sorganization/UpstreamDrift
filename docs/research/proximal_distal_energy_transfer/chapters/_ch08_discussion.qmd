@@ -70,7 +70,9 @@ for a golfer. The specific gaps, each with a tracked remediation:
   rotations [@marshall2000] are outside the primary 2-DOF model. The forward
   two-hand and coupled moving-base/flexible-club tiers address planar closure,
   translation, and one lumped flex mode; base rotation, distributed beams, and
-  full-body spatial dynamics remain appropriate staged extensions.
+  the reduced full-body common-state tier now addresses nonplanar inverse
+  dynamics, while base-ground coupling, distributed beams, and independently
+  solved spatial contact remain appropriate staged extensions.
 - **Simplified Actuator Models.** E1b shows the S2 ordering survives a
   linear torque-velocity bound on the drives with compressed margins
   (@sec-results-e1b), but activation-rate limits, history dependence,
@@ -85,8 +87,9 @@ for a golfer. The specific gaps, each with a tracked remediation:
   includes both pointwise ZTCF profiles and forward same-state killswitches in
   the double-pendulum and constrained two-hand tiers. The coupled extension now
   preserves the finite negative-couple branch with endogenous base translation
-  and club flex. It does not establish persistence under spatial full-body,
-  compliant-contact, or human dynamics.
+  and club flex. The spatial common-state tier transports the geometry response
+  across independent inverse-dynamics formulations, but prescribed loads do
+  not establish persistence under spatial compliant contact or human dynamics.
 - **No Human Data Yet.** The decisive observational test — wrist
   interface power time courses across skill levels from motion capture
   (@sec-falsify) — awaits an appropriately governed motion-capture study.

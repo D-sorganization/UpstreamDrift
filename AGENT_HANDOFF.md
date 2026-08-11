@@ -10,18 +10,14 @@ under 150 lines; use Git history and linked issues for completed chronology.
 - **Epic #8426 — Proximal-to-Distal Model Completion and Falsification.** All
   phase PRs target `integration/proximal-distal-completion`; only that
   consolidated branch will later target protected `main`.
-- **Phase 0:** branch `feat/8426-phase-0-evidence-contracts`, commit
-  `c39a0ab1c`, full PR **#8488**. It defines engine-neutral spatial wrench,
-  matched-state attribution, prediction, tolerance, migration, and
-  claim/falsifier contracts. Required substantive checks are green; only
-  unchanged runner-selection and Rust Quickstart jobs are queued. Do not create
-  redundant reruns.
-- **Phase 1:** branch `feat/8426-phase-1-forward-two-hand`, stacked on the Phase
-  0 commit until #8488 is merged. Three local commits complete the
-  seven-coordinate model, which advances two
-  two-link arms and a floating planar club under four independent grip
-  constraints. The KKT solve and mass-metric position/velocity projections
-  fail closed on singular or out-of-tolerance states.
+- **Phase 0:** PR **#8488** merged into integration at `7fdb0fe3d`. It defines
+  engine-neutral spatial-wrench, matched-state attribution, prediction,
+  tolerance, migration, and claim/falsifier contracts.
+- **Phase 1:** PR **#8491** merged into integration at `8a6d9c20d`. Its
+  seven-coordinate model advances two two-link arms and a floating planar club
+  under four independent grip constraints. All substantive checks are green;
+  unchanged post-merge runner-selection/optional jobs remain queued. Do not
+  rerun them.
 - **Phase 1 evidence:** deterministic baseline plus exact same-state
   zero-command branches; separate force-generated couple and direct wrist
   torque; common/differential force modes; contact-power identity; zero-grip-
@@ -32,14 +28,13 @@ under 150 lines; use Git history and linked issues for completed chronology.
   and reaches -7.43 N m. Removing both grip moment arms makes the force couple
   exactly zero. This is fixed-shoulder, rigid-club, planar model evidence, not
   muscle, human, or coaching evidence.
-- **Phase 1 focused gate:** 30 evidence-contract/forward-model/figure tests and 20
-  dependent hand-path/mechanism-ladder tests pass. Ruff, Python 3.12 mypy,
-  document-title, documentation-governance, and file-size gates pass. The final
-  113-page, 855,042-byte PDF preserves 110 URI links and 131 outline entries;
-  all changed pages and generated figure PDFs were visually checked. The
-  local checks pass. The final 113-page article was rendered, compacted, and
-  visually checked before the Phase 2 branch was created.
-- **Phase 2:** branch `feat/8426-phase-2-moving-base-flex`, stacked on Phase 1.
+- **Phase 1 gate:** 30 evidence/forward/figure tests plus 20 dependent tests,
+  Ruff, mypy, title, governance, and size gates passed. The 113-page PDF
+  preserved 110 URI links and 131 outlines and passed visual review.
+- **Phase 2:** branch `feat/8426-phase-2-moving-base-flex`, commit `ea335ee59`,
+  is locally complete and based on merged Phase 1. Its PR waits for the
+  remaining #8491 post-merge capacity jobs to settle so hosted waves remain
+  serialized.
   The ten-coordinate forward model couples a finite-mass translating base, two
   closed-loop arms, two solved grip reactions, and a two-segment compliant club.
   It records base and shaft energy, force-generated grip couple, direct wrist
@@ -52,10 +47,26 @@ under 150 lines; use Git history and linked issues for completed chronology.
   residual decreases 0.0483 -> 0.0254 -> 0.0130 J under 2/1/0.5 ms refinement.
   This is planar mechanism evidence, not anatomical, equipment, or human
   validation.
-- **Next action:** finish Phase 2 publication render, visual inspection, and
-  local gates; commit it. Merge #8488 only when capacity-only checks complete,
-  then rebase and open Phase 1 and Phase 2 full PRs sequentially against the
-  consolidated branch without overlapping hosted CI waves.
+- **Phase 2 gate:** the 121-page PDF, focused and dependent tests, Ruff, mypy,
+  title, governance, size, and visual checks passed before `ea335ee59`.
+- **Phase 3:** branch `feat/8426-phase-3-spatial-cross-engine` adds one canonical
+  reduced full-body 3D model evaluated by native MuJoCo inverse dynamics and an
+  independently assembled Lagrange--Christoffel formulation. It is a
+  cross-formulation common-state experiment, not yet a two-engine forward
+  contact simulation.
+- **Phase 3 bounded result:** the 20-coordinate, 32-inertia model has 34.96 mm
+  out-of-plane club motion. Prescribed action--reaction hand loads create a
+  -4.32 N m couple; reversing the moment arm reverses its sign to numerical
+  precision and coincident hands remove it exactly. Across 61 states, the two
+  formulations differ by at most `1.26e-9` generalized-force units and
+  `2.14e-11` relative. This supports common-state implementation transport,
+  not passive load origin, forward spatial contact, or human inference.
+- **Phase 3 local gate so far:** 18 focused/dependent tests, Ruff, mypy, and
+  generated-figure visual checks pass. Finish source hashes, full render,
+  complete article visual QA, and repository gates before committing.
+- **Next action:** finish and commit Phase 3 locally. When #8491 capacity-only
+  jobs settle, push/open/merge Phase 2 against integration; then rebase the
+  unpushed Phase 3 branch onto integration and publish it as the next full PR.
 
 ## Scientific Architecture Pointers
 
@@ -71,16 +82,19 @@ under 150 lines; use Git history and linked issues for completed chronology.
    coupled finite-mass base, closed arms, flexible club, and energy contracts.
 6. `scripts/research/proximal_distal_energy/run_moving_base_flexible_study.py` —
    deterministic branch, sensitivity, negative-control, and convergence study.
-7. `scripts/research/proximal_distal_energy/two_arm_closed_loop.py` — canonical
+7. `scripts/research/proximal_distal_energy/spatial_full_body.py` — common
+   reduced spatial model, wrench intervention, and two-formulation inverse
+   dynamics comparison.
+8. `scripts/research/proximal_distal_energy/two_arm_closed_loop.py` — canonical
    planar KKT, contact-force, wrench, and mode primitives; do not duplicate.
-8. `docs/research/proximal_distal_energy_transfer/WSCG_2024_LEGACY_EVIDENCE_AUDIT.md`
+9. `docs/research/proximal_distal_energy_transfer/WSCG_2024_LEGACY_EVIDENCE_AUDIT.md`
    — registered source claims and pointwise/forward interpretation boundary.
-9. `CLAUDE.md` and `AGENTS.md` — binding gates plus discovery-first shared-
-   infrastructure rules.
+10. `CLAUDE.md` and `AGENTS.md` — binding gates plus discovery-first shared-
+    infrastructure rules.
 
 ## Remaining Epic Order
 
-1. Spatial full-body common-observable experiments in two independent engines.
+1. Full-body forward cross-engine contact remains an explicit open tier.
 2. Identifiability, coupled uncertainty, delayed actuation, and robust control.
 3. Preregistered experimental falsification and held-out evaluation protocol.
 4. Research workbench, AffineDrift publication integration, archival release,

@@ -39,7 +39,7 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.497 |
+| **Spec Version** | 1.0.498 |
 | **Last Spec Update** | 2026-08-11 |
 
 ## 2. Purpose & Mission
@@ -71,6 +71,16 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-08-11** - Added a reduced full-body spatial common-state
+  inverse-dynamics tier for #8426. One canonical 20-coordinate, 32-inertia
+  model is evaluated by native MuJoCo inverse dynamics and an independently
+  assembled Lagrange--Christoffel formulation. Registered two-hand
+  action--reaction loads, reversed and coincident moment-arm interventions,
+  model digests, power closure, finite-difference convergence, and
+  predeclared generalized-force tolerances expose the comparison to direct
+  falsification. The result supports common-state implementation transport;
+  passive contact-force generation, forward spatial contact, calibration,
+  physiology, and coaching inference remain untested.
 - **2026-08-11** - Added the coupled moving-base/flexible-club reference tier
   for #8426. The ten-coordinate planar model evolves a finite-mass translating
   base, two closed-loop arms, two grip reactions, a floating proximal club, and
@@ -2058,6 +2068,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-11 | 1.0.498 | Added a reduced full-body 3D common-state inverse-dynamics experiment using one canonical 20-coordinate, 32-inertia model in native MuJoCo and an independent Lagrange--Christoffel formulation; added registered action--reaction hand loads, moment-arm reversal and coincidence controls, model hashes, power closure, finite-difference convergence, predeclared tolerance classification, deterministic JSON/NPZ evidence, three paired publication figures, and an explicit boundary that forward spatial contact, passive load origin, calibration, physiology, and coaching inference remain untested. |
 | 2026-08-11 | 1.0.497 | Added a forward constrained two-arm/floating-club reference model with exact same-state zero-command branching; separated contact-force couple, direct wrist torque, common/differential forces, and power; added a zero-moment-arm negative control plus timestep, projection, constraint, KKT, and work--energy audits; committed deterministic JSON/NPZ evidence and three paired publication figures; and expanded the scientific report while preserving explicit planar-model and non-physiological boundaries. |
 | 2026-08-10 | 1.0.496 | Added #8458 hand-path drift/control attribution across forward double-pendulum and one-arm cases plus a prescribed two-arm closed-loop sweep; exported deterministic force, impulse, power, work, joint/time-window, common/differential-mode, sensitivity, and closure evidence; bounded the late residual-couple preview result without claiming muscle preactivation or human performance; extended lossless object-stream PDF compaction to preserve the 106-page, 110-link, 122-outline publication below the size guard; and restored the all-files size gate with the final owned #8472 chat-dock exception through 2026-08-31. |
 | 2026-08-10 | 1.0.495 | Added a reproducible lossless article-PDF compaction command that fails closed on page, URI-link, outline, or size drift; reduced the 90-page publication artifact below the repository's 1 MiB PDF guard; and recorded the protected #8456 higher-order merge in the handoff. |

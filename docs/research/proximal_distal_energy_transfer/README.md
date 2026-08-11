@@ -12,8 +12,11 @@ matched rigid/flexible three-coordinate study separately accounts for control,
 momentum, gravity, joint damping, shaft elasticity, and shaft damping, with
 closed energy bookkeeping and a 120-case robustness grid. A common-observable
 model ladder then tests wrench transport, prescribed mobile-hub reactions,
-two-hand constraint rank, and proper 3-D frame invariance without representing
-the still-open full-body cross-engine comparison as complete. A three-tier
+two-hand constraint rank, and proper 3-D frame invariance. A reduced full-body
+common-state tier adds genuine nonplanar motion and compares MuJoCo inverse
+dynamics with an independent Lagrange--Christoffel formulation built from the
+same hashed model. It preserves the geometry sign intervention while keeping
+passive and forward-contact claims explicitly open. A three-tier
 hand-path attribution study now separates stitched pointwise ZTCF drift,
 same-state control, and separately defined ZVCF reactions for force vectors,
 impulse, power, work, every modeled joint, and four neutral time windows. A
@@ -73,6 +76,7 @@ python3 -m scripts.research.proximal_distal_energy.run_hand_path_attribution_stu
 python3 -m scripts.research.proximal_distal_energy.two_hand_preactivation_hypothesis
 python3 -m scripts.research.proximal_distal_energy.run_forward_two_arm_study
 python3 -m scripts.research.proximal_distal_energy.run_moving_base_flexible_study
+python3 -m scripts.research.proximal_distal_energy.run_spatial_full_body_study
 # robustness analyses
 python3 -m scripts.research.proximal_distal_energy.e1b_bounded_torque
 python3 -m scripts.research.proximal_distal_energy.e1c_impact_sensitivity
@@ -86,6 +90,7 @@ python3 -m scripts.research.proximal_distal_energy.make_shaft_contribution_figur
 python3 -m scripts.research.proximal_distal_energy.make_mechanism_ladder_figures
 python3 -m scripts.research.proximal_distal_energy.make_forward_two_arm_figures
 python3 -m scripts.research.proximal_distal_energy.make_moving_base_flexible_figures
+python3 -m scripts.research.proximal_distal_energy.make_spatial_full_body_figures
 # document
 cd docs/research/proximal_distal_energy_transfer
 quarto render proximal_distal_energy_transfer.qmd --to pdf
@@ -119,9 +124,11 @@ recorded in `data/*.json`.
   neither establishes a universal coaching prescription, equipment effect, or
   population-level result.
 - The higher-order ladder executes a three-coordinate interface audit,
-  prescribed mobile-hub inverse dynamics, planar closed-loop constraint
-  geometry, and 3-D frame transformations. Full-body cross-engine dynamics are
-  explicitly recorded as unexecuted.
+  prescribed mobile-hub inverse dynamics, planar closed-loop geometry, proper
+  3-D frame transformations, and reduced full-body nonplanar common-state
+  inverse dynamics in two independent formulations. The spatial tier prescribes
+  hand loads; forward closed contact and passive load generation remain
+  explicitly untested.
 - The hand-path evidence uses two forward-simulated open-chain reference cases
   and one prescribed, constraint-consistent two-arm local sweep. Its normalized
   time quartiles are bookkeeping windows, not anatomical swing phases. ZVCF
@@ -139,6 +146,10 @@ recorded in `data/*.json`.
   Its planar point contacts, linear springs and dampers, and declared
   mechanism-study parameters are not a calibrated body, distributed shaft, or
   equipment comparison.
+- The reduced full-body spatial study uses 20 generalized coordinates and
+  spherical inertia elements shared by MuJoCo and an independent analytical
+  implementation. Its same-state agreement is an implementation-transport
+  result, not anatomical validation or a forward-contact simulation.
 - Generalization and human-data work is tracked in
   [#8426](https://github.com/D-sorganization/UpstreamDrift/issues/8426).
 

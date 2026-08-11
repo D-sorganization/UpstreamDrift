@@ -1,0 +1,60 @@
+{
+  "schema_version": "spatial-full-body-common-state-evidence-v1",
+  "study_id": "spatial-full-body-common-state-v1",
+  "model_tier": "reduced_full_body_3d_common_state_inverse_dynamics",
+  "trajectory_kind": "prescribed_common_state_inverse_dynamics",
+  "formulations": ["lagrange_christoffel", "mujoco_native_inverse_dynamics"],
+  "common_model_sha256": "47695634f98d2691351cfe50597e86c20f3c951c80eb8cc8ad753a78d9fc2e7f",
+  "model_dimensions": {
+    "generalized_coordinates": 20,
+    "body_inertia_elements": 32,
+    "club_coordinates": 6
+  },
+  "intervention": {
+    "description": "Reverse the signed two-hand contact moment arm while retaining force histories and common achieved state.",
+    "direct_club_torque_command_nm": 0.0,
+    "contact_load_origin": "prescribed action-reaction input",
+    "force_generated_couple_minimum_nm": -4.3182723455539245,
+    "first_negative_time_s": 0.17200000000000001,
+    "reversed_geometry_couple_maximum_nm": 4.318272345553925,
+    "sign_reversal_residual_max_nm": 8.881784197001252e-16,
+    "coincident_hands_couple_max_abs_nm": 0.0
+  },
+  "cross_formulation": {
+    "classification": "equivalent",
+    "maximum_absolute_generalized_force_error": 1.2523404535613736e-9,
+    "maximum_relative_inverse_dynamics_error": 2.1357383954285e-11,
+    "intervention_event_grid_error_s": 0.0,
+    "tolerance": {
+      "absolute_generalized_force": 0.75,
+      "relative": 0.05,
+      "event_time_s": 0.004,
+      "calibration": "finite-difference steps 2e-6 and 1e-6 on a manufactured spherical-inertia tree, fixed before the preferred event-window result"
+    },
+    "finite_difference_finest_pair_difference": 1.4671854842163157e-9
+  },
+  "spatial_checks": {
+    "out_of_plane_club_motion_m": 0.03495739734773644,
+    "maximum_abs_action_reaction_power_residual_w": 0.0,
+    "proper_axes_rank": 3
+  },
+  "claim_status": {
+    "H2_geometry_dependent_transfer": "supported_in_reduced_spatial_common_state_tier",
+    "H3_passive_late_negative_couple": "inconclusive_contact_loads_prescribed",
+    "H5_implementation_transport": "supported_for_common_state_inverse_dynamics",
+    "full_body_forward_closed_contact": "untested",
+    "human_or_coaching_inference": "unsupported"
+  },
+  "limitations": [
+    "The reduced full-body tree is not a subject-specific anatomical model.",
+    "Hand contact forces are prescribed rather than solved from two-hand closure.",
+    "The experiment compares identical achieved states, not divergent forward rollouts.",
+    "Spherical inertia elements regularize a common model and do not represent distributed soft tissue.",
+    "No measured human trajectory or force record is used as validation data."
+  ],
+  "source_sha256": {
+    "scripts/research/proximal_distal_energy/spatial_full_body.py": "218d92732fd3e9ca283c38878f788e923d19934076918c4925f9832b4699ea0a",
+    "scripts/research/proximal_distal_energy/run_spatial_full_body_study.py": "0448596117ad2a5c625cb20f6cd4b48b0c4be7a96b1f172d853b5aa6de8ee7ab"
+  },
+  "array_artifact": "spatial_full_body_study.npz"
+}
