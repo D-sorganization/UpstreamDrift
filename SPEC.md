@@ -39,7 +39,7 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.500 |
+| **Spec Version** | 1.0.501 |
 | **Last Spec Update** | 2026-08-11 |
 
 ## 2. Purpose & Mission
@@ -71,6 +71,18 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-08-11** - Decomposed the launcher settings surface from exact draft
+  PR #8486 head `624043537a5ab10aa7ef56dc61685a004b872c0c` without changing
+  its public dialog/widget contract. Runtime dependency probes and the WSL
+  setup dialog now live in `settings_runtime.py`; diagnostics, log
+  synchronization, and process-management behavior live in the private
+  `_settings_auxiliary_tabs.py` mixin. `SettingsWidget` retains its constructor,
+  signal, tab constants, controls, and historical methods through compatibility
+  imports/inheritance. The facade is 1,124 lines (from 2,190), so both its
+  file-size and expired module-size exceptions are removed; the obsolete
+  `WslScriptDialog._setup_ui` long-function exception is also removed after that
+  UI was split into focused builders. The global module-size gate now reports
+  only the unrelated inherited `launcher_ui_setup.py` violation.
 - **2026-08-11** - Decomposed the Simscape C3D viewer for #8485 without
   changing its public UI contract. User-defined segment shape construction,
   fitting, library/theme resolution, artist lifecycle, and frame updates now
@@ -2037,6 +2049,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-11 | 1.0.501 | Decomposed the launcher settings surface from exact draft PR #8486 head `624043537a5ab10aa7ef56dc61685a004b872c0c`: runtime dependency checks and the WSL setup dialog now live in `settings_runtime.py`, while diagnostics, log synchronization, and process-management behavior live in the private `_settings_auxiliary_tabs.py` mixin. Preserved the `SettingsWidget`/`SettingsDialog` constructor, signals, tab constants, controls, methods, and compatibility imports. Reduced `settings_dialog.py` from 2,190 to 1,124 lines; removed its file-size and expired module-size exceptions plus the obsolete `WslScriptDialog._setup_ui` long-function exception without renewal. The remaining global module-size violation is the parent-identical `launcher_ui_setup.py`; accurate open issue tracking is still required before publication because the retired exceptions cite closed or unrelated issues. |
 | 2026-08-11 | 1.0.500 | Decomposed the launcher shared-Tools freshness probe behind a focused, dependency-injected local-Git boundary while preserving `LauncherDiagnostics.check_shared_tools_freshness()` and its result-recording behavior. Reduced `launcher_diagnostics.py` from 1,307 to 1,196 lines and removed its expired module-size exception, active file-size exception, and obsolete long-function exception without renewal or policy widening. The cited #5922 maintainability issue is closed, cited #7341/#7342 are closed and concern different defects, and #8472 is chat-dock-specific, so this slice deliberately does not claim issue completion; accurate open tracking remains a publication prerequisite. Three expired exceptions and four oversized production modules remain explicit module-gate blockers. |
 | 2026-08-11 | 1.0.499 | Completed the local UpstreamDrift portion of #8472's chat-dock compatibility-shell decomposition: moved WebSocket dispatch, terminal-mode mechanics, streaming-state initialization, and collapsed-view mutation into focused `chat._qt.runtime` helpers; retained every historical `ChatDockWidget` method as a thin delegate; and reduced `_chat_dock_widget_qt.py` from 1,490 to 1,150 lines. Removed the chat dock from both file-size exception ledgers without renewing or widening either policy. Focused delegation, terminal-payload, chat behavior, module-truthfulness, lint, type, architecture, and file-size checks cover the new boundaries. Canonical Tools synchronization remains required before refreshing the cross-repository drift hash; that sentinel already fails on the parent for the dock and `models.py`. Four expired exceptions and five oversized production modules remain explicit module-gate blockers. |
 | 2026-08-11 | 1.0.498 | Advanced #8472 without renewing or widening module-size exceptions: consolidated the duplicated stateless slope-gravity, roll-direction, and contact-normal calculations in `src/shared/python/physics/terrain_representation.py` onto the canonical split terrain implementation, reducing the legacy module below the 1,200-line hard limit while preserving its distinct boundary and serialization contracts. Removed its expired size exception, tightened its architecture-debt ratchet from 1,250 to 1,200 lines, and corrected the chat-dock exception's stale 1,989-line description to its measured 1,490 lines without changing its expiry. Identity and numerical regressions preserve the shared helper API. Five expired exceptions and six oversized production modules remain explicit release blockers. |

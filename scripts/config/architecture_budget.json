@@ -116,14 +116,6 @@
     },
     {
       "path": "src/launchers/settings_dialog.py",
-      "symbol": "WslScriptDialog._setup_ui",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Issues #7341/#7342 legacy settings dialog decomposition: WslScriptDialog._setup_ui exceeded the changed-file budget before Docker build cancellation was hardened and needs focused widget builders.",
-      "expires_on": "2026-08-31"
-    },
-    {
-      "path": "src/launchers/settings_dialog.py",
       "symbol": "SettingsWidget._create_layout_tab",
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",

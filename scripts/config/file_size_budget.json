@@ -19,12 +19,6 @@
       "owner": "@physics-core",
       "reason": "Terrain representation at 1253 lines combines mesh, elevation, and surface-material models. Split into domain submodules planned, tracked in issue #2456.",
       "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/launchers/settings_dialog.py",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Issue #5922 temporary exception while settings dialog tabs are decomposed into focused UI components.",
-      "expires_on": "2027-01-31"
     }
   ]
 }

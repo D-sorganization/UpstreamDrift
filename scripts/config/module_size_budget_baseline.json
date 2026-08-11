@@ -2,12 +2,6 @@
   "max_lines": 1200,
   "exceptions": [
     {
-      "path": "src/launchers/settings_dialog.py",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Legacy launcher settings dialog (2104 lines, pending decomposition under #5922)",
-      "expires_on": "2026-07-31"
-    },
-    {
       "path": "src/launchers/launcher_ui_setup.py",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "reason": "Legacy launcher UI setup module (2105 lines, pending decomposition under #5922)",
