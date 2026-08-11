@@ -255,6 +255,14 @@ export interface AnalysisStatisticsResponse {
 }
 
 /**
+ * Bounded inline data and an analysis request; paths are never accepted.
+ */
+export interface AnalyzePayload {
+  records: Record<string, unknown>[];
+  analysis: FlexibleAnalysisPayload;
+}
+
+/**
  * Appearance preferences for the web shell.
  */
 export interface AppearanceSettings {
@@ -955,6 +963,21 @@ export interface FeatureReportModel {
   message: string;
   missing?: string[];
   depends_on?: string[];
+}
+
+/**
+ * Serialized form of :class:`FlexibleAnalysisRequest`.
+ */
+export interface FlexibleAnalysisPayload {
+  outcome: string;
+  predictors: string[];
+  analysis_mode: "correlation" | "regression" | "comprehensive";
+  correlation_method: "pearson" | "spearman" | "kendall";
+  missing_policy: "pairwise" | "listwise" | "fail";
+  group_by?: string | null;
+  confidence_level: number;
+  min_samples: number;
+  allow_aggregate: boolean;
 }
 
 /**

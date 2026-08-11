@@ -96,7 +96,8 @@ async def login(
     else:
         # Perform dummy verification using a valid bcrypt hash with the same
         # work factor (12) used in the system, to take roughly the same time.
-        dummy_hash = "$2b$12$L7M5I.3Tf30z0q2o0rD1n.yT2kG1a5c6m2a5m8m5j2v5l2r7z4a9G"
+        # This hash was generated with bcrypt for the password 'dummy_password'
+        dummy_hash = "$2b$12$9KWF9XkUM7.biKJYGY1oCeql3F9vNsKwhxDusKhRk8iCg5gUdT7G."
         security_manager.verify_password(login_data.password, dummy_hash)
         password_valid = False
 
