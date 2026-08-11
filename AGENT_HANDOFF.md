@@ -5,6 +5,23 @@ Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
 
+- **#8472 module-size decomposition slice (local stacked candidate)** — branch
+  `fix/8472-module-size-decomposition` is stacked directly on the #8477 parent
+  commit `fda4a06ee3af79bb207db5b54b9e612d6882b7de`. It consolidates the
+  duplicated stateless terrain physics helpers onto the canonical split terrain
+  implementation, takes the legacy `terrain_representation.py` below 1,200
+  lines, removes that expired exception, and tightens its architecture ratchet
+  from 1,250 to 1,200 lines. The legacy and canonical classes remain separate
+  because their nominal-boundary and serialized-material contracts conflict;
+  forcing a full facade caused broader terrain regressions. This advances the
+  failing module-size gate from six expired exceptions/seven oversized modules
+  to five/six. It does not make the gate green: launcher
+  diagnostics/UI/settings/main launcher, chat dock,
+  and the Simscape 3D viewer still require owned decompositions. The chat-dock
+  reason now truthfully records 1,490 lines, but its expiry is intentionally
+  unchanged; do not renew or widen these exceptions as a substitute for the
+  remaining work.
+
 - **Exact-main release-gate unblocker candidate (local only)** — branch
   `fix/current-main-release-gate-unblockers` starts at exact `main`
   `69eb7e9db32ccd17e45824619315b1d04b400c27`. It repairs the two

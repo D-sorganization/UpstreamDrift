@@ -53,7 +53,7 @@
     },
     {
       "path": "src/shared/python/physics/terrain_representation.py",
-      "max_lines": 1250
+      "max_lines": 1200
     },
     {
       "path": "src/shared/python/sidekick/process_calculators/pressure_drop_calculator/pressure_drop_api.py",

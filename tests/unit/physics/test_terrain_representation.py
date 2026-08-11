@@ -17,12 +17,20 @@ import math
 import numpy as np
 import pytest
 from src.shared.python.physics import terrain_representation as tr
+from src.shared.python.physics import terrain as canonical_terrain
 from src.shared.python.physics._terrain_physics import (
     CompressibleTurfModel,
     TerrainContactModel,
 )
 
 pytestmark = pytest.mark.unit
+
+
+def test_stateless_physics_helpers_use_the_canonical_terrain_implementation() -> None:
+    """The legacy model must not duplicate stateless terrain calculations."""
+    assert tr.compute_gravity_on_slope is canonical_terrain.compute_gravity_on_slope
+    assert tr.compute_roll_direction is canonical_terrain.compute_roll_direction
+    assert tr.get_contact_normal is canonical_terrain.get_contact_normal
 
 
 # --------------------------------------------------------------------------- #
