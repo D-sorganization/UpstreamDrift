@@ -11,6 +11,11 @@ from src.launchers.launcher_model_sources import (
 )
 from src.shared.python.config.model_registry import ModelRegistry
 from src.shared.python.config.model_source_providers import resolve_model_source
+from src.shared.python.config.tools_vendor_authority import (
+    ProviderUnavailableError,
+    TOOLS_GITLINK_SHA,
+    ToolsVendorAuthority,
+)
 
 
 TOOLS_MODEL_IDS = (
@@ -27,6 +32,19 @@ class ProviderBackedModel:
     source_root = "../Drake_Models"
     working_dir = "python"
     python_paths = ["src", "bindings", "src"]
+
+
+def _authorize_tools_vendor(monkeypatch: pytest.MonkeyPatch, repo_root: Path) -> Path:
+    vendor_root = (repo_root / "vendor" / "ud-tools").resolve()
+    monkeypatch.setattr(
+        "src.shared.python.config.model_source_providers.inspect_tools_vendor_authority",
+        lambda _repo_root: ToolsVendorAuthority(
+            root=vendor_root,
+            expected_sha=TOOLS_GITLINK_SHA,
+            available=True,
+        ),
+    )
+    return vendor_root
 
 
 def test_get_model_source_root_uses_override() -> None:
@@ -86,13 +104,15 @@ def test_resolve_model_source_preserves_local_provider_parity(tmp_path: Path) ->
 
 def test_tools_provider_prefers_pinned_vendor_over_mutable_sibling(
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     class ToolsModel:
         provider = "tools"
+        package_name = "mutable_tools_package"
         source_root = "../Tools"
         path = "src/tool.py"
 
-    vendor_root = tmp_path / "vendor" / "ud-tools"
+    vendor_root = _authorize_tools_vendor(monkeypatch, tmp_path)
     sibling_root = tmp_path.parent / "Tools"
     (vendor_root / "src").mkdir(parents=True)
     (sibling_root / "src").mkdir(parents=True, exist_ok=True)
@@ -118,15 +138,15 @@ def test_tools_provider_missing_vendor_does_not_fall_back_to_sibling(
     (override_root / "src").mkdir(parents=True, exist_ok=True)
     monkeypatch.setenv("TOOLS_REPO_PATH", str(override_root))
 
-    resolved = resolve_model_source(ToolsModel(), tmp_path)
-
-    assert resolved.provider_id == "tools-vendor"
-    assert resolved.source_root == (tmp_path / "vendor" / "ud-tools").resolve()
-    assert not resolved.source_root.exists()
+    with pytest.raises(ProviderUnavailableError, match="provider_unavailable"):
+        resolve_model_source(ToolsModel(), tmp_path)
 
 
-def test_all_tools_launchers_resolve_from_pinned_vendor(tmp_path: Path) -> None:
-    vendor_root = tmp_path / "vendor" / "ud-tools"
+def test_all_tools_launchers_resolve_from_pinned_vendor(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    vendor_root = _authorize_tools_vendor(monkeypatch, tmp_path)
     sibling_root = tmp_path.parent / "Tools"
     (vendor_root / "src").mkdir(parents=True)
     (sibling_root / "src").mkdir(parents=True, exist_ok=True)
@@ -138,6 +158,123 @@ def test_all_tools_launchers_resolve_from_pinned_vendor(tmp_path: Path) -> None:
         resolved = resolve_model_source(model, tmp_path)
         assert resolved.provider_id == "tools-vendor"
         assert resolved.source_root == vendor_root.resolve()
+
+
+@pytest.mark.parametrize(
+    ("field_name", "field_value"),
+    [
+        ("path", "../escape.py"),
+        ("working_dir", "../escape"),
+        ("python_paths", ["../escape"]),
+    ],
+)
+def test_tools_provider_rejects_relative_path_escape(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    field_name: str,
+    field_value: str | list[str],
+) -> None:
+    class ToolsModel:
+        provider = "tools"
+        path = "src/tool.py"
+        working_dir = "src"
+        python_paths = ["src"]
+
+    vendor_root = _authorize_tools_vendor(monkeypatch, tmp_path)
+    (vendor_root / "src").mkdir(parents=True)
+    setattr(ToolsModel, field_name, field_value)
+
+    with pytest.raises(ProviderUnavailableError, match="provider_unavailable"):
+        resolve_model_source(ToolsModel(), tmp_path)
+
+
+@pytest.mark.parametrize("field_name", ["path", "working_dir", "python_paths"])
+def test_tools_provider_rejects_absolute_path_escape(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    field_name: str,
+) -> None:
+    class ToolsModel:
+        provider = "tools"
+        path = "src/tool.py"
+        working_dir = "src"
+        python_paths = ["src"]
+
+    vendor_root = _authorize_tools_vendor(monkeypatch, tmp_path)
+    (vendor_root / "src").mkdir(parents=True)
+    outside = (tmp_path / "outside").resolve()
+    value: str | list[str] = str(outside)
+    if field_name == "python_paths":
+        value = [str(outside)]
+    setattr(ToolsModel, field_name, value)
+
+    with pytest.raises(ProviderUnavailableError, match="provider_unavailable"):
+        resolve_model_source(ToolsModel(), tmp_path)
+
+
+def test_tools_provider_rejects_resolved_link_escape(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class ToolsModel:
+        provider = "tools"
+        path = "src/link/tool.py"
+
+    vendor_root = _authorize_tools_vendor(monkeypatch, tmp_path)
+    source_root = vendor_root / "src"
+    outside = (tmp_path / "outside").resolve()
+    source_root.mkdir(parents=True)
+    escaped_artifact = source_root / "link" / "tool.py"
+    real_resolve = Path.resolve
+
+    def resolve_with_link_escape(path: Path, strict: bool = False) -> Path:
+        if path == escaped_artifact:
+            return outside / "tool.py"
+        return real_resolve(path, strict=strict)
+
+    monkeypatch.setattr(Path, "resolve", resolve_with_link_escape)
+
+    with pytest.raises(ProviderUnavailableError, match="provider_unavailable"):
+        resolve_model_source(ToolsModel(), tmp_path)
+
+
+def test_tools_launcher_path_helpers_keep_every_path_under_vendor(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class EscapedArtifactModel:
+        provider = "tools"
+        path = "../escape.py"
+
+    class EscapedWorkingModel:
+        provider = "tools"
+        path = "src/tool.py"
+        working_dir = "../escape"
+
+    class EscapedPythonPathModel:
+        provider = "tools"
+        path = "src/tool.py"
+        python_paths = ["../escape"]
+
+    class FallbackWorkingModel:
+        provider = "tools"
+        path = "src/tool.py"
+
+    vendor_root = _authorize_tools_vendor(monkeypatch, tmp_path)
+    (vendor_root / "src").mkdir(parents=True)
+
+    with pytest.raises(ProviderUnavailableError, match="provider_unavailable"):
+        resolve_model_artifact_path(EscapedArtifactModel(), tmp_path)
+    with pytest.raises(ProviderUnavailableError, match="provider_unavailable"):
+        get_model_working_directory(EscapedWorkingModel(), tmp_path)
+    with pytest.raises(ProviderUnavailableError, match="provider_unavailable"):
+        get_model_python_paths(EscapedPythonPathModel(), tmp_path)
+    with pytest.raises(ProviderUnavailableError, match="provider_unavailable"):
+        get_model_working_directory(
+            FallbackWorkingModel(),
+            tmp_path,
+            fallback_relative="../escape",
+        )
 
 
 def test_generic_sibling_provider_resolution_is_unchanged(tmp_path: Path) -> None:
@@ -186,13 +323,16 @@ def test_movement_optimizer_targets_sibling_public_entry_point() -> None:
     )
 
 
-def test_visible_registry_tiles_have_unique_display_name_and_artifact() -> None:
+def test_visible_registry_tiles_have_unique_display_name_and_artifact(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """Visible launcher cards must not send users to the same entry point.
 
     Hidden aliases are intentionally excluded: they preserve saved layouts
     without presenting duplicate cards in the PyQt6 launcher.
     """
     repo_root = Path(__file__).resolve().parents[2]
+    _authorize_tools_vendor(monkeypatch, repo_root)
     registry = ModelRegistry()
     visible_targets: dict[tuple[str, Path], list[str]] = {}
 

@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 from src.config.launcher_manifest_loader import (
@@ -321,6 +322,7 @@ models:
     def test_manifest_loads_utility_provider_tiles_from_known_roots_without_env(
         self,
         tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         """Utility repos should be discoverable through the shared launch path."""
         workspace_root = tmp_path
@@ -337,6 +339,10 @@ models:
         tools_root = workspace_root / "Tools"
         tools_root.mkdir(parents=True)
         (repo_root / "vendor" / "ud-tools" / "src").mkdir(parents=True)
+        monkeypatch.setattr(
+            "src.config.launcher_manifest_loader.inspect_tools_vendor_authority",
+            lambda _repo_root: SimpleNamespace(available=True),
+        )
         (tools_root / "model_pack.yaml").write_text(
             """
 manifest_version: "1.0.0"

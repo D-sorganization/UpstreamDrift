@@ -26,7 +26,9 @@ from typing import Any
 from src.launchers.launcher_provider_compatibility import is_engine_runtime_available
 from src.shared.python.config.model_pack_manifest import LauncherPresentationMetadata
 from src.shared.python.config.model_registry import ModelConfig, ModelRegistry
-from src.shared.python.config.model_source_providers import resolve_model_source_root
+from src.shared.python.config.tools_vendor_authority import (
+    inspect_tools_vendor_authority,
+)
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -107,8 +109,7 @@ def _provider_status(
 ) -> str:
     """Return an availability-aware status without exposing resolved paths."""
     if model.provider == "tools":
-        tools_root = resolve_model_source_root(model, repo_root)
-        if not (tools_root / "src").is_dir():
+        if not inspect_tools_vendor_authority(repo_root).available:
             return "provider_unavailable"
     elif isinstance(model.source_root, str) and not Path(model.source_root).exists():
         return "provider_unavailable"

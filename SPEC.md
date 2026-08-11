@@ -135,11 +135,16 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 - **2026-08-11** - Added the first bounded #4262 immutable Tools-provider
   source contract. Launcher entries with `provider: tools` now resolve only
   from the repository-pinned `vendor/ud-tools` gitlink, before generic sibling
-  providers; the five Tools launchers no longer serialize `../Tools` source
-  roots. A missing or uninitialized vendor source reports
-  `provider_unavailable` and never falls back to a mutable sibling checkout.
+  and installed-package providers; the five Tools launchers no longer serialize
+  `../Tools` source roots. Authority requires the already-declared exact
+  `ff4240217005e1415ca409fd124e50b64ee642d2` gitlink, matching clean checkout
+  HEAD, current-superproject attachment, and a non-reparse vendor directory.
+  Every resolved artifact, working directory, fallback, and Python path must
+  remain under that authority after canonicalization. Missing, uninitialized,
+  dirty, replaced, mismatched, or escaping sources report
+  `provider_unavailable` and never fall back to mutable sibling/package input.
   Generic sibling-provider resolution is unchanged. This slice does not change
-  the gitlink pin, validate `TOOLS_REPO_PATH` identity, or complete #4262.
+  the gitlink pin, accept an unvalidated `TOOLS_REPO_PATH`, or complete #4262.
 - (spec-exempt: security fix) Fixed Command Injection in `pandas.DataFrame.query()` inside `rust_engine.py` (both `data_processor` and `data_processor_io`) by explicitly validating user expressions using an AST-based validator (`validate_pandas_formula`). This eliminates an arbitrary code execution vulnerability.
 
 - **2026-08-05** - Retargeted #8345 P1's 3D putting workflow to `main`
@@ -2037,7 +2042,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-08-11 | 1.0.497 | Added the bounded #4262 immutable Tools-provider resolution slice: all five Tools launchers select the pinned `vendor/ud-tools` source, fail closed as `provider_unavailable` when it is absent, preserve generic sibling-provider behavior, and omit mutable `../Tools` roots from serialized manifests; gitlink pin updates and identity-validated development overrides remain open. |
+| 2026-08-11 | 1.0.497 | Added the bounded #4262 immutable Tools-provider resolution slice: all five Tools launchers select the exact clean `vendor/ud-tools` gitlink at declared SHA `ff4240217005e1415ca409fd124e50b64ee642d2`, take precedence over conflicting sibling/package metadata, reject dirty/replaced/mismatched authority and canonical path escapes as `provider_unavailable`, preserve generic sibling-provider behavior, and omit mutable `../Tools` roots from serialized manifests; gitlink pin updates and identity-validated development overrides remain open. |
 | 2026-08-10 | 1.0.496 | Added #8458 hand-path drift/control attribution across forward double-pendulum and one-arm cases plus a prescribed two-arm closed-loop sweep; exported deterministic force, impulse, power, work, joint/time-window, common/differential-mode, sensitivity, and closure evidence; bounded the late residual-couple preview result without claiming muscle preactivation or human performance; extended lossless object-stream PDF compaction to preserve the 106-page, 110-link, 122-outline publication below the size guard; and restored the all-files size gate with the final owned #8472 chat-dock exception through 2026-08-31. |
 | 2026-08-10 | 1.0.495 | Added a reproducible lossless article-PDF compaction command that fails closed on page, URI-link, outline, or size drift; reduced the 90-page publication artifact below the repository's 1 MiB PDF guard; and recorded the protected #8456 higher-order merge in the handoff. |
 | 2026-08-10 | 1.0.494 | Added a reference- and frame-explicit interaction-wrench schema; exact moment/velocity transport and proper-rotation power contracts; prescribed mobile-hub inverse-dynamics comparisons; planar two-hand closed-loop rank/nullspace diagnostics; a fail-closed model-discrepancy record; seven reproducible figures; and a higher-order scientific chapter that explicitly leaves full-body cross-engine dynamics unexecuted. |

@@ -8,12 +8,16 @@ Update this file with every PR and every push to main.
 - **#4262 immutable Tools provider source** — local branch
   `feat/4262-pinned-tools-provider-resolution` is a bounded first slice from
   exact `main` `69eb7e9d`. The five `provider: tools` launcher entries resolve
-  exclusively to `vendor/ud-tools`; missing/uninitialized vendor content is
-  `provider_unavailable`, mutable `../Tools` roots are no longer serialized,
-  and unrelated sibling providers retain their existing resolution. The branch
-  deliberately does not change the gitlink pin or add `TOOLS_REPO_PATH` until
-  an exact repository/commit identity contract exists. #4262 remains open for
-  pin updates, identity-validated development overrides, broader consumer
+  exclusively to `vendor/ud-tools` at the already-declared gitlink SHA
+  `ff4240217005e1415ca409fd124e50b64ee642d2`. Follow-up hardening makes the
+  Tools provider win over conflicting installed-package or sibling metadata,
+  requires an initialized, exact-HEAD, clean gitlink attached to this
+  superproject, rejects reparse-point replacements and all resolved path
+  escapes, and normalizes failure to `provider_unavailable`. Mutable
+  `../Tools` roots are no longer serialized and unrelated sibling providers
+  retain their existing resolution. The branch deliberately does not change
+  the gitlink pin or add `TOOLS_REPO_PATH`. #4262 remains open for any future
+  pin update, an identity-validated development override, broader consumer
   migration, and protected integration.
 - **#8458 hand-path drift/control attribution** — consolidated branch
   `feat/hand-path-drift-control-attribution` defines the canonical same-state

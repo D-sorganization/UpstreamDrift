@@ -19,6 +19,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Protocol
 
+from src.shared.python.config.tools_vendor_authority import (
+    ProviderUnavailableError,
+    inspect_tools_vendor_authority,
+)
 from src.shared.python.core.contracts import require
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -94,9 +98,13 @@ class ModelSourcePathPolicy:
         self,
         default_root: Path,
         approved_roots: Iterable[Path] = (),
+        *,
+        allow_parent: bool = True,
     ) -> None:
         canonical_default = Path(default_root).resolve(strict=False)
-        roots = [canonical_default, canonical_default.parent]
+        roots = [canonical_default]
+        if allow_parent:
+            roots.append(canonical_default.parent)
         roots.extend(Path(root).resolve(strict=False) for root in approved_roots)
 
         seen: set[Path] = set()
@@ -265,11 +273,15 @@ class ToolsVendorModelSourceProvider:
         """Return the canonical pinned Tools root.
 
         Postcondition:
-            The result is always the ``vendor/ud-tools`` path under the
-            supplied UpstreamDrift checkout, whether or not the gitlink has
-            been initialized.
+            The result is the validated, initialized, exact-revision
+            ``vendor/ud-tools`` gitlink under the supplied checkout.
         """
-        return path_policy.resolve_source_root("vendor/ud-tools")
+        authority = inspect_tools_vendor_authority(path_policy.default_root)
+        if not authority.available:
+            raise ProviderUnavailableError(
+                f"provider_unavailable: {authority.reason or 'Tools authority failed'}"
+            )
+        return authority.root
 
     def resolve(
         self,
@@ -278,25 +290,31 @@ class ToolsVendorModelSourceProvider:
         fallback_relative: str | Path | None = None,
     ) -> ResolvedModelSource:
         source_root = self.source_root(path_policy)
-        return ResolvedModelSource(
-            provider_id=self.provider_id,
-            source_root=source_root,
-            artifact_path=path_policy.resolve_path(
-                source_root,
-                _get_optional_string_attr(model, "path"),
-                field_name="path",
-            ),
-            working_directory=path_policy.resolve_optional_path(
-                source_root,
-                _get_optional_string_attr(model, "working_dir"),
-                fallback_path=fallback_relative,
-                field_name="working_dir",
-            ),
-            python_paths=path_policy.resolve_python_paths(
-                source_root,
-                _iter_python_path_values(model),
-            ),
-        )
+        strict_policy = ModelSourcePathPolicy(source_root, allow_parent=False)
+        try:
+            return ResolvedModelSource(
+                provider_id=self.provider_id,
+                source_root=source_root,
+                artifact_path=strict_policy.resolve_path(
+                    source_root,
+                    _get_optional_string_attr(model, "path"),
+                    field_name="path",
+                ),
+                working_directory=strict_policy.resolve_optional_path(
+                    source_root,
+                    _get_optional_string_attr(model, "working_dir"),
+                    fallback_path=fallback_relative,
+                    field_name="working_dir",
+                ),
+                python_paths=strict_policy.resolve_python_paths(
+                    source_root,
+                    _iter_python_path_values(model),
+                ),
+            )
+        except ValueError as exc:
+            raise ProviderUnavailableError(
+                f"provider_unavailable: Tools path escaped vendor authority: {exc}"
+            ) from exc
 
 
 class SiblingRepoModelSourceProvider:
@@ -383,8 +401,8 @@ class InstalledPackageModelSourceProvider:
 
 
 _PROVIDERS: tuple[ModelSourceProvider, ...] = (
-    InstalledPackageModelSourceProvider(),
     ToolsVendorModelSourceProvider(),
+    InstalledPackageModelSourceProvider(),
     SiblingRepoModelSourceProvider(),
     LocalRepoModelSourceProvider(),
 )
@@ -423,6 +441,12 @@ def resolve_model_artifact(
     approved_roots: Iterable[Path] = (),
 ) -> Path:
     """Resolve only the canonical artifact path for a model."""
+    provider = _select_provider(model)
+    if isinstance(provider, ToolsVendorModelSourceProvider):
+        return provider.resolve(
+            model,
+            ModelSourcePathPolicy(default_root, approved_roots=approved_roots),
+        ).artifact_path
     path_policy = ModelSourcePathPolicy(default_root, approved_roots=approved_roots)
     source_root = resolve_model_source_root(
         model,
@@ -444,6 +468,13 @@ def resolve_model_working_directory(
     approved_roots: Iterable[Path] = (),
 ) -> Path:
     """Resolve only the canonical working directory for a model."""
+    provider = _select_provider(model)
+    if isinstance(provider, ToolsVendorModelSourceProvider):
+        return provider.resolve(
+            model,
+            ModelSourcePathPolicy(default_root, approved_roots=approved_roots),
+            fallback_relative=fallback_relative,
+        ).working_directory
     path_policy = ModelSourcePathPolicy(default_root, approved_roots=approved_roots)
     source_root = resolve_model_source_root(
         model,
@@ -465,6 +496,12 @@ def resolve_model_python_paths(
     approved_roots: Iterable[Path] = (),
 ) -> tuple[Path, ...]:
     """Resolve only the canonical extra python paths for a model."""
+    provider = _select_provider(model)
+    if isinstance(provider, ToolsVendorModelSourceProvider):
+        return provider.resolve(
+            model,
+            ModelSourcePathPolicy(default_root, approved_roots=approved_roots),
+        ).python_paths
     path_policy = ModelSourcePathPolicy(default_root, approved_roots=approved_roots)
     source_root = resolve_model_source_root(
         model,

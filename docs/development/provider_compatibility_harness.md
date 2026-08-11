@@ -16,15 +16,27 @@ whether a provider-backed model pack is safe to surface in UpstreamDrift.
 Launcher models declaring `provider: tools` use the repository-pinned
 `vendor/ud-tools` gitlink as their sole production source authority. The
 resolver intentionally ignores legacy `source_root: ../Tools` declarations and
-workspace sibling checkouts. If `vendor/ud-tools/src` is absent because the
-gitlink is missing or uninitialized, the launcher reports
-`provider_unavailable`; it does not run a potentially different Tools revision.
+workspace sibling checkouts, even if conflicting `package_name` metadata is
+present. Readiness requires one tracked mode-`160000` gitlink at declared SHA
+`ff4240217005e1415ca409fd124e50b64ee642d2`, an initialized normal directory
+attached to the current superproject, the same checked-out HEAD, and clean
+inner and superproject status. Symlink/reparse-point replacements, detached or
+independent worktrees, dirty state, missing `src`, and pin mismatches all report
+`provider_unavailable`; the launcher never runs a potentially different Tools
+revision.
+
+All Tools artifact, working-directory, fallback, and extra `python_paths`
+values are canonicalized under that exact vendor root. Parent traversals,
+absolute paths outside it, and symlink/junction resolutions that escape it fail
+closed as `provider_unavailable`. Generic sibling providers retain their
+existing workspace resolution contract.
 
 `TOOLS_REPO_PATH` remains available to the separate Sidekick development
 bootstrap, but is not accepted by this model-provider slice because the current
-override contract validates directory shape rather than exact repository and
+override contract validates directory shape rather than this exact gitlink and
 commit identity. Adding a commit-validated development override remains open
-under #4262.
+under #4262; this slice does not preserve that environment variable for Tools
+launcher models.
 
 ## Machine-Readable Diagnostics
 
