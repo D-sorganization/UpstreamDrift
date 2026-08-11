@@ -55,6 +55,7 @@ python3 -m scripts.research.proximal_distal_energy.run_forward_two_arm_study
 python3 -m scripts.research.proximal_distal_energy.run_moving_base_flexible_study
 python3 -m scripts.research.proximal_distal_energy.run_spatial_full_body_study
 python3 -m scripts.research.proximal_distal_energy.run_uncertainty_control_study
+python3 -m scripts.research.proximal_distal_energy.run_experimental_protocol_dry_run
 
 # Robustness analyses
 python3 -m scripts.research.proximal_distal_energy.e1b_bounded_torque
@@ -169,3 +170,7 @@ Recorded outputs:
 - `data/uncertainty_control_study.{json,npz}` — declared design, actuator
   contract, uncertainty intervals, PRCC screen, identifiability audit,
   training/held-out program comparison, closure, and rollout arrays.
+- `data/experimental_protocol_v1.json` — frozen inclusion, measurement,
+  processing, participant-split, prediction, and inference contract.
+- `data/experimental_protocol_{dry_run,readiness}.json` — synthetic-only intake
+  fixture and fail-closed readiness classification; no human observations.

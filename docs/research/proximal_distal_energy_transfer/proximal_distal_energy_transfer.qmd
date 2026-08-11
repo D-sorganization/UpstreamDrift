@@ -80,7 +80,12 @@ abstract: |
   programs are nondominated on held-out samples. An early opposing command
   improves lower-tail speed relative to late drive but worsens the planar
   face/path proxy, rejecting a universal optimum and any direct physiological
-  interpretation. A separate hand-path
+  interpretation. A preregistered experimental protocol then fixes synchronized
+  motion, bilateral hand-wrench, club, ground-reaction, launch, and activation
+  measurements; participant-level holdout; filtering; calibration; residuals;
+  identity protection; and four outcome falsifiers. Its synthetic dry run
+  qualifies only the fail-closed pipeline. No human outcome is analyzed, and
+  every experimental prediction remains untested. A separate hand-path
   attribution study evaluates the
   MacKenzie force-work-per-path-length estimand in an impact-truncated double
   pendulum, a forward-simulated one-arm model, and a mechanically closed
@@ -147,6 +152,8 @@ format:
 {{< include chapters/_ch06c_spatial_cross_formulation.qmd >}}
 
 {{< include chapters/_ch06d_uncertainty_control.qmd >}}
+
+{{< include chapters/_ch06e_experimental_protocol.qmd >}}
 
 {{< include chapters/_ch07_model_ladder.qmd >}}
 

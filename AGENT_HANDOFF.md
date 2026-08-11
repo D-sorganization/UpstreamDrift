@@ -83,9 +83,25 @@ under 150 lines; use Git history and linked issues for completed chronology.
   The optimized 135-page PDF preserves 120 URI links and 158 outlines. One
   unrelated legacy Wave 6 test remains at its baseline smoothing-factor
   assertion; do not mix that engine repair into this scientific phase.
-- **Next action:** finish and commit Phase 4 locally. When #8491 capacity-only
+- **Phase 5 readiness:** branch `feat/8426-phase-5-experimental-protocol`
+  freezes six required measurement streams, four prediction-specific
+  falsifiers, participant-level 25% holdout, identity-safe provenance,
+  filtering/calibration/residual/missingness gates, and observational/causal
+  boundaries. The executable validator rejects identity fields, unit/hash/rate/
+  synchronization drift, split overlap, missing governance, and a public-repo
+  human-data authority.
+- **Phase 5 boundary:** the committed two-participant record is synthetic and
+  qualifies pipeline behavior only. EXP-H1--H4 remain
+  `untested_no_governed_human_data`; an ethics/oversight reference, consent and
+  reuse basis, private data authority, synchronized measurements, and frozen
+  participant split are externally required before scientific evaluation.
+- **Phase 5 readiness gate:** seven protocol tests, Ruff, mypy, title,
+  governance, source-hash, and visual gates pass. The optimized 137-page PDF
+  remains below 1 MiB with 122 URI links and 166 outlines.
+- **Next action:** finish and commit Phase 5 readiness locally. When #8491 capacity-only
   jobs settle, publish and merge Phase 2 against integration; then rebase and
-  publish the unpushed Phase 3 and Phase 4 branches sequentially.
+  publish the unpushed Phase 3--Phase 5 branches sequentially. Continue Phase 6
+  release qualification locally without promoting the synthetic dry run.
 
 ## Scientific Architecture Pointers
 
@@ -106,11 +122,13 @@ under 150 lines; use Git history and linked issues for completed chronology.
    dynamics comparison.
 8. `scripts/research/proximal_distal_energy/uncertainty_control.py` — coupled
    design, delayed actuator, PRCC, identifiability, and control comparison.
-9. `scripts/research/proximal_distal_energy/two_arm_closed_loop.py` — canonical
-   planar KKT, contact-force, wrench, and mode primitives; do not duplicate.
-10. `docs/research/proximal_distal_energy_transfer/WSCG_2024_LEGACY_EVIDENCE_AUDIT.md`
+9. `scripts/research/proximal_distal_energy/experimental_protocol.py` — frozen
+   experimental manifest and fail-closed governed-data readiness validator.
+10. `scripts/research/proximal_distal_energy/two_arm_closed_loop.py` — canonical
+    planar KKT, contact-force, wrench, and mode primitives; do not duplicate.
+11. `docs/research/proximal_distal_energy_transfer/WSCG_2024_LEGACY_EVIDENCE_AUDIT.md`
     — registered source claims and pointwise/forward interpretation boundary.
-11. `CLAUDE.md` and `AGENTS.md` — binding gates plus discovery-first shared-
+12. `CLAUDE.md` and `AGENTS.md` — binding gates plus discovery-first shared-
     infrastructure rules.
 
 ## Remaining Epic Order

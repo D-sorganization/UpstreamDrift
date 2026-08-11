@@ -58,6 +58,13 @@ relative to late drive but increases the planar face/path error, so the result
 supports a conditional model mechanism rather than a universal or
 physiological strategy.
 
+The experimental phase is preregistered but not empirically executed. Its
+machine-readable protocol fixes six synchronized modalities, participant-level
+holdout, identity-safe provenance, filtering and residual sensitivities, and
+four prediction-specific falsifiers. The synthetic dry run passes all intake
+and fail-closed controls, but it cannot advance H1--H4. Governed human data are
+still required.
+
 ## Research Priorities {#sec-future}
 
 The next work should reduce the largest inferential risks in dependency
@@ -75,10 +82,10 @@ order:
    club, ground pathways, and distributed or modal shaft behavior without
    changing the registered interface observables. Each rung should carry
    conservation checks and cross-engine tolerance gates.
-4. **Human-Data Protocol.** Predefine inclusion criteria, outcomes,
-   uncertainty treatment, and inverse-dynamics sensitivity before analyzing
-   appropriately licensed or consented motion and force data. Sequence order
-   alone must not be treated as evidence of energy transfer.
+4. **Execute the Frozen Human-Data Protocol.** Acquire governed synchronized
+   measurements that pass the fixed inclusion, residual, missingness,
+   participant-holdout, and provenance gates. Sequence order alone must not be
+   treated as evidence of energy transfer.
 5. **Open-Resource Release.** Maintain deterministic commands,
    machine-readable results, data dictionaries, checksums, citation metadata,
    and explicit license boundaries. Archive validated releases with a
@@ -102,3 +109,6 @@ The spatial common-state evidence is recorded in
 [`data/spatial_full_body_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json).
 The uncertainty, identifiability, and control evidence is recorded in
 [`data/uncertainty_control_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.json).
+The frozen experimental protocol and synthetic readiness classification are
+recorded in [`data/experimental_protocol_v1.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/experimental_protocol_v1.json)
+and [`data/experimental_protocol_readiness.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/experimental_protocol_readiness.json).
