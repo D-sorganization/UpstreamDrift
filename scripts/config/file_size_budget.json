@@ -33,12 +33,6 @@
       "expires_on": "2027-01-31"
     },
     {
-      "path": "src/launchers/launcher_diagnostics.py",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Issue #5922 temporary exception: diagnostics module grew to 1236 lines when PR #6506 added dependency checks; decomposition into a focused diagnostics subpackage is tracked there.",
-      "expires_on": "2027-02-28"
-    },
-    {
       "path": "src/launchers/upstream_drift_launcher.py",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "reason": "Issue #7399 legacy launcher decomposition: upstream_drift_launcher.py exceeds the file size budget until decomposed into smaller managers.",

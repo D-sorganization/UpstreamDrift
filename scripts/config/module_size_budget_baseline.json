@@ -18,12 +18,6 @@
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "reason": "Legacy 3D viewer tab (1422 lines, pending decomposition under #5922)",
       "expires_on": "2026-07-31"
-    },
-    {
-      "path": "src/launchers/launcher_diagnostics.py",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Legacy launcher diagnostics module (1236 lines, pending decomposition under #5922)",
-      "expires_on": "2026-07-31"
     }
   ]
 }

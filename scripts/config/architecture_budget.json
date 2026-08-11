@@ -107,14 +107,6 @@
       "expires_on": "2026-08-31"
     },
     {
-      "path": "src/launchers/launcher_diagnostics.py",
-      "symbol": "LauncherDiagnostics.check_shared_tools_freshness",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Issues #7341/#7342 legacy launcher diagnostics decomposition: check_shared_tools_freshness exceeded the changed-file budget before layout reset backups were centralized and needs responsibility splitting.",
-      "expires_on": "2026-08-31"
-    },
-    {
       "path": "src/launchers/launcher_dialogs.py",
       "symbol": "DependencyErrorDialog.__init__",
       "rule": "function-lines",

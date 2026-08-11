@@ -5,6 +5,24 @@ Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
 
+- **Launcher-diagnostics size slice (local, no publish)** — branch
+  `fix/launcher-diagnostics-size-decomposition` starts at exact draft PR #8480
+  head `971649efd5ad2e5793240a5237a0314d45cc2faf`. It moves the local
+  `vendor/ud-tools` pin/checkout/sibling/remote comparison into the focused
+  `launcher_shared_tools_diagnostics` module while retaining
+  `LauncherDiagnostics.check_shared_tools_freshness()` as the public recording
+  boundary. `launcher_diagnostics.py` is now 1,196 lines, and its expired
+  module-size exception plus its file-size and long-function exceptions are
+  removed without renewal or policy widening. Do not describe this as closing
+  an issue: cited maintainability issue #5922 is closed, cited #7341/#7342 are
+  closed and concern Docker cancellation/layout reset, and open #8472 is scoped
+  specifically to the chat dock. Confirm or create accurate tracking before
+  publication. Three expired exceptions and four oversized production modules
+  remain in the module-size release gate. The legacy
+  `tests/unit/test_launcher_diagnostics.py` also has three parent-identical
+  stale assertions (17 versus the current 48 models and the former product
+  title); keep that separate from this structural slice.
+
 - **#8472 chat-dock decomposition (local stacked candidate)** — branch
   `fix/8472-chat-dock-decomposition` is stacked directly on the #8479 parent
   commit `2c98644d3ef3e32820eb6c2df80e75250593392b`. It moves WebSocket event
@@ -15,9 +33,10 @@ Update this file with every PR and every push to main.
   removed without renewal or policy widening. Focused behavior tests and the
   file-size gate pass. The parent already fails the Tools drift sentinel for
   `_chat_dock_widget_qt.py` and `models.py`; synchronize this decomposition to
-  the canonical Tools source before updating that hash. The repository module
-  gate remains red with four expired exceptions/five oversized modules:
-  launcher diagnostics/UI/settings/main launcher and the Simscape 3D viewer.
+  the canonical Tools source before updating that hash. After the local
+  launcher-diagnostics slice, the repository module gate remains red with
+  three expired exceptions/four oversized modules: launcher UI, settings, the
+  main launcher, and the Simscape 3D viewer.
 
 - **Exact-main release-gate unblocker candidate (local only)** — branch
   `fix/current-main-release-gate-unblockers` starts at exact `main`
@@ -32,8 +51,8 @@ Update this file with every PR and every push to main.
   type-check, build, audit, and SPEC path checks must be green before
   publication. The expired/oversized Python module-size
   exceptions remain an inherited release blocker: this branch neither renews
-  nor widens them, and #8472 remains the documented owner for decomposition or
-  an independently reviewed time-bounded policy decision.
+  nor widens them. #8472 owns only the chat-dock split; the remaining modules
+  need accurate open tracking rather than being attributed to that issue.
 
 - **#8458 hand-path drift/control attribution** — consolidated branch
   `feat/hand-path-drift-control-attribution` defines the canonical same-state
