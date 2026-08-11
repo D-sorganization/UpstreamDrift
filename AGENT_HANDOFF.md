@@ -14,11 +14,18 @@ Update this file with every PR and every push to main.
   historical methods exactly once across the facade and two inherited mixins;
   the public widget exports, dynamic manager-to-launcher method rebinding,
   monkeypatch-sensitive zoom description/window-control seams, and zero-argument
-  `super()` behavior remain compatible. The facade is now 983 lines (down from
-  2,263), and its file-size/module-size exceptions plus four moved
-  long-function exceptions are removed without renewal. The module-size,
+  `super()` behavior remain compatible. Independent-review regressions now
+  prove that runtime zoom/menu builders dispatch through narrow facade hooks;
+  the private mixins retain standalone defaults without importing the facade.
+  The responsive source contract inspects the extracted search/zoom helper
+  owners while retaining its original clipping assertions. The facade is now
+  995 lines (down from 2,263), and its file-size/module-size exceptions plus
+  four moved long-function exceptions are removed without renewal. The module-size,
   file-size, architecture, error-handling, suppression, TODO, and LoD gates are
   green, as are the focused decomposition and launcher source-contract tests.
+  The official repository MyPy wrapper excludes `launcher_ui_setup.py`,
+  `_launcher_navigation_ui.py`, and `_launcher_top_bar_ui.py`; the clean wrapper
+  skip is not evidence that these modules are type-safe.
   The broader launcher contract selection has the same 15 failures as the exact
   parent, all caused by pre-existing shared theme/style export drift. The
   suite-marker and DRY duplication gates also fail identically to that exact

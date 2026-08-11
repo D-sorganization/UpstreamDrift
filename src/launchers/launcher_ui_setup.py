@@ -186,6 +186,18 @@ class UISetupManager(LauncherNavigationUIMixin, LauncherTopBarUIMixin):
     def __init__(self, launcher):
         self.launcher = launcher
 
+    def _create_menu_bar_close_widget(
+        self,
+        parent: QWidget,
+        close_callback: Any,
+    ) -> QWidget:
+        """Route runtime menu construction through the historical facade seam."""
+        return _build_menu_bar_close_widget(parent, close_callback)
+
+    def _get_zoom_accessible_description(self) -> str:
+        """Route runtime zoom guidance through the historical facade seam."""
+        return _build_zoom_accessible_description()
+
     def __getattr__(self, name):
         return getattr(self.launcher, name)
 

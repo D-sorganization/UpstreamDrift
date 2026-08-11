@@ -53,6 +53,14 @@ def _build_menu_bar_close_widget(
 class LauncherNavigationUIMixin:
     """Build the launcher's global navigation and application menus."""
 
+    def _create_menu_bar_close_widget(
+        self,
+        parent: QWidget,
+        close_callback: Any,
+    ) -> QWidget:
+        """Create the menu close widget through the mixin's default seam."""
+        return _build_menu_bar_close_widget(parent, close_callback)
+
     def _build_sidebar_button(
         self,
         label: str,
@@ -384,7 +392,7 @@ class LauncherNavigationUIMixin:
         self._setup_tools_menu(menubar)
         self._setup_help_menu(menubar)
         menubar.setCornerWidget(
-            _build_menu_bar_close_widget(self, self.close),
+            self._create_menu_bar_close_widget(self, self.close),
             Qt.Corner.TopRightCorner,
         )
 

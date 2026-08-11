@@ -39,7 +39,7 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.504 |
+| **Spec Version** | 1.0.505 |
 | **Last Spec Update** | 2026-08-11 |
 
 ## 2. Purpose & Mission
@@ -79,13 +79,19 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   construction and the historical top-bar widgets live in the private
   `_launcher_top_bar_ui.py` mixin. `UISetupManager` retains every historical
   method through inheritance or its compatibility facade, including dynamic
-  manager-to-launcher rebinding and monkeypatch-sensitive exports. The facade
-  is 983 lines (down from 2,263), both launcher size exceptions and four moved
-  long-function exceptions are retired without renewal, and the module-size
-  gate is green. Focused launcher contracts and changed-file quality gates pass;
-  the 15 broader launcher failures, suite-marker baseline drift, and duplication
-  baseline drift are exactly parent-identical. This candidate remains local and
-  unpublished pending independent review.
+  manager-to-launcher rebinding and monkeypatch-sensitive exports. Narrow
+  instance hooks route runtime menu-close construction and zoom accessibility
+  text through the historical facade seams while leaving both private mixins
+  independently usable. The facade is 995 lines (down from 2,263), both
+  launcher size exceptions and four moved long-function exceptions are retired
+  without renewal, and the module-size gate is green. Focused launcher
+  contracts and changed-file quality gates pass; the 15 broader launcher
+  failures, suite-marker baseline drift, and duplication baseline drift are
+  exactly parent-identical. The official repository MyPy wrapper excludes
+  `launcher_ui_setup.py`, `_launcher_navigation_ui.py`, and
+  `_launcher_top_bar_ui.py`; this validation therefore provides no type-safety
+  evidence for those modules. This candidate remains local and unpublished
+  pending independent review.
 - **2026-08-11** - Published the independently reviewed launcher-settings
   decomposition as ready PR #8489 at exact head
   `832969ebbd6c58c9892dc16f82638e67a05b20dc`, stacked on unchanged PR #8486
@@ -2080,6 +2086,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-11 | 1.0.505 | Repaired the #8490 local candidate after independent review: runtime menu-close and zoom-description builders now dispatch through narrow instance hooks so monkeypatches of the historical `launcher_ui_setup` facade remain effective, while the private mixins retain independent defaults and no import cycle is introduced. Updated the responsive source contract to inspect the extracted search and zoom helper owners without weakening its clipping assertions. The official repository MyPy wrapper excludes the facade and both mixins, so its clean skip is not type-safety evidence. The exact-parent broader failure disclosures remain unchanged. |
 | 2026-08-11 | 1.0.504 | Prepared issue #8490's local launcher UI-setup decomposition from exact PR #8489 head `2f664d2beaddf7444b12f90080ae9897aea24fcc`. Split navigation/sidebar/menu construction into `_launcher_navigation_ui.py` and status/search/runtime/view/zoom construction into `_launcher_top_bar_ui.py`, while preserving `UISetupManager` compatibility exports, historical methods, dynamic launcher rebinding, and monkeypatch seams. Reduced `launcher_ui_setup.py` from 2,263 to 983 lines; removed its file-size and module-size exceptions plus four moved long-function exceptions without renewal. Focused contracts and changed-file gates pass; the 15 broader launcher failures, suite-marker drift, and duplication drift are exact-parent-identical. The candidate remains local pending independent review. |
 | 2026-08-11 | 1.0.503 | Published the independently reviewed launcher-settings decomposition as ready PR #8489 at exact head `832969ebbd6c58c9892dc16f82638e67a05b20dc`, stacked on unchanged PR #8486 head `624043537a5ab10aa7ef56dc61685a004b872c0c`. The independent reviewer found no actionable compatibility, MRO, behavior-parity, or Qt worker-lifecycle regression and reran all 44 focused tests successfully. Protected CI, approval, parent dependency, issue completion, and release state remain unresolved. |
 | 2026-08-11 | 1.0.502 | Registered #8487 as the truthful tracker for local candidate `e63e6908db6a1caa113a57f43a44fc0ecc00dc17`, based on exact draft PR #8486 head `624043537a5ab10aa7ef56dc61685a004b872c0c`. The 44 focused settings contracts and changed-file quality gates pass. The 18 wider launcher failures, unrestricted launcher-suite Windows access violation, and remaining oversized `launcher_ui_setup.py` module are parent-identical. Publication remains gated on independent review and normal protected repository behavior. |

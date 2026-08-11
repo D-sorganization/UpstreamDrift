@@ -148,6 +148,10 @@ def _build_zoom_accessible_description(
 class LauncherTopBarUIMixin:
     """Build and coordinate the launcher's top-bar controls."""
 
+    def _get_zoom_accessible_description(self) -> str:
+        """Return zoom guidance through the mixin's default seam."""
+        return _build_zoom_accessible_description()
+
     def _setup_top_bar_status_and_search(self, top_bar: QHBoxLayout) -> None:
         """Add status indicator, execution mode label, and search bar."""
         if top_bar is None:
@@ -487,7 +491,9 @@ class LauncherTopBarUIMixin:
         """)
         self.zoom_slider.setToolTip("Adjust the size of the model tiles")
         self.zoom_slider.setAccessibleName("Tile zoom")
-        self.zoom_slider.setAccessibleDescription(_build_zoom_accessible_description())
+        self.zoom_slider.setAccessibleDescription(
+            self._get_zoom_accessible_description()
+        )
         self.zoom_slider.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
         from src.launchers.launcher_constants import TILE_SCALE_DEFAULT

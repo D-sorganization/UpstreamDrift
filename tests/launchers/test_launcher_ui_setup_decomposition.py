@@ -9,7 +9,11 @@ from unittest.mock import MagicMock
 import pytest
 from PyQt6.QtCore import QEvent, QObject
 
-from src.launchers import launcher_ui_setup
+from src.launchers import (
+    _launcher_navigation_ui,
+    _launcher_top_bar_ui,
+    launcher_ui_setup,
+)
 from src.launchers._launcher_navigation_ui import LauncherNavigationUIMixin
 from src.launchers._launcher_top_bar_ui import (
     ClickableLabel,
@@ -91,6 +95,34 @@ def test_help_hover_filter_uses_runtime_button_timer_boundary() -> None:
 
     hover_filter.eventFilter(watched, QEvent(QEvent.Type.Leave))
     runtime_button.schedule_hide.assert_called_once_with()
+
+
+def test_private_mixins_keep_independent_default_builder_seams(monkeypatch) -> None:
+    """Private mixins remain usable without importing the historical facade."""
+    close_widget = object()
+    build_close_widget = MagicMock(return_value=close_widget)
+    monkeypatch.setattr(
+        _launcher_navigation_ui,
+        "_build_menu_bar_close_widget",
+        build_close_widget,
+    )
+    navigation = LauncherNavigationUIMixin()
+    parent = MagicMock()
+    close_callback = MagicMock()
+    assert (
+        navigation._create_menu_bar_close_widget(parent, close_callback) is close_widget
+    )
+    build_close_widget.assert_called_once_with(parent, close_callback)
+
+    build_description = MagicMock(return_value="Mixin zoom description")
+    monkeypatch.setattr(
+        _launcher_top_bar_ui,
+        "_build_zoom_accessible_description",
+        build_description,
+    )
+    top_bar = LauncherTopBarUIMixin()
+    assert top_bar._get_zoom_accessible_description() == "Mixin zoom description"
+    build_description.assert_called_once_with()
 
 
 def test_launcher_ui_modules_are_under_budget_without_size_exceptions() -> None:
