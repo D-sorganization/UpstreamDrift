@@ -35,11 +35,11 @@ Update this file with every PR and every push to main.
   dependency, issue completion, and release state remain unresolved; do not
   claim any of them before normal protected repository behavior confirms them.
 
-- **#8485 Simscape 3D-viewer size slice — draft PR
+- **#8485 Simscape 3D-viewer size slice — ready PR
   [#8486](https://github.com/D-sorganization/UpstreamDrift/pull/8486)** — branch
-  `fix/viewer-3d-module-size-decomposition` is stacked on draft PR #8484 at
-  exact base head `89f87590981f789755c2b45e1b03ed2ee57247a3`; its published
-  implementation/docs head is `9445a7c8b202540efc5d1247b378d3d66551b517`.
+  `fix/viewer-3d-module-size-decomposition` is stacked on ready PR #8484 at
+  exact base head `89f87590981f789755c2b45e1b03ed2ee57247a3`; its exact current
+  published head is `624043537a5ab10aa7ef56dc61685a004b872c0c`.
   It moves user-defined body-segment shape construction, fitting,
   library/theme resolution, artist lifecycle, and per-frame updates into the private
   `_viewer_3d_segments.UserSegmentRenderer`; `Viewer3DTab` retains its existing
@@ -49,7 +49,8 @@ Update this file with every PR and every push to main.
   budget-contract tests pass after initializing the repository's pinned
   `vendor/ud-tools` gitlink; the broader C3D/UI selection is 159 passed, 6
   skipped, and one parent-identical stale loader-message assertion. Protected
-  CI is pending, so this is not yet merge-ready. The module-size gate still
+  CI remains incomplete with queued and cancelled contexts, so this is not yet
+  merge-ready. The module-size gate still
   reports only the inherited `launcher_ui_setup.py` and `settings_dialog.py`
   violations.
 
