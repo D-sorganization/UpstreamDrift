@@ -2539,3 +2539,6 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 ## Refactoring & Optimization Notes
 
 - `spec-exempt`: Replaced `np.linalg.norm` with `math.sqrt(np.vdot(..., ...))` in `src/shared/python/spatial_algebra/indexed_acceleration.py` to optimize 1D array norm calculation without changing logic.
+
+### Performance Improvements
+* Optimized sum of squares calculation in `launch_monitor` module using `np.vdot` instead of `np.sum` to avoid intermediate array allocations. (spec-exempt: micro-optimization)
