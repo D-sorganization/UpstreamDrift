@@ -25,6 +25,12 @@ zero-command branches, separated force-generated and direct-wrist moments,
 contact modes and power, a zero-moment-arm negative control, and timestep and
 projection sensitivity. The result establishes finite passive-couple
 persistence in the declared planar model only.
+A coupled moving-base and flexible-club extension now evolves a finite-mass
+translating base, both constrained arms, both grip reactions, and a two-segment
+club in one forward solve. It records base and shaft energy, a same-state
+zero-command branch, a coincident-grip geometric control, parameter
+sensitivity, and timestep convergence without prescribing base motion or
+shaft flex.
 
 The public-facing article is available on
 [affinedrift.com](https://affinedrift.com/articles/proximal-distal-energy-transfer.html).
@@ -66,6 +72,7 @@ python3 -m scripts.research.proximal_distal_energy.run_mechanism_ladder_study
 python3 -m scripts.research.proximal_distal_energy.run_hand_path_attribution_study
 python3 -m scripts.research.proximal_distal_energy.two_hand_preactivation_hypothesis
 python3 -m scripts.research.proximal_distal_energy.run_forward_two_arm_study
+python3 -m scripts.research.proximal_distal_energy.run_moving_base_flexible_study
 # robustness analyses
 python3 -m scripts.research.proximal_distal_energy.e1b_bounded_torque
 python3 -m scripts.research.proximal_distal_energy.e1c_impact_sensitivity
@@ -78,6 +85,7 @@ python3 -m scripts.research.proximal_distal_energy.make_two_hand_wscg_figures
 python3 -m scripts.research.proximal_distal_energy.make_shaft_contribution_figures
 python3 -m scripts.research.proximal_distal_energy.make_mechanism_ladder_figures
 python3 -m scripts.research.proximal_distal_energy.make_forward_two_arm_figures
+python3 -m scripts.research.proximal_distal_energy.make_moving_base_flexible_figures
 # document
 cd docs/research/proximal_distal_energy_transfer
 quarto render proximal_distal_energy_transfer.qmd --to pdf
@@ -126,6 +134,11 @@ recorded in `data/*.json`.
   point constraints, and one declared command/parameter set. Its zero-command
   branch demonstrates mechanical persistence, not muscle passivity, human use,
   or an optimal speed strategy.
+- The coupled moving-base/flexible-club study replaces prescribed hub motion
+  with a finite-mass translating base and adds one lumped torsional club mode.
+  Its planar point contacts, linear springs and dampers, and declared
+  mechanism-study parameters are not a calibrated body, distributed shaft, or
+  equipment comparison.
 - Generalization and human-data work is tracked in
   [#8426](https://github.com/D-sorganization/UpstreamDrift/issues/8426).
 

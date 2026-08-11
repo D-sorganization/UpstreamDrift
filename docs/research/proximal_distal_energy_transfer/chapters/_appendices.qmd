@@ -15,9 +15,9 @@ The current evidence boundary includes these known limitations:
   declared torque program; other torque programs, model classes, and uncertainty
   distributions remain necessary before making general persistence claims.
 - The archived two-hand ZTCF remains pointwise along the BASE state history.
-  A separate forward rigid-club two-hand model now demonstrates finite
-  zero-command persistence, but moving-base, compliant-club, spatial, and human
-  variants remain open validation steps.
+  Separate forward rigid-club and coupled moving-base/flexible-club models now
+  demonstrate finite zero-command persistence, but spatial and human variants
+  remain open validation steps.
 - The primary model has two planar links and a fixed hub; torso, hub-path,
   long-axis rotation, and closed-loop arm effects are absent.
 - The shaft extension is a three-coordinate point-mass surrogate with one
@@ -49,6 +49,7 @@ python3 -m scripts.research.proximal_distal_energy.run_two_hand_wscg_analysis
 python3 -m scripts.research.proximal_distal_energy.run_shaft_contribution_study
 python3 -m scripts.research.proximal_distal_energy.run_mechanism_ladder_study
 python3 -m scripts.research.proximal_distal_energy.run_forward_two_arm_study
+python3 -m scripts.research.proximal_distal_energy.run_moving_base_flexible_study
 
 # Robustness analyses
 python3 -m scripts.research.proximal_distal_energy.e1b_bounded_torque
@@ -63,6 +64,7 @@ python3 -m scripts.research.proximal_distal_energy.make_two_hand_wscg_figures
 python3 -m scripts.research.proximal_distal_energy.make_shaft_contribution_figures
 python3 -m scripts.research.proximal_distal_energy.make_mechanism_ladder_figures
 python3 -m scripts.research.proximal_distal_energy.make_forward_two_arm_figures
+python3 -m scripts.research.proximal_distal_energy.make_moving_base_flexible_figures
 cd docs/research/proximal_distal_energy_transfer
 quarto render proximal_distal_energy_transfer.qmd --to pdf
 cd ../../..

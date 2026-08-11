@@ -17,7 +17,8 @@ under 150 lines; use Git history and linked issues for completed chronology.
   unchanged runner-selection and Rust Quickstart jobs are queued. Do not create
   redundant reruns.
 - **Phase 1:** branch `feat/8426-phase-1-forward-two-hand`, stacked on the Phase
-  0 commit until #8488 is merged. The seven-coordinate model advances two
+  0 commit until #8488 is merged. Three local commits complete the
+  seven-coordinate model, which advances two
   two-link arms and a floating planar club under four independent grip
   constraints. The KKT solve and mass-metric position/velocity projections
   fail closed on singular or out-of-tolerance states.
@@ -31,16 +32,30 @@ under 150 lines; use Git history and linked issues for completed chronology.
   and reaches -7.43 N m. Removing both grip moment arms makes the force couple
   exactly zero. This is fixed-shoulder, rigid-club, planar model evidence, not
   muscle, human, or coaching evidence.
-- **Focused gate:** 30 evidence-contract/forward-model/figure tests and 20
+- **Phase 1 focused gate:** 30 evidence-contract/forward-model/figure tests and 20
   dependent hand-path/mechanism-ladder tests pass. Ruff, Python 3.12 mypy,
   document-title, documentation-governance, and file-size gates pass. The final
   113-page, 855,042-byte PDF preserves 110 URI links and 131 outline entries;
   all changed pages and generated figure PDFs were visually checked. The
-  pre-push repository gate remains before opening the Phase 1 PR.
-- **Next action:** finish report/source registers and gates; render, compact,
-  and inspect the complete article; commit/push Phase 1; merge #8488 when its
-  capacity-only jobs complete; rebase Phase 1 onto the consolidated branch;
-  then open the full Phase 1 PR against that branch.
+  local checks pass. The final 113-page article was rendered, compacted, and
+  visually checked before the Phase 2 branch was created.
+- **Phase 2:** branch `feat/8426-phase-2-moving-base-flex`, stacked on Phase 1.
+  The ten-coordinate forward model couples a finite-mass translating base, two
+  closed-loop arms, two solved grip reactions, and a two-segment compliant club.
+  It records base and shaft energy, force-generated grip couple, direct wrist
+  torque, shaft moment, common-wrench samples, contact-power identity, and all
+  constraint/projection residuals.
+- **Phase 2 bounded result:** the declared baseline moves the base by 26.9 mm,
+  flexes 7.08 degrees, and crosses to a -4.15 N m force-generated minimum. The
+  exact 0.200 s zero-command branch remains negative for 50 ms and reaches
+  -2.17 N m. Coincident grips remove the force couple exactly. Work--energy
+  residual decreases 0.0483 -> 0.0254 -> 0.0130 J under 2/1/0.5 ms refinement.
+  This is planar mechanism evidence, not anatomical, equipment, or human
+  validation.
+- **Next action:** finish Phase 2 publication render, visual inspection, and
+  local gates; commit it. Merge #8488 only when capacity-only checks complete,
+  then rebase and open Phase 1 and Phase 2 full PRs sequentially against the
+  consolidated branch without overlapping hosted CI waves.
 
 ## Scientific Architecture Pointers
 
@@ -52,20 +67,23 @@ under 150 lines; use Git history and linked issues for completed chronology.
    constrained integrator and exact same-state branch API.
 4. `scripts/research/proximal_distal_energy/run_forward_two_arm_study.py` —
    deterministic evidence and negative-control protocol.
-5. `scripts/research/proximal_distal_energy/two_arm_closed_loop.py` — canonical
+5. `scripts/research/proximal_distal_energy/moving_base_flexible_club.py` —
+   coupled finite-mass base, closed arms, flexible club, and energy contracts.
+6. `scripts/research/proximal_distal_energy/run_moving_base_flexible_study.py` —
+   deterministic branch, sensitivity, negative-control, and convergence study.
+7. `scripts/research/proximal_distal_energy/two_arm_closed_loop.py` — canonical
    planar KKT, contact-force, wrench, and mode primitives; do not duplicate.
-6. `docs/research/proximal_distal_energy_transfer/WSCG_2024_LEGACY_EVIDENCE_AUDIT.md`
+8. `docs/research/proximal_distal_energy_transfer/WSCG_2024_LEGACY_EVIDENCE_AUDIT.md`
    — registered source claims and pointwise/forward interpretation boundary.
-7. `CLAUDE.md` and `AGENTS.md` — binding gates plus discovery-first shared-
+9. `CLAUDE.md` and `AGENTS.md` — binding gates plus discovery-first shared-
    infrastructure rules.
 
 ## Remaining Epic Order
 
-1. Dynamic moving-base and compliant-club energy closure.
-2. Spatial full-body common-observable experiments in two independent engines.
-3. Identifiability, coupled uncertainty, delayed actuation, and robust control.
-4. Preregistered experimental falsification and held-out evaluation protocol.
-5. Research workbench, AffineDrift publication integration, archival release,
+1. Spatial full-body common-observable experiments in two independent engines.
+2. Identifiability, coupled uncertainty, delayed actuation, and robust control.
+3. Preregistered experimental falsification and held-out evaluation protocol.
+4. Research workbench, AffineDrift publication integration, archival release,
    complete visual QA, and protected merges.
 
 ## Other Current Repository Context
@@ -103,8 +121,8 @@ inspect every changed/full-document page rather than relying on compilation.
 - Do not import the deprecated `upstream_drift_tools`; use `sidekick`.
 - Do not bypass hooks, reviews, required checks, leases, or branch protection.
 - Do not open drafts, force-push, or create redundant CI reruns.
-- Do not infer biological effort from contact force or promote planar support
-  into moving-base, compliant, spatial, or human tiers.
+- Do not infer biological effort from contact force or promote coupled planar
+  support into spatial or human tiers.
 - Do not call pointwise ZTCF a forward trajectory or count projection energy as
   physical work.
 - Do not edit generated `.tex`; edit Quarto source and regenerate it.

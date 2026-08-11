@@ -21,8 +21,8 @@ This conclusion is conditional. The result survived torque-velocity bounds,
 alternative scoring rules, and 13 one-at-a-time parameter cases, but the
 optimal onset shifted across cases. The study therefore supports a robust
 ordering within a local model neighborhood, not a universal timing value or
-an individual coaching prescription. A fixed hub, rigid shaft, planar chain,
-simplified actuators, and absence of human data remain material limitations.
+an individual coaching prescription. Planar motion, simplified actuators, and
+absence of human data remain material limitations.
 
 The forward constrained two-hand extension resolves one previously open
 mechanistic question. Starting from the exact same 0.200 s state, the
@@ -32,28 +32,36 @@ are removed and remains stable under timestep and projection refinement. This
 supports finite passive-couple persistence in the declared planar model, not a
 claim about muscle inactivity or human technique.
 
+The coupled moving-base/flexible-club extension resolves the next structural
+question at the planar tier. Base translation, shaft flex, and both grip forces
+evolve in one forward constrained solve. The negative force-generated couple
+survives the same-state zero-command intervention, while coincident grip points
+remove it exactly; constraint, contact-power, and work--energy residuals close
+under timestep refinement. This transports the mechanism beyond a fixed base
+and rigid club without promoting it to a spatial or physiological result.
+
 ## Research Priorities {#sec-future}
 
 The next work should reduce the largest inferential risks in dependency
 order:
 
-1. **Counterfactual transport.** Carry the now-executed same-state
-   torque-killswitch from fixed-base rigid planar models into a dynamic moving
-   base, compliant club, and then a spatial full-body model. Preserve the same
+1. **Spatial Counterfactual Transport.** Carry the now-executed same-state
+   torque-killswitch from rigid and coupled planar models into a spatial
+   full-body model in two independent engines. Preserve the same
    force, couple, power, work, and closure observables at every tier.
-2. **Coupled sensitivity and constrained control.** Replace
+2. **Coupled Sensitivity and Constrained Control.** Replace
    one-at-a-time perturbations with a declared multivariable design, add
    activation-rate and history-dependent actuator limits, and compare
    preselected torque programs with a constrained optimal-control solution.
-3. **Model-fidelity ladder.** Repeat the primary comparisons in a
-   torso--arm--club chain, then add mobile-hub and flexible-shaft energy
-   terms before moving to closed-loop and full-body models. Each rung should
-   carry conservation checks and cross-engine tolerance gates.
-4. **Human-data protocol.** Predefine inclusion criteria, outcomes,
+3. **Spatial Model-Fidelity Ladder.** Add base rotation, a three-dimensional
+   club, ground pathways, and distributed or modal shaft behavior without
+   changing the registered interface observables. Each rung should carry
+   conservation checks and cross-engine tolerance gates.
+4. **Human-Data Protocol.** Predefine inclusion criteria, outcomes,
    uncertainty treatment, and inverse-dynamics sensitivity before analyzing
    appropriately licensed or consented motion and force data. Sequence order
    alone must not be treated as evidence of energy transfer.
-5. **Open-resource release.** Maintain deterministic commands,
+5. **Open-Resource Release.** Maintain deterministic commands,
    machine-readable results, data dictionaries, checksums, citation metadata,
    and explicit license boundaries. Archive validated releases with a
    persistent identifier.

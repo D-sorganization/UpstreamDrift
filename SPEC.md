@@ -39,8 +39,8 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.496 |
-| **Last Spec Update** | 2026-08-10 |
+| **Spec Version** | 1.0.497 |
+| **Last Spec Update** | 2026-08-11 |
 
 ## 2. Purpose & Mission
 
@@ -71,6 +71,16 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-08-11** - Added the coupled moving-base/flexible-club reference tier
+  for #8426. The ten-coordinate planar model evolves a finite-mass translating
+  base, two closed-loop arms, two grip reactions, a floating proximal club, and
+  a compliant distal segment in one fail-closed KKT solve. Deterministic
+  evidence separates force-generated grip couple, direct wrist torque, shaft
+  moment, base/shaft energy, damping, ideal-contact power, and numerical
+  projection; adds an exact-state zero-command branch, coincident-grip
+  negative control, parameter sensitivity, and timestep convergence; and
+  preserves the common spatial-wrench schema. Results are mechanism-study
+  evidence, not calibrated equipment, physiological, or human findings.
 - **2026-08-11** - Added the forward constrained two-hand reference tier for
   #8426. The seven-coordinate planar model evolves both two-link arms and a
   floating club under four independent grip constraints, with fail-closed KKT

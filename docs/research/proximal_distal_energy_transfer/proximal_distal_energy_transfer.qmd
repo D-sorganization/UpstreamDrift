@@ -54,8 +54,14 @@ abstract: |
   zero-command trajectory at 0.200 s. Its contact-force couple remains negative
   for the full 50 ms branch and reaches -7.43 N m; removing both grip moment
   arms collapses that couple exactly to zero, while timestep and projection
-  studies bound the numerical result. This is a planar model-feasibility result,
-  not physiological or human evidence. A common-observable model ladder then
+  studies bound the numerical result. A coupled extension then admits a
+  finite-mass translating base, two constrained arms, and a two-segment
+  compliant club in one forward KKT system. Base motion and shaft flex are
+  endogenous; a same-state zero-command branch retains a negative
+  force-generated couple for 50 ms, the coincident-grip control removes it
+  exactly, and work--energy and contact-power identities close under timestep
+  refinement. These are planar model-feasibility results, not physiological or
+  human evidence. A common-observable model ladder then
   carries reference-explicit
   force, couple, velocity, angular velocity, and power through a third
   coordinate, prescribed hub motion, two-hand constraint geometry, and proper
@@ -83,6 +89,7 @@ keywords:
   - double pendulum
   - two-hand wrench
   - shaft flexibility
+  - moving-base dynamics
   - work-energy accounting
   - multibody constraints
   - wrench transport
@@ -119,6 +126,8 @@ format:
 {{< include chapters/_ch05b_forward_two_hand.qmd >}}
 
 {{< include chapters/_ch06_shaft_contributions.qmd >}}
+
+{{< include chapters/_ch06b_coupled_base_flex.qmd >}}
 
 {{< include chapters/_ch07_model_ladder.qmd >}}
 

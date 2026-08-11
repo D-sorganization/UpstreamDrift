@@ -64,28 +64,30 @@ The results chapter demonstrates the S2 pattern in the model class where
 the classical timing literature lives; it does not yet demonstrate it
 for a golfer. The specific gaps, each with a tracked remediation:
 
-- **Fixed hub, rigid shaft, planar chain.** The hub-path and inward-pull
+- **Spatial Body and Distributed-Club Dynamics.** The hub-path and inward-pull
   mechanisms [@miura2001; @nesbit2009hub; @nesbit2014hub], shaft
   dynamics [@mackenzie2009; @betzler2012; @osis2012], and long-axis
-  rotations [@marshall2000] are all outside this model. Closed-loop,
-  flexible-shaft, and full-body models are appropriate staged extensions.
-- **Simplified actuator models.** E1b shows the S2 ordering survives a
+  rotations [@marshall2000] are outside the primary 2-DOF model. The forward
+  two-hand and coupled moving-base/flexible-club tiers address planar closure,
+  translation, and one lumped flex mode; base rotation, distributed beams, and
+  full-body spatial dynamics remain appropriate staged extensions.
+- **Simplified Actuator Models.** E1b shows the S2 ordering survives a
   linear torque-velocity bound on the drives with compressed margins
   (@sec-results-e1b), but activation-rate limits, history dependence,
   and eccentric-side detail remain unmodeled; full optimal-control
   treatments with physiological actuators are the appropriate
   refinement [@sprigings2000; @sharp2009; @mcnally2018].
-- **Local, one-at-a-time sensitivity.** Alternative impact definitions and
+- **Local, One-at-a-Time Sensitivity.** Alternative impact definitions and
   single-parameter perturbations preserved the ordering
   (@sec-results-robustness), but coupled parameter variation, measurement
   uncertainty, and population variability were not modeled.
-- **Counterfactuals remain model-tier specific.** The Python pathway now
+- **Counterfactuals Remain Model-Tier Specific.** The Python pathway now
   includes both pointwise ZTCF profiles and forward same-state killswitches in
-  the double-pendulum and constrained two-hand tiers. The two-hand forward
-  result still uses a fixed shoulder base, rigid club, and planar constraints;
-  it does not establish persistence under moving-base, compliant, or spatial
-  dynamics.
-- **No human data yet.** The decisive observational test — wrist
+  the double-pendulum and constrained two-hand tiers. The coupled extension now
+  preserves the finite negative-couple branch with endogenous base translation
+  and club flex. It does not establish persistence under spatial full-body,
+  compliant-contact, or human dynamics.
+- **No Human Data Yet.** The decisive observational test — wrist
   interface power time courses across skill levels from motion capture
   (@sec-falsify) — awaits an appropriately governed motion-capture study.
 
