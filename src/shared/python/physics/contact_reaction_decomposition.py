@@ -268,7 +268,8 @@ def evaluate_reaction_prediction(
         1.0 - np.sum(residual[:, variable] ** 2, axis=0) / denominator[variable]
     )
     trapezoid = getattr(np, "trapezoid", None)
-    require(trapezoid is not None, "NumPy must provide trapezoid integration")
+    if trapezoid is None:
+        raise RuntimeError("NumPy must provide trapezoid integration")
     impulse_error = np.asarray(trapezoid(residual, t, axis=0), dtype=float)
     return ReactionPredictionMetrics(
         component_names=tuple(component_names),
