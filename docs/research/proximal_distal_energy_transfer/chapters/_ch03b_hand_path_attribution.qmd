@@ -233,25 +233,152 @@ as if it supplied two further independent constraints. Such a model can return
 numbers from a least-squares solve while failing to identify the individual
 contact reactions required for the scientific claim.
 
-## Two Hands Create Observable and Internal Modes {#sec-attribution-two-hand-modes}
+## Reference-Case Attribution Results {#sec-attribution-reference-results}
 
-Let $\mathbf F_L$ and $\mathbf F_T$ be the lead- and trail-hand forces on the
-club. Define
+The three reference cases apply one observable contract but do not pretend to
+be three measurements of the same swing. The double pendulum is a forward
+simulation truncated at its first valid club-vertical impact (0.3493 s). The
+one-arm model is a forward simulation over a declared 0.400 s window. The
+two-arm closed loop is a 0.400 s, constraint-consistent **local kinematic
+sweep** with only 0.0425 m of mid-grip travel. Its line integrals diagnose the
+prescribed path; they are not realized forward-simulation work and are not
+scaled up to a full downswing.
+
+Table @tbl-hand-path-primary-results reports the MacKenzie-compatible primary
+estimand at the wrist for the open-chain models and at the mid-grip resultant
+for the closed loop. Drift is the stitched pointwise ZTCF contribution. Total
+equals drift plus control at the achieved state. ZVCF is displayed in a
+separate column because it is not an additive component of that equality; its
+force is projected on the achieved velocity only to make the diagnostic
+comparable in units.
+
+| Model Tier | Path (m) | Total Work (J) | Drift Work (J) | Control Work (J) | ZVCF Projected Diagnostic (J) | $\overline F_{\parallel}$ Total / Drift / Control (N) |
+|---|---:|---:|---:|---:|---:|---:|
+| Double pendulum | 2.2241 | 130.794 | 132.375 | -1.580 | -1.588 | 58.807 / 59.517 / -0.711 |
+| One-arm three-link | 2.7336 | 27.802 | 28.781 | -0.979 | -1.827 | 10.170 / 10.528 / -0.358 |
+| Two-arm closed loop | 0.0425 | -0.00381 | -0.05236 | +0.04855 | +0.00188 | -0.0898 / -1.2330 / +1.1432 |
+
+: Primary Hand-Path Force-Work Attribution in the Declared Reference Cases {#tbl-hand-path-primary-results}
+
+The first two rows answer the central inference question directly. In the
+double pendulum, the drift contribution is 101.2% of signed force work and the
+control increment is -1.2%; in cancellation-stable magnitude terms the split
+is 98.8% drift and 1.2% control. In the one-arm case, the signed split is
+103.5% drift and -3.5% control, while the magnitude split is 96.7% and 3.3%.
+Thus a positive net force-work-per-path-length value can be generated mostly
+by the state-dependent reaction even while the current command contribution
+opposes the hand path. The result is about mechanical attribution within the
+declared trajectories. It does not imply that the achieved states were
+obtained without earlier control or biological effort.
+
+The two-arm row exposes the opposite interpretive hazard. Drift and control
+work are individually about an order of magnitude larger than their net and
+oppose one another. Their magnitude shares are 51.9% and 48.1%, but the
+cancellation index is 0.962. A signed percentage of the near-zero resultant
+would exceed 1,000% and obscure the mechanics. Raw work, magnitude shares, and
+the cancellation index are therefore the defensible summary.
+
+![Signed Force Along the Achieved Hand Path for the Three Reference Cases](data/hand_path_attribution/figures/fig_hand_path_components.pdf){#fig-hand-path-components width=100%}
+
+Figure @fig-hand-path-components shows why the integrated results cannot be
+inferred from a force peak alone. In the double pendulum, the late positive
+rise is almost entirely drift. In the one-arm model, drift changes sign and
+then becomes strongly positive while control remains opposing late. In the
+two-arm local sweep, much larger opposing drift and control components leave a
+small net resultant. The dashed ZVCF trace stays distinct from the control
+increment even when the two happen to be close over part of a history.
+
+![Total, Drift, Control, and ZVCF Force Vectors at Normalized Time Quartiles](data/hand_path_attribution/figures/fig_hand_path_force_vectors.pdf){#fig-hand-path-force-vectors width=100%}
+
+Figure @fig-hand-path-force-vectors retains vector direction rather than only
+the along-path scalar. All four splits use one force-arrow scale within each
+model row, and both two-hand contacts are shown. The achieved path tangent is a
+geometric reference, not an additional force. A control vector can therefore
+look counterintuitive in global coordinates while its tangent projection,
+normal component, and future geometric effect remain separately identifiable.
+
+![Signed Target-Direction Impulse and Force-Work Attribution](data/hand_path_attribution/figures/fig_hand_path_impulse_work.pdf){#fig-hand-path-impulse-work width=100%}
+
+Figure @fig-hand-path-impulse-work separates the target-direction component of
+global vector impulse from force work. For example, the two-arm sweep has a
+positive 5.57 N s target-direction resultant assembled from -0.40 N s drift
+and +5.97 N s control, yet its net force work is nearly zero because work also
+depends on the direction and speed of the mid-grip path. ZVCF bars are again
+same-configuration projections, not a third additive share.
+
+### Every Joint and Time Window {#sec-attribution-joint-atlas}
+
+The joint atlas uses total-wrench work, including both force and couple power.
+Each horizontal bar in Figure @fig-hand-path-phase-shares is
+$|W_d|/(|W_d|+|W_c|)$ for one joint and one normalized time quartile. The cross
+is plotted at the corresponding cancellation index when that index is at least
+0.25. This presentation keeps all 36 model--joint--window combinations visible
+without converting cancellation into unstable signed percentages.
+
+![Phase-Resolved Drift Work Shares and Cancellation for Every Joint](data/hand_path_attribution/figures/fig_hand_path_phase_joint_shares.pdf){#fig-hand-path-phase-shares width=100%}
+
+The atlas rejects a system-wide label such as “drift dominated.” In the double
+pendulum, shoulder total-wrench work remains control dominated in all four
+windows, while wrist drift share rises from less than 1% in the first window
+to roughly 63%, 56%, and 72% thereafter. In the one-arm case, the shoulder is
+control dominated throughout, whereas the elbow and wrist become strongly
+drift influenced late. The two-arm model adds left/right asymmetry and contact
+redundancy: a drift-dominant hand contact can coexist with a control-dominant
+shoulder or elbow during the same interval. The exact raw work values and
+signed shares remain in the JSON evidence rather than being recoverable only
+from bar lengths.
+
+Power requires an instantaneous guard analogous to the work guard:
 
 $$
-\mathbf F_c=\frac{\mathbf F_L+\mathbf F_T}{2},
+m_{P,d}(t)=\frac{|P_d(t)|}{|P_d(t)|+|P_c(t)|},
 \qquad
-\mathbf F_d=\frac{\mathbf F_L-\mathbf F_T}{2}.
+\chi_P(t)=1-\frac{|P_d(t)+P_c(t)|}{|P_d(t)|+|P_c(t)|}.
+$$ {#eq-power-share-cancellation}
+
+Near-zero denominators are undefined and masked. Figure
+@fig-hand-path-power-shares plots $m_{P,d}$ for every joint; crosses identify
+samples with $\chi_P\geq0.25$. The rapid excursions are a substantive result:
+an integrated work share can be stable even though the instantaneous power
+allocation changes quickly or passes through near cancellation. This is why a
+single peak-power fraction is not substituted for the time history.
+
+![Instantaneous Drift Power Shares and Cancellation for Every Joint](data/hand_path_attribution/figures/fig_hand_path_power_shares.pdf){#fig-hand-path-power-shares width=100%}
+
+### Numerical Closure and Resolution Sensitivity {#sec-attribution-closure}
+
+For all three tiers, the maximum additive force and couple residual is below
+$1.8\times10^{-15}$ in SI units, the maximum power residual is below
+$2.3\times10^{-13}$ W, and the maximum cumulative-work residual is below
+$5.7\times10^{-14}$ J. The four windows cover every integration interval once
+and only once. Coarsening the stored histories from 81 to 41 samples changes
+primary force work by 0.044 J in the double pendulum, 0.059 J in the one-arm
+case, and less than 0.001 J in the two-arm sweep. At 21 samples, the respective
+changes are 1.11 J, 0.29 J, and less than 0.001 J. These are quadrature and
+sampling checks, not parameter uncertainty or biological validation.
+
+![Quadrature Sensitivity and Additive Closure Diagnostics](data/hand_path_attribution/figures/fig_hand_path_sensitivity_closure.pdf){#fig-hand-path-sensitivity-closure width=100%}
+
+## Two Hands Create Observable and Internal Modes {#sec-attribution-two-hand-modes}
+
+Let $\mathbf F_R$ and $\mathbf F_L$ be the right- and left-hand forces on the
+club. The evidence package uses the explicitly declared convention
+
+$$
+\mathbf R=\mathbf F_R+\mathbf F_L,
+\qquad
+\mathbf F_d=\frac{\mathbf F_R-\mathbf F_L}{2}.
 $$ {#eq-attribution-contact-modes}
 
-The common mode determines the resultant $\mathbf R=2\mathbf F_c$. About the
-grip midpoint, the differential mode creates the force couple
+The common mode is the resultant $\mathbf R$. About the grip midpoint, the
+differential mode creates the force couple
 
 $$
 \mathbf M_{F,M}=-\mathbf d\times\mathbf F_d,
 $$ {#eq-attribution-differential-couple}
 
-where $\mathbf d$ points between the grip contacts. Two large opposing forces
+where $\mathbf d$ points from the right-hand contact to the left-hand contact.
+Two large opposing forces
 can therefore produce a small net force and a large club moment. Conversely,
 a large internal squeeze can increase contact loading while contributing no
 net rigid-club wrench. Neither the net hand force nor the club's rigid-body
@@ -267,6 +394,16 @@ physiological objective it cannot rank them as human effort strategies. Human
 two-hand experiments likewise show that similar object kinematics can coexist
 with substantially different hand torques and internal squeeze
 [@reinkensmeyer1992].
+
+![Common-Resultant and Differential Two-Hand Force Modes](data/hand_path_attribution/figures/fig_two_hand_common_differential.pdf){#fig-two-hand-common-differential width=100%}
+
+Figure @fig-two-hand-common-differential makes the hidden mode visible in the
+declared local sweep. The common resultant is largely control supplied while
+the drift contribution remains smaller. The differential-mode magnitudes are
+larger and diverge late, so the same interval can support a modest net
+mid-grip force and a substantial separated-contact couple. Magnitudes alone do
+not identify the sign of that couple; the signed contact vectors and the
+declared right-minus-left convention are required for that calculation.
 
 ## Why an Apparently Counterproductive Control Can Be Useful {#sec-counterintuitive-control}
 
@@ -361,10 +498,13 @@ rather than presenting it as an observed human mechanism.
 
 ## Phase-Resolved Reporting Protocol {#sec-attribution-phases}
 
-Every model history is partitioned into nonoverlapping event windows whose
-boundaries are stored with the data. The analysis does not assume that equal
-fractions of elapsed time represent equivalent mechanics. Whenever the model
-provides the necessary events, the windows distinguish:
+Every reference history is partitioned into four nonoverlapping, equal-duration
+windows whose exact time and sample boundaries are stored with the data. These
+are named **normalized time quartiles**, not anatomical swing phases. They make
+the bookkeeping and cross-tier comparisons reproducible, but equal fractions
+of elapsed time are not assumed to represent equivalent mechanics. When a
+model or experiment provides independently defined events, a second analysis
+should replace or supplement these neutral windows with intervals such as:
 
 1. early acceleration and retention;
 2. transition toward release;
@@ -372,14 +512,17 @@ provides the necessary events, the windows distinguish:
 4. late drift-reaction reversal; and
 5. the final delivery interval.
 
-For every joint and phase, the evidence record stores vector impulse, signed
-positive/negative/absolute tangent impulse, force work, couple work, total
-wrench work, peak positive and negative power, path length, path-averaged
-force, robust shares, cancellation indices, and closure residuals. Total,
-drift, control, and ZVCF traces are retained separately. A conclusion is called
-common across tiers only when its sign and interpretation survive the declared
-differences in coordinates, mass representation, constraints, and control
-allocation.
+For every joint and time window, the evidence record stores vector impulse,
+signed tangent impulse, force work, couple work, total-wrench work, robust
+shares, cancellation indices, and closure residuals. Dense arrays retain the
+positive, negative, and absolute tangent-impulse accumulations and the
+pointwise force, couple, and total-power traces, so peak and sign-specific
+questions can be recomputed without reconstructing the dynamics. Path length
+and path-averaged force are reported separately. Total, drift, control, and
+ZVCF force traces are retained; ZVCF power is not called a realized quantity
+because its defining velocity is zero. A conclusion is called common across
+tiers only when its sign and interpretation survive the declared differences
+in coordinates, mass representation, constraints, and control allocation.
 
 ## What the Models Can Establish {#sec-attribution-claims}
 

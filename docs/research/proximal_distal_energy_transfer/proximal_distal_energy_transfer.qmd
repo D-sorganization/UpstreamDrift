@@ -54,7 +54,16 @@ abstract: |
   force, couple, velocity, angular velocity, and power through a third
   coordinate, prescribed hub motion, two-hand constraint geometry, and proper
   3-D frame transformations, while explicitly leaving full-body cross-engine
-  dynamics unexecuted. References, analysis code,
+  dynamics unexecuted. A separate hand-path attribution study evaluates the
+  MacKenzie force-work-per-path-length estimand in an impact-truncated double
+  pendulum, a forward-simulated one-arm model, and a mechanically closed
+  two-arm local sweep. Drift supplies 101.2% and 103.5% of signed hand-path
+  force work in the two forward cases because the contemporaneous control
+  contribution is slightly opposing; in the two-arm sweep, drift and control
+  instead cancel with an index of 0.962. Joint- and time-resolved impulse,
+  power, work, force-vector, and common/differential-mode results show why a
+  large net hand-path force is a mechanical transfer observable rather than a
+  direct measure of biological effort. References, analysis code,
   machine-readable results, and provenance are available with the document for
   independent inspection and reuse.
 keywords:

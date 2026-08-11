@@ -5,6 +5,23 @@ Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
 
+- **#8458 hand-path drift/control attribution** — consolidated branch
+  `feat/hand-path-drift-control-attribution` defines the canonical same-state
+  ZTCF/control/ZVCF contract; implements exact double-pendulum, one-arm, and
+  mechanically closed two-arm adapters; and generates a deterministic
+  joint/time-resolved evidence package with force vectors, impulse, power,
+  work, cancellation-safe shares, common/differential two-hand modes, source
+  hashes, and numerical closure. The two forward cases attribute 101.2% and
+  103.5% of signed primary force work to drift because control is opposing. The
+  prescribed two-arm local sweep instead has a 0.962 drift/control cancellation
+  index. A separate bounded residual-couple preview test reduces the declared
+  30 ms actuator RMSE by 57.6%; it is a signal-delay hypothesis, not evidence
+  of muscle preactivation or human performance. The seven generated evidence
+  figures have been visually inspected. Remaining handoff: render and inspect
+  the complete PDF, run repository gates, merge the protected PR, then pin the
+  compact consumer snapshot and SVGs in AffineDrift to the actual merged
+  commit.
+
 - **#8461 WSCG 2024 legacy-evidence audit** — both archived source decks were
   hash-matched to the user-supplied originals and all 12 slides were inspected.
   `docs/research/proximal_distal_energy_transfer/WSCG_2024_LEGACY_EVIDENCE_AUDIT.md`
@@ -125,6 +142,8 @@ Update this file with every PR and every push to main.
 
 The active branches are independent topic branches off `main` unless noted:
 
+- `feat/hand-path-drift-control-attribution` — consolidated implementation for
+  epic #8458 and children #8459–#8471; target `main` after local render/gates.
 - `research/two-hand-passive-couple` — full PR **#8454** for #8446 under epic
   #8443; direct WSCG table reconstruction and passive equivalent-couple audit.
 - `research/counterfactual-killswitch-ensemble` — full PR **#8453** for #8445

@@ -13,13 +13,21 @@ momentum, gravity, joint damping, shaft elasticity, and shaft damping, with
 closed energy bookkeeping and a 120-case robustness grid. A common-observable
 model ladder then tests wrench transport, prescribed mobile-hub reactions,
 two-hand constraint rank, and proper 3-D frame invariance without representing
-the still-open full-body cross-engine comparison as complete.
+the still-open full-body cross-engine comparison as complete. A three-tier
+hand-path attribution study now separates stitched pointwise ZTCF drift,
+same-state control, and separately defined ZVCF reactions for force vectors,
+impulse, power, work, every modeled joint, and four neutral time windows. A
+bounded first-order residual-couple preview study records the late two-hand
+preactivation hypothesis without promoting it to a physiological finding.
 
 The public-facing article is available on
 [affinedrift.com](https://affinedrift.com/articles/proximal-distal-energy-transfer.html).
 Ongoing validation and extension work is tracked in
 [#8426](https://github.com/D-sorganization/UpstreamDrift/issues/8426) and the
 [interaction-force mechanisms epic](https://github.com/D-sorganization/UpstreamDrift/issues/8443).
+The hand-path attribution, two-hand redundancy, and preactivation validation
+program is tracked in
+[#8458](https://github.com/D-sorganization/UpstreamDrift/issues/8458).
 
 ## Layout
 
@@ -47,6 +55,8 @@ python3 -m scripts.research.proximal_distal_energy.run_counterfactual_ensemble
 python3 -m scripts.research.proximal_distal_energy.run_two_hand_wscg_analysis
 python3 -m scripts.research.proximal_distal_energy.run_shaft_contribution_study
 python3 -m scripts.research.proximal_distal_energy.run_mechanism_ladder_study
+python3 -m scripts.research.proximal_distal_energy.run_hand_path_attribution_study
+python3 -m scripts.research.proximal_distal_energy.two_hand_preactivation_hypothesis
 # robustness analyses
 python3 -m scripts.research.proximal_distal_energy.e1b_bounded_torque
 python3 -m scripts.research.proximal_distal_energy.e1c_impact_sensitivity
@@ -92,6 +102,14 @@ Experiments are deterministic (fixed-step RK4); provenance
   prescribed mobile-hub inverse dynamics, planar closed-loop constraint
   geometry, and 3-D frame transformations. Full-body cross-engine dynamics are
   explicitly recorded as unexecuted.
+- The hand-path evidence uses two forward-simulated open-chain reference cases
+  and one prescribed, constraint-consistent two-arm local sweep. Its normalized
+  time quartiles are bookkeeping windows, not anatomical swing phases. ZVCF
+  forces are same-configuration diagnostics and are never added to the exact
+  total = drift + control closure.
+- The residual-couple preview test holds archived BASE and pointwise ZTCF
+  traces fixed. It tests a signal-delay hypothesis, not muscle activation,
+  metabolic effort, clubhead-speed improvement, or a human timing prescription.
 - Generalization and human-data work is tracked in
   [#8426](https://github.com/D-sorganization/UpstreamDrift/issues/8426).
 
