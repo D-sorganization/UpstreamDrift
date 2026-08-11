@@ -24,16 +24,23 @@ ordering within a local model neighborhood, not a universal timing value or
 an individual coaching prescription. A fixed hub, rigid shaft, planar chain,
 simplified actuators, and absence of human data remain material limitations.
 
+The forward constrained two-hand extension resolves one previously open
+mechanistic question. Starting from the exact same 0.200 s state, the
+force-generated club couple remains negative for 50 ms after all applied joint
+torques are removed. The effect disappears exactly when both grip moment arms
+are removed and remains stable under timestep and projection refinement. This
+supports finite passive-couple persistence in the declared planar model, not a
+claim about muscle inactivity or human technique.
+
 ## Research Priorities {#sec-future}
 
 The next work should reduce the largest inferential risks in dependency
 order:
 
-1. **Counterfactual-method parity.** Implement torque-killswitch
-   re-simulation in Python, compare it with the pointwise decomposition on
-   matched trajectories, and cross-check the existing MATLAB pathway.
-   Pointwise attribution and forward divergence answer different questions;
-   agreement should not be assumed.
+1. **Counterfactual transport.** Carry the now-executed same-state
+   torque-killswitch from fixed-base rigid planar models into a dynamic moving
+   base, compliant club, and then a spatial full-body model. Preserve the same
+   force, couple, power, work, and closure observables at every tier.
 2. **Coupled sensitivity and constrained control.** Replace
    one-at-a-time perturbations with a declared multivariable design, add
    activation-rate and history-dependent actuator limits, and compare
