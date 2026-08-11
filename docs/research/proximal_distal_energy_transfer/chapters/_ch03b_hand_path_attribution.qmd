@@ -28,7 +28,9 @@ required to satisfy the equations of motion and the joint constraints. Its
 value can contain a large contribution from gravity, velocity-dependent
 interaction dynamics, passive elements, prescribed-base motion, and earlier
 work stored in the achieved state. None of those contributions is identified
-by a net grip-force trace alone [@putnam1991; @putnam1993; @zajac1989].
+by a net grip-force trace alone [@putnam1991; @putnam1993; @zajac1989]. Even a
+specified endpoint force can admit wide ranges of muscle activation in a
+redundant musculoskeletal model [@sohn2013].
 
 The correct conclusion from the 2020 study is therefore narrow and useful:
 golfers who produced more signed linear work per metre of hand travel also
@@ -251,7 +253,7 @@ where $\mathbf d$ points between the grip contacts. Two large opposing forces
 can therefore produce a small net force and a large club moment. Conversely,
 a large internal squeeze can increase contact loading while contributing no
 net rigid-club wrench. Neither the net hand force nor the club's rigid-body
-work identifies that internal demand.
+work identifies that internal demand [@zatsiorsky2008prehension].
 
 The redundancy extends to control allocation. A desired equivalent club
 moment can be produced by the separated hand-force couple, by applied wrist
@@ -259,7 +261,10 @@ free torques, or by combinations in which those pathways oppose. Equal net
 club action does not imply equal joint loading, actuator work, co-contraction,
 or robustness to perturbation. The constrained model can expose these
 mechanical alternatives, but without muscles, activation dynamics, and a
-physiological objective it cannot rank them as human effort strategies.
+physiological objective it cannot rank them as human effort strategies. Human
+two-hand experiments likewise show that similar object kinematics can coexist
+with substantially different hand torques and internal squeeze
+[@reinkensmeyer1992].
 
 ## Why an Apparently Counterproductive Control Can Be Useful {#sec-counterintuitive-control}
 
@@ -279,6 +284,12 @@ mistake, and a positive drift force is not free propulsion. The achieved state
 embodies earlier control and energy history. A defensible strategy statement
 must specify the optimized objective, actuator limits, event definition, and
 cost of producing that state.
+
+This interpretation is consistent with multijoint reaching evidence in which
+people exploited or compensated interaction torque differently as speed and
+load changed; reproducing the behavior required mixed kinematic, energetic,
+and dynamic costs rather than a single force-maximization rule [@vu2016]. It is
+supporting context for the mechanism, not golf-specific validation.
 
 ## Late Reversal and the Preactivation Hypothesis {#sec-preactivation-hypothesis}
 
