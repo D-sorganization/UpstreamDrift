@@ -132,6 +132,16 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   reported strategy ordering is reproduced for the defined cases. These
   simplified-model results are not a universal effect estimate or a coaching
   prescription.
+- **2026-08-11** - Began the proximal-to-distal model-completion and
+  falsification program with an engine-neutral spatial evidence contract.
+  Named interfaces now bind 3-D wrenches to compatible twists, frames,
+  reference points, bodies, and action directions; matched-state total, drift,
+  and control components must close. A machine-readable registry predeclares
+  five mechanism predictions, competing explanations, negative controls,
+  model tiers, falsifiers, and numerical tolerances. Reference transport and
+  proper-frame rotation preserve power, planar evidence migrates losslessly
+  into the spatial axes, and unexecuted higher tiers remain explicitly
+  untested rather than inheriting lower-tier support.
 - (spec-exempt: security fix) Fixed Command Injection in `pandas.DataFrame.query()` inside `rust_engine.py` (both `data_processor` and `data_processor_io`) by explicitly validating user expressions using an AST-based validator (`validate_pandas_formula`). This eliminates an arbitrary code execution vulnerability.
 
 - **2026-08-05** - Retargeted #8345 P1's 3D putting workflow to `main`

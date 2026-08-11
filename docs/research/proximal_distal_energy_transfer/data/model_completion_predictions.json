@@ -1,0 +1,152 @@
+{
+  "schema_version": "proximal-distal-evidence-v2",
+  "study_id": "proximal-distal-model-completion",
+  "predictions": [
+    {
+      "prediction_id": "PD-H1-P1",
+      "hypothesis_id": "H1",
+      "statement": "A material late distal interaction contribution remains in the matched-state zero-command drift solve.",
+      "estimand": "Late event-window distal-interface drift work and cancellation-stable drift share.",
+      "intervention": "Evaluate total, zero-command drift, and commanded increment at identical achieved states, then execute a branched zero-command rollout.",
+      "expected_result": "Late drift work is positive and the branched response persists beyond the numerical convergence interval.",
+      "falsifier": "The contribution fails component closure, becomes non-positive after passive/base/shaft terms are inventoried, or disappears within the convergence-calibrated interval.",
+      "competing_explanations": [
+        "direct distal actuation",
+        "gravity",
+        "passive stiffness or damping",
+        "shaft recoil",
+        "prescribed-base work",
+        "constraint stabilization"
+      ],
+      "negative_controls": [
+        "remove velocity-dependent terms",
+        "remove gravity",
+        "hold shaft elasticity at its matched rigid limit"
+      ],
+      "required_model_tiers": [
+        "double_pendulum",
+        "forward_two_hand",
+        "moving_base_flexible_club",
+        "full_body_3d"
+      ],
+      "tolerance_id": "preoutcome-primary",
+      "status": "untested"
+    },
+    {
+      "prediction_id": "PD-H2-P1",
+      "hypothesis_id": "H2",
+      "statement": "Interaction transfer changes sign with force-velocity alignment and contact moment-arm geometry rather than force magnitude alone.",
+      "estimand": "Interface wrench power and equivalent club couple under registered geometry interventions.",
+      "intervention": "Reverse the registered path projection or contact moment arm while holding the force norm and declared state inventory fixed.",
+      "expected_result": "The corresponding power or equivalent-couple contribution reverses sign within the registered event neighborhood.",
+      "falsifier": "The predicted sign response does not occur, depends on a reference-frame artifact, or fails at the next model tier under the same observable definition.",
+      "competing_explanations": [
+        "force-magnitude scaling",
+        "event misalignment",
+        "reference-point transport error"
+      ],
+      "negative_controls": [
+        "properly rotate the complete wrench and twist together",
+        "transport wrench and twist to a second reference point"
+      ],
+      "required_model_tiers": [
+        "double_pendulum",
+        "forward_two_hand",
+        "full_body_3d"
+      ],
+      "tolerance_id": "preoutcome-primary",
+      "status": "untested"
+    },
+    {
+      "prediction_id": "PD-H3-P1",
+      "hypothesis_id": "H3",
+      "statement": "A late negative club couple persists without simultaneous commanded distal torque in a nonsingular forward two-hand model.",
+      "estimand": "Equivalent club couple and club angular work after a registered distal-torque killswitch.",
+      "intervention": "Branch the forward constrained trajectory at preregistered cut events and set distal commands to zero without changing state or contact mode.",
+      "expected_result": "A negative force-generated club couple persists for a nonzero convergence-resolved horizon.",
+      "falsifier": "The couple vanishes, changes sign, requires singular contact allocation, or is accounted for by omitted active, passive, shaft, or stabilization terms.",
+      "competing_explanations": [
+        "active wrist torque",
+        "internal-force regularization",
+        "shaft elastic recoil",
+        "constraint stabilization"
+      ],
+      "negative_controls": [
+        "remove the relevant contact moment arm",
+        "swap lead and trail contact geometry",
+        "repeat with independent constraint stabilization settings"
+      ],
+      "required_model_tiers": [
+        "forward_two_hand",
+        "moving_base_flexible_club",
+        "full_body_3d"
+      ],
+      "tolerance_id": "preoutcome-primary",
+      "status": "untested"
+    },
+    {
+      "prediction_id": "PD-H4-P1",
+      "hypothesis_id": "H4",
+      "statement": "Anticipatory opposing commands can improve a declared delivery objective when actuator delay overlaps the drift-force reversal.",
+      "estimand": "Held-out club delivery objective under matched actuator cost, joint-load, and command-rate constraints.",
+      "intervention": "Compare delayed reactive, preview, and robust controllers in forward dynamics with matched feasible effort proxies.",
+      "expected_result": "Preview control improves the preregistered held-out objective without exceeding matched loading and actuator constraints.",
+      "falsifier": "The benefit disappears under forward activation dynamics, matched constraints, uncertainty, or held-out trajectories.",
+      "competing_explanations": [
+        "fixed-reference-trace artifact",
+        "unbounded torque rate",
+        "objective leakage",
+        "unmodeled co-contraction"
+      ],
+      "negative_controls": [
+        "zero actuator delay",
+        "shuffle reversal-event timing within the admissible window",
+        "evaluate on held-out parameter ensembles"
+      ],
+      "required_model_tiers": [
+        "forward_two_hand",
+        "moving_base_flexible_club",
+        "full_body_3d"
+      ],
+      "tolerance_id": "preoutcome-primary",
+      "status": "untested"
+    },
+    {
+      "prediction_id": "PD-H5-P1",
+      "hypothesis_id": "H5",
+      "statement": "The qualitative intervention response survives transport from planar open chains to constrained moving-base and 3-D full-body models.",
+      "estimand": "Registered sign, event ordering, work partition, and intervention-response equivalence metrics across model tiers and engines.",
+      "intervention": "Replay the same registered mechanism experiment through each supported model adapter and independent engine.",
+      "expected_result": "Every preregistered qualitative response remains inside its preoutcome equivalence region or is explicitly classified as a structural discrepancy.",
+      "falsifier": "A higher tier or independent engine contradicts a registered response outside the calibrated numerical and parameter uncertainty bounds.",
+      "competing_explanations": [
+        "coordinate-convention mismatch",
+        "contact-model discrepancy",
+        "event-alignment error",
+        "model structural inadequacy"
+      ],
+      "negative_controls": [
+        "proper-frame rotation audit",
+        "manufactured spatial-wrench case",
+        "engine-independent analytical baseline"
+      ],
+      "required_model_tiers": [
+        "double_pendulum",
+        "forward_two_hand",
+        "moving_base_flexible_club",
+        "full_body_3d"
+      ],
+      "tolerance_id": "preoutcome-primary",
+      "status": "untested"
+    }
+  ],
+  "tolerances": [
+    {
+      "tolerance_id": "preoutcome-primary",
+      "absolute": 1e-8,
+      "relative": 1e-8,
+      "calibration_method": "existing-analytical-closure-and-finest-pair-convergence-before-new-phase-outcomes",
+      "source": "Current double-pendulum closure, mechanism-ladder invariance, and committed timestep-convergence evidence; each later phase must recalibrate before evaluating its primary outcomes."
+    }
+  ]
+}

@@ -29,6 +29,16 @@ from .fsp_integration import (
     detect_md_mf_window,
     extract_clubhead_trajectory,
 )
+from .interaction_evidence import (
+    EvidenceManifest,
+    InterfaceDescriptor,
+    NumericalTolerance,
+    PredictionRecord,
+    SpatialWrenchTrajectory,
+    calibrate_convergence_tolerance,
+    load_evidence_manifest,
+    spatial_from_planar,
+)
 from .hill_muscle import HillMuscleModel, MuscleParameters, MuscleState
 from .kinematic_sequence import SegmentPeak, SegmentTimingResult
 from .multi_muscle import MuscleAttachment, MuscleGroup
@@ -111,6 +121,15 @@ __all__: list[str] = [
     "compute_power_and_work",
     "project_forces_onto_path",
     "summarize_phases",
+    # interaction_evidence
+    "EvidenceManifest",
+    "InterfaceDescriptor",
+    "NumericalTolerance",
+    "PredictionRecord",
+    "SpatialWrenchTrajectory",
+    "calibrate_convergence_tolerance",
+    "load_evidence_manifest",
+    "spatial_from_planar",
     # hill_muscle
     "HillMuscleModel",
     "MuscleParameters",
