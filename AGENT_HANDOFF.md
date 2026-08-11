@@ -1,26 +1,23 @@
 # Agent Handoff — UpstreamDrift
 
-Last updated: 2026-08-10
+Last updated: 2026-08-11
 Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
 
-- **#8472 module-size decomposition slice (local stacked candidate)** — branch
-  `fix/8472-module-size-decomposition` is stacked directly on the #8477 parent
-  commit `fda4a06ee3af79bb207db5b54b9e612d6882b7de`. It consolidates the
-  duplicated stateless terrain physics helpers onto the canonical split terrain
-  implementation, takes the legacy `terrain_representation.py` below 1,200
-  lines, removes that expired exception, and tightens its architecture ratchet
-  from 1,250 to 1,200 lines. The legacy and canonical classes remain separate
-  because their nominal-boundary and serialized-material contracts conflict;
-  forcing a full facade caused broader terrain regressions. This advances the
-  failing module-size gate from six expired exceptions/seven oversized modules
-  to five/six. It does not make the gate green: launcher
-  diagnostics/UI/settings/main launcher, chat dock,
-  and the Simscape 3D viewer still require owned decompositions. The chat-dock
-  reason now truthfully records 1,490 lines, but its expiry is intentionally
-  unchanged; do not renew or widen these exceptions as a substitute for the
-  remaining work.
+- **#8472 chat-dock decomposition (local stacked candidate)** — branch
+  `fix/8472-chat-dock-decomposition` is stacked directly on the #8479 parent
+  commit `2c98644d3ef3e32820eb6c2df80e75250593392b`. It moves WebSocket event
+  routing, terminal-mode mechanics, streaming-state initialization, and
+  collapsed-view mutation into `chat._qt.runtime`, retaining the historical
+  `ChatDockWidget` methods as thin delegates. The compatibility shell is now
+  1,150 lines, and both its file-size and expired module-size exceptions are
+  removed without renewal or policy widening. Focused behavior tests and the
+  file-size gate pass. The parent already fails the Tools drift sentinel for
+  `_chat_dock_widget_qt.py` and `models.py`; synchronize this decomposition to
+  the canonical Tools source before updating that hash. The repository module
+  gate remains red with four expired exceptions/five oversized modules:
+  launcher diagnostics/UI/settings/main launcher and the Simscape 3D viewer.
 
 - **Exact-main release-gate unblocker candidate (local only)** — branch
   `fix/current-main-release-gate-unblockers` starts at exact `main`

@@ -2,12 +2,6 @@
   "max_lines": 1200,
   "exceptions": [
     {
-      "path": "src/shared/python/chat/_chat_dock_widget_qt.py",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Legacy shared PyQt chat dock widget (1490 lines, pending decomposition under #5922)",
-      "expires_on": "2026-07-31"
-    },
-    {
       "path": "src/launchers/settings_dialog.py",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "reason": "Legacy launcher settings dialog (2104 lines, pending decomposition under #5922)",

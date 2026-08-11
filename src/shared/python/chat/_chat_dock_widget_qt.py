@@ -10,7 +10,7 @@ This widget keeps application-specific integrations behind injectable or
 lazy-loaded collaborators so the chat package can be imported independently.
 
 This module historically held the entire dock widget implementation in
-one file. To stay under the repo's 1500-line per-file budget the
+one file. To stay under the repo's 1,200-line per-file budget the
 non-class helpers and large method bodies now live in the private
 ``chat._qt`` package; this module remains the canonical public entry
 point and re-exports every name external code or tests reference
@@ -54,6 +54,7 @@ from PyQt6.QtWidgets import (
 from . import chat_dock_widget as _connection_contract
 from ._qt import ai_dropdowns as _ai
 from ._qt import exports as _exports
+from ._qt import runtime as _runtime
 from ._qt import sessions as _sessions
 from ._qt.bubbles import ChatMessageBubble
 from ._qt.history_sidebar import HistorySidebar
@@ -194,33 +195,7 @@ class ChatDockWidget(QDockWidget):
         self._memory_manager_factory = (
             memory_manager_factory or self._default_memory_manager_factory
         )
-        self._is_streaming = False
-        # Busy-state message queue: messages typed/sent while streaming
-        # land here and are flushed FIFO on each ``complete`` arrival.
-        # Stored as ``QueuedMessage`` dataclasses so each row carries a
-        # stable id (needed for the steer-by-id protocol exposed by the
-        # inline ``QueuePanel`` preview widget).
-        self._queued_messages: list[QueuedMessage] = []
-        # Chunk-batching: incoming streaming chunks accumulate here and
-        # flush to the active bubble on a short QTimer instead of forcing
-        # a Qt repaint per network frame. This is the single biggest
-        # perceived-latency win measured on warm-model traces because the
-        # GUI thread no longer ping-pongs between every 2–10 byte chunk.
-        self._chunk_buffer: list[str] = []
-        self._chunk_flush_timer = QTimer(self)
-        self._chunk_flush_timer.setSingleShot(True)
-        self._chunk_flush_timer.setInterval(50)  # 50 ms = 20 Hz max repaint
-        self._chunk_flush_timer.timeout.connect(self._flush_chunk_buffer)
-        # Send-button visual state machine. Tracks idle/awaiting/stop so
-        # the button colour reflects what Enter will do next.
-        self._send_button_state: str = "idle"
-        self._last_chunk_at: float | None = None
-        self._stop_state_timer = QTimer(self)
-        self._stop_state_timer.setSingleShot(True)
-        self._stop_state_timer.setInterval(10_000)  # 10 s without a chunk
-        self._stop_state_timer.timeout.connect(self._on_stop_state_timeout)
-        self._current_bubble: ChatMessageBubble | None = None
-        self._terminal_session_id: str | None = None
+        _runtime.initialize_streaming_state(self, timer_factory=QTimer)
         # Tools issue #2871: mid-thread provider/model/thinking state.
         self._message_history: list[dict[str, Any]] = []
         self._current_provider: str = "ollama"
@@ -281,47 +256,7 @@ class ChatDockWidget(QDockWidget):
 
     def set_collapsed(self, collapsed: bool) -> None:
         """Switch between full and collapsed state, hiding the main UI components when collapsed."""
-        self._collapsed = collapsed
-
-        widgets_to_hide = [
-            self._status_label,
-            self._tools_btn,
-            self._token_indicator,
-            self._ai_provider_combo,
-            self._ai_model_combo,
-            self._ai_thinking_combo,
-            self._mode_combo,
-            self._content_stack,
-            self._input_edit,
-            self._upload_btn,
-            self._screenshot_btn,
-            self._mic_btn,
-            self._agent_mode_combo,
-            self._send_btn,
-            self._steer_btn,
-            self._stop_agent_btn,
-        ]
-        terminal_widgets = [
-            self._shell_combo,
-            self._provider_combo,
-            self._terminal_start_btn,
-            self._terminal_stop_btn,
-        ]
-
-        if collapsed:
-            for w in widgets_to_hide + terminal_widgets:
-                if w is not None:
-                    w.setVisible(False)
-        else:
-            for w in widgets_to_hide:
-                if w is not None:
-                    w.setVisible(True)
-            is_terminal = self._current_mode() == "terminal"
-            for w in terminal_widgets:
-                if w is not None:
-                    w.setVisible(is_terminal)
-
-        self.updateGeometry()
+        _runtime.set_chat_dock_collapsed(self, collapsed)
 
     def minimumSizeHint(self) -> QSize:
         if self._collapsed:
@@ -340,50 +275,16 @@ class ChatDockWidget(QDockWidget):
 
     def _connect(self) -> None:
         """Establish WebSocket connection to the chat server."""
-        self._intentional_disconnect = False
-        self._is_closing = False
-        if self._socket is not None:
-            self._socket.close()
-            self._socket.deleteLater()
-        sid = ChatDockWidget._get_shared_session_id() or "new"
-        path = self._ws_path_template.replace("{session_id}", sid)
-        origin, url_text = _connection_contract._native_websocket_connection(
-            self._server_url, path
+        _runtime.connect(
+            self,
+            native_connection=_connection_contract._native_websocket_connection,
+            websocket_factory=QWebSocket,
+            url_factory=QUrl,
         )
-        self._socket = QWebSocket(origin)
-        self._socket.connected.connect(self._on_connected)
-        self._socket.disconnected.connect(self._on_disconnected)
-        self._socket.textMessageReceived.connect(self._on_message)
-
-        self._status_label.setText("Connecting...")
-        self._socket.open(QUrl(url_text))
 
     def connection_diagnostics(self) -> dict[str, Any]:
         """Return host-readable WebSocket readiness diagnostics."""
-        socket = self._socket
-        state = "not_started"
-        error = ""
-        if socket is not None:
-            try:
-                raw_state = socket.state()
-                state = getattr(raw_state, "name", str(raw_state))
-            except RuntimeError as exc:
-                state = "deleted"
-                error = str(exc)
-            else:
-                try:
-                    error = socket.errorString()
-                except RuntimeError as exc:
-                    error = str(exc)
-        return {
-            "ready": state == "ConnectedState",
-            "server_url": self._server_url,
-            "ws_path_template": self._ws_path_template,
-            "session_id": ChatDockWidget._get_shared_session_id(),
-            "socket_state": state,
-            "error": error,
-            "connect_on_show": bool(getattr(self, "_connect_on_show", False)),
-        }
+        return _runtime.connection_diagnostics(self)
 
     def _on_connected(self) -> None:
         self._status_label.setText("Connected")
@@ -430,147 +331,16 @@ class ChatDockWidget(QDockWidget):
         self._memory_panel_window = panel
 
     def _on_disconnected(self) -> None:
-        if bool(getattr(self, "_intentional_disconnect", False)) or bool(
-            getattr(self, "_is_closing", False)
-        ):
-            if hasattr(self, "_exit_thinking_state"):
-                self._exit_thinking_state()
-            else:
-                self._is_streaming = False
-                if hasattr(self, "_send_btn") and self._send_btn is not None:
-                    self._send_btn.setEnabled(True)
-            return
-        self._status_label.setText(
-            "Sidekick API unavailable — retrying in 3s. Set UD_CHAT_WS_URL if the local API is external."
-        )
-        self._status_label.setStyleSheet("color: #f85149; font-size: 10px;")
-        if hasattr(self, "_exit_thinking_state"):
-            self._exit_thinking_state()
-        else:
-            self._is_streaming = False
-            if hasattr(self, "_send_btn") and self._send_btn is not None:
-                self._send_btn.setEnabled(True)
-        self._reconnect_timer.start(3000)
+        _runtime.on_disconnected(self)
 
     def _on_message(self, raw: str) -> None:
         """Handle incoming WebSocket message."""
-        if raw is None:
-            raise ValueError("raw must be provided")
-        try:
-            data = json.loads(raw)
-        except (json.JSONDecodeError, TypeError):
-            return
-
-        msg_type = data.get("type")
-
-        if msg_type == "session_info":
-            sid = data.get("session_id", "")
-            ChatDockWidget._set_shared_session_id(sid)
-            _write_shared_session_id(sid, self._session_file)
-            capabilities = data.get("capabilities", {})
-            self._set_terminal_runtime_available(
-                bool(
-                    isinstance(capabilities, dict)
-                    and capabilities.get("terminal_runtime")
-                )
-            )
-            self._send_ws({"action": "history"})
-
-        elif msg_type == "chunk":
-            content = data.get("content", "")
-            if self._current_bubble and content:
-                # Buffer rather than render synchronously. The flush timer
-                # coalesces multiple bytes-per-frame chunks into a single
-                # Qt label update — measured ~10x faster end-to-end for
-                # warm cloud models that stream short tokens.
-                self._chunk_buffer.append(content)
-                if not self._chunk_flush_timer.isActive():
-                    self._chunk_flush_timer.start()
-                # Reset the no-chunk-for-10s timer used by the Send-button
-                # "Stop" state. Each chunk arrival pushes the deadline out.
-                import time as _time
-
-                self._last_chunk_at = _time.monotonic()
-                if self._is_streaming:
-                    self._stop_state_timer.start()
-
-        elif msg_type == "complete":
-            # Drain any pending chunk fragments before tearing down the
-            # current bubble so trailing content is never lost.
-            self._flush_chunk_buffer()
-            self._stop_state_timer.stop()
-            self._exit_thinking_state()
-            self._current_bubble = None
-            sid = data.get("session_id")
-            if sid:
-                ChatDockWidget._set_shared_session_id(sid)
-                _write_shared_session_id(sid, self._session_file)
-            self._flush_queued_messages()
-
-        elif msg_type == "session_created":
-            sid = data.get("session_id", "")
-            ChatDockWidget._set_shared_session_id(sid)
-            _write_shared_session_id(sid, self._session_file)
-            while self._message_layout.count() > 1:
-                item = self._message_layout.takeAt(0)
-                if item:
-                    w = item.widget()
-                    if w:
-                        w.deleteLater()
-            self._message_history = []
-            self._add_bubble("assistant", "Hello! How can I help you today?")
-            if hasattr(self, "_history_sidebar") and self._history_sidebar is not None:
-                self._history_sidebar.refresh_lists()
-
-        elif msg_type == "history":
-            self._populate_history(data.get("messages", []))
-
-        elif msg_type == "model_list":
-            models = data.get("models", [])
-            if isinstance(models, list):
-                self.models_refreshed.emit(models)
-
-        elif msg_type == "index_status":
-            self.index_status_changed.emit(dict(data))
-            state = data.get("state")
-            if state == "running":
-                files = data.get("files_parsed", 0)
-                self._status_label.setText(f"Indexing codebase ({files} files)...")
-            elif state == "complete":
-                self._status_label.setText("Connected")
-                self._status_label.setStyleSheet("color: #3fb950; font-size: 10px;")
-            elif state == "error":
-                detail = data.get("error", "Unknown indexing error")
-                self._status_label.setText(f"Index error: {detail}")
-                self._status_label.setStyleSheet("color: #f85149; font-size: 10px;")
-
-        elif msg_type == "error":
-            detail = data.get("detail", "Unknown error")
-            self._status_label.setText(f"Error: {detail}")
-            self._exit_thinking_state()
-            # Surface remaining queue state to the user; do NOT auto-flush
-            # after a server error so queued steering messages are not
-            # silently delivered against an unhealthy session.
-            self._update_queue_affordance()
-
-        elif msg_type == "terminal_session":
-            session = data.get("session", {})
-            self._terminal_session_id = session.get("session_id")
-            self._terminal_start_pending = False
-            state = session.get("state", "unknown")
-            self._status_label.setText(f"Terminal {state}")
-            if self._terminal_session_id:
-                self._append_terminal_line(f"[terminal] session {state}")
-            if state in {"stopped", "exited", "error"}:
-                self._terminal_session_id = None
-            self._sync_terminal_controls()
-
-        elif msg_type == "terminal_events":
-            for event in data.get("events", []):
-                self._append_terminal_line(event.get("data", ""))
-
-        elif msg_type == "terminal_ack":
-            self._status_label.setText("Terminal input sent")
+        _runtime.handle_message(
+            self,
+            raw,
+            set_shared_session_id=ChatDockWidget._set_shared_session_id,
+            write_shared_session_id=_write_shared_session_id,
+        )
 
     # ── Thinking indicator (Tools chat thinking-indicator) ───────────
 
@@ -597,12 +367,10 @@ class ChatDockWidget(QDockWidget):
         self._is_streaming = True
         # Send button stays enabled in ``awaiting`` / ``stop`` states so
         # the user can keep typing steering messages or click to abort.
-        try:
+        # The indicator may not exist during very early initialization or
+        # in tests that intentionally bypass ``_setup_ui``.
+        with contextlib.suppress(AttributeError):
             self._thinking_indicator.start()
-        except AttributeError:
-            # Indicator widget not yet constructed (very early init / tests
-            # that bypass _setup_ui) — silently skip.
-            pass
         # Start the no-chunk-for-10s watchdog so the Send button flips to
         # red "Stop" if the agent stalls.
         self._stop_state_timer.start()
@@ -1098,83 +866,22 @@ class ChatDockWidget(QDockWidget):
     # ── Terminal mode ───────────────────────────────────────────────
 
     def _populate_shell_combo(self) -> None:
-        self._shell_combo.clear()
-        for shell in self._terminal_registry.shells():
-            self._shell_combo.addItem(shell.display_name, shell.id)
+        _runtime.populate_shell_combo(self)
 
     def _populate_provider_combo(self) -> None:
-        shell_id = str(self._shell_combo.currentData() or "")
-        providers = self._terminal_registry.providers_for_shell(shell_id)
-        current_provider = self._provider_combo.currentData()
-        self._provider_combo.blockSignals(True)
-        try:
-            self._provider_combo.clear()
-            for provider in providers:
-                self._provider_combo.addItem(provider.display_name, provider.id)
-            if current_provider:
-                idx = self._provider_combo.findData(current_provider)
-                if idx >= 0:
-                    self._provider_combo.setCurrentIndex(idx)
-        finally:
-            self._provider_combo.blockSignals(False)
-        self._sync_terminal_controls()
+        _runtime.populate_provider_combo(self)
 
     def _on_terminal_shell_changed(self, _index: int) -> None:
         self._populate_provider_combo()
 
     def _on_terminal_start(self) -> None:
-        if not self._terminal_runtime_available:
-            self._append_terminal_line(
-                "[terminal] host has not enabled terminal runtime"
-            )
-            return
-        if self._terminal_session_id or self._terminal_start_pending:
-            self._append_terminal_line("[terminal] session already active")
-            return
-        if (
-            not self._shell_combo.currentData()
-            or not self._provider_combo.currentData()
-        ):
-            self._append_terminal_line("[terminal] select a shell and provider first")
-            return
-        self._terminal_start_pending = True
-        self._sync_terminal_controls()
-        self._terminal_output.clear()
-        self._append_terminal_line("[terminal] starting...")
-        self._send_ws(
-            {
-                "action": "terminal_start",
-                "project_root": str(self._project_root),
-                "shell_id": self._shell_combo.currentData(),
-                "provider_id": self._provider_combo.currentData(),
-                "app_context": self._app_context,
-            }
-        )
+        _runtime.on_terminal_start(self)
 
     def _on_terminal_stop(self) -> None:
-        if not self._terminal_session_id:
-            self._append_terminal_line("[terminal] start a session first")
-            return
-        self._send_ws(
-            {
-                "action": "terminal_stop",
-                "terminal_session_id": self._terminal_session_id,
-            }
-        )
+        _runtime.on_terminal_stop(self)
 
     def _on_terminal_input(self, text: str) -> None:
-        if not self._terminal_session_id:
-            self._append_terminal_line("[terminal] start a session first")
-            return
-        self._input_edit.clear()
-        self._append_terminal_line(f"> {text}")
-        self._send_ws(
-            {
-                "action": "terminal_input",
-                "terminal_session_id": self._terminal_session_id,
-                "text": f"{text}\n",
-            }
-        )
+        _runtime.on_terminal_input(self, text)
 
     # ── Input affordances ───────────────────────────────────────────
 
@@ -1242,66 +949,19 @@ class ChatDockWidget(QDockWidget):
         self._status_label.setText(f"Voice: {message}")
 
     def _on_mode_changed(self) -> None:
-        is_terminal = (
-            self._current_mode() == "terminal" and self._terminal_runtime_available
-        )
-        self._content_stack.setCurrentIndex(1 if is_terminal else 0)
-        self._shell_combo.setVisible(is_terminal)
-        self._provider_combo.setVisible(is_terminal)
-        self._terminal_start_btn.setVisible(is_terminal)
-        self._terminal_stop_btn.setVisible(is_terminal)
-        self._sync_terminal_controls()
-        placeholder = (
-            "Type terminal input..." if is_terminal else self._placeholder_text
-        )
-        self._input_edit.setPlaceholderText(placeholder)
+        _runtime.on_mode_changed(self)
 
     def _current_mode(self) -> str:
-        mode = self._mode_combo.currentData()
-        return str(mode or "chat")
+        return _runtime.current_mode(self)
 
     def _set_terminal_runtime_available(self, available: bool) -> None:
-        self._terminal_runtime_available = bool(available)
-        if not hasattr(self, "_mode_combo"):
-            if not self._terminal_runtime_available:
-                self._terminal_session_id = None
-                self._terminal_start_pending = False
-            return
-        terminal_index = self._mode_combo.findData("terminal")
-        if self._terminal_runtime_available:
-            if terminal_index < 0:
-                self._mode_combo.addItem("Terminal", "terminal")
-        else:
-            if terminal_index >= 0:
-                if self._current_mode() == "terminal":
-                    chat_index = self._mode_combo.findData("chat")
-                    self._mode_combo.setCurrentIndex(max(0, chat_index))
-                self._mode_combo.removeItem(terminal_index)
-            self._terminal_session_id = None
-            self._terminal_start_pending = False
-        self._sync_terminal_controls()
-        self._on_mode_changed()
+        _runtime.set_terminal_runtime_available(self, available)
 
     def _sync_terminal_controls(self) -> None:
-        if not hasattr(self, "_terminal_start_btn"):
-            return
-        active = bool(self._terminal_session_id)
-        pending = bool(self._terminal_start_pending)
-        startable = (
-            self._terminal_runtime_available
-            and not active
-            and not pending
-            and bool(self._shell_combo.currentData())
-            and bool(self._provider_combo.currentData())
-        )
-        self._terminal_start_btn.setEnabled(startable)
-        self._terminal_stop_btn.setEnabled(active)
-        self._shell_combo.setEnabled(not active and not pending)
-        self._provider_combo.setEnabled(not active and not pending)
+        _runtime.sync_terminal_controls(self)
 
     def _append_terminal_line(self, text: str) -> None:
-        if text:
-            self._terminal_output.appendPlainText(text)
+        _runtime.append_terminal_line(self, text)
 
     # ── Messaging helpers ───────────────────────────────────────────
 
