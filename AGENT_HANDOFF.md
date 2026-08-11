@@ -5,6 +5,22 @@ Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
 
+- **Exact-main release-gate unblocker candidate (local only)** — branch
+  `fix/current-main-release-gate-unblockers` starts at exact `main`
+  `69eb7e9db32ccd17e45824619315b1d04b400c27`. It repairs the two
+  `CanonicalCoreShell` ESLint violations without suppressions, rejects stale
+  status responses across mode changes, corrects the stale durable-task-manager
+  SPEC paths after #8322 removed that implementation, and locks the three
+  vulnerable transitive npm packages to patched same-range releases. It also
+  restores the engine-store unload tests' mocked backend boundary after the
+  earlier `apiFetch` migration left two tests attempting relative-URL network
+  calls under Node. Focused React regression tests, the full React suite, lint,
+  type-check, build, audit, and SPEC path checks must be green before
+  publication. The expired/oversized Python module-size
+  exceptions remain an inherited release blocker: this branch neither renews
+  nor widens them, and #8472 remains the documented owner for decomposition or
+  an independently reviewed time-bounded policy decision.
+
 - **#8458 hand-path drift/control attribution** — consolidated branch
   `feat/hand-path-drift-control-attribution` defines the canonical same-state
   ZTCF/control/ZVCF contract; implements exact double-pendulum, one-arm, and

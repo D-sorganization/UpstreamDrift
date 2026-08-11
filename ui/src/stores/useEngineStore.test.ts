@@ -74,6 +74,16 @@ describe('useEngineStore', () => {
   });
 
   describe('unloadEngine', () => {
+    beforeEach(() => {
+      global.fetch = vi.fn(() =>
+        Promise.resolve(
+          new Response(JSON.stringify({ status: 'unloaded' }), {
+            headers: { 'Content-Type': 'application/json' },
+          })
+        )
+      );
+    });
+
     it('sets engine to idle', async () => {
       // Manually set an engine to loaded
       useEngineStore.setState((state) => ({
@@ -90,6 +100,10 @@ describe('useEngineStore', () => {
         .getState()
         .engines.find((e) => e.name === 'mujoco');
       expect(mujoco?.loadState).toBe('idle');
+      expect(global.fetch).toHaveBeenCalledWith(
+        '/api/engines/mujoco/unload',
+        expect.objectContaining({ method: 'POST' })
+      );
     });
 
     it('clears selection if unloading the selected engine', async () => {
