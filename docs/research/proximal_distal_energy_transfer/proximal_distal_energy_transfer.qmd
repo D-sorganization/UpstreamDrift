@@ -144,6 +144,14 @@ abstract: |
   same net moment while changing internal stiffness and series-energy proxies;
   continuous activation and series-force states make preparation history
   observable but do not identify anatomy or a preferred technique.
+  A final adversarial transmission study compares clock- and state-triggered
+  handoff under paired training and held-out perturbations. State triggering
+  improves lower-tail delivery speed and a planar face/path proxy relative to
+  clock timing but raises peak hand force; higher impedance changes the
+  tradeoff, and all four registered programs remain Pareto-nondominated. A
+  local task-Jacobian partition exposes five task-null input directions, but
+  this is a model property rather than evidence of a neural synergy or human
+  self-stabilization.
   References, analysis code,
   machine-readable results, and provenance are available with the document for
   independent inspection and reuse.
@@ -169,6 +177,10 @@ keywords:
   - muscle redundancy
   - activation dynamics
   - cross-engine pose interchange
+  - task robustness
+  - motor abundance
+  - perturbation response
+  - Pareto control
 bibliography: references.bib
 link-citations: true
 number-sections: true
@@ -226,6 +238,8 @@ format:
 {{< include chapters/_ch07_model_ladder.qmd >}}
 
 {{< include chapters/_ch07b_frames_biology_engines.qmd >}}
+
+{{< include chapters/_ch07c_transmission_robustness.qmd >}}
 
 {{< include chapters/_ch03_evidence.qmd >}}
 

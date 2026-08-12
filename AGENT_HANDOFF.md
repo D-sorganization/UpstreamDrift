@@ -5,6 +5,18 @@ Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
 
+- **#8507 adversarial transmission and task robustness** — branch
+  `research/proximal-distal-transmission-robustness` adds a paired clock-versus-
+  state-trigger study on common training and held-out perturbations, explicit
+  lower-tail speed/dispersion/face-path/load/effort objectives, a local
+  task-Jacobian variance partition, four vector figure families, and a 12-item
+  severity-ranked gap register. State triggering improves selected held-out
+  speed and face/path metrics but increases peak hand force; every registered
+  program remains Pareto-nondominated. The result is model-conditional and does
+  not establish human self-stabilization. Remaining gates: manuscript render,
+  AffineDrift synchronization, release qualification, protected PRs, CI, and
+  remote-main verification.
+
 - **#8505 advanced proximal--distal expansion** — isolated branch
   `research/proximal-distal-advanced-expansion` adds an executable frame and
   reduced-biological bridge: paired wrench/twist point transport, proper-frame

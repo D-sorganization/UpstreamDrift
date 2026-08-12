@@ -1,5 +1,19 @@
 # Reviewer Workbench
 
+## Adversarial Transmission and Robustness Package
+
+The second adversarial pass is indexed by
+[`ADVERSARIAL_TRANSMISSION_REVIEW.md`](ADVERSARIAL_TRANSMISSION_REVIEW.md).
+Its executable evidence is
+[`transmission_robustness_study.json`](data/transmission_robustness_study.json)
+with dense arrays in
+[`transmission_robustness_study.npz`](data/transmission_robustness_study.npz).
+Reviewers should inspect every Pareto member, the paired clock/state outcomes,
+the local outcome Jacobian, the 12-item gap register, and both numerical
+closures. The projected whole-system work--energy ledger has a declared 4 ms
+residual; the algebraic two-contact power identity is the machine-precision
+check.
+
 ## Start With Claim Status
 
 Read the [claim–evidence–falsifier matrix](MODEL_COMPLETION_FALSIFICATION_MATRIX.md)

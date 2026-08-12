@@ -248,7 +248,8 @@ pendulum, two-hand wrench, shaft flexibility, moving-base
 dynamics, work-energy accounting, multibody constraints, wrench
 transport, ground reaction force, contact dynamics, force
 plate, reference-frame invariance, muscle redundancy, activation
-dynamics, cross-engine pose interchange},
+dynamics, cross-engine pose interchange, task robustness, motor
+abundance, perturbation response, Pareto control},
   colorlinks=true,
   linkcolor={blue},
   filecolor={Maroon},
@@ -414,7 +415,15 @@ five-engine dynamics parity. A reduced Hill-type study demonstrates that
 41 agonist--antagonist allocations can produce the same net moment while
 changing internal stiffness and series-energy proxies; continuous
 activation and series-force states make preparation history observable
-but do not identify anatomy or a preferred technique. References,
+but do not identify anatomy or a preferred technique. A final
+adversarial transmission study compares clock- and state-triggered
+handoff under paired training and held-out perturbations. State
+triggering improves lower-tail delivery speed and a planar face/path
+proxy relative to clock timing but raises peak hand force; higher
+impedance changes the tradeoff, and all four registered programs remain
+Pareto-nondominated. A local task-Jacobian partition exposes five
+task-null input directions, but this is a model property rather than
+evidence of a neural synergy or human self-stabilization. References,
 analysis code, machine-readable results, and provenance are available
 with the document for independent inspection and reuse.
 \end{abstract}
@@ -427,7 +436,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, toprule=.15mm, colback=white, toptitle=1mm, bottomrule=.15mm, leftrule=.75mm, breakable, bottomtitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, left=2mm, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, opacityback=0, titlerule=0mm, rightrule=.15mm, coltitle=black, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, left=2mm, toprule=.15mm, opacitybacktitle=0.6, leftrule=.75mm, titlerule=0mm, breakable, colbacktitle=quarto-callout-note-color!10!white, rightrule=.15mm, bottomrule=.15mm, toptitle=1mm, colframe=quarto-callout-note-color-frame, arc=.35mm, bottomtitle=1mm, colback=white, opacityback=0]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -7663,6 +7672,272 @@ Backend disagreement should first be classified as a convention,
 numerical, structural, parameter, or data discrepancy; it is not
 automatically biological evidence.
 
+\chapter{Transmission Pathways, Robust Speed, and Task
+Stability}\label{sec-transmission-robustness}
+
+\section{Why a Second Adversarial Pass Is
+Necessary}\label{why-a-second-adversarial-pass-is-necessary}
+
+The preceding model ladder makes a bounded mechanical case: interaction
+forces, constraint reactions, separated hand forces, and elastic states
+can transmit power to the distal system, and delayed distal actuation
+can outperform early drive in several declared models. Those results do
+\textbf{not} establish that the fastest nominal program is repeatable,
+that low joint variability is desirable, that a negative torque removes
+energy, or that a human strategy is self-stabilizing. This chapter
+therefore asks a different question: \emph{which transmission variables
+can be manipulated, and how do speed, variability, loading, and
+perturbation rejection trade against one another?}
+
+The full finding-by-finding adjudication is published in
+\href{../ADVERSARIAL_TRANSMISSION_REVIEW.md}{\texttt{ADVERSARIAL\_TRANSMISSION\_REVIEW.md}},
+and the numerical record is
+\href{../data/transmission_robustness_study.json}{\texttt{transmission\_robustness\_study.json}}.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_transmission_pathway_framework.pdf}
+
+}
+
+\caption{\label{fig-transmission-pathway-framework}The transmission
+ledger distinguishes pathway identity from kinematic sequence, torque
+sign from power sign, pointwise drift from a forward future, and model
+robustness from human stability.}
+
+\end{figure}%
+
+\section{A Pathway Ledger Rather Than a Single Transfer
+Number}\label{a-pathway-ledger-rather-than-a-single-transfer-number}
+
+Let \(S\) be the distal subsystem and let every wrench be expressed at a
+declared point in a declared frame. Its mechanical-energy balance is
+
+\[
+\Delta E_S =
+\underbrace{\int \mathbf{F}_{J}\!\cdot\!\mathbf{v}_{J}\,dt}_{W_{\mathrm{constraint}}}
++\underbrace{\int \boldsymbol{\tau}_{J}\!\cdot\!\boldsymbol{\omega}_{S}\,dt}_{W_{\mathrm{direct}}}
++\underbrace{\Delta U_{\mathrm{shaft}}}_{W_{\mathrm{elastic}}}
++\underbrace{W_g}_{\mathrm{gravity}}
+-\underbrace{D}_{\mathrm{dissipation}}
++\varepsilon_E .
+\]
+
+For the whole constrained model, external control work, gravity (already
+in potential energy), damping, and projection correction replace
+internal contact work, which cancels by ideal-constraint power. The
+present 4 ms projected integrator has a worst normalized work--energy
+residual of 3.77\%; that is a declared numerical limitation, not a
+machine-precision closure claim. The two-point contact-power identity
+itself closes to \(6.40\times10^{-14}\) W. Future strategy comparisons
+should report both.
+
+This ledger produces a useful hierarchy of manipulable variables:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Timing and phase:} clock onset, configuration threshold, phase
+  estimate, torque slope, and activation delay;
+\item
+  \textbf{Geometry:} hand path, grip separation, moment arms, club
+  orientation, and the reference point at which a wrench is resolved;
+\item
+  \textbf{Mechanical state:} proximal angular momentum, relative wrist
+  state, shaft strain energy, base motion, and hand-force
+  common/differential modes;
+\item
+  \textbf{Regulation:} impedance, damping, feedback gain,
+  sensory/observer delay, saturation, and task-dependent error
+  coordinates;
+\item
+  \textbf{Equipment and subject parameters:} inertia distribution, shaft
+  stiffness/damping, anthropometry, strength, and contact properties.
+\end{itemize}
+
+No scalar ``transfer efficiency'' uniquely identifies these pathways
+without an explicit numerator, denominator, boundary, and time interval.
+
+\section{Paired Perturbations and Held-Out
+Evaluation}\label{paired-perturbations-and-held-out-evaluation}
+
+Four preregistered programs were evaluated in the existing moving-base,
+two-hand, compliant-club tier: clock-triggered restrain-then-drive,
+arm-angle-triggered handoff, the same state trigger with higher
+impedance, and early drive. Ten training and fifteen held-out
+perturbations varied initial arm and wrist angles and velocities,
+command scale, activation delay, shaft stiffness, and grip separation.
+Every program received the same samples (common random numbers).
+Outcomes were lower-tail delivery speed, speed dispersion, a planar
+face/path proxy, peak hand force, squared-torque effort, event time,
+late contact work, late direct-wrist work, and shaft-energy release.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_robust_speed_variability_pareto.pdf}
+
+}
+
+\caption{\label{fig-robust-speed-variability}Held-out lower-tail speed
+and dispersion do not select the same program, and face/path error
+trades against peak hand force. Marker size in the left panel increases
+with peak-force exposure.}
+
+\end{figure}%
+
+All four programs remain Pareto-nondominated. Relative to the clock
+trigger, the state trigger increases held-out 10th-percentile delivery
+speed from 4.94 to 5.28 m/s, reduces mean face/path proxy error from
+9.44 to 2.29 degrees, and slightly reduces delivery-speed amplification.
+It also raises the 90th-percentile peak hand force from 166.9 to 208.1
+N. Higher impedance raises nominal speed to 5.78 m/s and reduces mean
+face/path proxy error to 1.26 degrees, but does not minimize speed
+dispersion. Early drive has the smallest speed standard deviation only
+because it occupies a much slower regime; low variance around a poor
+mean is not robust performance.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_clock_vs_state_perturbation_response.pdf}
+
+}
+
+\caption{\label{fig-clock-state-response}State-triggered handoff reduces
+speed and face/path amplification relative to clock timing but amplifies
+peak hand force. The right panel expresses paired mean changes as
+percentages so unlike units are not visually conflated.}
+
+\end{figure}%
+
+These results justify only a model-conditional statement: triggering on
+a mechanical state can reduce sensitivity to clock-time variation
+because the transition follows the realized trajectory, but the same
+change can redirect the disturbance into contact loading. A
+self-stabilizing strategy must specify the task error it attenuates and
+the costs it is allowed to increase.
+
+\section{Task-Null Variability and Motor
+Abundance}\label{task-null-variability-and-motor-abundance}
+
+Movement variability is not synonymous with outcome error. Golf data
+show that marker-trajectory variability need not correlate with
+ball-speed variability (\citeproc{ref-tucker2014}{Tucker, Anderson, and
+Kenny 2014}), and uncontrolled-manifold analysis has found greater
+task-compatible variance in more skilled golfers
+(\citeproc{ref-morrison2016}{Morrison, McGrath, and Wallace 2016}). This
+agrees with the broader principle of motor abundance: variability
+parallel to a task solution manifold can preserve a salient outcome,
+whereas variability orthogonal to it changes the outcome
+(\citeproc{ref-latash2014practice}{Latash et al. 2010}).
+
+For local inputs \(\mathbf{x}\) and task outcomes \(\mathbf{y}\),
+
+\[
+\delta\mathbf{y}\approx \mathbf{J}_y\,\delta\mathbf{x},\qquad
+\mathcal{N}=\ker(\mathbf{J}_y).
+\]
+
+The eight-input, three-outcome local map has rank three and nullity
+five. Under the held-out perturbation covariance, projected task-null
+variance is 0.1322 and task-relevant variance is 0.00466, giving the
+declared local index
+
+\[
+\Delta V = \frac{V_{\mathcal{N}}-V_{\perp}}{V_{\mathcal{N}}+V_{\perp}}=0.932.
+\]
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_task_null_variability_map.pdf}
+
+}
+
+\caption{\label{fig-task-null-map}The local outcome Jacobian identifies
+task-sensitive input directions and a five-dimensional null space. This
+is a model input--outcome partition, not evidence of a neural synergy.}
+
+\end{figure}%
+
+The result is descriptive and local. Curvature can make a direction that
+is null infinitesimally task-relevant at larger amplitude. The correct
+future test is therefore trial-level covariance relative to a nonlinear,
+participant- specific impact manifold---not a recommendation to minimize
+all joint variance.
+
+\section{Biological Realization and
+Impedance}\label{biological-realization-and-impedance}
+
+Coactivation can increase endpoint stiffness and attenuate an imposed
+disturbance (\citeproc{ref-deRugy2018}{Rugy, Loeb, and Carroll 2018}),
+but excessive co-contraction can also be energetically inefficient and
+does not guarantee stability when the source is internal or feedback is
+delayed (\citeproc{ref-latash2015stability}{Latash and Huang 2015}). The
+reduced muscle bridge in Section~\ref{sec-frames-biology-engines}
+demonstrates redundancy and preparation history; it does not identify
+time-varying human impedance or reflex gains. \textbf{Human
+self-stabilization is untested.} Such a biological claim requires
+controlled, phase-registered perturbations, bilateral wrench
+measurement, EMG, and an identified mapping from muscle activation to
+endpoint impedance.
+
+Likewise, repeatability should be evaluated above measurement noise and
+across sessions. Launch-monitor speed and distance can be reliable in
+talented golfers, but other variables have wider reliability ranges
+(\citeproc{ref-shaw2023}{Shaw et al. 2023}). The experimental protocol
+must propagate device error rather than label every observed difference
+a motor-control effect.
+
+\section{Falsifiable Performance
+Implications}\label{falsifiable-performance-implications}
+
+The present evidence supports a research program rather than a universal
+instruction:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Optimize a distribution, not one trajectory.} Maximize
+  lower-tail impact performance subject to face, path, strike,
+  hand-force, effort, and injury- relevant constraints.
+\item
+  \textbf{Prefer state variables only when observable.} A configuration-
+  or phase-triggered handoff can reject timing variation, but sensing
+  delay, estimation noise, and saturation must be included.
+\item
+  \textbf{Preserve useful abundance.} Stabilize club impact variables
+  while allowing task-null variation in joints, muscles, and hand-force
+  allocation.
+\item
+  \textbf{Treat impedance as a tradeoff.} More stiffness may improve one
+  error and worsen force, effort, or coupled stability.
+\item
+  \textbf{Measure the pathway.} Kinematics alone cannot distinguish
+  proximal work, constraint-force transport, direct wrist moment, shaft
+  release, gravity, and dissipation.
+\item
+  \textbf{Propagate to the ball.} Pure distance claims require strike
+  location, dynamic loft, attack angle, ball speed, spin, carry, and
+  lateral dispersion, not clubhead speed alone.
+\end{enumerate}
+
+The strongest near-term experiment is participant-held-out and phase-
+perturbed: synchronize whole-body motion, force plates, bilateral hand
+wrenches, shaft response, EMG, club/ball impact, and launch; estimate
+task-null and task-relevant covariance; and test whether state-relative
+handoff predicts a better speed--dispersion--load frontier than
+clock-relative timing. Failure to replicate that frontier would reject
+the performance implication while leaving the narrower multibody
+mechanism intact.
+
 \chapter{Empirical Evidence in Golfers}\label{sec-evidence}
 
 \section{The Work and Power Budget of the Swing}\label{sec-workbudget}
@@ -9562,6 +9837,18 @@ Langdown, Ben L., Matthew Bridge, and François-Xavier Li. 2012.
 {``Movement Variability in the Golf Swing.''} \emph{Sports Biomechanics}
 11 (2): 273--87. \url{https://doi.org/10.1080/14763141.2011.650187}.
 
+\bibitem[\citeproctext]{ref-latash2015stability}
+Latash, Mark L., and Xian-Geng Huang. 2015. {``Neural Control of
+Movement Stability: Lessons from Studies of Neurological Patients.''}
+\emph{Neuroscience} 301: 39--48.
+\url{https://doi.org/10.1016/j.neuroscience.2015.05.075}.
+
+\bibitem[\citeproctext]{ref-latash2014practice}
+Latash, Mark L., Mindy F. Levin, John P. Scholz, and Gregor Schöner.
+2010. {``Motor Control Theories and Their Applications.''}
+\emph{Medicina} 46 (6): 382--92.
+\url{https://doi.org/10.3390/medicina46060054}.
+
 \bibitem[\citeproctext]{ref-lee2026}
 Lee, Junghoon, Justin Ehrlich, and Christopher Cain. 2026. {``The
 Effects of Different Kinematic Sequences of the Elite Golf Swing on
@@ -9666,6 +9953,12 @@ Swing.''} \emph{Medicine and Science in Sports and Exercise} 14 (1):
 Miura, Ken. 2001. {``Parametric Acceleration --- the Effect of Inward
 Pull of the Golf Club at Impact Stage.''} \emph{Sports Engineering} 4
 (2): 75--86. \url{https://doi.org/10.1046/j.1460-2687.2001.00071.x}.
+
+\bibitem[\citeproctext]{ref-morrison2016}
+Morrison, Andrew, Denise McGrath, and Eric S. Wallace. 2016. {``Motor
+Abundance and Control Structure in the Golf Swing.''} \emph{Human
+Movement Science} 46: 129--47.
+\url{https://doi.org/10.1016/j.humov.2016.01.009}.
 
 \bibitem[\citeproctext]{ref-myers2008}
 Myers, Joseph, Scott Lephart, Yung-Shen Tsai, Timothy Sell, James
@@ -9777,11 +10070,24 @@ Golf Swing Joint Kinematics in Sub-Elite Golfers?''} \emph{Journal of
 Sports Sciences} 41 (17): 1596--1604.
 \url{https://doi.org/10.1080/02640414.2023.2285121}.
 
+\bibitem[\citeproctext]{ref-deRugy2018}
+Rugy, Aymar de, Gerald E. Loeb, and Timothy J. Carroll. 2018. {``Muscle
+Patterns Underlying Voluntary Modulation of Co-Contraction.''}
+\emph{PLoS ONE} 13 (10): e0205538.
+\url{https://doi.org/10.1371/journal.pone.0205538}.
+
 \bibitem[\citeproctext]{ref-sharp2009}
 Sharp, Robin S. 2009. {``On the Mechanics of the Golf Swing.''}
 \emph{Proceedings of the Royal Society A: Mathematical, Physical and
 Engineering Sciences} 465 (2102): 551--70.
 \url{https://doi.org/10.1098/rspa.2008.0304}.
+
+\bibitem[\citeproctext]{ref-shaw2023}
+Shaw, James, Zachariah I. Gould, Jon L. Oliver, and Rhodri S. Lloyd.
+2023. {``Within- and Between-Session Reliability of Golf Swing Variables
+Using the {TrackMan} Launch Monitor in Talented Golfers.''}
+\emph{Journal of Strength and Conditioning Research} 37 (12): 2431--37.
+\url{https://doi.org/10.1519/JSC.0000000000004554}.
 
 \bibitem[\citeproctext]{ref-smith2015}
 Smith, Aimée, Jonathan Roberts, Eric S. Wallace, Pui Wah Kong, and Steph
@@ -9826,6 +10132,12 @@ Todorov, Emanuel, Tom Erez, and Yuval Tassa. 2012. {``{MuJoCo}: A
 Physics Engine for Model-Based Control.''} In \emph{2012 IEEE/RSJ
 International Conference on Intelligent Robots and Systems}, 5026--33.
 \url{https://doi.org/10.1109/IROS.2012.6386109}.
+
+\bibitem[\citeproctext]{ref-tucker2014}
+Tucker, Catherine B., Ross Anderson, and Ian C. Kenny. 2014. {``Is
+Outcome Related to Movement Variability in Golf?''} \emph{Sports
+Biomechanics} 13 (3): 343--54.
+\url{https://doi.org/10.1080/14763141.2013.873817}.
 
 \bibitem[\citeproctext]{ref-vu2016}
 Vu, Van Hoan, Brice Isableu, and Bastien Berret. 2016. {``Adaptive Use

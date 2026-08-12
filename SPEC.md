@@ -39,7 +39,7 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.507 |
+| **Spec Version** | 1.0.508 |
 | **Last Spec Update** | 2026-08-12 |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,16 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ## 4. Architecture Overview
 
 ### Recent Spec Updates
+
+- **2026-08-12** - Added epic #8507's adversarial transmission and task-
+  robustness tier: paired clock/state-trigger programs on common training and
+  held-out perturbations, lower-tail speed and variability/load/effort
+  objectives, explicit pathway and contact-power closure, a local task-null
+  variance analysis, a machine-readable 12-item gap register, and four vector
+  figures. All programs remain Pareto-nondominated; state triggering improves
+  selected speed and planar face/path metrics while increasing peak hand force.
+  Human self-stabilization, causal physiology, and coaching prescriptions remain
+  untested or unsupported.
 
 - **2026-08-12** - Expanded the proximal--distal resource with explicit
   reference-frame and point-transport equations, numerical power and virtual-

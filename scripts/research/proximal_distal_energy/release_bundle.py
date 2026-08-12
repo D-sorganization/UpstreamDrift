@@ -102,6 +102,10 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
                 "command": "python -m scripts.research.proximal_distal_energy.run_advanced_biological_bridge",
                 "tier": "frame_invariance_and_reduced_hill_type_mechanism",
             },
+            "transmission_robustness": {
+                "command": "python -m scripts.research.proximal_distal_energy.run_transmission_robustness_study",
+                "tier": "paired_state_trigger_and_task_robustness",
+            },
         },
         "claims": {
             "interaction_dynamics_planar": "supported_at_declared_model_tier",
@@ -128,6 +132,8 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
                 "supported_for_coordinate_representation_only"
             ),
             "drake_opensim_myosuite_human_validation": "unexecuted",
+            "state_triggered_model_robustness": "conditional_with_force_tradeoff",
+            "human_self_stabilization": "untested",
         },
         "known_open_gates": [
             "subject-scaled articulated spatial contact with calibrated grip and distributed shaft",
