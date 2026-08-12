@@ -39,8 +39,8 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.506 |
-| **Last Spec Update** | 2026-08-11 |
+| **Spec Version** | 1.0.507 |
+| **Last Spec Update** | 2026-08-12 |
 
 ## 2. Purpose & Mission
 
@@ -70,6 +70,15 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ## 4. Architecture Overview
 
 ### Recent Spec Updates
+
+- **2026-08-12** - Expanded the proximal--distal resource with explicit
+  reference-frame and point-transport equations, numerical power and virtual-
+  work invariance checks, a reduced Hill-type redundancy and activation-history
+  bridge, five canonical-pose adapter round trips, a question-to-engine ladder,
+  five vector figure families, a normative terminology contract, a reviewer
+  index, and an advanced falsification roadmap under epic #8505. Pose adapter
+  closure is representation evidence only; subject-scaled anatomy, five-engine
+  dynamics parity, and human validation remain open.
 
 - **2026-08-11** - Added the continuous preparation-history falsifier for the
   arm--wrist transmission study. Both channels now start relaxed, load for 180
@@ -2079,6 +2088,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-12 | 1.0.507 | Added the advanced proximal--distal frame, biology, canonical-pose, cross-engine, visual, terminology, and falsification bridge tracked by epic #8505. |
 | 2026-08-11 | 1.0.504 | Added a coupled forward three-mode shaft experiment plus an exact same-state arm--wrist allocation and phenomenological preload/role-reversal study; published deterministic evidence, figures, release presets, and falsifiers while explicitly withholding muscle, scapular, tissue, equipment, human-performance, and universal-technique claims. |
 | 2026-08-11 | 1.0.498 | Added a fail-closed, headless UpstreamDrift gateway for the exact Tools flight-to-ground request/result and reference-execution v1 façade, with absence/presence/malformed-contract tests and explicit dependency/release limitations for Tools #4276. |
 | 2026-08-11 | 1.0.497 | Added #8493 frame-explicit constrained-contact reaction decomposition with configuration, velocity, control, and retained-external components; verified total, ZTCF, and ZVCF closure in a deterministic fixed-support double-pendulum benchmark; published machine-readable evidence and three reproducible figures; and expanded the proximal-distal scientific article with GRF, COP, free-moment, identifiability, and held-out human-data falsification boundaries. |

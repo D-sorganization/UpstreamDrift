@@ -26,6 +26,7 @@ not be promoted to a human or physiological result.
 | `uncertainty_control_study.{json,npz}`       | Parameter ensembles, PRCC, identifiability, programs, Pareto metrics, rollouts               | Engineering envelopes and actuator proxies        |
 | `experimental_protocol_v1.json`              | Frozen modalities, outcomes, split, residuals, and inference rules                           | Protocol, not participant evidence                |
 | `experimental_protocol_readiness.json`       | Synthetic intake qualification and untested claim status                                     | No human observations                             |
+| `advanced_biological_bridge.{json,npz}`      | Frame/power invariance, muscle redundancy, activation history, and engine-role records       | Reduced synthetic biology; no subject validation  |
 
 ## Recurring Field Families
 

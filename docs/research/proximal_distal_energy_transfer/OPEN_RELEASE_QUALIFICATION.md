@@ -13,6 +13,12 @@ the canonical command for each
 preset, and the manifest hashes source, data, figures, chapters, and the
 rendered article.
 
+The advanced bridge additionally qualifies proper-frame and reference-point
+power invariance, Jacobian virtual-work closure, a reduced Hill-type
+agonist--antagonist redundancy surface, continuous activation/series-force
+history, and pose-only round trips through all five canonical engine adapters.
+The adapter result is explicitly not a five-engine dynamics-parity claim.
+
 Run:
 
 ```bash
@@ -43,6 +49,12 @@ checks PDF identity and GitHub's 100,000,000-byte hard file boundary.
   declared reduced spatial carriage model; articulated anatomy remains
   untested.
 - A universal control strategy is unsupported.
+- The same generalized moment is compatible with many reduced muscle-force
+  allocations. The resulting stiffness and elastic-energy proxies are
+  model-derived and do not identify recruitment or preference.
+- Frame power and five pose-adapter mappings close numerically at their
+  declared tiers; full dynamic-state and trajectory parity across all five
+  engines remains untested.
 - Human experimental predictions remain untested.
 
 ## License and Source Boundaries

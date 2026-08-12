@@ -98,6 +98,10 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
                 "command": "python -m scripts.research.proximal_distal_energy.run_experimental_protocol_dry_run",
                 "tier": "synthetic_protocol_qualification_only",
             },
+            "advanced_biological_bridge": {
+                "command": "python -m scripts.research.proximal_distal_energy.run_advanced_biological_bridge",
+                "tier": "frame_invariance_and_reduced_hill_type_mechanism",
+            },
         },
         "claims": {
             "interaction_dynamics_planar": "supported_at_declared_model_tier",
@@ -118,6 +122,12 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
             ),
             "universal_control_strategy": "unsupported",
             "human_experimental": "untested",
+            "reference_frame_power_invariance": "supported_to_declared_numerical_tolerance",
+            "muscle_redundancy_same_moment": "supported_at_reduced_hill_type_tier",
+            "canonical_pose_adapter_round_trip": (
+                "supported_for_coordinate_representation_only"
+            ),
+            "drake_opensim_myosuite_human_validation": "unexecuted",
         },
         "known_open_gates": [
             "subject-scaled articulated spatial contact with calibrated grip and distributed shaft",

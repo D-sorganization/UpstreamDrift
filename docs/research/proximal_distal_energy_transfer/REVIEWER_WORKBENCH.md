@@ -90,6 +90,30 @@ physiological, equipment, or human validation.
 - Evidence:
   [`uncertainty_control_study.json`](data/uncertainty_control_study.json)
 
+## Reference Frames, Biological Redundancy, and Engine Roles
+
+- Phase-resolved model geometry:
+  [`fig_advanced_model_motion_plate.svg`](figures/fig_advanced_model_motion_plate.svg)
+- Wrench/twist transport and invariant power:
+  [`fig_frame_power_invariance.svg`](figures/fig_frame_power_invariance.svg)
+- Matched-moment muscle redundancy:
+  [`fig_biological_redundancy.svg`](figures/fig_biological_redundancy.svg)
+- Activation and series-force history:
+  [`fig_biological_role_reversal.svg`](figures/fig_biological_role_reversal.svg)
+- Cross-engine question ladder:
+  [`fig_cross_engine_question_ladder.svg`](figures/fig_cross_engine_question_ladder.svg)
+- Evidence:
+  [`advanced_biological_bridge.json`](data/advanced_biological_bridge.json) and
+  [`advanced_biological_bridge.npz`](data/advanced_biological_bridge.npz)
+
+The frame and virtual-work closures are executed numerical invariance checks.
+The reduced muscle study demonstrates non-uniqueness and preparation-history
+effects under declared synthetic parameters. The MuJoCo, Pinocchio, Drake,
+OpenSim, and MyoSuite pose-adapter round trips are executed coordinate-mapping
+checks only; they are not five-engine forward-dynamics or human-validation
+results. Use the [terminology and conventions contract](TERMINOLOGY_AND_CONVENTIONS.md)
+when translating quantities between tiers.
+
 ## Experimental Readiness
 
 The [experimental protocol](EXPERIMENTAL_FALSIFICATION_PROTOCOL.md) and

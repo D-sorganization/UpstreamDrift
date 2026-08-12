@@ -29,6 +29,7 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         "spatial_forward_contact",
         "uncertainty_control",
         "experimental_readiness",
+        "advanced_biological_bridge",
     ]
     assert manifest["claims"]["human_experimental"] == "untested"
     assert (
@@ -49,6 +50,9 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
     )
     assert manifest["claims"]["scapular_or_muscle_strategy_identification"] == (
         "unsupported"
+    )
+    assert manifest["claims"]["canonical_pose_adapter_round_trip"] == (
+        "supported_for_coordinate_representation_only"
     )
     assert manifest["presets"]["forward_modal_shaft"]["command"].endswith(
         "run_moving_base_modal_shaft_study"
