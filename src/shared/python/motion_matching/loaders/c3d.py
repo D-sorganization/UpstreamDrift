@@ -12,8 +12,9 @@ import hashlib
 import logging
 from pathlib import Path
 
-import numpy as np
 import math
+
+import numpy as np
 import pandas as pd
 
 from src.shared.python.core.contracts import postcondition, precondition
@@ -355,7 +356,7 @@ def _shaft_quaternions(butt: np.ndarray, head: np.ndarray) -> np.ndarray:
     z_axis = np.array([0.0, 0.0, 1.0])
     for i in range(n):
         v = head[i] - butt[i]
-        # ⚡ Bolt: math.hypot(*v) is ~2x faster than np.linalg.norm for small arrays
+        # Bolt: math.hypot is faster than np.linalg.norm for small 1D arrays
         norm = float(math.hypot(*v))
         if norm == 0.0:
             out[i] = np.array([1.0, 0.0, 0.0, 0.0])
@@ -369,7 +370,7 @@ def _shaft_quaternions(butt: np.ndarray, head: np.ndarray) -> np.ndarray:
             out[i] = np.array([0.0, 1.0, 0.0, 0.0])
             continue
         axis = np.cross(z_axis, v)
-        # ⚡ Bolt: math.hypot(*axis) is ~2x faster than np.linalg.norm for small arrays
+        # Bolt: math.hypot is faster than np.linalg.norm for small 1D arrays
         axis = axis / math.hypot(*axis)
         angle = np.arccos(dot)
         s = np.sin(angle / 2.0)
@@ -377,6 +378,6 @@ def _shaft_quaternions(butt: np.ndarray, head: np.ndarray) -> np.ndarray:
         q = np.array([c, axis[0] * s, axis[1] * s, axis[2] * s])
         if q[0] < 0:
             q = -q
-        # ⚡ Bolt: math.hypot(*q) is ~2x faster than np.linalg.norm for small arrays
+        # Bolt: math.hypot is faster than np.linalg.norm for small 1D arrays
         out[i] = q / math.hypot(*q)
     return out
