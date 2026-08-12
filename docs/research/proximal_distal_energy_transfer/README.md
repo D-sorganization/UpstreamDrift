@@ -85,8 +85,14 @@ complete-role-reversal preparation histories. A question-to-engine ladder then
 connects MuJoCo, Pinocchio, Drake, OpenSim, and MyoSuite to common observables
 without promoting optional backend capability to human validation.
 
-The public-facing article is available on
+The public-facing technical article is available on
 [affinedrift.com](https://affinedrift.com/articles/proximal-distal-energy-transfer.html).
+For a visual, book-like route through the same mechanics, use the companion
+[_How a Golf Swing Carries Energy_](https://affinedrift.com/articles/proximal-distal-a-journey-through-the-swing.html),
+including its downloadable
+[PDF edition](https://affinedrift.com/articles/proximal-distal-a-journey-through-the-swing.pdf).
+The companion labels model results, human evidence, and hypotheses separately
+and returns readers to this directory for the complete evidence and limitations.
 Ongoing validation and extension work is tracked in
 [#8426](https://github.com/D-sorganization/UpstreamDrift/issues/8426) and the
 [interaction-force mechanisms epic](https://github.com/D-sorganization/UpstreamDrift/issues/8443).

@@ -5,6 +5,13 @@ Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
 
+- **#8509 accessible proximal--distal companion** — branch
+  `docs/proximal-distal-companion-book` links the open technical evidence to
+  AffineDrift's visual companion, _How a Golf Swing Carries Energy_, in HTML
+  and PDF. The companion keeps model results, human evidence, hypotheses, and
+  coaching implications distinct; AffineDrift owns its source and fourteen
+  reproducible figures while this repository remains the evidence authority.
+
 - **#8507 adversarial transmission and task robustness** — branch
   `research/proximal-distal-transmission-robustness` adds a paired clock-versus-
   state-trigger study on common training and held-out perturbations, explicit
