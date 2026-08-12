@@ -1,9 +1,9 @@
 {
   "provenance": {
-    "git_sha": "ea335ee590",
+    "git_sha": "8867dad9ad",
     "source_trace": "shaft_contribution_traces.npz:flexible_reference",
     "common_schema": "InteractionSample v1",
-    "interpretation_boundary": "The three-link, prescribed mobile-hub, closed-loop geometry, rigid-frame audits, and reduced full-body common-state inverse dynamics are executed mechanism tests. Forward two-hand spatial contact dynamics remain unexecuted."
+    "interpretation_boundary": "The three-link, prescribed mobile-hub, closed-loop geometry, rigid-frame audits, and reduced full-body common-state inverse dynamics are executed mechanism tests. Reduced MuJoCo/Pinocchio forward contact is also executed; articulated anatomical forward contact remains unexecuted."
   },
   "three_link_reference": {
     "delivery_time_s": 0.4272523530885576,
@@ -60,9 +60,9 @@
     "maximum_rank": 4,
     "minimum_nullspace_dimension": 1,
     "maximum_nullspace_dimension": 1,
-    "minimum_condition_number": 9.052293552169411,
-    "maximum_condition_number": 9.46477799550427,
-    "maximum_constraint_velocity_residual": 5.075937747629085e-16,
+    "minimum_condition_number": 9.052293552169415,
+    "maximum_condition_number": 9.464777995504267,
+    "maximum_constraint_velocity_residual": 6.7932984062127e-16,
     "interpretation": "Rank and conditioning describe kinematic constraint transmission; they do not determine contact-force magnitude without dynamics."
   },
   "model_discrepancy_table": [
@@ -109,11 +109,18 @@
       "boundary": "prescribed hand loads and common state; not forward closed contact"
     },
     {
-      "tier": "full_body_forward_cross_engine_contact",
+      "tier": "reduced_spatial_forward_cross_engine_contact",
+      "status": "executed",
+      "added_mechanism": "native MuJoCo/Pinocchio forward dynamics with paired compliant contacts and a same-state driver killswitch",
+      "surviving_result": "negative contact couple persists for 37.5 ms",
+      "boundary": "finite-mass translational hand carriages and rigid club; not anatomy, tissue, equipment, or human validation"
+    },
+    {
+      "tier": "articulated_full_body_forward_cross_engine_contact",
       "status": "not_executed",
-      "added_mechanism": "independent forward two-hand contact solvers and compliant anatomy",
+      "added_mechanism": "subject-scaled articulated arms, calibrated grip, and coupled distributed shaft",
       "surviving_result": "undetermined",
-      "boundary": "must not be inferred from common-state inverse dynamics"
+      "boundary": "must not be inferred from the reduced carriage model"
     }
   ]
 }

@@ -322,6 +322,7 @@ def fig_discrepancy_matrix(record: dict) -> None:
         "3-D Frame",
         "Spatial Inverse Dynamics",
         "Forward Contact",
+        "Articulated Contact",
     ]
     matrix = np.full((len(rows), len(mechanisms)), np.nan)
     for index in range(len(rows)):

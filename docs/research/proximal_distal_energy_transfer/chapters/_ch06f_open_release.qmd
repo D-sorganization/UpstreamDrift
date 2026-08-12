@@ -3,10 +3,11 @@
 ## Release Contract
 
 The scientific product is distributed as an open research resource rather
-than as evidence for a software platform. Seven presets identify reproducible
+than as evidence for a software platform. Eight presets identify reproducible
 entry points: analytical double pendulum, forward two-hand, coupled
 moving-base/flexible-club, synthetic distributed shaft, reduced spatial common
-state, uncertainty/control, and experimental readiness. Preset names preserve
+state, reduced two-engine spatial forward contact, uncertainty/control, and
+experimental readiness. Preset names preserve
 the model ladder and never
 imply that a higher unexecuted tier is available.
 
@@ -54,13 +55,14 @@ The release records planar interaction dynamics and negative-couple
 feasibility as supported at their declared tiers, geometry response as
 supported through reduced spatial common-state inverse dynamics, and modal
 reduction behavior as supported on a synthetic structural shaft case. It records
-forward passive spatial contact and human predictions as untested, and a
-universal controller as unsupported.
+post-killswitch contact persistence as supported only in the reduced spatial
+carriage model, human predictions as untested, and a universal controller as
+unsupported.
 
-Four release-level completion gates remain visible: independently solved
-forward spatial contact in two engines; an equipment-calibrated distributed
-beam coupled into the forward two-hand solve; governed held-out human
-evaluation; and external
+Four release-level completion gates remain visible: subject-scaled articulated
+spatial contact with calibrated grip; an equipment-calibrated distributed beam
+coupled into the forward two-hand solve; governed held-out human evaluation;
+and external
 archive deposit with a persistent identifier. Archive deposition changes
 external state and has not been performed. A reproducible local bundle is not
 described as a permanently archived release until that deposit is verified.

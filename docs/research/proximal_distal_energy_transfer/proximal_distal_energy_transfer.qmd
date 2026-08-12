@@ -78,8 +78,15 @@ abstract: |
   $2.14\times10^{-11}$; reversing the hand moment arm reverses a $-4.32$ N m
   force-generated couple, and coincident hands remove it exactly. Because
   contact loads are prescribed, passive spatial contact remains inconclusive
-  and forward cross-engine contact remains untested. A coupled uncertainty and
-  control experiment then varies 12 inputs simultaneously, audits structural
+  at that tier. A subsequent reduced forward-contact experiment independently
+  integrates MuJoCo and Pinocchio with two finite-mass hand carriages, paired
+  compliant interfaces, and no direct club actuation. Its exact same-state
+  driver-killswitch branch retains a negative swing-normal contact couple for
+  37.5 ms; coincident and reversed-moment-arm controls close exactly, trajectory
+  and wrench gates pass, and work--energy residual decreases under timestep
+  refinement. This supports a reduced spatial mechanism, not anatomical arms,
+  muscle coordination, human strategy, or equipment calibration. A coupled
+  uncertainty and control experiment then varies 12 inputs simultaneously, audits structural
   and practical identifiability, and compares eight preselected delayed-command
   programs on separate training and held-out ensembles. The net planar wrench
   leaves one individual-hand-force mode unidentified, the six summary
@@ -159,6 +166,8 @@ format:
 {{< include chapters/_ch06bb_shaft_beam_reference.qmd >}}
 
 {{< include chapters/_ch06c_spatial_cross_formulation.qmd >}}
+
+{{< include chapters/_ch06cc_spatial_forward_contact.qmd >}}
 
 {{< include chapters/_ch06d_uncertainty_control.qmd >}}
 

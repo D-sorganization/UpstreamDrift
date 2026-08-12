@@ -1,0 +1,220 @@
+{
+  "array_artifact": "spatial_forward_contact_study.npz",
+  "claim_boundary": {
+    "equipment_calibration": "untested",
+    "human_strategy": "untested",
+    "muscle_mechanism": "untested",
+    "physiological_effort": "untested"
+  },
+  "claim_status": {
+    "cross_engine_forward_contact_transport": "supported_for_mujoco_and_pinocchio_declared_model",
+    "ground_pathway_accounting": "executed_as_reduced_driver_reaction_proxy",
+    "human_strategy": "untested",
+    "long_axis_rotation_and_swing_plane_evolution": "executed_in_both_engines",
+    "muscle_coordination": "untested",
+    "passive_post_killswitch_negative_force_couple": "supported_in_declared_reduced_spatial_contact_model",
+    "subject_specific_anatomy": "untested"
+  },
+  "contact_contract": {
+    "action_reaction": "equal and opposite at every evaluation",
+    "club_direct_actuation": "none",
+    "driver_pathway": "grounded spring-damper force on finite-mass hand carriages",
+    "force_origin": "achieved relative hand-club displacement and velocity",
+    "kind": "paired Kelvin-Voigt point interfaces"
+  },
+  "engine_identities": {
+    "mujoco": {
+      "coordinate_count": 13,
+      "library": "mujoco",
+      "native_forward_dynamics": true,
+      "solver": "mj_forward continuous-time acceleration with shared semi-implicit step",
+      "velocity_count": 12,
+      "version": "3.8.0"
+    },
+    "pinocchio": {
+      "coordinate_count": 13,
+      "library": "pinocchio",
+      "native_forward_dynamics": true,
+      "solver": "Pinocchio articulated-body algorithm with shared semi-implicit step",
+      "velocity_count": 12,
+      "version": "3.8.0"
+    }
+  },
+  "interventions": {
+    "coincident_grips": "same achieved forces transported through club reference",
+    "reversed_geometry": "same achieved forces with both moment arms negated",
+    "same_state_driver_killswitch_s": 0.18
+  },
+  "limitations": [
+    "The two hand bodies are finite-mass translational carriages, not anatomical arms.",
+    "The grounded driver is a declared reference-force pathway, not muscle activation.",
+    "The Kelvin-Voigt interface is a reduced grip law, not measured tissue calibration.",
+    "The two engines share one contact law while independently solving kinematics and forward dynamics.",
+    "The experiment does not use participant data and cannot support a coaching prescription."
+  ],
+  "mechanism_tests": {
+    "baseline_and_killswitch_trace_summaries": {
+      "mujoco_baseline": {
+        "action_reaction_force_residual_max_n": 0.0,
+        "club_axis_out_of_plane_range_deg": 10.427515028635428,
+        "club_long_axis_rotation_rate_peak_rad_s": 13.592686425028663,
+        "coincident_grip_couple_max_nm": 0.0,
+        "energy_balance_residual_max_j": 0.040992299662996334,
+        "ground_pathway_force_peak_n": 56.847106132504486,
+        "ground_pathway_moment_peak_nm": 62.61199074895776,
+        "minimum_post_killswitch_couple_nm": -0.9444009316468268,
+        "minimum_swing_normal_couple_nm": -0.9444009316468268,
+        "peak_long_axis_couple_abs_nm": 0.38475715692715606,
+        "post_killswitch_negative_duration_s": 0.06025,
+        "reversed_geometry_sign_residual_nm": 4.440892098500626e-16
+      },
+      "mujoco_killswitch": {
+        "action_reaction_force_residual_max_n": 0.0,
+        "club_axis_out_of_plane_range_deg": 7.551308105569788,
+        "club_long_axis_rotation_rate_peak_rad_s": 13.592686425028663,
+        "coincident_grip_couple_max_nm": 0.0,
+        "energy_balance_residual_max_j": 0.030523226525231983,
+        "ground_pathway_force_peak_n": 56.847106132504486,
+        "ground_pathway_moment_peak_nm": 62.61199074895776,
+        "minimum_post_killswitch_couple_nm": -0.4092851000343657,
+        "minimum_swing_normal_couple_nm": -0.4092851000343657,
+        "peak_long_axis_couple_abs_nm": 0.24175208162485573,
+        "post_killswitch_negative_duration_s": 0.0375,
+        "reversed_geometry_sign_residual_nm": 9.159339953157541e-16
+      },
+      "pinocchio_baseline": {
+        "action_reaction_force_residual_max_n": 0.0,
+        "club_axis_out_of_plane_range_deg": 10.427515028635737,
+        "club_long_axis_rotation_rate_peak_rad_s": 13.592686425027283,
+        "coincident_grip_couple_max_nm": 0.0,
+        "energy_balance_residual_max_j": 0.046041224047407514,
+        "ground_pathway_force_peak_n": 56.845736671753954,
+        "ground_pathway_moment_peak_nm": 62.611249576375336,
+        "minimum_post_killswitch_couple_nm": -0.9451912709677093,
+        "minimum_swing_normal_couple_nm": -0.9451912709677093,
+        "peak_long_axis_couple_abs_nm": 0.38475715692716056,
+        "post_killswitch_negative_duration_s": 0.06025,
+        "reversed_geometry_sign_residual_nm": 4.440892098500626e-16
+      },
+      "pinocchio_killswitch": {
+        "action_reaction_force_residual_max_n": 0.0,
+        "club_axis_out_of_plane_range_deg": 7.551308105569969,
+        "club_long_axis_rotation_rate_peak_rad_s": 13.592686425027283,
+        "coincident_grip_couple_max_nm": 0.0,
+        "energy_balance_residual_max_j": 0.03494299323724581,
+        "ground_pathway_force_peak_n": 56.845736671753954,
+        "ground_pathway_moment_peak_nm": 62.611249576375336,
+        "minimum_post_killswitch_couple_nm": -0.4092839624648751,
+        "minimum_swing_normal_couple_nm": -0.4092839624648751,
+        "peak_long_axis_couple_abs_nm": 0.241752081624878,
+        "post_killswitch_negative_duration_s": 0.0375,
+        "reversed_geometry_sign_residual_nm": 8.465450562766819e-16
+      }
+    },
+    "coincident_grip_couple_max_nm": 0.0,
+    "direct_club_force_or_torque_command": "none",
+    "reversed_geometry_sign_residual_max_nm": 9.159339953157541e-16,
+    "same_state_killswitch_minimum_couple_nm": -0.4092851000343657,
+    "same_state_killswitch_negative_duration_s": 0.0375,
+    "same_state_prebranch_max_state_difference": 0.0
+  },
+  "model_contract": {
+    "adapter_digests": {
+      "mujoco_baseline": "65a6d80d4366c7874bfaef01ec7592ba1067db4a5952cf95f0ad274b6f10491a",
+      "pinocchio_baseline": "65a6d80d4366c7874bfaef01ec7592ba1067db4a5952cf95f0ad274b6f10491a"
+    },
+    "canonical_record": {
+      "club_direct_actuation": "none",
+      "club_inertia": [0.0012, 0.025, 0.025],
+      "club_initial_position": [0.65, 0.0, 1.05],
+      "club_mass": 0.32,
+      "comparison_stride": 4,
+      "contact_damping": 18.0,
+      "contact_law": "paired Kelvin-Voigt point interfaces",
+      "contact_stiffness": 1800.0,
+      "coordinates": {
+        "club": "free rigid body SE(3)",
+        "lead_hand": "world translation xyz",
+        "trail_hand": "world translation xyz"
+      },
+      "driver_damping": 24.0,
+      "driver_stiffness": 420.0,
+      "duration": 0.24,
+      "gravity": [0.0, 0.0, -9.81],
+      "hand_inertia": 0.0008,
+      "hand_mass": 0.55,
+      "killswitch_time": 0.18,
+      "lead_grip_offset": [-0.08, 0.015, 0.0],
+      "model_name": "spatial-two-hand-carriage-club-v1",
+      "time_step": 0.00025,
+      "trail_grip_offset": [0.08, -0.015, 0.0]
+    },
+    "digest_match": true,
+    "sha256": "65a6d80d4366c7874bfaef01ec7592ba1067db4a5952cf95f0ad274b6f10491a"
+  },
+  "model_tier": "reduced_spatial_two_hand_forward_compliant_contact",
+  "numerical_gates": {
+    "baseline": {
+      "declared_tolerances": {
+        "club_orientation_max_limit_rad": 0.035,
+        "club_position_max_limit_m": 0.009,
+        "club_position_rms_limit_m": 0.003,
+        "contact_wrench_relative_rms_limit": 0.1,
+        "normalized_energy_discrepancy_limit": 0.08
+      },
+      "energy_gate_passed": true,
+      "observed_metrics": {
+        "club_orientation_max_rad": 8.940696716308595e-8,
+        "club_position_max_m": 3.79461344904858e-5,
+        "club_position_rms_m": 1.2753197482136776e-5,
+        "contact_wrench_relative_rms": 0.00256335098739382,
+        "contact_wrench_rms": 0.010012101370899116,
+        "normalized_energy_discrepancy": 0.00023455972979492614
+      },
+      "tolerance_calibration": "Engineering acceptance regions for a shared semi-implicit integrator. Exact common initial state, analytic action-reaction controls, timestep refinement, and two native rollouts audit the regions; they are not empirical confidence intervals.",
+      "trajectory_gate_passed": true,
+      "wrench_gate_passed": true
+    },
+    "energy_gate_passed": true,
+    "same_state_killswitch": {
+      "declared_tolerances": {
+        "club_orientation_max_limit_rad": 0.035,
+        "club_position_max_limit_m": 0.009,
+        "club_position_rms_limit_m": 0.003,
+        "contact_wrench_relative_rms_limit": 0.1,
+        "normalized_energy_discrepancy_limit": 0.08
+      },
+      "energy_gate_passed": true,
+      "observed_metrics": {
+        "club_orientation_max_rad": 9.424321830774485e-8,
+        "club_position_max_m": 7.789261685804944e-5,
+        "club_position_rms_m": 1.69647504991969e-5,
+        "contact_wrench_relative_rms": 0.002735672699938936,
+        "contact_wrench_rms": 0.009141100981486858,
+        "normalized_energy_discrepancy": 0.0004611575683746604
+      },
+      "tolerance_calibration": "Engineering acceptance regions for a shared semi-implicit integrator. Exact common initial state, analytic action-reaction controls, timestep refinement, and two native rollouts audit the regions; they are not empirical confidence intervals.",
+      "trajectory_gate_passed": true,
+      "wrench_gate_passed": true
+    },
+    "trajectory_gate_passed": true,
+    "wrench_gate_passed": true
+  },
+  "schema_version": "spatial-forward-contact-evidence-v1",
+  "source_sha256": {
+    "scripts/research/proximal_distal_energy/make_spatial_forward_contact_figures.py": "39ddf766310b6c70692e2f5927f0e6ace654e09fde21159e95227271d58b8a82",
+    "scripts/research/proximal_distal_energy/run_spatial_forward_contact_study.py": "fa397e8f5fbe77e445b96823cd8b185c394a8b1c199d7c6263f5963b372a5c0a",
+    "scripts/research/proximal_distal_energy/spatial_forward_contract.py": "8803ff4922223870953999489f4e133a89b024a18c253b1764cfa218a4980ef7",
+    "scripts/research/proximal_distal_energy/spatial_forward_engines.py": "dd5c9b29c2fbc8df8003068446190e3cb50cf34adf6e8627caf08d06ccb47456",
+    "scripts/research/proximal_distal_energy/spatial_forward_study.py": "ba9d718d4b8751d19d281a317fd310bf8805c9be8c1e7edc3e65dc0e71485daf"
+  },
+  "study_id": "spatial-forward-two-engine-contact-v1",
+  "timestep_refinement": {
+    "maximum_work_energy_residual_j": [
+      0.06106448708794865, 0.030523226525231983, 0.015259379819487773
+    ],
+    "monotone_residual_reduction": true,
+    "time_step_s": [0.0005, 0.00025, 0.000125]
+  },
+  "trajectory_kind": "independently_integrated_native_forward_dynamics"
+}

@@ -88,6 +88,13 @@ def _save(figure: plt.Figure, figure_dir: Path, stem: str) -> tuple[Path, Path]:
         metadata={"Creator": "UpstreamDrift Open Research", "CreationDate": None},
     )
     figure.savefig(svg_path, bbox_inches="tight", metadata={"Creator": "UpstreamDrift"})
+    svg_path.write_text(
+        "\n".join(
+            line.rstrip() for line in svg_path.read_text(encoding="utf-8").splitlines()
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     plt.close(figure)
     return pdf_path, svg_path
 
@@ -374,6 +381,10 @@ def render_figures(
             "font.size": 9.5,
             "figure.dpi": 130,
             "savefig.dpi": 180,
+            "pdf.use14corefonts": True,
+            "pdf.compression": 9,
+            "path.simplify": True,
+            "path.simplify_threshold": 1.0,
             "svg.hashsalt": "forward-two-arm-phase-1",
         }
     )

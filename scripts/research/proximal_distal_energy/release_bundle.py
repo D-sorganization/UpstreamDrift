@@ -78,6 +78,10 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
                 "command": "python -m scripts.research.proximal_distal_energy.run_spatial_full_body_study",
                 "tier": "reduced_full_body_common_state",
             },
+            "spatial_forward_contact": {
+                "command": "python -m scripts.research.proximal_distal_energy.run_spatial_forward_contact_study",
+                "tier": "reduced_two_engine_forward_contact",
+            },
             "uncertainty_control": {
                 "command": "python -m scripts.research.proximal_distal_energy.run_uncertainty_control_study",
                 "tier": "coupled_uncertainty_control",
@@ -91,12 +95,14 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
             "interaction_dynamics_planar": "supported_at_declared_model_tier",
             "geometry_transfer_spatial_common_state": "supported_at_declared_model_tier",
             "distributed_shaft_modal_reduction": "supported_on_synthetic_structural_case",
-            "passive_negative_couple_spatial_forward": "untested",
+            "passive_negative_couple_spatial_forward": (
+                "supported_at_declared_reduced_contact_tier"
+            ),
             "universal_control_strategy": "unsupported",
             "human_experimental": "untested",
         },
         "known_open_gates": [
-            "forward spatial contact in two independent engines",
+            "subject-scaled articulated spatial contact with calibrated grip and distributed shaft",
             "equipment-calibrated distributed beam coupled into the forward two-hand solve",
             "governed held-out human experimental evaluation",
             "external archive deposit and persistent identifier",

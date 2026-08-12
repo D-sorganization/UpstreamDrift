@@ -341,8 +341,16 @@ Lagrange--Christoffel formulation. Across 20 generalized coordinates and
 61 states, the maximum relative discrepancy is \(2.14\times10^{-11}\);
 reversing the hand moment arm reverses a \(-4.32\) N m force-generated
 couple, and coincident hands remove it exactly. Because contact loads
-are prescribed, passive spatial contact remains inconclusive and forward
-cross-engine contact remains untested. A coupled uncertainty and control
+are prescribed, passive spatial contact remains inconclusive at that
+tier. A subsequent reduced forward-contact experiment independently
+integrates MuJoCo and Pinocchio with two finite-mass hand carriages,
+paired compliant interfaces, and no direct club actuation. Its exact
+same-state driver-killswitch branch retains a negative swing-normal
+contact couple for 37.5 ms; coincident and reversed-moment-arm controls
+close exactly, trajectory and wrench gates pass, and work--energy
+residual decreases under timestep refinement. This supports a reduced
+spatial mechanism, not anatomical arms, muscle coordination, human
+strategy, or equipment calibration. A coupled uncertainty and control
 experiment then varies 12 inputs simultaneously, audits structural and
 practical identifiability, and compares eight preselected
 delayed-command programs on separate training and held-out ensembles.
@@ -380,7 +388,7 @@ for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, left=2mm, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, arc=.35mm, titlerule=0mm, opacityback=0, coltitle=black, colframe=quarto-callout-note-color-frame, colback=white, breakable, bottomtitle=1mm, leftrule=.75mm, toptitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, rightrule=.15mm, bottomrule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, titlerule=0mm, toprule=.15mm, arc=.35mm, breakable, rightrule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, coltitle=black, leftrule=.75mm, colframe=quarto-callout-note-color-frame, colback=white, bottomrule=.15mm, opacityback=0, toptitle=1mm, bottomtitle=1mm, left=2mm, opacitybacktitle=0.6, colbacktitle=quarto-callout-note-color!10!white]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -4811,9 +4819,11 @@ Four stronger statements remain open:
   inputs. A forward compliant two-hand solve must determine whether
   equivalent loads emerge after a distal command killswitch.
 \item
-  \textbf{Forward Cross-Engine Contact Is Untested.} Same-state inverse
-  dynamics removes trajectory divergence by design. Independent forward
-  contact models must still be event-aligned and compared.
+  \textbf{Forward Cross-Engine Contact Is Untested at This Tier.}
+  Same-state inverse dynamics removes trajectory divergence by design.
+  The independently integrated reduced contact experiment in
+  Section~\ref{sec-spatial-forward-contact} addresses that separate
+  estimand without promoting this prescribed-load result.
 \item
   \textbf{Anatomical Magnitude Is Unsupported.} The reduced tree and
   spherical inertias are not subject-specific anatomy, muscle, or tissue
@@ -4824,10 +4834,399 @@ Four stronger statements remain open:
   follows from this mechanism experiment.
 \end{itemize}
 
-The next phase therefore treats identifiability and uncertainty before
-control claims. Parameter compensation can otherwise make a structurally
-inadequate model reproduce one output while assigning the wrong
-contribution to contact, base motion, passive tissue, or actuation.
+The next chapter tests the reduced contact mechanism under independent
+forward integration. Identifiability and uncertainty are then treated
+before control claims. Parameter compensation can otherwise make a
+structurally inadequate model reproduce one output while assigning the
+wrong contribution to contact, base motion, passive tissue, or
+actuation.
+
+\chapter{Independently Executed Spatial Forward
+Contact}\label{sec-spatial-forward-contact}
+
+The common-state experiment in Section~\ref{sec-spatial-full-body} asks
+whether two dynamics formulations return the same generalized action at
+identical achieved states. It deliberately prescribes the hand forces
+and removes trajectory divergence. The experiment in this chapter asks
+the next, stronger question:
+
+\begin{quote}
+Can a negative force-generated couple arise from the achieved state of a
+forward compliant two-hand system, persist after its grounded driver is
+removed, and survive independent integration by two actual multibody
+engines?
+\end{quote}
+
+The answer is affirmative for one declared reduced model. MuJoCo and
+Pinocchio independently integrate the same 13-coordinate contract using
+their native forward-dynamics algorithms
+(\citeproc{ref-todorov2012mujoco}{Todorov, Erez, and Tassa 2012};
+\citeproc{ref-carpentier2019pinocchio}{Carpentier et al. 2019}). Neither
+engine receives a prescribed contact-force history. Each contact force
+is calculated from the engine's own achieved relative hand--club
+displacement and velocity. The common contact law, reference driver,
+timestep, and output convention are held fixed so that engine
+implementation is the principal changed factor.
+
+This result closes the \emph{reduced forward-contact} gate, not the
+anatomical or human gate. The hand bodies are finite-mass translational
+carriages, not arms; the grounded driver is not muscle; and the grip
+parameters are declared rather than identified from measurements. Those
+boundaries are properties of the experiment, not qualifications added
+after observing its outcome.
+
+\section{Model Estimand and Deliberate
+Reduction}\label{sec-spatial-forward-estimand}
+
+The model contains two finite-mass hand carriages and one free rigid
+club. The hand positions are \(\mathbf h_L,\mathbf h_T\in\mathbb R^3\).
+The club state is a world position \(\mathbf x_C\), orientation
+\(\mathbf R_C\in SO(3)\), linear velocity \(\mathbf v_C\), and angular
+velocity \(\boldsymbol\omega_C\). Its lead and trail grip offsets,
+expressed in the club frame, are
+
+\begin{equation}\phantomsection\label{eq-spatial-forward-grip-offsets}{
+\boldsymbol\rho_L=
+\begin{bmatrix}-0.080&0.015&0\end{bmatrix}^{\mathsf T}\ \mathrm{m},
+\qquad
+\boldsymbol\rho_T=
+\begin{bmatrix}0.080&-0.015&0\end{bmatrix}^{\mathsf T}\ \mathrm{m}.
+}\end{equation}
+
+The achieved club-side contact positions and velocities are therefore
+
+\begin{equation}\phantomsection\label{eq-spatial-forward-contact-kinematics}{
+\mathbf p_i = \mathbf x_C + \mathbf R_C\boldsymbol\rho_i,
+\qquad
+\dot{\mathbf p}_i = \mathbf v_C
++\boldsymbol\omega_C\times(\mathbf R_C\boldsymbol\rho_i).
+}\end{equation}
+
+The reduction is purposeful. A full arm introduces joint topology,
+anthropometric estimation, muscle redundancy, and tissue compliance at
+the same time as contact and engine divergence. The carriage model
+isolates a narrower estimand: whether finite hand-side inertia and
+compliant two-point closure can generate the proposed spatial wrench
+without direct club actuation. A positive result makes an anatomical
+test worthwhile; it does not substitute for one.
+
+The common record fixes each hand mass at 0.55 kg, club mass at 0.32 kg,
+principal club inertias at \([0.0012,0.025,0.025]\) kg m\(^2\), gravity
+at \(-9.81\) m/s\(^2\) on the vertical axis, a 0.240 s interval, and a
+0.25 ms timestep. The complete JSON-serializable record is hashed before
+either engine is constructed. Both realized adapters report the same
+SHA-256 model digest.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_spatial_forward_contact_geometry.pdf}
+
+}
+
+\caption{\label{fig-spatial-forward-contact-geometry}Achieved Spatial
+Contact Geometry and Engine-Solved Force Vectors}
+
+\end{figure}%
+
+Figure~\ref{fig-spatial-forward-contact-geometry} shows three achieved
+MuJoCo states. The blue and red arrows are not prescribed inputs. They
+are the compliant interface forces obtained from the achieved engine
+state at each sample. The two engines start from identical hand
+positions, club position, orientation, and zero velocity.
+
+\section{Paired Contact and Grounded Driver
+Contracts}\label{sec-spatial-forward-contact-law}
+
+Each interface uses a paired Kelvin--Voigt law,
+
+\begin{equation}\phantomsection\label{eq-spatial-forward-contact-force}{
+\mathbf F_i =
+k_c(\mathbf h_i-\mathbf p_i)
++c_c(\dot{\mathbf h}_i-\dot{\mathbf p}_i),
+}\end{equation}
+
+with \(k_c=1800\) N/m and \(c_c=18\) N s/m. The club receives
+\(+\mathbf F_i\) at \(\mathbf p_i\) and the hand receives
+\(-\mathbf F_i\) at \(\mathbf h_i\). The force-sum residual is therefore
+an exact runtime invariant rather than an outcome tolerance. The contact
+storage and dissipation terms are
+
+\begin{equation}\phantomsection\label{eq-spatial-forward-contact-energy}{
+U_{c,i}=\frac{1}{2}k_c
+\lVert\mathbf h_i-\mathbf p_i\rVert^2,
+\qquad
+P_{d,i}=-c_c
+\lVert\dot{\mathbf h}_i-\dot{\mathbf p}_i\rVert^2.
+}\end{equation}
+
+A world-referenced trajectory moves the finite hand carriages through a
+grounded spring--damper driver,
+
+\begin{equation}\phantomsection\label{eq-spatial-forward-driver}{
+\mathbf G_i =
+k_d(\mathbf h_i^\star-\mathbf h_i)
++c_d(\dot{\mathbf h}_i^\star-\dot{\mathbf h}_i),
+}\end{equation}
+
+where \(k_d=420\) N/m and \(c_d=24\) N s/m. The declared target contains
+a downswing-like rotation, translation, changing swing-plane tilt, and a
+bounded bilateral out-of-plane component. It is a manufactured
+excitation designed to exercise three-dimensional coupling. It is not a
+measured hand path.
+
+No force or torque is applied directly to the club. The only club-side
+generalized load is the transported contact wrench
+
+\begin{equation}\phantomsection\label{eq-spatial-forward-wrench}{
+\mathcal W_C=
+\begin{bmatrix}
+\sum_i\mathbf F_i\\
+\sum_i(\mathbf p_i-\mathbf x_C)\times\mathbf F_i
+\end{bmatrix}.
+}\end{equation}
+
+The equal and opposite driver wrench about the world origin is retained
+as a reduced ground-pathway reaction proxy. Because the carriages omit
+legs, pelvis, trunk, and anatomical arms, that proxy is not a prediction
+of measured ground-reaction force. It answers the bookkeeping question
+``where does the external reference-driver action close?'' and prevents
+that pathway from being silently omitted.
+
+\section{Independent Engine
+Realizations}\label{sec-spatial-forward-engines}
+
+The common experiment executes in two native libraries, both version
+3.8.0 in the archived run:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{MuJoCo.} Two three-axis slide bodies and one free club body
+  are compiled from generated MJCF. World-frame hand and point forces
+  are mapped through \texttt{mj\_applyFT}; \texttt{mj\_forward} computes
+  continuous-time acceleration.
+\item
+  \textbf{Pinocchio.} Two \texttt{JointModelTranslation} branches and
+  one \texttt{JointModelFreeFlyer} branch are assembled
+  programmatically. Equal and opposite forces are transformed into each
+  joint's local spatial-force convention; the articulated-body algorithm
+  computes acceleration.
+\end{itemize}
+
+Both engines use the same semi-implicit position/velocity update after
+their native acceleration evaluation. This is a controlled numerical
+choice, not an assertion that the engines have identical internal
+integrators. It removes an uninteresting integration-method difference
+while retaining independent mass, bias, gravity, kinematics,
+spatial-force mapping, and forward-dynamics implementations. The
+Pinocchio adapter uses a local-world-aligned velocity at the moving club
+origin; using a world-origin spatial velocity instead creates an
+artificial contact-velocity discrepancy. That frame distinction is now
+covered by the forward trajectory gate.
+
+The comparison evaluates complete trajectories, not just matched states.
+The declared engineering regions are 3 mm RMS and 9 mm maximum
+club-position difference, 0.035 rad maximum orientation difference, 10\%
+relative RMS complete-wrench difference, and 8\% normalized energy
+discrepancy. They are algorithmic acceptance regions, not statistical
+confidence intervals. Exact initial-state equality, action--reaction
+closure, analytical geometry controls, and timestep refinement provide
+independent checks that a passing trajectory is meaningful.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_spatial_forward_cross_engine.pdf}
+
+}
+
+\caption{\label{fig-spatial-forward-cross-engine}Independent MuJoCo and
+Pinocchio Forward Dynamics Satisfy Declared Gates}
+
+\end{figure}%
+
+\section{Forward Cross-Engine
+Results}\label{sec-spatial-forward-results}
+
+Figure~\ref{fig-spatial-forward-cross-engine} shows that the two
+independently integrated trajectories remain close. In the
+continuing-driver branch:
+
+\begin{itemize}
+\tightlist
+\item
+  club-position RMS difference is 12.75 µm and maximum difference is
+  37.95 µm;
+\item
+  maximum orientation difference is \(8.94\times10^{-8}\) rad;
+\item
+  relative RMS complete-wrench difference is 0.256\%; and
+\item
+  normalized energy discrepancy is 0.0235\%.
+\end{itemize}
+
+In the driver-killswitch branch, the corresponding values are 16.96 µm,
+77.89 µm, \(9.42\times10^{-8}\) rad, 0.274\%, and 0.0461\%. Every
+observed value is well inside its declared region. The result is
+stronger than the preceding common-state inverse-dynamics comparison
+because numerical error can now accumulate and feed back into the
+contact law. It remains narrower than a cross-engine anatomical
+comparison because the engines realize one reduced common model.
+
+\section{Exact Same-State Driver
+Killswitch}\label{sec-spatial-forward-killswitch}
+
+The baseline and intervention branches are bit-identical through
+\(t_k=0.180\) s. At that sample, the intervention sets
+\(\mathbf G_L=\mathbf G_T=\mathbf0\) for the remainder of the rollout.
+Contact, gravity, hand inertia, club inertia, and interface
+storage/dissipation remain active. This intervention removes the
+complete grounded driver rather than merely setting a named distal
+torque to zero.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_spatial_forward_killswitch.pdf}
+
+}
+
+\caption{\label{fig-spatial-forward-killswitch}Post-Killswitch
+Interaction Dynamics Persist Without Direct Club Actuation}
+
+\end{figure}%
+
+After the killswitch, both engines retain a negative force-generated
+swing-normal couple for 37.5 ms and reach approximately -0.409 N m. The
+branch also retains 7.55 degrees of club-axis out-of-plane evolution, a
+peak club-long-axis rotation rate of 13.59 rad/s, and a peak
+force-generated long-axis couple of 0.242 N m. These observables are
+separated deliberately: the negative quantity is a projection of contact
+moment on the instantaneous swing normal, while long-axis couple and
+rotation report torsional evolution. Calling either projection ``the
+club torque'' without naming its axis would be ambiguous.
+
+The ground-pathway proxy reaches 56.85 N in resultant force and 62.61 N
+m in moment before the branch. It becomes exactly zero with the driver
+at the killswitch, while the two compliant interfaces continue to
+exchange force and moment internally. This separates prior external
+input from subsequent interaction dynamics. It does not make the
+pre-killswitch motion unforced or biologically passive.
+
+\section{Geometry Controls and Work--Energy
+Closure}\label{sec-spatial-forward-controls}
+
+Two same-force geometry controls are evaluated without advancing a new
+trajectory:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  transport the achieved forces through the club reference, making both
+  moment arms zero; and
+\item
+  negate both achieved moment arms while retaining force vectors and
+  state.
+\end{enumerate}
+
+The coincident-grip couple is exactly zero at every stored sample.
+Reversing the arms reverses the swing-normal couple with a maximum
+residual below \(9.2\times10^{-16}\) N m. These controls rule out total
+force magnitude, integration history, and engine state as explanations
+for the sign response. Within the declared wrench equation, moment-arm
+geometry is necessary.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_spatial_forward_energy_controls.pdf}
+
+}
+
+\caption{\label{fig-spatial-forward-energy-controls}Conservation and
+Negative Controls Bound the Forward-Contact Claim}
+
+\end{figure}%
+
+The work--energy residual includes engine-native rigid-body kinetic and
+potential energy, interface storage, driver power, and contact
+dissipation. For the MuJoCo killswitch branch its maximum absolute value
+decreases from 0.0611 to 0.0305 to 0.0153 J as the timestep decreases
+from 0.50 to 0.25 to 0.125 ms. The monotone approximately first-order
+reduction is consistent with the shared semi-implicit step. At 0.25 ms,
+the residual is about 0.55\% of the 5.52 J total-energy range.
+Pinocchio's corresponding maximum is 0.0349 J. The residual is reported
+rather than normalized away because it is a direct falsifier of the
+discretized experiment.
+
+\section{What the Experiment
+Falsifies}\label{sec-spatial-forward-falsifiers}
+
+The committed record fails closed if any of these conditions occurs:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  either imported library lacks its native model and forward-dynamics
+  API;
+\item
+  the generated adapters report different common-model digests;
+\item
+  baseline or killswitch trajectories exceed a declared cross-engine
+  region;
+\item
+  contact action--reaction force does not close at each evaluation;
+\item
+  the coincident-grip couple is nonzero;
+\item
+  reversed moment arms do not reverse couple sign;
+\item
+  baseline and killswitch states differ before the branch sample;
+\item
+  the post-killswitch negative interval is shorter than 30 ms; or
+\item
+  the work--energy residual fails to decrease under timestep refinement.
+\end{enumerate}
+
+The experiment would therefore reject the stated reduced mechanism if a
+second native solver does not transport it or if it depends on hidden
+direct club actuation. Passing those tests does not establish that
+humans use the mechanism, that the declared stiffness represents tissue,
+or that a player should seek a particular force pattern.
+
+\section{Reproduction and Platform
+Boundary}\label{sec-spatial-forward-reproduction}
+
+The evidence is stored in
+\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json}{\texttt{data/spatial\_forward\_contact\_study.json}}
+and
+\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.npz}{\texttt{data/spatial\_forward\_contact\_study.npz}}.
+Reproduction requires the repository's MuJoCo and Pinocchio optional
+engine dependencies. The native Pinocchio wheel used here executes in
+the Linux/WSL environment; a package named \texttt{pinocchio} on the
+default Windows Python index can resolve to an unrelated stub and is
+explicitly rejected by the adapter.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_spatial\_forward\_contact\_study}
+\ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.make\_spatial\_forward\_contact\_figures}
+\ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ pytest tests/research/test\_spatial\_forward\_contact.py }\AttributeTok{{-}q}
+\end{Highlighting}
+\end{Shaded}
+
+The next transport step is not ``more confidence'' in the carriage
+model. It is replacement of the carriages with subject-scaled
+articulated arms and a distributed shaft while preserving the same
+engine identity, wrench, killswitch, energy, event, and claim-boundary
+contracts.
 
 \chapter{Coupled Uncertainty, Identifiability, and
 Control}\label{sec-uncertainty-control}
@@ -5236,12 +5635,13 @@ Qualification}\label{sec-open-release}
 \section{Release Contract}\label{release-contract}
 
 The scientific product is distributed as an open research resource
-rather than as evidence for a software platform. Seven presets identify
+rather than as evidence for a software platform. Eight presets identify
 reproducible entry points: analytical double pendulum, forward two-hand,
 coupled moving-base/flexible-club, synthetic distributed shaft, reduced
-spatial common state, uncertainty/control, and experimental readiness.
-Preset names preserve the model ladder and never imply that a higher
-unexecuted tier is available.
+spatial common state, reduced two-engine spatial forward contact,
+uncertainty/control, and experimental readiness. Preset names preserve
+the model ladder and never imply that a higher unexecuted tier is
+available.
 
 The release manifest hashes the report source and PDF, chapter source,
 linked bibliography, evidence JSON/NPZ/CSV, publication PDF/SVG figures,
@@ -5293,16 +5693,17 @@ The release records planar interaction dynamics and negative-couple
 feasibility as supported at their declared tiers, geometry response as
 supported through reduced spatial common-state inverse dynamics, and
 modal reduction behavior as supported on a synthetic structural shaft
-case. It records forward passive spatial contact and human predictions
-as untested, and a universal controller as unsupported.
+case. It records post-killswitch contact persistence as supported only
+in the reduced spatial carriage model, human predictions as untested,
+and a universal controller as unsupported.
 
-Four release-level completion gates remain visible: independently solved
-forward spatial contact in two engines; an equipment-calibrated
-distributed beam coupled into the forward two-hand solve; governed
-held-out human evaluation; and external archive deposit with a
-persistent identifier. Archive deposition changes external state and has
-not been performed. A reproducible local bundle is not described as a
-permanently archived release until that deposit is verified.
+Four release-level completion gates remain visible: subject-scaled
+articulated spatial contact with calibrated grip; an
+equipment-calibrated distributed beam coupled into the forward two-hand
+solve; governed held-out human evaluation; and external archive deposit
+with a persistent identifier. Archive deposition changes external state
+and has not been performed. A reproducible local bundle is not described
+as a permanently archived release until that deposit is verified.
 
 \chapter{A Common-Observable Ladder Toward Higher-Order
 Models}\label{sec-model-ladder}
@@ -5668,9 +6069,35 @@ spatial mass and bias terms.
 
 The result remains common-state inverse dynamics with prescribed hand
 loads. It does not solve closed contact, execute a zero-command forward
-branch, or identify passive biological load generation. Those limits
-create a narrower remaining boundary: forward spatial two-hand contact,
-rather than all spatial dynamics, is still open.
+branch, or identify passive biological load generation. The reduced
+forward-contact tier in Section~\ref{sec-spatial-forward-contact}
+addresses the first two limitations without promoting either model to
+anatomical or biological evidence.
+
+\section{Reduced Spatial Forward
+Contact}\label{sec-ladder-spatial-forward-contact}
+
+The next tier replaces prescribed hand loads with two compliant point
+interfaces between finite-mass hand carriages and a free rigid club.
+MuJoCo and Pinocchio independently evaluate achieved kinematics,
+spatial-force mapping, mass, bias, gravity, and native forward dynamics.
+The two adapters share a hashed parameter record, contact law,
+semi-implicit update, and output schema.
+
+In the exact same-state driver-killswitch branch, the complete grounded
+driver is removed at 0.180 s. The force-generated swing-normal couple
+remains negative for 37.5 ms in both engines and reaches approximately
+-0.409 N m. Coincident grips remove the couple exactly; reversed moment
+arms reverse its sign below \(9.2\times10^{-16}\) N m residual.
+Cross-engine trajectory, wrench, orientation, and energy gates pass, and
+the work--energy residual decreases monotonically as timestep is halved.
+
+This executes independent forward spatial contact at a reduced mechanism
+tier. It does not add anatomical arms, subject-specific inertias,
+muscles, measured grip compliance, a distributed shaft, or human
+observations. The evidence boundary therefore moves from ``forward
+contact unexecuted'' to ``reduced forward contact supported; articulated
+human transport untested.''
 
 \section{What Survives, What Changes, and What Remains
 Open}\label{sec-ladder-discrepancy}
@@ -5689,7 +6116,7 @@ Executed Mechanisms and the Remaining Boundary}
 \end{figure}%
 
 The discrepancy matrix in Figure~\ref{fig-ladder-discrepancy-matrix}
-summarizes the evidence boundary. Seven statements survive the executed
+summarizes the evidence boundary. Nine statements survive the executed
 tiers:
 
 \begin{enumerate}
@@ -5714,15 +6141,22 @@ tiers:
   inverse-dynamics formulations; and
 \item
   reversing spatial contact moment-arm geometry reverses the
-  force-generated club couple while coincident points remove it.
+  force-generated club couple while coincident points remove it;
+\item
+  the negative force-generated couple persists after complete
+  grounded-driver removal in the declared reduced spatial
+  compliant-contact model; and
+\item
+  that forward-contact result transports through native MuJoCo and
+  Pinocchio dynamics within declared trajectory, wrench, orientation,
+  and energy regions.
 \end{enumerate}
 
 Other claims do not yet survive because they have not been tested. The
-present analysis does not show that the negative couple persists in a
-forward spatial two-hand killswitch, that its magnitude is invariant to
-a distributed shaft, or that independently authored native humanoid
-models produce matched force histories. Those are separate
-forward-contact, structural, and empirical questions.
+present analysis does not show that the reduced result survives
+anatomical arms, that its magnitude is invariant to a distributed shaft,
+or that independently authored native humanoid models produce matched
+force histories. Those are separate structural and empirical questions.
 
 \subsection{Tier-by-Tier
 Interpretation}\label{sec-ladder-tier-interpretation}
@@ -5776,11 +6210,19 @@ transport and executes genuine out-of-plane dynamics. Its agreement is
 not anatomical validation because the model is reduced and its hand
 loads are prescribed.
 
-\textbf{Full-Body Forward Contact.} This tier remains open because it
-must add independently solved two-hand contact, state divergence,
-compliance, and event alignment without changing the observable. Contact
-parameters, stabilization, actuation, and numerical tolerances must be
-registered before the preferred outcome is inspected.
+\textbf{Reduced Spatial Forward Contact.} This tier adds independently
+solved two-hand compliance, state divergence, a same-state driver
+killswitch, long-axis rotation, swing-plane evolution, and reduced
+ground-pathway bookkeeping. It transports the declared mechanism through
+two native engines. Its hand carriages and declared contact law prevent
+anatomical, tissue, muscle, or human inference.
+
+\textbf{Articulated Full-Body Forward Contact.} This tier remains open
+because it must replace the carriages with subject-scaled articulated
+arms, retain independently solved two-hand contact, and preserve event
+alignment without changing the observable. Contact calibration,
+stabilization, actuation, and anatomical uncertainty must be registered
+before the preferred outcome is inspected.
 
 \subsection{Cross-Engine Gate
 Definition}\label{sec-ladder-cross-engine-gate}
@@ -5810,10 +6252,11 @@ minimum:
 \end{itemize}
 
 Engine capability is not evidence that the comparison was run. The
-machine-readable discrepancy table marks reduced full-body common-state
-inverse dynamics as \texttt{executed} and forward spatial contact as
-\texttt{not\_executed}. This split prevents same-state agreement from
-silently becoming a forward contact or anatomical claim.
+machine-readable discrepancy table separately marks reduced full-body
+common-state inverse dynamics and reduced two-engine forward contact as
+\texttt{executed}; articulated full-body forward contact remains
+\texttt{not\_executed}. This split prevents a carriage-model result from
+silently becoming an anatomical claim.
 
 \section{Strategy Implications Across the
 Ladder}\label{sec-ladder-strategy}
@@ -5862,15 +6305,17 @@ The ladder remains deliberately incomplete:
   inertia elements rather than solved contact and subject-specific
   anatomy; and
 \item
-  no forward spatial contact comparison is represented as complete.
+  the forward spatial tier uses two translational hand carriages,
+  declared Kelvin--Voigt contacts, and a rigid club rather than
+  anatomical arms, measured tissue, or the distributed shaft.
 \end{itemize}
 
-The next decisive test is an event-aligned forward spatial experiment
-with independently solved two-hand contact that emits the same common
-schema and supports an exact same-state command-removal branch. Failure
-of force/moment balance, power invariance, contact-rank agreement, or
-matched-event parity at that tier would falsify transport of the
-lower-order passive-persistence claim.
+The next decisive model test replaces the carriages with subject-scaled
+articulated arms and couples the distributed shaft while emitting the
+same common schema and preserving the exact same-state command-removal
+branch. Failure of force/moment balance, power invariance, contact-rank
+agreement, or matched-event parity at that tier would falsify transport
+of the reduced passive-persistence claim.
 
 \chapter{Empirical Evidence in Golfers}\label{sec-evidence}
 
@@ -6948,9 +7393,11 @@ for a golfer. The specific gaps, each with a tracked remediation:
   moving-base/flexible-club tiers address planar closure, translation,
   and one lumped flex mode; base rotation, distributed beams, and the
   reduced full-body common-state tier now addresses nonplanar inverse
-  dynamics, while base-ground coupling, distributed beams, and
-  independently solved spatial contact remain appropriate staged
-  extensions.
+  dynamics. The reduced MuJoCo/Pinocchio forward-contact tier adds
+  compliant spatial closure, long-axis rotation, swing-plane evolution,
+  and a reduced ground-pathway proxy. Subject-scaled articulated arms,
+  base--ground dynamics, and a coupled distributed beam remain
+  appropriate staged extensions.
 \item
   \textbf{Simplified Actuator Models.} E1b shows the S2 ordering
   survives a linear torque-velocity bound on the drives with compressed
@@ -6978,8 +7425,10 @@ for a golfer. The specific gaps, each with a tracked remediation:
   two-hand tiers. The coupled extension now preserves the finite
   negative-couple branch with endogenous base translation and club flex.
   The spatial common-state tier transports the geometry response across
-  independent inverse-dynamics formulations, but prescribed loads do not
-  establish persistence under spatial compliant contact or human
+  independent inverse-dynamics formulations. The reduced spatial forward
+  tier then preserves a negative contact couple after complete driver
+  removal in both native engines. Its hand carriages and declared
+  contact law do not establish persistence in anatomical arms or human
   dynamics.
 \item
   \textbf{No Human Data Yet.} The decisive observational test --- wrist
@@ -7081,7 +7530,19 @@ nonplanar states to \(2.14\times10^{-11}\) relative error. Reversing the
 hand moment arm reverses the force-generated couple and coincident
 points remove it exactly. Because the forces are prescribed and the
 state is shared, this supports spatial inverse-dynamics and geometry
-transport but leaves passive forward contact explicitly inconclusive.
+transport but leaves passive forward contact inconclusive at that tier.
+
+The reduced spatial forward-contact extension resolves that narrower
+mechanism gate. Native MuJoCo and Pinocchio independently integrate two
+finite-mass hand carriages, paired compliant interfaces, and a free
+rigid club without direct club actuation. Their baseline and same-state
+killswitch trajectories satisfy the declared position, orientation,
+wrench, and energy regions. Removing the complete grounded driver leaves
+a negative force-generated swing-normal couple for 37.5 ms in both
+engines; coincident and reversed-moment-arm controls close exactly, and
+the work--energy residual decreases under timestep refinement. This
+supports reduced spatial contact persistence, not anatomical arms,
+muscles, calibrated grip tissue, equipment, or human strategy.
 
 The coupled uncertainty/control phase rejects two additional shortcuts.
 A net planar wrench cannot uniquely identify both hand forces, and six
@@ -7103,7 +7564,7 @@ The open-resource layer now supplies model-tier presets, a hash-pinned
 release manifest, standard checksums, a data dictionary, citation
 metadata, and a claim-first reviewer workbench. Validation fails closed
 on artifact drift. The bundle remains a qualified local release
-candidate rather than a persistent archive: cross-engine forward
+candidate rather than a persistent archive: articulated subject-scaled
 contact, equipment-calibrated beam coupling, governed human evaluation,
 and external identifier deposit remain open.
 
@@ -7116,11 +7577,11 @@ order:
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \textbf{Spatial Forward-Contact Counterfactual.} Extend the executed
-  spatial common-state reference with independently solved compliant
-  two-hand contact, then carry the planar same-state torque-killswitch
-  into both forward formulations. Preserve force, couple, power, work,
-  and closure observables.
+  \textbf{Articulated Spatial Forward-Contact Counterfactual.} Replace
+  the executed hand-carriage reference with subject-scaled articulated
+  arms and calibrated grip interfaces while preserving the two-engine
+  same-state killswitch, force, couple, power, work, pathway, and
+  closure observables.
 \item
   \textbf{Calibrated Uncertainty and Constrained Control.} Extend the
   executed multivariable screen with population-informed distributions,
@@ -7162,6 +7623,8 @@ and the parameter-sensitivity results are recorded in
 \href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/e1d_parameter_sensitivity.json}{\texttt{data/e1d\_parameter\_sensitivity.json}}.
 The spatial common-state evidence is recorded in
 \href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json}{\texttt{data/spatial\_full\_body\_study.json}}.
+The two-engine spatial forward-contact evidence is recorded in
+\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json}{\texttt{data/spatial\_forward\_contact\_study.json}}.
 The uncertainty, identifiability, and control evidence is recorded in
 \href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.json}{\texttt{data/uncertainty\_control\_study.json}}.
 The distributed-shaft structural evidence is recorded in
@@ -7484,6 +7947,14 @@ Presentation and Wrist Kinematics.''} \emph{Sports Biomechanics} 11 (2):
 \bibitem[\citeproctext]{ref-bunn1972}
 Bunn, John W. 1972. \emph{Scientific Principles of Coaching}. 2nd ed.
 Englewood Cliffs, NJ: Prentice-Hall.
+
+\bibitem[\citeproctext]{ref-carpentier2019pinocchio}
+Carpentier, Justin, Guilhem Saurel, Gabriele Buondonno, Joseph Mirabel,
+Florent Lamiraux, Olivier Stasse, and Nicolas Mansard. 2019. {``The
+{Pinocchio} {C++} Library: A Fast and Flexible Implementation of Rigid
+Body Dynamics Algorithms and Their Analytical Derivatives.''} In
+\emph{2019 {IEEE/SICE} International Symposium on System Integration
+({SII})}, 614--19. \url{https://doi.org/10.1109/SII.2019.8700380}.
 
 \bibitem[\citeproctext]{ref-cheetham2008}
 Cheetham, Phillip J., Gregory A. Rose, Richard N. Hinrichs, Robert J.

@@ -52,7 +52,7 @@ def test_closed_loop_constraint_diagnostics_remain_rank_consistent(
     assert diagnostics["maximum_constraint_velocity_residual"] < 1e-12
 
 
-def test_model_discrepancy_table_distinguishes_executed_spatial_inverse_dynamics(
+def test_model_discrepancy_table_distinguishes_executed_spatial_tiers(
     record: dict,
 ) -> None:
     rows = {row["tier"]: row for row in record["model_discrepancy_table"]}
@@ -64,8 +64,15 @@ def test_model_discrepancy_table_distinguishes_executed_spatial_inverse_dynamics
     assert (
         rows["reduced_full_body_common_state_inverse_dynamics"]["status"] == "executed"
     )
-    assert rows["full_body_forward_cross_engine_contact"]["status"] == "not_executed"
-    assert "must not" in rows["full_body_forward_cross_engine_contact"]["boundary"]
+    assert rows["reduced_spatial_forward_cross_engine_contact"]["status"] == "executed"
+    assert (
+        rows["articulated_full_body_forward_cross_engine_contact"]["status"]
+        == "not_executed"
+    )
+    assert (
+        "must not"
+        in rows["articulated_full_body_forward_cross_engine_contact"]["boundary"]
+    )
 
 
 def test_headline_values_are_finite_and_bounded(record: dict) -> None:

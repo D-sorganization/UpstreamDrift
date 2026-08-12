@@ -258,16 +258,19 @@ Four stronger statements remain open:
 - **Passive Contact Origin Is Inconclusive.** The hand forces are inputs. A
   forward compliant two-hand solve must determine whether equivalent loads
   emerge after a distal command killswitch.
-- **Forward Cross-Engine Contact Is Untested.** Same-state inverse dynamics
-  removes trajectory divergence by design. Independent forward contact models
-  must still be event-aligned and compared.
+- **Forward Cross-Engine Contact Is Untested at This Tier.** Same-state inverse
+  dynamics removes trajectory divergence by design. The independently
+  integrated reduced contact experiment in @sec-spatial-forward-contact
+  addresses that separate estimand without promoting this prescribed-load
+  result.
 - **Anatomical Magnitude Is Unsupported.** The reduced tree and spherical
   inertias are not subject-specific anatomy, muscle, or tissue mechanics.
 - **Human Strategy Is Unsupported.** No measured trajectory or force record is
   held out for validation, and no coaching prescription follows from this
   mechanism experiment.
 
-The next phase therefore treats identifiability and uncertainty before control
+The next chapter tests the reduced contact mechanism under independent forward
+integration. Identifiability and uncertainty are then treated before control
 claims. Parameter compensation can otherwise make a structurally inadequate
 model reproduce one output while assigning the wrong contribution to contact,
 base motion, passive tissue, or actuation.

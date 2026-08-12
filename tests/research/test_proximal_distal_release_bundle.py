@@ -24,6 +24,7 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         "moving_base_flexible_club",
         "shaft_beam_reference",
         "spatial_common_state",
+        "spatial_forward_contact",
         "uncertainty_control",
         "experimental_readiness",
     ]
@@ -31,6 +32,10 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
     assert (
         manifest["claims"]["distributed_shaft_modal_reduction"]
         == "supported_on_synthetic_structural_case"
+    )
+    assert (
+        manifest["claims"]["passive_negative_couple_spatial_forward"]
+        == "supported_at_declared_reduced_contact_tier"
     )
     assert (
         manifest["archive"]["persistent_identifier_status"]

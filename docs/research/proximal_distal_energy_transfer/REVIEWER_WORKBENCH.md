@@ -55,6 +55,23 @@ calibration and is not yet coupled into the constrained two-hand rollout.
 - Evidence:
   [`spatial_full_body_study.json`](data/spatial_full_body_study.json)
 
+## Reduced Spatial Forward-Contact Tier
+
+- Achieved geometry and engine-solved force vectors:
+  [`fig_spatial_forward_contact_geometry.svg`](figures/fig_spatial_forward_contact_geometry.svg)
+- Native forward trajectory and wrench comparison:
+  [`fig_spatial_forward_cross_engine.svg`](figures/fig_spatial_forward_cross_engine.svg)
+- Exact same-state driver killswitch and pathway observables:
+  [`fig_spatial_forward_killswitch.svg`](figures/fig_spatial_forward_killswitch.svg)
+- Energy closure, geometry controls, and claim boundary:
+  [`fig_spatial_forward_energy_controls.svg`](figures/fig_spatial_forward_energy_controls.svg)
+- Evidence:
+  [`spatial_forward_contact_study.json`](data/spatial_forward_contact_study.json)
+
+This tier uses two finite-mass translational hand carriages and one rigid club.
+It is forward cross-engine mechanism evidence, not anatomical, tissue,
+physiological, equipment, or human validation.
+
 ## Uncertainty, Identifiability, and Control
 
 - Global intervals and PRCC:

@@ -250,16 +250,38 @@ out-of-plane motion and state-dependent spatial mass and bias terms.
 
 The result remains common-state inverse dynamics with prescribed hand loads.
 It does not solve closed contact, execute a zero-command forward branch, or
-identify passive biological load generation. Those limits create a narrower
-remaining boundary: forward spatial two-hand contact, rather than all spatial
-dynamics, is still open.
+identify passive biological load generation. The reduced forward-contact tier
+in @sec-spatial-forward-contact addresses the first two limitations without
+promoting either model to anatomical or biological evidence.
+
+## Reduced Spatial Forward Contact {#sec-ladder-spatial-forward-contact}
+
+The next tier replaces prescribed hand loads with two compliant point
+interfaces between finite-mass hand carriages and a free rigid club. MuJoCo and
+Pinocchio independently evaluate achieved kinematics, spatial-force mapping,
+mass, bias, gravity, and native forward dynamics. The two adapters share a
+hashed parameter record, contact law, semi-implicit update, and output schema.
+
+In the exact same-state driver-killswitch branch, the complete grounded driver
+is removed at 0.180 s. The force-generated swing-normal couple remains negative
+for 37.5 ms in both engines and reaches approximately -0.409 N m. Coincident
+grips remove the couple exactly; reversed moment arms reverse its sign below
+$9.2\times10^{-16}$ N m residual. Cross-engine trajectory, wrench,
+orientation, and energy gates pass, and the work--energy residual decreases
+monotonically as timestep is halved.
+
+This executes independent forward spatial contact at a reduced mechanism tier.
+It does not add anatomical arms, subject-specific inertias, muscles, measured
+grip compliance, a distributed shaft, or human observations. The evidence
+boundary therefore moves from “forward contact unexecuted” to “reduced forward
+contact supported; articulated human transport untested.”
 
 ## What Survives, What Changes, and What Remains Open {#sec-ladder-discrepancy}
 
 ![Model Discrepancy Matrix: Executed Mechanisms and the Remaining Boundary](figures/fig_ladder_discrepancy_matrix.pdf){#fig-ladder-discrepancy-matrix width=100%}
 
 The discrepancy matrix in @fig-ladder-discrepancy-matrix summarizes the
-evidence boundary. Seven statements survive the executed tiers:
+evidence boundary. Nine statements survive the executed tiers:
 
 1. interaction force may remain nonzero under zero instantaneous distal
    command;
@@ -272,14 +294,18 @@ evidence boundary. Seven statements survive the executed tiers:
 6. nonplanar generalized action is reproducible across the two declared
    inverse-dynamics formulations; and
 7. reversing spatial contact moment-arm geometry reverses the force-generated
-   club couple while coincident points remove it.
+   club couple while coincident points remove it;
+8. the negative force-generated couple persists after complete grounded-driver
+   removal in the declared reduced spatial compliant-contact model; and
+9. that forward-contact result transports through native MuJoCo and Pinocchio
+   dynamics within declared trajectory, wrench, orientation, and energy
+   regions.
 
 Other claims do not yet survive because they have not been tested. The present
-analysis does not show that the negative couple persists in a forward spatial
-two-hand killswitch, that its magnitude is invariant to a distributed shaft,
-or that independently authored native humanoid models produce matched force
-histories. Those are separate forward-contact, structural, and empirical
-questions.
+analysis does not show that the reduced result survives anatomical arms, that
+its magnitude is invariant to a distributed shaft, or that independently
+authored native humanoid models produce matched force histories. Those are
+separate structural and empirical questions.
 
 ### Tier-by-Tier Interpretation {#sec-ladder-tier-interpretation}
 
@@ -327,11 +353,19 @@ therefore isolates implementation transport and executes genuine out-of-plane
 dynamics. Its agreement is not anatomical validation because the model is
 reduced and its hand loads are prescribed.
 
-**Full-Body Forward Contact.** This tier remains open because it must add
-independently solved two-hand contact, state divergence, compliance, and event
-alignment without changing the observable. Contact parameters, stabilization,
-actuation, and numerical tolerances must be registered before the preferred
-outcome is inspected.
+**Reduced Spatial Forward Contact.** This tier adds independently solved
+two-hand compliance, state divergence, a same-state driver killswitch,
+long-axis rotation, swing-plane evolution, and reduced ground-pathway
+bookkeeping. It transports the declared mechanism through two native engines.
+Its hand carriages and declared contact law prevent anatomical, tissue, muscle,
+or human inference.
+
+**Articulated Full-Body Forward Contact.** This tier remains open because it
+must replace the carriages with subject-scaled articulated arms, retain
+independently solved two-hand contact, and preserve event alignment without
+changing the observable. Contact calibration, stabilization, actuation, and
+anatomical uncertainty must be registered before the preferred outcome is
+inspected.
 
 ### Cross-Engine Gate Definition {#sec-ladder-cross-engine-gate}
 
@@ -350,10 +384,11 @@ must retain those checks and additionally pass, at minimum:
   trajectory divergence.
 
 Engine capability is not evidence that the comparison was run. The
-machine-readable discrepancy table marks reduced full-body common-state
-inverse dynamics as `executed` and forward spatial contact as `not_executed`.
-This split prevents same-state agreement from silently becoming a forward
-contact or anatomical claim.
+machine-readable discrepancy table separately marks reduced full-body
+common-state inverse dynamics and reduced two-engine forward contact as
+`executed`; articulated full-body forward contact remains `not_executed`. This
+split prevents a carriage-model result from silently becoming an anatomical
+claim.
 
 ## Strategy Implications Across the Ladder {#sec-ladder-strategy}
 
@@ -388,10 +423,13 @@ The ladder remains deliberately incomplete:
   spatial beam;
 - the reduced full-body tier uses prescribed hand loads and spherical inertia
   elements rather than solved contact and subject-specific anatomy; and
-- no forward spatial contact comparison is represented as complete.
+- the forward spatial tier uses two translational hand carriages, declared
+  Kelvin--Voigt contacts, and a rigid club rather than anatomical arms,
+  measured tissue, or the distributed shaft.
 
-The next decisive test is an event-aligned forward spatial experiment with
-independently solved two-hand contact that emits the same common schema and
-supports an exact same-state command-removal branch. Failure of force/moment
-balance, power invariance, contact-rank agreement, or matched-event parity at
-that tier would falsify transport of the lower-order passive-persistence claim.
+The next decisive model test replaces the carriages with subject-scaled
+articulated arms and couples the distributed shaft while emitting the same
+common schema and preserving the exact same-state command-removal branch.
+Failure of force/moment balance, power invariance, contact-rank agreement, or
+matched-event parity at that tier would falsify transport of the reduced
+passive-persistence claim.

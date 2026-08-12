@@ -48,7 +48,7 @@ to `main`; use Git history and linked issues for completed chronology.
   manifest/checksums, citation/data/license records, read-only validation, and
   a claim-first reviewer workbench. The visually inspected 139-page optimized
   PDF is 1,012,137 bytes with 122 URI links and 171 outlines.
-- **Current Phase 7:** `feat/8426-phase-7-beam-reference` reuses the canonical
+- **Phase 7:** commit `8867dad9a` reuses the canonical
   Euler--Bernoulli finite-element shaft, adds declared tip inertia, identifies
   a synthetic two-parameter modal case, and compares one-mode and six-mode
   responses. It includes deterministic JSON/NPZ evidence and three paired
@@ -59,14 +59,29 @@ to `main`; use Git history and linked issues for completed chronology.
   Work--energy residual is at most `2.88e-7` J. Identification recovers only a
   declared synthetic truth; it is not equipment calibration, and the beam is
   not yet coupled into the two-hand KKT solve.
+- **Current Phase 8:** `feat/8426-phase-8-spatial-forward-contact` executes
+  native MuJoCo and Pinocchio forward dynamics for one hashed reduced model
+  with two finite-mass hand carriages, paired compliant contacts, a free rigid
+  club, and no direct club actuation. It records complete wrenches, energy,
+  long-axis rotation, swing-plane evolution, and a reduced ground pathway.
+- **Phase 8 result:** cross-engine position RMS is 12.75 micrometres and
+  relative wrench RMS is 0.256%. An exact same-state grounded-driver
+  killswitch retains a negative swing-normal couple for 37.5 ms and reaches
+  -0.409 N m in both engines. Coincident grips give zero couple, reversed arms
+  reverse sign below `9.2e-16` N m, and the work--energy residual halves with
+  timestep. This supports the reduced carriage model only, not anatomy,
+  tissue, muscle, equipment, human use, or coaching. The Phase 8 source hashes
+  close, the full research suite passes apart from the documented Wave 6
+  deselection, and the visually inspected 150-page PDF is 1,038,329 bytes with
+  130 URI links and 187 outline entries after lossless compaction.
 
 ## Remaining Scientific Gates
 
 1. Couple an equipment-calibrated distributed/modal shaft into the forward
    moving-base two-hand solve and repeat contact/energy interventions.
-2. Execute independently solved forward spatial two-hand contact in two actual
-   engine adapters, including constraints, interface wrenches, energy, events,
-   long-axis club rotation, swing-plane evolution, and ground pathways.
+2. Replace the reduced spatial hand carriages with subject-scaled articulated
+   arms and calibrated grip interfaces while preserving the two-engine
+   killswitch, wrench, energy, event, rotation, plane, and pathway contracts.
 3. Evaluate the frozen protocol on governed participant-held-out human data;
    never substitute synthetic readiness for empirical evidence.
 4. Deliver synchronized 3-D reviewer views and golden tutorials, synchronize
@@ -82,10 +97,11 @@ to `main`; use Git history and linked issues for completed chronology.
 5. `scripts/research/proximal_distal_energy/shaft_beam_reference.py`
 6. `src/shared/python/physics/flexible_shaft.py`
 7. `scripts/research/proximal_distal_energy/spatial_full_body.py`
-8. `scripts/research/proximal_distal_energy/uncertainty_control.py`
-9. `scripts/research/proximal_distal_energy/experimental_protocol.py`
-10. `scripts/research/proximal_distal_energy/release_bundle.py`
-11. `CLAUDE.md` and `AGENTS.md`
+8. `scripts/research/proximal_distal_energy/spatial_forward_study.py`
+9. `scripts/research/proximal_distal_energy/uncertainty_control.py`
+10. `scripts/research/proximal_distal_energy/experimental_protocol.py`
+11. `scripts/research/proximal_distal_energy/release_bundle.py`
+12. `CLAUDE.md` and `AGENTS.md`
 
 ## Other Current Context
 

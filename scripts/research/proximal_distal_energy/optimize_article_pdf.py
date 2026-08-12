@@ -60,6 +60,7 @@ def optimize_pdf(
         document.save(
             temporary,
             garbage=4,
+            clean=True,
             deflate=True,
             deflate_images=True,
             deflate_fonts=True,

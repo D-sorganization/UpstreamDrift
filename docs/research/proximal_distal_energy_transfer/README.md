@@ -16,7 +16,13 @@ two-hand constraint rank, and proper 3-D frame invariance. A reduced full-body
 common-state tier adds genuine nonplanar motion and compares MuJoCo inverse
 dynamics with an independent Lagrange--Christoffel formulation built from the
 same hashed model. It preserves the geometry sign intervention while keeping
-passive and forward-contact claims explicitly open. A three-tier
+passive and forward-contact claims open at that tier. A subsequent reduced
+spatial experiment independently advances native MuJoCo and Pinocchio forward
+dynamics with finite-mass hand carriages, paired compliant interfaces, an
+exact same-state grounded-driver killswitch, long-axis rotation, swing-plane
+evolution, and ground-pathway bookkeeping. It supports reduced forward-contact
+transport while keeping anatomical, muscle, equipment, human, and coaching
+claims explicitly open. A three-tier
 hand-path attribution study now separates stitched pointwise ZTCF drift,
 same-state control, and separately defined ZVCF reactions for force vectors,
 impulse, power, work, every modeled joint, and four neutral time windows. A
@@ -95,6 +101,7 @@ python3 -m scripts.research.proximal_distal_energy.run_forward_two_arm_study
 python3 -m scripts.research.proximal_distal_energy.run_moving_base_flexible_study
 python3 -m scripts.research.proximal_distal_energy.run_shaft_beam_reference
 python3 -m scripts.research.proximal_distal_energy.run_spatial_full_body_study
+python3 -m scripts.research.proximal_distal_energy.run_spatial_forward_contact_study
 python3 -m scripts.research.proximal_distal_energy.run_uncertainty_control_study
 python3 -m scripts.research.proximal_distal_energy.run_experimental_protocol_dry_run
 python3 -m scripts.research.proximal_distal_energy.qualify_open_release validate
@@ -113,6 +120,7 @@ python3 -m scripts.research.proximal_distal_energy.make_forward_two_arm_figures
 python3 -m scripts.research.proximal_distal_energy.make_moving_base_flexible_figures
 python3 -m scripts.research.proximal_distal_energy.make_shaft_beam_reference_figures
 python3 -m scripts.research.proximal_distal_energy.make_spatial_full_body_figures
+python3 -m scripts.research.proximal_distal_energy.make_spatial_forward_contact_figures
 python3 -m scripts.research.proximal_distal_energy.make_uncertainty_control_figures
 # document
 cd docs/research/proximal_distal_energy_transfer
@@ -128,7 +136,11 @@ compaction and fails if the page, URI-link, or outline contract changes.
 Experiments are deterministic. The open-chain studies use fixed-step RK4; the
 forward constrained two-hand study uses velocity Verlet with mass-metric
 position and velocity projection. Parameters and numerical contracts are
-recorded in `data/*.json`.
+recorded in `data/*.json`. Re-executing the two-engine spatial forward study
+also requires the declared `mujoco` and `pinocchio` extras. The native
+Pinocchio `pin` wheel used for this archive executes in Linux/WSL; the adapters
+reject unrelated packages that expose the same import name without the native
+model and ABA APIs.
 
 ## Evidence Boundaries
 
@@ -150,8 +162,12 @@ recorded in `data/*.json`.
   prescribed mobile-hub inverse dynamics, planar closed-loop geometry, proper
   3-D frame transformations, and reduced full-body nonplanar common-state
   inverse dynamics in two independent formulations. The spatial tier prescribes
-  hand loads; forward closed contact and passive load generation remain
-  explicitly untested.
+  hand loads and therefore cannot establish passive load origin by itself.
+- The reduced spatial forward-contact tier independently executes native
+  MuJoCo and Pinocchio trajectories with two translational hand carriages and a
+  rigid club. Its compliant-contact killswitch supports mechanism persistence
+  only for that declared model; it is not articulated anatomy, measured grip
+  tissue, a distributed shaft, muscle coordination, or human evidence.
 - The hand-path evidence uses two forward-simulated open-chain reference cases
   and one prescribed, constraint-consistent two-arm local sweep. Its normalized
   time quartiles are bookkeeping windows, not anatomical swing phases. ZVCF
