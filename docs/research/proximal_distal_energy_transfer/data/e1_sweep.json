@@ -1,6 +1,6 @@
 {
   "provenance": {
-    "git_sha": "92bf58e",
+    "git_sha": "e495ce9da",
     "dt_s": 0.001,
     "horizon": 900,
     "initial_q_rad": [-2.2, -1.57],
@@ -21,9 +21,13 @@
       "wrist_drive_nm": 0.0,
       "wrist_restrain_nm": 0.0,
       "onset_s": null,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.36990090543102033,
       "clubhead_speed_mps": 34.15364542695601,
-      "theta1_at_impact_rad": 1.1689639287399873
+      "theta1_at_impact_rad": 1.1689639287399873,
+      "candidate_t_crossing_s": 0.36990090543102033,
+      "candidate_clubhead_speed_mps": 34.15364542695601,
+      "candidate_theta1_at_crossing_rad": 1.1689639287399873
     },
     {
       "profile": "drive_only",
@@ -31,9 +35,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 0.0,
       "onset_s": 0.0,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.32670359932775184,
       "clubhead_speed_mps": 28.9182969487125,
-      "theta1_at_impact_rad": -0.35668227029510524
+      "theta1_at_impact_rad": -0.35668227029510524,
+      "candidate_t_crossing_s": 0.32670359932775184,
+      "candidate_clubhead_speed_mps": 28.9182969487125,
+      "candidate_theta1_at_crossing_rad": -0.35668227029510524
     },
     {
       "profile": "restrain_then_drive",
@@ -41,9 +49,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 5.0,
       "onset_s": 0.0,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.32670359932775184,
       "clubhead_speed_mps": 28.9182969487125,
-      "theta1_at_impact_rad": -0.35668227029510524
+      "theta1_at_impact_rad": -0.35668227029510524,
+      "candidate_t_crossing_s": 0.32670359932775184,
+      "candidate_clubhead_speed_mps": 28.9182969487125,
+      "candidate_theta1_at_crossing_rad": -0.35668227029510524
     },
     {
       "profile": "restrain_then_drive",
@@ -51,9 +63,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 10.0,
       "onset_s": 0.0,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.32670359932775184,
       "clubhead_speed_mps": 28.9182969487125,
-      "theta1_at_impact_rad": -0.35668227029510524
+      "theta1_at_impact_rad": -0.35668227029510524,
+      "candidate_t_crossing_s": 0.32670359932775184,
+      "candidate_clubhead_speed_mps": 28.9182969487125,
+      "candidate_theta1_at_crossing_rad": -0.35668227029510524
     },
     {
       "profile": "drive_only",
@@ -61,9 +77,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 0.0,
       "onset_s": 0.025,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.32736847607429514,
-      "clubhead_speed_mps": 30.90449116693356,
-      "theta1_at_impact_rad": -0.2709883233407564
+      "clubhead_speed_mps": 30.904491166933553,
+      "theta1_at_impact_rad": -0.2709883233407564,
+      "candidate_t_crossing_s": 0.32736847607429514,
+      "candidate_clubhead_speed_mps": 30.904491166933553,
+      "candidate_theta1_at_crossing_rad": -0.2709883233407564
     },
     {
       "profile": "restrain_then_drive",
@@ -71,9 +91,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 5.0,
       "onset_s": 0.025,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.3276383984537785,
       "clubhead_speed_mps": 31.559289362532162,
-      "theta1_at_impact_rad": -0.23760398166941774
+      "theta1_at_impact_rad": -0.23760398166941774,
+      "candidate_t_crossing_s": 0.3276383984537785,
+      "candidate_clubhead_speed_mps": 31.559289362532162,
+      "candidate_theta1_at_crossing_rad": -0.23760398166941774
     },
     {
       "profile": "restrain_then_drive",
@@ -81,9 +105,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 10.0,
       "onset_s": 0.025,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.3279557143607142,
       "clubhead_speed_mps": 32.208752785066494,
-      "theta1_at_impact_rad": -0.20136963875656408
+      "theta1_at_impact_rad": -0.20136963875656408,
+      "candidate_t_crossing_s": 0.3279557143607142,
+      "candidate_clubhead_speed_mps": 32.208752785066494,
+      "candidate_theta1_at_crossing_rad": -0.20136963875656408
     },
     {
       "profile": "drive_only",
@@ -91,9 +119,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 0.0,
       "onset_s": 0.05,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.32901970503891426,
       "clubhead_speed_mps": 32.73598254590704,
-      "theta1_at_impact_rad": -0.16191723559968715
+      "theta1_at_impact_rad": -0.16191723559968715,
+      "candidate_t_crossing_s": 0.32901970503891426,
+      "candidate_clubhead_speed_mps": 32.73598254590704,
+      "candidate_theta1_at_crossing_rad": -0.16191723559968715
     },
     {
       "profile": "restrain_then_drive",
@@ -101,9 +133,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 5.0,
       "onset_s": 0.05,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.33012024280034297,
-      "clubhead_speed_mps": 33.95710400579324,
-      "theta1_at_impact_rad": -0.0754825011679662
+      "clubhead_speed_mps": 33.95710400579325,
+      "theta1_at_impact_rad": -0.07548250116796618,
+      "candidate_t_crossing_s": 0.33012024280034297,
+      "candidate_clubhead_speed_mps": 33.95710400579325,
+      "candidate_theta1_at_crossing_rad": -0.07548250116796618
     },
     {
       "profile": "restrain_then_drive",
@@ -111,9 +147,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 10.0,
       "onset_s": 0.05,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.3315851350728154,
       "clubhead_speed_mps": 35.13487657170004,
-      "theta1_at_impact_rad": 0.026107723112063417
+      "theta1_at_impact_rad": 0.026107723112063417,
+      "candidate_t_crossing_s": 0.3315851350728154,
+      "candidate_clubhead_speed_mps": 35.13487657170004,
+      "candidate_theta1_at_crossing_rad": 0.026107723112063417
     },
     {
       "profile": "drive_only",
@@ -121,9 +161,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 0.0,
       "onset_s": 0.075,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.33159519453610786,
       "clubhead_speed_mps": 34.359167152554654,
-      "theta1_at_impact_rad": -0.0330541154710932
+      "theta1_at_impact_rad": -0.0330541154710932,
+      "candidate_t_crossing_s": 0.33159519453610786,
+      "candidate_clubhead_speed_mps": 34.359167152554654,
+      "candidate_theta1_at_crossing_rad": -0.0330541154710932
     },
     {
       "profile": "restrain_then_drive",
@@ -131,9 +175,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 5.0,
       "onset_s": 0.075,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.3342568964169373,
       "clubhead_speed_mps": 36.00768407240919,
-      "theta1_at_impact_rad": 0.12886844222241667
+      "theta1_at_impact_rad": 0.12886844222241667,
+      "candidate_t_crossing_s": 0.3342568964169373,
+      "candidate_clubhead_speed_mps": 36.00768407240919,
+      "candidate_theta1_at_crossing_rad": 0.12886844222241667
     },
     {
       "profile": "restrain_then_drive",
@@ -141,9 +189,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 10.0,
       "onset_s": 0.075,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.3382821087095357,
       "clubhead_speed_mps": 37.487081331945106,
-      "theta1_at_impact_rad": 0.33846735749584494
+      "theta1_at_impact_rad": 0.33846735749584494,
+      "candidate_t_crossing_s": 0.3382821087095357,
+      "candidate_clubhead_speed_mps": 37.487081331945106,
+      "candidate_theta1_at_crossing_rad": 0.33846735749584494
     },
     {
       "profile": "drive_only",
@@ -151,9 +203,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 0.0,
       "onset_s": 0.1,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.33496923779257076,
       "clubhead_speed_mps": 35.735032577723025,
-      "theta1_at_impact_rad": 0.1110136597552634
+      "theta1_at_impact_rad": 0.1110136597552634,
+      "candidate_t_crossing_s": 0.33496923779257076,
+      "candidate_clubhead_speed_mps": 35.735032577723025,
+      "candidate_theta1_at_crossing_rad": 0.1110136597552634
     },
     {
       "profile": "restrain_then_drive",
@@ -161,9 +217,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 5.0,
       "onset_s": 0.1,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.34010255046501214,
       "clubhead_speed_mps": 37.61076972246627,
-      "theta1_at_impact_rad": 0.37489933618179927
+      "theta1_at_impact_rad": 0.37489933618179927,
+      "candidate_t_crossing_s": 0.34010255046501214,
+      "candidate_clubhead_speed_mps": 37.61076972246627,
+      "candidate_theta1_at_crossing_rad": 0.37489933618179927
     },
     {
       "profile": "restrain_then_drive",
@@ -171,9 +231,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 10.0,
       "onset_s": 0.1,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.3492558238610142,
       "clubhead_speed_mps": 38.85378591434185,
-      "theta1_at_impact_rad": 0.7657949744160512
+      "theta1_at_impact_rad": 0.7657949744160512,
+      "candidate_t_crossing_s": 0.3492558238610142,
+      "candidate_clubhead_speed_mps": 38.85378591434185,
+      "candidate_theta1_at_crossing_rad": 0.7657949744160512
     },
     {
       "profile": "drive_only",
@@ -181,9 +245,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 0.0,
       "onset_s": 0.125,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.3389638448476103,
       "clubhead_speed_mps": 36.83472677239652,
-      "theta1_at_impact_rad": 0.2647089641179028
+      "theta1_at_impact_rad": 0.2647089641179028,
+      "candidate_t_crossing_s": 0.3389638448476103,
+      "candidate_clubhead_speed_mps": 36.83472677239652,
+      "candidate_theta1_at_crossing_rad": 0.2647089641179028
     },
     {
       "profile": "restrain_then_drive",
@@ -191,9 +259,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 5.0,
       "onset_s": 0.125,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.34769516360133446,
       "clubhead_speed_mps": 38.625296426593714,
-      "theta1_at_impact_rad": 0.6622864212498377
+      "theta1_at_impact_rad": 0.6622864212498377,
+      "candidate_t_crossing_s": 0.34769516360133446,
+      "candidate_clubhead_speed_mps": 38.625296426593714,
+      "candidate_theta1_at_crossing_rad": 0.6622864212498377
     },
     {
       "profile": "restrain_then_drive",
@@ -201,9 +273,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 10.0,
       "onset_s": 0.125,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.3678509660296725,
       "clubhead_speed_mps": 37.53841241952049,
-      "theta1_at_impact_rad": 1.3898865895080568
+      "theta1_at_impact_rad": 1.3898865895080568,
+      "candidate_t_crossing_s": 0.3678509660296725,
+      "candidate_clubhead_speed_mps": 37.53841241952049,
+      "candidate_theta1_at_crossing_rad": 1.3898865895080568
     },
     {
       "profile": "drive_only",
@@ -211,9 +287,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 0.0,
       "onset_s": 0.15,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.3433567228809212,
       "clubhead_speed_mps": 37.64285175925903,
-      "theta1_at_impact_rad": 0.42141680105447754
+      "theta1_at_impact_rad": 0.42141680105447754,
+      "candidate_t_crossing_s": 0.3433567228809212,
+      "candidate_clubhead_speed_mps": 37.64285175925903,
+      "candidate_theta1_at_crossing_rad": 0.42141680105447754
     },
     {
       "profile": "restrain_then_drive",
@@ -221,9 +301,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 5.0,
       "onset_s": 0.15,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.3570962072229932,
       "clubhead_speed_mps": 38.79527184599661,
-      "theta1_at_impact_rad": 0.9906267327411253
+      "theta1_at_impact_rad": 0.9906267327411253,
+      "candidate_t_crossing_s": 0.3570962072229932,
+      "candidate_clubhead_speed_mps": 38.79527184599661,
+      "candidate_theta1_at_crossing_rad": 0.9906267327411253
     },
     {
       "profile": "restrain_then_drive",
@@ -231,9 +315,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 10.0,
       "onset_s": 0.15,
+      "impact_status": "crossing_outside_registered_delivery_zone",
       "t_impact_s": null,
       "clubhead_speed_mps": null,
-      "theta1_at_impact_rad": null
+      "theta1_at_impact_rad": null,
+      "candidate_t_crossing_s": 0.4158962423924845,
+      "candidate_clubhead_speed_mps": 18.985014400331284,
+      "candidate_theta1_at_crossing_rad": 2.658981313897703
     },
     {
       "profile": "drive_only",
@@ -241,9 +329,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 0.0,
       "onset_s": 0.175,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.3478992295654995,
       "clubhead_speed_mps": 38.158796945870016,
-      "theta1_at_impact_rad": 0.5739090587991265
+      "theta1_at_impact_rad": 0.5739090587991265,
+      "candidate_t_crossing_s": 0.3478992295654995,
+      "candidate_clubhead_speed_mps": 38.158796945870016,
+      "candidate_theta1_at_crossing_rad": 0.5739090587991265
     },
     {
       "profile": "restrain_then_drive",
@@ -251,9 +343,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 5.0,
       "onset_s": 0.175,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.36848108150207776,
       "clubhead_speed_mps": 37.64194191062843,
-      "theta1_at_impact_rad": 1.3599284648289378
+      "theta1_at_impact_rad": 1.3599284648289378,
+      "candidate_t_crossing_s": 0.36848108150207776,
+      "candidate_clubhead_speed_mps": 37.64194191062843,
+      "candidate_theta1_at_crossing_rad": 1.3599284648289378
     },
     {
       "profile": "restrain_then_drive",
@@ -261,9 +357,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 10.0,
       "onset_s": 0.175,
+      "impact_status": "crossing_outside_registered_delivery_zone",
       "t_impact_s": null,
       "clubhead_speed_mps": null,
-      "theta1_at_impact_rad": null
+      "theta1_at_impact_rad": null,
+      "candidate_t_crossing_s": 0.628476232652166,
+      "candidate_clubhead_speed_mps": 50.49737369361943,
+      "candidate_theta1_at_crossing_rad": 6.271575926546789
     },
     {
       "profile": "drive_only",
@@ -271,9 +371,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 0.0,
       "onset_s": 0.2,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.35234432212815464,
       "clubhead_speed_mps": 38.395335750230586,
-      "theta1_at_impact_rad": 0.7151663122457012
+      "theta1_at_impact_rad": 0.7151663122457012,
+      "candidate_t_crossing_s": 0.35234432212815464,
+      "candidate_clubhead_speed_mps": 38.395335750230586,
+      "candidate_theta1_at_crossing_rad": 0.7151663122457012
     },
     {
       "profile": "restrain_then_drive",
@@ -281,9 +385,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 5.0,
       "onset_s": 0.2,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.3823652961519008,
       "clubhead_speed_mps": 34.317714336343336,
-      "theta1_at_impact_rad": 1.7743104224486521
+      "theta1_at_impact_rad": 1.7743104224486521,
+      "candidate_t_crossing_s": 0.3823652961519008,
+      "candidate_clubhead_speed_mps": 34.317714336343336,
+      "candidate_theta1_at_crossing_rad": 1.7743104224486521
     },
     {
       "profile": "restrain_then_drive",
@@ -291,9 +399,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 10.0,
       "onset_s": 0.2,
+      "impact_status": "crossing_outside_registered_delivery_zone",
       "t_impact_s": null,
       "clubhead_speed_mps": null,
-      "theta1_at_impact_rad": null
+      "theta1_at_impact_rad": null,
+      "candidate_t_crossing_s": 0.6237681239468515,
+      "candidate_clubhead_speed_mps": 46.09285525257685,
+      "candidate_theta1_at_crossing_rad": 5.747578479440967
     },
     {
       "profile": "drive_only",
@@ -301,9 +413,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 0.0,
       "onset_s": 0.225,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.3564869709754787,
       "clubhead_speed_mps": 38.382672979153995,
-      "theta1_at_impact_rad": 0.839625451414648
+      "theta1_at_impact_rad": 0.839625451414648,
+      "candidate_t_crossing_s": 0.3564869709754787,
+      "candidate_clubhead_speed_mps": 38.382672979153995,
+      "candidate_theta1_at_crossing_rad": 0.839625451414648
     },
     {
       "profile": "restrain_then_drive",
@@ -311,9 +427,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 5.0,
       "onset_s": 0.225,
+      "impact_status": "crossing_outside_registered_delivery_zone",
       "t_impact_s": null,
       "clubhead_speed_mps": null,
-      "theta1_at_impact_rad": null
+      "theta1_at_impact_rad": null,
+      "candidate_t_crossing_s": 0.4002186478275693,
+      "candidate_clubhead_speed_mps": 27.265409449318717,
+      "candidate_theta1_at_crossing_rad": 2.2543389086715013
     },
     {
       "profile": "restrain_then_drive",
@@ -321,9 +441,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 10.0,
       "onset_s": 0.225,
+      "impact_status": "crossing_outside_registered_delivery_zone",
       "t_impact_s": null,
       "clubhead_speed_mps": null,
-      "theta1_at_impact_rad": null
+      "theta1_at_impact_rad": null,
+      "candidate_t_crossing_s": 0.6201233014511245,
+      "candidate_clubhead_speed_mps": 43.38892666564435,
+      "candidate_theta1_at_crossing_rad": 5.538955275516969
     },
     {
       "profile": "drive_only",
@@ -331,9 +455,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 0.0,
       "onset_s": 0.25,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.36019075968298714,
       "clubhead_speed_mps": 38.15559264474086,
-      "theta1_at_impact_rad": 0.9440334346529021
+      "theta1_at_impact_rad": 0.9440334346529021,
+      "candidate_t_crossing_s": 0.36019075968298714,
+      "candidate_clubhead_speed_mps": 38.15559264474086,
+      "candidate_theta1_at_crossing_rad": 0.9440334346529021
     },
     {
       "profile": "restrain_then_drive",
@@ -341,9 +469,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 5.0,
       "onset_s": 0.25,
+      "impact_status": "crossing_outside_registered_delivery_zone",
       "t_impact_s": null,
       "clubhead_speed_mps": null,
-      "theta1_at_impact_rad": null
+      "theta1_at_impact_rad": null,
+      "candidate_t_crossing_s": 0.4273214850861099,
+      "candidate_clubhead_speed_mps": 13.386925210625051,
+      "candidate_theta1_at_crossing_rad": 2.894996952106335
     },
     {
       "profile": "restrain_then_drive",
@@ -351,9 +483,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 10.0,
       "onset_s": 0.25,
+      "impact_status": "crossing_outside_registered_delivery_zone",
       "t_impact_s": null,
       "clubhead_speed_mps": null,
-      "theta1_at_impact_rad": null
+      "theta1_at_impact_rad": null,
+      "candidate_t_crossing_s": 0.6157074656068572,
+      "candidate_clubhead_speed_mps": 42.584158107649635,
+      "candidate_theta1_at_crossing_rad": 5.431500819129369
     },
     {
       "profile": "drive_only",
@@ -361,9 +497,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 0.0,
       "onset_s": 0.275,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.3633892031656772,
       "clubhead_speed_mps": 37.73788024603041,
-      "theta1_at_impact_rad": 1.0275443171721577
+      "theta1_at_impact_rad": 1.0275443171721577,
+      "candidate_t_crossing_s": 0.3633892031656772,
+      "candidate_clubhead_speed_mps": 37.73788024603041,
+      "candidate_theta1_at_crossing_rad": 1.0275443171721577
     },
     {
       "profile": "restrain_then_drive",
@@ -371,9 +511,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 5.0,
       "onset_s": 0.275,
+      "impact_status": "crossing_outside_registered_delivery_zone",
       "t_impact_s": null,
       "clubhead_speed_mps": null,
-      "theta1_at_impact_rad": null
+      "theta1_at_impact_rad": null,
+      "candidate_t_crossing_s": 0.6420192321314886,
+      "candidate_clubhead_speed_mps": 38.556813650210664,
+      "candidate_theta1_at_crossing_rad": 7.713132122323741
     },
     {
       "profile": "restrain_then_drive",
@@ -381,9 +525,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 10.0,
       "onset_s": 0.275,
+      "impact_status": "crossing_outside_registered_delivery_zone",
       "t_impact_s": null,
       "clubhead_speed_mps": null,
-      "theta1_at_impact_rad": null
+      "theta1_at_impact_rad": null,
+      "candidate_t_crossing_s": 0.6104418419306374,
+      "candidate_clubhead_speed_mps": 43.50296145933055,
+      "candidate_theta1_at_crossing_rad": 5.381921435931217
     },
     {
       "profile": "drive_only",
@@ -391,9 +539,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 0.0,
       "onset_s": 0.3,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.3660554265029347,
       "clubhead_speed_mps": 37.13214178525125,
-      "theta1_at_impact_rad": 1.0910404899017014
+      "theta1_at_impact_rad": 1.0910404899017014,
+      "candidate_t_crossing_s": 0.3660554265029347,
+      "candidate_clubhead_speed_mps": 37.13214178525125,
+      "candidate_theta1_at_crossing_rad": 1.0910404899017014
     },
     {
       "profile": "restrain_then_drive",
@@ -401,9 +553,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 5.0,
       "onset_s": 0.3,
+      "impact_status": "crossing_outside_registered_delivery_zone",
       "t_impact_s": null,
       "clubhead_speed_mps": null,
-      "theta1_at_impact_rad": null
+      "theta1_at_impact_rad": null,
+      "candidate_t_crossing_s": 0.6349766494312462,
+      "candidate_clubhead_speed_mps": 48.78656664208444,
+      "candidate_theta1_at_crossing_rad": 7.158725591244913
     },
     {
       "profile": "restrain_then_drive",
@@ -411,9 +567,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 10.0,
       "onset_s": 0.3,
+      "impact_status": "crossing_outside_registered_delivery_zone",
       "t_impact_s": null,
       "clubhead_speed_mps": null,
-      "theta1_at_impact_rad": null
+      "theta1_at_impact_rad": null,
+      "candidate_t_crossing_s": 0.6049980999875775,
+      "candidate_clubhead_speed_mps": 46.251112303976505,
+      "candidate_theta1_at_crossing_rad": 5.400191235508079
     },
     {
       "profile": "drive_only",
@@ -421,9 +581,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 0.0,
       "onset_s": 0.325,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.36814044606897905,
       "clubhead_speed_mps": 36.31161790226582,
-      "theta1_at_impact_rad": 1.1357373788436051
+      "theta1_at_impact_rad": 1.1357373788436051,
+      "candidate_t_crossing_s": 0.36814044606897905,
+      "candidate_clubhead_speed_mps": 36.31161790226582,
+      "candidate_theta1_at_crossing_rad": 1.1357373788436051
     },
     {
       "profile": "restrain_then_drive",
@@ -431,9 +595,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 5.0,
       "onset_s": 0.325,
+      "impact_status": "crossing_outside_registered_delivery_zone",
       "t_impact_s": null,
       "clubhead_speed_mps": null,
-      "theta1_at_impact_rad": null
+      "theta1_at_impact_rad": null,
+      "candidate_t_crossing_s": 0.6311577303474565,
+      "candidate_clubhead_speed_mps": 51.144483189148275,
+      "candidate_theta1_at_crossing_rad": 6.90396418355198
     },
     {
       "profile": "restrain_then_drive",
@@ -441,9 +609,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 10.0,
       "onset_s": 0.325,
+      "impact_status": "crossing_outside_registered_delivery_zone",
       "t_impact_s": null,
       "clubhead_speed_mps": null,
-      "theta1_at_impact_rad": null
+      "theta1_at_impact_rad": null,
+      "candidate_t_crossing_s": 0.6010211867280215,
+      "candidate_clubhead_speed_mps": 51.176689036911775,
+      "candidate_theta1_at_crossing_rad": 5.546629501011928
     },
     {
       "profile": "drive_only",
@@ -451,9 +623,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 0.0,
       "onset_s": 0.35,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.369509384308425,
       "clubhead_speed_mps": 35.231765986179795,
-      "theta1_at_impact_rad": 1.1620629798587463
+      "theta1_at_impact_rad": 1.1620629798587463,
+      "candidate_t_crossing_s": 0.369509384308425,
+      "candidate_clubhead_speed_mps": 35.231765986179795,
+      "candidate_theta1_at_crossing_rad": 1.1620629798587463
     },
     {
       "profile": "restrain_then_drive",
@@ -461,9 +637,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 5.0,
       "onset_s": 0.35,
+      "impact_status": "crossing_outside_registered_delivery_zone",
       "t_impact_s": null,
       "clubhead_speed_mps": null,
-      "theta1_at_impact_rad": null
+      "theta1_at_impact_rad": null,
+      "candidate_t_crossing_s": 0.628500586459516,
+      "candidate_clubhead_speed_mps": 52.22362620931008,
+      "candidate_theta1_at_crossing_rad": 6.776439482110612
     },
     {
       "profile": "restrain_then_drive",
@@ -471,9 +651,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 10.0,
       "onset_s": 0.35,
+      "impact_status": "crossing_outside_registered_delivery_zone",
       "t_impact_s": null,
       "clubhead_speed_mps": null,
-      "theta1_at_impact_rad": null
+      "theta1_at_impact_rad": null,
+      "candidate_t_crossing_s": 0.6030156266659832,
+      "candidate_clubhead_speed_mps": 58.235960024500955,
+      "candidate_theta1_at_crossing_rad": 6.013752521360232
     },
     {
       "profile": "passive",
@@ -481,9 +665,13 @@
       "wrist_drive_nm": 0.0,
       "wrist_restrain_nm": 0.0,
       "onset_s": null,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.2989809654604518,
       "clubhead_speed_mps": 43.12958067086403,
-      "theta1_at_impact_rad": 1.1563215661890636
+      "theta1_at_impact_rad": 1.1563215661890636,
+      "candidate_t_crossing_s": 0.2989809654604518,
+      "candidate_clubhead_speed_mps": 43.12958067086403,
+      "candidate_theta1_at_crossing_rad": 1.1563215661890636
     },
     {
       "profile": "drive_only",
@@ -491,9 +679,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 0.0,
       "onset_s": 0.0,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.2775306421843149,
       "clubhead_speed_mps": 38.5168781332826,
-      "theta1_at_impact_rad": 0.01212376881840049
+      "theta1_at_impact_rad": 0.01212376881840049,
+      "candidate_t_crossing_s": 0.2775306421843149,
+      "candidate_clubhead_speed_mps": 38.5168781332826,
+      "candidate_theta1_at_crossing_rad": 0.01212376881840049
     },
     {
       "profile": "restrain_then_drive",
@@ -501,9 +693,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 5.0,
       "onset_s": 0.0,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.2775306421843149,
       "clubhead_speed_mps": 38.5168781332826,
-      "theta1_at_impact_rad": 0.01212376881840049
+      "theta1_at_impact_rad": 0.01212376881840049,
+      "candidate_t_crossing_s": 0.2775306421843149,
+      "candidate_clubhead_speed_mps": 38.5168781332826,
+      "candidate_theta1_at_crossing_rad": 0.01212376881840049
     },
     {
       "profile": "restrain_then_drive",
@@ -511,9 +707,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 10.0,
       "onset_s": 0.0,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.2775306421843149,
       "clubhead_speed_mps": 38.5168781332826,
-      "theta1_at_impact_rad": 0.01212376881840049
+      "theta1_at_impact_rad": 0.01212376881840049,
+      "candidate_t_crossing_s": 0.2775306421843149,
+      "candidate_clubhead_speed_mps": 38.5168781332826,
+      "candidate_theta1_at_crossing_rad": 0.01212376881840049
     },
     {
       "profile": "drive_only",
@@ -521,9 +721,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 0.0,
       "onset_s": 0.025,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.2771733984105174,
       "clubhead_speed_mps": 40.4464400356109,
-      "theta1_at_impact_rad": 0.09936511426816011
+      "theta1_at_impact_rad": 0.09936511426816011,
+      "candidate_t_crossing_s": 0.2771733984105174,
+      "candidate_clubhead_speed_mps": 40.4464400356109,
+      "candidate_theta1_at_crossing_rad": 0.09936511426816011
     },
     {
       "profile": "restrain_then_drive",
@@ -531,9 +735,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 5.0,
       "onset_s": 0.025,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.27718452137144195,
       "clubhead_speed_mps": 41.0798944573932,
-      "theta1_at_impact_rad": 0.1344419648811197
+      "theta1_at_impact_rad": 0.1344419648811197,
+      "candidate_t_crossing_s": 0.27718452137144195,
+      "candidate_clubhead_speed_mps": 41.0798944573932,
+      "candidate_theta1_at_crossing_rad": 0.1344419648811197
     },
     {
       "profile": "restrain_then_drive",
@@ -541,9 +749,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 10.0,
       "onset_s": 0.025,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.2772714558272949,
       "clubhead_speed_mps": 41.70671678371345,
-      "theta1_at_impact_rad": 0.1728932622209838
+      "theta1_at_impact_rad": 0.1728932622209838,
+      "candidate_t_crossing_s": 0.2772714558272949,
+      "candidate_clubhead_speed_mps": 41.70671678371345,
+      "candidate_theta1_at_crossing_rad": 0.1728932622209838
     },
     {
       "profile": "drive_only",
@@ -551,9 +763,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 0.0,
       "onset_s": 0.05,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.2779872205492326,
       "clubhead_speed_mps": 42.22814644079747,
-      "theta1_at_impact_rad": 0.21425900606687692
+      "theta1_at_impact_rad": 0.21425900606687692,
+      "candidate_t_crossing_s": 0.2779872205492326,
+      "candidate_clubhead_speed_mps": 42.22814644079747,
+      "candidate_theta1_at_crossing_rad": 0.21425900606687692
     },
     {
       "profile": "restrain_then_drive",
@@ -561,9 +777,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 5.0,
       "onset_s": 0.05,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.2786831344071245,
       "clubhead_speed_mps": 43.3960221125479,
-      "theta1_at_impact_rad": 0.3068714519972308
+      "theta1_at_impact_rad": 0.3068714519972308,
+      "candidate_t_crossing_s": 0.2786831344071245,
+      "candidate_clubhead_speed_mps": 43.3960221125479,
+      "candidate_theta1_at_crossing_rad": 0.3068714519972308
     },
     {
       "profile": "restrain_then_drive",
@@ -571,9 +791,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 10.0,
       "onset_s": 0.05,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.27977825725186933,
       "clubhead_speed_mps": 44.506835124913614,
-      "theta1_at_impact_rad": 0.4166338999256931
+      "theta1_at_impact_rad": 0.4166338999256931,
+      "candidate_t_crossing_s": 0.27977825725186933,
+      "candidate_clubhead_speed_mps": 44.506835124913614,
+      "candidate_theta1_at_crossing_rad": 0.4166338999256931
     },
     {
       "profile": "drive_only",
@@ -581,9 +805,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 0.0,
       "onset_s": 0.075,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.27976288584712966,
       "clubhead_speed_mps": 43.763592892934035,
-      "theta1_at_impact_rad": 0.34907586328409335
+      "theta1_at_impact_rad": 0.34907586328409335,
+      "candidate_t_crossing_s": 0.27976288584712966,
+      "candidate_clubhead_speed_mps": 43.763592892934035,
+      "candidate_theta1_at_crossing_rad": 0.34907586328409335
     },
     {
       "profile": "restrain_then_drive",
@@ -591,9 +819,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 5.0,
       "onset_s": 0.075,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.2818170605212236,
       "clubhead_speed_mps": 45.27884798285286,
-      "theta1_at_impact_rad": 0.5219884696656243
+      "theta1_at_impact_rad": 0.5219884696656243,
+      "candidate_t_crossing_s": 0.2818170605212236,
+      "candidate_clubhead_speed_mps": 45.27884798285286,
+      "candidate_theta1_at_crossing_rad": 0.5219884696656243
     },
     {
       "profile": "restrain_then_drive",
@@ -601,9 +833,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 10.0,
       "onset_s": 0.075,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.2851480012207932,
       "clubhead_speed_mps": 46.50163111813499,
-      "theta1_at_impact_rad": 0.7475100600314233
+      "theta1_at_impact_rad": 0.7475100600314233,
+      "candidate_t_crossing_s": 0.2851480012207932,
+      "candidate_clubhead_speed_mps": 46.50163111813499,
+      "candidate_theta1_at_crossing_rad": 0.7475100600314233
     },
     {
       "profile": "drive_only",
@@ -611,9 +847,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 0.0,
       "onset_s": 0.1,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.2822431186839178,
       "clubhead_speed_mps": 44.98149766371552,
-      "theta1_at_impact_rad": 0.4946986851510684
+      "theta1_at_impact_rad": 0.4946986851510684,
+      "candidate_t_crossing_s": 0.2822431186839178,
+      "candidate_clubhead_speed_mps": 44.98149766371552,
+      "candidate_theta1_at_crossing_rad": 0.4946986851510684
     },
     {
       "profile": "restrain_then_drive",
@@ -621,9 +861,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 5.0,
       "onset_s": 0.1,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.2863310629669418,
       "clubhead_speed_mps": 46.52721901460729,
-      "theta1_at_impact_rad": 0.7706946651296597
+      "theta1_at_impact_rad": 0.7706946651296597,
+      "candidate_t_crossing_s": 0.2863310629669418,
+      "candidate_clubhead_speed_mps": 46.52721901460729,
+      "candidate_theta1_at_crossing_rad": 0.7706946651296597
     },
     {
       "profile": "restrain_then_drive",
@@ -631,9 +875,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 10.0,
       "onset_s": 0.1,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.29387969471827696,
       "clubhead_speed_mps": 46.780207194673636,
-      "theta1_at_impact_rad": 1.1817945680239377
+      "theta1_at_impact_rad": 1.1817945680239377,
+      "candidate_t_crossing_s": 0.29387969471827696,
+      "candidate_clubhead_speed_mps": 46.780207194673636,
+      "candidate_theta1_at_crossing_rad": 1.1817945680239377
     },
     {
       "profile": "drive_only",
@@ -641,9 +889,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 0.0,
       "onset_s": 0.125,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.2851350169513707,
       "clubhead_speed_mps": 45.838157724955835,
-      "theta1_at_impact_rad": 0.640914267547157
+      "theta1_at_impact_rad": 0.640914267547157,
+      "candidate_t_crossing_s": 0.2851350169513707,
+      "candidate_clubhead_speed_mps": 45.838157724955835,
+      "candidate_theta1_at_crossing_rad": 0.640914267547157
     },
     {
       "profile": "restrain_then_drive",
@@ -651,9 +903,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 5.0,
       "onset_s": 0.125,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.2918995783796897,
       "clubhead_speed_mps": 46.91257268525718,
-      "theta1_at_impact_rad": 1.0405915649162798
+      "theta1_at_impact_rad": 1.0405915649162798,
+      "candidate_t_crossing_s": 0.2918995783796897,
+      "candidate_clubhead_speed_mps": 46.91257268525718,
+      "candidate_theta1_at_crossing_rad": 1.0405915649162798
     },
     {
       "profile": "restrain_then_drive",
@@ -661,9 +917,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 10.0,
       "onset_s": 0.125,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.307812826387132,
       "clubhead_speed_mps": 42.46287702509604,
-      "theta1_at_impact_rad": 1.769236053846416
+      "theta1_at_impact_rad": 1.769236053846416,
+      "candidate_t_crossing_s": 0.307812826387132,
+      "candidate_clubhead_speed_mps": 42.46287702509604,
+      "candidate_theta1_at_crossing_rad": 1.769236053846416
     },
     {
       "profile": "drive_only",
@@ -671,9 +931,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 0.0,
       "onset_s": 0.15,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.2881394846792998,
       "clubhead_speed_mps": 46.326415414926906,
-      "theta1_at_impact_rad": 0.7774973534580726
+      "theta1_at_impact_rad": 0.7774973534580726,
+      "candidate_t_crossing_s": 0.2881394846792998,
+      "candidate_clubhead_speed_mps": 46.326415414926906,
+      "candidate_theta1_at_crossing_rad": 0.7774973534580726
     },
     {
       "profile": "restrain_then_drive",
@@ -681,9 +945,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 5.0,
       "onset_s": 0.15,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.2981042714669063,
       "clubhead_speed_mps": 46.225442883525055,
-      "theta1_at_impact_rad": 1.3150562363626408
+      "theta1_at_impact_rad": 1.3150562363626408,
+      "candidate_t_crossing_s": 0.2981042714669063,
+      "candidate_clubhead_speed_mps": 46.225442883525055,
+      "candidate_theta1_at_crossing_rad": 1.3150562363626408
     },
     {
       "profile": "restrain_then_drive",
@@ -691,9 +959,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 10.0,
       "onset_s": 0.15,
+      "impact_status": "crossing_outside_registered_delivery_zone",
       "t_impact_s": null,
       "clubhead_speed_mps": null,
-      "theta1_at_impact_rad": null
+      "theta1_at_impact_rad": null,
+      "candidate_t_crossing_s": 0.3379102442296683,
+      "candidate_clubhead_speed_mps": 19.070270851526885,
+      "candidate_theta1_at_crossing_rad": 2.7877516521986707
     },
     {
       "profile": "drive_only",
@@ -701,9 +973,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 0.0,
       "onset_s": 0.175,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.29099860788679305,
-      "clubhead_speed_mps": 46.47822097625764,
-      "theta1_at_impact_rad": 0.8961360645806355
+      "clubhead_speed_mps": 46.47822097625763,
+      "theta1_at_impact_rad": 0.8961360645806353,
+      "candidate_t_crossing_s": 0.29099860788679305,
+      "candidate_clubhead_speed_mps": 46.47822097625763,
+      "candidate_theta1_at_crossing_rad": 0.8961360645806353
     },
     {
       "profile": "restrain_then_drive",
@@ -711,9 +987,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 5.0,
       "onset_s": 0.175,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.3044376202574408,
       "clubhead_speed_mps": 44.4240738256283,
-      "theta1_at_impact_rad": 1.574711006023078
+      "theta1_at_impact_rad": 1.574711006023078,
+      "candidate_t_crossing_s": 0.3044376202574408,
+      "candidate_clubhead_speed_mps": 44.4240738256283,
+      "candidate_theta1_at_crossing_rad": 1.574711006023078
     },
     {
       "profile": "restrain_then_drive",
@@ -721,9 +1001,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 10.0,
       "onset_s": 0.175,
+      "impact_status": "crossing_outside_registered_delivery_zone",
       "t_impact_s": null,
       "clubhead_speed_mps": null,
-      "theta1_at_impact_rad": null
+      "theta1_at_impact_rad": null,
+      "candidate_t_crossing_s": 0.5012567239226747,
+      "candidate_clubhead_speed_mps": 67.9361232121604,
+      "candidate_theta1_at_crossing_rad": 7.170810395032139
     },
     {
       "profile": "drive_only",
@@ -731,9 +1015,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 0.0,
       "onset_s": 0.2,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.2935372210133828,
       "clubhead_speed_mps": 46.34164399843968,
-      "theta1_at_impact_rad": 0.9920905891094763
+      "theta1_at_impact_rad": 0.9920905891094763,
+      "candidate_t_crossing_s": 0.2935372210133828,
+      "candidate_clubhead_speed_mps": 46.34164399843968,
+      "candidate_theta1_at_crossing_rad": 0.9920905891094763
     },
     {
       "profile": "restrain_then_drive",
@@ -741,9 +1029,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 5.0,
       "onset_s": 0.2,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.31035582567345255,
       "clubhead_speed_mps": 41.77295025302882,
-      "theta1_at_impact_rad": 1.8014328832129836
+      "theta1_at_impact_rad": 1.8014328832129836,
+      "candidate_t_crossing_s": 0.31035582567345255,
+      "candidate_clubhead_speed_mps": 41.77295025302882,
+      "candidate_theta1_at_crossing_rad": 1.8014328832129836
     },
     {
       "profile": "restrain_then_drive",
@@ -751,9 +1043,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 10.0,
       "onset_s": 0.2,
+      "impact_status": "crossing_outside_registered_delivery_zone",
       "t_impact_s": null,
       "clubhead_speed_mps": null,
-      "theta1_at_impact_rad": null
+      "theta1_at_impact_rad": null,
+      "candidate_t_crossing_s": 0.49516547441796765,
+      "candidate_clubhead_speed_mps": 70.79875116542662,
+      "candidate_theta1_at_crossing_rad": 6.639159134383629
     },
     {
       "profile": "drive_only",
@@ -761,9 +1057,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 0.0,
       "onset_s": 0.225,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.2956738061502651,
       "clubhead_speed_mps": 45.95590733844249,
-      "theta1_at_impact_rad": 1.0646597021008166
+      "theta1_at_impact_rad": 1.0646597021008168,
+      "candidate_t_crossing_s": 0.2956738061502651,
+      "candidate_clubhead_speed_mps": 45.95590733844249,
+      "candidate_theta1_at_crossing_rad": 1.0646597021008168
     },
     {
       "profile": "restrain_then_drive",
@@ -771,9 +1071,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 5.0,
       "onset_s": 0.225,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.31539273080329056,
       "clubhead_speed_mps": 38.79157026437164,
-      "theta1_at_impact_rad": 1.982942518712017
+      "theta1_at_impact_rad": 1.982942518712017,
+      "candidate_t_crossing_s": 0.31539273080329056,
+      "candidate_clubhead_speed_mps": 38.79157026437164,
+      "candidate_theta1_at_crossing_rad": 1.982942518712017
     },
     {
       "profile": "restrain_then_drive",
@@ -781,9 +1085,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 10.0,
       "onset_s": 0.225,
+      "impact_status": "crossing_outside_registered_delivery_zone",
       "t_impact_s": null,
       "clubhead_speed_mps": null,
-      "theta1_at_impact_rad": null
+      "theta1_at_impact_rad": null,
+      "candidate_t_crossing_s": 0.49212014070732935,
+      "candidate_clubhead_speed_mps": 70.94043825301397,
+      "candidate_theta1_at_crossing_rad": 6.432432141063379
     },
     {
       "profile": "drive_only",
@@ -791,9 +1099,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 0.0,
       "onset_s": 0.25,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.2973684172244442,
       "clubhead_speed_mps": 45.315141488563086,
-      "theta1_at_impact_rad": 1.115439417916306
+      "theta1_at_impact_rad": 1.115439417916306,
+      "candidate_t_crossing_s": 0.2973684172244442,
+      "candidate_clubhead_speed_mps": 45.315141488563086,
+      "candidate_theta1_at_crossing_rad": 1.115439417916306
     },
     {
       "profile": "restrain_then_drive",
@@ -801,9 +1113,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 5.0,
       "onset_s": 0.25,
+      "impact_status": "crossing_outside_registered_delivery_zone",
       "t_impact_s": null,
       "clubhead_speed_mps": null,
-      "theta1_at_impact_rad": null
+      "theta1_at_impact_rad": null,
+      "candidate_t_crossing_s": 0.3192867896502057,
+      "candidate_clubhead_speed_mps": 35.993667348051815,
+      "candidate_theta1_at_crossing_rad": 2.115553647859499
     },
     {
       "profile": "restrain_then_drive",
@@ -811,9 +1127,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 10.0,
       "onset_s": 0.25,
+      "impact_status": "crossing_outside_registered_delivery_zone",
       "t_impact_s": null,
       "clubhead_speed_mps": null,
-      "theta1_at_impact_rad": null
+      "theta1_at_impact_rad": null,
+      "candidate_t_crossing_s": 0.4900528877131404,
+      "candidate_clubhead_speed_mps": 71.3702727611904,
+      "candidate_theta1_at_crossing_rad": 6.359631565586487
     },
     {
       "profile": "drive_only",
@@ -821,9 +1141,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 0.0,
       "onset_s": 0.275,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.29854051136728554,
       "clubhead_speed_mps": 44.37308107114917,
-      "theta1_at_impact_rad": 1.1460924729538136
+      "theta1_at_impact_rad": 1.1460924729538136,
+      "candidate_t_crossing_s": 0.29854051136728554,
+      "candidate_clubhead_speed_mps": 44.37308107114917,
+      "candidate_theta1_at_crossing_rad": 1.1460924729538136
     },
     {
       "profile": "restrain_then_drive",
@@ -831,9 +1155,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 5.0,
       "onset_s": 0.275,
+      "impact_status": "crossing_outside_registered_delivery_zone",
       "t_impact_s": null,
       "clubhead_speed_mps": null,
-      "theta1_at_impact_rad": null
+      "theta1_at_impact_rad": null,
+      "candidate_t_crossing_s": 0.322009082533621,
+      "candidate_clubhead_speed_mps": 33.63395848984597,
+      "candidate_theta1_at_crossing_rad": 2.20299868474649
     },
     {
       "profile": "restrain_then_drive",
@@ -841,9 +1169,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 10.0,
       "onset_s": 0.275,
+      "impact_status": "crossing_outside_registered_delivery_zone",
       "t_impact_s": null,
       "clubhead_speed_mps": null,
-      "theta1_at_impact_rad": null
+      "theta1_at_impact_rad": null,
+      "candidate_t_crossing_s": 0.488581373666372,
+      "candidate_clubhead_speed_mps": 72.51721291210748,
+      "candidate_theta1_at_crossing_rad": 6.380530862351537
     },
     {
       "profile": "drive_only",
@@ -851,9 +1183,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 0.0,
       "onset_s": 0.3,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.2989809654604518,
       "clubhead_speed_mps": 43.12958067086403,
-      "theta1_at_impact_rad": 1.1563215661890636
+      "theta1_at_impact_rad": 1.1563215661890636,
+      "candidate_t_crossing_s": 0.2989809654604518,
+      "candidate_clubhead_speed_mps": 43.12958067086403,
+      "candidate_theta1_at_crossing_rad": 1.1563215661890636
     },
     {
       "profile": "restrain_then_drive",
@@ -861,9 +1197,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 5.0,
       "onset_s": 0.3,
+      "impact_status": "crossing_outside_registered_delivery_zone",
       "t_impact_s": null,
       "clubhead_speed_mps": null,
-      "theta1_at_impact_rad": null
+      "theta1_at_impact_rad": null,
+      "candidate_t_crossing_s": 0.32364637553543263,
+      "candidate_clubhead_speed_mps": 31.665988507761405,
+      "candidate_theta1_at_crossing_rad": 2.252027676163978
     },
     {
       "profile": "restrain_then_drive",
@@ -871,9 +1211,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 10.0,
       "onset_s": 0.3,
+      "impact_status": "crossing_outside_registered_delivery_zone",
       "t_impact_s": null,
       "clubhead_speed_mps": null,
-      "theta1_at_impact_rad": null
+      "theta1_at_impact_rad": null,
+      "candidate_t_crossing_s": 0.4881104783700967,
+      "candidate_clubhead_speed_mps": 74.47686061645243,
+      "candidate_theta1_at_crossing_rad": 6.512719288738185
     },
     {
       "profile": "drive_only",
@@ -881,9 +1225,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 0.0,
       "onset_s": 0.325,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.2989809654604518,
       "clubhead_speed_mps": 43.12958067086403,
-      "theta1_at_impact_rad": 1.1563215661890636
+      "theta1_at_impact_rad": 1.1563215661890636,
+      "candidate_t_crossing_s": 0.2989809654604518,
+      "candidate_clubhead_speed_mps": 43.12958067086403,
+      "candidate_theta1_at_crossing_rad": 1.1563215661890636
     },
     {
       "profile": "restrain_then_drive",
@@ -891,9 +1239,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 5.0,
       "onset_s": 0.325,
+      "impact_status": "crossing_outside_registered_delivery_zone",
       "t_impact_s": null,
       "clubhead_speed_mps": null,
-      "theta1_at_impact_rad": null
+      "theta1_at_impact_rad": null,
+      "candidate_t_crossing_s": 0.3242074408632814,
+      "candidate_clubhead_speed_mps": 29.912486864582597,
+      "candidate_theta1_at_crossing_rad": 2.2675435127819523
     },
     {
       "profile": "restrain_then_drive",
@@ -901,9 +1253,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 10.0,
       "onset_s": 0.325,
+      "impact_status": "crossing_outside_registered_delivery_zone",
       "t_impact_s": null,
       "clubhead_speed_mps": null,
-      "theta1_at_impact_rad": null
+      "theta1_at_impact_rad": null,
+      "candidate_t_crossing_s": 0.4901566374027127,
+      "candidate_clubhead_speed_mps": 76.65397146009585,
+      "candidate_theta1_at_crossing_rad": 6.839555199815314
     },
     {
       "profile": "drive_only",
@@ -911,9 +1267,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 0.0,
       "onset_s": 0.35,
+      "impact_status": "accepted_registered_delivery_zone",
       "t_impact_s": 0.2989809654604518,
       "clubhead_speed_mps": 43.12958067086403,
-      "theta1_at_impact_rad": 1.1563215661890636
+      "theta1_at_impact_rad": 1.1563215661890636,
+      "candidate_t_crossing_s": 0.2989809654604518,
+      "candidate_clubhead_speed_mps": 43.12958067086403,
+      "candidate_theta1_at_crossing_rad": 1.1563215661890636
     },
     {
       "profile": "restrain_then_drive",
@@ -921,9 +1281,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 5.0,
       "onset_s": 0.35,
+      "impact_status": "crossing_outside_registered_delivery_zone",
       "t_impact_s": null,
       "clubhead_speed_mps": null,
-      "theta1_at_impact_rad": null
+      "theta1_at_impact_rad": null,
+      "candidate_t_crossing_s": 0.3242074408632814,
+      "candidate_clubhead_speed_mps": 29.912486864582597,
+      "candidate_theta1_at_crossing_rad": 2.2675435127819523
     },
     {
       "profile": "restrain_then_drive",
@@ -931,9 +1295,13 @@
       "wrist_drive_nm": 15.0,
       "wrist_restrain_nm": 10.0,
       "onset_s": 0.35,
+      "impact_status": "crossing_outside_registered_delivery_zone",
       "t_impact_s": null,
       "clubhead_speed_mps": null,
-      "theta1_at_impact_rad": null
+      "theta1_at_impact_rad": null,
+      "candidate_t_crossing_s": 0.4973897939471052,
+      "candidate_clubhead_speed_mps": 74.94013088233167,
+      "candidate_theta1_at_crossing_rad": 7.467193268559845
     }
   ]
 }

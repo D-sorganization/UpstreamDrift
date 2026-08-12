@@ -78,6 +78,13 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   reversal crosses the declared dead zones. This is an abstract transmission
   history, not an anatomical backswing or muscle-activation model.
 
+- **2026-08-11** - Adjudicated the independent proximal-to-distal technical
+  review in epic #8499. Corrected the phase-integration boundary and replaced
+  sampled COM differentiation with analytic acceleration, retained every
+  geometric impact candidate with a reason-coded status, added 20--50 ms
+  command-rise sensitivity, and narrowed finite-grid, actuator-work,
+  pointwise-counterfactual, physiological, and coaching claims.
+
 - **2026-08-11** - Replaced the obsolete fixed 1 MiB PDF ceiling with an
   artifact-integrity and repository-boundary policy. Changed PDFs must carry a
   valid `%PDF-` signature, files above GitHub's 50,000,000-byte recommendation

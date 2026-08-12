@@ -28,27 +28,27 @@ an instance of the general proximal-to-distal (P→D) sequencing observed
 in throwing and striking skills [@putnam1993] — is routinely interpreted
 as the visible signature of mechanical energy generated in the large
 proximal segments and transferred outward to the small, fast distal
-ones, and it has been translated into coaching doctrine accordingly
-[@smith2015].
+ones. Its interpretation as mechanical energy transfer has also influenced
+applied swing descriptions [@smith2015].
 
 That interpretation leaves a first-order question unanswered:
 
-> **Should a golfer attempt to transfer energy from proximal to distal
-> segments *early* in the downswing, or should energy be *retained* in
-> the proximal segments early and the transfer deliberately
-> *accelerated* late?**
+> **Within a declared model or measured swing, does earlier distal actuation
+> improve delivery, or can delayed distal actuation permit a more effective
+> late handoff?**
 
-The two strategies imply opposite coaching cues ("fire the club from the
-top" versus "hold the lag and let it release"), opposite torque programs
-at the wrists and torso, and different predictions for what
+For experimental contrast, the two poles are given the shorthand labels
+"drive early" and "retain early/release late." These labels are not a survey
+of coaching doctrine, nor are model torques coaching cues. The poles imply
+opposite idealized torque programs and different predictions for what
 counterfactual decompositions of a measured swing should show. The
 question also connects to a long-standing thread in the modeling
 literature: double-pendulum analyses have argued since the 1960s that
 the highest clubhead speeds arise when the distal joint is *not* driven
 early — when release is passively or actively delayed
-[@cochran1968; @jorgensen1970; @milburn1982; @pickering1999] — while the
-coaching translation of the kinematic sequence often emphasizes
-initiating distal motion promptly after transition.
+[@cochran1968; @jorgensen1970; @milburn1982; @pickering1999]. The present
+study therefore tests and instruments a well-established model behavior; it
+does not claim novelty for the general delayed-release idea.
 
 This study approaches the question with *counterfactual dynamics*.
 Two decompositions are evaluated: the

@@ -83,6 +83,10 @@ The arm--wrist allocation, role-reversal, and preload program is tracked in
 [#8497](https://github.com/D-sorganization/UpstreamDrift/issues/8497).
 Ground-reaction drift attribution and human validation requirements are tracked
 in [#8493](https://github.com/D-sorganization/UpstreamDrift/issues/8493).
+The independent review adjudication and its numerical remediation are tracked
+in [#8499](https://github.com/D-sorganization/UpstreamDrift/issues/8499), with
+the finding-by-finding record in
+[`ADVERSARIAL_REVIEW_ADJUDICATION.md`](ADVERSARIAL_REVIEW_ADJUDICATION.md).
 
 ## Layout
 
@@ -95,6 +99,7 @@ in [#8493](https://github.com/D-sorganization/UpstreamDrift/issues/8493).
 | [`MODEL_COMPLETION_FALSIFICATION_MATRIX.md`](MODEL_COMPLETION_FALSIFICATION_MATRIX.md) | Claim, alternative-explanation, model-discrepancy, and falsifier register         |
 | [`EXPERIMENTAL_FALSIFICATION_PROTOCOL.md`](EXPERIMENTAL_FALSIFICATION_PROTOCOL.md)     | Frozen human-data acquisition, split, analysis, and inference-boundary protocol   |
 | [`REVIEWER_WORKBENCH.md`](REVIEWER_WORKBENCH.md)                                       | Claim-first figure, evidence, and download index by model tier                    |
+| [`ADVERSARIAL_REVIEW_ADJUDICATION.md`](ADVERSARIAL_REVIEW_ADJUDICATION.md)             | Verified disposition and remediation record for the independent technical review  |
 | [`DATA_DICTIONARY.md`](DATA_DICTIONARY.md)                                             | Artifact and recurring-field definitions with interpretation boundaries           |
 | [`release_manifest.json`](release_manifest.json)                                       | Hash-pinned presets, claim status, artifacts, and open release gates              |
 | [`references.bib`](references.bib)                                                     | Linked bibliography plus a clearly labeled project-originated presentation source |
@@ -133,6 +138,7 @@ python3 -m scripts.research.proximal_distal_energy.qualify_open_release validate
 python3 -m scripts.research.proximal_distal_energy.e1b_bounded_torque
 python3 -m scripts.research.proximal_distal_energy.e1c_impact_sensitivity
 python3 -m scripts.research.proximal_distal_energy.e1d_parameter_sensitivity
+python3 -m scripts.research.proximal_distal_energy.e1e_smooth_command_sensitivity
 # figures
 python3 -m scripts.research.proximal_distal_energy.make_figures
 python3 -m scripts.research.proximal_distal_energy.make_interaction_force_figures

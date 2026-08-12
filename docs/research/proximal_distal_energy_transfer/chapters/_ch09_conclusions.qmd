@@ -11,18 +11,21 @@ distal handoff later in the downswing.
 
 The present simulations provide model-derived support for that mechanism.
 Under matched shoulder torque in a planar two-link model, early wrist drive
-reduced clubhead speed relative to a passive wrist, whereas optimized late
+reduced clubhead speed relative to a passive wrist, whereas grid-selected late
 drive increased it. A small early restraining torque followed by late drive
 was best among the tested programs. Energy and counterfactual accounting
 located the modeled mechanism in early arm-energy retention and late
 joint-force transfer rather than in early active wrist work.
 
 This conclusion is conditional. The result survived torque-velocity bounds,
-alternative scoring rules, and 13 one-at-a-time parameter cases, but the
-optimal onset shifted across cases. The study therefore supports a robust
+alternative scoring rules, 13 one-at-a-time parameter cases, and declared
+20--50 ms command transitions, but the selected onset shifted across cases.
+The study therefore supports a robust
 ordering within a local model neighborhood, not a universal timing value or
 an individual coaching prescription. Planar motion, simplified actuators, and
-absence of human data remain material limitations.
+absence of human data remain material limitations. The finite sweep is not a
+continuous optimal-control solution, and the command filters are not muscle
+activation models.
 
 The forward constrained two-hand extension resolves one previously open
 mechanistic question. Starting from the exact same 0.200 s state, the

@@ -205,7 +205,7 @@ def fig_wrist_power(traces: dict[str, np.ndarray], summary: dict) -> None:
     ax2.plot(
         t[mask],
         traces[f"{label}__power__club_energy_rate"][mask],
-        label=r"$\dot{E}_{club}$ (finite difference)",
+        label=r"$\dot{E}_{club}$ (analytic kinematics)",
         lw=1.5,
     )
     ax2.plot(

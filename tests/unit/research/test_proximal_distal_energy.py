@@ -12,8 +12,10 @@ import pytest
 
 from scripts.research.proximal_distal_energy.run_experiments import (
     _phase_energy_budget,
+    _split_integrals,
     counterfactual_split,
     rollout_program,
+    trace_accelerations,
 )
 from scripts.research.proximal_distal_energy.e1d_parameter_sensitivity import (
     build_parameter_cases,
@@ -21,7 +23,9 @@ from scripts.research.proximal_distal_energy.e1d_parameter_sensitivity import (
 )
 from scripts.research.proximal_distal_energy.swing_model import (
     PlanarInertials,
+    club_com_acceleration,
     find_impact,
+    first_club_vertical_crossing,
     segment_kinetic_energies,
     wrist_interface_powers,
 )
@@ -103,7 +107,8 @@ def test_headline_pinned_numbers(
     )
     imp_r = find_impact(t_r, q_r, v_r, inertials)
     assert imp_r is not None
-    budget = _phase_energy_budget(inertials, t_r, q_r, v_r, u_r, imp_r[0])
+    qdd_r = trace_accelerations(params, q_r, v_r, u_r)
+    budget = _phase_energy_budget(inertials, t_r, q_r, v_r, qdd_r, u_r, imp_r[0])
 
     assert abs(budget["wrist_actuator_work_early_j"] - (-1.85)) < 0.5
     assert abs(budget["joint_force_transfer_late_j"] - 131.7) < 5.0
@@ -124,7 +129,8 @@ def test_robertson_winter_energy_balance(
     t_c, q_c, v_c, u_c = t[mask], q[mask], v[mask], u[mask]
 
     _, e_kin_club = segment_kinetic_energies(inertials, q_c, v_c)
-    powers = wrist_interface_powers(inertials, t_c, q_c, v_c, u_c)
+    qdd_c = trace_accelerations(params, q_c, v_c, u_c)
+    powers = wrist_interface_powers(inertials, t_c, q_c, v_c, qdd_c, u_c)
 
     integrated_work = np.trapezoid(
         powers["joint_force_power"]
@@ -133,7 +139,41 @@ def test_robertson_winter_energy_balance(
         t_c,
     )
     delta_e_club = e_kin_club[-1] - e_kin_club[0]
-    assert abs(integrated_work - delta_e_club) < 1.0
+    # Remaining error is quadrature of an exact pointwise power identity.
+    assert abs(integrated_work - delta_e_club) < 0.05
+    np.testing.assert_allclose(
+        powers["club_energy_rate"],
+        powers["joint_force_power"] + powers["moment_power_on_club"],
+        rtol=0.0,
+        atol=1e-9,
+    )
+
+
+@pytest.mark.unit
+def test_phase_integrals_share_an_exact_interpolated_boundary() -> None:
+    """Early and late quadrature must cover the full interval without a gap."""
+    t = np.array([0.0, 0.10, 0.20, 0.30])
+    power = 2.0 * t + 3.0
+    early, late = _split_integrals(power, t, split=0.175)
+
+    assert early + late == pytest.approx(np.trapezoid(power, t), abs=1e-15)
+    assert early == pytest.approx(3.0 * 0.175 + 0.175**2, abs=1e-15)
+
+
+@pytest.mark.unit
+def test_club_com_acceleration_is_analytic_for_uniform_rotation(
+    inertials: PlanarInertials,
+) -> None:
+    q = np.array([[0.3, -0.2], [0.3, -0.2]])
+    v = np.array([[2.0, -0.5], [2.0, -0.5]])
+    qdd = np.zeros_like(q)
+
+    acceleration = club_com_acceleration(inertials, q, v, qdd)
+    expected = -(
+        inertials.l1 * 2.0**2 * np.array([np.sin(0.3), -np.cos(0.3)])
+        + inertials.lc2 * 1.5**2 * np.array([np.sin(0.1), -np.cos(0.1)])
+    )
+    np.testing.assert_allclose(acceleration, np.tile(expected, (2, 1)), atol=1e-14)
 
 
 @pytest.mark.unit
@@ -161,6 +201,23 @@ def test_impact_detection_edge_cases(
     q = np.zeros((100, 2))
     v = np.zeros((100, 2))
     assert find_impact(t, q, v, inertials) is None
+
+
+@pytest.mark.unit
+def test_geometric_crossing_is_retained_when_delivery_rule_excludes_it(
+    inertials: PlanarInertials,
+) -> None:
+    t = np.array([0.0, 0.01])
+    q = np.array([[2.1, -0.2], [2.2, -0.1]])
+    # Shift the relative angle so the absolute club angle crosses zero.
+    q[:, 1] = np.array([-2.2, -2.1])
+    v = np.ones_like(q)
+
+    candidate = first_club_vertical_crossing(t, q, v, inertials)
+    assert candidate is not None
+    assert candidate[2] > 2.0
+    assert find_impact(t, q, v, inertials) is None
+    assert find_impact(t, q, v, inertials, max_arm_angle_rad=None) == candidate
 
 
 @pytest.mark.unit

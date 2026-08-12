@@ -6,6 +6,9 @@ Read the [claim–evidence–falsifier matrix](MODEL_COMPLETION_FALSIFICATION_MA
 before interpreting figures. Every panel is model-tier specific. The
 [release manifest](release_manifest.json) supplies exact hashes and canonical
 commands; the [data dictionary](DATA_DICTIONARY.md) defines recurring fields.
+The [adversarial review adjudication](ADVERSARIAL_REVIEW_ADJUDICATION.md)
+records every external criticism, its verification status, and the resulting
+code, evidence, or claim-boundary response.
 
 ## Analytical Mechanism
 
