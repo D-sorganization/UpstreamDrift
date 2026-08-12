@@ -13,19 +13,20 @@ Sprigings and Neal's ≈4% gain from a physiologically bounded late wrist
 torque [@sprigings2000] — our unbounded constant 15 N·m torque and
 longer active window make a larger gain expected. The dominance of the
 passive late energy pathway (joint-force transfer of 131.7 J versus
-25.7 J of late wrist work in the best swing) is White's parametric
+25.7 J of late wrist work in the grid-selected swing) is White's parametric
 transfer made explicit in Robertson-Winter accounting
-[@white2006; @robertson1980]. The casting geometry of the early-drive
+[@white2006; @robertson1980]. The early-delivery geometry of the early-drive
 swing — clubhead overtaking the hands before the arm reaches vertical —
-is the model's rendering of the amateur release failure documented
-across skill-level studies [@cheetham2008; @zheng2008], and the
-impact geometry of the winning programs (hands ahead, arm 0.7–0.8 rad
-past vertical) matches the skilled pattern. Finally, the drift/control
+is consistent with release differences documented across skill-level studies
+[@cheetham2008; @zheng2008]. The two selected programs instead have the hands
+ahead in the model's coordinate convention, with the arm 0.7–0.8 rad past
+vertical. These are geometric comparators, not player classifications.
+Finally, the drift/control
 time signature — control as early restraint, drift as late delivery —
 is the counterfactual pattern proposed in @sec-hypothesis, now exhibited
 by this model.
 
-## Why Retention Wins: A Mechanistic Reading {#sec-discussion-mechanism}
+## Why the Selected Retention Program Is Faster: A Mechanistic Reading {#sec-discussion-mechanism}
 
 The energy budgets localize the causal structure. Early wrist drive
 fails through *two* simultaneous channels: it raises the system's
@@ -34,29 +35,26 @@ accelerating (so the same shoulder torque buys less arm speed — the
 early-drive program banks 21 J less early shoulder work than the
 retain program despite identical $\tau_s$), and it spends the wrist's
 work budget at a time when the joint-force/parametric channel cannot
-yet amplify it [@white2006]. Timed restraint wins through the mirror
+yet amplify it [@white2006]. Timed restraint is faster in the tested family
+through the mirror
 mechanisms: it holds the compact configuration slightly longer than a
 free hinge would (the drift field already wants to open the wrist — the
 restraint is fighting centrifugal release, not gravity), banks that
 margin as arm speed, and then releases into a fully developed
 centrifugal field where the passive channel converts arm energy to club
 energy at the maximum rate. The negative early wrist work (−1.9 J) is
-small in absolute terms but diagnostic: retention is an *energetic
-withdrawal*, not merely an absence of drive — precisely the
-"restraining torque" role that appears in Jorgensen's fitted expert
-swing and in Sprigings-Neal-type actuator solutions
-[@jorgensen1999; @sprigings2000; @herring1992].
+small in absolute terms and diagnostic only of this simulated command:
+the imposed negative actuator torque opposes the modeled joint's opening
+velocity. It distinguishes active model restraint from zero model torque,
+consistent with the restraining-torque role in Jorgensen's fitted swing and
+Sprigings--Neal-type actuator solutions
+[@jorgensen1999; @sprigings2000; @herring1992]. It does not identify a muscle,
+neural intent, eccentric physiology, or a human retention technique.
 
-Two honest qualifications temper the S2 reading. First, the margin of
-active restraint over the best *passive-then-drive* program is small
-(+0.5 m/s at both effort levels): in this model most of the retention
-benefit is available from simply *not driving* the wrist, with active
-holding adding a final increment. Second, retention is only valuable
-*timed*: heavier or longer restraint programs failed the first-pass
-validity rule rather than winning — over-retention postpones delivery
-past the useful window. "Retain early, release late" is therefore not
-"retain maximally"; it is *retain until the drift field can pay, then
-stop retaining*.
+Two qualifications temper this reading. Active restraint adds only +0.5 m/s
+over the selected passive-then-drive program; most of the modeled benefit comes
+from not driving early. Heavier or longer restraint crosses outside the
+registered delivery zone. Neither result prescribes human timing.
 
 ## What the 2-DOF Model Cannot Establish {#sec-discussion-limits}
 
@@ -105,18 +103,11 @@ for a golfer. The specific gaps, each with a tracked remediation:
 
 ## Implications, Cautiously Stated {#sec-discussion-implications}
 
-For modeling practice, the analysis shows that the timing question is
-tractable with counterfactual decomposition, and that
-energy-level accounting (not peak ordering) is the observable that
-separates strategies — supporting the methodological argument of
-@sec-energyflow and the transfer-efficiency findings in recent human
-data [@frontiers2026footground]. For coaching interpretation, the
-results align with instruction that discourages "hitting from the top"
-and encourages retained lag with late release
-[@cochran1968; @jorgensen1999] — but a 2-DOF torque-program result is
-evidence about mechanism, not a prescription for any individual player,
-whose constraints (mobility, strength, consistency, injury history
-[@cole2016; @hume2005]) sit outside this model. Any coaching
-translation should also respect that within-player timing variability
-in experts is real and partly functional
-[@neal2007; @langdown2012; @glazier2011].
+For modeling, counterfactual and energy-level accounting make the timing
+question testable without treating peak order as energy transfer, consistent
+with recent human transfer-efficiency findings [@frontiers2026footground]. The
+program names denote finite model inputs, not coaching cues or novelty over
+delayed-release literature [@cochran1968; @jorgensen1999]. No recommendation
+follows. Player-specific translation requires governed human evidence spanning
+physical constraints, injury history, and functional timing variability
+[@cole2016; @hume2005; @neal2007; @langdown2012; @glazier2011].

@@ -5,6 +5,20 @@ Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
 
+- **#8499 adversarial review adjudication** — isolated branch
+  `research/proximal-distal-adversarial-review` starts from the exact tracked
+  snapshot of the active paper-development branch. It confirms and corrects an
+  early/late trapezoid gap and sampled COM-acceleration differentiation;
+  retains all 92 first-crossing candidates with reason-coded registration
+  status; shows the selected winner is unchanged across 1.5--2.5 rad bounds;
+  and adds 20, 35, and 50 ms command-transition sensitivity. The review ledger
+  rejects stale claims that forward killswitches, moving-base/flexible/modal
+  shaft tiers, spatial models, or coupled parameter screening are absent, while
+  accepting warranted limits on finite-grid optimality, negative actuator-work
+  interpretation, pointwise ZTCF semantics, physiology, and coaching. Local
+  numerical tests pass after regeneration; final article render, visual gate,
+  AffineDrift synchronization, and protected publication remain pending.
+
 - **#8497 arm--wrist torque allocation and preload** — branch
   `feat/8426-phase-9-forward-distributed-shaft` adds an exact same-state 8 N m
   actuator-allocation sweep, a separately declared dead-zone transmission

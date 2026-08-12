@@ -31,6 +31,7 @@ from scripts.research.proximal_distal_energy.run_experiments import (
 from scripts.research.proximal_distal_energy.swing_model import (
     PlanarInertials,
     clubhead_speed,
+    first_club_vertical_crossing,
 )
 from scripts.research.proximal_distal_energy.torque_programs import (
     drive_only_program,
@@ -191,21 +192,22 @@ def evaluate_sensitivity() -> dict[str, Any]:
         c5_results = {}
         for max_angle in [1.5, 1.8, 2.0, 2.2, 2.5]:
             scores = []
+            status_counts = {
+                "accepted": 0,
+                "outside_delivery_zone": 0,
+                "no_crossing": 0,
+            }
             for r in rollouts:
-                below = r["theta_club"] < 0.0
-                crossings = np.nonzero(below[:-1] & ~below[1:])[0]
-                if len(crossings) > 0:
-                    k = int(crossings[0])
-                    th0, th1_val = r["theta_club"][k], r["theta_club"][k + 1]
-                    frac = 0.0 if th1_val == th0 else float(-th0 / (th1_val - th0))
-                    speed = float(
-                        r["speeds"][k] + frac * (r["speeds"][k + 1] - r["speeds"][k])
-                    )
-                    th1_imp = float(
-                        r["theta1"][k] + frac * (r["theta1"][k + 1] - r["theta1"][k])
-                    )
-                    if th1_imp <= max_angle:
-                        scores.append((r["name"], speed))
+                crossing = first_club_vertical_crossing(
+                    r["t"], r["q"], r["v"], inertials
+                )
+                if crossing is None:
+                    status_counts["no_crossing"] += 1
+                elif crossing[2] <= max_angle:
+                    status_counts["accepted"] += 1
+                    scores.append((r["name"], crossing[1]))
+                else:
+                    status_counts["outside_delivery_zone"] += 1
             scores.sort(key=lambda x: x[1], reverse=True)
             c5_results[f"max_arm_angle_{max_angle}"] = {
                 "winner": scores[0][0] if scores else None,
@@ -214,6 +216,8 @@ def evaluate_sensitivity() -> dict[str, Any]:
                 "early_drive_speed": next(
                     (s for n, s in scores if n == "early_drive"), None
                 ),
+                "attempted_programs": len(rollouts),
+                "status_counts": status_counts,
             }
 
         results_by_shoulder[tau_key] = {

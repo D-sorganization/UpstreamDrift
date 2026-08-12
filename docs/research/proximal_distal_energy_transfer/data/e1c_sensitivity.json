@@ -1,5 +1,5 @@
 {
-  "git_sha": "842ac2cbd",
+  "git_sha": "e495ce9da",
   "summary": "Impact-criterion robustness evaluation across 5 alternative impact definitions",
   "ordering_robustness_confirmed": true,
   "results": {
@@ -47,31 +47,61 @@
           "winner": "restrain_10.0_onset_0.1",
           "winner_speed": 38.85378591434185,
           "passive_speed": 34.15364542695601,
-          "early_drive_speed": 28.9182969487125
+          "early_drive_speed": 28.9182969487125,
+          "attempted_programs": 46,
+          "status_counts": {
+            "accepted": 30,
+            "outside_delivery_zone": 16,
+            "no_crossing": 0
+          }
         },
         "max_arm_angle_1.8": {
           "winner": "restrain_10.0_onset_0.1",
           "winner_speed": 38.85378591434185,
           "passive_speed": 34.15364542695601,
-          "early_drive_speed": 28.9182969487125
+          "early_drive_speed": 28.9182969487125,
+          "attempted_programs": 46,
+          "status_counts": {
+            "accepted": 31,
+            "outside_delivery_zone": 15,
+            "no_crossing": 0
+          }
         },
         "max_arm_angle_2.0": {
           "winner": "restrain_10.0_onset_0.1",
           "winner_speed": 38.85378591434185,
           "passive_speed": 34.15364542695601,
-          "early_drive_speed": 28.9182969487125
+          "early_drive_speed": 28.9182969487125,
+          "attempted_programs": 46,
+          "status_counts": {
+            "accepted": 31,
+            "outside_delivery_zone": 15,
+            "no_crossing": 0
+          }
         },
         "max_arm_angle_2.2": {
           "winner": "restrain_10.0_onset_0.1",
           "winner_speed": 38.85378591434185,
           "passive_speed": 34.15364542695601,
-          "early_drive_speed": 28.9182969487125
+          "early_drive_speed": 28.9182969487125,
+          "attempted_programs": 46,
+          "status_counts": {
+            "accepted": 31,
+            "outside_delivery_zone": 15,
+            "no_crossing": 0
+          }
         },
         "max_arm_angle_2.5": {
           "winner": "restrain_10.0_onset_0.1",
           "winner_speed": 38.85378591434185,
           "passive_speed": 34.15364542695601,
-          "early_drive_speed": 28.9182969487125
+          "early_drive_speed": 28.9182969487125,
+          "attempted_programs": 46,
+          "status_counts": {
+            "accepted": 32,
+            "outside_delivery_zone": 14,
+            "no_crossing": 0
+          }
         }
       }
     },
@@ -119,31 +149,61 @@
           "winner": "restrain_5.0_onset_0.125",
           "winner_speed": 46.91257268525718,
           "passive_speed": 43.12958067086403,
-          "early_drive_speed": 38.5168781332826
+          "early_drive_speed": 38.5168781332826,
+          "attempted_programs": 46,
+          "status_counts": {
+            "accepted": 28,
+            "outside_delivery_zone": 18,
+            "no_crossing": 0
+          }
         },
         "max_arm_angle_1.8": {
           "winner": "restrain_5.0_onset_0.125",
           "winner_speed": 46.91257268525718,
           "passive_speed": 43.12958067086403,
-          "early_drive_speed": 38.5168781332826
+          "early_drive_speed": 38.5168781332826,
+          "attempted_programs": 46,
+          "status_counts": {
+            "accepted": 30,
+            "outside_delivery_zone": 16,
+            "no_crossing": 0
+          }
         },
         "max_arm_angle_2.0": {
           "winner": "restrain_5.0_onset_0.125",
           "winner_speed": 46.91257268525718,
           "passive_speed": 43.12958067086403,
-          "early_drive_speed": 38.5168781332826
+          "early_drive_speed": 38.5168781332826,
+          "attempted_programs": 46,
+          "status_counts": {
+            "accepted": 32,
+            "outside_delivery_zone": 14,
+            "no_crossing": 0
+          }
         },
         "max_arm_angle_2.2": {
           "winner": "restrain_5.0_onset_0.125",
           "winner_speed": 46.91257268525718,
           "passive_speed": 43.12958067086403,
-          "early_drive_speed": 38.5168781332826
+          "early_drive_speed": 38.5168781332826,
+          "attempted_programs": 46,
+          "status_counts": {
+            "accepted": 33,
+            "outside_delivery_zone": 13,
+            "no_crossing": 0
+          }
         },
         "max_arm_angle_2.5": {
           "winner": "restrain_5.0_onset_0.125",
           "winner_speed": 46.91257268525718,
           "passive_speed": 43.12958067086403,
-          "early_drive_speed": 38.5168781332826
+          "early_drive_speed": 38.5168781332826,
+          "attempted_programs": 46,
+          "status_counts": {
+            "accepted": 37,
+            "outside_delivery_zone": 9,
+            "no_crossing": 0
+          }
         }
       }
     }

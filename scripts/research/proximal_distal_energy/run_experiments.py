@@ -35,6 +35,7 @@ from scripts.research.proximal_distal_energy.swing_model import (
     PlanarInertials,
     clubhead_speed,
     find_impact,
+    first_club_vertical_crossing,
     segment_kinetic_energies,
     wrist_interface_powers,
 )
@@ -86,10 +87,21 @@ def rollout_program(
 
     Returns ``(t, q, v, u)`` arrays with ``horizon + 1`` samples each.
     """
+    controls = program.controls(HORIZON, DT)
+    return rollout_controls(params, controls)
+
+
+def rollout_controls(
+    params: GolfModelParams,
+    controls: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Roll out an explicit control history from the registered initial state."""
+    control_array = np.asarray(controls, dtype=float)
+    if control_array.shape != (HORIZON, 2):
+        raise ValueError(f"controls must have shape ({HORIZON}, 2)")
     backend = make_backend("ode", params)
     backend.reset(SimState(q=np.array(INITIAL_Q, dtype=float), v=np.zeros(2), time=0.0))
-    controls = program.controls(HORIZON, DT)
-    trace = backend.rollout(controls=controls, horizon=HORIZON, dt=DT)
+    trace = backend.rollout(controls=control_array, horizon=HORIZON, dt=DT)
     u = trace.u if trace.u is not None else np.zeros_like(trace.v)
     return trace.t, trace.q, trace.v, u
 
@@ -110,44 +122,93 @@ def counterfactual_split(
     return drift, control
 
 
+def trace_accelerations(
+    params: GolfModelParams,
+    q: np.ndarray,
+    v: np.ndarray,
+    u: np.ndarray,
+) -> np.ndarray:
+    """Evaluate exact backend forward dynamics at every recorded sample."""
+    if not (len(q) == len(v) == len(u)):
+        raise ValueError("q, v, and u must have equal sample counts")
+    backend = make_backend("ode", params)
+    return np.asarray(
+        [
+            backend.forward_dynamics(qk, vk, uk)
+            for qk, vk, uk in zip(q, v, u, strict=True)
+        ],
+        dtype=float,
+    )
+
+
+def _split_integrals(
+    series: np.ndarray,
+    t: np.ndarray,
+    *,
+    split: float,
+) -> tuple[float, float]:
+    """Integrate before/after an exact shared, interpolated split boundary."""
+    values = np.asarray(series, dtype=float)
+    times = np.asarray(t, dtype=float)
+    if values.shape != times.shape:
+        raise ValueError("series and t must be one-dimensional arrays of equal shape")
+    if times.ndim != 1 or len(times) < 2 or np.any(np.diff(times) <= 0.0):
+        raise ValueError("t must contain at least two strictly increasing samples")
+    if not times[0] <= split <= times[-1]:
+        raise ValueError("split must lie within the sampled interval")
+
+    split_value = float(np.interp(split, times, values))
+    before = times < split
+    after = times > split
+    early_t = np.concatenate((times[before], [split]))
+    early_y = np.concatenate((values[before], [split_value]))
+    late_t = np.concatenate(([split], times[after]))
+    late_y = np.concatenate(([split_value], values[after]))
+    early = 0.0 if len(early_t) < 2 else float(np.trapezoid(early_y, early_t))
+    late = 0.0 if len(late_t) < 2 else float(np.trapezoid(late_y, late_t))
+    return early, late
+
+
 def _phase_energy_budget(
     inertials: PlanarInertials,
     t: np.ndarray,
     q: np.ndarray,
     v: np.ndarray,
+    qdd: np.ndarray,
     u: np.ndarray,
     t_impact: float,
 ) -> dict[str, float]:
     """Early-half / late-half energy accounting up to impact."""
     mask = t <= t_impact
-    t_c, q_c, v_c, u_c = t[mask], q[mask], v[mask], u[mask]
+    t_c, q_c, v_c, qdd_c, u_c = (
+        t[mask],
+        q[mask],
+        v[mask],
+        qdd[mask],
+        u[mask],
+    )
     half = t_impact / 2.0
-    early = t_c <= half
-    late = ~early
 
     _, e_club = segment_kinetic_energies(inertials, q_c, v_c)
-    powers = wrist_interface_powers(inertials, t_c, q_c, v_c, u_c)
-
-    def _integrate(series: np.ndarray, sel: np.ndarray) -> float:
-        if sel.sum() < 2:
-            return 0.0
-        return float(np.trapezoid(series[sel], t_c[sel]))
+    powers = wrist_interface_powers(inertials, t_c, q_c, v_c, qdd_c, u_c)
+    e_club_half = float(np.interp(half, t_c, e_club))
 
     shoulder_power = u_c[:, 0] * v_c[:, 0]
     wrist_power = powers["muscle_moment_power"]
+    wrist_early, wrist_late = _split_integrals(wrist_power, t_c, split=half)
+    shoulder_early, shoulder_late = _split_integrals(shoulder_power, t_c, split=half)
+    force_early, force_late = _split_integrals(
+        powers["joint_force_power"], t_c, split=half
+    )
     return {
-        "club_ke_gain_early_j": float(
-            e_club[early][-1] - e_club[0] if early.sum() >= 2 else 0.0
-        ),
-        "club_ke_gain_late_j": float(
-            e_club[-1] - e_club[early][-1] if early.sum() >= 2 else 0.0
-        ),
-        "wrist_actuator_work_early_j": _integrate(wrist_power, early),
-        "wrist_actuator_work_late_j": _integrate(wrist_power, late),
-        "shoulder_work_early_j": _integrate(shoulder_power, early),
-        "shoulder_work_late_j": _integrate(shoulder_power, late),
-        "joint_force_transfer_early_j": _integrate(powers["joint_force_power"], early),
-        "joint_force_transfer_late_j": _integrate(powers["joint_force_power"], late),
+        "club_ke_gain_early_j": e_club_half - float(e_club[0]),
+        "club_ke_gain_late_j": float(e_club[-1]) - e_club_half,
+        "wrist_actuator_work_early_j": wrist_early,
+        "wrist_actuator_work_late_j": wrist_late,
+        "shoulder_work_early_j": shoulder_early,
+        "shoulder_work_late_j": shoulder_late,
+        "joint_force_transfer_early_j": force_early,
+        "joint_force_transfer_late_j": force_late,
     }
 
 
@@ -166,6 +227,7 @@ def run_sweep(params: GolfModelParams, inertials: PlanarInertials) -> list[dict]
                 )
         for program in programs:
             t, q, v, u = rollout_program(params, program)
+            candidate = first_club_vertical_crossing(t, q, v, inertials)
             impact = find_impact(t, q, v, inertials)
             row: dict[str, Any] = {
                 "profile": program.name.split("@")[0],
@@ -175,19 +237,38 @@ def run_sweep(params: GolfModelParams, inertials: PlanarInertials) -> list[dict]
                 "onset_s": (None if np.isinf(program.onset_s) else program.onset_s),
             }
             if impact is None:
+                status = (
+                    "no_club_vertical_crossing"
+                    if candidate is None
+                    else "crossing_outside_registered_delivery_zone"
+                )
                 row.update(
                     {
+                        "impact_status": status,
                         "t_impact_s": None,
                         "clubhead_speed_mps": None,
                         "theta1_at_impact_rad": None,
+                        "candidate_t_crossing_s": (
+                            None if candidate is None else candidate[0]
+                        ),
+                        "candidate_clubhead_speed_mps": (
+                            None if candidate is None else candidate[1]
+                        ),
+                        "candidate_theta1_at_crossing_rad": (
+                            None if candidate is None else candidate[2]
+                        ),
                     }
                 )
             else:
                 row.update(
                     {
+                        "impact_status": "accepted_registered_delivery_zone",
                         "t_impact_s": impact[0],
                         "clubhead_speed_mps": impact[1],
                         "theta1_at_impact_rad": impact[2],
+                        "candidate_t_crossing_s": impact[0],
+                        "candidate_clubhead_speed_mps": impact[1],
+                        "candidate_theta1_at_crossing_rad": impact[2],
                     }
                 )
             rows.append(row)
@@ -233,8 +314,9 @@ def collect_representatives(
         t, q, v, u = rollout_program(params, program)
         impact = find_impact(t, q, v, inertials)
         drift, control = counterfactual_split(params, q, v, u)
+        qdd = drift + control
         e_arm, e_club = segment_kinetic_energies(inertials, q, v)
-        powers = wrist_interface_powers(inertials, t, q, v, u)
+        powers = wrist_interface_powers(inertials, t, q, v, qdd, u)
         bundle = {
             "program": {
                 "name": program.name,
@@ -256,7 +338,9 @@ def collect_representatives(
             "powers": powers,
         }
         if impact is not None:
-            bundle["budget"] = _phase_energy_budget(inertials, t, q, v, u, impact[0])
+            bundle["budget"] = _phase_energy_budget(
+                inertials, t, q, v, qdd, u, impact[0]
+            )
         bundles[label] = bundle
     return bundles
 

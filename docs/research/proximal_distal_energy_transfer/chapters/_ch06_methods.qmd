@@ -56,6 +56,10 @@ programs; `drive-only` at $t_{\mathrm{on}} = 0$ is the S1
 late onset is the S2 pole. Torque magnitudes sit inside the ranges used
 by comparable two- and three-segment studies
 [@sprigings2000; @pickering1999], scaled to this model's inertias.
+These profiles are a finite heuristic design, not a continuous optimal-control
+solution and not a physiological activation reconstruction. Consequently,
+"best" below always means grid-selected within the declared programs and
+endpoint rule.
 
 **E1b (actuator-bound sensitivity).** Because constant torques overstate
 what muscle can deliver at speed, a companion sweep
@@ -69,6 +73,13 @@ shortening velocity). State-dependent torques require closed-loop
 integration, done with the backend's own `mass_matrix`/`bias_forces`
 primitives under the identical RK4 settings.
 
+**E1e (finite command-rise sensitivity).** A separate audit replaces each
+post-initial command change with an exact-discrete first-order transition at
+20, 35, and 50 ms, alongside the unfiltered reference. The command at the top
+of the downswing is treated as preloaded; only later changes are filtered. This
+tests whether the ideal step switch creates the ordering. It is a command-level
+sensitivity, not a calcium-kinetics model, muscle identification, or OCP.
+
 ## Impact Definition and Validity {#sec-methods-impact}
 
 Impact is the first upward crossing of
@@ -78,12 +89,16 @@ the clubhead (distal tip) speed at that instant. Because the shoulder
 torque is constant, a program that keeps the club folded through the
 bottom of the swing can postpone the crossing into a second rotation
 while the shoulder keeps pumping energy — an artifact, not a swing. A
-trial is therefore **invalid** unless the arm angle at the crossing
+trial is therefore outside the registered delivery-zone estimand unless the
+arm angle at the crossing
 satisfies $\theta_1 \le 2.0$ rad (a first-pass delivery); 29 of the 92
 programs were excluded by this rule, all of them heavy-restraint or
-very-late-onset programs. This constraint is conservative *against* the
-S2 hypothesis: it discards only trials that would otherwise have
-inflated the restraint arm of the sweep.
+very-late-onset programs. Every attempted program now records its first
+geometric crossing, speed, arm angle, and explicit acceptance status even when
+excluded. Bounds from 1.5 to 2.5 rad accept 58 to 69 of 92 programs; the
+grid-selected profile and onset remain unchanged at both shoulder-torque
+levels. This supports threshold robustness of the selected result, but it does
+not make 2.0 rad an anatomical cutoff or validate the endpoint as impact.
 
 ## Recorded Quantities {#sec-methods-quantities}
 
@@ -103,7 +118,8 @@ $\mathbf v_{c2}$ computed analytically from the state.
 $P_f = \mathbf F \cdot \mathbf v_{\mathrm{wrist}}$, with the joint
 reaction force recovered from Newton's second law for the club segment,
 $\mathbf F = m_2 \mathbf a_{c2} - m_2 \mathbf g$ (centre-of-mass
-acceleration by central differences of the analytic velocity); the net
+acceleration evaluated analytically as
+$J_{c2}(q)\ddot q+\dot J_{c2}(q,\dot q)\dot q$); the net
 wrist moment power on the club
 $(\tau_w - b_w\dot\theta_2)(\dot\theta_1+\dot\theta_2)$; the wrist
 actuator power $\tau_w \dot\theta_2$; and the residual check that the
@@ -141,7 +157,10 @@ BASE minus counterfactual after time alignment (@sec-killswitch-ensemble).
 
 **Phase budgets.** With the downswing divided at $t_{\mathrm{imp}}/2$:
 club kinetic-energy gain, wrist actuator work, shoulder work, and
-integrated joint-force transfer, per half.
+integrated joint-force transfer, per half. The value at the exact split is
+linearly interpolated and included as the terminal point of the early integral
+and the initial point of the late integral, so the two trapezoidal integrals
+close to the unsplit integral without an omitted sample interval.
 
 **Robustness analyses (E1c and E1d).** E1c re-scores the same 92
 trajectories using fixed arm positions, peak horizontal clubhead velocity,
@@ -150,7 +169,8 @@ repeats the four-strategy comparison after changing one model input at a
 time: arm length (±10%), arm mass (±15%), club length (±10%), clubhead mass
 (±20%), swing-plane inclination (25° and 45° versus 35°), and both damping
 coefficients (0.5× and 1.5×). For each E1d case, late-drive and
-restrain-then-drive onset are re-optimized on the original onset grid.
+restrain-then-drive onset are reselected on the original onset grid. E1e
+repeats the complete 92-program sweep under finite command transitions.
 These ranges test local structural sensitivity; they are not population
 percentiles or confidence intervals.
 
