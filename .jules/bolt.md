@@ -104,3 +104,7 @@
 ## 2026-06-25 - [Replacing np.linalg.norm with math.hypot for 2D vectors in Contact models]
 **Learning:** `np.linalg.norm` has significant overhead for small, fixed-size 2D arrays (like 2D tangent velocity vectors) evaluated within tight simulation loops (e.g. `src/shared/python/motion_pipeline/matching/contact.py`).
 **Action:** Replaced `np.linalg.norm(v_tan)` with `math.hypot(v_tan[0], v_tan[1])` to bypass array allocation and NumPy dispatch overhead, achieving a measured ~7x speedup for this specific norm calculation.
+
+## 2024-05-30 - [Replacing np.linalg.norm with math.sqrt(np.vdot) in IK Loop]
+**Learning:** In tight iterative loops (like the Levenberg-Marquardt IK solver in `pinocchio_backend.py`), using `np.linalg.norm` for small error arrays incurs significant Python overhead due to NumPy's dispatching. Using `math.sqrt(np.vdot(err, err))` bypasses this overhead and is noticeably faster for small 1D arrays, resulting in an overall speedup for IK iterations without altering mathematics or data types.
+**Action:** When finding operations on small static vectors in hot loops (like IK solvers), prefer explicitly calculating the norm with `math.sqrt(np.vdot(arr, arr))` over `np.linalg.norm` if the vector length is small but dynamic (or hard to unpack).
