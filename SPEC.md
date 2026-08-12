@@ -39,7 +39,7 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.497 |
+| **Spec Version** | 1.0.498 |
 | **Last Spec Update** | 2026-08-11 |
 
 ## 2. Purpose & Mission
@@ -71,6 +71,14 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-08-11** - Added the first UpstreamDrift consumer boundary for the
+  canonical Tools ground-model contracts (Tools #4276). The headless gateway
+  validates the exact flight-to-ground request/result and reference-execution
+  v1 schemas before binding Tools parsers or execution, stays import-safe when
+  the optional authority is absent, and preserves returned records and
+  provenance unchanged. This is not a dependency pin or UI parity claim: the
+  exact `vendor/ud-tools`/Cargo repin, FastAPI, PyQt, React, clean-install, and
+  protected-release gates remain blocked on the reviewed Tools ground merge.
 - **2026-08-11** - Added #8493 ground-reaction drift attribution: a
   frame-explicit constrained-contact reaction solver decomposes support
   reactions into configuration, velocity, control, and retained-external
@@ -1523,6 +1531,7 @@ UpstreamDrift/
 │   │                               # contraction)
 │   └── shared/python/              # Cross-cutting libraries; highlights:
 │       ├── engine_core/            # EngineManager/Registry/probes/capabilities
+│       ├── ground_model/            # Fail-closed consumer of Tools ground v1
 │       ├── launcher_embed/         # EmbeddableTool contract + registry (ADR-0013)
 │       ├── physics/                # Ball flight models, impact, swing→flight pipeline
 │       ├── putting_dynamics/       # Surface-aware putt collision and roll physics
@@ -1568,6 +1577,7 @@ UpstreamDrift/
 | Configuration Manager    | `src/config/`                            | Centralized configuration loading, validation, and environment management                   |
 | Analysis Tool CLIs       | `src/tools/drift_control/`, `src/tools/contraction/` | Headless AffineDrift-compatible drift/control, contraction, and Floquet analysis tools |
 | Launch Monitor Analytics | `src/tools/launch_monitor_analytics/`, `src/shared/python/launch_monitor/` | PyQt6, FastAPI, and headless vendor-neutral import plus arbitrary-field association/regression, missingness, multiplicity, grouping, lineage, dependency, model, agreement, dispersion, and trend analysis |
+| Tools Ground Consumer    | `src/shared/python/ground_model/`      | Headless exact-schema gateway to Tools flight-to-ground v1 records and reference execution; UI and final dependency pins remain tracked |
 | Putting Dynamics         | `src/shared/python/putting_dynamics/`   | Headless heterogeneous-green, collision, loft, hosel-wrench, skid/roll/rest, and hole-capture physics for #8345 |
 | 3D Putting UI            | `src/api/routes/putting_green.py`, `ui/src/pages/PuttingGreen.tsx`, `ui/src/components/visualization/PuttingScene3D.tsx` | Generated-contract R3F playback of the canonical putting model with collision, spin, hosel, surface, camera, and video controls for #8345 P1 |
 | Shared Utilities         | `src/shared/`                            | Cross-engine validators, helpers, and exception definitions                                 |
@@ -1608,6 +1618,7 @@ Engine tier metadata is declared in each in-scope engine package with
 | F14 | Reinforcement learning integration | 🔄     | Gym-compatible interface for RL-based controller learning and policy optimization                   |
 | F15 | Sidekick AI assistant              | 🔄     | In-app and standalone AI assistant surface (PyQt + React/Tauri + `sidekick.standalone.*`) with streaming, RAG, session history, persisted standalone preferences, onboarding, and agentic tool dispatch. See `docs/sidekick/README.md` and ADR-0018. |
 | F16 | Model-training controller          | 🔄     | In-launcher training dashboard (PR3) with scheduler, dataset library, resource monitor, engine-compat gate, and ML/RL-aware stats. Backend contracts + scheduler land in `src/shared/python/training/` (PRs 1–2); GUI tab, tab-backgrounding refactor, and CVAE wiring in PRs 3–5. |
+| F17 | Tools ground-model integration     | 🔄     | Headless v1 consumer gateway validates the canonical Tools façade and degrades safely when absent; exact dependency pins, FastAPI, PyQt, React, parity, and protected release remain open under Tools #4276. |
 
 ### API / Interface Contract
 
@@ -1945,7 +1956,7 @@ Beyond standard tools, CI enforces custom checks:
 
 | Repo             | Relationship | Description                                              |
 | ---------------- | ------------ | -------------------------------------------------------- |
-| (none currently) | —            | UpstreamDrift is currently a standalone fleet repository |
+| Tools            | Vendored Python and pinned Rust authority | `vendor/ud-tools` plus the Cargo `tools-core` revision provide reviewed shared contracts and kernels. Ground-model release pins remain pending Tools #4276. |
 
 ## 10. Deployment & Operations
 
@@ -2031,11 +2042,15 @@ blocks Python package publication on the built-wheel smoke matrix.
 - RL integration currently supports basic Gym environments; no hierarchical or multi-agent support
 - Tauri app Windows builds require MSVC toolchain (no MinGW support)
 - Performance scaling beyond 100-muscle models not yet tested
+- Ground-model execution is not yet available from the clean UpstreamDrift
+  release: the headless consumer gateway exists, but exact Tools pins and
+  FastAPI/PyQt/React surfaces await the protected Tools ground merge (#4276).
 
 ## 12. Change Log
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-11 | 1.0.498 | Added a fail-closed, headless UpstreamDrift gateway for the exact Tools flight-to-ground request/result and reference-execution v1 façade, with absence/presence/malformed-contract tests and explicit dependency/release limitations for Tools #4276. |
 | 2026-08-11 | 1.0.497 | Added #8493 frame-explicit constrained-contact reaction decomposition with configuration, velocity, control, and retained-external components; verified total, ZTCF, and ZVCF closure in a deterministic fixed-support double-pendulum benchmark; published machine-readable evidence and three reproducible figures; and expanded the proximal-distal scientific article with GRF, COP, free-moment, identifiability, and held-out human-data falsification boundaries. |
 | 2026-08-10 | 1.0.496 | Added #8458 hand-path drift/control attribution across forward double-pendulum and one-arm cases plus a prescribed two-arm closed-loop sweep; exported deterministic force, impulse, power, work, joint/time-window, common/differential-mode, sensitivity, and closure evidence; bounded the late residual-couple preview result without claiming muscle preactivation or human performance; extended lossless object-stream PDF compaction to preserve the 106-page, 110-link, 122-outline publication below the size guard; and restored the all-files size gate with the final owned #8472 chat-dock exception through 2026-08-31. |
 | 2026-08-10 | 1.0.495 | Added a reproducible lossless article-PDF compaction command that fails closed on page, URI-link, outline, or size drift; reduced the 90-page publication artifact below the repository's 1 MiB PDF guard; and recorded the protected #8456 higher-order merge in the handoff. |

@@ -104,6 +104,15 @@ Update this file with every PR and every push to main.
   fleet convention in `AGENTS.md`. The full tracked-document audit command is
   `python scripts/check_document_title_case.py`.
 
+- **Tools #4276** — PR **#8440** remains a partial, headless, fail-closed
+  consumer for the canonical Tools ground v1 façade while preserving Tools
+  records/provenance. Its exact published head `e2f436beebc3c2739dcc5f06b5efe5e130513c65`
+  has been reconciled locally by a normal merge of current `main`
+  `69eb7e9db32ccd17e45824619315b1d04b400c27`; the resulting local candidate is
+  not published or release-qualified. Final Tools merges and exact vendor/Cargo
+  pins, FastAPI/PyQt/React parity, clean-install smokes, protected CI, and
+  independent current-head review remain open.
+
 - **#8432** (`feat/launch-monitor-flexible-analysis`, replacing draft #8369)
   adds a versioned,
   vendor-neutral flexible-analysis contract with matched FastAPI and PyQt
@@ -181,6 +190,10 @@ The active branches are independent topic branches off `main` unless noted:
 - `chore/consolidate-open-pr-backlog` (full PR **#8431**) — clean branch from current `main`; replaces
   the applicable micro-optimization and Dependabot branches listed above without
   carrying their stale historical merge differences.
+- `feat/4276-ground-consumer-adapter` — PR **#8440**, a partial Tools #4276
+  consumer slice locally reconciled onto `main` `69eb7e9d`; no vendor pin,
+  current-head review, or release claim until the protected Tools ground stack
+  lands and the remaining consumer surfaces are qualified.
 
 ## Gate Commands (Run These Before Opening/Updating a PR)
 
@@ -195,6 +208,8 @@ python3 scripts/ci/check_error_handling_ratchet.py  # error-handling anti-patter
 python3 scripts/check_docs_governance.py            # docs-only PR gate (docs-ci.yml)
 python3 -m scripts.generate_feature_parity_matrix   # after editing feature_parity.json
 maturin develop                                     # build Rust extensions locally
+# Ground consumer focus:
+python3 -m pytest tests/unit/ground_model/test_consumer_gateway.py -q
 ```
 
 CI entry points: `.github/workflows/ci-standard.yml` (full matrix: `code-quality`,
@@ -241,3 +256,5 @@ CI entry points: `.github/workflows/ci-standard.yml` (full matrix: `code-quality
 5. Review full PR **#8354** for #8345 P1; it consumes the
    curated `putting_dynamics` façade without duplicating physics in React. Then
    complete P5 public sharing and parity registration.
+6. After Tools ground merges, repin its exact commit and finish #4276 UI/release
+   gates. Closed draft #8369 is not a parent; replacement #8432 already merged.
