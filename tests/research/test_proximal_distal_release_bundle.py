@@ -22,7 +22,9 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         "double_pendulum",
         "forward_two_hand",
         "moving_base_flexible_club",
+        "forward_modal_shaft",
         "shaft_beam_reference",
+        "torque_allocation_preload",
         "spatial_common_state",
         "spatial_forward_contact",
         "uncertainty_control",
@@ -36,6 +38,26 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
     assert (
         manifest["claims"]["passive_negative_couple_spatial_forward"]
         == "supported_at_declared_reduced_contact_tier"
+    )
+    assert (
+        manifest["claims"]["arm_wrist_allocation_equivalence"]
+        == "supported_for_the_declared_same_state_club_task"
+    )
+    assert (
+        manifest["claims"]["preload_continuity_advantage"]
+        == "conditional_on_the_declared_dead_zone_transmission_family"
+    )
+    assert manifest["claims"]["scapular_or_muscle_strategy_identification"] == (
+        "unsupported"
+    )
+    assert manifest["presets"]["forward_modal_shaft"]["command"].endswith(
+        "run_moving_base_modal_shaft_study"
+    )
+    allocation_command = manifest["presets"]["torque_allocation_preload"]["command"]
+    assert allocation_command.endswith("run_torque_allocation_preload_study")
+    assert (
+        "measured tissue-level preload and slack identification"
+        in manifest["known_open_gates"]
     )
     assert (
         manifest["archive"]["persistent_identifier_status"]

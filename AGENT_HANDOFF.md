@@ -11,6 +11,15 @@ to `main`; use Git history and linked issues for completed chronology.
   `integration/proximal-distal-completion`; only the consolidated branch later
   targets protected `main`. Use full PRs, serialize hosted CI, and preserve
   protected review/check requirements.
+- **Epic #8497:** adds a matched 8 N m arm--wrist allocation surface and a
+  separate phenomenological preload/role-reversal transmission test. The
+  persistent-direction advantage occurs in 11 of 12 declared sensitivity
+  cases and is exactly absent in all zero-dead-zone cases. This is conditional
+  model evidence, not technique, scapular, or muscle evidence.
+- **Phase 9:** `feat/8426-phase-9-forward-distributed-shaft` transports three
+  shaft modes into the moving-base two-hand solve. The baseline remains within
+  the 5% deflection screen, the zero-command force couple stays negative for
+  30 ms, geometry controls close, and energy residual decreases with timestep.
 - **Phase 0:** PR #8488 merged into integration at `7fdb0fe3d`; it freezes the
   prediction, evidence-v2, wrench/twist, tolerance, migration, and falsifier
   contracts.
@@ -57,8 +66,9 @@ to `main`; use Git history and linked issues for completed chronology.
   three frequencies are 5.240, 62.931, and 137.909 Hz. Slow-load RMS reduction
   error is 0.000687 mm versus 0.0413 mm under a short force/moment pulse.
   Work--energy residual is at most `2.88e-7` J. Identification recovers only a
-  declared synthetic truth; it is not equipment calibration, and the beam is
-  not yet coupled into the two-hand KKT solve.
+  declared synthetic truth; it is not equipment calibration. Phase 9 now
+  couples transported modes into the two-hand KKT solve, while equipment and
+  subject calibration remain open.
 - **Current Phase 8:** `feat/8426-phase-8-spatial-forward-contact` executes
   native MuJoCo and Pinocchio forward dynamics for one hashed reduced model
   with two finite-mass hand carriages, paired compliant contacts, a free rigid
@@ -100,8 +110,10 @@ to `main`; use Git history and linked issues for completed chronology.
 8. `scripts/research/proximal_distal_energy/spatial_forward_study.py`
 9. `scripts/research/proximal_distal_energy/uncertainty_control.py`
 10. `scripts/research/proximal_distal_energy/experimental_protocol.py`
-11. `scripts/research/proximal_distal_energy/release_bundle.py`
-12. `CLAUDE.md` and `AGENTS.md`
+11. `scripts/research/proximal_distal_energy/moving_base_modal_shaft.py`
+12. `scripts/research/proximal_distal_energy/torque_allocation_preload.py`
+13. `scripts/research/proximal_distal_energy/release_bundle.py`
+14. `CLAUDE.md` and `AGENTS.md`
 
 ## Other Current Context
 

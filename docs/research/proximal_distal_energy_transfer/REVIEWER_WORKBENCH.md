@@ -42,7 +42,9 @@ commands; the [data dictionary](DATA_DICTIONARY.md) defines recurring fields.
   [`shaft_beam_reference.json`](data/shaft_beam_reference.json)
 
 This tier is a synthetic structural comparison. It is not an equipment
-calibration and is not yet coupled into the constrained two-hand rollout.
+calibration. The later forward modal-shaft tier performs the coupling test at
+the declared planar mechanism level; measured equipment calibration remains
+open.
 
 ## Spatial Common-State Tier
 
@@ -91,3 +93,19 @@ The [experimental protocol](EXPERIMENTAL_FALSIFICATION_PROTOCOL.md) and
 [`experimental_protocol_readiness.json`](data/experimental_protocol_readiness.json)
 are readiness artifacts only. They contain no human observations. The review
 surface must not render synthetic readiness as empirical support.
+
+## Arm--Wrist Allocation and Transmission Preload
+
+- Matched-task allocation and moment closure:
+  [`fig_torque_allocation_moment_closure.svg`](figures/fig_torque_allocation_moment_closure.svg)
+- Geometry-dependent internal-demand surface:
+  [`fig_torque_allocation_geometry_surface.svg`](figures/fig_torque_allocation_geometry_surface.svg)
+- Persistent-direction and role-reversal traces:
+  [`fig_torque_role_reversal_transmission.svg`](figures/fig_torque_role_reversal_transmission.svg)
+- Evidence:
+  [`torque_allocation_preload_study.json`](data/torque_allocation_preload_study.json)
+
+The allocation poles are generalized actuator subspaces. The transmission
+channel is a declared phenomenological dead-zone model. Neither identifies
+scapular action, muscular inactivity, biological slack, or a preferred human
+technique.

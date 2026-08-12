@@ -70,9 +70,17 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
                 "command": "python -m scripts.research.proximal_distal_energy.run_moving_base_flexible_study",
                 "tier": "planar_coupled_base_flex",
             },
+            "forward_modal_shaft": {
+                "command": "python -m scripts.research.proximal_distal_energy.run_moving_base_modal_shaft_study",
+                "tier": "planar_coupled_base_distributed_modal_shaft",
+            },
             "shaft_beam_reference": {
                 "command": "python -m scripts.research.proximal_distal_energy.run_shaft_beam_reference",
                 "tier": "synthetic_distributed_shaft_comparison",
+            },
+            "torque_allocation_preload": {
+                "command": "python -m scripts.research.proximal_distal_energy.run_torque_allocation_preload_study",
+                "tier": "matched_task_allocation_and_phenomenological_transmission",
             },
             "spatial_common_state": {
                 "command": "python -m scripts.research.proximal_distal_energy.run_spatial_full_body_study",
@@ -95,6 +103,16 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
             "interaction_dynamics_planar": "supported_at_declared_model_tier",
             "geometry_transfer_spatial_common_state": "supported_at_declared_model_tier",
             "distributed_shaft_modal_reduction": "supported_on_synthetic_structural_case",
+            "distributed_modal_shaft_coupled_forward": (
+                "supported_at_declared_planar_mechanism_tier"
+            ),
+            "arm_wrist_allocation_equivalence": (
+                "supported_for_the_declared_same_state_club_task"
+            ),
+            "preload_continuity_advantage": (
+                "conditional_on_the_declared_dead_zone_transmission_family"
+            ),
+            "scapular_or_muscle_strategy_identification": "unsupported",
             "passive_negative_couple_spatial_forward": (
                 "supported_at_declared_reduced_contact_tier"
             ),
@@ -103,7 +121,8 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
         },
         "known_open_gates": [
             "subject-scaled articulated spatial contact with calibrated grip and distributed shaft",
-            "equipment-calibrated distributed beam coupled into the forward two-hand solve",
+            "equipment-calibrated distributed beam and grip coupled into a subject-scaled forward solve",
+            "measured tissue-level preload and slack identification",
             "governed held-out human experimental evaluation",
             "external archive deposit and persistent identifier",
         ],

@@ -12,7 +12,8 @@ DEFAULT_PDF = (
     / "proximal_distal_energy_transfer"
     / "proximal_distal_energy_transfer.pdf"
 )
-DEFAULT_LIMIT_BYTES = 1_048_576
+# Hard limit for the 160+ page linked vector release; avoid lossy rasterization.
+DEFAULT_LIMIT_BYTES = 1_150_000
 
 
 def _load_fitz():

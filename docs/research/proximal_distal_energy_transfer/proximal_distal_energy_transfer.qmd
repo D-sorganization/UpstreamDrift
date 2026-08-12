@@ -66,9 +66,13 @@ abstract: |
   a six-mode reference. Synthetic modal identification recovers its declared
   modulus and tip mass, mesh and work--energy gates close, and a short load
   pulse exposes sixty times more RMS response discrepancy than a slow pulse.
-  This is structural verification, not equipment calibration, and the beam is
-  not yet coupled into the two-hand forward solve. A common-observable model
-  ladder then carries
+  This is structural verification, not equipment calibration. A subsequent
+  planar experiment couples three transported shaft modes into the moving-base,
+  two-hand forward solve. The declared baseline stays within a 5% deflection
+  screen; the zero-command grip couple remains negative for 30 ms; coincident
+  and reversed moment-arm controls close exactly; and work--energy error
+  decreases under timestep refinement. The result supports only the declared
+  synthetic planar mechanism. A common-observable model ladder then carries
   reference-explicit force, couple, velocity, angular velocity, and power
   through a third coordinate, prescribed hub motion, two-hand constraint
   geometry, and proper 3-D frame transformations. A reduced full-body
@@ -109,7 +113,14 @@ abstract: |
   instead cancel with an index of 0.962. Joint- and time-resolved impulse,
   power, work, force-vector, and common/differential-mode results show why a
   large net hand-path force is a mechanical transfer observable rather than a
-  direct measure of biological effort. References, analysis code,
+  direct measure of biological effort. A final matched-task allocation
+  experiment separates direct wrist moments from the moment of bilateral hand
+  forces at identical club states. Internal demands vary even when club-moment
+  closure is exact. A separate dead-zone transmission model predicts that
+  preserving each channel's loaded direction avoids a reversal gap, whereas
+  reversing both modeled channels crosses zero transmission. These conditional
+  predictions do not identify scapular action or establish a preferred human
+  technique. References, analysis code,
   machine-readable results, and provenance are available with the document for
   independent inspection and reuse.
 keywords:
@@ -163,7 +174,11 @@ format:
 
 {{< include chapters/_ch06b_coupled_base_flex.qmd >}}
 
+{{< include chapters/_ch06bc_torque_allocation_preload.qmd >}}
+
 {{< include chapters/_ch06bb_shaft_beam_reference.qmd >}}
+
+{{< include chapters/_ch06bbb_forward_modal_shaft.qmd >}}
 
 {{< include chapters/_ch06c_spatial_cross_formulation.qmd >}}
 

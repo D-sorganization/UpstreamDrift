@@ -4,7 +4,9 @@
 
 The release bundle provides a deterministic model ladder from the analytical
 double pendulum through forward planar two-hand, moving-base/flexible-club,
-synthetic distributed-shaft, reduced spatial common-state, coupled
+coupled forward modal-shaft, synthetic distributed-shaft, matched-task
+arm--wrist allocation and phenomenological transmission, reduced spatial
+common-state, coupled
 two-engine spatial forward-contact, uncertainty/control, and synthetic
 experimental-readiness tiers. The CLI lists
 the canonical command for each
@@ -21,6 +23,8 @@ python -m scripts.research.proximal_distal_energy.qualify_open_release validate
 `validate` fails on a missing file, changed bytes, unsafe path, or record
 mismatch. Regeneration is an explicit `write` action after all scientific and
 visual gates pass; validation never silently updates expected hashes.
+The final lossless compaction gate preserves page, URI-link, and outline
+counts and enforces a 1,150,000-byte ceiling for the linked vector PDF.
 
 ## Claim Status
 
@@ -30,6 +34,10 @@ visual gates pass; validation never silently updates expected hashes.
   dynamics.
 - Reduced/distributed shaft response is supported for a synthetic structural
   case, not calibrated equipment.
+- Same-state arm--wrist actuator allocations can produce the same declared
+  club moment while changing internal loads. The preload-continuity advantage
+  is conditional on the declared dead-zone transmission family; neither result
+  identifies a scapular or muscle strategy.
 - Passive post-killswitch contact persistence is supported only for the
   declared reduced spatial carriage model; articulated anatomy remains
   untested.
@@ -46,9 +54,10 @@ participant data are included or authorized for public release.
 
 ## Open Completion Gates
 
-The manifest records, rather than conceals, four open gates: subject-scaled
+The manifest records, rather than conceals, five open gates: subject-scaled
 articulated spatial contact with calibrated grip and distributed shaft; an
-equipment-calibrated distributed beam coupled into the forward two-hand solve;
+equipment-calibrated distributed beam and grip coupled into a subject-scaled
+forward solve; measured tissue-level preload and slack identification;
 governed held-out human evaluation; and external archival deposit with a
 persistent identifier. The last item requires an external publication action
 and is not represented as complete.

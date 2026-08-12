@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0.0",
+  "epic": "https://github.com/D-sorganization/UpstreamDrift/issues/8497",
+  "claim_boundary": "The constrained sweep compares generalized actuator allocations; it neither identifies muscles nor equates proximal joint torque with scapular retraction. The transmission study is phenomenological.",
+  "matched_task": {
+    "target_net_control_moment_nm": 8.0,
+    "maximum_moment_closure_error_nm": 4.440892098500626e-15,
+    "maximum_task_error_nm": 5.329070518200751e-15,
+    "minimum_hand_force_rms_n": 7.581686905156809,
+    "maximum_hand_force_rms_n": 91.51213361769024,
+    "minimum_joint_torque_norm_nm": 5.736508698407808,
+    "maximum_joint_torque_norm_nm": 25.44939024411236
+  },
+  "transmission_channel": {
+    "stiffness_nm_rad": 600.0,
+    "dead_zone_rad": 0.012,
+    "time_constant_s": 0.018
+  },
+  "programs": {
+    "persistent_arm_drive": {
+      "name": "persistent_arm_drive",
+      "arm_pre_nm": 10.0,
+      "wrist_pre_nm": -4.0,
+      "arm_post_nm": 16.0,
+      "wrist_post_nm": -6.0
+    },
+    "wrist_to_arm_role_reversal": {
+      "name": "wrist_to_arm_role_reversal",
+      "arm_pre_nm": -4.0,
+      "wrist_pre_nm": 10.0,
+      "arm_post_nm": 16.0,
+      "wrist_post_nm": -6.0
+    }
+  },
+  "transmission_results": {
+    "persistent_arm_drive_preloaded": {
+      "arm_zero_transmission_duration_s": 0.0,
+      "wrist_zero_transmission_duration_s": 0.0,
+      "net_torque_error_impulse_nms": 0.0717103076307577,
+      "arm_reversal_delay_s": 0.0,
+      "wrist_reversal_delay_s": 0.0
+    },
+    "persistent_arm_drive_relaxed": {
+      "arm_zero_transmission_duration_s": 0.0067,
+      "wrist_zero_transmission_duration_s": 0.0142,
+      "net_torque_error_impulse_nms": 0.20107138073005523,
+      "arm_reversal_delay_s": 0.0086,
+      "wrist_reversal_delay_s": 0.0161
+    },
+    "wrist_to_arm_role_reversal_preloaded": {
+      "arm_zero_transmission_duration_s": 0.0115,
+      "wrist_zero_transmission_duration_s": 0.022000000000000002,
+      "net_torque_error_impulse_nms": 0.19540693388776567,
+      "arm_reversal_delay_s": 0.015700000000000002,
+      "wrist_reversal_delay_s": 0.031100000000000003
+    },
+    "wrist_to_arm_role_reversal_relaxed": {
+      "arm_zero_transmission_duration_s": 0.0067,
+      "wrist_zero_transmission_duration_s": 0.0142,
+      "net_torque_error_impulse_nms": 0.20107138073005523,
+      "arm_reversal_delay_s": 0.0086,
+      "wrist_reversal_delay_s": 0.0161
+    }
+  },
+  "transmission_sensitivity": {
+    "dead_zone_rad": [0.0, 0.004, 0.012, 0.024],
+    "time_constant_s": [0.008, 0.018, 0.035],
+    "persistent_direction_has_lower_error_case_count": 11,
+    "case_count": 12,
+    "interpretation": "The persistent-direction advantage is conditional on the declared transmission family. The programs are equal to numerical precision in all three zero-dead-zone cases."
+  },
+  "registered_hypotheses": {
+    "RA-H1": "Allocation extremes can match the same club task.",
+    "RA-H2": "Allocation changes internal force and effort signatures.",
+    "RA-H3": "Sign reversal across a dead zone creates transmission delay.",
+    "RA-H4": "Preload improves early torque continuity for a fixed program.",
+    "RA-H5": "No universal allocation optimum is asserted without cost weights."
+  }
+}

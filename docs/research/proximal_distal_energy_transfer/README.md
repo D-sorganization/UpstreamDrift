@@ -40,12 +40,23 @@ club in one forward solve. It records base and shaft energy, a same-state
 zero-command branch, a coincident-grip geometric control, parameter
 sensitivity, and timestep convergence without prescribing base motion or
 shaft flex.
+A coupled forward modal-shaft extension replaces the single lumped flex
+coordinate with multiple bending modes while retaining the moving base, two
+hand contacts, and same-state controls. It is a synthetic mechanism test, not
+an equipment-calibrated shaft result.
 A distributed-shaft structural study now reuses the shared Euler--Bernoulli
 finite-element model, adds declared head inertia, identifies a synthetic
 two-parameter modal case, and compares one-mode and six-mode responses under
 slow and short-duration loads. It exposes higher-mode discrepancy while
 remaining explicitly separate from equipment calibration and from the coupled
 two-hand solve.
+A matched-task allocation study then compares the proximal joint-torque and
+direct wrist-moment extremes that can produce the same declared club moment.
+A separate phenomenological transmission channel tests persistent-direction
+and wrist-to-arm role-reversal programs with and without preload, across a
+registered dead-zone and time-constant grid. These are actuator-allocation and
+transmission hypotheses; they do not identify scapular muscles, tissue slack,
+or a preferred human technique.
 A coupled uncertainty, identifiability, and delayed-control phase now varies
 12 inputs simultaneously in that same forward model. It publishes deterministic
 Latin-hypercube/PRCC screening, rank and null-space audits, and separate
@@ -62,6 +73,8 @@ Ongoing validation and extension work is tracked in
 The hand-path attribution, two-hand redundancy, and preactivation validation
 program is tracked in
 [#8458](https://github.com/D-sorganization/UpstreamDrift/issues/8458).
+The arm--wrist allocation, role-reversal, and preload program is tracked in
+[#8497](https://github.com/D-sorganization/UpstreamDrift/issues/8497).
 
 ## Layout
 
@@ -99,7 +112,9 @@ python3 -m scripts.research.proximal_distal_energy.run_hand_path_attribution_stu
 python3 -m scripts.research.proximal_distal_energy.two_hand_preactivation_hypothesis
 python3 -m scripts.research.proximal_distal_energy.run_forward_two_arm_study
 python3 -m scripts.research.proximal_distal_energy.run_moving_base_flexible_study
+python3 -m scripts.research.proximal_distal_energy.run_moving_base_modal_shaft_study
 python3 -m scripts.research.proximal_distal_energy.run_shaft_beam_reference
+python3 -m scripts.research.proximal_distal_energy.run_torque_allocation_preload_study
 python3 -m scripts.research.proximal_distal_energy.run_spatial_full_body_study
 python3 -m scripts.research.proximal_distal_energy.run_spatial_forward_contact_study
 python3 -m scripts.research.proximal_distal_energy.run_uncertainty_control_study
@@ -118,7 +133,9 @@ python3 -m scripts.research.proximal_distal_energy.make_shaft_contribution_figur
 python3 -m scripts.research.proximal_distal_energy.make_mechanism_ladder_figures
 python3 -m scripts.research.proximal_distal_energy.make_forward_two_arm_figures
 python3 -m scripts.research.proximal_distal_energy.make_moving_base_flexible_figures
+python3 -m scripts.research.proximal_distal_energy.make_moving_base_modal_shaft_figures
 python3 -m scripts.research.proximal_distal_energy.make_shaft_beam_reference_figures
+python3 -m scripts.research.proximal_distal_energy.make_torque_allocation_preload_figures
 python3 -m scripts.research.proximal_distal_energy.make_spatial_full_body_figures
 python3 -m scripts.research.proximal_distal_energy.make_spatial_forward_contact_figures
 python3 -m scripts.research.proximal_distal_energy.make_uncertainty_control_figures
@@ -189,6 +206,14 @@ model and ABA APIs.
   truth. Its finite-element convergence and work--energy closure do not
   constitute equipment calibration, measured shaft validation, or proof that
   the result survives coupling into the constrained two-hand solve.
+- The coupled modal-shaft study closes that synthetic coupling gap only for the
+  declared planar mechanism case. It does not provide measured equipment
+  calibration, torsion, nonlinear shaft behavior, or a subject-specific grip.
+- The allocation study solves an exact same-state club-moment task over declared
+  generalized actuator subspaces. Calling the proximal subspace an arm or
+  scapular strategy is shorthand, not muscle identification. Its transmission
+  channel gives a falsifiable operational meaning to lost continuity; it is not
+  evidence that anatomical tissue was literally slack.
 - The reduced full-body spatial study uses 20 generalized coordinates and
   spherical inertia elements shared by MuJoCo and an independent analytical
   implementation. Its same-state agreement is an implementation-transport

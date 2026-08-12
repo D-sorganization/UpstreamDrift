@@ -171,6 +171,14 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   proper-frame rotation preserve power, planar evidence migrates losslessly
   into the spatial axes, and unexecuted higher tiers remain explicitly
   untested rather than inheriting lower-tier support.
+- **2026-08-11** - Extended the open proximal-distal resource with a forward
+  moving-base, two-hand model carrying three transported shaft modes and with a
+  separate matched-task arm--wrist allocation/preload experiment. The latter
+  defines generalized actuator subspaces, exact club-moment closure, and a
+  declared dead-zone/stiffness/force-rise channel. It explicitly prohibits
+  inference to scapular motion, muscular inactivity, biological slack, or a
+  preferred human technique without bilateral wrench, pressure, activation,
+  stiffness, and participant-holdout evidence.
 - (spec-exempt: security fix) Fixed Command Injection in `pandas.DataFrame.query()` inside `rust_engine.py` (both `data_processor` and `data_processor_io`) by explicitly validating user expressions using an AST-based validator (`validate_pandas_formula`). This eliminates an arbitrary code execution vulnerability.
 
 - **2026-08-05** - Retargeted #8345 P1's 3D putting workflow to `main`

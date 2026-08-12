@@ -102,11 +102,9 @@ $2.87\times10^{-7}$ J for the six-mode reference and
 $2.77\times10^{-8}$ J for the one-mode reduction. This closes the isolated
 beam comparison and makes damping loss explicit.
 
-The experiment narrows, but does not close, the Phase 2 structural gap. The
-distributed reference is not yet a coordinate inside the moving-base,
-two-hand KKT solve, so it cannot show whether the late grip-couple reversal
-survives coupled higher-mode shaft motion. The next falsification gate is to
-replace the lumped flex coordinate in that forward solve with a calibrated
-modal beam interface and repeat the contact, constraint, and whole-system
-energy interventions. Equipment-specific language remains prohibited until
-measured modal and inertia data are supplied.
+The isolated experiment narrows, but does not itself close, the structural
+coupling gap. @sec-forward-modal-shaft next inserts the transported modes into
+the moving-base, two-hand KKT solve and repeats the contact, constraint, and
+whole-system energy interventions. Equipment-specific language remains
+prohibited until measured modal, damping, inertia, and boundary-condition data
+are supplied.
