@@ -39,7 +39,7 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.509 |
+| **Spec Version** | 1.0.510 |
 | **Last Spec Update** | 2026-08-12 |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,14 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ## 4. Architecture Overview
 
 ### Recent Spec Updates
+
+- **2026-08-12** - Added the interactive proximal--distal dynamics companion
+  under epic #8511. UpstreamDrift now resolves the canonical sibling Tools
+  provider and its dockable adapter instead of maintaining launcher-specific
+  physics. The PyQt6 and React/Tauri clients share a validated experiment and
+  glossary catalog covering double, triple, bilateral, counterfactual, and
+  robustness studies. Interactive output is explicitly exploratory; scripted,
+  frozen analyses remain the publication authority.
 
 - **2026-08-12** - Added epic #8507's adversarial transmission and task-
   robustness tier: paired clock/state-trigger programs on common training and

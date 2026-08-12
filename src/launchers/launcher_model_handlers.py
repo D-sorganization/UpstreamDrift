@@ -360,7 +360,12 @@ class SpecialAppHandler:
         embed_adapter = getattr(model, "embed_adapter", None)
         if embed_adapter and "::" in embed_adapter:
             mod_path, func_name = embed_adapter.split("::")
-            adapter_script = repo_path / mod_path
+            source_root = get_model_source_root(model, repo_path)
+            provider_adapter = source_root / mod_path
+            local_adapter = repo_path / mod_path
+            adapter_script = (
+                provider_adapter if provider_adapter.exists() else local_adapter
+            )
             if adapter_script.exists():
                 import importlib.util
                 import sys

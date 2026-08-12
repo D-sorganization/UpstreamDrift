@@ -587,13 +587,23 @@
     {
       "id": "pendulum_simulator",
       "name": "Pendulum Simulator",
-      "description": "Educational 2-DOF pendulum models for physics learning and quick prototyping",
+      "description": "Interactive proximal–distal companion for double, triple, and 8-DOF golfer dynamics",
       "category": "physics_engine",
       "type": "special_app",
-      "path": "src/shared/python/pendulum_simulator/__main__.py",
+      "path": "src/double_pendulum_golf/__main__.py",
+      "provider": "tools",
+      "source_root": "../Tools/src/pendulum_simulator",
+      "working_dir": ".",
+      "python_paths": ["src"],
       "logo": "pendulum.svg",
       "status": "gui_ready",
-      "capabilities": ["educational", "2dof", "pendulum"],
+      "capabilities": [
+        "educational",
+        "pendulum",
+        "proximal_distal",
+        "counterfactuals",
+        "force_vectors"
+      ],
       "order": 26,
       "web": {
         "mode": "native-window"

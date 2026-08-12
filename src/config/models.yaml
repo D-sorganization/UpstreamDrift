@@ -157,10 +157,15 @@ models:
 
   - id: "pendulum_simulator"
     name: "Pendulum Simulator"
-    description: "Double/triple pendulum golf swing dynamics simulator"
+    description: "Interactive proximal–distal companion for double, triple, and 8-DOF golfer dynamics"
     type: "special_app"
-    path: "src/shared/python/pendulum_simulator/__main__.py"
-    embed_adapter: "src/shared/python/pendulum_simulator/__main__.py::get_dockable_ui"
+    path: "src/double_pendulum_golf/__main__.py"
+    provider: "tools"
+    source_root: "../Tools/src/pendulum_simulator"
+    working_dir: "."
+    python_paths:
+      - "src"
+    embed_adapter: "src/double_pendulum_golf/_embed_adapter.py::get_dockable_ui"
     launcher:
       category: "simulation"
       logo: "pendulum.svg"

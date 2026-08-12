@@ -5,6 +5,15 @@ Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
 
+- **#8511 interactive proximal--distal dynamics workbench** — branch
+  `feat/proximal-distal-workbench-integration` makes the pendulum launcher
+  consume the canonical sibling Tools provider and dockable adapter. Tools
+  owns both PyQt6 and React/Tauri clients plus the shared experiment/glossary
+  catalog; UpstreamDrift owns the article integration, provider resolution,
+  immutable vendor pin, and evidence boundary. Focused launcher tests pass.
+  Remaining gates: merge Tools, pin its exact main commit, publish the
+  AffineDrift reader page, run scoped repository gates, then protected merge.
+
 - **#8509 accessible proximal--distal companion** — branch
   `docs/proximal-distal-companion-book` links the open technical evidence to
   AffineDrift's visual companion, _How a Golf Swing Carries Energy_, in HTML
