@@ -23,7 +23,6 @@ def _style() -> None:
     mpl.rcParams.update(
         {
             "font.family": "sans-serif",
-            "font.sans-serif": ["Helvetica"],
             "pdf.use14corefonts": True,
             "ps.useafm": True,
             "svg.fonttype": "none",
@@ -156,12 +155,63 @@ def role_reversal(arrays) -> None:
     _save(figure, "fig_torque_role_reversal_transmission")
 
 
+def continuous_preparation(arrays) -> None:
+    figure, axes = plt.subplots(2, 1, figsize=(9.2, 6.6), constrained_layout=True)
+    records = (
+        ("continuous_persistent_arm_drive", "Persistent Channel Directions"),
+        ("continuous_wrist_to_arm_role_reversal", "Complete Role Reversal"),
+    )
+    for axis, (name, title) in zip(axes, records, strict=True):
+        time_ms = 1000.0 * arrays[f"{name}_time_s"]
+        axis.plot(
+            time_ms,
+            arrays[f"{name}_desired_net_torque_nm"],
+            color="0.2",
+            linestyle="--",
+            label="desired net",
+        )
+        axis.plot(
+            time_ms,
+            arrays[f"{name}_transmitted_net_torque_nm"],
+            color=PURPLE,
+            linewidth=2,
+            label="transmitted net",
+        )
+        axis.plot(
+            time_ms,
+            arrays[f"{name}_transmitted_arm_torque_nm"],
+            color=BLUE,
+            alpha=0.85,
+            label="arm channel",
+        )
+        axis.plot(
+            time_ms,
+            arrays[f"{name}_transmitted_wrist_torque_nm"],
+            color=ORANGE,
+            alpha=0.85,
+            label="wrist channel",
+        )
+        axis.axvline(0.0, color="0.1", linewidth=1.1, label="transition")
+        axis.axhline(0.0, color="0.45", linewidth=0.7)
+        axis.set_title(title)
+        axis.set_ylabel("Torque (N m)")
+        axis.grid(alpha=0.22)
+    axes[-1].set_xlabel("Time Relative to Command Transition (ms)")
+    axes[0].legend(ncol=3, fontsize=8)
+    figure.suptitle(
+        "Preparation History Carries Internal State Through Reversal",
+        fontweight="bold",
+    )
+    _save(figure, "fig_torque_continuous_preparation")
+
+
 def main() -> None:
     _style()
     with np.load(DATA) as arrays:
         allocation_surface(arrays)
         moment_closure(arrays)
         role_reversal(arrays)
+        continuous_preparation(arrays)
 
 
 if __name__ == "__main__":

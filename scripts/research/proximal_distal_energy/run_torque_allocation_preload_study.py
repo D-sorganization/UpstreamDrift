@@ -11,6 +11,7 @@ import numpy as np
 from scripts.research.proximal_distal_energy.torque_allocation_preload import (
     RoleReversalProgram,
     TransmissionChannel,
+    evaluate_continuous_role_reversal,
     evaluate_role_reversal,
     matched_allocation_sweep,
 )
@@ -56,6 +57,17 @@ def main() -> None:
         )
         for program in programs
         for preload in (True, False)
+    }
+    continuous_traces = {
+        program.name: evaluate_continuous_role_reversal(
+            program,
+            arm_channel=channel,
+            wrist_channel=channel,
+            preparation_duration_s=0.18,
+            post_transition_duration_s=0.12,
+            step_s=0.0001,
+        )
+        for program in programs
     }
     dead_zones = np.array([0.0, 0.004, 0.012, 0.024])
     time_constants = np.array([0.008, 0.018, 0.035])
@@ -118,6 +130,17 @@ def main() -> None:
         "transmission_results": {
             name: _trace_record(trace) for name, trace in traces.items()
         },
+        "continuous_preparation_results": {
+            "preparation_duration_s": 0.18,
+            "initial_state": "relaxed_zero_deflection",
+            "transition_contract": (
+                "Internal deflection and transmitted torque remain continuous; "
+                "only desired channel commands change at time zero."
+            ),
+            "programs": {
+                name: _trace_record(trace) for name, trace in continuous_traces.items()
+            },
+        },
         "transmission_sensitivity": {
             "dead_zone_rad": dead_zones.tolist(),
             "time_constant_s": time_constants.tolist(),
@@ -161,6 +184,15 @@ def main() -> None:
         arrays[f"{name}_transmitted_net_torque_nm"] = trace.transmitted_net_torque_nm
         arrays[f"{name}_transmitted_arm_torque_nm"] = trace.transmitted_arm_torque_nm
         arrays[f"{name}_transmitted_wrist_torque_nm"] = (
+            trace.transmitted_wrist_torque_nm
+        )
+    for name, trace in continuous_traces.items():
+        prefix = f"continuous_{name}"
+        arrays[f"{prefix}_time_s"] = trace.time_s
+        arrays[f"{prefix}_desired_net_torque_nm"] = trace.desired_net_torque_nm
+        arrays[f"{prefix}_transmitted_net_torque_nm"] = trace.transmitted_net_torque_nm
+        arrays[f"{prefix}_transmitted_arm_torque_nm"] = trace.transmitted_arm_torque_nm
+        arrays[f"{prefix}_transmitted_wrist_torque_nm"] = (
             trace.transmitted_wrist_torque_nm
         )
     (DATA / "torque_allocation_preload_study.json").write_text(

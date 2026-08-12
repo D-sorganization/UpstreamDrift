@@ -51,6 +51,20 @@ def test_trace_archive_reproduces_reported_transmission_metrics() -> None:
             proposed["net_torque_error_impulse_nms"]
             < opposite["net_torque_error_impulse_nms"]
         )
+        continuous = record["continuous_preparation_results"]
+        assert continuous["preparation_duration_s"] == pytest.approx(0.18)
+        assert continuous["initial_state"] == "relaxed_zero_deflection"
+        assert "remain continuous" in continuous["transition_contract"]
+        continuous_proposed = continuous["programs"]["persistent_arm_drive"]
+        continuous_opposite = continuous["programs"]["wrist_to_arm_role_reversal"]
+        assert continuous_proposed["arm_zero_transmission_duration_s"] == 0.0
+        assert continuous_proposed["wrist_zero_transmission_duration_s"] == 0.0
+        assert continuous_opposite["arm_zero_transmission_duration_s"] > 0.0
+        assert continuous_opposite["wrist_zero_transmission_duration_s"] > 0.0
+        assert arrays["continuous_persistent_arm_drive_time_s"][0] == pytest.approx(
+            -0.18
+        )
+        assert 0.0 in arrays["continuous_persistent_arm_drive_time_s"]
 
 
 def test_publication_figures_exist_in_pdf_and_svg() -> None:
@@ -58,6 +72,7 @@ def test_publication_figures_exist_in_pdf_and_svg() -> None:
         "fig_torque_allocation_geometry_surface",
         "fig_torque_allocation_moment_closure",
         "fig_torque_role_reversal_transmission",
+        "fig_torque_continuous_preparation",
     ):
         for suffix in (".pdf", ".svg"):
             path = ARTICLE / "figures" / f"{stem}{suffix}"

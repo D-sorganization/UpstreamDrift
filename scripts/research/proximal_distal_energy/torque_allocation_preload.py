@@ -143,6 +143,8 @@ class RoleReversalTrace:
     net_torque_error_impulse_nms: float
     arm_reversal_delay_s: float
     wrist_reversal_delay_s: float
+    preparation_duration_s: float
+    transition_index: int
 
 
 def _finite_state(name: str, value: object) -> FloatArray:
@@ -418,6 +420,121 @@ def evaluate_role_reversal(
         wrist_reversal_delay_s=_reversal_delay(
             time, wrist_torque, program.wrist_post_nm
         ),
+        preparation_duration_s=0.0,
+        transition_index=0,
+    )
+
+
+def evaluate_continuous_role_reversal(
+    program: RoleReversalProgram,
+    *,
+    arm_channel: TransmissionChannel,
+    wrist_channel: TransmissionChannel,
+    preparation_duration_s: float,
+    post_transition_duration_s: float,
+    step_s: float,
+) -> RoleReversalTrace:
+    """Carry a relaxed preparation history continuously through reversal.
+
+    Both channels begin at zero deflection. The pre-transition commands act for
+    ``preparation_duration_s``; at time zero only the desired command changes.
+    The internal deflections and transmitted torques are not reinitialized.
+    Post-transition delay and error metrics are evaluated from time zero.
+    """
+    durations = np.asarray(
+        [preparation_duration_s, post_transition_duration_s, step_s], dtype=float
+    )
+    if not np.all(np.isfinite(durations)) or np.any(durations <= 0.0):
+        raise ValueError(
+            "preparation, post-transition, and step durations must be positive"
+        )
+    preparation_intervals = int(round(preparation_duration_s / step_s))
+    post_intervals = int(round(post_transition_duration_s / step_s))
+    if not np.isclose(
+        preparation_intervals * step_s,
+        preparation_duration_s,
+        atol=1e-12,
+        rtol=0.0,
+    ) or not np.isclose(
+        post_intervals * step_s,
+        post_transition_duration_s,
+        atol=1e-12,
+        rtol=0.0,
+    ):
+        raise ValueError("both durations must be integer multiples of step_s")
+
+    transition_index = preparation_intervals
+    time = (
+        np.arange(preparation_intervals + post_intervals + 1, dtype=float)
+        - transition_index
+    ) * step_s
+    desired_arm = np.where(time < 0.0, program.arm_pre_nm, program.arm_post_nm)
+    desired_wrist = np.where(time < 0.0, program.wrist_pre_nm, program.wrist_post_nm)
+    arm_deflection = np.zeros_like(time)
+    wrist_deflection = np.zeros_like(time)
+    arm_torque = np.zeros_like(time)
+    wrist_torque = np.zeros_like(time)
+
+    for index in range(time.size - 1):
+        # The interval ending at the transition still carries the preparation
+        # command; the post-transition command first evolves the state after t=0.
+        use_preparation_command = index < transition_index
+        arm_command = (
+            program.arm_pre_nm if use_preparation_command else program.arm_post_nm
+        )
+        wrist_command = (
+            program.wrist_pre_nm if use_preparation_command else program.wrist_post_nm
+        )
+        arm_target = _command_deflection(arm_command, arm_channel)
+        wrist_target = _command_deflection(wrist_command, wrist_channel)
+        arm_deflection[index + 1] = (
+            arm_deflection[index]
+            + step_s
+            * (arm_target - arm_deflection[index])
+            / arm_channel.time_constant_s
+        )
+        wrist_deflection[index + 1] = (
+            wrist_deflection[index]
+            + step_s
+            * (wrist_target - wrist_deflection[index])
+            / wrist_channel.time_constant_s
+        )
+        arm_torque[index + 1] = _engaged_torque(arm_deflection[index + 1], arm_channel)
+        wrist_torque[index + 1] = _engaged_torque(
+            wrist_deflection[index + 1], wrist_channel
+        )
+
+    desired_net = desired_arm + desired_wrist
+    transmitted_net = arm_torque + wrist_torque
+    post_time = time[transition_index:]
+    post_arm = arm_torque[transition_index:]
+    post_wrist = wrist_torque[transition_index:]
+    post_desired_net = desired_net[transition_index:]
+    post_transmitted_net = transmitted_net[transition_index:]
+    tolerance = 1e-12
+    return RoleReversalTrace(
+        time_s=time,
+        desired_arm_torque_nm=desired_arm,
+        desired_wrist_torque_nm=desired_wrist,
+        transmitted_arm_torque_nm=arm_torque,
+        transmitted_wrist_torque_nm=wrist_torque,
+        desired_net_torque_nm=desired_net,
+        transmitted_net_torque_nm=transmitted_net,
+        arm_zero_transmission_duration_s=float(
+            np.count_nonzero(np.abs(post_arm) <= tolerance) * step_s
+        ),
+        wrist_zero_transmission_duration_s=float(
+            np.count_nonzero(np.abs(post_wrist) <= tolerance) * step_s
+        ),
+        net_torque_error_impulse_nms=float(
+            np.trapezoid(np.abs(post_desired_net - post_transmitted_net), post_time)
+        ),
+        arm_reversal_delay_s=_reversal_delay(post_time, post_arm, program.arm_post_nm),
+        wrist_reversal_delay_s=_reversal_delay(
+            post_time, post_wrist, program.wrist_post_nm
+        ),
+        preparation_duration_s=float(preparation_duration_s),
+        transition_index=transition_index,
     )
 
 
@@ -429,5 +546,6 @@ __all__ = [
     "TransmissionChannel",
     "allocate_matched_angular_acceleration",
     "evaluate_role_reversal",
+    "evaluate_continuous_role_reversal",
     "matched_allocation_sweep",
 ]
