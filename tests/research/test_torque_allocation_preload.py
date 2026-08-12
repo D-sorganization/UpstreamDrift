@@ -9,6 +9,7 @@ from scripts.research.proximal_distal_energy.torque_allocation_preload import (
     RoleReversalProgram,
     TransmissionChannel,
     allocate_matched_angular_acceleration,
+    evaluate_continuous_role_reversal,
     evaluate_role_reversal,
     matched_allocation_sweep,
 )
@@ -134,6 +135,51 @@ def test_dead_zone_penalizes_sign_reversal_and_preload_reduces_delay() -> None:
     assert opposite.wrist_zero_transmission_duration_s > 0.0
     assert proposed.net_torque_error_impulse_nms < opposite.net_torque_error_impulse_nms
     assert opposite.net_torque_error_impulse_nms < relaxed.net_torque_error_impulse_nms
+
+
+def test_continuous_preparation_carries_internal_state_through_transition() -> None:
+    channel = TransmissionChannel(
+        stiffness_nm_rad=600.0,
+        dead_zone_rad=0.012,
+        time_constant_s=0.018,
+    )
+    persistent = evaluate_continuous_role_reversal(
+        RoleReversalProgram.persistent_direction(),
+        arm_channel=channel,
+        wrist_channel=channel,
+        preparation_duration_s=0.18,
+        post_transition_duration_s=0.12,
+        step_s=0.0001,
+    )
+    reversal = evaluate_continuous_role_reversal(
+        RoleReversalProgram.opposite_role_reversal(),
+        arm_channel=channel,
+        wrist_channel=channel,
+        preparation_duration_s=0.18,
+        post_transition_duration_s=0.12,
+        step_s=0.0001,
+    )
+
+    index = persistent.transition_index
+    assert persistent.time_s[index] == pytest.approx(0.0)
+    assert persistent.preparation_duration_s == pytest.approx(0.18)
+    assert persistent.transmitted_arm_torque_nm[index] == pytest.approx(
+        persistent.transmitted_arm_torque_nm[index - 1], abs=0.002
+    )
+    assert persistent.transmitted_wrist_torque_nm[index] == pytest.approx(
+        persistent.transmitted_wrist_torque_nm[index - 1], abs=0.002
+    )
+    assert persistent.transmitted_arm_torque_nm[index] > 0.0
+    assert persistent.transmitted_wrist_torque_nm[index] < 0.0
+    assert reversal.transmitted_arm_torque_nm[index] < 0.0
+    assert reversal.transmitted_wrist_torque_nm[index] > 0.0
+    assert persistent.arm_zero_transmission_duration_s == pytest.approx(0.0)
+    assert persistent.wrist_zero_transmission_duration_s == pytest.approx(0.0)
+    assert reversal.arm_zero_transmission_duration_s > 0.0
+    assert reversal.wrist_zero_transmission_duration_s > 0.0
+    assert (
+        persistent.net_torque_error_impulse_nms < reversal.net_torque_error_impulse_nms
+    )
 
 
 def test_invalid_transmission_and_unreachable_allocation_fail_closed() -> None:

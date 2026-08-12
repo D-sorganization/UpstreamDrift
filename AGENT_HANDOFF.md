@@ -12,7 +12,9 @@ Update this file with every PR and every push to main.
   tier, deterministic evidence, publication figures, and explicit bilateral
   wrench/stiffness/EMG/holdout falsifiers. The persistent-direction advantage
   is conditional; neither the proximal subspace nor slack is identified as a
-  measured scapular or tissue property.
+  measured scapular or tissue property. A finite 180 ms preparation history now
+  starts from zero deflection and carries the exact internal transmission state
+  across the command transition without reinitialization.
 
 - **#8493 ground-reaction drift attribution** — isolated branch
   `feat/grf-drift-decomposition` adds a strict constrained-contact solve for

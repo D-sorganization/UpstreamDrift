@@ -62,6 +62,27 @@
       "wrist_reversal_delay_s": 0.0161
     }
   },
+  "continuous_preparation_results": {
+    "preparation_duration_s": 0.18,
+    "initial_state": "relaxed_zero_deflection",
+    "transition_contract": "Internal deflection and transmitted torque remain continuous; only desired channel commands change at time zero.",
+    "programs": {
+      "persistent_arm_drive": {
+        "arm_zero_transmission_duration_s": 0.0,
+        "wrist_zero_transmission_duration_s": 0.0,
+        "net_torque_error_impulse_nms": 0.07171505681942013,
+        "arm_reversal_delay_s": 0.0,
+        "wrist_reversal_delay_s": 0.0
+      },
+      "wrist_to_arm_role_reversal": {
+        "arm_zero_transmission_duration_s": 0.0115,
+        "wrist_zero_transmission_duration_s": 0.022000000000000002,
+        "net_torque_error_impulse_nms": 0.1954089217169282,
+        "arm_reversal_delay_s": 0.015700000000000002,
+        "wrist_reversal_delay_s": 0.031100000000000003
+      }
+    }
+  },
   "transmission_sensitivity": {
     "dead_zone_rad": [0.0, 0.004, 0.012, 0.024],
     "time_constant_s": [0.008, 0.018, 0.035],

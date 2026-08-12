@@ -39,7 +39,7 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.505 |
+| **Spec Version** | 1.0.506 |
 | **Last Spec Update** | 2026-08-11 |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,13 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ## 4. Architecture Overview
 
 ### Recent Spec Updates
+
+- **2026-08-11** - Added the continuous preparation-history falsifier for the
+  arm--wrist transmission study. Both channels now start relaxed, load for 180
+  ms, and retain their exact deflection and transmitted torque across the
+  command transition; persistent directions remain engaged while complete role
+  reversal crosses the declared dead zones. This is an abstract transmission
+  history, not an anatomical backswing or muscle-activation model.
 
 - **2026-08-11** - Replaced the obsolete fixed 1 MiB PDF ceiling with an
   artifact-integrity and repository-boundary policy. Changed PDFs must carry a
