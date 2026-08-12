@@ -27,4 +27,10 @@ We have decided to select Path 2 from issue #3059: split these modules out. The 
 
 ## Validation
 
-A CI check has been added to enforce that no `.pdf` files larger than 1MB can be committed to the tree going forward.
+A CI check was initially added to enforce a 1 MB ceiling for every PDF. That
+limit was superseded on 2026-08-11 because it also blocked large, in-scope
+scientific publications and encouraged quality-reducing transformations. The
+current guard validates PDF signatures, reports files above GitHub's
+50,000,000-byte recommendation, and rejects files beyond GitHub's
+100,000,000-byte hard boundary. Mission scope remains governed by this ADR and
+review, not inferred from an arbitrary binary size.

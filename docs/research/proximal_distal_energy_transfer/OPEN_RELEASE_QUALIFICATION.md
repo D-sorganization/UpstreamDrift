@@ -24,7 +24,8 @@ python -m scripts.research.proximal_distal_energy.qualify_open_release validate
 mismatch. Regeneration is an explicit `write` action after all scientific and
 visual gates pass; validation never silently updates expected hashes.
 The final lossless compaction gate preserves page, URI-link, and outline
-counts and enforces a 1,150,000-byte ceiling for the linked vector PDF.
+counts. It applies no arbitrary manuscript-size ceiling; repository CI instead
+checks PDF identity and GitHub's 100,000,000-byte hard file boundary.
 
 ## Claim Status
 

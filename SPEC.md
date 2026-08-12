@@ -39,7 +39,7 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.504 |
+| **Spec Version** | 1.0.505 |
 | **Last Spec Update** | 2026-08-11 |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,13 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ## 4. Architecture Overview
 
 ### Recent Spec Updates
+
+- **2026-08-11** - Replaced the obsolete fixed 1 MiB PDF ceiling with an
+  artifact-integrity and repository-boundary policy. Changed PDFs must carry a
+  valid `%PDF-` signature, files above GitHub's 50,000,000-byte recommendation
+  are reported, and files beyond its 100,000,000-byte hard boundary fail. The
+  manuscript optimizer still proves page, URI-link, and outline preservation;
+  an explicit release-specific ceiling remains available when justified.
 
 - **2026-08-11** - Added a coupled moving-base, two-hand, three-mode shaft
   experiment and a separate matched-task arm--wrist allocation/preload study.

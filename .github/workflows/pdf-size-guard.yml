@@ -1,4 +1,4 @@
-name: PDF Size Guard
+name: PDF Artifact Guard
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -19,9 +19,9 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Check PDF sizes
+      - name: Check PDF Integrity And Repository Boundary
         run: |
-          echo "Checking for new or modified PDFs larger than 1MB..."
+          echo "Checking PDF signatures and GitHub's hard 100 MB file boundary..."
 
           # Get list of added or modified PDF files in this PR
           FILES=$(git diff --name-only --diff-filter=AM origin/${{ github.base_ref }}...HEAD | grep '\.pdf$' || true)
@@ -36,21 +36,27 @@ jobs:
           for file in $FILES; do
             if [ -f "$file" ]; then
               SIZE=$(stat -c%s "$file" 2>/dev/null || stat -f%z "$file")
-              SIZE_MB=$(echo "scale=2; $SIZE / 1048576" | bc)
-              
-              if [ "$SIZE" -gt 1048576 ]; then
-                echo "- BLOCKED: File $file is too large ($SIZE_MB MB). Maximum allowed is 1MB."
+              SIZE_MB=$(awk "BEGIN {printf \"%.2f\", $SIZE / 1048576}")
+              SIGNATURE=$(head -c 5 "$file")
+
+              if [ "$SIGNATURE" != "%PDF-" ]; then
+                echo "- BLOCKED: $file does not begin with a PDF signature."
                 BLOCKED=true
+              elif [ "$SIZE" -gt 100000000 ]; then
+                echo "- BLOCKED: $file is $SIZE_MB MiB and exceeds GitHub's 100,000,000-byte hard limit."
+                BLOCKED=true
+              elif [ "$SIZE" -gt 50000000 ]; then
+                echo "- WARNING: $file is $SIZE_MB MiB; GitHub warns for files above 50,000,000 bytes."
               else
-                echo "- File $file is within limits ($SIZE_MB MB)."
+                echo "- $file is a valid PDF within the repository boundary ($SIZE_MB MiB)."
               fi
             fi
           done
 
           if [ "$BLOCKED" = true ]; then
             echo ""
-            echo "- This PR introduces PDF files larger than 1MB. Please store large assets in Git LFS or external storage."
+            echo "- One or more PDF artifacts are invalid or exceed GitHub's hard file boundary."
             exit 1
           fi
 
-          echo "- All PDFs within size limits."
+          echo "- All PDFs passed artifact checks."
