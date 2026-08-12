@@ -2002,7 +2002,7 @@ jobs:
           fi
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: matlab-actions/setup-matlab@2323adb8243827ea460b0def4c413545aaec46a9
-      - uses: matlab-actions/run-command@bcd446a219949c24051c1d04a4b4e0274c42f23b
+      - uses: matlab-actions/run-command@75644028e1e2aa374bbfdc968a65718a178cc264
         with:
           command: |
             addpath('matlab');
