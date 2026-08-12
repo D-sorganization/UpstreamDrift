@@ -91,16 +91,16 @@
       "bytes": 11817
     },
     "docs/research/proximal_distal_energy_transfer/ADVERSARIAL_TRANSMISSION_REVIEW.md": {
-      "sha256": "15e1aecce20ee8b9a0917da084a4bf2efacd22d62fc967798c38c410e23f1cc1",
-      "bytes": 4566
+      "sha256": "538fa36934e033cf4eaa69bd7063090bf883e20815d640894827c6769969e363",
+      "bytes": 5290
     },
     "docs/research/proximal_distal_energy_transfer/CITATION.cff": {
       "sha256": "44ddf79f758b09ab0fac1e18b63672032c8e7b83cccf6596c80d8a6790fab553",
       "bytes": 587
     },
     "docs/research/proximal_distal_energy_transfer/DATA_DICTIONARY.md": {
-      "sha256": "59d8773d572aebe429464b044fc2b914f96cb82a8e4f4d53a42c3080b83c0b38",
-      "bytes": 5421
+      "sha256": "64b931d76107fb733a410479ac45b79236a8e9de90d388725a88616acdba1a2e",
+      "bytes": 6143
     },
     "docs/research/proximal_distal_energy_transfer/EVIDENCE_SCHEMA_V2.md": {
       "sha256": "43e5e9728e63f6c22bed3874c5149976df7b50ffbf20d1e28104033b8a3adc7e",
@@ -115,8 +115,8 @@
       "bytes": 10816
     },
     "docs/research/proximal_distal_energy_transfer/MODEL_COMPLETION_FALSIFICATION_MATRIX.md": {
-      "sha256": "c78188698b37d361b158eb5e4323cf34631aa92f36aaa17923a7e3d5cf3a61a7",
-      "bytes": 20269
+      "sha256": "72cf691b798b9d0a5d9648c114e168e20be53441815bdbead5765248f43c6333",
+      "bytes": 21218
     },
     "docs/research/proximal_distal_energy_transfer/OPEN_RELEASE_QUALIFICATION.md": {
       "sha256": "0e079557b208e57898f281eb9117c6ba6fa1c728d0d5ebfb904c87fbbc8f5435",
@@ -411,8 +411,8 @@
       "bytes": 278378
     },
     "docs/research/proximal_distal_energy_transfer/data/transmission_robustness_study.json": {
-      "sha256": "268d36336128a9381d02c00bbc6864f8e0cb2904a2d3a0dab256d3ba6cc11651",
-      "bytes": 29868
+      "sha256": "7d909476efbfc63136faa87a4bfa34d146f93b6a6d6e79fbada3e3509f0ec70e",
+      "bytes": 28991
     },
     "docs/research/proximal_distal_energy_transfer/data/transmission_robustness_study.npz": {
       "sha256": "2289c787ef3cef6c3ee3c03c2de44d410bde0fd2ff0d1507d6cf062b9d5200a9",
