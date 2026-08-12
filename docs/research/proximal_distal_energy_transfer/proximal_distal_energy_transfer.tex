@@ -179,8 +179,6 @@
  
 
 
-% Share included-figure font resources instead of copying each font.
-\pdfvariable inclusioncopyfonts=0
 \makeatletter
 \@ifpackageloaded{tcolorbox}{}{\usepackage[skins,breakable]{tcolorbox}}
 \@ifpackageloaded{fontawesome5}{}{\usepackage{fontawesome5}}
@@ -412,7 +410,7 @@ inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, arc=.35mm, left=2mm, opacityback=0, colback=white, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, breakable, leftrule=.75mm, opacitybacktitle=0.6, toptitle=1mm, bottomrule=.15mm, bottomtitle=1mm, toprule=.15mm, titlerule=0mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, coltitle=black]
+\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, leftrule=.75mm, breakable, opacitybacktitle=0.6, opacityback=0, left=2mm, toprule=.15mm, titlerule=0mm, colback=white, coltitle=black, bottomrule=.15mm, rightrule=.15mm, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, arc=.35mm]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
