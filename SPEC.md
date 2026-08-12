@@ -39,7 +39,7 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.508 |
+| **Spec Version** | 1.0.509 |
 | **Last Spec Update** | 2026-08-12 |
 
 ## 2. Purpose & Mission
@@ -2098,6 +2098,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-12 | 1.0.509 | Linked the canonical proximal--distal evidence workspace to the accessible AffineDrift companion *How a Golf Swing Carries Energy* in HTML and PDF, while retaining UpstreamDrift as the complete evidence and limitations authority. |
 | 2026-08-12 | 1.0.507 | Added the advanced proximal--distal frame, biology, canonical-pose, cross-engine, visual, terminology, and falsification bridge tracked by epic #8505. |
 | 2026-08-11 | 1.0.504 | Added a coupled forward three-mode shaft experiment plus an exact same-state arm--wrist allocation and phenomenological preload/role-reversal study; published deterministic evidence, figures, release presets, and falsifiers while explicitly withholding muscle, scapular, tissue, equipment, human-performance, and universal-technique claims. |
 | 2026-08-11 | 1.0.498 | Added a fail-closed, headless UpstreamDrift gateway for the exact Tools flight-to-ground request/result and reference-execution v1 façade, with absence/presence/malformed-contract tests and explicit dependency/release limitations for Tools #4276. |
