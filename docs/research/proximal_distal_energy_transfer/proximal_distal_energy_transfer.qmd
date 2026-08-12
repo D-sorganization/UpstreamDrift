@@ -63,7 +63,16 @@ abstract: |
   instead cancel with an index of 0.962. Joint- and time-resolved impulse,
   power, work, force-vector, and common/differential-mode results show why a
   large net hand-path force is a mechanical transfer observable rather than a
-  direct measure of biological effort. References, analysis code,
+  direct measure of biological effort. A constrained-contact extension then
+  defines frame-explicit configuration, velocity, control, and external-load
+  contributions to reaction force and fails closed when contact allocation is
+  nonunique. In the fixed-support double-pendulum benchmark, pointwise ZTCF
+  predicts the modeled support-reaction waveform with componentwise R-squared
+  values of 0.871 and 0.814 but retains large amplitude error; opposing control
+  also makes the vertical ZTCF impulse exceed the total. This benchmark is not
+  a bilateral human force-plate validation, and the required synchronized
+  force-plate and whole-body kinematic experiment is specified as a
+  falsification protocol. References, analysis code,
   machine-readable results, and provenance are available with the document for
   independent inspection and reuse.
 keywords:
@@ -80,6 +89,9 @@ keywords:
   - work-energy accounting
   - multibody constraints
   - wrench transport
+  - ground reaction force
+  - contact dynamics
+  - force plate
 bibliography: references.bib
 link-citations: true
 number-sections: true
@@ -105,6 +117,8 @@ format:
 {{< include chapters/_ch03_interaction_forces.qmd >}}
 
 {{< include chapters/_ch03b_hand_path_attribution.qmd >}}
+
+{{< include chapters/_ch03c_ground_reaction_drift.qmd >}}
 
 {{< include chapters/_ch04_counterfactual_ensemble.qmd >}}
 

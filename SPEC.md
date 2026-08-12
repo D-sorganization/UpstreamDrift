@@ -39,8 +39,8 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.497 |
-| **Last Spec Update** | 2026-08-10 |
+| **Spec Version** | 1.0.498 |
+| **Last Spec Update** | 2026-08-11 |
 
 ## 2. Purpose & Mission
 
@@ -71,7 +71,7 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
-- **2026-08-10** - Added the first UpstreamDrift consumer boundary for the
+- **2026-08-11** - Added the first UpstreamDrift consumer boundary for the
   canonical Tools ground-model contracts (Tools #4276). The headless gateway
   validates the exact flight-to-ground request/result and reference-execution
   v1 schemas before binding Tools parsers or execution, stays import-safe when
@@ -79,6 +79,13 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   provenance unchanged. This is not a dependency pin or UI parity claim: the
   exact `vendor/ud-tools`/Cargo repin, FastAPI, PyQt, React, clean-install, and
   protected-release gates remain blocked on the reviewed Tools ground merge.
+- **2026-08-11** - Added #8493 ground-reaction drift attribution: a
+  frame-explicit constrained-contact reaction solver decomposes support
+  reactions into configuration, velocity, control, and retained-external
+  components; deterministic double-pendulum evidence verifies total, ZTCF, and
+  ZVCF closure; and the scientific article defines measurement, identifiability,
+  and human-data falsification boundaries without treating overlapping
+  counterfactuals as additive effort fractions.
 - **2026-08-10** - Added #8458 hand-path attribution: canonical pointwise
   ZTCF/control/ZVCF definitions; exact double-pendulum, one-arm, and closed-loop
   two-arm adapters; deterministic force-vector, impulse, power, work,
@@ -2043,7 +2050,8 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-08-10 | 1.0.497 | Added a fail-closed, headless UpstreamDrift gateway for the exact Tools flight-to-ground request/result and reference-execution v1 façade, with absence/presence/malformed-contract tests and explicit dependency/release limitations for Tools #4276. |
+| 2026-08-11 | 1.0.498 | Added a fail-closed, headless UpstreamDrift gateway for the exact Tools flight-to-ground request/result and reference-execution v1 façade, with absence/presence/malformed-contract tests and explicit dependency/release limitations for Tools #4276. |
+| 2026-08-11 | 1.0.497 | Added #8493 frame-explicit constrained-contact reaction decomposition with configuration, velocity, control, and retained-external components; verified total, ZTCF, and ZVCF closure in a deterministic fixed-support double-pendulum benchmark; published machine-readable evidence and three reproducible figures; and expanded the proximal-distal scientific article with GRF, COP, free-moment, identifiability, and held-out human-data falsification boundaries. |
 | 2026-08-10 | 1.0.496 | Added #8458 hand-path drift/control attribution across forward double-pendulum and one-arm cases plus a prescribed two-arm closed-loop sweep; exported deterministic force, impulse, power, work, joint/time-window, common/differential-mode, sensitivity, and closure evidence; bounded the late residual-couple preview result without claiming muscle preactivation or human performance; extended lossless object-stream PDF compaction to preserve the 106-page, 110-link, 122-outline publication below the size guard; and restored the all-files size gate with the final owned #8472 chat-dock exception through 2026-08-31. |
 | 2026-08-10 | 1.0.495 | Added a reproducible lossless article-PDF compaction command that fails closed on page, URI-link, outline, or size drift; reduced the 90-page publication artifact below the repository's 1 MiB PDF guard; and recorded the protected #8456 higher-order merge in the handoff. |
 | 2026-08-10 | 1.0.494 | Added a reference- and frame-explicit interaction-wrench schema; exact moment/velocity transport and proper-rotation power contracts; prescribed mobile-hub inverse-dynamics comparisons; planar two-hand closed-loop rank/nullspace diagnostics; a fail-closed model-discrepancy record; seven reproducible figures; and a higher-order scientific chapter that explicitly leaves full-body cross-engine dynamics unexecuted. |
