@@ -1,0 +1,812 @@
+{
+  "schema_version": "proximal-distal-transmission-robustness-v1",
+  "study_id": "paired-transmission-pathway-task-robustness-v1",
+  "registered_before_preferred_result": true,
+  "model_tier": "moving_base_two_hand_compliant_club",
+  "design": {
+    "paired_common_random_numbers": true,
+    "training_perturbations": 10,
+    "held_out_perturbations": 15,
+    "training_seed": 8507,
+    "held_out_seed": 8508,
+    "duration_s": 0.24,
+    "step_s": 0.004,
+    "perturbation_half_ranges": {
+      "initial_arm_angle_rad": 0.035,
+      "initial_wrist_angle_rad": 0.045,
+      "initial_arm_speed_rad_s": 0.35,
+      "initial_wrist_speed_rad_s": 0.45,
+      "command_scale": 0.08,
+      "activation_delay_s": 0.012,
+      "shaft_stiffness_scale": 0.18,
+      "grip_separation_scale": 0.12
+    }
+  },
+  "programs": [
+    "clock_restrain_then_drive",
+    "state_triggered_handoff",
+    "state_triggered_higher_impedance",
+    "early_drive"
+  ],
+  "program_specs": [
+    {
+      "name": "clock_restrain_then_drive",
+      "trigger": "clock",
+      "onset_s": 0.14,
+      "arm_angle_threshold_rad": -0.42,
+      "early_wrist_nm": -2.0,
+      "late_wrist_nm": 5.0,
+      "impedance_nms_rad": 0.08
+    },
+    {
+      "name": "state_triggered_handoff",
+      "trigger": "arm_angle",
+      "onset_s": 0.14,
+      "arm_angle_threshold_rad": -0.42,
+      "early_wrist_nm": -2.0,
+      "late_wrist_nm": 5.0,
+      "impedance_nms_rad": 0.08
+    },
+    {
+      "name": "state_triggered_higher_impedance",
+      "trigger": "arm_angle",
+      "onset_s": 0.14,
+      "arm_angle_threshold_rad": -0.42,
+      "early_wrist_nm": -2.0,
+      "late_wrist_nm": 5.0,
+      "impedance_nms_rad": 0.24
+    },
+    {
+      "name": "early_drive",
+      "trigger": "clock",
+      "onset_s": 0.0,
+      "arm_angle_threshold_rad": -0.42,
+      "early_wrist_nm": 4.0,
+      "late_wrist_nm": 4.0,
+      "impedance_nms_rad": 0.08
+    }
+  ],
+  "perturbation_names": [
+    "initial_arm_angle_rad",
+    "initial_wrist_angle_rad",
+    "initial_arm_speed_rad_s",
+    "initial_wrist_speed_rad_s",
+    "command_scale",
+    "activation_delay_s",
+    "shaft_stiffness_scale",
+    "grip_separation_scale"
+  ],
+  "outcome_names": [
+    "delivery_speed_m_s",
+    "face_path_error_deg",
+    "peak_hand_force_n",
+    "effort_proxy_nms",
+    "event_time_s",
+    "late_contact_work_j",
+    "late_direct_wrist_work_j",
+    "shaft_energy_release_j"
+  ],
+  "program_summaries": {
+    "clock_restrain_then_drive": {
+      "nominal": {
+        "delivery_speed_m_s": 5.429581528094317,
+        "face_path_error_deg": 9.230724721418477,
+        "peak_hand_force_n": 154.8771423708427,
+        "effort_proxy_nms": 89.58118443406676,
+        "event_time_s": 0.14,
+        "late_contact_work_j": 2.887020639558879,
+        "late_direct_wrist_work_j": 0.07934569294581419,
+        "shaft_energy_release_j": -0.013320884341026136
+      },
+      "training": {
+        "delivery_speed_m_s": {
+          "mean": 5.486742410257312,
+          "q10": 4.6508526392065574,
+          "q90": 6.304768561283972,
+          "std": 0.6682166557854693
+        },
+        "face_path_error_deg": {
+          "mean": 9.365863475943337,
+          "q10": 6.724314094335669,
+          "q90": 10.940670541871514,
+          "std": 1.8549362175264077
+        },
+        "peak_hand_force_n": {
+          "mean": 154.45238952547493,
+          "q10": 141.03793237881666,
+          "q90": 170.0146551153034,
+          "std": 12.675174890956015
+        },
+        "effort_proxy_nms": {
+          "mean": 90.26918853827712,
+          "q10": 78.49503075826655,
+          "q90": 101.41827866014,
+          "std": 9.827533996838277
+        },
+        "event_time_s": {
+          "mean": 0.14000000000000004,
+          "q10": 0.14,
+          "q90": 0.14,
+          "std": 2.925694557147251e-17
+        },
+        "late_contact_work_j": {
+          "mean": 2.9639053957598493,
+          "q10": 2.0819227361229604,
+          "q90": 3.8692168198494326,
+          "std": 0.707067569584328
+        },
+        "late_direct_wrist_work_j": {
+          "mean": 0.0849061343673733,
+          "q10": 0.005461197878402257,
+          "q90": 0.16200487648295223,
+          "std": 0.07297041414827601
+        },
+        "shaft_energy_release_j": {
+          "mean": -0.016264829373208566,
+          "q10": -0.023561192573613374,
+          "q90": -0.010000375927057529,
+          "std": 0.00768183176768241
+        }
+      },
+      "held_out": {
+        "delivery_speed_m_s": {
+          "mean": 5.478748104184078,
+          "q10": 4.941706651175656,
+          "q90": 5.847462083809826,
+          "std": 0.38776327674127
+        },
+        "face_path_error_deg": {
+          "mean": 9.44009241950323,
+          "q10": 6.49134550243719,
+          "q90": 12.265235913152166,
+          "std": 2.281539896000159
+        },
+        "peak_hand_force_n": {
+          "mean": 153.73177334950253,
+          "q10": 144.02982142319473,
+          "q90": 166.87871947157083,
+          "std": 11.189013742659494
+        },
+        "effort_proxy_nms": {
+          "mean": 90.24600307524689,
+          "q10": 80.94939553105795,
+          "q90": 99.61164650880538,
+          "std": 7.644365648172239
+        },
+        "event_time_s": {
+          "mean": 0.14000000000000007,
+          "q10": 0.14,
+          "q90": 0.14,
+          "std": 5.745950043620392e-17
+        },
+        "late_contact_work_j": {
+          "mean": 2.942973094981018,
+          "q10": 2.4244640794562167,
+          "q90": 3.2799164828235026,
+          "std": 0.43412836099640545
+        },
+        "late_direct_wrist_work_j": {
+          "mean": 0.08261417019849995,
+          "q10": 0.0068468099642987265,
+          "q90": 0.1470692205862619,
+          "std": 0.06106793013546093
+        },
+        "shaft_energy_release_j": {
+          "mean": -0.016175366879303505,
+          "q10": -0.02497303545413335,
+          "q90": -0.010343471072120127,
+          "std": 0.009391943673285323
+        }
+      }
+    },
+    "state_triggered_handoff": {
+      "nominal": {
+        "delivery_speed_m_s": 5.6687851944286125,
+        "face_path_error_deg": 0.6357419336939254,
+        "peak_hand_force_n": 187.6520515837731,
+        "effort_proxy_nms": 92.46493802115205,
+        "event_time_s": 0.14,
+        "late_contact_work_j": 2.5844598205577682,
+        "late_direct_wrist_work_j": 0.05823787447070877,
+        "shaft_energy_release_j": -0.00696300386378349
+      },
+      "training": {
+        "delivery_speed_m_s": {
+          "mean": 5.723393424627462,
+          "q10": 4.947828886201165,
+          "q90": 6.62605965389979,
+          "std": 0.6736907038193088
+        },
+        "face_path_error_deg": {
+          "mean": 2.2045966730639193,
+          "q10": 0.2695389174371504,
+          "q90": 4.339012370848594,
+          "std": 1.8828347840228485
+        },
+        "peak_hand_force_n": {
+          "mean": 185.62202612874233,
+          "q10": 162.5864460929787,
+          "q90": 209.14099400108432,
+          "std": 18.746289669330316
+        },
+        "effort_proxy_nms": {
+          "mean": 93.08764084905826,
+          "q10": 80.9685478831108,
+          "q90": 104.41531047374956,
+          "std": 9.964554919711222
+        },
+        "event_time_s": {
+          "mean": 0.14160000000000003,
+          "q10": 0.1348,
+          "q90": 0.1524,
+          "std": 0.009082339395160744
+        },
+        "late_contact_work_j": {
+          "mean": 2.63337349041688,
+          "q10": 1.8174554107215954,
+          "q90": 3.485102101495254,
+          "std": 0.678040783403669
+        },
+        "late_direct_wrist_work_j": {
+          "mean": 0.08916550339666773,
+          "q10": -0.08894438468942999,
+          "q90": 0.22078722303588766,
+          "std": 0.13284418554742478
+        },
+        "shaft_energy_release_j": {
+          "mean": -0.009401572532533884,
+          "q10": -0.01591144252387489,
+          "q90": -0.004953000675215055,
+          "std": 0.006828321303072348
+        }
+      },
+      "held_out": {
+        "delivery_speed_m_s": {
+          "mean": 5.718625685001564,
+          "q10": 5.283599468856324,
+          "q90": 6.039426608196812,
+          "std": 0.374123607142608
+        },
+        "face_path_error_deg": {
+          "mean": 2.290929153643234,
+          "q10": 0.5436879436056834,
+          "q90": 4.261364674329815,
+          "std": 1.6181966575035165
+        },
+        "peak_hand_force_n": {
+          "mean": 185.07813841898388,
+          "q10": 170.60791380189394,
+          "q90": 208.08296737810394,
+          "std": 15.503700012869194
+        },
+        "effort_proxy_nms": {
+          "mean": 93.0754628156834,
+          "q10": 83.48391573287353,
+          "q90": 102.78460023628546,
+          "std": 7.728401406724534
+        },
+        "event_time_s": {
+          "mean": 0.14133333333333337,
+          "q10": 0.1296,
+          "q90": 0.152,
+          "std": 0.009641181512261914
+        },
+        "late_contact_work_j": {
+          "mean": 2.609834919738759,
+          "q10": 2.057599684576635,
+          "q90": 2.9461968954843964,
+          "std": 0.4160762843333899
+        },
+        "late_direct_wrist_work_j": {
+          "mean": 0.08764422830239384,
+          "q10": -0.033215158167724475,
+          "q90": 0.2320672451848426,
+          "std": 0.10473605966041735
+        },
+        "shaft_energy_release_j": {
+          "mean": -0.009831805761601942,
+          "q10": -0.016472604542673245,
+          "q90": -0.004692536554238872,
+          "std": 0.008617884531957266
+        }
+      }
+    },
+    "state_triggered_higher_impedance": {
+      "nominal": {
+        "delivery_speed_m_s": 5.780740822884557,
+        "face_path_error_deg": 0.5768562728021055,
+        "peak_hand_force_n": 158.09313029562617,
+        "effort_proxy_nms": 91.1809943102108,
+        "event_time_s": 0.148,
+        "late_contact_work_j": 2.1036038874831684,
+        "late_direct_wrist_work_j": 0.11947177184516347,
+        "shaft_energy_release_j": -0.013940846057662408
+      },
+      "training": {
+        "delivery_speed_m_s": {
+          "mean": 5.709408578281376,
+          "q10": 4.917822689534976,
+          "q90": 6.514298465183763,
+          "std": 0.6607567956847739
+        },
+        "face_path_error_deg": {
+          "mean": 1.2268583285702122,
+          "q10": 0.5909070231231996,
+          "q90": 1.9987349044753888,
+          "std": 0.5952629214373837
+        },
+        "peak_hand_force_n": {
+          "mean": 155.79975561228994,
+          "q10": 148.12436199594973,
+          "q90": 162.8442910941308,
+          "std": 6.954944890353757
+        },
+        "effort_proxy_nms": {
+          "mean": 91.8693404950943,
+          "q10": 79.69975236400757,
+          "q90": 103.19573665762854,
+          "std": 9.835909639087742
+        },
+        "event_time_s": {
+          "mean": 0.14640000000000003,
+          "q10": 0.1388,
+          "q90": 0.156,
+          "std": 0.008474799243771038
+        },
+        "late_contact_work_j": {
+          "mean": 2.1234035890258456,
+          "q10": 1.5258482845599024,
+          "q90": 2.7891596234918117,
+          "std": 0.5178230900414507
+        },
+        "late_direct_wrist_work_j": {
+          "mean": 0.11791107978880973,
+          "q10": -0.025699888599423557,
+          "q90": 0.2559078786597118,
+          "std": 0.12510612092928275
+        },
+        "shaft_energy_release_j": {
+          "mean": -0.019740382034807116,
+          "q10": -0.04482541027764474,
+          "q90": 0.0006730667380647785,
+          "std": 0.027104892455948208
+        }
+      },
+      "held_out": {
+        "delivery_speed_m_s": {
+          "mean": 5.716657858197893,
+          "q10": 5.259858080775923,
+          "q90": 6.167925110874835,
+          "std": 0.39080007939779915
+        },
+        "face_path_error_deg": {
+          "mean": 1.2640618929924232,
+          "q10": 0.508934585765711,
+          "q90": 1.9925144977920786,
+          "std": 0.6873868943788545
+        },
+        "peak_hand_force_n": {
+          "mean": 156.64792541805724,
+          "q10": 142.7994941930737,
+          "q90": 175.69338567573413,
+          "std": 12.877117957605666
+        },
+        "effort_proxy_nms": {
+          "mean": 91.85703837189067,
+          "q10": 82.27938605295441,
+          "q90": 101.4693899717381,
+          "std": 7.728584341179855
+        },
+        "event_time_s": {
+          "mean": 0.1464,
+          "q10": 0.1336,
+          "q90": 0.1584,
+          "std": 0.00977460265907812
+        },
+        "late_contact_work_j": {
+          "mean": 2.1045895290239582,
+          "q10": 1.65950441904224,
+          "q90": 2.477833018563792,
+          "std": 0.3334214024036293
+        },
+        "late_direct_wrist_work_j": {
+          "mean": 0.1175780544789588,
+          "q10": 0.005089706910050663,
+          "q90": 0.24254705259065795,
+          "std": 0.09685460729908696
+        },
+        "shaft_energy_release_j": {
+          "mean": -0.019556358324351267,
+          "q10": -0.0518671986117298,
+          "q90": 0.0003794144000804282,
+          "std": 0.029764344653671015
+        }
+      }
+    },
+    "early_drive": {
+      "nominal": {
+        "delivery_speed_m_s": 3.2449200540823915,
+        "face_path_error_deg": 22.1219753600579,
+        "peak_hand_force_n": 194.69649449464234,
+        "effort_proxy_nms": 92.00638589189747,
+        "event_time_s": 0.0,
+        "late_contact_work_j": 1.437067015202733,
+        "late_direct_wrist_work_j": -0.276771677720839,
+        "shaft_energy_release_j": -0.006829472934671618
+      },
+      "training": {
+        "delivery_speed_m_s": {
+          "mean": 3.3300919270272096,
+          "q10": 2.6388418628855974,
+          "q90": 3.797929397440622,
+          "std": 0.5142932032783051
+        },
+        "face_path_error_deg": {
+          "mean": 20.31709585069864,
+          "q10": 4.9572560551291724,
+          "q90": 34.77656694656911,
+          "std": 11.165331341653747
+        },
+        "peak_hand_force_n": {
+          "mean": 190.35579752321166,
+          "q10": 128.68642527670153,
+          "q90": 241.10684914222003,
+          "std": 42.55976408488207
+        },
+        "effort_proxy_nms": {
+          "mean": 92.7748728658112,
+          "q10": 80.13191683108143,
+          "q90": 104.89100046579027,
+          "std": 10.27045297732749
+        },
+        "event_time_s": {
+          "mean": 0.0,
+          "q10": 0.0,
+          "q90": 0.0,
+          "std": 0.0
+        },
+        "late_contact_work_j": {
+          "mean": 1.4594032405736628,
+          "q10": 1.1013083292749055,
+          "q90": 1.8525917177543718,
+          "std": 0.29441735458539475
+        },
+        "late_direct_wrist_work_j": {
+          "mean": -0.286925841192649,
+          "q10": -0.4265093438564118,
+          "q90": -0.15343842637727972,
+          "std": 0.10937013246603407
+        },
+        "shaft_energy_release_j": {
+          "mean": -0.006604551271945418,
+          "q10": -0.012532611970555578,
+          "q90": -7.798740753393348e-5,
+          "std": 0.004865136537452295
+        }
+      },
+      "held_out": {
+        "delivery_speed_m_s": {
+          "mean": 3.332014923338382,
+          "q10": 2.8631143954780898,
+          "q90": 3.6932974137047605,
+          "std": 0.34999264891811804
+        },
+        "face_path_error_deg": {
+          "mean": 20.005000442627427,
+          "q10": 4.995186707808851,
+          "q90": 30.69138386491949,
+          "std": 10.01086600777461
+        },
+        "peak_hand_force_n": {
+          "mean": 190.85679300256896,
+          "q10": 153.18142181297154,
+          "q90": 246.51281303680386,
+          "std": 36.23465042849205
+        },
+        "effort_proxy_nms": {
+          "mean": 92.75899799981688,
+          "q10": 82.89988620264266,
+          "q90": 102.67957843602713,
+          "std": 8.070630246641315
+        },
+        "event_time_s": {
+          "mean": 0.0,
+          "q10": 0.0,
+          "q90": 0.0,
+          "std": 0.0
+        },
+        "late_contact_work_j": {
+          "mean": 1.448412955763234,
+          "q10": 1.221548110256889,
+          "q90": 1.7021130021917728,
+          "std": 0.22247604607477733
+        },
+        "late_direct_wrist_work_j": {
+          "mean": -0.2841897521233118,
+          "q10": -0.40355532273212646,
+          "q90": -0.1433448716344346,
+          "std": 0.10250191034711438
+        },
+        "shaft_energy_release_j": {
+          "mean": -0.006791957184901011,
+          "q10": -0.011380870183698955,
+          "q90": 8.704351490486405e-7,
+          "std": 0.004661336995527317
+        }
+      }
+    }
+  },
+  "clock_vs_state_paired_held_out": {
+    "delivery_speed_m_s": {
+      "baseline_mean": 5.478748104184078,
+      "candidate_mean": 5.718625685001564,
+      "baseline_q10": 4.941706651175656,
+      "candidate_q10": 5.283599468856324,
+      "baseline_std": 0.38776327674127,
+      "candidate_std": 0.374123607142608,
+      "paired_mean_delta": 0.23987758081748686,
+      "baseline_amplification": 1.0480788523163136,
+      "candidate_amplification": 1.011212418292243
+    },
+    "face_path_error_deg": {
+      "baseline_mean": 9.44009241950323,
+      "candidate_mean": 2.290929153643234,
+      "baseline_q10": 6.49134550243719,
+      "candidate_q10": 0.5436879436056834,
+      "baseline_std": 2.281539896000159,
+      "candidate_std": 1.6181966575035165,
+      "paired_mean_delta": -7.149163265859997,
+      "baseline_amplification": 6.166735890539857,
+      "candidate_amplification": 4.373796585049008
+    },
+    "peak_hand_force_n": {
+      "baseline_mean": 153.73177334950253,
+      "candidate_mean": 185.07813841898388,
+      "baseline_q10": 144.02982142319473,
+      "candidate_q10": 170.60791380189394,
+      "baseline_std": 11.189013742659494,
+      "candidate_std": 15.503700012869194,
+      "paired_mean_delta": 31.346365069481333,
+      "baseline_amplification": 30.2425974437561,
+      "candidate_amplification": 41.904690543932965
+    },
+    "effort_proxy_nms": {
+      "baseline_mean": 90.24600307524689,
+      "candidate_mean": 93.0754628156834,
+      "baseline_q10": 80.94939553105795,
+      "candidate_q10": 83.48391573287353,
+      "baseline_std": 7.644365648172239,
+      "candidate_std": 7.728401406724534,
+      "paired_mean_delta": 2.8294597404364983,
+      "baseline_amplification": 20.661827604083424,
+      "candidate_amplification": 20.888966445381666
+    },
+    "event_time_s": {
+      "baseline_mean": 0.14000000000000007,
+      "candidate_mean": 0.14133333333333337,
+      "baseline_q10": 0.14,
+      "candidate_q10": 0.1296,
+      "baseline_std": 5.745950043620392e-17,
+      "candidate_std": 0.009641181512261914,
+      "paired_mean_delta": 0.0013333333333333253,
+      "baseline_amplification": 1.5530631930374296e-16,
+      "candidate_amplification": 0.02605898768770455
+    },
+    "late_contact_work_j": {
+      "baseline_mean": 2.942973094981018,
+      "candidate_mean": 2.609834919738759,
+      "baseline_q10": 2.4244640794562167,
+      "candidate_q10": 2.057599684576635,
+      "baseline_std": 0.43412836099640545,
+      "candidate_std": 0.4160762843333899,
+      "paired_mean_delta": -0.33313817524225847,
+      "baseline_amplification": 1.173398260337758,
+      "candidate_amplification": 1.1246056053192077
+    },
+    "late_direct_wrist_work_j": {
+      "baseline_mean": 0.08261417019849995,
+      "candidate_mean": 0.08764422830239384,
+      "baseline_q10": 0.0068468099642987265,
+      "candidate_q10": -0.033215158167724475,
+      "baseline_std": 0.06106793013546093,
+      "candidate_std": 0.10473605966041735,
+      "paired_mean_delta": 0.005030058103893874,
+      "baseline_amplification": 0.16505948337240958,
+      "candidate_amplification": 0.28308933772051564
+    },
+    "shaft_energy_release_j": {
+      "baseline_mean": -0.016175366879303505,
+      "candidate_mean": -0.009831805761601942,
+      "baseline_q10": -0.02497303545413335,
+      "candidate_q10": -0.016472604542673245,
+      "baseline_std": 0.009391943673285323,
+      "candidate_std": 0.008617884531957266,
+      "paired_mean_delta": 0.006343561117701566,
+      "baseline_amplification": 0.02538532691605113,
+      "candidate_amplification": 0.023293135455101165
+    }
+  },
+  "objectives": [
+    "maximize q10 delivery speed",
+    "minimize delivery-speed dispersion",
+    "minimize mean face-path error",
+    "minimize q90 individual-hand force",
+    "minimize mean squared-torque effort proxy"
+  ],
+  "training_pareto_programs": [
+    "clock_restrain_then_drive",
+    "state_triggered_handoff",
+    "state_triggered_higher_impedance",
+    "early_drive"
+  ],
+  "held_out_pareto_programs": [
+    "clock_restrain_then_drive",
+    "state_triggered_handoff",
+    "state_triggered_higher_impedance",
+    "early_drive"
+  ],
+  "local_task_map": {
+    "input_names": [
+      "initial_arm_angle_rad",
+      "initial_wrist_angle_rad",
+      "initial_arm_speed_rad_s",
+      "initial_wrist_speed_rad_s",
+      "command_scale",
+      "activation_delay_s",
+      "shaft_stiffness_scale",
+      "grip_separation_scale"
+    ],
+    "outcome_names": [
+      "delivery_speed_m_s",
+      "face_path_error_deg",
+      "peak_hand_force_n"
+    ],
+    "steps": [0.008, 0.01, 0.08, 0.1, 0.02, 0.003, 0.04, 0.03],
+    "task_rank": 3,
+    "nullity": 5,
+    "null_variance": 0.13221953442080944,
+    "task_relevant_variance": 0.0046621803751192145,
+    "synergy_index": 0.9318801582509416,
+    "interpretation": "local_model_input_outcome_partition_not_neural_synergy"
+  },
+  "closure": {
+    "maximum_pathway_residual_j": 0.22606424370910627,
+    "maximum_normalized_pathway_residual": 0.037655635793460075,
+    "maximum_contact_power_residual_w": 6.394884621840902e-14,
+    "maximum_position_constraint_m": 9.99383037824248e-11,
+    "maximum_velocity_constraint_m_s": 2.493451541170551e-15
+  },
+  "adversarial_gap_register": [
+    {
+      "id": "G1",
+      "severity": "critical",
+      "status": "confirmed",
+      "gap": "Nominal clubhead speed was sometimes discussed near robustness language.",
+      "counterexample": "A faster nominal program can have larger speed or face-path dispersion.",
+      "falsifier": "Paired perturbations must show lower amplification and acceptable lower-tail outcomes.",
+      "path_forward": "Retain separate nominal, q10, dispersion, load, and effort objectives."
+    },
+    {
+      "id": "G2",
+      "severity": "critical",
+      "status": "confirmed",
+      "gap": "Negative torque can be mistaken for energy removal or biological braking.",
+      "counterexample": "Negative torque with negative angular velocity produces positive power.",
+      "falsifier": "Report torque, angular velocity, power, and integrated work together.",
+      "path_forward": "Require sign-quadrant and interface-power plots in human validation."
+    },
+    {
+      "id": "G3",
+      "severity": "high",
+      "status": "confirmed",
+      "gap": "A kinematic sequence does not uniquely identify an energy pathway.",
+      "counterexample": "Identical peak ordering can arise with different control and constraint-force work.",
+      "falsifier": "Pathway-resolved work must distinguish matched kinematics.",
+      "path_forward": "Fit full inverse-dynamics and bilateral wrench alternatives, not peak order alone."
+    },
+    {
+      "id": "G4",
+      "severity": "high",
+      "status": "confirmed",
+      "gap": "Instantaneous drift is not a forward future or causal mediator.",
+      "counterexample": "Control changes the subsequent state, so integrated pointwise ZTCF is not a killed-control trajectory.",
+      "falsifier": "Same-state forward killswitches and causal intervention models must agree on the bounded claim.",
+      "path_forward": "Keep pointwise, forward-counterfactual, and statistical mediation labels separate."
+    },
+    {
+      "id": "G5",
+      "severity": "high",
+      "status": "open",
+      "gap": "Fixed terminal time is not ball impact and may reorder programs.",
+      "counterexample": "A program can be fast at 240 ms but miss the impact manifold.",
+      "falsifier": "Event-aligned ball/contact outcomes preserve the Pareto ordering.",
+      "path_forward": "Add 3-D face/path/contact and impact-location events in spatial engines."
+    },
+    {
+      "id": "G6",
+      "severity": "high",
+      "status": "open",
+      "gap": "Engineering parameter envelopes are not population distributions.",
+      "counterexample": "Uniform/LHS weighting can favor regions uncommon in golfers.",
+      "falsifier": "Participant-held-out posterior predictive checks reproduce distributions and rankings.",
+      "path_forward": "Estimate hierarchical subject/equipment distributions from synchronized data."
+    },
+    {
+      "id": "G7",
+      "severity": "high",
+      "status": "open",
+      "gap": "Impedance and coactivation proxies do not establish biological stability.",
+      "counterexample": "Higher coactivation can reduce displacement while increasing force, effort, and coupled instability.",
+      "falsifier": "Measured perturbation recovery improves without unacceptable load or accuracy cost.",
+      "path_forward": "Identify time-varying endpoint impedance with EMG and controlled perturbations."
+    },
+    {
+      "id": "G8",
+      "severity": "medium",
+      "status": "confirmed",
+      "gap": "Less joint variability is not necessarily better performance.",
+      "counterexample": "Task-null variability can coexist with stable club state and support adaptation.",
+      "falsifier": "UCM/task-Jacobian analysis separates null from outcome-relevant variance.",
+      "path_forward": "Report covariance structure, not scalar trajectory dispersion alone."
+    },
+    {
+      "id": "G9",
+      "severity": "medium",
+      "status": "open",
+      "gap": "A local linear null space may fail under large perturbations.",
+      "counterexample": "Curvature moves a nominally null direction into task-relevant error.",
+      "falsifier": "Nonlinear re-evaluation bounds prediction error across perturbation amplitude.",
+      "path_forward": "Add second-order and trajectory-level UCM/manifold tests."
+    },
+    {
+      "id": "G10",
+      "severity": "high",
+      "status": "open",
+      "gap": "Distance and accuracy are not reducible to clubhead speed and face/path alone.",
+      "counterexample": "Off-center impact, dynamic loft, attack angle, and strike location can reverse carry rankings.",
+      "falsifier": "Ball-flight and impact models preserve strategy tradeoffs on carry and dispersion.",
+      "path_forward": "Propagate full impact state through calibrated launch and aerodynamic models."
+    },
+    {
+      "id": "G11",
+      "severity": "medium",
+      "status": "open",
+      "gap": "Open-loop and instantaneous state feedback omit sensory delay and estimation error.",
+      "counterexample": "A stable perfect-state controller may destabilize under delayed noisy feedback.",
+      "falsifier": "Delay/noise sweeps and observer models retain bounded task error.",
+      "path_forward": "Add delayed state estimation and phase-response identification."
+    },
+    {
+      "id": "G12",
+      "severity": "critical",
+      "status": "open",
+      "gap": "No current model result establishes a universal human technique or injury benefit.",
+      "counterexample": "Anthropometry, strength, equipment, intent, and injury tolerance can change the optimum.",
+      "falsifier": "Prospective participant-held-out intervention improves prespecified outcomes and safety endpoints.",
+      "path_forward": "Treat model results as experiment generators and personalize only after validation."
+    }
+  ],
+  "claim_status": {
+    "universal_optimum": "rejected_by_tradeoffs",
+    "nominal_speed_implies_repeatability": "rejected",
+    "state_trigger_is_self_stabilizing": "model_conditional",
+    "human_self_stabilization": "untested",
+    "causal_biological_pathway": "untested",
+    "coaching_prescription": "unsupported"
+  },
+  "limitations": [
+    "The terminal sample is a delivery proxy, not a ball-impact collision.",
+    "Perturbations are declared engineering envelopes, not a fitted golfer population.",
+    "State feedback has perfect state access and omits sensory delay beyond actuator delay.",
+    "The squared-torque effort metric is not metabolic cost or muscle activation.",
+    "The planar face-path proxy omits 3-D face orientation, strike location, and ball flight.",
+    "Local task-null directions are linearized model properties, not measured neural synergies."
+  ],
+  "source_sha256": {
+    "scripts/research/proximal_distal_energy/transmission_robustness.py": "18ecc23dd94915a7103aa79235e99398617956073a52623e48a7648cbc6308f5",
+    "scripts/research/proximal_distal_energy/run_transmission_robustness_study.py": "e8ae5fe19bf0a7c4b4dda66f5749ca362fa54ddc7eadc9dc924b7cca7a1084c7",
+    "scripts/research/proximal_distal_energy/moving_base_flexible_club.py": "251c345bdc961316c00058831624cfc96954d9a6cf59817e48500bd6b19a9a23",
+    "scripts/research/proximal_distal_energy/uncertainty_control.py": "443012e55b6cb1dd23bcd3595efbe68da07ae120735e8ee756085ac1f7e883e9"
+  },
+  "array_artifact": "transmission_robustness_study.npz"
+}

@@ -1,5 +1,12 @@
 # Proximal-to-Distal Energy Transfer in the Golf Swing
 
+The latest adversarial extension separates transmission-pathway identity,
+nominal speed, lower-tail performance, dispersion, contact loading, task-null
+variability, and model-conditional perturbation rejection. Start with
+[`ADVERSARIAL_TRANSMISSION_REVIEW.md`](ADVERSARIAL_TRANSMISSION_REVIEW.md) and
+the chapter “Transmission Pathways, Robust Speed, and Task Stability.” These
+results do not establish human self-stabilization or a universal strategy.
+
 Open research materials for a study of proximal-to-distal (P→D) energy
 transfer in the golf swing. The study combines a literature synthesis
 with reproducible two-link simulations, counterfactual acceleration

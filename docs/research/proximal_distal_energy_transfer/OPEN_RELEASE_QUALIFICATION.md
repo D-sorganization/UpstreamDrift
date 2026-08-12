@@ -19,6 +19,12 @@ agonist--antagonist redundancy surface, continuous activation/series-force
 history, and pose-only round trips through all five canonical engine adapters.
 The adapter result is explicitly not a five-engine dynamics-parity claim.
 
+The transmission-robustness preset adds deterministic paired training and
+held-out perturbations, a local input--outcome Jacobian, a task-null variance
+partition, a complete Pareto set, and an adversarial gap register. It preserves
+the distinction between exact contact-power closure and the declared numerical
+work--energy residual of the projected forward integrator.
+
 Run:
 
 ```bash
