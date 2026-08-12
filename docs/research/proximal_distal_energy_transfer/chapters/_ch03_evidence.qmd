@@ -136,7 +136,7 @@ wrist contribution
 players truncate exactly this separation: early release ("casting")
 moves energy into the club before proximal speed has peaked, producing
 the lower distal peak speeds and transfer ratios observed in amateur
-cohorts [@cheetham2008; @zheng2008; @milburn1982]. Chapter @sec-results
+cohorts [@cheetham2008; @zheng2008; @milburn1982]. Section @sec-results
 reproduces this entire pattern — including the casting failure mode —
 inside a fully instrumented model where every energy pathway is
 measurable exactly.

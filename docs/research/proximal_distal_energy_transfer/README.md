@@ -70,6 +70,13 @@ training/held-out comparisons of eight preselected programs across five
 objectives. The result exposes non-identifiability and strategy tradeoffs; it
 does not claim a population distribution, physiological actuator, universal
 optimum, or coaching prescription.
+An advanced bridge now makes force-first wrench, linear-first twist,
+reference-point transport, Jacobian virtual work, and power conventions
+executable. It adds a reduced Hill-type agonist--antagonist redundancy surface
+and continuous activation/series-force comparison of persistent-direction and
+complete-role-reversal preparation histories. A question-to-engine ladder then
+connects MuJoCo, Pinocchio, Drake, OpenSim, and MyoSuite to common observables
+without promoting optional backend capability to human validation.
 
 The public-facing article is available on
 [affinedrift.com](https://affinedrift.com/articles/proximal-distal-energy-transfer.html).
@@ -81,6 +88,8 @@ program is tracked in
 [#8458](https://github.com/D-sorganization/UpstreamDrift/issues/8458).
 The arm--wrist allocation, role-reversal, and preload program is tracked in
 [#8497](https://github.com/D-sorganization/UpstreamDrift/issues/8497).
+The advanced frame, biological, visual, and cross-engine expansion is tracked
+in [#8505](https://github.com/D-sorganization/UpstreamDrift/issues/8505).
 Ground-reaction drift attribution and human validation requirements are tracked
 in [#8493](https://github.com/D-sorganization/UpstreamDrift/issues/8493).
 The independent review adjudication and its numerical remediation are tracked
@@ -95,6 +104,8 @@ the finding-by-finding record in
 | [`proximal_distal_energy_transfer.qmd`](proximal_distal_energy_transfer.qmd)           | Master Quarto document (front matter + chapter includes)                          |
 | [`chapters/`](chapters/)                                                               | Chapter source files (`_ch01`–`_ch09`, `_appendices`)                             |
 | [`HAND_PATH_ATTRIBUTION_CONTRACT.md`](HAND_PATH_ATTRIBUTION_CONTRACT.md)               | Canonical source, terminology, and estimand contract for hand-path attribution    |
+| [`TERMINOLOGY_AND_CONVENTIONS.md`](TERMINOLOGY_AND_CONVENTIONS.md)                     | Normative scientific vocabulary, frame, wrench, power, and evidence-status rules  |
+| [`ADVANCED_EXPANSION_REVIEW.md`](ADVANCED_EXPANSION_REVIEW.md)                         | Completed review, implemented expansion, and falsifiable next-model roadmap       |
 | [`EVIDENCE_SCHEMA_V2.md`](EVIDENCE_SCHEMA_V2.md)                                       | Falsifiable prediction and named spatial-interface evidence contract              |
 | [`MODEL_COMPLETION_FALSIFICATION_MATRIX.md`](MODEL_COMPLETION_FALSIFICATION_MATRIX.md) | Claim, alternative-explanation, model-discrepancy, and falsifier register         |
 | [`EXPERIMENTAL_FALSIFICATION_PROTOCOL.md`](EXPERIMENTAL_FALSIFICATION_PROTOCOL.md)     | Frozen human-data acquisition, split, analysis, and inference-boundary protocol   |
@@ -133,6 +144,7 @@ python3 -m scripts.research.proximal_distal_energy.run_spatial_full_body_study
 python3 -m scripts.research.proximal_distal_energy.run_spatial_forward_contact_study
 python3 -m scripts.research.proximal_distal_energy.run_uncertainty_control_study
 python3 -m scripts.research.proximal_distal_energy.run_experimental_protocol_dry_run
+python3 -m scripts.research.proximal_distal_energy.run_advanced_biological_bridge
 python3 -m scripts.research.proximal_distal_energy.qualify_open_release validate
 # robustness analyses
 python3 -m scripts.research.proximal_distal_energy.e1b_bounded_torque
@@ -143,6 +155,7 @@ python3 -m scripts.research.proximal_distal_energy.e1e_smooth_command_sensitivit
 python3 -m scripts.research.proximal_distal_energy.make_figures
 python3 -m scripts.research.proximal_distal_energy.make_interaction_force_figures
 python3 -m scripts.research.proximal_distal_energy.make_counterfactual_figures
+python3 -m scripts.research.proximal_distal_energy.make_advanced_biological_bridge_figures
 python3 -m scripts.research.proximal_distal_energy.make_two_hand_wscg_figures
 python3 -m scripts.research.proximal_distal_energy.make_shaft_contribution_figures
 python3 -m scripts.research.proximal_distal_energy.make_mechanism_ladder_figures

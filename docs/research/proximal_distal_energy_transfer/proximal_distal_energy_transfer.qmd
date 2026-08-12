@@ -135,6 +135,15 @@ abstract: |
   vertical ZTCF impulse exceed the total. This benchmark is not a bilateral
   human force-plate validation, and the required synchronized force-plate and
   whole-body kinematic experiment is specified as a falsification protocol.
+  An advanced bridge then proves wrench--twist power invariance under proper
+  rotations and paired reference-point transport, verifies Jacobian virtual
+  work, and round-trips one canonical pose through the MuJoCo, Pinocchio,
+  Drake, OpenSim, and MyoSuite coordinate adapters. The pose result is a
+  representation check, not five-engine dynamics parity. A reduced Hill-type
+  study demonstrates that 41 agonist--antagonist allocations can produce the
+  same net moment while changing internal stiffness and series-energy proxies;
+  continuous activation and series-force states make preparation history
+  observable but do not identify anatomy or a preferred technique.
   References, analysis code,
   machine-readable results, and provenance are available with the document for
   independent inspection and reuse.
@@ -156,6 +165,10 @@ keywords:
   - ground reaction force
   - contact dynamics
   - force plate
+  - reference-frame invariance
+  - muscle redundancy
+  - activation dynamics
+  - cross-engine pose interchange
 bibliography: references.bib
 link-citations: true
 number-sections: true
@@ -211,6 +224,8 @@ format:
 {{< include chapters/_ch06f_open_release.qmd >}}
 
 {{< include chapters/_ch07_model_ladder.qmd >}}
+
+{{< include chapters/_ch07b_frames_biology_engines.qmd >}}
 
 {{< include chapters/_ch03_evidence.qmd >}}
 

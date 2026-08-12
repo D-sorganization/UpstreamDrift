@@ -5,6 +5,18 @@ Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
 
+- **#8505 advanced proximal--distal expansion** — isolated branch
+  `research/proximal-distal-advanced-expansion` adds an executable frame and
+  reduced-biological bridge: paired wrench/twist point transport, proper-frame
+  and Jacobian-power closure, forty-one matched-moment muscle allocations,
+  continuous activation/series-force role histories, and pose-coordinate round
+  trips through MuJoCo, Pinocchio, Drake, OpenSim, and MyoSuite adapters. Five
+  new vector figure families, a terminology contract, reviewer workbench,
+  falsification hypotheses H7/H8, AffineDrift integration, and an advanced
+  expansion review keep representation, dynamics, biology, and human evidence
+  distinct. Focused scientific tests pass; final render, release manifest,
+  full gates, protected PR, and remote-main verification remain.
+
 - **#8499 adversarial review adjudication** — isolated branch
   `research/proximal-distal-adversarial-review` starts from the exact tracked
   snapshot of the active paper-development branch. It confirms and corrects an
