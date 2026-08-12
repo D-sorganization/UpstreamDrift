@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 
 from scripts.research.proximal_distal_energy.double_pendulum_attribution import (
+    double_pendulum_support_reaction_decomposition,
     double_pendulum_joint_transfer_trajectory,
 )
 from scripts.research.proximal_distal_energy.interaction_forces import (
@@ -138,3 +139,44 @@ def test_fixed_shoulder_has_undefined_path_projection_but_wrist_is_valid(
     assert np.all(np.isnan(projection.total_along[:, 0]))
     assert np.isnan(projection.total_along[0, 1])
     assert np.all(np.isfinite(projection.total_along[1:, 1]))
+
+
+def test_support_reaction_decomposition_closes_pointwise(
+    reference_trace: tuple[
+        GolfModelParams, np.ndarray, np.ndarray, np.ndarray, np.ndarray
+    ],
+) -> None:
+    params, t, q, v, u = reference_trace
+    result = double_pendulum_support_reaction_decomposition(t, q, v, u, params)
+
+    np.testing.assert_allclose(
+        result.total,
+        result.configuration + result.velocity + result.control,
+        atol=1e-10,
+    )
+    np.testing.assert_allclose(
+        result.ztcf,
+        result.configuration + result.velocity,
+        atol=1e-10,
+    )
+    np.testing.assert_allclose(
+        result.zvcf,
+        result.configuration + result.control,
+        atol=1e-10,
+    )
+    assert result.force_direction == "support_on_mechanism"
+    assert result.model_scope == "fixed_base_support_reaction_proxy"
+
+
+def test_support_counterfactuals_are_pointwise_not_forward_rollouts(
+    reference_trace: tuple[
+        GolfModelParams, np.ndarray, np.ndarray, np.ndarray, np.ndarray
+    ],
+) -> None:
+    params, t, q, v, u = reference_trace
+    result = double_pendulum_support_reaction_decomposition(t, q, v, u, params)
+
+    assert result.total.shape == (t.size, 2)
+    np.testing.assert_array_equal(result.time, t)
+    assert np.linalg.norm(result.velocity) > 0.0
+    assert np.linalg.norm(result.control) > 0.0

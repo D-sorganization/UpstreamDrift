@@ -28,6 +28,12 @@ same-state control, and separately defined ZVCF reactions for force vectors,
 impulse, power, work, every modeled joint, and four neutral time windows. A
 bounded first-order residual-couple preview study records the late two-hand
 preactivation hypothesis without promoting it to a physiological finding.
+A constrained-contact extension now separates configuration, velocity,
+control, and other-external contributions to a uniquely determined reaction;
+the fixed-support double-pendulum benchmark adds pointwise GRF-analogue ZTCF
+and ZVCF traces, closure tests, prediction metrics, vector figures, and an
+explicit human force-plate falsification protocol. It does not infer bilateral
+foot forces from a resultant wrench.
 A forward constrained two-arm study now evolves the floating club and both arm
 chains under four independent grip constraints. It records exact same-state
 zero-command branches, separated force-generated and direct-wrist moments,
@@ -75,6 +81,8 @@ program is tracked in
 [#8458](https://github.com/D-sorganization/UpstreamDrift/issues/8458).
 The arm--wrist allocation, role-reversal, and preload program is tracked in
 [#8497](https://github.com/D-sorganization/UpstreamDrift/issues/8497).
+Ground-reaction drift attribution and human validation requirements are tracked
+in [#8493](https://github.com/D-sorganization/UpstreamDrift/issues/8493).
 
 ## Layout
 
@@ -109,6 +117,7 @@ python3 -m scripts.research.proximal_distal_energy.run_two_hand_wscg_analysis
 python3 -m scripts.research.proximal_distal_energy.run_shaft_contribution_study
 python3 -m scripts.research.proximal_distal_energy.run_mechanism_ladder_study
 python3 -m scripts.research.proximal_distal_energy.run_hand_path_attribution_study
+python3 -m scripts.research.proximal_distal_energy.run_grf_drift_study
 python3 -m scripts.research.proximal_distal_energy.two_hand_preactivation_hypothesis
 python3 -m scripts.research.proximal_distal_energy.run_forward_two_arm_study
 python3 -m scripts.research.proximal_distal_energy.run_moving_base_flexible_study
@@ -214,6 +223,10 @@ model and ABA APIs.
   scapular strategy is shorthand, not muscle identification. Its transmission
   channel gives a falsifiable operational meaning to lost continuity; it is not
   evidence that anatomical tissue was literally slack.
+- The ground-reaction extension demonstrates constrained-reaction algebra and a
+  fixed-support planar benchmark. Human drift fractions, bilateral foot-force
+  allocation, COP, and free moment remain unvalidated without synchronized
+  force-plate, whole-body, and club data.
 - The reduced full-body spatial study uses 20 generalized coordinates and
   spherical inertia elements shared by MuJoCo and an independent analytical
   implementation. Its same-state agreement is an implementation-transport

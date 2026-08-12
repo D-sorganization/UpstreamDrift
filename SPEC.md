@@ -39,7 +39,7 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.503 |
+| **Spec Version** | 1.0.504 |
 | **Last Spec Update** | 2026-08-11 |
 
 ## 2. Purpose & Mission
@@ -71,35 +71,29 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
-- **2026-08-11** - Added a reduced full-body spatial common-state
-  inverse-dynamics tier for #8426. One canonical 20-coordinate, 32-inertia
-  model is evaluated by native MuJoCo inverse dynamics and an independently
-  assembled Lagrange--Christoffel formulation. Registered two-hand
-  action--reaction loads, reversed and coincident moment-arm interventions,
-  model digests, power closure, finite-difference convergence, and
-  predeclared generalized-force tolerances expose the comparison to direct
-  falsification. The result supports common-state implementation transport;
-  passive contact-force generation, forward spatial contact, calibration,
-  physiology, and coaching inference remain untested.
-- **2026-08-11** - Added the coupled moving-base/flexible-club reference tier
-  for #8426. The ten-coordinate planar model evolves a finite-mass translating
-  base, two closed-loop arms, two grip reactions, a floating proximal club, and
-  a compliant distal segment in one fail-closed KKT solve. Deterministic
-  evidence separates force-generated grip couple, direct wrist torque, shaft
-  moment, base/shaft energy, damping, ideal-contact power, and numerical
-  projection; adds an exact-state zero-command branch, coincident-grip
-  negative control, parameter sensitivity, and timestep convergence; and
-  preserves the common spatial-wrench schema. Results are mechanism-study
-  evidence, not calibrated equipment, physiological, or human findings.
-- **2026-08-11** - Added the forward constrained two-hand reference tier for
-  #8426. The seven-coordinate planar model evolves both two-link arms and a
-  floating club under four independent grip constraints, with fail-closed KKT
-  and mass-metric projection contracts. Deterministic evidence separates the
-  contact-force couple from direct wrist torque, branches exact same-state
-  zero-command futures, removes both moment arms as a negative control, and
-  records constraint, power, work--energy, timestep, and projection closure.
-  The observed 50 ms negative-couple persistence is bounded to this rigid,
-  fixed-shoulder planar model and is not physiological or human evidence.
+- **2026-08-11** - Added a coupled moving-base, two-hand, three-mode shaft
+  experiment and a separate matched-task arm--wrist allocation/preload study.
+  The latter holds an 8 N m club task exact while varying actuator subspace,
+  quantifies internal load tradeoffs, and tests persistent-direction versus
+  role-reversal commands over a declared dead-zone/time-constant grid. Both
+  remain synthetic mechanism tiers; muscle, scapular, tissue-slack, equipment,
+  human-performance, and universal-technique claims remain unsupported.
+
+- **2026-08-11** - Added the first UpstreamDrift consumer boundary for the
+  canonical Tools ground-model contracts (Tools #4276). The headless gateway
+  validates the exact flight-to-ground request/result and reference-execution
+  v1 schemas before binding Tools parsers or execution, stays import-safe when
+  the optional authority is absent, and preserves returned records and
+  provenance unchanged. This is not a dependency pin or UI parity claim: the
+  exact `vendor/ud-tools`/Cargo repin, FastAPI, PyQt, React, clean-install, and
+  protected-release gates remain blocked on the reviewed Tools ground merge.
+- **2026-08-11** - Added #8493 ground-reaction drift attribution: a
+  frame-explicit constrained-contact reaction solver decomposes support
+  reactions into configuration, velocity, control, and retained-external
+  components; deterministic double-pendulum evidence verifies total, ZTCF, and
+  ZVCF closure; and the scientific article defines measurement, identifiability,
+  and human-data falsification boundaries without treating overlapping
+  counterfactuals as additive effort fractions.
 - **2026-08-10** - Added #8458 hand-path attribution: canonical pointwise
   ZTCF/control/ZVCF definitions; exact double-pendulum, one-arm, and closed-loop
   two-arm adapters; deterministic force-vector, impulse, power, work,
@@ -161,24 +155,6 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   reported strategy ordering is reproduced for the defined cases. These
   simplified-model results are not a universal effect estimate or a coaching
   prescription.
-- **2026-08-11** - Began the proximal-to-distal model-completion and
-  falsification program with an engine-neutral spatial evidence contract.
-  Named interfaces now bind 3-D wrenches to compatible twists, frames,
-  reference points, bodies, and action directions; matched-state total, drift,
-  and control components must close. A machine-readable registry predeclares
-  five mechanism predictions, competing explanations, negative controls,
-  model tiers, falsifiers, and numerical tolerances. Reference transport and
-  proper-frame rotation preserve power, planar evidence migrates losslessly
-  into the spatial axes, and unexecuted higher tiers remain explicitly
-  untested rather than inheriting lower-tier support.
-- **2026-08-11** - Extended the open proximal-distal resource with a forward
-  moving-base, two-hand model carrying three transported shaft modes and with a
-  separate matched-task arm--wrist allocation/preload experiment. The latter
-  defines generalized actuator subspaces, exact club-moment closure, and a
-  declared dead-zone/stiffness/force-rise channel. It explicitly prohibits
-  inference to scapular motion, muscular inactivity, biological slack, or a
-  preferred human technique without bilateral wrench, pressure, activation,
-  stiffness, and participant-holdout evidence.
 - (spec-exempt: security fix) Fixed Command Injection in `pandas.DataFrame.query()` inside `rust_engine.py` (both `data_processor` and `data_processor_io`) by explicitly validating user expressions using an AST-based validator (`validate_pandas_formula`). This eliminates an arbitrary code execution vulnerability.
 
 - **2026-08-05** - Retargeted #8345 P1's 3D putting workflow to `main`
@@ -1563,6 +1539,7 @@ UpstreamDrift/
 │   │                               # contraction)
 │   └── shared/python/              # Cross-cutting libraries; highlights:
 │       ├── engine_core/            # EngineManager/Registry/probes/capabilities
+│       ├── ground_model/            # Fail-closed consumer of Tools ground v1
 │       ├── launcher_embed/         # EmbeddableTool contract + registry (ADR-0013)
 │       ├── physics/                # Ball flight models, impact, swing→flight pipeline
 │       ├── putting_dynamics/       # Surface-aware putt collision and roll physics
@@ -1608,6 +1585,7 @@ UpstreamDrift/
 | Configuration Manager    | `src/config/`                            | Centralized configuration loading, validation, and environment management                   |
 | Analysis Tool CLIs       | `src/tools/drift_control/`, `src/tools/contraction/` | Headless AffineDrift-compatible drift/control, contraction, and Floquet analysis tools |
 | Launch Monitor Analytics | `src/tools/launch_monitor_analytics/`, `src/shared/python/launch_monitor/` | PyQt6, FastAPI, and headless vendor-neutral import plus arbitrary-field association/regression, missingness, multiplicity, grouping, lineage, dependency, model, agreement, dispersion, and trend analysis |
+| Tools Ground Consumer    | `src/shared/python/ground_model/`      | Headless exact-schema gateway to Tools flight-to-ground v1 records and reference execution; UI and final dependency pins remain tracked |
 | Putting Dynamics         | `src/shared/python/putting_dynamics/`   | Headless heterogeneous-green, collision, loft, hosel-wrench, skid/roll/rest, and hole-capture physics for #8345 |
 | 3D Putting UI            | `src/api/routes/putting_green.py`, `ui/src/pages/PuttingGreen.tsx`, `ui/src/components/visualization/PuttingScene3D.tsx` | Generated-contract R3F playback of the canonical putting model with collision, spin, hosel, surface, camera, and video controls for #8345 P1 |
 | Shared Utilities         | `src/shared/`                            | Cross-engine validators, helpers, and exception definitions                                 |
@@ -1648,6 +1626,7 @@ Engine tier metadata is declared in each in-scope engine package with
 | F14 | Reinforcement learning integration | 🔄     | Gym-compatible interface for RL-based controller learning and policy optimization                   |
 | F15 | Sidekick AI assistant              | 🔄     | In-app and standalone AI assistant surface (PyQt + React/Tauri + `sidekick.standalone.*`) with streaming, RAG, session history, persisted standalone preferences, onboarding, and agentic tool dispatch. See `docs/sidekick/README.md` and ADR-0018. |
 | F16 | Model-training controller          | 🔄     | In-launcher training dashboard (PR3) with scheduler, dataset library, resource monitor, engine-compat gate, and ML/RL-aware stats. Backend contracts + scheduler land in `src/shared/python/training/` (PRs 1–2); GUI tab, tab-backgrounding refactor, and CVAE wiring in PRs 3–5. |
+| F17 | Tools ground-model integration     | 🔄     | Headless v1 consumer gateway validates the canonical Tools façade and degrades safely when absent; exact dependency pins, FastAPI, PyQt, React, parity, and protected release remain open under Tools #4276. |
 
 ### API / Interface Contract
 
@@ -1985,7 +1964,7 @@ Beyond standard tools, CI enforces custom checks:
 
 | Repo             | Relationship | Description                                              |
 | ---------------- | ------------ | -------------------------------------------------------- |
-| (none currently) | —            | UpstreamDrift is currently a standalone fleet repository |
+| Tools            | Vendored Python and pinned Rust authority | `vendor/ud-tools` plus the Cargo `tools-core` revision provide reviewed shared contracts and kernels. Ground-model release pins remain pending Tools #4276. |
 
 ## 10. Deployment & Operations
 
@@ -2071,18 +2050,17 @@ blocks Python package publication on the built-wheel smoke matrix.
 - RL integration currently supports basic Gym environments; no hierarchical or multi-agent support
 - Tauri app Windows builds require MSVC toolchain (no MinGW support)
 - Performance scaling beyond 100-muscle models not yet tested
+- Ground-model execution is not yet available from the clean UpstreamDrift
+  release: the headless consumer gateway exists, but exact Tools pins and
+  FastAPI/PyQt/React surfaces await the protected Tools ground merge (#4276).
 
 ## 12. Change Log
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-08-11 | 1.0.503 | Added an independently executed reduced spatial forward-contact reference using native MuJoCo and Pinocchio adapters over one SHA-256-bound model contract. Two finite-mass hand carriages interact with a free rigid club through paired compliant point interfaces with no direct club actuation. The phase records complete contact wrenches, long-axis rotation, swing-plane evolution, reduced ground-pathway reactions, engine-native energy, an exact same-state grounded-driver killswitch, coincident/reversed geometry controls, timestep refinement, deterministic JSON/NPZ evidence, and four paired PDF/SVG figures. Cross-engine trajectory, orientation, wrench, and energy gates pass; the negative swing-normal couple persists for 37.5 ms after driver removal. Claims remain bounded to the reduced carriage model and explicitly exclude anatomical arms, calibrated tissue/equipment, muscles, humans, and coaching. |
-| 2026-08-11 | 1.0.502 | Added a distributed-shaft structural reference that reuses the canonical Euler--Bernoulli finite-element implementation, adds declared clubhead translation and rotary inertia, identifies a declared synthetic elastic-modulus/head-mass case with local assumed-noise intervals, verifies modal mass orthogonality and mesh convergence, compares one-mode and six-mode responses under slow and short-duration loads, closes input/damping/stored-energy accounting, emits deterministic JSON/NPZ evidence and paired PDF/SVG figures, and explicitly leaves equipment calibration and coupling into the constrained two-hand solve open. |
-| 2026-08-11 | 1.0.501 | Added open-resource release qualification with six model-tier presets, a deterministic artifact manifest, standard checksum export, read-only fail-closed validation, data dictionary, citation metadata, claim-first reviewer workbench, license/source boundaries, and explicit open gates for forward spatial contact, calibrated beam comparison, governed human evaluation, and external persistent-identifier deposit. |
-| 2026-08-11 | 1.0.500 | Added a frozen experimental falsification protocol for synchronized full-body motion, bilateral hand wrenches, club kinematics, ground reaction, launch-monitor, and activation evidence; added participant-level governed holdout, identity-safe provenance, filtering/calibration/residual/missingness contracts, four prediction-specific falsifiers, a fail-closed intake validator, synthetic dry-run evidence, and explicit untested status until governed human data are supplied. |
-| 2026-08-11 | 1.0.499 | Added coupled uncertainty, identifiability, and delayed-control evaluation in the moving-base/flexible-club model; added deterministic 12-input Latin-hypercube and PRCC screening, individual-hand-wrench and parameter sensitivity-rank audits, eight preselected command programs, separate training and held-out ensembles, five-objective Pareto reporting, deterministic JSON/NPZ evidence, four paired publication figures, and explicit prohibitions on population, physiological, universal-strategy, and coaching inference. |
-| 2026-08-11 | 1.0.498 | Added a reduced full-body 3D common-state inverse-dynamics experiment using one canonical 20-coordinate, 32-inertia model in native MuJoCo and an independent Lagrange--Christoffel formulation; added registered action--reaction hand loads, moment-arm reversal and coincidence controls, model hashes, power closure, finite-difference convergence, predeclared tolerance classification, deterministic JSON/NPZ evidence, three paired publication figures, and an explicit boundary that forward spatial contact, passive load origin, calibration, physiology, and coaching inference remain untested. |
-| 2026-08-11 | 1.0.497 | Added a forward constrained two-arm/floating-club reference model with exact same-state zero-command branching; separated contact-force couple, direct wrist torque, common/differential forces, and power; added a zero-moment-arm negative control plus timestep, projection, constraint, KKT, and work--energy audits; committed deterministic JSON/NPZ evidence and three paired publication figures; and expanded the scientific report while preserving explicit planar-model and non-physiological boundaries. |
+| 2026-08-11 | 1.0.504 | Added a coupled forward three-mode shaft experiment plus an exact same-state arm--wrist allocation and phenomenological preload/role-reversal study; published deterministic evidence, figures, release presets, and falsifiers while explicitly withholding muscle, scapular, tissue, equipment, human-performance, and universal-technique claims. |
+| 2026-08-11 | 1.0.498 | Added a fail-closed, headless UpstreamDrift gateway for the exact Tools flight-to-ground request/result and reference-execution v1 façade, with absence/presence/malformed-contract tests and explicit dependency/release limitations for Tools #4276. |
+| 2026-08-11 | 1.0.497 | Added #8493 frame-explicit constrained-contact reaction decomposition with configuration, velocity, control, and retained-external components; verified total, ZTCF, and ZVCF closure in a deterministic fixed-support double-pendulum benchmark; published machine-readable evidence and three reproducible figures; and expanded the proximal-distal scientific article with GRF, COP, free-moment, identifiability, and held-out human-data falsification boundaries. |
 | 2026-08-10 | 1.0.496 | Added #8458 hand-path drift/control attribution across forward double-pendulum and one-arm cases plus a prescribed two-arm closed-loop sweep; exported deterministic force, impulse, power, work, joint/time-window, common/differential-mode, sensitivity, and closure evidence; bounded the late residual-couple preview result without claiming muscle preactivation or human performance; extended lossless object-stream PDF compaction to preserve the 106-page, 110-link, 122-outline publication below the size guard; and restored the all-files size gate with the final owned #8472 chat-dock exception through 2026-08-31. |
 | 2026-08-10 | 1.0.495 | Added a reproducible lossless article-PDF compaction command that fails closed on page, URI-link, outline, or size drift; reduced the 90-page publication artifact below the repository's 1 MiB PDF guard; and recorded the protected #8456 higher-order merge in the handoff. |
 | 2026-08-10 | 1.0.494 | Added a reference- and frame-explicit interaction-wrench schema; exact moment/velocity transport and proper-rotation power contracts; prescribed mobile-hub inverse-dynamics comparisons; planar two-hand closed-loop rank/nullspace diagnostics; a fail-closed model-discrepancy record; seven reproducible figures; and a higher-order scientific chapter that explicitly leaves full-body cross-engine dynamics unexecuted. |

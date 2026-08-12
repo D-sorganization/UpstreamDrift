@@ -120,7 +120,16 @@ abstract: |
   preserving each channel's loaded direction avoids a reversal gap, whereas
   reversing both modeled channels crosses zero transmission. These conditional
   predictions do not identify scapular action or establish a preferred human
-  technique. References, analysis code,
+  technique. A constrained-contact extension then defines frame-explicit
+  configuration, velocity, control, and external-load contributions to reaction
+  force and fails closed when contact allocation is nonunique. In the
+  fixed-support double-pendulum benchmark, pointwise ZTCF predicts the modeled
+  support-reaction waveform with componentwise R-squared values of 0.871 and
+  0.814 but retains large amplitude error; opposing control also makes the
+  vertical ZTCF impulse exceed the total. This benchmark is not a bilateral
+  human force-plate validation, and the required synchronized force-plate and
+  whole-body kinematic experiment is specified as a falsification protocol.
+  References, analysis code,
   machine-readable results, and provenance are available with the document for
   independent inspection and reuse.
 keywords:
@@ -138,6 +147,9 @@ keywords:
   - work-energy accounting
   - multibody constraints
   - wrench transport
+  - ground reaction force
+  - contact dynamics
+  - force plate
 bibliography: references.bib
 link-citations: true
 number-sections: true
@@ -163,6 +175,8 @@ format:
 {{< include chapters/_ch03_interaction_forces.qmd >}}
 
 {{< include chapters/_ch03b_hand_path_attribution.qmd >}}
+
+{{< include chapters/_ch03c_ground_reaction_drift.qmd >}}
 
 {{< include chapters/_ch04_counterfactual_ensemble.qmd >}}
 

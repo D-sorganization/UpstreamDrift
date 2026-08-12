@@ -105,6 +105,15 @@ for the golf double-pendulum behind one Protocol. See
   measured trajectory — _not_ forward-integrated. Do not "fix" them into a time
   integration (see the `# AGENT-NOTE:` in that module).
 
+### Tools Ground-Model Consumer Boundary
+
+`src/shared/python/ground_model/` is UpstreamDrift's thin, headless gateway to
+the canonical `shared.python.swing_sim.ground` façade owned by Tools. It checks
+the exact request, result, and reference-execution schema versions before
+binding parsers or execution. Keep physics and wire records in Tools; build
+UpstreamDrift API, PyQt, and React presenters on this gateway without copying
+the solver or relabeling provenance.
+
 ### Motion matching (the big one)
 
 `src/shared/python/motion_matching/`
