@@ -13,6 +13,7 @@ import logging
 from pathlib import Path
 
 import numpy as np
+import math
 import pandas as pd
 
 from src.shared.python.core.contracts import postcondition, precondition
@@ -354,7 +355,8 @@ def _shaft_quaternions(butt: np.ndarray, head: np.ndarray) -> np.ndarray:
     z_axis = np.array([0.0, 0.0, 1.0])
     for i in range(n):
         v = head[i] - butt[i]
-        norm = float(np.linalg.norm(v))
+        # ⚡ Bolt: math.hypot(*v) is ~2x faster than np.linalg.norm for small arrays
+        norm = float(math.hypot(*v))
         if norm == 0.0:
             out[i] = np.array([1.0, 0.0, 0.0, 0.0])
             continue
@@ -367,12 +369,14 @@ def _shaft_quaternions(butt: np.ndarray, head: np.ndarray) -> np.ndarray:
             out[i] = np.array([0.0, 1.0, 0.0, 0.0])
             continue
         axis = np.cross(z_axis, v)
-        axis = axis / np.linalg.norm(axis)
+        # ⚡ Bolt: math.hypot(*axis) is ~2x faster than np.linalg.norm for small arrays
+        axis = axis / math.hypot(*axis)
         angle = np.arccos(dot)
         s = np.sin(angle / 2.0)
         c = np.cos(angle / 2.0)
         q = np.array([c, axis[0] * s, axis[1] * s, axis[2] * s])
         if q[0] < 0:
             q = -q
-        out[i] = q / np.linalg.norm(q)
+        # ⚡ Bolt: math.hypot(*q) is ~2x faster than np.linalg.norm for small arrays
+        out[i] = q / math.hypot(*q)
     return out
