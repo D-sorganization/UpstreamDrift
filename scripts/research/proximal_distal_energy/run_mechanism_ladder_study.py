@@ -216,6 +216,12 @@ def _closed_loop_diagnostics(samples: list[InteractionSample]) -> tuple[dict, di
 def build_study() -> tuple[dict, dict[str, np.ndarray]]:
     """Return the complete model-ladder record and plotting arrays."""
     arrays, shaft_record = _reference_arrays()
+    spatial_record = json.loads(
+        (DATA_DIR / "spatial_full_body_study.json").read_text(encoding="utf-8")
+    )
+    spatial_forward_record = json.loads(
+        (DATA_DIR / "spatial_forward_contact_study.json").read_text(encoding="utf-8")
+    )
     samples, impact_index = _three_link_samples(arrays, shaft_record)
     audits = _frame_and_transport_audits(samples)
     hub_rows, hub_arrays = _mobile_hub_cases(samples)
@@ -244,8 +250,10 @@ def build_study() -> tuple[dict, dict[str, np.ndarray]]:
             "common_schema": "InteractionSample v1",
             "interpretation_boundary": (
                 "The three-link, prescribed mobile-hub, closed-loop geometry, "
-                "and rigid-frame audits are executed mechanism tests. Full-body "
-                "cross-engine dynamics are explicitly not executed here."
+                "rigid-frame audits, and reduced full-body common-state inverse "
+                "dynamics are executed mechanism tests. Reduced MuJoCo/Pinocchio "
+                "forward contact is also executed; articulated anatomical "
+                "forward contact remains unexecuted."
             ),
         },
         "three_link_reference": {
@@ -297,11 +305,40 @@ def build_study() -> tuple[dict, dict[str, np.ndarray]]:
                 "boundary": "3-D representation of a planar trajectory, not out-of-plane dynamics",
             },
             {
-                "tier": "full_body_cross_engine_dynamics",
+                "tier": "reduced_full_body_common_state_inverse_dynamics",
+                "status": "executed",
+                "added_mechanism": "nonplanar body and free-club inverse dynamics in two formulations",
+                "surviving_result": (
+                    "geometry sign response and same-state generalized action agree "
+                    f"to {spatial_record['cross_formulation']['maximum_relative_inverse_dynamics_error']:.3e} relative error"
+                ),
+                "boundary": "prescribed hand loads and common state; not forward closed contact",
+            },
+            {
+                "tier": "reduced_spatial_forward_cross_engine_contact",
+                "status": "executed",
+                "added_mechanism": (
+                    "native MuJoCo/Pinocchio forward dynamics with paired "
+                    "compliant contacts and a same-state driver killswitch"
+                ),
+                "surviving_result": (
+                    "negative contact couple persists for "
+                    f"{1e3 * spatial_forward_record['mechanism_tests']['same_state_killswitch_negative_duration_s']:.1f} ms"
+                ),
+                "boundary": (
+                    "finite-mass translational hand carriages and rigid club; "
+                    "not anatomy, tissue, equipment, or human validation"
+                ),
+            },
+            {
+                "tier": "articulated_full_body_forward_cross_engine_contact",
                 "status": "not_executed",
-                "added_mechanism": "moving anatomy, muscle actuation, and engine contact solvers",
+                "added_mechanism": (
+                    "subject-scaled articulated arms, calibrated grip, and "
+                    "coupled distributed shaft"
+                ),
                 "surviving_result": "undetermined",
-                "boundary": "must not be inferred from the lower-order mechanism audits",
+                "boundary": "must not be inferred from the reduced carriage model",
             },
         ],
     }

@@ -64,27 +64,42 @@ The results chapter demonstrates the S2 pattern in the model class where
 the classical timing literature lives; it does not yet demonstrate it
 for a golfer. The specific gaps, each with a tracked remediation:
 
-- **Fixed hub, rigid shaft, planar chain.** The hub-path and inward-pull
+- **Spatial Body and Distributed-Club Dynamics.** The hub-path and inward-pull
   mechanisms [@miura2001; @nesbit2009hub; @nesbit2014hub], shaft
   dynamics [@mackenzie2009; @betzler2012; @osis2012], and long-axis
-  rotations [@marshall2000] are all outside this model. Closed-loop,
-  flexible-shaft, and full-body models are appropriate staged extensions.
-- **Simplified actuator models.** E1b shows the S2 ordering survives a
+  rotations [@marshall2000] are outside the primary 2-DOF model. The forward
+  two-hand and coupled moving-base/flexible-club tiers address planar closure,
+  translation, and one lumped flex mode; base rotation, distributed beams, and
+  the reduced full-body common-state tier now addresses nonplanar inverse
+  dynamics. The reduced MuJoCo/Pinocchio forward-contact tier adds compliant
+  spatial closure, long-axis rotation, swing-plane evolution, and a reduced
+  ground-pathway proxy. Subject-scaled articulated arms, base--ground
+  dynamics, and a coupled distributed beam remain appropriate staged
+  extensions.
+- **Simplified Actuator Models.** E1b shows the S2 ordering survives a
   linear torque-velocity bound on the drives with compressed margins
   (@sec-results-e1b), but activation-rate limits, history dependence,
-  and eccentric-side detail remain unmodeled; full optimal-control
+  and eccentric-side detail remain unmodeled. The coupled study adds pure
+  delay, first-order activation, rate limits, torque--velocity bounds, and an
+  impedance proxy, but these remain command-level surrogates; full optimal-control
   treatments with physiological actuators are the appropriate
   refinement [@sprigings2000; @sharp2009; @mcnally2018].
-- **Local, one-at-a-time sensitivity.** Alternative impact definitions and
+- **Coupled Sensitivity Is a Screening Tier.** Alternative impact definitions and
   single-parameter perturbations preserved the ordering
-  (@sec-results-robustness), but coupled parameter variation, measurement
-  uncertainty, and population variability were not modeled.
-- **Pointwise counterfactuals only.** The Python pathway evaluates
-  instantaneous ZTCF profiles; the MATLAB re-simulation variant
-  (killswitch rollouts, DELTA tables) has not yet been reproduced in
-  Python, so the two operationalizations have never been formally
-  compared on matched trajectories.
-- **No human data yet.** The decisive observational test — wrist
+  (@sec-results-robustness). The 12-input Latin-hypercube study now exposes
+  coupled effects, parameter non-identifiability, and held-out strategy
+  tradeoffs. Its ranges are engineering envelopes and its sample is small;
+  measurement uncertainty and population distributions remain unmodeled.
+- **Counterfactuals Remain Model-Tier Specific.** The Python pathway now
+  includes both pointwise ZTCF profiles and forward same-state killswitches in
+  the double-pendulum and constrained two-hand tiers. The coupled extension now
+  preserves the finite negative-couple branch with endogenous base translation
+  and club flex. The spatial common-state tier transports the geometry response
+  across independent inverse-dynamics formulations. The reduced spatial
+  forward tier then preserves a negative contact couple after complete driver
+  removal in both native engines. Its hand carriages and declared contact law
+  do not establish persistence in anatomical arms or human dynamics.
+- **No Human Data Yet.** The decisive observational test — wrist
   interface power time courses across skill levels from motion capture
   (@sec-falsify) — awaits an appropriately governed motion-capture study.
 

@@ -1,0 +1,280 @@
+# Independently Executed Spatial Forward Contact {#sec-spatial-forward-contact}
+
+The common-state experiment in @sec-spatial-full-body asks whether two
+dynamics formulations return the same generalized action at identical
+achieved states. It deliberately prescribes the hand forces and removes
+trajectory divergence. The experiment in this chapter asks the next, stronger
+question:
+
+> Can a negative force-generated couple arise from the achieved state of a
+> forward compliant two-hand system, persist after its grounded driver is
+> removed, and survive independent integration by two actual multibody
+> engines?
+
+The answer is affirmative for one declared reduced model. MuJoCo and
+Pinocchio independently integrate the same 13-coordinate contract using their
+native forward-dynamics algorithms [@todorov2012mujoco;
+@carpentier2019pinocchio]. Neither engine receives a prescribed contact-force
+history. Each contact force is calculated from the engine's own achieved
+relative hand--club displacement and velocity. The common contact law,
+reference driver, timestep, and output convention are held fixed so that
+engine implementation is the principal changed factor.
+
+This result closes the *reduced forward-contact* gate, not the anatomical or
+human gate. The hand bodies are finite-mass translational carriages, not arms;
+the grounded driver is not muscle; and the grip parameters are declared rather
+than identified from measurements. Those boundaries are properties of the
+experiment, not qualifications added after observing its outcome.
+
+## Model Estimand and Deliberate Reduction {#sec-spatial-forward-estimand}
+
+The model contains two finite-mass hand carriages and one free rigid club. The
+hand positions are $\mathbf h_L,\mathbf h_T\in\mathbb R^3$. The club state is a
+world position $\mathbf x_C$, orientation $\mathbf R_C\in SO(3)$, linear
+velocity $\mathbf v_C$, and angular velocity $\boldsymbol\omega_C$. Its lead
+and trail grip offsets, expressed in the club frame, are
+
+$$
+\boldsymbol\rho_L=
+\begin{bmatrix}-0.080&0.015&0\end{bmatrix}^{\mathsf T}\ \mathrm{m},
+\qquad
+\boldsymbol\rho_T=
+\begin{bmatrix}0.080&-0.015&0\end{bmatrix}^{\mathsf T}\ \mathrm{m}.
+$$ {#eq-spatial-forward-grip-offsets}
+
+The achieved club-side contact positions and velocities are therefore
+
+$$
+\mathbf p_i = \mathbf x_C + \mathbf R_C\boldsymbol\rho_i,
+\qquad
+\dot{\mathbf p}_i = \mathbf v_C
++\boldsymbol\omega_C\times(\mathbf R_C\boldsymbol\rho_i).
+$$ {#eq-spatial-forward-contact-kinematics}
+
+The reduction is purposeful. A full arm introduces joint topology,
+anthropometric estimation, muscle redundancy, and tissue compliance at the
+same time as contact and engine divergence. The carriage model isolates a
+narrower estimand: whether finite hand-side inertia and compliant two-point
+closure can generate the proposed spatial wrench without direct club
+actuation. A positive result makes an anatomical test worthwhile; it does not
+substitute for one.
+
+The common record fixes each hand mass at 0.55 kg, club mass at 0.32 kg,
+principal club inertias at $[0.0012,0.025,0.025]$ kg m$^2$, gravity at
+$-9.81$ m/s$^2$ on the vertical axis, a 0.240 s interval, and a 0.25 ms
+timestep. The complete JSON-serializable record is hashed before either engine
+is constructed. Both realized adapters report the same SHA-256 model digest.
+
+![Achieved Spatial Contact Geometry and Engine-Solved Force Vectors](figures/fig_spatial_forward_contact_geometry.pdf){#fig-spatial-forward-contact-geometry width=100%}
+
+@fig-spatial-forward-contact-geometry shows three achieved MuJoCo states. The
+blue and red arrows are not prescribed inputs. They are the compliant
+interface forces obtained from the achieved engine state at each sample. The
+two engines start from identical hand positions, club position, orientation,
+and zero velocity.
+
+## Paired Contact and Grounded Driver Contracts {#sec-spatial-forward-contact-law}
+
+Each interface uses a paired Kelvin--Voigt law,
+
+$$
+\mathbf F_i =
+k_c(\mathbf h_i-\mathbf p_i)
++c_c(\dot{\mathbf h}_i-\dot{\mathbf p}_i),
+$$ {#eq-spatial-forward-contact-force}
+
+with $k_c=1800$ N/m and $c_c=18$ N s/m. The club receives
+$+\mathbf F_i$ at $\mathbf p_i$ and the hand receives
+$-\mathbf F_i$ at $\mathbf h_i$. The force-sum residual is therefore an exact
+runtime invariant rather than an outcome tolerance. The contact storage and
+dissipation terms are
+
+$$
+U_{c,i}=\frac{1}{2}k_c
+\lVert\mathbf h_i-\mathbf p_i\rVert^2,
+\qquad
+P_{d,i}=-c_c
+\lVert\dot{\mathbf h}_i-\dot{\mathbf p}_i\rVert^2.
+$$ {#eq-spatial-forward-contact-energy}
+
+A world-referenced trajectory moves the finite hand carriages through a
+grounded spring--damper driver,
+
+$$
+\mathbf G_i =
+k_d(\mathbf h_i^\star-\mathbf h_i)
++c_d(\dot{\mathbf h}_i^\star-\dot{\mathbf h}_i),
+$$ {#eq-spatial-forward-driver}
+
+where $k_d=420$ N/m and $c_d=24$ N s/m. The declared target contains a
+downswing-like rotation, translation, changing swing-plane tilt, and a bounded
+bilateral out-of-plane component. It is a manufactured excitation designed to
+exercise three-dimensional coupling. It is not a measured hand path.
+
+No force or torque is applied directly to the club. The only club-side
+generalized load is the transported contact wrench
+
+$$
+\mathcal W_C=
+\begin{bmatrix}
+\sum_i\mathbf F_i\\
+\sum_i(\mathbf p_i-\mathbf x_C)\times\mathbf F_i
+\end{bmatrix}.
+$$ {#eq-spatial-forward-wrench}
+
+The equal and opposite driver wrench about the world origin is retained as a
+reduced ground-pathway reaction proxy. Because the carriages omit legs,
+pelvis, trunk, and anatomical arms, that proxy is not a prediction of measured
+ground-reaction force. It answers the bookkeeping question “where does the
+external reference-driver action close?” and prevents that pathway from being
+silently omitted.
+
+## Independent Engine Realizations {#sec-spatial-forward-engines}
+
+The common experiment executes in two native libraries, both version 3.8.0 in
+the archived run:
+
+- **MuJoCo.** Two three-axis slide bodies and one free club body are compiled
+  from generated MJCF. World-frame hand and point forces are mapped through
+  `mj_applyFT`; `mj_forward` computes continuous-time acceleration.
+- **Pinocchio.** Two `JointModelTranslation` branches and one
+  `JointModelFreeFlyer` branch are assembled programmatically. Equal and
+  opposite forces are transformed into each joint's local spatial-force
+  convention; the articulated-body algorithm computes acceleration.
+
+Both engines use the same semi-implicit position/velocity update after their
+native acceleration evaluation. This is a controlled numerical choice, not an
+assertion that the engines have identical internal integrators. It removes an
+uninteresting integration-method difference while retaining independent mass,
+bias, gravity, kinematics, spatial-force mapping, and forward-dynamics
+implementations. The Pinocchio adapter uses a local-world-aligned velocity at
+the moving club origin; using a world-origin spatial velocity instead creates
+an artificial contact-velocity discrepancy. That frame distinction is now
+covered by the forward trajectory gate.
+
+The comparison evaluates complete trajectories, not just matched states. The
+declared engineering regions are 3 mm RMS and 9 mm maximum club-position
+difference, 0.035 rad maximum orientation difference, 10% relative RMS
+complete-wrench difference, and 8% normalized energy discrepancy. They are
+algorithmic acceptance regions, not statistical confidence intervals. Exact
+initial-state equality, action--reaction closure, analytical geometry
+controls, and timestep refinement provide independent checks that a passing
+trajectory is meaningful.
+
+![Independent MuJoCo and Pinocchio Forward Dynamics Satisfy Declared Gates](figures/fig_spatial_forward_cross_engine.pdf){#fig-spatial-forward-cross-engine width=100%}
+
+## Forward Cross-Engine Results {#sec-spatial-forward-results}
+
+@fig-spatial-forward-cross-engine shows that the two independently integrated
+trajectories remain close. In the continuing-driver branch:
+
+- club-position RMS difference is 12.75 µm and maximum difference is
+  37.95 µm;
+- maximum orientation difference is $8.94\times10^{-8}$ rad;
+- relative RMS complete-wrench difference is 0.256%; and
+- normalized energy discrepancy is 0.0235%.
+
+In the driver-killswitch branch, the corresponding values are 16.96 µm,
+77.89 µm, $9.42\times10^{-8}$ rad, 0.274%, and 0.0461%. Every observed value
+is well inside its declared region. The result is stronger than the preceding
+common-state inverse-dynamics comparison because numerical error can now
+accumulate and feed back into the contact law. It remains narrower than a
+cross-engine anatomical comparison because the engines realize one reduced
+common model.
+
+## Exact Same-State Driver Killswitch {#sec-spatial-forward-killswitch}
+
+The baseline and intervention branches are bit-identical through
+$t_k=0.180$ s. At that sample, the intervention sets
+$\mathbf G_L=\mathbf G_T=\mathbf0$ for the remainder of the rollout. Contact,
+gravity, hand inertia, club inertia, and interface storage/dissipation remain
+active. This intervention removes the complete grounded driver rather than
+merely setting a named distal torque to zero.
+
+![Post-Killswitch Interaction Dynamics Persist Without Direct Club Actuation](figures/fig_spatial_forward_killswitch.pdf){#fig-spatial-forward-killswitch width=100%}
+
+After the killswitch, both engines retain a negative force-generated
+swing-normal couple for 37.5 ms and reach approximately -0.409 N m. The branch
+also retains 7.55 degrees of club-axis out-of-plane evolution, a peak
+club-long-axis rotation rate of 13.59 rad/s, and a peak force-generated
+long-axis couple of 0.242 N m. These observables are separated deliberately:
+the negative quantity is a projection of contact moment on the instantaneous
+swing normal, while long-axis couple and rotation report torsional evolution.
+Calling either projection “the club torque” without naming its axis would be
+ambiguous.
+
+The ground-pathway proxy reaches 56.85 N in resultant force and 62.61 N m in
+moment before the branch. It becomes exactly zero with the driver at the
+killswitch, while the two compliant interfaces continue to exchange force and
+moment internally. This separates prior external input from subsequent
+interaction dynamics. It does not make the pre-killswitch motion unforced or
+biologically passive.
+
+## Geometry Controls and Work--Energy Closure {#sec-spatial-forward-controls}
+
+Two same-force geometry controls are evaluated without advancing a new
+trajectory:
+
+1. transport the achieved forces through the club reference, making both
+   moment arms zero; and
+2. negate both achieved moment arms while retaining force vectors and state.
+
+The coincident-grip couple is exactly zero at every stored sample. Reversing
+the arms reverses the swing-normal couple with a maximum residual below
+$9.2\times10^{-16}$ N m. These controls rule out total force magnitude,
+integration history, and engine state as explanations for the sign response.
+Within the declared wrench equation, moment-arm geometry is necessary.
+
+![Conservation and Negative Controls Bound the Forward-Contact Claim](figures/fig_spatial_forward_energy_controls.pdf){#fig-spatial-forward-energy-controls width=100%}
+
+The work--energy residual includes engine-native rigid-body kinetic and
+potential energy, interface storage, driver power, and contact dissipation.
+For the MuJoCo killswitch branch its maximum absolute value decreases from
+0.0611 to 0.0305 to 0.0153 J as the timestep decreases from 0.50 to 0.25 to
+0.125 ms. The monotone approximately first-order reduction is consistent with
+the shared semi-implicit step. At 0.25 ms, the residual is about 0.55% of the
+5.52 J total-energy range. Pinocchio's corresponding maximum is 0.0349 J. The
+residual is reported rather than normalized away because it is a direct
+falsifier of the discretized experiment.
+
+## What the Experiment Falsifies {#sec-spatial-forward-falsifiers}
+
+The committed record fails closed if any of these conditions occurs:
+
+1. either imported library lacks its native model and forward-dynamics API;
+2. the generated adapters report different common-model digests;
+3. baseline or killswitch trajectories exceed a declared cross-engine region;
+4. contact action--reaction force does not close at each evaluation;
+5. the coincident-grip couple is nonzero;
+6. reversed moment arms do not reverse couple sign;
+7. baseline and killswitch states differ before the branch sample;
+8. the post-killswitch negative interval is shorter than 30 ms; or
+9. the work--energy residual fails to decrease under timestep refinement.
+
+The experiment would therefore reject the stated reduced mechanism if a
+second native solver does not transport it or if it depends on hidden direct
+club actuation. Passing those tests does not establish that humans use the
+mechanism, that the declared stiffness represents tissue, or that a player
+should seek a particular force pattern.
+
+## Reproduction and Platform Boundary {#sec-spatial-forward-reproduction}
+
+The evidence is stored in
+[`data/spatial_forward_contact_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json)
+and
+[`data/spatial_forward_contact_study.npz`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.npz).
+Reproduction requires the repository's MuJoCo and Pinocchio optional engine
+dependencies. The native Pinocchio wheel used here executes in the Linux/WSL
+environment; a package named `pinocchio` on the default Windows Python index
+can resolve to an unrelated stub and is explicitly rejected by the adapter.
+
+```{.bash}
+python3 -m scripts.research.proximal_distal_energy.run_spatial_forward_contact_study
+python3 -m scripts.research.proximal_distal_energy.make_spatial_forward_contact_figures
+python3 -m pytest tests/research/test_spatial_forward_contact.py -q
+```
+
+The next transport step is not “more confidence” in the carriage model. It is
+replacement of the carriages with subject-scaled articulated arms and a
+distributed shaft while preserving the same engine identity, wrench,
+killswitch, energy, event, and claim-boundary contracts.

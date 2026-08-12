@@ -21,38 +21,114 @@ This conclusion is conditional. The result survived torque-velocity bounds,
 alternative scoring rules, and 13 one-at-a-time parameter cases, but the
 optimal onset shifted across cases. The study therefore supports a robust
 ordering within a local model neighborhood, not a universal timing value or
-an individual coaching prescription. A fixed hub, rigid shaft, planar chain,
-simplified actuators, and absence of human data remain material limitations.
+an individual coaching prescription. Planar motion, simplified actuators, and
+absence of human data remain material limitations.
+
+The forward constrained two-hand extension resolves one previously open
+mechanistic question. Starting from the exact same 0.200 s state, the
+force-generated club couple remains negative for 50 ms after all applied joint
+torques are removed. The effect disappears exactly when both grip moment arms
+are removed and remains stable under timestep and projection refinement. This
+supports finite passive-couple persistence in the declared planar model, not a
+claim about muscle inactivity or human technique.
+
+The coupled moving-base/flexible-club extension resolves the next structural
+question at the planar tier. Base translation, shaft flex, and both grip forces
+evolve in one forward constrained solve. The negative force-generated couple
+survives the same-state zero-command intervention, while coincident grip points
+remove it exactly; constraint, contact-power, and work--energy residuals close
+under timestep refinement. This transports the mechanism beyond a fixed base
+and rigid club without promoting it to a spatial or physiological result.
+
+The distributed-shaft comparison closes a narrower structural gate. A
+one-mode reduction and six-mode Euler--Bernoulli reference share the same
+assembled mass, stiffness, damping, tip inertia, and loads. The reduced model
+closely follows slow loading but misses higher-mode history under a short
+force-and-moment pulse, even when their peak deflections are similar. Synthetic
+modal identification, mesh convergence, and work--energy closure pass. This
+does not calibrate equipment or show that the result survives coupling the
+beam into the two-hand constrained solve.
+
+The reduced full-body common-state extension resolves implementation transport
+for a narrower spatial estimand. MuJoCo and an independent
+Lagrange--Christoffel formulation agree across 20 coordinates and 61 nonplanar
+states to $2.14\times10^{-11}$ relative error. Reversing the hand moment arm
+reverses the force-generated couple and coincident points remove it exactly.
+Because the forces are prescribed and the state is shared, this supports
+spatial inverse-dynamics and geometry transport but leaves passive forward
+contact inconclusive at that tier.
+
+The reduced spatial forward-contact extension resolves that narrower mechanism
+gate. Native MuJoCo and Pinocchio independently integrate two finite-mass hand
+carriages, paired compliant interfaces, and a free rigid club without direct
+club actuation. Their baseline and same-state killswitch trajectories satisfy
+the declared position, orientation, wrench, and energy regions. Removing the
+complete grounded driver leaves a negative force-generated swing-normal couple
+for 37.5 ms in both engines; coincident and reversed-moment-arm controls close
+exactly, and the work--energy residual decreases under timestep refinement.
+This supports reduced spatial contact persistence, not anatomical arms,
+muscles, calibrated grip tissue, equipment, or human strategy.
+
+The coupled uncertainty/control phase rejects two additional shortcuts. A net
+planar wrench cannot uniquely identify both hand forces, and six summary
+observables cannot identify the complete 12-parameter vector. Separate
+training and held-out ensembles leave objective-dependent tradeoffs among all
+eight command programs. Early restraint improves held-out lower-tail speed
+relative to late drive but increases the planar face/path error, so the result
+supports a conditional model mechanism rather than a universal or
+physiological strategy.
+
+The experimental phase is preregistered but not empirically executed. Its
+machine-readable protocol fixes six synchronized modalities, participant-level
+holdout, identity-safe provenance, filtering and residual sensitivities, and
+four prediction-specific falsifiers. The synthetic dry run passes all intake
+and fail-closed controls, but it cannot advance H1--H4. Governed human data are
+still required.
+
+The open-resource layer now supplies model-tier presets, a hash-pinned release
+manifest, standard checksums, a data dictionary, citation metadata, and a
+claim-first reviewer workbench. Validation fails closed on artifact drift. The
+bundle remains a qualified local release candidate rather than a persistent
+archive: articulated subject-scaled contact, equipment-calibrated beam
+coupling, governed human evaluation, and external identifier deposit remain
+open.
 
 ## Research Priorities {#sec-future}
 
 The next work should reduce the largest inferential risks in dependency
 order:
 
-1. **Counterfactual-method parity.** Implement torque-killswitch
-   re-simulation in Python, compare it with the pointwise decomposition on
-   matched trajectories, and cross-check the existing MATLAB pathway.
-   Pointwise attribution and forward divergence answer different questions;
-   agreement should not be assumed.
-2. **Coupled sensitivity and constrained control.** Replace
-   one-at-a-time perturbations with a declared multivariable design, add
-   activation-rate and history-dependent actuator limits, and compare
-   preselected torque programs with a constrained optimal-control solution.
-3. **Model-fidelity ladder.** Repeat the primary comparisons in a
-   torso--arm--club chain, then add mobile-hub and flexible-shaft energy
-   terms before moving to closed-loop and full-body models. Each rung should
-   carry conservation checks and cross-engine tolerance gates.
-4. **Human-data protocol.** Predefine inclusion criteria, outcomes,
-   uncertainty treatment, and inverse-dynamics sensitivity before analyzing
-   appropriately licensed or consented motion and force data. Sequence order
-   alone must not be treated as evidence of energy transfer.
-5. **Open-resource release.** Maintain deterministic commands,
+1. **Articulated Spatial Forward-Contact Counterfactual.** Replace the executed
+   hand-carriage reference with subject-scaled articulated arms and calibrated
+   grip interfaces while preserving the two-engine same-state killswitch,
+   force, couple, power, work, pathway, and closure observables.
+2. **Calibrated Uncertainty and Constrained Control.** Extend the executed
+   multivariable screen with population-informed distributions, measurement
+   error, profile-likelihood or Bayesian calibration, larger held-out
+   ensembles, and a constrained optimal-control comparator.
+3. **Spatial Model-Fidelity Ladder.** Add base rotation, a three-dimensional
+   club, ground pathways, and couple the executed distributed/modal shaft
+   reference into the forward constrained solve without changing the
+   registered interface observables. Each rung should carry
+   conservation checks and cross-engine tolerance gates.
+4. **Execute the Frozen Human-Data Protocol.** Acquire governed synchronized
+   measurements that pass the fixed inclusion, residual, missingness,
+   participant-holdout, and provenance gates. Sequence order alone must not be
+   treated as evidence of energy transfer.
+5. **Arm--Wrist Allocation and Preload Falsification.** Execute the bilateral
+   grip-wrench, pressure, activation, stiffness, and participant-holdout tests
+   registered in @sec-torque-allocation-preload. Treat the dead-zone mechanism
+   as rejected if its predicted gap is absent under documented low tangent
+   stiffness or if any performance difference disappears on holdout.
+6. **Open-Resource Release.** Maintain deterministic commands,
    machine-readable results, data dictionaries, checksums, citation metadata,
    and explicit license boundaries. Archive validated releases with a
    persistent identifier.
 
 The implementation roadmap and acceptance criteria are tracked in
 [the open research epic](https://github.com/D-sorganization/UpstreamDrift/issues/8426).
+The matched-task allocation and transmission program is tracked separately in
+[its falsification epic](https://github.com/D-sorganization/UpstreamDrift/issues/8497).
 
 # Code and Data Availability {.unnumbered}
 
@@ -65,3 +141,19 @@ summary is recorded in
 [`data/results_summary.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/results_summary.json),
 and the parameter-sensitivity results are recorded in
 [`data/e1d_parameter_sensitivity.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/e1d_parameter_sensitivity.json).
+The spatial common-state evidence is recorded in
+[`data/spatial_full_body_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json).
+The two-engine spatial forward-contact evidence is recorded in
+[`data/spatial_forward_contact_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json).
+The uncertainty, identifiability, and control evidence is recorded in
+[`data/uncertainty_control_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.json).
+The distributed-shaft structural evidence is recorded in
+[`data/shaft_beam_reference.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json).
+The forward distributed-modal shaft and arm--wrist allocation evidence are
+recorded in
+[`data/moving_base_modal_shaft_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/moving_base_modal_shaft_study.json)
+and
+[`data/torque_allocation_preload_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/torque_allocation_preload_study.json).
+The frozen experimental protocol and synthetic readiness classification are
+recorded in [`data/experimental_protocol_v1.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/experimental_protocol_v1.json)
+and [`data/experimental_protocol_readiness.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/experimental_protocol_readiness.json).

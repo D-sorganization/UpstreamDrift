@@ -1,0 +1,1224 @@
+{
+  "schema_version": "proximal-distal-open-release-v1",
+  "release_id": "proximal-distal-model-ladder-2026-08",
+  "resource_framing": "neutral_open_research_resource",
+  "presets": {
+    "double_pendulum": {
+      "command": "python -m scripts.research.proximal_distal_energy.run_experiments",
+      "tier": "planar_open_chain"
+    },
+    "forward_two_hand": {
+      "command": "python -m scripts.research.proximal_distal_energy.run_forward_two_arm_study",
+      "tier": "planar_constrained_forward"
+    },
+    "moving_base_flexible_club": {
+      "command": "python -m scripts.research.proximal_distal_energy.run_moving_base_flexible_study",
+      "tier": "planar_coupled_base_flex"
+    },
+    "forward_modal_shaft": {
+      "command": "python -m scripts.research.proximal_distal_energy.run_moving_base_modal_shaft_study",
+      "tier": "planar_coupled_base_distributed_modal_shaft"
+    },
+    "shaft_beam_reference": {
+      "command": "python -m scripts.research.proximal_distal_energy.run_shaft_beam_reference",
+      "tier": "synthetic_distributed_shaft_comparison"
+    },
+    "torque_allocation_preload": {
+      "command": "python -m scripts.research.proximal_distal_energy.run_torque_allocation_preload_study",
+      "tier": "matched_task_allocation_and_phenomenological_transmission"
+    },
+    "spatial_common_state": {
+      "command": "python -m scripts.research.proximal_distal_energy.run_spatial_full_body_study",
+      "tier": "reduced_full_body_common_state"
+    },
+    "spatial_forward_contact": {
+      "command": "python -m scripts.research.proximal_distal_energy.run_spatial_forward_contact_study",
+      "tier": "reduced_two_engine_forward_contact"
+    },
+    "uncertainty_control": {
+      "command": "python -m scripts.research.proximal_distal_energy.run_uncertainty_control_study",
+      "tier": "coupled_uncertainty_control"
+    },
+    "experimental_readiness": {
+      "command": "python -m scripts.research.proximal_distal_energy.run_experimental_protocol_dry_run",
+      "tier": "synthetic_protocol_qualification_only"
+    }
+  },
+  "claims": {
+    "interaction_dynamics_planar": "supported_at_declared_model_tier",
+    "geometry_transfer_spatial_common_state": "supported_at_declared_model_tier",
+    "distributed_shaft_modal_reduction": "supported_on_synthetic_structural_case",
+    "distributed_modal_shaft_coupled_forward": "supported_at_declared_planar_mechanism_tier",
+    "arm_wrist_allocation_equivalence": "supported_for_the_declared_same_state_club_task",
+    "preload_continuity_advantage": "conditional_on_the_declared_dead_zone_transmission_family",
+    "scapular_or_muscle_strategy_identification": "unsupported",
+    "passive_negative_couple_spatial_forward": "supported_at_declared_reduced_contact_tier",
+    "universal_control_strategy": "unsupported",
+    "human_experimental": "untested"
+  },
+  "known_open_gates": [
+    "subject-scaled articulated spatial contact with calibrated grip and distributed shaft",
+    "equipment-calibrated distributed beam and grip coupled into a subject-scaled forward solve",
+    "measured tissue-level preload and slack identification",
+    "governed held-out human experimental evaluation",
+    "external archive deposit and persistent identifier"
+  ],
+  "archive": {
+    "persistent_identifier_status": "pending_external_archive",
+    "reason": "Archive deposition is an external publication action and has not been executed."
+  },
+  "artifacts": {
+    "docs/research/proximal_distal_energy_transfer/CITATION.cff": {
+      "sha256": "44ddf79f758b09ab0fac1e18b63672032c8e7b83cccf6596c80d8a6790fab553",
+      "bytes": 587
+    },
+    "docs/research/proximal_distal_energy_transfer/DATA_DICTIONARY.md": {
+      "sha256": "fe53c271a99a6cc20e1340c056d2f7b0bc2154875c79cb0bb173d10a2f47204b",
+      "bytes": 4991
+    },
+    "docs/research/proximal_distal_energy_transfer/EVIDENCE_SCHEMA_V2.md": {
+      "sha256": "43e5e9728e63f6c22bed3874c5149976df7b50ffbf20d1e28104033b8a3adc7e",
+      "bytes": 4338
+    },
+    "docs/research/proximal_distal_energy_transfer/EXPERIMENTAL_FALSIFICATION_PROTOCOL.md": {
+      "sha256": "1e5a6c691521d3a41432da96d145927b09c12820cc27b1b4453f515c4f6d7510",
+      "bytes": 5587
+    },
+    "docs/research/proximal_distal_energy_transfer/HAND_PATH_ATTRIBUTION_CONTRACT.md": {
+      "sha256": "60da18093b5753c8019236558fb3061c00add288536630984075e906e1378abe",
+      "bytes": 10816
+    },
+    "docs/research/proximal_distal_energy_transfer/MODEL_COMPLETION_FALSIFICATION_MATRIX.md": {
+      "sha256": "e0b8af4bf6b63cddb0a76f8d1f1b80c697b94115ff55e9d7a2b62df47dddc588",
+      "bytes": 14836
+    },
+    "docs/research/proximal_distal_energy_transfer/OPEN_RELEASE_QUALIFICATION.md": {
+      "sha256": "e26da72fcf8e17e27fb6980195632bbcd4f946057a383f8d20d7c6177a416a40",
+      "bytes": 3011
+    },
+    "docs/research/proximal_distal_energy_transfer/README.md": {
+      "sha256": "1c3356175705748ccc9382deeea3bc4d16bc266d0d22315a135c58b4510ff6f4",
+      "bytes": 17769
+    },
+    "docs/research/proximal_distal_energy_transfer/REVIEWER_WORKBENCH.md": {
+      "sha256": "83018307b8c999b38e90181c90e9a59569e2a13b9163e9a65ca3a55ca734a6f6",
+      "bytes": 5269
+    },
+    "docs/research/proximal_distal_energy_transfer/WSCG_2024_LEGACY_EVIDENCE_AUDIT.md": {
+      "sha256": "c29c51d55e8edb984a4c5bf8875d728fc4561860a4897e26b6e0bb3f5bf62f11",
+      "bytes": 15020
+    },
+    "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd": {
+      "sha256": "84f1d3e4efa81fb23c1d123162e622b192bd327946a5f2fdee88aab79a2eab9d",
+      "bytes": 11571
+    },
+    "docs/research/proximal_distal_energy_transfer/chapters/_ch01_introduction.qmd": {
+      "sha256": "8f52d466f1134fd07fa0bb12259fdbf1fbbee749186d2d7feea8bffb2b1a6ad8",
+      "bytes": 6710
+    },
+    "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd": {
+      "sha256": "7d015a98161efe5eebb8b84ae16d2c0964ee52eb4efeb8ef4c8cdfe91ada2e17",
+      "bytes": 12918
+    },
+    "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd": {
+      "sha256": "dbef9a60f3b3bea4cf91cf48dcd61c0ecbaf249a33068905aab2e804dbb79ec5",
+      "bytes": 8522
+    },
+    "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd": {
+      "sha256": "967f62ee8e470f175ef205895c124808c67cb97d0fd25cd86e83d1dd71256a96",
+      "bytes": 21355
+    },
+    "docs/research/proximal_distal_energy_transfer/chapters/_ch03b_hand_path_attribution.qmd": {
+      "sha256": "1907dda000d53afdec3eb87bc2b0b1ce59e8c3e5daaea153948084a1036ca62d",
+      "bytes": 29762
+    },
+    "docs/research/proximal_distal_energy_transfer/chapters/_ch03c_ground_reaction_drift.qmd": {
+      "sha256": "a8f50723ff664ea03538f8d4418435db0ee7a09f124191a892c9b3b469763c4d",
+      "bytes": 10962
+    },
+    "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactual_ensemble.qmd": {
+      "sha256": "8da0033d74b3bb7ec77a6385b1e7356396efdd209f70bf6c77de72dee520566e",
+      "bytes": 10927
+    },
+    "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactuals.qmd": {
+      "sha256": "734faa4e2085b8d7dd4d39d398a2a74fef65271812a0fc17a89d6f1fb222c507",
+      "bytes": 10048
+    },
+    "docs/research/proximal_distal_energy_transfer/chapters/_ch05_platform.qmd": {
+      "sha256": "e50ba68de00ce333fa98afea48f0007a032f6d393ff55175b1a4494bd0d5cca6",
+      "bytes": 2160
+    },
+    "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd": {
+      "sha256": "daa755b3a3b0b42a76915c5222ebb77144bebe663b4c3c339a9147c6364064db",
+      "bytes": 23826
+    },
+    "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd": {
+      "sha256": "95bab37ab30ec19de322d173bccacc85b0559ef411f9a8170a020710e7877ee7",
+      "bytes": 16414
+    },
+    "docs/research/proximal_distal_energy_transfer/chapters/_ch06_methods.qmd": {
+      "sha256": "73622e5e0b9b8294ee997519336951412d561840e7662e3f30051ae1e9847b6e",
+      "bytes": 9498
+    },
+    "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd": {
+      "sha256": "e5eb7588067ddf3eda3ce5c220a76b39a78bf7a56cd34337418fae06c54d6273",
+      "bytes": 15742
+    },
+    "docs/research/proximal_distal_energy_transfer/chapters/_ch06b_coupled_base_flex.qmd": {
+      "sha256": "401b80544a2fb177d3c3208d73409490de04ed3de7e5176e9e00e9a029f62ce1",
+      "bytes": 13990
+    },
+    "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd": {
+      "sha256": "e28d4a7d64a27854d96334e74377e4feecff46fa85f8cd7fc48b6df378ec96f6",
+      "bytes": 5737
+    },
+    "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd": {
+      "sha256": "2cfcba5c2ab45308d72d6ce62f2a9456c1c3dc2cbe6204d817a77055b2fe3697",
+      "bytes": 10925
+    },
+    "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd": {
+      "sha256": "84a54f81f6344ee94466cf5cfdabcbccb260f597f045e894e97eabbf17e73221",
+      "bytes": 12229
+    },
+    "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd": {
+      "sha256": "fed7a7d2c52c765fb800aa0d6390f5366e9ef0042b4ba0e859bc374aaf03d24f",
+      "bytes": 13416
+    },
+    "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd": {
+      "sha256": "c591b8fd1081d5a7e88fbb136b863ae3e2cc0a840df46b335e826f56b1de496f",
+      "bytes": 14548
+    },
+    "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd": {
+      "sha256": "9eab4b1ba9b8d622a7e34059dfc9573deb987959722c53b8cf61bb27e865f1df",
+      "bytes": 10065
+    },
+    "docs/research/proximal_distal_energy_transfer/chapters/_ch06e_experimental_protocol.qmd": {
+      "sha256": "8c05daf47ac8a67fbd7089582c7deded7e74bd2ae4473010409482910f5dc903",
+      "bytes": 6404
+    },
+    "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd": {
+      "sha256": "ce63a88ada64cb5c21627901c0a066d3740cf338f71dc45d5d1ac31befbec44c",
+      "bytes": 3819
+    },
+    "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd": {
+      "sha256": "e4ebb7d52b769d67ec45ce2ead7658ef0e4e98082e48649e69dd0757454388a1",
+      "bytes": 23885
+    },
+    "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd": {
+      "sha256": "7583ab9d544fc35465dfbce8ba29f4108cb160f8bc61623789d1aff524c84691",
+      "bytes": 11800
+    },
+    "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd": {
+      "sha256": "d0544aa7c87c93cd8b5b9bbfcb55c95520105f978d99077fe729729228e1bdf3",
+      "bytes": 7669
+    },
+    "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd": {
+      "sha256": "6678ca2cc49b47504595193ec9f3d321e53ef4d065a3eb78bcc38cdaddb71762",
+      "bytes": 10888
+    },
+    "docs/research/proximal_distal_energy_transfer/data/counterfactual_ensemble.json": {
+      "sha256": "da856aab9a698570da9287741cbdbb1c77f766b7e831d0ffee4cfe2003c40d64",
+      "bytes": 84012
+    },
+    "docs/research/proximal_distal_energy_transfer/data/counterfactual_selected_traces.npz": {
+      "sha256": "9c413384e46995269d8d395ddfd9d8623c6fe37e38f39d69ef3f45d188fbb65e",
+      "bytes": 34289
+    },
+    "docs/research/proximal_distal_energy_transfer/data/e1_sweep.json": {
+      "sha256": "a3aa5bf100924dfb61f534ed221da669f91542b0fd22252a20f891e3f65a9fb9",
+      "bytes": 27443
+    },
+    "docs/research/proximal_distal_energy_transfer/data/e1b_bounded_sweep.json": {
+      "sha256": "479961f4b45b6ff40e45dfbc4a4351164805a83adffb79b035221580a76e8bb5",
+      "bytes": 10586
+    },
+    "docs/research/proximal_distal_energy_transfer/data/e1c_sensitivity.json": {
+      "sha256": "ca41b1f0bf82e0734ce1cf2eca0f18d813aaa0bffd80ad128c40642d6459faf9",
+      "bytes": 5381
+    },
+    "docs/research/proximal_distal_energy_transfer/data/e1d_parameter_sensitivity.json": {
+      "sha256": "9b3c66993b515915480ab7ac5ec525661d0900907763ba6823cca9878dc05b9c",
+      "bytes": 14134
+    },
+    "docs/research/proximal_distal_energy_transfer/data/experimental_protocol_dry_run.json": {
+      "sha256": "6b193ae754d54150e158fc559a045eee5dd497a64e0a393e58e30e1165f12c93",
+      "bytes": 1602
+    },
+    "docs/research/proximal_distal_energy_transfer/data/experimental_protocol_readiness.json": {
+      "sha256": "5815eee513d0b384609ff0cbf9be73d7e3bf96559e4f4a7c47f870610bd3536c",
+      "bytes": 1237
+    },
+    "docs/research/proximal_distal_energy_transfer/data/experimental_protocol_v1.json": {
+      "sha256": "c3af53b966083702eab7ca99a39e5e99d35dfbf7e7a8ae3ff8261a1945bc0834",
+      "bytes": 6164
+    },
+    "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.json": {
+      "sha256": "f3bb5b6eb3ef751d56815bec5ee95b849ad217d821eb0b38770766f9e0863cfc",
+      "bytes": 7347
+    },
+    "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.npz": {
+      "sha256": "f754b5a704a0d68ef216ab37beb01d3e871a96fecf08574ed02a44ca5f4952a0",
+      "bytes": 595969
+    },
+    "docs/research/proximal_distal_energy_transfer/data/grf_drift/grf_drift_study.json": {
+      "sha256": "556291cfe0877eecad64ba030d811024ca21ac386f38d5542a2971838f74ad4e",
+      "bytes": 2840
+    },
+    "docs/research/proximal_distal_energy_transfer/data/grf_drift/grf_drift_traces.npz": {
+      "sha256": "8b441782bed774ed7af876f5a68b29d59000d3c13f49c9477dc56fbd12deb3fd",
+      "bytes": 22899
+    },
+    "docs/research/proximal_distal_energy_transfer/data/hand_path_attribution/hand_path_attribution_study.json": {
+      "sha256": "5ad71c7b2939169df91d464a9b5bcb4ba998c7fbb87421a1aaa969e90e6c377f",
+      "bytes": 67115
+    },
+    "docs/research/proximal_distal_energy_transfer/data/hand_path_attribution/hand_path_attribution_traces.npz": {
+      "sha256": "90d95e975cad3a1097235b01908e40f454d1a737c13c4e6228b4bf500a5987e4",
+      "bytes": 453767
+    },
+    "docs/research/proximal_distal_energy_transfer/data/interaction_force_mechanisms.npz": {
+      "sha256": "69f641abdb55f6388a5a92e818aa1b415e9c4fdb35d065f39e3382ebd381b20a",
+      "bytes": 209135
+    },
+    "docs/research/proximal_distal_energy_transfer/data/interaction_force_summary.json": {
+      "sha256": "9c56f485b229fcfeca63f9d377672a65e9c57add241141012920fca9f2bcf4e7",
+      "bytes": 1272
+    },
+    "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json": {
+      "sha256": "74539f2d1b9e015adf3e84ade7e063b0e9f7ed3aa6ba9dfaa93cce1c0b4362cc",
+      "bytes": 5630
+    },
+    "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_traces.npz": {
+      "sha256": "d161e1c2ef453b44899ef6c015246f7fe40ab69f9d99d6c6557209a1ac9d679f",
+      "bytes": 199612
+    },
+    "docs/research/proximal_distal_energy_transfer/data/model_completion_predictions.json": {
+      "sha256": "dee0996036587ffbc6d8c175dcc1ad69b69f95eafcdcc007d79816e400052783",
+      "bytes": 7472
+    },
+    "docs/research/proximal_distal_energy_transfer/data/moving_base_flexible_study.json": {
+      "sha256": "f45a424ca8084fdcf517ed2719a8ce9c0974d259fb9a41476ca8f935b3733635",
+      "bytes": 12703
+    },
+    "docs/research/proximal_distal_energy_transfer/data/moving_base_flexible_study.npz": {
+      "sha256": "f4cc694511e3fceda151da73b2e4e791d898f367b4aa1b00e4d931c4d6be5ce0",
+      "bytes": 434578
+    },
+    "docs/research/proximal_distal_energy_transfer/data/moving_base_modal_shaft_study.json": {
+      "sha256": "0527bb6a026656da0cc96444444ac3ad77675eec6705b214df81effc1f4e984a",
+      "bytes": 16222
+    },
+    "docs/research/proximal_distal_energy_transfer/data/moving_base_modal_shaft_study.npz": {
+      "sha256": "c151f723a6ed9c1b3bd84fa9b87224d0458232c7efac87883b64a393b24be122",
+      "bytes": 234376
+    },
+    "docs/research/proximal_distal_energy_transfer/data/representative_traces.npz": {
+      "sha256": "8f6a2afd049d8ad6996a29e678511ce454dae82c7f8c745bcb1453c77bf7d54d",
+      "bytes": 453571
+    },
+    "docs/research/proximal_distal_energy_transfer/data/results_summary.json": {
+      "sha256": "bdfac584da20d4a69a4cc25df9b10ebcbb0cb945808bb6ea2491e058931b71f5",
+      "bytes": 4380
+    },
+    "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json": {
+      "sha256": "f07fc33cc76fb80f395cd10b01a30169b6440cec3854be3894024d435bc0f722",
+      "bytes": 2591
+    },
+    "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.npz": {
+      "sha256": "5212b62aa7c9c35794fffe9eb9bf6f1c14a943b9a2d14b1faca01224f538ddea",
+      "bytes": 1061539
+    },
+    "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json": {
+      "sha256": "d0ee95fa4ba4af21384ec20dfd0bcd6eb15f37570f3e897f2e0fd7bd9a767c71",
+      "bytes": 140205
+    },
+    "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_traces.npz": {
+      "sha256": "c370a8352a69915e0f47adfd7b86cfc246a63e21835e076874a3346f87700515",
+      "bytes": 1716617
+    },
+    "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json": {
+      "sha256": "c5a4f0bc3cca34bdea1e48a48cdc44a91d406484452fa22b9c4e43c669a635f7",
+      "bytes": 10629
+    },
+    "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.npz": {
+      "sha256": "658f4a9aa5ff083b106691672df91a797c7b83375c90bf7a88feab64d01bca00",
+      "bytes": 1675300
+    },
+    "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json": {
+      "sha256": "4ac63c5768d464702b55b1e0c0654208c952df4c94470b91fef3c065b18e4413",
+      "bytes": 3037
+    },
+    "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.npz": {
+      "sha256": "0e16f247e9133be28fb2313ec5c714901367e689d5682ca0bcd8334336fd758d",
+      "bytes": 28567
+    },
+    "docs/research/proximal_distal_energy_transfer/data/torque_allocation_preload_study.json": {
+      "sha256": "e9e9165608ccb3e6617c92af4b24f57b35f3a42bca794e0443098cb02a4a3fa1",
+      "bytes": 3263
+    },
+    "docs/research/proximal_distal_energy_transfer/data/torque_allocation_preload_study.npz": {
+      "sha256": "a380eb3366c12ef68f97309d98cc2b6d17c47c368fd7506fd36543fe4593e813",
+      "bytes": 139289
+    },
+    "docs/research/proximal_distal_energy_transfer/data/two_hand_preactivation_hypothesis.json": {
+      "sha256": "45d3283f6f054fafc913c3f765a747822b045f90ed1c19c1fb2c0148fcc7d0ee",
+      "bytes": 3936
+    },
+    "docs/research/proximal_distal_energy_transfer/data/two_hand_preactivation_hypothesis.npz": {
+      "sha256": "b75d1be7a3c0b239a53c7d0a367f8f1f50096dee83479ef7e3f1b221fb708147",
+      "bytes": 187268
+    },
+    "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json": {
+      "sha256": "31b61a0504063024e9445ff701d13b68de7343e92108aad3c222d0afb667d50a",
+      "bytes": 28116
+    },
+    "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.npz": {
+      "sha256": "084b49ba093fe8a713e2d98b5fab24bebd7f352fe65a03e1dd0ed29cf1413239",
+      "bytes": 2163151
+    },
+    "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.json": {
+      "sha256": "75d7f2b5b810a61f439bc095aae62fd88ba360d6c4ae9472fd34524ebe73b006",
+      "bytes": 18484
+    },
+    "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.npz": {
+      "sha256": "090cd7e80cc491350f6153eac16303d168d44f6840a04f924cd84a7aaf82a6b8",
+      "bytes": 16915
+    },
+    "docs/research/proximal_distal_energy_transfer/data/wscg_2024_hand_force_series.csv": {
+      "sha256": "5cdf32b890e58d733085eea87f102aaf325012435e6e83fcdc21a1b84d26d7b2",
+      "bytes": 84652
+    },
+    "docs/research/proximal_distal_energy_transfer/data/wscg_2024_source_provenance.json": {
+      "sha256": "74476c8a0d2bcc097b01454be63e2d91c6f963154f0a49bf82d791849c41da94",
+      "bytes": 850
+    },
+    "docs/research/proximal_distal_energy_transfer/data/wscg_two_hand_raw/base.csv": {
+      "sha256": "7458e3fd604bfef13b3369046c0d7597faef35a0f89441f79d4c23ee7b9f1e78",
+      "bytes": 3678063
+    },
+    "docs/research/proximal_distal_energy_transfer/data/wscg_two_hand_raw/delta.csv": {
+      "sha256": "5d41c2976db0cc37dedeb20f30fbc1d88765bbff5f455fee22f7ca7aed756ec0",
+      "bytes": 4010562
+    },
+    "docs/research/proximal_distal_energy_transfer/data/wscg_two_hand_raw/ztcf.csv": {
+      "sha256": "47445e57db5246f695177b4644bcd67237593ed1fb40ddb38e286cab19a1e12a",
+      "bytes": 3628977
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_control_pareto_train_holdout.pdf": {
+      "sha256": "fe23fb90e9583025cd33622bf27cc4d9b27d5b300705beae39a52830379bce07",
+      "bytes": 31879
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_control_pareto_train_holdout.svg": {
+      "sha256": "cd111e40f33387250b2a402ce3f60719d18fe363dd50b9274882a29b9b256196",
+      "bytes": 94019
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_control_strategy_tradeoffs.pdf": {
+      "sha256": "cea697d1a74a1b19c49cfa9ccdf1bceac50451ce8cbce06ee45734f23b978e60",
+      "bytes": 30839
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_control_strategy_tradeoffs.svg": {
+      "sha256": "4dcccc9bbb30e8fcf8930e3ce7acae390ceebf9cfb5c76e493477c2c1a232d7f",
+      "bytes": 118972
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_counterfactual_divergence_maps.pdf": {
+      "sha256": "39a56bfbf767f2d1b0427286a2aef195d7d61bf2eea34ed289ae7e565108b0ea",
+      "bytes": 24255
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_counterfactual_divergence_maps.svg": {
+      "sha256": "fd55b4de937363856d08d267f684554fbd06a925fe24333427544d7ab7e4c887",
+      "bytes": 71638
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_counterfactual_physics_variants.pdf": {
+      "sha256": "364486d0a7fbcc770748e93030687e5c3a5188a297bcc347b52b446917ecf655",
+      "bytes": 18824
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_counterfactual_physics_variants.svg": {
+      "sha256": "5ce974e4c911c4f62295dac06d09608a34a662d0780541b6258118121a97506f",
+      "bytes": 59176
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_counterfactual_selected_futures.pdf": {
+      "sha256": "6df461567f96bcad647eb73d881c964880af5f6b6a09855421091c4b86a7cfdd",
+      "bytes": 34055
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_counterfactual_selected_futures.svg": {
+      "sha256": "fd36da8ea09619984f0a56c717b8d7faa92ff536652a7dd5a580da2b340f1f14",
+      "bytes": 162393
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_counterfactual_timestep_sensitivity.pdf": {
+      "sha256": "e68b4ac979ea4e8bb42059f8a19fe11d6780b9b4c1e3ed77a453ed738d90ab82",
+      "bytes": 19944
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_counterfactual_timestep_sensitivity.svg": {
+      "sha256": "a47735d85c96d6b37776600fc2ed70eeb5c7f1733bb7d0cdc1af91dad01ac96f",
+      "bytes": 102008
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_coupled_base_flex_falsification.pdf": {
+      "sha256": "c47e9504165fd3f8211aaf4b17e195d2e9e029716d1227306ca306f9201fbfa1",
+      "bytes": 29808
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_coupled_base_flex_falsification.svg": {
+      "sha256": "f20e6914e2a48bcbbd78d766d9ad4ac0b8f590804e78ddc76516d882aadec84a",
+      "bytes": 97340
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_coupled_base_flex_force_geometry.pdf": {
+      "sha256": "dcfa6b424ff6868c06767100446b8e6b669e659e411acda8e3a1a9588b54601d",
+      "bytes": 31186
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_coupled_base_flex_force_geometry.svg": {
+      "sha256": "2f95b02cb43591d5ae1292b9489f17770c5d0b1f4bf30532a3542d71a030c8fa",
+      "bytes": 89428
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_coupled_base_flex_transfer.pdf": {
+      "sha256": "8b15a3cb0bb6bc9f577a2ba28df5aa7a89305d6ff3ddb6d32270f1b7bad4cddc",
+      "bytes": 35532
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_coupled_base_flex_transfer.svg": {
+      "sha256": "a1225b6374f4b6a29ea23ddeb7b67e52c6bb8128209426aa39ffa390bb011e45",
+      "bytes": 123494
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_e1_onset_sweep.pdf": {
+      "sha256": "35ec12d623fe4a5382fded8e751fbbe77c0a998065e43381ea2e3bffcec92570",
+      "bytes": 22201
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_e1_onset_sweep.svg": {
+      "sha256": "a3c5a556d8d204e326c2c8758a007b29514553a407f29504f58a7aa9dc21154e",
+      "bytes": 78938
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_e1b_bounded_sweep.pdf": {
+      "sha256": "1abc00fdb8931dd869e012c82fd5ecbfa6748e102fdcbeda5edcbd91a4888cc0",
+      "bytes": 18899
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_e1b_bounded_sweep.svg": {
+      "sha256": "6473ec463440dbae37d2129abafc7ff50d3fd53e6cc8367bbf129e569e267671",
+      "bytes": 58629
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_energy_budget.pdf": {
+      "sha256": "11c29cf94ca7c443bad30b991827603363fb77fa3fe8e0fcccbbf726d48dabaf",
+      "bytes": 16617
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_energy_budget.svg": {
+      "sha256": "8b2af0aa86ff62e94bf7479d611f9ccb6e33816852e2c479b0dd5d8952ad7807",
+      "bytes": 57932
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_forward_two_hand_couple_killswitch.pdf": {
+      "sha256": "e843a3eea8915e078c43c3661093f7b7fb37babb929c258a19546447701110b7",
+      "bytes": 6683
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_forward_two_hand_couple_killswitch.svg": {
+      "sha256": "c6833ec7125666de0610b988d61a00252def8bab8eadb5eb8ce92aac529b0fbd",
+      "bytes": 107847
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_forward_two_hand_force_geometry.pdf": {
+      "sha256": "a95745ec1d705ce5e5006fb812b4d9e1d8fb8786b253dec3cc4cb3e1f3491a6e",
+      "bytes": 8051
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_forward_two_hand_force_geometry.svg": {
+      "sha256": "aabb9d610c0cd481e2ffa42aaa68362e1f5798e14c811985dc558253d47bd1a7",
+      "bytes": 94254
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_forward_two_hand_numerical_audit.pdf": {
+      "sha256": "82499c95c6ea10426961e9a7e0701ddcc51f8169cab9581aa9c2d86ea7df5fd4",
+      "bytes": 17056
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_forward_two_hand_numerical_audit.svg": {
+      "sha256": "f3e9349a8520ca651d3445f21b54e6ff71b6d88c27ad8c8d92476f5f04ea845b",
+      "bytes": 142982
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_identifiability_audit.pdf": {
+      "sha256": "b0782427680b8a13745b09995c67c5005388330884c80715fa7ff71ccd19ddf5",
+      "bytes": 33996
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_identifiability_audit.svg": {
+      "sha256": "70493f378978a906e2483ca89fc0a9d6428a1b3d2b1ac0db45aa12e0f1f91989",
+      "bytes": 82614
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_interaction_force_components.pdf": {
+      "sha256": "47a9d360a1b86495b1f3d71bdb83b8aa172388280093a3c967212b036307e4fb",
+      "bytes": 21443
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_interaction_force_components.svg": {
+      "sha256": "6fb47beca8f5adf7c0bc724cebe5bd4d63b2654ee0047fc0aa1b8eeefd4acd64",
+      "bytes": 78367
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_interaction_force_power.pdf": {
+      "sha256": "296044ffee95965caddd9ca6466ec2fa6c52fbb74e1fcfdc48ca12f960aaf248",
+      "bytes": 21985
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_interaction_force_power.svg": {
+      "sha256": "8765cb40f383441aa90515366e837ce1849a5e56840ba4a7b1365e1e4e72ea2d",
+      "bytes": 79345
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_interaction_free_body.pdf": {
+      "sha256": "27619fe04050a0a1d5316f18c23894528b6db5de337245913aac1ec3cffbe9ed",
+      "bytes": 22397
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_interaction_free_body.svg": {
+      "sha256": "824ff122bcff0dc7b08493ad939b534bb57e726cec8159464a11a62ad6046821",
+      "bytes": 49689
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_interaction_geometry_coefficients.pdf": {
+      "sha256": "9de25dae218682571034eefc2bf57e06ae2708f9af1b1ff6920508c8d3d3e2e8",
+      "bytes": 22455
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_interaction_geometry_coefficients.svg": {
+      "sha256": "803bdd6e67403f17f283d39abcb13dead4b54d53d8448281f46ac3cff91f3518",
+      "bytes": 60359
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_interaction_killswitch.pdf": {
+      "sha256": "3f74bf725a895ac217a5fd4ad1027a9374b7daf02fa31a74abfe83d4d6d8d9c2",
+      "bytes": 21949
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_interaction_killswitch.svg": {
+      "sha256": "18359c47f34c4b8a9789942b1a9a0a85ce73261952262e19cb649b8aa67a1744",
+      "bytes": 77974
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_interaction_vector_montage.pdf": {
+      "sha256": "6fbe2def58fed1f89ae80c844864526a60b95fda94d604a2ccbd374b26d568e1",
+      "bytes": 19815
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_interaction_vector_montage.svg": {
+      "sha256": "c00e8271dbeb7cc0a6b7ceb2cfa2adcde00e2647c2b764874fa70749553b9b07",
+      "bytes": 130671
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_kinematic_sequence.pdf": {
+      "sha256": "1625e51c18c6ab4b8eec94caa696261220001528bd70f8ba803b9fcb3fb0e216",
+      "bytes": 26355
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_kinematic_sequence.svg": {
+      "sha256": "374da4b67e71a7303a5db1fe52ac93664d6f046d0c0ad22407ddd1adee1d2a54",
+      "bytes": 107116
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_ladder_closed_loop.pdf": {
+      "sha256": "39db7dd63c0abf2fbc263390e6825ee949da9b481b9badac0f2b1fbfe1aeb7a9",
+      "bytes": 23692
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_ladder_closed_loop.svg": {
+      "sha256": "198d782675ce2094ea08fbefbac1a42b5bc4cc83f27967f25f74dfaa08c4d0ac",
+      "bytes": 64003
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_ladder_discrepancy_matrix.pdf": {
+      "sha256": "cb07eefa4ee9dab5fba8887eaf7879721e08a7d6051cf6d17976103a669f09d9",
+      "bytes": 17450
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_ladder_discrepancy_matrix.svg": {
+      "sha256": "184d7e96ea1d654b7e85d763f2b6c21a091d89ab585cb5f867185e8a219b14c3",
+      "bytes": 92406
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_ladder_invariance_residuals.pdf": {
+      "sha256": "98e10ea1ea0c23f5c344c7fe01dc7c301dae103646b5a698b84f5b7a515855a6",
+      "bytes": 16756
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_ladder_invariance_residuals.svg": {
+      "sha256": "6b19835081cc5d77ca852cf4279b859dd7f22f5e57dd1a4dd53a9c82f797424a",
+      "bytes": 44951
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_ladder_mobile_hub.pdf": {
+      "sha256": "34533b0904ace153c20d7afe56cde5bbeba6c4ddc71bb41955f30cc8493cb1af",
+      "bytes": 24927
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_ladder_mobile_hub.svg": {
+      "sha256": "5505461edfe408e427e4a48ddc23e34a11b47c43889ab2b79f7489e42ebc5410",
+      "bytes": 79801
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_ladder_rotated_wrenches.pdf": {
+      "sha256": "c5eec84a4a55b3b715063bec0375018272b5a4c67b97b931faa32df1c822d5cd",
+      "bytes": 15518
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_ladder_rotated_wrenches.svg": {
+      "sha256": "0a630985d0f0770b0364ae4f0c3c2bdde21dbed800a5d350dbd69ad3774b8297",
+      "bytes": 42009
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_ladder_schematic.pdf": {
+      "sha256": "6cd60b7e7de8050992ff83d8b3f09d495079604040ebeafc0ee331cce0c8e937",
+      "bytes": 27826
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_ladder_schematic.svg": {
+      "sha256": "7a181b73aacbdbcf480fadb9b3c101cbd00425c419836930a06e05925c9f67a8",
+      "bytes": 68258
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_ladder_three_link_observables.pdf": {
+      "sha256": "7188acd434ac2cfe1957641dc5efb0043e4795e7fb10f6368e4a74548ab4ddab",
+      "bytes": 23730
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_ladder_three_link_observables.svg": {
+      "sha256": "cfe05cd02183dab541b45fef657575aea850314fbd3d65a2631fbbace9cfdfce",
+      "bytes": 61813
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_modal_shaft_forward_geometry.pdf": {
+      "sha256": "8b3e33f6eb28c2b5023a18bcf5b4a2cfc52667e1c47737cd5da08ad7684c572e",
+      "bytes": 10355
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_modal_shaft_forward_geometry.svg": {
+      "sha256": "79fc46da56a4604ba1e7fd6d1f382c86ccd41e09c9b34f416028b2941264c09f",
+      "bytes": 94244
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_modal_shaft_killswitch_controls.pdf": {
+      "sha256": "8a278212ff28a226e8d98e7e2f3052be3eac3e84e6ea276626d5421371fa12c6",
+      "bytes": 11811
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_modal_shaft_killswitch_controls.svg": {
+      "sha256": "8123c0a92c0486dd7a923d6392d0ee3514cd4a5f2081afe925419372a24795e6",
+      "bytes": 112951
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_modal_shaft_mode_convergence.pdf": {
+      "sha256": "44b0af52223d3aa9913be4c8865f5aea1db18b68ab5afa450273f26bd7cdf8b1",
+      "bytes": 7027
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_modal_shaft_mode_convergence.svg": {
+      "sha256": "1db47088568b99881d26fed697c324e072e47d9030b6937cbce937dd6a9f7f9b",
+      "bytes": 114124
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_segment_energies.pdf": {
+      "sha256": "d8804acc7643d2e0d0748e0411721555bd6065088096c380f21180c9d22d26a6",
+      "bytes": 21127
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_segment_energies.svg": {
+      "sha256": "86c4c679cea7610c715627661960fca3de2337875217effe3aafa5e589feb9fa",
+      "bytes": 74163
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_shaft_acceleration_contributions.pdf": {
+      "sha256": "7a53f875d4937cbbf7b66ea8d2865eca3e51f8e882722a87cb5b1e85616ef926",
+      "bytes": 22083
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_shaft_acceleration_contributions.svg": {
+      "sha256": "73eda060f92fe720ca8547df41553161ccc1fec3ab13d1f417942f7eec9c9460",
+      "bytes": 67775
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_shaft_beam_energy.pdf": {
+      "sha256": "d1cd69b3c4501009b66491b1d6842275028cd4ea5289d21f76850582bf869fcb",
+      "bytes": 23221
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_shaft_beam_energy.svg": {
+      "sha256": "a76d236ea72c811ac72bd4615d48dd69967f9466ce3c871dc151a83e5b6c112c",
+      "bytes": 65294
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_shaft_beam_identification.pdf": {
+      "sha256": "0f4f9b1e1e572b3616376ca2d564c7c719168e240df75f4e55334a2caf45c379",
+      "bytes": 19158
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_shaft_beam_identification.svg": {
+      "sha256": "07581f2b1249adab48dbb110073600f480da1f4e6aee17d1efd265da8e1fcc72",
+      "bytes": 57434
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_shaft_beam_response.pdf": {
+      "sha256": "d7c0df2714ff855d46a468e876242e619a36a5e1a8ecbff0f8263ae0492b8676",
+      "bytes": 18680
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_shaft_beam_response.svg": {
+      "sha256": "8cbd5989d7e33f3273fa76da5f7f006652add8f1308ad3da725991b335367205",
+      "bytes": 53163
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_shaft_energy_closure.pdf": {
+      "sha256": "3ff0741df403096a9ce6330bb6e892320a6fc5100844dc38f8a078194494b4e1",
+      "bytes": 20022
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_shaft_energy_closure.svg": {
+      "sha256": "2dae00215ba82d42df0e5a31cd049451702fad8cb038359eed1e3c35cf97da46",
+      "bytes": 70565
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_shaft_matched_comparison.pdf": {
+      "sha256": "89eb27cbc9d22afbbdf13b2221d4fb3a57210c37f6812487c63ee138a6149896",
+      "bytes": 22076
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_shaft_matched_comparison.svg": {
+      "sha256": "cb1a5632c1126a20028aadedcccc3e45e85682712e83ed9f24b9dc5d2ce4bca8",
+      "bytes": 70094
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_shaft_model_schematic.pdf": {
+      "sha256": "5d2e469d82bba601ceb57c841337ddb810e64ac1140ca3eb09149a3be6dd0c22",
+      "bytes": 16762
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_shaft_model_schematic.svg": {
+      "sha256": "fa4ac387fe162f78d242d13cd9a535de08c462a24c9141c4573e740defddfe35",
+      "bytes": 30172
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_shaft_physics_ablations.pdf": {
+      "sha256": "232de0464058804e196361eb8e37021f39cb2979d80d680d3e543bc15afcf8dd",
+      "bytes": 18488
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_shaft_physics_ablations.svg": {
+      "sha256": "54123e6ab4773c2415120b13121e0a75b2f1e6f7de5bfa52c261f21059687f41",
+      "bytes": 79619
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_shaft_pose_overlay.pdf": {
+      "sha256": "2a6ca642be07dda25d2d7f393abe87bc0b128459d8bcd9cbf44acfc77ce92390",
+      "bytes": 13817
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_shaft_pose_overlay.svg": {
+      "sha256": "08f9ad99baebb5547e67dd4099ceec26031a09fe720a01fd24f4738dac6cb546",
+      "bytes": 35602
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_shaft_robustness_maps.pdf": {
+      "sha256": "818424320da0dfc2b3799772aeef4dfad1eb8e2b26f244bfe43ea90edbdf1a9c",
+      "bytes": 23106
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_shaft_robustness_maps.svg": {
+      "sha256": "b35279ef6fec3ae50bcaab00db77b5d1972eede59bd5e41e37c43266e9d6d185",
+      "bytes": 64233
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_shaft_window_timestep.pdf": {
+      "sha256": "566bdb5a7595a910c0eb977d0f993df49ed262dd988279e1a197fe44add7e445",
+      "bytes": 21703
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_shaft_window_timestep.svg": {
+      "sha256": "cb60498bd274cfdf3401b35889bd41a80adb9971747de72f8f5a3c7cc1fd4fc7",
+      "bytes": 77945
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_spatial_cross_formulation_inverse_dynamics.pdf": {
+      "sha256": "23c15f914f2dcda5ebd118f158a15f0c34386021592a31765d7d6c1791fc8c77",
+      "bytes": 31507
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_spatial_cross_formulation_inverse_dynamics.svg": {
+      "sha256": "d8a7ebd40b586cdb93042c03c61e26a21173a08754b6a00991b0f6e7a84969d6",
+      "bytes": 113140
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_spatial_forward_contact_geometry.pdf": {
+      "sha256": "9bffa8e37a4983446acd5c2ea5d48e3deb75b97b62659700f1a5f1c1c01154e8",
+      "bytes": 15624
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_spatial_forward_contact_geometry.svg": {
+      "sha256": "f35fe1f115193190217a9117e7a4317c69e5dd85a942c83c9a2a3ec61663e501",
+      "bytes": 102089
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_spatial_forward_cross_engine.pdf": {
+      "sha256": "9204a2c9599bb514090eb97f6cc457e2d195e6f13f246052ba7e4388b27dd007",
+      "bytes": 10467
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_spatial_forward_cross_engine.svg": {
+      "sha256": "8e0618c9b4639a9e4addaa3f2d06b8b91d9186f9c73fd26b4a5e4abaf3f4af99",
+      "bytes": 126074
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_spatial_forward_energy_controls.pdf": {
+      "sha256": "db9d7ecb4f6c7ba59d9515dbec06b66391177706bc79e8e5710d9140c2398ce5",
+      "bytes": 5051
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_spatial_forward_energy_controls.svg": {
+      "sha256": "031e86847f7845beaff213faa4bf0080efb471cfffd0bf8067fc1013fb773367",
+      "bytes": 92360
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_spatial_forward_killswitch.pdf": {
+      "sha256": "52e32b0673053b2983655b2f860c62c603b7f3136c0caaf7ab4facf5cbe738a3",
+      "bytes": 7374
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_spatial_forward_killswitch.svg": {
+      "sha256": "30890506b89039fb5d9fed0e5710de8c60e3f8c4f360d7c4cc80af5f287d0b52",
+      "bytes": 129851
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_spatial_full_body_falsification.pdf": {
+      "sha256": "c0145df244db4b9a3c8749ce86e5cd29d64ba4c3a8e579bbefdeb47c97d35f12",
+      "bytes": 28840
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_spatial_full_body_falsification.svg": {
+      "sha256": "dc647d429556da963979760bdc45cb61ca1ec511e93ffd0ae2cddadc08fc88d9",
+      "bytes": 85111
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_spatial_full_body_force_geometry.pdf": {
+      "sha256": "737fc1ea26c3e15c56125e47b0d8e8db99101039e006a5d6df0b0c07eb3b381b",
+      "bytes": 32363
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_spatial_full_body_force_geometry.svg": {
+      "sha256": "f544f8fc616b923dcaa34c8447c5fd68a48813e1711452fea4fae5f1b2209e7b",
+      "bytes": 94046
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_swing_montage.pdf": {
+      "sha256": "211653f42a191d5e3443fcd61967f021795f26ce30c8eac6e2e334e05be143bc",
+      "bytes": 14511
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_swing_montage.svg": {
+      "sha256": "8108c0e71a1f2197b0cf4317581068aa1a42dadbd499eb89f0163c733bbf8030",
+      "bytes": 39984
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_torque_allocation_geometry_surface.pdf": {
+      "sha256": "2bd4aa1975da33a1bc9c18472675b666dbb145fd846309f84e57cc7c9202d437",
+      "bytes": 25629
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_torque_allocation_geometry_surface.svg": {
+      "sha256": "3effe256a3ee15bd495d354659d0e98a08d1ef7697414e8948b60e654d65c943",
+      "bytes": 189280
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_torque_allocation_moment_closure.pdf": {
+      "sha256": "6c7f3c067b0c734d85c28483e245ce31aee430e3e702ef4f7d988c42a490a1ff",
+      "bytes": 4508
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_torque_allocation_moment_closure.svg": {
+      "sha256": "4529a1d43f25aef2604ce1bab8686712dd59ebf312b81da2abb7d38ac513827e",
+      "bytes": 29272
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_torque_role_reversal_transmission.pdf": {
+      "sha256": "fdbe2ce1d05abde5dadcd7828896c02fd238fb0f941694147f92c6ebe12fa97e",
+      "bytes": 8283
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_torque_role_reversal_transmission.svg": {
+      "sha256": "05cb61304c0c7d0a8bc1b4e2fc7ec967f4df50aa518f06e6eaa9c9db0fa83c86",
+      "bytes": 57231
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_two_hand_couple_decomposition.pdf": {
+      "sha256": "7cebd212667582c8d86a35c182e220337287eaa1ffba4fefefe9907fc0932926",
+      "bytes": 34172
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_two_hand_couple_decomposition.svg": {
+      "sha256": "99e0030d35d8a71dbf829232956ac12853ac90692b3045e0a0802ea704c96a66",
+      "bytes": 232682
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_two_hand_force_cancellation.pdf": {
+      "sha256": "2d157163a5f65b02ec44b22dd95726bb125547422fea7b71db391f0fd71b88bb",
+      "bytes": 5642
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_two_hand_force_cancellation.svg": {
+      "sha256": "a0310b1ce4a8a369604b472c569ff966f505ec158cf2938de23a46ea45d9c509",
+      "bytes": 67528
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_two_hand_force_pose_montage.pdf": {
+      "sha256": "68904083064238732cceab683267ef3359bd7035fdec1f5146c89ecdd21ba618",
+      "bytes": 4072
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_two_hand_force_pose_montage.svg": {
+      "sha256": "2640f51413f56fc1391640bf1baf9594717cbae03f2b12d622887534e5d8da9d",
+      "bytes": 54899
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_two_hand_geometry_sweep.pdf": {
+      "sha256": "3185682904b7021d1796bcc248a132576d9b4a84206ddc9641727b8759c1755a",
+      "bytes": 4503
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_two_hand_geometry_sweep.svg": {
+      "sha256": "95e1b944df3e45e513bc9266b999c43fcea3d0b686e62c67a20309de3953a1dc",
+      "bytes": 75612
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_two_hand_local_force_components.pdf": {
+      "sha256": "a21721fac4749c233b692fe4628ab4c7673910e7067a7b86f492b7de09df260e",
+      "bytes": 6906
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_two_hand_local_force_components.svg": {
+      "sha256": "9c105135ade2cbccee1ae94574265a22f7473551d5739d468e4177c93398bc7d",
+      "bytes": 88428
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_two_hand_power_decomposition.pdf": {
+      "sha256": "c19a29cfe2a29a41cdb93a0279fab9b95073127e4bc02f717df6290346d0b592",
+      "bytes": 5066
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_two_hand_power_decomposition.svg": {
+      "sha256": "c9958e0a0a6f61a5eaf3df1f9e35854943e78692c8e0bf29949aba7a0736b8a7",
+      "bytes": 73614
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_two_hand_preactivation_hypothesis.pdf": {
+      "sha256": "a6fbd0c15838fdadaa06104e6c67ba2e715b0a7b0934e86a0f3902e11eb5b425",
+      "bytes": 10626
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_two_hand_preactivation_hypothesis.svg": {
+      "sha256": "b342ef2c0c38465eae5308eefad8f3e97fa685289b3843ecbae97922fc630f38",
+      "bytes": 130014
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_two_hand_reference_transport.pdf": {
+      "sha256": "91e70fd34fc5a7dcdc6627b7565b1b466fc494c29ac6f0aa70bb2d67e3d17038",
+      "bytes": 3484
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_two_hand_reference_transport.svg": {
+      "sha256": "54f968b17afa10d0c77367d2cb0491b921a7ebeda0aa36cba0d11617e6c5f011",
+      "bytes": 48689
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_two_hand_reversal_sensitivity.pdf": {
+      "sha256": "69dc5920f68b637c6f0fc25a06ecb9beb36528c6a496590ba97f78432f166c2a",
+      "bytes": 5683
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_two_hand_reversal_sensitivity.svg": {
+      "sha256": "4aeb6206864acb7ee5d690f37ce72d80a3f06f0621088d4a43d310c4a58d01c4",
+      "bytes": 78253
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_uncertainty_intervals_and_prcc.pdf": {
+      "sha256": "7bb1535407a5a2e5f8dc0fef7f254d1a21063e4673a9159ac8b6d7a46c51550d",
+      "bytes": 34892
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_uncertainty_intervals_and_prcc.svg": {
+      "sha256": "204c9a94c5bb8494611e04704ef6abaec68da7fdc9896705e8ed495a9da7c49a",
+      "bytes": 109070
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_wrist_interface_power.pdf": {
+      "sha256": "1877017548e28884a5fe4aa8a920f173638d2dba1227022b234a272406397a74",
+      "bytes": 23942
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_wrist_interface_power.svg": {
+      "sha256": "0f60d96227d0923eca1b1647017b6a279e573273b0816bb9c7313e312ba423fa",
+      "bytes": 76505
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_wscg_registered_hand_forces.pdf": {
+      "sha256": "202a405fed3431a2092b992f3ab5d3af8154c079a1efa9baef6ac39825209e9f",
+      "bytes": 22927
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_wscg_registered_hand_forces.svg": {
+      "sha256": "a99600811722e414e8ca9ef84c23a1ef76835ebb48bf8299ce1165849d28059e",
+      "bytes": 96348
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_ztcf_drift_control.pdf": {
+      "sha256": "6cc99d26007c079e9c0658369e2a893475b298c4ac688d57a01625cfabc2f7a3",
+      "bytes": 21577
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_ztcf_drift_control.svg": {
+      "sha256": "5c44ae19369c9bb3d6bc2407d66f33434b694c7d8441d2467acc237ef19b77b4",
+      "bytes": 72699
+    },
+    "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.pdf": {
+      "sha256": "f868ff9770e44b66c7a672410053b2201a7d997542e718202c8a5c3cc07ebe85",
+      "bytes": 1773617
+    },
+    "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd": {
+      "sha256": "912f3b52faccfffa9ada38c3e4508a50bb94a2fc998318dad84c508e3c9ffd0b",
+      "bytes": 11838
+    },
+    "docs/research/proximal_distal_energy_transfer/references.bib": {
+      "sha256": "93fa0019f5456e3b4289df77aa881c9aeea65ee95f2266fa296ffc5acca4e72b",
+      "bytes": 39269
+    },
+    "scripts/research/proximal_distal_energy/__init__.py": {
+      "sha256": "6284875dd432761d214dbcad5031e14cc4203018bc19b59005712521acb1bea1",
+      "bytes": 261
+    },
+    "scripts/research/proximal_distal_energy/counterfactual_ensemble.py": {
+      "sha256": "818650090577ad85f26b6bdad2ac38b8dc72c04a1d314236d9c9a894ea29de1f",
+      "bytes": 8292
+    },
+    "scripts/research/proximal_distal_energy/double_pendulum_attribution.py": {
+      "sha256": "615b84e6579aae7dd8fadd25be221cf6b989444d860ff5fdbf35ca455547655b",
+      "bytes": 9576
+    },
+    "scripts/research/proximal_distal_energy/e1b_bounded_torque.py": {
+      "sha256": "d12049142a827a40a1e436da0f8aec3ba4175d7586fba835400b688bd2f0c7dc",
+      "bytes": 7404
+    },
+    "scripts/research/proximal_distal_energy/e1c_impact_sensitivity.py": {
+      "sha256": "b7a41209d9de6b485b363d2b774bf8166c07ce52aaf4acb712c9066cc614950a",
+      "bytes": 9713
+    },
+    "scripts/research/proximal_distal_energy/e1d_parameter_sensitivity.py": {
+      "sha256": "121eec08078b85fb5610862eb10e4caf35cbd8a57ed71df6245d4dcc14b5c846",
+      "bytes": 8606
+    },
+    "scripts/research/proximal_distal_energy/experimental_protocol.py": {
+      "sha256": "7e824f4cf7e48437138546294c8542299d1636324305d66bc472cf7e59958d03",
+      "bytes": 9484
+    },
+    "scripts/research/proximal_distal_energy/extract_wscg_charts.py": {
+      "sha256": "1b8d6fe6222cd228564f9b0f7bca539fd799465d78ae81785153f17d0ceda054",
+      "bytes": 4899
+    },
+    "scripts/research/proximal_distal_energy/flexible_shaft_study.py": {
+      "sha256": "4f857a3865adaaebf4e3e2c86bda780d506b2e6060cc20623a9e29cdfef21f39",
+      "bytes": 15794
+    },
+    "scripts/research/proximal_distal_energy/forward_two_arm.py": {
+      "sha256": "1668f88d47d2c7b9d59b3a9344e995031c1c2ea2c745b49ae0febc4bf4cc342c",
+      "bytes": 12840
+    },
+    "scripts/research/proximal_distal_energy/interaction_forces.py": {
+      "sha256": "813088e7d6cb1c205d514fc5c4f63465567ded5c6616a7a343847660f9d7bb77",
+      "bytes": 7449
+    },
+    "scripts/research/proximal_distal_energy/make_counterfactual_figures.py": {
+      "sha256": "5007c82632577576649f88bcb496fab5c76d7908f5f8b9a033f9d9b3a4e2c613",
+      "bytes": 7773
+    },
+    "scripts/research/proximal_distal_energy/make_figures.py": {
+      "sha256": "d4033b840adfbc88a061542593ff8d8e3d8955aa5079e694128fd579620ce97d",
+      "bytes": 12660
+    },
+    "scripts/research/proximal_distal_energy/make_forward_two_arm_figures.py": {
+      "sha256": "ac8d05bc86cef250637ae5216b9a79c9c2ab91845f5c4e64abaeb1dd542554bf",
+      "bytes": 12984
+    },
+    "scripts/research/proximal_distal_energy/make_interaction_force_figures.py": {
+      "sha256": "e3448e6cec651c793c8afea3f0e367b2b2d2dd74427fa5fc7d00bae4cca3e83e",
+      "bytes": 12275
+    },
+    "scripts/research/proximal_distal_energy/make_mechanism_ladder_figures.py": {
+      "sha256": "dd8cd6f5afbf5aae0ec086a40ffe6850c2b8f9b3c88a0030056614b9936df69e",
+      "bytes": 13389
+    },
+    "scripts/research/proximal_distal_energy/make_moving_base_flexible_figures.py": {
+      "sha256": "d5ff44c6d98a5676386ae0ac0ade0083a1b1e987d88a5b6e959139823a4c6ac0",
+      "bytes": 10776
+    },
+    "scripts/research/proximal_distal_energy/make_moving_base_modal_shaft_figures.py": {
+      "sha256": "cb0b1b30f4cbcb1875555ddf27dedb82419f4f1ecf63c9eed0e9fa11ace550b6",
+      "bytes": 9647
+    },
+    "scripts/research/proximal_distal_energy/make_shaft_beam_reference_figures.py": {
+      "sha256": "4b1c2d5f616b740171af1492ba3b183273742b3273b1ad9e2bfe5941c6508238",
+      "bytes": 7365
+    },
+    "scripts/research/proximal_distal_energy/make_shaft_contribution_figures.py": {
+      "sha256": "f6643b2e7d70bd3276af7ac43bcf7945cfc946c75a4bea6cfcb837ccb7228a8d",
+      "bytes": 14782
+    },
+    "scripts/research/proximal_distal_energy/make_spatial_forward_contact_figures.py": {
+      "sha256": "39ddf766310b6c70692e2f5927f0e6ace654e09fde21159e95227271d58b8a82",
+      "bytes": 14424
+    },
+    "scripts/research/proximal_distal_energy/make_spatial_full_body_figures.py": {
+      "sha256": "9cced36985c95d4d66c5ee053a93f141ac180a4150713e20c587da55644cd50b",
+      "bytes": 9376
+    },
+    "scripts/research/proximal_distal_energy/make_torque_allocation_preload_figures.py": {
+      "sha256": "d985b27dfa553a37e2ae5b9b31ae0ecd0feb4292fa469e698b12b385fd73ef8c",
+      "bytes": 5538
+    },
+    "scripts/research/proximal_distal_energy/make_two_hand_wscg_figures.py": {
+      "sha256": "3f017eb1c5ce6557741041e5a87b253c029e990dcae6764c1dfac53b49784c53",
+      "bytes": 15235
+    },
+    "scripts/research/proximal_distal_energy/make_uncertainty_control_figures.py": {
+      "sha256": "fc83e5ee62b8c0d54cfb68cd226c2a9b7ae6fb7f835e1cf4c11d72165ca76f96",
+      "bytes": 10764
+    },
+    "scripts/research/proximal_distal_energy/mechanism_ladder.py": {
+      "sha256": "fe096a8c039c0327f44a4e202b88bb52deb63c171c6d6e5b9b29d1c744e0f84e",
+      "bytes": 9106
+    },
+    "scripts/research/proximal_distal_energy/moving_base_flexible_club.py": {
+      "sha256": "251c345bdc961316c00058831624cfc96954d9a6cf59817e48500bd6b19a9a23",
+      "bytes": 32475
+    },
+    "scripts/research/proximal_distal_energy/moving_base_modal_shaft.py": {
+      "sha256": "260adaad2d43b2ce288c8344bb4e432272ff872fc719fe333c5cdcad571680e2",
+      "bytes": 35920
+    },
+    "scripts/research/proximal_distal_energy/one_arm_attribution.py": {
+      "sha256": "e6181944d41a542de4fe9c2cab0ea4059a4022b4f68e8da61e7aa7622fe5fe95",
+      "bytes": 5524
+    },
+    "scripts/research/proximal_distal_energy/optimize_article_pdf.py": {
+      "sha256": "d1672caeb2f16aee36eb55a1c6052da33d98e71d67311698b3d83bb41c45ff87",
+      "bytes": 3554
+    },
+    "scripts/research/proximal_distal_energy/optimize_figure_pdfs.py": {
+      "sha256": "41d441e706451d0c35b3d1e59289c34573c9a6720c44df1031c9c5a7517306b4",
+      "bytes": 2032
+    },
+    "scripts/research/proximal_distal_energy/qualify_open_release.py": {
+      "sha256": "2b96a99ba8c8d62c3c840267137379ddabdb99afd4971c796219a946e560749d",
+      "bytes": 1492
+    },
+    "scripts/research/proximal_distal_energy/release_bundle.py": {
+      "sha256": "4064875205adbdb53062ca4844fa1933d2313b69ec336c1ee6b8b452b1c6432a",
+      "bytes": 7508
+    },
+    "scripts/research/proximal_distal_energy/run_counterfactual_ensemble.py": {
+      "sha256": "743e73b7cea98567ced96023598088ea3fa4f8855b6d82fd5275a3035d519160",
+      "bytes": 7688
+    },
+    "scripts/research/proximal_distal_energy/run_experimental_protocol_dry_run.py": {
+      "sha256": "2507a49a2b1c8f562f3e7a24b19e85668eac4446ba99ccb41a8e9f28ce977ab8",
+      "bytes": 2215
+    },
+    "scripts/research/proximal_distal_energy/run_experiments.py": {
+      "sha256": "6c49cc2aa167eab115deb005049f9bf95c78e2a61fb07a1bcd85e0e0700522b6",
+      "bytes": 11954
+    },
+    "scripts/research/proximal_distal_energy/run_forward_two_arm_study.py": {
+      "sha256": "da4a11cac52ef4347b9b4d17aff55f1a37808b86a219f7c7dfd708c8e78ade03",
+      "bytes": 17458
+    },
+    "scripts/research/proximal_distal_energy/run_grf_drift_study.py": {
+      "sha256": "2df9574cd2854788a2077b02c81478d5d7080c0a766f3b8e200f5a24d5801e16",
+      "bytes": 12158
+    },
+    "scripts/research/proximal_distal_energy/run_hand_path_attribution_study.py": {
+      "sha256": "9f85659674b9634213585fefb9ffad78bc360dad3d9ef7b2d83797553edbacf4",
+      "bytes": 40055
+    },
+    "scripts/research/proximal_distal_energy/run_interaction_force_study.py": {
+      "sha256": "bacbc849db85a3849d3f5dbf12e88291e22df51f7c7cbfb559c8b922c8ca2425",
+      "bytes": 7304
+    },
+    "scripts/research/proximal_distal_energy/run_mechanism_ladder_study.py": {
+      "sha256": "c6b7c1955ccac1945785bf562017237f988ba5c26f5c7a344c221870cf247e4a",
+      "bytes": 15182
+    },
+    "scripts/research/proximal_distal_energy/run_moving_base_flexible_study.py": {
+      "sha256": "193f85e2718108aab575016130ecf944eaff90999bd1b6f000af03d799cd629a",
+      "bytes": 15952
+    },
+    "scripts/research/proximal_distal_energy/run_moving_base_modal_shaft_study.py": {
+      "sha256": "e2a6e326d7418180d684ab4ae4f994b017d911699046768429a24aecfaa29e7d",
+      "bytes": 15222
+    },
+    "scripts/research/proximal_distal_energy/run_shaft_beam_reference.py": {
+      "sha256": "3fc8a06f843257e4888aa5638213577e890ad4ace37f85a3d8063e44cf5a7a70",
+      "bytes": 4905
+    },
+    "scripts/research/proximal_distal_energy/run_shaft_contribution_study.py": {
+      "sha256": "20152dd01614e6bd48450dd287db5b32b162189da08d31a6374f6a34340e88f9",
+      "bytes": 11639
+    },
+    "scripts/research/proximal_distal_energy/run_spatial_forward_contact_study.py": {
+      "sha256": "fa397e8f5fbe77e445b96823cd8b185c394a8b1c199d7c6263f5963b372a5c0a",
+      "bytes": 10442
+    },
+    "scripts/research/proximal_distal_energy/run_spatial_full_body_study.py": {
+      "sha256": "0448596117ad2a5c625cb20f6cd4b48b0c4be7a96b1f172d853b5aa6de8ee7ab",
+      "bytes": 7919
+    },
+    "scripts/research/proximal_distal_energy/run_torque_allocation_preload_study.py": {
+      "sha256": "38a8889681c4fa8a3634ddff049eeb963444ea2355e1f7f39fadfa80915fb788",
+      "bytes": 7355
+    },
+    "scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py": {
+      "sha256": "e82622d78d75090479f191984669b974b521238ed9176b6eed6bc1acbeeb3cc6",
+      "bytes": 16427
+    },
+    "scripts/research/proximal_distal_energy/run_uncertainty_control_study.py": {
+      "sha256": "7119232050483321d1761a1b9d47ee5bdf90c3abc8ddb58f1e385271df5bf02f",
+      "bytes": 19194
+    },
+    "scripts/research/proximal_distal_energy/shaft_beam_reference.py": {
+      "sha256": "1405dc8214cfdf4931ec71e9c1608d284cd44c0fa42d5d42d3c1e338f212481e",
+      "bytes": 17081
+    },
+    "scripts/research/proximal_distal_energy/spatial_forward_contract.py": {
+      "sha256": "8803ff4922223870953999489f4e133a89b024a18c253b1764cfa218a4980ef7",
+      "bytes": 10403
+    },
+    "scripts/research/proximal_distal_energy/spatial_forward_engines.py": {
+      "sha256": "dd5c9b29c2fbc8df8003068446190e3cb50cf34adf6e8627caf08d06ccb47456",
+      "bytes": 15180
+    },
+    "scripts/research/proximal_distal_energy/spatial_forward_study.py": {
+      "sha256": "ba9d718d4b8751d19d281a317fd310bf8805c9be8c1e7edc3e65dc0e71485daf",
+      "bytes": 14883
+    },
+    "scripts/research/proximal_distal_energy/spatial_full_body.py": {
+      "sha256": "218d92732fd3e9ca283c38878f788e923d19934076918c4925f9832b4699ea0a",
+      "bytes": 26846
+    },
+    "scripts/research/proximal_distal_energy/swing_model.py": {
+      "sha256": "cfa6dd3f1041f2a462dc046fb1f6169cc296be20499490bcb2f022ecc5b160ea",
+      "bytes": 9485
+    },
+    "scripts/research/proximal_distal_energy/torque_allocation_preload.py": {
+      "sha256": "55319b127e8206d45403b1c530d31f459dfc2dd8bdf88633efb05d8fd31a3da1",
+      "bytes": 16099
+    },
+    "scripts/research/proximal_distal_energy/torque_programs.py": {
+      "sha256": "7ab86458ac3c889f5595a9a966bc42da705e3d9b02bcf0e1ee9c48b1716d2b02",
+      "bytes": 2668
+    },
+    "scripts/research/proximal_distal_energy/two_arm_closed_loop.py": {
+      "sha256": "bd322833baee73319a8f5c9a3ae0d14c150cc9fbcd062a7a2594b946f6065302",
+      "bytes": 30005
+    },
+    "scripts/research/proximal_distal_energy/two_hand_preactivation_hypothesis.py": {
+      "sha256": "ab4adee1d0bc20637e0aede6515e814ab2cccbc7485a5d971cf1859c36425922",
+      "bytes": 14637
+    },
+    "scripts/research/proximal_distal_energy/two_hand_wrench.py": {
+      "sha256": "67b49e4fff99e9615ec9985372b1d34e81b483dee1ffa58dcdf3c6f9c3b2ebf8",
+      "bytes": 5545
+    },
+    "scripts/research/proximal_distal_energy/uncertainty_control.py": {
+      "sha256": "443012e55b6cb1dd23bcd3595efbe68da07ae120735e8ee756085ac1f7e883e9",
+      "bytes": 11292
+    },
+    "src/shared/python/biomechanics/interaction_evidence.py": {
+      "sha256": "b8d8a9c57b6b46f00fef7ee3144060a640b8bfc9dffc264e68ac04baaa6f3284",
+      "bytes": 19078
+    }
+  }
+}

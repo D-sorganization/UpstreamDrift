@@ -12,9 +12,6 @@ DEFAULT_PDF = (
     / "proximal_distal_energy_transfer"
     / "proximal_distal_energy_transfer.pdf"
 )
-DEFAULT_LIMIT_BYTES = 1_048_576
-
-
 def _load_fitz():
     try:
         import fitz
@@ -40,14 +37,14 @@ def optimize_pdf(
     input_path: Path,
     output_path: Path | None = None,
     *,
-    max_bytes: int = DEFAULT_LIMIT_BYTES,
+    max_bytes: int | None = None,
 ) -> dict[str, int]:
     """Compact a PDF and fail closed if pages, URI links, or outline change."""
     source = input_path.resolve()
     destination = (output_path or input_path).resolve()
     if not source.is_file():
         raise FileNotFoundError(source)
-    if max_bytes <= 0:
+    if max_bytes is not None and max_bytes <= 0:
         raise ValueError("max_bytes must be positive")
     destination.parent.mkdir(parents=True, exist_ok=True)
     temporary = destination.with_suffix(destination.suffix + ".optimized.tmp")
@@ -60,6 +57,7 @@ def optimize_pdf(
         document.save(
             temporary,
             garbage=4,
+            clean=True,
             deflate=True,
             deflate_images=True,
             deflate_fonts=True,
@@ -74,7 +72,7 @@ def optimize_pdf(
             f"before={before}, after={after}"
         )
     optimized_bytes = temporary.stat().st_size
-    if optimized_bytes > max_bytes:
+    if max_bytes is not None and optimized_bytes > max_bytes:
         temporary.unlink(missing_ok=True)
         raise RuntimeError(
             f"Optimized PDF is {optimized_bytes} bytes; limit is {max_bytes} bytes"
@@ -95,7 +93,11 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("input", nargs="?", type=Path, default=DEFAULT_PDF)
     parser.add_argument("--output", type=Path)
-    parser.add_argument("--max-bytes", type=int, default=DEFAULT_LIMIT_BYTES)
+    parser.add_argument(
+        "--max-bytes",
+        type=int,
+        help="Optional release-specific ceiling; no fixed ceiling is applied by default.",
+    )
     args = parser.parse_args()
     result = optimize_pdf(args.input, args.output, max_bytes=args.max_bytes)
     print(

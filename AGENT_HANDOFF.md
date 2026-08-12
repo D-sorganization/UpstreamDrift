@@ -5,6 +5,15 @@ Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
 
+- **#8497 arm--wrist torque allocation and preload** — branch
+  `feat/8426-phase-9-forward-distributed-shaft` adds an exact same-state 8 N m
+  actuator-allocation sweep, a separately declared dead-zone transmission
+  model, preload and role-reversal sensitivity, a coupled forward modal-shaft
+  tier, deterministic evidence, publication figures, and explicit bilateral
+  wrench/stiffness/EMG/holdout falsifiers. The persistent-direction advantage
+  is conditional; neither the proximal subspace nor slack is identified as a
+  measured scapular or tissue property.
+
 - **#8493 ground-reaction drift attribution** — isolated branch
   `feat/grf-drift-decomposition` adds a strict constrained-contact solve for
   configuration, velocity, control, and external-load reaction components;
@@ -57,9 +66,10 @@ Update this file with every PR and every push to main.
   two-hand constraint rank/nullspace diagnostics, seven figures, and a model
   discrepancy table. The evidence record deliberately marks full-body
   cross-engine dynamics `not_executed`; capability is not reported as a result.
-  Follow-up full PR **#8457** losslessly compacts the 90-page PDF below the
-  repository's 1 MiB guard with page, link, outline, and visual-equivalence
-  checks.
+  Follow-up full PR **#8457** losslessly compacts the 90-page PDF with page,
+  link, outline, and visual-equivalence checks. The later publication policy
+  removed the obsolete 1 MiB ceiling while retaining artifact-integrity and
+  GitHub hard-boundary controls.
 
 - **#8447 gravity, momentum, damping, and shaft-flex separation** — full PR
   **#8455** on `research/momentum-gravity-shaft-flex`. A tested three-coordinate point-mass

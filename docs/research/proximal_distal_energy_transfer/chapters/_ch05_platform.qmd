@@ -32,9 +32,9 @@ evidence for the physical claims.
 
 The implementation includes unit tests for drift-plus-control
 reconstruction, work--energy consistency, deterministic replay, impact
-detection, and headline ordering. Independent simulation backends provide a
-route to cross-engine validation, but the results in this document should be
-read as one validated implementation of one model class. Cross-engine
-agreement would reduce implementation risk; it would not remove structural
-limitations such as the fixed hub, rigid shaft, planar motion, or simplified
-actuators.
+detection, and headline ordering. The reduced full-body common-state tier now
+compares MuJoCo with an independent Lagrange--Christoffel implementation
+generated from one hashed model. That agreement reduces implementation risk
+for the declared inverse-dynamics estimand; it does not validate the primary
+planar model or remove structural limitations such as prescribed spatial hand
+loads, simplified inertias, missing forward contact, or simplified actuators.

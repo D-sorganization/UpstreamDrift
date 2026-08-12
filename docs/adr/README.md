@@ -42,6 +42,10 @@ canonical-core app-shell registry reuse of the embeddable-tool contract.
 
 ## Recent Amendments
 
+- **2026-08-11:** ADR-0019 supersedes its original universal 1 MB PDF ceiling
+  with signature validation, a 50,000,000-byte warning, and GitHub's
+  100,000,000-byte hard file boundary so in-scope scientific publications can
+  retain publication-quality figures.
 - **2026-05-31:** ADR-0017 now records the CC-38 canonical-core Sidekick tool
   adapter and its fixed `canonical.*` action allowlist.
 

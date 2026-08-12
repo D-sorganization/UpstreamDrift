@@ -31,7 +31,7 @@ def test_optimizer_preserves_pages_uri_links_and_outline(tmp_path: Path) -> None
     document.save(source)
     document.close()
 
-    result = optimize_pdf(source, output, max_bytes=1_000_000)
+    result = optimize_pdf(source, output)
 
     assert result["pages"] == 2
     assert result["uri_links"] == 1
@@ -48,3 +48,14 @@ def test_optimizer_rejects_nonpositive_limit(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="positive"):
         optimize_pdf(source, max_bytes=0)
+
+
+def test_optimizer_honors_an_explicit_release_limit(tmp_path: Path) -> None:
+    source = tmp_path / "source.pdf"
+    document = fitz.open()
+    document.new_page().insert_text((72, 72), "Evidence")
+    document.save(source)
+    document.close()
+
+    with pytest.raises(RuntimeError, match="limit is 1 bytes"):
+        optimize_pdf(source, max_bytes=1)

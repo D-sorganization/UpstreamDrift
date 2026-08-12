@@ -27,6 +27,17 @@ COLORS = {
 }
 
 
+def _style() -> None:
+    """Use portable core fonts so repeated vector panels stay phone-sized."""
+    plt.rcParams.update(
+        {
+            "pdf.use14corefonts": True,
+            "path.simplify": True,
+            "path.simplify_threshold": 1.0,
+        }
+    )
+
+
 def _load() -> tuple[dict, dict[str, np.ndarray]]:
     with (DATA_DIR / "two_hand_wscg_analysis.json").open(encoding="utf-8") as stream:
         record = json.load(stream)
@@ -36,7 +47,15 @@ def _load() -> tuple[dict, dict[str, np.ndarray]]:
 def _save(fig: plt.Figure, stem: str) -> None:
     fig.tight_layout()
     fig.savefig(FIG_DIR / f"{stem}.pdf", bbox_inches="tight")
-    fig.savefig(FIG_DIR / f"{stem}.svg", bbox_inches="tight")
+    svg_path = FIG_DIR / f"{stem}.svg"
+    fig.savefig(svg_path, bbox_inches="tight")
+    svg_path.write_text(
+        "\n".join(
+            line.rstrip() for line in svg_path.read_text(encoding="utf-8").splitlines()
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     plt.close(fig)
 
 
@@ -377,6 +396,7 @@ def fig_reference_transport() -> None:
 
 def main() -> None:
     """Render every two-hand audit figure as PDF and SVG."""
+    _style()
     FIG_DIR.mkdir(parents=True, exist_ok=True)
     record, arrays = _load()
     fig_couple_decomposition(record, arrays)

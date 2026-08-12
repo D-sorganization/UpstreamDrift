@@ -14,23 +14,27 @@ The current evidence boundary includes these known limitations:
 - A multi-phase matched-state torque-killswitch ensemble is complete for one
   declared torque program; other torque programs, model classes, and uncertainty
   distributions remain necessary before making general persistence claims.
-- The archived two-hand ZTCF is pointwise along the BASE state history. Its
-  force-generated negative couple is reproduced, but a two-hand forward
-  killswitch and matched solver/shaft variants remain open validation steps.
+- The archived two-hand ZTCF remains pointwise along the BASE state history.
+  Separate forward rigid-club and coupled moving-base/flexible-club models now
+  demonstrate finite zero-command persistence. A reduced full-body spatial
+  common-state tier now tests nonplanar inverse dynamics, but passive spatial
+  contact and human variants remain open validation steps.
 - The primary model has two planar links and a fixed hub; torso, hub-path,
   long-axis rotation, and closed-loop arm effects are absent.
 - The shaft extension is a three-coordinate point-mass surrogate with one
   linear torsional mode. It is not a calibrated distributed-beam or equipment
   model, and extreme low-stiffness deflections exceed its linear premise.
-- Actuator bounds are simplified; muscle activation and history effects are
-  not represented.
-- Parameter sensitivity is one-at-a-time; coupled uncertainty and population
-  distributions are not estimated.
+- The coupled actuator adds delay, first-order activation, rate and
+  torque--velocity limits, and impedance, but it remains a nonphysiological
+  command surrogate.
+- Coupled uncertainty is screened over declared engineering envelopes;
+  population distributions and measurement uncertainty are not estimated.
 - No human motion or force data are analyzed; the result is mechanistic and
   model-derived, not a skill-group effect.
-- The model ladder does not execute full-body cross-engine dynamics. Its 3-D
-  tier is a proper-frame transformation audit of a planar trace, and its
-  mobile-hub tier is a prescribed-motion inverse-dynamics comparison.
+- The model ladder now executes reduced full-body common-state inverse dynamics
+  in MuJoCo and an independent Lagrange--Christoffel formulation. The hand
+  loads are prescribed, so independently solved forward two-hand contact is
+  still unexecuted.
 
 # Reproducibility Guide {#sec-appendix-repro}
 
@@ -47,6 +51,13 @@ python3 -m scripts.research.proximal_distal_energy.run_counterfactual_ensemble
 python3 -m scripts.research.proximal_distal_energy.run_two_hand_wscg_analysis
 python3 -m scripts.research.proximal_distal_energy.run_shaft_contribution_study
 python3 -m scripts.research.proximal_distal_energy.run_mechanism_ladder_study
+python3 -m scripts.research.proximal_distal_energy.run_forward_two_arm_study
+python3 -m scripts.research.proximal_distal_energy.run_moving_base_flexible_study
+python3 -m scripts.research.proximal_distal_energy.run_shaft_beam_reference
+python3 -m scripts.research.proximal_distal_energy.run_spatial_full_body_study
+python3 -m scripts.research.proximal_distal_energy.run_uncertainty_control_study
+python3 -m scripts.research.proximal_distal_energy.run_experimental_protocol_dry_run
+python3 -m scripts.research.proximal_distal_energy.qualify_open_release validate
 
 # Robustness analyses
 python3 -m scripts.research.proximal_distal_energy.e1b_bounded_torque
@@ -60,16 +71,23 @@ python3 -m scripts.research.proximal_distal_energy.make_counterfactual_figures
 python3 -m scripts.research.proximal_distal_energy.make_two_hand_wscg_figures
 python3 -m scripts.research.proximal_distal_energy.make_shaft_contribution_figures
 python3 -m scripts.research.proximal_distal_energy.make_mechanism_ladder_figures
+python3 -m scripts.research.proximal_distal_energy.make_forward_two_arm_figures
+python3 -m scripts.research.proximal_distal_energy.make_moving_base_flexible_figures
+python3 -m scripts.research.proximal_distal_energy.make_shaft_beam_reference_figures
+python3 -m scripts.research.proximal_distal_energy.make_spatial_full_body_figures
+python3 -m scripts.research.proximal_distal_energy.make_uncertainty_control_figures
 cd docs/research/proximal_distal_energy_transfer
 quarto render proximal_distal_energy_transfer.qmd --to pdf
 cd ../../..
 python3 -m scripts.research.proximal_distal_energy.optimize_article_pdf
 ```
 
-Outputs land in `data/` (JSON and NPZ with commit, integrator, and parameter
-provenance) and `figures/` (PDF and SVG). The analyses use fixed-step RK4 and
-contain no stochastic elements. Re-runs should reproduce the recorded values
-up to floating-point environment differences. The final optimizer requires
+Outputs land in `data/` (JSON and NPZ with integrator and parameter provenance)
+and `figures/` (PDF and SVG). The open-chain analyses use fixed-step RK4; the
+forward constrained two-hand analysis uses velocity Verlet with mass-metric
+projection. The analyses contain no stochastic elements. Re-runs should
+reproduce the recorded values up to floating-point environment differences.
+The final optimizer requires
 PyMuPDF, performs lossless object/stream compaction, and refuses an artifact
 that changes the page count, URI-link count, or outline-entry count.
 
@@ -144,3 +162,23 @@ Recorded outputs:
   fail-closed model-discrepancy table.
 - `data/mechanism_ladder_traces.npz` — three-link interface, mobile-hub, and
   closed-loop conditioning arrays used by the higher-order figures.
+- `data/forward_two_arm_study.json` — forward model parameters, command,
+  closure, killswitch ensemble, negative control, and numerical sensitivities.
+- `data/forward_two_arm_study.npz` — baseline and representative branch states,
+  contact forces, force modes, moments, power, energy, and solver residuals.
+- `data/moving_base_flexible_study.{json,npz}` — coupled base/flex branch,
+  negative control, parameter screen, convergence, states, forces, and energy.
+- `data/shaft_beam_reference.{json,npz}` — synthetic modal identification,
+  finite-element convergence, paired one/six-mode responses, and work--energy
+  closure; not equipment calibration.
+- `data/spatial_full_body_study.{json,npz}` — common-model hashes, prescribed
+  wrench interventions, two-formulation inverse dynamics, and spatial states.
+- `data/uncertainty_control_study.{json,npz}` — declared design, actuator
+  contract, uncertainty intervals, PRCC screen, identifiability audit,
+  training/held-out program comparison, closure, and rollout arrays.
+- `data/experimental_protocol_v1.json` — frozen inclusion, measurement,
+  processing, participant-split, prediction, and inference contract.
+- `data/experimental_protocol_{dry_run,readiness}.json` — synthetic-only intake
+  fixture and fail-closed readiness classification; no human observations.
+- `release_manifest.json` and `CHECKSUMS.sha256` — exact release artifact
+  inventory, model-tier presets, claim status, open gates, hashes, and sizes.

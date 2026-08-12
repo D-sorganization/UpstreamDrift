@@ -1,0 +1,371 @@
+{
+  "array_artifact": {
+    "array_names": [
+      "baseline_contact_force_on_club_n",
+      "baseline_force_couple_nm",
+      "baseline_mechanical_energy_j",
+      "baseline_modal_coordinates",
+      "baseline_q",
+      "baseline_qdot",
+      "baseline_strain_energy_j",
+      "baseline_time_s",
+      "baseline_tip_deflection_m",
+      "branch_125us_couple_nm",
+      "branch_125us_energy_j",
+      "branch_125us_time_s",
+      "branch_250us_couple_nm",
+      "branch_250us_energy_j",
+      "branch_250us_time_s",
+      "branch_500us_couple_nm",
+      "branch_500us_energy_j",
+      "branch_500us_time_s",
+      "branch_coincident_couple_nm",
+      "branch_contact_force_on_club_n",
+      "branch_force_couple_nm",
+      "branch_modal_coordinates",
+      "branch_q",
+      "branch_qdot",
+      "branch_reversed_arm_couple_nm",
+      "branch_strain_energy_j",
+      "branch_time_s",
+      "branch_tip_deflection_m",
+      "pulse_modes_1_clubhead_position_m",
+      "pulse_modes_1_force_couple_nm",
+      "pulse_modes_1_strain_energy_j",
+      "pulse_modes_1_time_s",
+      "pulse_modes_1_tip_deflection_m",
+      "pulse_modes_3_clubhead_position_m",
+      "pulse_modes_3_force_couple_nm",
+      "pulse_modes_3_strain_energy_j",
+      "pulse_modes_3_time_s",
+      "pulse_modes_3_tip_deflection_m",
+      "pulse_modes_6_clubhead_position_m",
+      "pulse_modes_6_force_couple_nm",
+      "pulse_modes_6_strain_energy_j",
+      "pulse_modes_6_time_s",
+      "pulse_modes_6_tip_deflection_m",
+      "smooth_modes_1_clubhead_position_m",
+      "smooth_modes_1_force_couple_nm",
+      "smooth_modes_1_strain_energy_j",
+      "smooth_modes_1_time_s",
+      "smooth_modes_1_tip_deflection_m",
+      "smooth_modes_3_clubhead_position_m",
+      "smooth_modes_3_force_couple_nm",
+      "smooth_modes_3_strain_energy_j",
+      "smooth_modes_3_time_s",
+      "smooth_modes_3_tip_deflection_m",
+      "smooth_modes_6_clubhead_position_m",
+      "smooth_modes_6_force_couple_nm",
+      "smooth_modes_6_strain_energy_j",
+      "smooth_modes_6_time_s",
+      "smooth_modes_6_tip_deflection_m"
+    ],
+    "path": "docs/research/proximal_distal_energy_transfer/data/moving_base_modal_shaft_study.npz",
+    "sha256": "c151f723a6ed9c1b3bd84fa9b87224d0458232c7efac87883b64a393b24be122"
+  },
+  "baseline": {
+    "closure": {
+      "acceleration_constraint_residual_max": 1.1831123320395927e-13,
+      "contact_power_identity_max_w": 1.7053025658242404e-13,
+      "kkt_residual_max": 1.8684839110767547e-13,
+      "mechanical_energy_change_j": 39.48190522797997,
+      "net_nonconstraint_work_j": 39.46449347076131,
+      "position_constraint_max_m": 3.748873172645093e-14,
+      "projection_energy_change_sum_j": -0.02403115636815656,
+      "velocity_constraint_max_m_s": 2.2671395712616936e-15,
+      "work_energy_residual_abs_j": 0.017411757218660284
+    },
+    "duration_s": 0.25,
+    "maximum_abs_modal_coordinate": [
+      0.06253918891230585, 0.0002172223623722214, 2.5425005200744096e-5
+    ],
+    "maximum_abs_modal_tip_deflection_m": 0.1347566237083847,
+    "maximum_base_displacement_m": 0.02670408395471878,
+    "maximum_force_generated_couple_nm": 28.86561928208091,
+    "minimum_force_generated_couple_nm": -21.601361943599706,
+    "peak_clubhead_speed_m_s": 7.355705597093233,
+    "peak_shaft_strain_energy_j": 2.1231545878107876,
+    "step_s": 0.0005
+  },
+  "claim_status": {
+    "distributed_modal_shaft_coupled_forward": "supported_for_declared_synthetic_model",
+    "equipment_calibration": "untested_no_governed_measurements",
+    "human_strategy": "untested",
+    "late_negative_force_couple_after_zero_command": "supported_for_declared_synthetic_model"
+  },
+  "falsifiers": [
+    "modal quadrature does not reproduce the finite-element frequencies",
+    "the higher modes remain numerically inert under a resolved short pulse",
+    "the post-killswitch negative interval disappears under timestep refinement",
+    "coincident or reversed moment-arm controls fail their zero/sign tests",
+    "constraint, KKT, contact-power, or work-energy closure exceeds tolerance"
+  ],
+  "geometry_controls": {
+    "coincident_maximum_abs_nm": 0.0,
+    "moment_arms_m": [0.065, -0.065],
+    "registered_minimum_nm": -21.173909515110914,
+    "reversed_arm_sign_residual_max_abs_nm": 0.0,
+    "same_achieved_forces": true
+  },
+  "limitations": [
+    "planar reduced arms and a translating base are not anatomical full-body dynamics",
+    "linear Euler-Bernoulli bending omits torsion, shear deformation, and impact",
+    "shaft and head properties are declared synthetic values, not equipment calibration",
+    "the result is model-mechanism evidence, not a player or coaching prescription"
+  ],
+  "modal_transport": {
+    "coupled_quadrature_frequencies_hz": [
+      5.239954615606654, 62.94571366163065, 138.0330573880405
+    ],
+    "finite_element_frequencies_hz": [
+      5.239897333424722, 62.94572427196277, 138.0330543122767
+    ],
+    "interpretation": "finite-element modes are coupled into the moving-base two-hand forward solve through distributed mass quadrature; declared properties remain synthetic and are not equipment calibration",
+    "maximum_frequency_discrepancy_relative": 1.0931928296880968e-5,
+    "modal_mass_identity_max_abs": 2.220446049250313e-16
+  },
+  "model_tier": "forward_planar_moving_base_two_hand_distributed_modal_shaft",
+  "parameter_contract": {
+    "beam": {
+      "butt_diameter_m": 0.015,
+      "damping_ratio": 0.018,
+      "density_kg_m3": 1600.0,
+      "duration_s": 0.18,
+      "element_count": 24,
+      "head_mass_kg": 0.205,
+      "head_rotary_inertia_kg_m2": 0.00048,
+      "high_frequency_pulse_s": 0.004,
+      "length_m": 1.0,
+      "low_frequency_pulse_s": 0.08,
+      "mode_count": 6,
+      "peak_tip_force_n": 8.0,
+      "peak_tip_moment_nm": 4.0,
+      "step_s": 1.25e-5,
+      "tip_diameter_m": 0.0085,
+      "wall_thickness_m": 0.001,
+      "youngs_modulus_pa": 112000000000.0
+    },
+    "calibration_status": "synthetic_reference_not_equipment_calibrated",
+    "damping_ratio": 0.018,
+    "mechanism": {
+      "base_damping_ns_m": 500.0,
+      "base_mass_kg": 35.0,
+      "base_stiffness_n_m": 24000.0,
+      "constraint_tolerance_m": 1e-8,
+      "distal_club_inertia_kg_m2": 0.006561000000000001,
+      "distal_club_length_m": 0.54,
+      "distal_club_mass_kg": 0.27,
+      "forearm_inertia_kg_m2": 0.010125,
+      "forearm_length_m": 0.3,
+      "forearm_mass_kg": 1.35,
+      "gravity_m_s2": 9.80665,
+      "joint_damping_nms_rad": 0.08,
+      "kkt_tolerance": 1e-8,
+      "left_grip_offset_m": -0.065,
+      "left_shoulder_offset_m": [-0.19, 0.0],
+      "proximal_club_inertia_kg_m2": 0.003174,
+      "proximal_club_length_m": 0.46,
+      "proximal_club_mass_kg": 0.18,
+      "rank_tolerance": 1e-10,
+      "right_grip_offset_m": 0.065,
+      "right_shoulder_offset_m": [0.19, 0.0],
+      "shaft_damping_nms_rad": 0.6,
+      "shaft_stiffness_nm_rad": 80.0,
+      "upper_inertia_kg_m2": 0.016213333333333333,
+      "upper_length_m": 0.32,
+      "upper_mass_kg": 1.9
+    },
+    "quadrature_order": 4,
+    "retained_mode_count": 3
+  },
+  "same_state_killswitch": {
+    "closure": {
+      "acceleration_constraint_residual_max": 9.448147968507357e-14,
+      "contact_power_identity_max_w": 1.4210854715202004e-13,
+      "kkt_residual_max": 1.9147211549739527e-13,
+      "mechanical_energy_change_j": -1.7096128419543675,
+      "net_nonconstraint_work_j": -1.7189488873245196,
+      "position_constraint_max_m": 1.617558418452518e-14,
+      "projection_energy_change_sum_j": -0.0051490302663079746,
+      "velocity_constraint_max_m_s": 1.4895204919483639e-15,
+      "work_energy_residual_abs_j": 0.00933604537015209
+    },
+    "complete_distal_command_removed": true,
+    "cut_time_s": 0.22,
+    "minimum_force_generated_couple_nm": -21.173909515110914,
+    "negative_couple_persistence_s": 0.025499999999999995,
+    "prebranch_state_max_abs_difference": 0.0
+  },
+  "schema_version": "moving-base-modal-shaft-evidence-v1",
+  "short_pulse_mode_comparison": [
+    {
+      "closure": {
+        "acceleration_constraint_residual_max": 1.3014328225409287e-13,
+        "contact_power_identity_max_w": 1.3322676295501878e-15,
+        "kkt_residual_max": 1.851048437976794e-13,
+        "mechanical_energy_change_j": -0.0211765030676645,
+        "net_nonconstraint_work_j": -0.021212609858187438,
+        "position_constraint_max_m": 5.073049325500103e-11,
+        "projection_energy_change_sum_j": -3.4491876022002543e-10,
+        "velocity_constraint_max_m_s": 7.472462390623427e-10,
+        "work_energy_residual_abs_j": 3.61067905229398e-5
+      },
+      "clubhead_position_max_difference_m": 1.1968214307750104e-5,
+      "clubhead_position_rms_difference_m": 6.420032252395945e-6,
+      "mode_count": 1,
+      "peak_strain_energy_j": 0.0022856654376497395,
+      "tip_deflection_rms_difference_m": 0.00048436841825876486
+    },
+    {
+      "closure": {
+        "acceleration_constraint_residual_max": 1.4386985290908517e-13,
+        "contact_power_identity_max_w": 2.6645352591003757e-15,
+        "kkt_residual_max": 2.263891592475184e-13,
+        "mechanical_energy_change_j": -0.0204240977196406,
+        "net_nonconstraint_work_j": -0.020460136762649864,
+        "position_constraint_max_m": 7.668076066678681e-11,
+        "projection_energy_change_sum_j": -4.3168313368369127e-10,
+        "velocity_constraint_max_m_s": 2.0974291077903746e-10,
+        "work_energy_residual_abs_j": 3.6039043009264415e-5
+      },
+      "clubhead_position_max_difference_m": 1.183674431182992e-6,
+      "clubhead_position_rms_difference_m": 5.986452771052767e-7,
+      "mode_count": 3,
+      "peak_strain_energy_j": 0.0028368159580587486,
+      "tip_deflection_rms_difference_m": 7.549251960572762e-6
+    },
+    {
+      "closure": {
+        "acceleration_constraint_residual_max": 1.29428367931746e-13,
+        "contact_power_identity_max_w": 2.220446049250313e-15,
+        "kkt_residual_max": 2.0785637535361864e-13,
+        "mechanical_energy_change_j": -0.020409377756642755,
+        "net_nonconstraint_work_j": -0.02044544937522799,
+        "position_constraint_max_m": 7.56079154324708e-11,
+        "projection_energy_change_sum_j": -4.219273819217051e-10,
+        "velocity_constraint_max_m_s": 2.214982595740215e-10,
+        "work_energy_residual_abs_j": 3.607161858523375e-5
+      },
+      "clubhead_position_max_difference_m": 0.0,
+      "clubhead_position_rms_difference_m": 0.0,
+      "mode_count": 6,
+      "peak_strain_energy_j": 0.0028421072718450967,
+      "tip_deflection_rms_difference_m": 0.0
+    }
+  ],
+  "smooth_mode_comparison": [
+    {
+      "closure": {
+        "acceleration_constraint_residual_max": 1.2153668475864134e-13,
+        "contact_power_identity_max_w": 2.3314683517128287e-15,
+        "kkt_residual_max": 1.9590847648306807e-13,
+        "mechanical_energy_change_j": 0.1761269147261899,
+        "net_nonconstraint_work_j": 0.1760828831688882,
+        "position_constraint_max_m": 9.98089848180856e-11,
+        "projection_energy_change_sum_j": -8.86064555061239e-9,
+        "velocity_constraint_max_m_s": 1.8420036149940225e-10,
+        "work_energy_residual_abs_j": 4.4031557301704716e-5
+      },
+      "clubhead_position_max_difference_m": 1.3449934391730938e-5,
+      "clubhead_position_rms_difference_m": 8.40738801352793e-6,
+      "mode_count": 1,
+      "peak_strain_energy_j": 0.000410104227440893,
+      "tip_deflection_rms_difference_m": 0.00015976138178014435
+    },
+    {
+      "closure": {
+        "acceleration_constraint_residual_max": 1.116532905923927e-13,
+        "contact_power_identity_max_w": 1.4432899320127035e-15,
+        "kkt_residual_max": 1.8634915812442323e-13,
+        "mechanical_energy_change_j": 0.17605671785385368,
+        "net_nonconstraint_work_j": 0.17601272276515412,
+        "position_constraint_max_m": 9.945697812970604e-11,
+        "projection_energy_change_sum_j": -8.583999289157873e-9,
+        "velocity_constraint_max_m_s": 2.1180081038529662e-10,
+        "work_energy_residual_abs_j": 4.399508869956659e-5
+      },
+      "clubhead_position_max_difference_m": 4.219349411196596e-7,
+      "clubhead_position_rms_difference_m": 1.758737532338382e-7,
+      "mode_count": 3,
+      "peak_strain_energy_j": 0.00034570595289735133,
+      "tip_deflection_rms_difference_m": 1.8635072492738398e-6
+    },
+    {
+      "closure": {
+        "acceleration_constraint_residual_max": 1.6198216835143453e-13,
+        "contact_power_identity_max_w": 1.887379141862766e-15,
+        "kkt_residual_max": 2.665014521538482e-13,
+        "mechanical_energy_change_j": 0.17605695079510753,
+        "net_nonconstraint_work_j": 0.1760129493285345,
+        "position_constraint_max_m": 9.998628454434804e-11,
+        "projection_energy_change_sum_j": -8.578830090755218e-9,
+        "velocity_constraint_max_m_s": 2.212959459940672e-10,
+        "work_energy_residual_abs_j": 4.400146657301818e-5
+      },
+      "clubhead_position_max_difference_m": 0.0,
+      "clubhead_position_rms_difference_m": 0.0,
+      "mode_count": 6,
+      "peak_strain_energy_j": 0.0003489084013207508,
+      "tip_deflection_rms_difference_m": 0.0
+    }
+  ],
+  "source_sha256": {
+    "scripts/research/proximal_distal_energy/moving_base_flexible_club.py": "251c345bdc961316c00058831624cfc96954d9a6cf59817e48500bd6b19a9a23",
+    "scripts/research/proximal_distal_energy/moving_base_modal_shaft.py": "260adaad2d43b2ce288c8344bb4e432272ff872fc719fe333c5cdcad571680e2",
+    "scripts/research/proximal_distal_energy/run_moving_base_modal_shaft_study.py": "e2a6e326d7418180d684ab4ae4f994b017d911699046768429a24aecfaa29e7d",
+    "scripts/research/proximal_distal_energy/shaft_beam_reference.py": "1405dc8214cfdf4931ec71e9c1608d284cd44c0fa42d5d42d3c1e338f212481e",
+    "src/shared/python/physics/flexible_shaft.py": "d25cb7fd2408a0be0b8cd3a85469a3f8db7445665a963fd535ebeb8c2ed1f1fd"
+  },
+  "study_id": "forward-moving-base-distributed-modal-shaft-v1",
+  "timestep_refinement": [
+    {
+      "closure": {
+        "acceleration_constraint_residual_max": 9.448147968507357e-14,
+        "contact_power_identity_max_w": 1.4210854715202004e-13,
+        "kkt_residual_max": 1.9147211549739527e-13,
+        "mechanical_energy_change_j": -1.7096128419543675,
+        "net_nonconstraint_work_j": -1.7189488873245196,
+        "position_constraint_max_m": 1.617558418452518e-14,
+        "projection_energy_change_sum_j": -0.0051490302663079746,
+        "velocity_constraint_max_m_s": 1.4895204919483639e-15,
+        "work_energy_residual_abs_j": 0.00933604537015209
+      },
+      "minimum_force_generated_couple_nm": -21.173909515110914,
+      "negative_couple_persistence_s": 0.025499999999999995,
+      "step_s": 0.0005
+    },
+    {
+      "closure": {
+        "acceleration_constraint_residual_max": 9.903089807584105e-14,
+        "contact_power_identity_max_w": 1.7053025658242404e-13,
+        "kkt_residual_max": 1.7166191433416263e-13,
+        "mechanical_energy_change_j": -1.7139839687243903,
+        "net_nonconstraint_work_j": -1.718620230028373,
+        "position_constraint_max_m": 7.329180203193406e-15,
+        "projection_energy_change_sum_j": -0.0024734428049342227,
+        "velocity_constraint_max_m_s": 1.4895204919483639e-15,
+        "work_energy_residual_abs_j": 0.004636261303982758
+      },
+      "minimum_force_generated_couple_nm": -21.185998837250786,
+      "negative_couple_persistence_s": 0.025249999999999995,
+      "step_s": 0.00025
+    },
+    {
+      "closure": {
+        "acceleration_constraint_residual_max": 1.2480092031985845e-13,
+        "contact_power_identity_max_w": 1.9895196601282805e-13,
+        "kkt_residual_max": 1.8628778149458759e-13,
+        "mechanical_energy_change_j": -1.7161193755614583,
+        "net_nonconstraint_work_j": -1.7184296471975173,
+        "position_constraint_max_m": 7.329180203193406e-15,
+        "projection_energy_change_sum_j": -0.0012113680207122002,
+        "velocity_constraint_max_m_s": 1.4895204919483639e-15,
+        "work_energy_residual_abs_j": 0.0023102716360590136
+      },
+      "minimum_force_generated_couple_nm": -21.192214287764543,
+      "negative_couple_persistence_s": 0.02512500000000001,
+      "step_s": 0.000125
+    }
+  ],
+  "trajectory_kind": "forward_constrained_kkt_with_branched_intervention"
+}

@@ -391,27 +391,21 @@ def gravity_vector(q: np.ndarray, params: TwoArmParams) -> np.ndarray:
 def coriolis_vector(
     q: np.ndarray, qdot: np.ndarray, params: TwoArmParams
 ) -> np.ndarray:
-    """Return the Christoffel velocity-bias vector using M derivatives."""
+    """Return the exact velocity-bias vector for the two independent arms."""
     state = _state_vector("q", q)
     velocity = _state_vector("qdot", qdot)
-    step = 1e-6
-    derivatives = np.empty((N_COORDINATES, N_COORDINATES, N_COORDINATES))
-    for coordinate in range(N_COORDINATES):
-        plus = state.copy()
-        minus = state.copy()
-        plus[coordinate] += step
-        minus[coordinate] -= step
-        derivatives[coordinate] = (
-            mass_matrix(plus, params) - mass_matrix(minus, params)
-        ) / (2.0 * step)
     result = np.zeros(N_COORDINATES)
-    for i in range(N_COORDINATES):
-        for j in range(N_COORDINATES):
-            for k in range(N_COORDINATES):
-                christoffel = 0.5 * (
-                    derivatives[k, i, j] + derivatives[j, i, k] - derivatives[i, j, k]
-                )
-                result[i] += christoffel * velocity[j] * velocity[k]
+    coupling = (
+        0.5 * params.forearm_mass_kg * params.upper_length_m * params.forearm_length_m
+    )
+    for shoulder_index, elbow_index in ((0, 1), (2, 3)):
+        sine = np.sin(state[elbow_index])
+        shoulder_speed = velocity[shoulder_index]
+        elbow_speed = velocity[elbow_index]
+        result[shoulder_index] = (
+            -coupling * sine * (2.0 * shoulder_speed * elbow_speed + elbow_speed**2)
+        )
+        result[elbow_index] = coupling * sine * shoulder_speed**2
     return result
 
 

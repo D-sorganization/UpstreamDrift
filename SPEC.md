@@ -39,7 +39,7 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.498 |
+| **Spec Version** | 1.0.505 |
 | **Last Spec Update** | 2026-08-11 |
 
 ## 2. Purpose & Mission
@@ -70,6 +70,21 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ## 4. Architecture Overview
 
 ### Recent Spec Updates
+
+- **2026-08-11** - Replaced the obsolete fixed 1 MiB PDF ceiling with an
+  artifact-integrity and repository-boundary policy. Changed PDFs must carry a
+  valid `%PDF-` signature, files above GitHub's 50,000,000-byte recommendation
+  are reported, and files beyond its 100,000,000-byte hard boundary fail. The
+  manuscript optimizer still proves page, URI-link, and outline preservation;
+  an explicit release-specific ceiling remains available when justified.
+
+- **2026-08-11** - Added a coupled moving-base, two-hand, three-mode shaft
+  experiment and a separate matched-task arm--wrist allocation/preload study.
+  The latter holds an 8 N m club task exact while varying actuator subspace,
+  quantifies internal load tradeoffs, and tests persistent-direction versus
+  role-reversal commands over a declared dead-zone/time-constant grid. Both
+  remain synthetic mechanism tiers; muscle, scapular, tissue-slack, equipment,
+  human-performance, and universal-technique claims remain unsupported.
 
 - **2026-08-11** - Added the first UpstreamDrift consumer boundary for the
   canonical Tools ground-model contracts (Tools #4276). The headless gateway
@@ -1973,16 +1988,16 @@ Beyond standard tools, CI enforces custom checks:
 git clone https://github.com/D-sorganization/UpstreamDrift.git
 cd UpstreamDrift
 python -m pip install -e ".[dev]"  # Include dev dependencies
-# For desktop app: cargo install tauri-cli
+# For Desktop App: Cargo Install Tauri-Cli
 
 # Running the FastAPI Server
 uvicorn src.api.server:app --host 127.0.0.1 --port 8000 --reload
-# ...or, equivalently, through the launcher:
+# ...Or, Equivalently, Through the Launcher:
 upstream-drift --api-only --port 8000
 
 # Running the PyQt6 GUI
 upstream-drift --classic
-# ...or directly:
+# ...Or Directly:
 python launch_upstream_drift.py --classic
 
 # Running the CLI
@@ -2050,6 +2065,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-11 | 1.0.504 | Added a coupled forward three-mode shaft experiment plus an exact same-state arm--wrist allocation and phenomenological preload/role-reversal study; published deterministic evidence, figures, release presets, and falsifiers while explicitly withholding muscle, scapular, tissue, equipment, human-performance, and universal-technique claims. |
 | 2026-08-11 | 1.0.498 | Added a fail-closed, headless UpstreamDrift gateway for the exact Tools flight-to-ground request/result and reference-execution v1 façade, with absence/presence/malformed-contract tests and explicit dependency/release limitations for Tools #4276. |
 | 2026-08-11 | 1.0.497 | Added #8493 frame-explicit constrained-contact reaction decomposition with configuration, velocity, control, and retained-external components; verified total, ZTCF, and ZVCF closure in a deterministic fixed-support double-pendulum benchmark; published machine-readable evidence and three reproducible figures; and expanded the proximal-distal scientific article with GRF, COP, free-moment, identifiability, and held-out human-data falsification boundaries. |
 | 2026-08-10 | 1.0.496 | Added #8458 hand-path drift/control attribution across forward double-pendulum and one-arm cases plus a prescribed two-arm closed-loop sweep; exported deterministic force, impulse, power, work, joint/time-window, common/differential-mode, sensitivity, and closure evidence; bounded the late residual-couple preview result without claiming muscle preactivation or human performance; extended lossless object-stream PDF compaction to preserve the 106-page, 110-link, 122-outline publication below the size guard; and restored the all-files size gate with the final owned #8472 chat-dock exception through 2026-08-31. |

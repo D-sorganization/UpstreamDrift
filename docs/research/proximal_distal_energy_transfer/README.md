@@ -12,8 +12,17 @@ matched rigid/flexible three-coordinate study separately accounts for control,
 momentum, gravity, joint damping, shaft elasticity, and shaft damping, with
 closed energy bookkeeping and a 120-case robustness grid. A common-observable
 model ladder then tests wrench transport, prescribed mobile-hub reactions,
-two-hand constraint rank, and proper 3-D frame invariance without representing
-the still-open full-body cross-engine comparison as complete. A three-tier
+two-hand constraint rank, and proper 3-D frame invariance. A reduced full-body
+common-state tier adds genuine nonplanar motion and compares MuJoCo inverse
+dynamics with an independent Lagrange--Christoffel formulation built from the
+same hashed model. It preserves the geometry sign intervention while keeping
+passive and forward-contact claims open at that tier. A subsequent reduced
+spatial experiment independently advances native MuJoCo and Pinocchio forward
+dynamics with finite-mass hand carriages, paired compliant interfaces, an
+exact same-state grounded-driver killswitch, long-axis rotation, swing-plane
+evolution, and ground-pathway bookkeeping. It supports reduced forward-contact
+transport while keeping anatomical, muscle, equipment, human, and coaching
+claims explicitly open. A three-tier
 hand-path attribution study now separates stitched pointwise ZTCF drift,
 same-state control, and separately defined ZVCF reactions for force vectors,
 impulse, power, work, every modeled joint, and four neutral time windows. A
@@ -25,6 +34,42 @@ the fixed-support double-pendulum benchmark adds pointwise GRF-analogue ZTCF
 and ZVCF traces, closure tests, prediction metrics, vector figures, and an
 explicit human force-plate falsification protocol. It does not infer bilateral
 foot forces from a resultant wrench.
+A forward constrained two-arm study now evolves the floating club and both arm
+chains under four independent grip constraints. It records exact same-state
+zero-command branches, separated force-generated and direct-wrist moments,
+contact modes and power, a zero-moment-arm negative control, and timestep and
+projection sensitivity. The result establishes finite passive-couple
+persistence in the declared planar model only.
+A coupled moving-base and flexible-club extension now evolves a finite-mass
+translating base, both constrained arms, both grip reactions, and a two-segment
+club in one forward solve. It records base and shaft energy, a same-state
+zero-command branch, a coincident-grip geometric control, parameter
+sensitivity, and timestep convergence without prescribing base motion or
+shaft flex.
+A coupled forward modal-shaft extension replaces the single lumped flex
+coordinate with multiple bending modes while retaining the moving base, two
+hand contacts, and same-state controls. It is a synthetic mechanism test, not
+an equipment-calibrated shaft result.
+A distributed-shaft structural study now reuses the shared Euler--Bernoulli
+finite-element model, adds declared head inertia, identifies a synthetic
+two-parameter modal case, and compares one-mode and six-mode responses under
+slow and short-duration loads. It exposes higher-mode discrepancy while
+remaining explicitly separate from equipment calibration and from the coupled
+two-hand solve.
+A matched-task allocation study then compares the proximal joint-torque and
+direct wrist-moment extremes that can produce the same declared club moment.
+A separate phenomenological transmission channel tests persistent-direction
+and wrist-to-arm role-reversal programs with and without preload, across a
+registered dead-zone and time-constant grid. These are actuator-allocation and
+transmission hypotheses; they do not identify scapular muscles, tissue slack,
+or a preferred human technique.
+A coupled uncertainty, identifiability, and delayed-control phase now varies
+12 inputs simultaneously in that same forward model. It publishes deterministic
+Latin-hypercube/PRCC screening, rank and null-space audits, and separate
+training/held-out comparisons of eight preselected programs across five
+objectives. The result exposes non-identifiability and strategy tradeoffs; it
+does not claim a population distribution, physiological actuator, universal
+optimum, or coaching prescription.
 
 The public-facing article is available on
 [affinedrift.com](https://affinedrift.com/articles/proximal-distal-energy-transfer.html).
@@ -34,22 +79,30 @@ Ongoing validation and extension work is tracked in
 The hand-path attribution, two-hand redundancy, and preactivation validation
 program is tracked in
 [#8458](https://github.com/D-sorganization/UpstreamDrift/issues/8458).
+The arm--wrist allocation, role-reversal, and preload program is tracked in
+[#8497](https://github.com/D-sorganization/UpstreamDrift/issues/8497).
 Ground-reaction drift attribution and human validation requirements are tracked
 in [#8493](https://github.com/D-sorganization/UpstreamDrift/issues/8493).
 
 ## Layout
 
-| Path                                                                         | What it is                                                                        |
-| ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| [`proximal_distal_energy_transfer.qmd`](proximal_distal_energy_transfer.qmd) | Master Quarto document (front matter + chapter includes)                          |
-| [`chapters/`](chapters/)                                                     | Chapter source files (`_ch01`–`_ch09`, `_appendices`)                             |
-| [`HAND_PATH_ATTRIBUTION_CONTRACT.md`](HAND_PATH_ATTRIBUTION_CONTRACT.md)     | Canonical source, terminology, and estimand contract for hand-path attribution    |
-| [`references.bib`](references.bib)                                           | Linked bibliography plus a clearly labeled project-originated presentation source |
-| [`figures/`](figures/)                                                       | Figures generated from the recorded analyses (PDF and SVG)                        |
-| [`data/`](data/)                                                             | Recorded experiment outputs with provenance (JSON + NPZ)                          |
-| [`proximal_distal_energy_transfer.tex`](proximal_distal_energy_transfer.tex) | LaTeX generated from the Quarto source (`keep-tex: true`)                         |
-| [`sources/wscg_2024/`](sources/wscg_2024/)                                   | Hash-registered WSCG presentation sources and interpretation boundaries           |
-| [`proximal_distal_energy_transfer.pdf`](proximal_distal_energy_transfer.pdf) | Rendered scientific PDF                                                           |
+| Path                                                                                   | What it is                                                                        |
+| -------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| [`proximal_distal_energy_transfer.qmd`](proximal_distal_energy_transfer.qmd)           | Master Quarto document (front matter + chapter includes)                          |
+| [`chapters/`](chapters/)                                                               | Chapter source files (`_ch01`–`_ch09`, `_appendices`)                             |
+| [`HAND_PATH_ATTRIBUTION_CONTRACT.md`](HAND_PATH_ATTRIBUTION_CONTRACT.md)               | Canonical source, terminology, and estimand contract for hand-path attribution    |
+| [`EVIDENCE_SCHEMA_V2.md`](EVIDENCE_SCHEMA_V2.md)                                       | Falsifiable prediction and named spatial-interface evidence contract              |
+| [`MODEL_COMPLETION_FALSIFICATION_MATRIX.md`](MODEL_COMPLETION_FALSIFICATION_MATRIX.md) | Claim, alternative-explanation, model-discrepancy, and falsifier register         |
+| [`EXPERIMENTAL_FALSIFICATION_PROTOCOL.md`](EXPERIMENTAL_FALSIFICATION_PROTOCOL.md)     | Frozen human-data acquisition, split, analysis, and inference-boundary protocol   |
+| [`REVIEWER_WORKBENCH.md`](REVIEWER_WORKBENCH.md)                                       | Claim-first figure, evidence, and download index by model tier                    |
+| [`DATA_DICTIONARY.md`](DATA_DICTIONARY.md)                                             | Artifact and recurring-field definitions with interpretation boundaries           |
+| [`release_manifest.json`](release_manifest.json)                                       | Hash-pinned presets, claim status, artifacts, and open release gates              |
+| [`references.bib`](references.bib)                                                     | Linked bibliography plus a clearly labeled project-originated presentation source |
+| [`figures/`](figures/)                                                                 | Figures generated from the recorded analyses (PDF and SVG)                        |
+| [`data/`](data/)                                                                       | Recorded experiment outputs with provenance (JSON + NPZ)                          |
+| [`proximal_distal_energy_transfer.tex`](proximal_distal_energy_transfer.tex)           | LaTeX generated from the Quarto source (`keep-tex: true`)                         |
+| [`sources/wscg_2024/`](sources/wscg_2024/)                                             | Hash-registered WSCG presentation sources and interpretation boundaries           |
+| [`proximal_distal_energy_transfer.pdf`](proximal_distal_energy_transfer.pdf)           | Rendered scientific PDF                                                           |
 
 ## Reproducing Everything
 
@@ -66,6 +119,16 @@ python3 -m scripts.research.proximal_distal_energy.run_mechanism_ladder_study
 python3 -m scripts.research.proximal_distal_energy.run_hand_path_attribution_study
 python3 -m scripts.research.proximal_distal_energy.run_grf_drift_study
 python3 -m scripts.research.proximal_distal_energy.two_hand_preactivation_hypothesis
+python3 -m scripts.research.proximal_distal_energy.run_forward_two_arm_study
+python3 -m scripts.research.proximal_distal_energy.run_moving_base_flexible_study
+python3 -m scripts.research.proximal_distal_energy.run_moving_base_modal_shaft_study
+python3 -m scripts.research.proximal_distal_energy.run_shaft_beam_reference
+python3 -m scripts.research.proximal_distal_energy.run_torque_allocation_preload_study
+python3 -m scripts.research.proximal_distal_energy.run_spatial_full_body_study
+python3 -m scripts.research.proximal_distal_energy.run_spatial_forward_contact_study
+python3 -m scripts.research.proximal_distal_energy.run_uncertainty_control_study
+python3 -m scripts.research.proximal_distal_energy.run_experimental_protocol_dry_run
+python3 -m scripts.research.proximal_distal_energy.qualify_open_release validate
 # robustness analyses
 python3 -m scripts.research.proximal_distal_energy.e1b_bounded_torque
 python3 -m scripts.research.proximal_distal_energy.e1c_impact_sensitivity
@@ -77,6 +140,14 @@ python3 -m scripts.research.proximal_distal_energy.make_counterfactual_figures
 python3 -m scripts.research.proximal_distal_energy.make_two_hand_wscg_figures
 python3 -m scripts.research.proximal_distal_energy.make_shaft_contribution_figures
 python3 -m scripts.research.proximal_distal_energy.make_mechanism_ladder_figures
+python3 -m scripts.research.proximal_distal_energy.make_forward_two_arm_figures
+python3 -m scripts.research.proximal_distal_energy.make_moving_base_flexible_figures
+python3 -m scripts.research.proximal_distal_energy.make_moving_base_modal_shaft_figures
+python3 -m scripts.research.proximal_distal_energy.make_shaft_beam_reference_figures
+python3 -m scripts.research.proximal_distal_energy.make_torque_allocation_preload_figures
+python3 -m scripts.research.proximal_distal_energy.make_spatial_full_body_figures
+python3 -m scripts.research.proximal_distal_energy.make_spatial_forward_contact_figures
+python3 -m scripts.research.proximal_distal_energy.make_uncertainty_control_figures
 # document
 cd docs/research/proximal_distal_energy_transfer
 quarto render proximal_distal_energy_transfer.qmd --to pdf
@@ -88,8 +159,14 @@ Requires Quarto + a LaTeX distribution (TeX Live with `lmodern`), and
 Python 3.11+ with `numpy`, `matplotlib`, `pydantic`, `simpleeval`,
 `pandas`, and `pymupdf`. The final command performs lossless PDF object/stream
 compaction and fails if the page, URI-link, or outline contract changes.
-Experiments are deterministic (fixed-step RK4); provenance
-(git SHA, parameters) is stamped into `data/*.json`.
+Experiments are deterministic. The open-chain studies use fixed-step RK4; the
+forward constrained two-hand study uses velocity Verlet with mass-metric
+position and velocity projection. Parameters and numerical contracts are
+recorded in `data/*.json`. Re-executing the two-engine spatial forward study
+also requires the declared `mujoco` and `pinocchio` extras. The native
+Pinocchio `pin` wheel used for this archive executes in Linux/WSL; the adapters
+reject unrelated packages that expose the same import name without the native
+model and ABA APIs.
 
 ## Evidence Boundaries
 
@@ -108,9 +185,15 @@ Experiments are deterministic (fixed-step RK4); provenance
   neither establishes a universal coaching prescription, equipment effect, or
   population-level result.
 - The higher-order ladder executes a three-coordinate interface audit,
-  prescribed mobile-hub inverse dynamics, planar closed-loop constraint
-  geometry, and 3-D frame transformations. Full-body cross-engine dynamics are
-  explicitly recorded as unexecuted.
+  prescribed mobile-hub inverse dynamics, planar closed-loop geometry, proper
+  3-D frame transformations, and reduced full-body nonplanar common-state
+  inverse dynamics in two independent formulations. The spatial tier prescribes
+  hand loads and therefore cannot establish passive load origin by itself.
+- The reduced spatial forward-contact tier independently executes native
+  MuJoCo and Pinocchio trajectories with two translational hand carriages and a
+  rigid club. Its compliant-contact killswitch supports mechanism persistence
+  only for that declared model; it is not articulated anatomy, measured grip
+  tissue, a distributed shaft, muscle coordination, or human evidence.
 - The hand-path evidence uses two forward-simulated open-chain reference cases
   and one prescribed, constraint-consistent two-arm local sweep. Its normalized
   time quartiles are bookkeeping windows, not anatomical swing phases. ZVCF
@@ -119,10 +202,39 @@ Experiments are deterministic (fixed-step RK4); provenance
 - The residual-couple preview test holds archived BASE and pointwise ZTCF
   traces fixed. It tests a signal-delay hypothesis, not muscle activation,
   metabolic effort, clubhead-speed improvement, or a human timing prescription.
+- The forward two-hand study uses a fixed shoulder base, rigid club, planar
+  point constraints, and one declared command/parameter set. Its zero-command
+  branch demonstrates mechanical persistence, not muscle passivity, human use,
+  or an optimal speed strategy.
+- The coupled moving-base/flexible-club study replaces prescribed hub motion
+  with a finite-mass translating base and adds one lumped torsional club mode.
+  Its planar point contacts, linear springs and dampers, and declared
+  mechanism-study parameters are not a calibrated body, distributed shaft, or
+  equipment comparison.
+- The distributed-shaft comparison identifies only a declared synthetic modal
+  truth. Its finite-element convergence and work--energy closure do not
+  constitute equipment calibration, measured shaft validation, or proof that
+  the result survives coupling into the constrained two-hand solve.
+- The coupled modal-shaft study closes that synthetic coupling gap only for the
+  declared planar mechanism case. It does not provide measured equipment
+  calibration, torsion, nonlinear shaft behavior, or a subject-specific grip.
+- The allocation study solves an exact same-state club-moment task over declared
+  generalized actuator subspaces. Calling the proximal subspace an arm or
+  scapular strategy is shorthand, not muscle identification. Its transmission
+  channel gives a falsifiable operational meaning to lost continuity; it is not
+  evidence that anatomical tissue was literally slack.
 - The ground-reaction extension demonstrates constrained-reaction algebra and a
   fixed-support planar benchmark. Human drift fractions, bilateral foot-force
   allocation, COP, and free moment remain unvalidated without synchronized
   force-plate, whole-body, and club data.
+- The reduced full-body spatial study uses 20 generalized coordinates and
+  spherical inertia elements shared by MuJoCo and an independent analytical
+  implementation. Its same-state agreement is an implementation-transport
+  result, not anatomical validation or a forward-contact simulation.
+- The uncertainty/control study uses declared engineering envelopes and small
+  deterministic model ensembles. PRCC is a screening statistic; the effort
+  and face/path quantities are proxies; and held-out model performance is not
+  participant validation.
 - Generalization and human-data work is tracked in
   [#8426](https://github.com/D-sorganization/UpstreamDrift/issues/8426).
 

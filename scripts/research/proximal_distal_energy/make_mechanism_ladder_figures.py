@@ -61,7 +61,8 @@ def fig_ladder_schematic() -> None:
         ("Moving\nHub", "Base Translation", COLORS["mobile"]),
         ("Two-Hand\nLoop", "Constraint Rank", COLORS["loop"]),
         ("Rotated 3-D\nWrench", "Frame Audit", COLORS["three_d"]),
-        ("Full-Body\nDynamics", "Not Executed", COLORS["pending"]),
+        ("Reduced\nFull-Body\nDynamics", "Common State", COLORS["mobile"]),
+        ("Forward Spatial\nContact", "Not Executed", COLORS["pending"]),
     ]
     for index, (title, subtitle, color) in enumerate(tiers):
         ax.add_patch(
@@ -93,7 +94,7 @@ def fig_ladder_schematic() -> None:
                 )
             )
     ax.text(
-        2.5,
+        (len(tiers) - 1) / 2,
         -0.72,
         "Observables Stay Fixed: Reference Point, Frame, Force, Couple, Velocity, Angular Velocity, and Power",
         ha="center",
@@ -319,7 +320,9 @@ def fig_discrepancy_matrix(record: dict) -> None:
         "Moving Hub",
         "Closed Loop",
         "3-D Frame",
-        "Full-Body Dynamics",
+        "Spatial Inverse Dynamics",
+        "Forward Contact",
+        "Articulated Contact",
     ]
     matrix = np.full((len(rows), len(mechanisms)), np.nan)
     for index in range(len(rows)):

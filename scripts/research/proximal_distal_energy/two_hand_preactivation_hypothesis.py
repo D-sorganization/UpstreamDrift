@@ -250,6 +250,14 @@ def build_study(
 def _render_figure(
     record: dict[str, Any], arrays: dict[str, np.ndarray], figure_dir: Path
 ) -> tuple[Path, Path]:
+    plt.rcParams.update(
+        {
+            "pdf.use14corefonts": True,
+            "pdf.compression": 9,
+            "path.simplify": True,
+            "path.simplify_threshold": 1.0,
+        }
+    )
     time = arrays["time_s"]
     mask = arrays["late_window_mask"]
     fig, axes = plt.subplots(3, 1, figsize=(10.5, 9.3))
@@ -347,6 +355,13 @@ def _render_figure(
     pdf = figure_dir / f"{FIGURE_STEM}.pdf"
     fig.savefig(svg, bbox_inches="tight")
     fig.savefig(pdf, bbox_inches="tight")
+    svg.write_text(
+        "\n".join(
+            line.rstrip() for line in svg.read_text(encoding="utf-8").splitlines()
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     plt.close(fig)
     return svg, pdf
 
