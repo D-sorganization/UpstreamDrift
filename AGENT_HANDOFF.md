@@ -9,8 +9,9 @@ Update this file with every PR and every push to main.
 - **#8557 Comprehensive Scientific Claim Audit and Open Golf Modeling
   Program** — PR **#8576** and the concurrent rotating-base integration are on
   exact remote main `820f1e79f68ad0b56ce7b248ac3886762f3fe609`. Branch
-  `research/8557-coupled-base-compliance-audit` is the active sixteenth
-  fail-closed slice. It maps all 43 coupled-base/compliant-club candidates to
+  `research/8557-coupled-base-compliance-audit` is published as ready PR
+  **#8578** and is the active sixteenth fail-closed slice. It maps all 43
+  coupled-base/compliant-club candidates to
   PD-CLAIM-147 through PD-CLAIM-160. The primary acceleration-constraint bias
   is now analytic and independently directionally audited; all five sensitivity
   trajectories use the same 0.5 ms step. The reference evidence separately
