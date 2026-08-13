@@ -6,8 +6,8 @@ Update this file with every PR and every push to main.
 ## Where the Repo Is Heading
 
 - **#8557 Comprehensive Scientific Claim Audit and Open Golf Modeling
-  Program** — PRs #8558–#8565 are on `main`; branch
-  `research/8557-energy-accounting-audit` continues the fail-closed audit
+  Program** — PRs #8558–#8566 are on `main`; branch
+  `research/8557-interaction-force-audit` continues the fail-closed audit
   authority. It inventories all 895 narrative candidates across the 32-source
   Quarto paper and reconciles all 18 public release-claim keys without calling
   the review complete. The registry records that the Biomechanics and Nonlinear Control
@@ -46,13 +46,18 @@ scripts.research.proximal_distal_energy.claim_audit inventory`, then
   1986 inverse-dynamics paper, preserves Putnam's explicit negative findings,
   and bounds the Herring--Chapman and Marshall--Elliott transport claims. PR
   #8565 merged as exact remote-main commit
-  `293bd4ba5203991c6772044f30ba75c9e3d37495`. The sixth local slice
+  `293bd4ba5203991c6772044f30ba75c9e3d37495`. The sixth merged slice
   distinguishes net joint power from muscle energetics, restores complete
   segment wrench-power accounting, bounds Robertson--Winter and Zajac method
   claims, demonstrates kinematic-sequence method sensitivity, and treats
   planarity as an object-and-tolerance declaration rather than a universal
-  anatomical fact. Current local authority: 895 candidates, 54 reviewed, 50
-  registered atomic claims, and 841 unadjudicated candidates. Registry validation passes; render,
+  anatomical fact. PR #8566 merged as exact remote-main commit
+  `ad74e9a97c3e555b9cac91f9ae3872c332c00c0c`. The seventh local slice fully
+  adjudicates Chapters 2 and 3, distinguishes pointwise from forward
+  counterfactuals, narrows force-dominance statements to their registered RMS
+  norm, and replaces strategy language with five falsifiable study hypotheses.
+  Current local authority: 895 candidates, 116 reviewed, 61 registered atomic
+  claims, and 779 unadjudicated candidates. Registry validation passes; render,
   inspect, release-validate, and protected-merge this slice before treating the
   new counts as remote-main evidence.
   The required Tools side task is not complete. Its dispersion slice received

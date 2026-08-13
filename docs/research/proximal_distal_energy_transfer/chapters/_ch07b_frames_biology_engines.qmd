@@ -11,7 +11,7 @@ inverse dynamics identifies a unique biological cause.
 
 These transitions are connected. A force, moment, velocity, or activation is
 only useful if its frame, reference point, sign, units, and model tier are
-declared. Figure @fig-advanced-model-motion-plate uses one semantic visual
+declared. @fig-advanced-model-motion-plate uses one semantic visual
 language across four phases: dark segments are the mechanical chain, green and
 blue segments distinguish modeled bilateral pathways, the gold point is the
 grip reference, the orange point is the clubhead, and the magenta arrow is the

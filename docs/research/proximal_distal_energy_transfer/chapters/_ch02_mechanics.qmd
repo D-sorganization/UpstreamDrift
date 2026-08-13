@@ -142,8 +142,11 @@ to stroboscopic photographs of a professional swing
 [@jorgensen1970; @jorgensen1999]; Penner's review surveys the tradition
 [@penner2003]. Its enduring value here is that it makes the *timing* of
 the P→D handoff an explicit variable (the "release": the point at which
-the wrist angle is allowed, or driven, to open) and exposes the
-mechanism by which delay pays. Three results anchor the analysis:
+the wrist angle is allowed, or driven, to open) and exposes mechanisms
+by which delay can affect delivery. This lineage establishes an
+analytically useful reduced model, not empirical validation of a fixed
+hub, planar rigid shaft, or human wrist-control program. Three results
+anchor the analysis:
 
 **Delayed Release Increases Clubhead Speed.** Pickering and Vickers,
 sweeping release angles in a driven double-pendulum model, found

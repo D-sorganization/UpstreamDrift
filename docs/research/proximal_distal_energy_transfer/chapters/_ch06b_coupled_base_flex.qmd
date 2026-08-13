@@ -249,7 +249,7 @@ interval. The contact reactions still depend on inertia, gravity, base
 restoring forces, shaft elasticity, and damping.
 
 The geometric negative control sets both grip offsets to zero while retaining
-two independent hand constraints. Equation @eq-coupled-force-couple then
+two independent hand constraints. @eq-coupled-force-couple then
 predicts $M_F=0$ for any finite contact forces. The executed trace returns zero
 to machine precision. This rules out a solver sign convention or contact-force
 magnitude alone as the source of the reported couple.
