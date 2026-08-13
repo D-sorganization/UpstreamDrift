@@ -445,7 +445,7 @@ available with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, breakable, colframe=quarto-callout-note-color-frame, arc=.35mm, coltitle=black, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, bottomrule=.15mm, toprule=.15mm, leftrule=.75mm, titlerule=0mm, opacityback=0, colbacktitle=quarto-callout-note-color!10!white, bottomtitle=1mm, opacitybacktitle=0.6, toptitle=1mm, left=2mm, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, breakable, coltitle=black, toprule=.15mm, bottomrule=.15mm, opacitybacktitle=0.6, colframe=quarto-callout-note-color-frame, left=2mm, opacityback=0, toptitle=1mm, colback=white, titlerule=0mm, rightrule=.15mm, arc=.35mm, bottomtitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -639,26 +639,42 @@ b(q,\dot q) \;=\; C(q,\dot q)\,\dot q \;+\; g(q) \;+\; d(\dot q),
 
 with configuration \(q\), inertia matrix \(M\), applied generalized
 torques \(\tau\), Coriolis/centripetal terms \(C\dot q\), gravity \(g\),
-and velocity-dependent dissipation \(d\). Two structural facts drive
-everything that follows. First, the system is \emph{coupled}: \(M\) is
-not diagonal, so torque at any joint induces acceleration at every joint
---- the basis of induced-acceleration analysis
+and velocity-dependent dissipation \(d\). In an articulated rigid-body
+model, \(M(q)\) is generally configuration dependent and can contain
+off-diagonal terms. A generalized torque can therefore produce
+accelerations in coordinates other than the coordinate at which it is
+applied through \(M^{-1}\); the exact pathways depend on the
+coordinates, inertial parameters, constraints, and instantaneous
+configuration. Symmetry, decoupled coordinates, or a special
+configuration can make a particular cross-coordinate pathway zero. This
+qualified coupling is the basis of induced-acceleration analysis
 (\citeproc{ref-zajac1989}{Zajac and Gordon 1989}) and of the
 counterfactual decompositions of Section~\ref{sec-timing-framework}.
-Second, the equation is \emph{affine in} \(\tau\): the acceleration
-splits exactly into a drift part (what accumulated motion and gravity
-produce alone) and a control part (\(M^{-1}\tau\)), a property enforced
-to numerical tolerance by the accompanying tests
-(Section~\ref{sec-appendix-validation}).
+
+For the declared unconstrained manipulator model, with \(b\) independent
+of the current applied torque, the equation is \emph{affine in}
+\(\tau\):
+
+\begin{equation}\phantomsection\label{eq-affine-split}{
+\ddot q = -M^{-1}b + M^{-1}\tau.
+}\end{equation}
+
+The accompanying tests enforce this drift--control split to numerical
+tolerance (Section~\ref{sec-appendix-validation}). It is an exact
+identity for that model class, not a universal biological decomposition.
+Closed-loop constraints add reaction terms, contact can change mode, and
+muscle, tendon, or actuator states can make the mapping from neural
+command to generalized torque dynamic and state dependent.
 
 \section{The Summation-of-Speed Principle and Its
 Limits}\label{sec-summation}
 
-The oldest formalization of P→D sequencing is the \emph{summation of
-speed} principle: in skills demanding high end-point speed, each segment
-should begin its motion at the moment of peak speed of the segment
-proximal to it, so that distal speed is built on top of proximal speed
-(\citeproc{ref-bunn1972}{Bunn 1972}). Milburn applied the principle to
+An influential coaching formulation of P→D sequencing is Bunn's
+\emph{summation of speed} principle: in skills demanding high end-point
+speed, each segment should begin its motion at the moment of peak speed
+of the segment proximal to it, so that distal speed is built on top of
+proximal speed (\citeproc{ref-bunn1972}{Bunn 1972}). This is a coaching
+proposition, not an experimental law. Milburn applied the principle to
 golf with a double-pendulum analysis of the downswing and found the
 characteristic pattern of an initially dominant proximal (arm) rotation
 followed by rapid distal (club) rotation, noting that \emph{``an initial
@@ -669,36 +685,121 @@ structure of that finding: the summation principle, taken naively,
 prescribes \emph{sequential initiation}; Milburn's analysis showed the
 benefit comes specifically from \emph{delaying} the distal contribution.
 
-Putnam's segment-interaction analyses put the principle on a dynamical
-footing and exposed its limits (\citeproc{ref-putnam1991}{Putnam 1991},
+Putnam's segment-interaction analyses gave the principle a dynamical
+test and exposed its limits (\citeproc{ref-putnam1991}{Putnam 1991},
 \citeproc{ref-putnam1993}{1993}). In a linked chain, each segment's
 angular acceleration depends not only on joint torques but on
-\emph{motion-dependent interaction torques} --- centripetal and Coriolis
-terms proportional to squares and products of segment angular velocities
-(the \(C\dot q\) term of Equation~\ref{eq-eom}). Putnam showed the P→D
-pattern in striking and throwing arises substantially from these
-interaction torques: proximal deceleration and distal acceleration late
-in the motion are coupled through the joint force and occur even without
-a distal joint torque. Feltner and Dapena's classic analysis of the
-baseball pitch quantified the same interplay at the shoulder and elbow
-(\citeproc{ref-feltner1986}{Feltner and Dapena 1986}), and Herring and
-Chapman showed in simulated throws that the \emph{timing} of torque
-onsets and torque reversals --- including deliberately reversed
-(restraining) torques --- materially changes end-point speed
-(\citeproc{ref-herring1992}{Herring and Chapman 1992}). Two implications
-matter for golf. First, kinematic order does not reveal \emph{which}
-torques produced it: an identical peak sequence can arise from different
-mixes of muscular and interaction torques. Second, the proximal
-deceleration observed in experts need not be an active ``braking''
-strategy --- it can be the dynamical \emph{consequence} of the distal
-segment accelerating and back-reacting on the chain.
+\emph{motion-dependent interaction terms} --- including centripetal and
+Coriolis terms that contain squares and products of segment angular
+velocities (represented within \(C\dot q\) in Equation~\ref{eq-eom}).
+The 1991 study used high-speed film from four participants performing
+walking, running, and kicking. It found a significant thigh--leg
+interaction and support for summation of segment speeds, but no support
+for summation of force or for a general rule that negative thigh
+acceleration produces positive leg acceleration
+(\citeproc{ref-putnam1991}{Putnam 1991}). Putnam's 1993 synthesis
+extended the discussion to striking and throwing: distal acceleration
+could arise largely from motion-dependent interaction tied to proximal
+angular velocity, and proximal slowing could arise largely from the
+distal segment's motion-dependent effect. The source explicitly warned
+that task-dependent interaction differences must be examined before
+general principles are asserted (\citeproc{ref-putnam1993}{Putnam
+1993}).
 
-Marshall and Elliott added a measurement caution: planar peak-ordering
-analyses miss long-axis rotations, which peak very late in racquet
-skills and contribute substantially to end-point speed
-(\citeproc{ref-marshall2000}{Marshall and Elliott 2000}); the golf
-analogue is forearm rotation and wrist action in the final phase of the
-downswing.
+Feltner and Dapena's 1986 inverse-dynamics study estimated resultant
+shoulder and elbow forces and torques in fastball pitches by eight
+intercollegiate pitchers (\citeproc{ref-feltner1986}{Feltner and Dapena
+1986}). The later two-part interaction analysis supplied the relevant
+decomposition: a general three-dimensional two-segment model
+(\citeproc{ref-feltner1989a}{Feltner and Dapena 1989}) and its
+application to the same class of pitching motion
+(\citeproc{ref-feltner1989b}{Feltner 1989}). In eight collegiate
+pitchers, the Part II analysis attributed rapid pre-release elbow
+extension primarily to the angular velocity of the upper arm and trunk
+rather than to elbow-extensor torque
+(\citeproc{ref-feltner1989b}{Feltner 1989}). That result is a task- and
+model-bounded acceleration attribution, not evidence that distal
+musculature is generally inactive.
+
+Herring and Chapman obtained P→D torque onsets and beneficial late
+torque reversals in a sagittal three-segment throw simulation
+(\citeproc{ref-herring1992}{Herring and Chapman 1992}). The inputs were
+idealized constant joint torques switched on at varied times, with
+shoulder and elbow torque signs reversed instantaneously in the reversal
+trials. The result demonstrates a linked-system mechanism; it does not
+establish physiological muscle timing or the feasibility of an
+instantaneous human torque reversal. Two implications matter for golf.
+First, kinematic order does not reveal \emph{which} torques produced it:
+an identical peak sequence can arise from different mixes of muscular
+and interaction torques. Second, the proximal deceleration observed in
+experts need not be an active ``braking'' strategy --- it can be the
+dynamical \emph{consequence} of the distal segment accelerating and
+back-reacting on the chain.
+
+Marshall and Elliott added a task-specific measurement caution. In the
+tennis serve and squash forehand drive, upper-arm and forearm long-axis
+rotations peaked late and were important contributors to racquet-head
+speed (\citeproc{ref-marshall2000}{Marshall and Elliott 2000}). This
+shows why a planar peak-ordering analysis can omit relevant
+three-dimensional rotations in those racquet tasks. A corresponding role
+for forearm rotation and wrist action in golf is a testable analogy, not
+a result measured by that study.
+
+\subsection{Foundational Sequencing Evidence
+Boundaries}\label{foundational-sequencing-evidence-boundaries}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Source
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Declared Domain
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Supported Finding
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Boundary for This Paper
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Bunn (\citeproc{ref-bunn1972}{Bunn 1972}) & Coaching text &
+Summation-of-speed heuristic & Not an empirical validation or universal
+timing law \\
+Putnam (\citeproc{ref-putnam1991}{Putnam 1991}) & Four participants;
+walking, running, and kicking & Motion-dependent thigh--leg interaction
+was significant; segment-speed summation was supported & No support for
+summation of force or a general negative-proximal-acceleration rule \\
+Putnam (\citeproc{ref-putnam1993}{Putnam 1993}) & Review and mechanics
+synthesis spanning kicking, striking, and throwing & Proximal angular
+velocity can drive distal acceleration, and distal motion can slow the
+proximal segment & Interaction differs across skills; task geometry must
+be examined before generalization \\
+Feltner and Dapena (\citeproc{ref-feltner1986}{Feltner and Dapena 1986},
+\citeproc{ref-feltner1989a}{1989}; \citeproc{ref-feltner1989b}{Feltner
+1989}) & Three-dimensional pitching analysis; eight collegiate pitchers
+& Resultant joint loads were estimated, then angular acceleration was
+decomposed into torque- and motion-dependent terms & The 1986 paper
+alone does not provide the later decomposition; pitching attribution is
+not a golf or population-wide result \\
+Herring and Chapman (\citeproc{ref-herring1992}{Herring and Chapman
+1992}) & Sagittal three-segment throw simulation with constant torque
+inputs & P→D onsets and late P→D torque reversals improved simulated
+output & Idealized switches and instantaneous reversals are not muscle
+or neural-control evidence \\
+Marshall and Elliott (\citeproc{ref-marshall2000}{Marshall and Elliott
+2000}) & Tennis serve and squash forehand drive & Long-axis rotations
+peaked late and contributed to racquet-head speed & Golf relevance is an
+analogy requiring direct three-dimensional golf measurement \\
+\end{longtable}
+
+These sources establish candidate mechanisms and measurement cautions.
+They do not make peak order a measure of energy flow, prove a universal
+active braking strategy, or identify one optimal golf control program.
 
 \section{Double-Pendulum Mechanics of the Golf
 Downswing}\label{sec-doublependulum}
@@ -998,19 +1099,19 @@ model's wrist interface, including the energy-balance residual check.
 \subsection{Induced Accelerations and Dynamic
 Coupling}\label{induced-accelerations-and-dynamic-coupling}
 
-In a coupled chain, any single torque induces accelerations at
-\emph{every} joint --- including joints it does not span --- through the
-inverse inertia matrix (\citeproc{ref-zajac1989}{Zajac and Gordon
-1989}). Induced-acceleration and power-transfer analyses in locomotion
-research (\citeproc{ref-zajac2002}{Zajac, Neptune, and Kautz 2002}) show
-that intuitions of the form ``muscle X accelerates joint Y'' routinely
-fail in coupled systems. For golf this matters because a torso torque
-early in the downswing partly accelerates the \emph{club} (through
-coupling), and a wrist torque late in the downswing back-reacts on the
-torso; the net energy routing is an emergent property of the whole
-chain. The ZTCF/ZVCF decompositions of
-Section~\ref{sec-timing-framework} are the counterfactual cousins of
-this analysis.
+In a coupled chain, a single generalized torque can induce acceleration
+at multiple coordinates --- including coordinates it does not span ---
+through the inverse inertia matrix when the corresponding coupling terms
+are nonzero (\citeproc{ref-zajac1989}{Zajac and Gordon 1989}).
+Induced-acceleration and power-transfer analyses in locomotion research
+(\citeproc{ref-zajac2002}{Zajac, Neptune, and Kautz 2002}) show that
+intuitions of the form ``muscle X accelerates joint Y'' routinely fail
+in coupled systems. For golf this matters because a torso torque early
+in the downswing partly accelerates the \emph{club} (through coupling),
+and a wrist torque late in the downswing back-reacts on the torso; the
+net energy routing is an emergent property of the whole chain. The
+ZTCF/ZVCF decompositions of Section~\ref{sec-timing-framework} are the
+counterfactual cousins of this analysis.
 
 \subsection{Kinematic Sequence as a Proxy --- And Its Failure
 Modes}\label{kinematic-sequence-as-a-proxy-and-its-failure-modes}
@@ -10351,11 +10452,23 @@ Spon. \url{https://doi.org/10.4324/9780203474709-2}.
 Featherstone, Roy. 2008. \emph{Rigid Body Dynamics Algorithms}. New
 York, NY: Springer. \url{https://doi.org/10.1007/978-1-4899-7560-7}.
 
+\bibitem[\citeproctext]{ref-feltner1989b}
+Feltner, Michael E. 1989. {``Three-Dimensional Interactions in a
+Two-Segment Kinetic Chain. Part II: Application to the Throwing Arm in
+Baseball Pitching.''} \emph{International Journal of Sport Biomechanics}
+5 (4): 420--50. \url{https://doi.org/10.1123/ijsb.5.4.420}.
+
 \bibitem[\citeproctext]{ref-feltner1986}
 Feltner, Michael E., and Jesús Dapena. 1986. {``Dynamics of the Shoulder
 and Elbow Joints of the Throwing Arm During a Baseball Pitch.''}
 \emph{International Journal of Sport Biomechanics} 2 (4): 235--59.
-\url{https://journals.humankinetics.com/view/journals/jab/2/4/article-p235.xml}.
+\url{https://doi.org/10.1123/ijsb.2.4.235}.
+
+\bibitem[\citeproctext]{ref-feltner1989a}
+---------. 1989. {``Three-Dimensional Interactions in a Two-Segment
+Kinetic Chain. Part i: General Model.''} \emph{International Journal of
+Sport Biomechanics} 5 (4): 403--19.
+\url{https://doi.org/10.1123/ijsb.5.4.403}.
 
 \bibitem[\citeproctext]{ref-fradkin2004}
 Fradkin, Andrea J., Caroline A. Sherman, and Caroline F. Finch. 2004.
@@ -10573,7 +10686,7 @@ Biomechanics of the Elite Golf Swing: Benchmarks for Amateurs.''}
 \bibitem[\citeproctext]{ref-milburn1982}
 Milburn, Peter D. 1982. {``Summation of Segmental Velocities in the Golf
 Swing.''} \emph{Medicine and Science in Sports and Exercise} 14 (1):
-60--64. \url{https://pubmed.ncbi.nlm.nih.gov/7070260/}.
+60--64. \url{https://doi.org/10.1249/00005768-198201000-00012}.
 
 \bibitem[\citeproctext]{ref-miura2001}
 Miura, Ken. 2001. {``Parametric Acceleration --- the Effect of Inward

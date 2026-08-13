@@ -2,14 +2,14 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "b133994e225d2253d8288a980f008b483402928119aafe26cfe5135f7a727fde",
+    "source_digest": "201b956f877b70e5d199401b6e8ea5d11f07318316baad62256e6af165b6e3e4",
     "baseline_commit": "13ea6a69585a42dc1db4b3959440ed95787c9779"
   },
   "audit_scope": {
     "completion_status": "in_progress",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "Stable claim identity, cross-platform source digests, complete post-equation narrative parsing, and four high-risk external-evidence slices covering framing, ground mechanics, kinetic-energy sequencing, torso-pelvis associations, method sensitivity, timing, delayed release, wrist torque, passive transfer, hub-path models, optimal-control lineages, spatial forward optimization, and causal limitations. The complete 882-candidate paper audit remains in progress; 32 candidates are reviewed and 850 remain unadjudicated."
+    "current_scope": "Stable claim identity, cross-platform source digests, complete post-equation narrative parsing, and five high-risk external-evidence slices covering framing, ground mechanics, kinetic-energy sequencing, torso-pelvis associations, method sensitivity, timing, delayed release, wrist torque, passive transfer, hub-path models, foundational linked-segment mechanics, optimal-control lineages, spatial forward optimization, and causal limitations. The complete 889-candidate paper audit remains in progress; 44 candidates are reviewed and 845 remain unadjudicated."
   },
   "dependencies": [
     {
@@ -426,6 +426,109 @@
       "disposition": "material_claims_mapped",
       "claim_ids": ["PD-CLAIM-034"],
       "rationale": "The paragraph turns model and objective sensitivity into an explicit harmonized-validation requirement rather than a generic caution.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-cf3f7b352c9e84c4",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-035"],
+      "rationale": "The paragraph states the coordinate- and configuration-dependent multibody coupling identity and removes the former universal every-joint acceleration claim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-88e83225d7342a5b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-036"],
+      "rationale": "The paragraph declares the assumptions under which the drift-control affine split is exact.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-4bc21fdad9118061",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-036"],
+      "rationale": "The paragraph distinguishes a verified model identity from a biological, constrained-contact, or actuator-command decomposition.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-38e3f9405fdf8b36",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-037", "PD-CLAIM-038"],
+      "rationale": "The paragraph separates Bunn's coaching heuristic from Milburn's double-pendulum result and its model boundary.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-4aaadb815d40d35e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-039"],
+      "rationale": "The paragraph records Putnam's samples, supported interaction findings, explicit negative findings, and warning against cross-skill generalization.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-b3b82e810e48b777",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-040"],
+      "rationale": "The paragraph corrects the paper-year mismatch between the 1986 inverse-dynamics study and the 1989 angular-acceleration decomposition.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-437d5305db7783c5",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-041", "PD-CLAIM-043"],
+      "rationale": "The paragraph bounds Herring and Chapman's idealized torque-switch mechanism and separates kinematic description from torque and braking attribution.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-7a8fa6cba21d2983",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-042"],
+      "rationale": "The paragraph limits the measured long-axis-rotation result to tennis and squash and labels the golf extension as a hypothesis.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-eb9d34551fa52e4e",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This is the foundational evidence-matrix header rather than a scientific proposition.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-67a85d026566b52d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-037",
+        "PD-CLAIM-038",
+        "PD-CLAIM-039",
+        "PD-CLAIM-040",
+        "PD-CLAIM-041",
+        "PD-CLAIM-042"
+      ],
+      "rationale": "The matrix records the exact domain, supported finding, and non-transportable boundary for the six foundational source groups.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-c6b1cd96a80e8de6",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-043"],
+      "rationale": "The synthesis explicitly withholds energy-flow, active-braking, and universal golf-control conclusions from the foundational mechanism evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-1d6ac9dbe8a8b4d7",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-035"],
+      "rationale": "The later induced-acceleration discussion now carries the same nonzero-coupling qualification as the formalism section.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
     }
@@ -1570,6 +1673,298 @@
       ],
       "falsifier": "A harmonized preregistered reoptimization demonstrates invariant distal timing and effect size across the reviewed state spaces, objectives, and omitted-degree-of-freedom variants.",
       "adjudication": "The source-level design matrix contradicts the former collective wording. The revised paper treats common late activations as hypotheses for harmonized testing rather than replicated estimates of one biological optimum.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-035",
+      "candidate_ids": ["PD-CAND-cf3f7b352c9e84c4", "PD-CAND-1d6ac9dbe8a8b4d7"],
+      "statement": "In an articulated rigid-body model, generalized torque can induce acceleration in other coordinates through nonzero entries of the inverse inertia matrix, but the pathway depends on coordinates, inertial parameters, constraints, and configuration and can vanish under symmetry or decoupling.",
+      "classification": "definition_or_mathematical_identity",
+      "published_status": "corrected_and_supported_with_nonzero_coupling_condition",
+      "audit_status": "formal_identity_and_primary_method_source_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:22",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:312"
+      ],
+      "evidence_artifacts": [
+        "https://doi.org/10.1249/00005768-198901000-00006",
+        "docs/research/proximal_distal_energy_transfer/references.bib#featherstone2008"
+      ],
+      "model_domain": "Finite-dimensional articulated rigid-body coordinates with a nonsingular inertia matrix; cross-coordinate response is read from the relevant entries of M inverse.",
+      "uncertainty_boundary": "The identity does not determine whether a particular pathway is practically large and does not include contact-mode changes, algebraic constraints, or actuator dynamics unless those are added to the equations.",
+      "competing_explanations": [
+        "Direct torque in another coordinate",
+        "Constraint reaction or external contact force",
+        "Motion-dependent bias acceleration"
+      ],
+      "negative_controls": [
+        "Diagonal inertia matrix",
+        "Configuration with a zero relevant inverse-inertia entry",
+        "Matched state with the selected torque removed"
+      ],
+      "falsifier": "The declared equations have a zero inverse-inertia pathway while the manuscript attributes nonzero cross-coordinate acceleration to that torque, or independent symbolic evaluation contradicts the stated response.",
+      "adjudication": "The former manuscript said every torque accelerates every joint. The corrected statement preserves induced-acceleration mechanics while making the nonzero-coupling condition and model dependence explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-036",
+      "candidate_ids": ["PD-CAND-88e83225d7342a5b", "PD-CAND-4bc21fdad9118061"],
+      "statement": "For an unconstrained manipulator equation M(q) qdd = tau - b(q, qdot) in which b is independent of the current applied torque, acceleration separates exactly into drift -M inverse b and control M inverse tau.",
+      "classification": "definition_or_mathematical_identity",
+      "published_status": "supported_for_declared_unconstrained_model_class",
+      "audit_status": "algebraically_checked_and_numerically_regression_tested",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:35",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:42"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd#eq-affine-split",
+        "tests/unit/research/test_proximal_distal_energy.py",
+        "docs/research/proximal_distal_energy_transfer/references.bib#featherstone2008"
+      ],
+      "model_domain": "Unconstrained finite-dimensional manipulator dynamics with nonsingular M and generalized torque entering linearly at the evaluated state.",
+      "uncertainty_boundary": "Closed-loop constraints, unilateral contact, torque-dependent bias terms, activation dynamics, and neural-command-to-torque dynamics are outside the identity unless represented in an augmented state or constrained equation.",
+      "competing_explanations": [
+        "Constraint-force contribution",
+        "Contact-mode transition",
+        "State-dependent actuator or muscle dynamics"
+      ],
+      "negative_controls": [
+        "Direct algebraic reconstruction",
+        "Same-state zero-torque evaluation",
+        "Constrained formulation with reaction forces exposed separately"
+      ],
+      "falsifier": "The implementation fails drift plus control closure at the declared tolerance or b changes with current applied torque under the model claimed to satisfy this identity.",
+      "adjudication": "The split is exact within its assumptions. The paper now rejects direct transport of the identity to neural drive or constrained attribution when contacts and actuator states are omitted.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-037",
+      "candidate_ids": ["PD-CAND-38e3f9405fdf8b36", "PD-CAND-67a85d026566b52d"],
+      "statement": "Bunn presented summation of speed as a coaching principle for sequential high-endpoint-speed motion; its use here is a historical heuristic rather than empirical evidence for a universal timing law.",
+      "classification": "historical_coaching_proposition",
+      "published_status": "supported_as_attributed_heuristic_not_empirical_law",
+      "audit_status": "bibliographic_record_checked_original_page_verification_open",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:51",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:124"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/references.bib#bunn1972"
+      ],
+      "model_domain": "Historical coaching text and qualitative movement principle.",
+      "uncertainty_boundary": "No study sample, measured effect, task-general confidence interval, or causal intervention is supplied by the coaching source.",
+      "competing_explanations": [
+        "Task-specific interaction dynamics",
+        "Simultaneous rather than sequential control",
+        "Measurement-definition effects"
+      ],
+      "negative_controls": [
+        "Direct experimental tests across tasks",
+        "Alternative peak definitions",
+        "Models in which simultaneous control is optimal"
+      ],
+      "falsifier": "The original book does not contain the attributed principle or the manuscript presents it as empirical validation rather than a historical coaching proposition.",
+      "adjudication": "The source type is now explicit. Original-page verification remains open, so the audit does not count this as completed external empirical evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-038",
+      "candidate_ids": ["PD-CAND-38e3f9405fdf8b36", "PD-CAND-67a85d026566b52d"],
+      "statement": "Milburn's double-pendulum analysis reported that delaying wrist uncocking allowed greater arm acceleration and allowed club acceleration to be summed with the existing maximum angular acceleration of the proximal segment.",
+      "classification": "external_analytical_model_result",
+      "published_status": "supported_with_double_pendulum_qualification",
+      "audit_status": "primary_abstract_and_doi_record_checked_full_text_reimplementation_open",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:56",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:124"
+      ],
+      "evidence_artifacts": [
+        "https://doi.org/10.1249/00005768-198201000-00012"
+      ],
+      "model_domain": "Planar golf-downswing double pendulum pivoted at the shoulder and hinged at the wrist, evaluated through the author's instantaneous component equations.",
+      "uncertainty_boundary": "The source does not establish a human treatment effect, unique optimal release, three-dimensional validity, or muscle-control prescription.",
+      "competing_explanations": [
+        "Model geometry and initial conditions",
+        "Applied joint-torque assumptions",
+        "Impact and endpoint definitions"
+      ],
+      "negative_controls": [
+        "Faithful equation reimplementation",
+        "Early and delayed uncocking under matched state",
+        "Moving-base and spatial variants"
+      ],
+      "falsifier": "The primary paper does not report the attributed delay mechanism or a faithful reconstruction fails under the stated assumptions.",
+      "adjudication": "The DOI and primary abstract support the model result. The paper now avoids treating it as an experimental law and retains full-text numerical reproduction as open work.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-039",
+      "candidate_ids": ["PD-CAND-4aaadb815d40d35e", "PD-CAND-67a85d026566b52d"],
+      "statement": "Putnam's four-participant walking, running, and kicking study found significant thigh-leg motion-dependent interaction and support for summation of segment speeds, but not summation of force or a general negative-thigh-acceleration rule; the later synthesis warned that interaction differences across skills must precede generalization.",
+      "classification": "external_small_sample_empirical_and_review_synthesis",
+      "published_status": "corrected_and_supported_with_task_and_negative_finding_boundaries",
+      "audit_status": "primary_pubmed_records_checked_full_text_reanalysis_open",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:67",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:125"
+      ],
+      "evidence_artifacts": [
+        "https://pubmed.ncbi.nlm.nih.gov/1997807/",
+        "https://pubmed.ncbi.nlm.nih.gov/8505347/",
+        "https://doi.org/10.1016/0021-9290(93)90084-R"
+      ],
+      "model_domain": "High-speed-film lower-limb analysis in four subjects across walking, running, and kicking, plus a mechanics synthesis spanning kicking and pitching examples.",
+      "uncertainty_boundary": "The 1991 sample is four participants and lower-limb tasks; the 1993 paper is a synthesis, not a golf experiment or population estimate.",
+      "competing_explanations": [
+        "Resultant joint moments",
+        "Differences in knee geometry",
+        "Task-specific orientation and constraints"
+      ],
+      "negative_controls": [
+        "Summation-of-force test",
+        "Test of negative proximal acceleration as general cause",
+        "Cross-task common decomposition"
+      ],
+      "falsifier": "The original records do not report the sample, supported interaction, explicit negative findings, and cross-skill warning stated here.",
+      "adjudication": "The revision preserves both the positive interaction finding and the source's negative evidence, which contradicts the former universal proximal-deceleration wording.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-040",
+      "candidate_ids": ["PD-CAND-b3b82e810e48b777", "PD-CAND-67a85d026566b52d"],
+      "statement": "Feltner and Dapena's 1986 eight-pitcher study estimated resultant shoulder and elbow loads, whereas their 1989 Part I and Part II papers supplied and applied the torque-versus-motion-dependent angular-acceleration decomposition; Part II attributed rapid elbow extension primarily to upper-arm and trunk angular velocity rather than elbow-extensor torque.",
+      "classification": "external_small_sample_inverse_dynamics_and_acceleration_attribution",
+      "published_status": "corrected_to_source_matched_year_and_method",
+      "audit_status": "primary_publisher_records_checked_full_text_reanalysis_open",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:85",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:127"
+      ],
+      "evidence_artifacts": [
+        "https://doi.org/10.1123/ijsb.2.4.235",
+        "https://doi.org/10.1123/ijsb.5.4.403",
+        "https://doi.org/10.1123/ijsb.5.4.420"
+      ],
+      "model_domain": "Three-dimensional fastball-pitch analysis in eight intercollegiate or collegiate pitchers using DLT cinematography and a two-segment throwing-arm model.",
+      "uncertainty_boundary": "Resultant torques are not individual muscle forces, acceleration fractions depend on coordinates and model, and the task does not establish a golf mechanism.",
+      "competing_explanations": [
+        "Coordinate and segment-model choice",
+        "Unmodeled hand-ball details",
+        "Co-contraction hidden by resultant torque"
+      ],
+      "negative_controls": [
+        "1986 inverse dynamics without decomposition claim",
+        "Reproduce Part II from Part I equations",
+        "Apply decomposition to golf data"
+      ],
+      "falsifier": "The 1989 records do not contain the decomposition and elbow-extension attribution, or faithful reanalysis contradicts the dominant term.",
+      "adjudication": "The former text cited the 1986 load study for a later decomposition. The revision matches method and finding to the correct 1989 sources and states the sample boundary.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-041",
+      "candidate_ids": ["PD-CAND-437d5305db7783c5", "PD-CAND-67a85d026566b52d"],
+      "statement": "Herring and Chapman's sagittal three-segment throw simulation found that proximal-to-distal constant-torque onsets and late proximal-to-distal instantaneous shoulder and elbow torque-sign reversals improved simulated output.",
+      "classification": "external_idealized_forward_simulation_result",
+      "published_status": "supported_with_input_and_feasibility_qualification",
+      "audit_status": "primary_pubmed_and_publisher_abstract_checked_reimplementation_open",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:97",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:128"
+      ],
+      "evidence_artifacts": [
+        "https://pubmed.ncbi.nlm.nih.gov/1400517/",
+        "https://doi.org/10.1016/0021-9290(92)90073-A"
+      ],
+      "model_domain": "Sagittal upper-arm, forearm, and hand-plus-ball simulation with identical initial states, constant torques, and instantaneous shoulder and elbow sign reversals.",
+      "uncertainty_boundary": "The torque steps are not activation dynamics, muscle-force histories, measured control, or proof that an instantaneous reversal is biologically feasible.",
+      "competing_explanations": [
+        "Constant-torque parameterization",
+        "Segmental inertial values",
+        "Range versus speed objective"
+      ],
+      "negative_controls": [
+        "No-reversal simulations",
+        "Distal-to-proximal order",
+        "Rate-limited smooth transitions"
+      ],
+      "falsifier": "The source does not report the ordering and reversal results or a faithful implementation fails to reproduce them.",
+      "adjudication": "The mechanism is retained, but the idealized inputs and instantaneous reversals are visible so they cannot be mistaken for human control evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-042",
+      "candidate_ids": ["PD-CAND-7a8fa6cba21d2983", "PD-CAND-67a85d026566b52d"],
+      "statement": "Marshall and Elliott reported that upper-arm and forearm long-axis rotations peaked late and contributed importantly to racquet-head speed in the tennis serve and squash forehand drive; transferring that result to golf is a hypothesis requiring direct golf measurement.",
+      "classification": "external_task_specific_kinematic_result_and_hypothesis_boundary",
+      "published_status": "corrected_and_supported_for_racquet_tasks_only",
+      "audit_status": "primary_abstract_and_doi_record_checked_full_text_reanalysis_open",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:112",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:129"
+      ],
+      "evidence_artifacts": [
+        "https://doi.org/10.1080/026404100364983",
+        "https://pubmed.ncbi.nlm.nih.gov/10824641/"
+      ],
+      "model_domain": "Kinematic analysis of the tennis serve and squash forehand drive with upper-arm and forearm long-axis rotations included.",
+      "uncertainty_boundary": "The source does not measure golf, wrist joint power, hand forces, negative torque, or energy transfer between golf-club system elements.",
+      "competing_explanations": [
+        "Racquet-task constraints",
+        "Coordinate decomposition",
+        "Other late upper-limb degrees of freedom"
+      ],
+      "negative_controls": [
+        "Three-dimensional golf measurement",
+        "Planar-versus-spatial reconstruction",
+        "Joint-power contribution analysis"
+      ],
+      "falsifier": "The primary study does not report the late rotations and racquet-head-speed importance, or the paper presents the golf analogy as established despite contrary direct evidence.",
+      "adjudication": "The measurement warning is preserved while the unsupported assertion that the racquet-task result directly establishes the golf analogue is removed.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-043",
+      "candidate_ids": ["PD-CAND-437d5305db7783c5", "PD-CAND-c6b1cd96a80e8de6"],
+      "statement": "The reviewed foundational sequencing sources identify candidate interaction mechanisms and measurement limitations but do not make peak order a measure of energy flow, prove universal active braking, or identify one optimal golf control program.",
+      "classification": "cross_source_methodological_synthesis",
+      "published_status": "supported_by_source_domain_and_estimand_contrast",
+      "audit_status": "six_source_groups_checked_with_explicit_negative_evidence",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:104",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:131"
+      ],
+      "evidence_artifacts": [
+        "https://pubmed.ncbi.nlm.nih.gov/1997807/",
+        "https://pubmed.ncbi.nlm.nih.gov/8505347/",
+        "https://doi.org/10.1123/ijsb.5.4.420",
+        "https://pubmed.ncbi.nlm.nih.gov/1400517/",
+        "https://doi.org/10.1080/026404100364983"
+      ],
+      "model_domain": "Cross-source comparison of a coaching heuristic, lower-limb interaction analysis, throwing synthesis, pitching attribution, throw simulation, and racquet-task kinematics.",
+      "uncertainty_boundary": "The synthesis establishes missing transport evidence; it does not show active braking is absent in golf or determine the best human strategy.",
+      "competing_explanations": [
+        "Active braking may coexist with passive back-reaction",
+        "A robust motif may survive harmonized analysis",
+        "Golf mechanics may differ from source tasks"
+      ],
+      "negative_controls": [
+        "Joint-power accounting instead of peak order",
+        "Torque and motion-dependent decomposition on same data",
+        "Preregistered golf intervention"
+      ],
+      "falsifier": "A cited foundational source directly measures golf energy flow or experimentally identifies a universal active-braking or optimal-control program under a transportable design.",
+      "adjudication": "The matrix makes non-equivalence visible and uses the sources to define hypotheses and falsifiers rather than to sell a predetermined release strategy.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
     }

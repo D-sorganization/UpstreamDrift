@@ -132,8 +132,18 @@ It records each model's state space, objective, speed or carry result, actuator
 timing, omitted degrees of freedom, and validation boundary. The paper no
 longer labels their outputs collectively as expert-like or treats late distal
 activation as a repeated estimate of one universal strategy. The expanded
-paper has 882 candidates; 32 are reviewed, 34 atomic claims are registered, and
-850 remain unadjudicated.
+paper had 882 candidates at that merge; 32 were reviewed and 34 atomic claims
+were registered.
+The fifth evidence slice corrects the foundational mechanics. It replaces the
+universal assertion that every torque accelerates every joint with the exact
+nonzero inverse-inertia coupling condition, bounds the affine drift--control
+split to its declared unconstrained model class, and source-matches the Putnam,
+Feltner--Dapena, Herring--Chapman, and Marshall--Elliott findings. A new
+contrast matrix preserves Putnam's negative findings, distinguishes the 1986
+pitch-load analysis from the 1989 angular-acceleration decomposition, and
+labels the golf extension of racquet-task long-axis rotation as a hypothesis.
+The expanded paper now has 889 candidates; 44 are reviewed, 43 atomic claims
+are registered, and 845 remain unadjudicated.
 The hand-path attribution, two-hand redundancy, and preactivation validation
 program is tracked in
 [#8458](https://github.com/D-sorganization/UpstreamDrift/issues/8458).
