@@ -71,6 +71,12 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-08-13** - Adjudicated the transmission robustness chapter for #8557.
+  All four registered programs remain nondominated in every held-out
+  leave-one-case-out recomputation. The task map retains algebraic rank three
+  but exposes scale-dependent practical rank and material held-out linearization
+  error, preventing promotion of a local null space to a neural synergy.
+
 - **2026-08-13** - Reconciled the forward distributed modal-shaft chapter
   under epic #8557. The regenerated hash-bound authority now records the
   preregistered 5% tip-deflection model-use screen and its observed 13.48%

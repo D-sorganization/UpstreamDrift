@@ -455,7 +455,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, left=2mm, breakable, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, opacityback=0, colback=white, toprule=.15mm, toptitle=1mm, leftrule=.75mm, coltitle=black, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, arc=.35mm, bottomtitle=1mm, colframe=quarto-callout-note-color-frame, titlerule=0mm, rightrule=.15mm, bottomrule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, bottomtitle=1mm, leftrule=.75mm, left=2mm, coltitle=black, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, bottomrule=.15mm, titlerule=0mm, opacitybacktitle=0.6, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, rightrule=.15mm, breakable, arc=.35mm, colback=white, colframe=quarto-callout-note-color-frame, opacityback=0]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -9097,6 +9097,12 @@ dispersion. Early drive has the smallest speed standard deviation only
 because it occupies a much slower regime; low variance around a poor
 mean is not robust performance.
 
+This membership is stable to the available held-out cases: recomputing
+all five objectives after omitting each of the fifteen cases leaves all
+four programs nondominated in every recomputation. That is stability of
+a four-program comparison, not evidence that the Pareto frontier is
+complete; unexamined controls can still dominate the registered set.
+
 \begin{figure}
 
 \centering{
@@ -9167,7 +9173,14 @@ The result is descriptive and local. Curvature can make a direction that
 is null infinitesimally task-relevant at larger amplitude. The correct
 future test is therefore trial-level covariance relative to a nonlinear,
 participant- specific impact manifold---not a recommendation to minimize
-all joint variance.
+all joint variance. The raw, unit-dependent singular values are 1141.3,
+60.36, and 7.75. Relative thresholds give effective rank two at 1\% and
+5\% of the leading singular value, and rank one at 10\% and 20\%;
+rescaling inputs or outcomes changes these values. Moreover, applying
+this local linearization across the held-out envelope gives RMSE of
+0.115 m/s, 2.69 degrees, and 7.48 N for speed, face/path, and peak hand
+force. The algebraic rank/nullity result therefore must not be promoted
+to a globally predictive manifold or a neural-control dimension.
 
 \section{Biological Realization and
 Impedance}\label{biological-realization-and-impedance}
