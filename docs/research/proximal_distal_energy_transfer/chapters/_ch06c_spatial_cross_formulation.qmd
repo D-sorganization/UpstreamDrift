@@ -15,7 +15,8 @@ three world axes; the club has three translational and three rotational
 coordinates; and the hand forces include out-of-plane components. The two
 formulations evaluate exactly the same position, velocity, acceleration,
 inertias, gravity, and applied action--reaction loads. That common-state design
-isolates dynamics implementation from trajectory divergence.
+isolates dynamics implementation from trajectory divergence; it does not test
+whether the two implementations would integrate to the same later state.
 
 The hand loads are prescribed. Therefore the experiment can test spatial
 wrench transport, geometry interventions, and inverse-dynamics equivalence. It
@@ -38,9 +39,11 @@ effects:
 No tolerance can make that comparison causal. The present experiment instead
 defines one study-specific tree and generates the MuJoCo representation from
 the same in-memory specification consumed by the independent analytical
-formulation. A SHA-256 digest of the canonical joint, inertia, and attachment
-record is stored for both implementations. The two recorded hashes must be
-identical before an outcome is evaluated.
+formulation. A SHA-256 digest of the canonical joint, inertia, attachment, and
+interface-index record is stored for both implementations. The two recorded
+hashes must be identical before an outcome is evaluated. This is a
+content-integrity check on the shared generator, not evidence of independent
+model transcription.
 
 This common model is a reduced full-body model rather than a subject-specific
 anatomical reconstruction. It contains pelvis and lower-body mass, a spatial
@@ -125,6 +128,15 @@ conventions. Applying @eq-spatial-required-action explicitly reduced the
 maximum relative discrepancy to $2.14\times10^{-11}$. The preregistered 5%
 relative and 0.75 generalized-force absolute bounds were not changed.
 
+As an adversarial control, omitting that normalization produces a 26.3%
+maximum relative mismatch. Separate component audits compare the native and
+analytical mass matrices to $2.49\times10^{-14}$ absolute
+($1.33\times10^{-15}$ relative) and the bias vectors to
+$1.25\times10^{-9}$ absolute ($4.05\times10^{-11}$ relative). Thus the final
+agreement is not explained by cancellation between erroneous mass and bias
+terms. These component checks still share the same generated tree and do not
+constitute an independent anatomical-model validation.
+
 ## Two-Hand Wrench and Action--Reaction Contract {#sec-spatial-hand-wrench}
 
 At the declared club reference $O$, the lead and trail forces produce
@@ -153,6 +165,12 @@ stored precision. This checks the common virtual-work convention. It does not
 assert no work at a slipping or compliant biological contact, because the two
 sides would then have different point velocities and contact storage or
 dissipation would require its own state.
+
+An independent point-force calculation agrees with generalized external-load
+power within $2.67\times10^{-15}$ W. Transporting the club wrench and twist to
+an offset reference point preserves scalar power within
+$8.88\times10^{-16}$ W. These audits expose sign, Jacobian, and reference-point
+errors that the equal-and-opposite construction alone could conceal.
 
 The force-generated scalar club couple is the moment projection on the local
 club axis $\hat{\mathbf e}_C$,
@@ -195,7 +213,9 @@ The experiment is falsified at this tier if any of the following occurs:
 3. complete action--reaction wrench power does not close;
 4. reversing the moment arm fails to reverse the force-generated couple;
 5. coincident force application points retain a finite force couple; or
-6. the purported spatial trajectory has no out-of-plane motion.
+6. the purported spatial trajectory has no out-of-plane motion;
+7. mass-matrix or bias-force agreement fails when audited separately; or
+8. generalized point-force power or wrench-reference transport fails to close.
 
 ## Executed Results {#sec-spatial-results}
 
@@ -209,6 +229,11 @@ $2.14\times10^{-11}$. The registered intervention-grid alignment error is zero
 by construction and is reported separately from the dynamics residual. This result
 supports implementation equivalence for the declared common model and
 same-state inverse-dynamics observable.
+
+The separate component and virtual-work audits above narrow that conclusion to
+the mass, bias, external-load, and reference-transport pathways actually
+tested; they do not validate forward contact, tissue mechanics, or human
+anatomy.
 
 It does not show that arbitrary MuJoCo and analytical humanoid models agree.
 The equivalence depends on the identical model digest, joint order, spherical

@@ -69,7 +69,7 @@ class SpatialModel:
     @cached_property
     def canonical_hash(self) -> str:
         payload = {
-            "schema": "proximal-distal-spatial-model-v1",
+            "schema": "proximal-distal-spatial-model-v2",
             "joints": [
                 {
                     "name": joint.name,
@@ -92,6 +92,12 @@ class SpatialModel:
                 }
                 for body in self.bodies
             ],
+            "interfaces": {
+                "club_dof_indices": self.club_dof_indices.tolist(),
+                "lead_hand_joint": self.lead_hand_joint,
+                "trail_hand_joint": self.trail_hand_joint,
+                "club_frame_joint": self.club_frame_joint,
+            },
         }
         raw = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
         return hashlib.sha256(raw).hexdigest()
@@ -173,6 +179,11 @@ class CrossFormulationResult:
     out_of_plane_motion_m: float
     max_relative_inverse_dynamics_error: float
     max_absolute_generalized_force_error: float
+    max_absolute_mass_matrix_error: float
+    max_relative_mass_matrix_error: float
+    max_absolute_bias_force_error: float
+    max_relative_bias_force_error: float
+    external_load_convention_mismatch_relative_error: float
     intervention_event_grid_error_s: float
     tolerance: SpatialTolerance
     classification: Literal["equivalent", "structural_discrepancy"]
@@ -531,6 +542,43 @@ def generalized_hand_load(model: SpatialModel, time_s: float) -> Array:
     )
 
 
+def generalized_hand_load_power_residual(model: SpatialModel, time_s: float) -> float:
+    """Audit the generalized load against independent point-force power."""
+
+    q, qd, _ = prescribed_state(model, time_s)
+    kin = forward_kinematics(model, q)
+    sample = evaluate_hand_wrenches(model, time_s, coincident_hands=False)
+    point_specs = (
+        (model.club_frame_joint, _vec(0, 0.09, -0.03), sample.lead_force_n),
+        (model.club_frame_joint, _vec(0, -0.09, -0.03), sample.trail_force_n),
+        (model.lead_hand_joint, _vec(0.055, 0, 0), -sample.lead_force_n),
+        (model.trail_hand_joint, _vec(0.055, 0, 0), -sample.trail_force_n),
+    )
+    point_power = 0.0
+    for joint_index, local_point, force in point_specs:
+        _, linear_jacobian, _ = _point_jacobians(model, kin, joint_index, local_point)
+        point_power += float(force @ (linear_jacobian @ qd))
+    generalized_power = float(generalized_hand_load(model, time_s) @ qd)
+    return generalized_power - point_power
+
+
+def wrench_reference_power_residual(model: SpatialModel, time_s: float) -> float:
+    """Audit wrench/twist power invariance under a reference-point shift."""
+
+    sample = evaluate_hand_wrenches(model, time_s, coincident_hands=False)
+    force = sample.club_wrench[:3]
+    moment_o = sample.club_wrench[3:]
+    velocity_o = sample.compatible_twist[:3]
+    angular_velocity = sample.compatible_twist[3:]
+    displacement_op = _vec(0.07, -0.04, 0.03)
+    # r_P = r_O + displacement_op.  Transport both wrench and twist to P.
+    moment_p = moment_o - np.cross(displacement_op, force)
+    velocity_p = velocity_o + np.cross(angular_velocity, displacement_op)
+    power_o = float(force @ velocity_o + moment_o @ angular_velocity)
+    power_p = float(force @ velocity_p + moment_p @ angular_velocity)
+    return power_p - power_o
+
+
 def lagrange_inverse_dynamics(
     model: SpatialModel,
     q: Array,
@@ -640,6 +688,26 @@ def mujoco_inverse_dynamics(
     return result
 
 
+def mujoco_mass_matrix_and_bias(
+    model: SpatialModel, q: Array, qd: Array
+) -> tuple[Array, Array]:
+    """Return MuJoCo's native full mass matrix and bias-force vector."""
+
+    import mujoco
+
+    mj_model = _compiled_mujoco_model(model.canonical_hash, _mujoco_xml(model))
+    data = mujoco.MjData(mj_model)
+    data.qpos[:] = q
+    data.qvel[:] = qd
+    mujoco.mj_forward(mj_model, data)
+    matrix = np.empty((model.nq, model.nq), dtype=np.float64)
+    mujoco.mj_fullM(mj_model, matrix, data.qM)
+    bias = np.asarray(data.qfrc_bias, dtype=np.float64).copy()
+    if not np.all(np.isfinite(matrix)) or not np.all(np.isfinite(bias)):
+        raise RuntimeError("MuJoCo mass/bias audit returned invalid output")
+    return matrix, bias
+
+
 def run_cross_formulation_experiment(
     config: SpatialExperimentConfig = SpatialExperimentConfig(),
 ) -> CrossFormulationResult:
@@ -652,6 +720,11 @@ def run_cross_formulation_experiment(
     mujoco_result = np.empty_like(lagrange)
     couples = np.empty(time.size)
     lateral_positions = np.empty(time.size)
+    mass_absolute = np.empty(time.size)
+    mass_relative = np.empty(time.size)
+    bias_absolute = np.empty(time.size)
+    bias_relative = np.empty(time.size)
+    convention_mismatch = np.empty(time.size)
     for index, sample_time in enumerate(time):
         q, qd, qdd = prescribed_state(model, float(sample_time))
         external = generalized_hand_load(model, float(sample_time))
@@ -659,6 +732,20 @@ def run_cross_formulation_experiment(
             model, q, qd, qdd, external, config.derivative_step
         )
         mujoco_result[index] = mujoco_inverse_dynamics(model, q, qd, qdd, external)
+        convention_mismatch[index] = np.max(
+            np.abs((mujoco_result[index] + external) - lagrange[index])
+        ) / max(np.max(np.abs(lagrange[index])), config.tolerance.absolute)
+        analytical_mass = mass_matrix(model, q)
+        analytical_bias = bias_forces(model, q, qd, config.derivative_step)
+        native_mass, native_bias = mujoco_mass_matrix_and_bias(model, q, qd)
+        mass_absolute[index] = np.max(np.abs(native_mass - analytical_mass))
+        mass_relative[index] = mass_absolute[index] / max(
+            np.max(np.abs(analytical_mass)), config.tolerance.absolute
+        )
+        bias_absolute[index] = np.max(np.abs(native_bias - analytical_bias))
+        bias_relative[index] = bias_absolute[index] / max(
+            np.max(np.abs(analytical_bias)), config.tolerance.absolute
+        )
         sample = evaluate_hand_wrenches(
             model, float(sample_time), coincident_hands=False
         )
@@ -692,6 +779,13 @@ def run_cross_formulation_experiment(
         out_of_plane_motion_m=float(np.ptp(lateral_positions)),
         max_relative_inverse_dynamics_error=relative,
         max_absolute_generalized_force_error=absolute,
+        max_absolute_mass_matrix_error=float(np.max(mass_absolute)),
+        max_relative_mass_matrix_error=float(np.max(mass_relative)),
+        max_absolute_bias_force_error=float(np.max(bias_absolute)),
+        max_relative_bias_force_error=float(np.max(bias_relative)),
+        external_load_convention_mismatch_relative_error=float(
+            np.max(convention_mismatch)
+        ),
         intervention_event_grid_error_s=event_error,
         tolerance=config.tolerance,
         classification="equivalent" if equivalent else "structural_discrepancy",
@@ -709,9 +803,12 @@ __all__ = [
     "evaluate_hand_wrenches",
     "forward_kinematics",
     "generalized_hand_load",
+    "generalized_hand_load_power_residual",
     "lagrange_inverse_dynamics",
     "mass_matrix",
     "mujoco_inverse_dynamics",
+    "mujoco_mass_matrix_and_bias",
     "prescribed_state",
     "run_cross_formulation_experiment",
+    "wrench_reference_power_residual",
 ]
