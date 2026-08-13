@@ -2,14 +2,14 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "9246a9b897b7a7e3b6239632783942bac30d13effcee1ccede8a8f417b4e2e8f",
+    "source_digest": "22cc41f39b055ff5d9c2696f73ea87181e643884fc6e256dc9483bf2320caf86",
     "baseline_commit": "13ea6a69585a42dc1db4b3959440ed95787c9779"
   },
   "audit_scope": {
     "completion_status": "in_progress",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "Stable claim identity, cross-platform source digests, complete post-equation narrative parsing, and twelve high-risk evidence slices covering framing, ground mechanics, kinetic-energy sequencing, torso-pelvis associations, method sensitivity, timing, delayed release, wrist torque, passive transfer, hub-path models, foundational linked-segment mechanics, energy accounting, kinematic proxies, planarity, double-pendulum interaction-force identities, hand-path attribution, two-hand redundancy, oracle-preview boundaries, counterfactual contracts and matched-state persistence, optimal-control lineages, spatial forward optimization, ground-reaction attribution, proximal-velocity coordinate conventions, finite-grid association adequacy, and causal limitations. Chapters 2 through 5, both counterfactual chapters, and the proximal-velocity chapter are fully adjudicated. The complete 895-candidate paper audit remains in progress; 288 unique candidates are reviewed and 607 remain unadjudicated."
+    "current_scope": "Stable claim identity, cross-platform source digests, complete post-equation narrative parsing, and thirteen high-risk evidence slices. Chapters 2 through 5, both counterfactual chapters, the proximal-velocity chapter, and the archived two-hand wrench chapter are fully adjudicated. The complete 895-candidate paper audit remains in progress; 357 unique candidates are reviewed and 538 remain unadjudicated."
   },
   "dependencies": [
     {
@@ -2482,6 +2482,558 @@
       "disposition": "material_claims_mapped",
       "claim_ids": ["PD-CLAIM-103"],
       "rationale": "Adjudicated within PD-CLAIM-103; the candidate is bounded to the declared source, model, intervention, or nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-e9254e21781c5764",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-104"],
+      "rationale": "Adjudicated within PD-CLAIM-104; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-50618df2b4aa034f",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-104"],
+      "rationale": "Adjudicated within PD-CLAIM-104; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-9e4e89abceea6d73",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-104"],
+      "rationale": "Adjudicated within PD-CLAIM-104; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-4a6e7a958e0af928",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-104"],
+      "rationale": "Adjudicated within PD-CLAIM-104; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-071df1d1dfbdbb69",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-105"],
+      "rationale": "Adjudicated within PD-CLAIM-105; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-7c18aaddbe11a93a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-105"],
+      "rationale": "Adjudicated within PD-CLAIM-105; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-cd60191b51577c4b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-105"],
+      "rationale": "Adjudicated within PD-CLAIM-105; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-1f9ae88ab510638d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-105"],
+      "rationale": "Adjudicated within PD-CLAIM-105; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-b237945010ecf99a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-105"],
+      "rationale": "Adjudicated within PD-CLAIM-105; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-e019a18c04a7c147",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-106"],
+      "rationale": "Adjudicated within PD-CLAIM-106; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-dfb3bffc3ef8c41a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-106"],
+      "rationale": "Adjudicated within PD-CLAIM-106; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-4c53041e7afd3a26",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-106"],
+      "rationale": "Adjudicated within PD-CLAIM-106; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-56b8cbd420fba3b5",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-106"],
+      "rationale": "Adjudicated within PD-CLAIM-106; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-f0fd38efe6f34270",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-106"],
+      "rationale": "Adjudicated within PD-CLAIM-106; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-77974c49c00fc64d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-107"],
+      "rationale": "Adjudicated within PD-CLAIM-107; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-ff96278e01e63ea7",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-107"],
+      "rationale": "Adjudicated within PD-CLAIM-107; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-cbb6260482e77c3d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-107"],
+      "rationale": "Adjudicated within PD-CLAIM-107; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-cc4d41666e484be1",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-107"],
+      "rationale": "Adjudicated within PD-CLAIM-107; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-d14c72d88e01534a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-107"],
+      "rationale": "Adjudicated within PD-CLAIM-107; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-8c101a797890f6ed",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-107"],
+      "rationale": "Adjudicated within PD-CLAIM-107; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-875392c78836e375",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-108"],
+      "rationale": "Adjudicated within PD-CLAIM-108; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-2561bee6781c606f",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-108"],
+      "rationale": "Adjudicated within PD-CLAIM-108; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-e0544d23ee90a4ed",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-108"],
+      "rationale": "Adjudicated within PD-CLAIM-108; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-eb854bc0c28c7825",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-108"],
+      "rationale": "Adjudicated within PD-CLAIM-108; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-fd8dce28b21f3209",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-108"],
+      "rationale": "Adjudicated within PD-CLAIM-108; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-c508f4d44d55b8c8",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-108"],
+      "rationale": "Adjudicated within PD-CLAIM-108; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-2939df19ccc1680d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-108"],
+      "rationale": "Adjudicated within PD-CLAIM-108; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-79343342a06d94f9",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-109"],
+      "rationale": "Adjudicated within PD-CLAIM-109; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-783f9b7169417af8",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-109"],
+      "rationale": "Adjudicated within PD-CLAIM-109; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-cf701a1f4eb3b02d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-109"],
+      "rationale": "Adjudicated within PD-CLAIM-109; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-b7129e52dc84736b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-109"],
+      "rationale": "Adjudicated within PD-CLAIM-109; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-8d8a9e287def58af",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-110"],
+      "rationale": "Adjudicated within PD-CLAIM-110; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-ac5194e852825e74",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-110"],
+      "rationale": "Adjudicated within PD-CLAIM-110; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-dca45eecd19bdf74",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-110"],
+      "rationale": "Adjudicated within PD-CLAIM-110; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-33081722024259c2",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-110"],
+      "rationale": "Adjudicated within PD-CLAIM-110; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-e84680f5ebdeb22b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-111"],
+      "rationale": "Adjudicated within PD-CLAIM-111; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-da6677bdc679cc76",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-111"],
+      "rationale": "Adjudicated within PD-CLAIM-111; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-55fcf7ead6555eb6",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-111"],
+      "rationale": "Adjudicated within PD-CLAIM-111; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-67966e5cd42befd9",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-111"],
+      "rationale": "Adjudicated within PD-CLAIM-111; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-3e3f0da6267cba0c",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-112"],
+      "rationale": "Adjudicated within PD-CLAIM-112; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-dda56aed82096fe6",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-112"],
+      "rationale": "Adjudicated within PD-CLAIM-112; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-424fb359a6a6c061",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-112"],
+      "rationale": "Adjudicated within PD-CLAIM-112; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-741cb7a77d8cf116",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-112"],
+      "rationale": "Adjudicated within PD-CLAIM-112; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-2ab9e74c85c68bb8",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-112"],
+      "rationale": "Adjudicated within PD-CLAIM-112; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-fad36ac67493d171",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-113"],
+      "rationale": "Adjudicated within PD-CLAIM-113; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-ccb6de2e1dd2ba61",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-113"],
+      "rationale": "Adjudicated within PD-CLAIM-113; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-9aa9650d39a5feb1",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-113"],
+      "rationale": "Adjudicated within PD-CLAIM-113; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-19ee25436dd6a0d3",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-113"],
+      "rationale": "Adjudicated within PD-CLAIM-113; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-51122e04fa434334",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-113"],
+      "rationale": "Adjudicated within PD-CLAIM-113; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-60635afcd60e9377",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-113"],
+      "rationale": "Adjudicated within PD-CLAIM-113; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-96542d13b05ac5d7",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-114"],
+      "rationale": "Adjudicated within PD-CLAIM-114; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-67ea1b87e319f366",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-114"],
+      "rationale": "Adjudicated within PD-CLAIM-114; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-2e09eb763ad21113",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-114"],
+      "rationale": "Adjudicated within PD-CLAIM-114; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-bb859cf46b1d3929",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-114"],
+      "rationale": "Adjudicated within PD-CLAIM-114; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-e9f2848802900f4b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-115"],
+      "rationale": "Adjudicated within PD-CLAIM-115; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-1ff32852bacc3614",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-116"],
+      "rationale": "Adjudicated within PD-CLAIM-116; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-41d2cbb855b0ac2e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-116"],
+      "rationale": "Adjudicated within PD-CLAIM-116; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-e56aac7c9f015326",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-116"],
+      "rationale": "Adjudicated within PD-CLAIM-116; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-e22979ae13ef3287",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-116"],
+      "rationale": "Adjudicated within PD-CLAIM-116; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-9b780105a49ab034",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-116"],
+      "rationale": "Adjudicated within PD-CLAIM-116; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-0428aa9bcbe2a65b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-116"],
+      "rationale": "Adjudicated within PD-CLAIM-116; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-dbedbc9788c9308d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-117"],
+      "rationale": "Adjudicated within PD-CLAIM-117; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-7b431b6e2c6d56c4",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-117"],
+      "rationale": "Adjudicated within PD-CLAIM-117; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-64e803acbb996f3e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-117"],
+      "rationale": "Adjudicated within PD-CLAIM-117; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-3500131a0c524243",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-118"],
+      "rationale": "Adjudicated within PD-CLAIM-118; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-347057f61c257c75",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-118"],
+      "rationale": "Adjudicated within PD-CLAIM-118; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-8b6676582186e21c",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-118"],
+      "rationale": "Adjudicated within PD-CLAIM-118; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-e087aa97b04c2865",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-118"],
+      "rationale": "Adjudicated within PD-CLAIM-118; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-b17ce9f33f6f78b1",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-115"],
+      "rationale": "Adjudicated within PD-CLAIM-115; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
     }
@@ -6243,6 +6795,664 @@
       ],
       "falsifier": "Repeated generation differs, a declared input is omitted, a chapter candidate is unmapped, or a prohibited human or universal claim appears.",
       "adjudication": "Every candidate in both counterfactual chapters is mapped to a bounded claim with an executable evidence contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-104",
+      "candidate_ids": [
+        "PD-CAND-e9254e21781c5764",
+        "PD-CAND-50618df2b4aa034f",
+        "PD-CAND-9e4e89abceea6d73",
+        "PD-CAND-4a6e7a958e0af928"
+      ],
+      "statement": "Resultant hand force, equivalent grip-midpoint couple, and actively commanded wrist torque are distinct observables; separated opposing forces can create a couple with modest resultant and zero commanded free torque.",
+      "classification": "force_system_conceptual_distinction",
+      "published_status": "mechanics_identity",
+      "audit_status": "equations_and_actuation_semantics_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:5",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:14",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:17",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:21"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+        "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.npz",
+        "scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py",
+        "scripts/research/proximal_distal_energy/two_hand_wrench.py",
+        "tests/research/test_two_hand_wscg_analysis.py",
+        "tests/research/test_two_hand_wrench.py"
+      ],
+      "model_domain": "Two point contacts reduced to an equivalent wrench.",
+      "uncertainty_boundary": "The identity does not establish which coordination strategy a human uses.",
+      "competing_explanations": [
+        "commanded free torque",
+        "force-generated moment",
+        "reference-point transport"
+      ],
+      "negative_controls": [
+        "separate resultant and moment equations",
+        "individual command columns"
+      ],
+      "falsifier": "A correct wrench reconstruction shows the three statements are necessarily equivalent.",
+      "adjudication": "All reciprocal chapter candidates were reviewed against the executable evidence and narrowed where the evidence did not support the stronger reading.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-105",
+      "candidate_ids": [
+        "PD-CAND-071df1d1dfbdbb69",
+        "PD-CAND-7c18aaddbe11a93a",
+        "PD-CAND-cd60191b51577c4b",
+        "PD-CAND-1f9ae88ab510638d",
+        "PD-CAND-b237945010ecf99a"
+      ],
+      "statement": "The archived BASE, pointwise ZTCF, and DELTA tables are reproduced from 2,801 samples with nine SHA-256 source records; ZTCF is a matched-state instantaneous attribution only to finite cache precision, and the project-originated archive is not independent empirical validation.",
+      "classification": "source_provenance_and_counterfactual_boundary",
+      "published_status": "supported_as_internal_model_reproduction",
+      "audit_status": "hash_state_residual_and_case_semantics_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:27",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:38",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:40",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:45",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:59"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+        "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.npz",
+        "scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py",
+        "scripts/research/proximal_distal_energy/two_hand_wrench.py",
+        "tests/research/test_two_hand_wscg_analysis.py",
+        "tests/research/test_two_hand_wrench.py"
+      ],
+      "model_domain": "Archived WSCG two-hand simulation tables and executable export path.",
+      "uncertainty_boundary": "It is neither a forward torque-free swing nor human evidence.",
+      "competing_explanations": [
+        "rounding/export drift",
+        "earlier active state creation",
+        "DELTA bookkeeping"
+      ],
+      "negative_controls": [
+        "nine-source hash closure",
+        "finite state residuals",
+        "unchanged MAT sources"
+      ],
+      "falsifier": "A source hash is missing, state residuals exceed registered bounds, or ZTCF is shown to be a forward no-command trajectory.",
+      "adjudication": "All reciprocal chapter candidates were reviewed against the executable evidence and narrowed where the evidence did not support the stronger reading.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-106",
+      "candidate_ids": [
+        "PD-CAND-e019a18c04a7c147",
+        "PD-CAND-dfb3bffc3ef8c41a",
+        "PD-CAND-4c53041e7afd3a26",
+        "PD-CAND-56b8cbd420fba3b5",
+        "PD-CAND-f0fd38efe6f34270"
+      ],
+      "statement": "The declared action-reaction, hand-label, local-axis, and moment-sign conventions produce a near-planar reconstruction: local projection differs from archived components by at most 1.05 N and the maximum case-level out-of-plane ratio is 0.215%.",
+      "classification": "frame_sign_and_planarity_contract",
+      "published_status": "supported_to_declared_cache_tolerance",
+      "audit_status": "axes_projections_and_signs_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:71",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:74",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:82",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:89",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:97"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+        "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.npz",
+        "scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py",
+        "scripts/research/proximal_distal_energy/two_hand_wrench.py",
+        "tests/research/test_two_hand_wscg_analysis.py",
+        "tests/research/test_two_hand_wrench.py"
+      ],
+      "model_domain": "Archived global vectors projected into the declared oblique model plane.",
+      "uncertainty_boundary": "The result is near-planar, not exactly planar, and depends on the declared force direction.",
+      "competing_explanations": [
+        "opposite action-reaction convention",
+        "swapped hands",
+        "axis reversal",
+        "cache precision"
+      ],
+      "negative_controls": [
+        "global-to-local projection residual",
+        "out-of-plane ratio"
+      ],
+      "falsifier": "An alternate consistent frame removes the reported couple or residuals exceed tolerance.",
+      "adjudication": "All reciprocal chapter candidates were reviewed against the executable evidence and narrowed where the evidence did not support the stronger reading.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-107",
+      "candidate_ids": [
+        "PD-CAND-77974c49c00fc64d",
+        "PD-CAND-ff96278e01e63ea7",
+        "PD-CAND-cbb6260482e77c3d",
+        "PD-CAND-cc4d41666e484be1",
+        "PD-CAND-d14c72d88e01534a",
+        "PD-CAND-8c101a797890f6ed"
+      ],
+      "statement": "A two-contact force system preserves physical action under reference transport, but its scalar moment is reference invariant only for zero resultant; the implementation verifies transport plus rigid translation and co-rotation controls.",
+      "classification": "wrench_reduction_and_reference_transport",
+      "published_status": "analytical_identity_and_numerical_control_pass",
+      "audit_status": "transport_translation_and_corotation_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:104",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:119",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:127",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:136",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:143",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:145"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+        "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.npz",
+        "scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py",
+        "scripts/research/proximal_distal_energy/two_hand_wrench.py",
+        "tests/research/test_two_hand_wscg_analysis.py",
+        "tests/research/test_two_hand_wrench.py"
+      ],
+      "model_domain": "Rigid wrench reduction of the archived two-contact force system.",
+      "uncertainty_boundary": "Midpoint moment values cannot be compared across undeclared reference points.",
+      "competing_explanations": [
+        "reference-point mismatch",
+        "untransported moment comparison"
+      ],
+      "negative_controls": [
+        "wrench transport identity",
+        "translation control",
+        "co-rotation control"
+      ],
+      "falsifier": "Transported moments fail the wrench identity or rigid coordinate changes alter the physical action.",
+      "adjudication": "All reciprocal chapter candidates were reviewed against the executable evidence and narrowed where the evidence did not support the stronger reading.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-108",
+      "candidate_ids": [
+        "PD-CAND-875392c78836e375",
+        "PD-CAND-2561bee6781c606f",
+        "PD-CAND-e0544d23ee90a4ed",
+        "PD-CAND-eb854bc0c28c7825",
+        "PD-CAND-fd8dce28b21f3209",
+        "PD-CAND-c508f4d44d55b8c8",
+        "PD-CAND-2939df19ccc1680d"
+      ],
+      "statement": "At the grip midpoint the common force mode determines resultant force and the opposed differential mode determines contact-force couple; only differential force perpendicular to the contact separation contributes directly in the declared planar reduction.",
+      "classification": "common_differential_force_mechanism",
+      "published_status": "analytical_identity_with_archived_trace_support",
+      "audit_status": "mode_decomposition_and_geometry_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:153",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:164",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:171",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:176",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:183",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:188",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:190"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+        "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.npz",
+        "scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py",
+        "scripts/research/proximal_distal_energy/two_hand_wrench.py",
+        "tests/research/test_two_hand_wscg_analysis.py",
+        "tests/research/test_two_hand_wrench.py"
+      ],
+      "model_domain": "Two separated point forces in the archived near-planar grip.",
+      "uncertainty_boundary": "Axial forces can still affect loading, deformation, and power even when their direct midpoint moment vanishes.",
+      "competing_explanations": [
+        "free torque",
+        "noncollinear axial force",
+        "distributed pressure"
+      ],
+      "negative_controls": [
+        "common/opposed reconstruction",
+        "net-force comparison"
+      ],
+      "falsifier": "The algebraic mode decomposition fails or the archived couple cannot be reconstructed from the differential mode.",
+      "adjudication": "All reciprocal chapter candidates were reviewed against the executable evidence and narrowed where the evidence did not support the stronger reading.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-109",
+      "candidate_ids": [
+        "PD-CAND-79343342a06d94f9",
+        "PD-CAND-783f9b7169417af8",
+        "PD-CAND-cf701a1f4eb3b02d",
+        "PD-CAND-b7129e52dc84736b"
+      ],
+      "statement": "Across BASE, ZTCF, and DELTA the reconstruction closes resultant to 1.1e-12 N, global couple to 0.057 N m, and local BASE-minus-ZTCF-minus-DELTA couple to 1.2e-13 N m under a declared 0.1 N m couple tolerance.",
+      "classification": "wrench_reconstruction_numerical_closure",
+      "published_status": "supported_for_archived_cache",
+      "audit_status": "all_samples_and_tolerances_recomputed",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:197",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:199",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:210",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:216"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+        "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.npz",
+        "scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py",
+        "scripts/research/proximal_distal_energy/two_hand_wrench.py",
+        "tests/research/test_two_hand_wscg_analysis.py",
+        "tests/research/test_two_hand_wrench.py"
+      ],
+      "model_domain": "All 2,801 archived samples in each of three cases.",
+      "uncertainty_boundary": "The 0.057 N m residual is treated as cache/transform uncertainty, not physical torque.",
+      "competing_explanations": [
+        "table interpolation",
+        "coordinate precision",
+        "column misidentification"
+      ],
+      "negative_controls": [
+        "all-sample residual maxima",
+        "DELTA closure",
+        "absolute tolerance"
+      ],
+      "falsifier": "Independent replay exceeds tolerance or the residual changes the negative-couple interpretation.",
+      "adjudication": "All reciprocal chapter candidates were reviewed against the executable evidence and narrowed where the evidence did not support the stronger reading.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-110",
+      "candidate_ids": [
+        "PD-CAND-8d8a9e287def58af",
+        "PD-CAND-ac5194e852825e74",
+        "PD-CAND-dca45eecd19bdf74",
+        "PD-CAND-33081722024259c2"
+      ],
+      "statement": "BASE reaches -22.79 N m at 0.2151 s (-18.60 force moment and -4.22 free torque); pointwise ZTCF reaches -19.63 N m at 0.2148 s with both individual commands zero and free torque below 3.1e-13 N m, retaining 86.1% of BASE magnitude at the BASE minimum.",
+      "classification": "two_hand_negative_couple_attribution",
+      "published_status": "supported_in_archived_pointwise_model",
+      "audit_status": "individual_commands_decomposition_and_extrema_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:223",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:225",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:237",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:243"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+        "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.npz",
+        "scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py",
+        "scripts/research/proximal_distal_energy/two_hand_wrench.py",
+        "tests/research/test_two_hand_wscg_analysis.py",
+        "tests/research/test_two_hand_wrench.py"
+      ],
+      "model_domain": "Single archived parameterization evaluated on the achieved BASE state history.",
+      "uncertainty_boundary": "Earlier commands helped create the state; wrist torque is not irrelevant and no human partition is inferred.",
+      "competing_explanations": [
+        "equal-and-opposite hidden commands",
+        "free torque",
+        "prior active work",
+        "shaft/gravity effects"
+      ],
+      "negative_controls": [
+        "individual command maxima",
+        "command-sum closure",
+        "force/free decomposition"
+      ],
+      "falsifier": "Either individual ZTCF command is nonzero, force moment does not reconstruct the couple, or a matched rerun removes the result.",
+      "adjudication": "All reciprocal chapter candidates were reviewed against the executable evidence and narrowed where the evidence did not support the stronger reading.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-111",
+      "candidate_ids": [
+        "PD-CAND-e84680f5ebdeb22b",
+        "PD-CAND-da6677bdc679cc76",
+        "PD-CAND-55fcf7ead6555eb6",
+        "PD-CAND-67966e5cd42befd9"
+      ],
+      "statement": "The interpolated negative-couple intervals are 90.652 ms for BASE and 88.122 ms for ZTCF, with late reversals separated by 0.808 ms; offset-complete downsampling through 2 ms shifts the late crossing by at most 7.95 microseconds but does not establish solver convergence.",
+      "classification": "crossing_timing_and_sampling_adequacy",
+      "published_status": "supported_for_stored_smooth_curves",
+      "audit_status": "crossings_offsets_and_interpolation_recomputed",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:250",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:257",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:265",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:267"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+        "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.npz",
+        "scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py",
+        "scripts/research/proximal_distal_energy/two_hand_wrench.py",
+        "tests/research/test_two_hand_wscg_analysis.py",
+        "tests/research/test_two_hand_wrench.py"
+      ],
+      "model_domain": "Linear interpolation of the archived 0.1 ms cache with offset-complete downsampling.",
+      "uncertainty_boundary": "Sampling stability cannot substitute for solver, constraint, or model sensitivity.",
+      "competing_explanations": [
+        "interpolation phase",
+        "DELTA misinterpretation",
+        "solver error"
+      ],
+      "negative_controls": [
+        "all sample offsets",
+        "multiple downsample factors",
+        "ZTCF rather than DELTA timing"
+      ],
+      "falsifier": "Crossings move materially under finer source output or a solver-refined rerun changes their ordering.",
+      "adjudication": "All reciprocal chapter candidates were reviewed against the executable evidence and narrowed where the evidence did not support the stronger reading.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-112",
+      "candidate_ids": [
+        "PD-CAND-3e3f0da6267cba0c",
+        "PD-CAND-dda56aed82096fe6",
+        "PD-CAND-424fb359a6a6c061",
+        "PD-CAND-741cb7a77d8cf116",
+        "PD-CAND-2ab9e74c85c68bb8"
+      ],
+      "statement": "Near the ZTCF minimum, opposed lead/trail normal forces of +249.8 and -266.2 N generate the differential couple while axial loads of -497.5 and +30.4 N mainly affect resultant/internal loading; sign follows relative lever-arm/force geometry, not an intrinsic anatomical force label.",
+      "classification": "local_force_geometry_mechanism",
+      "published_status": "supported_in_archived_trace",
+      "audit_status": "local_components_pose_and_cross_products_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:274",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:276",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:284",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:292",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:294"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+        "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.npz",
+        "scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py",
+        "scripts/research/proximal_distal_energy/two_hand_wrench.py",
+        "tests/research/test_two_hand_wscg_analysis.py",
+        "tests/research/test_two_hand_wrench.py"
+      ],
+      "model_domain": "Declared local basis and six archived global poses.",
+      "uncertainty_boundary": "The model does not resolve distributed grip pressure or anatomical muscle intent.",
+      "competing_explanations": [
+        "axis convention",
+        "free torque",
+        "out-of-plane force",
+        "distributed contacts"
+      ],
+      "negative_controls": [
+        "local/global reconstruction",
+        "pose montage",
+        "cross-product sign"
+      ],
+      "falsifier": "Correctly framed forces do not yield the reported differential moment or out-of-plane terms dominate.",
+      "adjudication": "All reciprocal chapter candidates were reviewed against the executable evidence and narrowed where the evidence did not support the stronger reading.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-113",
+      "candidate_ids": [
+        "PD-CAND-fad36ac67493d171",
+        "PD-CAND-ccb6de2e1dd2ba61",
+        "PD-CAND-9aa9650d39a5feb1",
+        "PD-CAND-19ee25436dd6a0d3",
+        "PD-CAND-51122e04fa434334",
+        "PD-CAND-60635afcd60e9377"
+      ],
+      "statement": "Deterministic peak-negative geometry controls show linear moment scaling with contact separation, a sinusoidal relative-orientation gate, and co-rotation invariance to 1.5e-14 N m; therefore negative torque is under-specified without its geometric and actuation route.",
+      "classification": "geometry_counterfactuals",
+      "published_status": "mechanics_identity_at_fixed_force_state",
+      "audit_status": "scale_rotation_and_corotation_controls_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:304",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:308",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:313",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:319",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:326",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:328"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+        "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.npz",
+        "scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py",
+        "scripts/research/proximal_distal_energy/two_hand_wrench.py",
+        "tests/research/test_two_hand_wscg_analysis.py",
+        "tests/research/test_two_hand_wrench.py"
+      ],
+      "model_domain": "Fixed archived forces with synthetic contact-offset perturbations at one sample.",
+      "uncertainty_boundary": "These controls are not anatomical grip-width or coaching recommendations.",
+      "competing_explanations": [
+        "force adaptation to geometry",
+        "joint limits",
+        "distributed grip mechanics"
+      ],
+      "negative_controls": [
+        "zero separation",
+        "double separation",
+        "relative rotation",
+        "rigid co-rotation"
+      ],
+      "falsifier": "Moment fails linear/sinusoidal identities or changes under rigid co-rotation.",
+      "adjudication": "All reciprocal chapter candidates were reviewed against the executable evidence and narrowed where the evidence did not support the stronger reading.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-114",
+      "candidate_ids": [
+        "PD-CAND-96542d13b05ac5d7",
+        "PD-CAND-67ea1b87e319f366",
+        "PD-CAND-2e09eb763ad21113",
+        "PD-CAND-bb859cf46b1d3929"
+      ],
+      "statement": "Moment sign alone does not determine energy transfer: the reconstructed two-contact force-power identity closes to 2.0e-11 W, while archived ZTCF linear-power columns differ by as much as 72.8 W and the reconstructed relative-contact remainder is at most 0.188 W.",
+      "classification": "two_contact_power_identity_and_source_discrepancy",
+      "published_status": "supported_internally_with_archived_discrepancy",
+      "audit_status": "power_identity_archive_parity_and_rigidity_remainder_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:337",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:344",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:354",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:364"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+        "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.npz",
+        "scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py",
+        "scripts/research/proximal_distal_energy/two_hand_wrench.py",
+        "tests/research/test_two_hand_wscg_analysis.py",
+        "tests/research/test_two_hand_wrench.py"
+      ],
+      "model_domain": "Archived contact forces and velocities reconstructed independently of stored power columns.",
+      "uncertainty_boundary": "Internal identity closure is not proof that the archived linear-power columns are exact.",
+      "competing_explanations": [
+        "column definition mismatch",
+        "export precision",
+        "contact compliance"
+      ],
+      "negative_controls": [
+        "two formulations of force power",
+        "archived-column discrepancy",
+        "relative-motion remainder"
+      ],
+      "falsifier": "The reconstructed identity fails, the 72.8 W discrepancy is omitted, or contact deformation is not negligible under the declared metric.",
+      "adjudication": "All reciprocal chapter candidates were reviewed against the executable evidence and narrowed where the evidence did not support the stronger reading.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-115",
+      "candidate_ids": ["PD-CAND-e9f2848802900f4b", "PD-CAND-b17ce9f33f6f78b1"],
+      "statement": "At the ZTCF negative-couple minimum reconstructed contact-force power is -2.08 kW; over the 88.122 ms interval it is negative for 84.95% of interpolated samples and integrates to -149.42 J versus -149.45 J from archived columns, so this trace supports late energy removal/redirection rather than a direct positive-work explanation.",
+      "classification": "negative_interval_power_and_strategy_boundary",
+      "published_status": "supported_for_single_archived_trace",
+      "audit_status": "endpoint_interpolation_sign_fraction_and_work_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:366",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:378"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+        "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.npz",
+        "scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py",
+        "scripts/research/proximal_distal_energy/two_hand_wrench.py",
+        "tests/research/test_two_hand_wscg_analysis.py",
+        "tests/research/test_two_hand_wrench.py"
+      ],
+      "model_domain": "One archived pointwise ZTCF trace with reconstructed force power.",
+      "uncertainty_boundary": "The result does not identify total club energy, actuator cause, optimal technique, or human benefit.",
+      "competing_explanations": [
+        "other power pathways",
+        "timing relative to impact",
+        "orientation control",
+        "earlier active work"
+      ],
+      "negative_controls": [
+        "interpolated endpoints",
+        "archived sign comparison",
+        "work integration"
+      ],
+      "falsifier": "Recomputation changes the interval sign/work materially or total-energy accounting shows the claimed pathway supplies positive work.",
+      "adjudication": "All reciprocal chapter candidates were reviewed against the executable evidence and narrowed where the evidence did not support the stronger reading.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-116",
+      "candidate_ids": [
+        "PD-CAND-1ff32852bacc3614",
+        "PD-CAND-41d2cbb855b0ac2e",
+        "PD-CAND-e56aac7c9f015326",
+        "PD-CAND-e22979ae13ef3287",
+        "PD-CAND-9b780105a49ab034",
+        "PD-CAND-0428aa9bcbe2a65b"
+      ],
+      "statement": "The four phase labels summarize archived mechanics without assigning intent: positive formation, entry near 0.180 s, peak negative reaction near 0.215 s, and late reversal near 0.270 s; they are not anatomical or neural phases.",
+      "classification": "mechanical_phase_interpretation",
+      "published_status": "descriptive_for_archived_trace_only",
+      "audit_status": "phase_events_and_nonclaims_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:389",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:392",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:396",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:401",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:406",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:411"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+        "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.npz",
+        "scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py",
+        "scripts/research/proximal_distal_energy/two_hand_wrench.py",
+        "tests/research/test_two_hand_wscg_analysis.py",
+        "tests/research/test_two_hand_wrench.py"
+      ],
+      "model_domain": "Single archived two-hand model trajectory.",
+      "uncertainty_boundary": "Muscle coordination, grip pressure, tendon elasticity, and neural control are unresolved.",
+      "competing_explanations": [
+        "event-label choice",
+        "human phase definitions",
+        "different parameterizations"
+      ],
+      "negative_controls": ["numerical crossing events", "actuation nonclaim"],
+      "falsifier": "The events cannot be reproduced or the prose assigns physiological intent.",
+      "adjudication": "All reciprocal chapter candidates were reviewed against the executable evidence and narrowed where the evidence did not support the stronger reading.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-117",
+      "candidate_ids": [
+        "PD-CAND-dbedbc9788c9308d",
+        "PD-CAND-7b431b6e2c6d56c4",
+        "PD-CAND-64e803acbb996f3e"
+      ],
+      "statement": "The archived result constrains hypotheses rather than prescribing technique: differential force, power, endpoint orientation, loading, and sensitivity must be optimized jointly, and whether opposing the zero-command reaction helps remains an open registered question.",
+      "classification": "strategy_hypotheses_and_nonprescription",
+      "published_status": "hypothesis_only",
+      "audit_status": "prescriptive_language_and_endpoint_contract_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:418",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:421",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:438"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+        "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.npz",
+        "scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py",
+        "scripts/research/proximal_distal_energy/two_hand_wrench.py",
+        "tests/research/test_two_hand_wscg_analysis.py",
+        "tests/research/test_two_hand_wrench.py"
+      ],
+      "model_domain": "Optimization questions motivated by one internal model trace.",
+      "uncertainty_boundary": "Neither negative torque creates speed nor negative torque wastes speed is a general conclusion.",
+      "competing_explanations": [
+        "positive opposition command",
+        "allowing natural reaction",
+        "different impact objective"
+      ],
+      "negative_controls": [
+        "universal-slogan rejection",
+        "multi-objective endpoint list"
+      ],
+      "falsifier": "A registered optimization across credible models and humans establishes a robust universal direction.",
+      "adjudication": "All reciprocal chapter candidates were reviewed against the executable evidence and narrowed where the evidence did not support the stronger reading.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-118",
+      "candidate_ids": [
+        "PD-CAND-3500131a0c524243",
+        "PD-CAND-347057f61c257c75",
+        "PD-CAND-8b6676582186e21c",
+        "PD-CAND-e087aa97b04c2865"
+      ],
+      "statement": "External interpretation remains limited by pointwise finite-precision state matching, one planar parameter set, idealized contacts, unresolved shaft/compliance attribution, absent solver refinement, a 72.8 W archived-power discrepancy, and no synchronized human contact-force data; explicit rerun and measurement outcomes can falsify the mechanism.",
+      "classification": "limitations_and_falsification_program",
+      "published_status": "bounded_internal_support_only",
+      "audit_status": "limitations_falsifiers_and_next_tier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:444",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:448",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:465",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:472"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+        "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.npz",
+        "scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py",
+        "scripts/research/proximal_distal_energy/two_hand_wrench.py",
+        "tests/research/test_two_hand_wscg_analysis.py",
+        "tests/research/test_two_hand_wrench.py"
+      ],
+      "model_domain": "Scope boundary from archived planar reproduction to future higher-order and human studies.",
+      "uncertainty_boundary": "No external validity or coaching efficacy is claimed.",
+      "competing_explanations": [
+        "solver artifacts",
+        "frame error",
+        "shaft compliance",
+        "forward persistence failure",
+        "human force mismatch"
+      ],
+      "negative_controls": [
+        "listed falsifiers",
+        "higher-tier wrench/power contract",
+        "human nonclaim"
+      ],
+      "falsifier": "Any listed falsifier occurs without correction, or prose promotes the internal reproduction to external validation.",
+      "adjudication": "All reciprocal chapter candidates were reviewed against the executable evidence and narrowed where the evidence did not support the stronger reading.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
     }

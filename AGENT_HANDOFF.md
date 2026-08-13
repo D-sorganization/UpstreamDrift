@@ -6,33 +6,32 @@ Update this file with every PR and every push to main.
 ## Where the Repo Is Heading
 
 - **#8557 Comprehensive Scientific Claim Audit and Open Golf Modeling
-  Program** — PRs #8558–#8570 are on `main`; exact remote-main tip after #8570
-  is `64d9667168fbc2481907affae12c6eeb2b9fe58e`. Branch
-  `research/8557-counterfactual-audit` is ready PR **#8571** at initial exact
-  head `6c4cab3de8268ed1e0cf9f32e906f03d4f0e1e81` and is the twelfth
-  fail-closed audit slice.
-  It corrects the legacy MATLAB killswitch from a forward-counterfactual label
-  to a rerun-based pointwise sampler; rejects its residual-force dotted with
-  residual-velocity `DELTA` work as an additive pathway partition; fixes
-  terminal command sampling at the 0.100 s torque switch; and records
-  matched-state, interpolation, closure, timestep, provenance, and whole-model
-  variant boundaries. The deterministic evidence contains 96 baseline rows,
-  12 variants, 13 source hashes, and selected traces. All 45 candidates in the
-  two counterfactual chapters map to PD-CLAIM-093 through PD-CLAIM-103; one is
-  a stable candidate already reviewed in an earlier chapter. Current authority:
-  895 candidates, 288 uniquely reviewed, 103 atomic claims, and 607
-  unadjudicated. The 197-page PDF was rendered and pages 59–64 and 161–163 were
-  visually inspected. Run the claim-audit validator, focused mechanism and
-  terminology tests, release-bundle tests, title-case gate, and release
-  qualification before publication.
-  The required Tools side task remains active and not release-ready. Its latest
-  adversarial review found incomplete denominator, tolerance, target-unit,
-  provenance, immutability, identity/resource, and orphan-declaration
-  contracts. Completion still requires protected merge, immutable UpstreamDrift
-  pinning, typed no-impact retention, deterministic ensemble replay,
-  sensitivity adequacy, and PyQt6/React parity. Biomechanics and Nonlinear
-  Control NotebookLM collections remain blocked on manual reauthentication;
-  treat them only as research indexes and verify original sources independently.
+  Program** — PR **#8571** is merged at exact remote-main commit
+  `9742167fbd2e0ce825fb8e46ab2bcc59fd87992b`, completing the twelfth
+  fail-closed audit slice. Branch `research/8557-two-hand-wrench-audit` is the
+  active thirteenth slice. It audits every candidate in the archived WSCG
+  two-hand wrench chapter, replaces stale commit provenance with nine content
+  hashes, records finite BASE--ZTCF state mismatch, tests both individual
+  command torques, separates internal force-power closure from the 72.8 W
+  archived-column discrepancy, integrates the exact 88.122 ms negative-couple
+  interval, and converts strategy language into falsifiable hypotheses.
+  Current authority: 895 candidates, 357 uniquely reviewed, 118 atomic claims,
+  and 538 unadjudicated. All 69 candidates in the chapter map reciprocally to
+  PD-CLAIM-104 through PD-CLAIM-118. Focused mechanics tests and deterministic
+  JSON/NPZ/PDF/SVG replay are green. Complete-document rendering produced a
+  198-page optimized PDF; visual inspection caught and corrected missing minus
+  glyphs in core-font plots. Rerender once after the last attribution wording
+  correction, refresh release hashes, rerun repository qualification, then
+  publish through the protected squash-merge flow.
+  The required Tools side task remains active and not release-ready. At live
+  revision 24 it has local commit `bdf883458` with focused React, Playwright,
+  cross-runtime, and static gates green, but no genuine isolated-baseline
+  producer exists and publication is held for adversarial review. Completion
+  still requires protected merge, immutable UpstreamDrift pinning, typed
+  no-impact retention, deterministic ensemble replay, sensitivity adequacy,
+  and PyQt6/React parity. Biomechanics and Nonlinear Control NotebookLM
+  collections remain blocked on manual reauthentication; treat them only as
+  research indexes and verify original sources independently.
 
 - **#8511 interactive proximal--distal dynamics workbench** — branch
   `feat/proximal-distal-workbench-integration` makes the pendulum launcher

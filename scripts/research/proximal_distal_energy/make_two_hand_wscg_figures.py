@@ -32,6 +32,8 @@ def _style() -> None:
     plt.rcParams.update(
         {
             "pdf.use14corefonts": True,
+            "svg.hashsalt": "upstreamdrift-two-hand-wrench-audit-v2",
+            "axes.unicode_minus": False,
             "path.simplify": True,
             "path.simplify_threshold": 1.0,
         }
@@ -46,9 +48,13 @@ def _load() -> tuple[dict, dict[str, np.ndarray]]:
 
 def _save(fig: plt.Figure, stem: str) -> None:
     fig.tight_layout()
-    fig.savefig(FIG_DIR / f"{stem}.pdf", bbox_inches="tight")
+    fig.savefig(
+        FIG_DIR / f"{stem}.pdf",
+        bbox_inches="tight",
+        metadata={"CreationDate": None, "ModDate": None},
+    )
     svg_path = FIG_DIR / f"{stem}.svg"
-    fig.savefig(svg_path, bbox_inches="tight")
+    fig.savefig(svg_path, bbox_inches="tight", metadata={"Date": None})
     svg_path.write_text(
         "\n".join(
             line.rstrip() for line in svg_path.read_text(encoding="utf-8").splitlines()
