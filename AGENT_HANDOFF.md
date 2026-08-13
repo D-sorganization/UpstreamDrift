@@ -1,9 +1,13 @@
 # Agent Handoff — UpstreamDrift
 
 Last updated: 2026-08-13
+
+Last updated: 2026-08-11
 Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
+
+<<<<<<< HEAD
 
 - **#8557 Comprehensive Scientific Claim Audit and Open Golf Modeling
   Program** — PR **#8572** merged through protected checks at exact remote-main
@@ -166,6 +170,10 @@ Update this file with every PR and every push to main.
   blocked by the parent-identical Tools ownership mismatch for the already
   present `chat/_qt/runtime.py`; changed-file mypy also timed out under Python
   3.12 after the Python 3.13 run stopped in NumPy's version-gated stub.
+
+=======
+
+> > > > > > > pr-8482
 
 - **Launcher-diagnostics size slice (local, no publish)** — branch
   `fix/launcher-diagnostics-size-decomposition` starts at exact draft PR #8480
