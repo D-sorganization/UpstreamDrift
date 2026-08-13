@@ -20,8 +20,12 @@ Update this file with every PR and every push to main.
   optimized paper is 203 pages and 1,403,911 bytes with 186 URI links and 235
   outline entries; affected definition, GRF, force-vector, and appendix pages
   retain the visually approved layout. The 380-artifact release manifest has
-  zero mismatches. No human or physiological inference is added by this
-  semantic migration.
+  zero mismatches. The first hosted required quality-gate run identified two
+  new Law-of-Demeter occurrences in the MyoSuite drift adapter; the adapter now
+  binds the simulation data object once without changing its zero-control
+  semantics. The exact no-growth scan, Ruff, and all 55 focused MyoSuite tests
+  pass locally before the corrective push. No human or physiological inference
+  is added by this semantic migration.
 
 - **#8557 uncertainty and stability audit** — ready PR
   [#8587](https://github.com/D-sorganization/UpstreamDrift/pull/8587) from
