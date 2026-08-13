@@ -4,6 +4,22 @@ Last updated: 2026-08-13
 
 Update this file with every PR and every push to main.
 
+## Momentum Transfer Critical-Question Program
+
+- Branch `research/8595-momentum-agenda` implements issue #8595 under research
+  epic #8557. The photographed agenda is now a durable seven-question program
+  covering drift attribution, geometry, timing/casting, timing demand,
+  self-correction/robustness, proximal-velocity dose response, and typed slack.
+- Canonical sources are
+  `docs/research/proximal_distal_energy_transfer/MOMENTUM_TRANSFER_QUESTION_PROGRAM.md`
+  and `data/momentum_transfer_question_registry.json`. The registry requires
+  named estimands, negative controls, falsifiers, governing issues, and model
+  versus human evidence boundaries for every question.
+- Focused registry tests, Ruff, and changed-document title capitalization pass.
+  Before publication, regenerate/validate the open-release manifest, run the
+  relevant research/governance gates, update this handoff with the ready PR,
+  and preserve #8556 as an open external human-data gate.
+
 ## Complete Paper-Wide Claim Adjudication
 
 - Branch `research/8557-post-terminology-audit` completes the epic #8557 paper

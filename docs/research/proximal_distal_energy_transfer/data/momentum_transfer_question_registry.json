@@ -1,0 +1,163 @@
+{
+  "schema_version": "momentum-transfer-question-registry/v1",
+  "parent_epic": 8557,
+  "program_issue": 8595,
+  "questions": [
+    {
+      "id": "Q1",
+      "slug": "drift-attribution",
+      "question": "How much of each registered transfer observable is attributable to drift?",
+      "status": "conditionally_answered",
+      "required_estimands": [
+        "acceleration",
+        "force",
+        "impulse",
+        "power",
+        "work"
+      ],
+      "required_controls": [
+        "same-state driver killswitch",
+        "signed and magnitude shares",
+        "cancellation indicator",
+        "forward persistence"
+      ],
+      "falsifier": "The registered drift contribution or forward persistence vanishes, reverses, or falls inside declared numerical or measurement uncertainty under matched controls.",
+      "issues": [8448, 8556, 8595]
+    },
+    {
+      "id": "Q2",
+      "slug": "geometry-dependencies",
+      "question": "Which geometry variables gate transfer magnitude, sign, direction, timing, and work?",
+      "status": "partly_answered",
+      "required_estimands": [
+        "moment arm",
+        "force-velocity projection",
+        "contact couple",
+        "event-window work",
+        "delivery outcome"
+      ],
+      "required_controls": [
+        "coincident grip",
+        "reversed moment arm",
+        "proper-frame transform",
+        "subject-scaled geometry",
+        "independent engine"
+      ],
+      "falsifier": "A registered sign-reversing or null geometry intervention does not change the proposed pathway beyond uncertainty, or the effect fails in an independent engine.",
+      "issues": [8448, 8449, 8592, 8593, 8595]
+    },
+    {
+      "id": "Q3",
+      "slug": "timing-and-failure-modes",
+      "question": "Which timing patterns and failure modes matter, including casting, insufficient early proximal acceleration, and segment release timing?",
+      "status": "conditionally_answered",
+      "required_estimands": [
+        "registered casting event",
+        "proximal acceleration",
+        "release event",
+        "braking work",
+        "impact outcome"
+      ],
+      "required_controls": [
+        "independent timing interventions",
+        "matched input work",
+        "matched delivery state",
+        "alternative casting criteria",
+        "adverse load"
+      ],
+      "falsifier": "The proposed timing mechanism loses its benefit under matched work/state, reverses under a plausible event definition, or is dominated by load or orientation cost.",
+      "issues": [8449, 8551, 8595]
+    },
+    {
+      "id": "Q4",
+      "slug": "timing-demand",
+      "question": "Does passive or drift-mediated transfer reduce required timing precision?",
+      "status": "unresolved",
+      "required_estimands": [
+        "viable timing-window volume",
+        "event-time sensitivity",
+        "lower-tail outcome",
+        "observer-delay sensitivity",
+        "phase-error sensitivity"
+      ],
+      "required_controls": [
+        "clock policy",
+        "state policy",
+        "impedance policy",
+        "observer policy",
+        "held-out perturbations"
+      ],
+      "falsifier": "The drift-mediated policy has an equal or smaller viable region, worse lower-tail outcome, or greater delay/phase sensitivity after force and effort costs are matched.",
+      "issues": [8449, 8556, 8592, 8595]
+    },
+    {
+      "id": "Q5",
+      "slug": "self-correction-and-robustness",
+      "question": "Are any strategies self-correcting, noise-rejecting, or more robust?",
+      "status": "unresolved",
+      "required_estimands": [
+        "error decay",
+        "recovery time",
+        "viable-set return probability",
+        "attraction-region size",
+        "worst-case outcome"
+      ],
+      "required_controls": [
+        "matched state perturbation",
+        "sensor noise",
+        "observer delay",
+        "actuator saturation",
+        "adverse external load"
+      ],
+      "falsifier": "Perturbations do not decay, recovery is not more probable than the comparator, or any benefit requires an unregistered force/load increase.",
+      "issues": [8449, 8551, 8595]
+    },
+    {
+      "id": "Q6",
+      "slug": "proximal-velocity-dose-response",
+      "question": "Must proximal velocity be maximized to maximize transfer?",
+      "status": "no_general_rule_supported",
+      "required_estimands": [
+        "proximal rate",
+        "proximal acceleration",
+        "delivery speed",
+        "braking work",
+        "grip load",
+        "impact outcome"
+      ],
+      "required_controls": [
+        "matched initial state",
+        "matched work",
+        "torso killswitch",
+        "arm killswitch",
+        "wrist killswitch",
+        "interior-optimum search"
+      ],
+      "falsifier": "The proposed monotonic benefit shows a plateau, interior optimum, reversal, adverse load, or dependence on the matching rule.",
+      "issues": [8449, 8551, 8595]
+    },
+    {
+      "id": "Q7",
+      "slug": "typed-slack",
+      "question": "When is slack beneficial, harmful, or required?",
+      "status": "unresolved_until_typed",
+      "required_estimands": [
+        "contact engagement",
+        "backlash state",
+        "elastic energy",
+        "series force",
+        "activation deadband",
+        "passivity residual"
+      ],
+      "required_controls": [
+        "one slack class at a time",
+        "zero-slack comparator",
+        "onset and hysteresis sweep",
+        "energy closure",
+        "parameter identifiability"
+      ],
+      "falsifier": "A proposed slack benefit disappears when slack classes are separated, violates passivity/energy closure, or is non-identifiable from the available measurements.",
+      "issues": [8592, 8593, 8595]
+    }
+  ]
+}

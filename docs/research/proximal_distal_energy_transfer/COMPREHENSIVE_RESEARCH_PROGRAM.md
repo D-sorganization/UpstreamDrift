@@ -126,6 +126,13 @@ because the local profile failed network token validation.
 
 ## Delivery Milestones
 
+The photographed momentum-transfer agenda is governed by
+[`MOMENTUM_TRANSFER_QUESTION_PROGRAM.md`](MOMENTUM_TRANSFER_QUESTION_PROGRAM.md)
+and its machine-readable registry. It requires separate answers for drift
+attribution, geometry, timing and casting, timing demand, closed-loop
+robustness, proximal-velocity dose response, and typed slack. Those questions
+remain subject to the model and human-evidence boundaries below.
+
 1. **Audit Infrastructure:** deterministic candidate inventory, strict claim
    schema, release reconciliation, link/source checks, and figure-data checks.
 2. **Paper Adjudication:** every material claim classified and reviewed; every
