@@ -36,6 +36,15 @@
     "persistent_arm_drive_preloaded": {
       "arm_zero_transmission_duration_s": 0.0,
       "wrist_zero_transmission_duration_s": 0.0,
+      "arm_zero_transmission_duration_bounds_s": [
+        0.0,
+        0.0
+      ],
+      "wrist_zero_transmission_duration_bounds_s": [
+        0.0,
+        0.0
+      ],
+      "temporal_resolution_s": 0.0001,
       "net_torque_error_impulse_nms": 0.0717103076307577,
       "arm_reversal_delay_s": 0.0,
       "wrist_reversal_delay_s": 0.0
@@ -43,6 +52,15 @@
     "persistent_arm_drive_relaxed": {
       "arm_zero_transmission_duration_s": 0.0067,
       "wrist_zero_transmission_duration_s": 0.0142,
+      "arm_zero_transmission_duration_bounds_s": [
+        0.0066,
+        0.0068000000000000005
+      ],
+      "wrist_zero_transmission_duration_bounds_s": [
+        0.014100000000000001,
+        0.0143
+      ],
+      "temporal_resolution_s": 0.0001,
       "net_torque_error_impulse_nms": 0.20107138073005523,
       "arm_reversal_delay_s": 0.0086,
       "wrist_reversal_delay_s": 0.0161
@@ -50,6 +68,15 @@
     "wrist_to_arm_role_reversal_preloaded": {
       "arm_zero_transmission_duration_s": 0.0115,
       "wrist_zero_transmission_duration_s": 0.022000000000000002,
+      "arm_zero_transmission_duration_bounds_s": [
+        0.0114,
+        0.0116
+      ],
+      "wrist_zero_transmission_duration_bounds_s": [
+        0.021900000000000003,
+        0.0221
+      ],
+      "temporal_resolution_s": 0.0001,
       "net_torque_error_impulse_nms": 0.19540693388776567,
       "arm_reversal_delay_s": 0.015700000000000002,
       "wrist_reversal_delay_s": 0.031100000000000003
@@ -57,6 +84,15 @@
     "wrist_to_arm_role_reversal_relaxed": {
       "arm_zero_transmission_duration_s": 0.0067,
       "wrist_zero_transmission_duration_s": 0.0142,
+      "arm_zero_transmission_duration_bounds_s": [
+        0.0066,
+        0.0068000000000000005
+      ],
+      "wrist_zero_transmission_duration_bounds_s": [
+        0.014100000000000001,
+        0.0143
+      ],
+      "temporal_resolution_s": 0.0001,
       "net_torque_error_impulse_nms": 0.20107138073005523,
       "arm_reversal_delay_s": 0.0086,
       "wrist_reversal_delay_s": 0.0161
@@ -70,6 +106,15 @@
       "persistent_arm_drive": {
         "arm_zero_transmission_duration_s": 0.0,
         "wrist_zero_transmission_duration_s": 0.0,
+        "arm_zero_transmission_duration_bounds_s": [
+          0.0,
+          0.0
+        ],
+        "wrist_zero_transmission_duration_bounds_s": [
+          0.0,
+          0.0
+        ],
+        "temporal_resolution_s": 0.0001,
         "net_torque_error_impulse_nms": 0.07171505681942013,
         "arm_reversal_delay_s": 0.0,
         "wrist_reversal_delay_s": 0.0
@@ -77,6 +122,15 @@
       "wrist_to_arm_role_reversal": {
         "arm_zero_transmission_duration_s": 0.0115,
         "wrist_zero_transmission_duration_s": 0.022000000000000002,
+        "arm_zero_transmission_duration_bounds_s": [
+          0.0114,
+          0.0116
+        ],
+        "wrist_zero_transmission_duration_bounds_s": [
+          0.021900000000000003,
+          0.0221
+        ],
+        "temporal_resolution_s": 0.0001,
         "net_torque_error_impulse_nms": 0.1954089217169282,
         "arm_reversal_delay_s": 0.015700000000000002,
         "wrist_reversal_delay_s": 0.031100000000000003
@@ -84,11 +138,23 @@
     }
   },
   "transmission_sensitivity": {
-    "dead_zone_rad": [0.0, 0.004, 0.012, 0.024],
-    "time_constant_s": [0.008, 0.018, 0.035],
-    "persistent_direction_has_lower_error_case_count": 11,
+    "dead_zone_rad": [
+      0.0,
+      0.004,
+      0.012,
+      0.024
+    ],
+    "time_constant_s": [
+      0.008,
+      0.018,
+      0.035
+    ],
+    "equivalence_tolerance_nms": 1e-10,
+    "persistent_direction_favored_case_count": 9,
+    "equivalent_case_count": 3,
+    "role_reversal_favored_case_count": 0,
     "case_count": 12,
-    "interpretation": "The persistent-direction advantage is conditional on the declared transmission family. The programs are equal to numerical precision in all three zero-dead-zone cases."
+    "interpretation": "The persistent-direction advantage is conditional on the declared transmission family. Under the explicit equivalence tolerance, all three zero-dead-zone cases are equivalent and the nine positive-dead-zone cases favor persistent direction."
   },
   "registered_hypotheses": {
     "RA-H1": "Allocation extremes can match the same club task.",

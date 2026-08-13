@@ -6,6 +6,25 @@ Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
 
+- **#8557 torque-allocation and transmission audit** — branch
+  `research/8557-torque-allocation-audit` is ready PR
+  [#8584](https://github.com/D-sorganization/UpstreamDrift/pull/8584) at
+  implementation commit `389c8abfac1fb1b60179e10fe1d380d45ef962f9` and is the active twenty-first
+  fail-closed slice. All 29 chapter candidates are adjudicated as PD-CLAIM-200
+  through PD-CLAIM-206. The 8 N m task and direct-moment/force-couple closure
+  remain at machine precision. An explicit 1e-10 N m s equivalence region now
+  classifies the transmission grid as nine positive-dead-zone cases favoring
+  persistent direction, three zero-dead-zone equivalent cases, and no reversal
+  wins. Reported 11.5 ms and 22.0 ms zero-transmission occupancies now carry
+  0.1 ms resolution and 11.4--11.6/21.9--22.1 ms boundary brackets. Current
+  authority: 921 candidates, 713 reviewed, 206 atomic claims, and 208
+  unadjudicated. The biological and human-strategy boundaries remain explicit.
+  Eleven focused tests and Ruff pass. The regenerated, visually inspected
+  paper remains 202 pages and is 1,400,701 bytes, with 186 URI links and 235
+  outline entries. Its qualified release contains 373 artifacts with zero
+  mismatches. Remaining gates are the full repository checks, protected
+  publication, and exact remote-main verification.
+
 - **#8557 side-task integration and frame/biological audit** — torso-velocity
   issue [#8555](https://github.com/D-sorganization/UpstreamDrift/issues/8555)
   is complete through PR #8577; merge commit

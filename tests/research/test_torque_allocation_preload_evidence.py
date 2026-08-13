@@ -65,6 +65,14 @@ def test_trace_archive_reproduces_reported_transmission_metrics() -> None:
             -0.18
         )
         assert 0.0 in arrays["continuous_persistent_arm_drive_time_s"]
+        sensitivity = record["transmission_sensitivity"]
+        assert sensitivity["persistent_direction_favored_case_count"] == 9
+        assert sensitivity["equivalent_case_count"] == 3
+        assert sensitivity["role_reversal_favored_case_count"] == 0
+        difference = arrays["sensitivity_reversal_minus_persistent_nms"]
+        tolerance = sensitivity["equivalence_tolerance_nms"]
+        assert np.count_nonzero(difference > tolerance) == 9
+        assert np.count_nonzero(np.abs(difference) <= tolerance) == 3
 
 
 def test_publication_figures_exist_in_pdf_and_svg() -> None:

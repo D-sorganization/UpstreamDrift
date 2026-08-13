@@ -1,9 +1,9 @@
 {
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper_source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-  "source_digest": "94bbfb9c350db2c5d9c078e9ce6216705afd336487a44afac1158a903b524ab4",
+  "source_digest": "ef2763a251ad45fbdc524c2433f778b397519778d6e7b172d328c7ce6aebf116",
   "source_count": 32,
-  "candidate_count": 920,
+  "candidate_count": 921,
   "candidates": [
     {
       "candidate_id": "PD-CAND-53acb1d15368459c",
@@ -8234,12 +8234,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-4062f3c3fe3f5003",
+      "candidate_id": "PD-CAND-779772ce623f8cf3",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd",
       "line_start": 148,
-      "line_end": 154,
-      "text": "From the loaded state, the persistent-direction program has no zero-transmission interval and a net torque-error impulse of 0.0717 N m s. The role-reversal program spends 11.5 ms and 22.0 ms in zero transmission for the arm and wrist channels, respectively, and its error impulse is 0.1954 N m s. A relaxed start produces an error impulse of 0.2011 N m s for either program. Thus preload improves continuity for a fixed desired program, while a sign reversal can discard that advantage under this particular dead-zone model.",
-      "text_sha256": "513f9e591796e0da445ab6a1b73304daba330fd6de457c92156703f373a2921d",
+      "line_end": 156,
+      "text": "From the loaded state, the persistent-direction program has no zero-transmission interval and a net torque-error impulse of 0.0717 N m s. The role-reversal program spends 11.5 ms and 22.0 ms in zero transmission for the arm and wrist channels, respectively, and its error impulse is 0.1954 N m s. These are zero-valued sample-occupancy estimates on a 0.1 ms grid; unresolved entry and exit locations bound them to 11.4--11.6 ms and 21.9--22.1 ms. A relaxed start produces an error impulse of 0.2011 N m s for either program. Thus preload improves continuity for a fixed desired program, while a sign reversal can discard that advantage under this particular dead-zone model.",
+      "text_sha256": "ad75482496561274d92e8d467ef5bb95c64dbb9d87830021d723e657e7ee1706",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": true,
@@ -8253,8 +8253,8 @@
     {
       "candidate_id": "PD-CAND-4bc3f82e8ddd84b1",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd",
-      "line_start": 156,
-      "line_end": 161,
+      "line_start": 158,
+      "line_end": 163,
       "text": "The finite-history test reproduces those post-transition values without state reinitialization: the persistent-direction program again has zero gap in both channels and a 0.0717 N m s error impulse, while complete role reversal produces 11.5 ms and 22.0 ms gaps and a 0.1954 N m s impulse. Equality with the loaded initialization is expected after ten declared time constants of preparation; the new evidence establishes state continuity, not a new physiological result.",
       "text_sha256": "939a68dee08cf0ea0ff3306c7459c78185287f666d68cf8291c88c6f6d100f4b",
       "citation_keys": [],
@@ -8270,8 +8270,8 @@
     {
       "candidate_id": "PD-CAND-03ecdef193bcd270",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd",
-      "line_start": 163,
-      "line_end": 171,
+      "line_start": 165,
+      "line_end": 173,
       "text": "The interpretation is conditional. Biological series elasticity normally stores and returns energy rather than acting as backlash, and short-range muscle stiffness can increase with activation [@izzietal2023; @degroote2017]. Series compliance can also delay force rise [@luo1994; @mayfield2016], while co-contraction can improve task-relevant stiffness at an energetic cost [@berret2024]. Consequently, neither zero compliance nor maximum co-contraction is presumed optimal. Useful compliance can filter impact, store energy, and permit coordination; unwanted gaps or low tangent stiffness can impair rapid torque transmission. The distinction must be measured.",
       "text_sha256": "e5de2b5c652bb34c337a74a2ea689e3a335417798d2a63f9871076d1a2b30e56",
       "citation_keys": [
@@ -8293,10 +8293,27 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-9bdc0ea02e07b08e",
+      "candidate_id": "PD-CAND-109bb14498010814",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd",
       "line_start": 175,
-      "line_end": 175,
+      "line_end": 182,
+      "text": "Across the registered four-dead-zone by three-time-constant grid, an explicit $10^{-10}$ N m s equivalence tolerance classifies all three zero-dead-zone cases as equivalent, all nine positive-dead-zone cases as favoring persistent direction, and none as favoring complete role reversal. This is a structural result of the chosen backlash-like law: when its defining dead zone is removed, the modeled advantage disappears. The grid does not establish that biological transmission contains such a dead zone or that the sampled parameters span a human population.",
+      "text_sha256": "a275d50a4bb978b8f9c2202815f25e63ac340272c411cecd2ba5c698d89ff8c7",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": true,
+      "priority_score": 4,
+      "triage_flags": [
+        "numeric",
+        "assertive_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-9bdc0ea02e07b08e",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd",
+      "line_start": 186,
+      "line_end": 186,
       "text": "| Question | Persistent Arm Drive With Wrist Resistance | Wrist-to-Arm Role Reversal |",
       "text_sha256": "3f715dc8a40c90ba1732b4d5d6855daba9ed5f042e14012227bdb718d1eb752b",
       "citation_keys": [],
@@ -8309,8 +8326,8 @@
     {
       "candidate_id": "PD-CAND-12c086d178335c40",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd",
-      "line_start": 177,
-      "line_end": 182,
+      "line_start": 188,
+      "line_end": 193,
       "text": "| Club-level task | Can match the same net moment | Can match the same net moment | | Transmission continuity in the declared dead-zone model | Favored when each channel remains loaded in the same direction | Penalized when both channels cross zero | | Possible coordination benefit | Reuses a directionally persistent proximal command | Separates preparation and delivery roles | | Principal modeled cost | May require larger hand forces or proximal generalized torques, depending on geometry | May require reversal delay and transient torque error | | Physiological evidence | Scapular phase activity is compatible but non-identifying | Wrist phase activity is compatible but non-identifying | | Main falsifier | Measured bilateral forces show no predicted couple or preload continuity | Measured reversal occurs without force/stiffness gap and yields equal or better robustness |",
       "text_sha256": "1fb415e1e04e8516e81c1f9dcf98fe15fb2baf1f20cf8386a5d4a202baa604a9",
       "citation_keys": [],
@@ -8325,8 +8342,8 @@
     {
       "candidate_id": "PD-CAND-6d0f12e922a2777a",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd",
-      "line_start": 184,
-      "line_end": 189,
+      "line_start": 195,
+      "line_end": 200,
       "text": "The persistent-direction strategy therefore has a clear conditional advantage: if the relevant biological transmission behaves like the declared dead-zone element, retaining load direction can preserve immediate torque transmission. It is not established as universally superior. The wrist-led preparation may reduce proximal loading, exploit elastic storage, or improve accuracy in a participant-specific system; the current model does not price those outcomes.",
       "text_sha256": "86e8b7d4fea4c108b9042c71d034db4677340430544b26deb41755c014f7b3ef",
       "citation_keys": [],
@@ -8341,8 +8358,8 @@
     {
       "candidate_id": "PD-CAND-c81c7415aaf27d17",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd",
-      "line_start": 193,
-      "line_end": 194,
+      "line_start": 204,
+      "line_end": 205,
       "text": "The experimental protocol in @sec-experimental-protocol should add the following preregistered observables:",
       "text_sha256": "d59ca4d83be63a6b7f20aaae02896ad4c162ab67fdadc5fa5d062da76cd7f38a",
       "citation_keys": [],
@@ -8355,8 +8372,8 @@
     {
       "candidate_id": "PD-CAND-c06392d08940ad2e",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd",
-      "line_start": 196,
-      "line_end": 207,
+      "line_start": 207,
+      "line_end": 218,
       "text": "1. bilateral six-axis grip wrenches and grip-pressure distribution, transformed to a declared club reference point; 2. wrist moments from a closed-chain inverse-dynamics solve constrained by the measured internal grip wrench; 3. ultrasound or validated musculotendon-length proxies where feasible, plus perturbation-based or system-identification estimates of tangent stiffness; 4. surface EMG for forearm, shoulder, and scapular muscles, interpreted as activation timing rather than joint torque; 5. transition-aligned force-development delay, zero-force duration, torque-error impulse, club angular acceleration, shaft strain, and launch outcomes; and 6. participant-held-out comparisons of the two extremes and intermediate allocations, with no universal optimum asserted from group means alone.",
       "text_sha256": "0c66778fc10b12e8ea6aaecfeafdf4bf459026dfc9aa08db461470f239e88fec",
       "citation_keys": [],
@@ -8372,8 +8389,8 @@
     {
       "candidate_id": "PD-CAND-a61ee0b6aa1a4bbd",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd",
-      "line_start": 209,
-      "line_end": 213,
+      "line_start": 220,
+      "line_end": 224,
       "text": "The interpretation is falsified if the same club task does not show the predicted allocation-dependent hand forces, if inferred channel reversal does not produce a measurable transmission delay under a documented gap or low stiffness, or if any claimed performance advantage disappears on participant holdout. Observing scapular or wrist EMG timing alone is insufficient.",
       "text_sha256": "1cdcd26051b03d547242ae61f7dab7e3c6e64482f01193d5bb68a48645f563a5",
       "citation_keys": [],

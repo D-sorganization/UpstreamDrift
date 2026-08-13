@@ -133,6 +133,13 @@ def test_dead_zone_penalizes_sign_reversal_and_preload_reduces_delay() -> None:
     assert proposed.wrist_zero_transmission_duration_s == pytest.approx(0.0)
     assert opposite.arm_zero_transmission_duration_s > 0.0
     assert opposite.wrist_zero_transmission_duration_s > 0.0
+    assert opposite.arm_zero_transmission_duration_bounds_s == pytest.approx(
+        (0.0114, 0.0116)
+    )
+    assert opposite.wrist_zero_transmission_duration_bounds_s == pytest.approx(
+        (0.0219, 0.0221)
+    )
+    assert opposite.temporal_resolution_s == pytest.approx(0.0001)
     assert proposed.net_torque_error_impulse_nms < opposite.net_torque_error_impulse_nms
     assert opposite.net_torque_error_impulse_nms < relaxed.net_torque_error_impulse_nms
 

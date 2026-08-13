@@ -452,7 +452,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, breakable, titlerule=0mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, leftrule=.75mm, bottomrule=.15mm, bottomtitle=1mm, colframe=quarto-callout-note-color-frame, opacityback=0, left=2mm, colback=white, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, rightrule=.15mm, arc=.35mm, toprule=.15mm, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-note-color-frame, leftrule=.75mm, colback=white, arc=.35mm, opacitybacktitle=0.6, left=2mm, opacityback=0, coltitle=black, titlerule=0mm, breakable, bottomrule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, bottomtitle=1mm, toptitle=1mm, rightrule=.15mm, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -6016,10 +6016,12 @@ From the loaded state, the persistent-direction program has no
 zero-transmission interval and a net torque-error impulse of 0.0717 N m
 s. The role-reversal program spends 11.5 ms and 22.0 ms in zero
 transmission for the arm and wrist channels, respectively, and its error
-impulse is 0.1954 N m s. A relaxed start produces an error impulse of
-0.2011 N m s for either program. Thus preload improves continuity for a
-fixed desired program, while a sign reversal can discard that advantage
-under this particular dead-zone model.
+impulse is 0.1954 N m s. These are zero-valued sample-occupancy
+estimates on a 0.1 ms grid; unresolved entry and exit locations bound
+them to 11.4--11.6 ms and 21.9--22.1 ms. A relaxed start produces an
+error impulse of 0.2011 N m s for either program. Thus preload improves
+continuity for a fixed desired program, while a sign reversal can
+discard that advantage under this particular dead-zone model.
 
 The finite-history test reproduces those post-transition values without
 state reinitialization: the persistent-direction program again has zero
@@ -6042,6 +6044,16 @@ stiffness at an energetic cost (\citeproc{ref-berret2024}{Berret et al.
 is presumed optimal. Useful compliance can filter impact, store energy,
 and permit coordination; unwanted gaps or low tangent stiffness can
 impair rapid torque transmission. The distinction must be measured.
+
+Across the registered four-dead-zone by three-time-constant grid, an
+explicit \(10^{-10}\) N m s equivalence tolerance classifies all three
+zero-dead-zone cases as equivalent, all nine positive-dead-zone cases as
+favoring persistent direction, and none as favoring complete role
+reversal. This is a structural result of the chosen backlash-like law:
+when its defining dead zone is removed, the modeled advantage
+disappears. The grid does not establish that biological transmission
+contains such a dead zone or that the sampled parameters span a human
+population.
 
 \section{Critical Comparison of the Two
 Extremes}\label{critical-comparison-of-the-two-extremes}

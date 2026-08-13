@@ -2,14 +2,14 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "94bbfb9c350db2c5d9c078e9ce6216705afd336487a44afac1158a903b524ab4",
+    "source_digest": "ef2763a251ad45fbdc524c2433f778b397519778d6e7b172d328c7ce6aebf116",
     "baseline_commit": "13ea6a69585a42dc1db4b3959440ed95787c9779"
   },
   "audit_scope": {
     "completion_status": "in_progress",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "The complete candidate audit remains in progress. The frame, reduced biological, engine-boundary, and governed human-protocol chapters are fully adjudicated; #8555 is merged, while #8556 remains open at its external bilateral-wrench acquisition boundary."
+    "current_scope": "The complete candidate audit remains in progress. The torque-allocation and transmission-preload chapter is fully adjudicated, including explicit zero-dead-zone equivalence, temporal-resolution bounds, literature limits, and the governed human-measurement gate."
   },
   "dependencies": [
     {
@@ -61,17 +61,17 @@
     {
       "release_claim_key": "arm_wrist_allocation_equivalence",
       "published_status": "supported_for_the_declared_same_state_club_task",
-      "audit_state": "pending"
+      "audit_state": "reviewed"
     },
     {
       "release_claim_key": "preload_continuity_advantage",
       "published_status": "conditional_on_the_declared_dead_zone_transmission_family",
-      "audit_state": "pending"
+      "audit_state": "reviewed"
     },
     {
       "release_claim_key": "scapular_or_muscle_strategy_identification",
       "published_status": "unsupported",
-      "audit_state": "reviewed_as_unsupported_or_untested"
+      "audit_state": "reviewed_as_unsupported"
     },
     {
       "release_claim_key": "passive_negative_couple_spatial_forward",
@@ -81,7 +81,7 @@
     {
       "release_claim_key": "universal_control_strategy",
       "published_status": "unsupported",
-      "audit_state": "pending"
+      "audit_state": "reviewed_as_unsupported"
     },
     {
       "release_claim_key": "human_experimental",
@@ -6946,6 +6946,296 @@
         "PD-CLAIM-199"
       ],
       "rationale": "This passage participates in the registered frame, reduced biological, engine-boundary, or governed human-acquisition audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-fedea546f906b69e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-200"
+      ],
+      "rationale": "This passage participates in the registered allocation, transmission, literature-boundary, or human-falsification audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-542f101933ab8796",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-200"
+      ],
+      "rationale": "This passage participates in the registered allocation, transmission, literature-boundary, or human-falsification audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-085c39cfd0008545",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-200"
+      ],
+      "rationale": "This passage participates in the registered allocation, transmission, literature-boundary, or human-falsification audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-186a6358eb9189ae",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-200"
+      ],
+      "rationale": "This passage participates in the registered allocation, transmission, literature-boundary, or human-falsification audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-9c4b7ec0b7f8a273",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-200"
+      ],
+      "rationale": "This passage participates in the registered allocation, transmission, literature-boundary, or human-falsification audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-338e733b76433506",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-200"
+      ],
+      "rationale": "This passage participates in the registered allocation, transmission, literature-boundary, or human-falsification audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-fa969f32c2eb6b3a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-201"
+      ],
+      "rationale": "This passage participates in the registered allocation, transmission, literature-boundary, or human-falsification audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-3238983d1e775558",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-201"
+      ],
+      "rationale": "This passage participates in the registered allocation, transmission, literature-boundary, or human-falsification audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-9b51b462f7b87dc0",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-201"
+      ],
+      "rationale": "This passage participates in the registered allocation, transmission, literature-boundary, or human-falsification audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-29633899ceea6486",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-201"
+      ],
+      "rationale": "This passage participates in the registered allocation, transmission, literature-boundary, or human-falsification audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-3dbaf2fd2954a088",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-202"
+      ],
+      "rationale": "This passage participates in the registered allocation, transmission, literature-boundary, or human-falsification audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-01e482b69fb99c74",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-202"
+      ],
+      "rationale": "This passage participates in the registered allocation, transmission, literature-boundary, or human-falsification audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-670dda8339c26595",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-202"
+      ],
+      "rationale": "This passage participates in the registered allocation, transmission, literature-boundary, or human-falsification audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-363ee48d0dd29a14",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-203"
+      ],
+      "rationale": "This passage participates in the registered allocation, transmission, literature-boundary, or human-falsification audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-ab825fd73b96cbf0",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-203"
+      ],
+      "rationale": "This passage participates in the registered allocation, transmission, literature-boundary, or human-falsification audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-f231bf910c426b87",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-203"
+      ],
+      "rationale": "This passage participates in the registered allocation, transmission, literature-boundary, or human-falsification audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-b5c3606e952ce9e3",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-203"
+      ],
+      "rationale": "This passage participates in the registered allocation, transmission, literature-boundary, or human-falsification audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-0400ede10f42f462",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-203"
+      ],
+      "rationale": "This passage participates in the registered allocation, transmission, literature-boundary, or human-falsification audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-0e44f56dc44067af",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-203"
+      ],
+      "rationale": "This passage participates in the registered allocation, transmission, literature-boundary, or human-falsification audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-779772ce623f8cf3",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-204"
+      ],
+      "rationale": "This passage participates in the registered allocation, transmission, literature-boundary, or human-falsification audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-4bc3f82e8ddd84b1",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-204"
+      ],
+      "rationale": "This passage participates in the registered allocation, transmission, literature-boundary, or human-falsification audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-03ecdef193bcd270",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-204"
+      ],
+      "rationale": "This passage participates in the registered allocation, transmission, literature-boundary, or human-falsification audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-109bb14498010814",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-204"
+      ],
+      "rationale": "This passage participates in the registered allocation, transmission, literature-boundary, or human-falsification audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-9bdc0ea02e07b08e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-205"
+      ],
+      "rationale": "This passage participates in the registered allocation, transmission, literature-boundary, or human-falsification audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-12c086d178335c40",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-205"
+      ],
+      "rationale": "This passage participates in the registered allocation, transmission, literature-boundary, or human-falsification audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-6d0f12e922a2777a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-205"
+      ],
+      "rationale": "This passage participates in the registered allocation, transmission, literature-boundary, or human-falsification audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-c81c7415aaf27d17",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-206"
+      ],
+      "rationale": "This passage participates in the registered allocation, transmission, literature-boundary, or human-falsification audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-c06392d08940ad2e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-206"
+      ],
+      "rationale": "This passage participates in the registered allocation, transmission, literature-boundary, or human-falsification audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-a61ee0b6aa1a4bbd",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-206"
+      ],
+      "rationale": "This passage participates in the registered allocation, transmission, literature-boundary, or human-falsification audit.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
     }
@@ -15288,6 +15578,344 @@
       ],
       "falsifier": "Human support is claimed without qualifying governed held-out data or synthetic/digitized evidence is substituted.",
       "adjudication": "Every passage in the frame/biological chapter and experimental protocol chapter was reviewed against regenerated evidence and the verified #8555/#8556 external state.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-200",
+      "candidate_ids": [
+        "PD-CAND-fedea546f906b69e",
+        "PD-CAND-542f101933ab8796",
+        "PD-CAND-085c39cfd0008545",
+        "PD-CAND-186a6358eb9189ae",
+        "PD-CAND-9c4b7ec0b7f8a273",
+        "PD-CAND-338e733b76433506"
+      ],
+      "statement": "Direct wrist moment and the moment of separated hand forces are mechanically distinguishable but not uniquely recoverable from club kinematics; current EMG and grip literature motivates rather than identifies allocation.",
+      "classification": "mechanism_identifiability_and_literature_boundary",
+      "published_status": "partly_supported_mechanics_biological_allocation_unidentified",
+      "audit_status": "allocation_closure_transmission_sensitivity_and_boundaries_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:5",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:12",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:21",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:34",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:42",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:53"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/torque_allocation_preload_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/torque_allocation_preload_study.npz",
+        "scripts/research/proximal_distal_energy/torque_allocation_preload.py",
+        "scripts/research/proximal_distal_energy/run_torque_allocation_preload_study.py",
+        "tests/research/test_torque_allocation_preload.py",
+        "tests/research/test_torque_allocation_preload_evidence.py"
+      ],
+      "model_domain": "Same-state club mechanics plus observational literature.",
+      "uncertainty_boundary": "Scapular or wrist EMG does not establish hand-force direction, joint torque, or a unique club-moment pathway.",
+      "competing_explanations": [
+        "changed trajectory rather than allocation",
+        "alternative cost weights",
+        "unmeasured bilateral internal force",
+        "continuous biological compliance rather than a dead zone",
+        "subject-specific activation and tissue properties"
+      ],
+      "negative_controls": [
+        "same state and matched club task",
+        "direct-moment plus force-couple closure",
+        "relaxed versus preloaded initialization",
+        "continuous finite preparation history",
+        "zero-dead-zone equivalence",
+        "participant-held-out measurement protocol"
+      ],
+      "falsifier": "Kinematics alone uniquely recover bilateral allocation or cited EMG is presented as torque/pathway proof.",
+      "adjudication": "All chapter passages were checked against regenerated allocation and transmission evidence, original-source boundaries, explicit numerical equivalence, temporal resolution, and the governed human-data gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-201",
+      "candidate_ids": [
+        "PD-CAND-fa969f32c2eb6b3a",
+        "PD-CAND-3238983d1e775558",
+        "PD-CAND-9b51b462f7b87dc0",
+        "PD-CAND-29633899ceea6486"
+      ],
+      "statement": "Minimum-norm proximal and wrist control subspaces and their convex mixtures reproduce the same 8 N m same-state club task, with direct wrist moment plus grip-force couple closing to machine precision.",
+      "classification": "matched_task_allocation_equivalence",
+      "published_status": "supported_for_declared_same_state_task",
+      "audit_status": "allocation_closure_transmission_sensitivity_and_boundaries_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:62",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:72",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:80",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:88"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/torque_allocation_preload_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/torque_allocation_preload_study.npz",
+        "scripts/research/proximal_distal_energy/torque_allocation_preload.py",
+        "scripts/research/proximal_distal_energy/run_torque_allocation_preload_study.py",
+        "tests/research/test_torque_allocation_preload.py",
+        "tests/research/test_torque_allocation_preload_evidence.py"
+      ],
+      "model_domain": "Planar constrained two-arm model at 19 geometries and 21 allocation fractions.",
+      "uncertainty_boundary": "The proximal subspace is generalized shoulder/elbow torque and is not a measured scapular action.",
+      "competing_explanations": [
+        "changed trajectory rather than allocation",
+        "alternative cost weights",
+        "unmeasured bilateral internal force",
+        "continuous biological compliance rather than a dead zone",
+        "subject-specific activation and tissue properties"
+      ],
+      "negative_controls": [
+        "same state and matched club task",
+        "direct-moment plus force-couple closure",
+        "relaxed versus preloaded initialization",
+        "continuous finite preparation history",
+        "zero-dead-zone equivalence",
+        "participant-held-out measurement protocol"
+      ],
+      "falsifier": "Task error exceeds 1e-10 N m or moment partition fails closure.",
+      "adjudication": "All chapter passages were checked against regenerated allocation and transmission evidence, original-source boundaries, explicit numerical equivalence, temporal resolution, and the governed human-data gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-202",
+      "candidate_ids": [
+        "PD-CAND-3dbaf2fd2954a088",
+        "PD-CAND-01e482b69fb99c74",
+        "PD-CAND-670dda8339c26595"
+      ],
+      "statement": "Task-equivalent allocations have geometry-dependent hand-force and generalized-torque demands, so no allocation optimum exists without an explicitly weighted multi-objective cost.",
+      "classification": "geometry_and_objective_dependent_internal_demand",
+      "published_status": "supported_for_declared_unweighted_metrics",
+      "audit_status": "allocation_closure_transmission_sensitivity_and_boundaries_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:90",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:97",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:99"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/torque_allocation_preload_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/torque_allocation_preload_study.npz",
+        "scripts/research/proximal_distal_energy/torque_allocation_preload.py",
+        "scripts/research/proximal_distal_energy/run_torque_allocation_preload_study.py",
+        "tests/research/test_torque_allocation_preload.py",
+        "tests/research/test_torque_allocation_preload_evidence.py"
+      ],
+      "model_domain": "Synthetic planar allocation surface.",
+      "uncertainty_boundary": "RMS hand force and Euclidean generalized-torque norm are not physiological effort, safety, comfort, or accuracy measures.",
+      "competing_explanations": [
+        "changed trajectory rather than allocation",
+        "alternative cost weights",
+        "unmeasured bilateral internal force",
+        "continuous biological compliance rather than a dead zone",
+        "subject-specific activation and tissue properties"
+      ],
+      "negative_controls": [
+        "same state and matched club task",
+        "direct-moment plus force-couple closure",
+        "relaxed versus preloaded initialization",
+        "continuous finite preparation history",
+        "zero-dead-zone equivalence",
+        "participant-held-out measurement protocol"
+      ],
+      "falsifier": "One allocation minimizes every preregistered objective across geometry or the paper asserts a universal optimum.",
+      "adjudication": "All chapter passages were checked against regenerated allocation and transmission evidence, original-source boundaries, explicit numerical equivalence, temporal resolution, and the governed human-data gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-203",
+      "candidate_ids": [
+        "PD-CAND-363ee48d0dd29a14",
+        "PD-CAND-ab825fd73b96cbf0",
+        "PD-CAND-f231bf910c426b87",
+        "PD-CAND-b5c3606e952ce9e3",
+        "PD-CAND-0400ede10f42f462",
+        "PD-CAND-0e44f56dc44067af"
+      ],
+      "statement": "The transmission experiment defines slack narrowly as zero transmitted torque in a synthetic rotational dead zone and compares persistent-direction and complete-role-reversal histories without state reset.",
+      "classification": "operational_dead_zone_and_history_contract",
+      "published_status": "supported_as_phenomenological_model_definition",
+      "audit_status": "allocation_closure_transmission_sensitivity_and_boundaries_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:107",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:122",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:128",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:136",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:144",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:146"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/torque_allocation_preload_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/torque_allocation_preload_study.npz",
+        "scripts/research/proximal_distal_energy/torque_allocation_preload.py",
+        "scripts/research/proximal_distal_energy/run_torque_allocation_preload_study.py",
+        "tests/research/test_torque_allocation_preload.py",
+        "tests/research/test_torque_allocation_preload_evidence.py"
+      ],
+      "model_domain": "Two abstract first-order dead-zone channels.",
+      "uncertainty_boundary": "The parameters are manufactured and the preparation interval is not an anatomical backswing.",
+      "competing_explanations": [
+        "changed trajectory rather than allocation",
+        "alternative cost weights",
+        "unmeasured bilateral internal force",
+        "continuous biological compliance rather than a dead zone",
+        "subject-specific activation and tissue properties"
+      ],
+      "negative_controls": [
+        "same state and matched club task",
+        "direct-moment plus force-couple closure",
+        "relaxed versus preloaded initialization",
+        "continuous finite preparation history",
+        "zero-dead-zone equivalence",
+        "participant-held-out measurement protocol"
+      ],
+      "falsifier": "The model is described as literal tendon, wrist, grip, or scapular backlash.",
+      "adjudication": "All chapter passages were checked against regenerated allocation and transmission evidence, original-source boundaries, explicit numerical equivalence, temporal resolution, and the governed human-data gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-204",
+      "candidate_ids": [
+        "PD-CAND-779772ce623f8cf3",
+        "PD-CAND-4bc3f82e8ddd84b1",
+        "PD-CAND-03ecdef193bcd270",
+        "PD-CAND-109bb14498010814"
+      ],
+      "statement": "At the declared positive dead zone, persistent direction preserves transmission and lowers torque-error impulse; zero-sample occupancies are resolution-bounded, and zero dead zone makes the programs equivalent.",
+      "classification": "conditional_preload_continuity_with_equivalence_region",
+      "published_status": "conditional_on_declared_dead_zone_family",
+      "audit_status": "allocation_closure_transmission_sensitivity_and_boundaries_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:148",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:158",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:165",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:175"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/torque_allocation_preload_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/torque_allocation_preload_study.npz",
+        "scripts/research/proximal_distal_energy/torque_allocation_preload.py",
+        "scripts/research/proximal_distal_energy/run_torque_allocation_preload_study.py",
+        "tests/research/test_torque_allocation_preload.py",
+        "tests/research/test_torque_allocation_preload_evidence.py"
+      ],
+      "model_domain": "Four dead zones by three time constants with a 0.1 ms temporal grid.",
+      "uncertainty_boundary": "All nine positive-dead-zone cases favor persistence, all three zero-dead-zone cases are equivalent, and no biological dead zone has been identified.",
+      "competing_explanations": [
+        "changed trajectory rather than allocation",
+        "alternative cost weights",
+        "unmeasured bilateral internal force",
+        "continuous biological compliance rather than a dead zone",
+        "subject-specific activation and tissue properties"
+      ],
+      "negative_controls": [
+        "same state and matched club task",
+        "direct-moment plus force-couple closure",
+        "relaxed versus preloaded initialization",
+        "continuous finite preparation history",
+        "zero-dead-zone equivalence",
+        "participant-held-out measurement protocol"
+      ],
+      "falsifier": "The advantage persists when the defining dead zone is removed, reverses within the registered grid, or temporal precision exceeds its one-step bracket.",
+      "adjudication": "All chapter passages were checked against regenerated allocation and transmission evidence, original-source boundaries, explicit numerical equivalence, temporal resolution, and the governed human-data gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-205",
+      "candidate_ids": [
+        "PD-CAND-9bdc0ea02e07b08e",
+        "PD-CAND-12c086d178335c40",
+        "PD-CAND-6d0f12e922a2777a"
+      ],
+      "statement": "Persistent arm drive has only a conditional advantage under the backlash-like transmission law; wrist-led preparation may trade proximal load, elastic storage, or accuracy in ways the current model does not price.",
+      "classification": "critical_strategy_comparison_boundary",
+      "published_status": "no_universal_strategy_supported",
+      "audit_status": "allocation_closure_transmission_sensitivity_and_boundaries_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:186",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:188",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:195"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/torque_allocation_preload_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/torque_allocation_preload_study.npz",
+        "scripts/research/proximal_distal_energy/torque_allocation_preload.py",
+        "scripts/research/proximal_distal_energy/run_torque_allocation_preload_study.py",
+        "tests/research/test_torque_allocation_preload.py",
+        "tests/research/test_torque_allocation_preload_evidence.py"
+      ],
+      "model_domain": "Comparison of two extreme command allocations in reduced models.",
+      "uncertainty_boundary": "Neither extreme maps uniquely to anatomy or includes calibrated elasticity, neural control, fatigue, injury, or accuracy.",
+      "competing_explanations": [
+        "changed trajectory rather than allocation",
+        "alternative cost weights",
+        "unmeasured bilateral internal force",
+        "continuous biological compliance rather than a dead zone",
+        "subject-specific activation and tissue properties"
+      ],
+      "negative_controls": [
+        "same state and matched club task",
+        "direct-moment plus force-couple closure",
+        "relaxed versus preloaded initialization",
+        "continuous finite preparation history",
+        "zero-dead-zone equivalence",
+        "participant-held-out measurement protocol"
+      ],
+      "falsifier": "Either extreme is presented as universally superior or as a coaching prescription.",
+      "adjudication": "All chapter passages were checked against regenerated allocation and transmission evidence, original-source boundaries, explicit numerical equivalence, temporal resolution, and the governed human-data gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-206",
+      "candidate_ids": [
+        "PD-CAND-c81c7415aaf27d17",
+        "PD-CAND-c06392d08940ad2e",
+        "PD-CAND-a61ee0b6aa1a4bbd"
+      ],
+      "statement": "Bilateral six-axis wrenches, pressure, constrained inverse dynamics, stiffness/delay, EMG, shaft, launch, and participant holdout are required to test the allocation and preload predictions; those human results remain unexecuted.",
+      "classification": "registered_measurement_and_human_falsification_gate",
+      "published_status": "untested_no_governed_human_data",
+      "audit_status": "allocation_closure_transmission_sensitivity_and_boundaries_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:204",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:207",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:220"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/torque_allocation_preload_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/torque_allocation_preload_study.npz",
+        "scripts/research/proximal_distal_energy/torque_allocation_preload.py",
+        "scripts/research/proximal_distal_energy/run_torque_allocation_preload_study.py",
+        "tests/research/test_torque_allocation_preload.py",
+        "tests/research/test_torque_allocation_preload_evidence.py"
+      ],
+      "model_domain": "Frozen prospective measurement plan.",
+      "uncertainty_boundary": "EMG timing alone and net club wrench are insufficient to identify the bilateral pathway.",
+      "competing_explanations": [
+        "changed trajectory rather than allocation",
+        "alternative cost weights",
+        "unmeasured bilateral internal force",
+        "continuous biological compliance rather than a dead zone",
+        "subject-specific activation and tissue properties"
+      ],
+      "negative_controls": [
+        "same state and matched club task",
+        "direct-moment plus force-couple closure",
+        "relaxed versus preloaded initialization",
+        "continuous finite preparation history",
+        "zero-dead-zone equivalence",
+        "participant-held-out measurement protocol"
+      ],
+      "falsifier": "Measured allocation forces or delays fail the prediction, held-out benefit disappears, or human support is claimed without the registered modalities.",
+      "adjudication": "All chapter passages were checked against regenerated allocation and transmission evidence, original-source boundaries, explicit numerical equivalence, temporal resolution, and the governed human-data gate.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
     }
