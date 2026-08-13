@@ -339,6 +339,15 @@ The active branches are independent topic branches off `main` unless noted:
 
 - `feat/hand-path-drift-control-attribution` — consolidated implementation for
   epic #8458 and children #8459–#8471; target `main` after local render/gates.
+- `research/shoulder-velocity-drift-transfer` — active implementation for epic
+  #8551. The first TDD slice adds a 90-case, five-phase, two-counterfactual
+  fixed-hub velocity sweep, exact drift/control and reaction-force closure,
+  machine-readable evidence, three generated figures, and the paper chapter
+  `#sec-shoulder-velocity-transfer`. The current model coordinate is proximal
+  link angular velocity, not anatomical shoulder or thorax velocity. Next:
+  trajectory-level braking work, rotating-base two-hand extension, companion
+  simulator diagnostics, AffineDrift publication surface, full render gates,
+  and protected PRs.
 - `research/two-hand-passive-couple` — full PR **#8454** for #8446 under epic
   #8443; direct WSCG table reconstruction and passive equivalent-couple audit.
 - `research/counterfactual-killswitch-ensemble` — full PR **#8453** for #8445

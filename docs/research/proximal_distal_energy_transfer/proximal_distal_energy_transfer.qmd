@@ -209,6 +209,8 @@ format:
 
 {{< include chapters/_ch03c_ground_reaction_drift.qmd >}}
 
+{{< include chapters/_ch03d_shoulder_velocity_transfer.qmd >}}
+
 {{< include chapters/_ch04_counterfactual_ensemble.qmd >}}
 
 {{< include chapters/_ch05_two_hand_wrench.qmd >}}
