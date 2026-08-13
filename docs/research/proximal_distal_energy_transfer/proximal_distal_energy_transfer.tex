@@ -445,7 +445,7 @@ available with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, bottomtitle=1mm, breakable, opacitybacktitle=0.6, coltitle=black, colframe=quarto-callout-note-color-frame, toprule=.15mm, left=2mm, opacityback=0, colbacktitle=quarto-callout-note-color!10!white, titlerule=0mm, rightrule=.15mm, arc=.35mm, colback=white, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, bottomrule=.15mm, toptitle=1mm]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, left=2mm, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, bottomrule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, coltitle=black, leftrule=.75mm, toprule=.15mm, bottomtitle=1mm, titlerule=0mm, colback=white, colframe=quarto-callout-note-color-frame, arc=.35mm, breakable, opacitybacktitle=0.6, opacityback=0]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -3352,7 +3352,7 @@ Let the source trace provide a state \(x_c=[q(t_c),\dot q(t_c)]\) at cut
 time \(t_c\). Two simulations are initialized with exactly that state:
 
 \begin{equation}\phantomsection\label{eq-matched-state-initialization}{
-x_{\mathrm{cmd}}(0)=x_0(t_c)=x_c.
+x_{\mathrm{cmd}}(0)=x_0(0)=x_c.
 }\end{equation}
 
 The commanded future continues the declared shoulder and wrist torque
@@ -3365,8 +3365,8 @@ initial acceleration difference is
 
 At the initial instant, the zero-torque acceleration, force, and force
 power are the pointwise ZTCF quantities. At every later instant, each
-future is evaluated on its own state. This construction preserves causal
-meaning:
+future is evaluated on its own state. This construction preserves a
+controlled intervention meaning inside the declared deterministic model:
 
 \begin{itemize}
 \tightlist
@@ -3377,16 +3377,21 @@ meaning:
   the killswitch tests whether the state carries the passive mechanism
   forward; and
 \item
-  commanded-minus-killswitch differences quantify the consequences of
-  continued control over a declared horizon.
+  commanded-minus-killswitch differences quantify the model-conditional
+  consequences of continued declared control over a declared horizon.
 \end{itemize}
 
 The ensemble spans eight cut times from 0.080 to 0.320 s, including
 0.099, 0.100, and 0.101 s around the wrist-torque switch; four horizons
 from 20 to 120 ms; and integration steps of 0.5, 1, and 2 ms. This gives
-96 baseline comparisons. Every row records position, velocity, wrist
-force, wrist-force power, integrated force work, and terminal
-clubhead-speed differences.
+96 baseline comparisons. Source states are obtained by declared
+componentwise linear interpolation of the smooth registered trace. Every
+row records position, velocity, wrist force, wrist-force power,
+integrated force work, terminal clubhead-speed differences,
+matched-state error, and initial affine-closure residuals. Commands are
+sampled at every state time, including the terminal endpoint, so a
+horizon ending exactly on a torque switch uses the new endpoint command
+for terminal force and power.
 
 \section{Why Cut Time and Horizon Matter}\label{sec-cut-horizon}
 
@@ -3434,10 +3439,12 @@ dependent.
 Power}\label{sec-future-separation}
 
 Figure~\ref{fig-counterfactual-selected-futures} follows three
-representative cuts for 80 ms. The curves coincide at the vertical
-dotted line by construction. Their slopes then separate because
-acceleration differs. Force and power can diverge faster than angle
-because both depend directly on acceleration and velocity-squared terms.
+representative cuts for 80 ms. Position and velocity coincide at the
+vertical dotted line by construction; their accelerations can differ
+immediately, so their state curves acquire different curvature and then
+different slopes. Force and power need not coincide even at the cut
+because force depends on acceleration and power pairs that force with
+the inherited common point velocity.
 
 \begin{figure}
 
@@ -3458,10 +3465,12 @@ wrist-force power is initially more negative than in the zero-torque
 future. At 0.22 s, commanded force and power rise much faster than the
 killswitch values, producing a large positive work difference. At 0.30
 s, both futures initially retain high positive power because both
-inherit a rapidly moving club. This last panel is the clearest
-persistence example: the zero-torque future does not lose its large
-interaction force when torque is removed; it loses ground gradually as
-the state evolves differently.
+inherit a rapidly moving club; the zero-command force power remains
+positive for 78 ms on the 1 ms trace. At the 0.22 s cut it remains
+positive over the full registered 80 ms horizon. These selected cases
+demonstrate finite-horizon persistence in this model: the zero-torque
+future does not lose its interaction force at removal, while the two
+futures separate as their states evolve.
 
 This behavior clarifies the meaning of passive contribution. A passive
 term can be large because earlier active work created high velocity.
@@ -3520,13 +3529,15 @@ integrates a power difference and because some cases cross the idealized
 torque step. The 2 ms result is retained as a coarse-step warning rather
 than hidden by a single convergence number.
 
-\section{Gravity and Damping Ablations}\label{sec-ensemble-ablations}
+\section{Whole-Model Gravity and Damping
+Variants}\label{sec-ensemble-ablations}
 
 Zero torque does not mean zero generalized forcing. Gravity and viscous
 damping remain inside the bias vector \(b(q,\dot q)\). To prevent the
 word \emph{passive} from collapsing these mechanisms into one category,
-the 80 ms ensemble is repeated with projected gravity disabled and with
-both damping coefficients set to zero.
+the complete source rollout and 80 ms ensemble are repeated with
+projected gravity disabled and with both damping coefficients set to
+zero.
 
 \begin{figure}
 
@@ -3536,26 +3547,26 @@ both damping coefficients set to zero.
 
 }
 
-\caption{\label{fig-counterfactual-physics-variants}Gravity and Damping
-Ablations of the Killswitch Comparison}
+\caption{\label{fig-counterfactual-physics-variants}Whole-Model Gravity
+and Damping Variants of the Killswitch Comparison}
 
 \end{figure}%
 
-The ablations change magnitudes but do not eliminate phase dependence.
-At a 0.28 s cut, baseline commanded-minus-zero-torque force work is
-29.17 J, versus 22.95 J without gravity and 36.73 J without damping.
-Terminal clubhead-speed differences remain positive in all three cases.
-At 0.12 s, force-work differences are negative in all three cases, while
-the damping-disabled speed difference is much smaller than baseline.
-These results show that gravity and damping materially shape the
-counterfactual; neither alone creates the late positive difference.
+The scenario variants change magnitudes but do not eliminate phase
+dependence. At a 0.28 s cut, baseline commanded-minus-zero-torque force
+work is 29.17 J, versus 22.95 J without gravity and 36.73 J without
+damping. Terminal clubhead-speed differences remain positive in all
+three cases. At 0.12 s, force-work differences are negative in all three
+cases, while the damping-disabled speed difference is much smaller than
+baseline. These results show that gravity and damping materially shape
+the counterfactual; neither alone creates the late positive difference.
 
-The ablations are not additive. Each altered model follows a different
-source trajectory before the cut, so subtracting variant numbers does
-not produce an orthogonal causal partition. A full mechanism partition
-would require matched source states with bias subterms selectively
-disabled inside the same dynamics evaluation. That finer separation is
-tracked in \#8447.
+The variants are not matched-state ablations and are not additive. Each
+altered model follows a different source trajectory before the cut, so
+subtracting variant numbers does not produce an orthogonal causal
+partition. A full mechanism partition would require matched source
+states with bias subterms selectively disabled inside the same dynamics
+evaluation. That finer separation is tracked in \#8447.
 
 \section{WSCG BASE/ZTCF/DELTA Convention
 Check}\label{sec-wscg-delta-check}
@@ -3585,11 +3596,12 @@ original pointwise analysis:
 \begin{itemize}
 \tightlist
 \item
-  pointwise ZTCF exactly equals the initial derivative of the
-  matched-state zero-torque future;
+  pointwise ZTCF equals the initial acceleration of the matched-state
+  zero-torque future to numerical tolerance in the same backend;
 \item
-  zero-torque interaction force and positive force power can persist for
-  tens of milliseconds after a late cut;
+  zero-torque interaction force and positive force power persist for
+  78--80 ms in the selected 0.30 and 0.22 s cuts, not as a
+  phase-independent law;
 \item
   persistence and commanded-minus-zero-torque differences depend
   strongly on cut phase and horizon;
@@ -3602,10 +3614,16 @@ original pointwise analysis:
   distinction between instantaneous attribution and a realizable future.
 \end{itemize}
 
-These conclusions close the counterfactual-contract gap for the double
-pendulum. They do not establish the source of the two-hand negative
-equivalent couple. That question requires local hand forces and wrench
-geometry, addressed at the next fidelity level.
+The committed evidence uses schema
+\texttt{matched-state-counterfactual-ensemble-v2}, hashes the complete
+declared Python and WSCG input closure, retains all 96 baseline
+comparisons and 12 whole-model variants, and is byte deterministic for
+both JSON and NPZ artifacts. The results distinguish pointwise
+attribution from forward intervention for this double pendulum. They do
+not establish the source of the two-hand negative equivalent couple, a
+human control strategy, or bilateral hand allocation. Those questions
+require local hand forces, wrench geometry, and higher-fidelity or
+measured evidence.
 
 \chapter{Two-Hand Wrench Mechanics and Passive Couple
 Reversal}\label{sec-two-hand-wrench}
@@ -8989,8 +9007,10 @@ Framework}\label{sec-timing-framework}
 
 \section{Two Strategies, Stated Precisely}\label{sec-strategies}
 
-Let \(E_p(t)\) be the kinetic energy of the proximal subsystem (trunk
-and arms, with the club riding folded) over a downswing
+At the conceptual human-system level, let \(E_p(t)\) be the kinetic
+energy of a declared proximal subsystem. In the primary model below,
+however, that subsystem is only the first rigid link about a fixed hub;
+it is not an identified trunk-and-arms energy. Over a downswing
 \(t \in [t_0, t_{\mathrm{imp}}]\), and define the transfer functional
 \(P_{\mathrm{w}}(t)\) as the inter-segment power crossing the wrist
 interface --- joint-force power plus moment power, in the sense of
@@ -9062,13 +9082,15 @@ a consensus proof:
   contribution must be evaluated from a declared decomposition.
 \end{enumerate}
 
-Empirically, S2-like signatures separate skill groups
-(Section~\ref{sec-skill}), while the within-expert null result on
-inter-peak lags (\citeproc{ref-neal2007}{Neal et al. 2007}) suggests
-that once S2 is grossly achieved, residual performance variance lives in
-finer variables (release profile shape, hub-path geometry,
-impulse-transfer efficiency) --- exactly what the counterfactual
-framework below is designed to expose.
+Some cross-sectional studies report skill-group differences in release
+or segment-peak timing (Section~\ref{sec-skill}), whereas Neal and
+colleagues found no significant difference in contiguous-segment
+peak-speed lags between player-rated well-timed and mistimed shots from
+25 highly skilled amateurs (\citeproc{ref-neal2007}{Neal et al. 2007}).
+Those observations do not establish a performance plateau or locate the
+remaining variance in release shape, hub-path geometry, or transfer
+efficiency. They motivate measuring those variables directly rather than
+inferring them from peak order.
 
 \section{What Would Falsify S2?}\label{sec-falsify}
 
@@ -9086,9 +9108,9 @@ evidence would count against the retain-early/release-late hypothesis:
   (normalized) is \emph{positively} associated with clubhead speed
   across players;
 \item
-  counterfactual (ZTCF/ZVCF) analyses showing that in faster swings the
-  control term dominates club acceleration \emph{early} rather than
-  late;
+  state-matched affine drift/control analyses showing that in faster
+  swings the control term dominates club acceleration \emph{early}
+  rather than late;
 \item
   \textbf{or, in the direct manipulation of Section~\ref{sec-methods}:
   torque programs that drive the wrist early outperforming programs that
@@ -9113,19 +9135,24 @@ measured state \((q, \dot q, \tau)\) of a swing:
   \;=\; M(q)^{-1}\,\bigl(\tau \;-\; g(q)\bigr),
 }\end{equation}
 
-where the simplification in Equation~\ref{eq-zvcf} holds because the
-Coriolis term (quadratic in velocity) and viscous dissipation (linear in
-velocity) vanish at \(\dot q = \mathbf 0\). The ZTCF
-(Equation~\ref{eq-ztcf}) answers \emph{``what would the system do right
-now if every actuator switched off?''} --- it is the \textbf{drift}
-field of the affine control system, containing gravity plus all
-motion-dependent interaction dynamics. The ZVCF (Equation~\ref{eq-zvcf})
-answers \emph{``what would the currently applied torques, together with
-gravity, produce from a standstill in this pose?''} --- it removes every
+where the simplification in Equation~\ref{eq-zvcf} holds for the
+implemented double-pendulum bias convention because its Coriolis term
+(quadratic in velocity) and viscous dissipation (linear in velocity)
+vanish at \(\dot q = \mathbf 0\), leaving the declared gravity term. A
+different engine may include other velocity-independent terms and must
+be checked rather than assuming this reduction. The ZTCF
+(Equation~\ref{eq-ztcf}) answers \emph{``what would the declared model
+do right now if every included actuator switched off while the state and
+constraint set stayed fixed?''} --- it is the \textbf{drift} field of
+the affine control system, containing gravity plus all motion-dependent
+interaction dynamics. The ZVCF (Equation~\ref{eq-zvcf}) answers
+\emph{``what would the currently applied torques, together with gravity,
+produce from a standstill in this pose?''} --- it removes every
 motion-dependent term but is \emph{not} the pure control contribution,
 since gravity remains in Equation~\ref{eq-zvcf}; the pure torque term is
 \(M^{-1}\tau\) in the split below. Because Equation~\ref{eq-eom} is
-affine in \(\tau\), the actual acceleration superposes exactly:
+affine in \(\tau\) at a fixed state and unchanged constraint set, the
+actual acceleration superposes exactly:
 
 \begin{equation}\phantomsection\label{eq-superposition}{
 \ddot q \;=\;
@@ -9151,45 +9178,61 @@ forward-integrated rollout. Each sample answers a local ``what if'';
 this is the right tool for drift/control \emph{time profiles} along a
 real swing, and it is the tool used in Section~\ref{sec-results}.
 
-\textbf{Re-simulation counterfactuals.} The original MATLAB/Simscape
-pipeline
+\textbf{Legacy rerun-based pointwise sampler.} The original
+MATLAB/Simscape pipeline
 (\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/core/simulation/run_ztcf_simulation.m}{\texttt{run\_ztcf\_simulation.m}})
-re-simulates the full model with a torque ``killswitch'' applied at time
-\(t\), for a sweep of \(t\) values, tabulating the counterfactual state
-reached with torques off. The pipeline forms the difference table
+reruns the full model with a torque ``killswitch'' applied at time \(t\)
+for a sweep of \(t\) values, but
+\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/core/simulation/run_single_ztcf_point.m}{\texttt{run\_single\_ztcf\_point.m}}
+retains only the first sample at killswitch activation. It therefore
+samples a state-matched instantaneous torque-removal response; it does
+\textbf{not} tabulate a future reached after evolving with torque off.
+The pipeline forms the difference table
 \(\mathrm{DELTA} = \mathrm{BASE} - \mathrm{ZTCF}\)
 (\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/core/processing/process_data_tables.m}{\texttt{process\_data\_tables.m}}),
-attributing to active control everything the passive system would not
-have done. A companion ZVCF model applies the measured torques to the
-same pose with velocities zeroed
+which is an operational BASE-minus-sampled-response residual, not an
+isolated muscle or actuator contribution. A companion ZVCF model applies
+the measured torques to the same pose with velocities zeroed
 (\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab/Model\%20Output/Scripts/SCRIPT_ZVCF_GENERATOR.m}{\texttt{SCRIPT\_ZVCF\_GENERATOR.m}});
-the ZVCF model is run without gravity so that, when its samples are set
-against the ZTCF (which retains gravity), the gravitational contribution
-is not double-counted. This decomposition is meaningful
+the ZVCF model may be run without gravity under its documented
+convention so gravity is not counted in both operands. This convention
+must be checked against the model configuration; the script's statement
+that the complete multibody system is a series of linear differential
+equations is not correct. The acceleration split is meaningful
 \emph{pointwise}, at matched states, in the sense of
-Equation~\ref{eq-superposition}: the ZVCF script records one sample per
-zero-velocity pose, and separately integrated counterfactual rollouts do
-not superpose at the trajectory level in a nonlinear multibody system,
-because \(M\) and \(b\) evolve differently once the counterfactual state
-diverges. The MATLAB pipeline additionally computes, for every joint and
-every table (BASE, ZTCF, DELTA), the linear work
-\(\int \mathbf F\cdot\mathbf v\,dt\), angular work
-\(\int \boldsymbol\tau\cdot\boldsymbol\omega\,dt\), total work and
-power, and the fractional contributions ZTCF/BASE and DELTA/BASE
+Equation~\ref{eq-superposition}. Separately integrated futures do not
+superpose at the trajectory level because \(M\) and \(b\) evolve
+differently once their states diverge. The MATLAB pipeline additionally
+computes the linear work \(\int \mathbf F\cdot\mathbf v\,dt\), angular
+work \(\int \boldsymbol\tau\cdot\boldsymbol\omega\,dt\), and summed work
+and power
 (\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/core/processing/calculate_work_impulse.m}{\texttt{calculate\_work\_impulse.m}},
 \href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/core/processing/calculate_total_work_power.m}{\texttt{calculate\_total\_work\_power.m}})
---- precisely the Robertson-Winter-style joint-interface accounting of
-Section~\ref{sec-rw}, including a kinematic-sequence plot computed
-\emph{separately for the BASE, ZTCF and DELTA components}
+for the stored tables. However, \texttt{process\_data\_tables.m}
+subtracts all BASE and ZTCF columns before
+\texttt{calculate\_work\_impulse.m} dots the resulting DELTA force with
+the resulting DELTA velocity. In general,
+\((\mathbf F_b-\mathbf F_z)\cdot(\mathbf v_b-\mathbf v_z)\) is not
+\(\mathbf F_b\cdot\mathbf v_b-\mathbf F_z\cdot\mathbf v_z\). The
+optimized \texttt{calculate\_total\_work\_power.m} also advertises
+fractional contributions in its header but does not calculate them.
+Consequently, the legacy DELTA work and power columns are \textbf{not}
+accepted here as an additive Robertson--Winter pathway partition. Valid
+pointwise contribution power must project force components onto one
+common achieved interface velocity, as the Python evidence does. The
+repository also contains a kinematic-sequence plot computed separately
+for the stored BASE, ZTCF, and DELTA tables
 (\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab/Scripts/_ZTCF\%20Scripts/SCRIPT_324_PLOT_ZTCF_KinematicSequence.m}{\texttt{SCRIPT\_324\_PLOT\_ZTCF\_KinematicSequence.m}}).
 
 \section{The Counterfactual Form of the Timing
 Hypothesis}\label{sec-hypothesis}
 
-The ZTCF/ZVCF language makes the S2 hypothesis crisp. Along a measured
-downswing, project the drift and control accelerations onto the club's
-speed-producing direction and integrate the associated powers. S2
-predicts, for high-performing swings:
+The affine drift/control language makes the S2 hypothesis crisp. Along a
+measured downswing, project acceleration components onto a declared club
+speed coordinate and compute power from force or moment components
+paired with their conjugate velocities. An acceleration projection
+cannot itself be integrated as energy. As a registered model
+hypothesis---not an empirical fact---S2 predicts:
 
 \begin{itemize}
 \tightlist
@@ -9206,8 +9249,8 @@ predicts, for high-performing swings:
   late window of positive wrist control power
   (\citeproc{ref-sprigings2000}{Sprigings and Neal 2000}). The active
   share of club-side work should concentrate before release; the passive
-  share should account for most club energy gain after release
-  (\citeproc{ref-white2006}{White 2006}).
+  share may account for most club energy gain after release in the
+  declared model (\citeproc{ref-white2006}{White 2006}).
 \end{itemize}
 
 This pattern was initially motivated by torque-removal analyses.
@@ -9215,8 +9258,10 @@ Section~\ref{sec-results} provides a reproducible quantitative test in a
 two-segment model; conversely, had the early-drive programs won the
 sweep, S2 would have been falsified in exactly the terms of 3.
 Bounded-actuator, impact-definition, and model-parameter sensitivity
-checks are reported here; re-simulation parity, 3D full-body models, and
-measured swings remain future work.
+checks are reported here. The next chapter supplies the distinct forward
+matched-state killswitch test that the legacy sampler does not.
+Like-for-like Simscape parity, 3D full-body models, and measured swings
+remain future work.
 
 \chapter{Computational Framework}\label{sec-platform}
 

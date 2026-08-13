@@ -71,6 +71,20 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-08-13** - Adjudicated both counterfactual chapters under epic #8557.
+  The legacy MATLAB killswitch is now classified as a rerun-based pointwise
+  sampler, and its `DELTA` force-work columns are explicitly rejected as an
+  additive actuator or muscle-work partition. The forward matched-state bundle
+  now samples the command at every state time including the terminal endpoint,
+  records affine closure and interpolation contracts, hashes its complete
+  declared source/data closure, separates 1 ms and 2 ms refinement from the
+  0.5 ms reference, labels gravity/damping studies as nonadditive whole-model
+  variants, and proves byte-deterministic evidence. All 45 chapter candidates
+  map into PD-CLAIM-093 through PD-CLAIM-103; one paragraph already reviewed in
+  an earlier chapter retains its stable identity, yielding 288 unique reviewed
+  candidates overall. Human, bilateral-hand, anatomical, and universal-strategy
+  conclusions remain untested.
+
 - **2026-08-13** - Corrected and hardened the proximal-link velocity evidence
   under epic #8557. The paper and machine contract now use the actual relative
   coordinate convention (`q2` relative, `q1 + q2` absolute), include the
@@ -2700,5 +2714,15 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   meanings, dependency hashes, deterministic artifacts, and at least one
   fixed-program timestep-refinement result before quantitative claims enter
   the paper.
+- **F-8557.7:** Counterfactual evidence shall distinguish a state-local
+  pointwise sampler from a forward future, initialize paired futures at the
+  same achieved state, declare source-state interpolation and terminal-command
+  sampling conventions, and verify affine closure and matched-state error.
+  A residual-table force dotted with a residual-table velocity shall not be
+  presented as additive actuator, muscle, or pathway work. Physics-off reruns
+  that change the achieved source state shall be labeled nonadditive
+  whole-model variants. Quantitative publication requires complete declared
+  dependency hashes, byte-deterministic replay, and a finer-timestep comparison
+  that resolves any control discontinuity used by the reported metric.
 - `spec-exempt` (#8483): Moved Sidekick readiness monitoring, degradation reporting, and workspace seeding from the main launcher facade into the existing launcher-owned `SidekickSidebarManager`.
 - (spec-exempt: security fix) Fixed user enumeration via timing attack in `/login` endpoint by ensuring a dummy password verification is performed even if the user is not found, to normalize response time.

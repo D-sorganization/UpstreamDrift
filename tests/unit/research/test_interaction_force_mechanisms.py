@@ -23,6 +23,10 @@ from scripts.research.proximal_distal_energy.run_experiments import rollout_prog
 from scripts.research.proximal_distal_energy.run_interaction_force_study import (
     build_evidence,
 )
+from scripts.research.proximal_distal_energy.run_counterfactual_ensemble import (
+    build_outputs,
+    write_outputs,
+)
 from scripts.research.proximal_distal_energy.swing_model import PlanarInertials
 from scripts.research.proximal_distal_energy.torque_programs import (
     restrain_then_drive_program,
@@ -238,6 +242,46 @@ def test_killswitch_case_reports_all_divergence_channels(
         "terminal_clubhead_speed_difference_m_s",
     }
     assert case.metrics["terminal_state_distance"] > 0.0
+    assert case.metrics["initial_ztcf_acceleration_closure_error_rad_s2"] < 1e-12
+    assert case.metrics["initial_control_acceleration_closure_error_rad_s2"] < 1e-12
+
+
+@pytest.mark.unit
+def test_terminal_command_is_sampled_at_endpoint_discontinuity(
+    params: GolfModelParams, inertials: PlanarInertials
+) -> None:
+    program = restrain_then_drive_program(60.0, 15.0, 10.0, 0.10)
+    t, q, v, _ = rollout_program(params, program)
+    case = evaluate_killswitch_case(
+        params,
+        inertials,
+        program,
+        source_time_s=0.08,
+        source_q=q[80],
+        source_v=v[80],
+        horizon_s=0.02,
+        dt_s=0.001,
+    )
+
+    np.testing.assert_array_equal(case.commanded.u[-2], np.array([60.0, -10.0]))
+    # Trace.u follows the integrator interval convention and leaves the terminal
+    # row empty; the evidence calculator independently evaluates +15 N m at the
+    # 0.100 s terminal state.  A stale -10 N m endpoint would change this power.
+    expected_controls = controls_at_times(program, np.array([0.1]))
+    backend = make_backend("ode", params)
+    qdd = backend.forward_dynamics(
+        case.commanded.q[-1], case.commanded.v[-1], expected_controls[0]
+    )
+    force = reaction_force_decomposition(
+        inertials,
+        case.commanded.q[-1:],
+        case.commanded.v[-1:],
+        qdd[None, :],
+    )
+    power = force_power_decomposition(
+        inertials, case.commanded.q[-1:], case.commanded.v[-1:], force
+    )
+    assert case.commanded_force_power[-1] == pytest.approx(power.total[0])
 
 
 @pytest.mark.unit
@@ -306,3 +350,31 @@ def test_killswitch_ensemble_covers_cut_time_and_timestep_grid(
     assert {row["cut_time_s"] for row in rows} == {0.12, 0.20, 0.28}
     assert {row["dt_s"] for row in rows} == {0.0005, 0.001, 0.002}
     assert all(row["matched_initial_state_error"] == 0.0 for row in rows)
+
+
+@pytest.mark.unit
+def test_counterfactual_evidence_has_auditable_provenance_and_boundaries() -> None:
+    record, arrays = build_outputs()
+
+    assert record["schema_version"] == "matched-state-counterfactual-ensemble-v2"
+    assert "git_sha" not in record["provenance"]
+    assert len(record["source_sha256"]) >= 12
+    assert record["claim_boundaries"]["human_causal_strategy"] == "not_tested"
+    assert "1_ms_versus_0_5_ms" in record["timestep_sensitivity"]
+    assert "2_ms_versus_0_5_ms" in record["timestep_sensitivity"]
+    assert (
+        record["selected_trace_diagnostics"][
+            "longest_initial_positive_zero_command_force_power_duration_s"
+        ]
+        >= 0.077
+    )
+    assert arrays["cut_0.30__time"][0] == pytest.approx(0.30)
+
+
+@pytest.mark.unit
+def test_counterfactual_evidence_is_byte_deterministic(tmp_path) -> None:
+    first = write_outputs(tmp_path / "first")
+    second = write_outputs(tmp_path / "second")
+
+    for left, right in zip(first, second, strict=True):
+        assert left.read_bytes() == right.read_bytes()

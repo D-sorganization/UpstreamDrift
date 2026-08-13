@@ -18,7 +18,9 @@ function [BASE, BASEQ, ZTCF, ZTCFQ, DELTA, DELTAQ] = calculate_total_work_power(
 % Calculations:
 %   - Total Work = Angular Work + Linear Work (for each joint)
 %   - Total Power = Angular Power + Linear Power (for each joint)
-%   - Fractional contributions (ZTCF/BASE, DELTA/BASE)
+% Fractional ZTCF/BASE or DELTA/BASE contributions are NOT computed here.
+% Such ratios also require a declared zero-denominator policy and a valid
+% additive contribution construction before scientific interpretation.
 %
 % OPTIMIZATION NOTES:
 %   - Precompute dt = diff(Time) once per table

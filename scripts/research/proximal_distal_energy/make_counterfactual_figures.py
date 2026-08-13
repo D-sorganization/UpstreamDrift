@@ -11,6 +11,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
+plt.rcParams["svg.hashsalt"] = "upstreamdrift-counterfactual-ensemble-v2"
+
 REPO_ROOT = Path(__file__).resolve().parents[3]
 OUTPUT_ROOT = REPO_ROOT / "docs" / "research" / "proximal_distal_energy_transfer"
 DATA_DIR = OUTPUT_ROOT / "data"
@@ -26,8 +28,21 @@ def _load() -> tuple[dict, dict[str, np.ndarray]]:
 
 def _save(fig: plt.Figure, stem: str) -> None:
     fig.tight_layout()
-    fig.savefig(FIG_DIR / f"{stem}.pdf", bbox_inches="tight")
-    fig.savefig(FIG_DIR / f"{stem}.svg", bbox_inches="tight")
+    fig.savefig(
+        FIG_DIR / f"{stem}.pdf",
+        bbox_inches="tight",
+        metadata={"CreationDate": None, "ModDate": None},
+    )
+    svg_path = FIG_DIR / f"{stem}.svg"
+    fig.savefig(
+        svg_path,
+        bbox_inches="tight",
+        metadata={"Date": None},
+    )
+    svg_path.write_text(
+        "\n".join(line.rstrip() for line in svg_path.read_text().splitlines()) + "\n",
+        encoding="utf-8",
+    )
     plt.close(fig)
 
 
@@ -178,9 +193,7 @@ def fig_physics_variants(record: dict) -> None:
         ax.set_title(title)
         ax.grid(alpha=0.2, axis="y")
     axes[0].legend(fontsize=8)
-    fig.suptitle(
-        "Gravity and Damping Change Magnitudes but Not the Counterfactual Contract"
-    )
+    fig.suptitle("Whole-Model Gravity and Damping Variants Remain Phase Dependent")
     _save(fig, "fig_counterfactual_physics_variants")
 
 

@@ -11,8 +11,9 @@ function ztcf_row = run_single_ztcf_point(config, mdlWks, killswitch_time, time_
 %   ztcf_row - Single-row table with ZTCF data at killswitch time
 %
 % This function runs one simulation with the killswitch triggered at the
-% specified time, extracting only the data at the moment the killswitch
-% activates (when joint torques go to zero).
+% specified time, extracting only the first data sample at activation (when
+% joint torques go to zero). It therefore supplies a pointwise sampler, not a
+% forward-integrated zero-torque trajectory.
 %
 % Author: Optimized Golf Swing Analysis System
 % Date: 2025

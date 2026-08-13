@@ -6,90 +6,33 @@ Update this file with every PR and every push to main.
 ## Where the Repo Is Heading
 
 - **#8557 Comprehensive Scientific Claim Audit and Open Golf Modeling
-  Program** — PRs #8558–#8569 are on `main`; branch
-  `research/8557-shoulder-velocity-audit` continues the fail-closed audit
-  authority. It inventories all 895 narrative candidates across the 32-source
-  Quarto paper and reconciles all 18 public release-claim keys without calling
-  the review complete. The registry records that the Biomechanics and Nonlinear Control
-  NotebookLM reviews are pending renewed network authentication and that Tools
-  #4142 must merge, be immutably pinned, and pass cross-repository parity before
-  program completion. Run `python -m
-scripts.research.proximal_distal_energy.claim_audit inventory`, then
-  `validate`, and the focused claim-audit tests. Do not mark the audit complete
-  while any candidate remains unadjudicated or treat NotebookLM output as an
-  original scientific source.
-  The first two external-evidence slices on `main` corrected overgeneralized framing,
-  distinguished ground reactions from energetic origin, and checked seven
-  additional atomic claims. The second slice replaced location-sensitive
-  candidate IDs with source/content/duplicate-ordinal identity and corrects a
-  substantive literature contradiction: Anderson (2006) and Kenny (2008)
-  reported proximal-to-distal increases in peak kinetic-energy magnitude but
-  not proximal-to-distal peak timing. It also qualifies torso-pelvis
-  associations, X-factor method sensitivity, shot-timing inference, and causal
-  claims about casting. A subsequent parser audit found that labeled Quarto
-  display-math closers had silently hidden later prose; the repaired inventory
-  adds 308 previously omitted paragraphs and canonicalizes source-digest line
-  endings across platforms. The third merged slice corrects the Sprigings--Neal
-  wrist-torque gain from approximately 4% to approximately 9%, separates it
-  from Sprigings--MacKenzie's 1.6% forced-delay contrast and post-release
-  torque ablation, and exposes White's second-order release-timing result and
-  constant-positive-torque penalty as genuine model disagreement. It adds a
-  source-level contrast matrix and qualifies Miura, Nesbit--McGinnis, and Sharp
-  claims. The fourth merged slice removes the collective "expert-like"
-  characterization of four non-equivalent optimizers and records their exact
-  objectives, speeds or carry distances, actuator timings, omitted degrees of
-  freedom, and validation boundaries. PR #8564 merged as exact remote-main
-  commit `09321c2e63dc801092443f068495d785f1b2d142`. The fifth merged slice
-  corrects universal inertia-coupling and affine-decomposition language,
-  separates Bunn's heuristic from model and empirical evidence, matches the
-  Feltner--Dapena decomposition to the 1989 Part I/II papers rather than the
-  1986 inverse-dynamics paper, preserves Putnam's explicit negative findings,
-  and bounds the Herring--Chapman and Marshall--Elliott transport claims. PR
-  #8565 merged as exact remote-main commit
-  `293bd4ba5203991c6772044f30ba75c9e3d37495`. The sixth merged slice
-  distinguishes net joint power from muscle energetics, restores complete
-  segment wrench-power accounting, bounds Robertson--Winter and Zajac method
-  claims, demonstrates kinematic-sequence method sensitivity, and treats
-  planarity as an object-and-tolerance declaration rather than a universal
-  anatomical fact. PR #8566 merged as exact remote-main commit
-  `ad74e9a97c3e555b9cac91f9ae3872c332c00c0c`. The seventh merged slice fully
-  adjudicates Chapters 2 and 3, distinguishes pointwise from forward
-  counterfactuals, narrows force-dominance statements to their registered RMS
-  norm, and replaces strategy language with five falsifiable study hypotheses.
-  PR #8567 merged as exact remote-main commit
-  `4443c726377c88b185ff5e76236db1181e602652`. The eighth merged slice removes
-  duplicated automatic figure and equation labels while completing the
-  Chapter 2 and 3 adjudication. The ninth merged slice fully
-  adjudicates Chapter 4, bounds the MacKenzie association and external
-  redundancy analogies, separates impulse from work and pointwise from forward
-  attribution, and labels future-residual preview as an offline oracle rather
-  than an implementable or physiological controller. PR #8568 merged as exact
-  remote-main commit `4ec060c8b51dc2d03fc16ffeb9518ef39bc171f5`. The tenth
-  merged slice fully adjudicates the ground-reaction chapter, corrects three
-  bibliographic author lists, distinguishes algebraic velocity-term killing
-  from a physical ZVCF under rheonomic constraints, defines fixed-prediction
-  R-squared beside bias and absolute error, and makes whole-system
-  center-of-mass force closure a required Newton--Euler identity. PR #8569
-  merged as exact remote-main commit
-  `f3d80141eb9a4cc84b092dd2d49ac3bcbf996427`. PR #8570 at exact head
-  `68f336340` is the eleventh slice and fully adjudicates the proximal-velocity
-  chapter. It corrects the displayed relative
-  versus absolute coordinate formulas and the actual reference-centered sweep,
-  adds local and finite-range sensitivity adequacy, complete dependency hashes,
-  byte-deterministic evidence, grid-selection and Pareto-coverage diagnostics,
-  fixed-program timestep refinement, a corrected Choi--Park bibliography
-  record, and net-interface-versus-anatomical-hand boundaries. Current local
-  authority: 895 candidates, 244 reviewed, 92 registered atomic claims, and 651
-  unadjudicated candidates. Local registry, render, visual, release, and focused
-  test gates pass; protected-merge PR #8570 before treating the new counts as
-  remote-main evidence.
-  The required Tools side task is not complete. Its dispersion slice received
-  final independent approval at `125d47d4`. Its live integration has GO-level
-  ellipsoid-mesh evidence at `45800fee`; draft PR #4416 is published at exact
-  head `0b38346c` above #4415, and localized React execution authority at
-  `84498e2d` is being integrated above #4416.
-  Completion still requires protected merge, immutable pinning, deterministic
-  replay, sensitivity adequacy, and PyQt6/React parity.
+  Program** — PRs #8558–#8570 are on `main`; exact remote-main tip after #8570
+  is `64d9667168fbc2481907affae12c6eeb2b9fe58e`. Branch
+  `research/8557-counterfactual-audit` is ready PR **#8571** at initial exact
+  head `6c4cab3de8268ed1e0cf9f32e906f03d4f0e1e81` and is the twelfth
+  fail-closed audit slice.
+  It corrects the legacy MATLAB killswitch from a forward-counterfactual label
+  to a rerun-based pointwise sampler; rejects its residual-force dotted with
+  residual-velocity `DELTA` work as an additive pathway partition; fixes
+  terminal command sampling at the 0.100 s torque switch; and records
+  matched-state, interpolation, closure, timestep, provenance, and whole-model
+  variant boundaries. The deterministic evidence contains 96 baseline rows,
+  12 variants, 13 source hashes, and selected traces. All 45 candidates in the
+  two counterfactual chapters map to PD-CLAIM-093 through PD-CLAIM-103; one is
+  a stable candidate already reviewed in an earlier chapter. Current authority:
+  895 candidates, 288 uniquely reviewed, 103 atomic claims, and 607
+  unadjudicated. The 197-page PDF was rendered and pages 59–64 and 161–163 were
+  visually inspected. Run the claim-audit validator, focused mechanism and
+  terminology tests, release-bundle tests, title-case gate, and release
+  qualification before publication.
+  The required Tools side task remains active and not release-ready. Its latest
+  adversarial review found incomplete denominator, tolerance, target-unit,
+  provenance, immutability, identity/resource, and orphan-declaration
+  contracts. Completion still requires protected merge, immutable UpstreamDrift
+  pinning, typed no-impact retention, deterministic ensemble replay,
+  sensitivity adequacy, and PyQt6/React parity. Biomechanics and Nonlinear
+  Control NotebookLM collections remain blocked on manual reauthentication;
+  treat them only as research indexes and verify original sources independently.
 
 - **#8511 interactive proximal--distal dynamics workbench** — branch
   `feat/proximal-distal-workbench-integration` makes the pendulum launcher
