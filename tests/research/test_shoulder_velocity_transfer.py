@@ -35,6 +35,7 @@ def test_velocity_sweep_has_exact_pointwise_drift_control_closure() -> None:
     assert all(abs(row.acceleration_closure_residual_rad_s2) < 1e-10 for row in rows)
     assert all(abs(row.force_closure_residual_n) < 1e-10 for row in rows)
     assert not np.isclose(rows[0].drift_grip_power_w, rows[-1].drift_grip_power_w)
+    assert all(row.relative_club_velocity_rad_s == pytest.approx(5.0) for row in rows)
 
 
 def test_velocity_constraint_can_preserve_absolute_club_rate() -> None:

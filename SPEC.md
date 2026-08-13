@@ -71,6 +71,18 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-08-13** - Corrected and hardened the proximal-link velocity evidence
+  under epic #8557. The paper and machine contract now use the actual relative
+  coordinate convention (`q2` relative, `q1 + q2` absolute), include the
+  achieved state in every reference-centered sweep, report finite-range and
+  local slopes beside linear-fit adequacy, preserve all grid-selection limits,
+  expose regression rank and conditioning plus Pareto coverage, distinguish a
+  net planar wrist-interface force from either hand's anatomical load, refine
+  the best fixed program at half timestep, hash the computational dependency
+  closure, and prove byte-deterministic JSON/NPZ evidence. All 30 chapter
+  candidates are mapped to PD-CLAIM-081 through PD-CLAIM-092; anatomical
+  shoulder, thorax, bilateral-hand, and coaching conclusions remain untested.
+
 - `src/shared/python/motion_matching/loaders/c3d.py`: Optimized `np.linalg.norm` to `math.hypot` inside `_shaft_quaternions` for better performance on small 3D vectors (spec-exempt: micro-optimization).
 - **2026-08-12** - Added the interactive proximal--distal dynamics companion
   under epic #8511. UpstreamDrift now resolves the canonical sibling Tools
@@ -2677,5 +2689,16 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   articulated spatial, neuromusculoskeletal, club-impact/flight, and governed
   human tiers only through declared observable, discrepancy, identifiability,
   uncertainty, negative-control, and falsification gates.
+- **F-8557.5:** Pointwise velocity counterfactuals shall declare relative and
+  absolute coordinate meanings, include the achieved reference state, record
+  the finite sweep range and stored-energy mismatch, distinguish model-time
+  labels from measured events, and report local sensitivity plus finite-range
+  fit adequacy whenever one slope summarizes a nonlinear response.
+- **F-8557.6:** Finite trajectory searches shall retain every attempted and
+  invalid outcome, expose their selection rule, regression rank and
+  conditioning, nondominated-set coverage, objective and interface-force
+  meanings, dependency hashes, deterministic artifacts, and at least one
+  fixed-program timestep-refinement result before quantitative claims enter
+  the paper.
 - `spec-exempt` (#8483): Moved Sidekick readiness monitoring, degradation reporting, and workspace seeding from the main launcher facade into the existing launcher-owned `SidekickSidebarManager`.
 - (spec-exempt: security fix) Fixed user enumeration via timing attack in `/login` endpoint by ensuring a dummy password verification is performed even if the user is not found, to normalize response time.

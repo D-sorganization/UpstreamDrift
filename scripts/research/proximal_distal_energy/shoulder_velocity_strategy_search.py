@@ -19,7 +19,7 @@ from scripts.research.proximal_distal_energy.double_pendulum_attribution import 
 from scripts.research.proximal_distal_energy.run_experiments import (
     DT,
     HORIZON,
-    rollout_controls,
+    INITIAL_Q,
 )
 from scripts.research.proximal_distal_energy.shoulder_velocity_transfer import (
     nondominated_indices,
@@ -30,7 +30,8 @@ from scripts.research.proximal_distal_energy.swing_model import (
     find_impact,
 )
 from src.shared.python.biomechanics.drift_control_transfer import compute_power_and_work
-from src.shared.python.simulation_backends import GolfModelParams
+from src.shared.python.simulation_backends import GolfModelParams, make_backend
+from src.shared.python.simulation_backends.protocol import SimState
 
 FloatArray = npt.NDArray[np.float64]
 
@@ -115,10 +116,25 @@ def _window_work(power: FloatArray, time: FloatArray, start: int, end: int) -> f
 
 
 def _evaluate_program(
-    program: ShoulderVelocityProgram, params: GolfModelParams
+    program: ShoulderVelocityProgram,
+    params: GolfModelParams,
+    *,
+    dt_s: float,
+    duration_s: float,
 ) -> ShoulderVelocityOutcome:
-    controls = build_controls(program)
-    time, q, velocity, applied = rollout_controls(params, controls)
+    if not np.isfinite(dt_s) or dt_s <= 0.0:
+        raise ValueError("dt_s must be positive and finite")
+    if not np.isfinite(duration_s) or duration_s <= dt_s:
+        raise ValueError("duration_s must be finite and exceed dt_s")
+    horizon = int(round(duration_s / dt_s))
+    controls = build_controls(program, horizon=horizon, dt_s=dt_s)
+    backend = make_backend("ode", params)
+    backend.reset(
+        SimState(q=np.asarray(INITIAL_Q, dtype=float), v=np.zeros(2), time=0.0)
+    )
+    trace = backend.rollout(controls=controls, horizon=horizon, dt=dt_s)
+    time, q, velocity = trace.t, trace.q, trace.v
+    applied = trace.u if trace.u is not None else np.zeros_like(trace.v)
     inertials = PlanarInertials.from_params(params)
     impact = find_impact(time, q, velocity, inertials)
     valid = impact is not None
@@ -166,7 +182,11 @@ def _evaluate_program(
 
 
 def evaluate_programs(
-    programs: tuple[ShoulderVelocityProgram, ...], params: GolfModelParams
+    programs: tuple[ShoulderVelocityProgram, ...],
+    params: GolfModelParams,
+    *,
+    dt_s: float = DT,
+    duration_s: float = HORIZON * DT,
 ) -> tuple[ShoulderVelocityOutcome, ...]:
     """Evaluate programs without discarding invalid impact attempts."""
     if not programs or any(
@@ -175,7 +195,10 @@ def evaluate_programs(
         raise ValueError("programs must contain ShoulderVelocityProgram values")
     if not isinstance(params, GolfModelParams):
         raise TypeError("params must be GolfModelParams")
-    return tuple(_evaluate_program(program, params) for program in programs)
+    return tuple(
+        _evaluate_program(program, params, dt_s=dt_s, duration_s=duration_s)
+        for program in programs
+    )
 
 
 def pareto_program_indices(values: object) -> npt.NDArray[np.int64]:

@@ -30,8 +30,10 @@ DATA_DIR = REPO_ROOT / "docs/research/proximal_distal_energy_transfer/data"
 FIGURE_DIR = DATA_DIR / "shoulder_velocity_transfer/figures"
 JSON_PATH = DATA_DIR / "shoulder_velocity_transfer_study.json"
 NPZ_PATH = DATA_DIR / "shoulder_velocity_transfer_study.npz"
-SCHEMA_VERSION = "shoulder-velocity-transfer-evidence-v1"
+SCHEMA_VERSION = "shoulder-velocity-transfer-evidence-v2"
 PHASE_FRACTIONS = (0.0, 0.15, 0.40, 0.70, 0.95)
+MINIMUM_VELOCITY_SCALE_RAD_S = 4.0
+VELOCITY_OFFSET_FRACTION = 0.75
 VELOCITY_CONSTRAINTS = (
     "preserve_relative_club_rate",
     "preserve_absolute_club_rate",
@@ -40,8 +42,17 @@ VELOCITY_CONSTRAINTS = (
 
 def _source_hashes() -> dict[str, str]:
     paths = (
+        "scripts/research/proximal_distal_energy/interaction_forces.py",
+        "scripts/research/proximal_distal_energy/run_experiments.py",
         "scripts/research/proximal_distal_energy/shoulder_velocity_transfer.py",
         "scripts/research/proximal_distal_energy/run_shoulder_velocity_transfer_study.py",
+        "scripts/research/proximal_distal_energy/swing_model.py",
+        "scripts/research/proximal_distal_energy/torque_programs.py",
+        "src/engines/pendulum_models/python/double_pendulum_model/physics/double_pendulum.py",
+        "src/shared/python/simulation_backends/factory.py",
+        "src/shared/python/simulation_backends/model_params.py",
+        "src/shared/python/simulation_backends/ode_backend.py",
+        "src/shared/python/simulation_backends/protocol.py",
     )
     return {
         path: hashlib.sha256((REPO_ROOT / path).read_bytes()).hexdigest()
@@ -49,10 +60,16 @@ def _source_hashes() -> dict[str, str]:
     }
 
 
+def _velocity_scale(reference_rate: float) -> float:
+    return max(abs(reference_rate), MINIMUM_VELOCITY_SCALE_RAD_S)
+
+
 def _velocity_grid(reference_rate: float) -> np.ndarray:
+    """Return a reference-centered sweep along the achieved rate direction."""
     direction = 1.0 if reference_rate >= 0.0 else -1.0
-    scale = max(abs(reference_rate), 4.0)
-    return direction * np.linspace(0.25 * scale, 1.75 * scale, 9)
+    scale = _velocity_scale(reference_rate)
+    offsets = np.linspace(-VELOCITY_OFFSET_FRACTION, VELOCITY_OFFSET_FRACTION, 9)
+    return reference_rate + direction * offsets * scale
 
 
 def _reference_trace() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, float]:
@@ -72,12 +89,14 @@ def _rows() -> list[dict[str, Any]]:
     for fraction in PHASE_FRACTIONS:
         sample_time = fraction * impact_time
         index = int(np.argmin(np.abs(time - sample_time)))
+        reference_rate = float(velocity[index, 0])
+        sweep_scale = _velocity_scale(reference_rate)
         for constraint in VELOCITY_CONSTRAINTS:
             request = VelocitySweepRequest(
                 q_rad=q[index],
                 reference_velocity_rad_s=velocity[index],
                 control_nm=control[index],
-                proximal_velocity_rad_s=_velocity_grid(float(velocity[index, 0])),
+                proximal_velocity_rad_s=_velocity_grid(reference_rate),
                 velocity_constraint=constraint,
             )
             for sample in evaluate_velocity_sweep(request, params):
@@ -88,6 +107,8 @@ def _rows() -> list[dict[str, Any]]:
                         "phase": classify_transfer_phase(fraction),
                         "reference_time_s": float(time[index]),
                         "reference_sample_index": index,
+                        "reference_proximal_velocity_rad_s": reference_rate,
+                        "velocity_sweep_scale_rad_s": sweep_scale,
                         "velocity_constraint": constraint,
                     }
                 )
@@ -111,12 +132,39 @@ def _phase_summaries(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
             velocity = _array(selected, "proximal_velocity_rad_s")
             drift_power = _array(selected, "drift_grip_power_w")
             braking = _array(selected, "braking_grip_power_w")
+            coefficients = np.polyfit(velocity, drift_power, 1)
+            fitted = np.polyval(coefficients, velocity)
+            residual_sum_squares = float(np.sum((drift_power - fitted) ** 2))
+            total_sum_squares = float(np.sum((drift_power - np.mean(drift_power)) ** 2))
+            linear_r_squared = (
+                1.0 - residual_sum_squares / total_sum_squares
+                if total_sum_squares > 1e-20
+                else 1.0
+            )
+            reference_rate = float(selected[0]["reference_proximal_velocity_rad_s"])
+            center_index = len(velocity) // 2
+            centered_slope = float(
+                (drift_power[center_index + 1] - drift_power[center_index - 1])
+                / (velocity[center_index + 1] - velocity[center_index - 1])
+            )
             summaries.append(
                 {
                     "phase": phase,
                     "velocity_constraint": constraint,
-                    "drift_power_slope_w_per_rad_s": float(
-                        np.polyfit(velocity, drift_power, 1)[0]
+                    "reference_proximal_rate_rad_s": reference_rate,
+                    "velocity_sweep_scale_rad_s": float(
+                        selected[0]["velocity_sweep_scale_rad_s"]
+                    ),
+                    "reference_state_in_grid": bool(
+                        np.any(np.isclose(velocity, reference_rate))
+                    ),
+                    "drift_power_slope_w_per_rad_s": float(coefficients[0]),
+                    "reference_centered_drift_power_slope_w_per_rad_s": (
+                        centered_slope
+                    ),
+                    "drift_power_linear_r_squared": linear_r_squared,
+                    "drift_power_endpoint_delta_w": float(
+                        drift_power[-1] - drift_power[0]
                     ),
                     "braking_power_slope_w_per_rad_s": float(
                         np.polyfit(velocity, braking, 1)[0]
@@ -165,7 +213,7 @@ def run_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
     phases = list(dict.fromkeys(row["phase"] for row in rows))
     record: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
-        "study_id": "phase-resolved-proximal-link-velocity-atlas-v1",
+        "study_id": "phase-resolved-proximal-link-velocity-atlas-v2",
         "model_tier": "exact_planar_double_pendulum",
         "counterfactual_kind": "pointwise_state_matched_zero_applied_control",
         "proximal_coordinate_meaning": (
@@ -174,6 +222,15 @@ def run_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
         "phase_labels": phases,
         "phase_fractions": list(PHASE_FRACTIONS),
         "velocity_constraints": list(VELOCITY_CONSTRAINTS),
+        "velocity_sweep_contract": {
+            "kind": "reference_centered_directional_rate_sweep",
+            "reference_state_included": True,
+            "offset_fraction_of_scale": VELOCITY_OFFSET_FRACTION,
+            "minimum_scale_rad_s": MINIMUM_VELOCITY_SCALE_RAD_S,
+            "scale_definition": "max(abs(reference proximal rate), minimum scale)",
+            "zero_rate_direction": "positive model coordinate",
+            "stored_energy_is_not_matched": True,
+        },
         "rows": rows,
         "phase_summaries": _phase_summaries(rows),
         "claim_status": {
@@ -205,13 +262,15 @@ def run_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
     return record, arrays
 
 
-def write_outputs() -> tuple[Path, Path]:
+def write_outputs(output_dir: Path = DATA_DIR) -> tuple[Path, Path]:
     """Persist deterministic JSON and lossless NumPy evidence."""
     record, arrays = run_study()
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
-    JSON_PATH.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
-    cast(Any, np.savez_compressed)(NPZ_PATH, **arrays)
-    return JSON_PATH, NPZ_PATH
+    output_dir.mkdir(parents=True, exist_ok=True)
+    json_path = output_dir / JSON_PATH.name
+    npz_path = output_dir / NPZ_PATH.name
+    json_path.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+    cast(Any, np.savez_compressed)(npz_path, **arrays)
+    return json_path, npz_path
 
 
 def main() -> None:

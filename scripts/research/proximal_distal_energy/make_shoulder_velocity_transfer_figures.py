@@ -9,6 +9,7 @@ import matplotlib
 import numpy as np
 
 matplotlib.use("Agg")
+matplotlib.rcParams["svg.hashsalt"] = "proximal-distal-shoulder-velocity-v2"
 import matplotlib.pyplot as plt  # noqa: E402
 
 from scripts.research.proximal_distal_energy.run_shoulder_velocity_transfer_study import (
@@ -36,8 +37,12 @@ def _save(figure: plt.Figure, stem: str) -> tuple[Path, Path]:
     FIGURE_DIR.mkdir(parents=True, exist_ok=True)
     pdf = FIGURE_DIR / f"{stem}.pdf"
     svg = FIGURE_DIR / f"{stem}.svg"
-    figure.savefig(pdf, bbox_inches="tight")
-    figure.savefig(svg, bbox_inches="tight")
+    figure.savefig(
+        pdf,
+        bbox_inches="tight",
+        metadata={"CreationDate": None, "ModDate": None},
+    )
+    figure.savefig(svg, bbox_inches="tight", metadata={"Date": None})
     plt.close(figure)
     return pdf, svg
 
@@ -72,10 +77,10 @@ def _power_by_phase(rows: list[dict]) -> tuple[Path, Path]:
         axis.set_title(title)
         axis.set_xlabel("Proximal-Link Angular Velocity (rad/s)")
         axis.grid(alpha=0.25)
-    axes[0].set_ylabel("Pointwise Drift Grip Power (W)")
+    axes[0].set_ylabel("Pointwise Drift Interface Power (W)")
     axes[1].legend(loc="upper left", fontsize=8)
     figure.suptitle(
-        "Drift Grip Power Depends on Phase and the Matched-Velocity Contract"
+        "Drift Interface Power Depends on Phase and the Matched-Velocity Contract"
     )
     figure.tight_layout()
     return _save(figure, "fig_shoulder_velocity_drift_power")
@@ -104,11 +109,11 @@ def _braking_map(rows: list[dict]) -> tuple[Path, Path]:
         0.0,
         color="#E45756",
         alpha=0.08,
-        label="Negative Grip-Force Work Rate",
+        label="Negative Interface-Force Work Rate",
     )
-    axis.set_title("High Proximal Speed Does Not Uniformly Remove Grip Braking")
+    axis.set_title("High Proximal Speed Does Not Uniformly Remove Interface Braking")
     axis.set_xlabel("Instantaneous Clubhead Speed (m/s)")
-    axis.set_ylabel("Total Grip-Force Power (W)")
+    axis.set_ylabel("Total Interface-Force Power (W)")
     axis.grid(alpha=0.25)
     axis.legend(fontsize=8, ncol=2)
     figure.tight_layout()
@@ -142,7 +147,7 @@ def _slope_summary(rows: list[dict]) -> tuple[Path, Path]:
             axis.text(
                 column, row, f"{slopes[row, column]:.1f}", ha="center", va="center"
             )
-    axis.set_title("Local Drift-Power Sensitivity Changes Sign Across Swing Phases")
+    axis.set_title("Finite-Range Drift-Power Slope Changes Sign Across Swing Phases")
     colorbar = figure.colorbar(image, ax=axis)
     colorbar.set_label("Slope (W per rad/s)")
     figure.tight_layout()

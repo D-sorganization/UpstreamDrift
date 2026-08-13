@@ -185,12 +185,12 @@
       "bytes": 30781
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch03c_ground_reaction_drift.qmd": {
-      "sha256": "bc17eaee50b616e4460b73a7221d79c3ec939863a822637fa902eed5d47fe088",
-      "bytes": 13367
+      "sha256": "ba260198a1c87d7b85e70fe282362ea9510e37fec3c606861e7ad5e9bb28b6cb",
+      "bytes": 13473
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd": {
-      "sha256": "a91c173d21fe085f8c2b53f14a4b38e33fa4501ff0eb8755ab2ecffb3047432d",
-      "bytes": 15068
+      "sha256": "61d2677f3e701d80cfb15c8a08d40d73872fbcbcc3dd07ed138507085ad06730",
+      "bytes": 17903
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactual_ensemble.qmd": {
       "sha256": "d0dfec6a597b969bec0250a7313a37748bb816759cd6b8eb5ab9413a74c1ae1f",
@@ -293,12 +293,12 @@
       "bytes": 216806
     },
     "docs/research/proximal_distal_energy_transfer/data/claim_audit_registry.json": {
-      "sha256": "942d182cd93be73057b42a1f16c231330be9128f1d20b3d1c3201a81590687f2",
-      "bytes": 269907
+      "sha256": "3441ba2516871ea524d2878c5fda73078beacdddee9b6fd55554797bac6d4a0b",
+      "bytes": 310098
     },
     "docs/research/proximal_distal_energy_transfer/data/claim_candidate_inventory.json": {
-      "sha256": "6646b405bfb4364983dee315af9453bbf7907f0e6bb5ab2406e6c413f208ce54",
-      "bytes": 861368
+      "sha256": "aee2091bb2015866854f45b319309849ecad2e5480ebc57a4a1321ba7d32a039",
+      "bytes": 864373
     },
     "docs/research/proximal_distal_energy_transfer/data/counterfactual_ensemble.json": {
       "sha256": "da856aab9a698570da9287741cbdbb1c77f766b7e831d0ffee4cfe2003c40d64",
@@ -465,44 +465,44 @@
       "bytes": 1716617
     },
     "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.json": {
-      "sha256": "62761c82154805190ad0816136da95727289551383a26c88a33f9fdaad22a7b6",
-      "bytes": 52659
+      "sha256": "6bc5fa3b4ea4261038fe3d14fbe76468bc433da333e11789f50bce6318391ebe",
+      "bytes": 55247
     },
     "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.npz": {
       "sha256": "92ce66d2c6b990296081b20273ef7dd41b160e9c3193b9ff42944e6ed81c49ca",
       "bytes": 5814
     },
     "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_transfer/figures/fig_shoulder_velocity_braking_map.pdf": {
-      "sha256": "f61d1d74a15cf646684c02c85744a5775fb7d4b5071b2a8acbad439a9c8ddf6b",
-      "bytes": 21759
+      "sha256": "66e8ce06810a367ee8c8d181959151e23de60c7a0b92b102b6bdbf604273676b",
+      "bytes": 21389
     },
     "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_transfer/figures/fig_shoulder_velocity_drift_power.pdf": {
-      "sha256": "19445fdfa983eba8f56b48b2687a685b85c5efdb79c3600b363aefaf332ac812",
-      "bytes": 22833
+      "sha256": "f01adb1688b9ad9d2cf85bf829b70e56e63cb64e291232ca742da7353a229285",
+      "bytes": 22517
     },
     "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_transfer/figures/fig_shoulder_velocity_phase_sensitivity.pdf": {
-      "sha256": "65a7a4292a9d3c6030c9096942f68a634526ec36559059f5a75f561d92d4144b",
-      "bytes": 21146
+      "sha256": "976bfa5134c45e97b130c790b2984832d3553386e60ffe151f20fb0784c24867",
+      "bytes": 20687
     },
     "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_transfer/figures/fig_shoulder_velocity_strategy_associations.pdf": {
-      "sha256": "ebebf1b31cd163bb437540089ed993a001678a2b06e7ed096b652c01f24c96ec",
-      "bytes": 22680
+      "sha256": "837f2ab3093e4bd558ac2173f6835a58df3e3aaa2929348ad25683b4e26e9bc2",
+      "bytes": 22289
     },
     "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_transfer/figures/fig_shoulder_velocity_strategy_grid.pdf": {
-      "sha256": "81e61b2137f82e9992dc22b92be025005b6fc05879fdd43dfe70cb107d15d0e5",
-      "bytes": 25235
+      "sha256": "dfcb2d5fa359656de44d6e5e490c63dc807fe2638eeb630d3cffd454be326f6a",
+      "bytes": 25195
     },
     "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_transfer/figures/fig_shoulder_velocity_strategy_pareto.pdf": {
-      "sha256": "8c1ae605c9895bed585e44bc981ca18a409daefec97b1b4834ee4039450ed601",
-      "bytes": 21974
+      "sha256": "3e42cbda20820855d85163baf073e314d0b12bf87d5818369e1d27d9914c4e46",
+      "bytes": 21587
     },
     "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_transfer_study.json": {
-      "sha256": "9c4648d933c3deac4e65c9e77091aec0d797a8d28be4aa647122ac9769490889",
-      "bytes": 131117
+      "sha256": "d8c9116560efaed62f0f9f7d3c4f23dbb0b8daa2786135fba6fd2fd744c07f06",
+      "bytes": 146270
     },
     "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_transfer_study.npz": {
-      "sha256": "6776fd870b701dc80c51bf7db8249cb0349321790dbcfbd6f721350dd1025046",
-      "bytes": 13507
+      "sha256": "ba7d9dd03a87e71a48d9a3cb788d39d233ea9145a482fb8c6e26708f5e3019bf",
+      "bytes": 13327
     },
     "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json": {
       "sha256": "c5a4f0bc3cca34bdea1e48a48cdc44a91d406484452fa22b9c4e43c669a635f7",
@@ -1221,16 +1221,16 @@
       "bytes": 71530
     },
     "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.pdf": {
-      "sha256": "814b70fdb819de7c9686bc3ab95cf21cfb83340a12c0dc5d40bdaa71935798b5",
-      "bytes": 1356305
+      "sha256": "99865ef7272c5537c1e73eaf51786053137a14971b44e521ce434b556fb09db1",
+      "bytes": 1359744
     },
     "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd": {
       "sha256": "f4c2cb66b4f7695f517d90f55a7799423e06b6b4831f30f7a774fcae9474378a",
       "bytes": 14618
     },
     "docs/research/proximal_distal_energy_transfer/references.bib": {
-      "sha256": "92f051f35903bdb0564ea731c4dcf48754da9446c22dbdebc2af75d0516bf020",
-      "bytes": 43578
+      "sha256": "c1be508efc92f63314d92db9ec6eb8e1eb2f27d2914867e8f0809c8a996478c8",
+      "bytes": 43639
     },
     "scripts/research/proximal_distal_energy/__init__.py": {
       "sha256": "6284875dd432761d214dbcad5031e14cc4203018bc19b59005712521acb1bea1",
@@ -1329,12 +1329,12 @@
       "bytes": 14782
     },
     "scripts/research/proximal_distal_energy/make_shoulder_velocity_strategy_figures.py": {
-      "sha256": "5283ec944163f1864b0785854b96ead606496de16ca1edc70dac9156804ca2e5",
-      "bytes": 5630
+      "sha256": "0e4e4ac86ff7a48630abf3ba9de9db32b3b4a8ed8e024d693c387ec85a047c09",
+      "bytes": 5943
     },
     "scripts/research/proximal_distal_energy/make_shoulder_velocity_transfer_figures.py": {
-      "sha256": "84a750bbd8ced5cbec48f965692ae9b0eacb26202c6e38bc05ad01c11ddd0cd6",
-      "bytes": 5513
+      "sha256": "2db4246663b2bdeecdaa1e012cc4f5caaeb881fb6d80919958a07a35d420e51b",
+      "bytes": 5722
     },
     "scripts/research/proximal_distal_energy/make_spatial_forward_contact_figures.py": {
       "sha256": "39ddf766310b6c70692e2f5927f0e6ace654e09fde21159e95227271d58b8a82",
@@ -1445,12 +1445,12 @@
       "bytes": 11639
     },
     "scripts/research/proximal_distal_energy/run_shoulder_velocity_strategy_study.py": {
-      "sha256": "972b2026b9492651904bea7e5ebd3534efa43f0dbc295c9029efa583b63e1d4e",
-      "bytes": 7510
+      "sha256": "7b78660606fd7fc559cd4083f46f8b0531839efc214f155494e2850b6bd7159f",
+      "bytes": 11800
     },
     "scripts/research/proximal_distal_energy/run_shoulder_velocity_transfer_study.py": {
-      "sha256": "66861608ec95d64251ab303a9bd4542541012a4e6d98ae9ced25d9001744bed9",
-      "bytes": 9096
+      "sha256": "720935401e4d0e901bde81d3178bd1630fb1d131237ff7d2ba6afc346ca1692e",
+      "bytes": 12341
     },
     "scripts/research/proximal_distal_energy/run_spatial_forward_contact_study.py": {
       "sha256": "fa397e8f5fbe77e445b96823cd8b185c394a8b1c199d7c6263f5963b372a5c0a",
@@ -1481,8 +1481,8 @@
       "bytes": 17081
     },
     "scripts/research/proximal_distal_energy/shoulder_velocity_strategy_search.py": {
-      "sha256": "4eef8fc6fd90bf68fd95efb713163b0d34e1791219c21ca58bf3ec463ae4d7b9",
-      "bytes": 7182
+      "sha256": "c33e6926b8ee636f41b263b8c0d5ef2796ee7b36db490c63a42dd7d653541a34",
+      "bytes": 8018
     },
     "scripts/research/proximal_distal_energy/shoulder_velocity_transfer.py": {
       "sha256": "bebac41d9c113389dfbcdfd03def6d28f6e1adeb5545ed8c8fe30bd55fe17373",

@@ -15,6 +15,7 @@ from scripts.research.proximal_distal_energy.shoulder_velocity_strategy_search i
     evaluate_programs,
     pareto_program_indices,
 )
+from scripts.research.proximal_distal_energy.run_experiments import DT
 from src.shared.python.simulation_backends import GolfModelParams
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -67,6 +68,31 @@ def _standardized_regression(rows: list[dict[str, Any]]) -> dict[str, float]:
     }
 
 
+def _standardized_regression_diagnostics(
+    rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    keys = (
+        "proximal_velocity_at_release_rad_s",
+        "wrist_release_s",
+        "shoulder_cut_s",
+        "shoulder_torque_after_nm",
+    )
+    predictors = np.asarray([[row[key] for key in keys] for row in rows], dtype=float)
+    scale = np.std(predictors, axis=0)
+    scale = np.where(scale > 1e-12, scale, 1.0)
+    standardized = (predictors - np.mean(predictors, axis=0)) / scale
+    design = np.column_stack((np.ones(len(rows)), standardized))
+    return {
+        "observation_count": len(rows),
+        "parameter_count_including_intercept": design.shape[1],
+        "matrix_rank": int(np.linalg.matrix_rank(design)),
+        "condition_number": float(np.linalg.cond(design)),
+        "selection_rule": "valid_impact_only",
+        "uncertainty_intervals_reported": False,
+        "causal_estimand": False,
+    }
+
+
 def _outcome_rows() -> list[dict[str, Any]]:
     outcomes = evaluate_programs(_programs(), GolfModelParams.default())
     rows = []
@@ -100,28 +126,53 @@ def _association_record(valid_rows: list[dict[str, Any]]) -> dict[str, Any]:
     )
     speed = np.asarray([row["impact_speed_m_s"] for row in valid_rows])
     braking = np.asarray([row["braking_grip_work_j"] for row in valid_rows])
+    peak_force = np.asarray([row["peak_grip_force_n"] for row in valid_rows])
     return {
         "release_velocity_vs_impact_speed_pearson_r": _correlation(velocity, speed),
         "release_velocity_vs_braking_work_pearson_r": _correlation(velocity, braking),
+        "release_velocity_vs_peak_force_pearson_r": _correlation(velocity, peak_force),
         "standardized_speed_regression": _standardized_regression(valid_rows),
+        "standardized_speed_regression_diagnostics": (
+            _standardized_regression_diagnostics(valid_rows)
+        ),
     }
 
 
 def _provenance() -> dict[str, str]:
-    sources = (
-        Path(__file__),
-        Path(__file__).with_name("shoulder_velocity_strategy_search.py"),
+    source_paths = (
+        "scripts/research/proximal_distal_energy/double_pendulum_attribution.py",
+        "scripts/research/proximal_distal_energy/interaction_forces.py",
+        "scripts/research/proximal_distal_energy/run_experiments.py",
+        "scripts/research/proximal_distal_energy/run_shoulder_velocity_strategy_study.py",
+        "scripts/research/proximal_distal_energy/shoulder_velocity_strategy_search.py",
+        "scripts/research/proximal_distal_energy/swing_model.py",
+        "src/engines/pendulum_models/python/double_pendulum_model/physics/double_pendulum.py",
+        "src/shared/python/biomechanics/drift_control_transfer.py",
+        "src/shared/python/simulation_backends/factory.py",
+        "src/shared/python/simulation_backends/model_params.py",
+        "src/shared/python/simulation_backends/ode_backend.py",
+        "src/shared/python/simulation_backends/protocol.py",
     )
-    return {
-        str(path.relative_to(REPO_ROOT)).replace("\\", "/"): _sha256(path)
-        for path in sources
-    }
+    return {path: _sha256(REPO_ROOT / path) for path in source_paths}
 
 
 def _record(rows: list[dict[str, Any]]) -> dict[str, Any]:
     valid_rows = [row for row in rows if row["valid_impact"]]
+    pareto_indices = _pareto_indices(valid_rows)
+    best_row = max(valid_rows, key=lambda row: row["impact_speed_m_s"])
+    best_program = ShoulderVelocityProgram(
+        best_row["shoulder_cut_s"],
+        best_row["shoulder_torque_before_nm"],
+        best_row["shoulder_torque_after_nm"],
+        best_row["wrist_release_s"],
+        best_row["wrist_restrain_nm"],
+        best_row["wrist_drive_nm"],
+    )
+    refined = evaluate_programs(
+        (best_program,), GolfModelParams.default(), dt_s=DT / 2.0
+    )[0]
     return {
-        "schema_version": "shoulder-velocity-strategy-evidence-v1",
+        "schema_version": "shoulder-velocity-strategy-evidence-v2",
         "study_id": "fixed-hub-proximal-drive-and-wrist-release-grid",
         "model_tier": "exact_planar_double_pendulum_fixed_hub",
         "program_count": len(rows),
@@ -135,11 +186,20 @@ def _record(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "wrist_drive_nm": 15.0,
         },
         "programs": rows,
-        "pareto_program_indices": _pareto_indices(valid_rows),
+        "pareto_program_indices": pareto_indices,
+        "pareto_diagnostics": {
+            "valid_program_count": len(valid_rows),
+            "nondominated_program_count": len(pareto_indices),
+            "nondominated_fraction": len(pareto_indices) / len(valid_rows),
+            "screen_is_weakly_discriminating": bool(
+                len(pareto_indices) / len(valid_rows) > 0.75
+            ),
+        },
         "associations_valid_impact_only": _association_record(valid_rows),
         "analysis_boundary": (
             "Grid associations are descriptive model associations, not causal human "
-            "effects or a continuous optimal-control solution."
+            "effects or a continuous optimal-control solution; conditioning on the "
+            "valid-impact selection rule can bias the associations."
         ),
         "claim_status": {
             "proximal_link_velocity": "tested_model_coordinate",
@@ -150,6 +210,28 @@ def _record(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "registered_objectives": {
             "maximize": ["impact_speed_m_s"],
             "minimize": ["braking_grip_work_j", "peak_grip_force_n"],
+        },
+        "interface_force_boundary": (
+            "peak_grip_force_n is the net modeled planar wrist-interface force on "
+            "the club, not either hand's anatomical grip force."
+        ),
+        "fixed_program_timestep_sensitivity": {
+            "program_index": best_row["program_index"],
+            "reference_dt_s": DT,
+            "refined_dt_s": DT / 2.0,
+            "same_valid_impact_classification": bool(
+                best_row["valid_impact"] == refined.valid_impact
+            ),
+            "absolute_impact_speed_difference_m_s": abs(
+                best_row["impact_speed_m_s"] - refined.impact_speed_m_s
+            ),
+            "absolute_total_grip_work_difference_j": abs(
+                best_row["total_grip_work_j"] - refined.total_grip_work_j
+            ),
+            "absolute_peak_interface_force_difference_n": abs(
+                best_row["peak_grip_force_n"] - refined.peak_grip_force_n
+            ),
+            "selection_was_not_reoptimized": True,
         },
         "falsification_tests": [
             "A speed association that vanishes after timing and drive controls weakens the high-velocity interpretation.",
@@ -193,12 +275,20 @@ def run_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
     return _record(rows), _arrays(rows)
 
 
+def write_outputs(output_dir: Path = DATA_DIR) -> tuple[Path, Path]:
+    """Write deterministic JSON and lossless NumPy evidence artifacts."""
+    record, arrays = run_study()
+    output_dir.mkdir(parents=True, exist_ok=True)
+    json_path = output_dir / JSON_PATH.name
+    npz_path = output_dir / NPZ_PATH.name
+    json_path.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+    np.savez_compressed(npz_path, **arrays)
+    return json_path, npz_path
+
+
 def main() -> None:
     """Write deterministic JSON and NPZ evidence artifacts."""
-    record, arrays = run_study()
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
-    JSON_PATH.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
-    np.savez_compressed(NPZ_PATH, **arrays)
+    write_outputs()
 
 
 if __name__ == "__main__":
