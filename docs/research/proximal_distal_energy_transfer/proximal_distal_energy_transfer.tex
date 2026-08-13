@@ -453,7 +453,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, arc=.35mm, rightrule=.15mm, coltitle=black, colbacktitle=quarto-callout-note-color!10!white, colframe=quarto-callout-note-color-frame, left=2mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, opacitybacktitle=0.6, toptitle=1mm, bottomtitle=1mm, titlerule=0mm, bottomrule=.15mm, opacityback=0, leftrule=.75mm, toprule=.15mm, breakable, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, arc=.35mm, leftrule=.75mm, titlerule=0mm, coltitle=black, colback=white, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, opacitybacktitle=0.6, opacityback=0, toprule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, toptitle=1mm, bottomrule=.15mm, breakable, left=2mm, colbacktitle=quarto-callout-note-color!10!white]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -7522,6 +7522,15 @@ force, grip separation for minimum force couple, and shaft stiffness for
 peak flex. These rankings are hypotheses for larger designs, not settled
 parameter importance.
 
+A leave-one-sample-out audit sharpens that boundary. Five of the six
+leading absolute-PRCC identities persist in all 24 omissions. The
+peak-hand-force leader does not: limb mass leads 12 omissions,
+activation time constant nine, and activation delay three. Several
+smaller coefficients also change sign. Thus the stable leaders are
+reproducible properties of this design, while the hand-force ranking and
+nonleading signs are especially fragile; none is a confidence interval
+or population statement.
+
 Identifiability is assessed separately from sensitivity
 (\citeproc{ref-raue2009}{Raue et al. 2009}). At a single planar instant,
 the two hand forces contain four scalar components, but their
@@ -7537,7 +7546,11 @@ formed from the six summary observables. Its six singular values are
 registered 5\% rule is six, so the full parameter vector has a nullity
 lower bound of six under this summary observation set. This is a local
 practical-identifiability screen, not a profile-likelihood analysis and
-not proof that every six-parameter subset is estimable.
+not proof that every six-parameter subset is estimable. Threshold
+sensitivity gives rank six at 1\%, 5\%, and 10\% of the largest singular
+value, but rank five at 20\%; the registered conclusion is therefore
+stable across the first three declared thresholds, not invariant to
+threshold choice.
 
 \begin{figure}
 
@@ -7572,6 +7585,14 @@ equal-range Chebyshev rule selects later release, a speed-priority rule
 selects early restrain, and a load-priority rule selects higher
 impedance. These are objective-specific selections, not interchangeable
 recommendations.
+
+Held-out Pareto membership is itself small-sample sensitive. Across the
+six leave-one-case-out recalculations, passive wrist, early drive, late
+drive, and higher impedance remain nondominated six times;
+restrain-then-drive, lower drive, and early restrain remain five times;
+later release remains four. The full-sample statement that all eight are
+nondominated is exact, but it should not be read as a stable estimate of
+a population Pareto set.
 
 \begin{figure}
 

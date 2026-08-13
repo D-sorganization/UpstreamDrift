@@ -1,9 +1,9 @@
 {
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper_source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-  "source_digest": "9d813503833168fab7161914faa07e2e0d05da643c4ead465cc6c54eb2f9cfd2",
+  "source_digest": "6f14f480796276c8b582cea1f985bc126963ac44725f68b379cb82c25a0010f1",
   "source_count": 32,
-  "candidate_count": 921,
+  "candidate_count": 923,
   "candidates": [
     {
       "candidate_id": "PD-CAND-a0d4fc073c7ef366",
@@ -10567,10 +10567,26 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-db0bf9312ae9c13c",
+      "candidate_id": "PD-CAND-ae4d0d619fe0bb32",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd",
       "line_start": 104,
       "line_end": 110,
+      "text": "A leave-one-sample-out audit sharpens that boundary. Five of the six leading absolute-PRCC identities persist in all 24 omissions. The peak-hand-force leader does not: limb mass leads 12 omissions, activation time constant nine, and activation delay three. Several smaller coefficients also change sign. Thus the stable leaders are reproducible properties of this design, while the hand-force ranking and nonleading signs are especially fragile; none is a confidence interval or population statement.",
+      "text_sha256": "8582752e10048af4d2db1331e9c8eab03763f88f4ad4ee7a0613a37f0d0eebde",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": false,
+      "priority_score": 2,
+      "triage_flags": [
+        "numeric"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-db0bf9312ae9c13c",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd",
+      "line_start": 112,
+      "line_end": 118,
       "text": "Identifiability is assessed separately from sensitivity [@raue2009]. At a single planar instant, the two hand forces contain four scalar components, but their transported net force and scalar couple provide only three independent equations. The wrench map therefore has rank 3 and nullity 1: individual hand forces are structurally non-identifiable from the net planar wrench alone. Independent contact measurements or an additional constitutive assumption are required.",
       "text_sha256": "1d3ef0b2fabfa318e08a13ce4ba837d59329b1ca2055358451dc5461c72889c5",
       "citation_keys": [
@@ -10586,12 +10602,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-8970804912521600",
+      "candidate_id": "PD-CAND-72a147b02ce2430a",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd",
-      "line_start": 112,
-      "line_end": 118,
-      "text": "For the 12 uncertain parameters, a standardized sensitivity matrix is formed from the six summary observables. Its six singular values are 1.785, 1.146, 1.039, 0.863, 0.379, and 0.239. The effective rank at the registered 5% rule is six, so the full parameter vector has a nullity lower bound of six under this summary observation set. This is a local practical-identifiability screen, not a profile-likelihood analysis and not proof that every six-parameter subset is estimable.",
-      "text_sha256": "ee1bf259fbaa1d750eaa9a2bc55642f4085703eb71ef06bb682dd04ed8786ad1",
+      "line_start": 120,
+      "line_end": 129,
+      "text": "For the 12 uncertain parameters, a standardized sensitivity matrix is formed from the six summary observables. Its six singular values are 1.785, 1.146, 1.039, 0.863, 0.379, and 0.239. The effective rank at the registered 5% rule is six, so the full parameter vector has a nullity lower bound of six under this summary observation set. This is a local practical-identifiability screen, not a profile-likelihood analysis and not proof that every six-parameter subset is estimable. Threshold sensitivity gives rank six at 1%, 5%, and 10% of the largest singular value, but rank five at 20%; the registered conclusion is therefore stable across the first three declared thresholds, not invariant to threshold choice.",
+      "text_sha256": "5d04679157234c989d1c13fbef4bb13e34468cc045318ab5a00e4cf2af0d13e3",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": false,
@@ -10604,8 +10620,8 @@
     {
       "candidate_id": "PD-CAND-d19b3de33355f734",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd",
-      "line_start": 120,
-      "line_end": 120,
+      "line_start": 131,
+      "line_end": 131,
       "text": "![Identifiability Audit. The net planar wrench cannot uniquely allocate both hand forces, and six summary observables cannot identify the full 12-parameter vector.](figures/fig_identifiability_audit.pdf){#fig-identifiability-audit width=94%}",
       "text_sha256": "4365a49f7741cfd2acf4ad42a3b1662bb69ec3b6db04777cdca9a26710443a66",
       "citation_keys": [],
@@ -10620,8 +10636,8 @@
     {
       "candidate_id": "PD-CAND-e13bf62d56be5ff5",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd",
-      "line_start": 124,
-      "line_end": 129,
+      "line_start": 135,
+      "line_end": 140,
       "text": "Eight programs were fixed before comparing results: passive wrist, early drive, late drive, restrain-then-drive, higher impedance, later release, lower drive, and early restrain. Five objectives are retained rather than collapsed prematurely: maximize the 10th-percentile delivery speed; minimize mean face/path error; minimize the 90th-percentile individual-hand force; minimize the effort proxy; and minimize delivery-speed dispersion.",
       "text_sha256": "0c5c7900d7de76aa46d8375b4c17bed00440b2610bb4711c7dc39ea4f67b6ddf",
       "citation_keys": [],
@@ -10637,8 +10653,8 @@
     {
       "candidate_id": "PD-CAND-4f3ad37e59405713",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd",
-      "line_start": 131,
-      "line_end": 137,
+      "line_start": 142,
+      "line_end": 148,
       "text": "Seven programs are nondominated on the training ensemble; all eight are nondominated on held-out samples. That instability is substantive evidence against a universal optimum: even the poor-speed early-drive program retains a held-out tradeoff in another objective. A balanced equal-range Chebyshev rule selects later release, a speed-priority rule selects early restrain, and a load-priority rule selects higher impedance. These are objective-specific selections, not interchangeable recommendations.",
       "text_sha256": "cdb4b0ef0a70123488ffab13b00e615dc0bd585453367e517853ef79487d3d5e",
       "citation_keys": [],
@@ -10652,10 +10668,26 @@
       "review_state": "unadjudicated"
     },
     {
+      "candidate_id": "PD-CAND-a97a7bf30e5bb26f",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd",
+      "line_start": 150,
+      "line_end": 155,
+      "text": "Held-out Pareto membership is itself small-sample sensitive. Across the six leave-one-case-out recalculations, passive wrist, early drive, late drive, and higher impedance remain nondominated six times; restrain-then-drive, lower drive, and early restrain remain five times; later release remains four. The full-sample statement that all eight are nondominated is exact, but it should not be read as a stable estimate of a population Pareto set.",
+      "text_sha256": "5a0d9984b3e0fabd942a1b33aae4d07a0b5381c906d19e02d7098ad9afa64f7d",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": true,
+      "priority_score": 2,
+      "triage_flags": [
+        "assertive_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
       "candidate_id": "PD-CAND-f921a66d00d93aec",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd",
-      "line_start": 139,
-      "line_end": 139,
+      "line_start": 157,
+      "line_end": 157,
       "text": "![Training and Independently Held-Out Pareto Comparisons. Membership changes across ensembles, so no program is promoted as universally optimal.](figures/fig_control_pareto_train_holdout.pdf){#fig-control-pareto width=100%}",
       "text_sha256": "40a250d09a6b20a40c6e859e5b1f889a1b58a83d579eb742a9d8d02e22afbc73",
       "citation_keys": [],
@@ -10671,8 +10703,8 @@
     {
       "candidate_id": "PD-CAND-f922726ed1e71b00",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd",
-      "line_start": 141,
-      "line_end": 141,
+      "line_start": 159,
+      "line_end": 159,
       "text": "![Held-Out Strategy Tradeoffs Across Speed, Planar Delivery Error, Hand Load, Effort Proxy, and Dispersion.](figures/fig_control_strategy_tradeoffs.pdf){#fig-control-tradeoffs width=100%}",
       "text_sha256": "b973991376691f9a3da68485e2790da7aac04f5b7582fcc3ddf494d22ae22330",
       "citation_keys": [],
@@ -10687,8 +10719,8 @@
     {
       "candidate_id": "PD-CAND-4836d374086821c5",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd",
-      "line_start": 145,
-      "line_end": 151,
+      "line_start": 163,
+      "line_end": 169,
       "text": "Hypothesis H4 asks whether a delayed actuator can benefit from an anticipatory opposing command. In the held-out ensemble, early restrain raises the 10th-percentile delivery speed to 4.706 m/s compared with 4.417 m/s for late drive, but worsens mean face/path error from 1.58 to 5.44 degrees. Thus H4 is supported only as a conditional lower-tail speed result for these bounded model schedules. It does not demonstrate human preactivation, neural timing, or a generally superior strategy.",
       "text_sha256": "dea3d06f58e40ae8897b461cfc71f58dd04dd2b3c381abc34d747067364e4d99",
       "citation_keys": [],
@@ -10704,8 +10736,8 @@
     {
       "candidate_id": "PD-CAND-f34d5609800d3c84",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd",
-      "line_start": 153,
-      "line_end": 157,
+      "line_start": 171,
+      "line_end": 175,
       "text": "Numerical closure remains materially below the reported effects across all rollouts: the maximum position-constraint residual is $9.99\\times10^{-11}$ m, velocity-constraint residual $2.40\\times10^{-15}$ m/s, KKT residual $1.90\\times10^{-13}$, and contact-power residual $6.40\\times10^{-14}$ W.",
       "text_sha256": "3d26877418b5c7a85ceb353097624642993306c555c33a8ec9d157d2a4003d68",
       "citation_keys": [],
@@ -10721,8 +10753,8 @@
     {
       "candidate_id": "PD-CAND-4724c2d7f98a3f33",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd",
-      "line_start": 161,
-      "line_end": 166,
+      "line_start": 179,
+      "line_end": 184,
       "text": "This phase supports four bounded conclusions: coupled uncertainty can change delivery materially; the chosen summaries cannot identify all 12 parameters; net wrench cannot identify individual planar hand forces; and command selection depends on the objective and evaluation ensemble. It does **not** support a universal program, physiological effort inference, human preactivation, or a coaching prescription.",
       "text_sha256": "32c07a590f93254fee592a47d736631dd6ab08c1dbb75fd8221c4de85b2bb4e0",
       "citation_keys": [],
@@ -10739,8 +10771,8 @@
     {
       "candidate_id": "PD-CAND-d54a6e58c85bab3c",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd",
-      "line_start": 168,
-      "line_end": 175,
+      "line_start": 186,
+      "line_end": 193,
       "text": "The results would be challenged by a larger registered ensemble that reverses the H4 lower-tail speed ordering, a direct two-hand measurement that uniquely resolves the wrench null mode without extra assumptions, or an independently implemented model in which the declared tradeoffs disappear under the same observables and actuator bounds. The next experimental protocol should measure both hand wrenches, club kinematics, ground reaction, and synchronization uncertainty; estimating all internal forces from club motion alone is not an acceptable substitute.",
       "text_sha256": "a18b78c2643a93f3f06062366e9cf955caed761e497f16fbd22b3663bf99960f",
       "citation_keys": [],
