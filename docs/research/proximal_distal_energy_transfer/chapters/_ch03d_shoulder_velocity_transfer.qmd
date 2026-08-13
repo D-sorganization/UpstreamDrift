@@ -176,6 +176,130 @@ trajectory-equivalent because their proximal-drive cut occurs after impact;
 they are retained for auditability rather than silently deduplicated. The
 result is a finite-grid Pareto set, not a unique or continuous optimum.
 
+## Rotating-Base, Bilateral-Hand Mechanism Test
+
+The fixed-hub results above cannot distinguish a moving torso from a proximal
+pendulum coordinate and cannot recover the two hand reactions independently.
+The next registered tier therefore introduces seven generalized coordinates:
+finite-inertia torso rotation, lead- and trail-arm rotation relative to the
+torso, planar grip-center translation, proximal-club rotation, and distal-shaft
+rotation relative to the proximal club. Four holonomic constraints close the
+lead and trail hands onto two club points separated by 0.13 m. The equations
+are solved as a full-rank KKT system,
+
+$$
+\begin{bmatrix}M(q)&-J(q)^\mathsf{T}\\J(q)&0\end{bmatrix}
+\begin{bmatrix}\ddot q\\\lambda\end{bmatrix}
+=
+\begin{bmatrix}Q_u-b(q,\dot q)\\-\dot J(q,\dot q)\dot q\end{bmatrix},
+$$
+
+where the four multipliers $\lambda$ are reshaped into two planar hand
+reactions. Their resultant and force-generated club couple are separately
+observable. Equal and opposite reactions are applied to the arm and club
+subsystems. The torso is driven through a declared torque channel, has 4.8
+kg m$^2$ inertia, and is not relabeled from a fixed-hub link. The distal club
+is joined through an 80 N m/rad torsional spring and 0.6 N m s/rad damper.
+These values define a mechanism experiment, not identified human parameters.
+
+The implementation rejects nonfinite or nonphysical parameters, rank-deficient
+constraints, and states outside the closure tolerance. Position and velocity
+are projected after every step. The bilateral contact-power identity is checked
+two ways: by summing each reaction dotted with its grip-point velocity and by
+combining resultant force power at the grip center with force-couple power.
+The full mechanical-energy change must equal integrated actuator and damping
+power plus the explicitly recorded projection-energy change. Null and adverse
+rows remain in the record.
+
+### Registered State Matching and Programs
+
+The initial torso rates are 1.5, 3.5, and 5.5 rad/s. Two matching contracts
+are used. Under **relative-club-rate matching**, initial proximal-club rate is
+torso rate plus 1 rad/s. Under **absolute-club-rate matching**, proximal-club
+rate remains 3 rad/s while torso rate changes. Each state is propagated under
+one of three torso commands: +55 N m, 0 N m, or -55 N m. The bilateral arms
+receive equal 7 N m commands, and each wrist changes from -3 to +4 N m at 25
+ms. The terms accelerating, constant-rate, and decelerating name these declared
+torso-command windows; the finite-inertia torso rate is an outcome and is not
+clamped.
+
+![Delivery speed across the rotating-base grid. An X identifies a retained row
+outside the registered 100 N peak-grip-force or 0.08 J work-closure envelope;
+lines are descriptive connections, not fitted human response curves.](data/rotating_base_torso_velocity/figures/fig_rotating_base_matched_grid.pdf){#fig-rotating-base-matched-grid width=100%}
+
+Thirteen of the 18 full-resolution rows satisfy the registered envelope. Across
+valid rows, initial torso rate and delivery speed are positively associated
+($r=0.604$), but initial torso rate and negative grip work are also positively
+associated ($r=0.273$). Thus, the model reproduces the apparent speed benefit
+without reproducing the proposed universal reduction in braking. Under
+relative-rate matching and positive torso torque, delivery speed rises from
+3.78 to 7.44 m/s across the initial-rate grid while negative grip work rises
+from 0.66 to 1.41 J. Under the zero-torso-torque program, speed rises from 2.00
+to 5.97 m/s while negative grip work rises from 0.81 to 2.31 J. These are
+conditional trajectory differences, not effects of changing one human joint
+velocity.
+
+The matching contract changes the interpretation. With absolute club rate
+fixed and positive torso torque, delivery speed rises from 4.10 to 6.20 m/s,
+whereas negative grip work falls from 0.86 to 0.11 J. This contrast is the
+central result: rapid base motion can accompany a cleaner modeled transfer
+when the distal laboratory-frame state is matched, yet it can accompany more
+opposing work when the relative state is matched. "Release at high torso
+speed" is therefore under-specified unless club rate, geometry, shaft state,
+and actuator work are also declared.
+
+![Torso rate, delivery speed, bilateral contact power, and force-generated
+couple for the three initial-rate levels under the relative-rate, zero-torso-
+torque program. The wrist command changes at 25 ms, producing the visible but
+auditable discontinuity.](data/rotating_base_torso_velocity/figures/fig_rotating_base_force_power_atlas.pdf){#fig-rotating-base-force-power-atlas width=100%}
+
+The force-power atlas shows why force magnitude alone cannot define transfer.
+Positive early contact power becomes negative after the wrist-command change,
+then briefly returns toward zero before becoming negative again. The force-
+generated couple changes sign during the same interval. A large reaction can
+be nearly perpendicular to grip velocity and transmit little power; a smaller
+reaction aligned against velocity can remove energy. The recorded outcomes
+therefore include distal-segment kinetic-energy gain, total control work,
+bilateral wrist work, force-couple work, negative contact work, negative
+along-path impulse, and peak reaction for every attempted row.
+
+### Same-State Killswitches and Geometric Controls
+
+At 30 ms, three counterfactuals branch from numerically identical states and
+commands: torso torque, both arm torques, or both wrist moments are set to zero
+while all other channels continue. The maximum pre-branch generalized-state
+difference is exactly zero at stored precision. Continuing the torso command
+adds 1.22 m/s to delivery speed relative to its killswitch. Continuing the
+bilateral arm commands *reduces* delivery speed by 1.36 m/s relative to their
+killswitch in this program. Continuing the wrist commands adds 1.81 m/s, while
+its post-branch contact-work difference has the opposite sign from the speed
+difference. These nonmonotonic results prevent the total gain from being
+assigned to a single colloquial "fling" mechanism.
+
+![Delivery-speed changes under exact same-state command killswitches and shaft-
+stiffness sensitivity. A positive bar means the continued baseline command
+finishes faster than the corresponding command-zero branch.](data/rotating_base_torso_velocity/figures/fig_rotating_base_falsification_summary.pdf){#fig-rotating-base-falsification-summary width=100%}
+
+Two geometry controls test the bilateral couple. Coincident grip points make
+the force-generated couple exactly zero. Reversing only the signed moment arms
+while holding the solved forces and state fixed reverses the couple from
++1.351 to -1.351 N m. The latter is an algebraic sign test, not a dynamically
+feasible human grip exchange. Shaft stiffnesses of 40, 80, and 160 N m/rad
+produce delivery speeds of 4.26, 4.06, and 4.03 m/s in the selected reference
+program. The uncertainty screen also perturbs torso inertia, arm mass, shaft
+damping, grip spacing, and wrist-release timing. Narrowing grip spacing raises
+the peak reaction above the registered 100 N ceiling, while an earlier wrist-
+command change increases speed but also makes contact work more negative.
+These cases expose a speed--load--braking trade rather than a single optimum.
+
+The supported mechanism claim is consequently limited: in this planar,
+finite-inertia, closed-loop model, torso-rate history changes bilateral reaction
+work and delivery speed conditional on matching rule, command history, grip
+geometry, and shaft parameters. The study does not identify scapular control,
+anatomical shoulder velocity, safe loading, or a coaching instruction. Only
+synchronized bilateral grip wrenches and segment kinematics can test whether
+the same decomposition predicts held-out human swings.
+
 ## Candidate Design Hypotheses Stated as Testable Conditions
 
 Within this model tier, the implications are better stated as five testable
@@ -234,11 +358,12 @@ A sampled two-hand strategy is nondominated only if no sampled alternative raise
 delivery speed without worsening at least one registered cost. This prevents a
 large speed gain obtained through excessive grip load, opposing hand work, or
 an unstable timing boundary from being called optimal. The existing
-fixed-shoulder two-arm model can test force allocation and force-generated
-couple, while the moving-base flexible tier can test translation and shaft
-response. Neither has an anatomical rotating torso. A forward, rotating-base,
-two-hand model with subject-scaled parameters and declared base work is
-required before the torso-velocity question can be tested as posed.
+fixed-shoulder two-arm model can test force allocation, the moving-base flexible
+tier can test translation and shaft response, and the rotating-base tier above
+tests a finite-inertia planar torso coordinate with bilateral closure. None is
+an anatomical torso--scapula--arm model. Subject-scaled parameters and
+synchronized bilateral human measurements remain required before the question
+can be interpreted as a human torso-velocity strategy.
 
 ## Falsification Criteria and Experimental Observables
 
