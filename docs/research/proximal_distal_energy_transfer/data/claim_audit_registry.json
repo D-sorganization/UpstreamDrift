@@ -2,14 +2,14 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "201b956f877b70e5d199401b6e8ea5d11f07318316baad62256e6af165b6e3e4",
+    "source_digest": "753dbd5508d5324c27b9f1f1107945f80124c61335a011c4ba81e8705d99ee0f",
     "baseline_commit": "13ea6a69585a42dc1db4b3959440ed95787c9779"
   },
   "audit_scope": {
     "completion_status": "in_progress",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "Stable claim identity, cross-platform source digests, complete post-equation narrative parsing, and five high-risk external-evidence slices covering framing, ground mechanics, kinetic-energy sequencing, torso-pelvis associations, method sensitivity, timing, delayed release, wrist torque, passive transfer, hub-path models, foundational linked-segment mechanics, optimal-control lineages, spatial forward optimization, and causal limitations. The complete 889-candidate paper audit remains in progress; 44 candidates are reviewed and 845 remain unadjudicated."
+    "current_scope": "Stable claim identity, cross-platform source digests, complete post-equation narrative parsing, and six high-risk external-evidence slices covering framing, ground mechanics, kinetic-energy sequencing, torso-pelvis associations, method sensitivity, timing, delayed release, wrist torque, passive transfer, hub-path models, foundational linked-segment mechanics, energy accounting, kinematic proxies, planarity, optimal-control lineages, spatial forward optimization, and causal limitations. The complete 895-candidate paper audit remains in progress; 54 candidates are reviewed and 841 remain unadjudicated."
   },
   "dependencies": [
     {
@@ -525,10 +525,90 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-1d6ac9dbe8a8b4d7",
+      "candidate_id": "PD-CAND-2aac87162777c1ba",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This paragraph introduces four accounting levels and does not itself assert an empirical result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-83bcf2fd7cd501da",
       "disposition": "material_claims_mapped",
-      "claim_ids": ["PD-CLAIM-035"],
-      "rationale": "The later induced-acceleration discussion now carries the same nonzero-coupling qualification as the formalism section.",
+      "claim_ids": ["PD-CLAIM-044"],
+      "rationale": "The paragraph defines net generalized joint power under a compatible coordinate and sign convention.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-3b45d68cb25d2016",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-044"],
+      "rationale": "The paragraph limits resultant joint-moment work to net mechanics and explicitly withholds individual-muscle energetics.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-b9a263648952ce95",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-045"],
+      "rationale": "The paragraph defines compatible-frame force and moment power for a joint wrench acting on one segment.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-8d30ffcba0441e99",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-045"],
+      "rationale": "The paragraph distinguishes whole-system internal-force cancellation from non-cancelling segment-level moment-power terms.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-8df9882910fb1516",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-046"],
+      "rationale": "The paragraph reports Robertson and Winter's two-participant walking validation and its ankle-phase and cross-task limits.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-a4c61849a5d7bee2",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-047", "PD-CLAIM-050"],
+      "rationale": "The paragraph states that joint powers and segment angular velocities alone do not identify energy flow or muscle coordination and defines the stronger simulation analysis needed.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-836dc14b06a1f1d3",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-035", "PD-CLAIM-047"],
+      "rationale": "The induced-acceleration section now distinguishes a verified multibody pathway from identification of biological torque or muscle causes.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-82046010bbf2ad7a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-048", "PD-CLAIM-050"],
+      "rationale": "The paragraph reports Marsan et al.'s method sensitivity and limits racquet-task evidence to an analogy rather than golf energy-flow validation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-76b154c47305f982",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-049"],
+      "rationale": "The paragraph reconciles the measured non-coplanarity of body and club paths with the narrower use of a declared planar mechanism model.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-d6df055d20cefafb",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-050"],
+      "rationale": "The recommendation operationalizes falsifiability by pairing a declared kinematic sequence with power accounting, sensitivity, and spatial residuals.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
     }
@@ -1678,7 +1758,7 @@
     },
     {
       "claim_id": "PD-CLAIM-035",
-      "candidate_ids": ["PD-CAND-cf3f7b352c9e84c4", "PD-CAND-1d6ac9dbe8a8b4d7"],
+      "candidate_ids": ["PD-CAND-cf3f7b352c9e84c4", "PD-CAND-836dc14b06a1f1d3"],
       "statement": "In an articulated rigid-body model, generalized torque can induce acceleration in other coordinates through nonzero entries of the inverse inertia matrix, but the pathway depends on coordinates, inertial parameters, constraints, and configuration and can vanish under symmetry or decoupling.",
       "classification": "definition_or_mathematical_identity",
       "published_status": "corrected_and_supported_with_nonzero_coupling_condition",
@@ -1965,6 +2045,225 @@
       ],
       "falsifier": "A cited foundational source directly measures golf energy flow or experimentally identifies a universal active-braking or optimal-control program under a transportable design.",
       "adjudication": "The matrix makes non-equivalence visible and uses the sources to define hypotheses and falsifiers rather than to sell a predetermined release strategy.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-044",
+      "candidate_ids": ["PD-CAND-83bcf2fd7cd501da", "PD-CAND-3b45d68cb25d2016"],
+      "statement": "For a declared one-degree-of-freedom joint, net generalized joint power is the product of resultant generalized torque and compatible relative joint rate; its integral is net mechanical work, not an identification of individual-muscle energy generation or absorption.",
+      "classification": "mechanics_identity_and_estimand_boundary",
+      "published_status": "supported_for_declared_coordinate_and_sign_convention",
+      "audit_status": "equation_and_interpretation_checked_against_energy_flow_methodology",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:285",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:293"
+      ],
+      "evidence_artifacts": ["https://doi.org/10.1016/S0966-6362(02)00068-1"],
+      "model_domain": "Resultant generalized torque and compatible relative joint rate in a declared mechanical coordinate.",
+      "uncertainty_boundary": "Net joint power can combine agonist, antagonist, passive-tissue, and unmodeled contributions and does not recover muscle-specific metabolic or mechanical power.",
+      "competing_explanations": [
+        "Co-contraction hidden by net moment",
+        "Passive-tissue contribution",
+        "Coordinate and sign-convention choice"
+      ],
+      "negative_controls": [
+        "Independent inverse-dynamics reconstruction",
+        "Muscle-force redundancy analysis",
+        "Sign-convention reversal test"
+      ],
+      "falsifier": "The stated product fails a dimensionally and sign-consistent generalized-power balance for the declared coordinate, or the text treats net power as individual-muscle energetics.",
+      "adjudication": "The scalar identity is retained while the former generating-versus-absorbing language is bounded to net mechanical work.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-045",
+      "candidate_ids": ["PD-CAND-b9a263648952ce95", "PD-CAND-8d30ffcba0441e99"],
+      "statement": "Segment-level power transfer through a joint requires the force and moment power of the joint wrench evaluated with the receiving segment's compatible endpoint and angular velocities; equal-and-opposite internal wrenches do not imply that adjacent segment moment-power terms individually cancel.",
+      "classification": "rigid_body_power_balance_identity",
+      "published_status": "supported_for_compatible_frames_and_ideal_internal_joint",
+      "audit_status": "analytic_balance_checked_empirical_application_separately_bounded",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:305",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:316"
+      ],
+      "evidence_artifacts": ["https://doi.org/10.1016/0021-9290(80)90172-4"],
+      "model_domain": "Rigid segments joined at an ideal internal joint with force and moment expressed in compatible frames.",
+      "uncertainty_boundary": "Soft-tissue work, joint translation, contact losses, and frame inconsistencies can invalidate a simplified balance.",
+      "competing_explanations": [
+        "Energy storage in compliant tissues",
+        "Work at non-ideal contacts",
+        "Numerical differentiation and frame error"
+      ],
+      "negative_controls": [
+        "Whole-system internal-force cancellation check",
+        "Frame-transformation invariance check",
+        "Segment residual-power audit"
+      ],
+      "falsifier": "A compatible-frame rigid-body energy balance contradicts the stated wrench-power expression or the adjacent segments share identical angular velocity while a nonzero differential moment-power sum is claimed.",
+      "adjudication": "The paper now distinguishes segmental conduits from whole-system cancellation instead of reducing transfer to net joint moment alone.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-046",
+      "candidate_ids": ["PD-CAND-8df9882910fb1516"],
+      "statement": "Robertson and Winter applied segment energy balances to sagittal walking data from two participants, reported acceptable agreement except at the ankle during weight acceptance and late push-off, and found intersegment transfers comparable in magnitude to estimated generation and absorption.",
+      "classification": "external_small_sample_method_validation",
+      "published_status": "supported_with_sample_phase_and_task_boundary",
+      "audit_status": "primary_abstract_and_doi_record_checked_full_reanalysis_open",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:324"
+      ],
+      "evidence_artifacts": ["https://doi.org/10.1016/0021-9290(80)90172-4"],
+      "model_domain": "Sagittal force-plate and cinefilm analysis of walking at several speeds in two participants.",
+      "uncertainty_boundary": "The study is not golf validation, muscle identification, or evidence that its ankle agreement extends to high-speed upper-limb motion.",
+      "competing_explanations": [
+        "Soft-tissue and foot-model error",
+        "Measurement differentiation error",
+        "Task- and speed-specific transfer patterns"
+      ],
+      "negative_controls": [
+        "Reconstruct ankle residuals",
+        "Apply the same balance to instrumented golf data",
+        "Compare planar and spatial balances"
+      ],
+      "falsifier": "The primary record does not report the two-participant design, the stated ankle exceptions, or transfer magnitudes comparable to generation and absorption.",
+      "adjudication": "The method is used as precedent for segment accounting while its small walking sample and known mismatch phases remain visible.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-047",
+      "candidate_ids": ["PD-CAND-a4c61849a5d7bee2", "PD-CAND-836dc14b06a1f1d3"],
+      "statement": "Joint powers and segment angular velocities alone cannot identify energy flow or muscle coordination; muscle-induced acceleration and power analyses require a declared dynamical simulation, and a zero-control or zero-velocity-field decomposition is a different intervention.",
+      "classification": "external_methodological_limitation_and_model_boundary",
+      "published_status": "supported_with_analysis_family_distinction",
+      "audit_status": "primary_review_abstract_checked_golf_application_open",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:335",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:347"
+      ],
+      "evidence_artifacts": [
+        "https://doi.org/10.1016/S0966-6362(02)00068-1",
+        "https://pubmed.ncbi.nlm.nih.gov/2676547/"
+      ],
+      "model_domain": "Forward dynamical attribution of muscle or generalized-control contributions under an explicitly declared intervention.",
+      "uncertainty_boundary": "Induced quantities depend on coordinates, constraints, actuator representation, state, and intervention definition and do not uniquely identify neural control.",
+      "competing_explanations": [
+        "Passive back-reaction",
+        "Multiple muscle-force solutions for one net moment",
+        "Contact and constraint reactions"
+      ],
+      "negative_controls": [
+        "Compare muscle-induced and generalized-torque decompositions",
+        "State-matched zero-control intervention",
+        "Coordinate and constraint sensitivity"
+      ],
+      "falsifier": "The cited methodological source endorses joint-power or peak-velocity traces alone as sufficient for muscle coordination and energy-flow inference, or the paper conflates distinct interventions.",
+      "adjudication": "The revised text uses induced analysis as a model-dependent attribution tool and removes biological identification from the wrist balance.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-048",
+      "candidate_ids": ["PD-CAND-82046010bbf2ad7a"],
+      "statement": "Marsan and colleagues found that seven angular-velocity methods applied to driver swings from 13 golfers produced nearly as many proximal-to-distal sequences as methods, with no accepted reference method for choosing among them.",
+      "classification": "external_method_sensitivity_result",
+      "published_status": "supported_with_sample_and_estimand_boundary",
+      "audit_status": "primary_open_full_text_and_pubmed_record_checked_reanalysis_open",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:364"
+      ],
+      "evidence_artifacts": [
+        "https://doi.org/10.5277/ABB-01318-2019-02",
+        "https://pubmed.ncbi.nlm.nih.gov/31741482/"
+      ],
+      "model_domain": "Method comparison for pelvis, upper-trunk, arm, and club angular-velocity sequences in driver swings from 13 golfers.",
+      "uncertainty_boundary": "The study compares kinematic definitions; it does not measure energy flow, joint power, or establish the best method outside its sample.",
+      "competing_explanations": [
+        "Axis and coordinate definition",
+        "Filtering and event detection",
+        "Participant-specific movement patterns"
+      ],
+      "negative_controls": [
+        "Predeclare one sequence metric",
+        "Report all seven methods",
+        "Compare against power-based timing"
+      ],
+      "falsifier": "The primary paper does not analyze 13 golfers with seven methods or does identify a validated reference method that resolves the reported sequence variation.",
+      "adjudication": "Peak order remains a descriptive proxy whose method dependence must be reported rather than a direct transfer measurement.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-049",
+      "candidate_ids": ["PD-CAND-76b154c47305f982"],
+      "statement": "Coleman and Rankin and Kwon and colleagues found that golfer body and club trajectories do not share one fixed plane, while Kwon's clubhead functional plane remained a useful object-specific approximation; this rejects an undeclared common-plane claim but not a narrowly declared planar mechanism model.",
+      "classification": "cross_source_spatial_measurement_synthesis",
+      "published_status": "supported_with_object_and_tolerance_boundary",
+      "audit_status": "primary_abstracts_and_doi_records_checked_reanalysis_open",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:373"
+      ],
+      "evidence_artifacts": [
+        "https://doi.org/10.1080/02640410410001730179",
+        "https://doi.org/10.1080/14763141.2012.660799"
+      ],
+      "model_domain": "Three-dimensional measurements of seven right-handed golfers in one study and 14 skilled male golfers using driver, five iron, and pitching wedge in the other.",
+      "uncertainty_boundary": "The measurements do not establish one universal numerical planarity tolerance or show that a planar reduced model predicts all three-dimensional kinetics.",
+      "competing_explanations": [
+        "Object-specific functional planes",
+        "Time-varying plane orientation",
+        "Club- and participant-dependent deviations"
+      ],
+      "negative_controls": [
+        "Report object-specific plane residuals",
+        "Compare fixed and moving planes",
+        "Cross-validate planar and spatial predictions"
+      ],
+      "falsifier": "The primary records show a single fixed body-and-club plane within a declared small tolerance throughout the swing, or the paper uses a planar mechanism result as unqualified three-dimensional human evidence.",
+      "adjudication": "Planarity is now an object-and-tolerance modeling declaration rather than a global anatomical assertion.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-050",
+      "candidate_ids": [
+        "PD-CAND-a4c61849a5d7bee2",
+        "PD-CAND-82046010bbf2ad7a",
+        "PD-CAND-d6df055d20cefafb"
+      ],
+      "statement": "A falsifiable proximal-distal timing test must define its kinematic sequence and pair it with segment or interface power, state- and coordinate-sensitivity analysis, and three-dimensional residuals; peak order alone cannot establish energy transfer or an optimal control strategy.",
+      "classification": "cross_source_falsifiability_requirement",
+      "published_status": "supported_by_estimand_and_method_non_equivalence",
+      "audit_status": "source_domains_checked_prospective_protocol_open",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:335",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:364",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:384"
+      ],
+      "evidence_artifacts": [
+        "https://doi.org/10.1016/S0966-6362(02)00068-1",
+        "https://doi.org/10.5277/ABB-01318-2019-02",
+        "https://doi.org/10.1080/02640410410001730179",
+        "https://doi.org/10.1080/14763141.2012.660799"
+      ],
+      "model_domain": "Prospective tests of proximal-distal timing and transfer across kinematic, energetic, dynamical, and spatial representations.",
+      "uncertainty_boundary": "These requirements improve identifiability but do not guarantee that observational data identify neural control or a universally optimal strategy.",
+      "competing_explanations": [
+        "Method-dependent peak ordering",
+        "Passive interaction dynamics",
+        "Three-dimensional out-of-plane work"
+      ],
+      "negative_controls": [
+        "Peak-order-only analysis",
+        "Alternative sequence definitions",
+        "Planar-versus-spatial residual comparison"
+      ],
+      "falsifier": "A validated analysis demonstrates that peak order alone uniquely determines energy flow and control attribution across definitions, states, and spatial models.",
+      "adjudication": "The paper now states a testable measurement bundle and withholds energetic or control conclusions from kinematics alone.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
     }

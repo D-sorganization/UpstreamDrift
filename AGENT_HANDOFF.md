@@ -6,9 +6,9 @@ Update this file with every PR and every push to main.
 ## Where the Repo Is Heading
 
 - **#8557 Comprehensive Scientific Claim Audit and Open Golf Modeling
-  Program** — PRs #8558–#8564 are on `main`; branch
-  `research/8557-foundational-mechanics-audit` continues the fail-closed audit
-  authority. It inventories all 889 narrative candidates across the 32-source
+  Program** — PRs #8558–#8565 are on `main`; branch
+  `research/8557-energy-accounting-audit` continues the fail-closed audit
+  authority. It inventories all 895 narrative candidates across the 32-source
   Quarto paper and reconciles all 18 public release-claim keys without calling
   the review complete. The registry records that the Biomechanics and Nonlinear Control
   NotebookLM reviews are pending renewed network authentication and that Tools
@@ -39,19 +39,25 @@ scripts.research.proximal_distal_energy.claim_audit inventory`, then
   characterization of four non-equivalent optimizers and records their exact
   objectives, speeds or carry distances, actuator timings, omitted degrees of
   freedom, and validation boundaries. PR #8564 merged as exact remote-main
-  commit `09321c2e63dc801092443f068495d785f1b2d142`. The fifth local slice
+  commit `09321c2e63dc801092443f068495d785f1b2d142`. The fifth merged slice
   corrects universal inertia-coupling and affine-decomposition language,
   separates Bunn's heuristic from model and empirical evidence, matches the
   Feltner--Dapena decomposition to the 1989 Part I/II papers rather than the
   1986 inverse-dynamics paper, preserves Putnam's explicit negative findings,
-  and bounds the Herring--Chapman and Marshall--Elliott transport claims.
-  Current local authority: 889 candidates, 44 reviewed, 43 registered atomic
-  claims, and 845 unadjudicated candidates. Registry validation passes; render,
+  and bounds the Herring--Chapman and Marshall--Elliott transport claims. PR
+  #8565 merged as exact remote-main commit
+  `293bd4ba5203991c6772044f30ba75c9e3d37495`. The sixth local slice
+  distinguishes net joint power from muscle energetics, restores complete
+  segment wrench-power accounting, bounds Robertson--Winter and Zajac method
+  claims, demonstrates kinematic-sequence method sensitivity, and treats
+  planarity as an object-and-tolerance declaration rather than a universal
+  anatomical fact. Current local authority: 895 candidates, 54 reviewed, 50
+  registered atomic claims, and 841 unadjudicated candidates. Registry validation passes; render,
   inspect, release-validate, and protected-merge this slice before treating the
   new counts as remote-main evidence.
   The required Tools side task is not complete. Its dispersion slice received
-  final independent approval at `71634bf7` and is being integrated above PR
-  #4414 while the approved locus/browser stack is preserved. Completion still
+  final independent approval at `125d47d4` and is being published as a draft
+  child of PR #4414 while the approved locus/browser stack is preserved. Completion still
   requires protected merge, immutable pinning, deterministic replay,
   sensitivity adequacy, and PyQt6/React parity.
 
