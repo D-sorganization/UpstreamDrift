@@ -2,14 +2,14 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "9d2d2598da541bed15f12086dc7b663a2decaf417e7f1f0f7a56c89b9c314e2e",
+    "source_digest": "8db3f74dfb0e7956fb26788fcc0509f31078009738000eacdaa3d647a8922948",
     "baseline_commit": "13ea6a69585a42dc1db4b3959440ed95787c9779"
   },
   "audit_scope": {
     "completion_status": "in_progress",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "Initial high-risk quantitative claims and reconciliation of the public release claim inventory. This is not a complete paper audit."
+    "current_scope": "Stable claim-identity migration and two high-risk external-evidence slices covering framing, ground mechanics, kinetic-energy sequencing, torso-pelvis associations, method sensitivity, timing, and causal limitations. The complete 567-candidate paper audit remains in progress."
   },
   "dependencies": [
     {
@@ -131,7 +131,7 @@
   ],
   "candidate_reviews": [
     {
-      "candidate_id": "PD-CAND-05bd84a7463e08d3",
+      "candidate_id": "PD-CAND-2a156a1bd63bde85",
       "disposition": "material_claims_mapped",
       "claim_ids": ["PD-CLAIM-001"],
       "rationale": "The paragraph reports quantitative model comparisons that require recomputation and domain-qualified interpretation.",
@@ -139,7 +139,7 @@
       "last_verified_on": "2026-08-12"
     },
     {
-      "candidate_id": "PD-CAND-d41384cfefc56bd2",
+      "candidate_id": "PD-CAND-e26d04fbfce5d458",
       "disposition": "material_claims_mapped",
       "claim_ids": ["PD-CLAIM-002"],
       "rationale": "The paragraph reports the archived WSCG force-couple reconstruction and its numerical extremum.",
@@ -147,7 +147,7 @@
       "last_verified_on": "2026-08-12"
     },
     {
-      "candidate_id": "PD-CAND-b28ad6439c735a98",
+      "candidate_id": "PD-CAND-955caef0fc7773b8",
       "disposition": "material_claims_mapped",
       "claim_ids": ["PD-CLAIM-003"],
       "rationale": "The paragraph asserts persistence of a negative force-generated couple in a forward model branch.",
@@ -155,7 +155,7 @@
       "last_verified_on": "2026-08-12"
     },
     {
-      "candidate_id": "PD-CAND-98723ed6bea5e6f6",
+      "candidate_id": "PD-CAND-227a00e5fa408d07",
       "disposition": "material_claims_mapped",
       "claim_ids": ["PD-CLAIM-004"],
       "rationale": "The paragraph reports a quantitative cross-formulation numerical agreement claim.",
@@ -163,7 +163,7 @@
       "last_verified_on": "2026-08-12"
     },
     {
-      "candidate_id": "PD-CAND-060fc968e26a2400",
+      "candidate_id": "PD-CAND-94e3561735825fe9",
       "disposition": "material_claims_mapped",
       "claim_ids": ["PD-CLAIM-005"],
       "rationale": "The paragraph reports cross-engine persistence under the reduced compliant-contact model.",
@@ -171,7 +171,7 @@
       "last_verified_on": "2026-08-12"
     },
     {
-      "candidate_id": "PD-CAND-a91dce205cbdb55a",
+      "candidate_id": "PD-CAND-96f95833c562cb11",
       "disposition": "material_claims_mapped",
       "claim_ids": ["PD-CLAIM-006", "PD-CLAIM-007", "PD-CLAIM-008"],
       "rationale": "The motivation paragraph combines performance association, kinematic-sequence prevalence, and the distinction between kinematic order and energy transfer.",
@@ -179,7 +179,7 @@
       "last_verified_on": "2026-08-12"
     },
     {
-      "candidate_id": "PD-CAND-90fe269bc987bea8",
+      "candidate_id": "PD-CAND-7570c40d01e68acd",
       "disposition": "material_claims_mapped",
       "claim_ids": ["PD-CLAIM-009"],
       "rationale": "The paragraph reports subject-model work fractions and draws a timing interpretation from a four-subject study.",
@@ -187,7 +187,7 @@
       "last_verified_on": "2026-08-12"
     },
     {
-      "candidate_id": "PD-CAND-d3f467eec93c457c",
+      "candidate_id": "PD-CAND-bdd43527e24b9b7a",
       "disposition": "material_claims_mapped",
       "claim_ids": ["PD-CLAIM-010", "PD-CLAIM-011"],
       "rationale": "The paragraph reports two empirical studies and distinguishes association from causal energy transfer.",
@@ -195,7 +195,7 @@
       "last_verified_on": "2026-08-12"
     },
     {
-      "candidate_id": "PD-CAND-941f43765387e22b",
+      "candidate_id": "PD-CAND-7f8f02cf74555681",
       "disposition": "material_claims_mapped",
       "claim_ids": ["PD-CLAIM-007", "PD-CLAIM-012"],
       "rationale": "The paragraph summarizes skilled-cohort sequence findings and between-skill observations across several studies.",
@@ -203,7 +203,7 @@
       "last_verified_on": "2026-08-12"
     },
     {
-      "candidate_id": "PD-CAND-b3e0aaf833daa150",
+      "candidate_id": "PD-CAND-3c12b7e2054e4237",
       "disposition": "material_claims_mapped",
       "claim_ids": ["PD-CLAIM-007", "PD-CLAIM-010", "PD-CLAIM-012"],
       "rationale": "The synthesis combines sequence prevalence, skill-group differences, and a model-dependent transfer-efficiency association.",
@@ -211,10 +211,76 @@
       "last_verified_on": "2026-08-12"
     },
     {
-      "candidate_id": "PD-CAND-c8d1e78ce0bca3f4",
+      "candidate_id": "PD-CAND-efa294cfd5f1828d",
       "disposition": "material_claims_mapped",
       "claim_ids": ["PD-CLAIM-008", "PD-CLAIM-010"],
       "rationale": "The discussion distinguishes counterfactual energy accounting from a cross-sectional human association and causal inference.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "candidate_id": "PD-CAND-2e48bad9c8336224",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-013", "PD-CLAIM-014"],
+      "rationale": "The paragraph corrects a material contradiction between peak kinetic-energy magnitude ordering and peak-timing ordering in the two cited studies.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "candidate_id": "PD-CAND-a93535d0aadd4363",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-015",
+        "PD-CLAIM-016",
+        "PD-CLAIM-017",
+        "PD-CLAIM-018"
+      ],
+      "rationale": "The paragraph distinguishes sample-specific associations and in-sample regressions from causal or population-wide performance rules and records method sensitivity of X-factor measures.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "candidate_id": "PD-CAND-ece40e6897fbc791",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This sentence introduces the numbered methodological qualifications and makes no independently testable scientific proposition.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "candidate_id": "PD-CAND-eca9e7374e7231c3",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-007", "PD-CLAIM-012"],
+      "rationale": "The paragraph supplies population- and method-qualified evidence for heterogeneous sequence patterns and performance associations in selected skilled samples.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "candidate_id": "PD-CAND-fbd2ff79ec68f392",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-019"],
+      "rationale": "The paragraph reports a null peak-lag comparison and explicitly bounds what that result can establish because clubhead state and impact location were not measured.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "candidate_id": "PD-CAND-61e9db608ffdbb62",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-007", "PD-CLAIM-020"],
+      "rationale": "The paragraph records direct within-data method sensitivity of kinematic-sequence classification and its consequence for cross-study comparison.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "candidate_id": "PD-CAND-a16c50fe1b7a7571",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-009",
+        "PD-CLAIM-013",
+        "PD-CLAIM-014",
+        "PD-CLAIM-021"
+      ],
+      "rationale": "The synthesis combines the audited model and external evidence while explicitly withholding causal claims about a dominant human pathway or the cause of amateur casting.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-12"
     }
@@ -223,7 +289,7 @@
     {
       "claim_id": "PD-CLAIM-001",
       "release_claim_key": "interaction_dynamics_planar",
-      "candidate_ids": ["PD-CAND-05bd84a7463e08d3"],
+      "candidate_ids": ["PD-CAND-2a156a1bd63bde85"],
       "statement": "In the declared 60 N m shoulder-torque double-pendulum case, immediate positive wrist drive produces about 15 percent less impact speed than a passive hinge, while the selected delayed drive produces about 12 percent more.",
       "classification": "model_conditional_quantitative_result",
       "published_status": "supported_at_declared_model_tier",
@@ -255,14 +321,15 @@
     {
       "claim_id": "PD-CLAIM-002",
       "release_claim_key": "interaction_dynamics_planar",
-      "candidate_ids": ["PD-CAND-d41384cfefc56bd2"],
+      "candidate_ids": ["PD-CAND-e26d04fbfce5d458"],
       "statement": "The archived WSCG pointwise zero-command reconstruction reaches a negative two-hand midpoint couple of -19.63 N m generated by separated contact forces.",
       "classification": "project_originated_model_reconstruction",
       "published_status": "supported_at_declared_model_tier",
       "audit_status": "provisionally_reproduced_not_independent_evidence",
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:222",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03b_hand_path_attribution.qmd:464"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03b_hand_path_attribution.qmd:464",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:132"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
@@ -289,7 +356,7 @@
     {
       "claim_id": "PD-CLAIM-003",
       "release_claim_key": "interaction_dynamics_planar",
-      "candidate_ids": ["PD-CAND-b28ad6439c735a98"],
+      "candidate_ids": ["PD-CAND-955caef0fc7773b8"],
       "statement": "The forward constrained planar two-arm zero-command branch retains a negative force-generated club couple for 50 ms and reaches -7.43 N m.",
       "classification": "model_conditional_forward_counterfactual",
       "published_status": "supported_at_declared_model_tier",
@@ -322,7 +389,7 @@
     {
       "claim_id": "PD-CLAIM-004",
       "release_claim_key": "geometry_transfer_spatial_common_state",
-      "candidate_ids": ["PD-CAND-98723ed6bea5e6f6"],
+      "candidate_ids": ["PD-CAND-227a00e5fa408d07"],
       "statement": "MuJoCo inverse dynamics and an independent Lagrange-Christoffel formulation agree to a maximum relative discrepancy of 2.14e-11 across the registered reduced spatial common-state study.",
       "classification": "cross_formulation_numerical_verification",
       "published_status": "supported_at_declared_model_tier",
@@ -354,7 +421,7 @@
     {
       "claim_id": "PD-CLAIM-005",
       "release_claim_key": "passive_negative_couple_spatial_forward",
-      "candidate_ids": ["PD-CAND-060fc968e26a2400"],
+      "candidate_ids": ["PD-CAND-94e3561735825fe9"],
       "statement": "The reduced MuJoCo and Pinocchio forward-contact killswitch branches retain a negative swing-normal contact couple for 37.5 ms under the declared compliant-interface model.",
       "classification": "cross_engine_model_conditional_forward_counterfactual",
       "published_status": "supported_at_declared_reduced_contact_tier",
@@ -387,7 +454,7 @@
     },
     {
       "claim_id": "PD-CLAIM-006",
-      "candidate_ids": ["PD-CAND-a91dce205cbdb55a"],
+      "candidate_ids": ["PD-CAND-96f95833c562cb11"],
       "statement": "In Fradkin and colleagues' sample of 45 male golfers aged 18–80 with handicaps 2–27, clubhead speed was strongly associated with handicap (reported r = 0.950).",
       "classification": "external_empirical_association",
       "published_status": "supported_after_scope_narrowing",
@@ -419,9 +486,11 @@
     {
       "claim_id": "PD-CLAIM-007",
       "candidate_ids": [
-        "PD-CAND-a91dce205cbdb55a",
-        "PD-CAND-941f43765387e22b",
-        "PD-CAND-b3e0aaf833daa150"
+        "PD-CAND-96f95833c562cb11",
+        "PD-CAND-7f8f02cf74555681",
+        "PD-CAND-3c12b7e2054e4237",
+        "PD-CAND-eca9e7374e7231c3",
+        "PD-CAND-61e9db608ffdbb62"
       ],
       "statement": "Under commonly used segment and angular-velocity definitions, proximal-to-distal peak ordering is common in sampled skilled golfers but is not universal or measurement-definition invariant.",
       "classification": "external_empirical_synthesis",
@@ -429,8 +498,10 @@
       "audit_status": "partially_original_source_checked_full_systematic_review_open",
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch01_introduction.qmd:17",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:59",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:121"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:126",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:121",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:96",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:118"
       ],
       "evidence_artifacts": [
         "https://doi.org/10.1080/14763141.2010.535842",
@@ -456,7 +527,7 @@
     },
     {
       "claim_id": "PD-CLAIM-008",
-      "candidate_ids": ["PD-CAND-a91dce205cbdb55a", "PD-CAND-c8d1e78ce0bca3f4"],
+      "candidate_ids": ["PD-CAND-96f95833c562cb11", "PD-CAND-efa294cfd5f1828d"],
       "statement": "The temporal order of segment angular-velocity peaks is not, by itself, a measurement of mechanical energy transfer.",
       "classification": "mechanical_definition_and_limitation",
       "published_status": "supported",
@@ -487,13 +558,14 @@
     },
     {
       "claim_id": "PD-CLAIM-009",
-      "candidate_ids": ["PD-CAND-90fe269bc987bea8"],
+      "candidate_ids": ["PD-CAND-7570c40d01e68acd", "PD-CAND-a16c50fe1b7a7571"],
       "statement": "In Nesbit and Serrano's four subject-specific inverse-dynamics models, the reported work partition was 68.7–72.2% for the trunk complex, 24.3–28% for shoulder and arm joints, and 3.3–3.8% for modeled leg joints.",
       "classification": "external_model_derived_quantitative_result",
       "published_status": "supported_with_model_partition_qualification",
       "audit_status": "source_values_checked_independent_recomputation_open",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:5"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:5",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:139"
       ],
       "evidence_artifacts": [
         "https://www.jssm.org/volume04/iss4/cap/jssm-04-520.pdf",
@@ -519,16 +591,16 @@
     {
       "claim_id": "PD-CLAIM-010",
       "candidate_ids": [
-        "PD-CAND-d3f467eec93c457c",
-        "PD-CAND-b3e0aaf833daa150",
-        "PD-CAND-c8d1e78ce0bca3f4"
+        "PD-CAND-bdd43527e24b9b7a",
+        "PD-CAND-3c12b7e2054e4237",
+        "PD-CAND-efa294cfd5f1828d"
       ],
       "statement": "In Ratchanavy and colleagues' 30-golfer pooled driver/7-iron analysis, a block containing two center-of-pressure factors and skill group explained 35.5% of clubhead-speed variance; adding trunk sequencing and a constructed impulse-related transfer-efficiency factor yielded 75.4%, with a significant indirect association through the transfer factor but no established causal pathway.",
       "classification": "external_cross_sectional_model_result",
       "published_status": "corrected_and_supported_with_causal_limitation",
       "audit_status": "open_access_full_text_checked_statistical_replication_open",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:21",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:126",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:121",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd:106"
       ],
@@ -557,7 +629,7 @@
     },
     {
       "claim_id": "PD-CLAIM-011",
-      "candidate_ids": ["PD-CAND-d3f467eec93c457c"],
+      "candidate_ids": ["PD-CAND-bdd43527e24b9b7a"],
       "statement": "Han and colleagues reported significant associations between selected golfer-ground force/moment parameters and maximum clubhead speed in 63 highly skilled male golfers with handicaps no greater than 3.",
       "classification": "external_empirical_association",
       "published_status": "supported_with_population_qualification",
@@ -588,14 +660,19 @@
     },
     {
       "claim_id": "PD-CLAIM-012",
-      "candidate_ids": ["PD-CAND-941f43765387e22b", "PD-CAND-b3e0aaf833daa150"],
+      "candidate_ids": [
+        "PD-CAND-7f8f02cf74555681",
+        "PD-CAND-3c12b7e2054e4237",
+        "PD-CAND-eca9e7374e7231c3"
+      ],
       "statement": "Several sampled professional or highly skilled groups show higher segment-speed magnitudes or more repeatable timing than comparison groups, but gross proximal-to-distal order alone is not sufficient to identify skill or performance.",
       "classification": "external_empirical_synthesis",
       "published_status": "supported_with_heterogeneity_qualification",
       "audit_status": "provisional_original_source_matrix_incomplete",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:59",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:121"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:126",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:121",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:96"
       ],
       "evidence_artifacts": [
         "https://www.researchgate.net/publication/252236426",
@@ -616,6 +693,290 @@
       ],
       "falsifier": "A preregistered common-pipeline synthesis shows no reliable magnitude or repeatability differences, or peak order alone predicts skill robustly after held-out validation.",
       "adjudication": "The synthesis was narrowed from a categorical statement about skilled golfers to observations in sampled groups. Full original-source and risk-of-bias review remains required before a final synthesis status.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "claim_id": "PD-CLAIM-013",
+      "candidate_ids": ["PD-CAND-2e48bad9c8336224", "PD-CAND-a16c50fe1b7a7571"],
+      "statement": "In Anderson, Wright, and Stefanyshyn's 45-male-scratch-golfer analysis, peak total kinetic-energy magnitudes increased from hips to club, while hips, torso, and arms peaked at approximately the same normalized time and only the club peaked significantly later.",
+      "classification": "external_empirical_model_derived_result",
+      "published_status": "corrected_and_supported_with_timing_qualification",
+      "audit_status": "original_abstract_and_book_record_checked_full_reanalysis_open",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:42",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:139"
+      ],
+      "evidence_artifacts": [
+        "https://doi.org/10.1007/978-0-387-46050-5_30",
+        "https://www.researchgate.net/publication/226339824_Segmental_Sequencing_of_Kinetic_Energy_in_the_Golf_Swing"
+      ],
+      "model_domain": "Driver swings from 45 male scratch golfers represented by a four-linked-group kinematic model with translational, remote rotational, and local rotational kinetic energy.",
+      "uncertainty_boundary": "Group-aggregated male scratch-golfer result; segment kinetic-energy peaks do not identify intersegment power flow, and full independent reconstruction from raw trajectories is unavailable.",
+      "competing_explanations": [
+        "Group averaging can blur individual timing",
+        "Segment aggregation and inertia assignments affect peak kinetic energy",
+        "Peak timing does not measure energy transfer between segments"
+      ],
+      "negative_controls": [
+        "Individual-level peak-order distributions",
+        "Alternative segment and inertia definitions",
+        "Direct joint-force and joint-moment power balances"
+      ],
+      "falsifier": "The original tables or a faithful reconstruction do not show the stated magnitude and timing patterns, or individual-level data show the group statement is an averaging artifact.",
+      "adjudication": "The prior paper wording incorrectly treated this study as evidence of proximal-to-distal kinetic-energy timing. The original abstract supports only distal amplification of peak magnitude and explicitly reports nonsequential timing.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "claim_id": "PD-CLAIM-014",
+      "candidate_ids": ["PD-CAND-2e48bad9c8336224", "PD-CAND-a16c50fe1b7a7571"],
+      "statement": "Kenny and colleagues' subject-specific driver and 7-iron simulations used one elite male golfer and produced peak kinetic-energy timing in the order arms, hips, torso, club, despite proximal-to-distal increases in peak magnitude.",
+      "classification": "external_single_subject_model_result",
+      "published_status": "corrected_and_supported_with_single_subject_qualification",
+      "audit_status": "original_full_text_checked_independent_reimplementation_open",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:42",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:139"
+      ],
+      "evidence_artifacts": [
+        "https://doi.org/10.1007/s12283-008-0005-0",
+        "https://people.stfx.ca/smackenz/Courses/DirectedStudy/Articles/Kenny%202008%20Segmental%20sequencing%20of%20kinetic%20energy%20in%20a%20computer-simulated.pdf"
+      ],
+      "model_domain": "One 25-year-old elite male golfer (+1 handicap), representative driver and 7-iron trials, and a subject-specific 19-segment, 42-DOF, 111-muscle computer model driven through inverse and forward dynamics.",
+      "uncertainty_boundary": "Single-subject, representative-trial, model-dependent result; no population inference, direct intersegment energy-flow measurement, or independent implementation.",
+      "competing_explanations": [
+        "Representative-trial selection",
+        "Model training and passive-joint assumptions",
+        "Segment grouping and kinetic-energy definition"
+      ],
+      "negative_controls": [
+        "Additional golfers and repeated trials",
+        "Alternative validated musculoskeletal formulations",
+        "Joint-level power and segment energy-balance reconciliation"
+      ],
+      "falsifier": "The original tables do not yield arms-hips-torso-club peak timing, or a faithful reimplementation under the declared model produces a materially different order.",
+      "adjudication": "The full article directly contradicts a simple proximal-to-distal peak-timing account while supporting proximal-to-distal peak-magnitude amplification in this one model.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "claim_id": "PD-CLAIM-015",
+      "candidate_ids": ["PD-CAND-a93535d0aadd4363"],
+      "statement": "Myers and colleagues found moderate associations (reported r at least 0.50) between selected torso-pelvis variables and ball velocity in 100 recreational golfers.",
+      "classification": "external_empirical_association",
+      "published_status": "supported_with_sample_and_association_qualification",
+      "audit_status": "original_abstract_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:79"
+      ],
+      "evidence_artifacts": [
+        "https://pubmed.ncbi.nlm.nih.gov/17852693/",
+        "https://doi.org/10.1080/02640410701373543"
+      ],
+      "model_domain": "Cross-sectional biomechanical driver analysis of 100 recreational golfers using their own drivers and launch-monitor ball velocity.",
+      "uncertainty_boundary": "Selected correlations and group contrasts; no causal intervention, out-of-sample prediction, or universal X-factor prescription.",
+      "competing_explanations": [
+        "Skill and training history",
+        "Anthropometry and strength",
+        "Equipment and impact efficiency",
+        "Multiple correlated kinematic predictors"
+      ],
+      "negative_controls": [
+        "Held-out multivariable prediction",
+        "Within-player prospective perturbation",
+        "Alternative X-factor definitions"
+      ],
+      "falsifier": "A faithful source check fails to reproduce the reported associations or a preregistered representative replication finds no material association.",
+      "adjudication": "The source supports moderate sample-specific associations. The paper now avoids converting those associations into a causal or universal performance rule.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "claim_id": "PD-CLAIM-016",
+      "candidate_ids": ["PD-CAND-a93535d0aadd4363"],
+      "statement": "Chu, Sell, and Lephart's four event-specific stepwise regression models in 308 golfers accounted for 43.7% to 73.5% of in-sample ball-velocity variance.",
+      "classification": "external_cross_sectional_regression_result",
+      "published_status": "supported_with_in_sample_qualification",
+      "audit_status": "original_full_text_checked_external_validation_open",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:79"
+      ],
+      "evidence_artifacts": [
+        "https://doi.org/10.1080/02640414.2010.507249",
+        "https://people.stfx.ca/smackenz/courses/hk396/handouts/Chu%202010%20The%20relationship%20between%20biomechanical%20variables%20and%20driving%20performance.pdf"
+      ],
+      "model_domain": "Stepwise linear regressions of kinematic and ground-reaction variables at four swing events in a heterogeneous sample of 308 golfers.",
+      "uncertainty_boundary": "In-sample explained variance after stepwise selection; participant-level held-out accuracy, shrinkage, causal effects, and population transport are unreported.",
+      "competing_explanations": [
+        "Stepwise selection optimism",
+        "Correlated predictors",
+        "Skill and equipment confounding",
+        "Event-specific multiple modeling"
+      ],
+      "negative_controls": [
+        "Nested participant-level cross-validation",
+        "Prespecified regression without stepwise selection",
+        "External cohort validation"
+      ],
+      "falsifier": "The original regression tables do not report the stated range or participant-level external validation shows materially weaker prediction.",
+      "adjudication": "The numerical range is supported, but it is now identified as in-sample variance rather than validated predictive performance or causal explanation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "claim_id": "PD-CLAIM-017",
+      "candidate_ids": ["PD-CAND-a93535d0aadd4363"],
+      "statement": "Joyce and colleagues' regressions in 15 low-handicap male golfers associated trunk variables with clubhead speed and explained 33.7% to 66.7% of variance across driver and five-iron models.",
+      "classification": "external_small_sample_regression_result",
+      "published_status": "supported_with_sample_and_in_sample_qualification",
+      "audit_status": "publisher_abstract_checked_full_statistical_replication_open",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:79"
+      ],
+      "evidence_artifacts": [
+        "https://doi.org/10.1080/14763141.2012.728244",
+        "https://www.tandfonline.com/doi/abs/10.1080/14763141.2012.728244"
+      ],
+      "model_domain": "Cross-sectional motion-capture and launch-monitor study of 15 low-handicap male golfers using driver and five-iron.",
+      "uncertainty_boundary": "Small male low-handicap sample, multiple regressions, no held-out validation, and no causal intervention.",
+      "competing_explanations": [
+        "Small-sample model instability",
+        "Participant-specific swing characteristics",
+        "Equipment and anthropometric covariates"
+      ],
+      "negative_controls": [
+        "Participant-level external validation",
+        "Penalized or Bayesian shrinkage models",
+        "Mixed-sex and broader-skill replication"
+      ],
+      "falsifier": "The original source values differ or a preregistered replication does not reproduce the associations under matched definitions.",
+      "adjudication": "The source supports sample-specific regression associations, not a general causal rule for torso-pelvis strategy.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "claim_id": "PD-CLAIM-018",
+      "candidate_ids": ["PD-CAND-a93535d0aadd4363"],
+      "statement": "Kwon and colleagues found that three valid X-factor computation methods produced significantly different values and that the resulting X-factor parameters were not directly associated with maximum clubhead velocity in 18 skilled male golfers.",
+      "classification": "external_method_comparison_and_null_association",
+      "published_status": "supported",
+      "audit_status": "publisher_abstract_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:79"
+      ],
+      "evidence_artifacts": [
+        "https://doi.org/10.1080/14763141.2013.771896",
+        "https://www.tandfonline.com/doi/abs/10.1080/14763141.2013.771896"
+      ],
+      "model_domain": "Five driver trials from each of 18 skilled male golfers, optical motion capture at 250 Hz, two plane-based and one Cardan-rotation X-factor method.",
+      "uncertainty_boundary": "Small skilled-male sample and selected definitions; a null direct correlation does not exclude nonlinear, conditional, or within-player effects.",
+      "competing_explanations": [
+        "Measurement-definition error",
+        "Restricted range in skilled golfers",
+        "Nonlinear or interaction effects"
+      ],
+      "negative_controls": [
+        "Common-pipeline method comparison",
+        "Broader-skill preregistered replication",
+        "Within-player perturbation and nonlinear held-out models"
+      ],
+      "falsifier": "The publisher record or original tables do not show method differences and null direct associations, or a matched preregistered replication consistently contradicts them.",
+      "adjudication": "This study directly limits use of X-factor as a definition-invariant performance metric. The missing DOI was restored in the bibliography.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "claim_id": "PD-CLAIM-019",
+      "candidate_ids": ["PD-CAND-fbd2ff79ec68f392"],
+      "statement": "Neal and colleagues found no significant difference in contiguous-segment peak-speed lags between player-rated well-timed and mistimed shots from 25 highly skilled amateur golfers.",
+      "classification": "external_within_player_null_comparison",
+      "published_status": "supported_with_measurement_limitation",
+      "audit_status": "original_article_and_publisher_record_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:106"
+      ],
+      "evidence_artifacts": [
+        "https://doi.org/10.1260/174795407789705497",
+        "https://journals.sagepub.com/doi/10.1260/174795407789705497",
+        "https://people.stfx.ca/smackenz/Courses/DirectedStudy/Articles/Neal%202007%20Body%20Segment%20Sequencing%20and%20Timing%20in%20Golf.pdf"
+      ],
+      "model_domain": "Approximately 20 driver shots per player from 25 highly skilled amateurs, five-segment three-dimensional kinematics, player-rated timing, shot distance, and lateral error.",
+      "uncertainty_boundary": "The study did not measure pre-impact clubhead state or impact location; a null result for peak-speed lags does not establish what subjective timing represents.",
+      "competing_explanations": [
+        "Impact centeredness",
+        "Clubhead delivery variables omitted from the metric",
+        "Insensitivity of peak-lag summaries",
+        "Player-specific criteria for timing"
+      ],
+      "negative_controls": [
+        "Measured impact location and six-DOF club state",
+        "Blinded outcome-defined shot quality",
+        "Within-player functional trajectory analysis"
+      ],
+      "falsifier": "The original analysis reports a significant well-timed versus mistimed peak-lag difference or a matched replication consistently identifies such a difference.",
+      "adjudication": "The result limits the tested five-segment peak-lag measure; the paper no longer infers that subjective timing necessarily resides in an unmeasured mechanism.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "claim_id": "PD-CLAIM-020",
+      "candidate_ids": ["PD-CAND-61e9db608ffdbb62"],
+      "statement": "Marsan and colleagues applied seven angular-velocity component methods to driver swings from 13 golfers and obtained nearly as many kinematic-sequence classifications as methods for each golfer.",
+      "classification": "external_within_data_method_sensitivity",
+      "published_status": "supported",
+      "audit_status": "original_article_metadata_and_method_result_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:118"
+      ],
+      "evidence_artifacts": ["https://doi.org/10.5277/ABB-01318-2019-02"],
+      "model_domain": "Driver swings from 13 golfers reprocessed using seven angular-velocity component definitions.",
+      "uncertainty_boundary": "One sample and a finite method set; does not quantify all preprocessing, filtering, coordinate, or population sources of variability.",
+      "competing_explanations": [
+        "True multi-planar motion interacting with component choice",
+        "Peak-detection sensitivity",
+        "Coordinate-system construction"
+      ],
+      "negative_controls": [
+        "Common raw-data reprocessing with preregistered definitions",
+        "Continuous vector and screw-axis measures",
+        "Cross-laboratory pipeline comparison"
+      ],
+      "falsifier": "The original method-by-golfer results do not show the stated classification sensitivity or a faithful reanalysis yields method-invariant order.",
+      "adjudication": "The study supports explicit method dependence. Cross-study peak-order comparisons are therefore conditional on matched computational definitions.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "claim_id": "PD-CLAIM-021",
+      "candidate_ids": ["PD-CAND-a16c50fe1b7a7571"],
+      "statement": "The cited observational and model studies do not establish a dominant causal human energy-transfer pathway or show that early distal transfer causes amateur casting.",
+      "classification": "evidence_boundary_and_untested_causal_hypothesis",
+      "published_status": "causal_claim_withheld",
+      "audit_status": "supported_as_nonidentifiability_and_evidence_scope_boundary",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:139"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd",
+        "docs/research/proximal_distal_energy_transfer/HUMAN_EXPERIMENT_PROTOCOL.md"
+      ],
+      "model_domain": "Current external observational studies, inverse-dynamics partitions, and repository reduced-model experiments considered together.",
+      "uncertainty_boundary": "Absence of causal identification is not evidence that the proposed delayed-handoff mechanism is false; the mechanism remains testable and model-conditional.",
+      "competing_explanations": [
+        "Impact-centeredness and club-delivery state",
+        "Strength and anthropometry",
+        "Equipment and shaft dynamics",
+        "Alternative coordination and impedance strategies"
+      ],
+      "negative_controls": [
+        "Prospective randomized or perturbation experiments",
+        "Participant-level held-out causal models",
+        "Mechanism-discriminating bilateral wrench and club-state measurements"
+      ],
+      "falsifier": "A preregistered intervention with complete club, hand-wrench, body, and impact measurements isolates early distal transfer as the dominant pathway and establishes its causal role in casting.",
+      "adjudication": "The former synthesis overreached from model feasibility and heterogeneous associations. The revised text preserves the hypothesis while withholding dominant-pathway and casting-causation claims.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-12"
     }

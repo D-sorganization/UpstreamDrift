@@ -110,6 +110,12 @@ evidence synthesis, records reciprocal candidate dispositions, and separates
 sample-specific associations from causal mechanisms. In particular, it corrects
 the composition of the 2026 foot-ground regression block and preserves the
 source's explicit cross-sectional causal limitation.
+The second slice corrects the kinetic-energy literature: distal amplification
+of peak kinetic-energy magnitude in Anderson (2006) and Kenny (2008) did not
+coincide with a simple proximal-to-distal ordering of peak times. It also uses
+content-stable candidate identifiers so unrelated line insertions no longer
+invalidate completed reviews, and it records explicit falsifiers and scope
+limits for torso-pelvis, X-factor, timing, and casting claims.
 The hand-path attribution, two-hand redundancy, and preactivation validation
 program is tracked in
 [#8458](https://github.com/D-sorganization/UpstreamDrift/issues/8458).
