@@ -423,9 +423,18 @@ proxy relative to clock timing but raises peak hand force; higher
 impedance changes the tradeoff, and all four registered programs remain
 Pareto-nondominated. A local task-Jacobian partition exposes five
 task-null input directions, but this is a model property rather than
-evidence of a neural synergy or human self-stabilization. References,
-analysis code, machine-readable results, and provenance are available
-with the document for independent inspection and reuse.
+evidence of a neural synergy or human self-stabilization. A
+phase-resolved proximal-velocity study then evaluates 90 exact
+same-state cases under relative- and absolute-club-rate matching. High
+proximal-link speed strongly increases late drift power in some states,
+but the sign reverses earlier and in the delivery state under
+absolute-rate matching. A separate 60-program trajectory grid is more
+adversarial: among 26 valid impacts, release-state proximal velocity
+correlates negatively with impact speed and positively with negative
+grip work. The combined result rejects proximal speed as a standalone
+release rule and motivates a rotating-base, two-hand falsification tier.
+References, analysis code, machine-readable results, and provenance are
+available with the document for independent inspection and reuse.
 \end{abstract}
 
 \renewcommand*\contentsname{Table of contents}
@@ -436,7 +445,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, left=2mm, breakable, colback=white, colbacktitle=quarto-callout-note-color!10!white, colframe=quarto-callout-note-color-frame, coltitle=black, titlerule=0mm, bottomtitle=1mm, arc=.35mm, opacitybacktitle=0.6, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, toprule=.15mm, toptitle=1mm, rightrule=.15mm, bottomrule=.15mm, leftrule=.75mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, arc=.35mm, colframe=quarto-callout-note-color-frame, breakable, opacityback=0, rightrule=.15mm, toprule=.15mm, leftrule=.75mm, titlerule=0mm, colback=white, bottomtitle=1mm, coltitle=black, toptitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, bottomrule=.15mm, left=2mm, opacitybacktitle=0.6, colbacktitle=quarto-callout-note-color!10!white]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -2661,6 +2670,89 @@ the declared local sweep.}
 
 \end{figure}%
 
+\section{Trajectory-Level Strategy
+Search}\label{trajectory-level-strategy-search}
+
+The pointwise sweep does not show whether a control program can reach a
+favorable state. A second experiment therefore varies three
+trajectory-level decisions: the time at which the 60 N m proximal drive
+is reduced (0.12, 0.18, 0.24, or 0.30 s), the post-cut proximal torque
+(0, 30, or 60 N m), and the wrist release time (0.10, 0.14, 0.18, 0.22,
+or 0.26 s). Every program uses a 10 N m opposing wrist command before
+release and a 15 N m drive afterward. All 60 attempted programs are
+retained; only 26 cross club vertical inside the registered delivery
+window.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{data/shoulder_velocity_transfer/figures/fig_shoulder_velocity_strategy_associations.pdf}
+
+}
+
+\caption{\label{fig-shoulder-velocity-strategy-associations}Release-state
+proximal velocity against impact speed and negative grip work for every
+valid-impact trajectory. Color denotes release time, exposing the timing
+confound.}
+
+\end{figure}%
+
+Within this finite grid, the empirical premise does not survive as a
+standalone model rule. Proximal-link velocity at release correlates with
+lower impact speed (\(r=-0.692\)) and greater post-release negative grip
+work (\(r=+0.943\)) among the valid trials. In a descriptive
+standardized regression that also includes release time, proximal-drive
+cut time, and post-cut proximal torque, the release-velocity coefficient
+remains negative (\(\beta=-0.514\)). This is not a causal estimate: the
+regressors are mechanically coupled, the grid is small, and conditioning
+on valid impact creates selection. It nevertheless rejects the claim
+that waiting for the modeled proximal link to attain a larger angular
+velocity is sufficient to improve transfer.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{data/shoulder_velocity_transfer/figures/fig_shoulder_velocity_strategy_grid.pdf}
+
+}
+
+\caption{\label{fig-shoulder-velocity-strategy-grid}Registered impact
+speed across the complete timing grid. An X denotes a program that fails
+to reach club vertical inside the declared delivery window.}
+
+\end{figure}%
+
+The highest-speed valid program releases at 0.10 s, retains the full 60
+N m proximal drive, and reaches 38.85 m/s. Its post-release grip-force
+work is 127.21 J, decomposed into 132.08 J drift and -4.87 J control,
+with 6.11 J of negative grip work and a 315.39 N peak grip force. The
+exact work-closure residual is \(2.1\times10^{-14}\) J. The large peak
+load makes clear why speed alone is an incomplete objective.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=0.88\linewidth,height=\textheight,keepaspectratio]{data/shoulder_velocity_transfer/figures/fig_shoulder_velocity_strategy_pareto.pdf}
+
+}
+
+\caption{\label{fig-shoulder-velocity-strategy-pareto}Nondominated
+speed, braking-work, and peak-force outcomes. Open red markers identify
+programs for which no sampled alternative is at least as good on all
+three objectives and strictly better on one.}
+
+\end{figure}%
+
+No single program dominates the registered objectives. Faster candidates
+generally demand more peak grip force, while low-force candidates
+sacrifice speed or accept more braking work. Several nominally different
+programs are trajectory-equivalent because their proximal-drive cut
+occurs after impact; they are retained for auditability rather than
+silently deduplicated. The result is a Pareto set, not a unique optimum.
+
 \section{A Control Strategy Stated as Testable
 Conditions}\label{a-control-strategy-stated-as-testable-conditions}
 
@@ -2796,14 +2888,18 @@ be declared before examining outcomes.
 \section{Reproducibility and Claim
 Boundary}\label{reproducibility-and-claim-boundary}
 
-The committed study contains 90 pointwise cases (five phases, two
-velocity-matching rules, and nine proximal rates). The machine-readable
-JSON records every row, phase summary, closure test, model-tier
-statement, falsifier, limitation, and source hash; the NPZ file
-preserves the numerical arrays. The generating scripts are
-\texttt{shoulder\_velocity\_transfer.py},
+The committed evidence contains 90 pointwise cases (five phases, two
+velocity-matching rules, and nine proximal rates) and all 60 attempted
+trajectory programs. The machine-readable JSON files record every row,
+phase summary, closure test, invalid-impact attempt, Pareto membership,
+model-tier statement, falsifier, limitation, and source hash; paired NPZ
+files preserve the numerical arrays. The pointwise generating scripts
+are \texttt{shoulder\_velocity\_transfer.py},
 \texttt{run\_shoulder\_velocity\_transfer\_study.py}, and
-\texttt{make\_shoulder\_velocity\_transfer\_figures.py}.
+\texttt{make\_shoulder\_velocity\_transfer\_figures.py}. The trajectory
+scripts are \texttt{shoulder\_velocity\_strategy\_search.py},
+\texttt{run\_shoulder\_velocity\_strategy\_study.py}, and
+\texttt{make\_shoulder\_velocity\_strategy\_figures.py}.
 
 The supported conclusion is narrow: in the reference fixed-hub planar
 model, high proximal-link angular velocity can markedly increase late
@@ -4147,6 +4243,43 @@ increasing distal speed. Whether a specific golfer should reduce,
 reverse, or maintain wrist torque requires the higher-order moving-base,
 flexible-shaft, three-dimensional, and human-data tests that follow in
 the completion program.
+
+\chapter{Interactive Proximal--Distal Dynamics
+Workbench}\label{sec-interactive-workbench}
+
+An open-source interactive workbench accompanies the scripted analyses.
+It provides PyQt6 and React/Tauri interfaces for the double-pendulum,
+triple-pendulum, and bilateral golfer models. Both interfaces consume
+one machine-readable experiment and glossary catalog from the canonical
+\href{https://github.com/D-sorganization/Tools/tree/main/src/pendulum_simulator}{Tools
+pendulum simulator}, so experiment names, hypotheses, falsifiers,
+limitations, and definitions do not diverge between applications.
+
+The guide exposes six bounded experiments: passive two-link transfer,
+distal-torque onset, a three-link cascade, the two-hand
+equivalent-couple mechanism, pointwise versus forward zero-torque
+counterfactuals, and a parameter-robustness envelope. Each experiment
+names an observation that would weaken or reject its proposed
+interpretation. The interfaces expose force and moment vectors, energy
+and power histories, counterfactual comparisons, and parameter
+perturbations; hover help and a searchable glossary define the terms at
+the point of use.
+
+The workbench is not the authority for numerical claims in this
+document. Interactive states are intentionally exploratory and carry the
+evidence status \texttt{exploratory\_model\_output}. Publication
+evidence must be reproduced by the committed scripts, frozen parameters,
+matched controls, convergence and closure checks, and machine-readable
+outputs described in Section~\ref{sec-methods}. This separation allows a
+reader to discover and challenge mechanisms without converting an
+unrecorded GUI configuration into evidence.
+
+Installation, launch commands, the guided-experiment matrix, and
+interpretation boundaries are provided in the
+\href{../COMPANION_WORKBENCH.md}{workbench guide}. UpstreamDrift
+consumes the Tools provider rather than maintaining a second
+implementation, and its immutable vendor pin identifies the reviewed
+provider revision.
 
 \chapter{Gravity, Momentum, Damping, and Shaft-Flex
 Contributions}\label{sec-shaft-contributions}

@@ -90,6 +90,54 @@ relative motion, not a consequence of proximal speed in isolation.
 cells indicate that faster proximal motion increases drift-mediated grip
 power within the declared local sweep.](data/shoulder_velocity_transfer/figures/fig_shoulder_velocity_phase_sensitivity.pdf){#fig-shoulder-velocity-phase-sensitivity width=100%}
 
+## Trajectory-Level Strategy Search
+
+The pointwise sweep does not show whether a control program can reach a
+favorable state. A second experiment therefore varies three trajectory-level
+decisions: the time at which the 60 N m proximal drive is reduced (0.12, 0.18,
+0.24, or 0.30 s), the post-cut proximal torque (0, 30, or 60 N m), and the
+wrist release time (0.10, 0.14, 0.18, 0.22, or 0.26 s). Every program uses a
+10 N m opposing wrist command before release and a 15 N m drive afterward.
+All 60 attempted programs are retained; only 26 cross club vertical inside the
+registered delivery window.
+
+![Release-state proximal velocity against impact speed and negative grip work
+for every valid-impact trajectory. Color denotes release time, exposing the
+timing confound.](data/shoulder_velocity_transfer/figures/fig_shoulder_velocity_strategy_associations.pdf){#fig-shoulder-velocity-strategy-associations width=100%}
+
+Within this finite grid, the empirical premise does not survive as a standalone
+model rule. Proximal-link velocity at release correlates with lower impact speed
+($r=-0.692$) and greater post-release negative grip work ($r=+0.943$) among the
+valid trials. In a descriptive standardized regression that also includes
+release time, proximal-drive cut time, and post-cut proximal torque, the
+release-velocity coefficient remains negative ($\beta=-0.514$). This is not a
+causal estimate: the regressors are mechanically coupled, the grid is small,
+and conditioning on valid impact creates selection. It nevertheless rejects
+the claim that waiting for the modeled proximal link to attain a larger angular
+velocity is sufficient to improve transfer.
+
+![Registered impact speed across the complete timing grid. An X denotes a
+program that fails to reach club vertical inside the declared delivery
+window.](data/shoulder_velocity_transfer/figures/fig_shoulder_velocity_strategy_grid.pdf){#fig-shoulder-velocity-strategy-grid width=100%}
+
+The highest-speed valid program releases at 0.10 s, retains the full 60 N m
+proximal drive, and reaches 38.85 m/s. Its post-release grip-force work is
+127.21 J, decomposed into 132.08 J drift and -4.87 J control, with 6.11 J of
+negative grip work and a 315.39 N peak grip force. The exact work-closure
+residual is $2.1\times10^{-14}$ J. The large peak load makes clear why speed
+alone is an incomplete objective.
+
+![Nondominated speed, braking-work, and peak-force outcomes. Open red markers
+identify programs for which no sampled alternative is at least as good on all
+three objectives and strictly better on one.](data/shoulder_velocity_transfer/figures/fig_shoulder_velocity_strategy_pareto.pdf){#fig-shoulder-velocity-strategy-pareto width=88%}
+
+No single program dominates the registered objectives. Faster candidates
+generally demand more peak grip force, while low-force candidates sacrifice
+speed or accept more braking work. Several nominally different programs are
+trajectory-equivalent because their proximal-drive cut occurs after impact;
+they are retained for auditability rather than silently deduplicated. The
+result is a Pareto set, not a unique optimum.
+
 ## A Control Strategy Stated as Testable Conditions
 
 Within this model tier, a strategy for exploiting drift-mediated transfer is
@@ -185,14 +233,18 @@ declared before examining outcomes.
 
 ## Reproducibility and Claim Boundary
 
-The committed study contains 90 pointwise cases (five phases, two
-velocity-matching rules, and nine proximal rates). The machine-readable JSON
-records every row, phase summary, closure test, model-tier statement,
-falsifier, limitation, and source hash; the NPZ file preserves the numerical
-arrays. The generating scripts are
+The committed evidence contains 90 pointwise cases (five phases, two
+velocity-matching rules, and nine proximal rates) and all 60 attempted
+trajectory programs. The machine-readable JSON files record every row, phase
+summary, closure test, invalid-impact attempt, Pareto membership,
+model-tier statement, falsifier, limitation, and source hash; paired NPZ files
+preserve the numerical arrays. The pointwise generating scripts are
 `shoulder_velocity_transfer.py`,
 `run_shoulder_velocity_transfer_study.py`, and
-`make_shoulder_velocity_transfer_figures.py`.
+`make_shoulder_velocity_transfer_figures.py`. The trajectory scripts are
+`shoulder_velocity_strategy_search.py`,
+`run_shoulder_velocity_strategy_study.py`, and
+`make_shoulder_velocity_strategy_figures.py`.
 
 The supported conclusion is narrow: in the reference fixed-hub planar model,
 high proximal-link angular velocity can markedly increase late drift-mediated

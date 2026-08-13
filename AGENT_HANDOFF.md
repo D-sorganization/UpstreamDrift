@@ -340,14 +340,18 @@ The active branches are independent topic branches off `main` unless noted:
 - `feat/hand-path-drift-control-attribution` — consolidated implementation for
   epic #8458 and children #8459–#8471; target `main` after local render/gates.
 - `research/shoulder-velocity-drift-transfer` — active implementation for epic
-  #8551. The first TDD slice adds a 90-case, five-phase, two-counterfactual
+  #8551. The TDD implementation adds a 90-case, five-phase, two-counterfactual
   fixed-hub velocity sweep, exact drift/control and reaction-force closure,
-  machine-readable evidence, three generated figures, and the paper chapter
+  plus a 60-program trajectory search varying proximal-drive cut, residual
+  proximal torque, and wrist release. All invalid impact attempts remain in
+  the evidence; speed, negative grip work, and peak force define the Pareto
+  objectives. Six generated figures and the paper chapter
   `#sec-shoulder-velocity-transfer`. The current model coordinate is proximal
-  link angular velocity, not anatomical shoulder or thorax velocity. Next:
-  trajectory-level braking work, rotating-base two-hand extension, companion
-  simulator diagnostics, AffineDrift publication surface, full render gates,
-  and protected PRs.
+  link angular velocity, not anatomical shoulder or thorax velocity. The
+  trajectory grid contradicts proximal speed as a standalone release rule.
+  Tools #4406 supplies the model-neutral metrics and PyQt Drift Transfer tab;
+  AffineDrift #3817 supplies the publication surface. A rotating-base two-hand
+  tier remains the next model required for a causal torso-velocity test.
 - `research/two-hand-passive-couple` — full PR **#8454** for #8446 under epic
   #8443; direct WSCG table reconstruction and passive equivalent-couple audit.
 - `research/counterfactual-killswitch-ensemble` — full PR **#8453** for #8445

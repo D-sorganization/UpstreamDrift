@@ -28,6 +28,7 @@ def _artifact_paths(root: Path) -> tuple[Path, ...]:
         "data/**/*.json",
         "data/**/*.npz",
         "data/**/*.csv",
+        "data/**/*.pdf",
         "figures/*.pdf",
         "figures/*.svg",
     ):
@@ -106,6 +107,14 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
                 "command": "python -m scripts.research.proximal_distal_energy.run_transmission_robustness_study",
                 "tier": "paired_state_trigger_and_task_robustness",
             },
+            "shoulder_velocity_pointwise": {
+                "command": "python -m scripts.research.proximal_distal_energy.run_shoulder_velocity_transfer_study",
+                "tier": "planar_fixed_hub_pointwise_phase_sensitivity",
+            },
+            "shoulder_velocity_strategy": {
+                "command": "python -m scripts.research.proximal_distal_energy.run_shoulder_velocity_strategy_study",
+                "tier": "planar_fixed_hub_control_program_search",
+            },
         },
         "claims": {
             "interaction_dynamics_planar": "supported_at_declared_model_tier",
@@ -134,6 +143,12 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
             "drake_opensim_myosuite_human_validation": "unexecuted",
             "state_triggered_model_robustness": "conditional_with_force_tradeoff",
             "human_self_stabilization": "untested",
+            "high_proximal_velocity_universally_beneficial": (
+                "falsified_at_declared_planar_tiers"
+            ),
+            "shoulder_velocity_control_strategy": (
+                "conditional_on_phase_geometry_wrist_state_and_objective"
+            ),
         },
         "known_open_gates": [
             "subject-scaled articulated spatial contact with calibrated grip and distributed shaft",
