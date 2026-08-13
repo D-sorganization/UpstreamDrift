@@ -71,17 +71,18 @@ scripts.research.proximal_distal_energy.claim_audit inventory`, then
   R-squared beside bias and absolute error, and makes whole-system
   center-of-mass force closure a required Newton--Euler identity. PR #8569
   merged as exact remote-main commit
-  `f3d80141eb9a4cc84b092dd2d49ac3bcbf996427`. The eleventh local slice fully
-  adjudicates the proximal-velocity chapter. It corrects the displayed relative
+  `f3d80141eb9a4cc84b092dd2d49ac3bcbf996427`. PR #8570 at exact head
+  `68f336340` is the eleventh slice and fully adjudicates the proximal-velocity
+  chapter. It corrects the displayed relative
   versus absolute coordinate formulas and the actual reference-centered sweep,
   adds local and finite-range sensitivity adequacy, complete dependency hashes,
   byte-deterministic evidence, grid-selection and Pareto-coverage diagnostics,
   fixed-program timestep refinement, a corrected Choi--Park bibliography
   record, and net-interface-versus-anatomical-hand boundaries. Current local
   authority: 895 candidates, 244 reviewed, 92 registered atomic claims, and 651
-  unadjudicated candidates. Registry validation must pass; render, inspect,
-  release-validate, and protected-merge this slice before treating the new
-  counts as remote-main evidence.
+  unadjudicated candidates. Local registry, render, visual, release, and focused
+  test gates pass; protected-merge PR #8570 before treating the new counts as
+  remote-main evidence.
   The required Tools side task is not complete. Its dispersion slice received
   final independent approval at `125d47d4`. Its live integration has GO-level
   ellipsoid-mesh evidence at `45800fee`; draft PR #4416 is published at exact
