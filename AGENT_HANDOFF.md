@@ -6,9 +6,11 @@ Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
 
-- **#8557 uncertainty and stability audit** — branch
-  `research/8557-uncertainty-audit` is the active twenty-third fail-closed
-  slice. All 28 chapter candidates are adjudicated as PD-CLAIM-215 through
+- **#8557 uncertainty and stability audit** — ready PR
+  [#8587](https://github.com/D-sorganization/UpstreamDrift/pull/8587) from
+  `research/8557-uncertainty-audit` at implementation commit
+  `9c573ce4c4d4be45a23f3de2f854718fe5b8046e` is the active twenty-third
+  fail-closed slice. All 28 chapter candidates are adjudicated as PD-CLAIM-215 through
   PD-CLAIM-222. A new stability audit performs 24 leave-one-out PRCC screens,
   six held-out Pareto jackknives, and four singular-value threshold checks.
   Five PRCC leaders are omission-stable, but the hand-force leader splits
