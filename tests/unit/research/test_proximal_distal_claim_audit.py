@@ -290,7 +290,7 @@ def test_complete_registry_rejects_candidates_that_still_require_split(
 
 
 @pytest.mark.unit
-def test_repository_registry_matches_release_claims_and_remains_open() -> None:
+def test_repository_registry_matches_release_claims_and_is_complete() -> None:
     root = Path(__file__).resolve().parents[3]
     registry_path = root / (
         "docs/research/proximal_distal_energy_transfer/data/claim_audit_registry.json"
@@ -301,5 +301,5 @@ def test_repository_registry_matches_release_claims_and_remains_open() -> None:
     assert result["release_claim_count"] >= 18
     assert result["registered_claim_count"] >= 5
     assert result["reviewed_candidate_count"] >= 5
-    assert result["completion_status"] == "in_progress"
-    assert result["unadjudicated_candidate_count"] > 0
+    assert result["completion_status"] == "complete"
+    assert result["unadjudicated_candidate_count"] == 0

@@ -1,5 +1,15 @@
 # SPEC.md — Repository Specification Document
 
+## Current Scientific Audit State (2026-08-13)
+
+Epic #8557 has completed the paper-wide candidate adjudication contract:
+925/925 candidates, 240 atomic claims, and zero unadjudicated entries. The
+registry is `complete` for the present paper state. This status does not waive
+open empirical or model-fidelity gates; #8556 remains blocked on governed human
+bilateral six-axis grip-wrench acquisition, and all new scientific content must
+regenerate the inventory and reopen adjudication until every new candidate is
+reviewed.
+
 <!--
   TEMPLATE VERSION: 1.0.0
   LAST UPDATED: 2026-06-18

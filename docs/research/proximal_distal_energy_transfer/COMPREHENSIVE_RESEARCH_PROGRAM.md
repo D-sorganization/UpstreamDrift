@@ -150,3 +150,21 @@ Each milestone updates the repository handoff, falsification matrix, evidence
 schema, release qualification, and AffineDrift's pinned review surface. The
 GitHub epic is the scheduling authority; this document defines the durable
 scientific contract.
+
+## Completed Paper-Wide Claim Audit
+
+The 2026-08-13 audit adjudicated all 925 narrative candidates against 240
+atomic claim contracts; no candidate remains unreviewed. Repeated methods,
+summary, limitation, and release passages point back to their primary claim
+instead of acquiring stronger authority through repetition. The final pass
+added missing primary records for the rotating-base torso experiment, the
+isolated synthetic beam experiment, and the exploratory-interface/open-release
+boundary.
+
+Completion of the paper audit is not completion of the research program. In
+particular, the audit rejected quantitative small-deflection shaft inference
+for the current coupled baseline, retained only bounded synthetic structural
+results, found scale-dependent practical rank in the allocation/transmission
+map, and preserves #8556 as an external human-data acquisition gate. Future
+milestones must create new claim records and falsifiers before new conclusions
+enter summaries or conclusions.

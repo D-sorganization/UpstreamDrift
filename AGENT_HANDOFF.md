@@ -4,6 +4,27 @@ Last updated: 2026-08-13
 
 Update this file with every PR and every push to main.
 
+## Complete Paper-Wide Claim Adjudication
+
+- Branch `research/8557-post-terminology-audit` completes the epic #8557 paper
+  audit after terminology unification: 925/925 narrative candidates reviewed,
+  zero unadjudicated, and 240 atomic claims.
+- Added deterministic registration authority at
+  `scripts/research/proximal_distal_energy/register_remaining_claim_reviews.py`
+  and seven missing primary contracts (PD-CLAIM-235 through PD-CLAIM-241) for
+  the rotating-base torso tier, isolated synthetic beam study, and
+  workbench/open-release boundary.
+- Side-task state is preserved: #8555/PR #8577 is merged at `967c40f...`;
+  #8556 remains open because no qualifying governed bilateral six-axis human
+  grip-wrench dataset exists; Tools #4430 remains dependency-gated.
+- Focused validation: registry complete with zero unadjudicated candidates;
+  19 claim/torso/beam tests and 18 governance/release tests pass. The 203-page
+  PDF renders and losslessly compacts to 1,405,573 bytes with 186 URI links and
+  235 outline entries; visual checks of the title, interior figure/text, and
+  final bibliography pages are clean. The qualified release contains 385
+  artifacts with zero mismatches. Protected squash merge remains for this
+  branch.
+
 ## Where the Repo Is Heading
 
 - **#8557 transmission robustness audit** — ready PR
