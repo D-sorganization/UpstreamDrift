@@ -2736,5 +2736,19 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   and label resampling stability separately from solver convergence. Moment
   sign alone shall not be promoted to energy-transfer sign, anatomical intent,
   or a technique recommendation.
+- **F-8557.9:** A model-fidelity program shall preserve a reference-explicit
+  wrench--twist observable while distinguishing a shared schema from a shared
+  trajectory. Machine-readable tier records shall declare execution status and
+  explicit branch capabilities; rendered matrices and schematics shall derive
+  those states from the record and shall not imply cumulative inheritance for
+  absent mechanisms. Aggregate evidence shall use content hashes rather than a
+  mutable commit label, use analytic state kinematics when available, disclose
+  any numerical-differentiation discrepancy, and specify prescribed path
+  frequencies and amplitudes. Proper-rotation and reference-transport audits
+  shall retain nonzero conjugate twist and shall not be promoted to improper-
+  reflection testing, adapter parity, nonplanar dynamics, anatomy, or human
+  validation. Engine availability is not execution evidence; articulated
+  transport remains open until its declared cross-engine, balance, power,
+  contact, event-alignment, and uncertainty gates pass.
 - `spec-exempt` (#8483): Moved Sidekick readiness monitoring, degradation reporting, and workspace seeding from the main launcher facade into the existing launcher-owned `SidekickSidebarManager`.
 - (spec-exempt: security fix) Fixed user enumeration via timing attack in `/login` endpoint by ensuring a dummy password verification is performed even if the user is not found, to normalize response time.

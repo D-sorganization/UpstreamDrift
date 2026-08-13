@@ -6,32 +6,33 @@ Update this file with every PR and every push to main.
 ## Where the Repo Is Heading
 
 - **#8557 Comprehensive Scientific Claim Audit and Open Golf Modeling
-  Program** — PR **#8571** is merged at exact remote-main commit
-  `9742167fbd2e0ce825fb8e46ab2bcc59fd87992b`, completing the twelfth
-  fail-closed audit slice. Branch `research/8557-two-hand-wrench-audit` is the
-  active thirteenth slice. It audits every candidate in the archived WSCG
-  two-hand wrench chapter, replaces stale commit provenance with nine content
-  hashes, records finite BASE--ZTCF state mismatch, tests both individual
-  command torques, separates internal force-power closure from the 72.8 W
-  archived-column discrepancy, integrates the exact 88.122 ms negative-couple
-  interval, and converts strategy language into falsifiable hypotheses.
-  Current authority: 895 candidates, 357 uniquely reviewed, 118 atomic claims,
-  and 538 unadjudicated. All 69 candidates in the chapter map reciprocally to
-  PD-CLAIM-104 through PD-CLAIM-118. Focused mechanics tests and deterministic
-  JSON/NPZ/PDF/SVG replay are green. Complete-document rendering produced a
-  198-page optimized PDF; visual inspection caught and corrected missing minus
-  glyphs in core-font plots. Rerender once after the last attribution wording
-  correction, refresh release hashes, rerun repository qualification, then
-  publish through the protected squash-merge flow.
+  Program** — PR **#8572** merged through protected checks at exact remote-main
+  commit `de22e7084b596585a38cc405ca4400215eb4b8e0`, completing the archived
+  two-hand wrench slice. Branch `research/8557-model-ladder-audit` is the active
+  fourteenth fail-closed slice. It fully maps all 65 candidates in the
+  common-observable model-ladder chapter to PD-CLAIM-119 through PD-CLAIM-132.
+  It removes stale commit provenance, hashes eight direct dependencies,
+  replaces position differencing with analytic joint velocity while retaining
+  the 0.0299 m/s discrepancy, declares the two-frequency hub path, replaces a
+  false triangular capability matrix with explicit branch membership, and
+  makes the schematic derive executed/open state from evidence. It also limits
+  the rotation audit to paired proper transforms and preserves actual nonzero
+  twist in the rotated-wrench figure. Current authority: 895 candidates, 422
+  uniquely reviewed, 132 atomic claims, and 473 unadjudicated. Deterministic
+  replay is byte-identical across all 16 ladder evidence/figure artifacts; the
+  scoped scientific suites and pre-commit gates are green; all 11 chapter pages
+  have been visually inspected in the 199-page optimized PDF; and the release
+  authority validates 362 governed artifacts without mismatch. Remaining
+  gates: protected PR and exact remote-main verification.
   The required Tools side task remains active and not release-ready. At live
-  revision 24 it has local commit `bdf883458` with focused React, Playwright,
-  cross-runtime, and static gates green, but no genuine isolated-baseline
-  producer exists and publication is held for adversarial review. Completion
-  still requires protected merge, immutable UpstreamDrift pinning, typed
-  no-impact retention, deterministic ensemble replay, sensitivity adequacy,
-  and PyQt6/React parity. Biomechanics and Nonlinear Control NotebookLM
-  collections remain blocked on manual reauthentication; treat them only as
-  research indexes and verify original sources independently.
+  revision 26 it has safely separated Tools PRs #4423 and #4424 and is building
+  genuine isolated baseline/perturbed producers plus reproducibility metadata;
+  it is still in progress. Completion still requires protected merge,
+  immutable UpstreamDrift pinning, typed no-impact retention, deterministic
+  ensemble replay, sensitivity adequacy, and PyQt6/React parity. Biomechanics
+  and Nonlinear Control NotebookLM collections remain blocked on manual
+  reauthentication; treat them only as research indexes and verify original
+  sources independently.
 
 - **#8511 interactive proximal--distal dynamics workbench** — branch
   `feat/proximal-distal-workbench-integration` makes the pendulum launcher
