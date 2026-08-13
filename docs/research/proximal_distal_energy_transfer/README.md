@@ -105,6 +105,11 @@ comprehensive open modeling program are tracked in
 [#8557](https://github.com/D-sorganization/UpstreamDrift/issues/8557), with the
 durable execution contract in
 [`COMPREHENSIVE_RESEARCH_PROGRAM.md`](COMPREHENSIVE_RESEARCH_PROGRAM.md).
+The first external-evidence audit slice narrows the introduction and empirical
+evidence synthesis, records reciprocal candidate dispositions, and separates
+sample-specific associations from causal mechanisms. In particular, it corrects
+the composition of the 2026 foot-ground regression block and preserves the
+source's explicit cross-sectional causal limitation.
 The hand-path attribution, two-hand redundancy, and preactivation validation
 program is tracked in
 [#8458](https://github.com/D-sorganization/UpstreamDrift/issues/8458).

@@ -23,14 +23,37 @@ paragraph with:
 - a stable content-and-location identifier;
 - canonical source path and exact line range;
 - normalized text and its SHA-256 digest;
-- citation keys;
-- numeric-content and assertive-language flags; and
+- bibliography citation keys;
+- numeric-content and assertive-language flags;
+- a deterministic review-priority score and transparent triage flags; and
 - an initial `unadjudicated` review state.
 
 The inventory is deliberately overinclusive. A question, transition, caption,
 or limitation may not be a scientific claim, but it remains visible until a
 reviewer marks it non-material. Automated extraction is a queue generator, not
 scientific adjudication.
+
+Quarto references such as `@sec-results`, `@fig-speed`, and `@eq-power` are
+excluded from `citation_keys`; only bibliography keys are retained. The triage
+score raises candidates containing numbers, assertive terms, external
+citations, or causal/generalizing language. It prioritizes human review but
+never assigns support or materiality.
+
+## Candidate Review
+
+Every inventory candidate receives exactly one review record before completion.
+The allowed dispositions are:
+
+- `material_claims_mapped`, with reciprocal links to every atomic claim record
+  needed to cover the paragraph;
+- `non_material`, for narrative that contains no scientific proposition;
+- `editorial_or_navigation`, for headings, signposts, and document mechanics;
+  or
+- `requires_split`, when the reviewer has not yet completed atomic coverage.
+
+A claim-to-candidate link is valid only when the candidate review links back to
+the same claim. This reciprocal rule prevents a paragraph from appearing
+adjudicated merely because one of several propositions was registered.
 
 ## Claim Record
 
@@ -80,8 +103,9 @@ The audit keeps these classes separate:
 Run
 `python -m scripts.research.proximal_distal_energy.claim_audit validate`.
 Validation fails on stale paper bytes, duplicate identifiers, missing required
-adjudication fields, drift from the public release-claim inventory, or a
-`complete` status while any candidate remains unadjudicated.
+adjudication fields, missing bibliography keys, non-reciprocal claim mappings,
+drift from the public release-claim inventory, or a `complete` status while any
+candidate remains unadjudicated or still requires splitting.
 
 Completion additionally requires recomputation of every quantitative claim,
 figure-data verification, original-source and live-link review, and an

@@ -14,22 +14,23 @@ prior literature is not independent empirical confirmation.
 
 ## Motivation
 
-Clubhead speed at impact is the dominant controllable determinant of
-drive distance, and it correlates strongly with playing standard
-[@fradkin2004; @hellstrom2009; @hume2005]. The golf downswing is among
-the most-studied examples of a *sequenced* multi-segment rotation in
-sport biomechanics [@mcphee2022; @dillman1994]. Across measurement
-systems and populations, the downswing of a skilled golfer shows a
-characteristic order: the pelvis reaches its peak angular speed first,
-then the thorax, then the lead arm, and finally the club, with each
-successive segment peaking faster than the one before
-[@cheetham2008; @tinmark2010]. This pattern — the *kinematic sequence*,
-an instance of the general proximal-to-distal (P→D) sequencing observed
-in throwing and striking skills [@putnam1993] — is routinely interpreted
-as the visible signature of mechanical energy generated in the large
-proximal segments and transferred outward to the small, fast distal
-ones. Its interpretation as mechanical energy transfer has also influenced
-applied swing descriptions [@smith2015].
+Subject to impact efficiency, launch angle, spin, and aerodynamic conditions,
+greater clubhead speed raises the available ball speed and distance. Clubhead
+speed has also been associated with handicap or playing standard in particular
+cohorts, including a 45-man sample spanning handicaps 2–27; those associations
+do not make it a complete measure of golf performance
+[@fradkin2004; @hellstrom2009; @hume2005]. The golf downswing is a widely
+studied example of sequenced multi-segment rotation
+[@mcphee2022; @dillman1994]. Under commonly used segment and angular-velocity
+definitions, many skilled golfers exhibit a pelvis–thorax–arm or hands–club
+ordering of peak speeds, often with distal speed amplification
+[@cheetham2008; @tinmark2010]. The identified order is neither universal nor
+independent of coordinate, component, event, and filtering choices
+[@marsan2019; @lee2026]. This *kinematic sequence* resembles the broader
+proximal-to-distal sequencing observed in throwing and striking
+[@putnam1993], but peak order alone is not a measurement of mechanical energy
+transfer. Treating it as such is an interpretation that has influenced applied
+swing descriptions [@smith2015], not an identity used in this study.
 
 That interpretation leaves a first-order question unanswered:
 

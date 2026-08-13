@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "1f495e140ab1035473b29c8410c8cc8248b856163d144a1e24dd6947f4c6bb92",
+    "source_digest": "9d2d2598da541bed15f12086dc7b663a2decaf417e7f1f0f7a56c89b9c314e2e",
     "baseline_commit": "13ea6a69585a42dc1db4b3959440ed95787c9779"
   },
   "audit_scope": {
@@ -127,6 +127,96 @@
       "release_claim_key": "shoulder_velocity_control_strategy",
       "published_status": "conditional_on_phase_geometry_wrist_state_and_objective",
       "audit_state": "pending"
+    }
+  ],
+  "candidate_reviews": [
+    {
+      "candidate_id": "PD-CAND-05bd84a7463e08d3",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-001"],
+      "rationale": "The paragraph reports quantitative model comparisons that require recomputation and domain-qualified interpretation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "candidate_id": "PD-CAND-d41384cfefc56bd2",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-002"],
+      "rationale": "The paragraph reports the archived WSCG force-couple reconstruction and its numerical extremum.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "candidate_id": "PD-CAND-b28ad6439c735a98",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-003"],
+      "rationale": "The paragraph asserts persistence of a negative force-generated couple in a forward model branch.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "candidate_id": "PD-CAND-98723ed6bea5e6f6",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-004"],
+      "rationale": "The paragraph reports a quantitative cross-formulation numerical agreement claim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "candidate_id": "PD-CAND-060fc968e26a2400",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-005"],
+      "rationale": "The paragraph reports cross-engine persistence under the reduced compliant-contact model.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "candidate_id": "PD-CAND-a91dce205cbdb55a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-006", "PD-CLAIM-007", "PD-CLAIM-008"],
+      "rationale": "The motivation paragraph combines performance association, kinematic-sequence prevalence, and the distinction between kinematic order and energy transfer.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "candidate_id": "PD-CAND-90fe269bc987bea8",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-009"],
+      "rationale": "The paragraph reports subject-model work fractions and draws a timing interpretation from a four-subject study.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "candidate_id": "PD-CAND-d3f467eec93c457c",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-010", "PD-CLAIM-011"],
+      "rationale": "The paragraph reports two empirical studies and distinguishes association from causal energy transfer.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "candidate_id": "PD-CAND-941f43765387e22b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-007", "PD-CLAIM-012"],
+      "rationale": "The paragraph summarizes skilled-cohort sequence findings and between-skill observations across several studies.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "candidate_id": "PD-CAND-b3e0aaf833daa150",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-007", "PD-CLAIM-010", "PD-CLAIM-012"],
+      "rationale": "The synthesis combines sequence prevalence, skill-group differences, and a model-dependent transfer-efficiency association.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "candidate_id": "PD-CAND-c8d1e78ce0bca3f4",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-008", "PD-CLAIM-010"],
+      "rationale": "The discussion distinguishes counterfactual energy accounting from a cross-sectional human association and causal inference.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
     }
   ],
   "claims": [
@@ -293,6 +383,240 @@
       "falsifier": "The persistence falls outside the registered cross-engine equivalence region, fails refinement, or disappears in articulated calibrated contact without an identified discrepancy term.",
       "adjudication": "The claim is narrowly framed and has useful controls, but independent contact models and articulated spatial transport remain required.",
       "reviewer": "Codex initial audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "claim_id": "PD-CLAIM-006",
+      "candidate_ids": ["PD-CAND-a91dce205cbdb55a"],
+      "statement": "In Fradkin and colleagues' sample of 45 male golfers aged 18–80 with handicaps 2–27, clubhead speed was strongly associated with handicap (reported r = 0.950).",
+      "classification": "external_empirical_association",
+      "published_status": "supported_after_scope_narrowing",
+      "audit_status": "original_abstract_checked_population_limited",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch01_introduction.qmd:17"
+      ],
+      "evidence_artifacts": [
+        "https://pubmed.ncbi.nlm.nih.gov/15712503/",
+        "https://doi.org/10.1016/S1440-2440(04)80265-2"
+      ],
+      "model_domain": "Cross-sectional association in 45 male golfers, handicaps 2–27, ten recorded swings per golfer, with clubhead speed estimated from high-speed video.",
+      "uncertainty_boundary": "Does not establish drive distance, scoring causality, women, elite-only populations, launch conditions, or a universal performance metric.",
+      "competing_explanations": [
+        "Handicap-related differences in technique, strength, equipment, and practice exposure",
+        "Restricted or nonrepresentative sample",
+        "Repeated-swing measurement and model-form choices"
+      ],
+      "negative_controls": [
+        "Adjustment for launch, impact, equipment, and demographic covariates",
+        "Independent mixed-sex and elite cohorts",
+        "Prospective within-player speed interventions"
+      ],
+      "falsifier": "A preregistered representative replication finds no material speed-handicap association or shows the association is explained by declared confounders.",
+      "adjudication": "The cited study supports a strong sample-specific association. The former wording about a dominant controllable determinant of distance exceeded that evidence and has been replaced with a conditional physical statement and explicit cohort limitation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "claim_id": "PD-CLAIM-007",
+      "candidate_ids": [
+        "PD-CAND-a91dce205cbdb55a",
+        "PD-CAND-941f43765387e22b",
+        "PD-CAND-b3e0aaf833daa150"
+      ],
+      "statement": "Under commonly used segment and angular-velocity definitions, proximal-to-distal peak ordering is common in sampled skilled golfers but is not universal or measurement-definition invariant.",
+      "classification": "external_empirical_synthesis",
+      "published_status": "supported_with_methodological_qualification",
+      "audit_status": "partially_original_source_checked_full_systematic_review_open",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch01_introduction.qmd:17",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:59",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:121"
+      ],
+      "evidence_artifacts": [
+        "https://doi.org/10.1080/14763141.2010.535842",
+        "https://doi.org/10.1177/17479541261429479",
+        "https://doi.org/10.5277/ABB-01318-2019-02"
+      ],
+      "model_domain": "Published optical-motion studies of selected skilled, elite, professional, and amateur samples using study-specific segment frames, angular-velocity components, filtering, and peak events.",
+      "uncertainty_boundary": "Prevalence across all golfers and invariance across coordinate definitions, clubs, shot intents, and processing pipelines remain unestablished.",
+      "competing_explanations": [
+        "Component-selection and coordinate-frame artifacts",
+        "Peak-detection and filtering choices",
+        "Selection, sex, skill, club, and shot-intent differences"
+      ],
+      "negative_controls": [
+        "Reprocessing identical trajectories with alternative valid angular-velocity definitions",
+        "Within-player repeatability and shot-intent contrasts",
+        "Preregistered multi-laboratory processing comparison"
+      ],
+      "falsifier": "A representative preregistered synthesis shows the pattern is not more prevalent than alternative orderings under prespecified definitions.",
+      "adjudication": "The original blanket statement across measurement systems and populations was too broad. The revised paper states commonality only in sampled skilled groups and foregrounds method dependence and non-universality.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "claim_id": "PD-CLAIM-008",
+      "candidate_ids": ["PD-CAND-a91dce205cbdb55a", "PD-CAND-c8d1e78ce0bca3f4"],
+      "statement": "The temporal order of segment angular-velocity peaks is not, by itself, a measurement of mechanical energy transfer.",
+      "classification": "mechanical_definition_and_limitation",
+      "published_status": "supported",
+      "audit_status": "supported_by_dimensional_and_balance_law_analysis",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch01_introduction.qmd:17",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd:106"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd",
+        "https://pubmed.ncbi.nlm.nih.gov/8505347/"
+      ],
+      "model_domain": "Rigid or deformable multibody systems for which energy transfer is evaluated through power/work or segment energy balances rather than peak-time order.",
+      "uncertainty_boundary": "Peak order may correlate with transfer in a declared dataset; the claim only rejects identity and sufficiency.",
+      "competing_explanations": [
+        "A latent control strategy may jointly influence both peak order and energy flow",
+        "Specific constrained model families may impose a consistent relationship"
+      ],
+      "negative_controls": [
+        "Trajectories with identical peak order and different joint-force power",
+        "Trajectories with different peak order and equivalent net club work"
+      ],
+      "falsifier": "A valid general identity derives energy-transfer magnitude and direction uniquely from peak ordering without force, torque, displacement, or inertia information.",
+      "adjudication": "Angular-velocity peak times do not contain the force and displacement information required by mechanical power or work. The distinction is retained as a methodological foundation rather than an empirical generalization.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "claim_id": "PD-CLAIM-009",
+      "candidate_ids": ["PD-CAND-90fe269bc987bea8"],
+      "statement": "In Nesbit and Serrano's four subject-specific inverse-dynamics models, the reported work partition was 68.7–72.2% for the trunk complex, 24.3–28% for shoulder and arm joints, and 3.3–3.8% for modeled leg joints.",
+      "classification": "external_model_derived_quantitative_result",
+      "published_status": "supported_with_model_partition_qualification",
+      "audit_status": "source_values_checked_independent_recomputation_open",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:5"
+      ],
+      "evidence_artifacts": [
+        "https://www.jssm.org/volume04/iss4/cap/jssm-04-520.pdf",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC3899667/"
+      ],
+      "model_domain": "Four subject-specific golf swings analyzed with the authors' linked-segment inverse-dynamics model and joint-work partition.",
+      "uncertainty_boundary": "Small sample, model-dependent partition, no population interval, and no implication that low leg-joint work means ground reaction or lower-limb mechanics are unimportant.",
+      "competing_explanations": [
+        "Joint partition and residual allocation",
+        "Inverse-dynamics and segment-inertia error",
+        "Subject and swing selection"
+      ],
+      "negative_controls": [
+        "Alternative segment and joint-work partitions",
+        "Residual and sensitivity analysis for inertial parameters",
+        "Independent full-body energetic reconstruction"
+      ],
+      "falsifier": "The reported source values cannot be reproduced from the original tables and definitions, or materially change under the source's stated computation.",
+      "adjudication": "The values are retained as results from four declared models. The superlative about completeness and the implication attached to the leg fraction were removed; causal or population-wide extrapolation is not supported.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "claim_id": "PD-CLAIM-010",
+      "candidate_ids": [
+        "PD-CAND-d3f467eec93c457c",
+        "PD-CAND-b3e0aaf833daa150",
+        "PD-CAND-c8d1e78ce0bca3f4"
+      ],
+      "statement": "In Ratchanavy and colleagues' 30-golfer pooled driver/7-iron analysis, a block containing two center-of-pressure factors and skill group explained 35.5% of clubhead-speed variance; adding trunk sequencing and a constructed impulse-related transfer-efficiency factor yielded 75.4%, with a significant indirect association through the transfer factor but no established causal pathway.",
+      "classification": "external_cross_sectional_model_result",
+      "published_status": "corrected_and_supported_with_causal_limitation",
+      "audit_status": "open_access_full_text_checked_statistical_replication_open",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:21",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:121",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd:106"
+      ],
+      "evidence_artifacts": [
+        "https://www.frontiersin.org/journals/sports-and-active-living/articles/10.3389/fspor.2026.1790645/full",
+        "https://doi.org/10.3389/fspor.2026.1790645"
+      ],
+      "model_domain": "Cross-sectional sample of 30 right-handed golfers, pooled driver and 7-iron swings, PCA-derived constructs, hierarchical regression, skill-group covariate, and bootstrap serial mediation.",
+      "uncertainty_boundary": "Small sample relative to the upstream feature space, pooled clubs, constructed factors, observational mediation, model-selection uncertainty, and no longitudinal causal intervention.",
+      "competing_explanations": [
+        "Skill-group confounding",
+        "Overfitting or factor-selection instability",
+        "Club pooling and repeated-swing dependence",
+        "Reverse causation or common latent coordination factors"
+      ],
+      "negative_controls": [
+        "Participant-level held-out validation",
+        "Separate driver and 7-iron models",
+        "Alternative PCA retention and mediation specifications",
+        "Prospective perturbation of foot mechanics"
+      ],
+      "falsifier": "Participant-level out-of-sample replication fails, the indirect effect is unstable to reasonable factor/model choices, or prospective perturbation contradicts the proposed direction.",
+      "adjudication": "The former text incorrectly called the 35.5% block foot-ground variables alone and presented mediation too mechanistically. The revised wording includes skill group, identifies the constructed factor, and rejects causal inference from the cross-sectional model.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "claim_id": "PD-CLAIM-011",
+      "candidate_ids": ["PD-CAND-d3f467eec93c457c"],
+      "statement": "Han and colleagues reported significant associations between selected golfer-ground force/moment parameters and maximum clubhead speed in 63 highly skilled male golfers with handicaps no greater than 3.",
+      "classification": "external_empirical_association",
+      "published_status": "supported_with_population_qualification",
+      "audit_status": "original_abstract_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:21"
+      ],
+      "evidence_artifacts": [
+        "https://pubmed.ncbi.nlm.nih.gov/31042142/",
+        "https://doi.org/10.1080/14763141.2019.1586983"
+      ],
+      "model_domain": "Cross-sectional optical motion capture and two-force-plate study of 63 highly skilled male golfers across driver, 5-iron, and pitching-wedge conditions.",
+      "uncertainty_boundary": "Association only; male low-handicap population; selected peaks and club conditions; no causal intervention or energetic source attribution.",
+      "competing_explanations": [
+        "Whole-swing coordination or skill as a common cause",
+        "Multiple tested force/moment parameters",
+        "Equipment and club-condition effects"
+      ],
+      "negative_controls": [
+        "Prospective within-golfer force-pattern perturbation",
+        "Independent mixed-sex and broader-handicap replication",
+        "Multiplicity-aware held-out parameter selection"
+      ],
+      "falsifier": "A preregistered representative replication fails to reproduce the selected associations after multiplicity and confounder control.",
+      "adjudication": "The source supports selected associations in the declared male skilled sample. The paper now avoids treating ground reactions as the energetic origin or these associations as causal.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "claim_id": "PD-CLAIM-012",
+      "candidate_ids": ["PD-CAND-941f43765387e22b", "PD-CAND-b3e0aaf833daa150"],
+      "statement": "Several sampled professional or highly skilled groups show higher segment-speed magnitudes or more repeatable timing than comparison groups, but gross proximal-to-distal order alone is not sufficient to identify skill or performance.",
+      "classification": "external_empirical_synthesis",
+      "published_status": "supported_with_heterogeneity_qualification",
+      "audit_status": "provisional_original_source_matrix_incomplete",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:59",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:121"
+      ],
+      "evidence_artifacts": [
+        "https://www.researchgate.net/publication/252236426",
+        "https://doi.org/10.1055/s-2008-1038732",
+        "https://doi.org/10.1177/17479541261429479"
+      ],
+      "model_domain": "Heterogeneous observational comparisons of selected professional, elite, amateur, and recreational golfer samples with study-specific kinematic definitions.",
+      "uncertainty_boundary": "Not a meta-analytic population effect; access to several full texts and a study-by-study bias matrix remain open.",
+      "competing_explanations": [
+        "Selection and training-history differences",
+        "Coordinate and signal-processing choices",
+        "Equipment, club, intent, and anthropometric differences"
+      ],
+      "negative_controls": [
+        "Within-player skill-development longitudinal designs",
+        "Common-pipeline reanalysis",
+        "Out-of-sample prediction from sequence order alone"
+      ],
+      "falsifier": "A preregistered common-pipeline synthesis shows no reliable magnitude or repeatability differences, or peak order alone predicts skill robustly after held-out validation.",
+      "adjudication": "The synthesis was narrowed from a categorical statement about skilled golfers to observations in sampled groups. Full original-source and risk-of-bias review remains required before a final synthesis status.",
+      "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-12"
     }
   ]

@@ -2648,10 +2648,15 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   source locations and content digests, and a separately adjudicated atomic
   claim registry containing evidence, model domain, uncertainty, alternatives,
   negative controls, falsifiers, review provenance, and release-claim mapping.
-- **F-8557.1:** Validation shall fail on stale paper bytes, duplicate claim or
-  release identifiers, incomplete required fields, drift from the public
-  release-claim manifest, or a completed audit status while any candidate is
-  unadjudicated.
+- **F-8557.1:** Validation shall fail on stale paper bytes, duplicate claim,
+  candidate-review, or release identifiers, missing bibliography keys,
+  incomplete required fields, non-reciprocal candidate-to-claim mappings,
+  drift from the public release-claim manifest, or a completed audit status
+  while any candidate is unadjudicated or still requires splitting.
+- **F-8557.1a:** Deterministic numeric, assertive, citation, and
+  causal/generalizing triage flags may prioritize review but shall never assign
+  scientific materiality or support automatically; Quarto cross-references
+  shall not be reported as bibliography citations.
 - **F-8557.2:** NotebookLM collections shall be treated as research indexes;
   collection-derived changes require independent original-source verification,
   and authentication or coverage gaps remain explicit.

@@ -18,7 +18,8 @@ from typing import Any
 
 SCHEMA_VERSION = "proximal-distal-claim-audit-v1"
 INCLUDE_PATTERN = re.compile(r"^\s*\{\{<\s*include\s+([^ >]+)\s*>\}\}\s*$")
-CITATION_PATTERN = re.compile(r"(?<!\w)@([A-Za-z0-9_:.\-]+)")
+CITATION_PATTERN = re.compile(r"(?<!\w)@([A-Za-z0-9_][A-Za-z0-9_:.\-]*)")
+CROSS_REFERENCE_PREFIXES = ("sec-", "fig-", "eq-", "tbl-", "lst-")
 NUMERIC_PATTERN = re.compile(
     r"(?<![A-Za-z])[-+]?\d+(?:[,.]\d+)*(?:e[-+]?\d+)?", re.IGNORECASE
 )
@@ -29,6 +30,11 @@ ASSERTION_PATTERN = re.compile(
     r"evidence|correlate|correlates|falsif(?:y|ies|ied))\b",
     re.IGNORECASE,
 )
+HIGH_RISK_LANGUAGE_PATTERN = re.compile(
+    r"\b(?:caus(?:e|al|ally|ation)|mechanism|optimal|univers(?:al|ally)|"
+    r"validat(?:e|es|ed|ion)|prove|proves|best|dominant|necessary|sufficient)\b",
+    re.IGNORECASE,
+)
 
 
 def _repository_root() -> Path:
@@ -37,6 +43,35 @@ def _repository_root() -> Path:
 
 def _normalise_text(text: str) -> str:
     return " ".join(text.split())
+
+
+def _bibliographic_citations(text: str) -> list[str]:
+    """Return bibliography keys while excluding Quarto cross-references."""
+    keys: set[str] = set()
+    for raw_key in CITATION_PATTERN.findall(text):
+        key = raw_key.rstrip(".:")
+        if key and not key.startswith(CROSS_REFERENCE_PREFIXES):
+            keys.add(key)
+    return sorted(keys)
+
+
+def _triage(text: str, citations: list[str]) -> tuple[int, list[str]]:
+    """Rank review urgency without making a scientific adjudication."""
+    flags: list[str] = []
+    score = 0
+    if NUMERIC_PATTERN.search(text):
+        flags.append("numeric")
+        score += 2
+    if ASSERTION_PATTERN.search(text):
+        flags.append("assertive_language")
+        score += 2
+    if citations:
+        flags.append("external_citation")
+        score += 1
+    if HIGH_RISK_LANGUAGE_PATTERN.search(text):
+        flags.append("causal_or_generalizing_language")
+        score += 3
+    return score, flags
 
 
 def _source_digest(paths: list[Path], root: Path) -> str:
@@ -178,7 +213,8 @@ def build_candidate_inventory(
             if candidate_id in seen_ids:
                 raise ValueError(f"Duplicate candidate identifier: {candidate_id}")
             seen_ids.add(candidate_id)
-            citations = sorted(set(CITATION_PATTERN.findall(text)))
+            citations = _bibliographic_citations(text)
+            priority_score, triage_flags = _triage(text, citations)
             candidates.append(
                 {
                     "candidate_id": candidate_id,
@@ -190,6 +226,8 @@ def build_candidate_inventory(
                     "citation_keys": citations,
                     "has_numeric_content": bool(NUMERIC_PATTERN.search(text)),
                     "has_assertive_language": bool(ASSERTION_PATTERN.search(text)),
+                    "priority_score": priority_score,
+                    "triage_flags": triage_flags,
                     "review_state": "unadjudicated",
                 }
             )
@@ -264,6 +302,25 @@ def validate_registry(
             "Paper source_digest is stale; rebuild the candidate inventory"
         )
 
+    bibliography = source.parent / "references.bib"
+    if bibliography.is_file():
+        bibliography_keys = set(
+            re.findall(
+                r"@\w+\s*\{\s*([^,\s]+)",
+                bibliography.read_text(encoding="utf-8"),
+            )
+        )
+        cited_keys = {
+            key
+            for candidate in inventory["candidates"]
+            for key in candidate["citation_keys"]
+        }
+        missing_citations = sorted(cited_keys - bibliography_keys)
+        if missing_citations:
+            raise ValueError(
+                f"Paper citations missing from references.bib: {missing_citations}"
+            )
+
     release_inventory = registry.get("release_claim_inventory", [])
     release_keys = [item.get("release_claim_key") for item in release_inventory]
     if len(release_keys) != len(set(release_keys)):
@@ -283,20 +340,75 @@ def validate_registry(
             )
 
     completion = registry.get("audit_scope", {}).get("completion_status")
-    adjudicated = {
-        candidate for claim in claims for candidate in claim.get("candidate_ids", [])
-    }
     candidate_ids = {item["candidate_id"] for item in inventory["candidates"]}
-    unadjudicated = candidate_ids - adjudicated
+    claim_id_set = set(claim_ids)
+    reviews = registry.get("candidate_reviews")
+    if not isinstance(reviews, list):
+        raise ValueError("candidate_reviews must be a list")
+    review_ids = [review.get("candidate_id") for review in reviews]
+    if len(review_ids) != len(set(review_ids)):
+        raise ValueError("Duplicate candidate_id in candidate_reviews")
+    unknown_reviews = sorted(set(review_ids) - candidate_ids)
+    if unknown_reviews:
+        raise ValueError(f"candidate_reviews contains unknown IDs: {unknown_reviews}")
+
+    allowed_dispositions = {
+        "material_claims_mapped",
+        "non_material",
+        "editorial_or_navigation",
+        "requires_split",
+    }
+    review_map: dict[str, set[str]] = {}
+    for review in reviews:
+        candidate_id = review.get("candidate_id", "<missing candidate_id>")
+        disposition = review.get("disposition")
+        if disposition not in allowed_dispositions:
+            raise ValueError(f"{candidate_id}: unsupported disposition {disposition!r}")
+        for field in ("rationale", "reviewer", "last_verified_on"):
+            if not isinstance(review.get(field), str) or not review[field].strip():
+                raise ValueError(f"{candidate_id}: {field} must be a non-empty string")
+        mapped_claims = review.get("claim_ids")
+        if not isinstance(mapped_claims, list):
+            raise ValueError(f"{candidate_id}: claim_ids must be a list")
+        mapped_set = set(mapped_claims)
+        if len(mapped_claims) != len(mapped_set):
+            raise ValueError(f"{candidate_id}: duplicate claim_ids")
+        unknown_claims = sorted(mapped_set - claim_id_set)
+        if unknown_claims:
+            raise ValueError(
+                f"{candidate_id}: unknown mapped claim_ids {unknown_claims}"
+            )
+        if disposition == "material_claims_mapped" and not mapped_set:
+            raise ValueError(f"{candidate_id}: material review must map a claim")
+        if disposition in {"non_material", "editorial_or_navigation"} and mapped_set:
+            raise ValueError(
+                f"{candidate_id}: non-material review cannot map scientific claims"
+            )
+        review_map[candidate_id] = mapped_set
+
+    for claim in claims:
+        claim_id = claim["claim_id"]
+        for candidate_id in claim.get("candidate_ids", []):
+            if claim_id not in review_map.get(candidate_id, set()):
+                raise ValueError(
+                    f"{claim_id}: {candidate_id} lacks a reciprocal candidate review"
+                )
+
+    unadjudicated = candidate_ids - set(review_ids)
     if completion == "complete" and unadjudicated:
         raise ValueError(
             "Audit cannot be complete while paper candidates remain unadjudicated"
         )
+    if completion == "complete" and any(
+        review["disposition"] == "requires_split" for review in reviews
+    ):
+        raise ValueError("Audit cannot be complete while candidates require splitting")
     return {
         "completion_status": completion,
         "candidate_count": len(candidate_ids),
         "unadjudicated_candidate_count": len(unadjudicated),
         "registered_claim_count": len(claims),
+        "reviewed_candidate_count": len(review_ids),
         "release_claim_count": len(release_keys),
         "source_digest": inventory["source_digest"],
     }
