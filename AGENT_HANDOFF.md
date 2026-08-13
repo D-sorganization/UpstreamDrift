@@ -11,28 +11,36 @@ Update this file with every PR and every push to main.
 <<<<<<< HEAD
 
 - **#8557 Comprehensive Scientific Claim Audit and Open Golf Modeling
-  Program** — PR **#8572** merged through protected checks at exact remote-main
-  commit `de22e7084b596585a38cc405ca4400215eb4b8e0`, completing the archived
-  two-hand wrench slice. Branch `research/8557-model-ladder-audit` is the active
-  fourteenth fail-closed slice. It fully maps all 65 candidates in the
-  common-observable model-ladder chapter to PD-CLAIM-119 through PD-CLAIM-132.
-  It removes stale commit provenance, hashes eight direct dependencies,
-  replaces position differencing with analytic joint velocity while retaining
-  the 0.0299 m/s discrepancy, declares the two-frequency hub path, replaces a
-  false triangular capability matrix with explicit branch membership, and
-  makes the schematic derive executed/open state from evidence. It also limits
-  the rotation audit to paired proper transforms and preserves actual nonzero
-  twist in the rotated-wrench figure. Current authority: 895 candidates, 422
-  uniquely reviewed, 132 atomic claims, and 473 unadjudicated. Deterministic
-  replay is byte-identical across all 16 ladder evidence/figure artifacts; the
-  scoped scientific suites and pre-commit gates are green; all 11 chapter pages
-  have been visually inspected in the 199-page optimized PDF; and the release
-  authority validates 362 governed artifacts without mismatch. Remaining
-  gates: protected PR and exact remote-main verification.
+  Program** — PR **#8574** merged through protected checks at exact remote-main
+  commit `4bc09936a0b6d73aa59f5cd970782629e3666f5e`, completing the
+  common-observable model-ladder slice. Branch
+  `research/8557-shaft-contribution-audit` is the active fifteenth fail-closed
+  slice. It maps all 48 shaft-contribution candidates to PD-CLAIM-133 through
+  PD-CLAIM-146, with one content-identical candidate shared reciprocally with
+  PD-CLAIM-002. It replaces stale commit provenance with three source hashes,
+  derives clubhead velocity analytically, records the position-gradient audit,
+  closes the Christoffel mass-matrix-rate identity, and retains both sides of
+  the compliant-joint port. The prior 106.69 W distal-side value is now
+  distinguished from the 0.682 W two-sided relative-coordinate power. A
+  balanced-grid main-effect decomposition also corrects the prior qualitative
+  stiffness claim: damping slightly exceeds stiffness for peak strain-energy
+  main-effect share, while cut time explains 99.14% of speed variation in the
+  declared grid. The robustness heatmaps now disclose that they are a
+  fixed-damping slice, distinct from the full-factorial attribution. Evidence
+  JSON replays byte-identically at ten significant digits; all 185 trace arrays
+  replay by key within the declared 1e-6 absolute tolerance after 1e-7 storage
+  canonicalization. Current authority: 897 candidates, 470 uniquely reviewed,
+  146 atomic claims, and 427 unadjudicated. The 199-page PDF was rebuilt and
+  losslessly optimized to 1,366,049 bytes with 183 URI links and 234 outline
+  entries; physical pages 89--99 were visually inspected with no clipping or
+  unreadable content. The 362-artifact open-release bundle validates. Remaining
+  gates: scoped pre-commit, protected PR, and exact remote-main verification.
   The required Tools side task remains active and not release-ready. At live
-  revision 26 it has safely separated Tools PRs #4423 and #4424 and is building
-  genuine isolated baseline/perturbed producers plus reproducibility metadata;
-  it is still in progress. Completion still requires protected merge,
+  revision 27 its independent review found that paired-producer hashes were not
+  recomputably bound and could permit cross-design evidence relabeling; it is
+  adding canonical design/request/pair bindings, swap tests, and a separate
+  full-import MyPy fix before publication. It is still in progress. Completion
+  still requires protected merge,
   immutable UpstreamDrift pinning, typed no-impact retention, deterministic
   ensemble replay, sensitivity adequacy, and PyQt6/React parity. Biomechanics
   and Nonlinear Control NotebookLM collections remain blocked on manual

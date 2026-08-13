@@ -452,7 +452,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, arc=.35mm, opacityback=0, rightrule=.15mm, colframe=quarto-callout-note-color-frame, coltitle=black, opacitybacktitle=0.6, colback=white, toptitle=1mm, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm, titlerule=0mm, left=2mm, bottomtitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, breakable, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, colframe=quarto-callout-note-color-frame, left=2mm, toprule=.15mm, titlerule=0mm, breakable, colback=white, opacityback=0, toptitle=1mm, rightrule=.15mm, bottomtitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, leftrule=.75mm, bottomrule=.15mm, arc=.35mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -5088,7 +5088,13 @@ declared dissipative processes enter the total energy balance below.
 The same caution applies to labels such as ``centrifugal power.'' A
 coordinate projection is useful for attribution, but it is not a new
 reservoir. The mechanism is exchange through coupled geometry and
-constraint forces.
+constraint forces. Numerically, the Christoffel-form identity
+\(\dot{\mathbf q}^{\mathsf T}\mathbf C
+=\tfrac12\dot{\mathbf q}^{\mathsf T}\dot{\mathbf M}\dot{\mathbf q}\)
+closes within \(3.6\times10^{-7}\) W throughout the reference trace
+using a centered directional derivative of \(\mathbf M\). This is the
+missing mass-matrix-rate term that prevents the 8.52 J coordinate
+integral from being treated as external work.
 
 \section{Shaft Interface Force, Moment, and
 Power}\label{sec-shaft-interface}
@@ -5097,8 +5103,11 @@ The internal shaft interface transmits a planar force \(\mathbf F_s\)
 and a moment \(M_s=\tau_s+\tau_{s,d}\). The power delivered across the
 interface is the sum of force power and moment power, evaluated with
 consistent action, velocity, and sign conventions. The internal force
-performs equal and opposite work on the adjacent subsystems only after
-both translational and rotational terms are retained.
+performs equal and opposite power at the common joint point. The opposed
+couples act at different angular velocities, so their two-body sum is
+\(M_s(\omega_d-\omega_p)=M_s\dot\phi_2\): it changes shaft storage and
+dissipates energy rather than cancelling. The recorded port arrays
+retain both sides of this identity.
 
 At the reference delivery crossing, the model predicts 56.34 N of
 interface force, -3.58° of shaft flex, +5.00 N·m of elastic moment, and
@@ -5107,6 +5116,14 @@ important when this chapter is compared with
 Section~\ref{sec-two-hand-wrench}: it cannot explain the archived -19.63
 N·m pointwise two-hand midpoint couple. The two quantities belong to
 different models, reference points, and physical mechanisms.
+
+At the nearest stored 0.5 ms delivery sample, the distal-side interface
+force power is 32.09 W and couple power is 74.60 W. The two-sided joint
+power is only 0.682 W because most of those distal-side terms are
+balanced by opposite work on the proximal link; the remainder is the
+instantaneous elastic/damping relative-coordinate power. A one-sided
+106.69 W interface delivery must therefore not be reported as net
+creation of whole-system energy.
 
 \section{Closed Work--Energy Accounting}\label{sec-shaft-energy}
 
@@ -5175,11 +5192,16 @@ Deliveries Differ Modestly in the Reference Case}
 
 \end{figure}%
 
-The flexible reference reaches the declared delivery crossing at 0.42725
-s with 20.799 m/s clubhead speed. The matched rigid reduction reaches it
-2.73 ms earlier at 20.691 m/s. The flexible-minus-rigid difference is
-therefore +0.108 m/s, or approximately 0.52\% of the rigid value. Peak
-speeds are 21.213 and 21.159 m/s, respectively.
+Clubhead velocity is evaluated analytically from the generalized state
+rather than by differentiating stored positions. The flexible reference
+reaches the declared delivery crossing at 0.42725 s with 20.799 m/s
+clubhead speed. The matched rigid reduction reaches it 2.73 ms earlier
+at 20.691 m/s. The flexible-minus-rigid difference is therefore +0.108
+m/s, or approximately 0.52\% of the rigid value. Peak speeds are 21.213
+and 21.160 m/s, respectively. A second-order difference of stored tip
+positions differs from the analytic velocity by at most 0.00134 m/s in
+the flexible trace and 0.00915 m/s in the rigid trace; it is retained as
+a numerical audit, not the published velocity authority.
 
 This result supports a restrained conclusion. The admitted elastic
 coordinate changes local forces, angular accelerations, pose, and
@@ -5253,17 +5275,28 @@ first delivery crossing.
 
 }
 
-\caption{\label{fig-shaft-robustness-maps}Torque-Cut Time Dominates the
-Stiffness Effect in the Declared Grid}
+\caption{\label{fig-shaft-robustness-maps}Stiffness and Torque-Cut-Time
+Slices at Reference Damping}
 
 \end{figure}%
 
+The two heatmaps are a declared two-dimensional slice at the reference
+shaft damping of 0.6 N·m·s/rad; they do not marginalize over the other
+three damping levels. The quantitative attribution below uses all 120
+combinations in the full factorial grid.
+
 Across the full grid, delivery speed spans 12.99--22.65 m/s and crossing
-time spans 0.425--0.719 s. Peak strain energy spans 0.161--18.05 J. The
-chosen torque-cut time produces the strongest organization visible in
-the speed map; stiffness more clearly organizes stored strain energy.
-This demonstrates why equipment-only comparisons are incomplete when the
-actuation history is not matched.
+time spans 0.425--0.719 s. Peak strain energy spans 0.161--18.05 J. In a
+descriptive main-effect sum-of-squares decomposition of this balanced
+deterministic grid, torque-cut time accounts for 99.14\% of
+delivery-speed variation, while stiffness and damping account for
+0.140\% and 0.083\%, respectively. For peak strain energy, the
+corresponding main-effect fractions are 23.78\% for stiffness, 27.06\%
+for damping, and 2.62\% for cut time; 46.54\% remains in interactions
+and other nonadditive structure. These are grid descriptors, not
+sampling uncertainty or human causal shares. They demonstrate why
+equipment-only comparisons are incomplete when actuation history is not
+matched.
 
 The full grid also includes impact flex from -42.9° to +11.1°. Those
 extreme values violate the small-deflection premise implicit in a
@@ -5295,8 +5328,8 @@ ms. For the reference case, the values are 20.799, 20.915, 21.016, and
 preference.
 
 Halving the reference 0.5 ms step to 0.25 ms changes crossing speed by
-5.8 mm/s and crossing time by 41 microseconds. Doubling it to 1 ms
-changes speed by 11.8 mm/s and time by 82 microseconds. The maximum
+5.6 mm/s and crossing time by 41 microseconds. Doubling it to 1 ms
+changes speed by 11.3 mm/s and time by 82 microseconds. The maximum
 energy-closure error scales from 0.0161 J at 0.25 ms to 0.0647 J at 1
 ms, consistent with a converging fixed-step calculation around a
 piecewise command.
@@ -5304,7 +5337,8 @@ piecewise command.
 \section{Implications for Late-Downswing
 Strategy}\label{sec-shaft-strategy}
 
-Three strategy-relevant conclusions survive the declared comparisons.
+Three strategy-relevant hypotheses are motivated by the declared
+comparisons.
 
 First, transfer is geometric and state dependent. Momentum coupling can
 create large distal acceleration without being an external energy
@@ -5325,13 +5359,15 @@ shaft elastic moment at delivery is positive. Conflating these signs
 would erase the distinction between handle-contact geometry and shaft
 recoil.
 
-Accordingly, the model suggests a testable strategy principle rather
-than a prescription: create the proximal motion and relative geometry
-that permit a late, velocity-aligned distal transfer while avoiding
-unnecessary dissipative work. Whether a golfer should actively restrain,
-release, or oppose a joint at a particular instant cannot be inferred
-from segment-speed order or torque sign alone. It requires joint power,
-interface wrench, state history, and a declared outcome window.
+Accordingly, the model defines a testable optimization hypothesis rather
+than a prescription: among trajectories satisfying the same endpoint,
+loading, and actuation constraints, those with late positive distal-side
+interface work and less dissipative work may deliver greater clubhead
+speed. Whether a golfer should actively restrain, release, or oppose a
+joint at a particular instant cannot be inferred from segment-speed
+order, one-sided interface power, or torque sign alone. It requires
+two-sided joint power, interface wrench, state history, a declared
+outcome window, and governed human evidence.
 
 \section{Falsification and Next Model
 Requirements}\label{sec-shaft-falsification}

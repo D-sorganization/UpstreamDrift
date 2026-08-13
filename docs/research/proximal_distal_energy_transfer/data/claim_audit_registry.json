@@ -2,14 +2,14 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "1ce1be06a9c0b1c89f5b8349743f1f2a148a2e24b84331fee0657090e93b170b",
+    "source_digest": "c4d94a9614add91db8f5ae8cb60488c655a2759972c7637d1a93e4c382ade4e7",
     "baseline_commit": "13ea6a69585a42dc1db4b3959440ed95787c9779"
   },
   "audit_scope": {
     "completion_status": "in_progress",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "Stable claim identity, cross-platform source digests, complete post-equation narrative parsing, and fourteen high-risk evidence slices. Chapters 2 through 5, both counterfactual chapters, the proximal-velocity chapter, the archived two-hand wrench chapter, and the common-observable model-ladder chapter are fully adjudicated. The complete 895-candidate paper audit remains in progress; 422 unique candidates are reviewed and 473 remain unadjudicated."
+    "current_scope": "Stable claim identity, cross-platform source digests, complete post-equation parsing, and fifteen high-risk evidence slices. Chapters 2 through 5, both counterfactual chapters, the proximal-velocity, archived two-hand wrench, shaft-contribution, and common-observable model-ladder chapters are fully adjudicated. The complete 896-candidate audit remains in progress; 469 unique candidates are reviewed and 427 remain unadjudicated."
   },
   "dependencies": [
     {
@@ -127,6 +127,16 @@
       "release_claim_key": "shoulder_velocity_control_strategy",
       "published_status": "conditional_on_phase_geometry_wrist_state_and_objective",
       "audit_state": "pending"
+    },
+    {
+      "release_claim_key": "rotating_base_torso_velocity_transfer",
+      "published_status": "supported_conditionally_at_declared_reduced_model_tier",
+      "audit_state": "pending"
+    },
+    {
+      "release_claim_key": "human_torso_velocity_strategy",
+      "published_status": "untested",
+      "audit_state": "pending"
     }
   ],
   "candidate_reviews": [
@@ -141,10 +151,10 @@
     {
       "candidate_id": "PD-CAND-e26d04fbfce5d458",
       "disposition": "material_claims_mapped",
-      "claim_ids": ["PD-CLAIM-002"],
-      "rationale": "The paragraph reports the archived WSCG force-couple reconstruction and its numerical extremum.",
+      "claim_ids": ["PD-CLAIM-002", "PD-CLAIM-137"],
+      "rationale": "The paragraph reports the archived WSCG force-couple reconstruction and its numerical extremum. The same content appears in the shaft chapter and is also mapped to its shaft-specific claim.",
       "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-12"
+      "last_verified_on": "2026-08-13"
     },
     {
       "candidate_id": "PD-CAND-955caef0fc7773b8",
@@ -2086,10 +2096,10 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-d4b441a5d98c8250",
+      "candidate_id": "PD-CAND-7594a6bd71e63d43",
       "disposition": "material_claims_mapped",
       "claim_ids": ["PD-CLAIM-090"],
-      "rationale": "Defines the sampled nondominance rule and rotating-base evidence gap in PD-CLAIM-090.",
+      "rationale": "Retains the sampled nondominance definition; the rotating-base requirement is now executed separately but remains unvalidated in humans.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
     },
@@ -3556,6 +3566,390 @@
       "rationale": "Adjudicated within PD-CLAIM-132; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-10e1473165d41bff",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-133"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-42af732abc1661a6",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-133"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-3d5174198fc86e3b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-133"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-319aa18abeda3a5b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-133", "PD-CLAIM-134"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-95ba79cf8bed59a4",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-134"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-63db79ef5be196c5",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-134"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-57c3de3614d4afef",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-134"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-71e24bc6f2d8eb09",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-134"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-05076c6811530b6a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-135"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-e91c6c0813e33518",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-135"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-2e54a1f5e57b4c66",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-135"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-7fe1554417167f98",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-135"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-5160f0ab71931375",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-135"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-bbfe6aa96a0db055",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-135"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-bbdb99a1c0d4acf3",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-136"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-6aba407eb754bb5e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-136"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-7afcb99d604e692d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-137"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-cf9bc513f6c30a4b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-137"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-1ed9bd30a19c8ce6",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-138"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-5c60224f02b36321",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-138"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-92a3693579f97271",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-138"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-9f42e705e4a2a5ab",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-138"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-f5ac7f00eccb781e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-138"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-4ac742e0c2817c66",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-138"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-1230c7a19130f1b3",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-139"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-4e63c377e7ff133d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-139"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-36136a2b501197d3",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-139"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-57571b63a498377f",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-139"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-5a1ff847fd1711c1",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-139"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-29011d56095b3ab9",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-140"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-6664e5ad61b3a758",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-140"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-6af65d4d89d16340",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-140"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-33561084052bdb24",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-141"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-69b3a4ee0cd2be06",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-141"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-6c273381d83cb9ab",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-141"],
+      "rationale": "The heatmap is explicitly disclosed as a fixed-damping slice, distinct from the full-factorial attribution used by the registered claim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-fb2e8097e95aef02",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-141"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-4e683aeb26224706",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-141"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-1d2633fa58e02871",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-142"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-280af0f9e7603765",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-142"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-409a9491fc83f848",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-142"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-75e5ac629b2721f1",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-143"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-d7868b56e198b721",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-143"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-6e1f2efc35396aac",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-144"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-9f0faec7e3c46fe6",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-145"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-38c1ccd62ff649d7",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-145"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-d9a77dd92228fc13",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-146"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-cae51a0c17753bfb",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-146"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-d92a722b8ea6805c",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-146"],
+      "rationale": "This shaft passage participates in a registered mechanics, numerical, interpretation, limitation, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
     }
   ],
   "claims": [
@@ -3728,7 +4122,7 @@
     {
       "claim_id": "PD-CLAIM-006",
       "candidate_ids": ["PD-CAND-96f95833c562cb11"],
-      "statement": "In Fradkin and colleagues' sample of 45 male golfers aged 18–80 with handicaps 2–27, clubhead speed was strongly associated with handicap (reported r = 0.950).",
+      "statement": "In Fradkin and colleagues' sample of 45 male golfers aged 18Ã¢â‚¬â€œ80 with handicaps 2Ã¢â‚¬â€œ27, clubhead speed was strongly associated with handicap (reported r = 0.950).",
       "classification": "external_empirical_association",
       "published_status": "supported_after_scope_narrowing",
       "audit_status": "original_abstract_checked_population_limited",
@@ -3739,7 +4133,7 @@
         "https://pubmed.ncbi.nlm.nih.gov/15712503/",
         "https://doi.org/10.1016/S1440-2440(04)80265-2"
       ],
-      "model_domain": "Cross-sectional association in 45 male golfers, handicaps 2–27, ten recorded swings per golfer, with clubhead speed estimated from high-speed video.",
+      "model_domain": "Cross-sectional association in 45 male golfers, handicaps 2Ã¢â‚¬â€œ27, ten recorded swings per golfer, with clubhead speed estimated from high-speed video.",
       "uncertainty_boundary": "Does not establish drive distance, scoring causality, women, elite-only populations, launch conditions, or a universal performance metric.",
       "competing_explanations": [
         "Handicap-related differences in technique, strength, equipment, and practice exposure",
@@ -3832,7 +4226,7 @@
     {
       "claim_id": "PD-CLAIM-009",
       "candidate_ids": ["PD-CAND-7570c40d01e68acd", "PD-CAND-a16c50fe1b7a7571"],
-      "statement": "In Nesbit and Serrano's four subject-specific inverse-dynamics models, the reported work partition was 68.7–72.2% for the trunk complex, 24.3–28% for shoulder and arm joints, and 3.3–3.8% for modeled leg joints.",
+      "statement": "In Nesbit and Serrano's four subject-specific inverse-dynamics models, the reported work partition was 68.7Ã¢â‚¬â€œ72.2% for the trunk complex, 24.3Ã¢â‚¬â€œ28% for shoulder and arm joints, and 3.3Ã¢â‚¬â€œ3.8% for modeled leg joints.",
       "classification": "external_model_derived_quantitative_result",
       "published_status": "supported_with_model_partition_qualification",
       "audit_status": "source_values_checked_independent_recomputation_open",
@@ -6780,16 +7174,16 @@
       "candidate_ids": [
         "PD-CAND-9ff680105a9d278a",
         "PD-CAND-3f4317b565b0613f",
-        "PD-CAND-d4b441a5d98c8250"
+        "PD-CAND-7594a6bd71e63d43"
       ],
-      "statement": "The fixed-hub double pendulum cannot determine bilateral hand strategy or anatomical torso control; testing those questions requires a forward rotating-base two-hand tier that preserves common and differential hand motion, separated force moments and wrist moments, club state and compliance, base work, subject scaling, and registered load, work, delivery, and robustness outcomes.",
+      "statement": "A sampled two-hand strategy is nondominated only if no sampled alternative raises delivery speed without worsening a registered cost; the fixed-hub double pendulum itself cannot determine bilateral hand strategy or anatomical torso control.",
       "classification": "next_tier_mechanical_requirements",
-      "published_status": "untested_research_requirement",
-      "audit_status": "current_model_capabilities_and_missing_variables_checked",
+      "published_status": "mixed_definition_and_model_boundary",
+      "audit_status": "definition_and_remaining_anatomical_boundary_checked",
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:218",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:222",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:233"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:357"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.json",
@@ -6797,7 +7191,7 @@
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.json"
       ],
       "model_domain": "Gap analysis across current fixed-hub, fixed-shoulder two-arm, and abstract two-hand transmission tiers.",
-      "uncertainty_boundary": "The required rotating-base, subject-scaled two-hand forward tier has not yet been executed for this hypothesis.",
+      "uncertainty_boundary": "A rotating-base two-hand model tier has now executed the mechanics question, but it remains reduced, synthetic, and nonanatomical; human validation is still untested.",
       "competing_explanations": [
         "direct wrist work",
         "force-generated couple",
@@ -6812,7 +7206,7 @@
         "base-work ledger"
       ],
       "falsifier": "A lower-order model is presented as identifying bilateral anatomy, or the proposed higher tier cannot close work and wrench balances under its negative controls.",
-      "adjudication": "The section is a repo-managed next-tier specification and remains explicitly untested for anatomical torso strategy.",
+      "adjudication": "The nondominance definition remains registered. A forward rotating-base two-hand tier now addresses part of the mechanics gap, while bilateral anatomy and human strategy remain explicitly unvalidated.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
     },
@@ -8611,6 +9005,567 @@
       ],
       "falsifier": "The articulated tier violates any listed contract or fails to reproduce the reduced persistence within declared uncertainty.",
       "adjudication": "All reciprocal chapter candidates were checked against executable evidence and narrowed where a branch, transform audit, or reduced model did not support the stronger reading.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-133",
+      "candidate_ids": [
+        "PD-CAND-10e1473165d41bff",
+        "PD-CAND-42af732abc1661a6",
+        "PD-CAND-3d5174198fc86e3b",
+        "PD-CAND-319aa18abeda3a5b"
+      ],
+      "statement": "The chapter separates acceleration, work, dissipation, and one-mode shaft deformation in a declared planar surrogate and does not calibrate equipment, reconstruct a human swing, or validate the archived model.",
+      "classification": "shaft_study_scope",
+      "published_status": "declared_mechanism_study_only",
+      "audit_status": "mechanics_numerics_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:5",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:14",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:21",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:31"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_traces.npz",
+        "scripts/research/proximal_distal_energy/flexible_shaft_study.py",
+        "scripts/research/proximal_distal_energy/run_shaft_contribution_study.py",
+        "tests/research/test_flexible_shaft_study.py",
+        "tests/research/test_shaft_contribution_evidence.py"
+      ],
+      "model_domain": "One three-coordinate planar mechanism study.",
+      "uncertainty_boundary": "No equipment or human validity follows.",
+      "competing_explanations": [
+        "equipment calibration",
+        "human reconstruction",
+        "archived-model equivalence"
+      ],
+      "negative_controls": ["four explicit questions", "human nonclaim"],
+      "falsifier": "The artifacts answer a different estimand or prose exceeds the boundary.",
+      "adjudication": "Every reciprocal chapter candidate was checked against regenerated executable evidence; kinematics, two-sided power, factorial attribution, and strategy language were corrected where needed.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-134",
+      "candidate_ids": [
+        "PD-CAND-319aa18abeda3a5b",
+        "PD-CAND-95ba79cf8bed59a4",
+        "PD-CAND-63db79ef5be196c5",
+        "PD-CAND-57c3de3614d4afef",
+        "PD-CAND-71e24bc6f2d8eb09"
+      ],
+      "statement": "The flexible/rigid pair matches masses, geometry, gravity, damping, initial state, and commands; rigid is phi2=dphi2=0, while the lumped linear mode omits distributed, spatial, grip, head-inertia, and material-loss physics.",
+      "classification": "matched_model_contract",
+      "published_status": "supported_as_coordinate_reduction",
+      "audit_status": "mechanics_numerics_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:31",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:40",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:46",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:48",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:55"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_traces.npz",
+        "scripts/research/proximal_distal_energy/flexible_shaft_study.py",
+        "scripts/research/proximal_distal_energy/run_shaft_contribution_study.py",
+        "tests/research/test_flexible_shaft_study.py",
+        "tests/research/test_shaft_contribution_evidence.py"
+      ],
+      "model_domain": "Point-mass chain with one torsional coordinate.",
+      "uncertainty_boundary": "Extreme flex is a surrogate stress test.",
+      "competing_explanations": [
+        "separately tuned rigid model",
+        "distributed beam",
+        "grip compliance"
+      ],
+      "negative_controls": ["locked-coordinate reduction", "matched actuation"],
+      "falsifier": "The pair differs outside the coordinate or calibrated evidence contradicts it.",
+      "adjudication": "Every reciprocal chapter candidate was checked against regenerated executable evidence; kinematics, two-sided power, factorial attribution, and strategy language were corrected where needed.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-135",
+      "candidate_ids": [
+        "PD-CAND-05076c6811530b6a",
+        "PD-CAND-e91c6c0813e33518",
+        "PD-CAND-2e54a1f5e57b4c66",
+        "PD-CAND-7fe1554417167f98",
+        "PD-CAND-5160f0ab71931375",
+        "PD-CAND-bbfe6aa96a0db055"
+      ],
+      "statement": "Solving M qddot_j=f_j for each declared term gives an additive acceleration decomposition matching the full solve; large elastic acceleration is not energy creation and one mass-matrix entry is not a mechanism.",
+      "classification": "acceleration_decomposition",
+      "published_status": "exact_algebraic_identity",
+      "audit_status": "mechanics_numerics_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:64",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:76",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:85",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:94",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:99",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:101"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_traces.npz",
+        "scripts/research/proximal_distal_energy/flexible_shaft_study.py",
+        "scripts/research/proximal_distal_energy/run_shaft_contribution_study.py",
+        "tests/research/test_flexible_shaft_study.py",
+        "tests/research/test_shaft_contribution_evidence.py"
+      ],
+      "model_domain": "Declared relative-coordinate equations.",
+      "uncertainty_boundary": "Contributions are coordinate dependent and not work shares.",
+      "competing_explanations": [
+        "single-entry attribution",
+        "coordinate relabeling",
+        "acceleration as energy"
+      ],
+      "negative_controls": ["direct/reconstructed solve", "full mass matrix"],
+      "falsifier": "Independent equations fail the sum or acceleration is promoted to work.",
+      "adjudication": "Every reciprocal chapter candidate was checked against regenerated executable evidence; kinematics, two-sided power, factorial attribution, and strategy language were corrected where needed.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-136",
+      "candidate_ids": ["PD-CAND-bbdb99a1c0d4acf3", "PD-CAND-6aba407eb754bb5e"],
+      "statement": "The integral of (-C)^T qdot is 8.52 J but not external work; qdot^T C=0.5 qdot^T Mdot qdot closes within 3.6e-7 W and identifies kinetic-energy redistribution.",
+      "classification": "velocity_bias_energy_identity",
+      "published_status": "analytical_identity_with_numerical_closure",
+      "audit_status": "mechanics_numerics_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:109",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:119"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_traces.npz",
+        "scripts/research/proximal_distal_energy/flexible_shaft_study.py",
+        "scripts/research/proximal_distal_energy/run_shaft_contribution_study.py",
+        "tests/research/test_flexible_shaft_study.py",
+        "tests/research/test_shaft_contribution_evidence.py"
+      ],
+      "model_domain": "Christoffel-form reference trace.",
+      "uncertainty_boundary": "No external reservoir or human momentum share is identified.",
+      "competing_explanations": [
+        "centrifugal work",
+        "omitted Mdot term",
+        "coordinate artifact"
+      ],
+      "negative_controls": [
+        "directional M derivative",
+        "whole-system energy balance"
+      ],
+      "falsifier": "The identity fails or 8.52 J is called supplied work.",
+      "adjudication": "Every reciprocal chapter candidate was checked against regenerated executable evidence; kinematics, two-sided power, factorial attribution, and strategy language were corrected where needed.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-137",
+      "candidate_ids": [
+        "PD-CAND-7afcb99d604e692d",
+        "PD-CAND-e26d04fbfce5d458",
+        "PD-CAND-cf9bc513f6c30a4b"
+      ],
+      "statement": "At delivery the interface has 56.34 N force, -3.58 deg flex, +5.00 N m elastic and -0.083 N m viscous moment; nearest-sample distal powers are 32.09 and 74.60 W, but two-sided power is 0.682 W and equals M_s dphi2.",
+      "classification": "two_sided_interface_power",
+      "published_status": "supported_for_reference_trace",
+      "audit_status": "mechanics_numerics_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:132",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:142",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:149"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_traces.npz",
+        "scripts/research/proximal_distal_energy/flexible_shaft_study.py",
+        "scripts/research/proximal_distal_energy/run_shaft_contribution_study.py",
+        "tests/research/test_flexible_shaft_study.py",
+        "tests/research/test_shaft_contribution_evidence.py"
+      ],
+      "model_domain": "Internal compliant joint in the point-mass chain.",
+      "uncertainty_boundary": "One-sided 106.69 W is not whole-system creation or the WSCG couple.",
+      "competing_explanations": [
+        "force-only power",
+        "one-sided creation",
+        "grip-couple conflation"
+      ],
+      "negative_controls": [
+        "paired force powers",
+        "opposed couples",
+        "relative-power equality"
+      ],
+      "falsifier": "Two-sided closure or event reconstruction fails.",
+      "adjudication": "Every reciprocal chapter candidate was checked against regenerated executable evidence; kinematics, two-sided power, factorial attribution, and strategy language were corrected where needed.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-138",
+      "candidate_ids": [
+        "PD-CAND-1ed9bd30a19c8ce6",
+        "PD-CAND-5c60224f02b36321",
+        "PD-CAND-92a3693579f97271",
+        "PD-CAND-9f42e705e4a2a5ab",
+        "PD-CAND-f5ac7f00eccb781e",
+        "PD-CAND-4ac742e0c2817c66"
+      ],
+      "statement": "Including gravity and shaft strain, the reference receives 164.38 J control work, dissipates 9.21 J joint and 0.97 J shaft work, peaks at 0.720 J strain and 227.88 J kinetic energy, and closes within 0.0322 J and 0.0092 W off-switch RMS.",
+      "classification": "work_energy_closure",
+      "published_status": "numerical_consistency_at_declared_step",
+      "audit_status": "mechanics_numerics_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:158",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:164",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:170",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:180",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:184",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:186"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_traces.npz",
+        "scripts/research/proximal_distal_energy/flexible_shaft_study.py",
+        "scripts/research/proximal_distal_energy/run_shaft_contribution_study.py",
+        "tests/research/test_flexible_shaft_study.py",
+        "tests/research/test_shaft_contribution_evidence.py"
+      ],
+      "model_domain": "Reference 0.5 ms RK4 trace.",
+      "uncertainty_boundary": "Closure does not validate parameters.",
+      "competing_explanations": [
+        "spring as loss",
+        "unmodeled source",
+        "switch differentiation"
+      ],
+      "negative_controls": [
+        "lossless energy test",
+        "signed dissipation",
+        "refinement"
+      ],
+      "falsifier": "Independent accounting does not close or error fails to refine.",
+      "adjudication": "Every reciprocal chapter candidate was checked against regenerated executable evidence; kinematics, two-sided power, factorial attribution, and strategy language were corrected where needed.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-139",
+      "candidate_ids": [
+        "PD-CAND-1230c7a19130f1b3",
+        "PD-CAND-4e63c377e7ff133d",
+        "PD-CAND-36136a2b501197d3",
+        "PD-CAND-57571b63a498377f",
+        "PD-CAND-5a1ff847fd1711c1"
+      ],
+      "statement": "Analytic state kinematics give flexible/rigid delivery speeds 20.799/20.691 m/s at 0.42725/0.42452 s, a +0.108 m/s difference; position-gradient discrepancies are at most 0.00134/0.00915 m/s.",
+      "classification": "matched_delivery_analytic_velocity",
+      "published_status": "supported_for_reference_endpoint",
+      "audit_status": "mechanics_numerics_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:196",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:198",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:209",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:216",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:218"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_traces.npz",
+        "scripts/research/proximal_distal_energy/flexible_shaft_study.py",
+        "scripts/research/proximal_distal_energy/run_shaft_contribution_study.py",
+        "tests/research/test_flexible_shaft_study.py",
+        "tests/research/test_shaft_contribution_evidence.py"
+      ],
+      "model_domain": "Matched flexible and rigid-reduction traces.",
+      "uncertainty_boundary": "The small difference is not a general shaft benefit.",
+      "competing_explanations": [
+        "numerical differentiation",
+        "different endpoint",
+        "timing effect"
+      ],
+      "negative_controls": [
+        "analytic kinematics",
+        "gradient audit",
+        "matched crossing"
+      ],
+      "falsifier": "Independent rollout changes the rounded result or nearby calibrated cases reverse it.",
+      "adjudication": "Every reciprocal chapter candidate was checked against regenerated executable evidence; kinematics, two-sided power, factorial attribution, and strategy language were corrected where needed.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-140",
+      "candidate_ids": [
+        "PD-CAND-29011d56095b3ab9",
+        "PD-CAND-6664e5ad61b3a758",
+        "PD-CAND-6af65d4d89d16340"
+      ],
+      "statement": "Removing gravity gives 16.035 m/s, removing joint damping 22.969 m/s, and removing shaft damping 20.508 m/s with -5.66 deg flex and 2.805 J strain; these rerolled ablations are not additive human causal shares.",
+      "classification": "physics_ablations",
+      "published_status": "supported_as_model_counterfactuals",
+      "audit_status": "mechanics_numerics_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:226",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:228",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:234"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_traces.npz",
+        "scripts/research/proximal_distal_energy/flexible_shaft_study.py",
+        "scripts/research/proximal_distal_energy/run_shaft_contribution_study.py",
+        "tests/research/test_flexible_shaft_study.py",
+        "tests/research/test_shaft_contribution_evidence.py"
+      ],
+      "model_domain": "Single-term removals from the surrogate.",
+      "uncertainty_boundary": "Every removal changes the later state.",
+      "competing_explanations": [
+        "additive causal share",
+        "retuned controls",
+        "timing change"
+      ],
+      "negative_controls": [
+        "term exactly zero",
+        "otherwise matched",
+        "full rerollout"
+      ],
+      "falsifier": "Ablated terms remain or prose claims human shares.",
+      "adjudication": "Every reciprocal chapter candidate was checked against regenerated executable evidence; kinematics, two-sided power, factorial attribution, and strategy language were corrected where needed.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-141",
+      "candidate_ids": [
+        "PD-CAND-33561084052bdb24",
+        "PD-CAND-69b3a4ee0cd2be06",
+        "PD-CAND-6c273381d83cb9ab",
+        "PD-CAND-fb2e8097e95aef02",
+        "PD-CAND-4e683aeb26224706"
+      ],
+      "statement": "The 120-case grid spans 12.99--22.65 m/s, 0.425--0.719 s, 0.161--18.05 J, and -42.9 to +11.1 deg; cut time explains 99.14% of speed main-effect SS, while strain main effects are 23.78% stiffness and 27.06% damping with 46.54% residual.",
+      "classification": "grid_robustness_attribution",
+      "published_status": "descriptive_balanced_grid_result",
+      "audit_status": "mechanics_numerics_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:242",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:248",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:250",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:255",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:267"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_traces.npz",
+        "scripts/research/proximal_distal_energy/flexible_shaft_study.py",
+        "scripts/research/proximal_distal_energy/run_shaft_contribution_study.py",
+        "tests/research/test_flexible_shaft_study.py",
+        "tests/research/test_shaft_contribution_evidence.py"
+      ],
+      "model_domain": "Six stiffnesses, four damping values, five commands.",
+      "uncertainty_boundary": "Fractions are grid descriptors, not uncertainty or human shares.",
+      "competing_explanations": [
+        "stiffness-dominant claim",
+        "interactions",
+        "small-deflection violation"
+      ],
+      "negative_controls": [
+        "complete grid",
+        "explicit residual",
+        "stress labeling"
+      ],
+      "falsifier": "Ranges/fractions fail reproduction or extremes become equipment claims.",
+      "adjudication": "Every reciprocal chapter candidate was checked against regenerated executable evidence; kinematics, two-sided power, factorial attribution, and strategy language were corrected where needed.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-142",
+      "candidate_ids": [
+        "PD-CAND-1d2633fa58e02871",
+        "PD-CAND-280af0f9e7603765",
+        "PD-CAND-409a9491fc83f848"
+      ],
+      "statement": "Crossing and +/-5/10/20 ms speeds are 20.799, 20.915, 21.016, 21.156 m/s; 0.25/0.5/1 ms steps show 5.6/11.3 mm/s and 41/82 microsecond differences with monotone 0.0161--0.0647 J closure error.",
+      "classification": "endpoint_timestep_sensitivity",
+      "published_status": "supported_for_declared_windows_steps",
+      "audit_status": "mechanics_numerics_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:271",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:273",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:278"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_traces.npz",
+        "scripts/research/proximal_distal_energy/flexible_shaft_study.py",
+        "scripts/research/proximal_distal_energy/run_shaft_contribution_study.py",
+        "tests/research/test_flexible_shaft_study.py",
+        "tests/research/test_shaft_contribution_evidence.py"
+      ],
+      "model_domain": "Configuration crossing and local windows.",
+      "uncertainty_boundary": "Three steps are local refinement, not formal global order.",
+      "competing_explanations": [
+        "window preference",
+        "event interpolation",
+        "command switch"
+      ],
+      "negative_controls": [
+        "three steps",
+        "event alignment",
+        "closure scaling"
+      ],
+      "falsifier": "Values fail reproduction or estimands are silently exchanged.",
+      "adjudication": "Every reciprocal chapter candidate was checked against regenerated executable evidence; kinematics, two-sided power, factorial attribution, and strategy language were corrected where needed.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-143",
+      "candidate_ids": ["PD-CAND-75e5ac629b2721f1", "PD-CAND-d7868b56e198b721"],
+      "statement": "The model motivates only the hypothesis that momentum transfer depends on geometry, velocities, and force--velocity alignment; velocity-bias acceleration can be large without external energy supply.",
+      "classification": "geometry_momentum_hypothesis",
+      "published_status": "hypothesis_only",
+      "audit_status": "mechanics_numerics_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:286",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:288"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_traces.npz",
+        "scripts/research/proximal_distal_energy/flexible_shaft_study.py",
+        "scripts/research/proximal_distal_energy/run_shaft_contribution_study.py",
+        "tests/research/test_flexible_shaft_study.py",
+        "tests/research/test_shaft_contribution_evidence.py"
+      ],
+      "model_domain": "Research hypothesis from one planar family.",
+      "uncertainty_boundary": "No golfer motion or coaching instruction follows.",
+      "competing_explanations": [
+        "acceleration as benefit",
+        "external reservoir",
+        "segment order alone"
+      ],
+      "negative_controls": [
+        "energy identity",
+        "interface power",
+        "human nonclaim"
+      ],
+      "falsifier": "Registered higher-tier or human evidence rejects it or prose prescribes motion.",
+      "adjudication": "Every reciprocal chapter candidate was checked against regenerated executable evidence; kinematics, two-sided power, factorial attribution, and strategy language were corrected where needed.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-144",
+      "candidate_ids": ["PD-CAND-6e1f2efc35396aac"],
+      "statement": "The model motivates only the hypothesis that elastic storage changes timing and configuration, while matched endpoint performance depends on actuation, damping, and endpoint rather than peak strain alone.",
+      "classification": "elastic_timing_hypothesis",
+      "published_status": "hypothesis_only",
+      "audit_status": "mechanics_numerics_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:293"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_traces.npz",
+        "scripts/research/proximal_distal_energy/flexible_shaft_study.py",
+        "scripts/research/proximal_distal_energy/run_shaft_contribution_study.py",
+        "tests/research/test_flexible_shaft_study.py",
+        "tests/research/test_shaft_contribution_evidence.py"
+      ],
+      "model_domain": "One torsional coordinate over a broad grid.",
+      "uncertainty_boundary": "No general recoil benefit or negligibility is shown.",
+      "competing_explanations": [
+        "peak strain as benefit",
+        "unmatched actuation",
+        "endpoint change"
+      ],
+      "negative_controls": ["rigid reduction", "damping ablation", "windows"],
+      "falsifier": "Calibrated paired tests reject the relationship.",
+      "adjudication": "Every reciprocal chapter candidate was checked against regenerated executable evidence; kinematics, two-sided power, factorial attribution, and strategy language were corrected where needed.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-145",
+      "candidate_ids": ["PD-CAND-9f0faec7e3c46fe6", "PD-CAND-38c1ccd62ff649d7"],
+      "statement": "Negative torque requires object and reference: the positive shaft moment differs from the negative grip couple; late distal-side work versus dissipation is an optimization hypothesis, while restraint, release, and opposition remain unprescribed without two-sided power and human evidence.",
+      "classification": "negative_torque_optimization_hypothesis",
+      "published_status": "hypothesis_only_with_nonprescription",
+      "audit_status": "mechanics_numerics_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:298",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:304"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_traces.npz",
+        "scripts/research/proximal_distal_energy/flexible_shaft_study.py",
+        "scripts/research/proximal_distal_energy/run_shaft_contribution_study.py",
+        "tests/research/test_flexible_shaft_study.py",
+        "tests/research/test_shaft_contribution_evidence.py"
+      ],
+      "model_domain": "Cross-model interpretation and future optimization.",
+      "uncertainty_boundary": "Torque sign, one-sided power, and segment order are insufficient.",
+      "competing_explanations": [
+        "shaft/grip conflation",
+        "one-sided optimum",
+        "universal wrist strategy"
+      ],
+      "negative_controls": [
+        "object/reference",
+        "two-sided power",
+        "matched constraints",
+        "human gate"
+      ],
+      "falsifier": "Governed evidence rejects it or current prose recommends action.",
+      "adjudication": "Every reciprocal chapter candidate was checked against regenerated executable evidence; kinematics, two-sided power, factorial attribution, and strategy language were corrected where needed.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-146",
+      "candidate_ids": [
+        "PD-CAND-d9a77dd92228fc13",
+        "PD-CAND-cae51a0c17753bfb",
+        "PD-CAND-d92a722b8ea6805c"
+      ],
+      "statement": "Independent equation failure, unclosed energy, calibrated reversal, measured force/deformation mismatch, or distributed two-hand free-torque attribution would weaken the mechanism; later tiers must preserve reductions, balances, closure, and endpoints.",
+      "classification": "falsifiers_and_model_sequence",
+      "published_status": "open_research_program",
+      "audit_status": "mechanics_numerics_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:315",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:318",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_shaft_contributions.qmd:328"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_traces.npz",
+        "scripts/research/proximal_distal_energy/flexible_shaft_study.py",
+        "scripts/research/proximal_distal_energy/run_shaft_contribution_study.py",
+        "tests/research/test_flexible_shaft_study.py",
+        "tests/research/test_shaft_contribution_evidence.py"
+      ],
+      "model_domain": "Transition to higher-order measured models.",
+      "uncertainty_boundary": "Architecture is not execution evidence.",
+      "competing_explanations": [
+        "implementation error",
+        "unmodeled energy",
+        "parameter reversal",
+        "measurement mismatch",
+        "free torque"
+      ],
+      "negative_controls": ["reduction", "balance", "closure", "endpoint"],
+      "falsifier": "Any listed failure occurs without correction or a tier silently changes the observable.",
+      "adjudication": "Every reciprocal chapter candidate was checked against regenerated executable evidence; kinematics, two-sided power, factorial attribution, and strategy language were corrected where needed.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
     }

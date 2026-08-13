@@ -27,6 +27,17 @@ COLORS = {
 }
 
 
+def _style() -> None:
+    """Use deterministic portable vector-output settings."""
+    plt.rcParams.update(
+        {
+            "pdf.use14corefonts": True,
+            "svg.hashsalt": "upstreamdrift-shaft-contribution-v2",
+            "axes.unicode_minus": False,
+        }
+    )
+
+
 def _load() -> tuple[dict, dict[str, np.ndarray]]:
     with (DATA_DIR / "shaft_contribution_study.json").open(encoding="utf-8") as stream:
         record = json.load(stream)
@@ -35,9 +46,13 @@ def _load() -> tuple[dict, dict[str, np.ndarray]]:
 
 def _save(fig: plt.Figure, stem: str) -> None:
     fig.tight_layout()
-    fig.savefig(FIG_DIR / f"{stem}.pdf", bbox_inches="tight")
+    fig.savefig(
+        FIG_DIR / f"{stem}.pdf",
+        bbox_inches="tight",
+        metadata={"CreationDate": None, "ModDate": None},
+    )
     svg_path = FIG_DIR / f"{stem}.svg"
-    fig.savefig(svg_path, bbox_inches="tight")
+    fig.savefig(svg_path, bbox_inches="tight", metadata={"Date": None})
     svg_text = svg_path.read_text(encoding="utf-8")
     svg_path.write_text(
         "\n".join(line.rstrip() for line in svg_text.splitlines()) + "\n",
@@ -291,7 +306,7 @@ def fig_robustness_maps(record: dict) -> None:
         ax.set_ylabel("Torque Cut Time [s]")
         ax.set_title(title)
         fig.colorbar(image, ax=ax, shrink=0.84)
-    fig.suptitle("Cut Time Dominates the Stiffness Effect in the Declared Grid")
+    fig.suptitle("Stiffness and Cut-Time Slices at Reference Damping (0.6 N m s/rad)")
     _save(fig, "fig_shaft_robustness_maps")
 
 
@@ -381,6 +396,7 @@ def fig_flexible_pose_overlay(arrays: dict[str, np.ndarray]) -> None:
 
 def main() -> None:
     """Render all shaft-contribution figures as PDF and SVG."""
+    _style()
     FIG_DIR.mkdir(parents=True, exist_ok=True)
     record, arrays = _load()
     fig_model_schematic()

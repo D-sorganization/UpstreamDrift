@@ -185,6 +185,28 @@ def acceleration_decomposition(
     return contributions
 
 
+def velocity_bias_power_identity_residual(
+    state: np.ndarray, params: FlexibleShaftParams, *, step: float = 1e-7
+) -> float:
+    """Return ``qdot.C - 0.5 qdot.Mdot.qdot`` for a directional M derivative."""
+    checked = np.asarray(state, dtype=float)
+    if checked.shape != (6,) or not np.all(np.isfinite(checked)):
+        raise ValueError("state must be a finite six-vector")
+    if not np.isfinite(step) or step <= 0.0:
+        raise ValueError("step must be finite and positive")
+    qdot = checked[3:]
+    params3 = params.triple()
+    matrix_minus = mass_matrix(
+        checked[1] - step * qdot[1], checked[2] - step * qdot[2], params3
+    )
+    matrix_plus = mass_matrix(
+        checked[1] + step * qdot[1], checked[2] + step * qdot[2], params3
+    )
+    matrix_rate = (matrix_plus - matrix_minus) / (2.0 * step)
+    bias = coriolis_vector(checked[1], checked[2], *checked[3:], params3)
+    return float(qdot @ bias - 0.5 * qdot @ matrix_rate @ qdot)
+
+
 def _flexible_rhs(
     state: np.ndarray, time_s: float, params: FlexibleShaftParams
 ) -> np.ndarray:
@@ -365,7 +387,7 @@ def mechanical_energy(state: np.ndarray, params: FlexibleShaftParams) -> float:
 def trace_kinematics(
     trace: FlexibleTrace, params: FlexibleShaftParams
 ) -> dict[str, np.ndarray]:
-    """Return joint positions, clubhead velocity, and clubhead speed."""
+    """Return positions and exact state-derived planar point velocities."""
     triple = params.triple()
     positions = {
         name: np.empty((trace.t.size, 2)) for name in ("wrist1", "wrist2", "tip")
@@ -374,11 +396,40 @@ def trace_kinematics(
         pose = forward_kinematics(sample[0], sample[1], sample[2], triple)
         for name in positions:
             positions[name][index] = pose[name]
-    velocity = np.gradient(positions["tip"], trace.t, axis=0, edge_order=2)
+    theta = trace.state[:, 0]
+    phi1 = trace.state[:, 1]
+    phi2 = trace.state[:, 2]
+    dtheta = trace.state[:, 3]
+    dphi1 = trace.state[:, 4]
+    dphi2 = trace.state[:, 5]
+    angle2 = theta + phi1
+    angle3 = angle2 + phi2
+    rate2 = dtheta + dphi1
+    rate3 = rate2 + dphi2
+    wrist1_velocity = np.column_stack(
+        (
+            triple.L1 * np.cos(theta) * dtheta,
+            triple.L1 * np.sin(theta) * dtheta,
+        )
+    )
+    wrist2_velocity = wrist1_velocity + np.column_stack(
+        (
+            triple.L2 * np.cos(angle2) * rate2,
+            triple.L2 * np.sin(angle2) * rate2,
+        )
+    )
+    tip_velocity = wrist2_velocity + np.column_stack(
+        (
+            triple.L3 * np.cos(angle3) * rate3,
+            triple.L3 * np.sin(angle3) * rate3,
+        )
+    )
     return {
         **positions,
-        "tip_velocity": velocity,
-        "tip_speed": np.linalg.norm(velocity, axis=1),
+        "wrist1_velocity": wrist1_velocity,
+        "wrist2_velocity": wrist2_velocity,
+        "tip_velocity": tip_velocity,
+        "tip_speed": np.linalg.norm(tip_velocity, axis=1),
     }
 
 
