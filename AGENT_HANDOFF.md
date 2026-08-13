@@ -6,6 +6,28 @@ Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
 
+- **#8557 uncertainty and stability audit** — ready PR
+  [#8587](https://github.com/D-sorganization/UpstreamDrift/pull/8587) from
+  `research/8557-uncertainty-audit` at implementation commit
+  `9c573ce4c4d4be45a23f3de2f854718fe5b8046e` is the active twenty-third
+  fail-closed slice. All 28 chapter candidates are adjudicated as PD-CLAIM-215 through
+  PD-CLAIM-222. A new stability audit performs 24 leave-one-out PRCC screens,
+  six held-out Pareto jackknives, and four singular-value threshold checks.
+  Five PRCC leaders are omission-stable, but the hand-force leader splits
+  12/9/3 among limb mass, activation time constant, and activation delay;
+  several weaker signs flip. Full-sample held-out nondominance is not uniformly
+  omission-stable, and practical rank falls from six to five at a 20% threshold.
+  The full uncertainty study was regenerated against the current model source
+  after its provenance guard exposed a stale source hash; the new source hash
+  is authoritative and all numerical changes are floating-point noise (maximum
+  absolute change about 1.3e-8), so no registered conclusion changed.
+  Current authority: 923 candidates, 770 reviewed, 221 atomic claims, and 153
+  unadjudicated. Sixty-five focused/governance tests and Ruff pass. The
+  regenerated, visually inspected paper is 203 pages and 1,403,053 bytes, with 186 URI links and 235
+  outline entries; its 379-artifact qualified release has zero mismatches.
+  Remaining gates are combined tests, protected publication, and remote-main
+  verification.
+
 - **#8557 original-results reconciliation** — branch
   `research/8557-results-audit` is ready PR
   [#8585](https://github.com/D-sorganization/UpstreamDrift/pull/8585) at

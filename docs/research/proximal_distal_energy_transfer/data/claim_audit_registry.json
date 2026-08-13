@@ -2,14 +2,14 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "9d813503833168fab7161914faa07e2e0d05da643c4ead465cc6c54eb2f9cfd2",
+    "source_digest": "6f14f480796276c8b582cea1f985bc126963ac44725f68b379cb82c25a0010f1",
     "baseline_commit": "13ea6a69585a42dc1db4b3959440ed95787c9779"
   },
   "audit_scope": {
     "completion_status": "in_progress",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "The complete candidate audit remains in progress. The original results chapter is now fully reconciled and adjudicated, including a corrected level-specific late-drive effect size and narrower causal language."
+    "current_scope": "The complete audit remains in progress. The uncertainty, identifiability, and control chapter is fully adjudicated with leave-one-out and threshold sensitivity."
   },
   "dependencies": [
     {
@@ -7526,6 +7526,286 @@
         "PD-CLAIM-214"
       ],
       "rationale": "This passage participates in the independently reconciled results audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-16cf3a7eaff93807",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-215"
+      ],
+      "rationale": "This passage participates in the uncertainty and stability audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-c33453e4ebae332b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-215"
+      ],
+      "rationale": "This passage participates in the uncertainty and stability audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-e4e049dd73e2cfd0",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-215"
+      ],
+      "rationale": "This passage participates in the uncertainty and stability audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-234d163c2b3c8ef3",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-216"
+      ],
+      "rationale": "This passage participates in the uncertainty and stability audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-619619c2e635d68b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-216"
+      ],
+      "rationale": "This passage participates in the uncertainty and stability audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-702bcec2ef36ecdd",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-216"
+      ],
+      "rationale": "This passage participates in the uncertainty and stability audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-8660305972651efd",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-216"
+      ],
+      "rationale": "This passage participates in the uncertainty and stability audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-22286bfcff3ec987",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-216"
+      ],
+      "rationale": "This passage participates in the uncertainty and stability audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-67dd739750092686",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-217"
+      ],
+      "rationale": "This passage participates in the uncertainty and stability audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-a543d9ea442173f9",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-217"
+      ],
+      "rationale": "This passage participates in the uncertainty and stability audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-f1e32737b0d6450a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-217"
+      ],
+      "rationale": "This passage participates in the uncertainty and stability audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-ebe3c2df7e81dedd",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-218"
+      ],
+      "rationale": "This passage participates in the uncertainty and stability audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-12d4d37b7cae5811",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-218"
+      ],
+      "rationale": "This passage participates in the uncertainty and stability audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-b3b68653512d7354",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-218"
+      ],
+      "rationale": "This passage participates in the uncertainty and stability audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-03d638749bd71df0",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-218"
+      ],
+      "rationale": "This passage participates in the uncertainty and stability audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-ae4d0d619fe0bb32",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-218"
+      ],
+      "rationale": "This passage participates in the uncertainty and stability audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-db0bf9312ae9c13c",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-219"
+      ],
+      "rationale": "This passage participates in the uncertainty and stability audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-72a147b02ce2430a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-219"
+      ],
+      "rationale": "This passage participates in the uncertainty and stability audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-d19b3de33355f734",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-219"
+      ],
+      "rationale": "This passage participates in the uncertainty and stability audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-e13bf62d56be5ff5",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-220"
+      ],
+      "rationale": "This passage participates in the uncertainty and stability audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-4f3ad37e59405713",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-220"
+      ],
+      "rationale": "This passage participates in the uncertainty and stability audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-a97a7bf30e5bb26f",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-220"
+      ],
+      "rationale": "This passage participates in the uncertainty and stability audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-f921a66d00d93aec",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-220"
+      ],
+      "rationale": "This passage participates in the uncertainty and stability audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-f922726ed1e71b00",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-220"
+      ],
+      "rationale": "This passage participates in the uncertainty and stability audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-4836d374086821c5",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-221"
+      ],
+      "rationale": "This passage participates in the uncertainty and stability audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-f34d5609800d3c84",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-221"
+      ],
+      "rationale": "This passage participates in the uncertainty and stability audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-4724c2d7f98a3f33",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-222"
+      ],
+      "rationale": "This passage participates in the uncertainty and stability audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-d54a6e58c85bab3c",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-222"
+      ],
+      "rationale": "This passage participates in the uncertainty and stability audit.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
     }
@@ -16584,6 +16864,414 @@
       ],
       "falsifier": "The summary restores the blanket 12 percent claim or promotes model-local ordering to human advice.",
       "adjudication": "Every displayed selection, percentage, work ledger, exclusion count, and robustness statement was reconciled to committed evidence. The blanket 12 percent claim was corrected to 12.4 and 7.8 percent.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-215",
+      "candidate_ids": [
+        "PD-CAND-16cf3a7eaff93807",
+        "PD-CAND-c33453e4ebae332b",
+        "PD-CAND-e4e049dd73e2cfd0"
+      ],
+      "statement": "The chapter asks bounded screening, identifiability, and held-out command questions without treating the design as a human population.",
+      "classification": "question_and_evidential_boundary",
+      "published_status": "supported_as_registered_scope",
+      "audit_status": "evidence_reconciliation_leave_one_out_and_threshold_sensitivity_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:5",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:11",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:18"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.npz",
+        "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_stability_audit.json",
+        "scripts/research/proximal_distal_energy/uncertainty_control.py",
+        "scripts/research/proximal_distal_energy/run_uncertainty_control_study.py",
+        "scripts/research/proximal_distal_energy/audit_uncertainty_stability.py",
+        "tests/research/test_uncertainty_control.py",
+        "tests/research/test_uncertainty_control_evidence.py",
+        "tests/research/test_uncertainty_stability_audit.py"
+      ],
+      "model_domain": "Synthetic ten-coordinate moving-base two-hand flexible-club model.",
+      "uncertainty_boundary": "Parameters are engineering envelopes and commands are not muscles.",
+      "competing_explanations": [
+        "small deterministic design",
+        "nonmonotonic response",
+        "parameter interactions",
+        "threshold choice",
+        "held-out case composition",
+        "unmodeled biological and impact dynamics"
+      ],
+      "negative_controls": [
+        "independent training and held-out seeds",
+        "leave-one-global-sample-out PRCC",
+        "leave-one-held-out-case Pareto recomputation",
+        "four singular-value thresholds",
+        "wrench rank-nullity audit",
+        "constraint and contact-power closure"
+      ],
+      "falsifier": "Any result is promoted to population prevalence, physiology, or coaching.",
+      "adjudication": "Every chapter passage was checked against committed arrays, source contracts, leave-one-out rankings, Pareto membership perturbations, threshold sensitivity, and explicit nonhuman boundaries.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-216",
+      "candidate_ids": [
+        "PD-CAND-234d163c2b3c8ef3",
+        "PD-CAND-619619c2e635d68b",
+        "PD-CAND-702bcec2ef36ecdd",
+        "PD-CAND-8660305972651efd",
+        "PD-CAND-22286bfcff3ec987"
+      ],
+      "statement": "A deterministic 24-point Latin hypercube varies 12 declared inputs jointly, with separate six-case training and held-out designs.",
+      "classification": "registered_coupled_design",
+      "published_status": "supported_with_small_sample_boundary",
+      "audit_status": "evidence_reconciliation_leave_one_out_and_threshold_sensitivity_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:25",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:32",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:38",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:40",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:53"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.npz",
+        "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_stability_audit.json",
+        "scripts/research/proximal_distal_energy/uncertainty_control.py",
+        "scripts/research/proximal_distal_energy/run_uncertainty_control_study.py",
+        "scripts/research/proximal_distal_energy/audit_uncertainty_stability.py",
+        "tests/research/test_uncertainty_control.py",
+        "tests/research/test_uncertainty_control_evidence.py",
+        "tests/research/test_uncertainty_stability_audit.py"
+      ],
+      "model_domain": "Synthetic ten-coordinate moving-base two-hand flexible-club model.",
+      "uncertainty_boundary": "The ranges omit fitted correlations and are sparse for interaction estimation.",
+      "competing_explanations": [
+        "small deterministic design",
+        "nonmonotonic response",
+        "parameter interactions",
+        "threshold choice",
+        "held-out case composition",
+        "unmodeled biological and impact dynamics"
+      ],
+      "negative_controls": [
+        "independent training and held-out seeds",
+        "leave-one-global-sample-out PRCC",
+        "leave-one-held-out-case Pareto recomputation",
+        "four singular-value thresholds",
+        "wrench rank-nullity audit",
+        "constraint and contact-power closure"
+      ],
+      "falsifier": "Seeds, ranges, sample counts, coupled model, or preselection provenance fail reconciliation.",
+      "adjudication": "Every chapter passage was checked against committed arrays, source contracts, leave-one-out rankings, Pareto membership perturbations, threshold sensitivity, and explicit nonhuman boundaries.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-217",
+      "candidate_ids": [
+        "PD-CAND-67dd739750092686",
+        "PD-CAND-a543d9ea442173f9",
+        "PD-CAND-f1e32737b0d6450a"
+      ],
+      "statement": "The applied command has delay, lag, rate, asymmetric velocity, and impedance limits; outputs are mechanical proxies rather than physiological variables.",
+      "classification": "actuator_and_outcome_contract",
+      "published_status": "supported_as_synthetic_surrogate",
+      "audit_status": "evidence_reconciliation_leave_one_out_and_threshold_sensitivity_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:59",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:66",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:71"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.npz",
+        "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_stability_audit.json",
+        "scripts/research/proximal_distal_energy/uncertainty_control.py",
+        "scripts/research/proximal_distal_energy/run_uncertainty_control_study.py",
+        "scripts/research/proximal_distal_energy/audit_uncertainty_stability.py",
+        "tests/research/test_uncertainty_control.py",
+        "tests/research/test_uncertainty_control_evidence.py",
+        "tests/research/test_uncertainty_stability_audit.py"
+      ],
+      "model_domain": "Synthetic ten-coordinate moving-base two-hand flexible-club model.",
+      "uncertainty_boundary": "Effort and face/path are squared-torque and planar orientation proxies.",
+      "competing_explanations": [
+        "small deterministic design",
+        "nonmonotonic response",
+        "parameter interactions",
+        "threshold choice",
+        "held-out case composition",
+        "unmodeled biological and impact dynamics"
+      ],
+      "negative_controls": [
+        "independent training and held-out seeds",
+        "leave-one-global-sample-out PRCC",
+        "leave-one-held-out-case Pareto recomputation",
+        "four singular-value thresholds",
+        "wrench rank-nullity audit",
+        "constraint and contact-power closure"
+      ],
+      "falsifier": "A state is relabeled neural activation, muscle force, metabolic cost, or 3-D clubface.",
+      "adjudication": "Every chapter passage was checked against committed arrays, source contracts, leave-one-out rankings, Pareto membership perturbations, threshold sensitivity, and explicit nonhuman boundaries.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-218",
+      "candidate_ids": [
+        "PD-CAND-ebe3c2df7e81dedd",
+        "PD-CAND-12d4d37b7cae5811",
+        "PD-CAND-b3b68653512d7354",
+        "PD-CAND-03d638749bd71df0",
+        "PD-CAND-ae4d0d619fe0bb32"
+      ],
+      "statement": "PRCC intervals and leaders reconcile, but leave-one-out analysis shows the hand-force leader is unstable and several nonleading coefficient signs flip.",
+      "classification": "small_sample_global_sensitivity_screen",
+      "published_status": "conditional_screening_not_parameter_importance",
+      "audit_status": "evidence_reconciliation_leave_one_out_and_threshold_sensitivity_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:80",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:88",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:90",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:99",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:104"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.npz",
+        "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_stability_audit.json",
+        "scripts/research/proximal_distal_energy/uncertainty_control.py",
+        "scripts/research/proximal_distal_energy/run_uncertainty_control_study.py",
+        "scripts/research/proximal_distal_energy/audit_uncertainty_stability.py",
+        "tests/research/test_uncertainty_control.py",
+        "tests/research/test_uncertainty_control_evidence.py",
+        "tests/research/test_uncertainty_stability_audit.py"
+      ],
+      "model_domain": "Synthetic ten-coordinate moving-base two-hand flexible-club model.",
+      "uncertainty_boundary": "Five leaders persist across omissions; limb mass leads hand force in only 12 of 24 omissions.",
+      "competing_explanations": [
+        "small deterministic design",
+        "nonmonotonic response",
+        "parameter interactions",
+        "threshold choice",
+        "held-out case composition",
+        "unmodeled biological and impact dynamics"
+      ],
+      "negative_controls": [
+        "independent training and held-out seeds",
+        "leave-one-global-sample-out PRCC",
+        "leave-one-held-out-case Pareto recomputation",
+        "four singular-value thresholds",
+        "wrench rank-nullity audit",
+        "constraint and contact-power closure"
+      ],
+      "falsifier": "The paper claims causal, variance, monotonic, population, or uniformly stable parameter importance.",
+      "adjudication": "Every chapter passage was checked against committed arrays, source contracts, leave-one-out rankings, Pareto membership perturbations, threshold sensitivity, and explicit nonhuman boundaries.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-219",
+      "candidate_ids": [
+        "PD-CAND-db0bf9312ae9c13c",
+        "PD-CAND-72a147b02ce2430a",
+        "PD-CAND-d19b3de33355f734"
+      ],
+      "statement": "The planar net wrench leaves one hand-force null mode, while six summaries yield rank six at 1 to 10 percent singular thresholds and rank five at 20 percent.",
+      "classification": "structural_and_practical_identifiability",
+      "published_status": "supported_with_threshold_sensitivity",
+      "audit_status": "evidence_reconciliation_leave_one_out_and_threshold_sensitivity_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:112",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:120",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:131"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.npz",
+        "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_stability_audit.json",
+        "scripts/research/proximal_distal_energy/uncertainty_control.py",
+        "scripts/research/proximal_distal_energy/run_uncertainty_control_study.py",
+        "scripts/research/proximal_distal_energy/audit_uncertainty_stability.py",
+        "tests/research/test_uncertainty_control.py",
+        "tests/research/test_uncertainty_control_evidence.py",
+        "tests/research/test_uncertainty_stability_audit.py"
+      ],
+      "model_domain": "Synthetic ten-coordinate moving-base two-hand flexible-club model.",
+      "uncertainty_boundary": "Rank does not identify a particular estimable parameter subset or replace profile likelihood.",
+      "competing_explanations": [
+        "small deterministic design",
+        "nonmonotonic response",
+        "parameter interactions",
+        "threshold choice",
+        "held-out case composition",
+        "unmodeled biological and impact dynamics"
+      ],
+      "negative_controls": [
+        "independent training and held-out seeds",
+        "leave-one-global-sample-out PRCC",
+        "leave-one-held-out-case Pareto recomputation",
+        "four singular-value thresholds",
+        "wrench rank-nullity audit",
+        "constraint and contact-power closure"
+      ],
+      "falsifier": "Individual forces become unique from net wrench alone or practical rank is claimed threshold invariant.",
+      "adjudication": "Every chapter passage was checked against committed arrays, source contracts, leave-one-out rankings, Pareto membership perturbations, threshold sensitivity, and explicit nonhuman boundaries.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-220",
+      "candidate_ids": [
+        "PD-CAND-e13bf62d56be5ff5",
+        "PD-CAND-4f3ad37e59405713",
+        "PD-CAND-a97a7bf30e5bb26f",
+        "PD-CAND-f921a66d00d93aec",
+        "PD-CAND-f922726ed1e71b00"
+      ],
+      "statement": "Seven training and eight held-out programs are nondominated, but held-out membership changes under leave-one-case-out recomputation.",
+      "classification": "held_out_multiobjective_tradeoff",
+      "published_status": "supports_no_universal_optimum_with_small_sample_instability",
+      "audit_status": "evidence_reconciliation_leave_one_out_and_threshold_sensitivity_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:135",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:142",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:150",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:157",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:159"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.npz",
+        "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_stability_audit.json",
+        "scripts/research/proximal_distal_energy/uncertainty_control.py",
+        "scripts/research/proximal_distal_energy/run_uncertainty_control_study.py",
+        "scripts/research/proximal_distal_energy/audit_uncertainty_stability.py",
+        "tests/research/test_uncertainty_control.py",
+        "tests/research/test_uncertainty_control_evidence.py",
+        "tests/research/test_uncertainty_stability_audit.py"
+      ],
+      "model_domain": "Synthetic ten-coordinate moving-base two-hand flexible-club model.",
+      "uncertainty_boundary": "Six held-out cases cannot estimate a population Pareto set.",
+      "competing_explanations": [
+        "small deterministic design",
+        "nonmonotonic response",
+        "parameter interactions",
+        "threshold choice",
+        "held-out case composition",
+        "unmodeled biological and impact dynamics"
+      ],
+      "negative_controls": [
+        "independent training and held-out seeds",
+        "leave-one-global-sample-out PRCC",
+        "leave-one-held-out-case Pareto recomputation",
+        "four singular-value thresholds",
+        "wrench rank-nullity audit",
+        "constraint and contact-power closure"
+      ],
+      "falsifier": "One program is promoted as universal or all memberships are claimed jackknife-stable.",
+      "adjudication": "Every chapter passage was checked against committed arrays, source contracts, leave-one-out rankings, Pareto membership perturbations, threshold sensitivity, and explicit nonhuman boundaries.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-221",
+      "candidate_ids": [
+        "PD-CAND-4836d374086821c5",
+        "PD-CAND-f34d5609800d3c84"
+      ],
+      "statement": "Early restraint improves held-out lower-tail speed versus late drive while worsening planar face/path error, with numerical residuals below reported effects.",
+      "classification": "conditional_opposing_command_tradeoff",
+      "published_status": "supported_for_declared_six_case_holdout",
+      "audit_status": "evidence_reconciliation_leave_one_out_and_threshold_sensitivity_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:163",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:171"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.npz",
+        "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_stability_audit.json",
+        "scripts/research/proximal_distal_energy/uncertainty_control.py",
+        "scripts/research/proximal_distal_energy/run_uncertainty_control_study.py",
+        "scripts/research/proximal_distal_energy/audit_uncertainty_stability.py",
+        "tests/research/test_uncertainty_control.py",
+        "tests/research/test_uncertainty_control_evidence.py",
+        "tests/research/test_uncertainty_stability_audit.py"
+      ],
+      "model_domain": "Synthetic ten-coordinate moving-base two-hand flexible-club model.",
+      "uncertainty_boundary": "This is neither human preactivation nor a general strategy.",
+      "competing_explanations": [
+        "small deterministic design",
+        "nonmonotonic response",
+        "parameter interactions",
+        "threshold choice",
+        "held-out case composition",
+        "unmodeled biological and impact dynamics"
+      ],
+      "negative_controls": [
+        "independent training and held-out seeds",
+        "leave-one-global-sample-out PRCC",
+        "leave-one-held-out-case Pareto recomputation",
+        "four singular-value thresholds",
+        "wrench rank-nullity audit",
+        "constraint and contact-power closure"
+      ],
+      "falsifier": "The ordering reverses in a larger registration or closure error approaches the effect.",
+      "adjudication": "Every chapter passage was checked against committed arrays, source contracts, leave-one-out rankings, Pareto membership perturbations, threshold sensitivity, and explicit nonhuman boundaries.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-222",
+      "candidate_ids": [
+        "PD-CAND-4724c2d7f98a3f33",
+        "PD-CAND-d54a6e58c85bab3c"
+      ],
+      "statement": "The phase supports non-identifiability and objective dependence while requiring bilateral measurement and larger registered replication.",
+      "classification": "bounded_conclusions_and_falsifiers",
+      "published_status": "supported_with_human_validation_open",
+      "audit_status": "evidence_reconciliation_leave_one_out_and_threshold_sensitivity_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:179",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:186"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.npz",
+        "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_stability_audit.json",
+        "scripts/research/proximal_distal_energy/uncertainty_control.py",
+        "scripts/research/proximal_distal_energy/run_uncertainty_control_study.py",
+        "scripts/research/proximal_distal_energy/audit_uncertainty_stability.py",
+        "tests/research/test_uncertainty_control.py",
+        "tests/research/test_uncertainty_control_evidence.py",
+        "tests/research/test_uncertainty_stability_audit.py"
+      ],
+      "model_domain": "Synthetic ten-coordinate moving-base two-hand flexible-club model.",
+      "uncertainty_boundary": "No governed human outcome is analyzed.",
+      "competing_explanations": [
+        "small deterministic design",
+        "nonmonotonic response",
+        "parameter interactions",
+        "threshold choice",
+        "held-out case composition",
+        "unmodeled biological and impact dynamics"
+      ],
+      "negative_controls": [
+        "independent training and held-out seeds",
+        "leave-one-global-sample-out PRCC",
+        "leave-one-held-out-case Pareto recomputation",
+        "four singular-value thresholds",
+        "wrench rank-nullity audit",
+        "constraint and contact-power closure"
+      ],
+      "falsifier": "Club motion alone resolves bilateral force or the study is called human validation.",
+      "adjudication": "Every chapter passage was checked against committed arrays, source contracts, leave-one-out rankings, Pareto membership perturbations, threshold sensitivity, and explicit nonhuman boundaries.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
     }

@@ -101,6 +101,14 @@ activation time constant for face/path error, limb mass for hand force, grip
 separation for minimum force couple, and shaft stiffness for peak flex. These
 rankings are hypotheses for larger designs, not settled parameter importance.
 
+A leave-one-sample-out audit sharpens that boundary. Five of the six leading
+absolute-PRCC identities persist in all 24 omissions. The peak-hand-force
+leader does not: limb mass leads 12 omissions, activation time constant nine,
+and activation delay three. Several smaller coefficients also change sign.
+Thus the stable leaders are reproducible properties of this design, while the
+hand-force ranking and nonleading signs are especially fragile; none is a
+confidence interval or population statement.
+
 Identifiability is assessed separately from sensitivity [@raue2009]. At a
 single planar instant, the two hand forces contain four scalar components, but
 their transported net force and scalar couple provide only three independent
@@ -115,7 +123,10 @@ from the six summary observables. Its six singular values are 1.785, 1.146,
 six, so the full parameter vector has a nullity lower bound of six under this
 summary observation set. This is a local practical-identifiability screen, not
 a profile-likelihood analysis and not proof that every six-parameter subset is
-estimable.
+estimable. Threshold sensitivity gives rank six at 1%, 5%, and 10% of the
+largest singular value, but rank five at 20%; the registered conclusion is
+therefore stable across the first three declared thresholds, not invariant to
+threshold choice.
 
 ![Identifiability Audit. The net planar wrench cannot uniquely allocate both hand forces, and six summary observables cannot identify the full 12-parameter vector.](figures/fig_identifiability_audit.pdf){#fig-identifiability-audit width=94%}
 
@@ -135,6 +146,13 @@ held-out tradeoff in another objective. A balanced equal-range Chebyshev rule
 selects later release, a speed-priority rule selects early restrain, and a
 load-priority rule selects higher impedance. These are objective-specific
 selections, not interchangeable recommendations.
+
+Held-out Pareto membership is itself small-sample sensitive. Across the six
+leave-one-case-out recalculations, passive wrist, early drive, late drive, and
+higher impedance remain nondominated six times; restrain-then-drive, lower
+drive, and early restrain remain five times; later release remains four. The
+full-sample statement that all eight are nondominated is exact, but it should
+not be read as a stable estimate of a population Pareto set.
 
 ![Training and Independently Held-Out Pareto Comparisons. Membership changes across ensembles, so no program is promoted as universally optimal.](figures/fig_control_pareto_train_holdout.pdf){#fig-control-pareto width=100%}
 

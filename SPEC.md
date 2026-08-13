@@ -2926,3 +2926,21 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   or an independently validated human pathway.
 - The planar pointwise drift/control split shall remain distinct from a forward
   zero-command rollout and from human strategy or coaching advice.
+
+### F-8557.18: Uncertainty and Control Stability Audit
+
+- Point PRCC leaders shall be accompanied by deterministic leave-one-sample-out
+  leader and sign-stability counts; sparse screening shall not be presented as
+  causal, variance, or population parameter importance.
+- Practical-identifiability rank shall be reported across multiple fractions
+  of the largest singular value and shall not imply that a particular parameter
+  subset is estimable.
+- Held-out Pareto membership from six cases shall be recomputed under every
+  leave-one-case-out omission; full-sample nondominance shall not be called a
+  stable population Pareto set.
+- Engineering parameter envelopes, mechanical effort/face proxies, and bounded
+  command states shall remain distinct from population distributions,
+  physiology, metabolic cost, or three-dimensional club delivery.
+- Individual hand forces shall remain structurally non-identifiable from a net
+  planar wrench without bilateral measurements or an additional constitutive
+  assumption.
