@@ -6,10 +6,10 @@
     "baseline_commit": "13ea6a69585a42dc1db4b3959440ed95787c9779"
   },
   "audit_scope": {
-    "completion_status": "in_progress",
+    "completion_status": "complete",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "The complete audit remains in progress. The transmission robustness chapter is fully adjudicated with jackknife and local-linear sensitivity."
+    "current_scope": "The complete 925-candidate paper inventory is adjudicated. Repeated methods, summary, limitation, provenance, and model-tier passages inherit the primary claim boundaries; editorial anchors are explicitly classified as nonclaims."
   },
   "dependencies": [
     {
@@ -8308,6 +8308,1103 @@
       "rationale": "This passage participates in the transmission robustness audit.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-384556ac26fc8724",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-007",
+        "PD-CLAIM-008",
+        "PD-CLAIM-214"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-7b974d9981fbe9c6",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-004",
+        "PD-CLAIM-223"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-f405c095d850ac4f",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-214"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-82b5634777708c30",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-214"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-52a2c44f84a0278d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-022",
+        "PD-CLAIM-214"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-82db2771cfb833af",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-047",
+        "PD-CLAIM-058"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-a9723406cdb2249e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-050",
+        "PD-CLAIM-215"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-2ab01a405fe71e34",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-050",
+        "PD-CLAIM-215"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-674d270b91dc88fc",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-050",
+        "PD-CLAIM-214"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-6ba1b7b897d652e0",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-050",
+        "PD-CLAIM-214"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-bebfd69fa0f3fe49",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This heading, equation fragment, figure/table anchor, command block, navigation statement, or repository pointer asserts no standalone scientific result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-4b987e9adf0c4921",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-076"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-3f24b7bec1a13566",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-235"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-3c07c3b67ea18ea3",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-235"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-22fff2ffb5e930ab",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-235"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-91a57be070bd4382",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-235",
+        "PD-CLAIM-236"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-ce7dfe2f88c50b9e",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This heading, equation fragment, figure/table anchor, command block, navigation statement, or repository pointer asserts no standalone scientific result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-6a547198e8748c41",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This heading, equation fragment, figure/table anchor, command block, navigation statement, or repository pointer asserts no standalone scientific result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-37da957d8de007e5",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-236"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-0b6cbdaa32c9dc7c",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This heading, equation fragment, figure/table anchor, command block, navigation statement, or repository pointer asserts no standalone scientific result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-4c9593273e19f5a6",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-235",
+        "PD-CLAIM-236"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-6f8bc79328b9bb51",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-237"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-ee8b3d4f4aeb19b1",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This heading, equation fragment, figure/table anchor, command block, navigation statement, or repository pointer asserts no standalone scientific result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-53f5d0b5a5122e3b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-238"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-b9f1bae7492c6c45",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-238"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-832e7c9916653440",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-241"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-50a3171488967d1a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-230",
+        "PD-CLAIM-241"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-367561442ab024a8",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-223",
+        "PD-CLAIM-241"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-3af40323c0ff313e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-241"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-4908f1e4a94179d1",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-239",
+        "PD-CLAIM-240"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-754200ff072e2f67",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-223",
+        "PD-CLAIM-239"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-0e0d81483621513a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-239",
+        "PD-CLAIM-240"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-78075195f3a5c55b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-223",
+        "PD-CLAIM-239"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-c6851af22838909b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-223",
+        "PD-CLAIM-239"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-5a5705ae572a585b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-223",
+        "PD-CLAIM-239"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-4025ee9f2eefeddb",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-223",
+        "PD-CLAIM-239"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-1a8e629a487d47b1",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-239",
+        "PD-CLAIM-240"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-6f754c2efe8bb75b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-240"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-894295e8a2324065",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-239",
+        "PD-CLAIM-240"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-202051f896defe8a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-240"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-e2e0449dd1d086b4",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-239",
+        "PD-CLAIM-240"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-a345790d750e6b57",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-239",
+        "PD-CLAIM-240"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-51dfce3188daba5e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-240"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-64c1e1f03ff86625",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-223",
+        "PD-CLAIM-239"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-30e25fdcda7653d6",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-223",
+        "PD-CLAIM-241"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-7ff19b66654551aa",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-223",
+        "PD-CLAIM-241"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-788e4fc5a7ff1dc5",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-223",
+        "PD-CLAIM-241"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-9da5c12ad10a77c9",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-223",
+        "PD-CLAIM-241"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-0044f981df612835",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-223",
+        "PD-CLAIM-241"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-5b93ad1d66007a40",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-223",
+        "PD-CLAIM-241"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-7667c0e512dd9e84",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-128",
+        "PD-CLAIM-229"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-e22bc4cdd8fe22cb",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-130",
+        "PD-CLAIM-206",
+        "PD-CLAIM-234"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-9d0c920870e583ce",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-223"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-8b92a2b1f44cafb3",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-051",
+        "PD-CLAIM-058"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-7c01f798d7a8ab44",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-223"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-bab8e8cd5403f689",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-223"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-348d24a4574e3fad",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-051",
+        "PD-CLAIM-058"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-073e4bf6f83508d5",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-207",
+        "PD-CLAIM-214"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-d5fd193d6bef6a80",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-207",
+        "PD-CLAIM-214"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-e536adbdfdb1d469",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-207",
+        "PD-CLAIM-214"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-ace8baee0f880d39",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-207",
+        "PD-CLAIM-214"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-e8941b313c3401ed",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-207",
+        "PD-CLAIM-214"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-44d2675295ae7789",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-207",
+        "PD-CLAIM-208"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-93506903c78e4e93",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-209"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-2973f61fd16556f9",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-213"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-053c7a1be8c9d5d8",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-207",
+        "PD-CLAIM-214"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-3e294fff579a8fee",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-207",
+        "PD-CLAIM-208"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-3054783d719679c3",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-211"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-60912032cee130ab",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-211"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-e7866967ad751a93",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-212"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-0e89d298372b6482",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-098",
+        "PD-CLAIM-099"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-7ab3c5324c999fa4",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-098",
+        "PD-CLAIM-099"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-57551870727e4c64",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-211"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-131df2a08a6dbfc4",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-213"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-88441da2d1b1dc7c",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-207",
+        "PD-CLAIM-214"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-eb17795da2f5fba6",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-208",
+        "PD-CLAIM-214"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-248e726470667ce5",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-211",
+        "PD-CLAIM-212"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-aa06823a134c06f0",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-208",
+        "PD-CLAIM-214"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-7c1423dce490ab9b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-132",
+        "PD-CLAIM-214"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-afbc50ff19058ed3",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-132",
+        "PD-CLAIM-214"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-26221cfd905990fb",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-007",
+        "PD-CLAIM-008",
+        "PD-CLAIM-214"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-1fcf0c163c7b8b70",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-208",
+        "PD-CLAIM-211",
+        "PD-CLAIM-212"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-18f049f59d0909e6",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-213",
+        "PD-CLAIM-214"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-b6165e33178ea346",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-003"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-017f52a6e550190e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-123"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-bd8bc18de707a023",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-227",
+        "PD-CLAIM-229"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-9cfa1145efd0be56",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-126"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-3a28f92e6b8aa6a3",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-127"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-58e2fdab32244d00",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-219",
+        "PD-CLAIM-220",
+        "PD-CLAIM-221"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-8fadc01cf2fdc629",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-206"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-2641f160380c0508",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-223"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-efee29754ee09df2",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-130",
+        "PD-CLAIM-206",
+        "PD-CLAIM-234"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-a2ac86d1b295e4e4",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-127"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-5f49580176ce4034",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This heading, equation fragment, figure/table anchor, command block, navigation statement, or repository pointer asserts no standalone scientific result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-fa5f064559bb1c98",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-127"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-601f18c64a7c62fa",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-223"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-fc0fb848d84d02cb",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-128",
+        "PD-CLAIM-132",
+        "PD-CLAIM-234"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-4a557d919aeb6342",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-128",
+        "PD-CLAIM-132",
+        "PD-CLAIM-234"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-0c2235723b633ab0",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This heading, equation fragment, figure/table anchor, command block, navigation statement, or repository pointer asserts no standalone scientific result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-c214da13b0628ac2",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-223"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-13cb53f154dc0811",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-211",
+        "PD-CLAIM-223"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-a8dad937ec740025",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This heading, equation fragment, figure/table anchor, command block, navigation statement, or repository pointer asserts no standalone scientific result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-0f3b207a3e11255c",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-207"
+      ],
+      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-25f2535da0af9221",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This heading, equation fragment, figure/table anchor, command block, navigation statement, or repository pointer asserts no standalone scientific result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-8d94385a32854a1c",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This heading, equation fragment, figure/table anchor, command block, navigation statement, or repository pointer asserts no standalone scientific result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
     }
   ],
   "claims": [
@@ -8350,14 +9447,16 @@
       "claim_id": "PD-CLAIM-003",
       "release_claim_key": "interaction_dynamics_planar",
       "candidate_ids": [
-        "PD-CAND-955caef0fc7773b8"
+        "PD-CAND-955caef0fc7773b8",
+        "PD-CAND-b6165e33178ea346"
       ],
       "statement": "The forward constrained planar two-arm zero-command branch retains a negative force-generated club couple for 50 ms and reaches -7.43 N m.",
       "classification": "model_conditional_forward_counterfactual",
       "published_status": "supported_at_declared_model_tier",
       "audit_status": "provisionally_reproduced_not_independently_reviewed",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:259"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:259",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:30"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.json",
@@ -8379,20 +9478,22 @@
       "falsifier": "The sign or duration fails timestep/stabilization convergence, contact power does not close, or zero moment arms do not collapse the couple.",
       "adjudication": "The declared model result is bounded correctly in the prose; independent solver reproduction remains open.",
       "reviewer": "Codex initial audit",
-      "last_verified_on": "2026-08-12"
+      "last_verified_on": "2026-08-13"
     },
     {
       "claim_id": "PD-CLAIM-004",
       "release_claim_key": "geometry_transfer_spatial_common_state",
       "candidate_ids": [
-        "PD-CAND-227a00e5fa408d07"
+        "PD-CAND-227a00e5fa408d07",
+        "PD-CAND-7b974d9981fbe9c6"
       ],
       "statement": "MuJoCo inverse dynamics and an independent Lagrange-Christoffel formulation agree to a maximum relative discrepancy of 2.14e-11 across the registered reduced spatial common-state study.",
       "classification": "cross_formulation_numerical_verification",
       "published_status": "supported_at_declared_model_tier",
       "audit_status": "provisionally_reproduced_not_cross_engine_forward_validation",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:123"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:123",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch01_introduction.qmd:4"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json",
@@ -8413,7 +9514,7 @@
       "falsifier": "Recomputation exceeds the preregistered tolerance or an independently authored formulation disagrees after convention alignment.",
       "adjudication": "The paper appropriately limits this to cross-formulation common-state verification; stronger independence remains open.",
       "reviewer": "Codex initial audit",
-      "last_verified_on": "2026-08-12"
+      "last_verified_on": "2026-08-13"
     },
     {
       "claim_id": "PD-CLAIM-005",
@@ -8496,7 +9597,9 @@
         "PD-CAND-7f8f02cf74555681",
         "PD-CAND-3c12b7e2054e4237",
         "PD-CAND-eca9e7374e7231c3",
-        "PD-CAND-61e9db608ffdbb62"
+        "PD-CAND-61e9db608ffdbb62",
+        "PD-CAND-384556ac26fc8724",
+        "PD-CAND-26221cfd905990fb"
       ],
       "statement": "Under commonly used segment and angular-velocity definitions, proximal-to-distal peak ordering is common in sampled skilled golfers but is not universal or measurement-definition invariant.",
       "classification": "external_empirical_synthesis",
@@ -8507,7 +9610,9 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:59",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:126",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:96",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:118"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:118",
+        "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd:10",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:5"
       ],
       "evidence_artifacts": [
         "https://doi.org/10.1080/14763141.2010.535842",
@@ -8529,13 +9634,15 @@
       "falsifier": "A representative preregistered synthesis shows the pattern is not more prevalent than alternative orderings under prespecified definitions.",
       "adjudication": "The original blanket statement across measurement systems and populations was too broad. The revised paper states commonality only in sampled skilled groups and foregrounds method dependence and non-universality.",
       "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-12"
+      "last_verified_on": "2026-08-13"
     },
     {
       "claim_id": "PD-CLAIM-008",
       "candidate_ids": [
         "PD-CAND-96f95833c562cb11",
-        "PD-CAND-efa294cfd5f1828d"
+        "PD-CAND-efa294cfd5f1828d",
+        "PD-CAND-384556ac26fc8724",
+        "PD-CAND-26221cfd905990fb"
       ],
       "statement": "The temporal order of segment angular-velocity peaks is not, by itself, a measurement of mechanical energy transfer.",
       "classification": "mechanical_definition_and_limitation",
@@ -8543,7 +9650,9 @@
       "audit_status": "supported_by_dimensional_and_balance_law_analysis",
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch01_introduction.qmd:17",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd:108"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd:108",
+        "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd:10",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:5"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd",
@@ -8563,7 +9672,7 @@
       "falsifier": "A valid general identity derives energy-transfer magnitude and direction uniquely from peak ordering without force, torque, displacement, or inertia information.",
       "adjudication": "Angular-velocity peak times do not contain the force and displacement information required by mechanical power or work. The distinction is retained as a methodological foundation rather than an empirical generalization.",
       "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-12"
+      "last_verified_on": "2026-08-13"
     },
     {
       "claim_id": "PD-CLAIM-009",
@@ -9022,7 +10131,8 @@
         "PD-CAND-659b3feb9e8aaf8d",
         "PD-CAND-922607fe383df435",
         "PD-CAND-f7367774e924b493",
-        "PD-CAND-462476573c0cf4be"
+        "PD-CAND-462476573c0cf4be",
+        "PD-CAND-52a2c44f84a0278d"
       ],
       "statement": "Pickering and Vickers' driven fixed-hub double-pendulum sweep found higher impact clubhead velocity with later release and minimum golfer-supplied energy for natural release.",
       "classification": "external_computational_model_result",
@@ -9032,7 +10142,8 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:151",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:203",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:224",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactuals.qmd:22"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactuals.qmd:22",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch01_introduction.qmd:41"
       ],
       "evidence_artifacts": [
         "https://doi.org/10.1046/j.1460-2687.1999.00028.x",
@@ -9053,7 +10164,7 @@
       "falsifier": "A faithful reimplementation of the published equations and parameters fails to reproduce the reported monotonic delayed-release result or natural-release energy minimum.",
       "adjudication": "The primary publisher abstract supports both findings within the declared model. The manuscript now rejects the former universal 'strictly inferior' extrapolation.",
       "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-12"
+      "last_verified_on": "2026-08-13"
     },
     {
       "claim_id": "PD-CLAIM-023",
@@ -9911,7 +11022,8 @@
       "claim_id": "PD-CLAIM-047",
       "candidate_ids": [
         "PD-CAND-a4c61849a5d7bee2",
-        "PD-CAND-836dc14b06a1f1d3"
+        "PD-CAND-836dc14b06a1f1d3",
+        "PD-CAND-82db2771cfb833af"
       ],
       "statement": "Joint powers and segment angular velocities alone cannot identify energy flow or muscle coordination; muscle-induced acceleration and power analyses require a declared dynamical simulation, and a zero-control or zero-velocity-field decomposition is a different intervention.",
       "classification": "external_methodological_limitation_and_model_boundary",
@@ -9919,7 +11031,8 @@
       "audit_status": "primary_review_abstract_checked_golf_application_open",
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:338",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:350"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:350",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch01_introduction.qmd:54"
       ],
       "evidence_artifacts": [
         "https://doi.org/10.1016/S0966-6362(02)00068-1",
@@ -10013,7 +11126,11 @@
       "candidate_ids": [
         "PD-CAND-a4c61849a5d7bee2",
         "PD-CAND-82046010bbf2ad7a",
-        "PD-CAND-d6df055d20cefafb"
+        "PD-CAND-d6df055d20cefafb",
+        "PD-CAND-a9723406cdb2249e",
+        "PD-CAND-2ab01a405fe71e34",
+        "PD-CAND-674d270b91dc88fc",
+        "PD-CAND-6ba1b7b897d652e0"
       ],
       "statement": "A falsifiable proximal-distal timing test must define its kinematic sequence and pair it with segment or interface power, state- and coordinate-sensitivity analysis, and three-dimensional residuals; peak order alone cannot establish energy transfer or an optimal control strategy.",
       "classification": "cross_source_falsifiability_requirement",
@@ -10022,7 +11139,11 @@
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:338",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:367",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:387"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:387",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch01_introduction.qmd:71",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch01_introduction.qmd:73",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch01_introduction.qmd:91",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch01_introduction.qmd:93"
       ],
       "evidence_artifacts": [
         "https://doi.org/10.1016/S0966-6362(02)00068-1",
@@ -10050,14 +11171,18 @@
     {
       "claim_id": "PD-CLAIM-051",
       "candidate_ids": [
-        "PD-CAND-9fcbd3f297367ba2"
+        "PD-CAND-9fcbd3f297367ba2",
+        "PD-CAND-8b92a2b1f44cafb3",
+        "PD-CAND-348d24a4574e3fad"
       ],
       "statement": "The two-lever, one-hinge golf model is a historically established analytical model lineage, but that lineage does not empirically validate a fixed hub, planar rigid shaft, or human wrist-control program.",
       "classification": "external_model_lineage_and_transport_boundary",
       "published_status": "supported_as_model_lineage_not_human_validation",
       "audit_status": "publisher_records_and_review_scope_checked",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:137"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:137",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_platform.qmd:11",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_platform.qmd:33"
       ],
       "evidence_artifacts": [
         "https://doi.org/10.1119/1.1976419",
@@ -10337,7 +11462,10 @@
         "PD-CAND-da3c0e3b9e45e4dd",
         "PD-CAND-f120b0f493750f4b",
         "PD-CAND-16867bfa4429df68",
-        "PD-CAND-1e409d963952b9f7"
+        "PD-CAND-1e409d963952b9f7",
+        "PD-CAND-82db2771cfb833af",
+        "PD-CAND-8b92a2b1f44cafb3",
+        "PD-CAND-348d24a4574e3fad"
       ],
       "statement": "A pointwise zero-torque counterfactual recomputes acceleration and reaction at independently state-matched samples, whereas a matched-state killswitch integrates a separate zero-command future; at the registered 0.251 s cut and 0.120 s horizon the futures separate by 0.540 rad and 8.49 rad/s.",
       "classification": "counterfactual_contract_and_model_result",
@@ -10347,7 +11475,10 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:293",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:299",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:305",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:317"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:317",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch01_introduction.qmd:54",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_platform.qmd:11",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_platform.qmd:33"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/interaction_force_summary.json",
@@ -11086,7 +12217,8 @@
         "PD-CAND-bc33ab0c3549456c",
         "PD-CAND-33f3767b282d44f9",
         "PD-CAND-43048748dad5d9d4",
-        "PD-CAND-85073389f5c8911e"
+        "PD-CAND-85073389f5c8911e",
+        "PD-CAND-4b987e9adf0c4921"
       ],
       "statement": "Ground-reaction ZTCF and ZVCF are overlapping pointwise interventions, not trajectories or complementary causes; the displayed ZVCF shortcut is physical only when the declared velocity and autonomous holonomic constraint biases vanish at zero velocity, otherwise the reaction must be recomputed with remaining rheonomic terms.",
       "classification": "counterfactual_contract_and_validity_boundary",
@@ -11096,7 +12228,8 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03c_ground_reaction_drift.qmd:119",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03c_ground_reaction_drift.qmd:126",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03c_ground_reaction_drift.qmd:134",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03c_ground_reaction_drift.qmd:143"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03c_ground_reaction_drift.qmd:143",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03c_ground_reaction_drift.qmd:135"
       ],
       "evidence_artifacts": [
         "src/shared/python/physics/contact_reaction_decomposition.py",
@@ -11978,7 +13111,9 @@
         "PD-CAND-58f58099c5ac22af",
         "PD-CAND-0faabc6eaa3f98d9",
         "PD-CAND-f1aa184e63168366",
-        "PD-CAND-bbab3bd9df63fece"
+        "PD-CAND-bbab3bd9df63fece",
+        "PD-CAND-0e89d298372b6482",
+        "PD-CAND-7ab3c5324c999fa4"
       ],
       "statement": "Each forward counterfactual pair begins from the same achieved state, applies commanded or zero joint torque thereafter, evaluates both futures independently, records affine closure, and samples commands at every state time including the terminal endpoint; this fixes the prior endpoint-switch mismatch in terminal force and power.",
       "classification": "matched_state_forward_contract",
@@ -11990,7 +13125,9 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactual_ensemble.qmd:20",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactual_ensemble.qmd:28",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactual_ensemble.qmd:33",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactual_ensemble.qmd:39"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactual_ensemble.qmd:39",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_methods.qmd:137",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_methods.qmd:148"
       ],
       "evidence_artifacts": [
         "scripts/research/proximal_distal_energy/counterfactual_ensemble.py",
@@ -12026,7 +13163,9 @@
         "PD-CAND-1dc60102271f2960",
         "PD-CAND-0af38588241bff71",
         "PD-CAND-58ef5978224564a6",
-        "PD-CAND-7559b4c5368cb1e0"
+        "PD-CAND-7559b4c5368cb1e0",
+        "PD-CAND-0e89d298372b6482",
+        "PD-CAND-7ab3c5324c999fa4"
       ],
       "statement": "Across 96 registered cut-time and horizon comparisons, commanded-minus-zero-torque force work is phase- and horizon-dependent, ranging from -30.876 J to +66.169 J at 1 ms; selected zero-command futures retain positive interface-force power for 78 ms at the 0.30 s cut and the full registered 80 ms at the 0.22 s cut.",
       "classification": "quantitative_forward_counterfactual_result",
@@ -12040,7 +13179,9 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactual_ensemble.qmd:79",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactual_ensemble.qmd:86",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactual_ensemble.qmd:88",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactual_ensemble.qmd:100"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactual_ensemble.qmd:100",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_methods.qmd:137",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_methods.qmd:148"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/counterfactual_ensemble.json",
@@ -13079,7 +14220,8 @@
       "candidate_ids": [
         "PD-CAND-f3f568935b96787c",
         "PD-CAND-edfa1e983d02bfee",
-        "PD-CAND-27d9fdb71b063cb5"
+        "PD-CAND-27d9fdb71b063cb5",
+        "PD-CAND-017f52a6e550190e"
       ],
       "statement": "The separately executed coupled moving-base planar tier evolves finite-mass base translation, two-hand closure, and one torsional club mode; its negative force couple persists for a 50 ms same-state zero-command branch, coincident moment arms remove it, and contact-power/work-energy identities refine.",
       "classification": "coupled_moving_base_bridge",
@@ -13088,7 +14230,8 @@
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:163",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:170",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:178"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:178",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:38"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
@@ -13224,7 +14367,8 @@
         "PD-CAND-31e1c3eb264b6a21",
         "PD-CAND-a4132a67ac5f598e",
         "PD-CAND-c3e175473e9d86c3",
-        "PD-CAND-a344ad1d62814e69"
+        "PD-CAND-a344ad1d62814e69",
+        "PD-CAND-9cfa1145efd0be56"
       ],
       "statement": "The reduced 20-coordinate full-body common-state study evaluates 61 states in MuJoCo and an independent Lagrange--Christoffel formulation with 2.14e-11 maximum relative generalized-action discrepancy; signed moment-arm reversal flips the -4.32 N m force couple and coincident points remove it.",
       "classification": "reduced_spatial_common_state_inverse_dynamics",
@@ -13234,7 +14378,8 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:251",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:258",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:264",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:367"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:367",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:55"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
@@ -13270,7 +14415,10 @@
         "PD-CAND-64e3d4dfc5ee4bc3",
         "PD-CAND-07ddae289f7864df",
         "PD-CAND-acab20dfe1ad13f4",
-        "PD-CAND-4b014ecc4e16a963"
+        "PD-CAND-4b014ecc4e16a963",
+        "PD-CAND-3a28f92e6b8aa6a3",
+        "PD-CAND-a2ac86d1b295e4e4",
+        "PD-CAND-fa5f064559bb1c98"
       ],
       "statement": "The reduced MuJoCo/Pinocchio forward-contact tier removes the grounded driver at 0.180 s from an exact same state; both engines retain a negative swing-normal force couple for 37.5 ms with approximately -0.409 N m minimum, coincident grips give zero, reversed arms flip sign below 9.2e-16 N m, and trajectory/wrench/orientation/energy gates pass with monotone work-energy refinement.",
       "classification": "reduced_spatial_forward_contact_persistence",
@@ -13280,7 +14428,10 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:272",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:278",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:286",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:373"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:373",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:64",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:104",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:138"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
@@ -13319,7 +14470,10 @@
         "PD-CAND-8be30b67be37e89f",
         "PD-CAND-c452c1575879a613",
         "PD-CAND-d200cb0a538c6e52",
-        "PD-CAND-d2bfd72f6462a516"
+        "PD-CAND-d2bfd72f6462a516",
+        "PD-CAND-7667c0e512dd9e84",
+        "PD-CAND-fc0fb848d84d02cb",
+        "PD-CAND-4a557d919aeb6342"
       ],
       "statement": "The discrepancy matrix records explicit branch capabilities rather than cumulative triangular inheritance; nine bounded findings are supported somewhere in executed tiers, while anatomical-arm, distributed-shaft-magnitude, and independently authored humanoid force-history transport remain untested.",
       "classification": "model_discrepancy_and_survival_boundary",
@@ -13329,7 +14483,10 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:294",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:296",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:302",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:319"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:319",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:56",
+        "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:12",
+        "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:14"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
@@ -13403,7 +14560,9 @@
         "PD-CAND-33f82aa81931f49b",
         "PD-CAND-b91f47da27c1513f",
         "PD-CAND-e6e35519ef68c092",
-        "PD-CAND-0ec9e1a76323e3fb"
+        "PD-CAND-0ec9e1a76323e3fb",
+        "PD-CAND-e22bc4cdd8fe22cb",
+        "PD-CAND-efee29754ee09df2"
       ],
       "statement": "Articulated subject-scaled forward contact remains open; a credible cross-engine gate requires identical model identity, frame/reference metadata, force/moment balance, constraint rank, transported power, physical settings, and event-aligned error separation, and engine capability alone is not execution evidence.",
       "classification": "articulated_cross_engine_gate",
@@ -13413,7 +14572,9 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:380",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:389",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:394",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:403"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:403",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:66",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:101"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
@@ -13488,7 +14649,11 @@
       "candidate_ids": [
         "PD-CAND-b9431c1dd8029d1e",
         "PD-CAND-c154a0643c3bc5a2",
-        "PD-CAND-23d01986b4ac7dc1"
+        "PD-CAND-23d01986b4ac7dc1",
+        "PD-CAND-7c1423dce490ab9b",
+        "PD-CAND-afbc50ff19058ed3",
+        "PD-CAND-fc0fb848d84d02cb",
+        "PD-CAND-4a557d919aeb6342"
       ],
       "statement": "The program remains limited by surrogate links, prescribed or translation-only bases, ideal planar contacts, lumped/rigid clubs, prescribed spatial hand loads, carriage contacts, and absent subject/tissue calibration; the next falsification tier couples articulated arms and a distributed shaft under the same observable and exact same-state branch.",
       "classification": "ladder_limitations_and_next_falsifier",
@@ -13497,7 +14662,11 @@
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:432",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:434",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:447"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:447",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd:63",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd:67",
+        "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:12",
+        "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:14"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
@@ -16914,7 +18083,10 @@
       "candidate_ids": [
         "PD-CAND-c81c7415aaf27d17",
         "PD-CAND-c06392d08940ad2e",
-        "PD-CAND-a61ee0b6aa1a4bbd"
+        "PD-CAND-a61ee0b6aa1a4bbd",
+        "PD-CAND-e22bc4cdd8fe22cb",
+        "PD-CAND-8fadc01cf2fdc629",
+        "PD-CAND-efee29754ee09df2"
       ],
       "statement": "Bilateral six-axis wrenches, pressure, constrained inverse dynamics, stiffness/delay, EMG, shaft, launch, and participant holdout are required to test the allocation and preload predictions; those human results remain unexecuted.",
       "classification": "registered_measurement_and_human_falsification_gate",
@@ -16923,7 +18095,10 @@
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:204",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:207",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:220"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:220",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:66",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:84",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:101"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/torque_allocation_preload_study.json",
@@ -16964,7 +18139,17 @@
         "PD-CAND-a990545d1f09e99e",
         "PD-CAND-dcb34c2a460126a8",
         "PD-CAND-f9014594ae3c6fad",
-        "PD-CAND-30a797237f52ce39"
+        "PD-CAND-30a797237f52ce39",
+        "PD-CAND-073e4bf6f83508d5",
+        "PD-CAND-d5fd193d6bef6a80",
+        "PD-CAND-e536adbdfdb1d469",
+        "PD-CAND-ace8baee0f880d39",
+        "PD-CAND-e8941b313c3401ed",
+        "PD-CAND-44d2675295ae7789",
+        "PD-CAND-053c7a1be8c9d5d8",
+        "PD-CAND-3e294fff579a8fee",
+        "PD-CAND-88441da2d1b1dc7c",
+        "PD-CAND-0f3b207a3e11255c"
       ],
       "statement": "The committed evidence contains 92 attempted programs, 63 accepted registered deliveries, 29 reason-coded exclusions, and the four reported 60 N m representatives.",
       "classification": "evidence_provenance_and_selection",
@@ -16977,7 +18162,17 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:22",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:24",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:29",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:31"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:31",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_methods.qmd:3",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_methods.qmd:15",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_methods.qmd:29",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_methods.qmd:39",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_methods.qmd:44",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_methods.qmd:52",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_methods.qmd:85",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_methods.qmd:105",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_methods.qmd:179",
+        "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:108"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/results_chapter_audit.json",
@@ -17018,7 +18213,12 @@
       "candidate_ids": [
         "PD-CAND-2a156a1bd63bde85",
         "PD-CAND-9190eaf7af72d373",
-        "PD-CAND-a4cd948ede155e3c"
+        "PD-CAND-a4cd948ede155e3c",
+        "PD-CAND-44d2675295ae7789",
+        "PD-CAND-3e294fff579a8fee",
+        "PD-CAND-eb17795da2f5fba6",
+        "PD-CAND-aa06823a134c06f0",
+        "PD-CAND-1fcf0c163c7b8b70"
       ],
       "statement": "Early drive is below passive at both levels; best late drive is 12.4 and 7.8 percent above passive, and the tested restrain program adds about 0.5 and 0.4 m/s over best drive.",
       "classification": "finite_grid_timing_order_and_effect_size",
@@ -17027,7 +18227,12 @@
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:33",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:41",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:50"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:50",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_methods.qmd:52",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_methods.qmd:105",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd:5",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd:56",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:12"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/results_chapter_audit.json",
@@ -17067,7 +18272,8 @@
       "claim_id": "PD-CLAIM-209",
       "candidate_ids": [
         "PD-CAND-aab973b7231143cd",
-        "PD-CAND-f57a68d3f269126e"
+        "PD-CAND-f57a68d3f269126e",
+        "PD-CAND-93506903c78e4e93"
       ],
       "statement": "One declared linear concentric torque-velocity bound preserves the tested ordering with compressed margins.",
       "classification": "bounded_actuator_sensitivity",
@@ -17075,7 +18281,8 @@
       "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:64",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:82"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:82",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_methods.qmd:64"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/results_chapter_audit.json",
@@ -17169,7 +18376,13 @@
         "PD-CAND-9ae3303681670230",
         "PD-CAND-242c3a5886362843",
         "PD-CAND-d2c6b2f7cd24ba08",
-        "PD-CAND-6c3f27710a6a9fe9"
+        "PD-CAND-6c3f27710a6a9fe9",
+        "PD-CAND-3054783d719679c3",
+        "PD-CAND-60912032cee130ab",
+        "PD-CAND-57551870727e4c64",
+        "PD-CAND-248e726470667ce5",
+        "PD-CAND-1fcf0c163c7b8b70",
+        "PD-CAND-13cb53f154dc0811"
       ],
       "statement": "The selected-trace ledger reproduces early and late segment energy and interface-work values, and club energy-rate closure is below 5e-12 W.",
       "classification": "segment_energy_and_interface_power_accounting",
@@ -17181,7 +18394,13 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:138",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:141",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:147",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:163"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:163",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_methods.qmd:110",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_methods.qmd:116",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_methods.qmd:158",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd:33",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:12",
+        "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:96"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/results_chapter_audit.json",
@@ -17221,7 +18440,10 @@
       "claim_id": "PD-CLAIM-212",
       "candidate_ids": [
         "PD-CAND-6043fd4e0116f19d",
-        "PD-CAND-c21b56bd8e64a514"
+        "PD-CAND-c21b56bd8e64a514",
+        "PD-CAND-e7866967ad751a93",
+        "PD-CAND-248e726470667ce5",
+        "PD-CAND-1fcf0c163c7b8b70"
       ],
       "statement": "The pointwise drift-control split shows early restraint and late drift dominance at the commanded state; it is not a forward zero-command trajectory.",
       "classification": "pointwise_drift_control_signature",
@@ -17229,7 +18451,10 @@
       "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:171",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:187"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:187",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_methods.qmd:131",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd:33",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:12"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/results_chapter_audit.json",
@@ -17273,7 +18498,10 @@
         "PD-CAND-d69df46b7476d2b2",
         "PD-CAND-779acad18ce2d202",
         "PD-CAND-c82007321bcfd94e",
-        "PD-CAND-59e4df4566ccd72c"
+        "PD-CAND-59e4df4566ccd72c",
+        "PD-CAND-2973f61fd16556f9",
+        "PD-CAND-131df2a08a6dbfc4",
+        "PD-CAND-18f049f59d0909e6"
       ],
       "statement": "Ordering persists across five impact families, 13 one-at-a-time parameter cases, registered delivery bounds, and 0 to 50 ms command filters.",
       "classification": "registered_local_robustness",
@@ -17285,7 +18513,10 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:206",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:212",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:218",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:227"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:227",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_methods.qmd:76",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_methods.qmd:165",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:20"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/results_chapter_audit.json",
@@ -17324,14 +18555,52 @@
     {
       "claim_id": "PD-CLAIM-214",
       "candidate_ids": [
-        "PD-CAND-c10fdeb10b48eb9b"
+        "PD-CAND-c10fdeb10b48eb9b",
+        "PD-CAND-384556ac26fc8724",
+        "PD-CAND-f405c095d850ac4f",
+        "PD-CAND-82b5634777708c30",
+        "PD-CAND-52a2c44f84a0278d",
+        "PD-CAND-674d270b91dc88fc",
+        "PD-CAND-6ba1b7b897d652e0",
+        "PD-CAND-073e4bf6f83508d5",
+        "PD-CAND-d5fd193d6bef6a80",
+        "PD-CAND-e536adbdfdb1d469",
+        "PD-CAND-ace8baee0f880d39",
+        "PD-CAND-e8941b313c3401ed",
+        "PD-CAND-053c7a1be8c9d5d8",
+        "PD-CAND-88441da2d1b1dc7c",
+        "PD-CAND-eb17795da2f5fba6",
+        "PD-CAND-aa06823a134c06f0",
+        "PD-CAND-7c1423dce490ab9b",
+        "PD-CAND-afbc50ff19058ed3",
+        "PD-CAND-26221cfd905990fb",
+        "PD-CAND-18f049f59d0909e6"
       ],
       "statement": "The chapter summary is restricted to the finite planar model and reports level-specific effect sizes and channel-specific energy language.",
       "classification": "results_scope_summary",
       "published_status": "supported_after_scope_and_effect_size_correction",
       "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:231"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:231",
+        "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd:10",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch01_introduction.qmd:35",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch01_introduction.qmd:37",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch01_introduction.qmd:41",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch01_introduction.qmd:91",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch01_introduction.qmd:93",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_methods.qmd:3",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_methods.qmd:15",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_methods.qmd:29",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_methods.qmd:39",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_methods.qmd:44",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_methods.qmd:85",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06_methods.qmd:179",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd:5",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd:56",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd:63",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd:67",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:5",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:20"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/results_chapter_audit.json",
@@ -17372,7 +18641,9 @@
       "candidate_ids": [
         "PD-CAND-16cf3a7eaff93807",
         "PD-CAND-c33453e4ebae332b",
-        "PD-CAND-e4e049dd73e2cfd0"
+        "PD-CAND-e4e049dd73e2cfd0",
+        "PD-CAND-a9723406cdb2249e",
+        "PD-CAND-2ab01a405fe71e34"
       ],
       "statement": "The chapter asks bounded screening, identifiability, and held-out command questions without treating the design as a human population.",
       "classification": "question_and_evidential_boundary",
@@ -17381,7 +18652,9 @@
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:5",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:11",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:18"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:18",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch01_introduction.qmd:71",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch01_introduction.qmd:73"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.json",
@@ -17580,7 +18853,8 @@
       "candidate_ids": [
         "PD-CAND-db0bf9312ae9c13c",
         "PD-CAND-72a147b02ce2430a",
-        "PD-CAND-d19b3de33355f734"
+        "PD-CAND-d19b3de33355f734",
+        "PD-CAND-58e2fdab32244d00"
       ],
       "statement": "The planar net wrench leaves one hand-force null mode, while six summaries yield rank six at 1 to 10 percent singular thresholds and rank five at 20 percent.",
       "classification": "structural_and_practical_identifiability",
@@ -17589,7 +18863,8 @@
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:112",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:120",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:131"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:131",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:75"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.json",
@@ -17632,7 +18907,8 @@
         "PD-CAND-4f3ad37e59405713",
         "PD-CAND-a97a7bf30e5bb26f",
         "PD-CAND-f921a66d00d93aec",
-        "PD-CAND-f922726ed1e71b00"
+        "PD-CAND-f922726ed1e71b00",
+        "PD-CAND-58e2fdab32244d00"
       ],
       "statement": "Seven training and eight held-out programs are nondominated, but held-out membership changes under leave-one-case-out recomputation.",
       "classification": "held_out_multiobjective_tradeoff",
@@ -17643,7 +18919,8 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:142",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:150",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:157",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:159"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:159",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:75"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.json",
@@ -17683,7 +18960,8 @@
       "claim_id": "PD-CLAIM-221",
       "candidate_ids": [
         "PD-CAND-4836d374086821c5",
-        "PD-CAND-f34d5609800d3c84"
+        "PD-CAND-f34d5609800d3c84",
+        "PD-CAND-58e2fdab32244d00"
       ],
       "statement": "Early restraint improves held-out lower-tail speed versus late drive while worsening planar face/path error, with numerical residuals below reported effects.",
       "classification": "conditional_opposing_command_tradeoff",
@@ -17691,7 +18969,8 @@
       "audit_status": "evidence_reconciliation_leave_one_out_and_threshold_sensitivity_checked",
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:163",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:171"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:171",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:75"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.json",
@@ -17780,7 +19059,28 @@
       "candidate_ids": [
         "PD-CAND-c4a663f4579b7302",
         "PD-CAND-e14a0e665fbc9883",
-        "PD-CAND-55c8beb511d3bbda"
+        "PD-CAND-55c8beb511d3bbda",
+        "PD-CAND-7b974d9981fbe9c6",
+        "PD-CAND-367561442ab024a8",
+        "PD-CAND-754200ff072e2f67",
+        "PD-CAND-78075195f3a5c55b",
+        "PD-CAND-c6851af22838909b",
+        "PD-CAND-5a5705ae572a585b",
+        "PD-CAND-4025ee9f2eefeddb",
+        "PD-CAND-64c1e1f03ff86625",
+        "PD-CAND-30e25fdcda7653d6",
+        "PD-CAND-7ff19b66654551aa",
+        "PD-CAND-788e4fc5a7ff1dc5",
+        "PD-CAND-9da5c12ad10a77c9",
+        "PD-CAND-0044f981df612835",
+        "PD-CAND-5b93ad1d66007a40",
+        "PD-CAND-9d0c920870e583ce",
+        "PD-CAND-7c01f798d7a8ab44",
+        "PD-CAND-bab8e8cd5403f689",
+        "PD-CAND-2641f160380c0508",
+        "PD-CAND-601f18c64a7c62fa",
+        "PD-CAND-c214da13b0628ac2",
+        "PD-CAND-13cb53f154dc0811"
       ],
       "statement": "The study is an open synthetic numerical experiment, not calibrated equipment or human evidence.",
       "classification": "scope_and_provenance",
@@ -17789,7 +19089,28 @@
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:5",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:15",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:24"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:24",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch01_introduction.qmd:4",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05a_interactive_workbench.qmd:20",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:17",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:37",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:47",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:55",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:57",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:105",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:5",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:16",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:26",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:33",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:42",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:49",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_platform.qmd:3",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_platform.qmd:13",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_platform.qmd:26",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:91",
+        "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:3",
+        "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:85",
+        "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:96"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/moving_base_modal_shaft_study.json",
@@ -17972,7 +19293,8 @@
       "candidate_ids": [
         "PD-CAND-c2572f125313bcfe",
         "PD-CAND-e5cbc4e673392727",
-        "PD-CAND-934f0ab73f4438be"
+        "PD-CAND-934f0ab73f4438be",
+        "PD-CAND-bd8bc18de707a023"
       ],
       "statement": "Mode truncation is excitation-dependent; three modes agree closely with six for the two declared inputs only.",
       "classification": "mode_truncation_screen",
@@ -17981,7 +19303,8 @@
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:154",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:160",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:162"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:162",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:46"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/moving_base_modal_shaft_study.json",
@@ -18067,7 +19390,9 @@
       "claim_id": "PD-CLAIM-229",
       "candidate_ids": [
         "PD-CAND-8f88e04d55380758",
-        "PD-CAND-9e83bd87a74f5035"
+        "PD-CAND-9e83bd87a74f5035",
+        "PD-CAND-7667c0e512dd9e84",
+        "PD-CAND-bd8bc18de707a023"
       ],
       "statement": "Only numerical coupling, identities, and qualitative geometry survive; quantitative shaft, human, and coaching claims remain unsupported.",
       "classification": "bounded_conclusion",
@@ -18075,7 +19400,9 @@
       "audit_status": "machine_authority_reproduced_and_stale_prose_reconciled",
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:205",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:212"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:212",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:56",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:46"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/moving_base_modal_shaft_study.json",
@@ -18112,7 +19439,8 @@
       "candidate_ids": [
         "PD-CAND-3537607a6423e3e0",
         "PD-CAND-6cd33f9be5b511ac",
-        "PD-CAND-6f3725f86f62cdf3"
+        "PD-CAND-6f3725f86f62cdf3",
+        "PD-CAND-50a3171488967d1a"
       ],
       "statement": "The chapter asks robustness and pathway questions without equating nominal speed, torque sign, or model response with human stability.",
       "classification": "scope_and_adversarial_boundary",
@@ -18121,7 +19449,8 @@
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07c_transmission_robustness.qmd:5",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07c_transmission_robustness.qmd:15",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07c_transmission_robustness.qmd:20"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07c_transmission_robustness.qmd:20",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05a_interactive_workbench.qmd:11"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/transmission_robustness_study.json",
@@ -18325,7 +19654,11 @@
         "PD-CAND-136e6f0bd085f467",
         "PD-CAND-cfa6d2db19edf168",
         "PD-CAND-522bf874f102b668",
-        "PD-CAND-4fb5c6e7be3a4809"
+        "PD-CAND-4fb5c6e7be3a4809",
+        "PD-CAND-e22bc4cdd8fe22cb",
+        "PD-CAND-efee29754ee09df2",
+        "PD-CAND-fc0fb848d84d02cb",
+        "PD-CAND-4a557d919aeb6342"
       ],
       "statement": "Biological impedance, repeatability, coaching, ball flight, and self-stabilization remain open participant-held-out experimental questions.",
       "classification": "bounded_research_program",
@@ -18335,7 +19668,11 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07c_transmission_robustness.qmd:159",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07c_transmission_robustness.qmd:167",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07c_transmission_robustness.qmd:170",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07c_transmission_robustness.qmd:187"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07c_transmission_robustness.qmd:187",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:66",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:101",
+        "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:12",
+        "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:14"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/transmission_robustness_study.json",
@@ -18369,6 +19706,302 @@
       "adjudication": "All passages were reconciled to regenerated hash-bound authority, Pareto jackknives, rank thresholds, and out-of-local-envelope prediction error.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_ids": [
+        "PD-CAND-3f24b7bec1a13566",
+        "PD-CAND-3c07c3b67ea18ea3",
+        "PD-CAND-22fff2ffb5e930ab",
+        "PD-CAND-91a57be070bd4382",
+        "PD-CAND-4c9593273e19f5a6"
+      ],
+      "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:181",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:197",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:205",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:216",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:256"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json",
+        "scripts/research/proximal_distal_energy/rotating_base_two_hand.py"
+      ],
+      "competing_explanations": [
+        "finite model scope",
+        "parameter choice",
+        "numerical implementation"
+      ],
+      "negative_controls": [
+        "exact rerun",
+        "geometry control",
+        "closure and provenance validation"
+      ],
+      "adjudication": "Reconciled to committed machine evidence with the stated model and human boundaries retained.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13",
+      "claim_id": "PD-CLAIM-235",
+      "statement": "The rotating-base tier is a seven-coordinate, four-constraint planar mechanism with finite torso inertia, separated hand reactions, projected position/velocity closure, and a checked bilateral contact-power identity.",
+      "classification": "rotating_base_model_and_constraint_contract",
+      "published_status": "supported_at_declared_model_tier",
+      "model_domain": "Finite-inertia planar torso, two arms, separated grips, and compliant club surrogate.",
+      "uncertainty_boundary": "The coordinates are mechanism coordinates, not anatomical thorax, scapula, or shoulder observables.",
+      "falsifier": "Constraint rank, closure, action-reaction, or bilateral power identity fails."
+    },
+    {
+      "candidate_ids": [
+        "PD-CAND-91a57be070bd4382",
+        "PD-CAND-37da957d8de007e5",
+        "PD-CAND-4c9593273e19f5a6"
+      ],
+      "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:216",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:242",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:256"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json"
+      ],
+      "competing_explanations": [
+        "finite model scope",
+        "parameter choice",
+        "numerical implementation"
+      ],
+      "negative_controls": [
+        "exact rerun",
+        "geometry control",
+        "closure and provenance validation"
+      ],
+      "adjudication": "Reconciled to committed machine evidence with the stated model and human boundaries retained.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13",
+      "claim_id": "PD-CLAIM-236",
+      "statement": "Thirteen of 18 rotating-base cases pass the registered load/closure envelope; torso rate correlates with delivery speed at r=0.604 and braking work at r=0.273, while the matching rule materially changes the speed/braking conclusion.",
+      "classification": "rotating_base_grid_association_and_matching_sensitivity",
+      "published_status": "supported_for_registered_deterministic_grid",
+      "model_domain": "Eighteen deterministic combinations of three initial torso rates, two matching rules, and three torso commands.",
+      "uncertainty_boundary": "Finite-grid associations are not causal effects, population estimates, or universal strategy rules.",
+      "falsifier": "Committed rows do not reproduce counts, correlations, or the stated matching-rule contrast."
+    },
+    {
+      "candidate_ids": [
+        "PD-CAND-6f8bc79328b9bb51"
+      ],
+      "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:268"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json"
+      ],
+      "competing_explanations": [
+        "finite model scope",
+        "parameter choice",
+        "numerical implementation"
+      ],
+      "negative_controls": [
+        "exact rerun",
+        "geometry control",
+        "closure and provenance validation"
+      ],
+      "adjudication": "Reconciled to committed machine evidence with the stated model and human boundaries retained.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13",
+      "claim_id": "PD-CLAIM-237",
+      "statement": "Exact 30 ms same-state killswitches give nonmonotonic channel effects: continued torso and wrist commands add 1.223 and 1.818 m/s, whereas continued bilateral-arm commands reduce delivery speed by 1.364 m/s in the registered program.",
+      "classification": "rotating_base_same_state_command_intervention",
+      "published_status": "supported_for_one_registered_program",
+      "model_domain": "One exact same-state branch within the declared rotating-base mechanism.",
+      "uncertainty_boundary": "A channel continuation effect is conditional on state, commands, model, and endpoint; it is not an anatomical or coaching effect.",
+      "falsifier": "Pre-branch states differ or branch recomputation reverses the recorded channel differences."
+    },
+    {
+      "candidate_ids": [
+        "PD-CAND-53f5d0b5a5122e3b",
+        "PD-CAND-b9f1bae7492c6c45"
+      ],
+      "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:283",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:295"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json"
+      ],
+      "competing_explanations": [
+        "finite model scope",
+        "parameter choice",
+        "numerical implementation"
+      ],
+      "negative_controls": [
+        "exact rerun",
+        "geometry control",
+        "closure and provenance validation"
+      ],
+      "adjudication": "Reconciled to committed machine evidence with the stated model and human boundaries retained.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13",
+      "claim_id": "PD-CLAIM-238",
+      "statement": "Coincident grips remove the rotating-base force couple exactly and signed arm reversal flips +1.351 to -1.351 N m; the supported conclusion is conditional reaction-work geometry, not scapular control, safe loading, or human technique.",
+      "classification": "rotating_base_geometry_controls_and_scope",
+      "published_status": "supported_with_explicit_human_boundary",
+      "model_domain": "Algebraic geometry controls and registered planar sensitivity cases.",
+      "uncertainty_boundary": "Signed arm reversal is an algebraic control, not a feasible grip exchange; human magnitude and strategy are unmeasured.",
+      "falsifier": "Couple survives coincident grips, fails signed reversal, or the paper makes a physiological prescription."
+    },
+    {
+      "candidate_ids": [
+        "PD-CAND-4908f1e4a94179d1",
+        "PD-CAND-754200ff072e2f67",
+        "PD-CAND-0e0d81483621513a",
+        "PD-CAND-78075195f3a5c55b",
+        "PD-CAND-c6851af22838909b",
+        "PD-CAND-5a5705ae572a585b",
+        "PD-CAND-4025ee9f2eefeddb",
+        "PD-CAND-1a8e629a487d47b1",
+        "PD-CAND-894295e8a2324065",
+        "PD-CAND-e2e0449dd1d086b4",
+        "PD-CAND-a345790d750e6b57",
+        "PD-CAND-64c1e1f03ff86625"
+      ],
+      "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:5",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:17",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:24",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:37",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:47",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:55",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:57",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:65",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:78",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:89",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:98",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:105"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json"
+      ],
+      "competing_explanations": [
+        "finite model scope",
+        "parameter choice",
+        "numerical implementation"
+      ],
+      "negative_controls": [
+        "exact rerun",
+        "geometry control",
+        "closure and provenance validation"
+      ],
+      "adjudication": "Reconciled to committed machine evidence with the stated model and human boundaries retained.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13",
+      "claim_id": "PD-CLAIM-239",
+      "statement": "The isolated Euler-Bernoulli beam experiment recovers a declared synthetic modulus and tip mass from two synthetic modes and demonstrates mesh convergence; it is structural verification rather than equipment identification.",
+      "classification": "synthetic_beam_identification_and_convergence",
+      "published_status": "supported_for_synthetic_reference_only",
+      "model_domain": "Declared tapered axisymmetric Euler-Bernoulli beam with synthetic modal observations.",
+      "uncertainty_boundary": "No measured shaft modal data, EI profile, boundary condition, or human load enters the inference.",
+      "falsifier": "Synthetic truth or mesh convergence fails reproduction, or the result is presented as calibrated equipment evidence."
+    },
+    {
+      "candidate_ids": [
+        "PD-CAND-4908f1e4a94179d1",
+        "PD-CAND-0e0d81483621513a",
+        "PD-CAND-1a8e629a487d47b1",
+        "PD-CAND-6f754c2efe8bb75b",
+        "PD-CAND-894295e8a2324065",
+        "PD-CAND-202051f896defe8a",
+        "PD-CAND-e2e0449dd1d086b4",
+        "PD-CAND-a345790d750e6b57",
+        "PD-CAND-51dfce3188daba5e"
+      ],
+      "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:5",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:24",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:65",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:72",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:78",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:80",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:89",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:98",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:100"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json"
+      ],
+      "competing_explanations": [
+        "finite model scope",
+        "parameter choice",
+        "numerical implementation"
+      ],
+      "negative_controls": [
+        "exact rerun",
+        "geometry control",
+        "closure and provenance validation"
+      ],
+      "adjudication": "Reconciled to committed machine evidence with the stated model and human boundaries retained.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13",
+      "claim_id": "PD-CLAIM-240",
+      "statement": "The isolated one-mode beam closely matches the six-mode slow-pulse response but its short-pulse RMS discrepancy is 0.0413 mm, about 60 times the slow-pulse discrepancy; declared work-energy residuals remain below 2.9e-7 J.",
+      "classification": "synthetic_beam_excitation_and_energy_closure",
+      "published_status": "supported_for_two_declared_load_histories",
+      "model_domain": "One- versus six-mode response under the same two synthetic force/moment histories.",
+      "uncertainty_boundary": "Peak agreement can conceal history error; two loads do not establish equipment-wide truncation validity.",
+      "falsifier": "Reproduction changes the discrepancy ratio materially or violates declared energy closure."
+    },
+    {
+      "candidate_ids": [
+        "PD-CAND-832e7c9916653440",
+        "PD-CAND-50a3171488967d1a",
+        "PD-CAND-367561442ab024a8",
+        "PD-CAND-3af40323c0ff313e",
+        "PD-CAND-30e25fdcda7653d6",
+        "PD-CAND-7ff19b66654551aa",
+        "PD-CAND-788e4fc5a7ff1dc5",
+        "PD-CAND-9da5c12ad10a77c9",
+        "PD-CAND-0044f981df612835",
+        "PD-CAND-5b93ad1d66007a40"
+      ],
+      "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05a_interactive_workbench.qmd:3",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05a_interactive_workbench.qmd:11",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05a_interactive_workbench.qmd:20",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05a_interactive_workbench.qmd:28",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:5",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:16",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:26",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:33",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:42",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:49"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/COMPANION_WORKBENCH.md",
+        "docs/research/proximal_distal_energy_transfer/release_manifest.json"
+      ],
+      "competing_explanations": [
+        "finite model scope",
+        "parameter choice",
+        "numerical implementation"
+      ],
+      "negative_controls": [
+        "exact rerun",
+        "geometry control",
+        "closure and provenance validation"
+      ],
+      "adjudication": "Reconciled to committed machine evidence with the stated model and human boundaries retained.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13",
+      "claim_id": "PD-CLAIM-241",
+      "statement": "The companion workbench is exploratory and the open-resource bundle is provenance infrastructure: scientific authority remains the scripted, pinned, fail-closed evidence release rather than either interface or repository branding.",
+      "classification": "open_resource_and_exploratory_interface_boundary",
+      "published_status": "supported_as_release_governance",
+      "model_domain": "Provider-pinned PyQt/React exploration and hash-pinned static evidence bundle.",
+      "uncertainty_boundary": "Interface availability and checksums do not validate physical claims or substitute for governed human data.",
+      "falsifier": "Interactive output is promoted as publication authority, provider identity drifts, or bundle validation permits artifact drift."
     }
   ]
 }
