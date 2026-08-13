@@ -6,9 +6,11 @@ Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
 
-- **#8557 forward modal-shaft reconciliation** — branch
-  `research/8557-forward-modal-audit` is the active twenty-fourth fail-closed
-  slice. All 26 chapter candidates are adjudicated as PD-CLAIM-223 through
+- **#8557 forward modal-shaft reconciliation** — ready PR
+  [#8589](https://github.com/D-sorganization/UpstreamDrift/pull/8589) from
+  `research/8557-forward-modal-audit` at implementation commit
+  `e00eb74c0d5bf8331df68dde8fc04e17cc6af453` is the active twenty-fourth
+  fail-closed slice. All 26 chapter candidates are adjudicated as PD-CLAIM-223 through
   PD-CLAIM-229. Regeneration changed only a stale source hash, confirming the
   committed numerical authority, but the prose described an obsolete run.
   The current 0.13476 tip-deflection ratio fails the preregistered 0.05 screen;
