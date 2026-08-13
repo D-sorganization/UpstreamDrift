@@ -2,14 +2,14 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "ef2763a251ad45fbdc524c2433f778b397519778d6e7b172d328c7ce6aebf116",
+    "source_digest": "9d813503833168fab7161914faa07e2e0d05da643c4ead465cc6c54eb2f9cfd2",
     "baseline_commit": "13ea6a69585a42dc1db4b3959440ed95787c9779"
   },
   "audit_scope": {
     "completion_status": "in_progress",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "The complete candidate audit remains in progress. The torque-allocation and transmission-preload chapter is fully adjudicated, including explicit zero-dead-zone equivalence, temporal-resolution bounds, literature limits, and the governed human-measurement gate."
+    "current_scope": "The complete candidate audit remains in progress. The original results chapter is now fully reconciled and adjudicated, including a corrected level-specific late-drive effect size and narrower causal language."
   },
   "dependencies": [
     {
@@ -140,16 +140,6 @@
     }
   ],
   "candidate_reviews": [
-    {
-      "candidate_id": "PD-CAND-2a156a1bd63bde85",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-001"
-      ],
-      "rationale": "The paragraph reports quantitative model comparisons that require recomputation and domain-qualified interpretation.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-12"
-    },
     {
       "candidate_id": "PD-CAND-e26d04fbfce5d458",
       "disposition": "material_claims_mapped",
@@ -7238,43 +7228,309 @@
       "rationale": "This passage participates in the registered allocation, transmission, literature-boundary, or human-falsification audit.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-0a8569e0ec8673ba",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-207"
+      ],
+      "rationale": "This passage participates in the independently reconciled results audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-89924ee5cf822e8a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-207"
+      ],
+      "rationale": "This passage participates in the independently reconciled results audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-c5b6bf7018e15f33",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-207"
+      ],
+      "rationale": "This passage participates in the independently reconciled results audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-a990545d1f09e99e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-207"
+      ],
+      "rationale": "This passage participates in the independently reconciled results audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-dcb34c2a460126a8",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-207"
+      ],
+      "rationale": "This passage participates in the independently reconciled results audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-f9014594ae3c6fad",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-207"
+      ],
+      "rationale": "This passage participates in the independently reconciled results audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-30a797237f52ce39",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-207"
+      ],
+      "rationale": "This passage participates in the independently reconciled results audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-2a156a1bd63bde85",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-208"
+      ],
+      "rationale": "This passage participates in the independently reconciled results audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-9190eaf7af72d373",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-208"
+      ],
+      "rationale": "This passage participates in the independently reconciled results audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-a4cd948ede155e3c",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-208"
+      ],
+      "rationale": "This passage participates in the independently reconciled results audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-aab973b7231143cd",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-209"
+      ],
+      "rationale": "This passage participates in the independently reconciled results audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-f57a68d3f269126e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-209"
+      ],
+      "rationale": "This passage participates in the independently reconciled results audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-b50e5c52c92cff65",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-210"
+      ],
+      "rationale": "This passage participates in the independently reconciled results audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-f970f734edd73835",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-210"
+      ],
+      "rationale": "This passage participates in the independently reconciled results audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-2f17610d3e9f8da3",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-210"
+      ],
+      "rationale": "This passage participates in the independently reconciled results audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-1fc4b86655ed54e9",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-211"
+      ],
+      "rationale": "This passage participates in the independently reconciled results audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-0507964a9f754e9b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-211"
+      ],
+      "rationale": "This passage participates in the independently reconciled results audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-9ae3303681670230",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-211"
+      ],
+      "rationale": "This passage participates in the independently reconciled results audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-242c3a5886362843",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-211"
+      ],
+      "rationale": "This passage participates in the independently reconciled results audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-d2c6b2f7cd24ba08",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-211"
+      ],
+      "rationale": "This passage participates in the independently reconciled results audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-6c3f27710a6a9fe9",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-211"
+      ],
+      "rationale": "This passage participates in the independently reconciled results audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-6043fd4e0116f19d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-212"
+      ],
+      "rationale": "This passage participates in the independently reconciled results audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-c21b56bd8e64a514",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-212"
+      ],
+      "rationale": "This passage participates in the independently reconciled results audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-928451012b3d0ebd",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-213"
+      ],
+      "rationale": "This passage participates in the independently reconciled results audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-90ed2245ee811feb",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-213"
+      ],
+      "rationale": "This passage participates in the independently reconciled results audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-d69df46b7476d2b2",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-213"
+      ],
+      "rationale": "This passage participates in the independently reconciled results audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-779acad18ce2d202",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-213"
+      ],
+      "rationale": "This passage participates in the independently reconciled results audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-c82007321bcfd94e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-213"
+      ],
+      "rationale": "This passage participates in the independently reconciled results audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-59e4df4566ccd72c",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-213"
+      ],
+      "rationale": "This passage participates in the independently reconciled results audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-c10fdeb10b48eb9b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-214"
+      ],
+      "rationale": "This passage participates in the independently reconciled results audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
     }
   ],
   "claims": [
-    {
-      "claim_id": "PD-CLAIM-001",
-      "release_claim_key": "interaction_dynamics_planar",
-      "candidate_ids": [
-        "PD-CAND-2a156a1bd63bde85"
-      ],
-      "statement": "In the declared 60 N m shoulder-torque double-pendulum case, immediate positive wrist drive produces about 15 percent less impact speed than a passive hinge, while the selected delayed drive produces about 12 percent more.",
-      "classification": "model_conditional_quantitative_result",
-      "published_status": "supported_at_declared_model_tier",
-      "audit_status": "provisionally_reproduced_not_independently_reviewed",
-      "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:33"
-      ],
-      "evidence_artifacts": [
-        "docs/research/proximal_distal_energy_transfer/data/results_summary.json",
-        "tests/unit/research/test_proximal_distal_energy.py"
-      ],
-      "model_domain": "Planar fixed-hub rigid-shaft double pendulum with the registered impact event and command grid.",
-      "uncertainty_boundary": "Deterministic registered parameters; not a continuous optimum, population estimate, or human timing prescription.",
-      "competing_explanations": [
-        "Grid and event-definition selection",
-        "Rigid-shaft and fixed-hub simplification",
-        "Actuator magnitude and transition assumptions"
-      ],
-      "negative_controls": [
-        "Passive hinge",
-        "Immediate positive drive",
-        "Parameter and impact-definition sweeps"
-      ],
-      "falsifier": "The ordering or reported ratios fail regeneration at the pinned commit, or reverse under a preregistered equivalent higher-tier intervention.",
-      "adjudication": "The repository has a pinned regression test, but independent implementation review and full source-to-number recomputation remain open.",
-      "reviewer": "Codex initial audit",
-      "last_verified_on": "2026-08-12"
-    },
     {
       "claim_id": "PD-CLAIM-002",
       "release_claim_key": "interaction_dynamics_planar",
@@ -15916,6 +16172,418 @@
       ],
       "falsifier": "Measured allocation forces or delays fail the prediction, held-out benefit disappears, or human support is claimed without the registered modalities.",
       "adjudication": "All chapter passages were checked against regenerated allocation and transmission evidence, original-source boundaries, explicit numerical equivalence, temporal resolution, and the governed human-data gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-207",
+      "candidate_ids": [
+        "PD-CAND-0a8569e0ec8673ba",
+        "PD-CAND-89924ee5cf822e8a",
+        "PD-CAND-c5b6bf7018e15f33",
+        "PD-CAND-a990545d1f09e99e",
+        "PD-CAND-dcb34c2a460126a8",
+        "PD-CAND-f9014594ae3c6fad",
+        "PD-CAND-30a797237f52ce39"
+      ],
+      "statement": "The committed evidence contains 92 attempted programs, 63 accepted registered deliveries, 29 reason-coded exclusions, and the four reported 60 N m representatives.",
+      "classification": "evidence_provenance_and_selection",
+      "published_status": "supported_by_deterministic_reconciliation",
+      "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:3",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:13",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:17",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:22",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:24",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:29",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:31"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/results_chapter_audit.json",
+        "docs/research/proximal_distal_energy_transfer/data/e1_sweep.json",
+        "docs/research/proximal_distal_energy_transfer/data/results_summary.json",
+        "docs/research/proximal_distal_energy_transfer/data/representative_traces.npz",
+        "docs/research/proximal_distal_energy_transfer/data/e1b_bounded_sweep.json",
+        "docs/research/proximal_distal_energy_transfer/data/e1c_sensitivity.json",
+        "docs/research/proximal_distal_energy_transfer/data/e1d_parameter_sensitivity.json",
+        "docs/research/proximal_distal_energy_transfer/data/e1e_smooth_command_sensitivity.json",
+        "scripts/research/proximal_distal_energy/audit_results_chapter.py",
+        "tests/research/test_results_chapter_audit.py"
+      ],
+      "model_domain": "Planar two-link model and finite registered command grids.",
+      "uncertainty_boundary": "Acceptance is a registered planar delivery-zone rule, not observed impact quality.",
+      "competing_explanations": [
+        "impact-selection rule",
+        "finite command-grid selection",
+        "unmodeled parameter interactions",
+        "different actuator capacity surface",
+        "model geometry rather than human technique"
+      ],
+      "negative_controls": [
+        "passive wrist program",
+        "two shoulder-torque levels",
+        "alternative impact criteria",
+        "one-at-a-time parameter cases",
+        "finite command-rise filters",
+        "pointwise energy-balance closure"
+      ],
+      "falsifier": "Attempt counts, status counts, representative rows, or displayed values fail exact reconciliation.",
+      "adjudication": "Every displayed selection, percentage, work ledger, exclusion count, and robustness statement was reconciled to committed evidence. The blanket 12 percent claim was corrected to 12.4 and 7.8 percent.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-208",
+      "candidate_ids": [
+        "PD-CAND-2a156a1bd63bde85",
+        "PD-CAND-9190eaf7af72d373",
+        "PD-CAND-a4cd948ede155e3c"
+      ],
+      "statement": "Early drive is below passive at both levels; best late drive is 12.4 and 7.8 percent above passive, and the tested restrain program adds about 0.5 and 0.4 m/s over best drive.",
+      "classification": "finite_grid_timing_order_and_effect_size",
+      "published_status": "supported_for_two_tested_torque_levels",
+      "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:33",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:41",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:50"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/results_chapter_audit.json",
+        "docs/research/proximal_distal_energy_transfer/data/e1_sweep.json",
+        "docs/research/proximal_distal_energy_transfer/data/results_summary.json",
+        "docs/research/proximal_distal_energy_transfer/data/representative_traces.npz",
+        "docs/research/proximal_distal_energy_transfer/data/e1b_bounded_sweep.json",
+        "docs/research/proximal_distal_energy_transfer/data/e1c_sensitivity.json",
+        "docs/research/proximal_distal_energy_transfer/data/e1d_parameter_sensitivity.json",
+        "docs/research/proximal_distal_energy_transfer/data/e1e_smooth_command_sensitivity.json",
+        "scripts/research/proximal_distal_energy/audit_results_chapter.py",
+        "tests/research/test_results_chapter_audit.py"
+      ],
+      "model_domain": "Planar two-link model and finite registered command grids.",
+      "uncertainty_boundary": "Effect size is not constant, and a grid-selected maximum is not a global optimum.",
+      "competing_explanations": [
+        "impact-selection rule",
+        "finite command-grid selection",
+        "unmodeled parameter interactions",
+        "different actuator capacity surface",
+        "model geometry rather than human technique"
+      ],
+      "negative_controls": [
+        "passive wrist program",
+        "two shoulder-torque levels",
+        "alternative impact criteria",
+        "one-at-a-time parameter cases",
+        "finite command-rise filters",
+        "pointwise energy-balance closure"
+      ],
+      "falsifier": "Recalculation reverses the ordering or the paper reports one effect size for both levels.",
+      "adjudication": "Every displayed selection, percentage, work ledger, exclusion count, and robustness statement was reconciled to committed evidence. The blanket 12 percent claim was corrected to 12.4 and 7.8 percent.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-209",
+      "candidate_ids": [
+        "PD-CAND-aab973b7231143cd",
+        "PD-CAND-f57a68d3f269126e"
+      ],
+      "statement": "One declared linear concentric torque-velocity bound preserves the tested ordering with compressed margins.",
+      "classification": "bounded_actuator_sensitivity",
+      "published_status": "supported_for_one_uncalibrated_bound",
+      "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:64",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:82"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/results_chapter_audit.json",
+        "docs/research/proximal_distal_energy_transfer/data/e1_sweep.json",
+        "docs/research/proximal_distal_energy_transfer/data/results_summary.json",
+        "docs/research/proximal_distal_energy_transfer/data/representative_traces.npz",
+        "docs/research/proximal_distal_energy_transfer/data/e1b_bounded_sweep.json",
+        "docs/research/proximal_distal_energy_transfer/data/e1c_sensitivity.json",
+        "docs/research/proximal_distal_energy_transfer/data/e1d_parameter_sensitivity.json",
+        "docs/research/proximal_distal_energy_transfer/data/e1e_smooth_command_sensitivity.json",
+        "scripts/research/proximal_distal_energy/audit_results_chapter.py",
+        "tests/research/test_results_chapter_audit.py"
+      ],
+      "model_domain": "Planar two-link model and finite registered command grids.",
+      "uncertainty_boundary": "Constant eccentric restraint is a modeling choice, not a physiological law.",
+      "competing_explanations": [
+        "impact-selection rule",
+        "finite command-grid selection",
+        "unmodeled parameter interactions",
+        "different actuator capacity surface",
+        "model geometry rather than human technique"
+      ],
+      "negative_controls": [
+        "passive wrist program",
+        "two shoulder-torque levels",
+        "alternative impact criteria",
+        "one-at-a-time parameter cases",
+        "finite command-rise filters",
+        "pointwise energy-balance closure"
+      ],
+      "falsifier": "The bound changes the registered ordering or is promoted as calibrated human capacity.",
+      "adjudication": "Every displayed selection, percentage, work ledger, exclusion count, and robustness statement was reconciled to committed evidence. The blanket 12 percent claim was corrected to 12.4 and 7.8 percent.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-210",
+      "candidate_ids": [
+        "PD-CAND-b50e5c52c92cff65",
+        "PD-CAND-f970f734edd73835",
+        "PD-CAND-2f17610d3e9f8da3"
+      ],
+      "statement": "All selected planar traces show an arm-then-club peak sequence, with configuration differences reported only in the model coordinate convention.",
+      "classification": "selected_trace_kinematic_sequence",
+      "published_status": "supported_for_four_selected_traces",
+      "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:87",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:104",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:108"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/results_chapter_audit.json",
+        "docs/research/proximal_distal_energy_transfer/data/e1_sweep.json",
+        "docs/research/proximal_distal_energy_transfer/data/results_summary.json",
+        "docs/research/proximal_distal_energy_transfer/data/representative_traces.npz",
+        "docs/research/proximal_distal_energy_transfer/data/e1b_bounded_sweep.json",
+        "docs/research/proximal_distal_energy_transfer/data/e1c_sensitivity.json",
+        "docs/research/proximal_distal_energy_transfer/data/e1d_parameter_sensitivity.json",
+        "docs/research/proximal_distal_energy_transfer/data/e1e_smooth_command_sensitivity.json",
+        "scripts/research/proximal_distal_energy/audit_results_chapter.py",
+        "tests/research/test_results_chapter_audit.py"
+      ],
+      "model_domain": "Planar two-link model and finite registered command grids.",
+      "uncertainty_boundary": "The sequence and montage do not classify a player or establish population timing.",
+      "competing_explanations": [
+        "impact-selection rule",
+        "finite command-grid selection",
+        "unmodeled parameter interactions",
+        "different actuator capacity surface",
+        "model geometry rather than human technique"
+      ],
+      "negative_controls": [
+        "passive wrist program",
+        "two shoulder-torque levels",
+        "alternative impact criteria",
+        "one-at-a-time parameter cases",
+        "finite command-rise filters",
+        "pointwise energy-balance closure"
+      ],
+      "falsifier": "Peak order fails in a selected trace or model geometry is labeled as human technique.",
+      "adjudication": "Every displayed selection, percentage, work ledger, exclusion count, and robustness statement was reconciled to committed evidence. The blanket 12 percent claim was corrected to 12.4 and 7.8 percent.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-211",
+      "candidate_ids": [
+        "PD-CAND-1fc4b86655ed54e9",
+        "PD-CAND-0507964a9f754e9b",
+        "PD-CAND-9ae3303681670230",
+        "PD-CAND-242c3a5886362843",
+        "PD-CAND-d2c6b2f7cd24ba08",
+        "PD-CAND-6c3f27710a6a9fe9"
+      ],
+      "statement": "The selected-trace ledger reproduces early and late segment energy and interface-work values, and club energy-rate closure is below 5e-12 W.",
+      "classification": "segment_energy_and_interface_power_accounting",
+      "published_status": "supported_for_selected_planar_traces",
+      "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:114",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:118",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:138",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:141",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:147",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:163"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/results_chapter_audit.json",
+        "docs/research/proximal_distal_energy_transfer/data/e1_sweep.json",
+        "docs/research/proximal_distal_energy_transfer/data/results_summary.json",
+        "docs/research/proximal_distal_energy_transfer/data/representative_traces.npz",
+        "docs/research/proximal_distal_energy_transfer/data/e1b_bounded_sweep.json",
+        "docs/research/proximal_distal_energy_transfer/data/e1c_sensitivity.json",
+        "docs/research/proximal_distal_energy_transfer/data/e1d_parameter_sensitivity.json",
+        "docs/research/proximal_distal_energy_transfer/data/e1e_smooth_command_sensitivity.json",
+        "scripts/research/proximal_distal_energy/audit_results_chapter.py",
+        "tests/research/test_results_chapter_audit.py"
+      ],
+      "model_domain": "Planar two-link model and finite registered command grids.",
+      "uncertainty_boundary": "Joint-force power is a mechanical channel, not a named muscle, intent, or independently validated human pathway.",
+      "competing_explanations": [
+        "impact-selection rule",
+        "finite command-grid selection",
+        "unmodeled parameter interactions",
+        "different actuator capacity surface",
+        "model geometry rather than human technique"
+      ],
+      "negative_controls": [
+        "passive wrist program",
+        "two shoulder-torque levels",
+        "alternative impact criteria",
+        "one-at-a-time parameter cases",
+        "finite command-rise filters",
+        "pointwise energy-balance closure"
+      ],
+      "falsifier": "Ledger values or pointwise balance fail reconciliation, or association is presented as human causation.",
+      "adjudication": "Every displayed selection, percentage, work ledger, exclusion count, and robustness statement was reconciled to committed evidence. The blanket 12 percent claim was corrected to 12.4 and 7.8 percent.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-212",
+      "candidate_ids": [
+        "PD-CAND-6043fd4e0116f19d",
+        "PD-CAND-c21b56bd8e64a514"
+      ],
+      "statement": "The pointwise drift-control split shows early restraint and late drift dominance at the commanded state; it is not a forward zero-command trajectory.",
+      "classification": "pointwise_drift_control_signature",
+      "published_status": "supported_as_instantaneous_model_decomposition",
+      "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:171",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:187"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/results_chapter_audit.json",
+        "docs/research/proximal_distal_energy_transfer/data/e1_sweep.json",
+        "docs/research/proximal_distal_energy_transfer/data/results_summary.json",
+        "docs/research/proximal_distal_energy_transfer/data/representative_traces.npz",
+        "docs/research/proximal_distal_energy_transfer/data/e1b_bounded_sweep.json",
+        "docs/research/proximal_distal_energy_transfer/data/e1c_sensitivity.json",
+        "docs/research/proximal_distal_energy_transfer/data/e1d_parameter_sensitivity.json",
+        "docs/research/proximal_distal_energy_transfer/data/e1e_smooth_command_sensitivity.json",
+        "scripts/research/proximal_distal_energy/audit_results_chapter.py",
+        "tests/research/test_results_chapter_audit.py"
+      ],
+      "model_domain": "Planar two-link model and finite registered command grids.",
+      "uncertainty_boundary": "The tangent-field signature does not by itself establish future persistence or passive human action.",
+      "competing_explanations": [
+        "impact-selection rule",
+        "finite command-grid selection",
+        "unmodeled parameter interactions",
+        "different actuator capacity surface",
+        "model geometry rather than human technique"
+      ],
+      "negative_controls": [
+        "passive wrist program",
+        "two shoulder-torque levels",
+        "alternative impact criteria",
+        "one-at-a-time parameter cases",
+        "finite command-rise filters",
+        "pointwise energy-balance closure"
+      ],
+      "falsifier": "Terms do not sum to modeled acceleration or are described as a zero-torque rollout.",
+      "adjudication": "Every displayed selection, percentage, work ledger, exclusion count, and robustness statement was reconciled to committed evidence. The blanket 12 percent claim was corrected to 12.4 and 7.8 percent.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-213",
+      "candidate_ids": [
+        "PD-CAND-928451012b3d0ebd",
+        "PD-CAND-90ed2245ee811feb",
+        "PD-CAND-d69df46b7476d2b2",
+        "PD-CAND-779acad18ce2d202",
+        "PD-CAND-c82007321bcfd94e",
+        "PD-CAND-59e4df4566ccd72c"
+      ],
+      "statement": "Ordering persists across five impact families, 13 one-at-a-time parameter cases, registered delivery bounds, and 0 to 50 ms command filters.",
+      "classification": "registered_local_robustness",
+      "published_status": "supported_but_not_global_or_population_robustness",
+      "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:194",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:199",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:206",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:212",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:218",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:227"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/results_chapter_audit.json",
+        "docs/research/proximal_distal_energy_transfer/data/e1_sweep.json",
+        "docs/research/proximal_distal_energy_transfer/data/results_summary.json",
+        "docs/research/proximal_distal_energy_transfer/data/representative_traces.npz",
+        "docs/research/proximal_distal_energy_transfer/data/e1b_bounded_sweep.json",
+        "docs/research/proximal_distal_energy_transfer/data/e1c_sensitivity.json",
+        "docs/research/proximal_distal_energy_transfer/data/e1d_parameter_sensitivity.json",
+        "docs/research/proximal_distal_energy_transfer/data/e1e_smooth_command_sensitivity.json",
+        "scripts/research/proximal_distal_energy/audit_results_chapter.py",
+        "tests/research/test_results_chapter_audit.py"
+      ],
+      "model_domain": "Planar two-link model and finite registered command grids.",
+      "uncertainty_boundary": "The studies omit joint parameter distributions, calibrated uncertainty, unmodeled impact physics, and global command optimization.",
+      "competing_explanations": [
+        "impact-selection rule",
+        "finite command-grid selection",
+        "unmodeled parameter interactions",
+        "different actuator capacity surface",
+        "model geometry rather than human technique"
+      ],
+      "negative_controls": [
+        "passive wrist program",
+        "two shoulder-torque levels",
+        "alternative impact criteria",
+        "one-at-a-time parameter cases",
+        "finite command-rise filters",
+        "pointwise energy-balance closure"
+      ],
+      "falsifier": "Any registered family reverses the ordering or local results are generalized as a universal onset.",
+      "adjudication": "Every displayed selection, percentage, work ledger, exclusion count, and robustness statement was reconciled to committed evidence. The blanket 12 percent claim was corrected to 12.4 and 7.8 percent.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-214",
+      "candidate_ids": [
+        "PD-CAND-c10fdeb10b48eb9b"
+      ],
+      "statement": "The chapter summary is restricted to the finite planar model and reports level-specific effect sizes and channel-specific energy language.",
+      "classification": "results_scope_summary",
+      "published_status": "supported_after_scope_and_effect_size_correction",
+      "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:231"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/results_chapter_audit.json",
+        "docs/research/proximal_distal_energy_transfer/data/e1_sweep.json",
+        "docs/research/proximal_distal_energy_transfer/data/results_summary.json",
+        "docs/research/proximal_distal_energy_transfer/data/representative_traces.npz",
+        "docs/research/proximal_distal_energy_transfer/data/e1b_bounded_sweep.json",
+        "docs/research/proximal_distal_energy_transfer/data/e1c_sensitivity.json",
+        "docs/research/proximal_distal_energy_transfer/data/e1d_parameter_sensitivity.json",
+        "docs/research/proximal_distal_energy_transfer/data/e1e_smooth_command_sensitivity.json",
+        "scripts/research/proximal_distal_energy/audit_results_chapter.py",
+        "tests/research/test_results_chapter_audit.py"
+      ],
+      "model_domain": "Planar two-link model and finite registered command grids.",
+      "uncertainty_boundary": "No biological validation, universal strategy, or coaching prescription follows.",
+      "competing_explanations": [
+        "impact-selection rule",
+        "finite command-grid selection",
+        "unmodeled parameter interactions",
+        "different actuator capacity surface",
+        "model geometry rather than human technique"
+      ],
+      "negative_controls": [
+        "passive wrist program",
+        "two shoulder-torque levels",
+        "alternative impact criteria",
+        "one-at-a-time parameter cases",
+        "finite command-rise filters",
+        "pointwise energy-balance closure"
+      ],
+      "falsifier": "The summary restores the blanket 12 percent claim or promotes model-local ordering to human advice.",
+      "adjudication": "Every displayed selection, percentage, work ledger, exclusion count, and robustness statement was reconciled to committed evidence. The blanket 12 percent claim was corrected to 12.4 and 7.8 percent.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
     }

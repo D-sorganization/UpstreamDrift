@@ -8,8 +8,8 @@ The harm of the tested early-drive program is consistent with the
 delayed-release results of Pickering and Vickers and of Sprigings and
 MacKenzie [@pickering1999; @sprigings2002] and with Milburn's account of
 delayed uncocking [@milburn1982]. It is not a replication: the models,
-objectives, admissible torques, and impact definitions differ. The +12%
-late-drive contrast should likewise be compared cautiously with
+objectives, admissible torques, and impact definitions differ. The +12.4% and
++7.8% late-drive contrasts should likewise be compared cautiously with
 Sprigings and Neal's approximately 9% enabled-versus-disabled
 wrist-generator contrast [@sprigings2000], and not with the 1.6% forced-delay
 contrast reported by Sprigings and MacKenzie [@sprigings2002]. The

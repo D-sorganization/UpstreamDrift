@@ -1,0 +1,52 @@
+{
+  "schema_version": "proximal-distal-results-chapter-audit-v1",
+  "selected_programs": {
+    "60": {
+      "passive_speed_m_s": 34.15364542695601,
+      "early_speed_m_s": 28.9182969487125,
+      "best_drive_speed_m_s": 38.395335750230586,
+      "best_drive_onset_s": 0.2,
+      "best_restrain_speed_m_s": 38.85378591434185,
+      "best_restrain_onset_s": 0.1,
+      "best_restrain_nm": 10.0,
+      "early_vs_passive_percent": -15.32881311144454,
+      "drive_vs_passive_percent": 12.419436549888152
+    },
+    "100": {
+      "passive_speed_m_s": 43.12958067086403,
+      "early_speed_m_s": 38.5168781332826,
+      "best_drive_speed_m_s": 46.47822097625763,
+      "best_drive_onset_s": 0.175,
+      "best_restrain_speed_m_s": 46.91257268525718,
+      "best_restrain_onset_s": 0.125,
+      "best_restrain_nm": 5.0,
+      "early_vs_passive_percent": -10.69498582140752,
+      "drive_vs_passive_percent": 7.764138332223003
+    }
+  },
+  "attempted_programs": 92,
+  "impact_status_counts": {
+    "accepted_registered_delivery_zone": 63,
+    "crossing_outside_registered_delivery_zone": 29
+  },
+  "summary_representatives_match": true,
+  "energy_balance_residual_max_w": 4.831690603168681e-12,
+  "energy_balance_residual_rms_w": 6.725648245802777e-13,
+  "bounded_selected_speed_m_s": {
+    "passive": 30.799298923729122,
+    "drive_only": 34.571745779064635,
+    "restrain_5": 34.72510966428563,
+    "restrain_10": 34.76118072204874
+  },
+  "all_parameter_cases_preserve_ordering": true,
+  "parameter_case_count": 13,
+  "impact_family_ordering_preserved": true,
+  "smooth_time_constants_s": [
+    0.0,
+    0.02,
+    0.035,
+    0.05
+  ],
+  "smooth_all_orderings_preserved": true,
+  "interpretation": "deterministic internal consistency of a finite planar command family; not biological validation, a global optimum, or coaching advice"
+}
