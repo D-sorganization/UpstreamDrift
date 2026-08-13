@@ -74,7 +74,14 @@ def test_short_pulse_exposes_truncation_without_invalidating_three_modes() -> No
 def test_claim_boundary_does_not_promote_synthetic_properties() -> None:
     record = _record()
     status = record["claim_status"]
-    assert status["distributed_modal_shaft_coupled_forward"].startswith("supported")
+    screen = record["model_use_screen"]
+    assert screen["metric"] == "maximum_abs_modal_tip_deflection_over_shaft_length"
+    assert screen["threshold"] == 0.05
+    assert screen["observed"] > screen["threshold"]
+    assert screen["passed"] is False
+    assert status["distributed_modal_shaft_coupled_forward"] == (
+        "numerical_coupling_supported_but_small_deflection_screen_failed"
+    )
     assert status["equipment_calibration"].startswith("untested")
     assert status["human_strategy"] == "untested"
     assert any("not equipment calibration" in item for item in record["limitations"])

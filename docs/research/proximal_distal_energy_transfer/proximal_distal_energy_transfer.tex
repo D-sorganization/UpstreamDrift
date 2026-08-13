@@ -342,89 +342,91 @@ and tip mass, mesh and work--energy gates close, and a short load pulse
 exposes sixty times more RMS response discrepancy than a slow pulse.
 This is structural verification, not equipment calibration. A subsequent
 planar experiment couples three transported shaft modes into the
-moving-base, two-hand forward solve. The declared baseline stays within
-a 5\% deflection screen; the zero-command grip couple remains negative
-for 30 ms; coincident and reversed moment-arm controls close exactly;
-and work--energy error decreases under timestep refinement. The result
-supports only the declared synthetic planar mechanism. A
-common-observable model ladder then carries reference-explicit force,
-couple, velocity, angular velocity, and power through a third
-coordinate, prescribed hub motion, two-hand constraint geometry, and
-proper 3-D frame transformations. A reduced full-body extension executes
-nonplanar common-state inverse dynamics through MuJoCo and an
-independent Lagrange--Christoffel formulation. Across 20 generalized
-coordinates and 61 states, the maximum relative discrepancy is
-\(2.14\times10^{-11}\); reversing the hand moment arm reverses a
-\(-4.32\) N m force-generated couple, and coincident hands remove it
-exactly. Because contact loads are prescribed, passive spatial contact
-remains inconclusive at that tier. A subsequent reduced forward-contact
-experiment independently integrates MuJoCo and Pinocchio with two
-finite-mass hand carriages, paired compliant interfaces, and no direct
-club actuation. Its exact same-state driver-killswitch branch retains a
-negative swing-normal contact couple for 37.5 ms; coincident and
-reversed-moment-arm controls close exactly, trajectory and wrench gates
-pass, and work--energy residual decreases under timestep refinement.
-This supports a reduced spatial mechanism, not anatomical arms, muscle
-coordination, human strategy, or equipment calibration. A coupled
-uncertainty and control experiment then varies 12 inputs simultaneously,
-audits structural and practical identifiability, and compares eight
-preselected delayed-command programs on separate training and held-out
-ensembles. The net planar wrench leaves one individual-hand-force mode
-unidentified, the six summary observables cannot identify the full
-12-parameter vector, and all eight programs are nondominated on held-out
-samples. An early opposing command improves lower-tail speed relative to
-late drive but worsens the planar face/path proxy, rejecting a universal
-optimum and any direct physiological interpretation. A preregistered
-experimental protocol then fixes synchronized motion, bilateral
-hand-wrench, club, ground-reaction, launch, and activation measurements;
-participant-level holdout; filtering; calibration; residuals; identity
-protection; and four outcome falsifiers. Its synthetic dry run qualifies
-only the fail-closed pipeline. No human outcome is analyzed, and every
-experimental prediction remains untested. A separate hand-path
-attribution study evaluates the MacKenzie force-work-per-path-length
-estimand in an impact-truncated double pendulum, a forward-simulated
-one-arm model, and a mechanically closed two-arm local sweep. Drift
-supplies 101.2\% and 103.5\% of signed hand-path force work in the two
-forward cases because the contemporaneous control contribution is
-slightly opposing; in the two-arm sweep, drift and control instead
-cancel with an index of 0.962. Joint- and time-resolved impulse, power,
-work, force-vector, and common/differential-mode results show why a
-large net hand-path force is a mechanical transfer observable rather
-than a direct measure of biological effort. A final matched-task
-allocation experiment separates direct wrist moments from the moment of
-bilateral hand forces at identical club states. Internal demands vary
-even when club-moment closure is exact. A separate dead-zone
-transmission model predicts that preserving each channel's loaded
-direction avoids a reversal gap, whereas reversing both modeled channels
-crosses zero transmission. These conditional predictions do not identify
-scapular action or establish a preferred human technique. A
-constrained-contact extension then defines frame-explicit configuration,
-velocity, control, and external-load contributions to reaction force and
-fails closed when contact allocation is nonunique. In the fixed-support
-double-pendulum benchmark, pointwise ZTCF predicts the modeled
-support-reaction waveform with componentwise R-squared values of 0.871
-and 0.814 but retains large amplitude error; opposing control also makes
-the vertical ZTCF impulse exceed the total. This benchmark is not a
-bilateral human force-plate validation, and the required synchronized
-force-plate and whole-body kinematic experiment is specified as a
-falsification protocol. An advanced bridge then proves wrench--twist
-power invariance under proper rotations and paired reference-point
-transport, verifies Jacobian virtual work, and round-trips one canonical
-pose through the MuJoCo, Pinocchio, Drake, OpenSim, and MyoSuite
-coordinate adapters. The pose result is a representation check, not
-five-engine dynamics parity. A reduced Hill-type study demonstrates that
-41 agonist--antagonist allocations can produce the same net moment while
-changing internal stiffness and series-energy proxies; continuous
-activation and series-force states make preparation history observable
-but do not identify anatomy or a preferred technique. A final
-adversarial transmission study compares clock- and state-triggered
-handoff under paired training and held-out perturbations. State
-triggering improves lower-tail delivery speed and a planar face/path
-proxy relative to clock timing but raises peak hand force; higher
-impedance changes the tradeoff, and all four registered programs remain
-Pareto-nondominated. A local task-Jacobian partition exposes five
-task-null input directions, but this is a model property rather than
-evidence of a neural synergy or human self-stabilization. A
+moving-base, two-hand forward solve. The current baseline reaches a
+13.48\% tip-deflection ratio and therefore fails its declared 5\%
+small-deflection screen. It is retained only as an out-of-domain
+numerical stress test: the zero-command grip couple remains negative for
+about 25 ms, coincident and reversed moment-arm controls close exactly,
+and work--energy error decreases under timestep refinement. These checks
+support numerical coupling and qualitative force-couple geometry, not
+quantitative shaft response. A common-observable model ladder then
+carries reference-explicit force, couple, velocity, angular velocity,
+and power through a third coordinate, prescribed hub motion, two-hand
+constraint geometry, and proper 3-D frame transformations. A reduced
+full-body extension executes nonplanar common-state inverse dynamics
+through MuJoCo and an independent Lagrange--Christoffel formulation.
+Across 20 generalized coordinates and 61 states, the maximum relative
+discrepancy is \(2.14\times10^{-11}\); reversing the hand moment arm
+reverses a \(-4.32\) N m force-generated couple, and coincident hands
+remove it exactly. Because contact loads are prescribed, passive spatial
+contact remains inconclusive at that tier. A subsequent reduced
+forward-contact experiment independently integrates MuJoCo and Pinocchio
+with two finite-mass hand carriages, paired compliant interfaces, and no
+direct club actuation. Its exact same-state driver-killswitch branch
+retains a negative swing-normal contact couple for 37.5 ms; coincident
+and reversed-moment-arm controls close exactly, trajectory and wrench
+gates pass, and work--energy residual decreases under timestep
+refinement. This supports a reduced spatial mechanism, not anatomical
+arms, muscle coordination, human strategy, or equipment calibration. A
+coupled uncertainty and control experiment then varies 12 inputs
+simultaneously, audits structural and practical identifiability, and
+compares eight preselected delayed-command programs on separate training
+and held-out ensembles. The net planar wrench leaves one
+individual-hand-force mode unidentified, the six summary observables
+cannot identify the full 12-parameter vector, and all eight programs are
+nondominated on held-out samples. An early opposing command improves
+lower-tail speed relative to late drive but worsens the planar face/path
+proxy, rejecting a universal optimum and any direct physiological
+interpretation. A preregistered experimental protocol then fixes
+synchronized motion, bilateral hand-wrench, club, ground-reaction,
+launch, and activation measurements; participant-level holdout;
+filtering; calibration; residuals; identity protection; and four outcome
+falsifiers. Its synthetic dry run qualifies only the fail-closed
+pipeline. No human outcome is analyzed, and every experimental
+prediction remains untested. A separate hand-path attribution study
+evaluates the MacKenzie force-work-per-path-length estimand in an
+impact-truncated double pendulum, a forward-simulated one-arm model, and
+a mechanically closed two-arm local sweep. Drift supplies 101.2\% and
+103.5\% of signed hand-path force work in the two forward cases because
+the contemporaneous control contribution is slightly opposing; in the
+two-arm sweep, drift and control instead cancel with an index of 0.962.
+Joint- and time-resolved impulse, power, work, force-vector, and
+common/differential-mode results show why a large net hand-path force is
+a mechanical transfer observable rather than a direct measure of
+biological effort. A final matched-task allocation experiment separates
+direct wrist moments from the moment of bilateral hand forces at
+identical club states. Internal demands vary even when club-moment
+closure is exact. A separate dead-zone transmission model predicts that
+preserving each channel's loaded direction avoids a reversal gap,
+whereas reversing both modeled channels crosses zero transmission. These
+conditional predictions do not identify scapular action or establish a
+preferred human technique. A constrained-contact extension then defines
+frame-explicit configuration, velocity, control, and external-load
+contributions to reaction force and fails closed when contact allocation
+is nonunique. In the fixed-support double-pendulum benchmark, pointwise
+ZTCF predicts the modeled support-reaction waveform with componentwise
+R-squared values of 0.871 and 0.814 but retains large amplitude error;
+opposing control also makes the vertical ZTCF impulse exceed the total.
+This benchmark is not a bilateral human force-plate validation, and the
+required synchronized force-plate and whole-body kinematic experiment is
+specified as a falsification protocol. An advanced bridge then proves
+wrench--twist power invariance under proper rotations and paired
+reference-point transport, verifies Jacobian virtual work, and
+round-trips one canonical pose through the MuJoCo, Pinocchio, Drake,
+OpenSim, and MyoSuite coordinate adapters. The pose result is a
+representation check, not five-engine dynamics parity. A reduced
+Hill-type study demonstrates that 41 agonist--antagonist allocations can
+produce the same net moment while changing internal stiffness and
+series-energy proxies; continuous activation and series-force states
+make preparation history observable but do not identify anatomy or a
+preferred technique. A final adversarial transmission study compares
+clock- and state-triggered handoff under paired training and held-out
+perturbations. State triggering improves lower-tail delivery speed and a
+planar face/path proxy relative to clock timing but raises peak hand
+force; higher impedance changes the tradeoff, and all four registered
+programs remain Pareto-nondominated. A local task-Jacobian partition
+exposes five task-null input directions, but this is a model property
+rather than evidence of a neural synergy or human self-stabilization. A
 phase-resolved proximal-velocity study then evaluates 90 exact
 same-state cases under relative- and absolute-club-rate matching. High
 proximal-link speed strongly increases late drift power in some states,
@@ -453,7 +455,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, arc=.35mm, leftrule=.75mm, titlerule=0mm, coltitle=black, colback=white, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, opacitybacktitle=0.6, opacityback=0, toprule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, toptitle=1mm, bottomrule=.15mm, breakable, left=2mm, colbacktitle=quarto-callout-note-color!10!white]
+\begin{tcolorbox}[enhanced jigsaw, left=2mm, breakable, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, opacityback=0, colback=white, toprule=.15mm, toptitle=1mm, leftrule=.75mm, coltitle=black, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, arc=.35mm, bottomtitle=1mm, colframe=quarto-callout-note-color-frame, titlerule=0mm, rightrule=.15mm, bottomrule=.15mm]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -6326,9 +6328,10 @@ The corresponding trace archive is
 
 This remains a synthetic mechanism experiment. The shaft bending
 rigidity is four times the isolated structural reference (implemented as
-448 GPa with the reference geometry) so that the declared drive remains
-inside a conservative small-deflection screen. That multiplier is a
-numerical stress-test choice, not a material, commercial-shaft, or
+448 GPa with the reference geometry). That multiplier was intended to
+keep the declared drive inside a conservative small-deflection screen,
+but the executed baseline still fails that screen as shown below. It is
+a numerical stress-test choice, not a material, commercial-shaft, or
 equipment-calibration claim. No measured EI profile, damping, grip
 compliance, hand force, body segment, or launch data enter the
 calculation.
@@ -6418,7 +6421,7 @@ identity is checked at every sample in both equivalent forms,
 }\end{equation}
 
 The maximum discrepancy is \(1.71\times10^{-13}\) W in the baseline and
-\(1.14\times10^{-13}\) W after the intervention. Position, velocity,
+\(1.42\times10^{-13}\) W after the intervention. Position, velocity,
 acceleration, and KKT residuals are also recorded rather than inferred
 from visual agreement.
 
@@ -6454,20 +6457,22 @@ study therefore preregisters the screening rule
 \max_t |w(L,t)|/L < 0.05.
 }\end{equation}
 
-The observed maximum is 0.03378, so the declared baseline passes. The
-5\% value is a conservative model-use screen for this resource, not a
-universal theorem about beam validity. Torsion, shear deformation,
-geometric nonlinearity, impact, and material anisotropy remain absent
-even when the screen passes.
+The observed maximum is 0.13476, so the current baseline \textbf{fails}
+this preregistered screen. The coupled run is retained as an explicit
+out-of-domain stress test, not as quantitatively valid small-deflection
+beam evidence. The 5\% value is a conservative model-use screen for this
+resource, not a universal theorem about beam validity. Torsion, shear
+deformation, geometric nonlinearity, impact, and material anisotropy
+remain absent.
 
-At a 0.25 ms step, the base moves by at most 26.65 mm, the modal tip
-deflection reaches 33.78 mm, and the first three modal coordinates all
-depart from zero. Peak shaft strain energy is 0.533 J and peak clubhead
-speed is 7.000 m/s. The force-generated couple spans -18.65 to 31.06 N
-m. Mechanical energy changes by 40.285 J while integrated applied and
-dissipative work is 40.279 J, leaving a 0.00574 J absolute residual.
-These are internal consistency observations for the synthetic case, not
-estimates of golfer or equipment performance.
+At a 0.50 ms step, the base moves by at most 26.70 mm, the modal tip
+deflection reaches 134.76 mm, and the first three modal coordinates all
+depart from zero. Peak shaft strain energy is 2.123 J and peak clubhead
+speed is 7.356 m/s. The force-generated couple spans -21.60 to 28.87 N
+m. Mechanical energy changes by 39.482 J while integrated applied and
+dissipative work is 39.464 J, leaving a 0.0174 J absolute residual.
+These are numerical observations for an out-of-screen synthetic stress
+test, not estimates of golfer or equipment performance.
 
 \section{Excitation-Dependent Mode
 Truncation}\label{excitation-dependent-mode-truncation}
@@ -6492,12 +6497,12 @@ Response Under Smooth and Short Inputs}
 \end{figure}%
 
 For the smooth drive, the one-mode tip-deflection RMS discrepancy
-relative to six modes is 0.0483 mm and its maximum clubhead-position
-discrepancy is 3.42 \(\mu\)m. Retaining three modes reduces those values
-to 0.000406 mm and 0.106 \(\mu\)m. Under the short pulse, the one-mode
-deflection discrepancy grows to 0.267 mm, 5.53 times its smooth-input
-value, while the three-mode discrepancy remains 0.00108 mm and the
-clubhead-position discrepancy remains 0.196 \(\mu\)m.
+relative to six modes is 0.160 mm and its maximum clubhead-position
+discrepancy is 13.45 \(\mu\)m. Retaining three modes reduces those
+values to 0.00186 mm and 0.422 \(\mu\)m. Under the short pulse, the
+one-mode deflection discrepancy grows to 0.484 mm, 3.03 times its
+smooth-input value, while the three-mode discrepancy is 0.00755 mm and
+its maximum clubhead-position discrepancy is 1.184 \(\mu\)m.
 Figure~\ref{fig-modal-shaft-mode-convergence} therefore supports a
 conditional statement: three modes are converged for the two declared
 excitations and timestep, whereas a single-mode approximation is
@@ -6515,7 +6520,7 @@ relabeled-load construction cannot be attributed to a changed initial
 condition.
 
 The force-generated couple is already negative at the cut and remains
-negative for the complete 30 ms branch, reaching -14.94 N m. This is a
+negative for 25.5 ms of the branch, reaching -21.17 N m. This is a
 statement about the continued constrained motion of the declared model
 after command removal; it is not evidence that biological muscles are
 inactive. The branch continues to contain inertia, gravity, base
@@ -6541,12 +6546,12 @@ Killswitch, Geometry Controls, and Numerical Closure}
 
 \end{figure}%
 
-The intervention is repeated at 0.25, 0.125, and 0.0625 ms. The absolute
-work--energy residual decreases monotonically from 0.00683 to 0.00340 to
-0.00169 J, while the negative interval remains 30 ms and the minimum
-couple converges from -14.94 to -14.97 N m. This separates a persistent
-mechanism result from a fixed-step artifact without claiming zero
-numerical error.
+The intervention is repeated at 0.50, 0.25, and 0.125 ms. The absolute
+work--energy residual decreases monotonically from 0.00934 to 0.00464 to
+0.00231 J, while the negative interval converges from 25.50 to 25.25 to
+25.125 ms and the minimum couple from -21.17 to -21.19 N m. This
+separates a persistent mechanism result from a fixed-step artifact
+without claiming zero numerical error.
 
 \section{Falsifiers and Remaining Inference
 Gaps}\label{falsifiers-and-remaining-inference-gaps}
@@ -6559,15 +6564,18 @@ timestep refinement; the coincident or reversed moment-arm controls
 failed; the 5\% deflection screen failed; or the constraint,
 contact-power, and work--energy residuals ceased to close.
 
-None of those failures occurs in this synthetic planar case. The
-supported claim is consequently narrow: a finite-element-derived modal
-shaft can be coupled into the moving-base two-hand forward solve while
-preserving the registered negative-couple intervention and numerical
-identities. Equipment calibration, anatomical arms, base rotation,
-three-dimensional shaft bending and torsion, compliant tissue, impact,
-muscle coordination, optimal control, human strategy, and coaching
-benefit remain untested. Those omissions define the next model tiers;
-they are not conclusions supplied by this one.
+The 5\% screen does fail in the current synthetic planar baseline, so
+the quantitative small-deflection claim is rejected for this run. The
+remaining supported claim is narrower: the finite-element-derived modal
+coordinates can be coupled into the moving-base two-hand forward solve
+while preserving the registered negative-couple intervention, geometry
+controls, and numerical identities, but the resulting amplitudes cannot
+be interpreted as a valid linear-beam equipment prediction. Equipment
+calibration, anatomical arms, base rotation, three-dimensional shaft
+bending and torsion, compliant tissue, impact, muscle coordination,
+optimal control, human strategy, and coaching benefit remain untested.
+Those omissions define the next model tiers; they are not conclusions
+supplied by this one.
 
 \chapter{Spatial Full-Body Common-State
 Dynamics}\label{sec-spatial-full-body}

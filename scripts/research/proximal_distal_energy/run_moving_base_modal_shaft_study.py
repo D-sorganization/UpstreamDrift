@@ -300,8 +300,25 @@ def build_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
         "timestep_refinement": refinement,
         "smooth_mode_comparison": smooth_modes,
         "short_pulse_mode_comparison": pulse_modes,
+        "model_use_screen": {
+            "metric": "maximum_abs_modal_tip_deflection_over_shaft_length",
+            "threshold": 0.05,
+            "observed": float(
+                np.max(np.abs(baseline.modal_tip_deflection_m)) / params.beam.length_m
+            ),
+            "passed": bool(
+                np.max(np.abs(baseline.modal_tip_deflection_m)) / params.beam.length_m
+                < 0.05
+            ),
+            "interpretation": (
+                "failure retains the run as an out-of-domain numerical stress "
+                "test but rejects quantitative small-deflection beam inference"
+            ),
+        },
         "claim_status": {
-            "distributed_modal_shaft_coupled_forward": "supported_for_declared_synthetic_model",
+            "distributed_modal_shaft_coupled_forward": (
+                "numerical_coupling_supported_but_small_deflection_screen_failed"
+            ),
             "late_negative_force_couple_after_zero_command": (
                 "supported_for_declared_synthetic_model"
             ),
@@ -313,11 +330,13 @@ def build_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
             "the higher modes remain numerically inert under a resolved short pulse",
             "the post-killswitch negative interval disappears under timestep refinement",
             "coincident or reversed moment-arm controls fail their zero/sign tests",
+            "the declared five-percent small-deflection screen fails",
             "constraint, KKT, contact-power, or work-energy closure exceeds tolerance",
         ],
         "limitations": [
             "planar reduced arms and a translating base are not anatomical full-body dynamics",
             "linear Euler-Bernoulli bending omits torsion, shear deformation, and impact",
+            "the baseline exceeds the declared small-deflection screen and is an out-of-domain stress test",
             "shaft and head properties are declared synthetic values, not equipment calibration",
             "the result is model-mechanism evidence, not a player or coaching prescription",
         ],

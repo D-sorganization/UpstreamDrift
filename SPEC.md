@@ -71,6 +71,13 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-08-13** - Reconciled the forward distributed modal-shaft chapter
+  under epic #8557. The regenerated hash-bound authority now records the
+  preregistered 5% tip-deflection model-use screen and its observed 13.48%
+  failure. The run remains evidence for numerical modal coupling, force-couple
+  geometry controls, and timestep behavior, but quantitative linear-shaft,
+  equipment, human, and coaching inferences are rejected for this baseline.
+
 - **2026-08-13** - Adjudicated both counterfactual chapters under epic #8557.
   The legacy MATLAB killswitch is now classified as a rerun-based pointwise
   sampler, and its `DELTA` force-work columns are explicitly rejected as an

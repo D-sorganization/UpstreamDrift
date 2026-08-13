@@ -77,7 +77,9 @@
     },
     "duration_s": 0.25,
     "maximum_abs_modal_coordinate": [
-      0.06253918891230585, 0.0002172223623722214, 2.5425005200744096e-5
+      0.06253918891230585,
+      0.0002172223623722214,
+      2.5425005200744096e-05
     ],
     "maximum_abs_modal_tip_deflection_m": 0.1347566237083847,
     "maximum_base_displacement_m": 0.02670408395471878,
@@ -88,7 +90,7 @@
     "step_s": 0.0005
   },
   "claim_status": {
-    "distributed_modal_shaft_coupled_forward": "supported_for_declared_synthetic_model",
+    "distributed_modal_shaft_coupled_forward": "numerical_coupling_supported_but_small_deflection_screen_failed",
     "equipment_calibration": "untested_no_governed_measurements",
     "human_strategy": "untested",
     "late_negative_force_couple_after_zero_command": "supported_for_declared_synthetic_model"
@@ -98,11 +100,15 @@
     "the higher modes remain numerically inert under a resolved short pulse",
     "the post-killswitch negative interval disappears under timestep refinement",
     "coincident or reversed moment-arm controls fail their zero/sign tests",
+    "the declared five-percent small-deflection screen fails",
     "constraint, KKT, contact-power, or work-energy closure exceeds tolerance"
   ],
   "geometry_controls": {
     "coincident_maximum_abs_nm": 0.0,
-    "moment_arms_m": [0.065, -0.065],
+    "moment_arms_m": [
+      0.065,
+      -0.065
+    ],
     "registered_minimum_nm": -21.173909515110914,
     "reversed_arm_sign_residual_max_abs_nm": 0.0,
     "same_achieved_forces": true
@@ -110,21 +116,33 @@
   "limitations": [
     "planar reduced arms and a translating base are not anatomical full-body dynamics",
     "linear Euler-Bernoulli bending omits torsion, shear deformation, and impact",
+    "the baseline exceeds the declared small-deflection screen and is an out-of-domain stress test",
     "shaft and head properties are declared synthetic values, not equipment calibration",
     "the result is model-mechanism evidence, not a player or coaching prescription"
   ],
   "modal_transport": {
     "coupled_quadrature_frequencies_hz": [
-      5.239954615606654, 62.94571366163065, 138.0330573880405
+      5.239954615606654,
+      62.94571366163065,
+      138.0330573880405
     ],
     "finite_element_frequencies_hz": [
-      5.239897333424722, 62.94572427196277, 138.0330543122767
+      5.239897333424722,
+      62.94572427196277,
+      138.0330543122767
     ],
     "interpretation": "finite-element modes are coupled into the moving-base two-hand forward solve through distributed mass quadrature; declared properties remain synthetic and are not equipment calibration",
-    "maximum_frequency_discrepancy_relative": 1.0931928296880968e-5,
+    "maximum_frequency_discrepancy_relative": 1.0931928296880968e-05,
     "modal_mass_identity_max_abs": 2.220446049250313e-16
   },
   "model_tier": "forward_planar_moving_base_two_hand_distributed_modal_shaft",
+  "model_use_screen": {
+    "interpretation": "failure retains the run as an out-of-domain numerical stress test but rejects quantitative small-deflection beam inference",
+    "metric": "maximum_abs_modal_tip_deflection_over_shaft_length",
+    "observed": 0.1347566237083847,
+    "passed": false,
+    "threshold": 0.05
+  },
   "parameter_contract": {
     "beam": {
       "butt_diameter_m": 0.015,
@@ -140,7 +158,7 @@
       "mode_count": 6,
       "peak_tip_force_n": 8.0,
       "peak_tip_moment_nm": 4.0,
-      "step_s": 1.25e-5,
+      "step_s": 1.25e-05,
       "tip_diameter_m": 0.0085,
       "wall_thickness_m": 0.001,
       "youngs_modulus_pa": 112000000000.0
@@ -151,7 +169,7 @@
       "base_damping_ns_m": 500.0,
       "base_mass_kg": 35.0,
       "base_stiffness_n_m": 24000.0,
-      "constraint_tolerance_m": 1e-8,
+      "constraint_tolerance_m": 1e-08,
       "distal_club_inertia_kg_m2": 0.006561000000000001,
       "distal_club_length_m": 0.54,
       "distal_club_mass_kg": 0.27,
@@ -160,15 +178,21 @@
       "forearm_mass_kg": 1.35,
       "gravity_m_s2": 9.80665,
       "joint_damping_nms_rad": 0.08,
-      "kkt_tolerance": 1e-8,
+      "kkt_tolerance": 1e-08,
       "left_grip_offset_m": -0.065,
-      "left_shoulder_offset_m": [-0.19, 0.0],
+      "left_shoulder_offset_m": [
+        -0.19,
+        0.0
+      ],
       "proximal_club_inertia_kg_m2": 0.003174,
       "proximal_club_length_m": 0.46,
       "proximal_club_mass_kg": 0.18,
       "rank_tolerance": 1e-10,
       "right_grip_offset_m": 0.065,
-      "right_shoulder_offset_m": [0.19, 0.0],
+      "right_shoulder_offset_m": [
+        0.19,
+        0.0
+      ],
       "shaft_damping_nms_rad": 0.6,
       "shaft_stiffness_nm_rad": 80.0,
       "upper_inertia_kg_m2": 0.016213333333333333,
@@ -208,10 +232,10 @@
         "position_constraint_max_m": 5.073049325500103e-11,
         "projection_energy_change_sum_j": -3.4491876022002543e-10,
         "velocity_constraint_max_m_s": 7.472462390623427e-10,
-        "work_energy_residual_abs_j": 3.61067905229398e-5
+        "work_energy_residual_abs_j": 3.61067905229398e-05
       },
-      "clubhead_position_max_difference_m": 1.1968214307750104e-5,
-      "clubhead_position_rms_difference_m": 6.420032252395945e-6,
+      "clubhead_position_max_difference_m": 1.1968214307750104e-05,
+      "clubhead_position_rms_difference_m": 6.420032252395945e-06,
       "mode_count": 1,
       "peak_strain_energy_j": 0.0022856654376497395,
       "tip_deflection_rms_difference_m": 0.00048436841825876486
@@ -226,13 +250,13 @@
         "position_constraint_max_m": 7.668076066678681e-11,
         "projection_energy_change_sum_j": -4.3168313368369127e-10,
         "velocity_constraint_max_m_s": 2.0974291077903746e-10,
-        "work_energy_residual_abs_j": 3.6039043009264415e-5
+        "work_energy_residual_abs_j": 3.6039043009264415e-05
       },
-      "clubhead_position_max_difference_m": 1.183674431182992e-6,
-      "clubhead_position_rms_difference_m": 5.986452771052767e-7,
+      "clubhead_position_max_difference_m": 1.183674431182992e-06,
+      "clubhead_position_rms_difference_m": 5.986452771052767e-07,
       "mode_count": 3,
       "peak_strain_energy_j": 0.0028368159580587486,
-      "tip_deflection_rms_difference_m": 7.549251960572762e-6
+      "tip_deflection_rms_difference_m": 7.549251960572762e-06
     },
     {
       "closure": {
@@ -244,7 +268,7 @@
         "position_constraint_max_m": 7.56079154324708e-11,
         "projection_energy_change_sum_j": -4.219273819217051e-10,
         "velocity_constraint_max_m_s": 2.214982595740215e-10,
-        "work_energy_residual_abs_j": 3.607161858523375e-5
+        "work_energy_residual_abs_j": 3.607161858523375e-05
       },
       "clubhead_position_max_difference_m": 0.0,
       "clubhead_position_rms_difference_m": 0.0,
@@ -262,12 +286,12 @@
         "mechanical_energy_change_j": 0.1761269147261899,
         "net_nonconstraint_work_j": 0.1760828831688882,
         "position_constraint_max_m": 9.98089848180856e-11,
-        "projection_energy_change_sum_j": -8.86064555061239e-9,
+        "projection_energy_change_sum_j": -8.86064555061239e-09,
         "velocity_constraint_max_m_s": 1.8420036149940225e-10,
-        "work_energy_residual_abs_j": 4.4031557301704716e-5
+        "work_energy_residual_abs_j": 4.4031557301704716e-05
       },
-      "clubhead_position_max_difference_m": 1.3449934391730938e-5,
-      "clubhead_position_rms_difference_m": 8.40738801352793e-6,
+      "clubhead_position_max_difference_m": 1.3449934391730938e-05,
+      "clubhead_position_rms_difference_m": 8.40738801352793e-06,
       "mode_count": 1,
       "peak_strain_energy_j": 0.000410104227440893,
       "tip_deflection_rms_difference_m": 0.00015976138178014435
@@ -280,15 +304,15 @@
         "mechanical_energy_change_j": 0.17605671785385368,
         "net_nonconstraint_work_j": 0.17601272276515412,
         "position_constraint_max_m": 9.945697812970604e-11,
-        "projection_energy_change_sum_j": -8.583999289157873e-9,
+        "projection_energy_change_sum_j": -8.583999289157873e-09,
         "velocity_constraint_max_m_s": 2.1180081038529662e-10,
-        "work_energy_residual_abs_j": 4.399508869956659e-5
+        "work_energy_residual_abs_j": 4.399508869956659e-05
       },
-      "clubhead_position_max_difference_m": 4.219349411196596e-7,
-      "clubhead_position_rms_difference_m": 1.758737532338382e-7,
+      "clubhead_position_max_difference_m": 4.219349411196596e-07,
+      "clubhead_position_rms_difference_m": 1.758737532338382e-07,
       "mode_count": 3,
       "peak_strain_energy_j": 0.00034570595289735133,
-      "tip_deflection_rms_difference_m": 1.8635072492738398e-6
+      "tip_deflection_rms_difference_m": 1.8635072492738398e-06
     },
     {
       "closure": {
@@ -298,9 +322,9 @@
         "mechanical_energy_change_j": 0.17605695079510753,
         "net_nonconstraint_work_j": 0.1760129493285345,
         "position_constraint_max_m": 9.998628454434804e-11,
-        "projection_energy_change_sum_j": -8.578830090755218e-9,
+        "projection_energy_change_sum_j": -8.578830090755218e-09,
         "velocity_constraint_max_m_s": 2.212959459940672e-10,
-        "work_energy_residual_abs_j": 4.400146657301818e-5
+        "work_energy_residual_abs_j": 4.400146657301818e-05
       },
       "clubhead_position_max_difference_m": 0.0,
       "clubhead_position_rms_difference_m": 0.0,
@@ -310,9 +334,9 @@
     }
   ],
   "source_sha256": {
-    "scripts/research/proximal_distal_energy/moving_base_flexible_club.py": "251c345bdc961316c00058831624cfc96954d9a6cf59817e48500bd6b19a9a23",
+    "scripts/research/proximal_distal_energy/moving_base_flexible_club.py": "c3f7b033f01ef890a384443e6a723c963afa5be5f244ef14c1a17344150b755e",
     "scripts/research/proximal_distal_energy/moving_base_modal_shaft.py": "260adaad2d43b2ce288c8344bb4e432272ff872fc719fe333c5cdcad571680e2",
-    "scripts/research/proximal_distal_energy/run_moving_base_modal_shaft_study.py": "e2a6e326d7418180d684ab4ae4f994b017d911699046768429a24aecfaa29e7d",
+    "scripts/research/proximal_distal_energy/run_moving_base_modal_shaft_study.py": "86214e1c20af89989e80177d1dc985e0d092a6b3e954cb096449389bfba2eef6",
     "scripts/research/proximal_distal_energy/shaft_beam_reference.py": "1405dc8214cfdf4931ec71e9c1608d284cd44c0fa42d5d42d3c1e338f212481e",
     "src/shared/python/physics/flexible_shaft.py": "d25cb7fd2408a0be0b8cd3a85469a3f8db7445665a963fd535ebeb8c2ed1f1fd"
   },
