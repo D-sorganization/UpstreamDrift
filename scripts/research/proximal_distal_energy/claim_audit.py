@@ -10,6 +10,7 @@ contradicted, inconclusive, or untested.
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import hashlib
 import json
 import re
@@ -203,10 +204,14 @@ def build_candidate_inventory(
     candidates: list[dict[str, Any]] = []
     seen_ids: set[str] = set()
     for source in sources:
+        text_occurrences: Counter[str] = Counter()
         for paragraph in _paragraphs(source, skip_front_matter=source == master):
             text = paragraph["text"]
             relative = source.relative_to(root).as_posix()
-            identity = f"{relative}:{paragraph['line_start']}:{text}"
+            text_digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
+            occurrence = text_occurrences[text_digest]
+            text_occurrences[text_digest] += 1
+            identity = f"{relative}\0{text_digest}\0{occurrence}"
             candidate_id = (
                 "PD-CAND-" + hashlib.sha256(identity.encode("utf-8")).hexdigest()[:16]
             )
@@ -222,7 +227,7 @@ def build_candidate_inventory(
                     "line_start": paragraph["line_start"],
                     "line_end": paragraph["line_end"],
                     "text": text,
-                    "text_sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
+                    "text_sha256": text_digest,
                     "citation_keys": citations,
                     "has_numeric_content": bool(NUMERIC_PATTERN.search(text)),
                     "has_assertive_language": bool(ASSERTION_PATTERN.search(text)),

@@ -2657,6 +2657,10 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   causal/generalizing triage flags may prioritize review but shall never assign
   scientific materiality or support automatically; Quarto cross-references
   shall not be reported as bibliography citations.
+- **F-8557.1b:** Candidate identity shall remain stable when unrelated lines are
+  inserted above a paragraph. Source path, normalized-content digest, and
+  within-source duplicate ordinal define identity; current line ranges remain
+  review locators and shall not define identity.
 - **F-8557.2:** NotebookLM collections shall be treated as research indexes;
   collection-derived changes require independent original-source verification,
   and authentication or coverage gaps remain explicit.

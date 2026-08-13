@@ -445,7 +445,7 @@ available with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, bottomrule=.15mm, coltitle=black, opacityback=0, colframe=quarto-callout-note-color-frame, colback=white, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, opacitybacktitle=0.6, bottomtitle=1mm, toptitle=1mm, titlerule=0mm, left=2mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, breakable, rightrule=.15mm, leftrule=.75mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, bottomrule=.15mm, opacityback=0, toprule=.15mm, arc=.35mm, left=2mm, coltitle=black, colback=white, titlerule=0mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, rightrule=.15mm, leftrule=.75mm, toptitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, breakable, colframe=quarto-callout-note-color-frame, bottomtitle=1mm]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -8414,22 +8414,23 @@ order rather than treating either as a causal mechanism by definition.
 
 \section{Segmental Kinetic-Energy Sequencing}\label{sec-ke-sequencing}
 
-Two studies measured the quantity this document cares most about ---
-segment \emph{kinetic energy}, not merely angular speed --- and both
-found the P→D structure at the energetic level. Anderson, Wright and
-Stefanyshyn computed segmental kinetic energies in the golf swing and
-documented the sequenced build-up and outward migration of energy along
-the chain (\citeproc{ref-anderson2006}{Anderson, Wright, and Stefanyshyn
-2006}). Kenny, McCloy, Wallace and Otto reproduced segmental
-kinetic-energy sequencing in a large-scale computer-simulated golf
-swing, confirming the ordered energetic handoff in a full
-forward-dynamic setting (\citeproc{ref-kenny2008}{Kenny et al. 2008}).
-These studies matter here for two reasons. First, they validate the
-segment-energy time course as a practical observable (the same
-observable computed for the model in Section~\ref{sec-results}). Second,
-they show the energetic sequence is not an artifact of angular-velocity
-bookkeeping: energy itself arrives late in the club, after the proximal
-segments have peaked.
+Two early studies calculated segment \emph{kinetic energy} rather than
+inferring energy flow from angular-speed peaks, but their results do not
+show a simple P→D timing sequence. Anderson, Wright and Stefanyshyn
+analyzed driver swings from 45 male scratch golfers with a four-group
+kinematic model. Peak total-KE magnitudes increased from hips to club,
+whereas hips, torso, and arms peaked at approximately the same
+normalized time and only the club peaked significantly later
+(\citeproc{ref-anderson2006}{Anderson, Wright, and Stefanyshyn 2006}).
+Kenny, McCloy, Wallace and Otto used measured kinematics from one elite
+male golfer to drive a 19-segment model and compared one driver and one
+7-iron simulation. Peak-KE magnitudes again increased distally, but the
+reported timing order was arms, hips, torso, then club---not a
+proximal-to-distal sequence (\citeproc{ref-kenny2008}{Kenny et al.
+2008}). Thus, segment KE is a computable observable, and both studies
+place the club's KE peak near impact; neither demonstrates sequential
+body-segment energy transfer, estimates intersegment power, or
+independently validates the present model.
 
 \section{Kinematic-Sequence Evidence and Skill-Level
 Differences}\label{sec-skill}
@@ -8457,56 +8458,66 @@ and Vandervoort review the broader catalogue of skill-level
 biomechanical differences (\citeproc{ref-lindsay2008}{Lindsay, Mantrop,
 and Vandervoort 2008}).
 
-Torso-pelvis interaction variables predict performance. Myers and
-colleagues found upper-torso and pelvis rotation (and their separation)
-associated with ball speed in golfers across skill levels
-(\citeproc{ref-myers2008}{Myers et al. 2008}); Chu, Sell and Lephart
-identified a small set of biomechanical variables --- among them trunk
-and pelvis kinematics at specific downswing events --- explaining a
-large share of driving-performance variance (\citeproc{ref-chu2010}{Chu,
-Sell, and Lephart 2010}); Joyce and colleagues related three-dimensional
-trunk kinematics to clubhead speed across clubs
-(\citeproc{ref-joyce2013}{Joyce et al. 2013}). On the widely coached
-``X-factor'' specifically, Kwon and colleagues showed the computed
-values depend materially on methodology and that, in skilled golfers,
-X-factor parameters were not straightforwardly associated with clubhead
-velocity (\citeproc{ref-kwon2013}{Kwon et al. 2013}) --- another
-instance of a popular proxy dissolving under measurement scrutiny.
+Torso-pelvis variables have sample-specific associations with ball or
+clubhead speed. Myers and colleagues reported moderate associations in
+100 recreational golfers (\citeproc{ref-myers2008}{Myers et al. 2008}).
+Chu, Sell and Lephart fit event-specific regressions to 308 golfers;
+their selected kinematic and ground-reaction variables accounted for
+44--74\% of in-sample ball-speed variance (\citeproc{ref-chu2010}{Chu,
+Sell, and Lephart 2010}). Joyce and colleagues reported associations
+between three-dimensional trunk kinematics and clubhead speed across
+clubs (\citeproc{ref-joyce2013}{Joyce et al. 2013}). These observational
+regressions do not establish that changing an isolated variable will
+reproduce the between-golfer association. For the widely coached
+``X-factor,'' Kwon and colleagues tested 18 skilled male golfers and
+found that three computation methods produced significantly different
+parameter values; none of the computed X-factor parameters was directly
+related to maximum clubhead velocity in that sample
+(\citeproc{ref-kwon2013}{Kwon et al. 2013}). The studies jointly
+motivate explicit measurement definitions and held-out or interventional
+validation, not a universal torso prescription.
 
 Three refinements prevent an overly tidy reading:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \item
-  \textbf{Sequence order is common but not universal --- even among the
-  best.} Skilled golfers whose peak ordering deviates from the canonical
-  pelvis-thorax-arm-club pattern are documented, and recent work
-  examines how alternative sequence patterns among elite players relate
-  to clubhead speed (\citeproc{ref-lee2026}{Lee, Ehrlich, and Cain
-  2026}). On-plane analyses of the ``axle-chain'' system in 66 skilled
-  golfers found clubhead-speed associations concentrated in specific
-  angular-motion characteristics rather than in gross ordering
-  (\citeproc{ref-madrid2020}{Madrid et al. 2020}).
+  \textbf{Sequence Order Is Common but Not Universal --- Even Among the
+  Best.} A recent study of 14 elite right-handed men reported that
+  slight sequence variations could yield clubhead speeds comparable to
+  the authors' defined optimal pattern, although its regression models
+  and unavailable public data do not establish a population-wide causal
+  optimum (\citeproc{ref-lee2026}{Lee, Ehrlich, and Cain 2026}).
+  On-plane analysis of 66 right-handed skilled men found associations
+  between selected axle-chain angular-motion characteristics and
+  clubhead speed (\citeproc{ref-madrid2020}{Madrid et al. 2020}). These
+  studies support heterogeneity and variable-level analysis; they do not
+  show that sequence order alone determines speed.
 \item
-  \textbf{Within-player timing differences do not straightforwardly
-  explain shot quality.} Comparing well-timed and mistimed shots
-  \emph{within} highly skilled players, Neal and colleagues found no
-  significant differences in the timing lags between peak angular speeds
-  of contiguous segments (\citeproc{ref-neal2007}{Neal et al. 2007}) ---
-  the felt sense of ``timing'' lives somewhere other than the inter-peak
-  lags of a five-segment model. Movement variability is itself
-  structured and functional in golf
-  (\citeproc{ref-langdown2012}{Langdown, Bridge, and Li 2012};
-  \citeproc{ref-glazier2011}{Glazier 2011}), so single-trial sequence
-  snapshots carry limited information.
+  \textbf{Within-Player Timing Differences Do Not Straightforwardly
+  Explain Shot Quality.} Neal and colleagues compared player-rated
+  well-timed and mistimed driver shots in 25 highly skilled amateurs and
+  found no significant differences in the lags between peak angular
+  speeds of contiguous segments (\citeproc{ref-neal2007}{Neal et al.
+  2007}). They did not measure pre-impact clubhead state or impact
+  location and proposed that the ratings may have reflected contact
+  centeredness. The result limits that five-segment peak-lag metric
+  under the declared protocol; it does not localize a golfer's
+  perception of timing. Reviews of golf-swing variability likewise
+  caution that trial-to-trial variation can be structured and
+  task-dependent (\citeproc{ref-langdown2012}{Langdown, Bridge, and Li
+  2012}; \citeproc{ref-glazier2011}{Glazier 2011}), not that every
+  deviation is beneficial.
 \item
-  \textbf{Method sensitivity.} As Section~\ref{sec-energyflow} noted,
-  the identified sequence depends on component-selection methodology
-  (\citeproc{ref-marsan2019}{Marsan et al. 2019}), so cross-study
-  comparisons of ordering statistics carry real uncertainty. Historical
-  measurements with specialized instrumentation reached compatible
-  conclusions about trunk-pelvis motion but with their own method
-  dependence (\citeproc{ref-mcteigue1994}{McTeigue et al. 1994}).
+  \textbf{Method Sensitivity.} Marsan and colleagues processed driver
+  swings from 13 golfers with seven angular-velocity component
+  definitions and obtained almost as many sequence classifications as
+  methods for each golfer (\citeproc{ref-marsan2019}{Marsan et al.
+  2019}). Cross-study ordering comparisons therefore require matched
+  coordinate, component, filtering, and peak-event definitions.
+  Historical trunk-pelvis measurements used different specialized
+  instrumentation and remain conditional on their own definitions
+  (\citeproc{ref-mcteigue1994}{McTeigue et al. 1994}).
 \end{enumerate}
 
 What survives these refinements is narrower: sampled skilled groups
@@ -8525,28 +8536,31 @@ the parameters the biomechanical literature supports
 
 \section{Where the Transfer Occurs}\label{sec-where}
 
-Synthesizing Section~\ref{sec-workbudget},
-Section~\ref{sec-ke-sequencing} and Section~\ref{sec-skill} with the
-mechanics of Section~\ref{sec-mechanics}: in a skilled swing, the
-dominant energy \emph{generation} occurs in the trunk-hip complex during
-the first two-thirds of the downswing
-(\citeproc{ref-nesbit2005work}{Nesbit and Serrano 2005}); the dominant
-\emph{transfer to the club} occurs in the final phase, through the wrist
-interface, by a mechanism that is substantially parametric/geometric
-(wrist-cock release under centrifugal loading, hub-path tightening) with
-a modest late active wrist contribution (\citeproc{ref-white2006}{White
-2006}; \citeproc{ref-miura2001}{Miura 2001};
+The available studies support a narrower account of where transfer may
+occur. Nesbit and Serrano's four subject-specific inverse-dynamics
+models assigned most positive joint work to the trunk complex and
+reported earlier torso-dominated work than the late club-interface
+conversion (\citeproc{ref-nesbit2005work}{Nesbit and Serrano 2005}).
+Classical and later models show that wrist-cock geometry and hub-path
+motion can accelerate the club without requiring large simultaneous
+positive wrist torque (\citeproc{ref-white2006}{White 2006};
+\citeproc{ref-miura2001}{Miura 2001};
 \citeproc{ref-sprigings2000}{Sprigings and Neal 2000};
-\citeproc{ref-nesbit2009hub}{Nesbit and McGinnis 2009}). Less-skilled
-players truncate exactly this separation: early release (``casting'')
-moves energy into the club before proximal speed has peaked, producing
-the lower distal peak speeds and transfer ratios observed in amateur
-cohorts (\citeproc{ref-cheetham2008}{Cheetham et al. 2008};
+\citeproc{ref-nesbit2009hub}{Nesbit and McGinnis 2009}). Anderson and
+Kenny place peak club KE near impact while explicitly rejecting simple
+P→D timing of body-segment KE peaks
+(\citeproc{ref-anderson2006}{Anderson, Wright, and Stefanyshyn 2006};
+\citeproc{ref-kenny2008}{Kenny et al. 2008}). These model-dependent
+results motivate late-handoff hypotheses but do not establish a dominant
+human pathway. Likewise, ``casting'' is a model and coaching
+interpretation: the cited amateur cohort comparisons and Milburn's
+double-pendulum analysis do not by themselves show that early release
+causally produced the observed skill-group differences
+(\citeproc{ref-cheetham2008}{Cheetham et al. 2008};
 \citeproc{ref-zheng2008}{Zheng et al. 2008};
-\citeproc{ref-milburn1982}{Milburn 1982}). Section
-Section~\ref{sec-results} reproduces this entire pattern --- including
-the casting failure mode --- inside a fully instrumented model where
-every energy pathway is measurable exactly.
+\citeproc{ref-milburn1982}{Milburn 1982}). Section~\ref{sec-results}
+demonstrates a related failure mode only within the registered model and
+command family.
 
 \chapter{The Timing Question and the Counterfactual
 Framework}\label{sec-timing-framework}
@@ -10247,7 +10261,7 @@ and Relationships to Clubhead Speed.''} \emph{Sports Biomechanics} 12
 (2): 108--20. \url{https://doi.org/10.1080/14763141.2012.728244}.
 
 \bibitem[\citeproctext]{ref-kenny2008}
-Kenny, Ian C., Adam J. McCloy, Eric S. Wallace, and Steve R. Otto. 2008.
+Kenny, Ian C., Alex J. McCloy, Eric S. Wallace, and Steve R. Otto. 2008.
 {``Segmental Sequencing of Kinetic Energy in a Computer-Simulated Golf
 Swing.''} \emph{Sports Engineering} 11 (1): 37--45.
 \url{https://doi.org/10.1007/s12283-008-0005-0}.
@@ -10269,7 +10283,7 @@ Kwon, Young-Hoo, Ki Hoon Han, Christopher S. Como, Sangwoo Lee, and
 Kunal Singhal. 2013. {``Validity of the {X}-Factor Computation Methods
 and Relationship Between the {X}-Factor Parameters and Clubhead Velocity
 in Skilled Golfers.''} \emph{Sports Biomechanics} 12 (3): 231--46.
-\url{https://www.researchgate.net/publication/258639892}.
+\url{https://doi.org/10.1080/14763141.2013.771896}.
 
 \bibitem[\citeproctext]{ref-lampsa1975}
 Lampsa, Michael A. 1975. {``Maximizing Distance of the Golf Drive: An

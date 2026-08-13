@@ -83,6 +83,30 @@ def test_candidate_inventory_excludes_cross_references_from_citations(
 
 
 @pytest.mark.unit
+def test_candidate_id_is_stable_when_unrelated_lines_are_inserted_above(
+    tmp_path: Path,
+) -> None:
+    master = tmp_path / "paper.qmd"
+    claim = "The declared model produces 12.0 m/s [@study].\n"
+    master.write_text(claim, encoding="utf-8")
+    before = build_candidate_inventory(master, repository_root=tmp_path)["candidates"][
+        0
+    ]
+
+    master.write_text("Unrelated context appears here.\n\n" + claim, encoding="utf-8")
+    after = next(
+        candidate
+        for candidate in build_candidate_inventory(master, repository_root=tmp_path)[
+            "candidates"
+        ]
+        if "12.0 m/s" in candidate["text"]
+    )
+
+    assert after["line_start"] != before["line_start"]
+    assert after["candidate_id"] == before["candidate_id"]
+
+
+@pytest.mark.unit
 def test_registry_rejects_duplicate_claim_identifiers(tmp_path: Path) -> None:
     registry = {
         "schema_version": "proximal-distal-claim-audit-v1",

@@ -20,7 +20,7 @@ The machine-readable authorities are:
 expands the master document in publication order and records every narrative
 paragraph with:
 
-- a stable content-and-location identifier;
+- a stable source-path/content/duplicate-ordinal identifier;
 - canonical source path and exact line range;
 - normalized text and its SHA-256 digest;
 - bibliography citation keys;
@@ -54,6 +54,12 @@ The allowed dispositions are:
 A claim-to-candidate link is valid only when the candidate review links back to
 the same claim. This reciprocal rule prevents a paragraph from appearing
 adjudicated merely because one of several propositions was registered.
+
+Line ranges are mutable locators rather than identity inputs. Inserting unrelated
+text above a paragraph therefore updates its locator without invalidating its
+review. Editing the paragraph's normalized content changes its identifier and
+requires a new review. Repeated identical paragraphs within one source are
+distinguished by their zero-based occurrence order.
 
 ## Claim Record
 
