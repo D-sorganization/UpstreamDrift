@@ -7,7 +7,10 @@ Update this file with every PR and every push to main.
 ## Where the Repo Is Heading
 
 - **#8557 original-results reconciliation** — branch
-  `research/8557-results-audit` is the active twenty-second fail-closed slice.
+  `research/8557-results-audit` is ready PR
+  [#8585](https://github.com/D-sorganization/UpstreamDrift/pull/8585) at
+  implementation commit `49cb95bd2fd7c872df7ae625d5a26e2872a9cd6b`
+  and is the active twenty-second fail-closed slice.
   All 30 current chapter candidates are adjudicated as PD-CLAIM-207 through
   PD-CLAIM-214. An independent deterministic audit reconciles all 92 attempted
   programs, the 63 accepted and 29 excluded deliveries, selected traces,
