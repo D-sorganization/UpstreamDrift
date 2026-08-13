@@ -1,9 +1,9 @@
 {
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper_source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-  "source_digest": "a4e0bd566ee0424a3faa31bdfff4f04cffe69c63d1a91e6ad3bafbca8bfd4b07",
+  "source_digest": "b133994e225d2253d8288a980f008b483402928119aafe26cfe5135f7a727fde",
   "source_count": 32,
-  "candidate_count": 879,
+  "candidate_count": 882,
   "candidates": [
     {
       "candidate_id": "PD-CAND-0c5fcbdf4604a7d6",
@@ -465,19 +465,31 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-00883dff2ac0982d",
+      "candidate_id": "PD-CAND-f616921cf110fe89",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd",
       "line_start": 176,
-      "line_end": 195,
-      "text": "If the timing question is posed as an optimization \u2014 what torque program maximizes clubhead speed subject to actuator limits? \u2014 the answer has been studied repeatedly. Lampsa's early optimal-control study of a driven double pendulum computed torque histories maximizing drive distance, and notably found the *optimal* torques differed in structure from those measured (via inverse dynamics) in his own swing [@lampsa1975] \u2014 early evidence that human swings need not be optimal and that the optimum is a meaningful target rather than a redescription of expert behavior. Sharp, fitting shoulder-arm-club models to expert swing data and then optimizing torque programs, established a pattern for the best use of the available driving torques across the downswing phases, with the distal contribution structured late rather than distributed evenly [@sharp2009]. Three-dimensional forward-dynamics models extended the approach with anatomically meaningful actuators and flexible shafts: MacKenzie and Sprigings' 3D model [@mackenzie2009], the carry-optimized model of Balzerson, Banerjee and McPhee [@balzerson2016], and the six-degree-of-freedom dynamic optimization of McNally and McPhee [@mcnally2018] all generate expert-like clubhead speeds with torque programs whose distal elements act late in the downswing. McPhee's review surveys this modeling lineage [@mcphee2022].",
-      "text_sha256": "cdab743098ca024fbe845c9ef40baaff1c5b0b008a561f8ca94ecbdc1c7eb51e",
+      "line_end": 187,
+      "text": "If the timing question is posed as an optimization \u2014 what torque program maximizes clubhead speed subject to actuator limits? \u2014 the answer has been studied repeatedly, but the resulting control histories are not one estimand. Lampsa used film of his own swing to parameterize and constrain a generalized two-link model, compared computed and actual torques, and used steepest ascent to search for torques maximizing drive distance [@lampsa1975]. Sharp later reproduced the published torque parameterization, found timing differences too large for both solutions to be numerically correct, and obtained a faster model swing with a negative-to-positive wrist-torque switch [@sharp2009]. Lampsa is therefore an early demonstration of the optimization question, not an independently confirmed global optimum or evidence that a human swing is suboptimal.",
+      "text_sha256": "dceff8256ffcb901aa0a364b9017f93ef5a55727a9cad5e5040556bf4e738126",
+      "citation_keys": ["lampsa1975", "sharp2009"],
+      "has_numeric_content": true,
+      "has_assertive_language": true,
+      "priority_score": 5,
+      "triage_flags": ["numeric", "assertive_language", "external_citation"],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-88547b5b3695b01e",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd",
+      "line_start": 189,
+      "line_end": 201,
+      "text": "Later spatial forward models increased biomechanical and club detail, but also changed the state, controls, constraints, and objective. MacKenzie and Sprigings optimized a four-degree-of-freedom model with a flexible segmented shaft for impact clubhead speed [@mackenzie2009]. Balzerson, Banerjee and McPhee coupled a four-degree-of-freedom golfer to a Rayleigh beam, impact, and ball-flight model and optimized carry distance [@balzerson2016]. McNally and McPhee added a pelvis, a second shoulder degree of freedom, a modeled backswing, passive joint resistance, and eccentric--concentric torque--velocity scaling, then optimized carry distance [@mcnally2018]. These models contain late wrist or forearm activations, but they do not establish one universal distal-torque program. Their source-level contrasts are separated below; McPhee reviews the broader lineage [@mcphee2022].",
+      "text_sha256": "9a1ee156ea9cca50a0e32d2f47c357200eb646cc47feee8c9970e2f38a8c56ea",
       "citation_keys": [
         "balzerson2016",
-        "lampsa1975",
         "mackenzie2009",
         "mcnally2018",
-        "mcphee2022",
-        "sharp2009"
+        "mcphee2022"
       ],
       "has_numeric_content": true,
       "has_assertive_language": true,
@@ -491,13 +503,33 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-ed4d5ddd22427a29",
+      "candidate_id": "PD-CAND-ce917b69d717a23b",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd",
-      "line_start": 197,
-      "line_end": 201,
-      "text": "A caution cuts the other way: optimal control optimizes *within a model*, and the sensitivity of optimal timing to model structure (hub mobility, shaft flexibility [@betzler2012; @osis2012], actuator rate limits) is why cross-engine validation (@sec-platform) is valuable when revisiting the question.",
-      "text_sha256": "396a122b36dc66b6e074026f30538724edb30b30ed1a47b8bd2db57220e2a7ad",
-      "citation_keys": ["betzler2012", "osis2012"],
+      "line_start": 205,
+      "line_end": 205,
+      "text": "| Source | Declared Model and Objective | Reported Result | Evidentiary Boundary |",
+      "text_sha256": "7ad4c679d42a182d8b8dbcfb8e16ee2c578672dca54a0492bb1430a3dbd66929",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": true,
+      "priority_score": 2,
+      "triage_flags": ["assertive_language"],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-f39940bf40216a62",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd",
+      "line_start": 207,
+      "line_end": 210,
+      "text": "| Lampsa [@lampsa1975] | Film-parameterized generalized two-link swing; steepest-ascent search for drive distance under penalty constraints | Computed optimal torques were compared with torques derived from the author's filmed swing, with parameter sensitivity examined | The publisher record reports necessary conditions and a numerical search, not proof of a unique global optimum; Sharp later reported a materially different reproduction and a faster admissible program [@sharp2009] | | MacKenzie and Sprigings [@mackenzie2009] | Four-degree-of-freedom spatial golfer with torque generators and a segmented flexible shaft; maximize impact clubhead speed | Optimized impact speed was 41.9 m/s; torso, shoulder, wrist-ulnar-deviation, and lead-arm external-rotation generators activated at approximately 0, 0.07, 0.16, and 0.17 s | Model validation used six accepted drives from one 3-handicap male and a single 2-D camera; the model omitted lower-body energy and a trail arm, and its optimized speed was about 7 m/s below the professional comparison cited by the authors | | Balzerson, Banerjee, and McPhee [@balzerson2016] | Four-degree-of-freedom torso--lead-arm--lead-hand model, continuous flexible shaft, impact, and ball flight; maximize carry | Optimized impact speed was 41.5 m/s with 196 m carry; wrist activation was approximately 0.11--0.12 s and forearm activation approximately 0.14--0.17 s | The model omitted the lower body and trail arm and explicitly assumed negligible trail-arm power; its authors positioned pelvis rotation as unnecessary for their club-design objective, not for joint-power attribution | | McNally and McPhee [@mcnally2018] | Six-degree-of-freedom golfer, flexible shaft, volumetric impact, and ball flight driven by 12 backswing/downswing torque generators; maximize carry | Optimized clubhead speed was 164 km/h (45.6 m/s) and carry was 257 yd | The optimizer initiated torso motion before pelvis motion, which the authors identified as inconsistent with real swings; simulated grip kinematics left the measured elite-golfer standard-deviation bands at some phases, especially late in the swing |",
+      "text_sha256": "ec53761b37e5a597cdc26a01992229f153cbb96abcb8177b5937cf8570adf8cb",
+      "citation_keys": [
+        "balzerson2016",
+        "lampsa1975",
+        "mackenzie2009",
+        "mcnally2018",
+        "sharp2009"
+      ],
       "has_numeric_content": true,
       "has_assertive_language": false,
       "priority_score": 6,
@@ -509,10 +541,29 @@
       "review_state": "unadjudicated"
     },
     {
+      "candidate_id": "PD-CAND-f58832b4edfa4b61",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd",
+      "line_start": 212,
+      "line_end": 218,
+      "text": "Optimal control optimizes *within a model*. Even the direction and timing of an apparent optimum can change with hub mobility, shaft flexibility [@betzler2012; @osis2012], actuator parameterization, impact definition, ball-flight objective, or omitted degrees of freedom. Cross-engine validation (@sec-platform), intervention ablations, and held-out human kinematics are therefore required before treating any optimized timing as a biological or coaching result.",
+      "text_sha256": "2b69fa5c93257bf86bc7b60d17c99df2dc0031fe6ff20a7654a769c5ed1d1fae",
+      "citation_keys": ["betzler2012", "osis2012"],
+      "has_numeric_content": true,
+      "has_assertive_language": true,
+      "priority_score": 8,
+      "triage_flags": [
+        "numeric",
+        "assertive_language",
+        "external_citation",
+        "causal_or_generalizing_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
       "candidate_id": "PD-CAND-2aac87162777c1ba",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd",
-      "line_start": 205,
-      "line_end": 207,
+      "line_start": 222,
+      "line_end": 224,
       "text": "Claims about energy transfer require an accounting framework. Four levels of analysis appear in the literature, and they are not interchangeable.",
       "text_sha256": "ee6fc870c8ee59572ab2bc1762e7f0c9bd88ce35583b6467c0ecfc7f268d91dd",
       "citation_keys": [],
@@ -525,8 +576,8 @@
     {
       "candidate_id": "PD-CAND-be182458dea527fc",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd",
-      "line_start": 211,
-      "line_end": 217,
+      "line_start": 228,
+      "line_end": 234,
       "text": "For a joint spanning segments $i$ and $i{+}1$ with net joint torque $\\tau$ and relative angular velocity $\\omega$, the *joint (moment) power* is $P_m = \\tau\\,\\omega$; its time integral over a phase is the mechanical work done by the net moment. Positive work indicates generation, negative work absorption. This is the quantity most golf studies report, and it is the basis of the work-power budget of Nesbit and Serrano (@sec-workbudget) [@nesbit2005work].",
       "text_sha256": "0333b2a620116c3a47202902990208b67dd32635a214baec1a954dfcb5d4bb5d",
       "citation_keys": ["nesbit2005work"],
@@ -539,8 +590,8 @@
     {
       "candidate_id": "PD-CAND-d43436c7aaef042c",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd",
-      "line_start": 221,
-      "line_end": 234,
+      "line_start": 238,
+      "line_end": 251,
       "text": "Joint moments are not the only conduit of mechanical energy: the joint reaction force $\\mathbf{F}$ acting at a joint moving with velocity $\\mathbf{v}$ transmits *joint-force power* $P_f = \\mathbf{F}\\cdot\\mathbf{v}$ from one segment to the next. Robertson and Winter's classic formulation balances, for each segment, the rate of change of segment mechanical energy against the sum of joint-force powers and moment powers at its proximal and distal ends, distinguishing energy *transferred between* segments from energy *generated or absorbed* at joints [@robertson1980; @winter2009]. This is the correct level of analysis for the timing question, because \"retain-early / release-late\" is precisely a claim about the *time course of inter-segment transfer terms*, not about peak angular velocities. @sec-methods implements exactly this accounting at the model's wrist interface, including the energy-balance residual check.",
       "text_sha256": "b95205c7df945f00c241e2a32b52f1f9c789f3a81ab4438544e3f9962f6814b0",
       "citation_keys": ["robertson1980", "winter2009"],
@@ -553,8 +604,8 @@
     {
       "candidate_id": "PD-CAND-5708e38cb83bf687",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd",
-      "line_start": 238,
-      "line_end": 247,
+      "line_start": 255,
+      "line_end": 264,
       "text": "In a coupled chain, any single torque induces accelerations at *every* joint \u2014 including joints it does not span \u2014 through the inverse inertia matrix [@zajac1989]. Induced-acceleration and power-transfer analyses in locomotion research [@zajac2002] show that intuitions of the form \"muscle X accelerates joint Y\" routinely fail in coupled systems. For golf this matters because a torso torque early in the downswing partly accelerates the *club* (through coupling), and a wrist torque late in the downswing back-reacts on the torso; the net energy routing is an emergent property of the whole chain. The ZTCF/ZVCF decompositions of @sec-timing-framework are the counterfactual cousins of this analysis.",
       "text_sha256": "d5d4773339f9ac5eeba24c5fb7452ef0062fdd3319e2ee73d5fb8cb21617a902",
       "citation_keys": ["zajac1989", "zajac2002"],
@@ -567,8 +618,8 @@
     {
       "candidate_id": "PD-CAND-5ce7b2c20979b9d2",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd",
-      "line_start": 251,
-      "line_end": 262,
+      "line_start": 268,
+      "line_end": 279,
       "text": "Peak-ordering of segment angular speeds is a *proxy* for energy flow, not a measurement of it. Marsan and colleagues showed that the identified kinematic sequence in golf depends materially on which angular-velocity component (or norm, or projection) is analyzed: thirteen golfers analyzed with seven component-selection methods yielded different sequences [@marsan2019]. Marshall and Elliott's long-axis-rotation caution [@marshall2000] is a special case of the same problem, and the near-planarity of the downswing is itself only an approximation [@coleman2005; @kwon2012]. Any serious test of the timing hypothesis must therefore run at the level of energy and power accounting (@sec-rw), with the kinematic sequence reported as corroborating description only \u2014 which is how @sec-results uses it.",
       "text_sha256": "ef9f363f90db5d5f12970698c13c0497c048f20ce18b064c4867af812327830b",
       "citation_keys": [

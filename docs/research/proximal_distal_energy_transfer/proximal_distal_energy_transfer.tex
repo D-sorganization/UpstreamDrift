@@ -445,7 +445,7 @@ available with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, rightrule=.15mm, colback=white, arc=.35mm, colbacktitle=quarto-callout-note-color!10!white, toprule=.15mm, opacityback=0, coltitle=black, bottomrule=.15mm, bottomtitle=1mm, toptitle=1mm, titlerule=0mm, left=2mm, leftrule=.75mm, colframe=quarto-callout-note-color-frame, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, breakable, colframe=quarto-callout-note-color-frame, arc=.35mm, coltitle=black, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, bottomrule=.15mm, toprule=.15mm, leftrule=.75mm, titlerule=0mm, opacityback=0, colbacktitle=quarto-callout-note-color!10!white, bottomtitle=1mm, opacitybacktitle=0.6, toptitle=1mm, left=2mm, colback=white]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -859,35 +859,103 @@ Sequencing}\label{sec-optimalcontrol}
 
 If the timing question is posed as an optimization --- what torque
 program maximizes clubhead speed subject to actuator limits? --- the
-answer has been studied repeatedly. Lampsa's early optimal-control study
-of a driven double pendulum computed torque histories maximizing drive
-distance, and notably found the \emph{optimal} torques differed in
-structure from those measured (via inverse dynamics) in his own swing
-(\citeproc{ref-lampsa1975}{Lampsa 1975}) --- early evidence that human
-swings need not be optimal and that the optimum is a meaningful target
-rather than a redescription of expert behavior. Sharp, fitting
-shoulder-arm-club models to expert swing data and then optimizing torque
-programs, established a pattern for the best use of the available
-driving torques across the downswing phases, with the distal
-contribution structured late rather than distributed evenly
-(\citeproc{ref-sharp2009}{Sharp 2009}). Three-dimensional
-forward-dynamics models extended the approach with anatomically
-meaningful actuators and flexible shafts: MacKenzie and Sprigings' 3D
-model (\citeproc{ref-mackenzie2009}{MacKenzie and Sprigings 2009}), the
-carry-optimized model of Balzerson, Banerjee and McPhee
-(\citeproc{ref-balzerson2016}{Balzerson, Banerjee, and McPhee 2016}),
-and the six-degree-of-freedom dynamic optimization of McNally and McPhee
-(\citeproc{ref-mcnally2018}{McNally and McPhee 2018}) all generate
-expert-like clubhead speeds with torque programs whose distal elements
-act late in the downswing. McPhee's review surveys this modeling lineage
+answer has been studied repeatedly, but the resulting control histories
+are not one estimand. Lampsa used film of his own swing to parameterize
+and constrain a generalized two-link model, compared computed and actual
+torques, and used steepest ascent to search for torques maximizing drive
+distance (\citeproc{ref-lampsa1975}{Lampsa 1975}). Sharp later
+reproduced the published torque parameterization, found timing
+differences too large for both solutions to be numerically correct, and
+obtained a faster model swing with a negative-to-positive wrist-torque
+switch (\citeproc{ref-sharp2009}{Sharp 2009}). Lampsa is therefore an
+early demonstration of the optimization question, not an independently
+confirmed global optimum or evidence that a human swing is suboptimal.
+
+Later spatial forward models increased biomechanical and club detail,
+but also changed the state, controls, constraints, and objective.
+MacKenzie and Sprigings optimized a four-degree-of-freedom model with a
+flexible segmented shaft for impact clubhead speed
+(\citeproc{ref-mackenzie2009}{MacKenzie and Sprigings 2009}). Balzerson,
+Banerjee and McPhee coupled a four-degree-of-freedom golfer to a
+Rayleigh beam, impact, and ball-flight model and optimized carry
+distance (\citeproc{ref-balzerson2016}{Balzerson, Banerjee, and McPhee
+2016}). McNally and McPhee added a pelvis, a second shoulder degree of
+freedom, a modeled backswing, passive joint resistance, and
+eccentric--concentric torque--velocity scaling, then optimized carry
+distance (\citeproc{ref-mcnally2018}{McNally and McPhee 2018}). These
+models contain late wrist or forearm activations, but they do not
+establish one universal distal-torque program. Their source-level
+contrasts are separated below; McPhee reviews the broader lineage
 (\citeproc{ref-mcphee2022}{McPhee 2022}).
 
-A caution cuts the other way: optimal control optimizes \emph{within a
-model}, and the sensitivity of optimal timing to model structure (hub
-mobility, shaft flexibility (\citeproc{ref-betzler2012}{Betzler et al.
-2012}; \citeproc{ref-osis2012}{Osis and Stefanyshyn 2012}), actuator
-rate limits) is why cross-engine validation (Section~\ref{sec-platform})
-is valuable when revisiting the question.
+\subsection{Forward-Optimization Model
+Boundaries}\label{forward-optimization-model-boundaries}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Source
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Declared Model and Objective
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Reported Result
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Evidentiary Boundary
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Lampsa (\citeproc{ref-lampsa1975}{Lampsa 1975}) & Film-parameterized
+generalized two-link swing; steepest-ascent search for drive distance
+under penalty constraints & Computed optimal torques were compared with
+torques derived from the author's filmed swing, with parameter
+sensitivity examined & The publisher record reports necessary conditions
+and a numerical search, not proof of a unique global optimum; Sharp
+later reported a materially different reproduction and a faster
+admissible program (\citeproc{ref-sharp2009}{Sharp 2009}) \\
+MacKenzie and Sprigings (\citeproc{ref-mackenzie2009}{MacKenzie and
+Sprigings 2009}) & Four-degree-of-freedom spatial golfer with torque
+generators and a segmented flexible shaft; maximize impact clubhead
+speed & Optimized impact speed was 41.9 m/s; torso, shoulder,
+wrist-ulnar-deviation, and lead-arm external-rotation generators
+activated at approximately 0, 0.07, 0.16, and 0.17 s & Model validation
+used six accepted drives from one 3-handicap male and a single 2-D
+camera; the model omitted lower-body energy and a trail arm, and its
+optimized speed was about 7 m/s below the professional comparison cited
+by the authors \\
+Balzerson, Banerjee, and McPhee (\citeproc{ref-balzerson2016}{Balzerson,
+Banerjee, and McPhee 2016}) & Four-degree-of-freedom
+torso--lead-arm--lead-hand model, continuous flexible shaft, impact, and
+ball flight; maximize carry & Optimized impact speed was 41.5 m/s with
+196 m carry; wrist activation was approximately 0.11--0.12 s and forearm
+activation approximately 0.14--0.17 s & The model omitted the lower body
+and trail arm and explicitly assumed negligible trail-arm power; its
+authors positioned pelvis rotation as unnecessary for their club-design
+objective, not for joint-power attribution \\
+McNally and McPhee (\citeproc{ref-mcnally2018}{McNally and McPhee 2018})
+& Six-degree-of-freedom golfer, flexible shaft, volumetric impact, and
+ball flight driven by 12 backswing/downswing torque generators; maximize
+carry & Optimized clubhead speed was 164 km/h (45.6 m/s) and carry was
+257 yd & The optimizer initiated torso motion before pelvis motion,
+which the authors identified as inconsistent with real swings; simulated
+grip kinematics left the measured elite-golfer standard-deviation bands
+at some phases, especially late in the swing \\
+\end{longtable}
+
+Optimal control optimizes \emph{within a model}. Even the direction and
+timing of an apparent optimum can change with hub mobility, shaft
+flexibility (\citeproc{ref-betzler2012}{Betzler et al. 2012};
+\citeproc{ref-osis2012}{Osis and Stefanyshyn 2012}), actuator
+parameterization, impact definition, ball-flight objective, or omitted
+degrees of freedom. Cross-engine validation
+(Section~\ref{sec-platform}), intervention ablations, and held-out human
+kinematics are therefore required before treating any optimized timing
+as a biological or coaching result.
 
 \section{What ``Energy Transfer'' Means
 Operationally}\label{sec-energyflow}
@@ -10388,8 +10456,7 @@ in Skilled Golfers.''} \emph{Sports Biomechanics} 12 (3): 231--46.
 \bibitem[\citeproctext]{ref-lampsa1975}
 Lampsa, Michael A. 1975. {``Maximizing Distance of the Golf Drive: An
 Optimal Control Study.''} \emph{Journal of Dynamic Systems, Measurement,
-and Control} 97 (4): 362--67.
-\url{https://asmedigitalcollection.asme.org/dynamicsystems/article-abstract/97/4/362/400950}.
+and Control} 97 (4): 362--67. \url{https://doi.org/10.1115/1.3426951}.
 
 \bibitem[\citeproctext]{ref-langdown2012}
 Langdown, Ben L., Matthew Bridge, and François-Xavier Li. 2012.

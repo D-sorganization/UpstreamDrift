@@ -126,9 +126,14 @@ forced-delay comparison in Sprigings and MacKenzie, and records White's
 different driven-model result rather than claiming uniform agreement. A
 source-level contrast matrix now distinguishes release delay, active wrist
 torque, passive transfer, prescribed inward pull, hub-path optimization, and
-negative-to-positive wrist-torque programs. The expanded paper has 879
-candidates; 27 are reviewed, 29 atomic claims are registered, and 852 remain
-unadjudicated.
+negative-to-positive wrist-torque programs.
+The fourth evidence slice separates four non-equivalent optimization studies.
+It records each model's state space, objective, speed or carry result, actuator
+timing, omitted degrees of freedom, and validation boundary. The paper no
+longer labels their outputs collectively as expert-like or treats late distal
+activation as a repeated estimate of one universal strategy. The expanded
+paper has 882 candidates; 32 are reviewed, 34 atomic claims are registered, and
+850 remain unadjudicated.
 The hand-path attribution, two-hand redundancy, and preactivation validation
 program is tracked in
 [#8458](https://github.com/D-sorganization/UpstreamDrift/issues/8458).

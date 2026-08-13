@@ -1,14 +1,14 @@
 # Agent Handoff — UpstreamDrift
 
-Last updated: 2026-08-12
+Last updated: 2026-08-13
 Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
 
 - **#8557 Comprehensive Scientific Claim Audit and Open Golf Modeling
-  Program** — PRs #8558–#8562 are on `main`; branch
-  `research/8557-mechanics-literature-audit` continues the fail-closed audit
-  authority. It inventories all 879 narrative candidates across the 32-source
+  Program** — PRs #8558–#8563 are on `main`; branch
+  `research/8557-optimal-control-audit` continues the fail-closed audit
+  authority. It inventories all 882 narrative candidates across the 32-source
   Quarto paper and reconciles all 18 public release-claim keys without calling
   the review complete. The registry records that the Biomechanics and Nonlinear Control
   NotebookLM reviews are pending renewed network authentication and that Tools
@@ -29,20 +29,24 @@ scripts.research.proximal_distal_energy.claim_audit inventory`, then
   claims about casting. A subsequent parser audit found that labeled Quarto
   display-math closers had silently hidden later prose; the repaired inventory
   adds 308 previously omitted paragraphs and canonicalizes source-digest line
-  endings across platforms. The third local slice corrects the Sprigings--Neal
+  endings across platforms. The third merged slice corrects the Sprigings--Neal
   wrist-torque gain from approximately 4% to approximately 9%, separates it
   from Sprigings--MacKenzie's 1.6% forced-delay contrast and post-release
   torque ablation, and exposes White's second-order release-timing result and
   constant-positive-torque penalty as genuine model disagreement. It adds a
   source-level contrast matrix and qualifies Miura, Nesbit--McGinnis, and Sharp
-  claims. Current local authority: 879 candidates, 27 reviewed, 29 registered
-  atomic claims, and 852 unadjudicated candidates. Focused audit tests and
-  registry validation pass; render, inspect, release-validate, and protected-
+  claims. The fourth local slice removes the collective "expert-like"
+  characterization of four non-equivalent optimizers and records their exact
+  objectives, speeds or carry distances, actuator timings, omitted degrees of
+  freedom, and validation boundaries. Current local authority: 882 candidates,
+  32 reviewed, 34 registered atomic claims, and 850 unadjudicated candidates.
+  Registry validation passes; render, inspect, release-validate, and protected-
   merge this slice before treating these updated counts as remote-main evidence.
   The required Tools side task is not complete: draft PR #4414 at exact head
-  `8e54954c` is stacked on #4413 and remains in protected CI. Completion still
-  requires protected merge, immutable pinning, deterministic replay,
-  sensitivity adequacy, and PyQt6/React parity.
+  `393f80e8` is stacked on #4413; its previously failing standard quality gate
+  and hosted Playwright job are green, while protected runner-selected contexts
+  remain queued. Completion still requires protected merge, immutable pinning,
+  deterministic replay, sensitivity adequacy, and PyQt6/React parity.
 
 - **#8511 interactive proximal--distal dynamics workbench** — branch
   `feat/proximal-distal-workbench-integration` makes the pendulum launcher
