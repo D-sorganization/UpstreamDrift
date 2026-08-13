@@ -445,7 +445,7 @@ available with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, bottomrule=.15mm, colback=white, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, left=2mm, arc=.35mm, colframe=quarto-callout-note-color-frame, toptitle=1mm, leftrule=.75mm, titlerule=0mm, breakable, opacityback=0, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, bottomtitle=1mm, rightrule=.15mm, coltitle=black]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, toptitle=1mm, breakable, opacitybacktitle=0.6, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, colframe=quarto-callout-note-color-frame, opacityback=0, coltitle=black, bottomtitle=1mm, leftrule=.75mm, arc=.35mm, colback=white, colbacktitle=quarto-callout-note-color!10!white, left=2mm, bottomrule=.15mm, toprule=.15mm, titlerule=0mm]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -1815,10 +1815,14 @@ amateur golfers with handicaps below 15 and represented the golfer's
 action on the driver as a resultant force at the mid-grip point plus a
 resultant couple (\citeproc{ref-mackenzie2020energy}{MacKenzie, McCourt,
 and Champoux 2020}). Their path-averaged force was strongly associated
-with clubhead speed (\(r=0.96\)); its square accounts for approximately
-92\% of the between-player variance in that sample. Mean linear work was
-174 J, mean angular work was 39 J, mean hand-path length was 1.35 m, and
-mean force along the path was 129 N.
+with clubhead speed (\(r=0.96\)); the corresponding bivariate regression
+entry reported \(R^2=0.92\) in that sample. Mean linear work was 174 J,
+mean angular work was 39 J, mean hand-path length was 1.35 m, and mean
+force along the path was 129 N. These are observational between-golfer
+associations from one sample and shared-club protocol, not an
+intervention estimate or a claim that adding force while holding the
+trajectory and all other determinants fixed would cause the same speed
+change.
 
 That result is important, but the observable must be named precisely. It
 is a signed mechanical line integral divided by path length,
@@ -1842,7 +1846,11 @@ alone (\citeproc{ref-putnam1991}{Putnam 1991},
 \citeproc{ref-putnam1993}{1993}; \citeproc{ref-zajac1989}{Zajac and
 Gordon 1989}). Even a specified endpoint force can admit wide ranges of
 muscle activation in a redundant musculoskeletal model
-(\citeproc{ref-sohn2013}{Sohn, McKay, and Ting 2013}).
+(\citeproc{ref-sohn2013}{Sohn, McKay, and Ting 2013}). That cited
+demonstration used static endpoint-force production in a 31-muscle
+cat-hindlimb model; it supports an identifiability warning, not a
+quantitative statement about human golf muscles or dynamic activation
+histories.
 
 The correct conclusion from the 2020 study is therefore narrow and
 useful: golfers who produced more signed linear work per metre of hand
@@ -2078,7 +2086,7 @@ of mid-grip travel. Its line integrals diagnose the prescribed path;
 they are not realized forward-simulation work and are not scaled up to a
 full downswing.
 
-Table Table~\ref{tbl-hand-path-primary-results} reports the
+Table~\ref{tbl-hand-path-primary-results} reports the
 MacKenzie-compatible primary estimand at the wrist for the open-chain
 models and at the mid-grip resultant for the closed loop. Drift is the
 stitched pointwise ZTCF contribution. Total equals drift plus control at
@@ -2353,10 +2361,13 @@ Equal net club action does not imply equal joint loading, actuator work,
 co-contraction, or robustness to perturbation. The constrained model can
 expose these mechanical alternatives, but without muscles, activation
 dynamics, and a physiological objective it cannot rank them as human
-effort strategies. Human two-hand experiments likewise show that similar
-object kinematics can coexist with substantially different hand torques
-and internal squeeze (\citeproc{ref-reinkensmeyer1992}{Reinkensmeyer,
-Lum, and Lehman 1992}).
+effort strategies. One instructed fast two-hand-grasp experiment
+likewise produced kinematics nearly indistinguishable from single-hand
+movement while the hand torques and internal squeeze differed
+substantially (\citeproc{ref-reinkensmeyer1992}{Reinkensmeyer, Lum, and
+Lehman 1992}). That experiment isolated one strategy in several
+subjects; it demonstrates non-equivalence of kinematics and internal
+action, not prevalence or optimality in golf.
 
 \begin{figure}
 
@@ -2412,12 +2423,12 @@ objective, actuator limits, event definition, and cost of producing that
 state.
 
 This interpretation is consistent with multijoint reaching evidence in
-which people exploited or compensated interaction torque differently as
-speed and load changed; reproducing the behavior required mixed
-kinematic, energetic, and dynamic costs rather than a single
-force-maximization rule (\citeproc{ref-vu2016}{Vu, Isableu, and Berret
-2016}). It is supporting context for the mechanism, not golf-specific
-validation.
+which people exploited or compensated interaction torque differently
+across the study's speed and load conditions; the authors compared
+optimal-control costs rather than validating a single force-maximization
+rule (\citeproc{ref-vu2016}{Vu, Isableu, and Berret 2016}). It is
+supporting upper-limb context, not golf-specific validation or a direct
+test of the present cost terms.
 
 \section{Late Reversal and the Preactivation
 Hypothesis}\label{sec-preactivation-hypothesis}
@@ -2463,10 +2474,13 @@ residual is only \(-3.15\) N m. Across the 0.16--0.25 s analysis window,
 the residual's peak magnitude is 3.18 N m compared with 23.17 N m for
 BASE.
 
-Those values suggest a control-management rule within this archived
-model: control the residual, not the net couple. Commanding the entire
-BASE couple on top of the already-present drift reaction double-counts
-the mechanical action. To examine timing, a unit-gain first-order
+Those values motivate a narrower signal-allocation hypothesis within
+this archived decomposition: when drift is recomputed at the achieved
+state, the additive command target is the residual rather than the net
+couple. Feeding the entire BASE trace into an additive control channel
+while also adding the registered drift trace double-counts the same
+target by construction. This is bookkeeping for the declared split, not
+a physiological control law. To examine timing, a unit-gain first-order
 actuator was used solely as a signal model,
 
 \begin{equation}\phantomsection\label{eq-preactivation-actuator}{
@@ -2496,14 +2510,16 @@ Preview Test for the Archived Two-Hand Model}
 \end{figure}%
 
 Figure~\ref{fig-two-hand-preactivation-hypothesis} establishes a narrow
-signal- tracking result: anticipation can compensate a declared
+signal-tracking result: oracle preview can compensate a declared
 first-order delay when the command targets BASE minus drift. It does not
 evaluate clubhead speed, muscle activation, metabolic cost, or a forward
 coupled golfer trajectory. The best preview is conditional on the
-assumed time constant and known future residual; it is not a recommended
-physiological timing value. The study turns preactivation into a
+assumed time constant and known future residual; without a causal state
+estimator or predictor, held-out evaluation, and a forward coupled
+plant, it is not an implementable controller or a recommended
+physiological timing value. The study turns anticipation into a
 reproducible hypothesis with explicit failure conditions rather than
-presenting it as an observed human mechanism.
+presenting preactivation as an observed human mechanism.
 
 \section{Phase-Resolved Reporting
 Protocol}\label{sec-attribution-phases}

@@ -6,8 +6,8 @@ Update this file with every PR and every push to main.
 ## Where the Repo Is Heading
 
 - **#8557 Comprehensive Scientific Claim Audit and Open Golf Modeling
-  Program** — PRs #8558–#8566 are on `main`; branch
-  `research/8557-interaction-force-audit` continues the fail-closed audit
+  Program** — PRs #8558–#8567 are on `main`; branch
+  `research/8557-hand-path-audit` continues the fail-closed audit
   authority. It inventories all 895 narrative candidates across the 32-source
   Quarto paper and reconciles all 18 public release-claim keys without calling
   the review complete. The registry records that the Biomechanics and Nonlinear Control
@@ -52,19 +52,28 @@ scripts.research.proximal_distal_energy.claim_audit inventory`, then
   claims, demonstrates kinematic-sequence method sensitivity, and treats
   planarity as an object-and-tolerance declaration rather than a universal
   anatomical fact. PR #8566 merged as exact remote-main commit
-  `ad74e9a97c3e555b9cac91f9ae3872c332c00c0c`. The seventh local slice fully
+  `ad74e9a97c3e555b9cac91f9ae3872c332c00c0c`. The seventh merged slice fully
   adjudicates Chapters 2 and 3, distinguishes pointwise from forward
   counterfactuals, narrows force-dominance statements to their registered RMS
   norm, and replaces strategy language with five falsifiable study hypotheses.
-  Current local authority: 895 candidates, 116 reviewed, 61 registered atomic
-  claims, and 779 unadjudicated candidates. Registry validation passes; render,
+  PR #8567 merged as exact remote-main commit
+  `4443c726377c88b185ff5e76236db1181e602652`. The eighth merged slice removes
+  duplicated automatic figure and equation labels while completing the
+  Chapter 2 and 3 adjudication. The ninth local slice fully
+  adjudicates Chapter 4, bounds the MacKenzie association and external
+  redundancy analogies, separates impulse from work and pointwise from forward
+  attribution, and labels future-residual preview as an offline oracle rather
+  than an implementable or physiological controller. Current local authority:
+  895 candidates, 188 reviewed, 72 registered atomic claims, and 707
+  unadjudicated candidates. Registry validation must pass; render,
   inspect, release-validate, and protected-merge this slice before treating the
   new counts as remote-main evidence.
   The required Tools side task is not complete. Its dispersion slice received
-  final independent approval at `125d47d4` and is being published as a draft
-  child of PR #4414 while the approved locus/browser stack is preserved. Completion still
-  requires protected merge, immutable pinning, deterministic replay,
-  sensitivity adequacy, and PyQt6/React parity.
+  final independent approval at `125d47d4`. The live React execution review is
+  correcting request-bound numeric validation, RK4 duration authority, export
+  formula neutralization, and non-finite rejection before publishing that head.
+  Completion still requires protected merge, immutable pinning, deterministic
+  replay, sensitivity adequacy, and PyQt6/React parity.
 
 - **#8511 interactive proximal--distal dynamics workbench** — branch
   `feat/proximal-distal-workbench-integration` makes the pendulum launcher
