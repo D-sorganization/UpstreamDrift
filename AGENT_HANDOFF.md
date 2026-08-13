@@ -6,6 +6,23 @@ Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
 
+- **#8557 transmission robustness audit** — ready PR
+  [#8590](https://github.com/D-sorganization/UpstreamDrift/pull/8590) from
+  `research/8557-transmission-audit` at implementation commit
+  `efce6bb3d7fe96041387606250b5639094d3b30e` is the active twenty-fifth fail-closed
+  slice. The chapter is being adjudicated as PD-CLAIM-230 through PD-CLAIM-234.
+  All four programs remain nondominated in all 15 leave-one-held-out-case
+  recomputations. The local Jacobian's raw rank is three, but effective rank is
+  two at 1--5% and one at 10--20% of its leading singular value; held-out
+  linear RMSE is 0.115 m/s, 2.69 degrees, and 7.48 N. Regeneration repaired a
+  stale source hash with only floating-point noise. Current authority: 924
+  candidates, 820 reviewed, 233 atomic claims, and 104 unadjudicated.
+  Fifty-nine focused scientific/governance tests and Ruff pass. The qualified
+  paper is 203 pages and 1,404,704 bytes with 186 URI links, 235 outline
+  entries, and 383 release artifacts; the edited pages were visually inspected.
+  Remaining gates are protected publication and
+  exact remote-main verification.
+
 - **#8557 forward modal-shaft reconciliation** — ready PR
   [#8589](https://github.com/D-sorganization/UpstreamDrift/pull/8589) from
   `research/8557-forward-modal-audit` at implementation commit

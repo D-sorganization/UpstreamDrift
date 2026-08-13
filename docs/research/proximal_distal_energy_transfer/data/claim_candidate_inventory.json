@@ -1,9 +1,9 @@
 {
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper_source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-  "source_digest": "6deaa87120daf1da3e2516adcc76cbfe2ea9cadcbe122a7292b39293c895b8df",
+  "source_digest": "d6602b5c6f2743a71ce0b90dc2b433e5cac8320f86e1b773f85487ae1ace29e6",
   "source_count": 32,
-  "candidate_count": 924,
+  "candidate_count": 925,
   "candidates": [
     {
       "candidate_id": "PD-CAND-384556ac26fc8724",
@@ -12923,10 +12923,26 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-5290b11a1d60d40c",
+      "candidate_id": "PD-CAND-bb3afeff5cb56611",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch07c_transmission_robustness.qmd",
       "line_start": 89,
-      "line_end": 91,
+      "line_end": 93,
+      "text": "This membership is stable to the available held-out cases: recomputing all five objectives after omitting each of the fifteen cases leaves all four programs nondominated in every recomputation. That is stability of a four-program comparison, not evidence that the Pareto frontier is complete; unexamined controls can still dominate the registered set.",
+      "text_sha256": "7e5d64f5ceb14fa06504f8661c67989a63b4f329638d79633b608dd1787b9b2f",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": true,
+      "priority_score": 2,
+      "triage_flags": [
+        "assertive_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-5290b11a1d60d40c",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch07c_transmission_robustness.qmd",
+      "line_start": 95,
+      "line_end": 97,
       "text": "![State-triggered handoff reduces speed and face/path amplification relative to clock timing but amplifies peak hand force. The right panel expresses paired mean changes as percentages so unlike units are not visually conflated.](figures/fig_clock_vs_state_perturbation_response.pdf){#fig-clock-state-response width=100%}",
       "text_sha256": "d7eb55b42bd291f24ea293b42a5e9f9a944bd534601e0b3d36b2499755bd7958",
       "citation_keys": [],
@@ -12941,8 +12957,8 @@
     {
       "candidate_id": "PD-CAND-741efe80d75a5f8c",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch07c_transmission_robustness.qmd",
-      "line_start": 93,
-      "line_end": 97,
+      "line_start": 99,
+      "line_end": 103,
       "text": "These results justify only a model-conditional statement: triggering on a mechanical state can reduce sensitivity to clock-time variation because the transition follows the realized trajectory, but the same change can redirect the disturbance into contact loading. A self-stabilizing strategy must specify the task error it attenuates and the costs it is allowed to increase.",
       "text_sha256": "b9c57b3786340f464b3092c0fda4dd6db9ef22ab15fcd66bc9975febb1f3a9c3",
       "citation_keys": [],
@@ -12957,8 +12973,8 @@
     {
       "candidate_id": "PD-CAND-1000c46645eac704",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch07c_transmission_robustness.qmd",
-      "line_start": 101,
-      "line_end": 107,
+      "line_start": 107,
+      "line_end": 113,
       "text": "Movement variability is not synonymous with outcome error. Golf data show that marker-trajectory variability need not correlate with ball-speed variability [@tucker2014], and uncontrolled-manifold analysis has found greater task-compatible variance in more skilled golfers [@morrison2016]. This agrees with the broader principle of motor abundance: variability parallel to a task solution manifold can preserve a salient outcome, whereas variability orthogonal to it changes the outcome [@latash2014practice].",
       "text_sha256": "8424599e6b543a3652bbfec3ae4deb68efd552a67e27b9c0f97de29ee37e81fb",
       "citation_keys": [
@@ -12979,8 +12995,8 @@
     {
       "candidate_id": "PD-CAND-b99598217e0a474c",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch07c_transmission_robustness.qmd",
-      "line_start": 109,
-      "line_end": 109,
+      "line_start": 115,
+      "line_end": 115,
       "text": "For local inputs $\\mathbf{x}$ and task outcomes $\\mathbf{y}$,",
       "text_sha256": "e7a03a23e7ae1e411d1370cb0c216423b548f5726816ce1bb70daab782cbfd5b",
       "citation_keys": [],
@@ -12993,8 +13009,8 @@
     {
       "candidate_id": "PD-CAND-d0b469b1fff082fc",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch07c_transmission_robustness.qmd",
-      "line_start": 116,
-      "line_end": 118,
+      "line_start": 122,
+      "line_end": 124,
       "text": "The eight-input, three-outcome local map has rank three and nullity five. Under the held-out perturbation covariance, projected task-null variance is 0.1322 and task-relevant variance is 0.00466, giving the declared local index",
       "text_sha256": "44323478762c9253f1482dcf05592a5e282f50fb22ea213928736d996c057b28",
       "citation_keys": [],
@@ -13009,8 +13025,8 @@
     {
       "candidate_id": "PD-CAND-257b1cb2345e0ea9",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch07c_transmission_robustness.qmd",
-      "line_start": 124,
-      "line_end": 126,
+      "line_start": 130,
+      "line_end": 132,
       "text": "![The local outcome Jacobian identifies task-sensitive input directions and a five-dimensional null space. This is a model input--outcome partition, not evidence of a neural synergy.](figures/fig_task_null_variability_map.pdf){#fig-task-null-map width=100%}",
       "text_sha256": "52b98edf1ec53bfa104b0201a2a38d119409b150bdaabb447a837ad99cc85cbb",
       "citation_keys": [],
@@ -13024,17 +13040,18 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-0db30b80b4e34dfd",
+      "candidate_id": "PD-CAND-c20f87b96c0bd7fe",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch07c_transmission_robustness.qmd",
-      "line_start": 128,
-      "line_end": 131,
-      "text": "The result is descriptive and local. Curvature can make a direction that is null infinitesimally task-relevant at larger amplitude. The correct future test is therefore trial-level covariance relative to a nonlinear, participant- specific impact manifold\u2014not a recommendation to minimize all joint variance.",
-      "text_sha256": "627ad91cc7c7d337dd2bc944fc24e06bdd76aa95cb371fb2006b46d9e4ee8a4f",
+      "line_start": 134,
+      "line_end": 144,
+      "text": "The result is descriptive and local. Curvature can make a direction that is null infinitesimally task-relevant at larger amplitude. The correct future test is therefore trial-level covariance relative to a nonlinear, participant- specific impact manifold\u2014not a recommendation to minimize all joint variance. The raw, unit-dependent singular values are 1141.3, 60.36, and 7.75. Relative thresholds give effective rank two at 1% and 5% of the leading singular value, and rank one at 10% and 20%; rescaling inputs or outcomes changes these values. Moreover, applying this local linearization across the held-out envelope gives RMSE of 0.115 m/s, 2.69 degrees, and 7.48 N for speed, face/path, and peak hand force. The algebraic rank/nullity result therefore must not be promoted to a globally predictive manifold or a neural-control dimension.",
+      "text_sha256": "5c1f336c0d1f4da7b88802a78879c7c6cb22ca96a118ec8692c188fa61cd62d3",
       "citation_keys": [],
-      "has_numeric_content": false,
+      "has_numeric_content": true,
       "has_assertive_language": true,
-      "priority_score": 2,
+      "priority_score": 4,
       "triage_flags": [
+        "numeric",
         "assertive_language"
       ],
       "review_state": "unadjudicated"
@@ -13042,8 +13059,8 @@
     {
       "candidate_id": "PD-CAND-aeed7e9f31e11d53",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch07c_transmission_robustness.qmd",
-      "line_start": 135,
-      "line_end": 144,
+      "line_start": 148,
+      "line_end": 157,
       "text": "Coactivation can increase endpoint stiffness and attenuate an imposed disturbance [@deRugy2018], but excessive co-contraction can also be energetically inefficient and does not guarantee stability when the source is internal or feedback is delayed [@latash2015stability]. The reduced muscle bridge in @sec-frames-biology-engines demonstrates redundancy and preparation history; it does not identify time-varying human impedance or reflex gains. **Human self-stabilization is untested.** Such a biological claim requires controlled, phase-registered perturbations, bilateral wrench measurement, EMG, and an identified mapping from muscle activation to endpoint impedance.",
       "text_sha256": "11e595afb50570214e489a5e17e137f13a6ad4e7ce2301c81df97048cf2adefe",
       "citation_keys": [
@@ -13063,8 +13080,8 @@
     {
       "candidate_id": "PD-CAND-136e6f0bd085f467",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch07c_transmission_robustness.qmd",
-      "line_start": 146,
-      "line_end": 150,
+      "line_start": 159,
+      "line_end": 163,
       "text": "Likewise, repeatability should be evaluated above measurement noise and across sessions. Launch-monitor speed and distance can be reliable in talented golfers, but other variables have wider reliability ranges [@shaw2023]. The experimental protocol must propagate device error rather than label every observed difference a motor-control effect.",
       "text_sha256": "af76ff08bb1ddf3008167f3289af9e994622d17d7e0989c107811d063b84cc6d",
       "citation_keys": [
@@ -13082,8 +13099,8 @@
     {
       "candidate_id": "PD-CAND-cfa6d2db19edf168",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch07c_transmission_robustness.qmd",
-      "line_start": 154,
-      "line_end": 155,
+      "line_start": 167,
+      "line_end": 168,
       "text": "The present evidence supports a research program rather than a universal instruction:",
       "text_sha256": "51c1775d88819130da6e27626e2a674ce49ff5155cc72cb4ed811054e8193053",
       "citation_keys": [],
@@ -13099,8 +13116,8 @@
     {
       "candidate_id": "PD-CAND-522bf874f102b668",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch07c_transmission_robustness.qmd",
-      "line_start": 157,
-      "line_end": 172,
+      "line_start": 170,
+      "line_end": 185,
       "text": "1. **Optimize a distribution, not one trajectory.** Maximize lower-tail impact performance subject to face, path, strike, hand-force, effort, and injury- relevant constraints. 2. **Prefer state variables only when observable.** A configuration- or phase-triggered handoff can reject timing variation, but sensing delay, estimation noise, and saturation must be included. 3. **Preserve useful abundance.** Stabilize club impact variables while allowing task-null variation in joints, muscles, and hand-force allocation. 4. **Treat impedance as a tradeoff.** More stiffness may improve one error and worsen force, effort, or coupled stability. 5. **Measure the pathway.** Kinematics alone cannot distinguish proximal work, constraint-force transport, direct wrist moment, shaft release, gravity, and dissipation. 6. **Propagate to the ball.** Pure distance claims require strike location, dynamic loft, attack angle, ball speed, spin, carry, and lateral dispersion, not clubhead speed alone.",
       "text_sha256": "3696452df342c016520267eb7dcc4c720528a58bb38fef28a353f302dcb7b321",
       "citation_keys": [],
@@ -13116,8 +13133,8 @@
     {
       "candidate_id": "PD-CAND-4fb5c6e7be3a4809",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch07c_transmission_robustness.qmd",
-      "line_start": 174,
-      "line_end": 180,
+      "line_start": 187,
+      "line_end": 193,
       "text": "The strongest near-term experiment is participant-held-out and phase- perturbed: synchronize whole-body motion, force plates, bilateral hand wrenches, shaft response, EMG, club/ball impact, and launch; estimate task-null and task-relevant covariance; and test whether state-relative handoff predicts a better speed--dispersion--load frontier than clock-relative timing. Failure to replicate that frontier would reject the performance implication while leaving the narrower multibody mechanism intact.",
       "text_sha256": "b8867182ecb97580b919d46f601ad6482b67d9b906b15938d90d4ec67a6c9a84",
       "citation_keys": [],

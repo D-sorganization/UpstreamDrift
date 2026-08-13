@@ -86,6 +86,12 @@ degrees, but does not minimize speed dispersion. Early drive has the smallest
 speed standard deviation only because it occupies a much slower regime; low
 variance around a poor mean is not robust performance.
 
+This membership is stable to the available held-out cases: recomputing all
+five objectives after omitting each of the fifteen cases leaves all four
+programs nondominated in every recomputation. That is stability of a
+four-program comparison, not evidence that the Pareto frontier is complete;
+unexamined controls can still dominate the registered set.
+
 ![State-triggered handoff reduces speed and face/path amplification relative to
 clock timing but amplifies peak hand force. The right panel expresses paired
 mean changes as percentages so unlike units are not visually conflated.](figures/fig_clock_vs_state_perturbation_response.pdf){#fig-clock-state-response width=100%}
@@ -129,6 +135,13 @@ The result is descriptive and local. Curvature can make a direction that is
 null infinitesimally task-relevant at larger amplitude. The correct future test
 is therefore trial-level covariance relative to a nonlinear, participant-
 specific impact manifold—not a recommendation to minimize all joint variance.
+The raw, unit-dependent singular values are 1141.3, 60.36, and 7.75. Relative
+thresholds give effective rank two at 1% and 5% of the leading singular value,
+and rank one at 10% and 20%; rescaling inputs or outcomes changes these values.
+Moreover, applying this local linearization across the held-out envelope gives
+RMSE of 0.115 m/s, 2.69 degrees, and 7.48 N for speed, face/path, and peak hand
+force. The algebraic rank/nullity result therefore must not be promoted to a
+globally predictive manifold or a neural-control dimension.
 
 ## Biological Realization and Impedance
 
