@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "399838af1857631339ccc55956b7be17f98ea42dcfc52e91fe049e6f839e231e",
+    "source_digest": "d2631846cb51b402366ee264e8d2c7eeaea6f41f459ed4a22137647d0c782b71",
     "baseline_commit": "13ea6a69585a42dc1db4b3959440ed95787c9779"
   },
   "audit_scope": {
@@ -1683,6 +1683,214 @@
       "rationale": "The candidate contributes to the bounded hand-path attribution claim family PD-CLAIM-072.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-a8fb457a8d919d71",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-073"],
+      "rationale": "Defines the bounded wrench, power, and inference contract for PD-CLAIM-073.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-128c2b0ce1529a57",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-080"],
+      "rationale": "States the model-only evidence level and open human quantity in PD-CLAIM-080.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-61062d10b8634450",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-074"],
+      "rationale": "Defines force-plate, COP, free-moment, and insole measurement boundaries in PD-CLAIM-074.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-e7dad8dfe29a2954",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-074"],
+      "rationale": "Maps the sample-specific GRF and COP literature review to PD-CLAIM-074.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-c84395345651db96",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-075"],
+      "rationale": "Introduces the constrained equation audited in PD-CLAIM-075.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-725a2afd7efeaa9a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-075"],
+      "rationale": "Introduces the acceleration constraint audited in PD-CLAIM-075.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-45525e5ec888dead",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-075"],
+      "rationale": "States rank, definiteness, and row-scaling conditions for PD-CLAIM-075.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-1a65a9aebf2bce6f",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-075"],
+      "rationale": "States the fail-closed allocation boundary for PD-CLAIM-075.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-48d289ce9bf47a43",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-075"],
+      "rationale": "Introduces the additive reaction split audited in PD-CLAIM-075.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-5d075bdd550c5913",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-075"],
+      "rationale": "Bounds dynamic inconsistency and residual interpretation in PD-CLAIM-075.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-bc33ab0c3549456c",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-076"],
+      "rationale": "Defines the pointwise ZTCF contract for PD-CLAIM-076.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-54920f8d0d93a336",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-076"],
+      "rationale": "States the autonomous-constraint ZVCF validity conditions in PD-CLAIM-076.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-43048748dad5d9d4",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-076"],
+      "rationale": "States rheonomic recomputation and nonadditivity boundaries for PD-CLAIM-076.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-85073389f5c8911e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-076"],
+      "rationale": "Maps reaction components to bounded interpretations in PD-CLAIM-076.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-694d7d5d4aae7e5d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-077"],
+      "rationale": "Defines the fixed-support benchmark domain for PD-CLAIM-077.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-46c7f3046dc81327",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-077"],
+      "rationale": "The figure visualizes registered pointwise benchmark evidence for PD-CLAIM-077.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-fc27a006b33a5d58",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-077"],
+      "rationale": "Reports closure, fixed-prediction R-squared, bias, and RMSE for PD-CLAIM-077.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-5434a027df5d6714",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-077"],
+      "rationale": "Reports impulse cancellation and percentage limits for PD-CLAIM-077.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-941e2fb53fb74477",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-077"],
+      "rationale": "The vector figure supports the registered benchmark interpretation in PD-CLAIM-077.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-4337fb9361791bbd",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-078"],
+      "rationale": "Introduces the nonprescriptive interpretation family in PD-CLAIM-078.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-69d2080200c0dae1",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-078"],
+      "rationale": "States observability limits and the required center-of-mass identity in PD-CLAIM-078.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-8aa7e9ec37924457",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-079"],
+      "rationale": "The ladder figure visualizes the prospective falsification protocol in PD-CLAIM-079.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-b73b583ba64b6bd5",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-079"],
+      "rationale": "Defines participant-held-out instrumentation and outcomes for PD-CLAIM-079.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-3ca8cb5c18c73f4d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-079"],
+      "rationale": "Introduces the rejection criteria audited in PD-CLAIM-079.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-efb376153e02db36",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-079"],
+      "rationale": "Enumerates fail-closed rejection and Newton-Euler consistency gates for PD-CLAIM-079.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-41b01687da07b5f2",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-080"],
+      "rationale": "Defines the machine-readable evidence and chapter nonclaim boundary in PD-CLAIM-080.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
     }
   ],
   "claims": [
@@ -2360,7 +2568,7 @@
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd",
-        "docs/research/proximal_distal_energy_transfer/HUMAN_EXPERIMENT_PROTOCOL.md"
+        "docs/research/proximal_distal_energy_transfer/EXPERIMENTAL_FALSIFICATION_PROTOCOL.md"
       ],
       "model_domain": "Current external observational studies, inverse-dynamics partitions, and repository reduced-model experiments considered together.",
       "uncertainty_boundary": "Absence of causal identification is not evidence that the proposed delayed-handoff mechanism is false; the mechanism remains testable and model-conditional.",
@@ -4237,6 +4445,323 @@
       ],
       "falsifier": "Any registered closure or boundary fails, or the chapter presents a withheld physiological or coaching conclusion as established.",
       "adjudication": "Every chapter candidate is now mapped to a bounded claim or editorial disposition, with prospective human tests left open.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-073",
+      "candidate_ids": ["PD-CAND-a8fb457a8d919d71"],
+      "statement": "Ground reaction is an external contact wrench and constrained-dynamics observable, not a direct control signal or club-energy-transfer measure; power additionally requires a same-reference-point twist, and ideal stationary no-slip contact can redirect momentum while doing zero contact work.",
+      "classification": "mechanical_observable_and_power_boundary",
+      "published_status": "supported_by_wrench_twist_mechanics",
+      "audit_status": "equation_sign_reference_and_nonclaim_boundary_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03c_ground_reaction_drift.qmd:3"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07b_frames_biology_engines.qmd",
+        "tests/unit/biomechanics/test_interaction_evidence.py"
+      ],
+      "model_domain": "Rigid-contact wrench and twist mechanics under a declared frame, origin, and contact convention.",
+      "uncertainty_boundary": "Real shoe and turf deformation, slip, and moving contact patches may permit nonzero contact work and require measured local kinematics.",
+      "competing_explanations": [
+        "Compliant contact work",
+        "slip",
+        "moving reference-point artifacts",
+        "and unmeasured external loads"
+      ],
+      "negative_controls": [
+        "Paired wrench transport and twist transport",
+        "stationary-contact power check",
+        "measured shoe and turf kinematics"
+      ],
+      "falsifier": "Power changes under paired reference transport, or measured contact kinematics establish nonzero work where the declared ideal contact predicts zero.",
+      "adjudication": "The chapter now separates force, impulse, wrench power, and internal energy redistribution before interpreting GRF timing.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-074",
+      "candidate_ids": ["PD-CAND-61062d10b8634450", "PD-CAND-e7dad8dfe29a2954"],
+      "statement": "COP and free moment require a transported six-axis wrench, declared support surface, non-negligible vertical force, and frame conventions; pressure insoles do not directly measure shear or full moments, while published golf GRF and COP findings remain sample-, direction-, and equipment-condition specific.",
+      "classification": "external_measurement_and_population_evidence_boundary",
+      "published_status": "supported_with_sample_and_measurement_qualifications",
+      "audit_status": "primary_abstracts_methods_and_review_record_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03c_ground_reaction_drift.qmd:27",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03c_ground_reaction_drift.qmd:42"
+      ],
+      "evidence_artifacts": [
+        "https://pubmed.ncbi.nlm.nih.gov/27515436/",
+        "https://pubmed.ncbi.nlm.nih.gov/17454544/",
+        "https://pubmed.ncbi.nlm.nih.gov/31042142/",
+        "https://pubmed.ncbi.nlm.nih.gov/24149910/",
+        "https://pubmed.ncbi.nlm.nih.gov/41653371/"
+      ],
+      "model_domain": "Force-plate, pressure-insole, cluster, association, equipment-condition, and systematic-review evidence in the cited samples.",
+      "uncertainty_boundary": "No cited study identifies a unique biological command, universal COP waveform, or causal performance intervention.",
+      "competing_explanations": [
+        "Skill and anthropometry",
+        "club and footwear condition",
+        "event and normalization definitions",
+        "and participant-specific strategies"
+      ],
+      "negative_controls": [
+        "Wrench-origin transport audit",
+        "low-force masking",
+        "participant-held-out replication",
+        "multiclub and mixed-skill stratification"
+      ],
+      "falsifier": "The primary records do not support the stated samples or measurement boundaries, or a preregistered intervention identifies an invariant causal GRF feature.",
+      "adjudication": "Author names, sample scope, direction-of-hit limitation, and observational status were corrected against primary records.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-075",
+      "candidate_ids": [
+        "PD-CAND-c84395345651db96",
+        "PD-CAND-725a2afd7efeaa9a",
+        "PD-CAND-45525e5ec888dead",
+        "PD-CAND-1a65a9aebf2bce6f",
+        "PD-CAND-48d289ce9bf47a43",
+        "PD-CAND-5d075bdd550c5913"
+      ],
+      "statement": "For positive-definite mass, full-row-rank constraints, and declared row scaling, the constrained reaction has a unique additive configuration, velocity, control, and external-load split; a pseudoinverse allocation or inverse-dynamics residual does not identify bilateral force or muscle control.",
+      "classification": "constrained_reaction_identity_and_identifiability_boundary",
+      "published_status": "supported_by_derivation_and_fail_closed_implementation",
+      "audit_status": "sign_derivation_rank_condition_and_external_context_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03c_ground_reaction_drift.qmd:58",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03c_ground_reaction_drift.qmd:71",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03c_ground_reaction_drift.qmd:84",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03c_ground_reaction_drift.qmd:89",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03c_ground_reaction_drift.qmd:106"
+      ],
+      "evidence_artifacts": [
+        "src/shared/python/physics/contact_reaction_decomposition.py",
+        "tests/unit/test_contact_reaction_decomposition.py",
+        "https://doi.org/10.1016/j.jbiomech.2022.111087",
+        "https://doi.org/10.1371/journal.pone.0295152"
+      ],
+      "model_domain": "Pointwise constrained multibody equations with supplied bias, actuation, external-load, and contact terms.",
+      "uncertainty_boundary": "Condition number depends on contact-row scaling, while model error, filtering, inertias, and omitted loads can all enter residuals.",
+      "competing_explanations": [
+        "Rank-deficient contact allocation",
+        "row-unit scaling",
+        "inertial error",
+        "kinematic noise",
+        "and omitted external loads"
+      ],
+      "negative_controls": [
+        "Dependent-row rejection",
+        "row-scaling sensitivity",
+        "independent equation closure",
+        "residual magnitude audit"
+      ],
+      "falsifier": "The derived sign or additive closure fails, or an equally admissible contact allocation changes an allegedly unique bilateral result.",
+      "adjudication": "The algebra is retained while residual-reduction citations are narrowed and the allocation and scaling limitations are explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-076",
+      "candidate_ids": [
+        "PD-CAND-bc33ab0c3549456c",
+        "PD-CAND-54920f8d0d93a336",
+        "PD-CAND-43048748dad5d9d4",
+        "PD-CAND-85073389f5c8911e"
+      ],
+      "statement": "Ground-reaction ZTCF and ZVCF are overlapping pointwise interventions, not trajectories or complementary causes; the displayed ZVCF shortcut is physical only when the declared velocity and autonomous holonomic constraint biases vanish at zero velocity, otherwise the reaction must be recomputed with remaining rheonomic terms.",
+      "classification": "counterfactual_contract_and_validity_boundary",
+      "published_status": "supported_with_new_rheonomic_limitation",
+      "audit_status": "algebra_code_metadata_and_regression_tests_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03c_ground_reaction_drift.qmd:119",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03c_ground_reaction_drift.qmd:126",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03c_ground_reaction_drift.qmd:134",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03c_ground_reaction_drift.qmd:143"
+      ],
+      "evidence_artifacts": [
+        "src/shared/python/physics/contact_reaction_decomposition.py",
+        "scripts/research/proximal_distal_energy/run_grf_drift_study.py",
+        "tests/research/test_grf_drift_study.py",
+        "tests/unit/test_contact_reaction_decomposition.py"
+      ],
+      "model_domain": "Pointwise zero-input and algebraic velocity-term-kill reactions at one supplied state.",
+      "uncertainty_boundary": "The implementation does not infer whether arbitrary supplied biases truly vanish at zero velocity; the calling model owns that contract.",
+      "competing_explanations": [
+        "Rheonomic constraint motion",
+        "time-dependent contact geometry",
+        "mispartitioned bias terms",
+        "and forward state divergence"
+      ],
+      "negative_controls": [
+        "Explicit zero-velocity reevaluation",
+        "rheonomic retained-bias case",
+        "forward branch",
+        "nonadditivity check"
+      ],
+      "falsifier": "A direct zero-velocity solve disagrees under the declared autonomous assumptions, or the shortcut is applied while a nonzero rheonomic bias remains.",
+      "adjudication": "The paper and shared implementation now distinguish algebraic term killing from a generally valid physical zero-velocity counterfactual.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-077",
+      "candidate_ids": [
+        "PD-CAND-694d7d5d4aae7e5d",
+        "PD-CAND-46c7f3046dc81327",
+        "PD-CAND-fc27a006b33a5d58",
+        "PD-CAND-5434a027df5d6714",
+        "PD-CAND-941e2fb53fb74477"
+      ],
+      "statement": "In the 161-state fixed-shoulder double-pendulum benchmark, additive closure is below 2e-13 N, fixed-prediction R-squared is 0.871 and 0.814, but RMSE is 1.02 and 1.42 projected planar-weight scales and vertical bias is 71.1 N; ZTCF vertical impulse exceeds total because control opposes it.",
+      "classification": "model_internal_support_reaction_benchmark",
+      "published_status": "supported_with_absolute_error_failure",
+      "audit_status": "deterministic_replay_metric_definition_impulse_and_boundary_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03c_ground_reaction_drift.qmd:153",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03c_ground_reaction_drift.qmd:161",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03c_ground_reaction_drift.qmd:163",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03c_ground_reaction_drift.qmd:175",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03c_ground_reaction_drift.qmd:182"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/grf_drift/grf_drift_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/grf_drift/grf_drift_traces.npz",
+        "scripts/research/proximal_distal_energy/run_grf_drift_study.py",
+        "tests/research/test_grf_drift_study.py"
+      ],
+      "model_domain": "Fixed-base planar double pendulum support reaction through the registered model-impact window.",
+      "uncertainty_boundary": "The support has no feet, COP, free moment, pelvis, transverse plane, measured participant, or human force-plate validation.",
+      "competing_explanations": [
+        "Chosen command program",
+        "projected gravity scale",
+        "fixed-pivot geometry",
+        "and pointwise rather than forward intervention"
+      ],
+      "negative_controls": [
+        "Independent additive closure",
+        "ZVCF closure",
+        "bias and RMSE beside R-squared",
+        "impulse cancellation reporting"
+      ],
+      "falsifier": "Canonical regeneration changes the values beyond numerical tolerance, closure fails, or the result is presented as a human force-plate validation.",
+      "adjudication": "The numerical result is retained but R-squared is defined as fixed-prediction SSE/TSS and explicitly fails the absolute-error screen.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-078",
+      "candidate_ids": ["PD-CAND-4337fb9361791bbd", "PD-CAND-69d2080200c0dae1"],
+      "statement": "GRF peaks, shear, COP, free moment, and plantar-pressure migration are non-equivalent observables; net external force for the complete golfer-plus-club system must satisfy the center-of-mass Newton-Euler identity, so model added value must concern moments, bilateral allocation, or genuine held-out counterfactual prediction.",
+      "classification": "observable_separation_and_required_mechanical_baseline",
+      "published_status": "supported_as_mechanical_identity_and_nonclaim",
+      "audit_status": "observable_definitions_and_baseline_logic_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03c_ground_reaction_drift.qmd:186",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03c_ground_reaction_drift.qmd:188"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/grf_drift/grf_drift_study.json",
+        "https://pubmed.ncbi.nlm.nih.gov/17454544/",
+        "docs/research/proximal_distal_energy_transfer/EXPERIMENTAL_FALSIFICATION_PROTOCOL.md"
+      ],
+      "model_domain": "Whole-system Newton-Euler force balance plus frame-explicit force-plate observables.",
+      "uncertainty_boundary": "Center-of-mass differentiation, unknown external loads, plate coverage, and segment inertial error can impair empirical closure.",
+      "competing_explanations": [
+        "COM measurement error",
+        "unmeasured club or environmental loads",
+        "plate-edge contact",
+        "and origin-transport error"
+      ],
+      "negative_controls": [
+        "Whole-system force closure",
+        "separate moment prediction",
+        "bilateral allocation invariance",
+        "held-out comparator"
+      ],
+      "falsifier": "Net modeled force violates measured center-of-mass dynamics after uncertainty is propagated, or claimed added value disappears against the required identity and held-out comparators.",
+      "adjudication": "The former optional COM baseline is corrected to a required consistency identity and the remaining modeling burden is stated.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-079",
+      "candidate_ids": [
+        "PD-CAND-8aa7e9ec37924457",
+        "PD-CAND-b73b583ba64b6bd5",
+        "PD-CAND-3ca8cb5c18c73f4d",
+        "PD-CAND-efb376153e02db36"
+      ],
+      "statement": "A human ground-reaction attribution test requires synchronized bilateral six-axis wrenches, whole-body and club kinematics, participant-separated calibration and evaluation, declared frames and filtering, raw bias and impulse metrics, Newton-Euler closure, allocation invariance, uncertainty perturbations, and preregistered rejection thresholds.",
+      "classification": "prospective_human_falsification_protocol",
+      "published_status": "untested_protocol",
+      "audit_status": "protocol_completeness_and_leakage_controls_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03c_ground_reaction_drift.qmd:220",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03c_ground_reaction_drift.qmd:222",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03c_ground_reaction_drift.qmd:232",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03c_ground_reaction_drift.qmd:234"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/EXPERIMENTAL_FALSIFICATION_PROTOCOL.md",
+        "docs/research/proximal_distal_energy_transfer/data/grf_drift/figures/fig_grf_falsification_ladder.pdf",
+        "https://pubmed.ncbi.nlm.nih.gov/41653371/"
+      ],
+      "model_domain": "Prospective, participant-held-out bilateral force-plate and motion-capture study.",
+      "uncertainty_boundary": "No human outcome is present and tolerances must be fixed before data access rather than selected from this benchmark.",
+      "competing_explanations": [
+        "Participant leakage",
+        "filter tuning",
+        "event mismatch",
+        "contact allocation",
+        "and inertial uncertainty"
+      ],
+      "negative_controls": [
+        "Participant-level holdout",
+        "COM identity",
+        "simpler registered comparators",
+        "allocation and parameter perturbations"
+      ],
+      "falsifier": "Any preregistered wrench, residual, invariance, sensitivity, or comparator criterion fails on held-out participants.",
+      "adjudication": "The protocol now closes training-test leakage and distinguishes required mechanics from optional model improvements.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-080",
+      "candidate_ids": ["PD-CAND-128c2b0ce1529a57", "PD-CAND-41b01687da07b5f2"],
+      "statement": "The ground-reaction chapter contains a generic algebraic solver and a deterministic fixed-support analogue only; its machine evidence records boundaries and metrics, but human drift fractions, bilateral attribution, COP, free moment, biological control, and technique remain unmeasured.",
+      "classification": "chapter_level_evidence_and_nonclaim_contract",
+      "published_status": "supported_with_human_questions_open",
+      "audit_status": "all_chapter_candidates_adjudicated_human_validation_absent",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03c_ground_reaction_drift.qmd:17",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03c_ground_reaction_drift.qmd:247"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/grf_drift/grf_drift_study.json",
+        "scripts/research/proximal_distal_energy/run_grf_drift_study.py",
+        "tests/research/test_grf_drift_study.py"
+      ],
+      "model_domain": "Synthesis of the ground-reaction attribution chapter and its committed benchmark evidence.",
+      "uncertainty_boundary": "No synchronized human bilateral force-plate, full-body, club, or intervention dataset is analyzed.",
+      "competing_explanations": [
+        "Fixed-support artifact",
+        "model-order error",
+        "participant heterogeneity",
+        "and unmeasured contact mechanics"
+      ],
+      "negative_controls": [
+        "Human data absence flag",
+        "nonidentifiable-quantity registry",
+        "source hashes",
+        "prospective falsification protocol"
+      ],
+      "falsifier": "The evidence package contains an unregistered human outcome, a stated nonidentifiable quantity is presented as identified, or any canonical benchmark gate fails.",
+      "adjudication": "Every chapter candidate is mapped to a bounded claim, and all human interpretation remains explicitly prospective.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
     }

@@ -170,9 +170,51 @@ def test_registry_rejects_duplicate_claim_identifiers(tmp_path: Path) -> None:
 
 
 @pytest.mark.unit
+def test_registry_rejects_missing_local_evidence_artifact(tmp_path: Path) -> None:
+    master = tmp_path / "paper.qmd"
+    master.write_text("", encoding="utf-8")
+    inventory = build_candidate_inventory(master, repository_root=tmp_path)
+    registry = {
+        "schema_version": "proximal-distal-claim-audit-v1",
+        "paper": {
+            "source": "paper.qmd",
+            "source_digest": inventory["source_digest"],
+        },
+        "audit_scope": {"completion_status": "in_progress"},
+        "release_claim_inventory": [],
+        "candidate_reviews": [],
+        "claims": [
+            {
+                "claim_id": "PD-CLAIM-001",
+                "statement": "A test claim.",
+                "classification": "test",
+                "published_status": "untested",
+                "audit_status": "provisional",
+                "source_locations": ["paper.qmd:1"],
+                "evidence_artifacts": ["evidence/missing.json"],
+                "model_domain": "Test domain.",
+                "uncertainty_boundary": "Test uncertainty.",
+                "competing_explanations": ["Alternative"],
+                "negative_controls": ["Negative control"],
+                "falsifier": "Evidence is absent.",
+                "adjudication": "Test adjudication.",
+                "reviewer": "Test reviewer",
+                "last_verified_on": "2026-08-13",
+            }
+        ],
+    }
+    path = tmp_path / "registry.json"
+    path.write_text(json.dumps(registry), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="missing local evidence artifact"):
+        validate_registry(path, repository_root=tmp_path, check_release_manifest=False)
+
+
+@pytest.mark.unit
 def test_registry_requires_reciprocal_candidate_claim_mapping(tmp_path: Path) -> None:
     master = tmp_path / "paper.qmd"
     master.write_text("The model produces 12 m/s.\n", encoding="utf-8")
+    (tmp_path / "result.json").write_text("{}\n", encoding="utf-8")
     inventory = build_candidate_inventory(master, repository_root=tmp_path)
     candidate_id = inventory["candidates"][0]["candidate_id"]
     registry = {

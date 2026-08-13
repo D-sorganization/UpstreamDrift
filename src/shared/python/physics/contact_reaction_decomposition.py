@@ -40,10 +40,14 @@ class ContactReactionInputs:
     """Inputs for a frame-explicit pointwise contact-reaction solve.
 
     ``static_bias`` contains velocity-independent bias forces, normally gravity.
-    ``velocity_bias`` contains velocity-dependent bias forces.  ``constraint_bias``
-    is the acceleration-level term often denoted ``Jdot qdot``.  External loads
-    are separate from controllable generalized forces so the zero-torque
-    counterfactual can retain known non-control loads.
+    ``velocity_bias`` contains terms declared to vanish when velocity is zero.
+    ``constraint_bias`` is the acceleration-level term often denoted
+    ``Jdot qdot``.  Calling the algebraic term-kill a physical zero-velocity
+    counterfactual requires an autonomous holonomic constraint for which both
+    supplied terms vanish at zero velocity; rheonomic constraints must retain
+    any remaining time-dependent bias explicitly.  External loads are separate
+    from controllable generalized forces so the zero-torque counterfactual can
+    retain known non-control loads.
     """
 
     mass_matrix: np.ndarray
@@ -143,9 +147,12 @@ def decompose_contact_reaction(
     """Solve and attribute the unique constrained-contact reaction.
 
     ZTCF means zero controllable torque while retaining declared external loads.
-    ZVCF means the velocity-dependent bias and constraint term are zeroed while
-    retaining configuration, control, and external-load terms.  They overlap and
-    therefore must not be added together as if they were complementary causes.
+    ZVCF here means the declared velocity-dependent bias and constraint term are
+    algebraically zeroed while retaining configuration, control, and
+    external-load terms.  This equals a physical zero-velocity evaluation only
+    under the input contract documented by :class:`ContactReactionInputs`.
+    ZTCF and ZVCF overlap and therefore must not be added together as if they
+    were complementary causes.
     """
     require(
         isinstance(inputs, ContactReactionInputs),
