@@ -59,6 +59,14 @@ def test_spatial_interventions_and_cross_formulation_result_satisfy_contract() -
         comparison["maximum_relative_inverse_dynamics_error"]
         <= comparison["tolerance"]["relative"]
     )
+    assert comparison["maximum_absolute_mass_matrix_error"] < 1e-10
+    assert comparison["maximum_relative_mass_matrix_error"] < 1e-10
+    assert comparison["maximum_absolute_bias_force_error"] < 1e-7
+    assert comparison["maximum_relative_bias_force_error"] < 1e-8
+    assert comparison["external_load_convention_mismatch_relative_error"] > 0.20
+    checks = record["spatial_checks"]
+    assert checks["maximum_abs_generalized_load_power_residual_w"] < 1e-10
+    assert checks["maximum_abs_reference_transport_power_residual_w"] < 1e-10
 
 
 def test_spatial_array_bundle_preserves_common_observables() -> None:
@@ -76,3 +84,5 @@ def test_spatial_array_bundle_preserves_common_observables() -> None:
         np.testing.assert_allclose(coincident, 0.0, atol=1e-12)
         np.testing.assert_allclose(lagrange, mujoco, atol=1e-8, rtol=1e-8)
         assert np.max(np.abs(arrays["action_reaction_power_residual_w"])) < 1e-10
+        assert np.max(np.abs(arrays["generalized_load_power_residual_w"])) < 1e-10
+        assert np.max(np.abs(arrays["reference_transport_power_residual_w"])) < 1e-10

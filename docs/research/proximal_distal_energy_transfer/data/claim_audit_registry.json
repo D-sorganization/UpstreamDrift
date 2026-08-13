@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "561a66870db5c2930e94460a929324c94331c92503ab4c76eee97cb509bf219e",
+    "source_digest": "dcf039db813a954305cbcac98267000b9993101042b7ec61179770e8cbc85202",
     "baseline_commit": "13ea6a69585a42dc1db4b3959440ed95787c9779"
   },
   "audit_scope": {
@@ -176,11 +176,12 @@
       "candidate_id": "PD-CAND-227a00e5fa408d07",
       "disposition": "material_claims_mapped",
       "claim_ids": [
-        "PD-CLAIM-004"
+        "PD-CLAIM-004",
+        "PD-CLAIM-177"
       ],
-      "rationale": "The paragraph reports a quantitative cross-formulation numerical agreement claim.",
+      "rationale": "The quantitative parity passage maps both to the public release claim and the component-resolved audit claim.",
       "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-12"
+      "last_verified_on": "2026-08-13"
     },
     {
       "candidate_id": "PD-CAND-94e3561735825fe9",
@@ -5644,6 +5645,406 @@
         "PD-CLAIM-174"
       ],
       "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-cf0db118a200f407",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-175"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-bb39a35e661568b9",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-175"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-bd49362ed4731cbd",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-175"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-fbe278047c3c0790",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-176"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-a026cc9313261f3e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-176"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-914b6c6d5575a729",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-176"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-5f9a38d5fbac7648",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-176"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-e801e44ee0618cf9",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-176"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-5e6b72abb07adb37",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-176"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-c006dfc27e140d3f",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-176"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-468faf8c9b226dab",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-176"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-5881758a9f46d7e9",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-177"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-517c883b51bdb07b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-177"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-812e63160e958014",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-177"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-b1ab9ec5fe1d5316",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-177"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-4afb413e82d6ae16",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-178"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-88a2f17df86e0756",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-178"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-240215d69f3f055c",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-178"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-7c7aa1563516fd91",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-178"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-6c080919eb1eb1b3",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-178"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-18695afc1ae8eaf7",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-178"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-dbff53be2154f586",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-179"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-0d8e412a448b24c5",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-179"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-4f018bc663ad7e01",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-179"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-f997d661977912d8",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-179"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-2bc6c02a90d4daad",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-179"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-5d31463a9687fc90",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-180"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-8ff38b53ff0e712f",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-180"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-b1e9c8b681098a89",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-180"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-7e4488f722684d3a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-180"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-be1d8dd4c49c68e8",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-181"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-c81d507e514e40de",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-181"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-f1142f9330d8db06",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-181"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-e6a141c32e670db8",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-182"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-ee0adfd0063a4727",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-182"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-2c2258c05cf1f8fc",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-182"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-6eb9b67c82f012a7",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-182"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-3ab6317faf735919",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-183"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-3f11c9ecc895d3c4",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-183"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-bbac8d9885489dc6",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-183"
+      ],
+      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
     }
@@ -12659,6 +13060,439 @@
       ],
       "falsifier": "The result is promoted to coaching advice or higher-tier evidence rejects it.",
       "adjudication": "Reciprocal passages were checked against regenerated evidence; exact constraint bias, distinct power identities, projection error, interventions, closure, and non-human boundaries are explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-175",
+      "candidate_ids": [
+        "PD-CAND-cf0db118a200f407",
+        "PD-CAND-bb39a35e661568b9",
+        "PD-CAND-bd49362ed4731cbd"
+      ],
+      "statement": "A prescribed-load, same-state, reduced 3-D model tests spatial wrench transport and inverse-dynamics implementation parity without testing forward trajectory parity or passive contact origin.",
+      "classification": "bounded_spatial_common_state_scope",
+      "published_status": "supported_as_scope_boundary",
+      "audit_status": "mechanics_components_virtual_work_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:3",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:12",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:21"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.npz",
+        "scripts/research/proximal_distal_energy/spatial_full_body.py",
+        "scripts/research/proximal_distal_energy/run_spatial_full_body_study.py",
+        "tests/research/test_spatial_full_body_evidence.py"
+      ],
+      "model_domain": "Same-state reduced spatial inverse dynamics with prescribed two-hand loads.",
+      "uncertainty_boundary": "No forward-contact, passive-origin, or human inference is identified.",
+      "competing_explanations": [
+        "shared model specification error",
+        "external-load convention",
+        "finite-difference bias error",
+        "frame or reference-point error",
+        "prescribed force history"
+      ],
+      "negative_controls": [
+        "wrong external-load convention",
+        "separate mass and bias parity",
+        "point-force virtual work",
+        "reference-point transport",
+        "reversed moment arm",
+        "coincident hands"
+      ],
+      "falsifier": "A trajectory effect, passive contact origin, or human result is inferred from this tier.",
+      "adjudication": "All chapter passages were checked against regenerated common-state evidence; component cancellation, generalized-load mapping, reference transport, geometric interventions, and non-human boundaries are explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-176",
+      "candidate_ids": [
+        "PD-CAND-fbe278047c3c0790",
+        "PD-CAND-a026cc9313261f3e",
+        "PD-CAND-914b6c6d5575a729",
+        "PD-CAND-5f9a38d5fbac7648",
+        "PD-CAND-e801e44ee0618cf9",
+        "PD-CAND-5e6b72abb07adb37",
+        "PD-CAND-c006dfc27e140d3f",
+        "PD-CAND-468faf8c9b226dab"
+      ],
+      "statement": "A canonical 20-coordinate reduced tree and its interface indices feed both formulations under one content hash; this prevents model drift but is not independent model transcription or anatomical validation.",
+      "classification": "canonical_common_model_integrity",
+      "published_status": "supported_at_declared_model_tier",
+      "audit_status": "mechanics_components_virtual_work_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:28",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:34",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:39",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:48",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:57",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:59",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:67",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:76"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.npz",
+        "scripts/research/proximal_distal_energy/spatial_full_body.py",
+        "scripts/research/proximal_distal_energy/run_spatial_full_body_study.py",
+        "tests/research/test_spatial_full_body_evidence.py"
+      ],
+      "model_domain": "Generated reduced 20-DOF tree shared by analytical and MuJoCo formulations.",
+      "uncertainty_boundary": "Shared generation can propagate the same specification error into both formulations.",
+      "competing_explanations": [
+        "shared model specification error",
+        "external-load convention",
+        "finite-difference bias error",
+        "frame or reference-point error",
+        "prescribed force history"
+      ],
+      "negative_controls": [
+        "wrong external-load convention",
+        "separate mass and bias parity",
+        "point-force virtual work",
+        "reference-point transport",
+        "reversed moment arm",
+        "coincident hands"
+      ],
+      "falsifier": "Hashes differ, interface fields are omitted, or the model is described as subject-specific anatomy.",
+      "adjudication": "All chapter passages were checked against regenerated common-state evidence; component cancellation, generalized-load mapping, reference transport, geometric interventions, and non-human boundaries are explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-177",
+      "candidate_ids": [
+        "PD-CAND-5881758a9f46d7e9",
+        "PD-CAND-517c883b51bdb07b",
+        "PD-CAND-812e63160e958014",
+        "PD-CAND-227a00e5fa408d07",
+        "PD-CAND-b1ab9ec5fe1d5316"
+      ],
+      "statement": "Required-action parity is not a cancellation artifact: mass matrices agree to 2.49e-14 absolute, bias vectors to 1.25e-9, while deliberately omitting external-load normalization produces a 26.3 percent mismatch.",
+      "classification": "component_level_cross_engine_parity",
+      "published_status": "supported_at_declared_model_tier",
+      "audit_status": "mechanics_components_virtual_work_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:82",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:98",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:110",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:123",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:131"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.npz",
+        "scripts/research/proximal_distal_energy/spatial_full_body.py",
+        "scripts/research/proximal_distal_energy/run_spatial_full_body_study.py",
+        "tests/research/test_spatial_full_body_evidence.py"
+      ],
+      "model_domain": "Same-state analytical and MuJoCo reduced-tree component audit.",
+      "uncertainty_boundary": "Both implementations share the generated tree, isotropic inertias, and prescribed states.",
+      "competing_explanations": [
+        "shared model specification error",
+        "external-load convention",
+        "finite-difference bias error",
+        "frame or reference-point error",
+        "prescribed force history"
+      ],
+      "negative_controls": [
+        "wrong external-load convention",
+        "separate mass and bias parity",
+        "point-force virtual work",
+        "reference-point transport",
+        "reversed moment arm",
+        "coincident hands"
+      ],
+      "falsifier": "Any component bound fails or the wrong external-load convention no longer produces a material mismatch.",
+      "adjudication": "All chapter passages were checked against regenerated common-state evidence; component cancellation, generalized-load mapping, reference transport, geometric interventions, and non-human boundaries are explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-178",
+      "candidate_ids": [
+        "PD-CAND-4afb413e82d6ae16",
+        "PD-CAND-88a2f17df86e0756",
+        "PD-CAND-240215d69f3f055c",
+        "PD-CAND-7c7aa1563516fd91",
+        "PD-CAND-6c080919eb1eb1b3",
+        "PD-CAND-18695afc1ae8eaf7"
+      ],
+      "statement": "Two-hand wrench power closes across equal-and-opposite sides, generalized point-force mapping, and an offset reference transport, while zero direct club torque remains distinct from passive force generation.",
+      "classification": "spatial_virtual_work_and_reference_invariance",
+      "published_status": "supported_at_declared_model_tier",
+      "audit_status": "mechanics_components_virtual_work_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:142",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:152",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:163",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:169",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:175",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:182"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.npz",
+        "scripts/research/proximal_distal_energy/spatial_full_body.py",
+        "scripts/research/proximal_distal_energy/run_spatial_full_body_study.py",
+        "tests/research/test_spatial_full_body_evidence.py"
+      ],
+      "model_domain": "Prescribed compatible spatial two-hand wrench and twist.",
+      "uncertainty_boundary": "Compatible rigid contact omits slip, compliance, storage, dissipation, and biological activation.",
+      "competing_explanations": [
+        "shared model specification error",
+        "external-load convention",
+        "finite-difference bias error",
+        "frame or reference-point error",
+        "prescribed force history"
+      ],
+      "negative_controls": [
+        "wrong external-load convention",
+        "separate mass and bias parity",
+        "point-force virtual work",
+        "reference-point transport",
+        "reversed moment arm",
+        "coincident hands"
+      ],
+      "falsifier": "Power residuals exceed 1e-10 W or the text equates zero direct torque with passive contact.",
+      "adjudication": "All chapter passages were checked against regenerated common-state evidence; component cancellation, generalized-load mapping, reference transport, geometric interventions, and non-human boundaries are explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-179",
+      "candidate_ids": [
+        "PD-CAND-dbff53be2154f586",
+        "PD-CAND-0d8e412a448b24c5",
+        "PD-CAND-4f018bc663ad7e01",
+        "PD-CAND-f997d661977912d8",
+        "PD-CAND-2bc6c02a90d4daad"
+      ],
+      "statement": "Predeclared same-state geometry, derivative, component-parity, virtual-work, and nonplanarity controls define falsifiers before interpreting the spatial result.",
+      "classification": "registered_spatial_falsification_contract",
+      "published_status": "supported_at_declared_model_tier",
+      "audit_status": "mechanics_components_virtual_work_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:189",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:192",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:199",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:209",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:211"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.npz",
+        "scripts/research/proximal_distal_energy/spatial_full_body.py",
+        "scripts/research/proximal_distal_energy/run_spatial_full_body_study.py",
+        "tests/research/test_spatial_full_body_evidence.py"
+      ],
+      "model_domain": "Registered reduced common-state experiment and negative controls.",
+      "uncertainty_boundary": "Tolerance provenance is internal preregistration rather than external blinded registration.",
+      "competing_explanations": [
+        "shared model specification error",
+        "external-load convention",
+        "finite-difference bias error",
+        "frame or reference-point error",
+        "prescribed force history"
+      ],
+      "negative_controls": [
+        "wrong external-load convention",
+        "separate mass and bias parity",
+        "point-force virtual work",
+        "reference-point transport",
+        "reversed moment arm",
+        "coincident hands"
+      ],
+      "falsifier": "A declared bound is changed after outcome inspection or any registered control fails.",
+      "adjudication": "All chapter passages were checked against regenerated common-state evidence; component cancellation, generalized-load mapping, reference transport, geometric interventions, and non-human boundaries are explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-180",
+      "candidate_ids": [
+        "PD-CAND-5d31463a9687fc90",
+        "PD-CAND-8ff38b53ff0e712f",
+        "PD-CAND-b1e9c8b681098a89",
+        "PD-CAND-7e4488f722684d3a"
+      ],
+      "statement": "Across 61 same states, two inverse-dynamics implementations agree to 1.25e-9 absolute and 2.14e-11 relative error, conditional on the identical generated model and declared action convention.",
+      "classification": "same_state_inverse_dynamics_transport",
+      "published_status": "supported_at_declared_model_tier",
+      "audit_status": "mechanics_components_virtual_work_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:222",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:224",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:233",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:238"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.npz",
+        "scripts/research/proximal_distal_energy/spatial_full_body.py",
+        "scripts/research/proximal_distal_energy/run_spatial_full_body_study.py",
+        "tests/research/test_spatial_full_body_evidence.py"
+      ],
+      "model_domain": "Reduced common-model same-state inverse dynamics only.",
+      "uncertainty_boundary": "Arbitrary humanoids and independent forward rollouts are outside this result.",
+      "competing_explanations": [
+        "shared model specification error",
+        "external-load convention",
+        "finite-difference bias error",
+        "frame or reference-point error",
+        "prescribed force history"
+      ],
+      "negative_controls": [
+        "wrong external-load convention",
+        "separate mass and bias parity",
+        "point-force virtual work",
+        "reference-point transport",
+        "reversed moment arm",
+        "coincident hands"
+      ],
+      "falsifier": "Registered residuals or separate component audits fail.",
+      "adjudication": "All chapter passages were checked against regenerated common-state evidence; component cancellation, generalized-load mapping, reference transport, geometric interventions, and non-human boundaries are explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-181",
+      "candidate_ids": [
+        "PD-CAND-be1d8dd4c49c68e8",
+        "PD-CAND-c81d507e514e40de",
+        "PD-CAND-f1142f9330d8db06"
+      ],
+      "statement": "With force histories and state fixed, reversing the signed hand separation reverses the club-axis couple and coincident application points remove it, demonstrating lever-arm control of sign in this spatial model.",
+      "classification": "spatial_geometry_intervention",
+      "published_status": "supported_at_declared_model_tier",
+      "audit_status": "mechanics_components_virtual_work_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:244",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:246",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:254"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.npz",
+        "scripts/research/proximal_distal_energy/spatial_full_body.py",
+        "scripts/research/proximal_distal_energy/run_spatial_full_body_study.py",
+        "tests/research/test_spatial_full_body_evidence.py"
+      ],
+      "model_domain": "Prescribed-load reduced spatial common-state model.",
+      "uncertainty_boundary": "The intervention does not show that a human generates or benefits from the forces.",
+      "competing_explanations": [
+        "shared model specification error",
+        "external-load convention",
+        "finite-difference bias error",
+        "frame or reference-point error",
+        "prescribed force history"
+      ],
+      "negative_controls": [
+        "wrong external-load convention",
+        "separate mass and bias parity",
+        "point-force virtual work",
+        "reference-point transport",
+        "reversed moment arm",
+        "coincident hands"
+      ],
+      "falsifier": "Force norm/state changes, reversal residual exceeds 1e-12 N m, or coincident points retain a couple.",
+      "adjudication": "All chapter passages were checked against regenerated common-state evidence; component cancellation, generalized-load mapping, reference transport, geometric interventions, and non-human boundaries are explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-182",
+      "candidate_ids": [
+        "PD-CAND-e6a141c32e670db8",
+        "PD-CAND-ee0adfd0063a4727",
+        "PD-CAND-2c2258c05cf1f8fc",
+        "PD-CAND-6eb9b67c82f012a7"
+      ],
+      "statement": "The spatial tier extends planar geometry to genuine nonplanar states and independent algorithms while retaining an exact geometric sign intervention.",
+      "classification": "spatial_evidence_boundary_advance",
+      "published_status": "supported_conditionally_at_declared_model_tier",
+      "audit_status": "mechanics_components_virtual_work_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:263",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:265",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:271",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:277"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.npz",
+        "scripts/research/proximal_distal_energy/spatial_full_body.py",
+        "scripts/research/proximal_distal_energy/run_spatial_full_body_study.py",
+        "tests/research/test_spatial_full_body_evidence.py"
+      ],
+      "model_domain": "Reduced common-state nonplanar prescribed-load model.",
+      "uncertainty_boundary": "Independent algorithms do not imply independent model content or biological validation.",
+      "competing_explanations": [
+        "shared model specification error",
+        "external-load convention",
+        "finite-difference bias error",
+        "frame or reference-point error",
+        "prescribed force history"
+      ],
+      "negative_controls": [
+        "wrong external-load convention",
+        "separate mass and bias parity",
+        "point-force virtual work",
+        "reference-point transport",
+        "reversed moment arm",
+        "coincident hands"
+      ],
+      "falsifier": "Out-of-plane motion vanishes, algorithm parity fails, or the geometry intervention fails.",
+      "adjudication": "All chapter passages were checked against regenerated common-state evidence; component cancellation, generalized-load mapping, reference transport, geometric interventions, and non-human boundaries are explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-183",
+      "candidate_ids": [
+        "PD-CAND-3ab6317faf735919",
+        "PD-CAND-3f11c9ecc895d3c4",
+        "PD-CAND-bbac8d9885489dc6"
+      ],
+      "statement": "Passive contact origin, forward cross-engine contact, anatomical magnitude, and human strategy remain open and require contact, identifiability, uncertainty, and governed human-data tiers.",
+      "classification": "explicit_open_claims_and_research_boundary",
+      "published_status": "explicitly_inconclusive_or_untested",
+      "audit_status": "mechanics_components_virtual_work_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:281",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:283",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:297"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.npz",
+        "scripts/research/proximal_distal_energy/spatial_full_body.py",
+        "scripts/research/proximal_distal_energy/run_spatial_full_body_study.py",
+        "tests/research/test_spatial_full_body_evidence.py"
+      ],
+      "model_domain": "Boundary statement spanning the next model tiers.",
+      "uncertainty_boundary": "No current evidence establishes those stronger claims.",
+      "competing_explanations": [
+        "shared model specification error",
+        "external-load convention",
+        "finite-difference bias error",
+        "frame or reference-point error",
+        "prescribed force history"
+      ],
+      "negative_controls": [
+        "wrong external-load convention",
+        "separate mass and bias parity",
+        "point-force virtual work",
+        "reference-point transport",
+        "reversed moment arm",
+        "coincident hands"
+      ],
+      "falsifier": "Any stronger claim is presented as supported by this prescribed-load same-state experiment.",
+      "adjudication": "All chapter passages were checked against regenerated common-state evidence; component cancellation, generalized-load mapping, reference transport, geometric interventions, and non-human boundaries are explicit.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
     }

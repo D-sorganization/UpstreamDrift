@@ -6,6 +6,28 @@ Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
 
+- **#8557 spatial common-state audit** — PR #8579 protected-squash-merged at
+  exact remote main `fad3191503c99dc8d1f9b975fb8232d929a51da2`. Ready PR
+  [#8580](https://github.com/D-sorganization/UpstreamDrift/pull/8580) from
+  branch `research/8557-spatial-cross-audit` is the active eighteenth
+  fail-closed slice at reviewed implementation commit
+  `57e57253bfe2361473aede8fccefc06e57884252`. It has reviewed all 41 current candidates in the spatial common-state
+  chapter as PD-CLAIM-175 through PD-CLAIM-183. The shared model hash now owns
+  interface indices as well as joints/bodies; separate native/analytical audits
+  close mass matrices to 2.49e-14 absolute and bias forces to 1.25e-9, while a
+  deliberately wrong external-load convention produces a 26.3% mismatch.
+  Generalized point-force power closes to 2.67e-15 W and reference-shifted
+  wrench/twist power to 8.88e-16 W. Current authority: 918 candidates, 594
+  reviewed, 183 atomic claims, 324 unadjudicated. Eighteen focused scientific
+  and claim-registry tests pass. The full paper renders as a visually inspected
+  202-page, 1,397,382-byte PDF with 183 URI links and 235 outline entries;
+  physical pages 122--126 were inspected, and the 371-artifact release bundle
+  validates without mismatches. Remaining gates are protected publication and
+  exact remote-main verification.
+  The required Tools side task remains active at live revision 33; its stricter
+  180 px mobile rule exposed six genuine narrow-layout failures, which it is
+  correcting without weakening the threshold.
+
 - **#8557 Comprehensive Scientific Claim Audit and Open Golf Modeling
   Program** — coupled-base/compliance PR **#8578** protected-squash-merged at
   exact remote main `16a767a8386b52e52a7a24ea718e7d54b91cd8ae`.

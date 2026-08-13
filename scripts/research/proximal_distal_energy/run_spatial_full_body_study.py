@@ -13,8 +13,10 @@ from scripts.research.proximal_distal_energy.spatial_full_body import (
     SpatialExperimentConfig,
     build_spatial_model,
     evaluate_hand_wrenches,
+    generalized_hand_load_power_residual,
     prescribed_state,
     run_cross_formulation_experiment,
+    wrench_reference_power_residual,
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -58,6 +60,8 @@ def run_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
     club_wrench = np.empty((fine.time_s.size, 6))
     compatible_twist = np.empty((fine.time_s.size, 6))
     power_residual = np.empty(fine.time_s.size)
+    generalized_load_power_residual = np.empty(fine.time_s.size)
+    reference_transport_power_residual = np.empty(fine.time_s.size)
     for index, time_s in enumerate(fine.time_s):
         baseline = evaluate_hand_wrenches(model, float(time_s), coincident_hands=False)
         reversed_sample = evaluate_hand_wrenches(
@@ -73,6 +77,12 @@ def run_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
         club_wrench[index] = baseline.club_wrench
         compatible_twist[index] = baseline.compatible_twist
         power_residual[index] = baseline.action_reaction_power_residual_w
+        generalized_load_power_residual[index] = generalized_hand_load_power_residual(
+            model, float(time_s)
+        )
+        reference_transport_power_residual[index] = wrench_reference_power_residual(
+            model, float(time_s)
+        )
         reversed_couple[index] = reversed_sample.force_generated_couple_nm
         coincident_couple[index] = coincident.force_generated_couple_nm
 
@@ -96,6 +106,8 @@ def run_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
         "club_wrench": club_wrench,
         "compatible_twist": compatible_twist,
         "action_reaction_power_residual_w": power_residual,
+        "generalized_load_power_residual_w": generalized_load_power_residual,
+        "reference_transport_power_residual_w": reference_transport_power_residual,
     }
     record: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
@@ -136,6 +148,13 @@ def run_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
             "maximum_relative_inverse_dynamics_error": (
                 fine.max_relative_inverse_dynamics_error
             ),
+            "maximum_absolute_mass_matrix_error": (fine.max_absolute_mass_matrix_error),
+            "maximum_relative_mass_matrix_error": (fine.max_relative_mass_matrix_error),
+            "maximum_absolute_bias_force_error": (fine.max_absolute_bias_force_error),
+            "maximum_relative_bias_force_error": (fine.max_relative_bias_force_error),
+            "external_load_convention_mismatch_relative_error": (
+                fine.external_load_convention_mismatch_relative_error
+            ),
             "intervention_event_grid_error_s": (fine.intervention_event_grid_error_s),
             "tolerance": {
                 "absolute_generalized_force": fine.tolerance.absolute,
@@ -149,6 +168,12 @@ def run_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
             "out_of_plane_club_motion_m": fine.out_of_plane_motion_m,
             "maximum_abs_action_reaction_power_residual_w": float(
                 np.max(np.abs(power_residual))
+            ),
+            "maximum_abs_generalized_load_power_residual_w": float(
+                np.max(np.abs(generalized_load_power_residual))
+            ),
+            "maximum_abs_reference_transport_power_residual_w": float(
+                np.max(np.abs(reference_transport_power_residual))
             ),
             "proper_axes_rank": 3,
         },
