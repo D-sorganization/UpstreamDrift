@@ -16,10 +16,16 @@ function [ZTCF_out, DELTA_out] = calculate_work_impulse(ZTCF_in, DELTA_in, confi
 % duplicate calculation logic into a single parameterized function.
 %
 % Calculations performed:
-%   - Linear Work = integral(F · v dt) for each joint
-%   - Angular Work = integral(T · ω dt) for each joint
+%   - Linear Work = integral(F · v dt) for each stored table and joint
+%   - Angular Work = integral(T · ω dt) for each stored table and joint
 %   - Linear Impulse = integral(F dt) for each joint
 %   - Angular Impulse = integral(T dt) for each joint
+%
+% IMPORTANT: If DELTA force and DELTA velocity were both formed by subtracting
+% ZTCF columns from BASE columns, their dot product is not generally BASE power
+% minus ZTCF power. Do not interpret DELTA work as an additive control pathway
+% without recomputing force components at one common state and projecting them
+% onto one common interface velocity.
 %
 % OPTIMIZATION NOTES:
 %   - Vectorized table data extraction (10-50x faster than loop)

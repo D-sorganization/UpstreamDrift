@@ -12,7 +12,8 @@ function [BASE, ZTCF, DELTA, BASEQ, ZTCFQ, DELTAQ] = process_data_tables(config,
 %
 % This function performs the critical data synchronization and processing:
 %   1. Time synchronization via interpolation
-%   2. DELTA calculation (BASE - ZTCF)
+%   2. DELTA calculation (BASE - ZTCF), an algebraic table residual rather
+%      than an identified actuator or muscle contribution
 %   3. Resampling to uniform time grids
 %   4. Generation of Q-tables for plotting
 %
@@ -60,7 +61,7 @@ function [BASE, ZTCF, DELTA, BASEQ, ZTCFQ, DELTAQ] = process_data_tables(config,
 
     %% Step 3: Calculate DELTA (BASE - ZTCF)
     if config.verbose
-        fprintf('   Calculating DELTA (active component)...\n');
+        fprintf('   Calculating DELTA (BASE-minus-ZTCF table residual)...\n');
     end
     DELTATimetable = BaseDataMatched - ZTCFTimetable;
 

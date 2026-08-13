@@ -14,6 +14,11 @@ pytestmark = pytest.mark.unit
 
 def test_normative_terminology_contract_covers_high_risk_terms() -> None:
     text = (ARTICLE / "TERMINOLOGY_AND_CONVENTIONS.md").read_text(encoding="utf-8")
+    defined_terms = {
+        line.split("|", maxsplit=2)[1].strip()
+        for line in text.splitlines()
+        if line.startswith("|") and line.count("|") >= 2
+    }
     for term in (
         "Proximal-to-distal sequence",
         "Energy transfer",
@@ -27,7 +32,7 @@ def test_normative_terminology_contract_covers_high_risk_terms() -> None:
         "Passive after killswitch",
         "Model support",
     ):
-        assert f"| {term} |" in text
+        assert term in defined_terms
 
 
 def test_advanced_chapter_declares_adapter_and_biology_boundaries() -> None:

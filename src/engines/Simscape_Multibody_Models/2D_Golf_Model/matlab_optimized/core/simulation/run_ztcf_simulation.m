@@ -11,10 +11,11 @@ function ZTCF = run_ztcf_simulation(config, mdlWks, BaseData)
 % Returns:
 %   ZTCF - Table containing Zero Torque Counterfactual data
 %
-% This function generates ZTCF (Zero Torque Counterfactual) data by running
-% simulations with joint torques zeroed at different time points. This
-% isolates the passive forces (gravity, momentum, shaft flex) from active
-% torque contributions.
+% This function generates a rerun-based POINTWISE zero-torque sample at each
+% requested time. Each rerun is retained only at the first killswitch sample;
+% it is not a forward zero-torque future. BASE minus this sample is an
+% operational residual and must not be labeled an isolated passive/active or
+% muscle contribution without a matched-state additive closure check.
 %
 % The function supports both serial and parallel execution modes:
 %   - Serial: Runs simulations sequentially with PREALLOCATED table

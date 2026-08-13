@@ -115,21 +115,21 @@ After completion, you'll have these tables in memory and saved to `data/output/`
 
 #### ZTCF Tables
 
-- **ZTCF**: Passive forces only (joint torques = 0)
+- **ZTCF**: First retained sample at joint-torque removal
 - **ZTCFQ**: Plot resolution
-- Shows contribution of: Gravity, momentum, shaft flexibility
+- Retains gravity, motion-dependent dynamics, and modeled compliance at the sampled state; it is not a physiological "passive forces only" label
 
 #### DELTA Tables
 
-- **DELTA = BASE - ZTCF**: Active torque contribution
+- **DELTA = BASE - ZTCF**: Algebraic table residual
 - **DELTAQ**: Plot resolution
-- Isolates the effect of muscle-generated joint torques
+- Does not isolate muscle-generated torque or additive power because force and velocity columns are both subtracted
 
 #### ZVCF Tables
 
 - **ZVCFTable**: Static pose analysis (all velocities = 0)
 - **ZVCFTableQ**: Plot resolution
-- Shows pure torque effects without momentum
+- Shows the configured zero-velocity response; gravity inclusion depends on the model setting, so it is not automatically a pure torque term
 
 ### Table Structure
 
@@ -155,7 +155,7 @@ Each table has ~186+ variables including:
 - Angular/Linear Power
 - Angular/Linear Impulse
 - Total Work/Power
-- Fractional contributions
+- Stored table totals; fractional contribution ratios are not implemented by `calculate_total_work_power.m`
 
 ### Generated Plots
 
@@ -450,7 +450,7 @@ end
 
 ## Troubleshooting
 
-### Issue: "Parallel pool cannot be created"
+### Issue: "Parallel Pool Cannot Be Created"
 
 **Solution:**
 
@@ -458,7 +458,7 @@ end
 run_analysis('use_parallel', false);
 ```
 
-### Issue: "Out of memory"
+### Issue: "Out of Memory"
 
 **Solutions:**
 
@@ -482,7 +482,7 @@ clear all; close all;
 run_analysis();
 ```
 
-### Issue: "Model not found"
+### Issue: "Model Not Found"
 
 **Solution:**
 Check model path:
@@ -493,7 +493,7 @@ disp(config.model_path);
 % Verify this directory exists and contains GolfSwing model
 ```
 
-### Issue: Analysis very slow
+### Issue: Analysis Very Slow
 
 **Check parallelization:**
 

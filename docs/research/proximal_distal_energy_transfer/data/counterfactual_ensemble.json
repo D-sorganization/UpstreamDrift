@@ -1,15 +1,50 @@
 {
+  "schema_version": "matched-state-counterfactual-ensemble-v2",
+  "source_sha256": {
+    "docs/research/proximal_distal_energy_transfer/data/wscg_2024_hand_force_series.csv": "5cdf32b890e58d733085eea87f102aaf325012435e6e83fcdc21a1b84d26d7b2",
+    "scripts/research/proximal_distal_energy/counterfactual_ensemble.py": "08944916666d8f6553a7982dba31bf726423235fd1fa6ee31577cf0aec980ca3",
+    "scripts/research/proximal_distal_energy/double_pendulum_attribution.py": "615b84e6579aae7dd8fadd25be221cf6b989444d860ff5fdbf35ca455547655b",
+    "scripts/research/proximal_distal_energy/interaction_forces.py": "813088e7d6cb1c205d514fc5c4f63465567ded5c6616a7a343847660f9d7bb77",
+    "scripts/research/proximal_distal_energy/run_counterfactual_ensemble.py": "306bac233c355e9ac9bf88729a639f98305033ef09771420d8a6c5e00e08ee0d",
+    "scripts/research/proximal_distal_energy/run_experiments.py": "650cc17c3d4877dcd8f89841c9dc31617c2ee6c09df7b73a4adae6f93403a742",
+    "scripts/research/proximal_distal_energy/swing_model.py": "47331e991cc5a0fac195044e664ab24f90e03e6a4d46962194ac69881b443d63",
+    "scripts/research/proximal_distal_energy/torque_programs.py": "7ab86458ac3c889f5595a9a966bc42da705e3d9b02bcf0e1ee9c48b1716d2b02",
+    "src/engines/pendulum_models/python/double_pendulum_model/physics/double_pendulum.py": "3c516a8d2812ac2d1a0390de802ccd4d6df622cba90f02a45aebfb0b2b053935",
+    "src/shared/python/simulation_backends/factory.py": "49f90d5525a84b3bdbd0989264e25b77c7ccc235c6d91a5bf7dbcd1f18c31711",
+    "src/shared/python/simulation_backends/model_params.py": "78aeb9c060f4b455b34b5dff5fcfe49847e7a2a3e545ec71060528a55e16be10",
+    "src/shared/python/simulation_backends/ode_backend.py": "08a548780f6b4ea9d769146200b80c434345d35a3b53c10d726a3d60f3eaf66c",
+    "src/shared/python/simulation_backends/protocol.py": "d4330b8cce3d25f754ea134dcf07c3bf8e72ef18a745d816b08c1709b9d44f1f"
+  },
   "provenance": {
-    "git_sha": "fd585d2aa",
     "backend": "ode",
     "integrator": "fixed-step RK4",
     "program": "restrain_then_drive@0.100s",
-    "cut_times_s": [0.08, 0.099, 0.1, 0.101, 0.16, 0.22, 0.28, 0.32],
-    "horizons_s": [0.02, 0.04, 0.08, 0.12],
-    "timesteps_s": [0.0005, 0.001, 0.002],
+    "cut_times_s": [
+      0.08,
+      0.099,
+      0.1,
+      0.101,
+      0.16,
+      0.22,
+      0.28,
+      0.32
+    ],
+    "horizons_s": [
+      0.02,
+      0.04,
+      0.08,
+      0.12
+    ],
+    "timesteps_s": [
+      0.0005,
+      0.001,
+      0.002
+    ],
     "pointwise_contract": "Recompute acceleration and force at a fixed source state.",
     "killswitch_contract": "Integrate commanded and zero-torque futures from one matched state.",
-    "wscg_convention": "DELTA = BASE - counterfactual after time alignment."
+    "wscg_convention": "DELTA = BASE - counterfactual after time alignment.",
+    "state_interpolation": "componentwise linear interpolation of the smooth registered source trace",
+    "terminal_control_sampling": "commands sampled at all state times including the terminal endpoint"
   },
   "rows": [
     {
@@ -20,14 +55,18 @@
       "terminal_q_distance_rad": 0.01743868421682262,
       "terminal_v_distance_rad_s": 1.7005316491905973,
       "terminal_state_distance": 1.7006210623199123,
-      "terminal_force_distance_n": 15.867420386832658,
-      "terminal_power_difference_w": 66.71631816973115,
-      "force_work_difference_j": 1.2408623461340302,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
+      "terminal_force_distance_n": 17.50347955247756,
+      "terminal_power_difference_w": -2.7428328169417213,
+      "force_work_difference_j": 1.2234975583873622,
       "terminal_clubhead_speed_difference_m_s": 1.0189189871039597,
       "initial_commanded_force_n": 16.491037980413008,
       "initial_pointwise_ztcf_force_n": 1.3239069680788695,
       "initial_commanded_force_power_w": 56.49684158611285,
-      "initial_pointwise_ztcf_force_power_w": 0.7234282340426235
+      "initial_pointwise_ztcf_force_power_w": 0.7234282340426235,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 0.0
     },
     {
       "cut_time_s": 0.08,
@@ -37,14 +76,18 @@
       "terminal_q_distance_rad": 0.017438684209936033,
       "terminal_v_distance_rad_s": 1.7005316491237612,
       "terminal_state_distance": 1.7006210622530091,
-      "terminal_force_distance_n": 15.867420386937496,
-      "terminal_power_difference_w": 66.71631816970591,
-      "force_work_difference_j": 1.2408325307460344,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
+      "terminal_force_distance_n": 17.503479552574582,
+      "terminal_power_difference_w": -2.7428328156029904,
+      "force_work_difference_j": 1.20610295525338,
       "terminal_clubhead_speed_difference_m_s": 1.0189189870583188,
       "initial_commanded_force_n": 16.491037980413008,
       "initial_pointwise_ztcf_force_n": 1.3239069680788695,
       "initial_commanded_force_power_w": 56.49684158611285,
-      "initial_pointwise_ztcf_force_power_w": 0.7234282340426235
+      "initial_pointwise_ztcf_force_power_w": 0.7234282340426235,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 0.0
     },
     {
       "cut_time_s": 0.08,
@@ -54,14 +97,18 @@
       "terminal_q_distance_rad": 0.017438684100276068,
       "terminal_v_distance_rad_s": 1.7005316480526422,
       "terminal_state_distance": 1.700621061180822,
-      "terminal_force_distance_n": 15.867420388606602,
-      "terminal_power_difference_w": 66.71631816927624,
-      "force_work_difference_j": 1.240713263935156,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
+      "terminal_force_distance_n": 17.50347955411786,
+      "terminal_power_difference_w": -2.7428327942796917,
+      "force_work_difference_j": 1.1712541129715999,
       "terminal_clubhead_speed_difference_m_s": 1.018918986326252,
       "initial_commanded_force_n": 16.491037980413008,
       "initial_pointwise_ztcf_force_n": 1.3239069680788695,
       "initial_commanded_force_power_w": 56.49684158611285,
-      "initial_pointwise_ztcf_force_power_w": 0.7234282340426235
+      "initial_pointwise_ztcf_force_power_w": 0.7234282340426235,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 0.0
     },
     {
       "cut_time_s": 0.08,
@@ -71,6 +118,8 @@
       "terminal_q_distance_rad": 0.04878362054387534,
       "terminal_v_distance_rad_s": 1.7748624265445176,
       "terminal_state_distance": 1.7755327298568344,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 15.381499838875577,
       "terminal_power_difference_w": -32.32560896571259,
       "force_work_difference_j": 0.86904110508912,
@@ -78,7 +127,9 @@
       "initial_commanded_force_n": 16.491037980413008,
       "initial_pointwise_ztcf_force_n": 1.3239069680788695,
       "initial_commanded_force_power_w": 56.49684158611285,
-      "initial_pointwise_ztcf_force_power_w": 0.7234282340426235
+      "initial_pointwise_ztcf_force_power_w": 0.7234282340426235,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 0.0
     },
     {
       "cut_time_s": 0.08,
@@ -88,6 +139,8 @@
       "terminal_q_distance_rad": 0.04878362053716377,
       "terminal_v_distance_rad_s": 1.7748624264582693,
       "terminal_state_distance": 1.7755327297704342,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 15.381499838994712,
       "terminal_power_difference_w": -32.32560896316718,
       "force_work_difference_j": 0.8516536585279745,
@@ -95,7 +148,9 @@
       "initial_commanded_force_n": 16.491037980413008,
       "initial_pointwise_ztcf_force_n": 1.3239069680788695,
       "initial_commanded_force_power_w": 56.49684158611285,
-      "initial_pointwise_ztcf_force_power_w": 0.7234282340426235
+      "initial_pointwise_ztcf_force_power_w": 0.7234282340426235,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 0.0
     },
     {
       "cut_time_s": 0.08,
@@ -105,6 +160,8 @@
       "terminal_q_distance_rad": 0.04878362043046654,
       "terminal_v_distance_rad_s": 1.7748624250783047,
       "terminal_state_distance": 1.7755327283880589,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 15.381499840890463,
       "terminal_power_difference_w": -32.325608922569415,
       "force_work_difference_j": 0.8168334400196893,
@@ -112,7 +169,9 @@
       "initial_commanded_force_n": 16.491037980413008,
       "initial_pointwise_ztcf_force_n": 1.3239069680788695,
       "initial_commanded_force_power_w": 56.49684158611285,
-      "initial_pointwise_ztcf_force_power_w": 0.7234282340426235
+      "initial_pointwise_ztcf_force_power_w": 0.7234282340426235,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 0.0
     },
     {
       "cut_time_s": 0.08,
@@ -122,6 +181,8 @@
       "terminal_q_distance_rad": 0.13926996286147778,
       "terminal_v_distance_rad_s": 4.081211202945658,
       "terminal_state_distance": 4.0835867819362655,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 14.39729052888738,
       "terminal_power_difference_w": -64.03261679207179,
       "force_work_difference_j": -1.2524167308357812,
@@ -129,7 +190,9 @@
       "initial_commanded_force_n": 16.491037980413008,
       "initial_pointwise_ztcf_force_n": 1.3239069680788695,
       "initial_commanded_force_power_w": 56.49684158611285,
-      "initial_pointwise_ztcf_force_power_w": 0.7234282340426235
+      "initial_pointwise_ztcf_force_power_w": 0.7234282340426235,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 0.0
     },
     {
       "cut_time_s": 0.08,
@@ -139,6 +202,8 @@
       "terminal_q_distance_rad": 0.1392699628624418,
       "terminal_v_distance_rad_s": 4.0812112030140275,
       "terminal_state_distance": 4.083586782004628,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 14.39729052929811,
       "terminal_power_difference_w": -64.03261678395458,
       "force_work_difference_j": -1.269713425514193,
@@ -146,7 +211,9 @@
       "initial_commanded_force_n": 16.491037980413008,
       "initial_pointwise_ztcf_force_n": 1.3239069680788695,
       "initial_commanded_force_power_w": 56.49684158611285,
-      "initial_pointwise_ztcf_force_power_w": 0.7234282340426235
+      "initial_pointwise_ztcf_force_power_w": 0.7234282340426235,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 0.0
     },
     {
       "cut_time_s": 0.08,
@@ -156,6 +223,8 @@
       "terminal_q_distance_rad": 0.1392699628781195,
       "terminal_v_distance_rad_s": 4.081211204121104,
       "terminal_state_distance": 4.083586783111594,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 14.397290535866498,
       "terminal_power_difference_w": -64.03261665399351,
       "force_work_difference_j": -1.304170632589392,
@@ -163,7 +232,9 @@
       "initial_commanded_force_n": 16.491037980413008,
       "initial_pointwise_ztcf_force_n": 1.3239069680788695,
       "initial_commanded_force_power_w": 56.49684158611285,
-      "initial_pointwise_ztcf_force_power_w": 0.7234282340426235
+      "initial_pointwise_ztcf_force_power_w": 0.7234282340426235,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 0.0
     },
     {
       "cut_time_s": 0.08,
@@ -173,6 +244,8 @@
       "terminal_q_distance_rad": 0.34534747172867714,
       "terminal_v_distance_rad_s": 7.48122012513948,
       "terminal_state_distance": 7.489186834164398,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 25.505128493506163,
       "terminal_power_difference_w": -3.6257117281691933,
       "force_work_difference_j": -3.04534246401501,
@@ -180,7 +253,9 @@
       "initial_commanded_force_n": 16.491037980413008,
       "initial_pointwise_ztcf_force_n": 1.3239069680788695,
       "initial_commanded_force_power_w": 56.49684158611285,
-      "initial_pointwise_ztcf_force_power_w": 0.7234282340426235
+      "initial_pointwise_ztcf_force_power_w": 0.7234282340426235,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 0.0
     },
     {
       "cut_time_s": 0.08,
@@ -190,6 +265,8 @@
       "terminal_q_distance_rad": 0.34534747173318686,
       "terminal_v_distance_rad_s": 7.481220125193051,
       "terminal_state_distance": 7.4891868342181205,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 25.505128494944884,
       "terminal_power_difference_w": -3.6257117172824778,
       "force_work_difference_j": -3.062429044818823,
@@ -197,7 +274,9 @@
       "initial_commanded_force_n": 16.491037980413008,
       "initial_pointwise_ztcf_force_n": 1.3239069680788695,
       "initial_commanded_force_power_w": 56.49684158611285,
-      "initial_pointwise_ztcf_force_power_w": 0.7234282340426235
+      "initial_pointwise_ztcf_force_power_w": 0.7234282340426235,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 0.0
     },
     {
       "cut_time_s": 0.08,
@@ -207,6 +286,8 @@
       "terminal_q_distance_rad": 0.3453474718052697,
       "terminal_v_distance_rad_s": 7.481220126076706,
       "terminal_state_distance": 7.489186835104159,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 25.505128518088657,
       "terminal_power_difference_w": -3.6257115423693804,
       "force_work_difference_j": -3.0960458285813393,
@@ -214,7 +295,9 @@
       "initial_commanded_force_n": 16.491037980413008,
       "initial_pointwise_ztcf_force_n": 1.3239069680788695,
       "initial_commanded_force_power_w": 56.49684158611285,
-      "initial_pointwise_ztcf_force_power_w": 0.7234282340426235
+      "initial_pointwise_ztcf_force_power_w": 0.7234282340426235,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 0.0
     },
     {
       "cut_time_s": 0.099,
@@ -224,6 +307,8 @@
       "terminal_q_distance_rad": 0.010040030705374361,
       "terminal_v_distance_rad_s": 1.0930156669121254,
       "terminal_state_distance": 1.0930617779118996,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 16.13694850937216,
       "terminal_power_difference_w": -22.952340071028242,
       "force_work_difference_j": -0.15025511627382546,
@@ -231,7 +316,9 @@
       "initial_commanded_force_n": 14.666318508329272,
       "initial_pointwise_ztcf_force_n": 1.9034637952409956,
       "initial_commanded_force_power_w": 61.95519272102867,
-      "initial_pointwise_ztcf_force_power_w": -8.641329379311536
+      "initial_pointwise_ztcf_force_power_w": -8.641329379311536,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.099,
@@ -241,6 +328,8 @@
       "terminal_q_distance_rad": 0.010040030708356074,
       "terminal_v_distance_rad_s": 1.0930156669708997,
       "terminal_state_distance": 1.0930617779706988,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 16.13694850938888,
       "terminal_power_difference_w": -22.952340070480197,
       "force_work_difference_j": -0.1676188502169356,
@@ -248,7 +337,9 @@
       "initial_commanded_force_n": 14.666318508329272,
       "initial_pointwise_ztcf_force_n": 1.9034637952409956,
       "initial_commanded_force_power_w": 61.95519272102867,
-      "initial_pointwise_ztcf_force_power_w": -8.641329379311536
+      "initial_pointwise_ztcf_force_power_w": -8.641329379311536,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.099,
@@ -258,6 +349,8 @@
       "terminal_q_distance_rad": 0.009090292773819368,
       "terminal_v_distance_rad_s": 1.0293563048951149,
       "terminal_state_distance": 1.0293964425089288,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 16.134293084703113,
       "terminal_power_difference_w": -23.41970683995154,
       "force_work_difference_j": -0.13490330934513647,
@@ -265,7 +358,9 @@
       "initial_commanded_force_n": 14.666318508329272,
       "initial_pointwise_ztcf_force_n": 1.9034637952409956,
       "initial_commanded_force_power_w": 61.95519272102867,
-      "initial_pointwise_ztcf_force_power_w": -8.641329379311536
+      "initial_pointwise_ztcf_force_power_w": -8.641329379311536,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.099,
@@ -275,6 +370,8 @@
       "terminal_q_distance_rad": 0.04482508690551669,
       "terminal_v_distance_rad_s": 2.42258152674343,
       "terminal_state_distance": 2.422996191110216,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 15.257864548543749,
       "terminal_power_difference_w": -44.13112486689362,
       "force_work_difference_j": -0.8355417075214495,
@@ -282,7 +379,9 @@
       "initial_commanded_force_n": 14.666318508329272,
       "initial_pointwise_ztcf_force_n": 1.9034637952409956,
       "initial_commanded_force_power_w": 61.95519272102867,
-      "initial_pointwise_ztcf_force_power_w": -8.641329379311536
+      "initial_pointwise_ztcf_force_power_w": -8.641329379311536,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.099,
@@ -292,6 +391,8 @@
       "terminal_q_distance_rad": 0.04482508691079098,
       "terminal_v_distance_rad_s": 2.422581526880773,
       "terminal_state_distance": 2.422996191247633,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 15.257864548671384,
       "terminal_power_difference_w": -44.13112486450758,
       "force_work_difference_j": -0.8528783612654911,
@@ -299,7 +400,9 @@
       "initial_commanded_force_n": 14.666318508329272,
       "initial_pointwise_ztcf_force_n": 1.9034637952409956,
       "initial_commanded_force_power_w": 61.95519272102867,
-      "initial_pointwise_ztcf_force_power_w": -8.641329379311536
+      "initial_pointwise_ztcf_force_power_w": -8.641329379311536,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.099,
@@ -309,6 +412,8 @@
       "terminal_q_distance_rad": 0.042319220069434685,
       "terminal_v_distance_rad_s": 2.354040976987898,
       "terminal_state_distance": 2.3544213381902197,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 15.182447805027838,
       "terminal_power_difference_w": -45.5388816931594,
       "force_work_difference_j": -0.83867380757614,
@@ -316,7 +421,9 @@
       "initial_commanded_force_n": 14.666318508329272,
       "initial_pointwise_ztcf_force_n": 1.9034637952409956,
       "initial_commanded_force_power_w": 61.95519272102867,
-      "initial_pointwise_ztcf_force_power_w": -8.641329379311536
+      "initial_pointwise_ztcf_force_power_w": -8.641329379311536,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.099,
@@ -326,6 +433,8 @@
       "terminal_q_distance_rad": 0.20224734697278798,
       "terminal_v_distance_rad_s": 5.574771569972054,
       "terminal_state_distance": 5.578439033163866,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 19.98151609382651,
       "terminal_power_difference_w": -41.539236289673674,
       "force_work_difference_j": -2.816098329091319,
@@ -333,7 +442,9 @@
       "initial_commanded_force_n": 14.666318508329272,
       "initial_pointwise_ztcf_force_n": 1.9034637952409956,
       "initial_commanded_force_power_w": 61.95519272102867,
-      "initial_pointwise_ztcf_force_power_w": -8.641329379311536
+      "initial_pointwise_ztcf_force_power_w": -8.641329379311536,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.099,
@@ -343,6 +454,8 @@
       "terminal_q_distance_rad": 0.20224734697852165,
       "terminal_v_distance_rad_s": 5.574771570195301,
       "terminal_state_distance": 5.578439033387174,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 19.98151609477282,
       "terminal_power_difference_w": -41.539236281230025,
       "force_work_difference_j": -2.8333087503791914,
@@ -350,7 +463,9 @@
       "initial_commanded_force_n": 14.666318508329272,
       "initial_pointwise_ztcf_force_n": 1.9034637952409956,
       "initial_commanded_force_power_w": 61.95519272102867,
-      "initial_pointwise_ztcf_force_power_w": -8.641329379311536
+      "initial_pointwise_ztcf_force_power_w": -8.641329379311536,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.099,
@@ -360,6 +475,8 @@
       "terminal_q_distance_rad": 0.1966433447919744,
       "terminal_v_distance_rad_s": 5.501819225974411,
       "terminal_state_distance": 5.505332269750178,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 19.556921998221824,
       "terminal_power_difference_w": -45.38895204609474,
       "force_work_difference_j": -2.919189996533096,
@@ -367,7 +484,9 @@
       "initial_commanded_force_n": 14.666318508329272,
       "initial_pointwise_ztcf_force_n": 1.9034637952409956,
       "initial_commanded_force_power_w": 61.95519272102867,
-      "initial_pointwise_ztcf_force_power_w": -8.641329379311536
+      "initial_pointwise_ztcf_force_power_w": -8.641329379311536,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.099,
@@ -377,6 +496,8 @@
       "terminal_q_distance_rad": 0.4996380658327396,
       "terminal_v_distance_rad_s": 9.51710908706468,
       "terminal_state_distance": 9.530215295150377,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 44.24700408441283,
       "terminal_power_difference_w": 91.61898395550867,
       "force_work_difference_j": -2.4846596286015044,
@@ -384,7 +505,9 @@
       "initial_commanded_force_n": 14.666318508329272,
       "initial_pointwise_ztcf_force_n": 1.9034637952409956,
       "initial_commanded_force_power_w": 61.95519272102867,
-      "initial_pointwise_ztcf_force_power_w": -8.641329379311536
+      "initial_pointwise_ztcf_force_power_w": -8.641329379311536,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.099,
@@ -394,6 +517,8 @@
       "terminal_q_distance_rad": 0.4996380658316007,
       "terminal_v_distance_rad_s": 9.517109087117074,
       "terminal_state_distance": 9.530215295202638,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 44.24700408468788,
       "terminal_power_difference_w": 91.61898395213879,
       "force_work_difference_j": -2.5015488636974696,
@@ -401,7 +526,9 @@
       "initial_commanded_force_n": 14.666318508329272,
       "initial_pointwise_ztcf_force_n": 1.9034637952409956,
       "initial_commanded_force_power_w": 61.95519272102867,
-      "initial_pointwise_ztcf_force_power_w": -8.641329379311536
+      "initial_pointwise_ztcf_force_power_w": -8.641329379311536,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.099,
@@ -411,6 +538,8 @@
       "terminal_q_distance_rad": 0.4905202791539999,
       "terminal_v_distance_rad_s": 9.426339643771373,
       "terminal_state_distance": 9.43909366538955,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 43.2536635234614,
       "terminal_power_difference_w": 81.72069456729989,
       "force_work_difference_j": -2.840291954605076,
@@ -418,7 +547,9 @@
       "initial_commanded_force_n": 14.666318508329272,
       "initial_pointwise_ztcf_force_n": 1.9034637952409956,
       "initial_commanded_force_power_w": 61.95519272102867,
-      "initial_pointwise_ztcf_force_power_w": -8.641329379311536
+      "initial_pointwise_ztcf_force_power_w": -8.641329379311536,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.1,
@@ -428,6 +559,8 @@
       "terminal_q_distance_rad": 0.011390771054945391,
       "terminal_v_distance_rad_s": 1.16738614915281,
       "terminal_state_distance": 1.1674417205578411,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 16.10766485588728,
       "terminal_power_difference_w": -23.704100193734178,
       "force_work_difference_j": -0.2198773510781741,
@@ -435,7 +568,9 @@
       "initial_commanded_force_n": 18.052681314778233,
       "initial_pointwise_ztcf_force_n": 2.0420484775146477,
       "initial_commanded_force_power_w": -7.483478510251896,
-      "initial_pointwise_ztcf_force_power_w": -9.382212661159963
+      "initial_pointwise_ztcf_force_power_w": -9.382212661159963,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.1,
@@ -445,6 +580,8 @@
       "terminal_q_distance_rad": 0.01139077105774758,
       "terminal_v_distance_rad_s": 1.1673861492204272,
       "terminal_state_distance": 1.1674417206254826,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 16.10766485589991,
       "terminal_power_difference_w": -23.704100193233312,
       "force_work_difference_j": -0.2198738507796596,
@@ -452,7 +589,9 @@
       "initial_commanded_force_n": 18.052681314778233,
       "initial_pointwise_ztcf_force_n": 2.0420484775146477,
       "initial_commanded_force_power_w": -7.483478510251896,
-      "initial_pointwise_ztcf_force_power_w": -9.382212661159963
+      "initial_pointwise_ztcf_force_power_w": -9.382212661159963,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.1,
@@ -462,6 +601,8 @@
       "terminal_q_distance_rad": 0.011390771102262913,
       "terminal_v_distance_rad_s": 1.167386150306331,
       "terminal_state_distance": 1.167441721711769,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 16.10766485609656,
       "terminal_power_difference_w": -23.70410018526102,
       "force_work_difference_j": -0.21985985248558296,
@@ -469,7 +610,9 @@
       "initial_commanded_force_n": 18.052681314778233,
       "initial_pointwise_ztcf_force_n": 2.0420484775146477,
       "initial_commanded_force_power_w": -7.483478510251896,
-      "initial_pointwise_ztcf_force_power_w": -9.382212661159963
+      "initial_pointwise_ztcf_force_power_w": -9.382212661159963,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.1,
@@ -479,6 +622,8 @@
       "terminal_q_distance_rad": 0.04781199467714069,
       "terminal_v_distance_rad_s": 2.5030461992112945,
       "terminal_state_distance": 2.503502798524722,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 15.314114224278411,
       "terminal_power_difference_w": -44.29866578195883,
       "force_work_difference_j": -0.9148242159813011,
@@ -486,7 +631,9 @@
       "initial_commanded_force_n": 18.052681314778233,
       "initial_pointwise_ztcf_force_n": 2.0420484775146477,
       "initial_commanded_force_power_w": -7.483478510251896,
-      "initial_pointwise_ztcf_force_power_w": -9.382212661159963
+      "initial_pointwise_ztcf_force_power_w": -9.382212661159963,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.1,
@@ -496,6 +643,8 @@
       "terminal_q_distance_rad": 0.047811994682157195,
       "terminal_v_distance_rad_s": 2.5030461993575503,
       "terminal_state_distance": 2.5035027986710467,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 15.31411422440831,
       "terminal_power_difference_w": -44.29866577957614,
       "force_work_difference_j": -0.9147927614300184,
@@ -503,7 +652,9 @@
       "initial_commanded_force_n": 18.052681314778233,
       "initial_pointwise_ztcf_force_n": 2.0420484775146477,
       "initial_commanded_force_power_w": -7.483478510251896,
-      "initial_pointwise_ztcf_force_power_w": -9.382212661159963
+      "initial_pointwise_ztcf_force_power_w": -9.382212661159963,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.1,
@@ -513,6 +664,8 @@
       "terminal_q_distance_rad": 0.04781199476184401,
       "terminal_v_distance_rad_s": 2.5030462017068116,
       "terminal_state_distance": 2.5035028010214013,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 15.31411422647967,
       "terminal_power_difference_w": -44.29866574146545,
       "force_work_difference_j": -0.9146669445810656,
@@ -520,7 +673,9 @@
       "initial_commanded_force_n": 18.052681314778233,
       "initial_pointwise_ztcf_force_n": 2.0420484775146477,
       "initial_commanded_force_power_w": -7.483478510251896,
-      "initial_pointwise_ztcf_force_power_w": -9.382212661159963
+      "initial_pointwise_ztcf_force_power_w": -9.382212661159963,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.1,
@@ -530,6 +685,8 @@
       "terminal_q_distance_rad": 0.2088804326910634,
       "terminal_v_distance_rad_s": 5.668987964679122,
       "terminal_state_distance": 5.672834880272643,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 20.480708323957852,
       "terminal_power_difference_w": -39.75451232500119,
       "force_work_difference_j": -2.866806530631564,
@@ -537,7 +694,9 @@
       "initial_commanded_force_n": 18.052681314778233,
       "initial_pointwise_ztcf_force_n": 2.0420484775146477,
       "initial_commanded_force_power_w": -7.483478510251896,
-      "initial_pointwise_ztcf_force_power_w": -9.382212661159963
+      "initial_pointwise_ztcf_force_power_w": -9.382212661159963,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.1,
@@ -547,6 +706,8 @@
       "terminal_q_distance_rad": 0.20888043269633805,
       "terminal_v_distance_rad_s": 5.6689879649080765,
       "terminal_state_distance": 5.672834880501637,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 20.48070832491856,
       "terminal_power_difference_w": -39.75451231662808,
       "force_work_difference_j": -2.866646955544735,
@@ -554,7 +715,9 @@
       "initial_commanded_force_n": 18.052681314778233,
       "initial_pointwise_ztcf_force_n": 2.0420484775146477,
       "initial_commanded_force_power_w": -7.483478510251896,
-      "initial_pointwise_ztcf_force_power_w": -9.382212661159963
+      "initial_pointwise_ztcf_force_power_w": -9.382212661159963,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.1,
@@ -564,6 +727,8 @@
       "terminal_q_distance_rad": 0.20888043277979074,
       "terminal_v_distance_rad_s": 5.668987968590537,
       "terminal_state_distance": 5.672834884184673,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 20.48070834032331,
       "terminal_power_difference_w": -39.75451218238105,
       "force_work_difference_j": -2.8660086658493666,
@@ -571,7 +736,9 @@
       "initial_commanded_force_n": 18.052681314778233,
       "initial_pointwise_ztcf_force_n": 2.0420484775146477,
       "initial_commanded_force_power_w": -7.483478510251896,
-      "initial_pointwise_ztcf_force_power_w": -9.382212661159963
+      "initial_pointwise_ztcf_force_power_w": -9.382212661159963,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.1,
@@ -581,6 +748,8 @@
       "terminal_q_distance_rad": 0.510841993386718,
       "terminal_v_distance_rad_s": 9.643039362323714,
       "terminal_state_distance": 9.656560862208236,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 45.41252911746519,
       "terminal_power_difference_w": 98.08792710427443,
       "force_work_difference_j": -2.387511542352842,
@@ -588,7 +757,9 @@
       "initial_commanded_force_n": 18.052681314778233,
       "initial_pointwise_ztcf_force_n": 2.0420484775146477,
       "initial_commanded_force_power_w": -7.483478510251896,
-      "initial_pointwise_ztcf_force_power_w": -9.382212661159963
+      "initial_pointwise_ztcf_force_power_w": -9.382212661159963,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.1,
@@ -598,6 +769,8 @@
       "terminal_q_distance_rad": 0.5108419933847717,
       "terminal_v_distance_rad_s": 9.643039362372795,
       "terminal_state_distance": 9.656560862257145,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 45.41252911762206,
       "terminal_power_difference_w": 98.08792709951142,
       "force_work_difference_j": -2.3870226005193906,
@@ -605,7 +778,9 @@
       "initial_commanded_force_n": 18.052681314778233,
       "initial_pointwise_ztcf_force_n": 2.0420484775146477,
       "initial_commanded_force_power_w": -7.483478510251896,
-      "initial_pointwise_ztcf_force_power_w": -9.382212661159963
+      "initial_pointwise_ztcf_force_power_w": -9.382212661159963,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.1,
@@ -615,6 +790,8 @@
       "terminal_q_distance_rad": 0.5108419933533637,
       "terminal_v_distance_rad_s": 9.643039363204151,
       "terminal_state_distance": 9.656560863085677,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 45.41252912043361,
       "terminal_power_difference_w": 98.08792702526493,
       "force_work_difference_j": -2.385066904344459,
@@ -622,7 +799,9 @@
       "initial_commanded_force_n": 18.052681314778233,
       "initial_pointwise_ztcf_force_n": 2.0420484775146477,
       "initial_commanded_force_power_w": -7.483478510251896,
-      "initial_pointwise_ztcf_force_power_w": -9.382212661159963
+      "initial_pointwise_ztcf_force_power_w": -9.382212661159963,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.101,
@@ -632,6 +811,8 @@
       "terminal_q_distance_rad": 0.01142896223796871,
       "terminal_v_distance_rad_s": 1.171173099603527,
       "terminal_state_distance": 1.171228863379301,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 16.11293444415958,
       "terminal_power_difference_w": -24.37563633554769,
       "force_work_difference_j": -0.2344220461348018,
@@ -639,7 +820,9 @@
       "initial_commanded_force_n": 17.89718220335758,
       "initial_pointwise_ztcf_force_n": 2.260974431157519,
       "initial_commanded_force_power_w": -9.271405716214453,
-      "initial_pointwise_ztcf_force_power_w": -10.445306111881223
+      "initial_pointwise_ztcf_force_power_w": -10.445306111881223,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 1.4210854715202004e-14
     },
     {
       "cut_time_s": 0.101,
@@ -649,6 +832,8 @@
       "terminal_q_distance_rad": 0.011428962240725598,
       "terminal_v_distance_rad_s": 1.171173099672209,
       "terminal_state_distance": 1.1712288634480068,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 16.11293444417483,
       "terminal_power_difference_w": -24.375636335021305,
       "force_work_difference_j": -0.2344174620245526,
@@ -656,7 +841,9 @@
       "initial_commanded_force_n": 17.89718220335758,
       "initial_pointwise_ztcf_force_n": 2.260974431157519,
       "initial_commanded_force_power_w": -9.271405716214453,
-      "initial_pointwise_ztcf_force_power_w": -10.445306111881223
+      "initial_pointwise_ztcf_force_power_w": -10.445306111881223,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 1.4210854715202004e-14
     },
     {
       "cut_time_s": 0.101,
@@ -666,6 +853,8 @@
       "terminal_q_distance_rad": 0.011428962284505899,
       "terminal_v_distance_rad_s": 1.1711731007752524,
       "terminal_state_distance": 1.171228864551425,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 16.112934444413312,
       "terminal_power_difference_w": -24.375636326640446,
       "force_work_difference_j": -0.2343991282545575,
@@ -673,7 +862,9 @@
       "initial_commanded_force_n": 17.89718220335758,
       "initial_pointwise_ztcf_force_n": 2.260974431157519,
       "initial_commanded_force_power_w": -9.271405716214453,
-      "initial_pointwise_ztcf_force_power_w": -10.445306111881223
+      "initial_pointwise_ztcf_force_power_w": -10.445306111881223,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 1.4210854715202004e-14
     },
     {
       "cut_time_s": 0.101,
@@ -683,6 +874,8 @@
       "terminal_q_distance_rad": 0.04796060790477279,
       "terminal_v_distance_rad_s": 2.5102279290461413,
       "terminal_state_distance": 2.5106860567729044,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 15.369109105548626,
       "terminal_power_difference_w": -44.54869615423547,
       "force_work_difference_j": -0.9392080031147727,
@@ -690,7 +883,9 @@
       "initial_commanded_force_n": 17.89718220335758,
       "initial_pointwise_ztcf_force_n": 2.260974431157519,
       "initial_commanded_force_power_w": -9.271405716214453,
-      "initial_pointwise_ztcf_force_power_w": -10.445306111881223
+      "initial_pointwise_ztcf_force_power_w": -10.445306111881223,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 1.4210854715202004e-14
     },
     {
       "cut_time_s": 0.101,
@@ -700,6 +895,8 @@
       "terminal_q_distance_rad": 0.047960607909660044,
       "terminal_v_distance_rad_s": 2.510227929193325,
       "terminal_state_distance": 2.510686056920154,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 15.369109105686745,
       "terminal_power_difference_w": -44.54869615178961,
       "force_work_difference_j": -0.9391742973432524,
@@ -707,7 +904,9 @@
       "initial_commanded_force_n": 17.89718220335758,
       "initial_pointwise_ztcf_force_n": 2.260974431157519,
       "initial_commanded_force_power_w": -9.271405716214453,
-      "initial_pointwise_ztcf_force_power_w": -10.445306111881223
+      "initial_pointwise_ztcf_force_power_w": -10.445306111881223,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 1.4210854715202004e-14
     },
     {
       "cut_time_s": 0.101,
@@ -717,6 +916,8 @@
       "terminal_q_distance_rad": 0.04796060798718979,
       "terminal_v_distance_rad_s": 2.5102279315576568,
       "terminal_state_distance": 2.510686059285536,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 15.369109107888333,
       "terminal_power_difference_w": -44.54869611267083,
       "force_work_difference_j": -0.9390394752961881,
@@ -724,7 +925,9 @@
       "initial_commanded_force_n": 17.89718220335758,
       "initial_pointwise_ztcf_force_n": 2.260974431157519,
       "initial_commanded_force_power_w": -9.271405716214453,
-      "initial_pointwise_ztcf_force_power_w": -10.445306111881223
+      "initial_pointwise_ztcf_force_power_w": -10.445306111881223,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 1.4210854715202004e-14
     },
     {
       "cut_time_s": 0.101,
@@ -734,6 +937,8 @@
       "terminal_q_distance_rad": 0.20943526843811705,
       "terminal_v_distance_rad_s": 5.682407057218087,
       "terminal_state_distance": 5.686265302954802,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 20.854925189305227,
       "terminal_power_difference_w": -37.990420665635135,
       "force_work_difference_j": -2.866767241815143,
@@ -741,7 +946,9 @@
       "initial_commanded_force_n": 17.89718220335758,
       "initial_pointwise_ztcf_force_n": 2.260974431157519,
       "initial_commanded_force_power_w": -9.271405716214453,
-      "initial_pointwise_ztcf_force_power_w": -10.445306111881223
+      "initial_pointwise_ztcf_force_power_w": -10.445306111881223,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 1.4210854715202004e-14
     },
     {
       "cut_time_s": 0.101,
@@ -751,6 +958,8 @@
       "terminal_q_distance_rad": 0.20943526844304153,
       "terminal_v_distance_rad_s": 5.68240705744391,
       "terminal_state_distance": 5.686265303180653,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 20.854925190279708,
       "terminal_power_difference_w": -37.990420657345354,
       "force_work_difference_j": -2.8666025531292023,
@@ -758,7 +967,9 @@
       "initial_commanded_force_n": 17.89718220335758,
       "initial_pointwise_ztcf_force_n": 2.260974431157519,
       "initial_commanded_force_power_w": -9.271405716214453,
-      "initial_pointwise_ztcf_force_power_w": -10.445306111881223
+      "initial_pointwise_ztcf_force_power_w": -10.445306111881223,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 1.4210854715202004e-14
     },
     {
       "cut_time_s": 0.101,
@@ -768,6 +979,8 @@
       "terminal_q_distance_rad": 0.20943526852082386,
       "terminal_v_distance_rad_s": 5.682407061076608,
       "terminal_state_distance": 5.686265306813751,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 20.8549252059048,
       "terminal_power_difference_w": -37.99042052442795,
       "force_work_difference_j": -2.865943809754007,
@@ -775,7 +988,9 @@
       "initial_commanded_force_n": 17.89718220335758,
       "initial_pointwise_ztcf_force_n": 2.260974431157519,
       "initial_commanded_force_power_w": -9.271405716214453,
-      "initial_pointwise_ztcf_force_power_w": -10.445306111881223
+      "initial_pointwise_ztcf_force_power_w": -10.445306111881223,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 1.4210854715202004e-14
     },
     {
       "cut_time_s": 0.101,
@@ -785,6 +1000,8 @@
       "terminal_q_distance_rad": 0.5121236085706942,
       "terminal_v_distance_rad_s": 9.668791368601626,
       "terminal_state_distance": 9.682344608616283,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 46.42266013225404,
       "terminal_power_difference_w": 105.31766751916588,
       "force_work_difference_j": -2.227326245680044,
@@ -792,7 +1009,9 @@
       "initial_commanded_force_n": 17.89718220335758,
       "initial_pointwise_ztcf_force_n": 2.260974431157519,
       "initial_commanded_force_power_w": -9.271405716214453,
-      "initial_pointwise_ztcf_force_power_w": -10.445306111881223
+      "initial_pointwise_ztcf_force_power_w": -10.445306111881223,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 1.4210854715202004e-14
     },
     {
       "cut_time_s": 0.101,
@@ -802,6 +1021,8 @@
       "terminal_q_distance_rad": 0.5121236085680688,
       "terminal_v_distance_rad_s": 9.668791368637747,
       "terminal_state_distance": 9.682344608652214,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 46.422660132272,
       "terminal_power_difference_w": 105.31766751276808,
       "force_work_difference_j": -2.226822852732971,
@@ -809,7 +1030,9 @@
       "initial_commanded_force_n": 17.89718220335758,
       "initial_pointwise_ztcf_force_n": 2.260974431157519,
       "initial_commanded_force_power_w": -9.271405716214453,
-      "initial_pointwise_ztcf_force_power_w": -10.445306111881223
+      "initial_pointwise_ztcf_force_power_w": -10.445306111881223,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 1.4210854715202004e-14
     },
     {
       "cut_time_s": 0.101,
@@ -819,6 +1042,8 @@
       "terminal_q_distance_rad": 0.5121236085257399,
       "terminal_v_distance_rad_s": 9.668791369263348,
       "terminal_state_distance": 9.682344609274699,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 46.422660132874675,
       "terminal_power_difference_w": 105.3176674124627,
       "force_work_difference_j": -2.224809353619433,
@@ -826,7 +1051,9 @@
       "initial_commanded_force_n": 17.89718220335758,
       "initial_pointwise_ztcf_force_n": 2.260974431157519,
       "initial_commanded_force_power_w": -9.271405716214453,
-      "initial_pointwise_ztcf_force_power_w": -10.445306111881223
+      "initial_pointwise_ztcf_force_power_w": -10.445306111881223,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 1.4210854715202004e-14
     },
     {
       "cut_time_s": 0.16,
@@ -836,6 +1063,8 @@
       "terminal_q_distance_rad": 0.01300603753584459,
       "terminal_v_distance_rad_s": 1.3233173000452993,
       "terminal_state_distance": 1.3233812125051363,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 17.74510081888622,
       "terminal_power_difference_w": -45.29245836519323,
       "force_work_difference_j": -0.9862726856597457,
@@ -843,7 +1072,9 @@
       "initial_commanded_force_n": 13.712806315747926,
       "initial_pointwise_ztcf_force_n": 9.817873990038793,
       "initial_commanded_force_power_w": -84.67775882907958,
-      "initial_pointwise_ztcf_force_power_w": -35.60602428708206
+      "initial_pointwise_ztcf_force_power_w": -35.60602428708206,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 0.0
     },
     {
       "cut_time_s": 0.16,
@@ -853,6 +1084,8 @@
       "terminal_q_distance_rad": 0.013006037532864667,
       "terminal_v_distance_rad_s": 1.3233173000760374,
       "terminal_state_distance": 1.3233812125358435,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 17.745100818970847,
       "terminal_power_difference_w": -45.292458364857445,
       "force_work_difference_j": -0.9861924378332754,
@@ -860,7 +1093,9 @@
       "initial_commanded_force_n": 13.712806315747926,
       "initial_pointwise_ztcf_force_n": 9.817873990038793,
       "initial_commanded_force_power_w": -84.67775882907958,
-      "initial_pointwise_ztcf_force_power_w": -35.60602428708206
+      "initial_pointwise_ztcf_force_power_w": -35.60602428708206,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 0.0
     },
     {
       "cut_time_s": 0.16,
@@ -870,6 +1105,8 @@
       "terminal_q_distance_rad": 0.013006037484731373,
       "terminal_v_distance_rad_s": 1.3233173005740477,
       "terminal_state_distance": 1.3233812130333567,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 17.745100820330848,
       "terminal_power_difference_w": -45.29245835941988,
       "force_work_difference_j": -0.9858714565623065,
@@ -877,7 +1114,9 @@
       "initial_commanded_force_n": 13.712806315747926,
       "initial_pointwise_ztcf_force_n": 9.817873990038793,
       "initial_commanded_force_power_w": -84.67775882907958,
-      "initial_pointwise_ztcf_force_power_w": -35.60602428708206
+      "initial_pointwise_ztcf_force_power_w": -35.60602428708206,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 0.0
     },
     {
       "cut_time_s": 0.16,
@@ -887,6 +1126,8 @@
       "terminal_q_distance_rad": 0.05384171091357012,
       "terminal_v_distance_rad_s": 2.78659212746676,
       "terminal_state_distance": 2.787112235754747,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 23.00613132320813,
       "terminal_power_difference_w": -9.187864542300442,
       "force_work_difference_j": -1.5981326171934156,
@@ -894,7 +1135,9 @@
       "initial_commanded_force_n": 13.712806315747926,
       "initial_pointwise_ztcf_force_n": 9.817873990038793,
       "initial_commanded_force_power_w": -84.67775882907958,
-      "initial_pointwise_ztcf_force_power_w": -35.60602428708206
+      "initial_pointwise_ztcf_force_power_w": -35.60602428708206,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 0.0
     },
     {
       "cut_time_s": 0.16,
@@ -904,6 +1147,8 @@
       "terminal_q_distance_rad": 0.0538417109062315,
       "terminal_v_distance_rad_s": 2.786592127463969,
       "terminal_state_distance": 2.7871122357518145,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 23.006131323118883,
       "terminal_power_difference_w": -9.187864546381554,
       "force_work_difference_j": -1.5979258764432065,
@@ -911,7 +1156,9 @@
       "initial_commanded_force_n": 13.712806315747926,
       "initial_pointwise_ztcf_force_n": 9.817873990038793,
       "initial_commanded_force_power_w": -84.67775882907958,
-      "initial_pointwise_ztcf_force_power_w": -35.60602428708206
+      "initial_pointwise_ztcf_force_power_w": -35.60602428708206,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 0.0
     },
     {
       "cut_time_s": 0.16,
@@ -921,6 +1168,8 @@
       "terminal_q_distance_rad": 0.05384171078820967,
       "terminal_v_distance_rad_s": 2.786592127433979,
       "terminal_state_distance": 2.7871122357195506,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 23.00613132174276,
       "terminal_power_difference_w": -9.187864611370191,
       "force_work_difference_j": -1.5970989493429542,
@@ -928,7 +1177,9 @@
       "initial_commanded_force_n": 13.712806315747926,
       "initial_pointwise_ztcf_force_n": 9.817873990038793,
       "initial_commanded_force_power_w": -84.67775882907958,
-      "initial_pointwise_ztcf_force_power_w": -35.60602428708206
+      "initial_pointwise_ztcf_force_power_w": -35.60602428708206,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 0.0
     },
     {
       "cut_time_s": 0.16,
@@ -938,6 +1189,8 @@
       "terminal_q_distance_rad": 0.2315185049029012,
       "terminal_v_distance_rad_s": 6.268653792515496,
       "terminal_state_distance": 6.272927640944967,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 55.23411277996499,
       "terminal_power_difference_w": 257.8259934347603,
       "force_work_difference_j": 2.1864971964263273,
@@ -945,7 +1198,9 @@
       "initial_commanded_force_n": 13.712806315747926,
       "initial_pointwise_ztcf_force_n": 9.817873990038793,
       "initial_commanded_force_power_w": -84.67775882907958,
-      "initial_pointwise_ztcf_force_power_w": -35.60602428708206
+      "initial_pointwise_ztcf_force_power_w": -35.60602428708206,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 0.0
     },
     {
       "cut_time_s": 0.16,
@@ -955,6 +1210,8 @@
       "terminal_q_distance_rad": 0.23151850488008852,
       "terminal_v_distance_rad_s": 6.268653792124256,
       "terminal_state_distance": 6.272927640553152,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 55.23411277457071,
       "terminal_power_difference_w": 257.82599336357686,
       "force_work_difference_j": 2.1872662300590906,
@@ -962,7 +1219,9 @@
       "initial_commanded_force_n": 13.712806315747926,
       "initial_pointwise_ztcf_force_n": 9.817873990038793,
       "initial_commanded_force_power_w": -84.67775882907958,
-      "initial_pointwise_ztcf_force_power_w": -35.60602428708206
+      "initial_pointwise_ztcf_force_power_w": -35.60602428708206,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 0.0
     },
     {
       "cut_time_s": 0.16,
@@ -972,6 +1231,8 @@
       "terminal_q_distance_rad": 0.23151850451560016,
       "terminal_v_distance_rad_s": 6.268653785946094,
       "terminal_state_distance": 6.272927634365747,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 55.234112689034134,
       "terminal_power_difference_w": 257.82599223041467,
       "force_work_difference_j": 2.1903422803227777,
@@ -979,7 +1240,9 @@
       "initial_commanded_force_n": 13.712806315747926,
       "initial_pointwise_ztcf_force_n": 9.817873990038793,
       "initial_commanded_force_power_w": -84.67775882907958,
-      "initial_pointwise_ztcf_force_power_w": -35.60602428708206
+      "initial_pointwise_ztcf_force_power_w": -35.60602428708206,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 0.0
     },
     {
       "cut_time_s": 0.16,
@@ -989,6 +1252,8 @@
       "terminal_q_distance_rad": 0.5679014545246568,
       "terminal_v_distance_rad_s": 11.005832829624593,
       "terminal_state_distance": 11.020474959623732,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 123.89460803469974,
       "terminal_power_difference_w": 1022.5171619640047,
       "force_work_difference_j": 25.94130722345659,
@@ -996,7 +1261,9 @@
       "initial_commanded_force_n": 13.712806315747926,
       "initial_pointwise_ztcf_force_n": 9.817873990038793,
       "initial_commanded_force_power_w": -84.67775882907958,
-      "initial_pointwise_ztcf_force_power_w": -35.60602428708206
+      "initial_pointwise_ztcf_force_power_w": -35.60602428708206,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 0.0
     },
     {
       "cut_time_s": 0.16,
@@ -1006,6 +1273,8 @@
       "terminal_q_distance_rad": 0.5679014544619938,
       "terminal_v_distance_rad_s": 11.005832828032837,
       "terminal_state_distance": 11.020474958030862,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 123.89460801380541,
       "terminal_power_difference_w": 1022.5171617572516,
       "force_work_difference_j": 25.942886804631286,
@@ -1013,7 +1282,9 @@
       "initial_commanded_force_n": 13.712806315747926,
       "initial_pointwise_ztcf_force_n": 9.817873990038793,
       "initial_commanded_force_power_w": -84.67775882907958,
-      "initial_pointwise_ztcf_force_power_w": -35.60602428708206
+      "initial_pointwise_ztcf_force_power_w": -35.60602428708206,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 0.0
     },
     {
       "cut_time_s": 0.16,
@@ -1023,6 +1294,8 @@
       "terminal_q_distance_rad": 0.56790145346639,
       "terminal_v_distance_rad_s": 11.00583280281912,
       "terminal_state_distance": 11.020474932799338,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 123.89460768237112,
       "terminal_power_difference_w": 1022.517158473092,
       "force_work_difference_j": 25.949205505873177,
@@ -1030,7 +1303,9 @@
       "initial_commanded_force_n": 13.712806315747926,
       "initial_pointwise_ztcf_force_n": 9.817873990038793,
       "initial_commanded_force_power_w": -84.67775882907958,
-      "initial_pointwise_ztcf_force_power_w": -35.60602428708206
+      "initial_pointwise_ztcf_force_power_w": -35.60602428708206,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 0.0
     },
     {
       "cut_time_s": 0.22,
@@ -1040,6 +1315,8 @@
       "terminal_q_distance_rad": 0.013178961581469252,
       "terminal_v_distance_rad_s": 1.3366490009100864,
       "terminal_state_distance": 1.3367139696518093,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 23.50442665526357,
       "terminal_power_difference_w": 31.11784142154758,
       "force_work_difference_j": -0.6058471519743689,
@@ -1047,7 +1324,9 @@
       "initial_commanded_force_n": 28.884381481238236,
       "initial_pointwise_ztcf_force_n": 20.836248099466662,
       "initial_commanded_force_power_w": 71.32621739298479,
-      "initial_pointwise_ztcf_force_power_w": 148.20047246934007
+      "initial_pointwise_ztcf_force_power_w": 148.20047246934007,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 1.0048591735576161e-14
     },
     {
       "cut_time_s": 0.22,
@@ -1057,6 +1336,8 @@
       "terminal_q_distance_rad": 0.013178961579302295,
       "terminal_v_distance_rad_s": 1.3366490008106988,
       "terminal_state_distance": 1.3367139695524053,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 23.50442665433955,
       "terminal_power_difference_w": 31.11784140416097,
       "force_work_difference_j": -0.6055685837682723,
@@ -1064,7 +1345,9 @@
       "initial_commanded_force_n": 28.884381481238236,
       "initial_pointwise_ztcf_force_n": 20.836248099466662,
       "initial_commanded_force_power_w": 71.32621739298479,
-      "initial_pointwise_ztcf_force_power_w": 148.20047246934007
+      "initial_pointwise_ztcf_force_power_w": 148.20047246934007,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 1.0048591735576161e-14
     },
     {
       "cut_time_s": 0.22,
@@ -1074,6 +1357,8 @@
       "terminal_q_distance_rad": 0.013178961544578214,
       "terminal_v_distance_rad_s": 1.336648999250906,
       "terminal_state_distance": 1.3367139679923459,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 23.504426639818057,
       "terminal_power_difference_w": 31.11784112825933,
       "force_work_difference_j": -0.6044543235907728,
@@ -1081,7 +1366,9 @@
       "initial_commanded_force_n": 28.884381481238236,
       "initial_pointwise_ztcf_force_n": 20.836248099466662,
       "initial_commanded_force_power_w": 71.32621739298479,
-      "initial_pointwise_ztcf_force_power_w": 148.20047246934007
+      "initial_pointwise_ztcf_force_power_w": 148.20047246934007,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 1.0048591735576161e-14
     },
     {
       "cut_time_s": 0.22,
@@ -1091,6 +1378,8 @@
       "terminal_q_distance_rad": 0.0542954230969123,
       "terminal_v_distance_rad_s": 2.8082103617384746,
       "terminal_state_distance": 2.8087352008946316,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 39.92075495404329,
       "terminal_power_difference_w": 249.35974247932216,
       "force_work_difference_j": 1.9842367158977177,
@@ -1098,7 +1387,9 @@
       "initial_commanded_force_n": 28.884381481238236,
       "initial_pointwise_ztcf_force_n": 20.836248099466662,
       "initial_commanded_force_power_w": 71.32621739298479,
-      "initial_pointwise_ztcf_force_power_w": 148.20047246934007
+      "initial_pointwise_ztcf_force_power_w": 148.20047246934007,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 1.0048591735576161e-14
     },
     {
       "cut_time_s": 0.22,
@@ -1108,6 +1399,8 @@
       "terminal_q_distance_rad": 0.054295423090149064,
       "terminal_v_distance_rad_s": 2.80821036144539,
       "terminal_state_distance": 2.808735200601471,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 39.920754949595924,
       "terminal_power_difference_w": 249.35974241935014,
       "force_work_difference_j": 1.9849149618231017,
@@ -1115,7 +1408,9 @@
       "initial_commanded_force_n": 28.884381481238236,
       "initial_pointwise_ztcf_force_n": 20.836248099466662,
       "initial_commanded_force_power_w": 71.32621739298479,
-      "initial_pointwise_ztcf_force_power_w": 148.20047246934007
+      "initial_pointwise_ztcf_force_power_w": 148.20047246934007,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 1.0048591735576161e-14
     },
     {
       "cut_time_s": 0.22,
@@ -1125,6 +1420,8 @@
       "terminal_q_distance_rad": 0.054295422982850214,
       "terminal_v_distance_rad_s": 2.8082103568436914,
       "terminal_state_distance": 2.8087351959985583,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 39.92075487949603,
       "terminal_power_difference_w": 249.35974146871717,
       "force_work_difference_j": 1.987628044731933,
@@ -1132,7 +1429,9 @@
       "initial_commanded_force_n": 28.884381481238236,
       "initial_pointwise_ztcf_force_n": 20.836248099466662,
       "initial_commanded_force_power_w": 71.32621739298479,
-      "initial_pointwise_ztcf_force_power_w": 148.20047246934007
+      "initial_pointwise_ztcf_force_power_w": 148.20047246934007,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 1.0048591735576161e-14
     },
     {
       "cut_time_s": 0.22,
@@ -1142,6 +1441,8 @@
       "terminal_q_distance_rad": 0.23386869879334396,
       "terminal_v_distance_rad_s": 6.4597294392280675,
       "terminal_state_distance": 6.46396155591175,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 99.69452399396155,
       "terminal_power_difference_w": 954.4765091881115,
       "force_work_difference_j": 25.82552967225131,
@@ -1149,7 +1450,9 @@
       "initial_commanded_force_n": 28.884381481238236,
       "initial_pointwise_ztcf_force_n": 20.836248099466662,
       "initial_commanded_force_power_w": 71.32621739298479,
-      "initial_pointwise_ztcf_force_power_w": 148.20047246934007
+      "initial_pointwise_ztcf_force_power_w": 148.20047246934007,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 1.0048591735576161e-14
     },
     {
       "cut_time_s": 0.22,
@@ -1159,6 +1462,8 @@
       "terminal_q_distance_rad": 0.23386869875069397,
       "terminal_v_distance_rad_s": 6.459729437083753,
       "terminal_state_distance": 6.463961553767296,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 99.6945239768688,
       "terminal_power_difference_w": 954.4765092950902,
       "force_work_difference_j": 25.826244023443174,
@@ -1166,7 +1471,9 @@
       "initial_commanded_force_n": 28.884381481238236,
       "initial_pointwise_ztcf_force_n": 20.836248099466662,
       "initial_commanded_force_power_w": 71.32621739298479,
-      "initial_pointwise_ztcf_force_power_w": 148.20047246934007
+      "initial_pointwise_ztcf_force_power_w": 148.20047246934007,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 1.0048591735576161e-14
     },
     {
       "cut_time_s": 0.22,
@@ -1176,6 +1483,8 @@
       "terminal_q_distance_rad": 0.23386869807776306,
       "terminal_v_distance_rad_s": 6.459729402930517,
       "terminal_state_distance": 6.4639615196120745,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 99.69452370543753,
       "terminal_power_difference_w": 954.4765110161572,
       "force_work_difference_j": 25.829102088172476,
@@ -1183,7 +1492,9 @@
       "initial_commanded_force_n": 28.884381481238236,
       "initial_pointwise_ztcf_force_n": 20.836248099466662,
       "initial_commanded_force_power_w": 71.32621739298479,
-      "initial_pointwise_ztcf_force_power_w": 148.20047246934007
+      "initial_pointwise_ztcf_force_power_w": 148.20047246934007,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 1.0048591735576161e-14
     },
     {
       "cut_time_s": 0.22,
@@ -1193,6 +1504,8 @@
       "terminal_q_distance_rad": 0.5820986040911775,
       "terminal_v_distance_rad_s": 11.609907369593149,
       "terminal_state_distance": 11.624490866933407,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 204.77606866710636,
       "terminal_power_difference_w": 771.0041532374372,
       "force_work_difference_j": 66.17089989071121,
@@ -1200,7 +1513,9 @@
       "initial_commanded_force_n": 28.884381481238236,
       "initial_pointwise_ztcf_force_n": 20.836248099466662,
       "initial_commanded_force_power_w": 71.32621739298479,
-      "initial_pointwise_ztcf_force_power_w": 148.20047246934007
+      "initial_pointwise_ztcf_force_power_w": 148.20047246934007,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 1.0048591735576161e-14
     },
     {
       "cut_time_s": 0.22,
@@ -1210,6 +1525,8 @@
       "terminal_q_distance_rad": 0.5820986041705266,
       "terminal_v_distance_rad_s": 11.60990735902178,
       "terminal_state_distance": 11.624490856379273,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 204.77606858473894,
       "terminal_power_difference_w": 771.004153770722,
       "force_work_difference_j": 66.16902040271255,
@@ -1217,7 +1534,9 @@
       "initial_commanded_force_n": 28.884381481238236,
       "initial_pointwise_ztcf_force_n": 20.836248099466662,
       "initial_commanded_force_power_w": 71.32621739298479,
-      "initial_pointwise_ztcf_force_power_w": 148.20047246934007
+      "initial_pointwise_ztcf_force_power_w": 148.20047246934007,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 1.0048591735576161e-14
     },
     {
       "cut_time_s": 0.22,
@@ -1227,6 +1546,8 @@
       "terminal_q_distance_rad": 0.5820986054498032,
       "terminal_v_distance_rad_s": 11.609907188829057,
       "terminal_state_distance": 11.624490686464128,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 204.77606726090355,
       "terminal_power_difference_w": 771.0041623558046,
       "force_work_difference_j": 66.16150210314274,
@@ -1234,7 +1555,9 @@
       "initial_commanded_force_n": 28.884381481238236,
       "initial_pointwise_ztcf_force_n": 20.836248099466662,
       "initial_commanded_force_power_w": 71.32621739298479,
-      "initial_pointwise_ztcf_force_power_w": 148.20047246934007
+      "initial_pointwise_ztcf_force_power_w": 148.20047246934007,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 1.0048591735576161e-14
     },
     {
       "cut_time_s": 0.28,
@@ -1244,6 +1567,8 @@
       "terminal_q_distance_rad": 0.011340864919300716,
       "terminal_v_distance_rad_s": 1.1484387918349774,
       "terminal_state_distance": 1.1484947861477215,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 30.613138443753424,
       "terminal_power_difference_w": 278.0105277887783,
       "force_work_difference_j": 2.5832438319991264,
@@ -1251,7 +1576,9 @@
       "initial_commanded_force_n": 130.08426834296472,
       "initial_pointwise_ztcf_force_n": 121.71140309503691,
       "initial_commanded_force_power_w": 1063.012299423878,
-      "initial_pointwise_ztcf_force_power_w": 1072.3839277968893
+      "initial_pointwise_ztcf_force_power_w": 1072.3839277968893,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.28,
@@ -1261,6 +1588,8 @@
       "terminal_q_distance_rad": 0.011340864913117728,
       "terminal_v_distance_rad_s": 1.1484387915786483,
       "terminal_state_distance": 1.1484947858913437,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 30.6131384427113,
       "terminal_power_difference_w": 278.0105278875428,
       "force_work_difference_j": 2.583427896911046,
@@ -1268,7 +1597,9 @@
       "initial_commanded_force_n": 130.08426834296472,
       "initial_pointwise_ztcf_force_n": 121.71140309503691,
       "initial_commanded_force_power_w": 1063.012299423878,
-      "initial_pointwise_ztcf_force_power_w": 1072.3839277968893
+      "initial_pointwise_ztcf_force_power_w": 1072.3839277968893,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.28,
@@ -1278,6 +1609,8 @@
       "terminal_q_distance_rad": 0.011340864816488612,
       "terminal_v_distance_rad_s": 1.1484387874729498,
       "terminal_state_distance": 1.1484947817848912,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 30.613138425779024,
       "terminal_power_difference_w": 278.010529465824,
       "force_work_difference_j": 2.5841645033795637,
@@ -1285,7 +1618,9 @@
       "initial_commanded_force_n": 130.08426834296472,
       "initial_pointwise_ztcf_force_n": 121.71140309503691,
       "initial_commanded_force_power_w": 1063.012299423878,
-      "initial_pointwise_ztcf_force_power_w": 1072.3839277968893
+      "initial_pointwise_ztcf_force_power_w": 1072.3839277968893,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.28,
@@ -1295,6 +1630,8 @@
       "terminal_q_distance_rad": 0.04664770628380648,
       "terminal_v_distance_rad_s": 2.4330160275154733,
       "terminal_state_distance": 2.43346316977445,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 51.85698699518,
       "terminal_power_difference_w": 521.7786847339439,
       "force_work_difference_j": 10.84922062127125,
@@ -1302,7 +1639,9 @@
       "initial_commanded_force_n": 130.08426834296472,
       "initial_pointwise_ztcf_force_n": 121.71140309503691,
       "initial_commanded_force_power_w": 1063.012299423878,
-      "initial_pointwise_ztcf_force_power_w": 1072.3839277968893
+      "initial_pointwise_ztcf_force_power_w": 1072.3839277968893,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.28,
@@ -1312,6 +1651,8 @@
       "terminal_q_distance_rad": 0.04664770628015406,
       "terminal_v_distance_rad_s": 2.4330160252852733,
       "terminal_state_distance": 2.43346316754459,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 51.85698698045361,
       "terminal_power_difference_w": 521.7786850473717,
       "force_work_difference_j": 10.84890467283878,
@@ -1319,7 +1660,9 @@
       "initial_commanded_force_n": 130.08426834296472,
       "initial_pointwise_ztcf_force_n": 121.71140309503691,
       "initial_commanded_force_power_w": 1063.012299423878,
-      "initial_pointwise_ztcf_force_power_w": 1072.3839277968893
+      "initial_pointwise_ztcf_force_power_w": 1072.3839277968893,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.28,
@@ -1329,6 +1672,8 @@
       "terminal_q_distance_rad": 0.046647706227867965,
       "terminal_v_distance_rad_s": 2.433015989532027,
       "terminal_state_distance": 2.433463131796911,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 51.85698674407088,
       "terminal_power_difference_w": 521.7786900594156,
       "force_work_difference_j": 10.847641164167861,
@@ -1336,7 +1681,9 @@
       "initial_commanded_force_n": 130.08426834296472,
       "initial_pointwise_ztcf_force_n": 121.71140309503691,
       "initial_commanded_force_power_w": 1063.012299423878,
-      "initial_pointwise_ztcf_force_power_w": 1072.3839277968893
+      "initial_pointwise_ztcf_force_power_w": 1072.3839277968893,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.28,
@@ -1346,6 +1693,8 @@
       "terminal_q_distance_rad": 0.20029051556136335,
       "terminal_v_distance_rad_s": 5.11199920079804,
       "terminal_state_distance": 5.115921434070664,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 126.5214056055917,
       "terminal_power_difference_w": 202.34776763973986,
       "force_work_difference_j": 29.167914060820017,
@@ -1353,7 +1702,9 @@
       "initial_commanded_force_n": 130.08426834296472,
       "initial_pointwise_ztcf_force_n": 121.71140309503691,
       "initial_commanded_force_power_w": 1063.012299423878,
-      "initial_pointwise_ztcf_force_power_w": 1072.3839277968893
+      "initial_pointwise_ztcf_force_power_w": 1072.3839277968893,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.28,
@@ -1363,6 +1714,8 @@
       "terminal_q_distance_rad": 0.2002905156344058,
       "terminal_v_distance_rad_s": 5.11199920826679,
       "terminal_state_distance": 5.115921441536548,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 126.52140571791935,
       "terminal_power_difference_w": 202.34776741097158,
       "force_work_difference_j": 29.16589962046705,
@@ -1370,7 +1723,9 @@
       "initial_commanded_force_n": 130.08426834296472,
       "initial_pointwise_ztcf_force_n": 121.71140309503691,
       "initial_commanded_force_power_w": 1063.012299423878,
-      "initial_pointwise_ztcf_force_power_w": 1072.3839277968893
+      "initial_pointwise_ztcf_force_power_w": 1072.3839277968893,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.28,
@@ -1380,6 +1735,8 @@
       "terminal_q_distance_rad": 0.20029051676895118,
       "terminal_v_distance_rad_s": 5.11199932154162,
       "terminal_state_distance": 5.115921554768951,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 126.52140743669065,
       "terminal_power_difference_w": 202.34776402925957,
       "force_work_difference_j": 29.15784175684321,
@@ -1387,7 +1744,9 @@
       "initial_commanded_force_n": 130.08426834296472,
       "initial_pointwise_ztcf_force_n": 121.71140309503691,
       "initial_commanded_force_power_w": 1063.012299423878,
-      "initial_pointwise_ztcf_force_power_w": 1072.3839277968893
+      "initial_pointwise_ztcf_force_power_w": 1072.3839277968893,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.28,
@@ -1397,6 +1756,8 @@
       "terminal_q_distance_rad": 0.3789150088040596,
       "terminal_v_distance_rad_s": 4.347161773735619,
       "terminal_state_distance": 4.363644356604373,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 140.8193237638466,
       "terminal_power_difference_w": -935.898527560725,
       "force_work_difference_j": 16.634156406230122,
@@ -1404,7 +1765,9 @@
       "initial_commanded_force_n": 130.08426834296472,
       "initial_pointwise_ztcf_force_n": 121.71140309503691,
       "initial_commanded_force_power_w": 1063.012299423878,
-      "initial_pointwise_ztcf_force_power_w": 1072.3839277968893
+      "initial_pointwise_ztcf_force_power_w": 1072.3839277968893,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.28,
@@ -1414,6 +1777,8 @@
       "terminal_q_distance_rad": 0.37891500841625314,
       "terminal_v_distance_rad_s": 4.347161771850947,
       "terminal_state_distance": 4.363644354693145,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 140.81932377515346,
       "terminal_power_difference_w": -935.8985262142274,
       "force_work_difference_j": 16.6313999030022,
@@ -1421,7 +1786,9 @@
       "initial_commanded_force_n": 130.08426834296472,
       "initial_pointwise_ztcf_force_n": 121.71140309503691,
       "initial_commanded_force_power_w": 1063.012299423878,
-      "initial_pointwise_ztcf_force_power_w": 1072.3839277968893
+      "initial_pointwise_ztcf_force_power_w": 1072.3839277968893,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.28,
@@ -1431,6 +1798,8 @@
       "terminal_q_distance_rad": 0.3789150017224101,
       "terminal_v_distance_rad_s": 4.347161737668735,
       "terminal_state_distance": 4.363644320058791,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 140.8193236811761,
       "terminal_power_difference_w": -935.8985033419511,
       "force_work_difference_j": 16.62037354643273,
@@ -1438,7 +1807,9 @@
       "initial_commanded_force_n": 130.08426834296472,
       "initial_pointwise_ztcf_force_n": 121.71140309503691,
       "initial_commanded_force_power_w": 1063.012299423878,
-      "initial_pointwise_ztcf_force_power_w": 1072.3839277968893
+      "initial_pointwise_ztcf_force_power_w": 1072.3839277968893,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "cut_time_s": 0.32,
@@ -1448,6 +1819,8 @@
       "terminal_q_distance_rad": 0.00855413720287207,
       "terminal_v_distance_rad_s": 0.8623416484044139,
       "terminal_state_distance": 0.8623840744332697,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 29.504997493277966,
       "terminal_power_difference_w": 257.2690741124886,
       "force_work_difference_j": 3.629894598031626,
@@ -1455,7 +1828,9 @@
       "initial_commanded_force_n": 229.23560380951727,
       "initial_pointwise_ztcf_force_n": 221.26869289405928,
       "initial_commanded_force_power_w": 1767.8587757649123,
-      "initial_pointwise_ztcf_force_power_w": 1693.533536218822
+      "initial_pointwise_ztcf_force_power_w": 1693.533536218822,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 3.2171190647067566e-14
     },
     {
       "cut_time_s": 0.32,
@@ -1465,6 +1840,8 @@
       "terminal_q_distance_rad": 0.00855413721338103,
       "terminal_v_distance_rad_s": 0.8623416462894463,
       "terminal_state_distance": 0.8623840723185104,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 29.50499746457319,
       "terminal_power_difference_w": 257.2690740762521,
       "force_work_difference_j": 3.6293146595205,
@@ -1472,7 +1849,9 @@
       "initial_commanded_force_n": 229.23560380951727,
       "initial_pointwise_ztcf_force_n": 221.26869289405928,
       "initial_commanded_force_power_w": 1767.8587757649123,
-      "initial_pointwise_ztcf_force_power_w": 1693.533536218822
+      "initial_pointwise_ztcf_force_power_w": 1693.533536218822,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 3.2171190647067566e-14
     },
     {
       "cut_time_s": 0.32,
@@ -1482,6 +1861,8 @@
       "terminal_q_distance_rad": 0.008554137387276464,
       "terminal_v_distance_rad_s": 0.8623416124246686,
       "terminal_state_distance": 0.8623840384571236,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 29.504997005018474,
       "terminal_power_difference_w": 257.2690735190836,
       "force_work_difference_j": 3.6269945786998776,
@@ -1489,7 +1870,9 @@
       "initial_commanded_force_n": 229.23560380951727,
       "initial_pointwise_ztcf_force_n": 221.26869289405928,
       "initial_commanded_force_power_w": 1767.8587757649123,
-      "initial_pointwise_ztcf_force_power_w": 1693.533536218822
+      "initial_pointwise_ztcf_force_power_w": 1693.533536218822,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 3.2171190647067566e-14
     },
     {
       "cut_time_s": 0.32,
@@ -1499,6 +1882,8 @@
       "terminal_q_distance_rad": 0.03440538461185208,
       "terminal_v_distance_rad_s": 1.703316592603731,
       "terminal_state_distance": 1.7036640352867327,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 47.831757429924096,
       "terminal_power_difference_w": 202.07753566893444,
       "force_work_difference_j": 8.653353580516285,
@@ -1506,7 +1891,9 @@
       "initial_commanded_force_n": 229.23560380951727,
       "initial_pointwise_ztcf_force_n": 221.26869289405928,
       "initial_commanded_force_power_w": 1767.8587757649123,
-      "initial_pointwise_ztcf_force_power_w": 1693.533536218822
+      "initial_pointwise_ztcf_force_power_w": 1693.533536218822,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 3.2171190647067566e-14
     },
     {
       "cut_time_s": 0.32,
@@ -1516,6 +1903,8 @@
       "terminal_q_distance_rad": 0.03440538463965963,
       "terminal_v_distance_rad_s": 1.7033165926944251,
       "terminal_state_distance": 1.70366403537797,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 47.8317574322958,
       "terminal_power_difference_w": 202.07753530095454,
       "force_work_difference_j": 8.651974284435866,
@@ -1523,7 +1912,9 @@
       "initial_commanded_force_n": 229.23560380951727,
       "initial_pointwise_ztcf_force_n": 221.26869289405928,
       "initial_commanded_force_power_w": 1767.8587757649123,
-      "initial_pointwise_ztcf_force_power_w": 1693.533536218822
+      "initial_pointwise_ztcf_force_power_w": 1693.533536218822,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 3.2171190647067566e-14
     },
     {
       "cut_time_s": 0.32,
@@ -1533,6 +1924,8 @@
       "terminal_q_distance_rad": 0.03440538508728269,
       "terminal_v_distance_rad_s": 1.7033165923589948,
       "terminal_state_distance": 1.7036640350516479,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 47.83175744235943,
       "terminal_power_difference_w": 202.0775295606599,
       "force_work_difference_j": 8.646456492170616,
@@ -1540,7 +1933,9 @@
       "initial_commanded_force_n": 229.23560380951727,
       "initial_pointwise_ztcf_force_n": 221.26869289405928,
       "initial_commanded_force_power_w": 1767.8587757649123,
-      "initial_pointwise_ztcf_force_power_w": 1693.533536218822
+      "initial_pointwise_ztcf_force_power_w": 1693.533536218822,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 3.2171190647067566e-14
     },
     {
       "cut_time_s": 0.32,
@@ -1550,6 +1945,8 @@
       "terminal_q_distance_rad": 0.11756181107351417,
       "terminal_v_distance_rad_s": 2.641749079967128,
       "terminal_state_distance": 2.644363624944582,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 60.333208565692104,
       "terminal_power_difference_w": -547.3662956322598,
       "force_work_difference_j": 3.8440038900505327,
@@ -1557,7 +1954,9 @@
       "initial_commanded_force_n": 229.23560380951727,
       "initial_pointwise_ztcf_force_n": 221.26869289405928,
       "initial_commanded_force_power_w": 1767.8587757649123,
-      "initial_pointwise_ztcf_force_power_w": 1693.533536218822
+      "initial_pointwise_ztcf_force_power_w": 1693.533536218822,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 3.2171190647067566e-14
     },
     {
       "cut_time_s": 0.32,
@@ -1567,6 +1966,8 @@
       "terminal_q_distance_rad": 0.11756181091810175,
       "terminal_v_distance_rad_s": 2.641749077809027,
       "terminal_state_distance": 2.644363622781706,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 60.333208525927354,
       "terminal_power_difference_w": -547.3662944457719,
       "force_work_difference_j": 3.841757342179028,
@@ -1574,7 +1975,9 @@
       "initial_commanded_force_n": 229.23560380951727,
       "initial_pointwise_ztcf_force_n": 221.26869289405928,
       "initial_commanded_force_power_w": 1767.8587757649123,
-      "initial_pointwise_ztcf_force_power_w": 1693.533536218822
+      "initial_pointwise_ztcf_force_power_w": 1693.533536218822,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 3.2171190647067566e-14
     },
     {
       "cut_time_s": 0.32,
@@ -1584,6 +1987,8 @@
       "terminal_q_distance_rad": 0.11756180829345166,
       "terminal_v_distance_rad_s": 2.6417490421872643,
       "terminal_state_distance": 2.644363587078478,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 60.33320774383673,
       "terminal_power_difference_w": -547.3662744177041,
       "force_work_difference_j": 3.8327704037513914,
@@ -1591,7 +1996,9 @@
       "initial_commanded_force_n": 229.23560380951727,
       "initial_pointwise_ztcf_force_n": 221.26869289405928,
       "initial_commanded_force_power_w": 1767.8587757649123,
-      "initial_pointwise_ztcf_force_power_w": 1693.533536218822
+      "initial_pointwise_ztcf_force_power_w": 1693.533536218822,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 3.2171190647067566e-14
     },
     {
       "cut_time_s": 0.32,
@@ -1601,6 +2008,8 @@
       "terminal_q_distance_rad": 0.24028466706825555,
       "terminal_v_distance_rad_s": 5.225831876519808,
       "terminal_state_distance": 5.23135312542354,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 49.704371654253684,
       "terminal_power_difference_w": -1004.3373371603363,
       "force_work_difference_j": -30.875421666638267,
@@ -1608,7 +2017,9 @@
       "initial_commanded_force_n": 229.23560380951727,
       "initial_pointwise_ztcf_force_n": 221.26869289405928,
       "initial_commanded_force_power_w": 1767.8587757649123,
-      "initial_pointwise_ztcf_force_power_w": 1693.533536218822
+      "initial_pointwise_ztcf_force_power_w": 1693.533536218822,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 3.2171190647067566e-14
     },
     {
       "cut_time_s": 0.32,
@@ -1618,6 +2029,8 @@
       "terminal_q_distance_rad": 0.2402846670589467,
       "terminal_v_distance_rad_s": 5.225831873278665,
       "terminal_state_distance": 5.23135312218539,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 49.704371682553024,
       "terminal_power_difference_w": -1004.3373375445894,
       "force_work_difference_j": -30.87602844327142,
@@ -1625,7 +2038,9 @@
       "initial_commanded_force_n": 229.23560380951727,
       "initial_pointwise_ztcf_force_n": 221.26869289405928,
       "initial_commanded_force_power_w": 1767.8587757649123,
-      "initial_pointwise_ztcf_force_power_w": 1693.533536218822
+      "initial_pointwise_ztcf_force_power_w": 1693.533536218822,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 3.2171190647067566e-14
     },
     {
       "cut_time_s": 0.32,
@@ -1635,6 +2050,8 @@
       "terminal_q_distance_rad": 0.2402846668222172,
       "terminal_v_distance_rad_s": 5.225831822982584,
       "terminal_state_distance": 5.231353071931519,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 49.70437192869979,
       "terminal_power_difference_w": -1004.3373414702808,
       "force_work_difference_j": -30.878455193143072,
@@ -1642,7 +2059,9 @@
       "initial_commanded_force_n": 229.23560380951727,
       "initial_pointwise_ztcf_force_n": 221.26869289405928,
       "initial_commanded_force_power_w": 1767.8587757649123,
-      "initial_pointwise_ztcf_force_power_w": 1693.533536218822
+      "initial_pointwise_ztcf_force_power_w": 1693.533536218822,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 3.2171190647067566e-14
     }
   ],
   "variant_rows": [
@@ -1655,6 +2074,8 @@
       "terminal_q_distance_rad": 0.21878290880672657,
       "terminal_v_distance_rad_s": 5.91291638454906,
       "terminal_state_distance": 5.916962576512941,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 29.40835426922809,
       "terminal_power_difference_w": 9.983131877007324,
       "force_work_difference_j": -2.4770667390541714,
@@ -1662,7 +2083,9 @@
       "initial_commanded_force_n": 15.67060994708113,
       "initial_pointwise_ztcf_force_n": 6.5790899743595155,
       "initial_commanded_force_power_w": -42.785207158574224,
-      "initial_pointwise_ztcf_force_power_w": -28.79221231835813
+      "initial_pointwise_ztcf_force_power_w": -28.79221231835813,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "variant": "baseline",
@@ -1673,6 +2096,8 @@
       "terminal_q_distance_rad": 0.23561343012761754,
       "terminal_v_distance_rad_s": 6.448768851982864,
       "terminal_state_distance": 6.453071624797054,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 86.62657403113818,
       "terminal_power_difference_w": 766.5842789534529,
       "force_work_difference_j": 16.11516604893766,
@@ -1680,7 +2105,9 @@
       "initial_commanded_force_n": 15.574054346565266,
       "initial_pointwise_ztcf_force_n": 5.321603950575449,
       "initial_commanded_force_power_w": -28.934684863078388,
-      "initial_pointwise_ztcf_force_power_w": 45.12042725471239
+      "initial_pointwise_ztcf_force_power_w": 45.12042725471239,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 1.0048591735576161e-14
     },
     {
       "variant": "baseline",
@@ -1691,6 +2118,8 @@
       "terminal_q_distance_rad": 0.2002905156344058,
       "terminal_v_distance_rad_s": 5.11199920826679,
       "terminal_state_distance": 5.115921441536548,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 126.52140571791935,
       "terminal_power_difference_w": 202.34776741097158,
       "force_work_difference_j": 29.16589962046705,
@@ -1698,7 +2127,9 @@
       "initial_commanded_force_n": 130.08426834296472,
       "initial_pointwise_ztcf_force_n": 121.71140309503691,
       "initial_commanded_force_power_w": 1063.012299423878,
-      "initial_pointwise_ztcf_force_power_w": 1072.3839277968893
+      "initial_pointwise_ztcf_force_power_w": 1072.3839277968893,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "variant": "baseline",
@@ -1709,6 +2140,8 @@
       "terminal_q_distance_rad": 0.11756181091810175,
       "terminal_v_distance_rad_s": 2.641749077809027,
       "terminal_state_distance": 2.644363622781706,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 60.333208525927354,
       "terminal_power_difference_w": -547.3662944457719,
       "force_work_difference_j": 3.841757342179028,
@@ -1716,7 +2149,9 @@
       "initial_commanded_force_n": 229.23560380951727,
       "initial_pointwise_ztcf_force_n": 221.26869289405928,
       "initial_commanded_force_power_w": 1767.8587757649123,
-      "initial_pointwise_ztcf_force_power_w": 1693.533536218822
+      "initial_pointwise_ztcf_force_power_w": 1693.533536218822,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 3.2171190647067566e-14
     },
     {
       "variant": "gravity_disabled",
@@ -1727,6 +2162,8 @@
       "terminal_q_distance_rad": 0.20342814983917507,
       "terminal_v_distance_rad_s": 5.3908641474680845,
       "terminal_state_distance": 5.394701036072693,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 24.047197819558725,
       "terminal_power_difference_w": 17.6955867999867,
       "force_work_difference_j": -0.9377683634281273,
@@ -1734,7 +2171,9 @@
       "initial_commanded_force_n": 16.777409571388535,
       "initial_pointwise_ztcf_force_n": 4.169310791384277,
       "initial_commanded_force_power_w": -18.7708919640442,
-      "initial_pointwise_ztcf_force_power_w": -15.734709701316625
+      "initial_pointwise_ztcf_force_power_w": -15.734709701316625,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 0.0
     },
     {
       "variant": "gravity_disabled",
@@ -1745,6 +2184,8 @@
       "terminal_q_distance_rad": 0.21446190089458958,
       "terminal_v_distance_rad_s": 5.679753919813888,
       "terminal_state_distance": 5.683801412485885,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 59.92630057040637,
       "terminal_power_difference_w": 409.18771366773024,
       "force_work_difference_j": 9.979349156390903,
@@ -1752,7 +2193,9 @@
       "initial_commanded_force_n": 18.777858520048714,
       "initial_pointwise_ztcf_force_n": 6.252191632914888,
       "initial_commanded_force_power_w": 2.1236209922728513,
-      "initial_pointwise_ztcf_force_power_w": 36.29190943684204
+      "initial_pointwise_ztcf_force_power_w": 36.29190943684204,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 1.0048591735576161e-14
     },
     {
       "variant": "gravity_disabled",
@@ -1763,6 +2206,8 @@
       "terminal_q_distance_rad": 0.18647626154538327,
       "terminal_v_distance_rad_s": 4.96361223668212,
       "terminal_state_distance": 4.967113833229557,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 87.81096212466068,
       "terminal_power_difference_w": 362.5728129491897,
       "force_work_difference_j": 22.946728869074732,
@@ -1770,7 +2215,9 @@
       "initial_commanded_force_n": 82.8473003523924,
       "initial_pointwise_ztcf_force_n": 73.72545393627037,
       "initial_commanded_force_power_w": 526.0693156903359,
-      "initial_pointwise_ztcf_force_power_w": 516.6688951257474
+      "initial_pointwise_ztcf_force_power_w": 516.6688951257474,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 2.1316282072803006e-14
     },
     {
       "variant": "gravity_disabled",
@@ -1781,6 +2228,8 @@
       "terminal_q_distance_rad": 0.1368670207042386,
       "terminal_v_distance_rad_s": 2.9750075286565116,
       "terminal_state_distance": 2.9781541895810864,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 69.31183134125,
       "terminal_power_difference_w": -69.85065694689982,
       "force_work_difference_j": 13.104530462168178,
@@ -1788,7 +2237,9 @@
       "initial_commanded_force_n": 137.45314575534994,
       "initial_pointwise_ztcf_force_n": 129.07288674976738,
       "initial_commanded_force_power_w": 912.4062622944914,
-      "initial_pointwise_ztcf_force_power_w": 852.7476416327485
+      "initial_pointwise_ztcf_force_power_w": 852.7476416327485,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 1.464821375527116e-14
     },
     {
       "variant": "damping_disabled",
@@ -1799,6 +2250,8 @@
       "terminal_q_distance_rad": 0.2269396356516167,
       "terminal_v_distance_rad_s": 6.1975508425389005,
       "terminal_state_distance": 6.201704446689178,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 27.007284934253686,
       "terminal_power_difference_w": -51.66291894259243,
       "force_work_difference_j": -4.422187021064493,
@@ -1806,7 +2259,9 @@
       "initial_commanded_force_n": 13.443949226482752,
       "initial_pointwise_ztcf_force_n": 7.074684750292205,
       "initial_commanded_force_power_w": -40.34416620952786,
-      "initial_pointwise_ztcf_force_power_w": -22.33609619132098
+      "initial_pointwise_ztcf_force_power_w": -22.33609619132098,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 7.105427357601002e-15
     },
     {
       "variant": "damping_disabled",
@@ -1817,6 +2272,8 @@
       "terminal_q_distance_rad": 0.24833950660897386,
       "terminal_v_distance_rad_s": 6.900066057832021,
       "terminal_state_distance": 6.904533591270905,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 90.78759321718415,
       "terminal_power_difference_w": 713.2851134983732,
       "force_work_difference_j": 10.862451489829628,
@@ -1824,7 +2281,9 @@
       "initial_commanded_force_n": 11.462484172163801,
       "initial_pointwise_ztcf_force_n": 5.122842816148756,
       "initial_commanded_force_power_w": -82.5491946015494,
-      "initial_pointwise_ztcf_force_power_w": 11.64800626518324
+      "initial_pointwise_ztcf_force_power_w": 11.64800626518324,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 1.0048591735576161e-14
     },
     {
       "variant": "damping_disabled",
@@ -1835,6 +2294,8 @@
       "terminal_q_distance_rad": 0.2291125104263712,
       "terminal_v_distance_rad_s": 6.406567801631426,
       "terminal_state_distance": 6.4106632682846785,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 158.4784489815662,
       "terminal_power_difference_w": 341.34040670413106,
       "force_work_difference_j": 36.72644305034774,
@@ -1842,7 +2303,9 @@
       "initial_commanded_force_n": 122.01195968094257,
       "initial_pointwise_ztcf_force_n": 114.09171985119409,
       "initial_commanded_force_power_w": 904.1742606255705,
-      "initial_pointwise_ztcf_force_power_w": 959.4813219188138
+      "initial_pointwise_ztcf_force_power_w": 959.4813219188138,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 2.1316282072803006e-14
     },
     {
       "variant": "damping_disabled",
@@ -1853,6 +2316,8 @@
       "terminal_q_distance_rad": 0.13578839866068917,
       "terminal_v_distance_rad_s": 2.8057315652092263,
       "terminal_state_distance": 2.809015504624752,
+      "terminal_state_distance_configuration_scale_rad": 1.0,
+      "terminal_state_distance_velocity_scale_rad_s": 1.0,
       "terminal_force_distance_n": 85.48589686296158,
       "terminal_power_difference_w": -725.6901295997692,
       "force_work_difference_j": 6.90527705554736,
@@ -1860,15 +2325,26 @@
       "initial_commanded_force_n": 242.70196590481834,
       "initial_pointwise_ztcf_force_n": 233.83713023010029,
       "initial_commanded_force_power_w": 2167.3926445023712,
-      "initial_pointwise_ztcf_force_power_w": 2112.9700461109337
+      "initial_pointwise_ztcf_force_power_w": 2112.9700461109337,
+      "initial_ztcf_acceleration_closure_error_rad_s2": 0.0,
+      "initial_control_acceleration_closure_error_rad_s2": 1.4210854715202004e-14
     }
   ],
   "timestep_sensitivity": {
-    "max_abs_terminal_q_distance_rad_versus_0_5_ms": 0.009117786678739692,
-    "max_abs_terminal_v_distance_rad_s_versus_0_5_ms": 0.09076944329330772,
-    "max_abs_terminal_force_distance_n_versus_0_5_ms": 0.993340560951431,
-    "max_abs_force_work_difference_j_versus_0_5_ms": 0.35563232600357164,
-    "max_abs_terminal_clubhead_speed_difference_m_s_versus_0_5_ms": 0.19002885475428677
+    "1_ms_versus_0_5_ms": {
+      "max_abs_terminal_q_distance_rad": 3.878064536166903e-10,
+      "max_abs_terminal_v_distance_rad_s": 1.057136955751048e-08,
+      "max_abs_terminal_force_distance_n": 1.1232765473323525e-07,
+      "max_abs_force_work_difference_j": 0.017394603133982223,
+      "max_abs_terminal_clubhead_speed_difference_m_s": 4.480270376916451e-09
+    },
+    "2_ms_versus_0_5_ms": {
+      "max_abs_terminal_q_distance_rad": 0.009117786678739692,
+      "max_abs_terminal_v_distance_rad_s": 0.09076944329330772,
+      "max_abs_terminal_force_distance_n": 0.993340560951431,
+      "max_abs_force_work_difference_j": 0.35563232600357164,
+      "max_abs_terminal_clubhead_speed_difference_m_s": 0.19002885475428677
+    }
   },
   "wscg_delta_consistency": {
     "LHDiffAxial": {
@@ -1887,5 +2363,19 @@
       "max_abs_residual_n": 1.5372969393019957,
       "rmse_n": 0.2072890770085137
     }
+  },
+  "selected_trace_diagnostics": {
+    "longest_initial_positive_zero_command_force_power_duration_s": 0.07999999999999999,
+    "selected_cut_times_s": [
+      0.12,
+      0.22,
+      0.3
+    ]
+  },
+  "claim_boundaries": {
+    "legacy_matlab_sampler": "re-simulates to each cut and records the first torque-off sample; not a forward zero-torque future",
+    "variant_rows": "whole-model scenario variants with different pre-cut source traces; not an additive mechanism partition",
+    "human_causal_strategy": "not_tested",
+    "bilateral_hand_allocation": "not_tested"
   }
 }

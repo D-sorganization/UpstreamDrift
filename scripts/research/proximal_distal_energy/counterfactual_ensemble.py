@@ -64,11 +64,11 @@ def _force_and_power(
     inertials: PlanarInertials,
     trace: Trace,
     controls: np.ndarray,
-) -> tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     qdd = _accelerations(params, trace, controls)
     forces = reaction_force_decomposition(inertials, trace.q, trace.v, qdd)
     powers = force_power_decomposition(inertials, trace.q, trace.v, forces)
-    return forces.total, powers.total
+    return qdd, forces.total, powers.total
 
 
 def _horizon_steps(horizon_s: float, dt_s: float) -> int:
@@ -103,9 +103,14 @@ def evaluate_killswitch_case(
     if not np.isfinite(source_time_s) or source_time_s < 0.0:
         raise ValueError("source_time_s must be nonnegative and finite")
     steps = _horizon_steps(horizon_s, dt_s)
-    control_times = source_time_s + np.arange(steps, dtype=float) * dt_s
-    controls = controls_at_times(program, control_times)
-    aligned_controls = np.vstack((controls, controls[-1]))
+    # The trace contains both interval starts and the terminal sample.  Sample
+    # the command at all T = steps + 1 states so a torque discontinuity that
+    # lands exactly on the horizon endpoint is not silently replaced by the
+    # preceding interval command.  The integrator consumes only interval-start
+    # controls; the full array is retained for state-aligned force accounting.
+    control_times = source_time_s + np.arange(steps + 1, dtype=float) * dt_s
+    aligned_controls = controls_at_times(program, control_times)
+    controls = aligned_controls[:-1]
     zero_controls = np.zeros_like(aligned_controls)
     state = SimState(q=q0, v=v0, time=source_time_s)
 
@@ -116,10 +121,10 @@ def evaluate_killswitch_case(
     zero_backend.reset(state)
     zero_torque = zero_backend.rollout(None, steps, dt_s)
 
-    commanded_force, commanded_power = _force_and_power(
+    commanded_qdd, commanded_force, commanded_power = _force_and_power(
         params, inertials, commanded, aligned_controls
     )
-    zero_force, zero_power = _force_and_power(
+    zero_qdd, zero_force, zero_power = _force_and_power(
         params, inertials, zero_torque, zero_controls
     )
     commanded_speed = clubhead_speed(inertials, commanded.q, commanded.v)
@@ -127,6 +132,8 @@ def evaluate_killswitch_case(
     q_delta = commanded.q[-1] - zero_torque.q[-1]
     v_delta = commanded.v[-1] - zero_torque.v[-1]
     normalized_state = np.concatenate((q_delta / 1.0, v_delta / 1.0))
+    backend = make_backend("ode", params)
+    expected_control_qdd = np.linalg.solve(backend.mass_matrix(q0), aligned_controls[0])
     metrics = {
         "matched_initial_state_error": float(
             np.linalg.norm(commanded.q[0] - zero_torque.q[0])
@@ -135,6 +142,8 @@ def evaluate_killswitch_case(
         "terminal_q_distance_rad": float(np.linalg.norm(q_delta)),
         "terminal_v_distance_rad_s": float(np.linalg.norm(v_delta)),
         "terminal_state_distance": float(np.linalg.norm(normalized_state)),
+        "terminal_state_distance_configuration_scale_rad": 1.0,
+        "terminal_state_distance_velocity_scale_rad_s": 1.0,
         "terminal_force_distance_n": float(
             np.linalg.norm(commanded_force[-1] - zero_force[-1])
         ),
@@ -149,6 +158,14 @@ def evaluate_killswitch_case(
         "initial_pointwise_ztcf_force_n": float(np.linalg.norm(zero_force[0])),
         "initial_commanded_force_power_w": float(commanded_power[0]),
         "initial_pointwise_ztcf_force_power_w": float(zero_power[0]),
+        "initial_ztcf_acceleration_closure_error_rad_s2": float(
+            np.linalg.norm(
+                zero_qdd[0] - backend.forward_dynamics(q0, v0, np.zeros(2, dtype=float))
+            )
+        ),
+        "initial_control_acceleration_closure_error_rad_s2": float(
+            np.linalg.norm(commanded_qdd[0] - zero_qdd[0] - expected_control_qdd)
+        ),
     }
     return KillswitchCase(
         commanded=commanded,

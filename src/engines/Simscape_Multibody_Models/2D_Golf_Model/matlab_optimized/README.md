@@ -50,11 +50,13 @@ addpath(genpath(pwd))
 
 ### Biomechanical Analysis
 
-The system performs **counterfactual analysis** of golf swings to decompose forces into:
+The system produces rerun-based pointwise counterfactual tables. The table
+names are operational conventions, not an identified physiological force
+decomposition:
 
 1. **BASE**: Complete swing with all forces active
-2. **ZTCF** (Zero Torque Counterfactual): Passive forces only (gravity, momentum, shaft flex)
-3. **DELTA**: Active torque contribution (DELTA = BASE - ZTCF)
+2. **ZTCF** (Zero Torque Counterfactual): first recorded sample at torque removal, retaining gravity and motion-dependent dynamics
+3. **DELTA**: algebraic table residual (`BASE - ZTCF`), not an isolated muscle or actuator contribution
 4. **ZVCF** (Zero Velocity Counterfactual): Static pose analysis
 
 ### Generated Outputs
@@ -63,6 +65,12 @@ The system performs **counterfactual analysis** of golf swings to decompose forc
 - **Calculated Quantities**: Work, power, impulse for all joints
 - **Summary Statistics**: Key events, peak values, timing
 - **Visualizations**: Comprehensive plot suite (~200 plots if using legacy scripts, ~20 parameterized functions)
+
+The DELTA table subtracts kinematic as well as force columns. Therefore its
+stored `DELTA force · DELTA velocity` is not generally `BASE power - ZTCF
+power` and must not be used as an additive pathway partition. Use a matched-
+state force decomposition projected onto one common interface velocity for
+that purpose.
 
 ---
 
@@ -249,7 +257,7 @@ config.ztcf_time_scale = 200; % Finer resolution
 [BASE, ZTCF, DELTA, ZVCF] = run_analysis('use_parallel', false);
 ```
 
-### Resume from Checkpoint
+### Resume From Checkpoint
 
 If analysis is interrupted, simply run again with checkpoints enabled:
 
@@ -285,7 +293,7 @@ fig = plot_total_work(ZTCFQ, 'ZTCF', 301, plot_cfg);
 - Existing GolfSwing Simulink model
 - Original MATLAB scripts (in `../matlab/Scripts/`)
 
-### Optional (for performance features)
+### Optional (For Performance Features)
 
 - Parallel Computing Toolbox (for parallelization)
   - Without this, system runs in serial mode (still optimized)
@@ -345,7 +353,7 @@ All saved to `data/plots/`:
 
 ---
 
-## 🔄 Migration from Original
+## 🔄 Migration From Original
 
 ### Running Original vs Optimized
 

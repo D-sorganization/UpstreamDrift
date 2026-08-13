@@ -14,7 +14,7 @@ $x_c=[q(t_c),\dot q(t_c)]$ at cut time $t_c$. Two simulations are initialized
 with exactly that state:
 
 $$
-x_{\mathrm{cmd}}(0)=x_0(t_c)=x_c.
+x_{\mathrm{cmd}}(0)=x_0(0)=x_c.
 $$ {#eq-matched-state-initialization}
 
 The commanded future continues the declared shoulder and wrist torque program;
@@ -27,19 +27,25 @@ $$ {#eq-initial-counterfactual-difference}
 
 At the initial instant, the zero-torque acceleration, force, and force power are
 the pointwise ZTCF quantities. At every later instant, each future is evaluated
-on its own state. This construction preserves causal meaning:
+on its own state. This construction preserves a controlled intervention
+meaning inside the declared deterministic model:
 
 - pointwise ZTCF attributes acceleration and force at the state already reached;
 - the killswitch tests whether the state carries the passive mechanism forward;
   and
-- commanded-minus-killswitch differences quantify the consequences of continued
-  control over a declared horizon.
+- commanded-minus-killswitch differences quantify the model-conditional
+  consequences of continued declared control over a declared horizon.
 
 The ensemble spans eight cut times from 0.080 to 0.320 s, including 0.099,
 0.100, and 0.101 s around the wrist-torque switch; four horizons from 20 to
 120 ms; and integration steps of 0.5, 1, and 2 ms. This gives 96 baseline
-comparisons. Every row records position, velocity, wrist force, wrist-force
-power, integrated force work, and terminal clubhead-speed differences.
+comparisons. Source states are obtained by declared componentwise linear
+interpolation of the smooth registered trace. Every row records position,
+velocity, wrist force, wrist-force power, integrated force work, terminal
+clubhead-speed differences, matched-state error, and initial affine-closure
+residuals. Commands are sampled at every state time, including the terminal
+endpoint, so a horizon ending exactly on a torque switch uses the new endpoint
+command for terminal force and power.
 
 ## Why Cut Time and Horizon Matter {#sec-cut-horizon}
 
@@ -70,11 +76,12 @@ mechanism is phase dependent.
 
 ## Separation of State, Force, and Power {#sec-future-separation}
 
-@fig-counterfactual-selected-futures follows three representative cuts
-for 80 ms. The curves coincide at the vertical dotted line by construction.
-Their slopes then separate because acceleration differs. Force and power can
-diverge faster than angle because both depend directly on acceleration and
-velocity-squared terms.
+@fig-counterfactual-selected-futures follows three representative cuts for 80
+ms. Position and velocity coincide at the vertical dotted line by construction;
+their accelerations can differ immediately, so their state curves acquire
+different curvature and then different slopes. Force and power need not
+coincide even at the cut because force depends on acceleration and power pairs
+that force with the inherited common point velocity.
 
 ![Commanded and Zero-Torque State, Force, and Power Futures](figures/fig_counterfactual_selected_futures.pdf){#fig-counterfactual-selected-futures width=100%}
 
@@ -82,11 +89,13 @@ The 0.12 s cut occurs soon after the restraint-to-drive transition. Continued
 wrist drive produces a more open club state, but commanded wrist-force power is
 initially more negative than in the zero-torque future. At 0.22 s, commanded
 force and power rise much faster than the killswitch values, producing a large
-positive work difference. At 0.30 s, both futures initially retain high positive
-power because both inherit a rapidly moving club. This last panel is the
-clearest persistence example: the zero-torque future does not lose its large
-interaction force when torque is removed; it loses ground gradually as the
-state evolves differently.
+positive work difference. At 0.30 s, both futures initially retain high
+positive power because both inherit a rapidly moving club; the zero-command
+force power remains positive for 78 ms on the 1 ms trace. At the 0.22 s cut it
+remains positive over the full registered 80 ms horizon. These selected cases
+demonstrate finite-horizon persistence in this model: the zero-torque future
+does not lose its interaction force at removal, while the two futures separate
+as their states evolve.
 
 This behavior clarifies the meaning of passive contribution. A passive term can
 be large because earlier active work created high velocity. Removing torque
@@ -130,16 +139,18 @@ power difference and because some cases cross the idealized torque step. The
 2 ms result is retained as a coarse-step warning rather than hidden by a single
 convergence number.
 
-## Gravity and Damping Ablations {#sec-ensemble-ablations}
+## Whole-Model Gravity and Damping Variants {#sec-ensemble-ablations}
 
 Zero torque does not mean zero generalized forcing. Gravity and viscous damping
 remain inside the bias vector $b(q,\dot q)$. To prevent the word *passive* from
-collapsing these mechanisms into one category, the 80 ms ensemble is repeated
-with projected gravity disabled and with both damping coefficients set to zero.
+collapsing these mechanisms into one category, the complete source rollout and
+80 ms ensemble are repeated with projected gravity disabled and with both
+damping coefficients set to zero.
 
-![Gravity and Damping Ablations of the Killswitch Comparison](figures/fig_counterfactual_physics_variants.pdf){#fig-counterfactual-physics-variants width=100%}
+![Whole-Model Gravity and Damping Variants of the Killswitch Comparison](figures/fig_counterfactual_physics_variants.pdf){#fig-counterfactual-physics-variants width=100%}
 
-The ablations change magnitudes but do not eliminate phase dependence. At a
+The scenario variants change magnitudes but do not eliminate phase dependence.
+At a
 0.28 s cut, baseline commanded-minus-zero-torque force work is 29.17 J, versus
 22.95 J without gravity and 36.73 J without damping. Terminal clubhead-speed
 differences remain positive in all three cases. At 0.12 s, force-work
@@ -148,11 +159,12 @@ difference is much smaller than baseline. These results show that gravity and
 damping materially shape the counterfactual; neither alone creates the late
 positive difference.
 
-The ablations are not additive. Each altered model follows a different source
-trajectory before the cut, so subtracting variant numbers does not produce an
-orthogonal causal partition. A full mechanism partition would require matched
-source states with bias subterms selectively disabled inside the same dynamics
-evaluation. That finer separation is tracked in #8447.
+The variants are not matched-state ablations and are not additive. Each altered
+model follows a different source trajectory before the cut, so subtracting
+variant numbers does not produce an orthogonal causal partition. A full
+mechanism partition would require matched source states with bias subterms
+selectively disabled inside the same dynamics evaluation. That finer separation
+is tracked in #8447.
 
 ## WSCG BASE/ZTCF/DELTA Convention Check {#sec-wscg-delta-check}
 
@@ -176,10 +188,10 @@ points, and equivalent-wrench definitions.
 The ensemble supports a stronger and more precise statement than the original
 pointwise analysis:
 
-- pointwise ZTCF exactly equals the initial derivative of the matched-state
-  zero-torque future;
-- zero-torque interaction force and positive force power can persist for tens
-  of milliseconds after a late cut;
+- pointwise ZTCF equals the initial acceleration of the matched-state
+  zero-torque future to numerical tolerance in the same backend;
+- zero-torque interaction force and positive force power persist for 78--80 ms
+  in the selected 0.30 and 0.22 s cuts, not as a phase-independent law;
 - persistence and commanded-minus-zero-torque differences depend strongly on
   cut phase and horizon;
 - the 1 ms integration step is converged for the reported state, force, work,
@@ -188,7 +200,11 @@ pointwise analysis:
   results without explaining away the underlying distinction between
   instantaneous attribution and a realizable future.
 
-These conclusions close the counterfactual-contract gap for the double
-pendulum. They do not establish the source of the two-hand negative equivalent
-couple. That question requires local hand forces and wrench geometry, addressed
-at the next fidelity level.
+The committed evidence uses schema `matched-state-counterfactual-ensemble-v2`,
+hashes the complete declared Python and WSCG input closure, retains all 96
+baseline comparisons and 12 whole-model variants, and is byte deterministic
+for both JSON and NPZ artifacts. The results distinguish pointwise attribution
+from forward intervention for this double pendulum. They do not establish the
+source of the two-hand negative equivalent couple, a human control strategy, or
+bilateral hand allocation. Those questions require local hand forces, wrench
+geometry, and higher-fidelity or measured evidence.
