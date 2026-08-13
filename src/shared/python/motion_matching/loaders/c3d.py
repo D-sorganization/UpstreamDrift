@@ -12,6 +12,8 @@ import hashlib
 import logging
 from pathlib import Path
 
+import math
+
 import numpy as np
 import pandas as pd
 
@@ -354,7 +356,8 @@ def _shaft_quaternions(butt: np.ndarray, head: np.ndarray) -> np.ndarray:
     z_axis = np.array([0.0, 0.0, 1.0])
     for i in range(n):
         v = head[i] - butt[i]
-        norm = float(np.linalg.norm(v))
+        # Bolt: math.hypot is faster than np.linalg.norm for small 1D arrays
+        norm = float(math.hypot(*v))
         if norm == 0.0:
             out[i] = np.array([1.0, 0.0, 0.0, 0.0])
             continue
@@ -367,12 +370,14 @@ def _shaft_quaternions(butt: np.ndarray, head: np.ndarray) -> np.ndarray:
             out[i] = np.array([0.0, 1.0, 0.0, 0.0])
             continue
         axis = np.cross(z_axis, v)
-        axis = axis / np.linalg.norm(axis)
+        # Bolt: math.hypot is faster than np.linalg.norm for small 1D arrays
+        axis = axis / math.hypot(*axis)
         angle = np.arccos(dot)
         s = np.sin(angle / 2.0)
         c = np.cos(angle / 2.0)
         q = np.array([c, axis[0] * s, axis[1] * s, axis[2] * s])
         if q[0] < 0:
             q = -q
-        out[i] = q / np.linalg.norm(q)
+        # Bolt: math.hypot is faster than np.linalg.norm for small 1D arrays
+        out[i] = q / math.hypot(*q)
     return out

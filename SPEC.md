@@ -71,6 +71,8 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- `src/shared/python/motion_matching/loaders/c3d.py`: Optimized `np.linalg.norm` to `math.hypot` inside `_shaft_quaternions` for better performance on small 3D vectors (spec-exempt: micro-optimization).
+
 - **2026-08-12** - Added epic #8507's adversarial transmission and task-
   robustness tier: paired clock/state-trigger programs on common training and
   held-out perturbations, lower-tail speed and variability/load/effort
@@ -2613,3 +2615,7 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 ## Refactoring & Optimization Notes
 
 - `spec-exempt`: Replaced `np.linalg.norm` with `math.sqrt(np.vdot(..., ...))` in `src/shared/python/spatial_algebra/indexed_acceleration.py` to optimize 1D array norm calculation without changing logic.
+
+### Performance Improvements
+
+- Optimized sum of squares calculation in `launch_monitor` module using `np.vdot` instead of `np.sum` to avoid intermediate array allocations. (spec-exempt: micro-optimization)
