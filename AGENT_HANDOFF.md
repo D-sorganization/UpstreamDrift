@@ -18,6 +18,13 @@ scripts.research.proximal_distal_energy.claim_audit inventory`, then
   `validate`, and the focused claim-audit tests. Do not mark the audit complete
   while any candidate remains unadjudicated or treat NotebookLM output as an
   original scientific source.
+  The current external-evidence audit slice corrects overgeneralized
+  introduction/evidence prose, distinguishes ground reactions from energetic
+  origin, checks original-source scope for seven additional atomic claims, and
+  adds reciprocal candidate dispositions. Current local authority: 567
+  candidates, 11 reviewed, 12 registered atomic claims, and 556 unadjudicated
+  candidates. Render and merge this slice before treating those counts as
+  remote-main evidence.
 
 - **#8511 interactive proximal--distal dynamics workbench** — branch
   `feat/proximal-distal-workbench-integration` makes the pendulum launcher

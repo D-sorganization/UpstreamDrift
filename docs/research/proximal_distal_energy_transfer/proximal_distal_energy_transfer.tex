@@ -445,7 +445,7 @@ available with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, arc=.35mm, colframe=quarto-callout-note-color-frame, breakable, opacityback=0, rightrule=.15mm, toprule=.15mm, leftrule=.75mm, titlerule=0mm, colback=white, bottomtitle=1mm, coltitle=black, toptitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, bottomrule=.15mm, left=2mm, opacitybacktitle=0.6, colbacktitle=quarto-callout-note-color!10!white]
+\begin{tcolorbox}[enhanced jigsaw, bottomrule=.15mm, coltitle=black, opacityback=0, colframe=quarto-callout-note-color-frame, colback=white, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, opacitybacktitle=0.6, bottomtitle=1mm, toptitle=1mm, titlerule=0mm, left=2mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, breakable, rightrule=.15mm, leftrule=.75mm, toprule=.15mm]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -462,28 +462,31 @@ independent empirical confirmation.
 
 \section{Motivation}\label{motivation}
 
-Clubhead speed at impact is the dominant controllable determinant of
-drive distance, and it correlates strongly with playing standard
-(\citeproc{ref-fradkin2004}{Fradkin, Sherman, and Finch 2004};
-\citeproc{ref-hellstrom2009}{Hellström 2009};
+Subject to impact efficiency, launch angle, spin, and aerodynamic
+conditions, greater clubhead speed raises the available ball speed and
+distance. Clubhead speed has also been associated with handicap or
+playing standard in particular cohorts, including a 45-man sample
+spanning handicaps 2--27; those associations do not make it a complete
+measure of golf performance (\citeproc{ref-fradkin2004}{Fradkin,
+Sherman, and Finch 2004}; \citeproc{ref-hellstrom2009}{Hellström 2009};
 \citeproc{ref-hume2005}{Hume, Keogh, and Reid 2005}). The golf downswing
-is among the most-studied examples of a \emph{sequenced} multi-segment
-rotation in sport biomechanics (\citeproc{ref-mcphee2022}{McPhee 2022};
-\citeproc{ref-dillman1994}{Dillman and Lange 1994}). Across measurement
-systems and populations, the downswing of a skilled golfer shows a
-characteristic order: the pelvis reaches its peak angular speed first,
-then the thorax, then the lead arm, and finally the club, with each
-successive segment peaking faster than the one before
-(\citeproc{ref-cheetham2008}{Cheetham et al. 2008};
-\citeproc{ref-tinmark2010}{Tinmark et al. 2010}). This pattern --- the
-\emph{kinematic sequence}, an instance of the general proximal-to-distal
-(P→D) sequencing observed in throwing and striking skills
-(\citeproc{ref-putnam1993}{Putnam 1993}) --- is routinely interpreted as
-the visible signature of mechanical energy generated in the large
-proximal segments and transferred outward to the small, fast distal
-ones. Its interpretation as mechanical energy transfer has also
-influenced applied swing descriptions (\citeproc{ref-smith2015}{Smith et
-al. 2015}).
+is a widely studied example of sequenced multi-segment rotation
+(\citeproc{ref-mcphee2022}{McPhee 2022};
+\citeproc{ref-dillman1994}{Dillman and Lange 1994}). Under commonly used
+segment and angular-velocity definitions, many skilled golfers exhibit a
+pelvis--thorax--arm or hands--club ordering of peak speeds, often with
+distal speed amplification (\citeproc{ref-cheetham2008}{Cheetham et al.
+2008}; \citeproc{ref-tinmark2010}{Tinmark et al. 2010}). The identified
+order is neither universal nor independent of coordinate, component,
+event, and filtering choices (\citeproc{ref-marsan2019}{Marsan et al.
+2019}; \citeproc{ref-lee2026}{Lee, Ehrlich, and Cain 2026}). This
+\emph{kinematic sequence} resembles the broader proximal-to-distal
+sequencing observed in throwing and striking
+(\citeproc{ref-putnam1993}{Putnam 1993}), but peak order alone is not a
+measurement of mechanical energy transfer. Treating it as such is an
+interpretation that has influenced applied swing descriptions
+(\citeproc{ref-smith2015}{Smith et al. 2015}), not an identity used in
+this study.
 
 That interpretation leaves a first-order question unanswered:
 
@@ -8369,39 +8372,45 @@ mechanism intact.
 \section{The Work and Power Budget of the Swing}\label{sec-workbudget}
 
 Nesbit's full-body kinematic-kinetic study and the companion work-power
-analysis of Nesbit and Serrano remain the most complete published energy
-budgets of the swing (\citeproc{ref-nesbit2005kinematic}{Nesbit 2005b};
+analysis of Nesbit and Serrano provide detailed published energy budgets
+of the swing (\citeproc{ref-nesbit2005kinematic}{Nesbit 2005b};
 \citeproc{ref-nesbit2005work}{Nesbit and Serrano 2005}). Using
 subject-specific full-body models of four golfers of widely differing
 skill, they report that the trunk complex (lumbar and thoracic spine
 plus hips) contributes 68.7--72.2\% of total swing work, the shoulder
-and arm joints 24.3--28\%, and the legs only 3.3--3.8\%
-(\citeproc{ref-nesbit2005work}{Nesbit and Serrano 2005}). Two further
-observations bear directly on the timing question. First, power
-generation and clubhead speed decreased systematically with increasing
-handicap. Second, the phase analysis locates the \emph{generation} of
-energy predominantly in the earlier downswing (torso-dominated) and the
-\emph{conversion} into clubhead speed late (shoulder/arm and club
-interface) --- generation and transfer are temporally separated, which
-is a precondition for the retain-early/release-late strategy to even be
-possible.
+and arm joints 24.3--28\%, and the modeled leg joints 3.3--3.8\%
+(\citeproc{ref-nesbit2005work}{Nesbit and Serrano 2005}). These
+fractions are conditional on the four subject models, joint partition,
+inverse-dynamics assumptions, and definition of work; the small
+leg-joint fraction is not evidence that the lower limbs or ground
+reactions are mechanically unimportant. Within that study, power
+generation and clubhead speed decreased as handicap increased, and the
+phase analysis placed much of the modeled torso work earlier than the
+late shoulder/arm and club-interface conversion. This temporal
+separation motivates a delayed- handoff hypothesis but does not
+establish that it is optimal in humans.
 
-The ground is the ultimate source of the external impulse. Han and
-colleagues characterized golfer-ground interaction in 63 skilled golfers
-and found meaningful associations between ground-interaction force and
-moment parameters and maximum clubhead speed (\citeproc{ref-han2019}{Han
-et al. 2019}). Recent work has pushed this to an explicitly energetic
-formulation: in thirty golfers (fifteen professionals, fifteen
-high-level amateurs), foot-ground interaction variables alone explained
-35.5\% of clubhead-speed variance, rising to 75.4\% when trunk
-sequencing and an \emph{impulse-based energy-transfer efficiency}
-measure (effectiveness of mechanical impulse transmission from proximal
-segments to the club) were added; mediation analysis attributed the
-dominant indirect pathway to transfer efficiency rather than to
-sequencing per se (\citeproc{ref-frontiers2026footground}{Rachnavy et
-al. 2026}). That distinction --- transfer \emph{efficiency} mattering
-where sequence \emph{order} alone does not --- recurs throughout the
-skill-level literature below.
+Ground reactions supply external forces and moments that constrain and
+redirect the golfer; muscular work supplies the system's internal
+mechanical energy. Han and colleagues characterized golfer-ground
+interaction in 63 skilled male golfers and reported associations between
+selected force and moment variables and maximum clubhead speed
+(\citeproc{ref-han2019}{Han et al. 2019}). A later cross-sectional study
+pooled driver and 7-iron swings from 30 right-handed golfers (15
+professionals and 15 amateurs) and formed principal-component constructs
+for hierarchical regression and mediation
+(\citeproc{ref-frontiers2026footground}{Rachnavy et al. 2026}). Its
+first regression block --- early and late center-of-pressure factors
+\textbf{plus skill group} --- explained 35.5\% of clubhead-speed
+variance; adding trunk sequencing and the study's constructed
+\emph{impulse-related energy-transfer efficiency} factor increased the
+final model's explained variance to 75.4\%. Early center-of-pressure
+behavior had no significant direct association, whereas an indirect path
+through the transfer-efficiency factor was significant. These are
+model-dependent cross-sectional associations, not a demonstrated causal
+transmission pathway; the source itself makes that limitation explicit.
+They motivate measuring transfer efficiency separately from sequence
+order rather than treating either as a causal mechanism by definition.
 
 \section{Segmental Kinetic-Energy Sequencing}\label{sec-ke-sequencing}
 
@@ -8425,12 +8434,13 @@ segments have peaked.
 \section{Kinematic-Sequence Evidence and Skill-Level
 Differences}\label{sec-skill}
 
-The descriptive P→D findings are robust in skilled populations. Tinmark
-and colleagues, studying elite golfers across full and partial shots,
-found a significant proximal-to-distal temporal ordering of peak speeds
-(pelvis → torso → hands/club) with successive amplification of peak
-speed at every level of effort, in both men and women
-(\citeproc{ref-tinmark2010}{Tinmark et al. 2010}). Cheetham and
+The descriptive P→D pattern is common in sampled skilled populations,
+but its reported prevalence and exact ordering depend on the measurement
+definition. Tinmark and colleagues, studying elite golfers across full
+and partial shots, found a significant proximal-to-distal temporal
+ordering of peak speeds (pelvis → torso → hands/club) with successive
+amplification of peak speed at every level of effort, in both men and
+women (\citeproc{ref-tinmark2010}{Tinmark et al. 2010}). Cheetham and
 colleagues compared amateur recreational players with touring
 professionals on transition- and downswing-phase kinematic sequence
 parameters and found professionals showed higher peak-speed magnitudes
@@ -8499,11 +8509,12 @@ Three refinements prevent an overly tidy reading:
   dependence (\citeproc{ref-mcteigue1994}{McTeigue et al. 1994}).
 \end{enumerate}
 
-What survives these refinements: \emph{skilled golfers generate larger
-proximal speeds, separate transition from release more distinctly, and
-transmit impulse and energy to the club more efficiently; merely
-exhibiting a P→D peak order is neither unique to skill nor sufficient
-for it} (\citeproc{ref-cheetham2008}{Cheetham et al. 2008};
+What survives these refinements is narrower: sampled skilled groups
+often show higher segment-speed magnitudes and more repeatable timing,
+while recent cross-sectional models associate constructed
+transfer-efficiency measures with clubhead speed. Merely exhibiting a
+P→D peak order is neither unique to skill nor sufficient for it
+(\citeproc{ref-cheetham2008}{Cheetham et al. 2008};
 \citeproc{ref-zheng2008}{Zheng et al. 2008};
 \citeproc{ref-frontiers2026footground}{Rachnavy et al. 2026};
 \citeproc{ref-lee2026}{Lee, Ehrlich, and Cain 2026}). Coaching
@@ -9553,8 +9564,10 @@ for a golfer. The specific gaps, each with a tracked remediation:
 Stated}\label{sec-discussion-implications}
 
 For modeling, counterfactual and energy-level accounting make the timing
-question testable without treating peak order as energy transfer,
-consistent with recent human transfer-efficiency findings
+question testable without treating peak order as energy transfer. A
+recent cross-sectional study likewise found its constructed
+transfer-efficiency factor associated with clubhead speed, but its
+mediation analysis does not establish a causal human transfer mechanism
 (\citeproc{ref-frontiers2026footground}{Rachnavy et al. 2026}). The
 program names denote finite model inputs, not coaching cues or novelty
 over delayed-release literature (\citeproc{ref-cochran1968}{Cochran and
@@ -10179,7 +10192,7 @@ Han, Ki Hoon, Christopher Como, Jemin Kim, Sangwoo Lee, Jaewoong Kim,
 Dae Kyoo Kim, and Young-Hoo Kwon. 2019. {``Effects of the Golfer--Ground
 Interaction on Clubhead Speed in Skilled Male Golfers.''} \emph{Sports
 Biomechanics} 18 (2): 115--34.
-\url{https://pubmed.ncbi.nlm.nih.gov/31042142/}.
+\url{https://doi.org/10.1080/14763141.2019.1586983}.
 
 \bibitem[\citeproctext]{ref-hellstrom2009}
 Hellström, John. 2009. {``Competitive Elite Golf: A Review of the
@@ -10325,12 +10338,12 @@ Biology} 254 (1): 178--96.
 \url{https://doi.org/10.1016/j.jtbi.2008.04.011}.
 
 \bibitem[\citeproctext]{ref-marsan2019}
-Marsan, Thibault, Maxime Bourgain, Patricia Thoreux, Christophe Sauret,
-and Philippe Rouch. 2019. {``Biomechanical Analysis of the Golf Swing:
-Methodological Effect of Angular Velocity Component on the
-Identification of the Kinematic Sequence.''} \emph{Acta of
-Bioengineering and Biomechanics} 21: 115--20.
-\url{https://www.researchgate.net/publication/333377321}.
+Marsan, Thibault, Patricia Thoreux, Maxime Bourgain, Olivier Rouillon,
+Philippe Rouch, and Christophe Sauret. 2019. {``Biomechanical Analysis
+of the Golf Swing: Methodological Effect of Angular Velocity Component
+on the Identification of the Kinematic Sequence.''} \emph{Acta of
+Bioengineering and Biomechanics} 21 (2): 115--20.
+\url{https://doi.org/10.5277/ABB-01318-2019-02}.
 
 \bibitem[\citeproctext]{ref-marshall2000}
 Marshall, Robert N., and Bruce C. Elliott. 2000. {``Long-Axis Rotation:

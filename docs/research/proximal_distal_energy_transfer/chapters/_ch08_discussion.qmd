@@ -104,8 +104,10 @@ for a golfer. The specific gaps, each with a tracked remediation:
 ## Implications, Cautiously Stated {#sec-discussion-implications}
 
 For modeling, counterfactual and energy-level accounting make the timing
-question testable without treating peak order as energy transfer, consistent
-with recent human transfer-efficiency findings [@frontiers2026footground]. The
+question testable without treating peak order as energy transfer. A recent
+cross-sectional study likewise found its constructed transfer-efficiency factor
+associated with clubhead speed, but its mediation analysis does not establish a
+causal human transfer mechanism [@frontiers2026footground]. The
 program names denote finite model inputs, not coaching cues or novelty over
 delayed-release literature [@cochran1968; @jorgensen1999]. No recommendation
 follows. Player-specific translation requires governed human evidence spanning

@@ -64,6 +64,25 @@ def test_candidate_inventory_includes_quarto_abstract(tmp_path: Path) -> None:
 
 
 @pytest.mark.unit
+def test_candidate_inventory_excludes_cross_references_from_citations(
+    tmp_path: Path,
+) -> None:
+    master = tmp_path / "paper.qmd"
+    master.write_text(
+        "A result is shown in @sec-results and @fig-speed, and agrees with "
+        "[@study2026].\n",
+        encoding="utf-8",
+    )
+
+    inventory = build_candidate_inventory(master, repository_root=tmp_path)
+
+    candidate = inventory["candidates"][0]
+    assert candidate["citation_keys"] == ["study2026"]
+    assert candidate["priority_score"] >= 4
+    assert "assertive_language" in candidate["triage_flags"]
+
+
+@pytest.mark.unit
 def test_registry_rejects_duplicate_claim_identifiers(tmp_path: Path) -> None:
     registry = {
         "schema_version": "proximal-distal-claim-audit-v1",
@@ -72,6 +91,7 @@ def test_registry_rejects_duplicate_claim_identifiers(tmp_path: Path) -> None:
         "dependencies": [],
         "research_collections": [],
         "release_claim_inventory": [],
+        "candidate_reviews": [],
         "claims": [
             {"claim_id": "PD-CLAIM-001"},
             {"claim_id": "PD-CLAIM-001"},
@@ -81,6 +101,84 @@ def test_registry_rejects_duplicate_claim_identifiers(tmp_path: Path) -> None:
     path.write_text(json.dumps(registry), encoding="utf-8")
 
     with pytest.raises(ValueError, match="Duplicate claim_id"):
+        validate_registry(path, repository_root=tmp_path, check_release_manifest=False)
+
+
+@pytest.mark.unit
+def test_registry_requires_reciprocal_candidate_claim_mapping(tmp_path: Path) -> None:
+    master = tmp_path / "paper.qmd"
+    master.write_text("The model produces 12 m/s.\n", encoding="utf-8")
+    inventory = build_candidate_inventory(master, repository_root=tmp_path)
+    candidate_id = inventory["candidates"][0]["candidate_id"]
+    registry = {
+        "schema_version": "proximal-distal-claim-audit-v1",
+        "paper": {
+            "source": "paper.qmd",
+            "source_digest": inventory["source_digest"],
+        },
+        "audit_scope": {"completion_status": "in_progress"},
+        "release_claim_inventory": [],
+        "candidate_reviews": [],
+        "claims": [
+            {
+                "claim_id": "PD-CLAIM-001",
+                "candidate_ids": [candidate_id],
+                "statement": "The declared model produces 12 m/s.",
+                "classification": "model_result",
+                "published_status": "supported",
+                "audit_status": "provisional",
+                "source_locations": ["paper.qmd:1"],
+                "evidence_artifacts": ["result.json"],
+                "model_domain": "Declared model.",
+                "uncertainty_boundary": "No population inference.",
+                "competing_explanations": ["Implementation error"],
+                "negative_controls": ["Zero input"],
+                "falsifier": "Recomputation disagrees.",
+                "adjudication": "Independent review remains open.",
+                "reviewer": "Test reviewer",
+                "last_verified_on": "2026-08-12",
+            }
+        ],
+    }
+    path = tmp_path / "registry.json"
+    path.write_text(json.dumps(registry), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="lacks a reciprocal candidate review"):
+        validate_registry(path, repository_root=tmp_path, check_release_manifest=False)
+
+
+@pytest.mark.unit
+def test_complete_registry_rejects_candidates_that_still_require_split(
+    tmp_path: Path,
+) -> None:
+    master = tmp_path / "paper.qmd"
+    master.write_text("This paragraph may contain two claims.\n", encoding="utf-8")
+    inventory = build_candidate_inventory(master, repository_root=tmp_path)
+    candidate_id = inventory["candidates"][0]["candidate_id"]
+    registry = {
+        "schema_version": "proximal-distal-claim-audit-v1",
+        "paper": {
+            "source": "paper.qmd",
+            "source_digest": inventory["source_digest"],
+        },
+        "audit_scope": {"completion_status": "complete"},
+        "release_claim_inventory": [],
+        "candidate_reviews": [
+            {
+                "candidate_id": candidate_id,
+                "disposition": "requires_split",
+                "claim_ids": [],
+                "rationale": "Atomic coverage is unfinished.",
+                "reviewer": "Test reviewer",
+                "last_verified_on": "2026-08-12",
+            }
+        ],
+        "claims": [],
+    }
+    path = tmp_path / "registry.json"
+    path.write_text(json.dumps(registry), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="require splitting"):
         validate_registry(path, repository_root=tmp_path, check_release_manifest=False)
 
 
@@ -95,5 +193,6 @@ def test_repository_registry_matches_release_claims_and_remains_open() -> None:
 
     assert result["release_claim_count"] >= 18
     assert result["registered_claim_count"] >= 5
+    assert result["reviewed_candidate_count"] >= 5
     assert result["completion_status"] == "in_progress"
     assert result["unadjudicated_candidate_count"] > 0
