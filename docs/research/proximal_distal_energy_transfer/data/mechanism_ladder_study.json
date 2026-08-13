@@ -2,13 +2,13 @@
   "schema_version": "mechanism-ladder-study-v2",
   "study_id": "common-observable-model-ladder",
   "source_sha256": {
-    "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json": "d0ee95fa4ba4af21384ec20dfd0bcd6eb15f37570f3e897f2e0fd7bd9a767c71",
-    "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_traces.npz": "c370a8352a69915e0f47adfd7b86cfc246a63e21835e076874a3346f87700515",
+    "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json": "8c6f16d9f7597efa963cb103f20db4fbddbc7eb869e92a1bf9226e58ec62731a",
+    "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_traces.npz": "800ea1eef9820bc61763c582cd7540e852e39f27ac18c84123da50b0f720a8b6",
     "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json": "4ac63c5768d464702b55b1e0c0654208c952df4c94470b91fef3c065b18e4413",
     "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json": "c5a4f0bc3cca34bdea1e48a48cdc44a91d406484452fa22b9c4e43c669a635f7",
     "scripts/research/proximal_distal_energy/mechanism_ladder.py": "fe096a8c039c0327f44a4e202b88bb52deb63c171c6d6e5b9b29d1c744e0f84e",
     "scripts/research/proximal_distal_energy/run_mechanism_ladder_study.py": "00d97228a34d439b79c9653952260f3bb9b0a241572671d1fe1c130dccf56457",
-    "scripts/research/proximal_distal_energy/flexible_shaft_study.py": "4f857a3865adaaebf4e3e2c86bda780d506b2e6060cc20623a9e29cdfef21f39",
+    "scripts/research/proximal_distal_energy/flexible_shaft_study.py": "957fb330da17f5028e75147ae4d8d7868dc355892dc4ba519b4a401815b809ba",
     "src/engines/common/jacobian_diagnostics.py": "c3e5a562a6ee33e8511411f808ef986ffe9d4e55dd41bd9a82157a11b71a08b0"
   },
   "provenance": {
@@ -17,18 +17,18 @@
     "interpretation_boundary": "The three-link, prescribed mobile-hub, closed-loop geometry, rigid-frame audits, and reduced full-body common-state inverse dynamics are executed mechanism tests. Reduced MuJoCo/Pinocchio forward contact is also executed; articulated anatomical forward contact remains unexecuted."
   },
   "three_link_reference": {
-    "delivery_time_s": 0.4272523530885576,
+    "delivery_time_s": 0.4272523531,
     "nearest_recorded_sample_time_s": 0.4275,
-    "interface_force_at_delivery_n": 56.37089718637489,
-    "interface_couple_at_delivery_nm": 4.914207966764519,
-    "interface_force_power_at_delivery_w": 32.09312537234233,
-    "interface_couple_power_at_delivery_w": 74.59782671600279,
-    "interface_total_power_at_delivery_w": 106.69095208834511
+    "interface_force_at_delivery_n": 56.37089714488685,
+    "interface_couple_at_delivery_nm": 4.9142118,
+    "interface_force_power_at_delivery_w": 32.09311344673263,
+    "interface_couple_power_at_delivery_w": 74.5978850074599,
+    "interface_total_power_at_delivery_w": 106.69099845419252
   },
   "kinematic_velocity_audit": {
     "method": "analytic relative-coordinate second-joint kinematics",
     "position_gradient_comparison_method": "numpy.gradient with second-order edges on the stored 0.5 ms positions",
-    "maximum_position_gradient_discrepancy_m_s": 0.02990013861110823
+    "maximum_position_gradient_discrepancy_m_s": 0.029946618204687598
   },
   "frame_and_transport_audits": {
     "rotation_sample_count": 51,
@@ -37,8 +37,8 @@
       -0.1,
       0.05
     ],
-    "maximum_rotation_power_residual_w": 1.4210854715202004e-13,
-    "maximum_transport_power_residual_w": 1.1368683772161603e-13,
+    "maximum_rotation_power_residual_w": 1.1368683772161603e-13,
+    "maximum_transport_power_residual_w": 8.526512829121202e-14,
     "maximum_rotation_force_norm_residual_n": 7.105427357601002e-15,
     "maximum_rotation_couple_norm_residual_nm": 8.881784197001252e-16
   },
@@ -64,24 +64,24 @@
       "frequency_hz": 1.25,
       "supported_mass_kg": 0.2,
       "maximum_force_shift_n": 0.6675779223012418,
-      "maximum_power_difference_w": 9.787258983669432,
-      "signed_power_difference_integral_j": -0.02893727750022901
+      "maximum_power_difference_w": 9.787258997982946,
+      "signed_power_difference_integral_j": -0.028937275636872928
     },
     {
       "amplitude_m": 0.05,
       "frequency_hz": 1.25,
       "supported_mass_kg": 0.2,
       "maximum_force_shift_n": 1.3351558446024836,
-      "maximum_power_difference_w": 19.39798187699438,
-      "signed_power_difference_integral_j": -0.06762714206059706
+      "maximum_power_difference_w": 19.39798190562138,
+      "signed_power_difference_integral_j": -0.06762713833388512
     },
     {
       "amplitude_m": 0.1,
       "frequency_hz": 1.25,
       "supported_mass_kg": 0.2,
       "maximum_force_shift_n": 2.670311689204967,
-      "maximum_power_difference_w": 38.089819392610934,
-      "signed_power_difference_integral_j": -0.17426463236175227
+      "maximum_power_difference_w": 38.089819449864905,
+      "signed_power_difference_integral_j": -0.17426462490832706
     }
   ],
   "closed_loop_diagnostics": {

@@ -2750,5 +2750,24 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   validation. Engine availability is not execution evidence; articulated
   transport remains open until its declared cross-engine, balance, power,
   contact, event-alignment, and uncertainty gates pass.
+- **F-8557.10:** A compliant-shaft contribution study shall define the rigid
+  comparator as an exact coordinate reduction under matched mass, geometry,
+  state, actuation, gravity, and declared losses. Published point velocities
+  shall use analytic state kinematics when available and retain numerical
+  differentiation only as an audit. Internal-interface evidence shall record
+  both adjacent-body force and couple powers, distinguish distal-subsystem
+  delivery from the two-sided joint sum, and verify that the latter equals the
+  relative-coordinate spring/damper power. Velocity-bias attribution shall
+  retain the mass-matrix-rate identity and shall not call a generalized
+  projection external work. Balanced robustness grids shall report
+  quantitative main-effect attribution and an explicit interaction residual,
+  and neither ablation differences nor grid fractions shall be promoted to
+  human causal shares. Strategy implications remain registered hypotheses
+  until matched higher-tier and governed human evidence satisfy their stated
+  falsification gates. JSON observables shall replay byte-identically at the
+  declared reporting precision; trajectory arrays shall enumerate identical
+  keys and replay within a declared absolute tolerance no larger than
+  (10^{-6}), so platform-level floating reduction noise is not mislabeled as
+  physical nondeterminism.
 - `spec-exempt` (#8483): Moved Sidekick readiness monitoring, degradation reporting, and workspace seeding from the main launcher facade into the existing launcher-owned `SidekickSidebarManager`.
 - (spec-exempt: security fix) Fixed user enumeration via timing attack in `/login` endpoint by ensuring a dummy password verification is performed even if the user is not found, to normalize response time.

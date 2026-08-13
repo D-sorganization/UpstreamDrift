@@ -12,6 +12,8 @@ from scripts.research.proximal_distal_energy.flexible_shaft_study import (
     rollout_flexible,
     shaft_energy,
     shaft_power_terms,
+    trace_kinematics,
+    velocity_bias_power_identity_residual,
 )
 
 
@@ -90,3 +92,31 @@ def test_reference_rollout_is_deterministic_and_finite() -> None:
     np.testing.assert_array_equal(first.state, second.state)
     assert np.all(np.isfinite(first.state))
     assert np.max(np.abs(first.state[:, 2])) < 1.0
+
+
+def test_tip_velocity_is_exact_state_kinematics() -> None:
+    params = FlexibleShaftParams.reference()
+    trace = rollout_flexible(params, horizon_s=0.02, dt_s=0.0005)
+    kinematics = trace_kinematics(trace, params)
+    index = 17
+    state = trace.state[index]
+    step = 1e-7
+    q_minus = state[:3] - step * state[3:]
+    q_plus = state[:3] + step * state[3:]
+    from src.shared.python.pendulum_simulator.physics_triple import forward_kinematics
+
+    tip_minus = np.asarray(forward_kinematics(*q_minus, params.triple())["tip"])
+    tip_plus = np.asarray(forward_kinematics(*q_plus, params.triple())["tip"])
+
+    np.testing.assert_allclose(
+        kinematics["tip_velocity"][index],
+        (tip_plus - tip_minus) / (2.0 * step),
+        atol=1e-8,
+    )
+
+
+def test_velocity_bias_power_identity_closes() -> None:
+    params = FlexibleShaftParams.reference()
+    state = np.array([-1.7, 0.5, 0.08, 4.0, -2.0, 3.0])
+
+    assert abs(velocity_bias_power_identity_residual(state, params)) < 1e-7
