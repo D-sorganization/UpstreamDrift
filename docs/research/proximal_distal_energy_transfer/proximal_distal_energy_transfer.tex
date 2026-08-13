@@ -445,7 +445,7 @@ available with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, toptitle=1mm, breakable, opacitybacktitle=0.6, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, colframe=quarto-callout-note-color-frame, opacityback=0, coltitle=black, bottomtitle=1mm, leftrule=.75mm, arc=.35mm, colback=white, colbacktitle=quarto-callout-note-color!10!white, left=2mm, bottomrule=.15mm, toprule=.15mm, titlerule=0mm]
+\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, opacitybacktitle=0.6, toptitle=1mm, coltitle=black, bottomrule=.15mm, bottomtitle=1mm, titlerule=0mm, breakable, colback=white, rightrule=.15mm, left=2mm, leftrule=.75mm, colframe=quarto-callout-note-color-frame, toprule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, opacityback=0]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -2589,7 +2589,11 @@ downstream of the neuromuscular commands, segment interactions, gravity,
 contact geometry, and inertial motion that jointly determine it. A
 force-plate trace is therefore neither a direct control signal nor a
 direct measure of energy transferred to the club. It is a
-constrained-dynamics observable. This chapter asks the narrower,
+constrained-dynamics observable. A wrench becomes a power quantity only
+after it is paired with the twist of the same reference point; under an
+ideal stationary no-slip contact that contact power is zero even though
+the reaction redirects momentum and changes how internal actuators
+redistribute energy. This chapter therefore asks the narrower,
 falsifiable question: \textbf{given a declared multibody model and a
 measured state, how much of its predicted ground-reaction wrench is
 retained when controllable generalized torques are set to zero?}
@@ -2607,32 +2611,38 @@ fraction remains an open empirical quantity.
 Boundaries}\label{measurement-and-model-boundaries}
 
 A six-axis force plate reports an equivalent contact wrench: three force
-components and three moments about a declared plate origin. Under a
-planar, rigid-ground convention, the center of pressure (COP) is
-inferred from the two horizontal moments and vertical force; the
-remaining vertical moment is the free moment. These derived quantities
-become unstable when vertical force is small and are frame- and
-sign-convention dependent. Pressure insoles directly measure normal
-pressure rather than the full six-axis wrench; recovering shear force
-and free moment requires an additional model. Joo and colleagues, for
-example, treated the nonvertical components as predictions learned
-against force-plate data rather than direct pressure measurements
-(\citeproc{ref-joo2016}{Joo, Oh, and Mun 2016}).
+components and three moments about a declared plate origin. The wrench
+must first be transported to the declared support surface. Under a
+rigid-ground convention with nonzero vertical force, the two horizontal
+moment-balance equations then define COP, and transporting the wrench to
+that COP leaves the vertical free moment. These derived quantities
+become ill-conditioned as vertical force approaches zero and remain
+frame-, origin-, surface-height-, and sign-convention dependent.
+Pressure insoles directly measure local normal pressure rather than the
+full six-axis wrench; recovering shear force and three-dimensional
+moments requires an additional model. Joo and colleagues, for example,
+trained a wavelet neural network against two force plates to predict
+six-axis reactions from pressure-derived inputs in golf swings from 80
+participants; the nonvertical channels were predictions, not direct
+pressure measurements (\citeproc{ref-joo2016}{Joo, Oh, and Mun 2016}).
 
 The golf literature also does not support one universal COP waveform.
-Ball and Best found two recurring direction-of-hit COP strategies across
-professional through high-handicap golfers
-(\citeproc{ref-ballbest2007}{Ball and Best 2007}). Han and colleagues
-associated specific lead-foot and trail-foot moment features with
-clubhead speed in a skilled male sample (\citeproc{ref-han2019}{Han et
-al. 2019}), while Worsfold and colleagues measured shoe--turf torque
-differences by handicap and footwear condition
-(\citeproc{ref-worsfold2008}{Worsfold, Smith, and Dyson 2008}). The
-recent systematic review emphasizes continued variation in terminology,
-normalization, events, and analysis choices
-(\citeproc{ref-watson2026grf}{Watson et al. 2026}). These are population
-associations and strategy descriptions, not evidence that a particular
-GRF feature uniquely identifies a biological command.
+Ball and Best found two recurring \textbf{direction-of-hit} COP clusters
+among 62 golfers spanning professional through high-handicap levels; the
+result does not claim that two clusters exhaust two-dimensional COP
+behavior (\citeproc{ref-ballbest2007}{Ball and Best 2007}). Han and
+colleagues reported correlations between selected lead- and trail-foot
+force or moment peaks and maximum clubhead speed in 63 highly skilled
+men (handicap at most 3) across three club conditions
+(\citeproc{ref-han2019}{Han et al. 2019}). Worsfold and colleagues
+measured shoe--natural-turf torque in 24 golfers across handicap, club,
+and footwear conditions (\citeproc{ref-worsfold2008}{Worsfold, Smith,
+and Dyson 2008}). A 2026 systematic review retained 24 studies and
+explicitly called for consistent GRF/COP terminology and methods
+(\citeproc{ref-watson2026grf}{Watson et al. 2026}). These are
+sample-specific associations, cluster descriptions, and
+equipment-condition comparisons, not interventions and not evidence that
+a particular GRF feature uniquely identifies a biological command.
 
 \section{Constrained-Reaction
 Equation}\label{constrained-reaction-equation}
@@ -2650,11 +2660,13 @@ with acceleration constraint
 J(q)\ddot q+\gamma(q,\dot q)=0.
 }\end{equation}
 
-Here \(h_0\) is velocity independent, \(h_v\) is velocity dependent,
-\(u\) is the declared controllable input, \(Q_{\mathrm{ext}}\) contains
-other known applied loads, and \(\lambda\) is the reaction expressed in
-contact coordinates. Define \(A=JM^{-1}J^\mathsf{T}\). When \(J\) has
-full row rank and \(A\) is well conditioned,
+Here \(h_0\) is velocity independent, \(h_v\) is the term declared to
+vanish when velocity is zero, \(u\) is the declared controllable input,
+\(Q_{\mathrm{ext}}\) contains other known applied loads, and \(\lambda\)
+is the reaction expressed in contact coordinates. Define
+\(A=JM^{-1}J^\mathsf{T}\). When \(M\) is positive definite, \(J\) has
+full row rank, and \(A\) is well conditioned under a declared
+contact-row scaling,
 
 \begin{equation}\phantomsection\label{eq-grf-reaction}{
 \lambda=A^{-1}\left[
@@ -2686,11 +2698,16 @@ where
 
 This is an attribution under a stated model, not a causal identification
 from force-plate data alone. Modeling errors in \(M\), \(J\), segment
-inertias, marker kinematics, filtering, or external loads appear in the
-same residual one might otherwise mislabel as control. Dynamic
-inconsistency between measured motion and measured external force is a
-known inverse-dynamics problem (\citeproc{ref-sturdy2022}{Sturdy et al.
-2022}; \citeproc{ref-werling2023}{Werling et al. 2023}).
+inertias, marker kinematics, filtering, or external loads can contribute
+to residual forces and moments that are not biological controls. Sturdy
+and colleagues optimized OpenSim residual-reduction tracking weights in
+running simulations, while Werling and colleagues jointly adjusted
+inertial parameters and kinematics in an automated motion-processing
+pipeline (\citeproc{ref-sturdy2022}{Sturdy, Silverman, and Pickle 2022};
+\citeproc{ref-werling2023}{Werling et al. 2023}). Those methods document
+and reduce dynamic inconsistency; neither makes the residual a direct
+measurement of unmodeled muscle action or validates the present golf
+decomposition.
 
 \section{Ground-Reaction ZTCF and
 ZVCF}\label{ground-reaction-ztcf-and-zvcf}
@@ -2703,25 +2720,30 @@ external loads:
 \lambda_{\mathrm{ZTCF}}=\lambda_0+\lambda_v+\lambda_e.
 \]
 
-The ground-reaction zero-velocity counterfactual (ZVCF) evaluates the
-same configuration and applied inputs with velocity set to zero:
+For an autonomous holonomic constraint, with \(h_v(q,0)=0\) and
+\(\gamma(q,0)=0\), the ground-reaction zero-velocity counterfactual
+(ZVCF) evaluates the same configuration and applied inputs with velocity
+set to zero:
 
 \[
 \lambda_{\mathrm{ZVCF}}=\lambda_0+\lambda_u+\lambda_e.
 \]
 
-Both are \textbf{pointwise}. Neither advances a zero-torque or
-zero-velocity system through time. They also overlap in
+For a rheonomic contact or any convention in which a velocity-zero
+constraint bias remains, the reaction must instead be recomputed with
+that retained term; the displayed shortcut is not valid. Both
+counterfactuals are \textbf{pointwise}. Neither advances a zero-torque
+or zero-velocity system through time. They also overlap in
 \(\lambda_0+\lambda_e\); consequently,
 \(\lambda_{\mathrm{ZTCF}}+\lambda_{\mathrm{ZVCF}}\) is generally not the
 total reaction. The complementary additive split is instead
 configuration, velocity, control, and other-external reaction in
 Equation~\ref{eq-grf-components}.
 
-In force-plate patterns, \(\lambda_0\) supplies the
+Within the declared split, \(\lambda_0\) supplies the
 configuration-dependent support baseline, \(\lambda_v\) can create
 phase-dependent shear and vertical features through centripetal,
-Coriolis, and moving-constraint terms, and \(\lambda_u\) captures how
+Coriolis, and constraint-bias terms, and \(\lambda_u\) captures how
 applied generalized torques alter the constraint reaction.
 Similar-looking peaks can arise from different combinations. This is why
 timing coincidence between a GRF peak and a distal-speed increase does
@@ -2755,11 +2777,14 @@ The additive identities close to \(5.7\times10^{-14}\) N for the total
 split and \(1.9\times10^{-13}\) N for the independently evaluated ZVCF
 identity. Treating ZTCF as a drift-only predictor of the modeled total
 support reaction gives \(R^2=0.871\) in the target-horizontal component
-and \(R^2=0.814\) in the swing-plane vertical component. The
-corresponding RMSE values are 64.6 N and 89.8 N. They are 1.02 and 1.42
-times the model's projected planar-weight scale, respectively. Thus the
-waveform association is strong while the pointwise amplitude error
-remains substantial; \(R^2\) alone would overstate predictive adequacy.
+and \(R^2=0.814\) in the swing-plane vertical component. These are
+fixed-prediction coefficients of determination, not squared correlations
+or fitted-regression results. The corresponding RMSE values are 64.6 N
+and 89.8 N, with biases of -14.2 N and +71.1 N. The RMSE values are 1.02
+and 1.42 times the model's projected planar-weight scale, respectively.
+The predictor captures substantial waveform variance but fails an
+absolute-error adequacy screen; \(R^2\) alone would overstate
+performance.
 
 The total vector impulse is \((22.92,35.20)\) N s. ZTCF contributes
 \((17.91,60.12)\) N s, while control contributes \((5.01,-24.93)\) N s.
@@ -2792,9 +2817,11 @@ The decomposition suggests testable, not prescriptive, interpretations:
 \item
   \textbf{Vertical force peaks.} A peak can include configuration
   support, velocity-dependent vertical acceleration, and input-induced
-  reaction. Zeroing velocity tests how much of the model peak requires
-  motion; zeroing control tests how much persists passively at the
-  achieved state.
+  reaction. The declared algebraic velocity-term kill tests what remains
+  after removing the terms that vanish at zero velocity; a physical ZVCF
+  additionally requires the autonomous-constraint condition stated
+  above. Zeroing control tests how much persists without the declared
+  input at the achieved state.
 \item
   \textbf{Anterior--posterior and medial--lateral shear.} These
   components are especially sensitive to frame definition, foot contact
@@ -2817,6 +2844,14 @@ The decomposition suggests testable, not prescriptive, interpretations:
   mass transfer and is not identical to energy transfer. Different COP
   strategies can be viable (\citeproc{ref-ballbest2007}{Ball and Best
   2007}).
+\item
+  \textbf{Net force and center-of-mass motion.} For the complete
+  golfer-plus-club system, net GRF force must close the Newton--Euler
+  identity against total center-of-mass acceleration, gravity, and any
+  other external loads. That is a required consistency check, not a
+  competing empirical theory. The model's additional burden is to
+  predict moments, bilateral allocation, and counterfactual changes
+  without merely reconstructing the measured wrench.
 \end{enumerate}
 
 \section{Human Falsification
@@ -2836,13 +2871,15 @@ Human Ground-Reaction Attribution}
 \end{figure}%
 
 A human test requires synchronized bilateral six-axis force plates,
-whole-body and club kinematics, segment inertial estimates, and a
-declared contact/frame convention. The primary endpoint should be
-held-out waveform error for each force and moment component,
-supplemented by vector impulse error, peak timing error, COP error
-during adequately loaded samples, and free- moment error. Results should
-be stratified by participant rather than randomly splitting time samples
-from the same swing.
+whole-body and club kinematics, segment inertial estimates, and declared
+contact, frame, wrench-origin, and filtering conventions. Model
+calibration must be confined to training participants. The primary
+endpoint should be participant-held-out waveform error for each force
+and moment component, supplemented by vector impulse error, signed bias,
+peak timing error, COP error during adequately loaded samples, and
+free-moment error. Randomly splitting time samples or swings from the
+same participant between training and test sets is not an independent
+validation.
 
 The following rejection criteria make the framework falsifiable:
 
@@ -2864,8 +2901,10 @@ The following rejection criteria make the framework falsifiable:
   a drift-only model fails held-out component, impulse, or event-timing
   tests; or
 \item
-  a simpler baseline, such as center-of-mass acceleration plus gravity,
-  predicts the same observables as well or better.
+  net modeled force fails the center-of-mass acceleration, gravity, and
+  known- load identity, or the decomposition adds no held-out predictive
+  information for moments, bilateral allocation, or registered
+  counterfactual outcomes.
 \end{itemize}
 
 The machine-readable evidence records the declared frame, scale,
@@ -10605,7 +10644,7 @@ Swing.''} \emph{The American Journal of Sports Medicine} 23 (1): 19--23.
 \url{https://doi.org/10.1177/036354659502300104}.
 
 \bibitem[\citeproctext]{ref-joo2016}
-Joo, Seung-Bum, Sang-Eun Oh, and Joon-Ho Mun. 2016. {``Improving the
+Joo, Su-Bin, Seung Eel Oh, and Joung Hwan Mun. 2016. {``Improving the
 Ground Reaction Force Prediction Accuracy Using One-Axis Plantar
 Pressure: Expansion of Input Variable for Neural Network.''}
 \emph{Journal of Biomechanics} 49 (14): 3153--61.
@@ -10939,11 +10978,10 @@ Study.''} \emph{Journal of Applied Biomechanics} 16 (4): 356--66.
 \url{https://doi.org/10.1123/jab.16.4.356}.
 
 \bibitem[\citeproctext]{ref-sturdy2022}
-Sturdy, Jordan T., Kirsten Veerkamp, Eckehard Dorschky, Bettina Muller,
-Adam Trepczynski, William R. Taylor, Jochem Menger, and Antonie J. van
-den Bogert. 2022. {``Automated Optimization of Residual Reduction
-Algorithm Parameters in {OpenSim}.''} \emph{Journal of Biomechanics}
-137: 111087. \url{https://doi.org/10.1016/j.jbiomech.2022.111087}.
+Sturdy, Jordan T., Anne K. Silverman, and Nathan T. Pickle. 2022.
+{``Automated Optimization of Residual Reduction Algorithm Parameters in
+{OpenSim}.''} \emph{Journal of Biomechanics} 137: 111087.
+\url{https://doi.org/10.1016/j.jbiomech.2022.111087}.
 
 \bibitem[\citeproctext]{ref-tinmark2010}
 Tinmark, Fredrik, John Hellström, Kjartan Halvorsen, and Alf
@@ -10979,10 +11017,11 @@ Review.''} \emph{Sports Medicine}.
 
 \bibitem[\citeproctext]{ref-werling2023}
 Werling, Keenon, Nicholas A. Bianco, Michael Raitor, Julia Stingel,
-Jennifer L. Hicks, and Scott L. Delp. 2023. {``{AddBiomechanics}:
-Automating Model Scaling, Inverse Kinematics, and Inverse Dynamics from
-Human Motion Data Through Sequential Optimization.''} \emph{PLOS ONE} 18
-(11): e0295152. \url{https://doi.org/10.1371/journal.pone.0295152}.
+Jennifer L. Hicks, Steven H. Collins, Scott L. Delp, and C. Karen Liu.
+2023. {``{AddBiomechanics}: Automating Model Scaling, Inverse
+Kinematics, and Inverse Dynamics from Human Motion Data Through
+Sequential Optimization.''} \emph{PLOS ONE} 18 (11): e0295152.
+\url{https://doi.org/10.1371/journal.pone.0295152}.
 
 \bibitem[\citeproctext]{ref-white2006}
 White, Rod. 2006. {``On the Efficiency of the Golf Swing.''}

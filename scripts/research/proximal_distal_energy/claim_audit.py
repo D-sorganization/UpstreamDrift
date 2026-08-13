@@ -302,6 +302,30 @@ def validate_registry(
                 raise ValueError(f"{claim_id}: {field} must be a non-empty string")
         for field in required_lists:
             _require_list(record, field, claim_id)
+        for artifact in record["evidence_artifacts"]:
+            if not isinstance(artifact, str) or not artifact.strip():
+                raise ValueError(
+                    f"{claim_id}: evidence_artifacts entries must be non-empty strings"
+                )
+            if artifact.startswith(("https://", "http://")):
+                continue
+            artifact_path_text = artifact.partition("#")[0]
+            artifact_path = Path(artifact_path_text)
+            if artifact_path.is_absolute():
+                raise ValueError(
+                    f"{claim_id}: local evidence artifact must be repository-relative: "
+                    f"{artifact!r}"
+                )
+            resolved_artifact = (root / artifact_path).resolve()
+            if not resolved_artifact.is_relative_to(root):
+                raise ValueError(
+                    f"{claim_id}: local evidence artifact escapes repository root: "
+                    f"{artifact!r}"
+                )
+            if not resolved_artifact.is_file():
+                raise ValueError(
+                    f"{claim_id}: missing local evidence artifact: {artifact!r}"
+                )
 
     paper = registry.get("paper", {})
     source = root / paper.get("source", "")

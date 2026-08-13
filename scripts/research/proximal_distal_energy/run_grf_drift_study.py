@@ -16,6 +16,7 @@ import matplotlib
 import numpy as np
 
 matplotlib.use("Agg")
+matplotlib.rcParams["svg.hashsalt"] = "proximal-distal-grf-drift-v1"
 import matplotlib.pyplot as plt  # noqa: E402
 
 from scripts.research.proximal_distal_energy.double_pendulum_attribution import (
@@ -157,8 +158,28 @@ def build_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
         "counterfactual_contract": {
             "pointwise": True,
             "ztcf": "configuration plus velocity reaction at zero applied control",
-            "zvcf": "configuration plus control reaction at zero velocity",
+            "zvcf": "configuration plus control reaction after algebraically zeroing declared velocity-dependent terms",
+            "zvcf_validity": (
+                "autonomous holonomic constraint with velocity_bias(q, 0) = 0 "
+                "and constraint_bias(q, 0) = 0"
+            ),
+            "rheonomic_warning": (
+                "recompute and retain any time-dependent constraint bias that "
+                "remains when generalized velocity is zero"
+            ),
             "overlap_warning": "ZTCF and ZVCF share configuration reaction and are not additive",
+        },
+        "net_force_consistency": {
+            "status": "required_identity",
+            "identity": (
+                "net external force = total mass times center-of-mass acceleration"
+            ),
+            "known_external_loads": ["gravity", "declared non-contact loads"],
+            "model_added_value_required_for": [
+                "reaction moments",
+                "bilateral allocation",
+                "registered counterfactual predictions",
+            ],
         },
         "drift_only_prediction": {
             "target": "modeled_total_support_reaction",
@@ -168,6 +189,8 @@ def build_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
             "rmse_N": _json_array(metrics.rmse),
             "nrmse_planar_weight": _json_array(metrics.nrmse),
             "r_squared": _json_array(metrics.r_squared),
+            "r_squared_definition": "1 - fixed_prediction_SSE / target_TSS",
+            "r_squared_is_squared_correlation": False,
             "impulse_error_Ns": _json_array(metrics.impulse_error),
             "total_impulse_Ns": _json_array(total_impulse),
             "component_impulses_Ns": {

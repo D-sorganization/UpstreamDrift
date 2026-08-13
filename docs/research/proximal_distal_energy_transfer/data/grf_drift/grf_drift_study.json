@@ -6,8 +6,10 @@
   "counterfactual_contract": {
     "overlap_warning": "ZTCF and ZVCF share configuration reaction and are not additive",
     "pointwise": true,
+    "rheonomic_warning": "recompute and retain any time-dependent constraint bias that remains when generalized velocity is zero",
     "ztcf": "configuration plus velocity reaction at zero applied control",
-    "zvcf": "configuration plus control reaction at zero velocity"
+    "zvcf": "configuration plus control reaction after algebraically zeroing declared velocity-dependent terms",
+    "zvcf_validity": "autonomous holonomic constraint with velocity_bias(q, 0) = 0 and constraint_bias(q, 0) = 0"
   },
   "drift_only_prediction": {
     "bias_N": [-14.245892133239835, 71.13644661473658],
@@ -23,6 +25,8 @@
     "nrmse_planar_weight": [1.0249700057458946, 1.4233561263316141],
     "predictor": "pointwise_ZTCF_support_reaction",
     "r_squared": [0.8711888692299216, 0.8137649250962993],
+    "r_squared_definition": "1 - fixed_prediction_SSE / target_TSS",
+    "r_squared_is_squared_correlation": false,
     "rmse_N": [64.63474032401803, 89.75702030138415],
     "target": "modeled_total_support_reaction",
     "total_impulse_Ns": [22.921169299568415, 35.196848051646626]
@@ -37,6 +41,16 @@
     "samples": 161,
     "support_interpretation": "shoulder support reaction on mechanism",
     "units": "SI"
+  },
+  "net_force_consistency": {
+    "identity": "net external force = total mass times center-of-mass acceleration",
+    "known_external_loads": ["gravity", "declared non-contact loads"],
+    "model_added_value_required_for": [
+      "reaction moments",
+      "bilateral allocation",
+      "registered counterfactual predictions"
+    ],
+    "status": "required_identity"
   },
   "non_identifiable": [
     "bilateral foot-force allocation",
@@ -54,7 +68,7 @@
   "source_manifest": [
     {
       "path": "scripts/research/proximal_distal_energy/run_grf_drift_study.py",
-      "sha256": "2df9574cd2854788a2077b02c81478d5d7080c0a766f3b8e200f5a24d5801e16"
+      "sha256": "c9fb9f290ebd8c015b054cbeb7b001cfe35d71b49144138a1f4a3304b203dbd3"
     },
     {
       "path": "scripts/research/proximal_distal_energy/double_pendulum_attribution.py",
@@ -62,7 +76,7 @@
     },
     {
       "path": "src/shared/python/physics/contact_reaction_decomposition.py",
-      "sha256": "fa44482a00252eb19ea9ed93796ccfb667736b3ef61efd8a56d5f96e8ca68301"
+      "sha256": "e45eba83c03c6412f6eb4d7519db0eff0188129b687004bccc90c751513b0751"
     }
   ]
 }
