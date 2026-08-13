@@ -49,7 +49,7 @@ reviewed.
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.512 |
+| **Spec Version** | 1.0.513 |
 | **Last Spec Update** | 2026-08-13 |
 
 ## 2. Purpose & Mission
@@ -2976,3 +2976,24 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Individual hand forces shall remain structurally non-identifiable from a net
   planar wrench without bilateral measurements or an additional constitutive
   assumption.
+
+### F-8557.19: Momentum Transfer Critical-Question Program
+
+- Drift attribution shall identify the observable, frame/coordinate, event
+  window, model tier, decomposition, denominator, and cancellation behavior;
+  pointwise attribution shall not substitute for forward persistence.
+- Geometry studies shall include null and sign-reversing controls and shall
+  separate force magnitude from moment arm, force–velocity projection, and
+  reference-point effects.
+- Casting, timing demand, and self-correction shall use preregistered event,
+  viable-window, observer-delay, perturbation-recovery, and load-cost metrics
+  rather than coaching labels.
+- Proximal-rate studies shall test nonmonotonic dose response under matched
+  state, work, contact-load, and impact definitions; maximum proximal velocity
+  shall not be presumed optimal.
+- Slack shall be typed as contact disengagement, transmission backlash/dead
+  zone, structural preload, biological series compliance, or control deadband;
+  one class shall not be inferred from another.
+- The machine-readable registry shall provide required estimands, controls,
+  falsifiers, and governing issues for all seven questions. Synthetic evidence
+  may design human tests but shall not close human claims.
