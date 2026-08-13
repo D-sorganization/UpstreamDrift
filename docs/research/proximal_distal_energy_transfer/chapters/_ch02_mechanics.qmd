@@ -282,56 +282,107 @@ interchangeable.
 
 ### Joint Power and Work
 
-For a joint spanning segments $i$ and $i{+}1$ with net joint torque
-$\tau$ and relative angular velocity $\omega$, the *joint (moment)
-power* is $P_m = \tau\,\omega$; its time integral over a phase is the
-mechanical work done by the net moment. Positive work indicates
-generation, negative work absorption. This is the quantity most golf
-studies report, and it is the basis of the work-power budget of Nesbit
-and Serrano (@sec-workbudget) [@nesbit2005work].
+For a one-degree-of-freedom joint spanning segments $i$ and $i{+}1$, with
+net generalized joint torque $\tau$ and compatible relative joint rate
+$\dot q$, the net joint power is
+
+$$
+P_{\mathrm{joint}} = \tau\dot q.
+$$ {#eq-net-joint-power}
+
+Its time integral is the net mechanical work associated with the
+resultant joint moment under the declared sign convention. Positive and
+negative values mean net positive and negative mechanical power; they do
+not, by themselves, identify muscle energy generation or absorption.
+Resultant inverse-dynamics torque can combine agonist and antagonist
+forces, passive tissue moments, and other unmodeled contributions. This
+net work--power quantity is central to the budget of Nesbit and Serrano
+(@sec-workbudget) [@nesbit2005work], but interpreting it physiologically
+requires additional muscle and tissue measurements or models.
 
 ### Joint-Force Power and Segmental Energy Accounting {#sec-rw}
 
-Joint moments are not the only conduit of mechanical energy: the joint
-reaction force $\mathbf{F}$ acting at a joint moving with velocity
-$\mathbf{v}$ transmits *joint-force power*
-$P_f = \mathbf{F}\cdot\mathbf{v}$ from one segment to the next.
-Robertson and Winter's classic formulation balances, for each segment,
-the rate of change of segment mechanical energy against the sum of
-joint-force powers and moment powers at its proximal and distal ends,
-distinguishing energy *transferred between* segments from energy
-*generated or absorbed* at joints [@robertson1980; @winter2009]. This is
-the correct level of analysis for the timing question, because
-"retain-early / release-late" is precisely a claim about the *time
-course of inter-segment transfer terms*, not about peak angular
-velocities. @sec-methods implements exactly this accounting at the
-model's wrist interface, including the energy-balance residual check.
+Joint moments are not the only conduit of segmental mechanical energy.
+For a wrench acting on one segment at joint point $J$, the endpoint power
+must use the velocity and angular velocity of that same segment, expressed
+in compatible frames:
+
+$$
+P_{J\rightarrow i}
+= \mathbf{F}_{J\rightarrow i}\!\cdot\mathbf{v}_{J,i}
++ \mathbf{M}_{J\rightarrow i}\!\cdot\boldsymbol{\omega}_i.
+$$ {#eq-segment-endpoint-power}
+
+The equal-and-opposite wrench on the adjacent segment generally has a
+different segment angular velocity, so the two moment-power terms need
+not cancel. Their sum is related to the net relative joint power; the
+individual segment terms describe delivery to or removal from each
+segment. At a common ideal joint point, the internal force-power terms
+cancel in the whole-system sum but remain essential to each segment's
+energy balance.
+
+Robertson and Winter balanced each leg segment's rate of mechanical-energy
+change against proximal and distal reaction-force and moment powers
+[@robertson1980]. Their validation used sagittal-plane force-plate and
+cinefilm data from two participants walking at several speeds. Agreement
+was acceptable except for ankle power during weight acceptance and late
+push-off, and the estimated joint transfers were comparable in magnitude
+to estimated muscle generation and absorption. The method therefore
+motivates full segment-level accounting; the small walking study is not a
+validation of golf power, three-dimensional joint-center estimates, or
+individual muscle energetics.
+
+The "retain-early / release-late" hypothesis concerns the time course of
+declared intersegment power terms, so segment energy balances are more
+direct than peak angular velocities. They are still not sufficient for
+muscle coordination: Zajac, Neptune, and Kautz explicitly cautioned that
+joint powers and segment angular velocities alone cannot determine energy
+flow, and recommended muscle-induced acceleration and power analysis in a
+dynamical simulation [@zajac2002]. @sec-methods implements a model-level
+wrist-interface balance, including a residual check; it does not identify
+the human muscles responsible for that balance.
 
 ### Induced Accelerations and Dynamic Coupling
 
 In a coupled chain, a single generalized torque can induce acceleration at
 multiple coordinates — including coordinates it does not span — through
 the inverse inertia matrix when the corresponding coupling terms are
-nonzero [@zajac1989]. Induced-acceleration and power-transfer analyses in
-locomotion research [@zajac2002] show that intuitions of the form
-"muscle X accelerates joint Y" routinely fail in coupled systems. For
-golf this matters because a torso torque early in the downswing partly
-accelerates the *club* (through coupling), and a wrist torque late in
-the downswing back-reacts on the torso; the net energy routing is an
-emergent property of the whole chain. The ZTCF/ZVCF decompositions of
-@sec-timing-framework are the counterfactual cousins of this analysis.
+nonzero [@zajac1989]. Zajac, Neptune, and Kautz reviewed why inverse
+dynamics cannot by itself assign causal action to individual muscles and
+why muscle-driven simulations are needed for induced-acceleration and
+power analyses [@zajac2002]. In a golf model with nonzero pathways, an
+early torso torque may induce club acceleration and a late wrist torque
+may induce proximal acceleration or deceleration. Their signs and
+magnitudes must be computed for the declared model and state; these are
+mechanical possibilities, not human-golf findings supplied by the walking
+literature. The ZTCF/ZVCF decompositions of @sec-timing-framework are
+model-level counterfactual analyses with a different intervention
+definition, not measurements of individual muscle action.
 
 ### Kinematic Sequence as a Proxy — And Its Failure Modes
 
-Peak-ordering of segment angular speeds is a *proxy* for energy flow,
-not a measurement of it. Marsan and colleagues showed that the
-identified kinematic sequence in golf depends materially on which
-angular-velocity component (or norm, or projection) is analyzed:
-thirteen golfers analyzed with seven component-selection methods yielded
-different sequences [@marsan2019]. Marshall and Elliott's
-long-axis-rotation caution [@marshall2000] is a special case of the same
-problem, and the near-planarity of the downswing is itself only an
-approximation [@coleman2005; @kwon2012]. Any serious test of the timing
-hypothesis must therefore run at the level of energy and power
-accounting (@sec-rw), with the kinematic sequence reported as
-corroborating description only — which is how @sec-results uses it.
+Peak-ordering of segment angular speeds is a *proxy* for energy flow, not
+a measurement of it. Marsan and colleagues analyzed driver swings from
+13 golfers with seven angular-velocity component-selection methods and
+obtained almost as many sequences as methods for each golfer; no method
+could be designated the reference, although one correlated most strongly
+with performance in that sample [@marsan2019]. Marshall and Elliott's
+long-axis-rotation result in two racquet tasks [@marshall2000] illustrates
+one omitted component, not a golf energy-flow validation.
+
+"Planar" also requires a declared object and tolerance. Coleman and Rankin
+measured seven right-handed golfers (handicap 0--15) and found that the
+left-arm plane changed orientation through the downswing while the
+clubhead was, on average, 0.291 m from that plane at impact
+[@coleman2005]. Kwon and colleagues measured 14 skilled male golfers with
+three clubs: the clubhead followed a well-defined functional swing plane,
+but shoulder and arm points occupied different motion planes and deviated
+substantially from the clubhead plane [@kwon2012]. These results reject a
+single fixed plane shared by the body and club; they do not imply that a
+planar club model is useless for a narrowly declared mechanism.
+
+Tests of the timing hypothesis should therefore pair an explicitly defined
+kinematic sequence with segment and interface power accounting
+(@sec-rw), coordinate sensitivity, and three-dimensional residuals. The
+sequence remains corroborating description rather than evidence of energy
+transfer—which is how @sec-results uses it.
