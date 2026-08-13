@@ -13,7 +13,7 @@ from scripts.research.proximal_distal_energy.run_forward_two_arm_study import (
     write_study,
 )
 
-pytestmark = pytest.mark.scientific
+pytestmark = [pytest.mark.scientific, pytest.mark.timeout(180)]
 ARTIFACT_DIR = (
     Path(__file__).resolve().parents[2]
     / "docs"
@@ -46,6 +46,8 @@ def test_evidence_executes_forward_model_and_declares_boundaries(
     assert all(len(digest) == 64 for digest in record["source_files"].values())
     assert arrays["baseline_q"].shape[1] == 7
     assert arrays["baseline_contact_force_on_club_n"].shape[1:] == (2, 2)
+    audit = record["constraint_acceleration_bias_audit"]
+    assert audit["maximum_residual_m_s2"] < audit["tolerance_m_s2"] == 1e-7
 
 
 def test_forward_constraints_and_energy_residuals_close(
@@ -60,6 +62,10 @@ def test_forward_constraints_and_energy_residuals_close(
     assert closure["acceleration_constraint_residual_max"] < 1e-9
     assert closure["work_energy_residual_abs_j"] < 0.1
     assert closure["contact_wrench_power_equivalence_max_w"] < 1e-9
+    assert closure["constraint_two_sided_power_residual_max_w"] < 1e-9
+    assert closure["projection_energy_change_absolute_sum_j"] >= abs(
+        closure["projection_energy_change_sum_j"]
+    )
 
 
 def test_force_generated_negative_couple_persists_after_killswitch(

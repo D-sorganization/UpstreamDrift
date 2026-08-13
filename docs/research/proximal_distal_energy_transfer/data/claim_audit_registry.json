@@ -2,14 +2,14 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "7f4563bfefad40444516cc1994a80e57407c795cfd019c0844859a594a57a5f0",
+    "source_digest": "561a66870db5c2930e94460a929324c94331c92503ab4c76eee97cb509bf219e",
     "baseline_commit": "13ea6a69585a42dc1db4b3959440ed95787c9779"
   },
   "audit_scope": {
     "completion_status": "in_progress",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "Stable claim identity, cross-platform source digests, complete post-equation parsing, and sixteen high-risk evidence slices. Chapters 2 through 5, both counterfactual chapters, the proximal-velocity, archived two-hand wrench, shaft-contribution, common-observable model-ladder, and coupled moving-base/compliant-club chapters are fully adjudicated. The complete 914-candidate audit remains in progress; 513 unique candidates are reviewed and 401 remain unadjudicated."
+    "current_scope": "Stable claim identity, cross-platform source digests, complete post-equation parsing, and seventeen high-risk evidence slices. Chapters 2 through 5, both counterfactual chapters, proximal-velocity, archived and forward two-hand, shaft-contribution, common-observable model-ladder, and coupled moving-base/compliant-club chapters are fully adjudicated. The complete 915-candidate audit remains in progress; 554 unique candidates are reviewed and 361 remain unadjudicated."
   },
   "dependencies": [
     {
@@ -165,11 +165,12 @@
       "candidate_id": "PD-CAND-955caef0fc7773b8",
       "disposition": "material_claims_mapped",
       "claim_ids": [
-        "PD-CLAIM-003"
+        "PD-CLAIM-003",
+        "PD-CLAIM-169"
       ],
-      "rationale": "The paragraph asserts persistence of a negative force-generated couple in a forward model branch.",
+      "rationale": "The paragraph asserts persistence of a negative force-generated couple in a forward model branch. This content-identical forward passage is also mapped to its chapter-specific claim.",
       "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-12"
+      "last_verified_on": "2026-08-13"
     },
     {
       "candidate_id": "PD-CAND-227a00e5fa408d07",
@@ -5233,6 +5234,416 @@
         "PD-CLAIM-160"
       ],
       "rationale": "This coupled-base passage participates in a registered mechanics, numerical, interpretation, boundary, sensitivity, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-41748e95e160a408",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-161"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-e35d8b5b2daa43c7",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-161"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-902ace651b1f5855",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-161"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-2f13076df7609898",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-162"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-88af272ae36f6aca",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-162"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-7f5910ccb0a4b492",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-162"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-48fb363ea98b2849",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-162"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-1b59d48d573836c6",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-162"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-bfebce976af2a93a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-163"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-7b6fc038f63c6cf9",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-163"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-61254da8a1e466ab",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-163"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-37e1df40c0e1b8cf",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-164"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-9301fa63af8c9eba",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-164"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-88e0436c9c6383e9",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-165"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-26d02d0b99180d67",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-165"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-a9fa003260d9a2eb",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-165"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-8522a7e840019a3a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-165"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-6af35ea67e9a9188",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-165"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-fad8eca050d5246b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-165"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-e8d0aef6d853c04c",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-166"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-397e2b8d834a389e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-166"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-b3bfd17b6264c089",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-166"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-8163939437c565ea",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-166"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-a53eaf39b520a0cb",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-167"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-c7fb0952d52520bf",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-167"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-62ddaed07fecdb8a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-168"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-8b166965d8ff0e64",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-168"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-464584cc9fe42574",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-168"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-a5bbe0bc7b95f6c1",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-169"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-9d84ecc5e2681325",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-169"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-b2d2869ccaf1f7ca",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-169"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-a16367707b70edc4",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-170"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-7d44ebaa4cca5310",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-170"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-69ab5a463b762fdd",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-170"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-77d8a6347e17ff47",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-171"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-c31033ccaad15dda",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-171"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-6e880d7370ae81b1",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-171"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-2784c2edf6f0be18",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-171"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-7675499079461c8c",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-172"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-801cd3bfc533926a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-173"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-db4b880cc306f553",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-174"
+      ],
+      "rationale": "This forward two-hand passage participates in a registered mechanics, numerical, intervention, boundary, or falsification claim checked against regenerated evidence.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
     }
@@ -11618,6 +12029,636 @@
       ],
       "falsifier": "A later tier claims support without execution or silently changes the observable, boundary, or reference.",
       "adjudication": "Each reciprocal chapter candidate was checked against regenerated executable evidence. Analytic constraint bias, two one-sided power representations, complete two-sided constraint power, projection energy, matched-step sensitivity, model boundaries, and falsifiers are explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-161",
+      "candidate_ids": [
+        "PD-CAND-41748e95e160a408",
+        "PD-CAND-e35d8b5b2daa43c7",
+        "PD-CAND-902ace651b1f5855"
+      ],
+      "statement": "A planar two-arm floating-club trajectory and exact same-state zero-command branch test finite mechanical persistence; they do not identify human effort, intent, use, or coaching strategy.",
+      "classification": "forward_two_hand_scope",
+      "published_status": "declared_mechanism_study_only",
+      "audit_status": "mechanics_numerics_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:5",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:13",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:21"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.npz",
+        "scripts/research/proximal_distal_energy/forward_two_arm.py",
+        "scripts/research/proximal_distal_energy/run_forward_two_arm_study.py",
+        "scripts/research/proximal_distal_energy/two_arm_closed_loop.py",
+        "tests/research/test_forward_two_arm.py",
+        "tests/research/test_forward_two_arm_evidence.py",
+        "tests/research/test_two_arm_closed_loop.py"
+      ],
+      "model_domain": "Planar forward two-hand constrained model and registered interventions.",
+      "uncertainty_boundary": "No golfer calibration, muscle model, anatomy, compliance, 3-D motion, or human validation.",
+      "competing_explanations": [
+        "command history",
+        "geometry",
+        "numerical projection",
+        "omitted higher-order mechanics"
+      ],
+      "negative_controls": [
+        "same-state branch",
+        "zero moment arm",
+        "timestep refinement",
+        "projection sensitivity"
+      ],
+      "falsifier": "The branch is not state-identical, commands remain, or the result is promoted to a human claim.",
+      "adjudication": "Reciprocal passages were checked against regenerated evidence; exact constraint bias, distinct power identities, projection error, interventions, closure, and non-human boundaries are explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-162",
+      "candidate_ids": [
+        "PD-CAND-2f13076df7609898",
+        "PD-CAND-88af272ae36f6aca",
+        "PD-CAND-7f5910ccb0a4b492",
+        "PD-CAND-48fb363ea98b2849",
+        "PD-CAND-1b59d48d573836c6"
+      ],
+      "statement": "Seven coordinates and four independent hand-minus-grip constraints leave three admissible instantaneous degrees of freedom; accepted states retain rank four and fail closed on singular geometry or projection.",
+      "classification": "coordinates_geometry_and_rank",
+      "published_status": "supported_at_declared_model_tier",
+      "audit_status": "mechanics_numerics_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:32",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:41",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:54",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:63",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:76"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.npz",
+        "scripts/research/proximal_distal_energy/forward_two_arm.py",
+        "scripts/research/proximal_distal_energy/run_forward_two_arm_study.py",
+        "scripts/research/proximal_distal_energy/two_arm_closed_loop.py",
+        "tests/research/test_forward_two_arm.py",
+        "tests/research/test_forward_two_arm_evidence.py",
+        "tests/research/test_two_arm_closed_loop.py"
+      ],
+      "model_domain": "Planar forward two-hand constrained model and registered interventions.",
+      "uncertainty_boundary": "Point contacts and coordinates are model surrogates, not measured anatomy or pressure centers.",
+      "competing_explanations": [
+        "command history",
+        "geometry",
+        "numerical projection",
+        "omitted higher-order mechanics"
+      ],
+      "negative_controls": [
+        "same-state branch",
+        "zero moment arm",
+        "timestep refinement",
+        "projection sensitivity"
+      ],
+      "falsifier": "Rank falls below four, closure exceeds tolerance, or a fallback supplies reactions.",
+      "adjudication": "Reciprocal passages were checked against regenerated evidence; exact constraint bias, distinct power identities, projection error, interventions, closure, and non-human boundaries are explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-163",
+      "candidate_ids": [
+        "PD-CAND-bfebce976af2a93a",
+        "PD-CAND-7b6fc038f63c6cf9",
+        "PD-CAND-61254da8a1e466ab"
+      ],
+      "statement": "Analytic rigid-body and constraint mechanics drive the KKT solve; exact J-dot-q-dot agrees with an independent five-point directional audit within 1.04e-9 m/s2.",
+      "classification": "exact_constrained_dynamics",
+      "published_status": "supported_with_independent_numeric_audit",
+      "audit_status": "mechanics_numerics_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:86",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:107",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:113"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.npz",
+        "scripts/research/proximal_distal_energy/forward_two_arm.py",
+        "scripts/research/proximal_distal_energy/run_forward_two_arm_study.py",
+        "scripts/research/proximal_distal_energy/two_arm_closed_loop.py",
+        "tests/research/test_forward_two_arm.py",
+        "tests/research/test_forward_two_arm_evidence.py",
+        "tests/research/test_two_arm_closed_loop.py"
+      ],
+      "model_domain": "Planar forward two-hand constrained model and registered interventions.",
+      "uncertainty_boundary": "The audit checks the analytic bias but is not an independent dynamics engine.",
+      "competing_explanations": [
+        "command history",
+        "geometry",
+        "numerical projection",
+        "omitted higher-order mechanics"
+      ],
+      "negative_controls": [
+        "same-state branch",
+        "zero moment arm",
+        "timestep refinement",
+        "projection sensitivity"
+      ],
+      "falsifier": "Bias mismatch reaches 1e-7 m/s2 or either KKT row fails tolerance.",
+      "adjudication": "Reciprocal passages were checked against regenerated evidence; exact constraint bias, distinct power identities, projection error, interventions, closure, and non-human boundaries are explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-164",
+      "candidate_ids": [
+        "PD-CAND-37e1df40c0e1b8cf",
+        "PD-CAND-9301fa63af8c9eba"
+      ],
+      "statement": "Each wrist torque acts oppositely on its arm coordinates and club rotation, so direct wrist command is not counted again as a constraint-force couple.",
+      "classification": "wrist_action_reaction_mapping",
+      "published_status": "supported_by_virtual_work_mapping",
+      "audit_status": "mechanics_numerics_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:120",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:137"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.npz",
+        "scripts/research/proximal_distal_energy/forward_two_arm.py",
+        "scripts/research/proximal_distal_energy/run_forward_two_arm_study.py",
+        "scripts/research/proximal_distal_energy/two_arm_closed_loop.py",
+        "tests/research/test_forward_two_arm.py",
+        "tests/research/test_forward_two_arm_evidence.py",
+        "tests/research/test_two_arm_closed_loop.py"
+      ],
+      "model_domain": "Planar forward two-hand constrained model and registered interventions.",
+      "uncertainty_boundary": "The mapping does not identify anatomical muscle torque or measured wrist loading.",
+      "competing_explanations": [
+        "command history",
+        "geometry",
+        "numerical projection",
+        "omitted higher-order mechanics"
+      ],
+      "negative_controls": [
+        "same-state branch",
+        "zero moment arm",
+        "timestep refinement",
+        "projection sensitivity"
+      ],
+      "falsifier": "Rigid-body action-reaction does not cancel or observables conflate wrist and force couple.",
+      "adjudication": "Reciprocal passages were checked against regenerated evidence; exact constraint bias, distinct power identities, projection error, interventions, closure, and non-human boundaries are explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-165",
+      "candidate_ids": [
+        "PD-CAND-88e0436c9c6383e9",
+        "PD-CAND-26d02d0b99180d67",
+        "PD-CAND-a9fa003260d9a2eb",
+        "PD-CAND-8522a7e840019a3a",
+        "PD-CAND-6af35ea67e9a9188",
+        "PD-CAND-fad8eca050d5246b"
+      ],
+      "statement": "The 0.400 s, 0.25 ms reference uses explicit mass-metric projections, a closed inverse-kinematic initial state, and a fully declared nonoptimized open-loop command.",
+      "classification": "integration_and_input_boundary",
+      "published_status": "supported_reproducible_input_contract",
+      "audit_status": "mechanics_numerics_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:142",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:152",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:157",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:162",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:164",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:171"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.npz",
+        "scripts/research/proximal_distal_energy/forward_two_arm.py",
+        "scripts/research/proximal_distal_energy/run_forward_two_arm_study.py",
+        "scripts/research/proximal_distal_energy/two_arm_closed_loop.py",
+        "tests/research/test_forward_two_arm.py",
+        "tests/research/test_forward_two_arm_evidence.py",
+        "tests/research/test_two_arm_closed_loop.py"
+      ],
+      "model_domain": "Planar forward two-hand constrained model and registered interventions.",
+      "uncertainty_boundary": "The command is a test input, not inferred human torque or an optimum.",
+      "competing_explanations": [
+        "command history",
+        "geometry",
+        "numerical projection",
+        "omitted higher-order mechanics"
+      ],
+      "negative_controls": [
+        "same-state branch",
+        "zero moment arm",
+        "timestep refinement",
+        "projection sensitivity"
+      ],
+      "falsifier": "Inputs fail replay, initial closure fails, or the command is described as inferred or optimal.",
+      "adjudication": "Reciprocal passages were checked against regenerated evidence; exact constraint bias, distinct power identities, projection error, interventions, closure, and non-human boundaries are explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-166",
+      "candidate_ids": [
+        "PD-CAND-e8d0aef6d853c04c",
+        "PD-CAND-397e2b8d834a389e",
+        "PD-CAND-b3bfd17b6264c089",
+        "PD-CAND-8163939437c565ea"
+      ],
+      "statement": "Force couple, direct wrist moment, resultant, and differential force are separate; only transverse force with signed nonzero moment arm contributes to the point-force couple.",
+      "classification": "force_couple_and_contact_modes",
+      "published_status": "supported_by_declared_mechanics",
+      "audit_status": "mechanics_numerics_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:179",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:187",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:193",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:201"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.npz",
+        "scripts/research/proximal_distal_energy/forward_two_arm.py",
+        "scripts/research/proximal_distal_energy/run_forward_two_arm_study.py",
+        "scripts/research/proximal_distal_energy/two_arm_closed_loop.py",
+        "tests/research/test_forward_two_arm.py",
+        "tests/research/test_forward_two_arm_evidence.py",
+        "tests/research/test_two_arm_closed_loop.py"
+      ],
+      "model_domain": "Planar forward two-hand constrained model and registered interventions.",
+      "uncertainty_boundary": "Distributed grip traction and free moment are omitted.",
+      "competing_explanations": [
+        "command history",
+        "geometry",
+        "numerical projection",
+        "omitted higher-order mechanics"
+      ],
+      "negative_controls": [
+        "same-state branch",
+        "zero moment arm",
+        "timestep refinement",
+        "projection sensitivity"
+      ],
+      "falsifier": "Mode reconstruction fails or nonzero point-force couple survives zero moment arms.",
+      "adjudication": "Reciprocal passages were checked against regenerated evidence; exact constraint bias, distinct power identities, projection error, interventions, closure, and non-human boundaries are explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-167",
+      "candidate_ids": [
+        "PD-CAND-a53eaf39b520a0cb",
+        "PD-CAND-c7fb0952d52520bf"
+      ],
+      "statement": "One-sided point-contact power equals club-center resultant-force and couple wrench power within 6.68e-13 W; couple sign alone does not determine contact-power sign.",
+      "classification": "contact_power_identity",
+      "published_status": "supported_at_declared_model_tier",
+      "audit_status": "mechanics_numerics_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:206",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:214"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.npz",
+        "scripts/research/proximal_distal_energy/forward_two_arm.py",
+        "scripts/research/proximal_distal_energy/run_forward_two_arm_study.py",
+        "scripts/research/proximal_distal_energy/two_arm_closed_loop.py",
+        "tests/research/test_forward_two_arm.py",
+        "tests/research/test_forward_two_arm_evidence.py",
+        "tests/research/test_two_arm_closed_loop.py"
+      ],
+      "model_domain": "Planar forward two-hand constrained model and registered interventions.",
+      "uncertainty_boundary": "This is club-side power, not muscle work or complete-system constraint work.",
+      "competing_explanations": [
+        "command history",
+        "geometry",
+        "numerical projection",
+        "omitted higher-order mechanics"
+      ],
+      "negative_controls": [
+        "same-state branch",
+        "zero moment arm",
+        "timestep refinement",
+        "projection sensitivity"
+      ],
+      "falsifier": "The identity exceeds 1e-9 W or prose infers power solely from couple sign.",
+      "adjudication": "Reciprocal passages were checked against regenerated evidence; exact constraint bias, distinct power identities, projection error, interventions, closure, and non-human boundaries are explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-168",
+      "candidate_ids": [
+        "PD-CAND-62ddaed07fecdb8a",
+        "PD-CAND-8b166965d8ff0e64",
+        "PD-CAND-464584cc9fe42574"
+      ],
+      "statement": "Same-state command removal, zero moment arm, timestep refinement, and projection-tolerance sensitivity have declared null consequences and observable failure modes.",
+      "classification": "registered_intervention_design",
+      "published_status": "registered_falsification_design",
+      "audit_status": "mechanics_numerics_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:222",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:224",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:240"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.npz",
+        "scripts/research/proximal_distal_energy/forward_two_arm.py",
+        "scripts/research/proximal_distal_energy/run_forward_two_arm_study.py",
+        "scripts/research/proximal_distal_energy/two_arm_closed_loop.py",
+        "tests/research/test_forward_two_arm.py",
+        "tests/research/test_forward_two_arm_evidence.py",
+        "tests/research/test_two_arm_closed_loop.py"
+      ],
+      "model_domain": "Planar forward two-hand constrained model and registered interventions.",
+      "uncertainty_boundary": "The controls do not span structural-model or human uncertainty.",
+      "competing_explanations": [
+        "command history",
+        "geometry",
+        "numerical projection",
+        "omitted higher-order mechanics"
+      ],
+      "negative_controls": [
+        "same-state branch",
+        "zero moment arm",
+        "timestep refinement",
+        "projection sensitivity"
+      ],
+      "falsifier": "Any null consequence fails or intervention inputs are not comparable.",
+      "adjudication": "Reciprocal passages were checked against regenerated evidence; exact constraint bias, distinct power identities, projection error, interventions, closure, and non-human boundaries are explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-169",
+      "candidate_ids": [
+        "PD-CAND-a5bbe0bc7b95f6c1",
+        "PD-CAND-9d84ecc5e2681325",
+        "PD-CAND-955caef0fc7773b8",
+        "PD-CAND-b2d2869ccaf1f7ca"
+      ],
+      "statement": "The reference force couple crosses negative at 0.19825 s and reaches -32.85 N m; a bitwise same-state 0.200 s zero-command branch remains negative for 50 ms, while the ensemble shows finite state dependence.",
+      "classification": "negative_couple_and_zero_command_persistence",
+      "published_status": "model_conditional_quantitative_result",
+      "audit_status": "mechanics_numerics_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:248",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:253",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:259",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:266"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.npz",
+        "scripts/research/proximal_distal_energy/forward_two_arm.py",
+        "scripts/research/proximal_distal_energy/run_forward_two_arm_study.py",
+        "scripts/research/proximal_distal_energy/two_arm_closed_loop.py",
+        "tests/research/test_forward_two_arm.py",
+        "tests/research/test_forward_two_arm_evidence.py",
+        "tests/research/test_two_arm_closed_loop.py"
+      ],
+      "model_domain": "Planar forward two-hand constrained model and registered interventions.",
+      "uncertainty_boundary": "Zero command is not zero activation, impedance, force, gravity, or momentum.",
+      "competing_explanations": [
+        "command history",
+        "geometry",
+        "numerical projection",
+        "omitted higher-order mechanics"
+      ],
+      "negative_controls": [
+        "same-state branch",
+        "zero moment arm",
+        "timestep refinement",
+        "projection sensitivity"
+      ],
+      "falsifier": "State differs, commands remain nonzero, or persistence fails the registered windows.",
+      "adjudication": "Reciprocal passages were checked against regenerated evidence; exact constraint bias, distinct power identities, projection error, interventions, closure, and non-human boundaries are explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-170",
+      "candidate_ids": [
+        "PD-CAND-a16367707b70edc4",
+        "PD-CAND-7d44ebaa4cca5310",
+        "PD-CAND-69ab5a463b762fdd"
+      ],
+      "statement": "Executable force vectors expose changing signed moment arms and transverse components; coincident grip points drive the point-force couple to machine zero.",
+      "classification": "geometric_force_vector_mechanism",
+      "published_status": "supported_at_declared_model_tier",
+      "audit_status": "mechanics_numerics_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:275",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:283",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:288"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.npz",
+        "scripts/research/proximal_distal_energy/forward_two_arm.py",
+        "scripts/research/proximal_distal_energy/run_forward_two_arm_study.py",
+        "scripts/research/proximal_distal_energy/two_arm_closed_loop.py",
+        "tests/research/test_forward_two_arm.py",
+        "tests/research/test_forward_two_arm_evidence.py",
+        "tests/research/test_two_arm_closed_loop.py"
+      ],
+      "model_domain": "Planar forward two-hand constrained model and registered interventions.",
+      "uncertainty_boundary": "A real grip may transmit omitted distributed traction and free moments.",
+      "competing_explanations": [
+        "command history",
+        "geometry",
+        "numerical projection",
+        "omitted higher-order mechanics"
+      ],
+      "negative_controls": [
+        "same-state branch",
+        "zero moment arm",
+        "timestep refinement",
+        "projection sensitivity"
+      ],
+      "falsifier": "Vectors disagree with evidence or couple remains above 1e-12 N m at coincident grips.",
+      "adjudication": "Reciprocal passages were checked against regenerated evidence; exact constraint bias, distinct power identities, projection error, interventions, closure, and non-human boundaries are explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-171",
+      "candidate_ids": [
+        "PD-CAND-77d8a6347e17ff47",
+        "PD-CAND-c31033ccaad15dda",
+        "PD-CAND-6e880d7370ae81b1",
+        "PD-CAND-2784c2edf6f0be18"
+      ],
+      "statement": "The reference closes rank, KKT, constraints, and two-sided constraint power; its 0.778 J absolute cumulative projection correction exceeds the 0.096 J raw balance residual, while refinement resolves the sign result.",
+      "classification": "numerical_closure_and_projection_budget",
+      "published_status": "supported_with_disclosed_numerical_error_budget",
+      "audit_status": "mechanics_numerics_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:296",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:307",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:313",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:322"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.npz",
+        "scripts/research/proximal_distal_energy/forward_two_arm.py",
+        "scripts/research/proximal_distal_energy/run_forward_two_arm_study.py",
+        "scripts/research/proximal_distal_energy/two_arm_closed_loop.py",
+        "tests/research/test_forward_two_arm.py",
+        "tests/research/test_forward_two_arm_evidence.py",
+        "tests/research/test_two_arm_closed_loop.py"
+      ],
+      "model_domain": "Planar forward two-hand constrained model and registered interventions.",
+      "uncertainty_boundary": "The raw residual is not the complete error budget because projection corrections can cancel it.",
+      "competing_explanations": [
+        "command history",
+        "geometry",
+        "numerical projection",
+        "omitted higher-order mechanics"
+      ],
+      "negative_controls": [
+        "same-state branch",
+        "zero moment arm",
+        "timestep refinement",
+        "projection sensitivity"
+      ],
+      "falsifier": "Closure fails, corrections are hidden, or sign/timing changes materially under refinement.",
+      "adjudication": "Reciprocal passages were checked against regenerated evidence; exact constraint bias, distinct power identities, projection error, interventions, closure, and non-human boundaries are explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-172",
+      "candidate_ids": [
+        "PD-CAND-7675499079461c8c"
+      ],
+      "statement": "The achieved model state can carry a negative separated-hand force couple for a finite interval after command removal, subject to registered geometry and numerical controls.",
+      "classification": "conditional_forward_mechanism_conclusion",
+      "published_status": "supported_conditionally_at_declared_model_tier",
+      "audit_status": "mechanics_numerics_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:333"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.npz",
+        "scripts/research/proximal_distal_energy/forward_two_arm.py",
+        "scripts/research/proximal_distal_energy/run_forward_two_arm_study.py",
+        "scripts/research/proximal_distal_energy/two_arm_closed_loop.py",
+        "tests/research/test_forward_two_arm.py",
+        "tests/research/test_forward_two_arm_evidence.py",
+        "tests/research/test_two_arm_closed_loop.py"
+      ],
+      "model_domain": "Planar forward two-hand constrained model and registered interventions.",
+      "uncertainty_boundary": "This is possibility, not prevalence, benefit, necessity, or human causation.",
+      "competing_explanations": [
+        "command history",
+        "geometry",
+        "numerical projection",
+        "omitted higher-order mechanics"
+      ],
+      "negative_controls": [
+        "same-state branch",
+        "zero moment arm",
+        "timestep refinement",
+        "projection sensitivity"
+      ],
+      "falsifier": "Any supporting branch, geometry, or convergence control fails.",
+      "adjudication": "Reciprocal passages were checked against regenerated evidence; exact constraint bias, distinct power identities, projection error, interventions, closure, and non-human boundaries are explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-173",
+      "candidate_ids": [
+        "PD-CAND-801cd3bfc533926a"
+      ],
+      "statement": "Zero model command does not mean absence of constraint force, gravity, momentum, stored energy, muscle activation, cocontraction, or impedance; omitted higher-order pathways remain open.",
+      "classification": "zero_command_not_biological_passivity",
+      "published_status": "explicit_nonphysiology_boundary",
+      "audit_status": "mechanics_numerics_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:340"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.npz",
+        "scripts/research/proximal_distal_energy/forward_two_arm.py",
+        "scripts/research/proximal_distal_energy/run_forward_two_arm_study.py",
+        "scripts/research/proximal_distal_energy/two_arm_closed_loop.py",
+        "tests/research/test_forward_two_arm.py",
+        "tests/research/test_forward_two_arm_evidence.py",
+        "tests/research/test_two_arm_closed_loop.py"
+      ],
+      "model_domain": "Planar forward two-hand constrained model and registered interventions.",
+      "uncertainty_boundary": "No biological allocation is identifiable from this model.",
+      "competing_explanations": [
+        "command history",
+        "geometry",
+        "numerical projection",
+        "omitted higher-order mechanics"
+      ],
+      "negative_controls": [
+        "same-state branch",
+        "zero moment arm",
+        "timestep refinement",
+        "projection sensitivity"
+      ],
+      "falsifier": "The paper describes zero command as biological passivity or complete force removal.",
+      "adjudication": "Reciprocal passages were checked against regenerated evidence; exact constraint bias, distinct power identities, projection error, interventions, closure, and non-human boundaries are explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-174",
+      "candidate_ids": [
+        "PD-CAND-db4b880cc306f553"
+      ],
+      "statement": "Positive wrist torque at every instant is not mechanically necessary for distal acceleration in this state, but golfer-specific strategy requires higher-order and governed human evidence.",
+      "classification": "strategy_hypothesis_nonprescription",
+      "published_status": "hypothesis_only_with_nonprescription",
+      "audit_status": "mechanics_numerics_boundaries_and_falsifier_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:348"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.npz",
+        "scripts/research/proximal_distal_energy/forward_two_arm.py",
+        "scripts/research/proximal_distal_energy/run_forward_two_arm_study.py",
+        "scripts/research/proximal_distal_energy/two_arm_closed_loop.py",
+        "tests/research/test_forward_two_arm.py",
+        "tests/research/test_forward_two_arm_evidence.py",
+        "tests/research/test_two_arm_closed_loop.py"
+      ],
+      "model_domain": "Planar forward two-hand constrained model and registered interventions.",
+      "uncertainty_boundary": "No direction, timing, safety, or performance prescription follows.",
+      "competing_explanations": [
+        "command history",
+        "geometry",
+        "numerical projection",
+        "omitted higher-order mechanics"
+      ],
+      "negative_controls": [
+        "same-state branch",
+        "zero moment arm",
+        "timestep refinement",
+        "projection sensitivity"
+      ],
+      "falsifier": "The result is promoted to coaching advice or higher-tier evidence rejects it.",
+      "adjudication": "Reciprocal passages were checked against regenerated evidence; exact constraint bias, distinct power identities, projection error, interventions, closure, and non-human boundaries are explicit.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
     }

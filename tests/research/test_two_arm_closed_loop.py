@@ -11,6 +11,7 @@ from scripts.research.proximal_distal_energy.two_arm_closed_loop import (
     TwoArmControl,
     TwoArmParams,
     contact_wrench,
+    constraint_acceleration_bias_audit,
     control_generalized_force,
     coriolis_vector,
     decompose_contact_forces,
@@ -72,6 +73,12 @@ def test_independent_hand_constraints_have_full_row_rank() -> None:
     assert result.constraint_rank == 4
     assert result.kkt_residual_norm < 1e-9
     assert result.acceleration_constraint_residual_norm < 1e-9
+
+
+def test_exact_constraint_acceleration_bias_matches_directional_audit() -> None:
+    params, q, _ = _state()
+    qdot = np.array([1.2, -0.7, -0.9, 0.4, 0.3, -0.2, 1.1])
+    assert constraint_acceleration_bias_audit(q, qdot, params) < 1e-9
 
 
 def test_singular_hand_geometry_fails_closed() -> None:

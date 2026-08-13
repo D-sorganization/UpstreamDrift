@@ -29,6 +29,8 @@ from scripts.research.proximal_distal_energy.two_arm_closed_loop import (
     TwoArmControl,
     TwoArmParams,
     contact_wrench,
+    constraint_acceleration_bias_audit,
+    constraint_jacobian,
     control_generalized_force,
     decompose_contact_forces,
     kinematics,
@@ -85,6 +87,7 @@ def _trace_observables(
     control_power = np.empty(samples)
     wrist_torque = np.empty(samples)
     wrench_power = np.empty(samples)
+    constraint_power = np.empty(samples)
     for index, (state, velocity, forces, control) in enumerate(
         zip(
             trace.q,
@@ -116,12 +119,16 @@ def _trace_observables(
             wrench.resultant_force_n @ velocity[4:6]
             + wrench.moment_about_center_nm * velocity[6]
         )
+        constraint_power[index] = trace.multipliers_n[index] @ (
+            constraint_jacobian(state, params) @ velocity
+        )
     return {
         "resultant_contact_force_n": resultant,
         "differential_contact_force_n": differential,
         "force_generated_couple_nm": force_couple,
         "contact_power_w": contact_power,
         "wrench_power_w": wrench_power,
+        "constraint_two_sided_power_residual_w": constraint_power,
         "control_power_w": control_power,
         "direct_wrist_torque_nm": wrist_torque,
     }
@@ -165,11 +172,20 @@ def _closure_record(
         "projection_energy_change_sum_j": float(
             np.sum(trace.projection_energy_change_j)
         ),
+        "projection_energy_change_absolute_sum_j": float(
+            np.sum(np.abs(trace.projection_energy_change_j))
+        ),
+        "projection_energy_change_max_abs_j": float(
+            np.max(np.abs(trace.projection_energy_change_j))
+        ),
         "projection_correction_max_m": trace.maximum_projection_correction_m,
         "contact_wrench_power_equivalence_max_w": float(
             np.max(
                 np.abs(observables["contact_power_w"] - observables["wrench_power_w"])
             )
+        ),
+        "constraint_two_sided_power_residual_max_w": float(
+            np.max(np.abs(observables["constraint_two_sided_power_residual_w"]))
         ),
     }
 
@@ -346,8 +362,9 @@ def _run_study_uncached() -> tuple[dict[str, Any], dict[str, FloatArray]]:
         "human_validation": False,
         "source_files": _source_hashes(),
         "claim_boundary": (
-            "The result demonstrates a mechanically feasible passive force-generated "
-            "negative club couple in this planar constrained model. It does not identify "
+            "The result demonstrates mechanically feasible zero-command persistence of "
+            "a force-generated negative club couple in this planar constrained model. "
+            "Zero command is not biological passivity; the result does not identify "
             "muscle strategy, prove human use, or establish optimal coaching advice."
         ),
         "parameters": _parameters_record(params),
@@ -386,6 +403,16 @@ def _run_study_uncached() -> tuple[dict[str, Any], dict[str, FloatArray]]:
                     np.max(baseline_observables["direct_wrist_torque_nm"])
                 ),
             },
+        },
+        "constraint_acceleration_bias_audit": {
+            "method": "exact centripetal expression versus five-point centered directional derivative of J",
+            "tolerance_m_s2": 1.0e-7,
+            "maximum_residual_m_s2": float(
+                max(
+                    constraint_acceleration_bias_audit(q, qdot, params)
+                    for q, qdot in zip(baseline.q, baseline.qdot, strict=True)
+                )
+            ),
         },
         "representative_killswitch": {
             "cut_index": cut_index,

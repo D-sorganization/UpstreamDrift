@@ -452,7 +452,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, left=2mm, breakable, toptitle=1mm, colback=white, titlerule=0mm, opacitybacktitle=0.6, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, leftrule=.75mm, coltitle=black, arc=.35mm, colbacktitle=quarto-callout-note-color!10!white, bottomtitle=1mm, rightrule=.15mm, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, toprule=.15mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, titlerule=0mm, opacityback=0, breakable, bottomrule=.15mm, rightrule=.15mm, colframe=quarto-callout-note-color-frame, coltitle=black, bottomtitle=1mm, toprule=.15mm, toptitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, colbacktitle=quarto-callout-note-color!10!white, colback=white, arc=.35mm, opacitybacktitle=0.6, left=2mm]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -4589,6 +4589,13 @@ the club is \(F_{h\rightarrow c}=-\lambda\) after reshaping the four
 multipliers into two planar forces. The residuals of both rows of
 Equation~\ref{eq-forward-two-hand-kkt} are stored for every sample.
 
+The primary acceleration-constraint bias \(\dot J(q,\dot q)\dot q\) is
+evaluated from the exact centripetal terms of both arms and both club
+grip offsets. It is not obtained by numerically differentiating \(J\)
+inside the KKT solve. An independent five-point centered directional
+derivative agrees within \(1.04\times10^{-9}\) m/s² over the reference
+trajectory, below the registered \(10^{-7}\) m/s² tolerance.
+
 The applied generalized force is not a six-entry vector copied directly
 into the seven coordinates. Wrist torque is an internal action--reaction
 pair: a positive wrist torque acts positively on the club and negatively
@@ -4698,7 +4705,7 @@ P_{contact}=F_R\cdot v_{g,R}+F_L\cdot v_{g,L}
 =R\cdot v_c+M_F\omega_c.
 }\end{equation}
 
-The two forms agree to \(6.3\times10^{-13}\) W in the reference run.
+The two forms agree to \(6.68\times10^{-13}\) W in the reference run.
 Couple sign alone still does not determine energy transfer: rotational
 power also depends on club angular velocity, while the resultant
 contributes translational power. This is consistent with standard
@@ -4780,8 +4787,8 @@ The branch ensemble also limits the interpretation. A branch at 0.180 s
 begins before reversal and crosses negative at 0.185 s. Branches
 initiated from 0.190 through 0.220 s remain negative for the full 50 ms
 window. The 0.240 s branch remains negative for 37.25 ms before changing
-sign. Passive persistence is therefore state dependent and finite; it is
-not an invariant property of the club or grip.
+sign. Zero-command persistence is therefore state dependent and finite;
+it is not an invariant property of the club or grip.
 
 \subsection{Geometric
 Mechanism}\label{sec-forward-two-hand-vector-mechanism}
@@ -4822,11 +4829,14 @@ Convergence}\label{sec-forward-two-hand-closure}
 
 The reference trajectory retains constraint rank four. The maximum
 position constraint residual is \(9.51\times10^{-11}\) m, the maximum
-velocity residual is \(3.99\times10^{-15}\) m/s, the KKT residual is
-below \(3.77\times10^{-13}\), and the acceleration-constraint residual
-is below \(3.43\times10^{-13}\). Over the 0.400 s interval, mechanical
+velocity residual is \(5.03\times10^{-15}\) m/s, the KKT residual is
+below \(4.41\times10^{-13}\), and the acceleration-constraint residual
+is below \(2.57\times10^{-13}\). Complete two-sided ideal-constraint
+power, \(\lambda^\mathsf T J\dot q\), remains below
+\(1.27\times10^{-12}\) W; this is distinct from the one-sided contact
+power delivered to the club. Over the 0.400 s interval, mechanical
 energy rises by 203.714 J and integrated applied-control work is 203.618
-J, leaving a 0.096 J physical work--energy residual at the 0.25 ms
+J, leaving a 0.096 J numerical work--energy residual at the 0.25 ms
 reporting step.
 
 \begin{figure}
@@ -4856,10 +4866,15 @@ of magnitude changes the 1.0 ms minimum couple by less than
 is therefore resolved relative to both timestep and projection tolerance
 in this model.
 
-The accumulated projection-energy diagnostic is negative and converges
-toward zero with timestep refinement. It is not added to or subtracted
-from the physical work budget. Reporting it separately prevents
-numerical stabilization from being mistaken for passive energy transfer.
+The baseline projections change mechanical energy by -0.778 J in signed
+sum (0.778 J in absolute sum), with no individual correction larger than
+0.00446 J. This cumulative correction is larger than the raw 0.096 J
+work--energy residual, so the latter is not the complete
+integration-error budget. The projection-energy diagnostic is negative
+and converges toward zero with timestep refinement. It is not added to
+or subtracted from the physical work budget; reporting both prevents
+numerical stabilization and cancellation from being mistaken for passive
+energy transfer or exact closure.
 
 \section{What the Forward Test
 Establishes}\label{sec-forward-two-hand-conclusions}

@@ -432,16 +432,56 @@ def control_generalized_force(control: TwoArmControl) -> np.ndarray:
 def _constraint_acceleration_bias(
     q: np.ndarray, qdot: np.ndarray, params: TwoArmParams
 ) -> np.ndarray:
+    """Return the exact autonomous-constraint bias ``Jdot(q, qdot) qdot``."""
+    state = _state_vector("q", q)
+    velocity = _state_vector("qdot", qdot)
+    result = np.zeros(N_CONSTRAINTS)
+    club_rate = velocity[6]
+    for row, shoulder_index, elbow_index, grip_offset in (
+        (0, 0, 1, params.right_grip_offset_m),
+        (2, 2, 3, params.left_grip_offset_m),
+    ):
+        shoulder = state[shoulder_index]
+        forearm = shoulder + state[elbow_index]
+        forearm_rate = velocity[shoulder_index] + velocity[elbow_index]
+        result[row : row + 2] = (
+            -params.upper_length_m
+            * velocity[shoulder_index] ** 2
+            * _segment_direction(shoulder)
+            - params.forearm_length_m * forearm_rate**2 * _segment_direction(forearm)
+            + grip_offset * club_rate**2 * _segment_direction(state[6])
+        )
+    return result
+
+
+def constraint_acceleration_bias_audit(
+    q: np.ndarray,
+    qdot: np.ndarray,
+    params: TwoArmParams,
+) -> float:
+    """Compare the exact bias with a centered directional derivative of J."""
+    state = _state_vector("q", q)
     velocity = _state_vector("qdot", qdot)
     speed = float(np.linalg.norm(velocity))
     if speed == 0.0:
-        return np.zeros(N_CONSTRAINTS)
-    step = 1e-6 / max(1.0, speed)
-    derivative = (
-        constraint_jacobian(q + step * velocity, params)
-        - constraint_jacobian(q - step * velocity, params)
-    ) / (2.0 * step)
-    return derivative @ velocity
+        return 0.0
+    # A five-point stencil permits a larger state perturbation, suppressing
+    # cancellation at the reference trajectory's highest rates while retaining
+    # fourth-order truncation accuracy. This remains independent of the exact
+    # centripetal implementation used by the solver.
+    step = 1e-3 / max(1.0, speed)
+    directional = (
+        -constraint_jacobian(state + 2.0 * step * velocity, params)
+        + 8.0 * constraint_jacobian(state + step * velocity, params)
+        - 8.0 * constraint_jacobian(state - step * velocity, params)
+        + constraint_jacobian(state - 2.0 * step * velocity, params)
+    ) / (12.0 * step)
+    return float(
+        np.linalg.norm(
+            _constraint_acceleration_bias(state, velocity, params)
+            - directional @ velocity
+        )
+    )
 
 
 def solve_constrained_dynamics(

@@ -2808,6 +2808,25 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   falsifiers. All findings remain conditional mechanical possibilities: the
   tier shall not infer passive musculature, calibrated equipment, human
   prevalence, coaching strategy, safety, optimality, or impact benefit.
+- **F-8557.12:** The forward two-hand constrained tier shall evolve two
+  independently constrained planar arms and one floating rigid club in a
+  seven-coordinate, rank-four KKT system without prescribed kinematics or
+  least-squares reaction allocation. Wrist torque shall retain explicit
+  arm--club action and reaction and remain separate from the point-force
+  couple. The primary autonomous acceleration-constraint bias shall be
+  analytic and shall agree with an independent five-point directional audit
+  within \(10^{-7}\) m/s². Published power evidence shall distinguish
+  one-sided point-force versus transported-wrench power from complete
+  two-sided multiplier power, with both residuals below \(10^{-9}\) W.
+  Position and velocity projection evidence shall retain signed, absolute,
+  and maximum energy changes; a work--energy residual shall not be called
+  physical closure or the complete error budget when the cumulative
+  projection correction is larger. A bitwise same-state zero-command branch,
+  a multi-cut branch ensemble, a coincident-grip moment-arm control, timestep
+  refinement, and projection-tolerance sensitivity shall remain executable
+  falsifiers. “Zero command” shall not be called biological passivity, zero
+  force, zero activation, or zero impedance, and no golfer-specific strategy
+  shall be prescribed from this tier.
 - **F-8555:** Torso-velocity transfer claims shall be tested in a forward,
   finite-inertia rotating-base model with two independently observable hand
   reactions, separated grip points, bilateral loop closure, and a compliant
