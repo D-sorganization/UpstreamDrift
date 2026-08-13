@@ -2,14 +2,14 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "a4e0bd566ee0424a3faa31bdfff4f04cffe69c63d1a91e6ad3bafbca8bfd4b07",
+    "source_digest": "b133994e225d2253d8288a980f008b483402928119aafe26cfe5135f7a727fde",
     "baseline_commit": "13ea6a69585a42dc1db4b3959440ed95787c9779"
   },
   "audit_scope": {
     "completion_status": "in_progress",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "Stable claim identity, cross-platform source digests, complete post-equation narrative parsing, and three high-risk external-evidence slices covering framing, ground mechanics, kinetic-energy sequencing, torso-pelvis associations, method sensitivity, timing, delayed release, wrist torque, passive transfer, hub-path models, and causal limitations. The complete 879-candidate paper audit remains in progress; 27 candidates are reviewed and 852 remain unadjudicated."
+    "current_scope": "Stable claim identity, cross-platform source digests, complete post-equation narrative parsing, and four high-risk external-evidence slices covering framing, ground mechanics, kinetic-energy sequencing, torso-pelvis associations, method sensitivity, timing, delayed release, wrist torque, passive transfer, hub-path models, optimal-control lineages, spatial forward optimization, and causal limitations. The complete 882-candidate paper audit remains in progress; 32 candidates are reviewed and 850 remain unadjudicated."
   },
   "dependencies": [
     {
@@ -378,6 +378,56 @@
       "rationale": "The paragraph replaces a false uniform-consensus claim with the source-verified model disagreement that motivates the falsification program.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-12"
+    },
+    {
+      "candidate_id": "PD-CAND-f616921cf110fe89",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-030"],
+      "rationale": "The paragraph distinguishes Lampsa's necessary-condition numerical search from a globally verified optimum and records Sharp's later reproduction disagreement.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-88547b5b3695b01e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-031",
+        "PD-CLAIM-032",
+        "PD-CLAIM-033",
+        "PD-CLAIM-034"
+      ],
+      "rationale": "The paragraph separates the state spaces, actuators, and speed-versus-carry objectives of three spatial forward optimizers and withdraws a universal distal-program inference.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-ce917b69d717a23b",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This is the forward-optimization contrast-matrix header rather than a scientific proposition.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-f39940bf40216a62",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-030",
+        "PD-CLAIM-031",
+        "PD-CLAIM-032",
+        "PD-CLAIM-033"
+      ],
+      "rationale": "The matrix records the exact model, objective, quantitative result, and evidentiary boundary for four non-equivalent optimization studies.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-f58832b4edfa4b61",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-034"],
+      "rationale": "The paragraph turns model and objective sensitivity into an explicit harmonized-validation requirement rather than a generic caution.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
     }
   ],
   "claims": [
@@ -1358,6 +1408,170 @@
       "adjudication": "The primary paper supports the model program and also supplies its limitations. The revised manuscript uses Sharp as model-conditional evidence rather than proof of a human universal strategy.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-12"
+    },
+    {
+      "claim_id": "PD-CLAIM-030",
+      "candidate_ids": ["PD-CAND-f616921cf110fe89", "PD-CAND-f39940bf40216a62"],
+      "statement": "Lampsa parameterized and constrained a generalized swing model using film of his own swing, compared computed and actual torques, and used steepest ascent to search for drive-distance-maximizing controls; the publisher record establishes necessary conditions and a numerical search rather than a unique global optimum.",
+      "classification": "external_optimal_control_model_result",
+      "published_status": "corrected_and_supported_with_optimality_qualification",
+      "audit_status": "publisher_record_and_later_full_text_reproduction_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:176",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:207"
+      ],
+      "evidence_artifacts": [
+        "https://doi.org/10.1115/1.3426951",
+        "https://api.crossref.org/works/10.1115/1.3426951",
+        "https://doi.org/10.1098/rspa.2008.0304"
+      ],
+      "model_domain": "Film-parameterized generalized two-link swing with penalty constraints, variational necessary conditions, and a steepest-ascent numerical search.",
+      "uncertainty_boundary": "The accessible publisher record does not establish uniqueness or global convergence; Sharp's later reconstruction reported materially different timing and a faster admissible program.",
+      "competing_explanations": [
+        "Local convergence of steepest ascent",
+        "Penalty-weight and constraint parameterization",
+        "Numerical integration and transcription differences"
+      ],
+      "negative_controls": [
+        "Multiple initial control histories",
+        "Direct transcription with convergence diagnostics",
+        "Alternative admissible torque parameterizations"
+      ],
+      "falsifier": "The publisher record does not contain the stated film parameterization, actual-versus-computed torque comparison, steepest-ascent search, and sensitivity analysis, or a faithful modern reconstruction proves a unique global solution with the published controls.",
+      "adjudication": "The former text treated a historical numerical optimum as evidence that a measured human swing was suboptimal. The revised text preserves the optimization contribution while removing that unsupported inference and exposing the later reproduction disagreement.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-031",
+      "candidate_ids": ["PD-CAND-88547b5b3695b01e", "PD-CAND-f39940bf40216a62"],
+      "statement": "MacKenzie and Sprigings' optimized four-degree-of-freedom spatial forward model produced 41.9 m/s impact speed with torque-generator activations at approximately 0, 0.07, 0.16, and 0.17 s for torso, shoulder, wrist ulnar deviation, and lead-arm external rotation, respectively.",
+      "classification": "external_spatial_forward_optimization_result",
+      "published_status": "supported_with_validation_and_model_qualification",
+      "audit_status": "author_full_text_checked_independent_reimplementation_open",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:189",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:208"
+      ],
+      "evidence_artifacts": [
+        "https://doi.org/10.1007/s12283-009-0020-9",
+        "https://www.sashomackenzie.com/publications/MacKenzie%202009%20A%20three%20dimensional%20forward%20dynamics%20model%20of%20the%20golf%20swing.pdf"
+      ],
+      "model_domain": "Four human degrees of freedom with parametric muscle-torque generators and a flexible segmented shaft, fitted and compared with one participant before a separate impact-speed optimization.",
+      "uncertainty_boundary": "Validation used six accepted drives from one 3-handicap male and one 2-D camera; the model omitted lower-body energy and a trail arm, and the optimized speed was approximately 7 m/s below the professional comparison cited in the paper.",
+      "competing_explanations": [
+        "Single-participant parameter fit",
+        "Compensating torque from omitted trail arm and legs",
+        "Restricted wrist and lead-arm degrees of freedom"
+      ],
+      "negative_controls": [
+        "Held-out participant validation",
+        "Two-arm and lower-body model variants",
+        "Alternative torque-generator timing families"
+      ],
+      "falsifier": "The original result figures and text do not report the 41.9 m/s speed and stated activation sequence, or a faithful reconstruction does not reproduce them under the declared model and objective.",
+      "adjudication": "The primary paper supports a late wrist and lead-arm activation pattern in this model. It does not support the manuscript's former collective claim that all later spatial optimizers generated expert-like speeds or one common distal program.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-032",
+      "candidate_ids": ["PD-CAND-88547b5b3695b01e", "PD-CAND-f39940bf40216a62"],
+      "statement": "Balzerson, Banerjee and McPhee's carry-optimized four-degree-of-freedom model produced 41.5 m/s impact speed and 196 m carry, with wrist activation at approximately 0.11 to 0.12 s and forearm activation at approximately 0.14 to 0.17 s.",
+      "classification": "external_spatial_forward_carry_optimization_result",
+      "published_status": "supported_with_objective_and_omission_qualification",
+      "audit_status": "institutional_full_text_checked_independent_reimplementation_open",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:189",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:209"
+      ],
+      "evidence_artifacts": [
+        "https://doi.org/10.1007/s12283-016-0197-7",
+        "https://uwspace.uwaterloo.ca/items/812277fb-2d1b-47b9-ba6d-8b25392c120f"
+      ],
+      "model_domain": "Four-degree-of-freedom torso, lead-arm, and lead-hand model with parametric joint torque generators, a continuous Rayleigh-beam shaft, impulse-momentum impact, and aerodynamic ball flight.",
+      "uncertainty_boundary": "The model omitted the lower body and trail arm, explicitly assumed negligible trail-arm power, and treated pelvis rotation as unnecessary for its club-design objective rather than testing that assumption for whole-body power attribution.",
+      "competing_explanations": [
+        "Carry objective and ball-flight model",
+        "Power lumped into retained lead-side degrees of freedom",
+        "Local optima within the 11-variable timing and initial-angle search"
+      ],
+      "negative_controls": [
+        "Explicit trail-arm power model",
+        "Pelvis degree-of-freedom ablation",
+        "Speed-only versus carry-distance objectives"
+      ],
+      "falsifier": "The institutional full text does not report 41.5 m/s, 196 m, and the stated timing intervals, or a faithful reconstruction does not reproduce them under the declared model and objective.",
+      "adjudication": "The source supports a late wrist and forearm activation pattern in a club-design-oriented model. The revised paper states the omitted-body assumptions and avoids generalizing the result to whole-body biological coordination.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-033",
+      "candidate_ids": ["PD-CAND-88547b5b3695b01e", "PD-CAND-f39940bf40216a62"],
+      "statement": "McNally and McPhee's six-degree-of-freedom carry optimization produced 164 km/h clubhead speed and 257 yd carry, but initiated torso motion before pelvis motion and left the measured elite-golfer grip-kinematic standard-deviation bands during some swing phases.",
+      "classification": "external_spatial_forward_carry_optimization_result",
+      "published_status": "supported_with_author_identified_counterevidence",
+      "audit_status": "open_access_full_text_checked_independent_reimplementation_open",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:189",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:210"
+      ],
+      "evidence_artifacts": [
+        "https://doi.org/10.3390/proceedings2060243",
+        "https://www.mdpi.com/2504-3900/2/6/243"
+      ],
+      "model_domain": "Six-degree-of-freedom golfer with pelvis and two-axis shoulder motion, 12 backswing and downswing torque generators, flexible shaft, volumetric contact, and aerodynamic ball flight optimized for carry.",
+      "uncertainty_boundary": "The optimized pelvis-torso onset ordering contradicted the observed sequence cited by the authors; late simulated grip discrepancies were partly associated with an extreme forward and high tee position selected by the optimization.",
+      "competing_explanations": [
+        "Rigid-torso representation",
+        "Permitted tee and impact geometry",
+        "Carry objective without an offline-distance penalty"
+      ],
+      "negative_controls": [
+        "Pelvis-before-torso ordering constraint",
+        "Held-out elite-swing trajectory objective",
+        "Realistic tee-position and delivery envelopes"
+      ],
+      "falsifier": "The open full text does not report the stated speed, carry, onset-order contradiction, and grip-kinematic discrepancies, or a faithful reconstruction satisfying the declared constraints yields materially different results.",
+      "adjudication": "The former manuscript classified this solution as expert-like based largely on speed. The revised account includes the source's own kinematic counterevidence and treats performance and biological fidelity as separate validation dimensions.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-034",
+      "candidate_ids": ["PD-CAND-88547b5b3695b01e", "PD-CAND-f58832b4edfa4b61"],
+      "statement": "The reviewed golf optimizers use non-equivalent state spaces, control parameterizations, omitted degrees of freedom, impact definitions, and speed or carry objectives, so their timing programs cannot be treated as repeated estimates of one universal distal-control strategy.",
+      "classification": "cross_source_methodological_synthesis",
+      "published_status": "supported_by_source_level_design_contrast",
+      "audit_status": "four_primary_sources_and_one_primary_reproduction_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:189",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:212"
+      ],
+      "evidence_artifacts": [
+        "https://doi.org/10.1115/1.3426951",
+        "https://doi.org/10.1007/s12283-009-0020-9",
+        "https://doi.org/10.1007/s12283-016-0197-7",
+        "https://doi.org/10.3390/proceedings2060243",
+        "https://doi.org/10.1098/rspa.2008.0304"
+      ],
+      "model_domain": "Cross-source comparison of historical planar optimal control, spatial impact-speed optimization, spatial carry optimization, and a later six-degree-of-freedom full-swing carry optimization.",
+      "uncertainty_boundary": "The synthesis establishes non-equivalence of the published estimands; it does not determine which model is most predictive of a population or which strategy a person should use.",
+      "competing_explanations": [
+        "A robust qualitative feature may survive despite quantitative non-equivalence",
+        "Different objectives may share a common local timing motif",
+        "Publication selection may overrepresent successful optimization results"
+      ],
+      "negative_controls": [
+        "Common-state and common-objective reoptimization across model tiers",
+        "Preregistered control families across engines",
+        "Held-out human kinematic and kinetic validation"
+      ],
+      "falsifier": "A harmonized preregistered reoptimization demonstrates invariant distal timing and effect size across the reviewed state spaces, objectives, and omitted-degree-of-freedom variants.",
+      "adjudication": "The source-level design matrix contradicts the former collective wording. The revised paper treats common late activations as hypotheses for harmonized testing rather than replicated estimates of one biological optimum.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
     }
   ]
 }
