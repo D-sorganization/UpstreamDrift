@@ -2640,5 +2640,27 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 ### Performance & Refactoring Improvements
 
 - Optimized sum of squares calculation in `launch_monitor` module using `np.vdot` instead of `np.sum` to avoid intermediate array allocations. (spec-exempt: micro-optimization)
+
+### Scientific Claim Audit and Comprehensive Golf Modeling Program
+
+- **F-8557:** The proximal-to-distal research package shall maintain a
+  deterministic inventory of every narrative paper candidate, with canonical
+  source locations and content digests, and a separately adjudicated atomic
+  claim registry containing evidence, model domain, uncertainty, alternatives,
+  negative controls, falsifiers, review provenance, and release-claim mapping.
+- **F-8557.1:** Validation shall fail on stale paper bytes, duplicate claim or
+  release identifiers, incomplete required fields, drift from the public
+  release-claim manifest, or a completed audit status while any candidate is
+  unadjudicated.
+- **F-8557.2:** NotebookLM collections shall be treated as research indexes;
+  collection-derived changes require independent original-source verification,
+  and authentication or coverage gaps remain explicit.
+- **F-8557.3:** Completion depends on the protected merge and immutable
+  UpstreamDrift consumption of Tools #4142, including typed no-impact outcomes,
+  deterministic ensembles, method-adequacy reporting, and desktop/web parity.
+- **F-8557.4:** The model program shall progress from analytical mechanics to
+  articulated spatial, neuromusculoskeletal, club-impact/flight, and governed
+  human tiers only through declared observable, discrepancy, identifiability,
+  uncertainty, negative-control, and falsification gates.
 - `spec-exempt` (#8483): Moved Sidekick readiness monitoring, degradation reporting, and workspace seeding from the main launcher facade into the existing launcher-owned `SidekickSidebarManager`.
 - (spec-exempt: security fix) Fixed user enumeration via timing attack in `/login` endpoint by ensuring a dummy password verification is performed even if the user is not found, to normalize response time.

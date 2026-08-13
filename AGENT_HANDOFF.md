@@ -1,9 +1,23 @@
 # Agent Handoff — UpstreamDrift
 
-Last updated: 2026-08-11
+Last updated: 2026-08-12
 Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
+
+- **#8557 comprehensive scientific claim audit and open golf modeling
+  program** — branch `feat/8557-claim-audit` starts the fail-closed audit
+  authority. It inventories all 566 narrative candidates across the 32-source
+  Quarto paper, reconciles all 18 public release-claim keys, and supplies five
+  initial high-risk quantitative adjudications without calling the review
+  complete. The registry records that the Biomechanics and Nonlinear Control
+  NotebookLM reviews are pending renewed network authentication and that Tools
+  #4142 must merge, be immutably pinned, and pass cross-repository parity before
+  program completion. Run `python -m
+scripts.research.proximal_distal_energy.claim_audit inventory`, then
+  `validate`, and the focused claim-audit tests. Do not mark the audit complete
+  while any candidate remains unadjudicated or treat NotebookLM output as an
+  original scientific source.
 
 - **#8511 interactive proximal--distal dynamics workbench** — branch
   `feat/proximal-distal-workbench-integration` makes the pendulum launcher
