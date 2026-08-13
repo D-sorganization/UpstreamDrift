@@ -49,10 +49,10 @@ class _Settings:
 
 def test_launcher_ui_setup_responsive(qapp: QApplication) -> None:
     """Launcher search and zoom controls avoid fixed-width clipping."""
-    from src.launchers.launcher_ui_setup import UISetupManager
+    from src.launchers._launcher_top_bar_ui import LauncherTopBarUIMixin
 
-    source = inspect.getsource(UISetupManager._setup_top_bar_status_and_search)
-    zoom_source = inspect.getsource(UISetupManager._setup_view_mode_and_zoom)
+    source = inspect.getsource(LauncherTopBarUIMixin._setup_search_controls)
+    zoom_source = inspect.getsource(LauncherTopBarUIMixin._setup_zoom_slider)
 
     assert "set_text_minimum_width" in source
     assert "TextWidthSpec(minimum_px=250)" in source

@@ -16,24 +16,22 @@
  * and available (the workspace, once a service exists).
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { apiFetch } from '@/api/fetch';
+import {
+  type CanonicalCoreStatus,
+  parseCanonicalCoreStatus,
+} from './canonicalCoreStatus';
 
 type CanonicalCoreMode = 'estimation' | 'comparison';
 
 type LoadStatus = 'loading' | 'ready' | 'error';
 
-/** Mirrors `CanonicalCoreStatus` in `src/api/routes/canonical_core.py`. */
-export interface CanonicalCoreStatus {
-  tool_id: string;
-  mode: string;
-  name: string;
-  description: string;
-  web_route: string;
-  capabilities: string[];
-  available: boolean;
-  reason: string;
-  next_step: string;
+interface RequestState {
+  mode: CanonicalCoreMode;
+  loadStatus: LoadStatus;
+  status: CanonicalCoreStatus | null;
+  loadError: string | null;
 }
 
 interface CanonicalCoreShellPageProps {
@@ -45,72 +43,65 @@ const FALLBACK_TITLE: Record<CanonicalCoreMode, string> = {
   comparison: 'Canonical-Core Comparison',
 };
 
-/**
- * Validate the status payload at runtime.
- *
- * The backend ships separately from the UI, so a shape mismatch must surface
- * as the page's error state rather than as a render-time TypeError.
- *
- * @param raw - Parsed JSON body.
- * @returns The validated status.
- * @throws Error when a required field is missing or mistyped.
- */
-export function parseCanonicalCoreStatus(raw: unknown): CanonicalCoreStatus {
-  if (typeof raw !== 'object' || raw === null) {
-    throw new Error('Canonical-core status response was not an object');
-  }
-  const body = raw as Record<string, unknown>;
-  if (typeof body.mode !== 'string' || body.mode.length === 0) {
-    throw new Error('Canonical-core status response is missing "mode"');
-  }
-  if (typeof body.available !== 'boolean') {
-    throw new Error('Canonical-core status response is missing "available"');
-  }
-  return {
-    tool_id: typeof body.tool_id === 'string' ? body.tool_id : '',
-    mode: body.mode,
-    name: typeof body.name === 'string' ? body.name : '',
-    description: typeof body.description === 'string' ? body.description : '',
-    web_route: typeof body.web_route === 'string' ? body.web_route : '',
-    capabilities: Array.isArray(body.capabilities)
-      ? body.capabilities.filter((c): c is string => typeof c === 'string')
-      : [],
-    available: body.available,
-    reason: typeof body.reason === 'string' ? body.reason : '',
-    next_step: typeof body.next_step === 'string' ? body.next_step : '',
-  };
-}
-
 export function CanonicalCoreShellPage({ mode }: CanonicalCoreShellPageProps) {
-  const [status, setStatus] = useState<CanonicalCoreStatus | null>(null);
-  const [loadStatus, setLoadStatus] = useState<LoadStatus>('loading');
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const [requestState, setRequestState] = useState<RequestState>({
+    mode,
+    loadStatus: 'loading',
+    status: null,
+    loadError: null,
+  });
+  const [requestGeneration, setRequestGeneration] = useState(0);
 
   const route = useMemo(() => `/tools/canonical-core/${mode}`, [mode]);
 
-  const loadStatusReport = useCallback(async () => {
-    setLoadStatus('loading');
-    setLoadError(null);
-    try {
-      const raw = await apiFetch<unknown>(
-        `/api/tools/canonical-core/${mode}/status`,
-      );
-      setStatus(parseCanonicalCoreStatus(raw));
-      setLoadStatus('ready');
-    } catch (err) {
-      setStatus(null);
-      setLoadStatus('error');
-      setLoadError(
-        err instanceof Error
-          ? err.message
-          : 'Failed to reach the canonical-core service',
-      );
-    }
-  }, [mode]);
-
   useEffect(() => {
-    void loadStatusReport();
-  }, [loadStatusReport]);
+    let active = true;
+
+    void apiFetch<unknown>(`/api/tools/canonical-core/${mode}/status`)
+      .then((raw) => {
+        const status = parseCanonicalCoreStatus(raw);
+        if (active) {
+          setRequestState({
+            mode,
+            loadStatus: 'ready',
+            status,
+            loadError: null,
+          });
+        }
+      })
+      .catch((error: unknown) => {
+        if (active) {
+          setRequestState({
+            mode,
+            loadStatus: 'error',
+            status: null,
+            loadError:
+              error instanceof Error
+                ? error.message
+                : 'Failed to reach the canonical-core service',
+          });
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [mode, requestGeneration]);
+
+  const isCurrentMode = requestState.mode === mode;
+  const loadStatus = isCurrentMode ? requestState.loadStatus : 'loading';
+  const status = isCurrentMode ? requestState.status : null;
+  const loadError = isCurrentMode ? requestState.loadError : null;
+
+  const retry = () => {
+    setRequestState({
+      mode,
+      loadStatus: 'loading',
+      status: null,
+      loadError: null,
+    });
+    setRequestGeneration((generation) => generation + 1);
+  };
 
   const title = status?.name || FALLBACK_TITLE[mode];
 
@@ -156,7 +147,7 @@ export function CanonicalCoreShellPage({ mode }: CanonicalCoreShellPageProps) {
             <button
               type="button"
               data-testid="canonical-core-retry"
-              onClick={() => void loadStatusReport()}
+              onClick={retry}
               className="rounded bg-red-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-red-500"
             >
               Retry

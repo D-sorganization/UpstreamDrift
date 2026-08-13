@@ -107,27 +107,11 @@
       "expires_on": "2026-08-31"
     },
     {
-      "path": "src/launchers/launcher_diagnostics.py",
-      "symbol": "LauncherDiagnostics.check_shared_tools_freshness",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Issues #7341/#7342 legacy launcher diagnostics decomposition: check_shared_tools_freshness exceeded the changed-file budget before layout reset backups were centralized and needs responsibility splitting.",
-      "expires_on": "2026-08-31"
-    },
-    {
       "path": "src/launchers/launcher_dialogs.py",
       "symbol": "DependencyErrorDialog.__init__",
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "reason": "Issues #7341/#7342 legacy launcher dialog decomposition: DependencyErrorDialog.__init__ exceeded the changed-file budget before layout reset backups were centralized and needs widget assembly helpers.",
-      "expires_on": "2026-08-31"
-    },
-    {
-      "path": "src/launchers/settings_dialog.py",
-      "symbol": "WslScriptDialog._setup_ui",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Issues #7341/#7342 legacy settings dialog decomposition: WslScriptDialog._setup_ui exceeded the changed-file budget before Docker build cancellation was hardened and needs focused widget builders.",
       "expires_on": "2026-08-31"
     },
     {
@@ -183,39 +167,7 @@
       "symbol": "UISetupManager.init_ui",
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Issue #7399 legacy launcher UI setup decomposition: init_ui exceeds the function-lines budget until split into smaller widget builders.",
-      "expires_on": "2026-10-31"
-    },
-    {
-      "path": "src/launchers/launcher_ui_setup.py",
-      "symbol": "UISetupManager._setup_global_sidebar",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Issue #7399 legacy launcher UI setup decomposition: _setup_global_sidebar exceeds the function-lines budget until split.",
-      "expires_on": "2026-10-31"
-    },
-    {
-      "path": "src/launchers/launcher_ui_setup.py",
-      "symbol": "UISetupManager._setup_help_menu",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Issue #7399 legacy launcher UI setup decomposition: _setup_help_menu exceeds the function-lines budget until split.",
-      "expires_on": "2026-10-31"
-    },
-    {
-      "path": "src/launchers/launcher_ui_setup.py",
-      "symbol": "UISetupManager._setup_top_bar_status_and_search",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Issue #7399 legacy launcher UI setup decomposition: _setup_top_bar_status_and_search exceeds the function-lines budget until split.",
-      "expires_on": "2026-10-31"
-    },
-    {
-      "path": "src/launchers/launcher_ui_setup.py",
-      "symbol": "UISetupManager._setup_view_mode_and_zoom",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Issue #7399 legacy launcher UI setup decomposition: _setup_view_mode_and_zoom exceeds the function-lines budget until split.",
+      "reason": "Issue #8490 records the independent launcher bootstrap follow-up: init_ui remains over the function-lines budget until its widget orchestration is split without changing startup order.",
       "expires_on": "2026-10-31"
     },
     {

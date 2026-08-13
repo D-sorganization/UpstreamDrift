@@ -3,52 +3,16 @@
   "max_exceptions": 10,
   "exceptions": [
     {
-      "path": "src/shared/python/chat/_chat_dock_widget_qt.py",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Issue #8472 short final exception while the 1490-line legacy chat dock compatibility shell is reduced below the 1200-line budget; do not renew without maintainer review.",
-      "expires_on": "2026-08-31"
-    },
-    {
-      "path": "src/launchers/launcher_ui_setup.py",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Issue #5922 temporary exception while launcher UI bootstrap logic is split by responsibility.",
-      "expires_on": "2026-08-31"
-    },
-    {
       "path": "scripts/_urdf_campaign_issues.py",
       "owner": "@dieterolson @D-sorganization/security-reviewers",
       "reason": "Issue #5922 temporary exception while the URDF campaign script is split by workflow domain.",
       "expires_on": "2026-10-31"
     },
     {
-      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/ui/tabs/viewer_3d_tab.py",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Issue #5922 temporary exception while the 3D viewer tab is decomposed into smaller UI modules.",
-      "expires_on": "2026-11-30"
-    },
-    {
       "path": "src/shared/python/physics/terrain_representation.py",
       "owner": "@physics-core",
       "reason": "Terrain representation at 1253 lines combines mesh, elevation, and surface-material models. Split into domain submodules planned, tracked in issue #2456.",
       "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/launchers/settings_dialog.py",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Issue #5922 temporary exception while settings dialog tabs are decomposed into focused UI components.",
-      "expires_on": "2027-01-31"
-    },
-    {
-      "path": "src/launchers/launcher_diagnostics.py",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Issue #5922 temporary exception: diagnostics module grew to 1236 lines when PR #6506 added dependency checks; decomposition into a focused diagnostics subpackage is tracked there.",
-      "expires_on": "2027-02-28"
-    },
-    {
-      "path": "src/launchers/upstream_drift_launcher.py",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Issue #7399 legacy launcher decomposition: upstream_drift_launcher.py exceeds the file size budget until decomposed into smaller managers.",
-      "expires_on": "2026-10-31"
     }
   ]
 }

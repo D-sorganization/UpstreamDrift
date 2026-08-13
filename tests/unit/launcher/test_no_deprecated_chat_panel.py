@@ -32,13 +32,19 @@ import pytest
 
 pytestmark = pytest.mark.ui
 
-_LAUNCHER_UI_SETUP = (
-    Path(__file__).resolve().parents[3] / "src" / "launchers" / "launcher_ui_setup.py"
+_LAUNCHER_UI_PATHS = (
+    Path(__file__).resolve().parents[3] / "src" / "launchers" / filename
+    for filename in (
+        "launcher_ui_setup.py",
+        "_launcher_navigation_ui.py",
+        "_launcher_top_bar_ui.py",
+    )
 )
+_LAUNCHER_UI_PATHS = tuple(_LAUNCHER_UI_PATHS)
 
 
 def _source_contents() -> str:
-    return _LAUNCHER_UI_SETUP.read_text(encoding="utf-8")
+    return "\n".join(path.read_text(encoding="utf-8") for path in _LAUNCHER_UI_PATHS)
 
 
 def _has_method(module_source: str, method_name: str) -> bool:

@@ -93,6 +93,10 @@ including its downloadable
 [PDF edition](https://affinedrift.com/articles/proximal-distal-a-journey-through-the-swing.pdf).
 The companion labels model results, human evidence, and hypotheses separately
 and returns readers to this directory for the complete evidence and limitations.
+Readers can also run the PyQt6 or React/Tauri
+[interactive dynamics workbench](COMPANION_WORKBENCH.md). Its guided experiments,
+hover help, glossary, hypotheses, falsifiers, and limitations share one
+canonical catalog maintained by the open-source Tools provider.
 Ongoing validation and extension work is tracked in
 [#8426](https://github.com/D-sorganization/UpstreamDrift/issues/8426) and the
 [interaction-force mechanisms epic](https://github.com/D-sorganization/UpstreamDrift/issues/8443).
@@ -123,6 +127,7 @@ the finding-by-finding record in
 | [`MODEL_COMPLETION_FALSIFICATION_MATRIX.md`](MODEL_COMPLETION_FALSIFICATION_MATRIX.md) | Claim, alternative-explanation, model-discrepancy, and falsifier register         |
 | [`EXPERIMENTAL_FALSIFICATION_PROTOCOL.md`](EXPERIMENTAL_FALSIFICATION_PROTOCOL.md)     | Frozen human-data acquisition, split, analysis, and inference-boundary protocol   |
 | [`REVIEWER_WORKBENCH.md`](REVIEWER_WORKBENCH.md)                                       | Claim-first figure, evidence, and download index by model tier                    |
+| [`COMPANION_WORKBENCH.md`](COMPANION_WORKBENCH.md)                                     | Interactive PyQt6 and React/Tauri model guide, experiments, and evidence boundary |
 | [`ADVERSARIAL_REVIEW_ADJUDICATION.md`](ADVERSARIAL_REVIEW_ADJUDICATION.md)             | Verified disposition and remediation record for the independent technical review  |
 | [`DATA_DICTIONARY.md`](DATA_DICTIONARY.md)                                             | Artifact and recurring-field definitions with interpretation boundaries           |
 | [`release_manifest.json`](release_manifest.json)                                       | Hash-pinned presets, claim status, artifacts, and open release gates              |

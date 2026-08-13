@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, patch  # noqa: E402
 
 from typing import Any
 import pytest  # noqa: E402
+from PyQt6.QtCore import Qt  # noqa: E402
 from PyQt6.QtWidgets import (
     QHBoxLayout,
     QMainWindow,
@@ -91,10 +92,51 @@ def test_setup_menu_bar(launcher) -> None:
     assert len(actions) == 4
 
 
+@pytest.mark.unit
+def test_setup_menu_bar_uses_facade_close_widget_seam(launcher) -> None:
+    """Runtime menu construction honors the historical facade helper seam."""
+    replacement = QWidget()
+    with patch(
+        "src.launchers.launcher_ui_setup._build_menu_bar_close_widget",
+        return_value=replacement,
+    ) as build_close_widget:
+        launcher._setup_menu_bar()
+
+    build_close_widget.assert_called_once()
+    assert launcher.menuBar().cornerWidget(Qt.Corner.TopRightCorner) is replacement
+
+
+@pytest.mark.unit
+def test_setup_menu_bar_uses_facade_window_control_factory(launcher) -> None:
+    """Runtime menu construction honors the historical facade factory seam."""
+    close_button = QToolButton()
+    with patch(
+        "src.launchers.launcher_ui_setup.create_window_control_button",
+        return_value=close_button,
+    ) as create_button:
+        launcher._setup_menu_bar()
+
+    create_button.assert_called_once()
+
+
 def test_setup_top_bar(launcher) -> None:
     with patch("src.launchers.launcher_constants.HELP_SYSTEM_AVAILABLE", False):
         top_bar = launcher._setup_top_bar()
         assert isinstance(top_bar, QHBoxLayout)
+
+
+@pytest.mark.unit
+def test_setup_zoom_slider_uses_facade_description_seam(launcher) -> None:
+    """Runtime zoom construction honors the historical facade helper seam."""
+    description = "Patched facade zoom description"
+    with patch(
+        "src.launchers.launcher_ui_setup._build_zoom_accessible_description",
+        return_value=description,
+    ) as build_description:
+        launcher._setup_zoom_slider()
+
+    build_description.assert_called_once_with()
+    assert launcher.zoom_slider.accessibleDescription() == description
 
 
 def test_setup_global_sidebar_uses_icon_navigation(launcher) -> None:
@@ -404,7 +446,7 @@ def test_sidebar_includes_biomechanics_button(launcher) -> None:
     with (
         patch.object(launcher, "_build_sidebar_button", build_button_spy),
         patch(
-            "src.launchers.launcher_ui_setup.QWidget.setTabOrder",
+            "src.launchers._launcher_navigation_ui.QWidget.setTabOrder",
             new=MagicMock(),
             create=True,
         ),
@@ -463,11 +505,11 @@ def test_sidebar_biomechanics_button_registered_with_id_two(launcher) -> None:
     with (
         patch.object(launcher, "_build_sidebar_button", _spy_builder),
         patch(
-            "src.launchers.launcher_ui_setup.QButtonGroup",
+            "src.launchers._launcher_navigation_ui.QButtonGroup",
             new=_RecordingGroup,
         ),
         patch(
-            "src.launchers.launcher_ui_setup.QWidget.setTabOrder",
+            "src.launchers._launcher_navigation_ui.QWidget.setTabOrder",
             new=MagicMock(),
             create=True,
         ),
@@ -611,7 +653,7 @@ def test_sidebar_includes_condensed_buttons(launcher) -> None:
     with (
         patch.object(launcher, "_build_sidebar_button", build_button_spy),
         patch(
-            "src.launchers.launcher_ui_setup.QWidget.setTabOrder",
+            "src.launchers._launcher_navigation_ui.QWidget.setTabOrder",
             new=MagicMock(),
             create=True,
         ),

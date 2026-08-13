@@ -5,75 +5,187 @@ Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
 
-- **#8509 accessible proximal--distal companion** — branch
-  `docs/proximal-distal-companion-book` links the open technical evidence to
-  AffineDrift's visual companion, _How a Golf Swing Carries Energy_, in HTML
-  and PDF. The companion keeps model results, human evidence, hypotheses, and
-  coaching implications distinct; AffineDrift owns its source and fourteen
-  reproducible figures while this repository remains the evidence authority.
+- **#8511 interactive proximal--distal dynamics workbench** — branch
+  `feat/proximal-distal-workbench-integration` makes the pendulum launcher
+  consume the canonical sibling Tools provider and dockable adapter. Tools
+  owns both PyQt6 and React/Tauri clients plus the shared experiment/glossary
+  catalog; UpstreamDrift owns the article integration, provider resolution,
+  immutable vendor pin, and evidence boundary. Focused launcher tests pass.
+  Remaining gates: merge Tools, pin its exact main commit, publish the
+  AffineDrift reader page, run scoped repository gates, then protected merge.
 
-- **#8507 adversarial transmission and task robustness** — branch
-  `research/proximal-distal-transmission-robustness` adds a paired clock-versus-
-  state-trigger study on common training and held-out perturbations, explicit
-  lower-tail speed/dispersion/face-path/load/effort objectives, a local
-  task-Jacobian variance partition, four vector figure families, and a 12-item
-  severity-ranked gap register. State triggering improves selected held-out
-  speed and face/path metrics but increases peak hand force; every registered
-  program remains Pareto-nondominated. The result is model-conditional and does
-  not establish human self-stabilization. Remaining gates: manuscript render,
-  AffineDrift synchronization, release qualification, protected PRs, CI, and
-  remote-main verification.
+- **#8490 launcher UI-setup size slice — ready PR
+  [#8492](https://github.com/D-sorganization/UpstreamDrift/pull/8492)** — branch
+  `codex/launcher-ui-setup-decomposition` moves sidebar/navigation/menu construction into `_launcher_navigation_ui.py` and top-bar status/search/runtime/view/zoom construction plus the historical widget types into `_launcher_top_bar_ui.py`.
 
-- **#8505 advanced proximal--distal expansion** — isolated branch
-  `research/proximal-distal-advanced-expansion` adds an executable frame and
-  reduced-biological bridge: paired wrench/twist point transport, proper-frame
-  and Jacobian-power closure, forty-one matched-moment muscle allocations,
-  continuous activation/series-force role histories, and pose-coordinate round
-  trips through MuJoCo, Pinocchio, Drake, OpenSim, and MyoSuite adapters. Five
-  new vector figure families, a terminology contract, reviewer workbench,
-  falsification hypotheses H7/H8, AffineDrift integration, and an advanced
-  expansion review keep representation, dynamics, biology, and human evidence
-  distinct. Focused scientific tests pass; final render, release manifest,
-  full gates, protected PR, and remote-main verification remain.
+- **Launcher-settings size slice — ready PR
+  [#8489](https://github.com/D-sorganization/UpstreamDrift/pull/8489)** — branch
+  `codex/settings-dialog-size-decomposition` extracts runtime dependency probes into `settings_runtime.py`.
 
-- **#8499 adversarial review adjudication** — isolated branch
-  `research/proximal-distal-adversarial-review` starts from the exact tracked
-  snapshot of the active paper-development branch. It confirms and corrects an
-  early/late trapezoid gap and sampled COM-acceleration differentiation;
-  retains all 92 first-crossing candidates with reason-coded registration
-  status; shows the selected winner is unchanged across 1.5--2.5 rad bounds;
-  and adds 20, 35, and 50 ms command-transition sensitivity. The review ledger
-  rejects stale claims that forward killswitches, moving-base/flexible/modal
-  shaft tiers, spatial models, or coupled parameter screening are absent, while
-  accepting warranted limits on finite-grid optimality, negative actuator-work
-  interpretation, pointwise ZTCF semantics, physiology, and coaching. Local
-  numerical tests pass after regeneration; final article render, visual gate,
-  AffineDrift synchronization, and protected publication remain pending.
+- **#8485 Simscape 3D-viewer size slice — ready PR
+  [#8486](https://github.com/D-sorganization/UpstreamDrift/pull/8486)** — branch
+  `fix/viewer-3d-module-size-decomposition` moves user-defined body-segment shape construction into `_viewer_3d_segments.UserSegmentRenderer`.
 
-- **#8497 arm--wrist torque allocation and preload** — branch
-  `feat/8426-phase-9-forward-distributed-shaft` adds an exact same-state 8 N m
-  actuator-allocation sweep, a separately declared dead-zone transmission
-  model, preload and role-reversal sensitivity, a coupled forward modal-shaft
-  tier, deterministic evidence, publication figures, and explicit bilateral
-  wrench/stiffness/EMG/holdout falsifiers. The persistent-direction advantage
-  is conditional; neither the proximal subspace nor slack is identified as a
-  measured scapular or tissue property. A finite 180 ms preparation history now
-  starts from zero deflection and carries the exact internal transmission state
-  across the command transition without reinitialization.
+- **#8483 main-launcher size slice — ready PR
+  [#8484](https://github.com/D-sorganization/UpstreamDrift/pull/8484)** — branch
+  `fix/upstream-launcher-module-size-decomposition` moves Sidekick API-readiness into `SidekickSidebarManager`.
 
-- **#8493 ground-reaction drift attribution** — isolated branch
-  `feat/grf-drift-decomposition` adds a strict constrained-contact solve for
-  configuration, velocity, control, and external-load reaction components;
-  pointwise reaction ZTCF/ZVCF definitions; componentwise RMSE, normalized
-  RMSE, R-squared, bias, and impulse-error metrics; and a deterministic
-  fixed-support double-pendulum benchmark. The benchmark closes below
-  `2e-13 N`; ZTCF yields componentwise R-squared values of 0.871 and 0.814 but
-  large amplitude errors, and its vertical impulse exceeds the total because
-  control is opposing. The new chapter maps the quantities to GRF, COP, and
-  free-moment measurements and specifies a held-out human falsification
-  protocol. It explicitly does not claim bilateral allocation or human
-  validation. NotebookLM corpus review is still blocked by expired local
-  authentication; independently verified primary sources are linked directly.
+- **#8476 Sentinel fix** — branch
+  `fix/auth-timing-attack-16287999036686770098` fixes user enumeration via timing attack in login endpoint.
+- **#8490 launcher UI-setup size slice — ready PR
+  [#8492](https://github.com/D-sorganization/UpstreamDrift/pull/8492)** — branch
+  `codex/launcher-ui-setup-decomposition` starts at exact PR #8489 head
+  `2f664d2beaddf7444b12f90080ae9897aea24fcc`; reviewed implementation commit
+  `ff7d937ccce767c432c53ef21e2193807ee77fdb` is published. It moves
+  sidebar/navigation/menu construction into `_launcher_navigation_ui.py` and
+  top-bar status/search/runtime/view/zoom construction plus the historical
+  widget types into `_launcher_top_bar_ui.py`. `UISetupManager` keeps all 62
+  historical methods exactly once across the facade and two inherited mixins;
+  the public widget exports, dynamic manager-to-launcher method rebinding,
+  monkeypatch-sensitive zoom description/window-control seams, and zero-argument
+  `super()` behavior remain compatible. Independent-review regressions now
+  prove that runtime zoom/menu builders dispatch through narrow facade hooks;
+  the private mixins retain standalone defaults without importing the facade.
+  The responsive source contract inspects the extracted search/zoom helper
+  owners while retaining its original clipping assertions. The facade is now
+  995 lines (down from 2,263), and its file-size/module-size exceptions plus
+  four moved long-function exceptions are removed without renewal. The module-size,
+  file-size, architecture, error-handling, suppression, TODO, and LoD gates are
+  green, as are the focused decomposition and launcher source-contract tests.
+  The official repository MyPy wrapper excludes `launcher_ui_setup.py`,
+  `_launcher_navigation_ui.py`, and `_launcher_top_bar_ui.py`; the clean wrapper
+  skip is not evidence that these modules are type-safe.
+  The broader launcher contract selection has the same 15 failures as the exact
+  parent, all caused by pre-existing shared theme/style export drift. The
+  suite-marker and DRY duplication gates also fail identically to that exact
+  parent. The suite-marker output is 275 lines with identical SHA-256
+  `a47813dfc45d70ebf231c1a4fd5a9dd89d9b5931f2fe563c275ed614b4dfa391`;
+  the duplication output is 1,571 lines with identical SHA-256
+  `73efdb450b2dadcd6261ab27b91d01c7bdf44c2f053e703ceda49bbc24a44fb3`.
+  Two independent review passes found and then verified closure of the
+  responsive-source, facade-seam, and MyPy-disclosure defects. The ready PR is
+  not released: protected CI, required human approval, and parent #8489 remain
+  open. Issue [#8490](https://github.com/D-sorganization/UpstreamDrift/issues/8490)
+  closes only after an ordinary protected merge; do not reuse closed #5922 or
+  #7399.
+
+- **Launcher-settings size slice — ready PR
+  [#8489](https://github.com/D-sorganization/UpstreamDrift/pull/8489)** — branch
+  `codex/settings-dialog-size-decomposition` starts at exact PR #8486 head
+  `624043537a5ab10aa7ef56dc61685a004b872c0c`; published head
+  `832969ebbd6c58c9892dc16f82638e67a05b20dc` is tracked by
+  [#8487](https://github.com/D-sorganization/UpstreamDrift/issues/8487). It
+  extracts runtime dependency probes and the WSL setup dialog into
+  `settings_runtime.py`, and extracts
+  diagnostics, log synchronization, and process-management behavior into the
+  private `_settings_auxiliary_tabs.py` mixin. `SettingsWidget` preserves its
+  constructor, signal, tab constants, control attributes, historical methods,
+  and runtime compatibility imports. `settings_dialog.py` is now 1,124 lines
+  (down from 2,190); its file-size and expired module-size exceptions plus the
+  obsolete `WslScriptDialog._setup_ui` long-function exception are removed
+  without renewal. All 44 focused settings/launcher contract tests pass, as do
+  changed-file Ruff/format/compile, architecture, file-size, and error-ratchet
+  gates. A wider 166-test launcher selection is 148 passed and 18 inherited
+  failures caused by shared theme/UI export drift; the exact parent produces
+  the same 18 failures (145 passed without the three new decomposition tests).
+  The unrestricted launcher suite also reaches the same Windows access
+  violation in `test_run_launcher` on the exact parent. The official Python
+  3.12 MyPy wrapper excludes all three launcher modules by repository policy.
+  The only remaining global module-size failure is the parent-identical expired
+  `launcher_ui_setup.py` exception. The cited #5922 and #7341/#7342 issues are
+  closed or unrelated; #8487 is now the truthful tracker. Independent review
+  found no actionable regression and reran all 44 focused tests successfully.
+  PR #8489 is ready for review, but required protected CI, approval, parent
+  dependency, issue completion, and release state remain unresolved; do not
+  claim any of them before normal protected repository behavior confirms them.
+
+- **#8485 Simscape 3D-viewer size slice — ready PR
+  [#8486](https://github.com/D-sorganization/UpstreamDrift/pull/8486)** — branch
+  `fix/viewer-3d-module-size-decomposition` is stacked on ready PR #8484 at
+  exact base head `89f87590981f789755c2b45e1b03ed2ee57247a3`; its exact current
+  published head is `624043537a5ab10aa7ef56dc61685a004b872c0c`.
+  It moves user-defined body-segment shape construction, fitting,
+  library/theme resolution, artist lifecycle, and per-frame updates into the private
+  `_viewer_3d_segments.UserSegmentRenderer`; `Viewer3DTab` retains its existing
+  public segment methods as thin delegates. The viewer facade is now 1,127
+  lines (down from 1,413), and both its file-size and expired module-size
+  exceptions are removed without renewal. All 71 focused viewer/UI and 31
+  budget-contract tests pass after initializing the repository's pinned
+  `vendor/ud-tools` gitlink; the broader C3D/UI selection is 159 passed, 6
+  skipped, and one parent-identical stale loader-message assertion. Protected
+  CI remains incomplete with queued and cancelled contexts, so this is not yet
+  merge-ready. The module-size gate still
+  reports only the inherited `launcher_ui_setup.py` and `settings_dialog.py`
+  violations.
+
+- **#8483 main-launcher size slice (local, no publish)** — branch
+  `fix/upstream-launcher-module-size-decomposition` starts at exact draft PR
+  #8482 head `73dd11df09a2f37ea150835930134ae4354ee5a7`. It moves the
+  Sidekick API-readiness state machine, terminal degradation report, and
+  workspace-registry seeding into the existing `SidekickSidebarManager`, while
+  preserving the historical `UpstreamDriftLauncher` methods as thin delegates
+  through the single manager owned by the launcher, and keeping the clock,
+  readiness probe, and Qt scheduler injectable. The
+  launcher facade is now 1,198 lines (down from 1,315), and its file-size
+  exception is removed without renewal. The module-size gate now reports three
+  inherited oversized modules rather than four. Issue #8483 now provides
+  accurate tracking; the retired exception had cited #7399, which is a closed,
+  unrelated body-part-visualization PR. Remaining module-size failures are
+  `launcher_ui_setup.py`,
+  `settings_dialog.py`, and `viewer_3d_tab.py` with expired exceptions. The 25
+  focused Sidekick-startup tests pass. The broader launcher selection remains
+  blocked by the parent-identical Tools ownership mismatch for the already
+  present `chat/_qt/runtime.py`; changed-file mypy also timed out under Python
+  3.12 after the Python 3.13 run stopped in NumPy's version-gated stub.
+
+- **Launcher-diagnostics size slice (local, no publish)** — branch
+  `fix/launcher-diagnostics-size-decomposition` starts at exact draft PR #8480
+  head `971649efd5ad2e5793240a5237a0314d45cc2faf`. It moves the local
+  `vendor/ud-tools` pin/checkout/sibling/remote comparison into the focused
+  `launcher_shared_tools_diagnostics` module while retaining
+  `LauncherDiagnostics.check_shared_tools_freshness()` as the public recording
+  boundary. `launcher_diagnostics.py` is now 1,196 lines, and its expired
+  module-size exception plus its file-size and long-function exceptions are
+  removed without renewal or policy widening. Do not describe this as closing
+  an issue: cited maintainability issue #5922 is closed, cited #7341/#7342 are
+  closed and concern Docker cancellation/layout reset, and open #8472 is scoped
+  specifically to the chat dock. Confirm or create accurate tracking before
+  publication. Three expired exceptions and four oversized production modules
+  remain in the module-size release gate. The legacy
+  `tests/unit/test_launcher_diagnostics.py` also has three parent-identical
+  stale assertions (17 versus the current 48 models and the former product
+  title); keep that separate from this structural slice.
+
+- **#8472 chat-dock decomposition (local stacked candidate)** — branch
+  `fix/8472-chat-dock-decomposition` is stacked directly on the #8479 parent
+  commit `2c98644d3ef3e32820eb6c2df80e75250593392b`. It moves WebSocket event
+  routing, terminal-mode mechanics, streaming-state initialization, and
+  collapsed-view mutation into `chat._qt.runtime`, retaining the historical
+  `ChatDockWidget` methods as thin delegates. The compatibility shell is now
+  1,150 lines, and both its file-size and expired module-size exceptions are
+  removed without renewal or policy widening. Focused behavior tests and the
+  file-size gate pass. The parent already fails the Tools drift sentinel for
+  `_chat_dock_widget_qt.py` and `models.py`; synchronize this decomposition to
+  the canonical Tools source before updating that hash. After the local
+  launcher-diagnostics slice, the repository module gate remains red with
+  three expired exceptions/four oversized modules: launcher UI, settings, the
+  main launcher, and the Simscape 3D viewer.
+
+- **Exact-main release-gate unblocker candidate (local only)** — branch
+  `fix/current-main-release-gate-unblockers` starts at exact `main`
+  `69eb7e9db32ccd17e45824619315b1d04b400c27`. It repairs the two
+  `CanonicalCoreShell` ESLint violations without suppressions, rejects stale
+  status responses across mode changes, corrects the stale durable-task-manager
+  SPEC paths after #8322 removed that implementation, and locks the three
+  vulnerable transitive npm packages to patched same-range releases. It also
+  restores the engine-store unload tests' mocked backend boundary after the
+  earlier `apiFetch` migration left two tests attempting relative-URL network
+  calls under Node. Focused React regression tests, the full React suite, lint,
+  type-check, build, audit, and SPEC path checks must be green before
+  publication. The expired/oversized Python module-size
+  exceptions remain an inherited release blocker: this branch neither renews
+  nor widens them. #8472 owns only the chat-dock split; the remaining modules
+  need accurate open tracking rather than being attributed to that issue.
 
 - **#8458 hand-path drift/control attribution** — consolidated branch
   `feat/hand-path-drift-control-attribution` defines the canonical same-state

@@ -332,13 +332,8 @@ class TestChatSidekickBoundaryAdr:
         path = _REPO_ROOT / "docs" / "adr" / "README.md"
         assert "0022-chat-sidekick-boundary.md" in path.read_text(encoding="utf-8")
 
-    def test_file_size_budget_references_adr_0022(self) -> None:
+    def test_file_size_budget_no_longer_exempts_chat_dock(self) -> None:
         path = _REPO_ROOT / "scripts" / "config" / "file_size_budget.json"
         data = json.loads(path.read_text(encoding="utf-8"))
-        reason = None
-        for entry in data["exceptions"]:
-            if entry["path"] == "src/shared/python/chat/_chat_dock_widget_qt.py":
-                reason = entry["reason"]
-                break
-        assert reason is not None, "chat dock widget exception must exist"
-        assert "ADR-0022" in reason
+        exception_paths = {entry["path"] for entry in data["exceptions"]}
+        assert "src/shared/python/chat/_chat_dock_widget_qt.py" not in exception_paths

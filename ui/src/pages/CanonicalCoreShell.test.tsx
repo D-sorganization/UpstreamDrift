@@ -14,7 +14,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 vi.mock('@/api/fetch', () => ({
@@ -23,10 +23,8 @@ vi.mock('@/api/fetch', () => ({
 }));
 
 import { apiFetch } from '@/api/fetch';
-import {
-  CanonicalCoreShellPage,
-  parseCanonicalCoreStatus,
-} from './CanonicalCoreShell';
+import { CanonicalCoreShellPage } from './CanonicalCoreShell';
+import { parseCanonicalCoreStatus } from './canonicalCoreStatus';
 
 const mockedApiFetch = vi.mocked(apiFetch);
 
@@ -86,6 +84,43 @@ describe('canonical-core unavailable state (#8081)', () => {
     const caps = await screen.findByTestId('canonical-core-capabilities');
     expect(caps).toHaveTextContent('canonical_core');
     expect(caps).toHaveTextContent('estimation');
+  });
+
+  it('ignores a stale response after the workspace mode changes', async () => {
+    let resolveEstimation: ((value: typeof UNAVAILABLE_ESTIMATION) => void) | null =
+      null;
+    mockedApiFetch
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveEstimation = resolve;
+          }),
+      )
+      .mockResolvedValueOnce({
+        ...UNAVAILABLE_ESTIMATION,
+        mode: 'comparison',
+        name: 'Canonical-Core Comparison',
+        reason: 'The comparison service is not implemented yet.',
+      });
+
+    const { rerender } = render(<CanonicalCoreShellPage mode="estimation" />);
+    rerender(<CanonicalCoreShellPage mode="comparison" />);
+
+    expect(await screen.findByRole('heading', { name: 'Canonical-Core Comparison' }))
+      .toBeInTheDocument();
+    expect(screen.getByTestId('canonical-core-unavailable')).toHaveTextContent(
+      'comparison service',
+    );
+
+    await act(async () => {
+      resolveEstimation?.(UNAVAILABLE_ESTIMATION);
+    });
+
+    expect(screen.getByRole('heading', { name: 'Canonical-Core Comparison' }))
+      .toBeInTheDocument();
+    expect(screen.getByTestId('canonical-core-unavailable')).toHaveTextContent(
+      'comparison service',
+    );
   });
 });
 

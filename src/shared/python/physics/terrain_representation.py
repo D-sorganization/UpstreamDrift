@@ -28,7 +28,6 @@ Design by Contract:
 
 from __future__ import annotations
 
-import functools
 import json
 import math
 from dataclasses import dataclass, field
@@ -39,7 +38,11 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.logging_pkg.logging_config import get_logger
-from src.shared.python.model_generation.core.constants import GRAVITY_M_S2
+from .terrain import (
+    compute_gravity_on_slope as compute_gravity_on_slope,
+    compute_roll_direction as compute_roll_direction,
+    get_contact_normal as get_contact_normal,
+)
 
 logger = get_logger(__name__)
 
@@ -1159,76 +1162,3 @@ def create_terrain_from_config(config_path: Path | str) -> Terrain:
     """
     config = TerrainConfig.load(config_path)
     return config.to_terrain()
-
-
-# Physics integration functions
-
-
-@functools.lru_cache(maxsize=256)
-def compute_gravity_on_slope(
-    slope_angle_deg: float,
-    gravity: float = float(GRAVITY_M_S2),
-) -> tuple[float, float]:
-    """Compute gravity components on a slope. Cached for performance.
-
-    Args:
-        slope_angle_deg: Slope angle in degrees
-        gravity: Gravitational acceleration (m/s^2)
-
-    Returns:
-        Tuple of (g_parallel, g_perpendicular) components
-    """
-    if slope_angle_deg is None:
-        raise ValueError("slope_angle_deg must be provided")
-    slope_rad = math.radians(slope_angle_deg)
-    g_parallel = gravity * math.sin(slope_rad)
-    g_perpendicular = gravity * math.cos(slope_rad)
-
-    return g_parallel, g_perpendicular
-
-
-def compute_roll_direction(
-    elevation: ElevationMap,
-    x: float,
-    y: float,
-) -> np.ndarray:
-    """Compute ball roll direction on terrain (downhill).
-
-    Args:
-        elevation: Elevation map
-        x: X coordinate (meters)
-        y: Y coordinate (meters)
-
-    Returns:
-        Unit vector in roll direction (2D: x, y)
-    """
-    if elevation is None:
-        raise ValueError("elevation must be provided")
-    dzdx, dzdy = elevation.get_gradient(x, y)
-
-    # Roll direction is opposite to gradient (downhill)
-    roll_dir = np.array([-dzdx, -dzdy])
-    magnitude = math.hypot(*roll_dir)
-
-    if magnitude < 1e-10:
-        return np.zeros(2)
-
-    return roll_dir / magnitude
-
-
-def get_contact_normal(
-    elevation: ElevationMap,
-    x: float,
-    y: float,
-) -> np.ndarray:
-    """Get contact normal for physics engine.
-
-    Args:
-        elevation: Elevation map
-        x: X coordinate (meters)
-        y: Y coordinate (meters)
-
-    Returns:
-        Unit normal vector (3,)
-    """
-    return elevation.get_normal(x, y)

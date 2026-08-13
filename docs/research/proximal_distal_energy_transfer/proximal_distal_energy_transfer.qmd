@@ -215,6 +215,8 @@ format:
 
 {{< include chapters/_ch05b_forward_two_hand.qmd >}}
 
+{{< include chapters/_ch05a_interactive_workbench.qmd >}}
+
 {{< include chapters/_ch06_shaft_contributions.qmd >}}
 
 {{< include chapters/_ch06b_coupled_base_flex.qmd >}}

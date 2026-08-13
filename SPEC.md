@@ -39,7 +39,7 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.509 |
+| **Spec Version** | 1.0.510 |
 | **Last Spec Update** | 2026-08-12 |
 
 ## 2. Purpose & Mission
@@ -72,6 +72,13 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ### Recent Spec Updates
 
 - `src/shared/python/motion_matching/loaders/c3d.py`: Optimized `np.linalg.norm` to `math.hypot` inside `_shaft_quaternions` for better performance on small 3D vectors (spec-exempt: micro-optimization).
+- **2026-08-12** - Added the interactive proximal--distal dynamics companion
+  under epic #8511. UpstreamDrift now resolves the canonical sibling Tools
+  provider and its dockable adapter instead of maintaining launcher-specific
+  physics. The PyQt6 and React/Tauri clients share a validated experiment and
+  glossary catalog covering double, triple, bilateral, counterfactual, and
+  robustness studies. Interactive output is explicitly exploratory; scripted,
+  frozen analyses remain the publication authority.
 
 - **2026-08-12** - Added epic #8507's adversarial transmission and task-
   robustness tier: paired clock/state-trigger programs on common training and
@@ -136,6 +143,20 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   ZVCF closure; and the scientific article defines measurement, identifiability,
   and human-data falsification boundaries without treating overlapping
   counterfactuals as additive effort fractions.
+- **2026-08-11** - Prepared the local launcher UI-setup decomposition tracked by
+  [#8490](https://github.com/D-sorganization/UpstreamDrift/issues/8490) from
+  exact PR #8489 head `2f664d2beaddf7444b12f90080ae9897aea24fcc`.
+  Navigation/sidebar/menu construction now lives in the private
+  `_launcher_navigation_ui.py` mixin, while status/search/runtime/view/zoom
+  construction and the historical top-bar widgets live in the private
+  `_launcher_top_bar_ui.py` mixin. `UISetupManager` retains every historical
+  method through inheritance or its compatibility facade, including dynamic
+  manager-to-launcher rebinding and monkeypatch-sensitive exports.
+- **2026-08-11** - Decomposed the launcher settings surface from exact draft
+  PR #8486 head `624043537a5ab10aa7ef56dc61685a004b872c0c` without changing
+  its public dialog/widget contract.
+- **2026-08-11** - Decomposed the Simscape C3D viewer for #8485 without
+  changing its public UI contract.
 - **2026-08-10** - Added #8458 hand-path attribution: canonical pointwise
   ZTCF/control/ZVCF definitions; exact double-pendulum, one-arm, and closed-loop
   two-arm adapters; deterministic force-vector, impulse, power, work,
@@ -2100,11 +2121,10 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-08-12 | 1.0.509 | Linked the canonical proximal--distal evidence workspace to the accessible AffineDrift companion *How a Golf Swing Carries Energy* in HTML and PDF, while retaining UpstreamDrift as the complete evidence and limitations authority. |
+| 2026-08-12 | 1.0.510 | Linked the canonical proximal--distal evidence workspace to the accessible AffineDrift companion *How a Golf Swing Carries Energy* in HTML and PDF, while retaining UpstreamDrift as the complete evidence and limitations authority. |
 | 2026-08-12 | 1.0.507 | Added the advanced proximal--distal frame, biology, canonical-pose, cross-engine, visual, terminology, and falsification bridge tracked by epic #8505. |
-| 2026-08-11 | 1.0.504 | Added a coupled forward three-mode shaft experiment plus an exact same-state arm--wrist allocation and phenomenological preload/role-reversal study; published deterministic evidence, figures, release presets, and falsifiers while explicitly withholding muscle, scapular, tissue, equipment, human-performance, and universal-technique claims. |
-| 2026-08-11 | 1.0.498 | Added a fail-closed, headless UpstreamDrift gateway for the exact Tools flight-to-ground request/result and reference-execution v1 façade, with absence/presence/malformed-contract tests and explicit dependency/release limitations for Tools #4276. |
-| 2026-08-11 | 1.0.497 | Added #8493 frame-explicit constrained-contact reaction decomposition with configuration, velocity, control, and retained-external components; verified total, ZTCF, and ZVCF closure in a deterministic fixed-support double-pendulum benchmark; published machine-readable evidence and three reproducible figures; and expanded the proximal-distal scientific article with GRF, COP, free-moment, identifiability, and held-out human-data falsification boundaries. |
+| 2026-08-11 | 1.0.506 | Decomposed launcher UI setup, settings dialog, Simscape 3D viewer, and launcher Sidekick readiness into modular helpers. |
+| 2026-08-11 | 1.0.504 | Added a coupled forward three-mode shaft experiment plus an exact same-state arm--wrist allocation and phenomenological preload/role-reversal study. |
 | 2026-08-10 | 1.0.496 | Added #8458 hand-path drift/control attribution across forward double-pendulum and one-arm cases plus a prescribed two-arm closed-loop sweep; exported deterministic force, impulse, power, work, joint/time-window, common/differential-mode, sensitivity, and closure evidence; bounded the late residual-couple preview result without claiming muscle preactivation or human performance; extended lossless object-stream PDF compaction to preserve the 106-page, 110-link, 122-outline publication below the size guard; and restored the all-files size gate with the final owned #8472 chat-dock exception through 2026-08-31. |
 | 2026-08-10 | 1.0.495 | Added a reproducible lossless article-PDF compaction command that fails closed on page, URI-link, outline, or size drift; reduced the 90-page publication artifact below the repository's 1 MiB PDF guard; and recorded the protected #8456 higher-order merge in the handoff. |
 | 2026-08-10 | 1.0.494 | Added a reference- and frame-explicit interaction-wrench schema; exact moment/velocity transport and proper-rotation power contracts; prescribed mobile-hub inverse-dynamics comparisons; planar two-hand closed-loop rank/nullspace diagnostics; a fail-closed model-discrepancy record; seven reproducible figures; and a higher-order scientific chapter that explicitly leaves full-body cross-engine dynamics unexecuted. |
@@ -2166,7 +2186,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 | 2026-06-18 | 1.0.441 | Restored current-main CI Standard after #7645. Strict API mypy now mirrors the baseline mypy push contract by checking only changed `src/api` Python files when `github.event.before` is available while preserving full strict API audits for scheduled/manual runs. The benchmark regression helper now keeps the 5x multiplier but applies a 10 microsecond absolute threshold floor for tiny hot paths, preventing sub-microsecond runner jitter from failing the 3.11 performance lane. |
 | 2026-06-18 | 1.0.440 | Closed current-main CI issue #7643. `ci-standard.yml` now scopes baseline mypy on ordinary pushes to changed `src/` Python files when `github.event.before` is available while retaining full-src baseline audits for scheduled/manual runs, and `Jules-PR-Cleanup.yml` now authenticates scheduled cleanup with `secrets.RUNNER_CHECK_TOKEN || github.token` so missing optional runner tokens no longer fail stale-PR discovery with HTTP 401. |
 | 2026-06-17 | 1.0.435 | Closed the dashboard launcher unit-test event-loop hang for issue #7639. `tests/unit/shared_python/test_launcher_integration.py` now patches the already-imported launcher module with `monkeypatch`, verifies the mocked Qt event-loop return code, and cannot enter the real `QApplication.exec()` loop when prior tests reload launcher modules. |
-| 2026-06-17 | 1.0.434 | Closed the durable task daemon cleanup startup race for issue #7638. `src/api/task_manager_durable.py` now shares cleanup execution between async and daemon-thread loops and performs an eager daemon startup sweep before sleeping for the full interval; `tests/api/test_task_manager_durable.py` covers both periodic deletion and startup deletion of expired tasks. |
+| 2026-06-17 | 1.0.434 | Closed the then-current durable task daemon cleanup startup race for issue #7638 and added coverage for periodic and startup deletion of expired tasks. The durable SQLite implementation and its dedicated tests were subsequently removed by consolidation #8322; the current `src/api/task_manager.py` is an intentionally process-local task manager. |
 | 2026-06-17 | 1.0.433 | Closed the Rust wheel parity overreach for issue #7637. `.github/workflows/ci-standard.yml` now keeps `rust-wheel-parity` required and fail-closed for Rust wheel, parity-test, and Python facade changes while explicitly skipping the expensive parity suite on unrelated PRs; `tests/ci/test_ci_infrastructure.py` locks the path-gated contract and the successful skip summary. |
 | 2026-06-17 | 1.0.432 | Closed the test-only PR core-lane OOM regression for issue #7635. CI Standard now exits after changed-test PR slices pass when no source/dependency coverage targets changed, preserving the no-collected-tests fallback and the scoped dependency-light lane for source/dependency PRs. |
 | 2026-06-17 | 1.0.431 | Closed the push-scoped Semgrep regression for issue #7633 by making `tests/unit/scripts/test_remove_icon_backdrops.py` parse generated SVGs with defusedxml in its assertion helpers while preserving the existing entity-bearing SVG rejection coverage. |
@@ -2616,6 +2636,8 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 
 - `spec-exempt`: Replaced `np.linalg.norm` with `math.sqrt(np.vdot(..., ...))` in `src/shared/python/spatial_algebra/indexed_acceleration.py` to optimize 1D array norm calculation without changing logic.
 
-### Performance Improvements
+### Performance & Refactoring Improvements
 
 - Optimized sum of squares calculation in `launch_monitor` module using `np.vdot` instead of `np.sum` to avoid intermediate array allocations. (spec-exempt: micro-optimization)
+- `spec-exempt` (#8483): Moved Sidekick readiness monitoring, degradation reporting, and workspace seeding from the main launcher facade into the existing launcher-owned `SidekickSidebarManager`.
+- (spec-exempt: security fix) Fixed user enumeration via timing attack in `/login` endpoint by ensuring a dummy password verification is performed even if the user is not found, to normalize response time.

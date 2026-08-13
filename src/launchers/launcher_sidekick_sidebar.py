@@ -13,6 +13,7 @@ from typing import Any
 
 from src.launchers.launcher_constants import REPOS_ROOT, logger
 from src.launchers.launcher_manager_attrs import forward_manager_attribute
+from src.launchers.sidekick_readiness import readiness_detail_for_log
 from src.launchers.sidekick_extension_overlay import (
     IncompleteParentSidekickRuntimeError,
     ManifestGatedSidekickFinder,
@@ -23,6 +24,12 @@ from src.launchers.tools_repo_path import resolve_tools_source_root
 
 _SOURCE_EXTENSION_FINDER: ManifestGatedSidekickFinder | None = None
 _SOURCE_EXTENSION_PARENT: Path | None = None
+
+SIDEKICK_API_READY_TIMEOUT_SEC: float = 45.0
+SIDEKICK_API_READY_RETRY_MS: int = 500
+SIDEKICK_API_RESTART_DELAY_MS: int = 1_000
+SIDEKICK_API_HEALTHCHECK_MS: int = 3_000
+SIDEKICK_API_MAX_RESTARTS: int = 2
 
 
 def _activate_source_extensions(tools_source_root: Path) -> None:
@@ -94,6 +101,139 @@ class SidekickSidebarManager:
             show_onboarding_if_needed(self.launcher)
         except ImportError as exc:
             logger.debug("Onboarding dialog not available: %s", exc)
+
+    def _monitor_sidekick_api_readiness(
+        self,
+        *,
+        readiness_check: Any,
+        schedule_once: Any,
+        monotonic: Any,
+    ) -> None:
+        """Advance the bounded API readiness state machine for the host.
+
+        The launcher supplies the clock, readiness probe, and Qt scheduler so
+        this manager stays independently testable and does not acquire a Qt
+        import-time dependency.
+        """
+        launcher = self.launcher
+        if not getattr(launcher, "_sidekick_api_monitoring", True):
+            return
+
+        runtime = launcher._sidekick_runtime_config
+        expected_instance_id = runtime.instance_id if runtime is not None else None
+        readiness = readiness_check(expected_instance_id=expected_instance_id)
+        if runtime is None:
+            launcher._report_sidekick_api_failure(readiness)
+            return
+        if readiness.ready:
+            launcher._sidekick_api_wait_started_at = None
+            launcher._sidekick_api_restart_count = 0
+            if not getattr(launcher, "_sidekick_api_was_ready", False):
+                logger.info("Sidekick API is ready: %s", readiness.url)
+            launcher._sidekick_api_was_ready = True
+            schedule_once(
+                SIDEKICK_API_HEALTHCHECK_MS,
+                launcher._monitor_sidekick_api_readiness,
+            )
+            return
+
+        launcher._sidekick_api_was_ready = False
+        now = monotonic()
+        if launcher._sidekick_api_wait_started_at is None:
+            launcher._sidekick_api_wait_started_at = now
+
+        elapsed = now - launcher._sidekick_api_wait_started_at
+        process = getattr(launcher, "background_api_process", None)
+        process_running = process is not None and process.poll() is None
+        if elapsed < SIDEKICK_API_READY_TIMEOUT_SEC and process_running:
+            logger.info(
+                "Waiting for Sidekick Chat API readiness: %s",
+                readiness_detail_for_log(readiness),
+            )
+            schedule_once(
+                SIDEKICK_API_READY_RETRY_MS,
+                launcher._monitor_sidekick_api_readiness,
+            )
+            return
+
+        if (
+            not process_running
+            and launcher._sidekick_runtime_config is not None
+            and launcher._sidekick_api_restart_count < SIDEKICK_API_MAX_RESTARTS
+        ):
+            launcher._sidekick_api_restart_count += 1
+            logger.warning(
+                "Restarting failed Sidekick API child (%s/%s): %s",
+                launcher._sidekick_api_restart_count,
+                SIDEKICK_API_MAX_RESTARTS,
+                readiness_detail_for_log(readiness),
+            )
+            launcher.background_api_process = (
+                launcher._restart_sidekick_background_api()
+            )
+            launcher._sidekick_api_wait_started_at = now
+            schedule_once(
+                SIDEKICK_API_RESTART_DELAY_MS,
+                launcher._monitor_sidekick_api_readiness,
+            )
+            return
+
+        launcher._report_sidekick_api_failure(readiness)
+
+    def _report_sidekick_api_failure(self, readiness: Any) -> None:
+        """Surface terminal API failure while leaving local tools available."""
+        launcher = self.launcher
+        logger.warning(
+            "Sidekick Chat remains degraded after API startup failed: %s",
+            readiness_detail_for_log(readiness),
+        )
+        show_toast = getattr(launcher, "show_toast", None)
+        if callable(show_toast):
+            configuration_detail = (
+                f" Configuration error: {launcher._sidekick_runtime_error}"
+                if launcher._sidekick_runtime_error
+                else ""
+            )
+            show_toast(
+                "Sidekick tools are available, but Chat could not connect to "
+                f"its local API at {readiness.url}.{configuration_detail}",
+                "warning",
+            )
+
+    def _seed_sidekick_workspace(self) -> None:
+        """Seed the active sidebar registry with launcher-owned model state."""
+        launcher = self.launcher
+        sidebar = launcher.sidekick_sidebar
+        if sidebar is None:
+            try:
+                from src.shared.python.gui_launcher import tools_sidebar_integration
+
+                get_active_sidebar = getattr(
+                    tools_sidebar_integration, "get_active_sidebar", None
+                )
+                if callable(get_active_sidebar):
+                    sidebar = get_active_sidebar()
+            except ImportError:
+                pass
+
+        if sidebar is None:
+            logger.debug("No sidekick sidebar found; workspace seed skipped")
+            return
+
+        registry = getattr(sidebar, "registry", None)
+        set_variable = getattr(registry, "set_variable", None)
+        if not callable(set_variable):
+            logger.debug(
+                "sidebar.registry has no callable set_variable; workspace seed skipped"
+            )
+            return
+
+        orchestrator = launcher.orchestrator
+        if orchestrator.engine_manager is not None:
+            set_variable("engine_manager", orchestrator.engine_manager)
+        if orchestrator.registry is not None:
+            set_variable("model_registry", orchestrator.registry)
+        logger.info("Sidekick workspace seeded with engine_manager and model_registry")
 
     @staticmethod
     def _should_skip_onboarding() -> bool:

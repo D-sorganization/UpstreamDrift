@@ -86,16 +86,22 @@ async def login(
 
     # Find user
     user = db.query(User).filter(User.email == login_data.email).first()
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
-        )
 
-    # Verify password
-    if not security_manager.verify_password(
-        login_data.password, str(user.hashed_password)
-    ):
+    # SECURITY: Prevent user enumeration via timing attacks by always
+    # performing a password verification even if the user is not found.
+    if user:
+        password_valid = security_manager.verify_password(
+            login_data.password, str(user.hashed_password)
+        )
+    else:
+        # Perform dummy verification using a valid bcrypt hash with the same
+        # work factor (12) used in the system, to take roughly the same time.
+        # This hash was generated with bcrypt for the password 'dummy_password'
+        dummy_hash = "$2b$12$9KWF9XkUM7.biKJYGY1oCeql3F9vNsKwhxDusKhRk8iCg5gUdT7G."
+        security_manager.verify_password(login_data.password, dummy_hash)
+        password_valid = False
+
+    if not password_valid:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
