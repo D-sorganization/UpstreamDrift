@@ -34,10 +34,12 @@ Update this file with every PR and every push to main.
   publication. Focused terminology, backend, engine, API, evidence, and
   publication tests pass; Ruff passes; title capitalization passes for all
   changed documents. After rebasing onto current remote main, the rendered and
-  optimized paper is 203 pages and 1,403,911 bytes with 186 URI links and 235
+  optimized paper is 203 pages and 1,404,572 bytes with 186 URI links and 235
   outline entries; affected definition, GRF, force-vector, and appendix pages
-  retain the visually approved layout. The 380-artifact release manifest has
-  zero mismatches. The first hosted required quality-gate run identified two
+  retain the visually approved layout. The combined post-rebase claim authority
+  contains 924 candidates, 796 reviewed candidates, and 228 registered claims;
+  the 381-artifact release manifest has zero mismatches. The first hosted
+  required quality-gate run identified two
   new Law-of-Demeter occurrences in the MyoSuite drift adapter; the adapter now
   binds the simulation data object once without changing its zero-control
   semantics. The exact no-growth scan, Ruff, and all 55 focused MyoSuite tests

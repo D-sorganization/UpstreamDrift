@@ -2,14 +2,14 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "37398e2931bd6c9e655dde7b9f9d076e36471214a077a64560c781a0d4898dbe",
+    "source_digest": "6deaa87120daf1da3e2516adcc76cbfe2ea9cadcbe122a7292b39293c895b8df",
     "baseline_commit": "13ea6a69585a42dc1db4b3959440ed95787c9779"
   },
   "audit_scope": {
     "completion_status": "in_progress",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "The complete audit remains in progress. The uncertainty, identifiability, and control chapter is fully adjudicated with leave-one-out and threshold sensitivity."
+    "current_scope": "The complete audit remains in progress. The forward modal-shaft chapter is fully reconciled, including a failed model-use screen."
   },
   "dependencies": [
     {
@@ -1562,24 +1562,6 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-9ab24a22e2f9fe0a",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-066"
-      ],
-      "rationale": "The candidate contributes to the bounded hand-path attribution claim family PD-CLAIM-066.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13"
-    },
-    {
-      "candidate_id": "PD-CAND-3050f2d4cee21790",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Equation or table lead-in, table body, or figure/table caption rather than an independent scientific proposition.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13"
-    },
-    {
       "candidate_id": "PD-CAND-b12e67811037d1b1",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
@@ -1617,24 +1599,6 @@
     },
     {
       "candidate_id": "PD-CAND-5e85e8c153465091",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Equation or table lead-in, table body, or figure/table caption rather than an independent scientific proposition.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13"
-    },
-    {
-      "candidate_id": "PD-CAND-7582fc4b9af7eb34",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-066"
-      ],
-      "rationale": "The candidate contributes to the bounded hand-path attribution claim family PD-CLAIM-066.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13"
-    },
-    {
-      "candidate_id": "PD-CAND-a3e29b1698ecad08",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "Equation or table lead-in, table body, or figure/table caption rather than an independent scientific proposition.",
@@ -2078,16 +2042,6 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-33f3767b282d44f9",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-076"
-      ],
-      "rationale": "States the autonomous-constraint ZVCF validity conditions in PD-CLAIM-076.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13"
-    },
-    {
       "candidate_id": "PD-CAND-43048748dad5d9d4",
       "disposition": "material_claims_mapped",
       "claim_ids": [
@@ -2124,16 +2078,6 @@
         "PD-CLAIM-077"
       ],
       "rationale": "The figure visualizes registered pointwise benchmark evidence for PD-CLAIM-077.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13"
-    },
-    {
-      "candidate_id": "PD-CAND-c159a38fee1ec15d",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-077"
-      ],
-      "rationale": "Reports closure, fixed-prediction R-squared, bias, and RMSE for PD-CLAIM-077.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
     },
@@ -2599,16 +2543,6 @@
     },
     {
       "candidate_id": "PD-CAND-97a1283cdfccec20",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-095"
-      ],
-      "rationale": "Adjudicated within PD-CLAIM-095; the candidate is bounded to the declared source, model, intervention, or nonclaim contract.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13"
-    },
-    {
-      "candidate_id": "PD-CAND-28b8d09be894b817",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-095"
@@ -7806,6 +7740,332 @@
         "PD-CLAIM-222"
       ],
       "rationale": "This passage participates in the uncertainty and stability audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-9ab24a22e2f9fe0a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-066"
+      ],
+      "rationale": "The candidate contributes to the bounded hand-path attribution claim family PD-CLAIM-066.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-3050f2d4cee21790",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Equation or table lead-in, table body, or figure/table caption rather than an independent scientific proposition.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-7582fc4b9af7eb34",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-066"
+      ],
+      "rationale": "The candidate contributes to the bounded hand-path attribution claim family PD-CLAIM-066.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-a3e29b1698ecad08",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Equation or table lead-in, table body, or figure/table caption rather than an independent scientific proposition.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-33f3767b282d44f9",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-076"
+      ],
+      "rationale": "States the autonomous-constraint ZVCF validity conditions in PD-CLAIM-076.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-c159a38fee1ec15d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-077"
+      ],
+      "rationale": "Reports closure, fixed-prediction R-squared, bias, and RMSE for PD-CLAIM-077.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-28b8d09be894b817",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-095"
+      ],
+      "rationale": "Adjudicated within PD-CLAIM-095; the candidate is bounded to the declared source, model, intervention, or nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-c4a663f4579b7302",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-223"
+      ],
+      "rationale": "This passage participates in the forward modal-shaft reconciliation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-e14a0e665fbc9883",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-223"
+      ],
+      "rationale": "This passage participates in the forward modal-shaft reconciliation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-55c8beb511d3bbda",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-223"
+      ],
+      "rationale": "This passage participates in the forward modal-shaft reconciliation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-aa9719de6abf5e1e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-224"
+      ],
+      "rationale": "This passage participates in the forward modal-shaft reconciliation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-b14a768ba9f50eec",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-224"
+      ],
+      "rationale": "This passage participates in the forward modal-shaft reconciliation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-bcd66e4c7d1e9d20",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-224"
+      ],
+      "rationale": "This passage participates in the forward modal-shaft reconciliation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-d24ae9bcadfe4d4e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-224"
+      ],
+      "rationale": "This passage participates in the forward modal-shaft reconciliation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-7c0b91af90df969a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-225"
+      ],
+      "rationale": "This passage participates in the forward modal-shaft reconciliation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-5a49d891ec0ebcee",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-225"
+      ],
+      "rationale": "This passage participates in the forward modal-shaft reconciliation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-cf5354e80e1fade2",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-225"
+      ],
+      "rationale": "This passage participates in the forward modal-shaft reconciliation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-9b46f7086fe99bf8",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-225"
+      ],
+      "rationale": "This passage participates in the forward modal-shaft reconciliation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-dce0de142038ba68",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-225"
+      ],
+      "rationale": "This passage participates in the forward modal-shaft reconciliation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-37b7f2f21bde0962",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-225"
+      ],
+      "rationale": "This passage participates in the forward modal-shaft reconciliation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-62ed299c81043109",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-226"
+      ],
+      "rationale": "This passage participates in the forward modal-shaft reconciliation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-08b48aae6b82a6c5",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-226"
+      ],
+      "rationale": "This passage participates in the forward modal-shaft reconciliation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-5da64f41a26d09bc",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-226"
+      ],
+      "rationale": "This passage participates in the forward modal-shaft reconciliation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-c2572f125313bcfe",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-227"
+      ],
+      "rationale": "This passage participates in the forward modal-shaft reconciliation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-e5cbc4e673392727",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-227"
+      ],
+      "rationale": "This passage participates in the forward modal-shaft reconciliation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-934f0ab73f4438be",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-227"
+      ],
+      "rationale": "This passage participates in the forward modal-shaft reconciliation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-1daf6ba9a73f1be7",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-228"
+      ],
+      "rationale": "This passage participates in the forward modal-shaft reconciliation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-6407a845781200a1",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-228"
+      ],
+      "rationale": "This passage participates in the forward modal-shaft reconciliation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-f4b6bbda8fe142aa",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-228"
+      ],
+      "rationale": "This passage participates in the forward modal-shaft reconciliation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-76273d1367b57770",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-228"
+      ],
+      "rationale": "This passage participates in the forward modal-shaft reconciliation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-3da90b2a535b59f0",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-228"
+      ],
+      "rationale": "This passage participates in the forward modal-shaft reconciliation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-8f88e04d55380758",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-229"
+      ],
+      "rationale": "This passage participates in the forward modal-shaft reconciliation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-9e83bd87a74f5035",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-229"
+      ],
+      "rationale": "This passage participates in the forward modal-shaft reconciliation.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
     }
@@ -17272,6 +17532,338 @@
       ],
       "falsifier": "Club motion alone resolves bilateral force or the study is called human validation.",
       "adjudication": "Every chapter passage was checked against committed arrays, source contracts, leave-one-out rankings, Pareto membership perturbations, threshold sensitivity, and explicit nonhuman boundaries.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-223",
+      "candidate_ids": [
+        "PD-CAND-c4a663f4579b7302",
+        "PD-CAND-e14a0e665fbc9883",
+        "PD-CAND-55c8beb511d3bbda"
+      ],
+      "statement": "The study is an open synthetic numerical experiment, not calibrated equipment or human evidence.",
+      "classification": "scope_and_provenance",
+      "published_status": "supported",
+      "audit_status": "machine_authority_reproduced_and_stale_prose_reconciled",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:5",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:15",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:24"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/moving_base_modal_shaft_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/moving_base_modal_shaft_study.npz",
+        "scripts/research/proximal_distal_energy/moving_base_modal_shaft.py",
+        "scripts/research/proximal_distal_energy/run_moving_base_modal_shaft_study.py",
+        "tests/research/test_moving_base_modal_shaft.py",
+        "tests/research/test_moving_base_modal_shaft_evidence.py"
+      ],
+      "model_domain": "Synthetic planar moving-base, two-hand, distributed modal-shaft model.",
+      "uncertainty_boundary": "No governed equipment or participant measurements enter.",
+      "competing_explanations": [
+        "linear-beam model-use failure",
+        "synthetic parameter selection",
+        "fixed-step integration",
+        "planar geometry",
+        "unmodeled impact and torsion"
+      ],
+      "negative_controls": [
+        "same-state killswitch",
+        "coincident moment arms",
+        "reversed moment arms",
+        "timestep refinement",
+        "one-three-six mode comparison",
+        "contact-power closure"
+      ],
+      "falsifier": "The resource is presented as calibrated or prescriptive.",
+      "adjudication": "Every passage was reconciled to regenerated hash-bound JSON/NPZ authority; obsolete run values were replaced and the failed model-use screen was promoted to the claim boundary.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-224",
+      "candidate_ids": [
+        "PD-CAND-aa9719de6abf5e1e",
+        "PD-CAND-b14a768ba9f50eec",
+        "PD-CAND-bcd66e4c7d1e9d20",
+        "PD-CAND-d24ae9bcadfe4d4e"
+      ],
+      "statement": "Finite-element modes are transported into one constrained forward KKT solve with rigid-modal inertial coupling.",
+      "classification": "model_construction",
+      "published_status": "supported_numerically",
+      "audit_status": "machine_authority_reproduced_and_stale_prose_reconciled",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:35",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:43",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:52",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:65"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/moving_base_modal_shaft_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/moving_base_modal_shaft_study.npz",
+        "scripts/research/proximal_distal_energy/moving_base_modal_shaft.py",
+        "scripts/research/proximal_distal_energy/run_moving_base_modal_shaft_study.py",
+        "tests/research/test_moving_base_modal_shaft.py",
+        "tests/research/test_moving_base_modal_shaft_evidence.py"
+      ],
+      "model_domain": "Synthetic planar moving-base, two-hand, distributed modal-shaft model.",
+      "uncertainty_boundary": "Planar Euler-Bernoulli assumptions remain.",
+      "competing_explanations": [
+        "linear-beam model-use failure",
+        "synthetic parameter selection",
+        "fixed-step integration",
+        "planar geometry",
+        "unmodeled impact and torsion"
+      ],
+      "negative_controls": [
+        "same-state killswitch",
+        "coincident moment arms",
+        "reversed moment arms",
+        "timestep refinement",
+        "one-three-six mode comparison",
+        "contact-power closure"
+      ],
+      "falsifier": "Modal mass/frequency or KKT contracts fail.",
+      "adjudication": "Every passage was reconciled to regenerated hash-bound JSON/NPZ authority; obsolete run values were replaced and the failed model-use screen was promoted to the claim boundary.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-225",
+      "candidate_ids": [
+        "PD-CAND-7c0b91af90df969a",
+        "PD-CAND-5a49d891ec0ebcee",
+        "PD-CAND-cf5354e80e1fade2",
+        "PD-CAND-9b46f7086fe99bf8",
+        "PD-CAND-dce0de142038ba68",
+        "PD-CAND-37b7f2f21bde0962"
+      ],
+      "statement": "Separated grip reactions satisfy force-couple geometry and contact-power identities at recorded tolerances.",
+      "classification": "mechanical_identity",
+      "published_status": "supported",
+      "audit_status": "machine_authority_reproduced_and_stale_prose_reconciled",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:75",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:94",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:102",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:112",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:117",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:119"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/moving_base_modal_shaft_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/moving_base_modal_shaft_study.npz",
+        "scripts/research/proximal_distal_energy/moving_base_modal_shaft.py",
+        "scripts/research/proximal_distal_energy/run_moving_base_modal_shaft_study.py",
+        "tests/research/test_moving_base_modal_shaft.py",
+        "tests/research/test_moving_base_modal_shaft_evidence.py"
+      ],
+      "model_domain": "Synthetic planar moving-base, two-hand, distributed modal-shaft model.",
+      "uncertainty_boundary": "Achieved reactions are model outputs, not measured forces.",
+      "competing_explanations": [
+        "linear-beam model-use failure",
+        "synthetic parameter selection",
+        "fixed-step integration",
+        "planar geometry",
+        "unmodeled impact and torsion"
+      ],
+      "negative_controls": [
+        "same-state killswitch",
+        "coincident moment arms",
+        "reversed moment arms",
+        "timestep refinement",
+        "one-three-six mode comparison",
+        "contact-power closure"
+      ],
+      "falsifier": "Coincident/reversed controls or power closure fail.",
+      "adjudication": "Every passage was reconciled to regenerated hash-bound JSON/NPZ authority; obsolete run values were replaced and the failed model-use screen was promoted to the claim boundary.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-226",
+      "candidate_ids": [
+        "PD-CAND-62ed299c81043109",
+        "PD-CAND-08b48aae6b82a6c5",
+        "PD-CAND-5da64f41a26d09bc"
+      ],
+      "statement": "The baseline reaches a 0.13476 tip-deflection ratio and fails the preregistered 0.05 linear-beam model-use screen.",
+      "classification": "model_use_screen",
+      "published_status": "failed_quantitative_small_deflection_inference",
+      "audit_status": "machine_authority_reproduced_and_stale_prose_reconciled",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:128",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:136",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:143"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/moving_base_modal_shaft_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/moving_base_modal_shaft_study.npz",
+        "scripts/research/proximal_distal_energy/moving_base_modal_shaft.py",
+        "scripts/research/proximal_distal_energy/run_moving_base_modal_shaft_study.py",
+        "tests/research/test_moving_base_modal_shaft.py",
+        "tests/research/test_moving_base_modal_shaft_evidence.py"
+      ],
+      "model_domain": "Synthetic planar moving-base, two-hand, distributed modal-shaft model.",
+      "uncertainty_boundary": "The run remains an out-of-domain numerical stress test.",
+      "competing_explanations": [
+        "linear-beam model-use failure",
+        "synthetic parameter selection",
+        "fixed-step integration",
+        "planar geometry",
+        "unmodeled impact and torsion"
+      ],
+      "negative_controls": [
+        "same-state killswitch",
+        "coincident moment arms",
+        "reversed moment arms",
+        "timestep refinement",
+        "one-three-six mode comparison",
+        "contact-power closure"
+      ],
+      "falsifier": "The release calls this quantitatively valid equipment response.",
+      "adjudication": "Every passage was reconciled to regenerated hash-bound JSON/NPZ authority; obsolete run values were replaced and the failed model-use screen was promoted to the claim boundary.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-227",
+      "candidate_ids": [
+        "PD-CAND-c2572f125313bcfe",
+        "PD-CAND-e5cbc4e673392727",
+        "PD-CAND-934f0ab73f4438be"
+      ],
+      "statement": "Mode truncation is excitation-dependent; three modes agree closely with six for the two declared inputs only.",
+      "classification": "mode_truncation_screen",
+      "published_status": "conditionally_supported",
+      "audit_status": "machine_authority_reproduced_and_stale_prose_reconciled",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:154",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:160",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:162"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/moving_base_modal_shaft_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/moving_base_modal_shaft_study.npz",
+        "scripts/research/proximal_distal_energy/moving_base_modal_shaft.py",
+        "scripts/research/proximal_distal_energy/run_moving_base_modal_shaft_study.py",
+        "tests/research/test_moving_base_modal_shaft.py",
+        "tests/research/test_moving_base_modal_shaft_evidence.py"
+      ],
+      "model_domain": "Synthetic planar moving-base, two-hand, distributed modal-shaft model.",
+      "uncertainty_boundary": "Six modes are a within-model reference, not truth or impact validation.",
+      "competing_explanations": [
+        "linear-beam model-use failure",
+        "synthetic parameter selection",
+        "fixed-step integration",
+        "planar geometry",
+        "unmodeled impact and torsion"
+      ],
+      "negative_controls": [
+        "same-state killswitch",
+        "coincident moment arms",
+        "reversed moment arms",
+        "timestep refinement",
+        "one-three-six mode comparison",
+        "contact-power closure"
+      ],
+      "falsifier": "The result is generalized to arbitrary loads or impact.",
+      "adjudication": "Every passage was reconciled to regenerated hash-bound JSON/NPZ authority; obsolete run values were replaced and the failed model-use screen was promoted to the claim boundary.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-228",
+      "candidate_ids": [
+        "PD-CAND-1daf6ba9a73f1be7",
+        "PD-CAND-6407a845781200a1",
+        "PD-CAND-f4b6bbda8fe142aa",
+        "PD-CAND-76273d1367b57770",
+        "PD-CAND-3da90b2a535b59f0"
+      ],
+      "statement": "A same-state zero-command branch retains a negative force-generated couple for about 25 ms and converges under refinement and geometry controls.",
+      "classification": "counterfactual_mechanism",
+      "published_status": "supported_for_out_of_screen_synthetic_model",
+      "audit_status": "machine_authority_reproduced_and_stale_prose_reconciled",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:175",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:181",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:188",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:195",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:197"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/moving_base_modal_shaft_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/moving_base_modal_shaft_study.npz",
+        "scripts/research/proximal_distal_energy/moving_base_modal_shaft.py",
+        "scripts/research/proximal_distal_energy/run_moving_base_modal_shaft_study.py",
+        "tests/research/test_moving_base_modal_shaft.py",
+        "tests/research/test_moving_base_modal_shaft_evidence.py"
+      ],
+      "model_domain": "Synthetic planar moving-base, two-hand, distributed modal-shaft model.",
+      "uncertainty_boundary": "Command removal is not muscle inactivity and amplitudes are not equipment predictions.",
+      "competing_explanations": [
+        "linear-beam model-use failure",
+        "synthetic parameter selection",
+        "fixed-step integration",
+        "planar geometry",
+        "unmodeled impact and torsion"
+      ],
+      "negative_controls": [
+        "same-state killswitch",
+        "coincident moment arms",
+        "reversed moment arms",
+        "timestep refinement",
+        "one-three-six mode comparison",
+        "contact-power closure"
+      ],
+      "falsifier": "Persistence disappears or control identities fail.",
+      "adjudication": "Every passage was reconciled to regenerated hash-bound JSON/NPZ authority; obsolete run values were replaced and the failed model-use screen was promoted to the claim boundary.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-229",
+      "candidate_ids": [
+        "PD-CAND-8f88e04d55380758",
+        "PD-CAND-9e83bd87a74f5035"
+      ],
+      "statement": "Only numerical coupling, identities, and qualitative geometry survive; quantitative shaft, human, and coaching claims remain unsupported.",
+      "classification": "bounded_conclusion",
+      "published_status": "supported_with_rejection",
+      "audit_status": "machine_authority_reproduced_and_stale_prose_reconciled",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:205",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:212"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/moving_base_modal_shaft_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/moving_base_modal_shaft_study.npz",
+        "scripts/research/proximal_distal_energy/moving_base_modal_shaft.py",
+        "scripts/research/proximal_distal_energy/run_moving_base_modal_shaft_study.py",
+        "tests/research/test_moving_base_modal_shaft.py",
+        "tests/research/test_moving_base_modal_shaft_evidence.py"
+      ],
+      "model_domain": "Synthetic planar moving-base, two-hand, distributed modal-shaft model.",
+      "uncertainty_boundary": "The failed deflection screen is dispositive for linear-beam amplitude inference.",
+      "competing_explanations": [
+        "linear-beam model-use failure",
+        "synthetic parameter selection",
+        "fixed-step integration",
+        "planar geometry",
+        "unmodeled impact and torsion"
+      ],
+      "negative_controls": [
+        "same-state killswitch",
+        "coincident moment arms",
+        "reversed moment arms",
+        "timestep refinement",
+        "one-three-six mode comparison",
+        "contact-power closure"
+      ],
+      "falsifier": "Unsupported quantitative or human claims are restored.",
+      "adjudication": "Every passage was reconciled to regenerated hash-bound JSON/NPZ authority; obsolete run values were replaced and the failed model-use screen was promoted to the claim boundary.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
     }
