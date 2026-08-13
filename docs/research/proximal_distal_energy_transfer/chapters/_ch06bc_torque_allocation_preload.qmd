@@ -148,7 +148,9 @@ and carried continuously into the post-transition interval.
 From the loaded state, the persistent-direction program has no zero-transmission
 interval and a net torque-error impulse of 0.0717 N m s. The role-reversal
 program spends 11.5 ms and 22.0 ms in zero transmission for the arm and wrist
-channels, respectively, and its error impulse is 0.1954 N m s. A relaxed start
+channels, respectively, and its error impulse is 0.1954 N m s. These are
+zero-valued sample-occupancy estimates on a 0.1 ms grid; unresolved entry and
+exit locations bound them to 11.4--11.6 ms and 21.9--22.1 ms. A relaxed start
 produces an error impulse of 0.2011 N m s for either program. Thus preload
 improves continuity for a fixed desired program, while a sign reversal can
 discard that advantage under this particular dead-zone model.
@@ -169,6 +171,15 @@ co-contraction can improve task-relevant stiffness at an energetic cost
 is presumed optimal. Useful compliance can filter impact, store energy, and
 permit coordination; unwanted gaps or low tangent stiffness can impair rapid
 torque transmission. The distinction must be measured.
+
+Across the registered four-dead-zone by three-time-constant grid, an explicit
+$10^{-10}$ N m s equivalence tolerance classifies all three zero-dead-zone cases
+as equivalent, all nine positive-dead-zone cases as favoring persistent
+direction, and none as favoring complete role reversal. This is a structural
+result of the chosen backlash-like law: when its defining dead zone is removed,
+the modeled advantage disappears. The grid does not establish that biological
+transmission contains such a dead zone or that the sampled parameters span a
+human population.
 
 ## Critical Comparison of the Two Extremes
 

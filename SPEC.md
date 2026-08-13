@@ -2896,3 +2896,17 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   participant-level dataset satisfies the frozen synchronized bilateral
   six-axis grip-wrench acquisition contract; synthetic traces, digitized
   figures, and publication aggregates shall fail as substitutes.
+
+### F-8557.16: Torque Allocation and Transmission Audit
+
+- Proximal and direct-wrist allocations shall be compared only at a common
+  state and matched club task, with direct moment plus force-couple closure.
+- Hand-force and generalized-torque metrics shall remain separate and shall not
+  be relabeled as physiological effort or a universal optimum.
+- Transmission gaps shall disclose the operational dead-zone definition,
+  sample resolution, and one-step temporal bounds.
+- Sensitivity comparisons shall use an explicit numerical equivalence region
+  and separately report favored, equivalent, and reversed cases.
+- Persistent-direction benefit shall remain conditional on positive dead-zone
+  behavior; zero-dead-zone equivalence and the absence of governed human
+  validation shall remain visible.

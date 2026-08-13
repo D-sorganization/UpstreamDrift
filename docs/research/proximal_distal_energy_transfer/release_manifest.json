@@ -243,8 +243,8 @@
       "bytes": 11140
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd": {
-      "sha256": "3936a3d38810955bc58728189bb1320c3cef1add652bb6fa383b77fd5f254c0c",
-      "bytes": 13832
+      "sha256": "0027bd80ca506c237b2aee79c587f29e8d5d95e6fdb24a81e29da0e37be4f99f",
+      "bytes": 14539
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd": {
       "sha256": "9ff477d70bbd11840d456ba04ff18fece736cfec871b02e0c192aff417d32033",
@@ -259,8 +259,8 @@
       "bytes": 10065
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch06e_experimental_protocol.qmd": {
-      "sha256": "802c2e7316af1d93836b2fac7f85b8797c4672a4cfbf39a72d4c76e9dcf4d9f3",
-      "bytes": 8320
+      "sha256": "e6a029ef9e6cd81d5488adfd9f899a26de3e5b01099d84f7eb490ff57a95c06b",
+      "bytes": 8332
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd": {
       "sha256": "dd097aa96961e64767241ce552074b0689e5bf5c4188ec25086c2c676a043777",
@@ -275,8 +275,8 @@
       "bytes": 13409
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch07b_frames_biology_engines.qmd": {
-      "sha256": "146f081f362cfbe64d44523f618f3f2002729e3e0185ef728532b10b2a59a654",
-      "bytes": 15664
+      "sha256": "af08b875e93cf93aed071872381a6ad7ed01a2c903a4707240736fe876cd61a4",
+      "bytes": 15681
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch07c_transmission_robustness.qmd": {
       "sha256": "6e74c1e1c18d950060b6d6ab2d63a3650e0b68c2aed89a2d50ac8244309badd1",
@@ -291,20 +291,20 @@
       "bytes": 11077
     },
     "docs/research/proximal_distal_energy_transfer/data/advanced_biological_bridge.json": {
-      "sha256": "41e5c13c2e5c5e63bc8b2af6dd8e1532a0c5e005a493400b01c0b4c077a8a9af",
-      "bytes": 6335
+      "sha256": "ab074f55458dae1356f6fc3d88e291254d7498d715ea21000bc2ce055e2a0c85",
+      "bytes": 6151
     },
     "docs/research/proximal_distal_energy_transfer/data/advanced_biological_bridge.npz": {
       "sha256": "6d2f0d6e6a71c38eb4c86fd6ab138bc6f8a3f113ca65de101e447ed3bf07af2f",
       "bytes": 217952
     },
     "docs/research/proximal_distal_energy_transfer/data/claim_audit_registry.json": {
-      "sha256": "658c2d0bc40f69b6d1ca396f1f85db89ac0aa50d7bdc51e3383da5819401b53e",
-      "bytes": 798641
+      "sha256": "26be713c07956f34e04a906324313969c0e43036c117c30a6133a765754fd2c1",
+      "bytes": 831602
     },
     "docs/research/proximal_distal_energy_transfer/data/claim_candidate_inventory.json": {
-      "sha256": "0708be8fb4d3825d59f4074be7807d3b69b0e1102f0ff415384d2fd330f8f887",
-      "bytes": 930249
+      "sha256": "3156a11f11ee8ead1664009b1dd7975b0a783224b3832b32e58baeb00d56d7ce",
+      "bytes": 931557
     },
     "docs/research/proximal_distal_energy_transfer/data/counterfactual_ensemble.json": {
       "sha256": "fe3157680189c1e0486085e104f77dbd79db056d44c63ed2aa3dd891003c41f5",
@@ -547,12 +547,12 @@
       "bytes": 29129
     },
     "docs/research/proximal_distal_energy_transfer/data/torque_allocation_preload_study.json": {
-      "sha256": "4980717ae0e33d3ec73c202f4fb3a534d023d920dddbe5d7ee8a9dc155e328c7",
-      "bytes": 4169
+      "sha256": "02c2a11305bc329e652c3f7d7ac849fac3d503b37fd7daac36d11bf84bf64a34",
+      "bytes": 6004
     },
     "docs/research/proximal_distal_energy_transfer/data/torque_allocation_preload_study.npz": {
-      "sha256": "a8393a9b31a706ce2a7baafcf6466078a1dd6445cba51ee70c115f3160e2c789",
-      "bytes": 278378
+      "sha256": "140adf1baa5daaff42f9d7beee02e49e55d5041bc25a049bc99ec6933699b849",
+      "bytes": 278721
     },
     "docs/research/proximal_distal_energy_transfer/data/torso_velocity_human_validation_registration.json": {
       "sha256": "adfe1fecd98bc17ab50be757d51fefabd672056ef28152f7e14f7c9bf5a187fd",
@@ -1107,36 +1107,36 @@
       "bytes": 92304
     },
     "docs/research/proximal_distal_energy_transfer/figures/fig_torque_allocation_geometry_surface.pdf": {
-      "sha256": "2bd4aa1975da33a1bc9c18472675b666dbb145fd846309f84e57cc7c9202d437",
+      "sha256": "3057b5249aa8c0d4a10f21b6b6ce8d7d7a771eba57a1e8fe7da620e4418074ee",
       "bytes": 25629
     },
     "docs/research/proximal_distal_energy_transfer/figures/fig_torque_allocation_geometry_surface.svg": {
-      "sha256": "3effe256a3ee15bd495d354659d0e98a08d1ef7697414e8948b60e654d65c943",
-      "bytes": 189280
+      "sha256": "a678d82da49bf3f2888c4436b4ba130dbc8c194ea61ca91c27521cb3080881c4",
+      "bytes": 197064
     },
     "docs/research/proximal_distal_energy_transfer/figures/fig_torque_allocation_moment_closure.pdf": {
-      "sha256": "6c7f3c067b0c734d85c28483e245ce31aee430e3e702ef4f7d988c42a490a1ff",
+      "sha256": "59fd54489c0fa3d8987439bfb86b9f9b9f34fb9871cddc010ba71b5c6963ca4a",
       "bytes": 4508
     },
     "docs/research/proximal_distal_energy_transfer/figures/fig_torque_allocation_moment_closure.svg": {
-      "sha256": "4529a1d43f25aef2604ce1bab8686712dd59ebf312b81da2abb7d38ac513827e",
-      "bytes": 29272
+      "sha256": "676cd034f3962b5d1d304ba8fe6627c5adc2870c750c4ea97d2178c1edd526b0",
+      "bytes": 34415
     },
     "docs/research/proximal_distal_energy_transfer/figures/fig_torque_continuous_preparation.pdf": {
-      "sha256": "827628a5d91322f97e3f9db6b4157ce90f838f25270e50a82873faa4856a46f0",
+      "sha256": "8ace88b7d7e9d9e1cd0fba217fdc30580a85e3d7c09b0ccead175aac73580b58",
       "bytes": 7063
     },
     "docs/research/proximal_distal_energy_transfer/figures/fig_torque_continuous_preparation.svg": {
-      "sha256": "0f6961dbef7fb9899ef2a4445138d750db3b95e268b66c98937880d8014fbf27",
+      "sha256": "2e38618c31b981a9738e5f3cfd50a4b01b7610100459bd827304f85ac12bc895",
       "bytes": 38426
     },
     "docs/research/proximal_distal_energy_transfer/figures/fig_torque_role_reversal_transmission.pdf": {
-      "sha256": "fdbe2ce1d05abde5dadcd7828896c02fd238fb0f941694147f92c6ebe12fa97e",
+      "sha256": "5137153a95bbb257218f99f7d1ce3a4ea5cb28645b978af03abb8a21dcc04d8d",
       "bytes": 8283
     },
     "docs/research/proximal_distal_energy_transfer/figures/fig_torque_role_reversal_transmission.svg": {
-      "sha256": "05cb61304c0c7d0a8bc1b4e2fc7ec967f4df50aa518f06e6eaa9c9db0fa83c86",
-      "bytes": 57231
+      "sha256": "39fdd29389ca3dbd441f862c40e65cf0bd6583e18d3607c61487beaa96d745e8",
+      "bytes": 66266
     },
     "docs/research/proximal_distal_energy_transfer/figures/fig_transmission_pathway_framework.pdf": {
       "sha256": "a8d8a61cff349a8020f91117a8b5c63aaf12eaa53bc3d512feac7f6436258889",
@@ -1251,8 +1251,8 @@
       "bytes": 71530
     },
     "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.pdf": {
-      "sha256": "96aece9ac1be82e9f7775d47a5204dbf2b9b4f22e82622c005d40ed1476dc491",
-      "bytes": 1399967
+      "sha256": "6f8e1743f52260bc8d3bd60ed2afb08e3cbe7421cfc55964f9d30fb748a643ed",
+      "bytes": 1400701
     },
     "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd": {
       "sha256": "a73e87e53bba8eefb6ef317c01e586badcc3fd5b2a3daf6a766c57fa7d3af57a",
@@ -1426,6 +1426,10 @@
       "sha256": "a77165f95ff971f6821d4ea81a4e35eadfe5b402877bb6680fa5b88e0a28d8fa",
       "bytes": 10930
     },
+    "scripts/research/proximal_distal_energy/register_torque_allocation_claims.py": {
+      "sha256": "7c2d26072dec7b068fad34492fa9cca79609939078b21a850cac422aa0c155d6",
+      "bytes": 11014
+    },
     "scripts/research/proximal_distal_energy/release_bundle.py": {
       "sha256": "9f72adf9a6bf4abf26fe31bf9228dba4e70d7d408591b497b222f35e65854538",
       "bytes": 9743
@@ -1507,8 +1511,8 @@
       "bytes": 9354
     },
     "scripts/research/proximal_distal_energy/run_torque_allocation_preload_study.py": {
-      "sha256": "e3b6962b50ebe0d0e3ac22d3fd20d84802bd1f72e1a1bc4466c9b815a34d3009",
-      "bytes": 8723
+      "sha256": "5d6e4d4f1e34cd104cecaffe5cd8373708a8b8f83ba3e49036295df7d168708a",
+      "bytes": 9747
     },
     "scripts/research/proximal_distal_energy/run_transmission_robustness_study.py": {
       "sha256": "e8ae5fe19bf0a7c4b4dda66f5749ca362fa54ddc7eadc9dc924b7cca7a1084c7",
@@ -1555,8 +1559,8 @@
       "bytes": 11006
     },
     "scripts/research/proximal_distal_energy/torque_allocation_preload.py": {
-      "sha256": "1fc3601789e87d49af4aaf9f9727a1965132465edca5c08a423afa45903dd886",
-      "bytes": 20888
+      "sha256": "ce91cacb4d37614053776d063fc490b84bbe181f1fa9a50e6e0edf15700a8c73",
+      "bytes": 21826
     },
     "scripts/research/proximal_distal_energy/torque_programs.py": {
       "sha256": "7ab86458ac3c889f5595a9a966bc42da705e3d9b02bcf0e1ee9c48b1716d2b02",

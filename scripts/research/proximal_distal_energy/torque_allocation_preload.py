@@ -140,6 +140,9 @@ class RoleReversalTrace:
     transmitted_net_torque_nm: FloatArray
     arm_zero_transmission_duration_s: float
     wrist_zero_transmission_duration_s: float
+    arm_zero_transmission_duration_bounds_s: tuple[float, float]
+    wrist_zero_transmission_duration_bounds_s: tuple[float, float]
+    temporal_resolution_s: float
     net_torque_error_impulse_nms: float
     arm_reversal_delay_s: float
     wrist_reversal_delay_s: float
@@ -347,6 +350,18 @@ def _reversal_delay(
     return float(time[indices[0]]) if indices.size else float(time[-1])
 
 
+def _zero_occupancy(
+    transmitted: FloatArray, step_s: float, tolerance: float
+) -> tuple[float, tuple[float, float]]:
+    """Return zero-sample occupancy and its one-step boundary bracket."""
+
+    count = int(np.count_nonzero(np.abs(transmitted) <= tolerance))
+    estimate = count * step_s
+    if count == 0:
+        return 0.0, (0.0, 0.0)
+    return estimate, (max(0.0, estimate - step_s), estimate + step_s)
+
+
 def evaluate_role_reversal(
     program: RoleReversalProgram,
     *,
@@ -401,6 +416,8 @@ def evaluate_role_reversal(
     transmitted_net = arm_torque + wrist_torque
     error_impulse = float(np.trapezoid(np.abs(desired_net - transmitted_net), time))
     tolerance = 1e-12
+    arm_occupancy, arm_bounds = _zero_occupancy(arm_torque, step_s, tolerance)
+    wrist_occupancy, wrist_bounds = _zero_occupancy(wrist_torque, step_s, tolerance)
     return RoleReversalTrace(
         time_s=time,
         desired_arm_torque_nm=desired_arm,
@@ -409,12 +426,11 @@ def evaluate_role_reversal(
         transmitted_wrist_torque_nm=wrist_torque,
         desired_net_torque_nm=desired_net,
         transmitted_net_torque_nm=transmitted_net,
-        arm_zero_transmission_duration_s=float(
-            np.count_nonzero(np.abs(arm_torque) <= tolerance) * step_s
-        ),
-        wrist_zero_transmission_duration_s=float(
-            np.count_nonzero(np.abs(wrist_torque) <= tolerance) * step_s
-        ),
+        arm_zero_transmission_duration_s=arm_occupancy,
+        wrist_zero_transmission_duration_s=wrist_occupancy,
+        arm_zero_transmission_duration_bounds_s=arm_bounds,
+        wrist_zero_transmission_duration_bounds_s=wrist_bounds,
+        temporal_resolution_s=step_s,
         net_torque_error_impulse_nms=error_impulse,
         arm_reversal_delay_s=_reversal_delay(time, arm_torque, program.arm_post_nm),
         wrist_reversal_delay_s=_reversal_delay(
@@ -512,6 +528,8 @@ def evaluate_continuous_role_reversal(
     post_desired_net = desired_net[transition_index:]
     post_transmitted_net = transmitted_net[transition_index:]
     tolerance = 1e-12
+    arm_occupancy, arm_bounds = _zero_occupancy(post_arm, step_s, tolerance)
+    wrist_occupancy, wrist_bounds = _zero_occupancy(post_wrist, step_s, tolerance)
     return RoleReversalTrace(
         time_s=time,
         desired_arm_torque_nm=desired_arm,
@@ -520,12 +538,11 @@ def evaluate_continuous_role_reversal(
         transmitted_wrist_torque_nm=wrist_torque,
         desired_net_torque_nm=desired_net,
         transmitted_net_torque_nm=transmitted_net,
-        arm_zero_transmission_duration_s=float(
-            np.count_nonzero(np.abs(post_arm) <= tolerance) * step_s
-        ),
-        wrist_zero_transmission_duration_s=float(
-            np.count_nonzero(np.abs(post_wrist) <= tolerance) * step_s
-        ),
+        arm_zero_transmission_duration_s=arm_occupancy,
+        wrist_zero_transmission_duration_s=wrist_occupancy,
+        arm_zero_transmission_duration_bounds_s=arm_bounds,
+        wrist_zero_transmission_duration_bounds_s=wrist_bounds,
+        temporal_resolution_s=step_s,
         net_torque_error_impulse_nms=float(
             np.trapezoid(np.abs(post_desired_net - post_transmitted_net), post_time)
         ),

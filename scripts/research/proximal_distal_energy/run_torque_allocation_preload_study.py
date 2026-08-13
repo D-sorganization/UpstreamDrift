@@ -25,6 +25,13 @@ def _trace_record(trace) -> dict[str, float]:
     return {
         "arm_zero_transmission_duration_s": trace.arm_zero_transmission_duration_s,
         "wrist_zero_transmission_duration_s": trace.wrist_zero_transmission_duration_s,
+        "arm_zero_transmission_duration_bounds_s": list(
+            trace.arm_zero_transmission_duration_bounds_s
+        ),
+        "wrist_zero_transmission_duration_bounds_s": list(
+            trace.wrist_zero_transmission_duration_bounds_s
+        ),
+        "temporal_resolution_s": trace.temporal_resolution_s,
         "net_torque_error_impulse_nms": trace.net_torque_error_impulse_nms,
         "arm_reversal_delay_s": trace.arm_reversal_delay_s,
         "wrist_reversal_delay_s": trace.wrist_reversal_delay_s,
@@ -98,6 +105,11 @@ def main() -> None:
                     trace.arm_zero_transmission_duration_s
                     + trace.wrist_zero_transmission_duration_s
                 )
+    equivalence_tolerance_nms = 1e-10
+    sensitivity_difference = sensitivity_error[:, :, 1] - sensitivity_error[:, :, 0]
+    persistent_favored = sensitivity_difference > equivalence_tolerance_nms
+    role_reversal_favored = sensitivity_difference < -equivalence_tolerance_nms
+    equivalent = np.abs(sensitivity_difference) <= equivalence_tolerance_nms
     summary = {
         "schema_version": "1.0.0",
         "epic": "https://github.com/D-sorganization/UpstreamDrift/issues/8497",
@@ -144,16 +156,20 @@ def main() -> None:
         "transmission_sensitivity": {
             "dead_zone_rad": dead_zones.tolist(),
             "time_constant_s": time_constants.tolist(),
-            "persistent_direction_has_lower_error_case_count": int(
-                np.count_nonzero(
-                    sensitivity_error[:, :, 0] < sensitivity_error[:, :, 1]
-                )
+            "equivalence_tolerance_nms": equivalence_tolerance_nms,
+            "persistent_direction_favored_case_count": int(
+                np.count_nonzero(persistent_favored)
+            ),
+            "equivalent_case_count": int(np.count_nonzero(equivalent)),
+            "role_reversal_favored_case_count": int(
+                np.count_nonzero(role_reversal_favored)
             ),
             "case_count": int(dead_zones.size * time_constants.size),
             "interpretation": (
                 "The persistent-direction advantage is conditional on the "
-                "declared transmission family. The programs are equal to "
-                "numerical precision in all three zero-dead-zone cases."
+                "declared transmission family. Under the explicit equivalence "
+                "tolerance, all three zero-dead-zone cases are equivalent and "
+                "the nine positive-dead-zone cases favor persistent direction."
             ),
         },
         "registered_hypotheses": {
@@ -176,6 +192,7 @@ def main() -> None:
         "sensitivity_dead_zone_rad": dead_zones,
         "sensitivity_time_constant_s": time_constants,
         "sensitivity_error_impulse_nms": sensitivity_error,
+        "sensitivity_reversal_minus_persistent_nms": sensitivity_difference,
         "sensitivity_zero_duration_s": sensitivity_zero_duration,
     }
     for name, trace in traces.items():
