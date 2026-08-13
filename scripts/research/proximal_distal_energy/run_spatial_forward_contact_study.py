@@ -66,6 +66,8 @@ def _trace_arrays(prefix: str, trace: SpatialForwardTrace) -> dict[str, np.ndarr
         "native_mechanical_energy",
         "total_energy",
         "action_reaction_force_residual",
+        "interface_power_residual",
+        "wrench_power_residual",
         "coincident_couple",
         "reversed_couple",
         "energy_balance_residual",

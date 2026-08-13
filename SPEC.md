@@ -2864,3 +2864,18 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   non-forward limitations explicit.
 - Every narrative candidate in the spatial common-state chapter shall map
   reciprocally to an atomic claim or a documented non-material disposition.
+
+### F-8557.14: Spatial Forward-Contact Independence and Power Audit
+
+- MuJoCo and Pinocchio engine identity, native forward-dynamics APIs, common
+  model digests, and exact initial/branch states shall fail closed.
+- The publication shall distinguish independently implemented rigid-body
+  dynamics and spatial-force mapping from the intentionally shared contact law,
+  driver, and semi-implicit update.
+- Paired contact shall close force, storage/dissipation power, and club-side
+  point-force/wrench power at every sample.
+- Post-killswitch persistence shall use the longest contiguous negative
+  interval, not a count that can join disconnected samples.
+- Cross-engine trajectory/wrench/orientation/energy gates, geometry controls,
+  timestep refinement, platform boundaries, and nonhuman limitations shall be
+  explicit and executable.

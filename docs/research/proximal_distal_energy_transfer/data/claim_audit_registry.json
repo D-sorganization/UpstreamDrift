@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "dcf039db813a954305cbcac98267000b9993101042b7ec61179770e8cbc85202",
+    "source_digest": "b99d916e0a15ac9df8814f41afeb36c8fb10bc8b877145ef0aa248235e661aa1",
     "baseline_commit": "13ea6a69585a42dc1db4b3959440ed95787c9779"
   },
   "audit_scope": {
@@ -182,16 +182,6 @@
       "rationale": "The quantitative parity passage maps both to the public release claim and the component-resolved audit claim.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
-    },
-    {
-      "candidate_id": "PD-CAND-94e3561735825fe9",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-005"
-      ],
-      "rationale": "The paragraph reports cross-engine persistence under the reduced compliant-contact model.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-12"
     },
     {
       "candidate_id": "PD-CAND-96f95833c562cb11",
@@ -6047,6 +6037,407 @@
       "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-da28478df3e21a5f",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-184"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-eb374ac30f5ba0c9",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-184"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-d2c5706c132b59a0",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-184"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-9acfb9f6d156c259",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-184"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-fb76a149a49ec7f9",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-184"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-81c9895785297c60",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-185"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-2ef53574dc729463",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-185"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-af1a9daf184f27fc",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-185"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-5392155bef5ba580",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-185"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-e2a3f0e88d8f32db",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-185"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-2c9fa48ffb95892e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-185"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-d266f8804a2f5261",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-186"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-f0b3d878d238ee7d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-186"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-745bbb19adf95c8c",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-186"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-50c5db13d47896d2",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-186"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-35bb601027084952",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-186"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-f24e814428000a81",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-186"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-68cdb52b41f9acaa",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-186"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-f760f1fdcb0bb898",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-187"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-047a0f7c64f0b193",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-187"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-f436dab0bf80bc63",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-187"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-96e1b6135b6c153d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-187"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-792b6b72d1f0a5c2",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-187"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-9d09e79628fc2c65",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-188"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-de15c16643204196",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-188"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-95005fd7a882b7e8",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-188"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-b5bd36dcbb974638",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-189"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-ec1715f721c2045f",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-189"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-7ea9c5abcda9d153",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-005",
+        "PD-CLAIM-189"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-ee93b4a527eb19d4",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-189"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-f23d51b94885271d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-190"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-49861c9434146f06",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-190"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-3abc1bc516488426",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-190"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-af819fb6b9ec7d1c",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-190"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-18be4516f035ec65",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-191"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-5caf52ed23f9ede9",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-192"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-2b31d9654f2523c9",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-192"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-fb9de8518c8d9fdc",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-192"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-e95769bc9dde5cab",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-193"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-95c24280fafe61bb",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-193"
+      ],
+      "rationale": "This spatial forward-contact passage participates in a registered engine, contact-power, branch, geometry, numerical, boundary, or falsification claim checked against WSL-native evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
     }
   ],
   "claims": [
@@ -6194,18 +6585,23 @@
       "claim_id": "PD-CLAIM-005",
       "release_claim_key": "passive_negative_couple_spatial_forward",
       "candidate_ids": [
-        "PD-CAND-94e3561735825fe9"
+        "PD-CAND-7ea9c5abcda9d153"
       ],
       "statement": "The reduced MuJoCo and Pinocchio forward-contact killswitch branches retain a negative swing-normal contact couple for 37.5 ms under the declared compliant-interface model.",
       "classification": "cross_engine_model_conditional_forward_counterfactual",
       "published_status": "supported_at_declared_reduced_contact_tier",
-      "audit_status": "provisionally_reproduced_not_anatomical_validation",
+      "audit_status": "two_native_engines_branch_power_geometry_and_refinement_checked",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:196"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:212"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json",
-        "scripts/research/proximal_distal_energy/spatial_forward_engines.py"
+        "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.npz",
+        "scripts/research/proximal_distal_energy/spatial_forward_contract.py",
+        "scripts/research/proximal_distal_energy/spatial_forward_engines.py",
+        "scripts/research/proximal_distal_energy/spatial_forward_study.py",
+        "scripts/research/proximal_distal_energy/run_spatial_forward_contact_study.py",
+        "tests/research/test_spatial_forward_contact.py"
       ],
       "model_domain": "Reduced 3-D rigid club and finite-mass translational hand carriages with paired compliant contacts and no direct club actuation.",
       "uncertainty_boundary": "Cross-engine reduced-mechanism evidence; articulated arms, measured grip tissue, muscles, and equipment calibration are absent.",
@@ -13493,6 +13889,526 @@
       ],
       "falsifier": "Any stronger claim is presented as supported by this prescribed-load same-state experiment.",
       "adjudication": "All chapter passages were checked against regenerated common-state evidence; component cancellation, generalized-load mapping, reference transport, geometric interventions, and non-human boundaries are explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-184",
+      "candidate_ids": [
+        "PD-CAND-da28478df3e21a5f",
+        "PD-CAND-eb374ac30f5ba0c9",
+        "PD-CAND-d2c5706c132b59a0",
+        "PD-CAND-9acfb9f6d156c259",
+        "PD-CAND-fb76a149a49ec7f9"
+      ],
+      "statement": "The reduced forward-contact tier tests trajectory-level transport through two native dynamics engines, while the contact law and state update remain shared and human/anatomical inference remains unsupported.",
+      "classification": "bounded_cross_engine_forward_estimand",
+      "published_status": "supported_at_declared_reduced_contact_tier",
+      "audit_status": "two_native_engines_contact_power_branch_geometry_refinement_and_boundaries_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:3",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:9",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:14",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:23",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:31"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.npz",
+        "scripts/research/proximal_distal_energy/spatial_forward_contract.py",
+        "scripts/research/proximal_distal_energy/spatial_forward_engines.py",
+        "scripts/research/proximal_distal_energy/spatial_forward_study.py",
+        "scripts/research/proximal_distal_energy/run_spatial_forward_contact_study.py",
+        "tests/research/test_spatial_forward_contact.py"
+      ],
+      "model_domain": "Two native rigid-body dynamics engines with shared reduced contact and integration contracts.",
+      "uncertainty_boundary": "The result does not independently validate the constitutive law, time integrator, anatomy, or human strategy.",
+      "competing_explanations": [
+        "shared contact-law error",
+        "shared integrator error",
+        "velocity-frame error",
+        "hidden direct actuation",
+        "disconnected negative samples",
+        "numerical energy drift"
+      ],
+      "negative_controls": [
+        "native engine identity",
+        "exact prebranch state",
+        "complete driver killswitch",
+        "coincident grips",
+        "reversed moment arms",
+        "interface virtual work",
+        "wrench power",
+        "timestep refinement"
+      ],
+      "falsifier": "Engine independence is stated without the shared-component boundary or the result is promoted beyond the reduced tier.",
+      "adjudication": "All chapter passages were checked against regenerated MuJoCo/Pinocchio WSL evidence; shared versus independent components, contiguous duration, virtual work, geometry, numerical residual, and nonhuman boundaries are explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-185",
+      "candidate_ids": [
+        "PD-CAND-81c9895785297c60",
+        "PD-CAND-2ef53574dc729463",
+        "PD-CAND-af1a9daf184f27fc",
+        "PD-CAND-5392155bef5ba580",
+        "PD-CAND-e2a3f0e88d8f32db",
+        "PD-CAND-2c9fa48ffb95892e"
+      ],
+      "statement": "A hashed 13-coordinate carriage-club model realizes achieved nonplanar two-point interface forces without direct club actuation, but is not an anatomical arm model.",
+      "classification": "reduced_spatial_forward_model_contract",
+      "published_status": "supported_at_declared_reduced_contact_tier",
+      "audit_status": "two_native_engines_contact_power_branch_geometry_refinement_and_boundaries_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:39",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:53",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:62",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:70",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:76",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:78"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.npz",
+        "scripts/research/proximal_distal_energy/spatial_forward_contract.py",
+        "scripts/research/proximal_distal_energy/spatial_forward_engines.py",
+        "scripts/research/proximal_distal_energy/spatial_forward_study.py",
+        "scripts/research/proximal_distal_energy/run_spatial_forward_contact_study.py",
+        "tests/research/test_spatial_forward_contact.py"
+      ],
+      "model_domain": "Finite-mass translational hand carriages and a free rigid club.",
+      "uncertainty_boundary": "Declared masses, inertias, stiffness, and paths are manufactured rather than participant-identified.",
+      "competing_explanations": [
+        "shared contact-law error",
+        "shared integrator error",
+        "velocity-frame error",
+        "hidden direct actuation",
+        "disconnected negative samples",
+        "numerical energy drift"
+      ],
+      "negative_controls": [
+        "native engine identity",
+        "exact prebranch state",
+        "complete driver killswitch",
+        "coincident grips",
+        "reversed moment arms",
+        "interface virtual work",
+        "wrench power",
+        "timestep refinement"
+      ],
+      "falsifier": "Digests differ, direct club actuation appears, or the reduced model is represented as anatomical.",
+      "adjudication": "All chapter passages were checked against regenerated MuJoCo/Pinocchio WSL evidence; shared versus independent components, contiguous duration, virtual work, geometry, numerical residual, and nonhuman boundaries are explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-186",
+      "candidate_ids": [
+        "PD-CAND-d266f8804a2f5261",
+        "PD-CAND-f0b3d878d238ee7d",
+        "PD-CAND-745bbb19adf95c8c",
+        "PD-CAND-50c5db13d47896d2",
+        "PD-CAND-35bb601027084952",
+        "PD-CAND-f24e814428000a81",
+        "PD-CAND-68cdb52b41f9acaa"
+      ],
+      "statement": "Paired Kelvin-Voigt contacts and the grounded driver close force, storage/dissipation power, club point-force/wrench power, and the reduced ground reaction pathway.",
+      "classification": "contact_virtual_work_and_pathway_accounting",
+      "published_status": "supported_at_declared_reduced_contact_tier",
+      "audit_status": "two_native_engines_contact_power_branch_geometry_refinement_and_boundaries_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:86",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:94",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:108",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:116",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:125",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:130",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:141"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.npz",
+        "scripts/research/proximal_distal_energy/spatial_forward_contract.py",
+        "scripts/research/proximal_distal_energy/spatial_forward_engines.py",
+        "scripts/research/proximal_distal_energy/spatial_forward_study.py",
+        "scripts/research/proximal_distal_energy/run_spatial_forward_contact_study.py",
+        "tests/research/test_spatial_forward_contact.py"
+      ],
+      "model_domain": "Reduced compliant point contacts and grounded carriage driver.",
+      "uncertainty_boundary": "No measured grip tissue, anatomical ground reaction, or muscle activation is represented.",
+      "competing_explanations": [
+        "shared contact-law error",
+        "shared integrator error",
+        "velocity-frame error",
+        "hidden direct actuation",
+        "disconnected negative samples",
+        "numerical energy drift"
+      ],
+      "negative_controls": [
+        "native engine identity",
+        "exact prebranch state",
+        "complete driver killswitch",
+        "coincident grips",
+        "reversed moment arms",
+        "interface virtual work",
+        "wrench power",
+        "timestep refinement"
+      ],
+      "falsifier": "Force closure, interface power, wrench power, or driver-path bookkeeping fails.",
+      "adjudication": "All chapter passages were checked against regenerated MuJoCo/Pinocchio WSL evidence; shared versus independent components, contiguous duration, virtual work, geometry, numerical residual, and nonhuman boundaries are explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-187",
+      "candidate_ids": [
+        "PD-CAND-f760f1fdcb0bb898",
+        "PD-CAND-047a0f7c64f0b193",
+        "PD-CAND-f436dab0bf80bc63",
+        "PD-CAND-96e1b6135b6c153d",
+        "PD-CAND-792b6b72d1f0a5c2"
+      ],
+      "statement": "MuJoCo and Pinocchio independently evaluate continuous-time rigid-body dynamics and spatial-force mappings while sharing a semi-implicit update; declared trajectory, wrench, orientation, and energy gates are engineering regions, not confidence intervals.",
+      "classification": "native_engine_identity_and_acceptance_contract",
+      "published_status": "supported_at_declared_reduced_contact_tier",
+      "audit_status": "two_native_engines_contact_power_branch_geometry_refinement_and_boundaries_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:150",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:153",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:161",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:171",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:180"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.npz",
+        "scripts/research/proximal_distal_energy/spatial_forward_contract.py",
+        "scripts/research/proximal_distal_energy/spatial_forward_engines.py",
+        "scripts/research/proximal_distal_energy/spatial_forward_study.py",
+        "scripts/research/proximal_distal_energy/run_spatial_forward_contact_study.py",
+        "tests/research/test_spatial_forward_contact.py"
+      ],
+      "model_domain": "MuJoCo 3.8.0 and Pinocchio 3.8.0 reduced common model.",
+      "uncertainty_boundary": "Shared integration and contact code narrow the independence claim.",
+      "competing_explanations": [
+        "shared contact-law error",
+        "shared integrator error",
+        "velocity-frame error",
+        "hidden direct actuation",
+        "disconnected negative samples",
+        "numerical energy drift"
+      ],
+      "negative_controls": [
+        "native engine identity",
+        "exact prebranch state",
+        "complete driver killswitch",
+        "coincident grips",
+        "reversed moment arms",
+        "interface virtual work",
+        "wrench power",
+        "timestep refinement"
+      ],
+      "falsifier": "A stub engine is accepted, identity/digest differs, or any declared gate fails.",
+      "adjudication": "All chapter passages were checked against regenerated MuJoCo/Pinocchio WSL evidence; shared versus independent components, contiguous duration, virtual work, geometry, numerical residual, and nonhuman boundaries are explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-188",
+      "candidate_ids": [
+        "PD-CAND-9d09e79628fc2c65",
+        "PD-CAND-de15c16643204196",
+        "PD-CAND-95005fd7a882b7e8"
+      ],
+      "statement": "The two forward trajectories remain far inside declared position, orientation, complete-wrench, and energy regions for both continuing-driver and killswitch branches.",
+      "classification": "cross_engine_forward_trajectory_transport",
+      "published_status": "supported_at_declared_reduced_contact_tier",
+      "audit_status": "two_native_engines_contact_power_branch_geometry_refinement_and_boundaries_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:184",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:187",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:193"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.npz",
+        "scripts/research/proximal_distal_energy/spatial_forward_contract.py",
+        "scripts/research/proximal_distal_energy/spatial_forward_engines.py",
+        "scripts/research/proximal_distal_energy/spatial_forward_study.py",
+        "scripts/research/proximal_distal_energy/run_spatial_forward_contact_study.py",
+        "tests/research/test_spatial_forward_contact.py"
+      ],
+      "model_domain": "Independently evaluated native accelerations with shared update and contact law.",
+      "uncertainty_boundary": "Agreement does not validate an anatomical model or independent contact implementation.",
+      "competing_explanations": [
+        "shared contact-law error",
+        "shared integrator error",
+        "velocity-frame error",
+        "hidden direct actuation",
+        "disconnected negative samples",
+        "numerical energy drift"
+      ],
+      "negative_controls": [
+        "native engine identity",
+        "exact prebranch state",
+        "complete driver killswitch",
+        "coincident grips",
+        "reversed moment arms",
+        "interface virtual work",
+        "wrench power",
+        "timestep refinement"
+      ],
+      "falsifier": "Any recorded metric exceeds its preregistered engineering region.",
+      "adjudication": "All chapter passages were checked against regenerated MuJoCo/Pinocchio WSL evidence; shared versus independent components, contiguous duration, virtual work, geometry, numerical residual, and nonhuman boundaries are explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-189",
+      "candidate_ids": [
+        "PD-CAND-b5bd36dcbb974638",
+        "PD-CAND-ec1715f721c2045f",
+        "PD-CAND-7ea9c5abcda9d153",
+        "PD-CAND-ee93b4a527eb19d4"
+      ],
+      "statement": "From an exact prebranch state, removing the complete grounded driver leaves a contiguous 37.5 ms negative swing-normal contact couple in both engines, with no direct club actuation and clearly separated axis projections.",
+      "classification": "same_state_spatial_driver_killswitch",
+      "published_status": "supported_at_declared_reduced_contact_tier",
+      "audit_status": "two_native_engines_contact_power_branch_geometry_refinement_and_boundaries_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:203",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:210",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:212",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:224"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.npz",
+        "scripts/research/proximal_distal_energy/spatial_forward_contract.py",
+        "scripts/research/proximal_distal_energy/spatial_forward_engines.py",
+        "scripts/research/proximal_distal_energy/spatial_forward_study.py",
+        "scripts/research/proximal_distal_energy/run_spatial_forward_contact_study.py",
+        "tests/research/test_spatial_forward_contact.py"
+      ],
+      "model_domain": "Reduced carriage-club contact branch after grounded-driver removal.",
+      "uncertainty_boundary": "Prior driver work, gravity, inertia, contact storage, and damping remain; zero driver is not biological passivity.",
+      "competing_explanations": [
+        "shared contact-law error",
+        "shared integrator error",
+        "velocity-frame error",
+        "hidden direct actuation",
+        "disconnected negative samples",
+        "numerical energy drift"
+      ],
+      "negative_controls": [
+        "native engine identity",
+        "exact prebranch state",
+        "complete driver killswitch",
+        "coincident grips",
+        "reversed moment arms",
+        "interface virtual work",
+        "wrench power",
+        "timestep refinement"
+      ],
+      "falsifier": "Prebranch state differs, interval is disconnected or shorter than 30 ms, direct club actuation exists, or engine results disagree.",
+      "adjudication": "All chapter passages were checked against regenerated MuJoCo/Pinocchio WSL evidence; shared versus independent components, contiguous duration, virtual work, geometry, numerical residual, and nonhuman boundaries are explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-190",
+      "candidate_ids": [
+        "PD-CAND-f23d51b94885271d",
+        "PD-CAND-49861c9434146f06",
+        "PD-CAND-3abc1bc516488426",
+        "PD-CAND-af819fb6b9ec7d1c"
+      ],
+      "statement": "At achieved states and fixed forces, coincident moment arms eliminate and reversed moment arms negate the swing-normal couple to machine precision.",
+      "classification": "spatial_forward_geometry_negative_controls",
+      "published_status": "supported_at_declared_reduced_contact_tier",
+      "audit_status": "two_native_engines_contact_power_branch_geometry_refinement_and_boundaries_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:233",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:236",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:240",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:246"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.npz",
+        "scripts/research/proximal_distal_energy/spatial_forward_contract.py",
+        "scripts/research/proximal_distal_energy/spatial_forward_engines.py",
+        "scripts/research/proximal_distal_energy/spatial_forward_study.py",
+        "scripts/research/proximal_distal_energy/run_spatial_forward_contact_study.py",
+        "tests/research/test_spatial_forward_contact.py"
+      ],
+      "model_domain": "Same-force point-wrench controls on executed forward states.",
+      "uncertainty_boundary": "Controls establish algebraic geometry necessity, not human force generation.",
+      "competing_explanations": [
+        "shared contact-law error",
+        "shared integrator error",
+        "velocity-frame error",
+        "hidden direct actuation",
+        "disconnected negative samples",
+        "numerical energy drift"
+      ],
+      "negative_controls": [
+        "native engine identity",
+        "exact prebranch state",
+        "complete driver killswitch",
+        "coincident grips",
+        "reversed moment arms",
+        "interface virtual work",
+        "wrench power",
+        "timestep refinement"
+      ],
+      "falsifier": "Coincident couple exceeds 1e-10 N m or reversal residual exceeds 1e-12 N m.",
+      "adjudication": "All chapter passages were checked against regenerated MuJoCo/Pinocchio WSL evidence; shared versus independent components, contiguous duration, virtual work, geometry, numerical residual, and nonhuman boundaries are explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-191",
+      "candidate_ids": [
+        "PD-CAND-18be4516f035ec65"
+      ],
+      "statement": "The discretized work-energy residual is explicit and decreases approximately first order under timestep refinement; it is small but not normalized away.",
+      "classification": "forward_contact_energy_convergence",
+      "published_status": "supported_with_disclosed_numerical_residual",
+      "audit_status": "two_native_engines_contact_power_branch_geometry_refinement_and_boundaries_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:248"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.npz",
+        "scripts/research/proximal_distal_energy/spatial_forward_contract.py",
+        "scripts/research/proximal_distal_energy/spatial_forward_engines.py",
+        "scripts/research/proximal_distal_energy/spatial_forward_study.py",
+        "scripts/research/proximal_distal_energy/run_spatial_forward_contact_study.py",
+        "tests/research/test_spatial_forward_contact.py"
+      ],
+      "model_domain": "Shared semi-implicit reduced forward experiment.",
+      "uncertainty_boundary": "Only MuJoCo is run at all refinement steps; residual is numerical evidence, not exact conservation.",
+      "competing_explanations": [
+        "shared contact-law error",
+        "shared integrator error",
+        "velocity-frame error",
+        "hidden direct actuation",
+        "disconnected negative samples",
+        "numerical energy drift"
+      ],
+      "negative_controls": [
+        "native engine identity",
+        "exact prebranch state",
+        "complete driver killswitch",
+        "coincident grips",
+        "reversed moment arms",
+        "interface virtual work",
+        "wrench power",
+        "timestep refinement"
+      ],
+      "falsifier": "Residual fails monotone refinement or exceeds the declared energy accounting gate.",
+      "adjudication": "All chapter passages were checked against regenerated MuJoCo/Pinocchio WSL evidence; shared versus independent components, contiguous duration, virtual work, geometry, numerical residual, and nonhuman boundaries are explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-192",
+      "candidate_ids": [
+        "PD-CAND-5caf52ed23f9ede9",
+        "PD-CAND-2b31d9654f2523c9",
+        "PD-CAND-fb9de8518c8d9fdc"
+      ],
+      "statement": "Engine identity, model digest, trajectory gates, force and power closure, branch identity, contiguous-duration, geometry, and refinement tests jointly define fail-closed falsifiers without supporting human prescription.",
+      "classification": "registered_forward_contact_falsification_contract",
+      "published_status": "supported_at_declared_reduced_contact_tier",
+      "audit_status": "two_native_engines_contact_power_branch_geometry_refinement_and_boundaries_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:260",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:262",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:274"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.npz",
+        "scripts/research/proximal_distal_energy/spatial_forward_contract.py",
+        "scripts/research/proximal_distal_energy/spatial_forward_engines.py",
+        "scripts/research/proximal_distal_energy/spatial_forward_study.py",
+        "scripts/research/proximal_distal_energy/run_spatial_forward_contact_study.py",
+        "tests/research/test_spatial_forward_contact.py"
+      ],
+      "model_domain": "Committed two-engine forward-contact release evidence.",
+      "uncertainty_boundary": "No subject, muscle, tissue calibration, or performance benefit is tested.",
+      "competing_explanations": [
+        "shared contact-law error",
+        "shared integrator error",
+        "velocity-frame error",
+        "hidden direct actuation",
+        "disconnected negative samples",
+        "numerical energy drift"
+      ],
+      "negative_controls": [
+        "native engine identity",
+        "exact prebranch state",
+        "complete driver killswitch",
+        "coincident grips",
+        "reversed moment arms",
+        "interface virtual work",
+        "wrench power",
+        "timestep refinement"
+      ],
+      "falsifier": "Any registered falsifier fails or the paper presents a coaching prescription.",
+      "adjudication": "All chapter passages were checked against regenerated MuJoCo/Pinocchio WSL evidence; shared versus independent components, contiguous duration, virtual work, geometry, numerical residual, and nonhuman boundaries are explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-193",
+      "candidate_ids": [
+        "PD-CAND-e95769bc9dde5cab",
+        "PD-CAND-95c24280fafe61bb"
+      ],
+      "statement": "Native Pinocchio reproduction is Linux/WSL-specific and fail-closed against the unrelated Windows stub; the next scientific transport requires articulated arms and a distributed shaft, not more carriage-model confidence.",
+      "classification": "platform_and_next_model_boundary",
+      "published_status": "explicit_reproduction_and_research_boundary",
+      "audit_status": "two_native_engines_contact_power_branch_geometry_refinement_and_boundaries_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:282",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:297"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.npz",
+        "scripts/research/proximal_distal_energy/spatial_forward_contract.py",
+        "scripts/research/proximal_distal_energy/spatial_forward_engines.py",
+        "scripts/research/proximal_distal_energy/spatial_forward_study.py",
+        "scripts/research/proximal_distal_energy/run_spatial_forward_contact_study.py",
+        "tests/research/test_spatial_forward_contact.py"
+      ],
+      "model_domain": "Qualified platform-specific reproduction and next-tier plan.",
+      "uncertainty_boundary": "Platform success is not scientific generalization; higher-order model results remain open.",
+      "competing_explanations": [
+        "shared contact-law error",
+        "shared integrator error",
+        "velocity-frame error",
+        "hidden direct actuation",
+        "disconnected negative samples",
+        "numerical energy drift"
+      ],
+      "negative_controls": [
+        "native engine identity",
+        "exact prebranch state",
+        "complete driver killswitch",
+        "coincident grips",
+        "reversed moment arms",
+        "interface virtual work",
+        "wrench power",
+        "timestep refinement"
+      ],
+      "falsifier": "A stub is accepted or carriage results are treated as completion of anatomical transport.",
+      "adjudication": "All chapter passages were checked against regenerated MuJoCo/Pinocchio WSL evidence; shared versus independent components, contiguous duration, virtual work, geometry, numerical residual, and nonhuman boundaries are explicit.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
     }

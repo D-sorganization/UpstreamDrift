@@ -133,6 +133,11 @@ def test_committed_spatial_forward_evidence_is_falsifiable() -> None:
         record["mechanism_tests"]["same_state_killswitch_negative_duration_s"] >= 0.03
     )
     assert record["timestep_refinement"]["monotone_residual_reduction"] is True
+    for summary in record["mechanism_tests"][
+        "baseline_and_killswitch_trace_summaries"
+    ].values():
+        assert summary["interface_power_residual_max_w"] < 1e-10
+        assert summary["wrench_power_residual_max_w"] < 1e-10
     assert record["claim_boundary"]["human_strategy"] == "untested"
     assert record["claim_boundary"]["muscle_mechanism"] == "untested"
     root = Path(__file__).resolve().parents[2]
@@ -150,3 +155,15 @@ def test_committed_spatial_forward_arrays_are_finite_and_aligned() -> None:
         )
         for name in archive.files:
             assert np.all(np.isfinite(archive[name])), name
+        for engine in ("mujoco", "pinocchio"):
+            for branch in ("baseline", "killswitch"):
+                assert (
+                    np.max(
+                        np.abs(archive[f"{engine}_{branch}_interface_power_residual"])
+                    )
+                    < 1e-10
+                )
+                assert (
+                    np.max(np.abs(archive[f"{engine}_{branch}_wrench_power_residual"]))
+                    < 1e-10
+                )
