@@ -40,11 +40,15 @@ def test_study_closes_all_pointwise_identities() -> None:
     np.testing.assert_allclose(
         arrays["ztcf"], arrays["configuration"] + arrays["velocity"], atol=1e-10
     )
+    np.testing.assert_allclose(arrays["zvcf"], arrays["configuration"], atol=1e-10)
     np.testing.assert_allclose(
-        arrays["zvcf"], arrays["configuration"] + arrays["control"], atol=1e-10
+        arrays["zero_velocity_control_preserved"],
+        arrays["configuration"] + arrays["control"],
+        atol=1e-10,
     )
     assert record["closure"]["max_abs_total_N"] < 1e-9
     assert record["closure"]["max_abs_zvcf_N"] < 1e-9
+    assert record["closure"]["max_abs_zero_velocity_control_preserved_N"] < 1e-9
 
 
 def test_drift_only_prediction_has_declared_falsification_metrics() -> None:

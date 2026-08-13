@@ -638,14 +638,13 @@ class DrakePhysicsEngine(BasePhysicsEngine):
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
         """Zero-Velocity Counterfactual (ZVCF) - Guideline G2.
 
-        Compute acceleration with joint velocities set to zero, preserving
-        configuration. This isolates configuration-dependent effects (gravity)
-        from velocity-dependent effects (Coriolis, centrifugal).
+        Compute acceleration at fixed configuration with velocity and declared
+        applied control set to zero.
 
         **Purpose**: Answer "What acceleration would occur if motion FROZE?"
 
         **Physics**: With v=0, acceleration has no velocity-dependent terms:
-            q̈_ZVCF = M(q)⁻¹ · (-g(q) + τ)
+            q̈_ZVCF = M(q)⁻¹ · (-g(q))
 
         Args:
             q: Joint positions (n_q,) [rad or m]
@@ -674,17 +673,10 @@ class DrakePhysicsEngine(BasePhysicsEngine):
             # Use gravity forces directly
             g = self.plant.CalcGravityGeneralizedForces(self.plant_context)
 
-            # ZVCF preserves the *applied actuation* (#7051). Read the fixed
-            # actuation input back from the context and map it through the
-            # actuation matrix B (u -> generalized force). If no actuation has
-            # been fixed (or B is unavailable) this falls back cleanly to the
-            # passive gravity-only counterfactual (tau = 0).
-            tau = self._read_actuation_generalized_force()
-
-            # ZVCF: M*a + g = τ → a = M^-1 * (τ - g)
+            # Canonical ZVCF: M*a + g = 0 → a = M^-1 * (-g)
             # Note: g is the gravity force vector, not gravity generalized force
             # CalcGravityGeneralizedForces returns -g in the equation M*a + c + g = τ
-            a_zvcf = np.linalg.solve(M, tau - g)
+            a_zvcf = np.linalg.solve(M, -g)
 
             return cast(np.ndarray, a_zvcf)
 

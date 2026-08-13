@@ -1,4 +1,4 @@
-"""Data-backed drift-control force-ratio analysis.
+"""Data-backed realized drift-to-input ratio analysis.
 
 The public tool works on generalized-force trajectories so MuJoCo, Pinocchio,
 or offline exported expert trajectories can feed the same stable contract.
@@ -35,7 +35,11 @@ class ForceTrajectory:
 
 
 class DriftControlAnalyzer:
-    """Compute drift-to-control generalized-force ratios for trajectories."""
+    """Compute realized drift-to-input (DIR) ratios for trajectories.
+
+    This is not DCR because the denominator is the realized input contribution,
+    not bounded admissible control capacity.
+    """
 
     _DRIFT_KEYS = (
         "drift_generalized_force",
@@ -69,7 +73,7 @@ class DriftControlAnalyzer:
         return self._build_trajectory(drift=drift, control=control, time=time)
 
     def compute_ratio(self, trajectory: ForceTrajectory) -> FloatArray:
-        """Compute rho(t)=||f(x)||/||g(x)u|| for each sample."""
+        """Compute DIR(t)=||f(x)||/||G(x)u|| for each sample."""
         self._validate_trajectory(trajectory)
         # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is ~2.4x faster than np.linalg.norm(..., axis=1)
         drift_norm = np.sqrt(

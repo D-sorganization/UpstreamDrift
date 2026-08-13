@@ -64,6 +64,7 @@ from src.shared.python.simulation_backends.validation import (
 )
 from src.shared.python.simulation_backends.ztcf_zvcf import (
     evaluate_ztcf_along_trajectory,
+    zero_velocity_control_preserved_acceleration,
     ztcf_acceleration,
     zvcf_acceleration,
 )
@@ -532,17 +533,19 @@ def test_ztcf_acceleration_rejects_non_finite() -> None:
 
 
 def test_zvcf_acceleration_rejects_wrong_length_q() -> None:
-    """A ``q``/``tau`` length mismatch violates the ZVCF precondition."""
+    """A configuration incompatible with provider tangent size is rejected."""
     provider = _GoodProvider()
     with pytest.raises(ValueError):
-        zvcf_acceleration(provider, np.zeros(3), np.zeros(2))
+        zvcf_acceleration(provider, np.zeros(3))
 
 
-def test_zvcf_acceleration_rejects_non_finite_tau() -> None:
-    """A non-finite ``tau`` entry violates the ZVCF finite-input precondition."""
+def test_control_preserved_acceleration_rejects_non_finite_tau() -> None:
+    """A non-finite control violates the explicit diagnostic precondition."""
     provider = _GoodProvider()
     with pytest.raises(ValueError, match="finite"):
-        zvcf_acceleration(provider, np.zeros(2), np.array([np.nan, 1.0]))
+        zero_velocity_control_preserved_acceleration(
+            provider, np.zeros(2), np.array([np.nan, 1.0])
+        )
 
 
 def test_evaluate_ztcf_along_trajectory_shape() -> None:

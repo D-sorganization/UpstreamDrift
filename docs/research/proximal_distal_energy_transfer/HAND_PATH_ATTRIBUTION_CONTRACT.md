@@ -117,12 +117,11 @@ that the stitched pointwise trace cannot. Every use of _ZTCF_ in the article,
 figures, data, and software is qualified as pointwise, stitched, forward, or
 branched on first use.
 
-The zero-velocity counterfactual (ZVCF) instead evaluates the model with
-$\dot q=0$. Unless gravity and every other configuration-dependent term are
-also removed by an explicit protocol, ZVCF is not the pure control term. Every
-figure and table therefore reports **drift**, **control**, **ZTCF**, and
-**ZVCF** by their mathematical definitions rather than using ZVCF as a synonym
-for control.
+The zero-velocity counterfactual (ZVCF) is an instantaneous evaluation at the
+fixed configuration/internal state with $\dot q=0$ and $u=0$. Passive and
+other autonomous plant terms remain. A computation that sets velocity to zero
+while preserving $u$ is a **zero-velocity control-preserved evaluation**, not
+ZVCF. Every figure, table, and dataset must distinguish these quantities.
 
 For constrained or closed-loop models, accelerations and constraint reactions
 must come from the same constrained solve. A reaction split

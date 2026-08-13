@@ -712,16 +712,14 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
         """Zero-Velocity Counterfactual (ZVCF) - Guideline G2.
 
-        Compute acceleration with joint velocities set to zero, preserving
-        configuration.
-        This isolates configuration-dependent effects (gravity, constraints)
-        from velocity-dependent effects (Coriolis, centrifugal).
+        Compute acceleration at fixed configuration with joint velocities and
+        declared applied control set to zero.
 
         **Purpose**: Answer "What acceleration would occur if motion FROZE
         instantaneously?"
 
         **Physics**: With v=0, acceleration has no velocity-dependent terms:
-            q̈_ZVCF = M(q)⁻¹ · (g(q) + τ + J^T·λ)
+            q̈_ZVCF = M(q)⁻¹ · (g(q) + J^T·λ)
 
         Args:
             q: Joint positions (n_q,) [rad or m]
@@ -737,13 +735,13 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
         # Save current state
         saved_qpos = self.data.qpos.copy()
         saved_qvel = self.data.qvel.copy()
+        saved_ctrl = self.data.ctrl.copy()
 
         try:
             # Set to counterfactual configuration with v=0
             self.data.qpos[:] = q
             self.data.qvel[:] = 0  # ZVCF: zero velocity
-
-            # Control is preserved from current state (already in data.ctrl)
+            self.data.ctrl[:] = 0  # ZVCF: zero declared applied control
 
             # Compute forward dynamics with zero velocity
             mujoco.mj_forward(self.model, self.data)
@@ -758,6 +756,7 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
             # Restore original state
             self.data.qpos[:] = saved_qpos
             self.data.qvel[:] = saved_qvel
+            self.data.ctrl[:] = saved_ctrl
             mujoco.mj_forward(self.model, self.data)
 
     # -------- Section B5: Flexible Beam Shaft --------

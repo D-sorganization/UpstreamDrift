@@ -330,14 +330,15 @@ class PendulumPhysicsEngine(BasePhysicsEngine):
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
         """Zero-Velocity Counterfactual - Guideline G2.
 
-        For double pendulum with v=0:
-            q_ddot_ZVCF = M(q)^-1 * (-g(q) + tau)
+        Canonical ZVCF fixes configuration and sets velocity and declared
+        applied control to zero:
+            q_ddot_ZVCF = M(q)^-1 * (-g(q))
 
         Args:
             q: Joint positions [rad] (2,)
 
         Returns:
-            Acceleration with v=0 but tau preserved [rad/s**2] (2,)
+            Acceleration with v=0 and tau=0 [rad/s**2] (2,)
         """
         if q is None:
             raise ValueError("q must be provided")
@@ -362,10 +363,8 @@ class PendulumPhysicsEngine(BasePhysicsEngine):
             )
             g = np.array([g1, g2])
 
-            tau = self.control.copy()
-
             M = self.compute_mass_matrix()
-            rhs = -g + tau
+            rhs = -g
             # ⚡ Bolt: Replace np.linalg.solve with explicit 2x2 inverse for ~5x speedup
             det = M[0, 0] * M[1, 1] - M[0, 1] * M[1, 0]
             inv_det = 1.0 / det
@@ -383,3 +382,17 @@ class PendulumPhysicsEngine(BasePhysicsEngine):
             self._pendulum_state.theta2 = theta2_orig
             self._pendulum_state.omega1 = omega1_orig
             self._pendulum_state.omega2 = omega2_orig
+
+    def compute_zero_velocity_control_preserved(self, q: np.ndarray) -> np.ndarray:
+        """Return the former zero-velocity, control-preserved diagnostic."""
+        canonical = self.compute_zvcf(q)
+        theta1_orig = self._pendulum_state.theta1
+        theta2_orig = self._pendulum_state.theta2
+        try:
+            self._pendulum_state.theta1 = float(q[0])
+            self._pendulum_state.theta2 = float(q[1])
+            mass = self.compute_mass_matrix()
+        finally:
+            self._pendulum_state.theta1 = theta1_orig
+            self._pendulum_state.theta2 = theta2_orig
+        return canonical + np.linalg.solve(mass, self.control)

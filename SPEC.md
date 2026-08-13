@@ -169,6 +169,14 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   provenance unchanged. This is not a dependency pin or UI parity claim: the
   exact `vendor/ud-tools`/Cargo repin, FastAPI, PyQt, React, clean-install, and
   protected-release gates remain blocked on the reviewed Tools ground merge.
+- **2026-08-13** - Ratified the cross-repository control-affine terminology
+  contract for #8586. Canonical ZVCF now means an instantaneous fixed-
+  configuration evaluation with velocity and declared applied control both
+  zero; analysis schema 3.0.0 preserves the former control-retaining result as
+  `zero_velocity_control_preserved_acceleration`. The proximal-distal evidence,
+  constrained-reaction decomposition, engine protocol, paper, and regression
+  tests distinguish the two quantities and link to AffineDrift's normative
+  notation authority.
 - **2026-08-11** - Added #8493 ground-reaction drift attribution: a
   frame-explicit constrained-contact reaction solver decomposes support
   reactions into configuration, velocity, control, and retained-external
@@ -2167,6 +2175,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-13 | 1.0.512 | Ratified the AffineDrift-conforming terminology profile; migrated ZVCF to zero velocity and zero applied control; preserved the prior diagnostic under an explicit control-preserved name and schema; regenerated affected evidence and publication figures; and added regression controls. |
 | 2026-08-12 | 1.0.511 | Added phase-resolved proximal-link velocity falsification and forward control-program search for drift-mediated transfer; registered exact same-state matching, drift/control work closure, negative grip-work and force tradeoffs, multi-objective Pareto reporting, deterministic evidence artifacts, and the explicit boundary that the fixed-hub coordinate does not identify torso or anatomical shoulder strategy. |
 | 2026-08-12 | 1.0.510 | Linked the canonical proximal--distal evidence workspace to the accessible AffineDrift companion *How a Golf Swing Carries Energy* in HTML and PDF, while retaining UpstreamDrift as the complete evidence and limitations authority. |
 | 2026-08-12 | 1.0.507 | Added the advanced proximal--distal frame, biology, canonical-pose, cross-engine, visual, terminology, and falsification bridge tracked by epic #8505. |

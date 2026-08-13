@@ -12,7 +12,7 @@ from src.tools.drift_control.analyzer import DriftControlAnalyzer
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Compute rho(t)=||f(x)||/||g(x)u|| from an expert trajectory NPZ."
+        description="Compute DIR(t)=||f(x)||/||G(x)u|| from realized trajectory data."
     )
     parser.add_argument("trajectory", type=Path, help="NPZ trajectory path")
     parser.add_argument(

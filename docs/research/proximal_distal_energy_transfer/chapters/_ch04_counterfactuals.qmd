@@ -92,8 +92,8 @@ $$ {#eq-ztcf}
 
 $$
 \ddot q_{\mathrm{ZVCF}}
-  \;=\; M(q)^{-1}\,\bigl(\tau \;-\; b(q,\mathbf{0})\bigr)
-  \;=\; M(q)^{-1}\,\bigl(\tau \;-\; g(q)\bigr),
+  \;=\; M(q)^{-1}\,\bigl(-b(q,\mathbf{0})\bigr)
+  \;=\; M(q)^{-1}\,\bigl(-g(q)\bigr),
 $$ {#eq-zvcf}
 
 where the simplification in @eq-zvcf holds for the implemented
@@ -105,12 +105,11 @@ assuming this reduction. The ZTCF (@eq-ztcf) answers *"what would the declared
 model do right now if every included actuator switched off while the state and
 constraint set stayed fixed?"* — it is the
 **drift** field of the affine control system, containing gravity plus
-all motion-dependent interaction dynamics. The ZVCF (@eq-zvcf) answers
-*"what would the currently applied torques, together with gravity,
-produce from a standstill in this pose?"* — it removes every
-motion-dependent term but is *not* the pure control contribution, since
-gravity remains in @eq-zvcf; the pure torque term is $M^{-1}\tau$ in the
-split below. Because @eq-eom is affine in $\tau$ at a fixed state and unchanged
+all retained autonomous plant dynamics. The ZVCF (@eq-zvcf) answers
+*"what instantaneous acceleration remains at this pose when velocity and the
+declared applied control are both zero?"* It is not the pure control
+contribution. The separately named zero-velocity control-preserved evaluation
+is $M^{-1}(\tau-b(q,0))$. Because @eq-eom is affine in $\tau$ at a fixed state and unchanged
 constraint set, the actual acceleration superposes exactly:
 
 $$

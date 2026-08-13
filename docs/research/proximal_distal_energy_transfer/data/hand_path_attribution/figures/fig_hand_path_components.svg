@@ -582,10 +582,10 @@ L 602.51625 39.84
    <g id="legend_1">
     <g id="patch_7">
      <path d="M 48.42625 69.725
-L 219.5625 69.725
-Q 221.1625 69.725 221.1625 68.125
-L 221.1625 45.44
-Q 221.1625 43.84 219.5625 43.84
+L 324.9525 69.725
+Q 326.5525 69.725 326.5525 68.125
+L 326.5525 45.44
+Q 326.5525 43.84 324.9525 43.84
 L 48.42625 43.84
 Q 46.82625 43.84 46.82625 45.44
 L 46.82625 68.125
@@ -627,7 +627,7 @@ L 190.4225 50.31875
 " style="fill: none; stroke-dasharray: 5.55,2.4; stroke-dashoffset: 0; stroke: #009e73; stroke-width: 1.5"/>
     </g>
     <g id="text_12">
-     <text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start" x="196.8225" y="53.11875" transform="rotate(-0 196.8225 53.11875)">ZVCF</text>
+     <text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start" x="196.8225" y="53.11875" transform="rotate(-0 196.8225 53.11875)">Zero-Velocity Control-Preserved</text>
     </g>
    </g>
   </g>
