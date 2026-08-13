@@ -6,8 +6,10 @@ Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
 
-- **#8557 transmission robustness audit** — branch
-  `research/8557-transmission-audit` is the active twenty-fifth fail-closed
+- **#8557 transmission robustness audit** — ready PR
+  [#8590](https://github.com/D-sorganization/UpstreamDrift/pull/8590) from
+  `research/8557-transmission-audit` at implementation commit
+  `efce6bb3d7fe96041387606250b5639094d3b30e` is the active twenty-fifth fail-closed
   slice. The chapter is being adjudicated as PD-CLAIM-230 through PD-CLAIM-234.
   All four programs remain nondominated in all 15 leave-one-held-out-case
   recomputations. The local Jacobian's raw rank is three, but effective rank is
