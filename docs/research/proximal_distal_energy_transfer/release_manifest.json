@@ -413,7 +413,7 @@
       "bytes": 1272
     },
     "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json": {
-      "sha256": "a70702af472882bc9c1fd0eb7129abc6f39e26cd9fb7862455d8a24781f95a5f",
+      "sha256": "ac777b329949d7503c1c1ac610eaa60a23272ad0d51d4fc46edae8972cb537e8",
       "bytes": 8483
     },
     "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_traces.npz": {
@@ -457,7 +457,7 @@
       "bytes": 1061539
     },
     "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json": {
-      "sha256": "8c6f16d9f7597efa963cb103f20db4fbddbc7eb869e92a1bf9226e58ec62731a",
+      "sha256": "7f3abf953ee824697e0a5d43a0c355462c189de808f69ce3bc49d69ba9050c6a",
       "bytes": 152990
     },
     "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_traces.npz": {

@@ -2,8 +2,8 @@
   "schema_version": "shaft-contribution-study-v2",
   "study_id": "matched-rigid-flexible-shaft-contribution-study",
   "source_sha256": {
-    "scripts/research/proximal_distal_energy/flexible_shaft_study.py": "957fb330da17f5028e75147ae4d8d7868dc355892dc4ba519b4a401815b809ba",
-    "scripts/research/proximal_distal_energy/run_shaft_contribution_study.py": "177daa247f18d00a88bab3ea81dc004b685590c1398f06e122a6158a7af19062",
+    "scripts/research/proximal_distal_energy/flexible_shaft_study.py": "6f1d895f086cd3a74d18f001640eb90e39791dacb7750816f0dd1214c6bd27fc",
+    "scripts/research/proximal_distal_energy/run_shaft_contribution_study.py": "9ef4384b89d901853ab47688711590a6e8873b8fb77c044959de8bd3f092b603",
     "src/shared/python/pendulum_simulator/physics_triple.py": "b7bfbb4a14fd0f85469f7ad1f70f000ccfe96492377fafba0f33591bd73f395e"
   },
   "provenance": {
