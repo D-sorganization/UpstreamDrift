@@ -120,6 +120,15 @@ The inventory parser also treats labeled Quarto display-math closers correctly
 and canonicalizes line endings in its source digest. This repair exposed 308
 previously omitted narrative paragraphs, raising the fail-closed audit queue
 from 567 to 875 candidates without invalidating the 18 completed reviews.
+The third evidence slice corrects the active-wrist-torque comparison reported
+for Sprigings and Neal (approximately 9%, not 4%), separates it from the 1.6%
+forced-delay comparison in Sprigings and MacKenzie, and records White's
+different driven-model result rather than claiming uniform agreement. A
+source-level contrast matrix now distinguishes release delay, active wrist
+torque, passive transfer, prescribed inward pull, hub-path optimization, and
+negative-to-positive wrist-torque programs. The expanded paper has 879
+candidates; 27 are reviewed, 29 atomic claims are registered, and 852 remain
+unadjudicated.
 The hand-path attribution, two-hand redundancy, and preactivation validation
 program is tracked in
 [#8458](https://github.com/D-sorganization/UpstreamDrift/issues/8458).

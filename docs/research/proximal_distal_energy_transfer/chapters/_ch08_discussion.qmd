@@ -2,16 +2,18 @@
 
 ## Agreement With the Literature {#sec-discussion-agreement}
 
-Every headline result of @sec-results has an antecedent in the
-literature of @sec-mechanics, and the quantitative agreement is close
-enough to be meaningful rather than merely directional. The harm of
-early release reproduces the delayed-release results of Pickering and
-Vickers and of Sprigings and MacKenzie [@pickering1999; @sprigings2002]
-and Milburn's original observation that early uncocking truncates arm
-acceleration [@milburn1982]. The +12% value of late wrist drive brackets
-Sprigings and Neal's ≈4% gain from a physiologically bounded late wrist
-torque [@sprigings2000] — our unbounded constant 15 N·m torque and
-longer active window make a larger gain expected. The dominance of the
+Several results of @sec-results are directionally comparable with studies
+in @sec-mechanics, but their magnitudes are not directly exchangeable.
+The harm of the tested early-drive program is consistent with the
+delayed-release results of Pickering and Vickers and of Sprigings and
+MacKenzie [@pickering1999; @sprigings2002] and with Milburn's account of
+delayed uncocking [@milburn1982]. It is not a replication: the models,
+objectives, admissible torques, and impact definitions differ. The +12%
+late-drive contrast should likewise be compared cautiously with
+Sprigings and Neal's approximately 9% enabled-versus-disabled
+wrist-generator contrast [@sprigings2000], and not with the 1.6% forced-delay
+contrast reported by Sprigings and MacKenzie [@sprigings2002]. The
+dominance of the
 passive late energy pathway (joint-force transfer of 131.7 J versus
 25.7 J of late wrist work in the grid-selected swing) is White's parametric
 transfer made explicit in Robertson-Winter accounting
@@ -28,21 +30,21 @@ by this model.
 
 ## Why the Selected Retention Program Is Faster: A Mechanistic Reading {#sec-discussion-mechanism}
 
-The energy budgets localize the causal structure. Early wrist drive
-fails through *two* simultaneous channels: it raises the system's
+Within this registered model and intervention family, the energy budgets
+localize two mechanisms associated with the ordering. Early wrist drive
+raises the system's
 moment of inertia about the hub while the shoulder is still
 accelerating (so the same shoulder torque buys less arm speed — the
 early-drive program banks 21 J less early shoulder work than the
-retain program despite identical $\tau_s$), and it spends the wrist's
-work budget at a time when the joint-force/parametric channel cannot
-yet amplify it [@white2006]. Timed restraint is faster in the tested family
-through the mirror
-mechanisms: it holds the compact configuration slightly longer than a
+retain program despite identical $\tau_s$). It also changes wrist work and
+joint-force transfer at a different state; the present comparison does
+not isolate an independent "amplification" factor. Timed restraint is
+faster in the tested family: it holds the compact configuration slightly longer than a
 free hinge would (the drift field already wants to open the wrist — the
 restraint is fighting centrifugal release, not gravity), banks that
 margin as arm speed, and then releases into a fully developed
-centrifugal field where the passive channel converts arm energy to club
-energy at the maximum rate. The negative early wrist work (−1.9 J) is
+motion-dependent field where the registered joint-force channel transfers
+arm energy to the club rapidly. The negative early wrist work (−1.9 J) is
 small in absolute terms and diagnostic only of this simulated command:
 the imposed negative actuator torque opposes the modeled joint's opening
 velocity. It distinguishes active model restraint from zero model torque,

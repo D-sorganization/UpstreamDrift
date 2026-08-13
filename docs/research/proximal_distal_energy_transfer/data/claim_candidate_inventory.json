@@ -1,9 +1,9 @@
 {
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper_source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-  "source_digest": "1ed657b1e63f7c1c1313b298f0693dee69fd77377b6cd0fe8ea89855e3b641d6",
+  "source_digest": "a4e0bd566ee0424a3faa31bdfff4f04cffe69c63d1a91e6ad3bafbca8bfd4b07",
   "source_count": 32,
-  "candidate_count": 875,
+  "candidate_count": 879,
   "candidates": [
     {
       "candidate_id": "PD-CAND-0c5fcbdf4604a7d6",
@@ -326,13 +326,13 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-48d8f1a94fb018b1",
+      "candidate_id": "PD-CAND-659b3feb9e8aaf8d",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd",
       "line_start": 91,
-      "line_end": 98,
-      "text": "**Delayed release increases clubhead speed.** Pickering and Vickers, sweeping release angles in a driven double-pendulum model, found clubhead velocity at impact increases as release is delayed \u2014 the classical \"late hit\" [@pickering1999]. Jorgensen's fitted model reproduced the expert swing only with a substantially delayed opening of the wrist angle [@jorgensen1970; @jorgensen1999]. In these models an early release (early P\u2192D handoff) is strictly inferior: club kinetic energy purchased early is paid for with arm speed that never develops.",
-      "text_sha256": "a3dfec08e961036d5c4f6e425bb0b6ce4d22218eb16e28500165fbacb4e257ed",
-      "citation_keys": ["jorgensen1970", "jorgensen1999", "pickering1999"],
+      "line_end": 99,
+      "text": "**Delayed Release Increases Clubhead Speed.** Pickering and Vickers, sweeping release angles in a driven double-pendulum model, found clubhead velocity at impact increases as release is delayed \u2014 the classical \"late hit\" [@pickering1999]. This result supports late release for the particular fixed-hub, rigid-link, torque, release, and impact definitions examined; it does not establish that every earlier release is inferior in every model. In particular, White later found release timing to have only a second-order effect in his constant-shoulder-torque model [@white2006].",
+      "text_sha256": "ba11464829c51f4233ddd1f2a140d6820d53ab3d78fbd5f9237815e2842057a4",
+      "citation_keys": ["pickering1999", "white2006"],
       "has_numeric_content": true,
       "has_assertive_language": true,
       "priority_score": 5,
@@ -340,12 +340,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-0fd9737992f9c7b0",
+      "candidate_id": "PD-CAND-71a231b29bec82b3",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd",
-      "line_start": 100,
-      "line_end": 107,
-      "text": "**Late wrist torque helps; early wrist torque is the wrong tool.** Sprigings and Neal, using a torque-driven three-segment model with physiologically bounded actuators, found that an active wrist torque applied *during the latter stages of the downswing* increased clubhead speed by approximately 4% [@sprigings2000]; Sprigings and MacKenzie confirmed the delayed-release benefit in a follow-up simulation focused on release timing [@sprigings2002]. The point is not that distal effort is useless, but that its productive window is late.",
-      "text_sha256": "c282c6a3d4fea09a4b657f3dd38e4c49ad4c17fde0746f1c4239ce60861d6f65",
+      "line_start": 101,
+      "line_end": 114,
+      "text": "**Late Wrist Torque Can Help in Actuator-Bounded Simulations.** Sprigings and Neal, using a torque-driven three-segment model with physiologically bounded actuators, found that an active wrist torque applied *during the latter stages of the downswing* increased clubhead speed by approximately 9% relative to their wrist-generator-disabled condition [@sprigings2000]. Their optimization placed wrist activation when the arm was about 30\u00b0 below horizontal, but the authors also reported that this time depended strongly on the assumed torque-profile shape. In a follow-up three-segment study, Sprigings and MacKenzie separated a forced 50 ms resistive delay from post-release wrist drive. The optimized forced delay increased impact speed from 44.0 to 44.7 m/s (1.6%), whereas removing active wrist torque after that delay reduced it to 38.9 m/s [@sprigings2002]. These are model-conditional comparisons, not a general human timing rule or a common effect size.",
+      "text_sha256": "6ec7a85ba6bd9525a65f9a1f86fd7b9af9f705d78acc93219a262e7d72abcff0",
       "citation_keys": ["sprigings2000", "sprigings2002"],
       "has_numeric_content": true,
       "has_assertive_language": false,
@@ -354,12 +354,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-39f35d4d21dd33a0",
+      "candidate_id": "PD-CAND-56b9141833f172f4",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd",
-      "line_start": 109,
-      "line_end": 124,
-      "text": "**Energy transfer to the club can be largely passive \u2014 governed by the changing geometry.** White analyzed an *undriven* double pendulum and showed that the transfer of kinetic energy from arms to club late in the downswing is a parametric-transfer phenomenon: as the club swings out, the effective moment of inertia of the system changes, and conservation of energy and angular momentum move kinetic energy distally without any wrist torque at all; the wrist-cock angle maintained before release is the principal efficiency-determining parameter [@white2006]. Miura's analysis of the \"inward pull\" complements this: an expert's hands moving toward the body near impact \u2014 shrinking the hub radius when centrifugal loading is fully developed \u2014 performs work against the centrifugal force that appears as additional clubhead kinetic energy [@miura2001]. Nesbit and McGinnis' hub-path analyses generalize the same idea: the non-circular hand path of skilled golfers, including its late-downswing tightening, is a mechanism for shaping kinetic transfer from golfer to club [@nesbit2009hub; @nesbit2014hub].",
-      "text_sha256": "954d00514662aac041926f0dc4572ae8d83e405478b863c5e02d700a2464a621",
+      "line_start": 116,
+      "line_end": 141,
+      "text": "**Energy Transfer to the Club Can Be Largely Passive\u2014Governed by the Changing Geometry.** White analyzed an *undriven* double pendulum and showed that the transfer of kinetic energy from arms to club late in the downswing is a parametric-transfer phenomenon: as the club swings out, the effective moment of inertia of the system changes, and conservation of energy and angular momentum move kinetic energy distally without any wrist torque at all; the wrist-cock angle maintained before release is the principal efficiency-determining parameter in that model [@white2006]. In White's driven sensitivity study, however, ordinary release advances or delays had little net effect, and increasing constant positive wrist torque reduced predicted distance because its efficiency gain was offset by a shorter downswing. White separately noted that selective late torque can avoid that tradeoff. Miura's modified double-link emulation predicted that moving the hub inward near impact, when the modeled centrifugal force was developed, could substantially increase clubhead velocity [@miura2001]. Nesbit and McGinnis measured one selected driver swing from each of four diverse amateur golfers and found non-circular hand paths with a shared three-phase radius pattern but substantial between-subject geometry differences [@nesbit2009hub]. Their later two-dimensional constrained optimization predicted that combined hand-path and club-angular-trajectory changes could increase impact speed for all four subjects within each subject's modeled force, torque, work, and power limits; the changes and limiting quantities were subject dependent [@nesbit2014hub]. These model-based results motivate hub-path interventions, but they do not isolate an inward-pull contribution in a human experiment.",
+      "text_sha256": "101bc6115eea837fd733a9adfb4a081ee0f4e52c2f18fded6cc4f0ef624fbd01",
       "citation_keys": [
         "miura2001",
         "nesbit2009hub",
@@ -367,22 +367,96 @@
         "white2006"
       ],
       "has_numeric_content": true,
-      "has_assertive_language": false,
-      "priority_score": 6,
+      "has_assertive_language": true,
+      "priority_score": 5,
+      "triage_flags": ["numeric", "assertive_language", "external_citation"],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-922607fe383df435",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd",
+      "line_start": 143,
+      "line_end": 153,
+      "text": "Together these studies motivate, but do not prove, a **retain-early / release-late** hypothesis. Pickering and Vickers, Sprigings and Neal, Sprigings and MacKenzie, and Sharp identify benefits from delayed release, late wrist drive, or a negative-to-positive wrist-torque program within their respective models [@pickering1999; @sprigings2000; @sprigings2002; @sharp2009]. White supports passive geometry-mediated transfer while also showing that release-delay and wrist-torque effects depend on how the downswing angle, impact event, and torque program are defined [@white2006]. The numerical study in @sec-results therefore tests one specified intervention family rather than treating the literature as a prior proof of its ordering.",
+      "text_sha256": "723b679e8f9eecb979ef8c1834ce0a9080b84d0c7d996ec8dc6993d38809810d",
+      "citation_keys": [
+        "pickering1999",
+        "sharp2009",
+        "sprigings2000",
+        "sprigings2002",
+        "white2006"
+      ],
+      "has_numeric_content": true,
+      "has_assertive_language": true,
+      "priority_score": 8,
       "triage_flags": [
         "numeric",
+        "assertive_language",
         "external_citation",
         "causal_or_generalizing_language"
       ],
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-241509d61ffed92b",
+      "candidate_id": "PD-CAND-306557943f3eadc5",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd",
-      "line_start": 126,
-      "line_end": 132,
-      "text": "Together these results describe a machine whose highest-output mode is: *load the proximal rotation first, hold the distal joint folded (retaining energy in a compact, fast-rotating configuration), then let geometry and \u2014 in the last phase \u2014 modest distal torque move the energy outward rapidly*. The double-pendulum literature is already an argument for **retain-early / release-late**. @sec-results tests exactly this proposition in the numerical implementation used here.",
-      "text_sha256": "e1bdbb9f83485b3e60c165bf2dbb76ef7752303b92913980e9c9a12e68f31b3a",
+      "line_start": 157,
+      "line_end": 160,
+      "text": "The cited studies answer different questions. Keeping their contrasts separate prevents a release-delay effect, an active-wrist-torque effect, and passive energy redistribution from being treated as the same quantity.",
+      "text_sha256": "41023facf7fe6be95af0dd463310f96cf740f5288e868834b8e06aab372e0956",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": false,
+      "priority_score": 0,
+      "triage_flags": [],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-9745bfe1d7becca7",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd",
+      "line_start": 162,
+      "line_end": 162,
+      "text": "| Source | Declared Comparison | Reported Finding | Evidentiary Boundary |",
+      "text_sha256": "a4260abf784a68024e107e33a48daf5e004caf19a14524bf697936ba70746dc3",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": false,
+      "priority_score": 0,
+      "triage_flags": [],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-f7367774e924b493",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd",
+      "line_start": 164,
+      "line_end": 168,
+      "text": "| Pickering and Vickers [@pickering1999] | Release angle in a driven fixed-hub double pendulum | Impact clubhead velocity increased with later release in the tested sweep; natural release minimized supplied energy | Computational parameter study; abstract does not establish universality or a human causal effect | | Sprigings and Neal [@sprigings2000] | Physiologically constrained three-segment simulation with wrist generator enabled versus disabled | Approximately 9% clubhead-speed gain with late active wrist torque; optimum activation near 30\u00b0 below horizontal | Timing depended strongly on assumed torque-profile shape | | Sprigings and MacKenzie [@sprigings2002] | No forced delay (SIM-1), 50 ms resisted delay plus active release (SIM-2), and resisted delay without post-release wrist torque (SIM-3) | SIM-2 versus SIM-1: 44.7 versus 44.0 m/s (1.6%); SIM-3: 38.9 m/s | Model included activation and force\u2013velocity limits but omitted legs, lateral torso motion, right-arm extension, and forearm rotation | | White [@white2006] | Undriven transfer analysis and driven constant-shoulder-torque sensitivity study | Passive parametric redistribution; ordinary release timing had a second-order net effect; increasing constant positive wrist torque reduced predicted distance | Point-mass or rigid-link planar models; late selective torque was discussed separately from constant torque | | Sharp [@sharp2009] | Parameterized arm\u2013club and shoulder\u2013arm\u2013club simulations fitted to historical expert data and optimized within torque bounds | Near-optimal programs included a negative-to-positive wrist-torque switch and delayed release | The author explicitly identifies kinematic mismatch, sparse historical data, and model-dependence |",
+      "text_sha256": "e62fe1e1c650e5f241c3cd86ae12b4b107c63d7e1503de55e96fe629a6687623",
+      "citation_keys": [
+        "pickering1999",
+        "sharp2009",
+        "sprigings2000",
+        "sprigings2002",
+        "white2006"
+      ],
+      "has_numeric_content": true,
+      "has_assertive_language": true,
+      "priority_score": 8,
+      "triage_flags": [
+        "numeric",
+        "assertive_language",
+        "external_citation",
+        "causal_or_generalizing_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-ad5bd48a3098adb7",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd",
+      "line_start": 170,
+      "line_end": 172,
+      "text": "This matrix is a preregistration aid for the project: a new model or experiment must declare which row's contrast it reproduces, or define a new estimand, before its result is compared numerically.",
+      "text_sha256": "2162550740003efdf195e4cddbf0de244a74cfe57c666eaf86fb772355a0c1d6",
       "citation_keys": [],
       "has_numeric_content": false,
       "has_assertive_language": true,
@@ -393,8 +467,8 @@
     {
       "candidate_id": "PD-CAND-00883dff2ac0982d",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd",
-      "line_start": 136,
-      "line_end": 155,
+      "line_start": 176,
+      "line_end": 195,
       "text": "If the timing question is posed as an optimization \u2014 what torque program maximizes clubhead speed subject to actuator limits? \u2014 the answer has been studied repeatedly. Lampsa's early optimal-control study of a driven double pendulum computed torque histories maximizing drive distance, and notably found the *optimal* torques differed in structure from those measured (via inverse dynamics) in his own swing [@lampsa1975] \u2014 early evidence that human swings need not be optimal and that the optimum is a meaningful target rather than a redescription of expert behavior. Sharp, fitting shoulder-arm-club models to expert swing data and then optimizing torque programs, established a pattern for the best use of the available driving torques across the downswing phases, with the distal contribution structured late rather than distributed evenly [@sharp2009]. Three-dimensional forward-dynamics models extended the approach with anatomically meaningful actuators and flexible shafts: MacKenzie and Sprigings' 3D model [@mackenzie2009], the carry-optimized model of Balzerson, Banerjee and McPhee [@balzerson2016], and the six-degree-of-freedom dynamic optimization of McNally and McPhee [@mcnally2018] all generate expert-like clubhead speeds with torque programs whose distal elements act late in the downswing. McPhee's review surveys this modeling lineage [@mcphee2022].",
       "text_sha256": "cdab743098ca024fbe845c9ef40baaff1c5b0b008a561f8ca94ecbdc1c7eb51e",
       "citation_keys": [
@@ -419,8 +493,8 @@
     {
       "candidate_id": "PD-CAND-ed4d5ddd22427a29",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd",
-      "line_start": 157,
-      "line_end": 161,
+      "line_start": 197,
+      "line_end": 201,
       "text": "A caution cuts the other way: optimal control optimizes *within a model*, and the sensitivity of optimal timing to model structure (hub mobility, shaft flexibility [@betzler2012; @osis2012], actuator rate limits) is why cross-engine validation (@sec-platform) is valuable when revisiting the question.",
       "text_sha256": "396a122b36dc66b6e074026f30538724edb30b30ed1a47b8bd2db57220e2a7ad",
       "citation_keys": ["betzler2012", "osis2012"],
@@ -437,8 +511,8 @@
     {
       "candidate_id": "PD-CAND-2aac87162777c1ba",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd",
-      "line_start": 165,
-      "line_end": 167,
+      "line_start": 205,
+      "line_end": 207,
       "text": "Claims about energy transfer require an accounting framework. Four levels of analysis appear in the literature, and they are not interchangeable.",
       "text_sha256": "ee6fc870c8ee59572ab2bc1762e7f0c9bd88ce35583b6467c0ecfc7f268d91dd",
       "citation_keys": [],
@@ -451,8 +525,8 @@
     {
       "candidate_id": "PD-CAND-be182458dea527fc",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd",
-      "line_start": 171,
-      "line_end": 177,
+      "line_start": 211,
+      "line_end": 217,
       "text": "For a joint spanning segments $i$ and $i{+}1$ with net joint torque $\\tau$ and relative angular velocity $\\omega$, the *joint (moment) power* is $P_m = \\tau\\,\\omega$; its time integral over a phase is the mechanical work done by the net moment. Positive work indicates generation, negative work absorption. This is the quantity most golf studies report, and it is the basis of the work-power budget of Nesbit and Serrano (@sec-workbudget) [@nesbit2005work].",
       "text_sha256": "0333b2a620116c3a47202902990208b67dd32635a214baec1a954dfcb5d4bb5d",
       "citation_keys": ["nesbit2005work"],
@@ -465,8 +539,8 @@
     {
       "candidate_id": "PD-CAND-d43436c7aaef042c",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd",
-      "line_start": 181,
-      "line_end": 194,
+      "line_start": 221,
+      "line_end": 234,
       "text": "Joint moments are not the only conduit of mechanical energy: the joint reaction force $\\mathbf{F}$ acting at a joint moving with velocity $\\mathbf{v}$ transmits *joint-force power* $P_f = \\mathbf{F}\\cdot\\mathbf{v}$ from one segment to the next. Robertson and Winter's classic formulation balances, for each segment, the rate of change of segment mechanical energy against the sum of joint-force powers and moment powers at its proximal and distal ends, distinguishing energy *transferred between* segments from energy *generated or absorbed* at joints [@robertson1980; @winter2009]. This is the correct level of analysis for the timing question, because \"retain-early / release-late\" is precisely a claim about the *time course of inter-segment transfer terms*, not about peak angular velocities. @sec-methods implements exactly this accounting at the model's wrist interface, including the energy-balance residual check.",
       "text_sha256": "b95205c7df945f00c241e2a32b52f1f9c789f3a81ab4438544e3f9962f6814b0",
       "citation_keys": ["robertson1980", "winter2009"],
@@ -479,8 +553,8 @@
     {
       "candidate_id": "PD-CAND-5708e38cb83bf687",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd",
-      "line_start": 198,
-      "line_end": 207,
+      "line_start": 238,
+      "line_end": 247,
       "text": "In a coupled chain, any single torque induces accelerations at *every* joint \u2014 including joints it does not span \u2014 through the inverse inertia matrix [@zajac1989]. Induced-acceleration and power-transfer analyses in locomotion research [@zajac2002] show that intuitions of the form \"muscle X accelerates joint Y\" routinely fail in coupled systems. For golf this matters because a torso torque early in the downswing partly accelerates the *club* (through coupling), and a wrist torque late in the downswing back-reacts on the torso; the net energy routing is an emergent property of the whole chain. The ZTCF/ZVCF decompositions of @sec-timing-framework are the counterfactual cousins of this analysis.",
       "text_sha256": "d5d4773339f9ac5eeba24c5fb7452ef0062fdd3319e2ee73d5fb8cb21617a902",
       "citation_keys": ["zajac1989", "zajac2002"],
@@ -493,8 +567,8 @@
     {
       "candidate_id": "PD-CAND-5ce7b2c20979b9d2",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd",
-      "line_start": 211,
-      "line_end": 222,
+      "line_start": 251,
+      "line_end": 262,
       "text": "Peak-ordering of segment angular speeds is a *proxy* for energy flow, not a measurement of it. Marsan and colleagues showed that the identified kinematic sequence in golf depends materially on which angular-velocity component (or norm, or projection) is analyzed: thirteen golfers analyzed with seven component-selection methods yielded different sequences [@marsan2019]. Marshall and Elliott's long-axis-rotation caution [@marshall2000] is a special case of the same problem, and the near-planarity of the downswing is itself only an approximation [@coleman2005; @kwon2012]. Any serious test of the timing hypothesis must therefore run at the level of energy and power accounting (@sec-rw), with the kinematic sequence reported as corroborating description only \u2014 which is how @sec-results uses it.",
       "text_sha256": "ef9f363f90db5d5f12970698c13c0497c048f20ce18b064c4867af812327830b",
       "citation_keys": [
@@ -11177,14 +11251,13 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-44015ddef7af4b00",
+      "candidate_id": "PD-CAND-462476573c0cf4be",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactuals.qmd",
       "line_start": 20,
-      "line_end": 24,
-      "text": "The double-pendulum, delayed-release and optimal-control literatures reviewed in @sec-mechanics uniformly favor S2 within their model classes [@milburn1982; @pickering1999; @sprigings2000; @sprigings2002; @sharp2009; @white2006]. The mechanistic reasons compose into a coherent account:",
-      "text_sha256": "08fe822b0ab821c79b700b833259f1e74ca7ffc5e77387f5289b45840eca6d5d",
+      "line_end": 29,
+      "text": "The double-pendulum and optimal-control studies reviewed in @sec-mechanics provide mixed, model-dependent evidence relevant to S2. Several favor delayed release, late wrist drive, or an early negative and late positive wrist-torque program [@pickering1999; @sprigings2000; @sprigings2002; @sharp2009]. White supports passive geometry-mediated transfer but reports only a second-order release-timing effect and a distance penalty for increasing constant positive wrist torque in his driven model [@white2006]. The following mechanisms are therefore hypotheses to separate experimentally and computationally, not a consensus proof:",
+      "text_sha256": "98496e0835c7fc082b987a6e90dcebbccf484a6cfb8d96be3f4046c31766bdcf",
       "citation_keys": [
-        "milburn1982",
         "pickering1999",
         "sharp2009",
         "sprigings2000",
@@ -11192,41 +11265,48 @@
         "white2006"
       ],
       "has_numeric_content": true,
-      "has_assertive_language": false,
-      "priority_score": 6,
+      "has_assertive_language": true,
+      "priority_score": 8,
       "triage_flags": [
         "numeric",
+        "assertive_language",
         "external_citation",
         "causal_or_generalizing_language"
       ],
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-fa4a941122619954",
+      "candidate_id": "PD-CAND-c5e272307cf3feef",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactuals.qmd",
-      "line_start": 26,
-      "line_end": 41,
-      "text": "1. **Inertia management.** With the wrist cocked, the system's moment of inertia about the hub is small, so proximal torque buys angular velocity cheaply; early release raises the inertia while proximal torque is still accelerating the system [@white2006; @jorgensen1999]. 2. **Actuator physiology.** Torque-velocity limits mean the wrist's small muscles add meaningful power only while wrist angular velocity is modest; early wrist torque squanders that window and can even require *negative* (restraining) torque later [@sprigings2000]. 3. **Parametric transfer needs developed centrifugal loading.** The passive outward energy flow at release, and the inward-pull gain, scale with the centrifugal field established by proximal rotation \u2014 weak early, strong late [@white2006; @miura2001]. 4. **Interaction torques do the late work for free.** Motion-dependent torques accelerate the distal segment and decelerate the proximal one automatically once release begins; the golfer's job is to *time* this cascade, not to muscle it [@putnam1993; @herring1992].",
-      "text_sha256": "202f870a729e3d21ee064fc47bd2efbd35fa7018f2ae9f396dfc0698e9cacc48",
+      "line_start": 31,
+      "line_end": 51,
+      "text": "1. **Inertia management.** With the wrist cocked, the system's moment of inertia about the hub is small, so proximal torque buys angular velocity cheaply; early release raises the inertia while proximal torque is still accelerating the system [@white2006; @jorgensen1999]. 2. **Actuator timing and limits.** In Sprigings and Neal's declared torque-generator model, the optimum placed active wrist torque late, but its timing depended strongly on the assumed torque-profile shape [@sprigings2000]. Sprigings and MacKenzie separately found a small benefit from a 50 ms actively resisted delay and a much larger penalty when post-release wrist torque was removed [@sprigings2002]. These simulations do not identify a muscle-level strategy. 3. **Geometry-mediated transfer.** White's undriven model demonstrates energy redistribution as the club unfolds, while Miura's translating- hub model predicts an inward-pull gain under its prescribed geometry [@white2006; @miura2001]. Whether either mechanism dominates a measured human swing requires state-resolved force and power data. 4. **Interaction dynamics can redistribute acceleration and power.** Motion-dependent terms can accelerate a distal segment while opposing a proximal segment, but they are consequences of the evolving state and prior actuator work\u2014not free energy [@putnam1993; @herring1992]. Their contribution must be evaluated from a declared decomposition.",
+      "text_sha256": "dbe396f9f20927b2b6c2109bc9748150299c2938cc55dc8612009f5498c7dd1c",
       "citation_keys": [
         "herring1992",
         "jorgensen1999",
         "miura2001",
         "putnam1993",
         "sprigings2000",
+        "sprigings2002",
         "white2006"
       ],
       "has_numeric_content": true,
-      "has_assertive_language": false,
-      "priority_score": 3,
-      "triage_flags": ["numeric", "external_citation"],
+      "has_assertive_language": true,
+      "priority_score": 8,
+      "triage_flags": [
+        "numeric",
+        "assertive_language",
+        "external_citation",
+        "causal_or_generalizing_language"
+      ],
       "review_state": "unadjudicated"
     },
     {
       "candidate_id": "PD-CAND-0bf8a966431ccdca",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactuals.qmd",
-      "line_start": 43,
-      "line_end": 48,
+      "line_start": 53,
+      "line_end": 58,
       "text": "Empirically, S2-like signatures separate skill groups (@sec-skill), while the within-expert null result on inter-peak lags [@neal2007] suggests that once S2 is grossly achieved, residual performance variance lives in finer variables (release profile shape, hub-path geometry, impulse-transfer efficiency) \u2014 exactly what the counterfactual framework below is designed to expose.",
       "text_sha256": "05cf84b6252203795edc44c5b3ee97a9ef9483c048f2c072ed321b28e57d4478",
       "citation_keys": ["neal2007"],
@@ -11239,8 +11319,8 @@
     {
       "candidate_id": "PD-CAND-1572d9f0298fe68c",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactuals.qmd",
-      "line_start": 52,
-      "line_end": 53,
+      "line_start": 62,
+      "line_end": 63,
       "text": "To keep the question scientific rather than rhetorical, we state what evidence would count against the retain-early/release-late hypothesis:",
       "text_sha256": "4aa150008b05082922c20ad0153f36be5f59c55ce0d8eaea88af713f08b09341",
       "citation_keys": [],
@@ -11253,8 +11333,8 @@
     {
       "candidate_id": "PD-CAND-7be438fc8bece84b",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactuals.qmd",
-      "line_start": 55,
-      "line_end": 65,
+      "line_start": 65,
+      "line_end": 75,
       "text": "- an optimal-control solution, in a validated 3D model with physiological actuator limits, whose optimal wrist-interface power is front-loaded; - measured expert swings in which early wrist-interface power (normalized) is *positively* associated with clubhead speed across players; - counterfactual (ZTCF/ZVCF) analyses showing that in faster swings the control term dominates club acceleration *early* rather than late; - **or, in the direct manipulation of @sec-methods: torque programs that drive the wrist early outperforming programs that retain early and drive late, under matched proximal effort.**",
       "text_sha256": "d5cc038cedae73bbeeb39a2807755867dc5a748d998acfc738fc96c3a4044256",
       "citation_keys": [],
@@ -11267,8 +11347,8 @@
     {
       "candidate_id": "PD-CAND-7d05ac804c5943b5",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactuals.qmd",
-      "line_start": 67,
-      "line_end": 67,
+      "line_start": 77,
+      "line_end": 77,
       "text": "The last test is executed in @sec-results.",
       "text_sha256": "4c8a983357b34e7f97f257f5bae6ea1d82b7fa0d53fa3396378a2248db11c537",
       "citation_keys": [],
@@ -11281,8 +11361,8 @@
     {
       "candidate_id": "PD-CAND-97a1283cdfccec20",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactuals.qmd",
-      "line_start": 71,
-      "line_end": 72,
+      "line_start": 81,
+      "line_end": 82,
       "text": "Two counterfactual accelerations are defined *pointwise* at each measured state $(q, \\dot q, \\tau)$ of a swing:",
       "text_sha256": "ba8ac8b48f1a01dd035fbdbb970a98b9958c759463e3196f603444aa5863a62f",
       "citation_keys": [],
@@ -11295,8 +11375,8 @@
     {
       "candidate_id": "PD-CAND-07360135b6972e8f",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactuals.qmd",
-      "line_start": 85,
-      "line_end": 96,
+      "line_start": 95,
+      "line_end": 106,
       "text": "where the simplification in @eq-zvcf holds because the Coriolis term (quadratic in velocity) and viscous dissipation (linear in velocity) vanish at $\\dot q = \\mathbf 0$. The ZTCF (@eq-ztcf) answers *\"what would the system do right now if every actuator switched off?\"* \u2014 it is the **drift** field of the affine control system, containing gravity plus all motion-dependent interaction dynamics. The ZVCF (@eq-zvcf) answers *\"what would the currently applied torques, together with gravity, produce from a standstill in this pose?\"* \u2014 it removes every motion-dependent term but is *not* the pure control contribution, since gravity remains in @eq-zvcf; the pure torque term is $M^{-1}\\tau$ in the split below. Because @eq-eom is affine in $\\tau$, the actual acceleration superposes exactly:",
       "text_sha256": "5116fa6bc9d265226251f2b2fa16c54806b6ee7866a906af7e793689fd84e4f9",
       "citation_keys": [],
@@ -11309,8 +11389,8 @@
     {
       "candidate_id": "PD-CAND-d2c317170171468b",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactuals.qmd",
-      "line_start": 105,
-      "line_end": 106,
+      "line_start": 115,
+      "line_end": 116,
       "text": "an identity enforced to numerical tolerance by the accompanying tests (@sec-appendix-validation).",
       "text_sha256": "b53181f2a993b6e8d48130c63f08ae6d5263ff8be78c25b881679ea83690ad44",
       "citation_keys": [],
@@ -11323,8 +11403,8 @@
     {
       "candidate_id": "PD-CAND-76f2c706fffcf628",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactuals.qmd",
-      "line_start": 110,
-      "line_end": 111,
+      "line_start": 120,
+      "line_end": 121,
       "text": "Two distinct operationalizations are available, and the difference matters for interpretation.",
       "text_sha256": "67510dc85b23d58de8653cf7961daa5a70e42c95c4b699323037b965a4bf6382",
       "citation_keys": [],
@@ -11337,8 +11417,8 @@
     {
       "candidate_id": "PD-CAND-1fafe12bbe976828",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactuals.qmd",
-      "line_start": 113,
-      "line_end": 120,
+      "line_start": 123,
+      "line_end": 130,
       "text": "**Pointwise (instantaneous) counterfactuals.** The engine-agnostic Python implementation ([`simulation_backends/ztcf_zvcf.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/simulation_backends/ztcf_zvcf.py)) evaluates @eq-ztcf and @eq-zvcf at each sample of an already-measured trajectory \u2014 explicitly *not* a forward-integrated rollout. Each sample answers a local \"what if\"; this is the right tool for drift/control *time profiles* along a real swing, and it is the tool used in @sec-results.",
       "text_sha256": "5fa58c82471f1ba516fc7a3e7919555cd9fc39901b01f8816b23d6115bc37a34",
       "citation_keys": [],
@@ -11351,8 +11431,8 @@
     {
       "candidate_id": "PD-CAND-4791113a77be6f3e",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactuals.qmd",
-      "line_start": 122,
-      "line_end": 150,
+      "line_start": 132,
+      "line_end": 160,
       "text": "**Re-simulation counterfactuals.** The original MATLAB/Simscape pipeline ([`run_ztcf_simulation.m`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/core/simulation/run_ztcf_simulation.m)) re-simulates the full model with a torque \"killswitch\" applied at time $t$, for a sweep of $t$ values, tabulating the counterfactual state reached with torques off. The pipeline forms the difference table $\\mathrm{DELTA} = \\mathrm{BASE} - \\mathrm{ZTCF}$ ([`process_data_tables.m`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/core/processing/process_data_tables.m)), attributing to active control everything the passive system would not have done. A companion ZVCF model applies the measured torques to the same pose with velocities zeroed ([`SCRIPT_ZVCF_GENERATOR.m`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab/Model%20Output/Scripts/SCRIPT_ZVCF_GENERATOR.m)); the ZVCF model is run without gravity so that, when its samples are set against the ZTCF (which retains gravity), the gravitational contribution is not double-counted. This decomposition is meaningful *pointwise*, at matched states, in the sense of @eq-superposition: the ZVCF script records one sample per zero-velocity pose, and separately integrated counterfactual rollouts do not superpose at the trajectory level in a nonlinear multibody system, because $M$ and $b$ evolve differently once the counterfactual state diverges. The MATLAB pipeline additionally computes, for every joint and every table (BASE, ZTCF, DELTA), the linear work $\\int \\mathbf F\\cdot\\mathbf v\\,dt$, angular work $\\int \\boldsymbol\\tau\\cdot\\boldsymbol\\omega\\,dt$, total work and power, and the fractional contributions ZTCF/BASE and DELTA/BASE ([`calculate_work_impulse.m`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/core/processing/calculate_work_impulse.m), [`calculate_total_work_power.m`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/core/processing/calculate_total_work_power.m)) \u2014 precisely the Robertson-Winter-style joint-interface accounting of @sec-rw, including a kinematic-sequence plot computed *separately for the BASE, ZTCF and DELTA components* ([`SCRIPT_324_PLOT_ZTCF_KinematicSequence.m`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab/Scripts/_ZTCF%20Scripts/SCRIPT_324_PLOT_ZTCF_KinematicSequence.m)).",
       "text_sha256": "50bcd9ab0cdc3038f88137d9252e092183605baed3e9cd949129240127b60ecd",
       "citation_keys": [],
@@ -11365,8 +11445,8 @@
     {
       "candidate_id": "PD-CAND-f2ed16dd5706df89",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactuals.qmd",
-      "line_start": 154,
-      "line_end": 157,
+      "line_start": 164,
+      "line_end": 167,
       "text": "The ZTCF/ZVCF language makes the S2 hypothesis crisp. Along a measured downswing, project the drift and control accelerations onto the club's speed-producing direction and integrate the associated powers. S2 predicts, for high-performing swings:",
       "text_sha256": "8089a88ed411fb428ee05b94eea7fb266da893288fb27936b63a73d5daa5e19a",
       "citation_keys": [],
@@ -11379,8 +11459,8 @@
     {
       "candidate_id": "PD-CAND-7e0c08532f62e180",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactuals.qmd",
-      "line_start": 159,
-      "line_end": 169,
+      "line_start": 169,
+      "line_end": 179,
       "text": "- **Early downswing:** the *control* term should dominate energy input at proximal joints, while at the wrist the control contribution to club angular acceleration should be small or negative (restraining lag against the developing centrifugal field). The club's ZTCF profile should show the drift field already \"wants\" to open the wrist \u2014 control is *holding energy back*. - **Late downswing:** the *drift* term (parametric transfer, centrifugal release) should dominate club acceleration, with a brief late window of positive wrist control power [@sprigings2000]. The active share of club-side work should concentrate before release; the passive share should account for most club energy gain after release [@white2006].",
       "text_sha256": "a2d35571289fcd91bd83e779d9033219e6b60bbdb4f76475c02c6d0f22ace977",
       "citation_keys": ["sprigings2000", "white2006"],
@@ -11393,8 +11473,8 @@
     {
       "candidate_id": "PD-CAND-2515c6eaeb0fa317",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactuals.qmd",
-      "line_start": 171,
-      "line_end": 177,
+      "line_start": 181,
+      "line_end": 187,
       "text": "This pattern was initially motivated by torque-removal analyses. @sec-results provides a reproducible quantitative test in a two-segment model; conversely, had the early-drive programs won the sweep, S2 would have been falsified in exactly the terms of @sec-falsify. Bounded-actuator, impact-definition, and model-parameter sensitivity checks are reported here; re-simulation parity, 3D full-body models, and measured swings remain future work.",
       "text_sha256": "97838e64224cd44dfab8e55a77bc65a0d1c405eb14f5f94b329c0d0f0b33fdcb",
       "citation_keys": [],
@@ -12164,12 +12244,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-8a6c82a328a63549",
+      "candidate_id": "PD-CAND-c8cf949ae2fab455",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd",
       "line_start": 5,
-      "line_end": 27,
-      "text": "Every headline result of @sec-results has an antecedent in the literature of @sec-mechanics, and the quantitative agreement is close enough to be meaningful rather than merely directional. The harm of early release reproduces the delayed-release results of Pickering and Vickers and of Sprigings and MacKenzie [@pickering1999; @sprigings2002] and Milburn's original observation that early uncocking truncates arm acceleration [@milburn1982]. The +12% value of late wrist drive brackets Sprigings and Neal's \u22484% gain from a physiologically bounded late wrist torque [@sprigings2000] \u2014 our unbounded constant 15 N\u00b7m torque and longer active window make a larger gain expected. The dominance of the passive late energy pathway (joint-force transfer of 131.7 J versus 25.7 J of late wrist work in the grid-selected swing) is White's parametric transfer made explicit in Robertson-Winter accounting [@white2006; @robertson1980]. The early-delivery geometry of the early-drive swing \u2014 clubhead overtaking the hands before the arm reaches vertical \u2014 is consistent with release differences documented across skill-level studies [@cheetham2008; @zheng2008]. The two selected programs instead have the hands ahead in the model's coordinate convention, with the arm 0.7\u20130.8 rad past vertical. These are geometric comparators, not player classifications. Finally, the drift/control time signature \u2014 control as early restraint, drift as late delivery \u2014 is the counterfactual pattern proposed in @sec-hypothesis, now exhibited by this model.",
-      "text_sha256": "605cd2ad3bddb6c14cec2d9a3a118eccba9a9ede26085507f9230a0d12556210",
+      "line_end": 29,
+      "text": "Several results of @sec-results are directionally comparable with studies in @sec-mechanics, but their magnitudes are not directly exchangeable. The harm of the tested early-drive program is consistent with the delayed-release results of Pickering and Vickers and of Sprigings and MacKenzie [@pickering1999; @sprigings2002] and with Milburn's account of delayed uncocking [@milburn1982]. It is not a replication: the models, objectives, admissible torques, and impact definitions differ. The +12% late-drive contrast should likewise be compared cautiously with Sprigings and Neal's approximately 9% enabled-versus-disabled wrist-generator contrast [@sprigings2000], and not with the 1.6% forced-delay contrast reported by Sprigings and MacKenzie [@sprigings2002]. The dominance of the passive late energy pathway (joint-force transfer of 131.7 J versus 25.7 J of late wrist work in the grid-selected swing) is White's parametric transfer made explicit in Robertson-Winter accounting [@white2006; @robertson1980]. The early-delivery geometry of the early-drive swing \u2014 clubhead overtaking the hands before the arm reaches vertical \u2014 is consistent with release differences documented across skill-level studies [@cheetham2008; @zheng2008]. The two selected programs instead have the hands ahead in the model's coordinate convention, with the arm 0.7\u20130.8 rad past vertical. These are geometric comparators, not player classifications. Finally, the drift/control time signature \u2014 control as early restraint, drift as late delivery \u2014 is the counterfactual pattern proposed in @sec-hypothesis, now exhibited by this model.",
+      "text_sha256": "14dada81970ce4c0066297ce7152d3c4879272112026757505ea946db0192295",
       "citation_keys": [
         "cheetham2008",
         "milburn1982",
@@ -12187,33 +12267,24 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-a0f83918d48d2800",
+      "candidate_id": "PD-CAND-248e726470667ce5",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd",
-      "line_start": 31,
-      "line_end": 52,
-      "text": "The energy budgets localize the causal structure. Early wrist drive fails through *two* simultaneous channels: it raises the system's moment of inertia about the hub while the shoulder is still accelerating (so the same shoulder torque buys less arm speed \u2014 the early-drive program banks 21 J less early shoulder work than the retain program despite identical $\\tau_s$), and it spends the wrist's work budget at a time when the joint-force/parametric channel cannot yet amplify it [@white2006]. Timed restraint is faster in the tested family through the mirror mechanisms: it holds the compact configuration slightly longer than a free hinge would (the drift field already wants to open the wrist \u2014 the restraint is fighting centrifugal release, not gravity), banks that margin as arm speed, and then releases into a fully developed centrifugal field where the passive channel converts arm energy to club energy at the maximum rate. The negative early wrist work (\u22121.9 J) is small in absolute terms and diagnostic only of this simulated command: the imposed negative actuator torque opposes the modeled joint's opening velocity. It distinguishes active model restraint from zero model torque, consistent with the restraining-torque role in Jorgensen's fitted swing and Sprigings--Neal-type actuator solutions [@jorgensen1999; @sprigings2000; @herring1992]. It does not identify a muscle, neural intent, eccentric physiology, or a human retention technique.",
-      "text_sha256": "709b02bf6dbfacf00d9cb16288821c00de81454a2fb215cebd2471271ef98838",
-      "citation_keys": [
-        "herring1992",
-        "jorgensen1999",
-        "sprigings2000",
-        "white2006"
-      ],
+      "line_start": 33,
+      "line_end": 54,
+      "text": "Within this registered model and intervention family, the energy budgets localize two mechanisms associated with the ordering. Early wrist drive raises the system's moment of inertia about the hub while the shoulder is still accelerating (so the same shoulder torque buys less arm speed \u2014 the early-drive program banks 21 J less early shoulder work than the retain program despite identical $\\tau_s$). It also changes wrist work and joint-force transfer at a different state; the present comparison does not isolate an independent \"amplification\" factor. Timed restraint is faster in the tested family: it holds the compact configuration slightly longer than a free hinge would (the drift field already wants to open the wrist \u2014 the restraint is fighting centrifugal release, not gravity), banks that margin as arm speed, and then releases into a fully developed motion-dependent field where the registered joint-force channel transfers arm energy to the club rapidly. The negative early wrist work (\u22121.9 J) is small in absolute terms and diagnostic only of this simulated command: the imposed negative actuator torque opposes the modeled joint's opening velocity. It distinguishes active model restraint from zero model torque, consistent with the restraining-torque role in Jorgensen's fitted swing and Sprigings--Neal-type actuator solutions [@jorgensen1999; @sprigings2000; @herring1992]. It does not identify a muscle, neural intent, eccentric physiology, or a human retention technique.",
+      "text_sha256": "b6049acd5ae09506419889dd33b04e6f5275839b872858c765be2fcbd0daeb7c",
+      "citation_keys": ["herring1992", "jorgensen1999", "sprigings2000"],
       "has_numeric_content": true,
       "has_assertive_language": false,
-      "priority_score": 6,
-      "triage_flags": [
-        "numeric",
-        "external_citation",
-        "causal_or_generalizing_language"
-      ],
+      "priority_score": 3,
+      "triage_flags": ["numeric", "external_citation"],
       "review_state": "unadjudicated"
     },
     {
       "candidate_id": "PD-CAND-aa06823a134c06f0",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd",
-      "line_start": 54,
-      "line_end": 57,
+      "line_start": 56,
+      "line_end": 59,
       "text": "Two qualifications temper this reading. Active restraint adds only +0.5 m/s over the selected passive-then-drive program; most of the modeled benefit comes from not driving early. Heavier or longer restraint crosses outside the registered delivery zone. Neither result prescribes human timing.",
       "text_sha256": "b488e3bc23bb10239d66f5fe79adce75a5a307d83ec674ae0ce9e403c8f6731f",
       "citation_keys": [],
@@ -12226,8 +12297,8 @@
     {
       "candidate_id": "PD-CAND-7c1423dce490ab9b",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd",
-      "line_start": 61,
-      "line_end": 63,
+      "line_start": 63,
+      "line_end": 65,
       "text": "The results chapter demonstrates the S2 pattern in the model class where the classical timing literature lives; it does not yet demonstrate it for a golfer. The specific gaps, each with a tracked remediation:",
       "text_sha256": "0ddde4e058ff237558bd747c693eb25647f248930171bb893d6965b0648437d1",
       "citation_keys": [],
@@ -12240,8 +12311,8 @@
     {
       "candidate_id": "PD-CAND-afbc50ff19058ed3",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd",
-      "line_start": 65,
-      "line_end": 102,
+      "line_start": 67,
+      "line_end": 104,
       "text": "- **Spatial Body and Distributed-Club Dynamics.** The hub-path and inward-pull mechanisms [@miura2001; @nesbit2009hub; @nesbit2014hub], shaft dynamics [@mackenzie2009; @betzler2012; @osis2012], and long-axis rotations [@marshall2000] are outside the primary 2-DOF model. The forward two-hand and coupled moving-base/flexible-club tiers address planar closure, translation, and one lumped flex mode; base rotation, distributed beams, and the reduced full-body common-state tier now addresses nonplanar inverse dynamics. The reduced MuJoCo/Pinocchio forward-contact tier adds compliant spatial closure, long-axis rotation, swing-plane evolution, and a reduced ground-pathway proxy. Subject-scaled articulated arms, base--ground dynamics, and a coupled distributed beam remain appropriate staged extensions. - **Simplified Actuator Models.** E1b shows the S2 ordering survives a linear torque-velocity bound on the drives with compressed margins (@sec-results-e1b), but activation-rate limits, history dependence, and eccentric-side detail remain unmodeled. The coupled study adds pure delay, first-order activation, rate limits, torque--velocity bounds, and an impedance proxy, but these remain command-level surrogates; full optimal-control treatments with physiological actuators are the appropriate refinement [@sprigings2000; @sharp2009; @mcnally2018]. - **Coupled Sensitivity Is a Screening Tier.** Alternative impact definitions and single-parameter perturbations preserved the ordering (@sec-results-robustness). The 12-input Latin-hypercube study now exposes coupled effects, parameter non-identifiability, and held-out strategy tradeoffs. Its ranges are engineering envelopes and its sample is small; measurement uncertainty and population distributions remain unmodeled. - **Counterfactuals Remain Model-Tier Specific.** The Python pathway now includes both pointwise ZTCF profiles and forward same-state killswitches in the double-pendulum and constrained two-hand tiers. The coupled extension now preserves the finite negative-couple branch with endogenous base translation and club flex. The spatial common-state tier transports the geometry response across independent inverse-dynamics formulations. The reduced spatial forward tier then preserves a negative contact couple after complete driver removal in both native engines. Its hand carriages and declared contact law do not establish persistence in anatomical arms or human dynamics. - **No Human Data Yet.** The decisive observational test \u2014 wrist interface power time courses across skill levels from motion capture (@sec-falsify) \u2014 awaits an appropriately governed motion-capture study.",
       "text_sha256": "f225ce995a62771bcb3742a477bafeba71905d98e621020fc146e13d4e867c93",
       "citation_keys": [
@@ -12270,8 +12341,8 @@
     {
       "candidate_id": "PD-CAND-efa294cfd5f1828d",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd",
-      "line_start": 106,
-      "line_end": 115,
+      "line_start": 108,
+      "line_end": 117,
       "text": "For modeling, counterfactual and energy-level accounting make the timing question testable without treating peak order as energy transfer. A recent cross-sectional study likewise found its constructed transfer-efficiency factor associated with clubhead speed, but its mediation analysis does not establish a causal human transfer mechanism [@frontiers2026footground]. The program names denote finite model inputs, not coaching cues or novelty over delayed-release literature [@cochran1968; @jorgensen1999]. No recommendation follows. Player-specific translation requires governed human evidence spanning physical constraints, injury history, and functional timing variability [@cole2016; @hume2005; @neal2007; @langdown2012; @glazier2011].",
       "text_sha256": "a40fa435da8a977400eb68f0064363917dd6229ffa283b63c16d2acc2ec90a9f",
       "citation_keys": [

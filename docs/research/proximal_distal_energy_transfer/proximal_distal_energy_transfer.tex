@@ -445,7 +445,7 @@ available with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, bottomrule=.15mm, opacityback=0, toprule=.15mm, arc=.35mm, left=2mm, coltitle=black, colback=white, titlerule=0mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, rightrule=.15mm, leftrule=.75mm, toptitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, breakable, colframe=quarto-callout-note-color-frame, bottomtitle=1mm]
+\begin{tcolorbox}[enhanced jigsaw, breakable, rightrule=.15mm, colback=white, arc=.35mm, colbacktitle=quarto-callout-note-color!10!white, toprule=.15mm, opacityback=0, coltitle=black, bottomrule=.15mm, bottomtitle=1mm, toptitle=1mm, titlerule=0mm, left=2mm, leftrule=.75mm, colframe=quarto-callout-note-color-frame, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, opacitybacktitle=0.6]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -717,57 +717,142 @@ handoff an explicit variable (the ``release'': the point at which the
 wrist angle is allowed, or driven, to open) and exposes the mechanism by
 which delay pays. Three results anchor the analysis:
 
-\textbf{Delayed release increases clubhead speed.} Pickering and
+\textbf{Delayed Release Increases Clubhead Speed.} Pickering and
 Vickers, sweeping release angles in a driven double-pendulum model,
 found clubhead velocity at impact increases as release is delayed ---
 the classical ``late hit'' (\citeproc{ref-pickering1999}{Pickering and
-Vickers 1999}). Jorgensen's fitted model reproduced the expert swing
-only with a substantially delayed opening of the wrist angle
-(\citeproc{ref-jorgensen1970}{T. Jorgensen 1970};
-\citeproc{ref-jorgensen1999}{T. P. Jorgensen 1999}). In these models an
-early release (early P→D handoff) is strictly inferior: club kinetic
-energy purchased early is paid for with arm speed that never develops.
+Vickers 1999}). This result supports late release for the particular
+fixed-hub, rigid-link, torque, release, and impact definitions examined;
+it does not establish that every earlier release is inferior in every
+model. In particular, White later found release timing to have only a
+second-order effect in his constant-shoulder-torque model
+(\citeproc{ref-white2006}{White 2006}).
 
-\textbf{Late wrist torque helps; early wrist torque is the wrong tool.}
+\textbf{Late Wrist Torque Can Help in Actuator-Bounded Simulations.}
 Sprigings and Neal, using a torque-driven three-segment model with
 physiologically bounded actuators, found that an active wrist torque
 applied \emph{during the latter stages of the downswing} increased
-clubhead speed by approximately 4\%
-(\citeproc{ref-sprigings2000}{Sprigings and Neal 2000}); Sprigings and
-MacKenzie confirmed the delayed-release benefit in a follow-up
-simulation focused on release timing
-(\citeproc{ref-sprigings2002}{Sprigings and MacKenzie 2002}). The point
-is not that distal effort is useless, but that its productive window is
-late.
+clubhead speed by approximately 9\% relative to their
+wrist-generator-disabled condition
+(\citeproc{ref-sprigings2000}{Sprigings and Neal 2000}). Their
+optimization placed wrist activation when the arm was about 30° below
+horizontal, but the authors also reported that this time depended
+strongly on the assumed torque-profile shape. In a follow-up
+three-segment study, Sprigings and MacKenzie separated a forced 50 ms
+resistive delay from post-release wrist drive. The optimized forced
+delay increased impact speed from 44.0 to 44.7 m/s (1.6\%), whereas
+removing active wrist torque after that delay reduced it to 38.9 m/s
+(\citeproc{ref-sprigings2002}{Sprigings and MacKenzie 2002}). These are
+model-conditional comparisons, not a general human timing rule or a
+common effect size.
 
-\textbf{Energy transfer to the club can be largely passive --- governed
-by the changing geometry.} White analyzed an \emph{undriven} double
+\textbf{Energy Transfer to the Club Can Be Largely Passive---Governed by
+the Changing Geometry.} White analyzed an \emph{undriven} double
 pendulum and showed that the transfer of kinetic energy from arms to
 club late in the downswing is a parametric-transfer phenomenon: as the
 club swings out, the effective moment of inertia of the system changes,
 and conservation of energy and angular momentum move kinetic energy
 distally without any wrist torque at all; the wrist-cock angle
 maintained before release is the principal efficiency-determining
-parameter (\citeproc{ref-white2006}{White 2006}). Miura's analysis of
-the ``inward pull'' complements this: an expert's hands moving toward
-the body near impact --- shrinking the hub radius when centrifugal
-loading is fully developed --- performs work against the centrifugal
-force that appears as additional clubhead kinetic energy
-(\citeproc{ref-miura2001}{Miura 2001}). Nesbit and McGinnis' hub-path
-analyses generalize the same idea: the non-circular hand path of skilled
-golfers, including its late-downswing tightening, is a mechanism for
-shaping kinetic transfer from golfer to club
-(\citeproc{ref-nesbit2009hub}{Nesbit and McGinnis 2009};
-\citeproc{ref-nesbit2014hub}{Nesbit and McGinnis 2014}).
+parameter in that model (\citeproc{ref-white2006}{White 2006}). In
+White's driven sensitivity study, however, ordinary release advances or
+delays had little net effect, and increasing constant positive wrist
+torque reduced predicted distance because its efficiency gain was offset
+by a shorter downswing. White separately noted that selective late
+torque can avoid that tradeoff. Miura's modified double-link emulation
+predicted that moving the hub inward near impact, when the modeled
+centrifugal force was developed, could substantially increase clubhead
+velocity (\citeproc{ref-miura2001}{Miura 2001}). Nesbit and McGinnis
+measured one selected driver swing from each of four diverse amateur
+golfers and found non-circular hand paths with a shared three-phase
+radius pattern but substantial between-subject geometry differences
+(\citeproc{ref-nesbit2009hub}{Nesbit and McGinnis 2009}). Their later
+two-dimensional constrained optimization predicted that combined
+hand-path and club-angular-trajectory changes could increase impact
+speed for all four subjects within each subject's modeled force, torque,
+work, and power limits; the changes and limiting quantities were subject
+dependent (\citeproc{ref-nesbit2014hub}{Nesbit and McGinnis 2014}).
+These model-based results motivate hub-path interventions, but they do
+not isolate an inward-pull contribution in a human experiment.
 
-Together these results describe a machine whose highest-output mode is:
-\emph{load the proximal rotation first, hold the distal joint folded
-(retaining energy in a compact, fast-rotating configuration), then let
-geometry and --- in the last phase --- modest distal torque move the
-energy outward rapidly}. The double-pendulum literature is already an
-argument for \textbf{retain-early / release-late}.
-Section~\ref{sec-results} tests exactly this proposition in the
-numerical implementation used here.
+Together these studies motivate, but do not prove, a
+\textbf{retain-early / release-late} hypothesis. Pickering and Vickers,
+Sprigings and Neal, Sprigings and MacKenzie, and Sharp identify benefits
+from delayed release, late wrist drive, or a negative-to-positive
+wrist-torque program within their respective models
+(\citeproc{ref-pickering1999}{Pickering and Vickers 1999};
+\citeproc{ref-sprigings2000}{Sprigings and Neal 2000};
+\citeproc{ref-sprigings2002}{Sprigings and MacKenzie 2002};
+\citeproc{ref-sharp2009}{Sharp 2009}). White supports passive
+geometry-mediated transfer while also showing that release-delay and
+wrist-torque effects depend on how the downswing angle, impact event,
+and torque program are defined (\citeproc{ref-white2006}{White 2006}).
+The numerical study in Section~\ref{sec-results} therefore tests one
+specified intervention family rather than treating the literature as a
+prior proof of its ordering.
+
+\subsection{Source-Level Contrast
+Matrix}\label{sec-release-contrast-matrix}
+
+The cited studies answer different questions. Keeping their contrasts
+separate prevents a release-delay effect, an active-wrist-torque effect,
+and passive energy redistribution from being treated as the same
+quantity.
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Source
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Declared Comparison
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Reported Finding
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Evidentiary Boundary
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Pickering and Vickers (\citeproc{ref-pickering1999}{Pickering and
+Vickers 1999}) & Release angle in a driven fixed-hub double pendulum &
+Impact clubhead velocity increased with later release in the tested
+sweep; natural release minimized supplied energy & Computational
+parameter study; abstract does not establish universality or a human
+causal effect \\
+Sprigings and Neal (\citeproc{ref-sprigings2000}{Sprigings and Neal
+2000}) & Physiologically constrained three-segment simulation with wrist
+generator enabled versus disabled & Approximately 9\% clubhead-speed
+gain with late active wrist torque; optimum activation near 30° below
+horizontal & Timing depended strongly on assumed torque-profile shape \\
+Sprigings and MacKenzie (\citeproc{ref-sprigings2002}{Sprigings and
+MacKenzie 2002}) & No forced delay (SIM-1), 50 ms resisted delay plus
+active release (SIM-2), and resisted delay without post-release wrist
+torque (SIM-3) & SIM-2 versus SIM-1: 44.7 versus 44.0 m/s (1.6\%);
+SIM-3: 38.9 m/s & Model included activation and force--velocity limits
+but omitted legs, lateral torso motion, right-arm extension, and forearm
+rotation \\
+White (\citeproc{ref-white2006}{White 2006}) & Undriven transfer
+analysis and driven constant-shoulder-torque sensitivity study & Passive
+parametric redistribution; ordinary release timing had a second-order
+net effect; increasing constant positive wrist torque reduced predicted
+distance & Point-mass or rigid-link planar models; late selective torque
+was discussed separately from constant torque \\
+Sharp (\citeproc{ref-sharp2009}{Sharp 2009}) & Parameterized arm--club
+and shoulder--arm--club simulations fitted to historical expert data and
+optimized within torque bounds & Near-optimal programs included a
+negative-to-positive wrist-torque switch and delayed release & The
+author explicitly identifies kinematic mismatch, sparse historical data,
+and model-dependence \\
+\end{longtable}
+
+This matrix is a preregistration aid for the project: a new model or
+experiment must declare which row's contrast it reproduces, or define a
+new estimand, before its result is compared numerically.
 
 \section{Optimal Control and Torque
 Sequencing}\label{sec-optimalcontrol}
@@ -8587,14 +8672,20 @@ Section~\ref{sec-rw}. The two strategies are:
   \(P_{\mathrm{w}}\) concentrated in the final phase.
 \end{itemize}
 
-The double-pendulum, delayed-release and optimal-control literatures
-reviewed in Section~\ref{sec-mechanics} uniformly favor S2 within their
-model classes (\citeproc{ref-milburn1982}{Milburn 1982};
-\citeproc{ref-pickering1999}{Pickering and Vickers 1999};
+The double-pendulum and optimal-control studies reviewed in
+Section~\ref{sec-mechanics} provide mixed, model-dependent evidence
+relevant to S2. Several favor delayed release, late wrist drive, or an
+early negative and late positive wrist-torque program
+(\citeproc{ref-pickering1999}{Pickering and Vickers 1999};
 \citeproc{ref-sprigings2000}{Sprigings and Neal 2000};
 \citeproc{ref-sprigings2002}{Sprigings and MacKenzie 2002};
-\citeproc{ref-sharp2009}{Sharp 2009}; \citeproc{ref-white2006}{White
-2006}). The mechanistic reasons compose into a coherent account:
+\citeproc{ref-sharp2009}{Sharp 2009}). White supports passive
+geometry-mediated transfer but reports only a second-order
+release-timing effect and a distance penalty for increasing constant
+positive wrist torque in his driven model
+(\citeproc{ref-white2006}{White 2006}). The following mechanisms are
+therefore hypotheses to separate experimentally and computationally, not
+a consensus proof:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -8607,24 +8698,31 @@ model classes (\citeproc{ref-milburn1982}{Milburn 1982};
   (\citeproc{ref-white2006}{White 2006}; \citeproc{ref-jorgensen1999}{T.
   P. Jorgensen 1999}).
 \item
-  \textbf{Actuator physiology.} Torque-velocity limits mean the wrist's
-  small muscles add meaningful power only while wrist angular velocity
-  is modest; early wrist torque squanders that window and can even
-  require \emph{negative} (restraining) torque later
-  (\citeproc{ref-sprigings2000}{Sprigings and Neal 2000}).
+  \textbf{Actuator timing and limits.} In Sprigings and Neal's declared
+  torque-generator model, the optimum placed active wrist torque late,
+  but its timing depended strongly on the assumed torque-profile shape
+  (\citeproc{ref-sprigings2000}{Sprigings and Neal 2000}). Sprigings and
+  MacKenzie separately found a small benefit from a 50 ms actively
+  resisted delay and a much larger penalty when post-release wrist
+  torque was removed (\citeproc{ref-sprigings2002}{Sprigings and
+  MacKenzie 2002}). These simulations do not identify a muscle-level
+  strategy.
 \item
-  \textbf{Parametric transfer needs developed centrifugal loading.} The
-  passive outward energy flow at release, and the inward-pull gain,
-  scale with the centrifugal field established by proximal rotation ---
-  weak early, strong late (\citeproc{ref-white2006}{White 2006};
-  \citeproc{ref-miura2001}{Miura 2001}).
+  \textbf{Geometry-mediated transfer.} White's undriven model
+  demonstrates energy redistribution as the club unfolds, while Miura's
+  translating- hub model predicts an inward-pull gain under its
+  prescribed geometry (\citeproc{ref-white2006}{White 2006};
+  \citeproc{ref-miura2001}{Miura 2001}). Whether either mechanism
+  dominates a measured human swing requires state-resolved force and
+  power data.
 \item
-  \textbf{Interaction torques do the late work for free.}
-  Motion-dependent torques accelerate the distal segment and decelerate
-  the proximal one automatically once release begins; the golfer's job
-  is to \emph{time} this cascade, not to muscle it
+  \textbf{Interaction dynamics can redistribute acceleration and power.}
+  Motion-dependent terms can accelerate a distal segment while opposing
+  a proximal segment, but they are consequences of the evolving state
+  and prior actuator work---not free energy
   (\citeproc{ref-putnam1993}{Putnam 1993};
-  \citeproc{ref-herring1992}{Herring and Chapman 1992}).
+  \citeproc{ref-herring1992}{Herring and Chapman 1992}). Their
+  contribution must be evaluated from a declared decomposition.
 \end{enumerate}
 
 Empirically, S2-like signatures separate skill groups
@@ -9438,20 +9536,22 @@ Section~\ref{sec-results-robustness}).
 
 \section{Agreement With the Literature}\label{sec-discussion-agreement}
 
-Every headline result of Section~\ref{sec-results} has an antecedent in
-the literature of Section~\ref{sec-mechanics}, and the quantitative
-agreement is close enough to be meaningful rather than merely
-directional. The harm of early release reproduces the delayed-release
-results of Pickering and Vickers and of Sprigings and MacKenzie
+Several results of Section~\ref{sec-results} are directionally
+comparable with studies in Section~\ref{sec-mechanics}, but their
+magnitudes are not directly exchangeable. The harm of the tested
+early-drive program is consistent with the delayed-release results of
+Pickering and Vickers and of Sprigings and MacKenzie
 (\citeproc{ref-pickering1999}{Pickering and Vickers 1999};
-\citeproc{ref-sprigings2002}{Sprigings and MacKenzie 2002}) and
-Milburn's original observation that early uncocking truncates arm
-acceleration (\citeproc{ref-milburn1982}{Milburn 1982}). The +12\% value
-of late wrist drive brackets Sprigings and Neal's ≈4\% gain from a
-physiologically bounded late wrist torque
-(\citeproc{ref-sprigings2000}{Sprigings and Neal 2000}) --- our
-unbounded constant 15 N·m torque and longer active window make a larger
-gain expected. The dominance of the passive late energy pathway
+\citeproc{ref-sprigings2002}{Sprigings and MacKenzie 2002}) and with
+Milburn's account of delayed uncocking
+(\citeproc{ref-milburn1982}{Milburn 1982}). It is not a replication: the
+models, objectives, admissible torques, and impact definitions differ.
+The +12\% late-drive contrast should likewise be compared cautiously
+with Sprigings and Neal's approximately 9\% enabled-versus-disabled
+wrist-generator contrast (\citeproc{ref-sprigings2000}{Sprigings and
+Neal 2000}), and not with the 1.6\% forced-delay contrast reported by
+Sprigings and MacKenzie (\citeproc{ref-sprigings2002}{Sprigings and
+MacKenzie 2002}). The dominance of the passive late energy pathway
 (joint-force transfer of 131.7 J versus 25.7 J of late wrist work in the
 grid-selected swing) is White's parametric transfer made explicit in
 Robertson-Winter accounting (\citeproc{ref-white2006}{White 2006};
@@ -9471,21 +9571,21 @@ exhibited by this model.
 \section{Why the Selected Retention Program Is Faster: A Mechanistic
 Reading}\label{sec-discussion-mechanism}
 
-The energy budgets localize the causal structure. Early wrist drive
-fails through \emph{two} simultaneous channels: it raises the system's
-moment of inertia about the hub while the shoulder is still accelerating
-(so the same shoulder torque buys less arm speed --- the early-drive
-program banks 21 J less early shoulder work than the retain program
-despite identical \(\tau_s\)), and it spends the wrist's work budget at
-a time when the joint-force/parametric channel cannot yet amplify it
-(\citeproc{ref-white2006}{White 2006}). Timed restraint is faster in the
-tested family through the mirror mechanisms: it holds the compact
+Within this registered model and intervention family, the energy budgets
+localize two mechanisms associated with the ordering. Early wrist drive
+raises the system's moment of inertia about the hub while the shoulder
+is still accelerating (so the same shoulder torque buys less arm speed
+--- the early-drive program banks 21 J less early shoulder work than the
+retain program despite identical \(\tau_s\)). It also changes wrist work
+and joint-force transfer at a different state; the present comparison
+does not isolate an independent ``amplification'' factor. Timed
+restraint is faster in the tested family: it holds the compact
 configuration slightly longer than a free hinge would (the drift field
 already wants to open the wrist --- the restraint is fighting
 centrifugal release, not gravity), banks that margin as arm speed, and
-then releases into a fully developed centrifugal field where the passive
-channel converts arm energy to club energy at the maximum rate. The
-negative early wrist work (−1.9 J) is small in absolute terms and
+then releases into a fully developed motion-dependent field where the
+registered joint-force channel transfers arm energy to the club rapidly.
+The negative early wrist work (−1.9 J) is small in absolute terms and
 diagnostic only of this simulated command: the imposed negative actuator
 torque opposes the modeled joint's opening velocity. It distinguishes
 active model restraint from zero model torque, consistent with the
