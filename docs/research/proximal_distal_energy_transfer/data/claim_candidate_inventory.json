@@ -1,7 +1,7 @@
 {
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper_source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-  "source_digest": "b99d916e0a15ac9df8814f41afeb36c8fb10bc8b877145ef0aa248235e661aa1",
+  "source_digest": "94bbfb9c350db2c5d9c078e9ce6216705afd336487a44afac1158a903b524ab4",
   "source_count": 32,
   "candidate_count": 920,
   "candidates": [
@@ -10955,17 +10955,18 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-b67337733c01ba7c",
+      "candidate_id": "PD-CAND-05592ee41c3a5e85",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06e_experimental_protocol.qmd",
       "line_start": 119,
-      "line_end": 124,
-      "text": "No governed human dataset was available in this phase. Accordingly, EXP-H1 through EXP-H4 remain `untested_no_governed_human_data`. Evaluation begins only after an ethics/oversight reference, consent and reuse basis, private data authority, synchronized streams, calibration records, frozen participant split, and analysis-release authorization pass the same validator. The protocol removes analytical discretion; it does not remove the need for measurements.",
-      "text_sha256": "11f05fafc1099e52700aacb36a5f3efb710298b83f16c88b91621446c0a3a274",
+      "line_end": 132,
+      "text": "No governed human dataset was available in this phase or found in the subsequent workspace and public-data search recorded in [UpstreamDrift #8556](https://github.com/D-sorganization/UpstreamDrift/issues/8556). Published instrumented-grip studies by [Choi and Park](https://mdpi-res.com/d_attachment/sensors/sensors-20-03672/article_deploy/sensors-20-03672-v2.pdf) and [Koike](https://ojs.ub.uni-konstanz.de/cpa/article/download/6828/6125) do not provide a governed participant-level deposit satisfying the synchronized bilateral six-axis grip-wrench contract. Accordingly, EXP-H1 through EXP-H6 remain `untested_no_governed_human_data`. Synthetic traces, digitized figures, and publication-level aggregates are not substitutes. Evaluation begins only after an ethics/oversight reference, consent and reuse basis, private data authority, synchronized streams, calibration records, frozen participant split, and analysis-release authorization pass the same validator. The protocol removes analytical discretion; it does not remove the need for measurements.",
+      "text_sha256": "28801165d88586b5db0c6b6bd8015f6385d28c64c3c311de47bbb76fd8ed0adf",
       "citation_keys": [],
-      "has_numeric_content": false,
+      "has_numeric_content": true,
       "has_assertive_language": true,
-      "priority_score": 2,
+      "priority_score": 4,
       "triage_flags": [
+        "numeric",
         "assertive_language"
       ],
       "review_state": "unadjudicated"
@@ -12452,12 +12453,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-5160a0a7fb199c44",
+      "candidate_id": "PD-CAND-79d180c72a8d4d72",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch07b_frames_biology_engines.qmd",
       "line_start": 165,
-      "line_end": 172,
-      "text": "The persistent program has a post-transition absolute torque-error impulse of 0.08998 N m s, versus 0.09084 N m s for complete reversal. The numerical difference is small, model-dependent, and not a performance claim. Its value is logical: activation and series-force states make role history observable even when pre- and post-transition net moments match. The result is consistent with the broader proposition that maintaining load direction can preserve an already-developed transmission state. It neither proves a scapular mechanism nor establishes the wrist as passive.",
-      "text_sha256": "c49b3f5008e3ba4afeb6f0d5e5c22d029b65ee138a58b0871870e2c8f73ac5c6",
+      "line_end": 174,
+      "text": "The persistent program has a post-transition absolute torque-error impulse of 0.08998 N m s, versus 0.09084 N m s for complete reversal. The numerical difference is 0.94% at the published 0.2 ms step, model-dependent, and not a performance claim. Refinement from 1.0 to 0.05 ms preserves its direction but reduces its magnitude from 0.00277 to 0.000514 N m s; the advantage is therefore not numerically converged. Its defensible value is logical: activation and series-force states make role history observable even when pre- and post-transition net moments match. This example motivates a preparation-history hypothesis but does not establish a robust benefit, a scapular mechanism, or a passive wrist.",
+      "text_sha256": "1be26d1617b448459075a1242911518e688b1e2bfea64b819eaba3f0c76e314a",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": true,
@@ -12472,8 +12473,8 @@
     {
       "candidate_id": "PD-CAND-e2a6d025f4e023f5",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch07b_frames_biology_engines.qmd",
-      "line_start": 174,
-      "line_end": 178,
+      "line_start": 176,
+      "line_end": 180,
       "text": "The biological term *slack* should therefore be avoided unless the measured quantity is named. Appropriate alternatives include contact gap, tendon slack length, series strain, low tangent stiffness, low activation, delayed force development, or loss of grip pressure. Those variables can have different signs and consequences.",
       "text_sha256": "6e5b03bc2cf77cf73f01ee035dafe3f7ed052deca927d796cb9c08bf8ec8f706",
       "citation_keys": [],
@@ -12486,8 +12487,8 @@
     {
       "candidate_id": "PD-CAND-bdbd66650ff36161",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch07b_frames_biology_engines.qmd",
-      "line_start": 182,
-      "line_end": 183,
+      "line_start": 184,
+      "line_end": 185,
       "text": "No one backend should be treated as a truth machine. The scientific question selects the backend, while common observables make comparisons possible.",
       "text_sha256": "a3a05754b2b3a73d901632f2fc08741ad374f66a1dc07fc81f138c6f3a3e431d",
       "citation_keys": [],
@@ -12500,8 +12501,8 @@
     {
       "candidate_id": "PD-CAND-bc92f3c1e8bd23c6",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch07b_frames_biology_engines.qmd",
-      "line_start": 185,
-      "line_end": 185,
+      "line_start": 187,
+      "line_end": 187,
       "text": "![Engine Roles and Their Canonical Comparison Surface](figures/fig_cross_engine_question_ladder.pdf){#fig-cross-engine-question-ladder width=100% fig-alt=\"Five engine boxes for MuJoCo, Pinocchio, Drake, OpenSim, and MyoSuite connect to a common comparison surface of frames, events, wrenches, generalized moments, power, and residuals.\"}",
       "text_sha256": "7a0fc300fd0d9c18607a14fb33dd14ac438d7fbefbf3f548f543b33a9cb6636d",
       "citation_keys": [],
@@ -12516,8 +12517,8 @@
     {
       "candidate_id": "PD-CAND-a85384405155c70d",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch07b_frames_biology_engines.qmd",
-      "line_start": 187,
-      "line_end": 187,
+      "line_start": 189,
+      "line_end": 189,
       "text": "| Engine | Best-Fit Question in This Program | Current Evidence Boundary |",
       "text_sha256": "92a81c91a6072b0493574e88bdfb54f410e9fc2e46e5afe1aa93c3af03e0eb7d",
       "citation_keys": [],
@@ -12533,8 +12534,8 @@
     {
       "candidate_id": "PD-CAND-620f9267a9b1d666",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch07b_frames_biology_engines.qmd",
-      "line_start": 189,
-      "line_end": 193,
+      "line_start": 191,
+      "line_end": 195,
       "text": "| MuJoCo | Does compliant contact generate the predicted achieved wrench in forward dynamics? | Executed for the reduced carriage--club model in @sec-spatial-forward-contact; not an anatomical grip | | Pinocchio | Do fast rigid-body Jacobians, RNEA, and ABA reproduce the same reduced mechanism? | Executed for the reduced forward-contact tier; contact is a declared external model | | Drake | Which trajectories and constraints satisfy a registered objective under alternative contact assumptions? | Repository capability and an actionable next validation tier; no new Drake result is claimed here | | OpenSim | Which subject-scaled muscle paths, moment arms, and activations can produce the inferred joint moments? | Repository capability and proposed subject-scaled validation; the reduced Hill bridge is not an OpenSim human model | | MyoSuite | Can activation-driven muscles and contact reproduce the preparation and reversal effects in forward simulation? | Repository capability and proposed activation-driven validation; no human strategy has been learned or inferred |",
       "text_sha256": "2a8c341e6021a6b6c7e82bd314ea476f228fc215c44775d184072b159cdd8e1c",
       "citation_keys": [],
@@ -12550,8 +12551,8 @@
     {
       "candidate_id": "PD-CAND-6a9b4dc39874ed98",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch07b_frames_biology_engines.qmd",
-      "line_start": 195,
-      "line_end": 199,
+      "line_start": 197,
+      "line_end": 201,
       "text": "This division of labor also prevents false independence. MuJoCo and MyoSuite share important computational structure; OpenSim and the reduced bridge may share Hill-type assumptions; and every engine can inherit the same geometry, inertial, contact, or measurement error. Agreement is valuable only after the shared and differing assumptions are listed.",
       "text_sha256": "3c4ee524950b418467a97ec20b9b97939b33ffc5ce83dc0a712faa8012ea9b00",
       "citation_keys": [],
@@ -12564,8 +12565,8 @@
     {
       "candidate_id": "PD-CAND-f7a5760d13b4c3d5",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch07b_frames_biology_engines.qmd",
-      "line_start": 203,
-      "line_end": 210,
+      "line_start": 205,
+      "line_end": 212,
       "text": "The repository's five canonical-pose adapters were exercised on one nonzero pelvis pose and four nonzero joint rotations. Each adapter encoded the same state into its native coordinate vector and decoded it back to the canonical representation. The native coordinate-vector sizes were 31 for MuJoCo, Pinocchio, and MyoSuite, 36 for Drake, and 30 for OpenSim. Across all five round trips, the maximum translation error was zero, the maximum rotation error was $3.56\\times10^{-15}$ degrees, and the maximum joint-coordinate error was $8.89\\times10^{-16}$ degrees.",
       "text_sha256": "53a3256353ed64b7104f5856ccd14ae1ca5bc54b403b518361332f8035e45050",
       "citation_keys": [],
@@ -12580,8 +12581,8 @@
     {
       "candidate_id": "PD-CAND-60527bcf8c5c83d3",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch07b_frames_biology_engines.qmd",
-      "line_start": 212,
-      "line_end": 216,
+      "line_start": 214,
+      "line_end": 218,
       "text": "This is an executed **representation** check. It verifies the adapter maps used to state a common pose; it does not execute five dynamics engines, compare contact solutions, validate anatomical coordinates, or establish trajectory parity. Those stronger claims require the common observables in the table plus model hashes, event definitions, integrator settings, and residual reports.",
       "text_sha256": "d91a10b495830060dca804c5b061923cec6c20247c81d6d44a686be449048dfa",
       "citation_keys": [],
@@ -12597,8 +12598,8 @@
     {
       "candidate_id": "PD-CAND-9c5da96d4d8a7e18",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch07b_frames_biology_engines.qmd",
-      "line_start": 220,
-      "line_end": 220,
+      "line_start": 222,
+      "line_end": 222,
       "text": "This chapter is the application layer for several companion explanations:",
       "text_sha256": "a8d7c22b49b8fd7ed752666e2f35dd618850a05cc496460293a187abf9036fc3",
       "citation_keys": [],
@@ -12611,8 +12612,8 @@
     {
       "candidate_id": "PD-CAND-0f41f7acb463e45f",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch07b_frames_biology_engines.qmd",
-      "line_start": 222,
-      "line_end": 237,
+      "line_start": 224,
+      "line_end": 239,
       "text": "- [The Language of Motion](https://affinedrift.com/articles/The_Physics_of_Golf/quarto/ch02_language_of_motion.html) introduces coordinates and velocities; - [Forces and Torques](https://affinedrift.com/articles/The_Physics_of_Golf/quarto/ch04_forces_and_torques.html) develops moments and power; - [The Affine Structure](https://affinedrift.com/articles/The_Physics_of_Golf/quarto/ch05_affine_structure.html) explains drift and control without assigning intent to either term; - [Constraint Forces](https://affinedrift.com/articles/The_Physics_of_Golf/quarto/ch07_constraint_forces.html) and [Parallel Mechanisms](https://affinedrift.com/articles/The_Physics_of_Golf/quarto/ch09_parallel_mechanisms.html) develop reaction and loop-closure mechanics; - [The Triple Pendulum](https://affinedrift.com/articles/The_Physics_of_Golf/quarto/ch08_triple_pendulum.html) adds the wrist coordinate; - [Passive and Distributed Control](https://affinedrift.com/articles/The_Physics_of_Golf/quarto/ch27_passive_distributed_control.html) provides the biological-control context; and - [Induced Acceleration Analysis](https://affinedrift.com/articles/The_Physics_of_Golf/quarto/ch30b_induced_acceleration.html) shows how a modeled force or moment contributes to acceleration without claiming unique anatomical causation.",
       "text_sha256": "9fec3fbd884e9bf3b1894e7b0db50b1c51686f97b101cf38c628d1b7e6fc12ca",
       "citation_keys": [],
@@ -12629,8 +12630,8 @@
     {
       "candidate_id": "PD-CAND-edb47202887b71b1",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch07b_frames_biology_engines.qmd",
-      "line_start": 239,
-      "line_end": 242,
+      "line_start": 241,
+      "line_end": 244,
       "text": "The unifying AffineDrift point is precise: decompositions depend on the chosen state, inputs, constraints, and coordinates, while a correctly transported physical scalar such as instantaneous power does not. A useful decomposition must expose both its representation and its invariants.",
       "text_sha256": "7e3410d684cfadf01df1ac083692edbcf2525259bb41be725c01029ff1fc117a",
       "citation_keys": [],
@@ -12643,8 +12644,8 @@
     {
       "candidate_id": "PD-CAND-acdcaa2502d35951",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch07b_frames_biology_engines.qmd",
-      "line_start": 246,
-      "line_end": 246,
+      "line_start": 248,
+      "line_end": 248,
       "text": "The current repository makes the following extensions actionable now:",
       "text_sha256": "d8bd5ec033f64f4a86c77dc9dc4870ad29187fd0e651b835092e599657aabd5a",
       "citation_keys": [],
@@ -12657,8 +12658,8 @@
     {
       "candidate_id": "PD-CAND-861606966d0ba31c",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch07b_frames_biology_engines.qmd",
-      "line_start": 248,
-      "line_end": 262,
+      "line_start": 250,
+      "line_end": 264,
       "text": "1. map a common measured trajectory into the canonical pose contract and audit Jacobian, generalized moment, wrench, and power conventions in each available backend, extending the executed pose-only round trips to dynamic-state parity; 2. use OpenSim moment arms and muscle paths to replace the constant moment arms in @eq-muscle-moment-map, then compare feasible activation families rather than one optimizer-selected solution; 3. reproduce the same excitation histories in MyoSuite and test whether contact, activation, force, and joint-moment traces preserve the reduced prediction; 4. use Drake to optimize registered multi-objective trajectories over speed, face/path proxy, effort, tissue load, and robustness rather than speed alone; 5. retain MuJoCo and Pinocchio as forward-contact and rigid-body cross-checks, with common event definitions and power residuals; and 6. fit no biological parameter until synchronized bilateral grip wrenches, kinematics, shaft strain, EMG, and participant identity-safe holdouts are available.",
       "text_sha256": "8cfc3b20ce7fa2631617d17fc5401b078b8d829bcd68f432ae30f2ee7311b39b",
       "citation_keys": [],
@@ -12671,18 +12672,19 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-f601352e681a1549",
+      "candidate_id": "PD-CAND-a6091a30743597bc",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch07b_frames_biology_engines.qmd",
-      "line_start": 264,
-      "line_end": 269,
-      "text": "The reduced prediction is refuted if its matched moments do not close, its coordinate transformations alter power, the preparation effect disappears under plausible parameter and timestep variation, or measured participants do not exhibit the predicted force/stiffness history. Backend disagreement should first be classified as a convention, numerical, structural, parameter, or data discrepancy; it is not automatically biological evidence.",
-      "text_sha256": "d15aad2736f5a87c38b62827c0e35b9b0d4a3bf9b60e83e47a0916e9052baaed",
+      "line_start": 266,
+      "line_end": 274,
+      "text": "The reduced prediction is refuted if its matched moments do not close, its coordinate transformations alter power, or the sign of the preparation effect disappears under a preregistered parameter and timestep domain. Its magnitude must not be used quantitatively until a convergence study and parameter uncertainty analysis establish a stable interval. A proposed human mechanism is separately refuted if measured participants do not exhibit its preregistered force, stiffness, and activation history. Backend disagreement should first be classified as a convention, numerical, structural, parameter, or data discrepancy; it is not automatically biological evidence.",
+      "text_sha256": "e7b0a8387d6b2d7cd382bb3257833004ee198cbdacb145cebcbb04488e3d6c79",
       "citation_keys": [],
       "has_numeric_content": false,
       "has_assertive_language": true,
-      "priority_score": 2,
+      "priority_score": 5,
       "triage_flags": [
-        "assertive_language"
+        "assertive_language",
+        "causal_or_generalizing_language"
       ],
       "review_state": "unadjudicated"
     },

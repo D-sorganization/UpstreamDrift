@@ -100,6 +100,21 @@ governed private authority:
 - calibration, filtering, event, missingness, and quality-control records;
 - frozen participant split and analysis-release authorization.
 
+### Current Acquisition Boundary
+
+As recorded in UpstreamDrift
+[#8556](https://github.com/D-sorganization/UpstreamDrift/issues/8556), the
+participant-held-out registration, null test, adverse-load test, required
+sensitivities, and fail-closed validators are implemented. The local inventory
+and public-data search did not identify a governed participant-level deposit
+that contains the required synchronized bilateral six-axis grip wrenches with
+the remaining modalities and provenance. Instrumented-grip publications by
+[Choi and Park](https://mdpi-res.com/d_attachment/sensors/sensors-20-03672/article_deploy/sensors-20-03672-v2.pdf)
+and [Koike](https://ojs.ub.uni-konstanz.de/cpa/article/download/6828/6125)
+are acquisition references, not qualifying data authorities. Therefore #8556
+remains open and all human outcomes remain untested. Synthetic traces, digitized
+publication figures, and aggregate paper results must not be substituted.
+
 The executable validator rejects identity-bearing records, unit drift, missing
 hashes, inadequate sampling, excessive synchronization uncertainty, participant
 split overlap, and a public-repository data authority.

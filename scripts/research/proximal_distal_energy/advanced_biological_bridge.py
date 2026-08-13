@@ -68,6 +68,16 @@ class BiologicalProgramStudy:
 
 
 @dataclass(frozen=True)
+class BiologicalTimestepAudit:
+    """Step-refinement record for the reduced preparation comparison."""
+
+    step_s: Array
+    persistent_error_impulse_nms: Array
+    reversal_error_impulse_nms: Array
+    reversal_minus_persistent_nms: Array
+
+
+@dataclass(frozen=True)
 class _MuscleChannel:
     name: str
     positive: HillMuscleModel
@@ -408,4 +418,26 @@ def simulate_biological_programs(*, step_s: float = 0.0002) -> BiologicalProgram
             "series-elastic consequences; they do not identify scapular muscles, "
             "neural strategy, tissue parameters, or a preferred human technique."
         ),
+    )
+
+
+def build_biological_timestep_audit() -> BiologicalTimestepAudit:
+    """Evaluate whether the small program difference survives step refinement."""
+
+    steps = np.array([0.001, 0.0005, 0.0002, 0.0001, 0.00005])
+    persistent = np.zeros_like(steps)
+    reversal = np.zeros_like(steps)
+    for index, step in enumerate(steps):
+        study = simulate_biological_programs(step_s=float(step))
+        persistent[index] = study.programs[
+            "persistent_direction"
+        ].post_transition_error_impulse_nms
+        reversal[index] = study.programs[
+            "complete_role_reversal"
+        ].post_transition_error_impulse_nms
+    return BiologicalTimestepAudit(
+        step_s=steps,
+        persistent_error_impulse_nms=persistent,
+        reversal_error_impulse_nms=reversal,
+        reversal_minus_persistent_nms=reversal - persistent,
     )

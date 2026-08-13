@@ -91,6 +91,29 @@ retention of misses and failures as scientific outcomes, adequacy and method
 assumption reporting, matched desktop/web behavior, an immutable UpstreamDrift
 pin, and cross-repository parity fixtures.
 
+The torso-velocity side study is complete: UpstreamDrift
+[#8555](https://github.com/D-sorganization/UpstreamDrift/issues/8555) merged
+through PR [#8577](https://github.com/D-sorganization/UpstreamDrift/pull/8577)
+at commit `967c40f54cc03f8cae89cde09268d62771d220fe`, which remains an
+ancestor of remote `main`. It found no universal relation among torso rate,
+delivery speed, and braking work; matching-rule choice and nonmonotonic
+torso/arm/wrist killswitch effects are retained as adverse evidence.
+
+Human validation [#8556](https://github.com/D-sorganization/UpstreamDrift/issues/8556)
+is intentionally open at an external acquisition boundary. Its
+participant-held-out registration, null and adverse-load tests, sensitivities,
+and fail-closed intake controls are implemented, but no qualifying governed
+participant dataset with synchronized bilateral six-axis grip wrenches was
+found in the workspace or public-data search. Published instrumented-grip
+studies such as [Choi and Park](https://mdpi-res.com/d_attachment/sensors/sensors-20-03672/article_deploy/sensors-20-03672-v2.pdf)
+and [Koike](https://ojs.ub.uni-konstanz.de/cpa/article/download/6828/6125)
+inform acquisition design but are not participant-level deposits satisfying
+the frozen contract. Synthetic traces and paper-level summary curves are
+prohibited substitutes. The companion GUI is tracked by Tools
+[#4430](https://github.com/D-sorganization/Tools/issues/4430), stacked after
+runner-pending PR [#4411](https://github.com/D-sorganization/Tools/pull/4411);
+unchanged CI must not be redundantly rerun.
+
 ## Research Collection Review
 
 The Biomechanics and Nonlinear Control NotebookLM collections are reviewed for
@@ -115,8 +138,11 @@ because the local profile failed network token validation.
    independent-engine comparison, and discrepancy report.
 6. **Neuromuscular and Control Models:** activation, redundancy,
    identifiability, robust control, and held-out simulation evidence.
-7. **Human Falsification:** governed data, participant holdout, preregistered
-   tests, and transparent null or contradictory results.
+7. **Human Falsification:** acquire governed synchronized bilateral six-axis
+   grip-wrench data for #8556, freeze the participant holdout before outcomes,
+   run preregistered null/adverse tests, and retain null or contradictory
+   results. Literature-only evidence and synthetic dry runs do not satisfy this
+   milestone.
 8. **Open Release:** tutorials, reviewer surfaces, qualified manifests,
    protected merges, visual QA, free artifacts, and archival persistent ID.
 

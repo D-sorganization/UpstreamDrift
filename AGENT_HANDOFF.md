@@ -6,6 +6,26 @@ Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
 
+- **#8557 side-task integration and frame/biological audit** — torso-velocity
+  issue [#8555](https://github.com/D-sorganization/UpstreamDrift/issues/8555)
+  is complete through PR #8577; merge commit
+  `967c40f54cc03f8cae89cde09268d62771d220fe` remains an ancestor of remote
+  `main`. Human validation #8556 is legitimately open: its participant-held-out
+  registration, null/adverse tests, sensitivities, and fail-closed controls are
+  implemented, but no governed participant dataset with synchronized bilateral
+  six-axis grip wrenches was found. Literature-only and synthetic evidence are
+  prohibited substitutes. Tools #4430 owns the companion GUI and is stacked
+  after runner-pending PR #4411. The active twentieth claim-audit slice is
+  `research/8557-frames-biology-audit`; it is adding timestep refinement to the
+  reduced preparation-history comparison because the sign persists but its
+  sub-percent magnitude is not converged. Both the frame/biological and human
+  protocol chapters are now fully adjudicated as PD-CLAIM-194 through
+  PD-CLAIM-199. Current authority: 920 candidates, 684 reviewed, 199 atomic
+  claims, and 236 unadjudicated. Twenty-four focused tests pass. The regenerated
+  202-page PDF is 1,399,967 bytes with 186 URI links and 235 outline entries;
+  affected experimental and biological pages were visually inspected. The
+  qualified release contains 372 artifacts with zero mismatches.
+
 - **#8557 spatial forward-contact audit** — based on spatial common-state PR
   #8580, protected-squash-merged at exact remote main
   `f23e8f614b563647deb7cca58da6acabef988eb3`.

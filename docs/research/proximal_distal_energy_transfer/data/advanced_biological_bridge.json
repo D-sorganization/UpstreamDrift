@@ -2,13 +2,22 @@
   "schema_version": "1.0.0",
   "epic": "https://github.com/D-sorganization/UpstreamDrift/issues/8505",
   "provenance": {
-    "git_sha": "2e8ebaef8d",
+    "git_sha": "df8a35d2d3",
     "shared_mechanics": "InteractionSample",
-    "shared_biological_models": ["HillMuscleModel", "ActivationDynamics"]
+    "shared_biological_models": [
+      "HillMuscleModel",
+      "ActivationDynamics"
+    ]
   },
   "frame_invariance": {
-    "wrench_order": ["force_xyz_n", "couple_xyz_nm"],
-    "twist_order": ["linear_xyz_m_s", "angular_xyz_rad_s"],
+    "wrench_order": [
+      "force_xyz_n",
+      "couple_xyz_nm"
+    ],
+    "twist_order": [
+      "linear_xyz_m_s",
+      "angular_xyz_rad_s"
+    ],
     "rotation_convention": "active proper rotation, right-handed Cartesian axes",
     "point_transport_convention": "same physical wrench and rigid-body twist",
     "maximum_rotation_power_residual_w": 1.1368683772161603e-13,
@@ -61,8 +70,14 @@
     "target_torque_nm": 10.0,
     "sample_count": 41,
     "maximum_torque_closure_error_nm": 1.7763568394002505e-15,
-    "stiffness_proxy_range_nm_rad": [3.3333333333333335, 23.333333333333336],
-    "series_elastic_energy_range_j": [0.20833333333333334, 5.208333333333333]
+    "stiffness_proxy_range_nm_rad": [
+      3.3333333333333335,
+      23.333333333333336
+    ],
+    "series_elastic_energy_range_j": [
+      0.20833333333333334,
+      5.208333333333333
+    ]
   },
   "biological_programs": {
     "persistent_direction": {
@@ -80,21 +95,69 @@
       "maximum_series_elastic_energy_j": 1.025210561065701
     }
   },
+  "biological_timestep_audit": {
+    "step_s": [
+      0.001,
+      0.0005,
+      0.0002,
+      0.0001,
+      5e-05
+    ],
+    "persistent_error_impulse_nms": [
+      0.08181640996992458,
+      0.08691878248741053,
+      0.08998329105737461,
+      0.09100471697260124,
+      0.09151535987766449
+    ],
+    "reversal_error_impulse_nms": [
+      0.08458606735817586,
+      0.08847182806152695,
+      0.0908399207197984,
+      0.09163278684144466,
+      0.09202975947743965
+    ],
+    "reversal_minus_persistent_nms": [
+      0.002769657388251287,
+      0.001553045574116424,
+      0.000856629662423794,
+      0.0006280698688434228,
+      0.0005143995997751588
+    ],
+    "direction_preserved": true,
+    "published_step_relative_difference": 0.009430101387539995,
+    "numerical_boundary": "The direction is preserved over the declared step grid, but the difference magnitude is not step-converged and is not a robust physiological or performance effect."
+  },
   "engine_ladder": {
     "mujoco": {
       "status": "executed_reduced_forward_contact_in_prior_tier",
       "role": "contact-rich forward dynamics and achieved contact wrenches",
-      "required_common_observables": ["q", "v", "contact_wrench", "power"]
+      "required_common_observables": [
+        "q",
+        "v",
+        "contact_wrench",
+        "power"
+      ]
     },
     "pinocchio": {
       "status": "executed_reduced_forward_contact_in_prior_tier",
       "role": "fast rigid-body Jacobians, RNEA, ABA, and sensitivity checks",
-      "required_common_observables": ["q", "v", "tau", "jacobian"]
+      "required_common_observables": [
+        "q",
+        "v",
+        "tau",
+        "jacobian"
+      ]
     },
     "drake": {
       "status": "repository_capability_and_proposed_advanced_validation",
       "role": "constrained optimization, trajectory design, and contact alternatives",
-      "required_common_observables": ["q", "v", "u", "constraint_wrench"]
+      "required_common_observables": [
+        "q",
+        "v",
+        "u",
+        "constraint_wrench"
+      ]
     },
     "opensim": {
       "status": "repository_capability_and_proposed_subject_scaled_validation",

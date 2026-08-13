@@ -7,6 +7,7 @@ import pytest
 
 from scripts.research.proximal_distal_energy.advanced_biological_bridge import (
     build_frame_invariance_audit,
+    build_biological_timestep_audit,
     build_pose_adapter_audit,
     build_redundancy_surface,
     simulate_biological_programs,
@@ -60,6 +61,19 @@ def test_persistent_direction_has_smaller_transition_error_for_declared_model() 
     assert persistent.minimum_tendon_force_n > 0.0
     assert reversal.minimum_tendon_force_n >= 0.0
     assert study.claim_boundary.startswith("Reduced Hill-type")
+
+
+def test_program_difference_is_direction_stable_but_magnitude_sensitive() -> None:
+    audit = build_biological_timestep_audit()
+
+    assert np.all(audit.reversal_minus_persistent_nms > 0.0)
+    assert audit.reversal_minus_persistent_nms[0] > (
+        5.0 * audit.reversal_minus_persistent_nms[-1]
+    )
+    assert (
+        audit.reversal_minus_persistent_nms[2] / (audit.reversal_error_impulse_nms[2])
+        < 0.01
+    )
 
 
 def test_invalid_bridge_inputs_fail_closed() -> None:

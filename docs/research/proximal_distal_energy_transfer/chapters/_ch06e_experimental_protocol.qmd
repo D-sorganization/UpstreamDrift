@@ -116,8 +116,16 @@ units, hashes, sampling, synchronization, split uniqueness, and absence of
 identity fields. Deliberate identity, unit, hash, synchronization, split, and
 governance violations fail closed in tests.
 
-No governed human dataset was available in this phase. Accordingly, EXP-H1
-through EXP-H4 remain `untested_no_governed_human_data`. Evaluation begins only
+No governed human dataset was available in this phase or found in the
+subsequent workspace and public-data search recorded in
+[UpstreamDrift #8556](https://github.com/D-sorganization/UpstreamDrift/issues/8556).
+Published instrumented-grip studies by
+[Choi and Park](https://mdpi-res.com/d_attachment/sensors/sensors-20-03672/article_deploy/sensors-20-03672-v2.pdf)
+and [Koike](https://ojs.ub.uni-konstanz.de/cpa/article/download/6828/6125)
+do not provide a governed participant-level deposit satisfying the synchronized
+bilateral six-axis grip-wrench contract. Accordingly, EXP-H1 through EXP-H6
+remain `untested_no_governed_human_data`. Synthetic traces, digitized figures,
+and publication-level aggregates are not substitutes. Evaluation begins only
 after an ethics/oversight reference, consent and reuse basis, private data
 authority, synchronized streams, calibration records, frozen participant split,
 and analysis-release authorization pass the same validator. The protocol

@@ -2879,3 +2879,20 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Cross-engine trajectory/wrench/orientation/energy gates, geometry controls,
   timestep refinement, platform boundaries, and nonhuman limitations shall be
   explicit and executable.
+
+### F-8557.15: Frame and Reduced Biological Claim Audit
+
+- Reference-frame, reference-point, and Jacobian virtual-work claims shall be
+  stated as numerical identities and shall not imply measured accuracy.
+- Coordinate-adapter round trips shall be labeled representation checks rather
+  than multi-engine dynamics validation.
+- Muscle redundancy, stiffness, and elastic-energy results shall remain at the
+  declared reduced Hill-type tier and shall not identify a unique anatomy or
+  preferred technique.
+- Any preparation-history advantage shall disclose its relative magnitude and
+  timestep sensitivity; a nonconverged difference shall not support a
+  quantitative physiological or performance claim.
+- Human validation shall remain open and untested until a governed
+  participant-level dataset satisfies the frozen synchronized bilateral
+  six-axis grip-wrench acquisition contract; synthetic traces, digitized
+  figures, and publication aggregates shall fail as substitutes.
