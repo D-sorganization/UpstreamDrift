@@ -50,6 +50,41 @@ def _source_digest(paths: list[Path], root: Path) -> str:
     return digest.hexdigest()
 
 
+def _front_matter_abstract(path: Path) -> list[dict[str, Any]]:
+    """Extract Quarto's literal-block abstract while ignoring other metadata."""
+    lines = path.read_text(encoding="utf-8").splitlines()
+    if not lines or lines[0].strip() != "---":
+        return []
+    abstract_lines: list[str] = []
+    start_line = 0
+    end_line = 0
+    in_abstract = False
+    for index, line in enumerate(lines[1:], start=2):
+        if not in_abstract:
+            if re.fullmatch(r"abstract:\s*[|>]\s*", line):
+                in_abstract = True
+            elif line.strip() == "---":
+                break
+            continue
+        if line and not line[0].isspace():
+            break
+        if not line.strip():
+            continue
+        if start_line == 0:
+            start_line = index
+        end_line = index
+        abstract_lines.append(line.strip())
+    if not abstract_lines:
+        return []
+    return [
+        {
+            "text": _normalise_text(" ".join(abstract_lines)),
+            "line_start": start_line,
+            "line_end": end_line,
+        }
+    ]
+
+
 def _paragraphs(path: Path, *, skip_front_matter: bool) -> list[dict[str, Any]]:
     lines = path.read_text(encoding="utf-8").splitlines()
     paragraphs: list[dict[str, Any]] = []
@@ -99,6 +134,8 @@ def _paragraphs(path: Path, *, skip_front_matter: bool) -> list[dict[str, Any]]:
             start_line = index
         buffer.append(stripped)
     flush(len(lines))
+    if skip_front_matter:
+        return _front_matter_abstract(path) + paragraphs
     return paragraphs
 
 
