@@ -9,8 +9,11 @@ Update this file with every PR and every push to main.
 - **#8557 spatial forward-contact audit** — based on spatial common-state PR
   #8580, protected-squash-merged at exact remote main
   `f23e8f614b563647deb7cca58da6acabef988eb3`.
-  Branch `research/8557-spatial-forward-contact-audit` is the active nineteenth
-  fail-closed slice. WSL-native MuJoCo 3.8.0 and Pinocchio 3.8.0 regenerated
+  Ready PR [#8581](https://github.com/D-sorganization/UpstreamDrift/pull/8581)
+  from branch `research/8557-spatial-forward-contact-audit` is the active
+  nineteenth fail-closed slice at implementation commit
+  `c5328bea5cd328325b179bf8d230b91467437dc7`. WSL-native MuJoCo 3.8.0 and
+  Pinocchio 3.8.0 regenerated
   the complete evidence and six focused tests pass. All 40 chapter candidates
   are reviewed as PD-CLAIM-184 through PD-CLAIM-193, with the public release
   claim PD-CLAIM-005 remapped to the current passage. The chapter now states
