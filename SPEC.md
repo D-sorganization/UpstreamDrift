@@ -39,8 +39,8 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.511 |
-| **Last Spec Update** | 2026-08-12 |
+| **Spec Version** | 1.0.512 |
+| **Last Spec Update** | 2026-08-13 |
 
 ## 2. Purpose & Mission
 
@@ -244,6 +244,19 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   reported strategy ordering is reproduced for the defined cases. These
   simplified-model results are not a universal effect estimate or a coaching
   prescription.
+- **2026-08-11** - Added the first bounded #4262 immutable Tools-provider
+  source contract. Launcher entries with `provider: tools` now resolve only
+  from the repository-pinned `vendor/ud-tools` gitlink, before generic sibling
+  and installed-package providers; the five Tools launchers no longer serialize
+  `../Tools` source roots. Authority requires the already-declared exact
+  `ff4240217005e1415ca409fd124e50b64ee642d2` gitlink, matching clean checkout
+  HEAD, current-superproject attachment, and a non-reparse vendor directory.
+  Every resolved artifact, working directory, fallback, and Python path must
+  remain under that authority after canonicalization. Missing, uninitialized,
+  dirty, replaced, mismatched, or escaping sources report
+  `provider_unavailable` and never fall back to mutable sibling/package input.
+  Generic sibling-provider resolution is unchanged. This slice does not change
+  the gitlink pin, accept an unvalidated `TOOLS_REPO_PATH`, or complete #4262.
 - (spec-exempt: security fix) Fixed Command Injection in `pandas.DataFrame.query()` inside `rust_engine.py` (both `data_processor` and `data_processor_io`) by explicitly validating user expressions using an AST-based validator (`validate_pandas_formula`). This eliminates an arbitrary code execution vulnerability.
 
 - **2026-08-05** - Retargeted #8345 P1's 3D putting workflow to `main`
@@ -2152,6 +2165,11 @@ blocks Python package publication on the built-wheel smoke matrix.
 | 2026-08-12 | 1.0.507 | Added the advanced proximal--distal frame, biology, canonical-pose, cross-engine, visual, terminology, and falsification bridge tracked by epic #8505. |
 | 2026-08-11 | 1.0.506 | Decomposed launcher UI setup, settings dialog, Simscape 3D viewer, and launcher Sidekick readiness into modular helpers. |
 | 2026-08-11 | 1.0.504 | Added a coupled forward three-mode shaft experiment plus an exact same-state arm--wrist allocation and phenomenological preload/role-reversal study. |
+| 2026-08-11 | 1.0.500 | Decomposed the launcher shared-Tools freshness probe behind a focused, dependency-injected local-Git boundary while preserving `LauncherDiagnostics.check_shared_tools_freshness()` and its result-recording behavior. Reduced `launcher_diagnostics.py` from 1,307 to 1,196 lines and removed its expired module-size exception, active file-size exception, and obsolete long-function exception without renewal or policy widening. The cited #5922 maintainability issue is closed, cited #7341/#7342 are closed and concern different defects, and #8472 is chat-dock-specific, so this slice deliberately does not claim issue completion; accurate open tracking remains a publication prerequisite. Three expired exceptions and four oversized production modules remain explicit module-gate blockers. |
+| 2026-08-11 | 1.0.499 | Completed the local UpstreamDrift portion of #8472's chat-dock compatibility-shell decomposition: moved WebSocket dispatch, terminal-mode mechanics, streaming-state initialization, and collapsed-view mutation into focused `chat._qt.runtime` helpers; retained every historical `ChatDockWidget` method as a thin delegate; and reduced `_chat_dock_widget_qt.py` from 1,490 to 1,150 lines. Removed the chat dock from both file-size exception ledgers without renewing or widening either policy. Focused delegation, terminal-payload, chat behavior, module-truthfulness, lint, type, architecture, and file-size checks cover the new boundaries. Canonical Tools synchronization remains required before refreshing the cross-repository drift hash; that sentinel already fails on the parent for the dock and `models.py`. Four expired exceptions and five oversized production modules remain explicit module-gate blockers. |
+| 2026-08-11 | 1.0.498 | Advanced #8472 without renewing or widening module-size exceptions: consolidated the duplicated stateless slope-gravity, roll-direction, and contact-normal calculations in `src/shared/python/physics/terrain_representation.py` onto the canonical split terrain implementation, reducing the legacy module below the 1,200-line hard limit while preserving its distinct boundary and serialization contracts. Removed its expired size exception, tightened its architecture-debt ratchet from 1,250 to 1,200 lines, and corrected the chat-dock exception's stale 1,989-line description to its measured 1,490 lines without changing its expiry. Identity and numerical regressions preserve the shared helper API. Five expired exceptions and six oversized production modules remain explicit release blockers. |
+| 2026-08-11 | 1.0.497 | Repaired the canonical-core React status shell so mode changes ignore stale responses, retry transitions remain explicit, and runtime payload parsing lives outside the Fast Refresh component boundary; restored the engine-store unload tests to their intended mocked-backend boundary; refreshed the lockfile to patched transitive `brace-expansion`, `nanoid`, and `undici` releases; and corrected the durable-task-manager history after confirming that #8322 removed that SQLite implementation and its tests while the current `src/api/task_manager.py` remains process-local. |
+| 2026-08-11 | 1.0.497 | Added the bounded #4262 immutable Tools-provider resolution slice: all five Tools launchers select the exact clean `vendor/ud-tools` gitlink at declared SHA `ff4240217005e1415ca409fd124e50b64ee642d2`, take precedence over conflicting sibling/package metadata, reject dirty/replaced/mismatched authority and canonical path escapes as `provider_unavailable`, preserve generic sibling-provider behavior, and omit mutable `../Tools` roots from serialized manifests; gitlink pin updates and identity-validated development overrides remain open. |
 | 2026-08-10 | 1.0.496 | Added #8458 hand-path drift/control attribution across forward double-pendulum and one-arm cases plus a prescribed two-arm closed-loop sweep; exported deterministic force, impulse, power, work, joint/time-window, common/differential-mode, sensitivity, and closure evidence; bounded the late residual-couple preview result without claiming muscle preactivation or human performance; extended lossless object-stream PDF compaction to preserve the 106-page, 110-link, 122-outline publication below the size guard; and restored the all-files size gate with the final owned #8472 chat-dock exception through 2026-08-31. |
 | 2026-08-10 | 1.0.495 | Added a reproducible lossless article-PDF compaction command that fails closed on page, URI-link, outline, or size drift; reduced the 90-page publication artifact below the repository's 1 MiB PDF guard; and recorded the protected #8456 higher-order merge in the handoff. |
 | 2026-08-10 | 1.0.494 | Added a reference- and frame-explicit interaction-wrench schema; exact moment/velocity transport and proper-rotation power contracts; prescribed mobile-hub inverse-dynamics comparisons; planar two-hand closed-loop rank/nullspace diagnostics; a fail-closed model-discrepancy record; seven reproducible figures; and a higher-order scientific chapter that explicitly leaves full-body cross-engine dynamics unexecuted. |
@@ -2619,6 +2637,8 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 
 ### Performance Improvements
 
+- Optimize trajectory evaluation constraints in drake optimization by replacing `np.sum(arr)` with `arr.sum()` and skipping numpy array dispatch overhead (spec-exempt: micro-optimization).
+- Replaced `np.sum(weights)` with `weights.sum()` in `keypoint_offsets.py` to bypass array conversion checks and improve execution speed. (spec-exempt: micro-optimization)
 - Consolidated focused ndarray reductions and small-vector norm calculations in
   recurrence analysis, terrain and pendulum geometry, screw-theory transforms,
   trajectory end-effector speed, clubhead diagnostics, and convex-distance
@@ -2752,3 +2772,4 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   contact, event-alignment, and uncertainty gates pass.
 - `spec-exempt` (#8483): Moved Sidekick readiness monitoring, degradation reporting, and workspace seeding from the main launcher facade into the existing launcher-owned `SidekickSidebarManager`.
 - (spec-exempt: security fix) Fixed user enumeration via timing attack in `/login` endpoint by ensuring a dummy password verification is performed even if the user is not found, to normalize response time.
+- (spec-exempt: micro-optimization) Replaced `np.sum` and `np.mean` calls with `np.vdot` and `np.einsum` to optimize array reductions and avoid temporary allocations.

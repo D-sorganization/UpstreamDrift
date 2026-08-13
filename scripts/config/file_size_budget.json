@@ -7,12 +7,6 @@
       "owner": "@dieterolson @D-sorganization/security-reviewers",
       "reason": "Issue #5922 temporary exception while the URDF campaign script is split by workflow domain.",
       "expires_on": "2026-10-31"
-    },
-    {
-      "path": "src/shared/python/physics/terrain_representation.py",
-      "owner": "@physics-core",
-      "reason": "Terrain representation at 1253 lines combines mesh, elevation, and surface-material models. Split into domain submodules planned, tracked in issue #2456.",
-      "expires_on": "2026-12-31"
     }
   ]
 }

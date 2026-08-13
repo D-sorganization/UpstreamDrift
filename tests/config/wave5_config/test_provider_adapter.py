@@ -124,6 +124,19 @@ class TestBuildProviderTile:
             tile = _build_provider_tile(model)
         assert tile.status == "provider_ready"
 
+    def test_missing_tools_gitlink_marks_provider_unavailable(self, tmp_path):
+        meta = LauncherPresentationMetadata(
+            category="tool", logo="x.svg", status="provider_ready"
+        )
+        model = _make_model(launcher=meta, provider="tools")
+        with patch(
+            "src.config.launcher_manifest_loader.is_engine_runtime_available",
+            return_value=True,
+        ):
+            tile = _build_provider_tile(model, repo_root=tmp_path)
+        assert tile.status == "provider_unavailable"
+        assert tile.source_root is None
+
     def test_runtime_unavailable_marks_status(self):
         meta = LauncherPresentationMetadata(
             category="physics_engine", logo="drake.svg", status="provider_ready"
