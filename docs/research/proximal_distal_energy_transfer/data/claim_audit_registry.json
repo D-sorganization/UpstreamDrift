@@ -2,14 +2,14 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "22cc41f39b055ff5d9c2696f73ea87181e643884fc6e256dc9483bf2320caf86",
+    "source_digest": "1ce1be06a9c0b1c89f5b8349743f1f2a148a2e24b84331fee0657090e93b170b",
     "baseline_commit": "13ea6a69585a42dc1db4b3959440ed95787c9779"
   },
   "audit_scope": {
     "completion_status": "in_progress",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "Stable claim identity, cross-platform source digests, complete post-equation narrative parsing, and thirteen high-risk evidence slices. Chapters 2 through 5, both counterfactual chapters, the proximal-velocity chapter, and the archived two-hand wrench chapter are fully adjudicated. The complete 895-candidate paper audit remains in progress; 357 unique candidates are reviewed and 538 remain unadjudicated."
+    "current_scope": "Stable claim identity, cross-platform source digests, complete post-equation narrative parsing, and fourteen high-risk evidence slices. Chapters 2 through 5, both counterfactual chapters, the proximal-velocity chapter, the archived two-hand wrench chapter, and the common-observable model-ladder chapter are fully adjudicated. The complete 895-candidate paper audit remains in progress; 422 unique candidates are reviewed and 473 remain unadjudicated."
   },
   "dependencies": [
     {
@@ -3034,6 +3034,526 @@
       "disposition": "material_claims_mapped",
       "claim_ids": ["PD-CLAIM-115"],
       "rationale": "Adjudicated within PD-CLAIM-115; the candidate is bounded to the archived model, declared mechanics, quantitative evidence, or explicit nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-edad8434b645d83c",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-119"],
+      "rationale": "Adjudicated within PD-CLAIM-119; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-06cccb946e16b242",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-119"],
+      "rationale": "Adjudicated within PD-CLAIM-119; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-ed74a3d21ca7ae45",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-119"],
+      "rationale": "Adjudicated within PD-CLAIM-119; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-693f835c7d4b028d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-119"],
+      "rationale": "Adjudicated within PD-CLAIM-119; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-2ba9318d3776b229",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-119"],
+      "rationale": "Adjudicated within PD-CLAIM-119; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-0aa70569f9a19e69",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-119"],
+      "rationale": "Adjudicated within PD-CLAIM-119; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-7438a157dea9d6ec",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-120"],
+      "rationale": "Adjudicated within PD-CLAIM-120; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-0df78b3a6d95f910",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-120"],
+      "rationale": "Adjudicated within PD-CLAIM-120; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-3efa698db01b55c8",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-120"],
+      "rationale": "Adjudicated within PD-CLAIM-120; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-4e9908e1ab186fdd",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-120"],
+      "rationale": "Adjudicated within PD-CLAIM-120; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-a6f0eddeb761a619",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-120"],
+      "rationale": "Adjudicated within PD-CLAIM-120; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-2a1067e54ef126ed",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-120"],
+      "rationale": "Adjudicated within PD-CLAIM-120; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-3c07a5dd8f20e268",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-120"],
+      "rationale": "Adjudicated within PD-CLAIM-120; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-3df309ad230f49cd",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-121"],
+      "rationale": "Adjudicated within PD-CLAIM-121; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-b28ed2bfdeaa0795",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-121"],
+      "rationale": "Adjudicated within PD-CLAIM-121; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-d4cb30c4bb779872",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-121"],
+      "rationale": "Adjudicated within PD-CLAIM-121; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-3d9df4cbfb3412af",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-121"],
+      "rationale": "Adjudicated within PD-CLAIM-121; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-378a1b80408b3e1c",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-121"],
+      "rationale": "Adjudicated within PD-CLAIM-121; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-c7607e1e1bb06ccd",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-122"],
+      "rationale": "Adjudicated within PD-CLAIM-122; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-81577c494550e345",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-122"],
+      "rationale": "Adjudicated within PD-CLAIM-122; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-0260e93b3271d743",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-122"],
+      "rationale": "Adjudicated within PD-CLAIM-122; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-8c998ddb5f741e48",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-122"],
+      "rationale": "Adjudicated within PD-CLAIM-122; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-aff907a78f06acf4",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-122"],
+      "rationale": "Adjudicated within PD-CLAIM-122; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-f3f568935b96787c",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-123"],
+      "rationale": "Adjudicated within PD-CLAIM-123; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-edfa1e983d02bfee",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-123"],
+      "rationale": "Adjudicated within PD-CLAIM-123; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-27d9fdb71b063cb5",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-123"],
+      "rationale": "Adjudicated within PD-CLAIM-123; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-ce92139836375e60",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-124"],
+      "rationale": "Adjudicated within PD-CLAIM-124; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-a6d6bbb034ea2180",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-124"],
+      "rationale": "Adjudicated within PD-CLAIM-124; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-c88dbf33fa1abd41",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-124"],
+      "rationale": "Adjudicated within PD-CLAIM-124; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-85b8922f2d3f3ddd",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-124"],
+      "rationale": "Adjudicated within PD-CLAIM-124; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-99ca95acd9772a0e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-124"],
+      "rationale": "Adjudicated within PD-CLAIM-124; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-9a969c4c8cf8df25",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-124"],
+      "rationale": "Adjudicated within PD-CLAIM-124; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-18c9e36e85efbee0",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-124"],
+      "rationale": "Adjudicated within PD-CLAIM-124; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-f4a82ab248820709",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-124"],
+      "rationale": "Adjudicated within PD-CLAIM-124; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-a7d22442ef34be0d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-124"],
+      "rationale": "Adjudicated within PD-CLAIM-124; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-9c39a9fc064a2ceb",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-125"],
+      "rationale": "Adjudicated within PD-CLAIM-125; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-9a2e2e17f83f3942",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-125"],
+      "rationale": "Adjudicated within PD-CLAIM-125; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-c323816d66a20c62",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-125"],
+      "rationale": "Adjudicated within PD-CLAIM-125; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-ed27d6f212a155b8",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-125"],
+      "rationale": "Adjudicated within PD-CLAIM-125; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-392c76561362dad4",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-125"],
+      "rationale": "Adjudicated within PD-CLAIM-125; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-31e1c3eb264b6a21",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-126"],
+      "rationale": "Adjudicated within PD-CLAIM-126; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-a4132a67ac5f598e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-126"],
+      "rationale": "Adjudicated within PD-CLAIM-126; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-c3e175473e9d86c3",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-126"],
+      "rationale": "Adjudicated within PD-CLAIM-126; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-a344ad1d62814e69",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-126"],
+      "rationale": "Adjudicated within PD-CLAIM-126; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-64e3d4dfc5ee4bc3",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-127"],
+      "rationale": "Adjudicated within PD-CLAIM-127; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-07ddae289f7864df",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-127"],
+      "rationale": "Adjudicated within PD-CLAIM-127; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-acab20dfe1ad13f4",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-127"],
+      "rationale": "Adjudicated within PD-CLAIM-127; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-4b014ecc4e16a963",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-127"],
+      "rationale": "Adjudicated within PD-CLAIM-127; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-8be30b67be37e89f",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-128"],
+      "rationale": "Adjudicated within PD-CLAIM-128; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-c452c1575879a613",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-128"],
+      "rationale": "Adjudicated within PD-CLAIM-128; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-d200cb0a538c6e52",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-128"],
+      "rationale": "Adjudicated within PD-CLAIM-128; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-d2bfd72f6462a516",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-128"],
+      "rationale": "Adjudicated within PD-CLAIM-128; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-8bf12b71c4efb86a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-129"],
+      "rationale": "Adjudicated within PD-CLAIM-129; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-b0e62c807fd73735",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-129"],
+      "rationale": "Adjudicated within PD-CLAIM-129; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-d58be3baf619c6d9",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-129"],
+      "rationale": "Adjudicated within PD-CLAIM-129; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-33f82aa81931f49b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-130"],
+      "rationale": "Adjudicated within PD-CLAIM-130; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-b91f47da27c1513f",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-130"],
+      "rationale": "Adjudicated within PD-CLAIM-130; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-e6e35519ef68c092",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-130"],
+      "rationale": "Adjudicated within PD-CLAIM-130; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-0ec9e1a76323e3fb",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-130"],
+      "rationale": "Adjudicated within PD-CLAIM-130; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-c85668cbc78193f2",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-131"],
+      "rationale": "Adjudicated within PD-CLAIM-131; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-466532d22ba5a75b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-131"],
+      "rationale": "Adjudicated within PD-CLAIM-131; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-df8083efd975fe24",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-131"],
+      "rationale": "Adjudicated within PD-CLAIM-131; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-b9431c1dd8029d1e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-132"],
+      "rationale": "Adjudicated within PD-CLAIM-132; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-c154a0643c3bc5a2",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-132"],
+      "rationale": "Adjudicated within PD-CLAIM-132; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-23d01986b4ac7dc1",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-132"],
+      "rationale": "Adjudicated within PD-CLAIM-132; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
     }
@@ -7453,6 +7973,644 @@
       ],
       "falsifier": "Any listed falsifier occurs without correction, or prose promotes the internal reproduction to external validation.",
       "adjudication": "All reciprocal chapter candidates were reviewed against the executable evidence and narrowed where the evidence did not support the stronger reading.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-119",
+      "candidate_ids": [
+        "PD-CAND-edad8434b645d83c",
+        "PD-CAND-06cccb946e16b242",
+        "PD-CAND-ed74a3d21ca7ae45",
+        "PD-CAND-693f835c7d4b028d",
+        "PD-CAND-2ba9318d3776b229",
+        "PD-CAND-0aa70569f9a19e69"
+      ],
+      "statement": "The model program preserves a common reference-explicit wrench--twist record schema across branched tiers, not one shared trajectory or a serial one-factor ladder; each comparison declares changed mechanisms and execution status.",
+      "classification": "common_observable_branched_ladder_contract",
+      "published_status": "supported_by_schema_and_discrepancy_record",
+      "audit_status": "schema_fields_branch_membership_and_status_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:5",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:19",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:21",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:26",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:34",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:36"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_traces.npz",
+        "scripts/research/proximal_distal_energy/run_mechanism_ladder_study.py",
+        "scripts/research/proximal_distal_energy/mechanism_ladder.py",
+        "tests/research/test_mechanism_ladder_evidence.py",
+        "tests/research/test_mechanism_ladder.py"
+      ],
+      "model_domain": "Common observable definitions across planar, prescribed, spatial inverse, and reduced forward branches.",
+      "uncertainty_boundary": "Sharing an observable does not make model states, contacts, or structural assumptions equivalent.",
+      "competing_explanations": [
+        "silent observable redefinition",
+        "multiple simultaneous structural changes",
+        "serial-fidelity inference"
+      ],
+      "negative_controls": [
+        "explicit tier/status/capabilities",
+        "common record fields",
+        "articulated open tier"
+      ],
+      "falsifier": "A tier changes reference/frame/power definitions without declaration or the figure implies unrecorded capability inheritance.",
+      "adjudication": "All reciprocal chapter candidates were checked against executable evidence and narrowed where a branch, transform audit, or reduced model did not support the stronger reading.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-120",
+      "candidate_ids": [
+        "PD-CAND-7438a157dea9d6ec",
+        "PD-CAND-0df78b3a6d95f910",
+        "PD-CAND-3efa698db01b55c8",
+        "PD-CAND-4e9908e1ab186fdd",
+        "PD-CAND-a6f0eddeb761a619",
+        "PD-CAND-2a1067e54ef126ed",
+        "PD-CAND-3c07a5dd8f20e268"
+      ],
+      "statement": "Paired wrench and twist transport preserves power under reference change and proper rotation; 51 sampled rotations and a [0.2,-0.1,0.05] m translation close force norm, couple norm, rotation power, and transport power to 7.1e-15 N, 8.9e-16 N m, 2.4e-13 W, and 5.7e-14 W.",
+      "classification": "wrench_twist_frame_transport_identity",
+      "published_status": "analytical_identity_with_numerical_closure",
+      "audit_status": "equations_samples_residuals_and_semantic_limits_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:46",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:55",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:62",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:68",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:73",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:81",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:83"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_traces.npz",
+        "scripts/research/proximal_distal_energy/run_mechanism_ladder_study.py",
+        "scripts/research/proximal_distal_energy/mechanism_ladder.py",
+        "tests/research/test_mechanism_ladder_evidence.py",
+        "tests/research/test_mechanism_ladder.py"
+      ],
+      "model_domain": "Proper SO(3) rotations and rigid reference transport of the three-link planar trace embedded in 3-D.",
+      "uncertainty_boundary": "The audit does not validate out-of-plane dynamics, adapter metadata, improper reflections, or consistent semantic axis mislabeling.",
+      "competing_explanations": [
+        "unpaired moment transport",
+        "unpaired point velocity",
+        "semantic frame error"
+      ],
+      "negative_controls": [
+        "paired rotation",
+        "paired reference translation",
+        "norm and power residuals"
+      ],
+      "falsifier": "Paired transforms fail power invariance or the paper promotes the algebraic audit to 3-D swing or adapter validation.",
+      "adjudication": "All reciprocal chapter candidates were checked against executable evidence and narrowed where a branch, transform audit, or reduced model did not support the stronger reading.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-121",
+      "candidate_ids": [
+        "PD-CAND-3df309ad230f49cd",
+        "PD-CAND-b28ed2bfdeaa0795",
+        "PD-CAND-d4cb30c4bb779872",
+        "PD-CAND-3d9df4cbfb3412af",
+        "PD-CAND-378a1b80408b3e1c"
+      ],
+      "statement": "The three-coordinate arm--shaft--head surrogate adds a second interface; at the 0.427252 s interpolated delivery event the nearest 0.5 ms sample has 56.37 N force, 4.91 N m couple, 32.09 W force power, 74.60 W couple power, and 106.69 W total power using analytic state-based joint velocity.",
+      "classification": "three_link_interface_power_result",
+      "published_status": "supported_for_declared_surrogate_trace",
+      "audit_status": "event_sample_wrench_power_and_analytic_velocity_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:91",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:102",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:111",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:113",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:119"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_traces.npz",
+        "scripts/research/proximal_distal_energy/run_mechanism_ladder_study.py",
+        "scripts/research/proximal_distal_energy/mechanism_ladder.py",
+        "tests/research/test_mechanism_ladder_evidence.py",
+        "tests/research/test_mechanism_ladder.py"
+      ],
+      "model_domain": "One flexible-reference trace of the declared lumped three-link planar surrogate.",
+      "uncertainty_boundary": "Values are model outputs, not human ranges; the coordinate is shaft flex, not an independently actuated torso.",
+      "competing_explanations": [
+        "position-difference velocity",
+        "elastic storage",
+        "additional proximal actuation"
+      ],
+      "negative_controls": [
+        "analytic kinematics",
+        "0.0299 m/s gradient discrepancy retained",
+        "full wrench-twist power identity"
+      ],
+      "falsifier": "Independent reconstruction changes the rounded event values, analytic velocity fails kinematics, or force/couple power does not sum to total.",
+      "adjudication": "All reciprocal chapter candidates were checked against executable evidence and narrowed where a branch, transform audit, or reduced model did not support the stronger reading.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-122",
+      "candidate_ids": [
+        "PD-CAND-c7607e1e1bb06ccd",
+        "PD-CAND-81577c494550e345",
+        "PD-CAND-0260e93b3271d743",
+        "PD-CAND-8c998ddb5f741e48",
+        "PD-CAND-aff907a78f06acf4"
+      ],
+      "statement": "For the fixed-relative-trace mobile-hub inverse comparison, Delta F=m_d a_H and paired point velocity produce exact zero-amplitude closure; the declared 1.25 Hz x fundamental and 2.5 Hz half-amplitude y harmonic at A=100 mm shift force by at most 2.67 N, power by 38.09 W, and integrated signed power by -0.174 J.",
+      "classification": "prescribed_mobile_hub_inverse_result",
+      "published_status": "supported_for_declared_path_only",
+      "audit_status": "path_equations_amplitudes_force_power_and_zero_control_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:127",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:137",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:142",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:144",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:153"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_traces.npz",
+        "scripts/research/proximal_distal_energy/run_mechanism_ladder_study.py",
+        "scripts/research/proximal_distal_energy/mechanism_ladder.py",
+        "tests/research/test_mechanism_ladder_evidence.py",
+        "tests/research/test_mechanism_ladder.py"
+      ],
+      "model_domain": "Prescribed planar translation with 0.20 kg supported distal mass and fixed relative trace.",
+      "uncertainty_boundary": "This is not a forward torso swing, body-translation benefit, or isolated result once hub and joints co-evolve.",
+      "competing_explanations": [
+        "hub velocity power term",
+        "hub acceleration reaction term",
+        "different relative trajectory"
+      ],
+      "negative_controls": [
+        "A=0 exact control",
+        "four amplitudes",
+        "explicit fundamental/harmonic contract"
+      ],
+      "falsifier": "Zero amplitude differs from baseline, Newtonian force increment fails, or a forward rerun reverses the bounded interpretation.",
+      "adjudication": "All reciprocal chapter candidates were checked against executable evidence and narrowed where a branch, transform audit, or reduced model did not support the stronger reading.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-123",
+      "candidate_ids": [
+        "PD-CAND-f3f568935b96787c",
+        "PD-CAND-edfa1e983d02bfee",
+        "PD-CAND-27d9fdb71b063cb5"
+      ],
+      "statement": "The separately executed coupled moving-base planar tier evolves finite-mass base translation, two-hand closure, and one torsional club mode; its negative force couple persists for a 50 ms same-state zero-command branch, coincident moment arms remove it, and contact-power/work-energy identities refine.",
+      "classification": "coupled_moving_base_bridge",
+      "published_status": "supported_in_separate_planar_forward_model",
+      "audit_status": "cross_referenced_forward_evidence_and_boundaries_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:163",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:170",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:178"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_traces.npz",
+        "scripts/research/proximal_distal_energy/run_mechanism_ladder_study.py",
+        "scripts/research/proximal_distal_energy/mechanism_ladder.py",
+        "tests/research/test_mechanism_ladder_evidence.py",
+        "tests/research/test_mechanism_ladder.py",
+        "docs/research/proximal_distal_energy_transfer/data/moving_base_flexible_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/moving_base_flexible_study.npz",
+        "tests/research/test_moving_base_flexible_evidence.py"
+      ],
+      "model_domain": "Declared coupled moving-base/flexible-club mechanism model.",
+      "uncertainty_boundary": "It has no base rotation, distributed beam, anatomy, or calibrated grip.",
+      "competing_explanations": [
+        "prescribed hub artifact",
+        "contact moment arms",
+        "shaft mode",
+        "numerical drift"
+      ],
+      "negative_controls": [
+        "same-state branch",
+        "coincident grips",
+        "timestep refinement"
+      ],
+      "falsifier": "The referenced coupled evidence fails closure or the mechanism disappears under registered controls.",
+      "adjudication": "All reciprocal chapter candidates were checked against executable evidence and narrowed where a branch, transform audit, or reduced model did not support the stronger reading.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-124",
+      "candidate_ids": [
+        "PD-CAND-ce92139836375e60",
+        "PD-CAND-a6d6bbb034ea2180",
+        "PD-CAND-c88dbf33fa1abd41",
+        "PD-CAND-85b8922f2d3f3ddd",
+        "PD-CAND-99ca95acd9772a0e",
+        "PD-CAND-9a969c4c8cf8df25",
+        "PD-CAND-18c9e36e85efbee0",
+        "PD-CAND-f4a82ab248820709",
+        "PD-CAND-a7d22442ef34be0d"
+      ],
+      "statement": "The five-coordinate, four-constraint planar grip Jacobian has rank four and one-dimensional nullspace across 201 sampled geometries, condition number 9.05--9.46, and nullspace residual below 6.8e-16; these are kinematic compatibility results and do not identify contact forces or couple sign.",
+      "classification": "closed_loop_constraint_geometry",
+      "published_status": "supported_as_kinematic_rank_audit",
+      "audit_status": "rank_nullspace_conditioning_and_dynamic_nonclaim_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:185",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:194",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:201",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:206",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:208",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:214",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:216",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:221",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:350"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_traces.npz",
+        "scripts/research/proximal_distal_energy/run_mechanism_ladder_study.py",
+        "scripts/research/proximal_distal_energy/mechanism_ladder.py",
+        "tests/research/test_mechanism_ladder_evidence.py",
+        "tests/research/test_mechanism_ladder.py"
+      ],
+      "model_domain": "Synthetic two-arm planar grip geometry sweep.",
+      "uncertainty_boundary": "The Jacobian alone contains no mass, acceleration, actuation, stabilization, multiplier, or human force solution.",
+      "competing_explanations": [
+        "dynamic contact allocation",
+        "singular geometry",
+        "archived versus forward force sources"
+      ],
+      "negative_controls": [
+        "expected-DOF diagnostic",
+        "nullspace residual",
+        "separate dynamic evidence records"
+      ],
+      "falsifier": "Rank changes, residual exceeds tolerance, or the chapter infers force magnitude/sign from kinematics alone.",
+      "adjudication": "All reciprocal chapter candidates were checked against executable evidence and narrowed where a branch, transform audit, or reduced model did not support the stronger reading.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-125",
+      "candidate_ids": [
+        "PD-CAND-9c39a9fc064a2ceb",
+        "PD-CAND-9a2e2e17f83f3942",
+        "PD-CAND-c323816d66a20c62",
+        "PD-CAND-ed27d6f212a155b8",
+        "PD-CAND-392c76561362dad4"
+      ],
+      "statement": "The rotated-wrench tier verifies paired proper-frame wrench--twist transformations and visualizes the same nonzero-power delivery sample in six frames, but it neither injects improper reflections nor exercises source-to-engine adapter metadata or out-of-plane dynamics.",
+      "classification": "three_dimensional_frame_audit_boundary",
+      "published_status": "coordinate_consistency_only",
+      "audit_status": "nonzero_power_rotation_and_nonclaims_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:229",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:235",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:237",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:242",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:358"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_traces.npz",
+        "scripts/research/proximal_distal_energy/run_mechanism_ladder_study.py",
+        "scripts/research/proximal_distal_energy/mechanism_ladder.py",
+        "tests/research/test_mechanism_ladder_evidence.py",
+        "tests/research/test_mechanism_ladder.py"
+      ],
+      "model_domain": "Planar delivery sample embedded and rotated in 3-D.",
+      "uncertainty_boundary": "Passing the audit cannot detect every consistent axis relabeling or validate a 3-D golf swing.",
+      "competing_explanations": [
+        "mixed angular-velocity frame",
+        "improper reflection",
+        "semantic axis swap",
+        "actual nonplanar dynamics"
+      ],
+      "negative_controls": [
+        "proper determinant-one rotations",
+        "nonzero actual twist",
+        "full wrench and twist transform"
+      ],
+      "falsifier": "Power changes under paired rotation or the result is described as engine parity or 3-D swing validation.",
+      "adjudication": "All reciprocal chapter candidates were checked against executable evidence and narrowed where a branch, transform audit, or reduced model did not support the stronger reading.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-126",
+      "candidate_ids": [
+        "PD-CAND-31e1c3eb264b6a21",
+        "PD-CAND-a4132a67ac5f598e",
+        "PD-CAND-c3e175473e9d86c3",
+        "PD-CAND-a344ad1d62814e69"
+      ],
+      "statement": "The reduced 20-coordinate full-body common-state study evaluates 61 states in MuJoCo and an independent Lagrange--Christoffel formulation with 2.14e-11 maximum relative generalized-action discrepancy; signed moment-arm reversal flips the -4.32 N m force couple and coincident points remove it.",
+      "classification": "reduced_spatial_common_state_inverse_dynamics",
+      "published_status": "supported_at_declared_inverse_tier",
+      "audit_status": "dimensions_states_cross_formulation_and_geometry_controls_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:251",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:258",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:264",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:367"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_traces.npz",
+        "scripts/research/proximal_distal_energy/run_mechanism_ladder_study.py",
+        "scripts/research/proximal_distal_energy/mechanism_ladder.py",
+        "tests/research/test_mechanism_ladder_evidence.py",
+        "tests/research/test_mechanism_ladder.py",
+        "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.npz",
+        "tests/research/test_spatial_full_body_evidence.py"
+      ],
+      "model_domain": "Reduced nonplanar common-state inverse dynamics with prescribed hand loads.",
+      "uncertainty_boundary": "It does not solve contact, branch forward, identify biology, or validate subject anatomy.",
+      "competing_explanations": [
+        "finite-difference formulation error",
+        "prescribed load origin",
+        "geometry sign convention"
+      ],
+      "negative_controls": [
+        "common model digest",
+        "finest-pair comparison",
+        "reversed/coincident geometry"
+      ],
+      "falsifier": "Cross-formulation error exceeds declared bounds or geometry controls fail.",
+      "adjudication": "All reciprocal chapter candidates were checked against executable evidence and narrowed where a branch, transform audit, or reduced model did not support the stronger reading.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-127",
+      "candidate_ids": [
+        "PD-CAND-64e3d4dfc5ee4bc3",
+        "PD-CAND-07ddae289f7864df",
+        "PD-CAND-acab20dfe1ad13f4",
+        "PD-CAND-4b014ecc4e16a963"
+      ],
+      "statement": "The reduced MuJoCo/Pinocchio forward-contact tier removes the grounded driver at 0.180 s from an exact same state; both engines retain a negative swing-normal force couple for 37.5 ms with approximately -0.409 N m minimum, coincident grips give zero, reversed arms flip sign below 9.2e-16 N m, and trajectory/wrench/orientation/energy gates pass with monotone work-energy refinement.",
+      "classification": "reduced_spatial_forward_contact_persistence",
+      "published_status": "supported_at_declared_carriage_contact_tier",
+      "audit_status": "engine_identity_branch_geometry_gates_and_refinement_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:272",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:278",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:286",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:373"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_traces.npz",
+        "scripts/research/proximal_distal_energy/run_mechanism_ladder_study.py",
+        "scripts/research/proximal_distal_energy/mechanism_ladder.py",
+        "tests/research/test_mechanism_ladder_evidence.py",
+        "tests/research/test_mechanism_ladder.py",
+        "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.npz",
+        "tests/research/test_spatial_forward_contact.py"
+      ],
+      "model_domain": "Two finite-mass translational hand carriages, Kelvin--Voigt point contacts, and free rigid club in two native engines.",
+      "uncertainty_boundary": "No anatomical arms, subject inertias, measured tissue/grip, distributed shaft, or human observations.",
+      "competing_explanations": [
+        "contact-law artifact",
+        "driver-removal transient",
+        "engine implementation",
+        "rigid-club assumption"
+      ],
+      "negative_controls": [
+        "exact prebranch state",
+        "coincident grips",
+        "reversed geometry",
+        "cross-engine gates",
+        "timestep refinement"
+      ],
+      "falsifier": "Either engine loses the bounded persistence, controls fail, or cross-engine/numerical gates leave declared regions.",
+      "adjudication": "All reciprocal chapter candidates were checked against executable evidence and narrowed where a branch, transform audit, or reduced model did not support the stronger reading.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-128",
+      "candidate_ids": [
+        "PD-CAND-8be30b67be37e89f",
+        "PD-CAND-c452c1575879a613",
+        "PD-CAND-d200cb0a538c6e52",
+        "PD-CAND-d2bfd72f6462a516"
+      ],
+      "statement": "The discrepancy matrix records explicit branch capabilities rather than cumulative triangular inheritance; nine bounded findings are supported somewhere in executed tiers, while anatomical-arm, distributed-shaft-magnitude, and independently authored humanoid force-history transport remain untested.",
+      "classification": "model_discrepancy_and_survival_boundary",
+      "published_status": "machine_readable_branched_boundary",
+      "audit_status": "capability_cells_findings_and_open_nonclaims_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:294",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:296",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:302",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:319"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_traces.npz",
+        "scripts/research/proximal_distal_energy/run_mechanism_ladder_study.py",
+        "scripts/research/proximal_distal_energy/mechanism_ladder.py",
+        "tests/research/test_mechanism_ladder_evidence.py",
+        "tests/research/test_mechanism_ladder.py"
+      ],
+      "model_domain": "Aggregate evidence boundary across the declared model branches.",
+      "uncertainty_boundary": "A finding at one tier is not automatically inherited by every other or higher tier.",
+      "competing_explanations": [
+        "serial fidelity assumption",
+        "capability versus execution",
+        "unmatched observable"
+      ],
+      "negative_controls": [
+        "explicit capabilities lists",
+        "executed/not_executed status",
+        "open articulated cell"
+      ],
+      "falsifier": "A rendered cell disagrees with the record or prose claims untested branch inheritance.",
+      "adjudication": "All reciprocal chapter candidates were checked against executable evidence and narrowed where a branch, transform audit, or reduced model did not support the stronger reading.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-129",
+      "candidate_ids": [
+        "PD-CAND-8bf12b71c4efb86a",
+        "PD-CAND-b0e62c807fd73735",
+        "PD-CAND-d58be3baf619c6d9"
+      ],
+      "statement": "The planar double pendulum, three-coordinate shaft surrogate, and prescribed hub branch retain common interface accounting while exposing distinct fixed-hub, elastic-storage, and inverse-base-motion limitations; none determines human magnitude or a body-translation benefit.",
+      "classification": "lower_tier_interpretation_boundary",
+      "published_status": "supported_as_mechanism_tiers_only",
+      "audit_status": "tier_mechanisms_strengths_and_nonclaims_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:327",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:335",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:343"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_traces.npz",
+        "scripts/research/proximal_distal_energy/run_mechanism_ladder_study.py",
+        "scripts/research/proximal_distal_energy/mechanism_ladder.py",
+        "tests/research/test_mechanism_ladder_evidence.py",
+        "tests/research/test_mechanism_ladder.py"
+      ],
+      "model_domain": "Three reduced planar branches with declared parameters and observables.",
+      "uncertainty_boundary": "No tier is a subject-calibrated full swing.",
+      "competing_explanations": [
+        "omitted torso actuation",
+        "lumped shaft flex",
+        "co-evolving hub/joint motion"
+      ],
+      "negative_controls": [
+        "matched-state and energy contracts",
+        "fixed-relative hub control",
+        "human nonclaims"
+      ],
+      "falsifier": "A higher-fidelity matched test invalidates the bounded accounting or prose turns branch values into expected human effects.",
+      "adjudication": "All reciprocal chapter candidates were checked against executable evidence and narrowed where a branch, transform audit, or reduced model did not support the stronger reading.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-130",
+      "candidate_ids": [
+        "PD-CAND-33f82aa81931f49b",
+        "PD-CAND-b91f47da27c1513f",
+        "PD-CAND-e6e35519ef68c092",
+        "PD-CAND-0ec9e1a76323e3fb"
+      ],
+      "statement": "Articulated subject-scaled forward contact remains open; a credible cross-engine gate requires identical model identity, frame/reference metadata, force/moment balance, constraint rank, transported power, physical settings, and event-aligned error separation, and engine capability alone is not execution evidence.",
+      "classification": "articulated_cross_engine_gate",
+      "published_status": "planned_falsification_tier_not_executed",
+      "audit_status": "open_status_and_minimum_gate_contract_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:380",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:389",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:394",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:403"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_traces.npz",
+        "scripts/research/proximal_distal_energy/run_mechanism_ladder_study.py",
+        "scripts/research/proximal_distal_energy/mechanism_ladder.py",
+        "tests/research/test_mechanism_ladder_evidence.py",
+        "tests/research/test_mechanism_ladder.py"
+      ],
+      "model_domain": "Future subject-scaled articulated arms, calibrated grip, and distributed shaft.",
+      "uncertainty_boundary": "No current carriage or common-state result satisfies this anatomical tier.",
+      "competing_explanations": [
+        "visually similar motion",
+        "different model identity",
+        "interpolation error",
+        "trajectory divergence"
+      ],
+      "negative_controls": [
+        "not_executed record",
+        "required gate list",
+        "event alignment"
+      ],
+      "falsifier": "The tier is called executed without artifacts or a future comparison fails any declared gate.",
+      "adjudication": "All reciprocal chapter candidates were checked against executable evidence and narrowed where a branch, transform audit, or reduced model did not support the stronger reading.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-131",
+      "candidate_ids": [
+        "PD-CAND-c85668cbc78193f2",
+        "PD-CAND-466532d22ba5a75b",
+        "PD-CAND-df8083efd975fe24"
+      ],
+      "statement": "Across the ladder, no single joint force, clock delay, or torque sign defines useful transfer; model optimization should report event-window force, couple, power, work, constraint, endpoint, and robustness diagnostics together, without promoting this conditional framework to coaching advice.",
+      "classification": "strategy_and_modeling_nonprescription",
+      "published_status": "conditional_model_building_guidance",
+      "audit_status": "multi_observable_objective_and_nonprescription_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:412",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:418",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:424"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_traces.npz",
+        "scripts/research/proximal_distal_energy/run_mechanism_ladder_study.py",
+        "scripts/research/proximal_distal_energy/mechanism_ladder.py",
+        "tests/research/test_mechanism_ladder_evidence.py",
+        "tests/research/test_mechanism_ladder.py"
+      ],
+      "model_domain": "Research design implications from the declared reduced models.",
+      "uncertainty_boundary": "No universal human control strategy is identified.",
+      "competing_explanations": [
+        "coordinate artifact",
+        "reference-point artifact",
+        "single-sample optimum",
+        "loading tradeoff"
+      ],
+      "negative_controls": [
+        "power identity",
+        "event-window objective",
+        "multi-diagnostic reporting"
+      ],
+      "falsifier": "A robust governed human study establishes a simpler sufficient strategy or current text prescribes technique.",
+      "adjudication": "All reciprocal chapter candidates were checked against executable evidence and narrowed where a branch, transform audit, or reduced model did not support the stronger reading.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-132",
+      "candidate_ids": [
+        "PD-CAND-b9431c1dd8029d1e",
+        "PD-CAND-c154a0643c3bc5a2",
+        "PD-CAND-23d01986b4ac7dc1"
+      ],
+      "statement": "The program remains limited by surrogate links, prescribed or translation-only bases, ideal planar contacts, lumped/rigid clubs, prescribed spatial hand loads, carriage contacts, and absent subject/tissue calibration; the next falsification tier couples articulated arms and a distributed shaft under the same observable and exact same-state branch.",
+      "classification": "ladder_limitations_and_next_falsifier",
+      "published_status": "open_research_program",
+      "audit_status": "all_tier_limitations_and_failure_criteria_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:432",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:434",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:447"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_traces.npz",
+        "scripts/research/proximal_distal_energy/run_mechanism_ladder_study.py",
+        "scripts/research/proximal_distal_energy/mechanism_ladder.py",
+        "tests/research/test_mechanism_ladder_evidence.py",
+        "tests/research/test_mechanism_ladder.py"
+      ],
+      "model_domain": "Transition from reduced mechanism branches to articulated spatial contact.",
+      "uncertainty_boundary": "Completion requires evidence, not engine availability or architectural intent.",
+      "competing_explanations": [
+        "contact calibration",
+        "distributed shaft",
+        "anatomical uncertainty",
+        "event mismatch"
+      ],
+      "negative_controls": [
+        "force/moment balance",
+        "power invariance",
+        "contact-rank agreement",
+        "matched-event parity"
+      ],
+      "falsifier": "The articulated tier violates any listed contract or fails to reproduce the reduced persistence within declared uncertainty.",
+      "adjudication": "All reciprocal chapter candidates were checked against executable evidence and narrowed where a branch, transform audit, or reduced model did not support the stronger reading.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
     }

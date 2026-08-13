@@ -4,14 +4,17 @@
 
 Adding degrees of freedom does not automatically strengthen a mechanism claim.
 It can instead change the question by changing the reference point, frame,
-contact definition, or reported power. A useful fidelity ladder must preserve
-the observable while relaxing one structural assumption at a time. This
-chapter therefore carries one common interaction record through a
-three-coordinate chain, a prescribed mobile-hub inverse-dynamics comparison,
-forward rigid- and flexible-club two-hand systems, and arbitrary
-three-dimensional frame rotations. The reduced full-body common-state tier in
-@sec-spatial-full-body then adds nonplanar body and club inverse dynamics in
-two independent formulations.
+contact definition, or reported power. A useful fidelity program must preserve
+the observable and declare every structural assumption changed by each
+comparison. Some branches below relax one assumption; others necessarily
+change several, so the discrepancy matrix prevents their differences from
+being attributed to a single factor. This chapter carries one common
+interaction-record schema—not one shared trajectory—through a three-coordinate
+chain, a prescribed mobile-hub inverse-dynamics comparison, forward rigid- and
+flexible-club two-hand systems, and arbitrary three-dimensional frame
+rotations. The reduced full-body common-state tier in @sec-spatial-full-body
+then adds nonplanar body and club inverse dynamics in two independent
+formulations.
 
 The common record contains:
 
@@ -77,10 +80,11 @@ $2.4\times10^{-13}$ W, and $5.7\times10^{-14}$ W.
 
 ![Frame and Reference-Transport Contracts Close at Floating-Point Scale](figures/fig_ladder_invariance_residuals.pdf){#fig-ladder-invariance-residuals width=88%}
 
-These residuals establish implementation consistency. They do not show that a
-planar model contains the physics of a three-dimensional swing. Their purpose
-is to ensure that any later discrepancy is physical or numerical rather than a
-silent frame-definition change.
+These residuals establish consistency for the tested paired rotations and
+reference transport. They do not show that a planar model contains the physics
+of a three-dimensional swing, and they cannot exclude a consistent but
+semantically wrong axis label inside an untested adapter. They remove the
+specific tested transform inconsistencies from later discrepancy explanations.
 
 ## Three Coordinates and Two Internal Interfaces {#sec-ladder-three-link}
 
@@ -98,6 +102,10 @@ $$ {#eq-ladder-three-link-power}
 At the interpolated delivery crossing, $t=0.427252$ s. The nearest stored
 0.5 ms sample has 56.37 N interface force, +4.91 N·m interface couple,
 32.09 W force power, 74.60 W couple power, and 106.69 W total wrench power.
+The joint velocity used in these power terms is evaluated analytically from
+the relative-coordinate state. A second-order finite difference of the stored
+positions differs by as much as 0.0299 m/s over the trace, so it is retained
+only as a numerical comparison rather than the published velocity authority.
 The precise values are model outputs, not expected human ranges.
 
 ![The Same Reference-Explicit Observables Extend to a Third Coordinate](figures/fig_ladder_three_link_observables.pdf){#fig-ladder-three-link-observables width=100%}
@@ -133,11 +141,14 @@ zero to stored precision.
 
 ![Prescribed Hub Motion Changes Reaction Force and Power Without Changing the Relative Trace](figures/fig_ladder_mobile_hub.pdf){#fig-ladder-mobile-hub width=100%}
 
-The declared hub path is a two-frequency planar translation at 1.25 Hz, tested
-at amplitudes 0, 25, 50, and 100 mm. At 100 mm, the maximum distal-force shift
-is 2.67 N and maximum instantaneous power change is 38.09 W. The signed power
-difference integrated over the half-second trace is -0.174 J. These values are
-specific to the prescribed path and the 0.20 kg supported distal mass.
+The declared hub path has a 1.25 Hz fundamental in $x$ and a 2.5 Hz second
+harmonic in $y$: $x=A\sin(\omega t)$ and
+$y=(A/2)\sin(2\omega t+0.35)$. The $x$ amplitudes tested are 0, 25, 50, and
+100 mm; the corresponding $y$ amplitudes are half as large. At $A=100$ mm,
+the maximum distal-force shift is 2.67 N and maximum instantaneous power change
+is 38.09 W. The signed power difference integrated over the half-second trace
+is -0.174 J. These values are specific to this prescribed path and the 0.20 kg
+supported distal mass.
 
 The comparison is useful precisely because it is not a new forward swing. The
 relative trajectory is held fixed, so @eq-ladder-hub-force exposes how base
@@ -207,10 +218,11 @@ This distinction connects the two evidence types cleanly:
 - the equivalent wrench reduces those reactions about a declared point; and
 - wrench power determines whether that action supplies or removes club energy.
 
-The archived WSCG force tables remain the dynamic evidence for the negative
-two-hand couple. The present Jacobian audit proves the geometry contract needed
-for a later forward closed-loop reproduction without pretending to have run
-that reproduction.
+The archived WSCG tables remain the source-specific dynamic evidence evaluated
+in @sec-two-hand-wrench. The present Jacobian audit establishes only its
+kinematic geometry contract. Separate forward constrained and coupled-base
+models in @sec-forward-two-hand and @sec-coupled-base-flex solve contact
+reactions dynamically; their evidence is not supplied by this rank audit.
 
 ## Three-Dimensional Frame Audit {#sec-ladder-three-dimensional}
 
@@ -228,10 +240,11 @@ total power do not. The transformation is performed on the complete wrench and
 twist, not on force alone.
 
 This executed audit is three-dimensional algebra applied to a planar
-trajectory. It tests frame handling and source-to-engine adapters. It does not
-include out-of-plane angular velocity, long-axis club rotation, aerodynamic
-forces, three-dimensional joint motion, or full-body contact dynamics. Calling
-it a “3-D swing validation” would be incorrect.
+trajectory. It tests the frame-handling contract that an engine adapter must
+satisfy, but it does not itself exercise source-to-engine adapter parity. It
+also does not include out-of-plane angular velocity, long-axis club rotation,
+aerodynamic forces, three-dimensional joint motion, or full-body contact
+dynamics. Calling it a “3-D swing validation” would be incorrect.
 
 ## Reduced Full-Body Common-State Inverse Dynamics {#sec-ladder-spatial-common-state}
 
@@ -281,18 +294,20 @@ contact supported; articulated human transport untested.”
 ![Model Discrepancy Matrix: Executed Mechanisms and the Remaining Boundary](figures/fig_ladder_discrepancy_matrix.pdf){#fig-ladder-discrepancy-matrix width=100%}
 
 The discrepancy matrix in @fig-ladder-discrepancy-matrix summarizes the
-evidence boundary. Nine statements survive the executed tiers:
+branched evidence boundary. Its cells are explicit capability memberships,
+not a triangular claim that every later model contains every earlier
+mechanism. Nine bounded findings are supported somewhere in the executed
+ladder:
 
 1. interaction force may remain nonzero under zero instantaneous distal
    command;
 2. force magnitude does not determine power;
 3. reference-point transport requires paired moment and velocity transport;
 4. moving-base acceleration changes required reaction through supported mass;
-   and
 5. closed-loop constraint rank determines admissible velocity dimension, not
    contact-force magnitude or couple sign;
 6. nonplanar generalized action is reproducible across the two declared
-   inverse-dynamics formulations; and
+   inverse-dynamics formulations;
 7. reversing spatial contact moment-arm geometry reverses the force-generated
    club couple while coincident points remove it;
 8. the negative force-generated couple persists after complete grounded-driver
@@ -336,16 +351,18 @@ shift is not an expected benefit of a particular body translation.
 the kinematic closure that a single-wrist pendulum omits. The audit shows one
 locally feasible velocity coordinate for the declared four-constraint,
 five-coordinate geometry. It does not solve for constraint multipliers. The
-negative equivalent-couple evidence therefore still comes from the archived
-force solution, while the Jacobian supplies the geometry contract a forward
-reproduction must satisfy.
+Jacobian therefore supplies a geometry contract but no force attribution. The
+archived WSCG, forward constrained, and coupled-base tiers provide three
+separate dynamic force records with different model boundaries.
 
-**Rotated Three-Dimensional Wrench.** The proper-rotation audit is a required
-adapter test. It catches axis swaps, improper reflections, inconsistent moment
-transport, and mixed angular-velocity frames before an engine comparison is
-interpreted physically. Passing it establishes coordinate consistency only.
-Out-of-plane dynamics require nonplanar states and forces, not merely three
-stored vector components.
+**Rotated Three-Dimensional Wrench.** The proper-rotation audit verifies paired
+wrench--twist rotations and reference transport before an engine comparison is
+interpreted physically. It would expose inconsistent transformation of force,
+moment, velocity, or angular velocity. Because it does not inject improper
+reflections or exercise adapter metadata, it cannot detect every semantic axis
+swap or source-to-engine mapping error. Passing it establishes only the tested
+coordinate consistency. Out-of-plane dynamics require nonplanar states and
+forces, not merely three stored vector components.
 
 **Reduced Full-Body Common-State Dynamics.** This tier aligns the model digest,
 joint order, state, gravity, external loads, and inverse-dynamics estimand. It

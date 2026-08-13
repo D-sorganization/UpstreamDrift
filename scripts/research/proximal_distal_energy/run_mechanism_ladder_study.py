@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
-import subprocess
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -23,18 +24,33 @@ from src.engines.common.jacobian_diagnostics import compute_constraint_diagnosti
 REPO_ROOT = Path(__file__).resolve().parents[3]
 OUTPUT_ROOT = REPO_ROOT / "docs" / "research" / "proximal_distal_energy_transfer"
 DATA_DIR = OUTPUT_ROOT / "data"
+SCHEMA_VERSION = "mechanism-ladder-study-v2"
+JSON_PATH = DATA_DIR / "mechanism_ladder_study.json"
+NPZ_PATH = DATA_DIR / "mechanism_ladder_traces.npz"
 
 
-def _git_sha() -> str:
-    result = subprocess.run(
-        ["git", "rev-parse", "--short=10", "HEAD"],
-        cwd=REPO_ROOT,
-        check=True,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _source_hashes() -> dict[str, str]:
+    """Hash every direct data and executable dependency of this aggregate study."""
+    paths = (
+        DATA_DIR / "shaft_contribution_study.json",
+        DATA_DIR / "shaft_contribution_traces.npz",
+        DATA_DIR / "spatial_full_body_study.json",
+        DATA_DIR / "spatial_forward_contact_study.json",
+        REPO_ROOT / "scripts/research/proximal_distal_energy/mechanism_ladder.py",
+        REPO_ROOT
+        / "scripts/research/proximal_distal_energy/run_mechanism_ladder_study.py",
+        REPO_ROOT / "scripts/research/proximal_distal_energy/flexible_shaft_study.py",
+        REPO_ROOT / "src/engines/common/jacobian_diagnostics.py",
     )
-    return result.stdout.strip()
+    return {path.relative_to(REPO_ROOT).as_posix(): _sha256(path) for path in paths}
 
 
 def _reference_arrays() -> tuple[dict[str, np.ndarray], dict]:
@@ -45,16 +61,39 @@ def _reference_arrays() -> tuple[dict[str, np.ndarray], dict]:
     return arrays, record
 
 
+def _wrist2_velocity(state: np.ndarray, params: FlexibleShaftParams) -> np.ndarray:
+    """Return exact second-joint velocity for relative triple-link coordinates."""
+    checked = np.asarray(state, dtype=float)
+    if checked.ndim != 2 or checked.shape[1] != 6:
+        raise ValueError("state must have shape (samples, 6)")
+    triple = params.triple()
+    theta = checked[:, 0]
+    phi = checked[:, 1]
+    dtheta = checked[:, 3]
+    dphi = checked[:, 4]
+    absolute_second = theta + phi
+    absolute_second_rate = dtheta + dphi
+    return np.column_stack(
+        (
+            triple.L1 * np.cos(theta) * dtheta
+            + triple.L2 * np.cos(absolute_second) * absolute_second_rate,
+            triple.L1 * np.sin(theta) * dtheta
+            + triple.L2 * np.sin(absolute_second) * absolute_second_rate,
+        )
+    )
+
+
 def _three_link_samples(
     arrays: dict[str, np.ndarray], record: dict
-) -> tuple[list[InteractionSample], int]:
+) -> tuple[list[InteractionSample], int, dict[str, Any]]:
     prefix = "flexible_reference__"
     time = arrays[f"{prefix}time"]
     wrist = arrays[f"{prefix}wrist2"]
-    velocity = np.gradient(wrist, time, axis=0, edge_order=2)
     force = arrays[f"{prefix}shaft_force"]
     state = arrays[f"{prefix}state"]
     params = FlexibleShaftParams.reference()
+    velocity = _wrist2_velocity(state, params)
+    gradient_velocity = np.gradient(wrist, time, axis=0, edge_order=2)
     elastic_moment = -params.shaft_stiffness_nm_rad * state[:, 2]
     damping_moment = -params.shaft_damping_nms_rad * state[:, 5]
     omega = state[:, 3] + state[:, 4] + state[:, 5]
@@ -77,10 +116,19 @@ def _three_link_samples(
     )
     impact_time = flexible["impact"]["impact_time_s"]
     impact_index = int(np.argmin(np.abs(time - impact_time)))
-    return samples, impact_index
+    velocity_audit = {
+        "method": "analytic relative-coordinate second-joint kinematics",
+        "position_gradient_comparison_method": (
+            "numpy.gradient with second-order edges on the stored 0.5 ms positions"
+        ),
+        "maximum_position_gradient_discrepancy_m_s": float(
+            np.max(np.linalg.norm(velocity - gradient_velocity, axis=1))
+        ),
+    }
+    return samples, impact_index, velocity_audit
 
 
-def _frame_and_transport_audits(samples: list[InteractionSample]) -> dict[str, float]:
+def _frame_and_transport_audits(samples: list[InteractionSample]) -> dict[str, Any]:
     rotation_power = []
     rotation_force = []
     rotation_couple = []
@@ -100,6 +148,8 @@ def _frame_and_transport_audits(samples: list[InteractionSample]) -> dict[str, f
         moved = sample.transport(new_point)
         transport_power.append(abs(moved.total_power_w - sample.total_power_w))
     return {
+        "rotation_sample_count": len(rotation_power),
+        "reference_translation_m": [0.2, -0.1, 0.05],
         "maximum_rotation_power_residual_w": max(rotation_power),
         "maximum_transport_power_residual_w": max(transport_power),
         "maximum_rotation_force_norm_residual_n": max(rotation_force),
@@ -222,7 +272,7 @@ def build_study() -> tuple[dict, dict[str, np.ndarray]]:
     spatial_forward_record = json.loads(
         (DATA_DIR / "spatial_forward_contact_study.json").read_text(encoding="utf-8")
     )
-    samples, impact_index = _three_link_samples(arrays, shaft_record)
+    samples, impact_index, velocity_audit = _three_link_samples(arrays, shaft_record)
     audits = _frame_and_transport_audits(samples)
     hub_rows, hub_arrays = _mobile_hub_cases(samples)
     loop_summary, loop_arrays = _closed_loop_diagnostics(samples)
@@ -234,18 +284,28 @@ def build_study() -> tuple[dict, dict[str, np.ndarray]]:
     )
     time = np.array([sample.time_s for sample in samples])
     three_force = np.stack([sample.force_n for sample in samples])
+    three_couple = np.stack([sample.couple_nm for sample in samples])
+    three_velocity = np.stack([sample.linear_velocity_m_s for sample in samples])
+    three_angular_velocity = np.stack(
+        [sample.angular_velocity_rad_s for sample in samples]
+    )
     three_power = np.array([sample.total_power_w for sample in samples])
     output_arrays = {
         "time": time,
         "three_link__force": three_force,
+        "three_link__couple": three_couple,
+        "three_link__velocity": three_velocity,
+        "three_link__angular_velocity": three_angular_velocity,
         "three_link__power": three_power,
         "three_link__point": np.stack([sample.reference_point_m for sample in samples]),
         **hub_arrays,
         **loop_arrays,
     }
     record = {
+        "schema_version": SCHEMA_VERSION,
+        "study_id": "common-observable-model-ladder",
+        "source_sha256": _source_hashes(),
         "provenance": {
-            "git_sha": _git_sha(),
             "source_trace": "shaft_contribution_traces.npz:flexible_reference",
             "common_schema": "InteractionSample v1",
             "interpretation_boundary": (
@@ -265,7 +325,18 @@ def build_study() -> tuple[dict, dict[str, np.ndarray]]:
             "interface_couple_power_at_delivery_w": impact.couple_power_w,
             "interface_total_power_at_delivery_w": impact.total_power_w,
         },
+        "kinematic_velocity_audit": velocity_audit,
         "frame_and_transport_audits": audits,
+        "mobile_hub_contract": {
+            "fundamental_frequency_hz": 1.25,
+            "second_harmonic_frequency_hz": 2.5,
+            "second_harmonic_position_amplitude_ratio": 0.5,
+            "phase_rad": 0.35,
+            "path_definition": ("x=A sin(omega t); y=(A/2) sin(2 omega t + phase)"),
+            "comparison_type": (
+                "prescribed inverse-dynamics perturbation at fixed relative trace"
+            ),
+        },
         "mobile_hub_cases": hub_rows,
         "closed_loop_diagnostics": loop_summary,
         "model_discrepancy_table": [
@@ -275,6 +346,7 @@ def build_study() -> tuple[dict, dict[str, np.ndarray]]:
                 "added_mechanism": "single wrist interaction force and power",
                 "surviving_result": "force magnitude alone does not determine transfer",
                 "boundary": "fixed hub, rigid links, one distal interface",
+                "capabilities": ["interface_wrench"],
             },
             {
                 "tier": "three_link_planar",
@@ -282,6 +354,7 @@ def build_study() -> tuple[dict, dict[str, np.ndarray]]:
                 "added_mechanism": "second internal interface and elastic coordinate",
                 "surviving_result": "reference-explicit force and couple power remain additive",
                 "boundary": "point masses and one linear torsional mode",
+                "capabilities": ["interface_wrench", "elastic_coordinate"],
             },
             {
                 "tier": "mobile_hub_inverse_dynamics",
@@ -289,6 +362,11 @@ def build_study() -> tuple[dict, dict[str, np.ndarray]]:
                 "added_mechanism": "prescribed hub translation",
                 "surviving_result": "hub acceleration changes reaction force through supported mass",
                 "boundary": "prescribed motion comparison, not a forward torso model",
+                "capabilities": [
+                    "interface_wrench",
+                    "elastic_coordinate",
+                    "prescribed_hub",
+                ],
             },
             {
                 "tier": "two_hand_closed_loop_geometry",
@@ -296,6 +374,7 @@ def build_study() -> tuple[dict, dict[str, np.ndarray]]:
                 "added_mechanism": "four grip constraints and one feasible nullspace coordinate",
                 "surviving_result": "constraint rank organizes admissible motion, not force magnitude",
                 "boundary": "geometry/rank audit; archived forces remain the dynamic evidence",
+                "capabilities": ["closed_loop_geometry"],
             },
             {
                 "tier": "rotated_3d_wrench_audit",
@@ -303,6 +382,11 @@ def build_study() -> tuple[dict, dict[str, np.ndarray]]:
                 "added_mechanism": "arbitrary proper 3-D frame rotations and wrench transport",
                 "surviving_result": "force norm, couple norm, and total power are frame invariant",
                 "boundary": "3-D representation of a planar trajectory, not out-of-plane dynamics",
+                "capabilities": [
+                    "interface_wrench",
+                    "elastic_coordinate",
+                    "frame_3d",
+                ],
             },
             {
                 "tier": "reduced_full_body_common_state_inverse_dynamics",
@@ -313,6 +397,7 @@ def build_study() -> tuple[dict, dict[str, np.ndarray]]:
                     f"to {spatial_record['cross_formulation']['maximum_relative_inverse_dynamics_error']:.3e} relative error"
                 ),
                 "boundary": "prescribed hand loads and common state; not forward closed contact",
+                "capabilities": ["frame_3d", "spatial_inverse_dynamics"],
             },
             {
                 "tier": "reduced_spatial_forward_cross_engine_contact",
@@ -329,6 +414,7 @@ def build_study() -> tuple[dict, dict[str, np.ndarray]]:
                     "finite-mass translational hand carriages and rigid club; "
                     "not anatomy, tissue, equipment, or human validation"
                 ),
+                "capabilities": ["frame_3d", "forward_contact"],
             },
             {
                 "tier": "articulated_full_body_forward_cross_engine_contact",
@@ -339,19 +425,27 @@ def build_study() -> tuple[dict, dict[str, np.ndarray]]:
                 ),
                 "surviving_result": "undetermined",
                 "boundary": "must not be inferred from the reduced carriage model",
+                "capabilities": ["articulated_contact"],
             },
         ],
     }
     return record, output_arrays
 
 
+def write_outputs(output_dir: Path = DATA_DIR) -> tuple[Path, Path]:
+    """Write deterministic JSON and NPZ evidence artifacts."""
+    record, arrays = build_study()
+    output_dir.mkdir(parents=True, exist_ok=True)
+    json_path = output_dir / JSON_PATH.name
+    npz_path = output_dir / NPZ_PATH.name
+    json_path.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+    np.savez_compressed(npz_path, **arrays)
+    return json_path, npz_path
+
+
 def main() -> None:
     """Write JSON and NPZ evidence artifacts."""
-    record, arrays = build_study()
-    (DATA_DIR / "mechanism_ladder_study.json").write_text(
-        json.dumps(record, indent=2) + "\n", encoding="utf-8"
-    )
-    np.savez_compressed(DATA_DIR / "mechanism_ladder_traces.npz", **arrays)
+    write_outputs()
 
 
 if __name__ == "__main__":

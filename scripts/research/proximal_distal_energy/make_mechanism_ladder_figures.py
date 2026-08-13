@@ -31,6 +31,53 @@ COLORS = {
     "couple": "#B23A48",
 }
 
+TIER_LABELS = {
+    "double_pendulum_planar": ("Two-Link\nPlanar", "Single Interface"),
+    "three_link_planar": ("Three-Link\nPlanar", "Second Interface"),
+    "mobile_hub_inverse_dynamics": ("Moving\nHub", "Prescribed Translation"),
+    "two_hand_closed_loop_geometry": ("Two-Hand\nLoop", "Constraint Geometry"),
+    "rotated_3d_wrench_audit": ("Rotated 3-D\nWrench", "Frame Audit"),
+    "reduced_full_body_common_state_inverse_dynamics": (
+        "Reduced\nFull-Body",
+        "Common-State Inverse",
+    ),
+    "reduced_spatial_forward_cross_engine_contact": (
+        "Forward Spatial\nContact",
+        "Reduced Contact",
+    ),
+    "articulated_full_body_forward_cross_engine_contact": (
+        "Articulated\nFull-Body",
+        "Open Contact Tier",
+    ),
+}
+
+
+def _style() -> None:
+    """Use deterministic portable vector-output settings."""
+    plt.rcParams.update(
+        {
+            "pdf.use14corefonts": True,
+            "svg.hashsalt": "upstreamdrift-mechanism-ladder-v2",
+            "axes.unicode_minus": False,
+        }
+    )
+
+
+def _schematic_tiers(record: dict) -> list[dict[str, str]]:
+    """Return display tiers directly from the machine-readable evidence boundary."""
+    result = []
+    for row in record["model_discrepancy_table"]:
+        title, subtitle = TIER_LABELS[row["tier"]]
+        result.append(
+            {
+                "tier": row["tier"],
+                "title": title,
+                "subtitle": subtitle,
+                "status": row["status"],
+            }
+        )
+    return result
+
 
 def _load() -> tuple[dict, dict[str, np.ndarray]]:
     record = json.loads(
@@ -41,9 +88,13 @@ def _load() -> tuple[dict, dict[str, np.ndarray]]:
 
 def _save(fig: plt.Figure, stem: str) -> None:
     fig.tight_layout()
-    fig.savefig(FIG_DIR / f"{stem}.pdf", bbox_inches="tight")
+    fig.savefig(
+        FIG_DIR / f"{stem}.pdf",
+        bbox_inches="tight",
+        metadata={"CreationDate": None, "ModDate": None},
+    )
     svg_path = FIG_DIR / f"{stem}.svg"
-    fig.savefig(svg_path, bbox_inches="tight")
+    fig.savefig(svg_path, bbox_inches="tight", metadata={"Date": None})
     text = svg_path.read_text(encoding="utf-8")
     svg_path.write_text(
         "\n".join(line.rstrip() for line in text.splitlines()) + "\n",
@@ -52,19 +103,22 @@ def _save(fig: plt.Figure, stem: str) -> None:
     plt.close(fig)
 
 
-def fig_ladder_schematic() -> None:
+def fig_ladder_schematic(record: dict) -> None:
     """Show added mechanisms and evidence boundaries at every tier."""
-    fig, ax = plt.subplots(figsize=(11.5, 4.3))
-    tiers = [
-        ("Two-Link\nPlanar", "Single Interface", COLORS["double"]),
-        ("Three-Link\nPlanar", "Second Interface", COLORS["three"]),
-        ("Moving\nHub", "Base Translation", COLORS["mobile"]),
-        ("Two-Hand\nLoop", "Constraint Rank", COLORS["loop"]),
-        ("Rotated 3-D\nWrench", "Frame Audit", COLORS["three_d"]),
-        ("Reduced\nFull-Body\nDynamics", "Common State", COLORS["mobile"]),
-        ("Forward Spatial\nContact", "Not Executed", COLORS["pending"]),
-    ]
-    for index, (title, subtitle, color) in enumerate(tiers):
+    fig, ax = plt.subplots(figsize=(12.0, 4.5))
+    tiers = _schematic_tiers(record)
+    executed_colors = (
+        COLORS["double"],
+        COLORS["three"],
+        COLORS["mobile"],
+        COLORS["loop"],
+        COLORS["three_d"],
+        COLORS["mobile"],
+        COLORS["three_d"],
+    )
+    for index, tier in enumerate(tiers):
+        executed = tier["status"] != "not_executed"
+        color = executed_colors[index] if executed else COLORS["pending"]
         ax.add_patch(
             plt.Rectangle(
                 (index - 0.42, -0.38),
@@ -77,10 +131,23 @@ def fig_ladder_schematic() -> None:
             )
         )
         ax.text(
-            index, 0.08, title, ha="center", va="center", color="white", weight="bold"
+            index,
+            0.10,
+            tier["title"],
+            ha="center",
+            va="center",
+            color="white",
+            weight="bold",
+            fontsize=9,
         )
         ax.text(
-            index, -0.25, subtitle, ha="center", va="center", color="white", fontsize=9
+            index,
+            -0.22,
+            f"{tier['subtitle']}\n{'Executed' if executed else 'Open'}",
+            ha="center",
+            va="center",
+            color="white",
+            fontsize=7.5,
         )
         if index < len(tiers) - 1:
             ax.add_patch(
@@ -239,9 +306,11 @@ def fig_rotated_wrenches(arrays: dict[str, np.ndarray], record: dict) -> None:
         time_s=float(time[index]),
         reference_point_xy_m=point,
         force_xy_n=force,
-        couple_z_nm=record["three_link_reference"]["interface_couple_at_delivery_nm"],
-        linear_velocity_xy_m_s=np.zeros(2),
-        angular_velocity_z_rad_s=0.0,
+        couple_z_nm=float(arrays["three_link__couple"][index, 2]),
+        linear_velocity_xy_m_s=arrays["three_link__velocity"][index, :2],
+        angular_velocity_z_rad_s=float(
+            arrays["three_link__angular_velocity"][index, 2]
+        ),
     )
     fig = plt.figure(figsize=(11.5, 7.0))
     for panel, angle in enumerate(np.linspace(0.0, 2.2, 6)):
@@ -265,7 +334,10 @@ def fig_rotated_wrenches(arrays: dict[str, np.ndarray], record: dict) -> None:
             color=COLORS["three"],
             lw=3,
         )
-        ax.set_title(f"Frame {panel + 1}: {np.degrees(angle):.0f}°")
+        ax.set_title(
+            f"Frame {panel + 1}: {np.degrees(angle):.0f}°; "
+            f"P = {rotated.total_power_w:.1f} W"
+        )
         ax.set_xlim(-1.2, 1.2)
         ax.set_ylim(-1.2, 1.2)
         ax.set_zlim(-1.2, 1.2)
@@ -314,26 +386,40 @@ def fig_invariance_residuals(record: dict) -> None:
 def fig_discrepancy_matrix(record: dict) -> None:
     """Render the executed-versus-open evidence boundary as a matrix."""
     rows = record["model_discrepancy_table"]
-    mechanisms = [
-        "Fixed Interface",
-        "Third Coordinate",
-        "Moving Hub",
-        "Closed Loop",
-        "3-D Frame",
-        "Spatial Inverse Dynamics",
-        "Forward Contact",
-        "Articulated Contact",
-    ]
-    matrix = np.full((len(rows), len(mechanisms)), np.nan)
-    for index in range(len(rows)):
-        matrix[index, : index + 1] = 1.0
-    matrix[-1, -1] = 0.0
+    mechanisms = {
+        "interface_wrench": "Interface Wrench",
+        "elastic_coordinate": "Elastic Coordinate",
+        "prescribed_hub": "Prescribed Hub",
+        "closed_loop_geometry": "Loop Geometry",
+        "frame_3d": "3-D Frame",
+        "spatial_inverse_dynamics": "Spatial Inverse",
+        "forward_contact": "Reduced Forward Contact",
+        "articulated_contact": "Articulated Contact",
+    }
+    capability_keys = list(mechanisms)
+    matrix = np.zeros((len(rows), len(capability_keys)))
+    labels: list[list[str]] = []
+    for row_index, row in enumerate(rows):
+        row_labels = []
+        for column_index, capability in enumerate(capability_keys):
+            present = capability in row["capabilities"]
+            matrix[row_index, column_index] = float(present)
+            if not present:
+                row_labels.append("—")
+            elif row["status"] == "not_executed":
+                row_labels.append("Open")
+            else:
+                row_labels.append("Audited")
+        labels.append(row_labels)
     fig, ax = plt.subplots(figsize=(11.5, 6.0))
     cmap = matplotlib.colors.ListedColormap(["#E2E8F0", COLORS["three"]])
-    ax.imshow(
-        np.nan_to_num(matrix, nan=0.0), cmap=cmap, vmin=0.0, vmax=1.0, aspect="auto"
+    ax.imshow(matrix, cmap=cmap, vmin=0.0, vmax=1.0, aspect="auto")
+    ax.set_xticks(
+        range(len(capability_keys)),
+        [mechanisms[key] for key in capability_keys],
+        rotation=25,
+        ha="right",
     )
-    ax.set_xticks(range(len(mechanisms)), mechanisms, rotation=25, ha="right")
     tier_labels = [
         row["tier"]
         .replace("two_hand", "two-hand")
@@ -346,14 +432,9 @@ def fig_discrepancy_matrix(record: dict) -> None:
         for row in rows
     ]
     ax.set_yticks(range(len(rows)), tier_labels)
-    for row_index, row in enumerate(rows):
-        for col_index in range(len(mechanisms)):
-            if col_index > row_index:
-                label = "—"
-            elif row["status"] == "not_executed" and col_index == len(mechanisms) - 1:
-                label = "Open"
-            else:
-                label = "Audited"
+    for row_index, _row in enumerate(rows):
+        for col_index in range(len(capability_keys)):
+            label = labels[row_index][col_index]
             ax.text(
                 col_index,
                 row_index,
@@ -371,9 +452,10 @@ def fig_discrepancy_matrix(record: dict) -> None:
 
 def main() -> None:
     """Render all mechanism-ladder figures as PDF and SVG."""
+    _style()
     FIG_DIR.mkdir(parents=True, exist_ok=True)
     record, arrays = _load()
-    fig_ladder_schematic()
+    fig_ladder_schematic(record)
     fig_three_link_observables(arrays, record)
     fig_mobile_hub(arrays)
     fig_closed_loop(arrays)
