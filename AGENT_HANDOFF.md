@@ -6,9 +6,9 @@ Update this file with every PR and every push to main.
 ## Where the Repo Is Heading
 
 - **#8557 Comprehensive Scientific Claim Audit and Open Golf Modeling
-  Program** — PRs #8558–#8563 are on `main`; branch
-  `research/8557-optimal-control-audit` continues the fail-closed audit
-  authority. It inventories all 882 narrative candidates across the 32-source
+  Program** — PRs #8558–#8564 are on `main`; branch
+  `research/8557-foundational-mechanics-audit` continues the fail-closed audit
+  authority. It inventories all 889 narrative candidates across the 32-source
   Quarto paper and reconciles all 18 public release-claim keys without calling
   the review complete. The registry records that the Biomechanics and Nonlinear Control
   NotebookLM reviews are pending renewed network authentication and that Tools
@@ -35,18 +35,25 @@ scripts.research.proximal_distal_energy.claim_audit inventory`, then
   torque ablation, and exposes White's second-order release-timing result and
   constant-positive-torque penalty as genuine model disagreement. It adds a
   source-level contrast matrix and qualifies Miura, Nesbit--McGinnis, and Sharp
-  claims. The fourth local slice removes the collective "expert-like"
+  claims. The fourth merged slice removes the collective "expert-like"
   characterization of four non-equivalent optimizers and records their exact
   objectives, speeds or carry distances, actuator timings, omitted degrees of
-  freedom, and validation boundaries. Current local authority: 882 candidates,
-  32 reviewed, 34 registered atomic claims, and 850 unadjudicated candidates.
-  Registry validation passes; render, inspect, release-validate, and protected-
-  merge this slice before treating these updated counts as remote-main evidence.
-  The required Tools side task is not complete: draft PR #4414 at exact head
-  `393f80e8` is stacked on #4413; its previously failing standard quality gate
-  and hosted Playwright job are green, while protected runner-selected contexts
-  remain queued. Completion still requires protected merge, immutable pinning,
-  deterministic replay, sensitivity adequacy, and PyQt6/React parity.
+  freedom, and validation boundaries. PR #8564 merged as exact remote-main
+  commit `09321c2e63dc801092443f068495d785f1b2d142`. The fifth local slice
+  corrects universal inertia-coupling and affine-decomposition language,
+  separates Bunn's heuristic from model and empirical evidence, matches the
+  Feltner--Dapena decomposition to the 1989 Part I/II papers rather than the
+  1986 inverse-dynamics paper, preserves Putnam's explicit negative findings,
+  and bounds the Herring--Chapman and Marshall--Elliott transport claims.
+  Current local authority: 889 candidates, 44 reviewed, 43 registered atomic
+  claims, and 845 unadjudicated candidates. Registry validation passes; render,
+  inspect, release-validate, and protected-merge this slice before treating the
+  new counts as remote-main evidence.
+  The required Tools side task is not complete. Its dispersion slice received
+  final independent approval at `71634bf7` and is being integrated above PR
+  #4414 while the approved locus/browser stack is preserved. Completion still
+  requires protected merge, immutable pinning, deterministic replay,
+  sensitivity adequacy, and PyQt6/React parity.
 
 - **#8511 interactive proximal--distal dynamics workbench** — branch
   `feat/proximal-distal-workbench-integration` makes the pendulum launcher
