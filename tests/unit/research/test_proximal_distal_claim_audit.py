@@ -107,6 +107,47 @@ def test_candidate_id_is_stable_when_unrelated_lines_are_inserted_above(
 
 
 @pytest.mark.unit
+def test_candidate_inventory_resumes_after_labeled_display_math(
+    tmp_path: Path,
+) -> None:
+    master = tmp_path / "paper.qmd"
+    master.write_text(
+        "Narrative before the registered equation.\n\n"
+        "$$\n"
+        "M(q) \\ddot q = \\tau - b(q, \\dot q).\n"
+        "$$ {#eq-motion}\n\n"
+        "Narrative after the equation remains auditable [@study].\n",
+        encoding="utf-8",
+    )
+
+    inventory = build_candidate_inventory(master, repository_root=tmp_path)
+
+    assert inventory["candidate_count"] == 2
+    assert [candidate["line_start"] for candidate in inventory["candidates"]] == [
+        1,
+        7,
+    ]
+    assert inventory["candidates"][1]["citation_keys"] == ["study"]
+
+
+@pytest.mark.unit
+def test_source_digest_is_invariant_to_checkout_line_endings(tmp_path: Path) -> None:
+    master = tmp_path / "paper.qmd"
+    source = "First auditable paragraph.\n\nSecond auditable paragraph.\n"
+    master.write_bytes(source.encode("utf-8"))
+    lf_digest = build_candidate_inventory(master, repository_root=tmp_path)[
+        "source_digest"
+    ]
+
+    master.write_bytes(source.replace("\n", "\r\n").encode("utf-8"))
+    crlf_digest = build_candidate_inventory(master, repository_root=tmp_path)[
+        "source_digest"
+    ]
+
+    assert crlf_digest == lf_digest
+
+
+@pytest.mark.unit
 def test_registry_rejects_duplicate_claim_identifiers(tmp_path: Path) -> None:
     registry = {
         "schema_version": "proximal-distal-claim-audit-v1",

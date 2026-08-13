@@ -6,9 +6,9 @@ Update this file with every PR and every push to main.
 ## Where the Repo Is Heading
 
 - **#8557 Comprehensive Scientific Claim Audit and Open Golf Modeling
-  Program** — PRs #8558, #8559, and #8560 are on `main`; branch
-  `research/8557-energy-evidence-audit` continues the fail-closed audit
-  authority. It inventories all 567 narrative candidates across the 32-source
+  Program** — PRs #8558–#8561 are on `main`; branch
+  `research/8557-mechanics-evidence-audit` continues the fail-closed audit
+  authority. It inventories all 875 narrative candidates across the 32-source
   Quarto paper and reconciles all 18 public release-claim keys without calling
   the review complete. The registry records that the Biomechanics and Nonlinear Control
   NotebookLM reviews are pending renewed network authentication and that Tools
@@ -18,18 +18,21 @@ scripts.research.proximal_distal_energy.claim_audit inventory`, then
   `validate`, and the focused claim-audit tests. Do not mark the audit complete
   while any candidate remains unadjudicated or treat NotebookLM output as an
   original scientific source.
-  The first external-evidence slice on `main` corrected overgeneralized framing,
+  The first two external-evidence slices on `main` corrected overgeneralized framing,
   distinguished ground reactions from energetic origin, and checked seven
-  additional atomic claims. The active second slice replaces location-sensitive
+  additional atomic claims. The second slice replaced location-sensitive
   candidate IDs with source/content/duplicate-ordinal identity and corrects a
   substantive literature contradiction: Anderson (2006) and Kenny (2008)
   reported proximal-to-distal increases in peak kinetic-energy magnitude but
   not proximal-to-distal peak timing. It also qualifies torso-pelvis
   associations, X-factor method sensitivity, shot-timing inference, and causal
-  claims about casting. Current local authority: 567 candidates, 18 reviewed,
-  21 registered atomic claims, and 549 unadjudicated candidates. Focused audit
-  tests and registry validation pass; render and merge this slice before
-  treating those updated counts as remote-main evidence.
+  claims about casting. A subsequent parser audit found that labeled Quarto
+  display-math closers had silently hidden later prose; the repaired inventory
+  adds 308 previously omitted paragraphs and canonicalizes source-digest line
+  endings across platforms. Current local authority: 875 candidates, 18
+  reviewed, 21 registered atomic claims, and 857 unadjudicated candidates.
+  Focused audit tests and registry validation pass; merge the parser repair
+  before treating these coverage counts as remote-main evidence.
 
 - **#8511 interactive proximal--distal dynamics workbench** — branch
   `feat/proximal-distal-workbench-integration` makes the pendulum launcher

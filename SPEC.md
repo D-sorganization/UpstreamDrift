@@ -2661,6 +2661,12 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   inserted above a paragraph. Source path, normalized-content digest, and
   within-source duplicate ordinal define identity; current line ranges remain
   review locators and shall not define identity.
+- **F-8557.1c:** Narrative inventory parsing shall resume after labeled Quarto
+  display-math closers such as `$$ {#eq-label}`; equations remain excluded, but
+  no later prose in the source may be silently omitted.
+- **F-8557.1d:** The paper source digest shall canonicalize CRLF and CR line
+  endings to LF so identical tracked scientific content has one digest across
+  checkout platforms.
 - **F-8557.2:** NotebookLM collections shall be treated as research indexes;
   collection-derived changes require independent original-source verification,
   and authentication or coverage gaps remain explicit.
