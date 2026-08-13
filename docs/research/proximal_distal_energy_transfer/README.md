@@ -100,6 +100,11 @@ canonical catalog maintained by the open-source Tools provider.
 Ongoing validation and extension work is tracked in
 [#8426](https://github.com/D-sorganization/UpstreamDrift/issues/8426) and the
 [interaction-force mechanisms epic](https://github.com/D-sorganization/UpstreamDrift/issues/8443).
+The paper-wide claim audit, biomechanics and nonlinear-control expansion, and
+comprehensive open modeling program are tracked in
+[#8557](https://github.com/D-sorganization/UpstreamDrift/issues/8557), with the
+durable execution contract in
+[`COMPREHENSIVE_RESEARCH_PROGRAM.md`](COMPREHENSIVE_RESEARCH_PROGRAM.md).
 The hand-path attribution, two-hand redundancy, and preactivation validation
 program is tracked in
 [#8458](https://github.com/D-sorganization/UpstreamDrift/issues/8458).
@@ -124,6 +129,8 @@ the finding-by-finding record in
 | [`TERMINOLOGY_AND_CONVENTIONS.md`](TERMINOLOGY_AND_CONVENTIONS.md)                     | Normative scientific vocabulary, frame, wrench, power, and evidence-status rules  |
 | [`ADVANCED_EXPANSION_REVIEW.md`](ADVANCED_EXPANSION_REVIEW.md)                         | Completed review, implemented expansion, and falsifiable next-model roadmap       |
 | [`EVIDENCE_SCHEMA_V2.md`](EVIDENCE_SCHEMA_V2.md)                                       | Falsifiable prediction and named spatial-interface evidence contract              |
+| [`CLAIM_AUDIT_SCHEMA.md`](CLAIM_AUDIT_SCHEMA.md)                                       | Atomic claim, candidate-inventory, source, alternative, and adjudication contract |
+| [`COMPREHENSIVE_RESEARCH_PROGRAM.md`](COMPREHENSIVE_RESEARCH_PROGRAM.md)               | Biomechanics, nonlinear-control, model-ladder, data, and validation roadmap       |
 | [`MODEL_COMPLETION_FALSIFICATION_MATRIX.md`](MODEL_COMPLETION_FALSIFICATION_MATRIX.md) | Claim, alternative-explanation, model-discrepancy, and falsifier register         |
 | [`EXPERIMENTAL_FALSIFICATION_PROTOCOL.md`](EXPERIMENTAL_FALSIFICATION_PROTOCOL.md)     | Frozen human-data acquisition, split, analysis, and inference-boundary protocol   |
 | [`REVIEWER_WORKBENCH.md`](REVIEWER_WORKBENCH.md)                                       | Claim-first figure, evidence, and download index by model tier                    |
@@ -163,6 +170,8 @@ python3 -m scripts.research.proximal_distal_energy.run_spatial_forward_contact_s
 python3 -m scripts.research.proximal_distal_energy.run_uncertainty_control_study
 python3 -m scripts.research.proximal_distal_energy.run_experimental_protocol_dry_run
 python3 -m scripts.research.proximal_distal_energy.run_advanced_biological_bridge
+python3 -m scripts.research.proximal_distal_energy.claim_audit inventory
+python3 -m scripts.research.proximal_distal_energy.claim_audit validate
 python3 -m scripts.research.proximal_distal_energy.qualify_open_release validate
 # robustness analyses
 python3 -m scripts.research.proximal_distal_energy.e1b_bounded_torque

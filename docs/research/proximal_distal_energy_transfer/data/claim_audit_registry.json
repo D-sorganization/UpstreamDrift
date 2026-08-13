@@ -1,0 +1,299 @@
+{
+  "schema_version": "proximal-distal-claim-audit-v1",
+  "paper": {
+    "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
+    "source_digest": "1f495e140ab1035473b29c8410c8cc8248b856163d144a1e24dd6947f4c6bb92",
+    "baseline_commit": "13ea6a69585a42dc1db4b3959440ed95787c9779"
+  },
+  "audit_scope": {
+    "completion_status": "in_progress",
+    "authority": "D-sorganization/UpstreamDrift#8557",
+    "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
+    "current_scope": "Initial high-risk quantitative claims and reconciliation of the public release claim inventory. This is not a complete paper audit."
+  },
+  "dependencies": [
+    {
+      "repository": "D-sorganization/Tools",
+      "issue": 4142,
+      "status": "in_progress",
+      "required_evidence": "Protected merge, immutable UpstreamDrift pin, typed no-impact retention, deterministic ensemble replay, sensitivity adequacy reporting, and PyQt6/React parity."
+    }
+  ],
+  "research_collections": [
+    {
+      "name": "Biomechanics",
+      "provider": "NotebookLM",
+      "review_status": "blocked_on_reauthentication",
+      "authority_status": "research_index_only",
+      "last_check": "2026-08-12",
+      "verification": "Original sources must be independently checked before use."
+    },
+    {
+      "name": "Nonlinear Control",
+      "provider": "NotebookLM",
+      "review_status": "blocked_on_reauthentication",
+      "authority_status": "research_index_only",
+      "last_check": "2026-08-12",
+      "verification": "Original sources must be independently checked before use."
+    }
+  ],
+  "release_claim_inventory": [
+    {
+      "release_claim_key": "interaction_dynamics_planar",
+      "published_status": "supported_at_declared_model_tier",
+      "audit_state": "in_progress"
+    },
+    {
+      "release_claim_key": "geometry_transfer_spatial_common_state",
+      "published_status": "supported_at_declared_model_tier",
+      "audit_state": "in_progress"
+    },
+    {
+      "release_claim_key": "distributed_shaft_modal_reduction",
+      "published_status": "supported_on_synthetic_structural_case",
+      "audit_state": "pending"
+    },
+    {
+      "release_claim_key": "distributed_modal_shaft_coupled_forward",
+      "published_status": "supported_at_declared_planar_mechanism_tier",
+      "audit_state": "pending"
+    },
+    {
+      "release_claim_key": "arm_wrist_allocation_equivalence",
+      "published_status": "supported_for_the_declared_same_state_club_task",
+      "audit_state": "pending"
+    },
+    {
+      "release_claim_key": "preload_continuity_advantage",
+      "published_status": "conditional_on_the_declared_dead_zone_transmission_family",
+      "audit_state": "pending"
+    },
+    {
+      "release_claim_key": "scapular_or_muscle_strategy_identification",
+      "published_status": "unsupported",
+      "audit_state": "pending"
+    },
+    {
+      "release_claim_key": "passive_negative_couple_spatial_forward",
+      "published_status": "supported_at_declared_reduced_contact_tier",
+      "audit_state": "in_progress"
+    },
+    {
+      "release_claim_key": "universal_control_strategy",
+      "published_status": "unsupported",
+      "audit_state": "pending"
+    },
+    {
+      "release_claim_key": "human_experimental",
+      "published_status": "untested",
+      "audit_state": "pending"
+    },
+    {
+      "release_claim_key": "reference_frame_power_invariance",
+      "published_status": "supported_to_declared_numerical_tolerance",
+      "audit_state": "in_progress"
+    },
+    {
+      "release_claim_key": "muscle_redundancy_same_moment",
+      "published_status": "supported_at_reduced_hill_type_tier",
+      "audit_state": "pending"
+    },
+    {
+      "release_claim_key": "canonical_pose_adapter_round_trip",
+      "published_status": "supported_for_coordinate_representation_only",
+      "audit_state": "pending"
+    },
+    {
+      "release_claim_key": "drake_opensim_myosuite_human_validation",
+      "published_status": "unexecuted",
+      "audit_state": "pending"
+    },
+    {
+      "release_claim_key": "state_triggered_model_robustness",
+      "published_status": "conditional_with_force_tradeoff",
+      "audit_state": "pending"
+    },
+    {
+      "release_claim_key": "human_self_stabilization",
+      "published_status": "untested",
+      "audit_state": "pending"
+    },
+    {
+      "release_claim_key": "high_proximal_velocity_universally_beneficial",
+      "published_status": "falsified_at_declared_planar_tiers",
+      "audit_state": "pending"
+    },
+    {
+      "release_claim_key": "shoulder_velocity_control_strategy",
+      "published_status": "conditional_on_phase_geometry_wrist_state_and_objective",
+      "audit_state": "pending"
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "PD-CLAIM-001",
+      "release_claim_key": "interaction_dynamics_planar",
+      "candidate_ids": ["PD-CAND-05bd84a7463e08d3"],
+      "statement": "In the declared 60 N m shoulder-torque double-pendulum case, immediate positive wrist drive produces about 15 percent less impact speed than a passive hinge, while the selected delayed drive produces about 12 percent more.",
+      "classification": "model_conditional_quantitative_result",
+      "published_status": "supported_at_declared_model_tier",
+      "audit_status": "provisionally_reproduced_not_independently_reviewed",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_results.qmd:33"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/results_summary.json",
+        "tests/unit/research/test_proximal_distal_energy.py"
+      ],
+      "model_domain": "Planar fixed-hub rigid-shaft double pendulum with the registered impact event and command grid.",
+      "uncertainty_boundary": "Deterministic registered parameters; not a continuous optimum, population estimate, or human timing prescription.",
+      "competing_explanations": [
+        "Grid and event-definition selection",
+        "Rigid-shaft and fixed-hub simplification",
+        "Actuator magnitude and transition assumptions"
+      ],
+      "negative_controls": [
+        "Passive hinge",
+        "Immediate positive drive",
+        "Parameter and impact-definition sweeps"
+      ],
+      "falsifier": "The ordering or reported ratios fail regeneration at the pinned commit, or reverse under a preregistered equivalent higher-tier intervention.",
+      "adjudication": "The repository has a pinned regression test, but independent implementation review and full source-to-number recomputation remain open.",
+      "reviewer": "Codex initial audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "claim_id": "PD-CLAIM-002",
+      "release_claim_key": "interaction_dynamics_planar",
+      "candidate_ids": ["PD-CAND-d41384cfefc56bd2"],
+      "statement": "The archived WSCG pointwise zero-command reconstruction reaches a negative two-hand midpoint couple of -19.63 N m generated by separated contact forces.",
+      "classification": "project_originated_model_reconstruction",
+      "published_status": "supported_at_declared_model_tier",
+      "audit_status": "provisionally_reproduced_not_independent_evidence",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:222",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03b_hand_path_attribution.qmd:464"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+        "docs/research/proximal_distal_energy_transfer/data/wscg_two_hand_raw/ztcf.csv",
+        "docs/research/proximal_distal_energy_transfer/WSCG_2024_LEGACY_EVIDENCE_AUDIT.md"
+      ],
+      "model_domain": "Pointwise archived planar WSCG tables with registered signs, grip geometry, and zero-command interpretation.",
+      "uncertainty_boundary": "Project-originated hypothesis evidence; not an independent experiment, forward trajectory, or physiological torque estimate.",
+      "competing_explanations": [
+        "Archived sign or frame error",
+        "Reference-point transport error",
+        "Prescribed-state rather than forward persistence"
+      ],
+      "negative_controls": [
+        "Coincident grip points",
+        "Reversed grip separation",
+        "Force-couple reconstruction from both hands"
+      ],
+      "falsifier": "Raw-table reconstruction fails, action-reaction or moment closure fails, or the couple vanishes when evaluated with the registered geometry.",
+      "adjudication": "Reproducible within registered project artifacts; independence and biological interpretation are explicitly withheld.",
+      "reviewer": "Codex initial audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "claim_id": "PD-CLAIM-003",
+      "release_claim_key": "interaction_dynamics_planar",
+      "candidate_ids": ["PD-CAND-b28ad6439c735a98"],
+      "statement": "The forward constrained planar two-arm zero-command branch retains a negative force-generated club couple for 50 ms and reaches -7.43 N m.",
+      "classification": "model_conditional_forward_counterfactual",
+      "published_status": "supported_at_declared_model_tier",
+      "audit_status": "provisionally_reproduced_not_independently_reviewed",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd:252"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.json",
+        "scripts/research/proximal_distal_energy/forward_two_arm.py"
+      ],
+      "model_domain": "Fixed-shoulder planar constrained two-arm model, rigid club, declared 0.200 s same-state branch and 50 ms horizon.",
+      "uncertainty_boundary": "Mechanical persistence in one reduced model; not muscle passivity, human use, or an optimal strategy.",
+      "competing_explanations": [
+        "Constraint projection work",
+        "Numerical stabilization",
+        "Fixed shoulder base",
+        "Rigid point-contact geometry"
+      ],
+      "negative_controls": [
+        "Coincident grip moment arms",
+        "Commanded continuation",
+        "Timestep and projection refinement"
+      ],
+      "falsifier": "The sign or duration fails timestep/stabilization convergence, contact power does not close, or zero moment arms do not collapse the couple.",
+      "adjudication": "The declared model result is bounded correctly in the prose; independent solver reproduction remains open.",
+      "reviewer": "Codex initial audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "claim_id": "PD-CLAIM-004",
+      "release_claim_key": "geometry_transfer_spatial_common_state",
+      "candidate_ids": ["PD-CAND-98723ed6bea5e6f6"],
+      "statement": "MuJoCo inverse dynamics and an independent Lagrange-Christoffel formulation agree to a maximum relative discrepancy of 2.14e-11 across the registered reduced spatial common-state study.",
+      "classification": "cross_formulation_numerical_verification",
+      "published_status": "supported_at_declared_model_tier",
+      "audit_status": "provisionally_reproduced_not_cross_engine_forward_validation",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:120"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json",
+        "scripts/research/proximal_distal_energy/spatial_full_body.py"
+      ],
+      "model_domain": "Reduced nonplanar common states with prescribed hand loads and two formulations derived from the same hashed model.",
+      "uncertainty_boundary": "A common-state inverse-dynamics implementation check, not independent model identity, forward contact, anatomy, or human validation.",
+      "competing_explanations": [
+        "Shared model or parameter error",
+        "Non-independent algebra generation",
+        "Agreement limited to sampled common states"
+      ],
+      "negative_controls": [
+        "Reversed hand moment arm",
+        "Coincident hands",
+        "Proper-frame power invariance"
+      ],
+      "falsifier": "Recomputation exceeds the preregistered tolerance or an independently authored formulation disagrees after convention alignment.",
+      "adjudication": "The paper appropriately limits this to cross-formulation common-state verification; stronger independence remains open.",
+      "reviewer": "Codex initial audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "claim_id": "PD-CLAIM-005",
+      "release_claim_key": "passive_negative_couple_spatial_forward",
+      "candidate_ids": ["PD-CAND-060fc968e26a2400"],
+      "statement": "The reduced MuJoCo and Pinocchio forward-contact killswitch branches retain a negative swing-normal contact couple for 37.5 ms under the declared compliant-interface model.",
+      "classification": "cross_engine_model_conditional_forward_counterfactual",
+      "published_status": "supported_at_declared_reduced_contact_tier",
+      "audit_status": "provisionally_reproduced_not_anatomical_validation",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:196"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json",
+        "scripts/research/proximal_distal_energy/spatial_forward_engines.py"
+      ],
+      "model_domain": "Reduced 3-D rigid club and finite-mass translational hand carriages with paired compliant contacts and no direct club actuation.",
+      "uncertainty_boundary": "Cross-engine reduced-mechanism evidence; articulated arms, measured grip tissue, muscles, and equipment calibration are absent.",
+      "competing_explanations": [
+        "Matched contact-law artifact",
+        "Carriage-model simplification",
+        "Event-alignment or timestep error",
+        "Omitted articulated-arm dynamics"
+      ],
+      "negative_controls": [
+        "Coincident contacts",
+        "Reversed moment arm",
+        "Same-state grounded-driver killswitch",
+        "Timestep-refined energy residual"
+      ],
+      "falsifier": "The persistence falls outside the registered cross-engine equivalence region, fails refinement, or disappears in articulated calibrated contact without an identified discrepancy term.",
+      "adjudication": "The claim is narrowly framed and has useful controls, but independent contact models and articulated spatial transport remain required.",
+      "reviewer": "Codex initial audit",
+      "last_verified_on": "2026-08-12"
+    }
+  ]
+}

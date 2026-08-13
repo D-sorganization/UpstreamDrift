@@ -1,0 +1,126 @@
+# Comprehensive Open Golf Modeling Research Program
+
+## Program Objective
+
+The proximal-to-distal framework becomes the common language for an open,
+engine-neutral program that tests golf-swing and human-motion mechanisms from
+analytical mechanics through governed human evidence. The program is managed
+by [epic #8557](https://github.com/D-sorganization/UpstreamDrift/issues/8557),
+a child of the existing model-completion epic. It is not a promise that the
+current theory will survive. A useful outcome may be support, contradiction,
+inconclusive evidence, or discovery that a proposed quantity is not
+identifiable.
+
+## Program Questions
+
+The next model or experiment must answer a discriminating question:
+
+1. Which forces and couples transfer power, redirect momentum, store elastic
+   energy, or merely satisfy a constraint?
+2. Which effects arise from achieved state and geometry, which require current
+   control, and which depend on passive, contact, shaft, base, or impact terms?
+3. Which bilateral hand, joint, muscle, or ground contributions are identifiable
+   from the proposed measurements?
+4. Which timing or state-triggered programs remain effective under uncertainty,
+   delay, phase error, loading limits, and competing performance objectives?
+5. Which model predictions survive independent formulations, contact models,
+   equipment calibration, subject scaling, and held-out human data?
+
+## Model Ladder and Promotion Gates
+
+| Tier                             | Question Added                                                                                      | Promotion Gate                                                                                                               |
+| -------------------------------- | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Analytical Double Pendulum       | Exact drift/control, energy, geometry, and intervention identities                                  | Closed equations, manufactured cases, convergence, and complete work-energy accounting                                       |
+| Forward Planar Two-Arm           | Bilateral constraint forces, direct wrist moment, force-generated couple, and internal modes        | Rank/conditioning, no silent regularization, action-reaction, contact power, and killswitch controls                         |
+| Moving Base and Distributed Club | Endogenous base motion, calibrated bending/torsion, grip compliance, and recoil                     | Base plus strain-energy closure, modal calibration uncertainty, and discrepancy against a beam reference                     |
+| Articulated Spatial Body         | Scapula, shoulder, forearm, wrists, hands, ground contacts, plane evolution, and long-axis rotation | Common named wrenches/twists, two independent engines, contact-model discrepancy, and proper-frame invariance                |
+| Neuromusculoskeletal             | Activation delay, muscle-tendon dynamics, redundancy, co-contraction, fatigue, and strength limits  | Subject-scaled paths, identifiability, posterior predictive checks, and no inference of muscle action from net moments alone |
+| Club-Ball-Flight                 | Strike location, impact impulse, face/path, equipment, and aerodynamic uncertainty                  | Momentum/energy loss accounting, calibrated impact parameters, and launch/flight validation                                  |
+| Human and Population             | Participant-specific and hierarchical variability, prospective falsification, and transportability  | Governed synchronized data, participant holdout, preregistered outcomes, and preserved null/contradictory findings           |
+
+Added fidelity is justified only when it reduces a registered discrepancy or
+makes a new hypothesis testable. Degrees of freedom alone do not constitute
+progress.
+
+## Biomechanics Program
+
+The source and model map must cover pelvis-thorax coupling, scapulothoracic and
+glenohumeral motion, forearm rotation, multi-axis wrist motion, bilateral grip
+compliance, lower-limb and ground pathways, and the club as a distributed
+structure. Muscle-tendon work must separate activation, contractile, series
+elastic, passive, and joint-level quantities. Anthropometric, skill, sex, age,
+injury, handedness, impairment, equipment, and task variation enter as declared
+domains or stratifiers, not hidden residual variance.
+
+Every biological statement must name the measurement that could distinguish it
+from alternatives. Candidate modalities include synchronized motion capture,
+force plates, instrumented bilateral grip wrenches, shaft sensing, EMG with
+electromechanical-delay treatment, ultrasound where tissue behavior is central,
+club/ball impact measurement, and launch-monitor outcomes. Sensor bandwidth,
+coordinate calibration, soft-tissue artifact, filtering, synchronization,
+missingness, and inverse-dynamics sensitivity propagate to the claim level.
+
+## Nonlinear Dynamics and Control Program
+
+The swing is treated as a hybrid constrained nonlinear system with uncertain
+events, unilateral contacts, impacts, actuator states, and state-dependent
+geometry. The program evaluates observability, controllability,
+identifiability, constraint singularities, internal-force null spaces,
+finite-time stability, phase sensitivity, basins, and bifurcations where the
+mathematics is applicable.
+
+Open-loop timing, state-triggered policies, impedance control, robust model
+predictive control, stochastic or optimal feedback control, differential
+dynamic programming, and risk-sensitive formulations are compared under the
+same actuator and state constraints. Speed, face/path, strike, balance,
+loading, effort proxy, consistency, and robustness remain separate objectives.
+The output is a Pareto set and failure map, not a universal optimum.
+
+Parameter estimation uses structural and practical identifiability checks
+before fitting. Bayesian or simulation-based inference requires prior and
+posterior predictive checks, held-out participants or trajectories, explicit
+model discrepancy, and sensitivity to event and measurement models.
+
+## Dependency on the Side Task
+
+[Tools #4142](https://github.com/D-sorganization/Tools/issues/4142) owns the
+reusable ensemble-variation, typed outcome, quiet-zone, and global-sensitivity
+authority. This program does not copy that logic. Completion requires protected
+merge of its implementation, deterministic replay across worker counts,
+retention of misses and failures as scientific outcomes, adequacy and method
+assumption reporting, matched desktop/web behavior, an immutable UpstreamDrift
+pin, and cross-repository parity fixtures.
+
+## Research Collection Review
+
+The Biomechanics and Nonlinear Control NotebookLM collections are reviewed for
+contrary evidence, disputed definitions, missing mechanisms, measurement
+limitations, model classes, and decisive experiments. Each collection receives
+a source manifest and coverage note. Notebook output remains a lead; every
+change to the paper or bibliography is supported by an independently checked
+original source. The initial 2026-08-12 live review is explicitly pending
+because the local profile failed network token validation.
+
+## Delivery Milestones
+
+1. **Audit Infrastructure:** deterministic candidate inventory, strict claim
+   schema, release reconciliation, link/source checks, and figure-data checks.
+2. **Paper Adjudication:** every material claim classified and reviewed; every
+   number and figure regenerated; weak claims narrowed, relabeled, or removed.
+3. **Research Map:** source manifests, coverage gaps, competing hypotheses,
+   model-to-measurement map, and preregistered experiment matrix.
+4. **Reusable Uncertainty Authority:** Tools #4142 merged, pinned, and parity
+   verified.
+5. **Articulated Spatial Model:** calibrated grip and club, whole-body contact,
+   independent-engine comparison, and discrepancy report.
+6. **Neuromuscular and Control Models:** activation, redundancy,
+   identifiability, robust control, and held-out simulation evidence.
+7. **Human Falsification:** governed data, participant holdout, preregistered
+   tests, and transparent null or contradictory results.
+8. **Open Release:** tutorials, reviewer surfaces, qualified manifests,
+   protected merges, visual QA, free artifacts, and archival persistent ID.
+
+Each milestone updates the repository handoff, falsification matrix, evidence
+schema, release qualification, and AffineDrift's pinned review surface. The
+GitHub epic is the scheduling authority; this document defines the durable
+scientific contract.
