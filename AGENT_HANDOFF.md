@@ -7,28 +7,29 @@ Update this file with every PR and every push to main.
 ## Where the Repo Is Heading
 
 - **#8557 Comprehensive Scientific Claim Audit and Open Golf Modeling
-  Program** — PR **#8576** and the concurrent rotating-base integration are on
-  exact remote main `820f1e79f68ad0b56ce7b248ac3886762f3fe609`. Branch
-  `research/8557-coupled-base-compliance-audit` is published as ready PR
-  **#8578** and is the active sixteenth fail-closed slice. It maps all 43
-  coupled-base/compliant-club candidates to
-  PD-CLAIM-147 through PD-CLAIM-160. The primary acceleration-constraint bias
-  is now analytic and independently directionally audited; all five sensitivity
-  trajectories use the same 0.5 ms step. The reference evidence separately
-  closes club-side point/wrench power to 1.28e-13 W and complete two-sided
-  ideal-constraint power to 2.65e-13 W. Projection energy is retained alongside
-  the raw work--energy residual so numerical cancellation cannot masquerade as
-  total error closure. Current authority: 914 candidates, 513 uniquely
-  reviewed, 160 atomic claims, and 401 unadjudicated. The regenerated
-  202-page, 1,395,245-byte PDF retains 183 URI links and 235 outline entries;
-  physical pages 102--107 passed visual inspection. The 371-artifact release
-  bundle validates. Remaining slice gates are scoped pre-commit, protected PR,
-  and exact remote-main verification.
-  The required Tools side task remains active at live revision 31. Its paired
-  archive correction now strictly rejects unknown runtime fields and duplicate
-  JSON keys, including escape-equivalent duplicates at any nesting level; 925
-  React tests and production browser coverage are green, with independent
-  re-review next. Completion still requires its protected merge, immutable
+  Program** — coupled-base/compliance PR **#8578** protected-squash-merged at
+  exact remote main `16a767a8386b52e52a7a24ea718e7d54b91cd8ae`.
+  Branch `research/8557-forward-two-hand-audit` is the active seventeenth
+  fail-closed slice. It maps all 42 candidates in the forward constrained
+  two-hand chapter to PD-CLAIM-161 through PD-CLAIM-174, preserving one
+  content-identical candidate's reciprocal mapping to PD-CLAIM-003. The primary
+  constraint bias is analytic and the five-point directional audit closes to
+  1.04e-9 m/s². Club-side point/wrench power closes to 6.68e-13 W and complete
+  two-sided constraint power to 1.27e-12 W. The chapter now discloses that the
+  0.778 J absolute cumulative projection correction exceeds the 0.096 J raw
+  work--energy residual and uses “zero-command persistence,” not biological
+  passivity. Current authority: 915 candidates, 554 uniquely reviewed, 174
+  atomic claims, and 361 unadjudicated. The full paper renders as a visually
+  inspected 202-page, 1,396,091-byte PDF with 183 live URI links and 235
+  outline entries; physical pages 84--90 were inspected, and the 371-artifact
+  release bundle validates with no mismatches. Remaining slice gates are scoped
+  repository checks, protected PR, and exact remote-main verification.
+  The required Tools side task remains active at live revision 32. Its strict
+  audit foundation now includes noncoercive cross-runtime manifest readers,
+  exact unique leaf locators, ancestor clipping, manifest-owned thresholds,
+  per-tab control ordering, a real PyQt launch-scatter preview, the Variation
+  landing canvas, expanded overlap checks, and 18 diagnostic images across both
+  DPI scales. Completion still requires its protected merge, immutable
   UpstreamDrift pin, typed no-impact retention, deterministic ensemble replay,
   sensitivity adequacy, and PyQt6/React parity. Biomechanics and Nonlinear Control NotebookLM collections
   remain blocked on manual reauthentication; treat them only as research

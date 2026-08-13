@@ -1,9 +1,9 @@
 {
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper_source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-  "source_digest": "7f4563bfefad40444516cc1994a80e57407c795cfd019c0844859a594a57a5f0",
+  "source_digest": "561a66870db5c2930e94460a929324c94331c92503ab4c76eee97cb509bf219e",
   "source_count": 32,
-  "candidate_count": 914,
+  "candidate_count": 915,
   "candidates": [
     {
       "candidate_id": "PD-CAND-53acb1d15368459c",
@@ -5897,10 +5897,26 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-37e1df40c0e1b8cf",
+      "candidate_id": "PD-CAND-61254da8a1e466ab",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd",
       "line_start": 113,
-      "line_end": 116,
+      "line_end": 118,
+      "text": "The primary acceleration-constraint bias $\\dot J(q,\\dot q)\\dot q$ is evaluated from the exact centripetal terms of both arms and both club grip offsets. It is not obtained by numerically differentiating $J$ inside the KKT solve. An independent five-point centered directional derivative agrees within $1.04\\times10^{-9}$ m/s\u00b2 over the reference trajectory, below the registered $10^{-7}$ m/s\u00b2 tolerance.",
+      "text_sha256": "33f4b24a34dd9353bbb6e6d68b1f9f34fc7ac5f42402ef927694989686c06c39",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": false,
+      "priority_score": 2,
+      "triage_flags": [
+        "numeric"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-37e1df40c0e1b8cf",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd",
+      "line_start": 120,
+      "line_end": 123,
       "text": "The applied generalized force is not a six-entry vector copied directly into the seven coordinates. Wrist torque is an internal action--reaction pair: a positive wrist torque acts positively on the club and negatively on the two arm coordinates that contribute to the corresponding forearm angle. Thus,",
       "text_sha256": "5072be992e3d4602c0a29c3a494a2d4e164c3298534e363bdb2b00c02536789f",
       "citation_keys": [],
@@ -5913,8 +5929,8 @@
     {
       "candidate_id": "PD-CAND-9301fa63af8c9eba",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd",
-      "line_start": 130,
-      "line_end": 131,
+      "line_start": 137,
+      "line_end": 138,
       "text": "This mapping prevents the directly applied wrist torque from being silently counted as a contact-force couple.",
       "text_sha256": "6e9ac6886043e41756b3dfd9ad73cbb7bcf607f4cee4f1ccd2d048ba20c50c2b",
       "citation_keys": [],
@@ -5927,8 +5943,8 @@
     {
       "candidate_id": "PD-CAND-88e0436c9c6383e9",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd",
-      "line_start": 135,
-      "line_end": 137,
+      "line_start": 142,
+      "line_end": 144,
       "text": "The reference trajectory is integrated for 0.400 s with a 0.25 ms step. A velocity-Verlet update is paired with mass-metric position and velocity projection. For a position residual $C$, the local correction is",
       "text_sha256": "472c92c6f283b9d61763fa3fa6216284e9aa610e63711700cd60d08c1d9678b4",
       "citation_keys": [],
@@ -5943,8 +5959,8 @@
     {
       "candidate_id": "PD-CAND-26d02d0b99180d67",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd",
-      "line_start": 145,
-      "line_end": 148,
+      "line_start": 152,
+      "line_end": 155,
       "text": "The projection is iterated to the declared tolerance. Velocity is projected onto $J\\dot q=0$ with the same mass metric. Projection correction and its numerical energy change are recorded separately. They are numerical stabilization diagnostics and are **not** reclassified as physical work.",
       "text_sha256": "1d65c59e3a141759f56a0b6440ec8c0142bf63c8d7a90568b02efdf01becc478",
       "citation_keys": [],
@@ -5959,8 +5975,8 @@
     {
       "candidate_id": "PD-CAND-a9fa003260d9a2eb",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd",
-      "line_start": 150,
-      "line_end": 153,
+      "line_start": 157,
+      "line_end": 160,
       "text": "The initial club center is $(0,-0.50)$ m, the club angle is 0.16 rad, and the arm angles are obtained by inverse kinematics on specified elbow branches. The initial generalized velocity is zero. The open-loop command is a smooth test input, not an inferred human torque history:",
       "text_sha256": "bbf52d5cc0fb09f0946f196c59f8292522b5a4efdeb5189b455f74cf5c6ef389",
       "citation_keys": [],
@@ -5975,8 +5991,8 @@
     {
       "candidate_id": "PD-CAND-8522a7e840019a3a",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd",
-      "line_start": 155,
-      "line_end": 155,
+      "line_start": 162,
+      "line_end": 162,
       "text": "| Applied Torque | Command Over $0\\le t\\le0.4$ s (N m) |",
       "text_sha256": "c7f984b4bdd764637fb950056799a7406cdaa583dd65d3a9571524d7f67d2829",
       "citation_keys": [],
@@ -5991,8 +6007,8 @@
     {
       "candidate_id": "PD-CAND-6af35ea67e9a9188",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd",
-      "line_start": 157,
-      "line_end": 162,
+      "line_start": 164,
+      "line_end": 169,
       "text": "| Right Shoulder | $18+4t/0.4$ | | Right Elbow | $7-1.5t/0.4$ | | Right Wrist | $-3+2t/0.4$ | | Left Shoulder | $16+3t/0.4$ | | Left Elbow | $6-t/0.4$ | | Left Wrist | $2-t/0.4$ |",
       "text_sha256": "3d9de1972f732a49bc8db80c461d2e1c7ef33869804afe2263ca9a3da56055a4",
       "citation_keys": [],
@@ -6007,8 +6023,8 @@
     {
       "candidate_id": "PD-CAND-fad8eca050d5246b",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd",
-      "line_start": 164,
-      "line_end": 168,
+      "line_start": 171,
+      "line_end": 175,
       "text": "The commands create a repeatable state history through which mechanism interventions can be compared. They are not optimized for clubhead speed and are not presented as normative technique. More complete forward golf models have shown why joint-torque timing, body motion, and objective definition must be treated together [@mackenzie2009; @balzerson2016].",
       "text_sha256": "cdead35d198fef687a23f69b99b69d706845ef8e26ccce1e9b3b8552a9e1b262",
       "citation_keys": [
@@ -6029,8 +6045,8 @@
     {
       "candidate_id": "PD-CAND-e8d0aef6d853c04c",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd",
-      "line_start": 172,
-      "line_end": 172,
+      "line_start": 179,
+      "line_end": 179,
       "text": "The force-generated couple about the declared club center is",
       "text_sha256": "c7c656e08c4946ee864ca27c5b4d616c8929943c187b3cdfdcbeee5ffeeef736",
       "citation_keys": [],
@@ -6043,8 +6059,8 @@
     {
       "candidate_id": "PD-CAND-397e2b8d834a389e",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd",
-      "line_start": 180,
-      "line_end": 184,
+      "line_start": 187,
+      "line_end": 191,
       "text": "The direct wrist contribution is stored separately as $M_w=u_{Rw}+u_{Lw}$. The total rotational action on the club is therefore $M_F+M_w$ before any other modeled external moment. This distinction is the central test: $M_F<0$ cannot be attributed algebraically to a negative applied wrist torque because $M_F$ is computed only from the two constraint forces.",
       "text_sha256": "a7ffcef5c53813d31f41c896ee62a5682922b17495f02d44068b767607227b11",
       "citation_keys": [],
@@ -6059,8 +6075,8 @@
     {
       "candidate_id": "PD-CAND-b3bfd17b6264c089",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd",
-      "line_start": 186,
-      "line_end": 186,
+      "line_start": 193,
+      "line_end": 193,
       "text": "The contact forces are also transformed into common and differential modes,",
       "text_sha256": "a95fc03ae9e7b89290e37f4f53d5c89218252e2794b06e6fec7c5f2ffe2cdcef",
       "citation_keys": [],
@@ -6073,8 +6089,8 @@
     {
       "candidate_id": "PD-CAND-8163939437c565ea",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd",
-      "line_start": 194,
-      "line_end": 197,
+      "line_start": 201,
+      "line_end": 204,
       "text": "The resultant $R$ controls club translation. The differential mode $D$ becomes rotationally effective through the signed grip moment arms. Large opposing forces can therefore produce a substantial couple with a modest resultant, as is familiar in multifinger prehension [@zatsiorsky2008prehension].",
       "text_sha256": "cc70ad94bec24e45ff3be4267c4f87832b20f4c5908b2c703083f222fc1fdee2",
       "citation_keys": [
@@ -6093,8 +6109,8 @@
     {
       "candidate_id": "PD-CAND-a53eaf39b520a0cb",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd",
-      "line_start": 199,
-      "line_end": 200,
+      "line_start": 206,
+      "line_end": 207,
       "text": "Finally, contact power is evaluated both pointwise and through the reduced wrench identity:",
       "text_sha256": "d861b6e51cfbe489c9abe43d1f953994fb91ee072379eb1a80eedfff294d8e37",
       "citation_keys": [],
@@ -6105,12 +6121,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-10222e4e0459606c",
+      "candidate_id": "PD-CAND-c7fb0952d52520bf",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd",
-      "line_start": 207,
-      "line_end": 211,
-      "text": "The two forms agree to $6.3\\times10^{-13}$ W in the reference run. Couple sign alone still does not determine energy transfer: rotational power also depends on club angular velocity, while the resultant contributes translational power. This is consistent with standard joint-force and segment-power bookkeeping [@winter2009].",
-      "text_sha256": "55f9ae2c83e628ea73230e1568d6e157f702ceb3f3a7632174afd46326686b8f",
+      "line_start": 214,
+      "line_end": 218,
+      "text": "The two forms agree to $6.68\\times10^{-13}$ W in the reference run. Couple sign alone still does not determine energy transfer: rotational power also depends on club angular velocity, while the resultant contributes translational power. This is consistent with standard joint-force and segment-power bookkeeping [@winter2009].",
+      "text_sha256": "1ad8117c604046787991f276f6bb71fbf2115baf2bda10a6fd6dc556b93d301a",
       "citation_keys": [
         "winter2009"
       ],
@@ -6126,8 +6142,8 @@
     {
       "candidate_id": "PD-CAND-62ddaed07fecdb8a",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd",
-      "line_start": 215,
-      "line_end": 215,
+      "line_start": 222,
+      "line_end": 222,
       "text": "Four intervention families expose the result to contradiction.",
       "text_sha256": "b772827beffe46e644951426ec62170811880a812f456883abcae5e3d473bb5c",
       "citation_keys": [],
@@ -6142,8 +6158,8 @@
     {
       "candidate_id": "PD-CAND-8b166965d8ff0e64",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd",
-      "line_start": 217,
-      "line_end": 231,
+      "line_start": 224,
+      "line_end": 238,
       "text": "1. **Matched-State Torque Killswitch.** At 0.200 s, the achieved $q$ and $\\dot q$ are copied bit for bit into a new forward trajectory and all six commands are set to zero for 50 ms. Additional branches start at 0.180, 0.190, 0.210, 0.220, and 0.240 s. 2. **Zero Contact Moment Arm.** Both grip offsets are set to zero and a new constraint-consistent initial state is constructed. If @eq-forward-two-hand-force-couple is implemented correctly, the force-generated couple must vanish even though nonzero contact forces may remain. 3. **Timestep Refinement.** The 0.400 s baseline is repeated at 2.0, 1.0, and 0.5 ms. The sign-reversal time and minimum couple must remain stable while the work--energy residual contracts. 4. **Projection Sensitivity.** The position-projection tolerance is changed from $10^{-8}$ to $10^{-10}$ m at a fixed 1.0 ms step. A mechanism that depends materially on stabilization tolerance is rejected.",
       "text_sha256": "9e3a03227968580c14b9b6daa29f505196872faf7d6433837c9f0e96d10695c4",
       "citation_keys": [],
@@ -6160,8 +6176,8 @@
     {
       "candidate_id": "PD-CAND-464584cc9fe42574",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd",
-      "line_start": 233,
-      "line_end": 235,
+      "line_start": 240,
+      "line_end": 242,
       "text": "These are mechanistic interventions. They are stronger than visual similarity between two curves because each has a declared null consequence and an observable failure mode.",
       "text_sha256": "b68a036f2c7ec6b9b2125bbf0d7de553a609230b8bc289c5e67ba2aac07a70c3",
       "citation_keys": [],
@@ -6174,8 +6190,8 @@
     {
       "candidate_id": "PD-CAND-a5bbe0bc7b95f6c1",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd",
-      "line_start": 241,
-      "line_end": 244,
+      "line_start": 248,
+      "line_end": 251,
       "text": "The baseline force-generated couple first becomes negative at 0.19825 s and reaches $-32.85$ N m over the recorded interval. The direct wrist torque ranges only from $-1.0$ to 0 N m and is excluded from that force-generated series. The late negative value is therefore not a relabeled wrist command.",
       "text_sha256": "3bb3836a1c815b76cf4746dc9ed8af051ce254b7899ebb709f1e40fdd0e173f4",
       "citation_keys": [],
@@ -6190,8 +6206,8 @@
     {
       "candidate_id": "PD-CAND-9d84ecc5e2681325",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd",
-      "line_start": 246,
-      "line_end": 250,
+      "line_start": 253,
+      "line_end": 257,
       "text": "![Forward Two-Hand Interaction-Force Mechanism. The force-generated couple is separated from direct wrist torque (upper left). A zero-command branch starts from the exact 200 ms state and retains a negative couple for the full 50 ms window (upper right). Contact power and common/differential force modes show why moment sign, power sign, and force magnitude are different observables.](figures/fig_forward_two_hand_couple_killswitch.pdf){#fig-forward-two-hand-couple-killswitch}",
       "text_sha256": "c08b14e8e0d23f9100cb8d0f17d4381aef1ee51e23793289184d135cea15ffef",
       "citation_keys": [],
@@ -6208,8 +6224,8 @@
     {
       "candidate_id": "PD-CAND-955caef0fc7773b8",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd",
-      "line_start": 252,
-      "line_end": 257,
+      "line_start": 259,
+      "line_end": 264,
       "text": "At the 0.200 s cut, the inherited force-generated couple is $-2.57$ N m. With all applied commands removed, it remains negative throughout the 50 ms branch and reaches $-7.43$ N m. The commanded continuation becomes more negative, reaching approximately $-13$ N m over the same horizon, but that difference is not the central claim. The decisive observation is that the negative force-generated couple does not collapse to zero when command is removed.",
       "text_sha256": "21010a6ed4f49fa996f9c042425239a426422304da6fa7ee01ac29ca4690218b",
       "citation_keys": [],
@@ -6223,12 +6239,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-e3606734021e47c6",
+      "candidate_id": "PD-CAND-b2d2869ccaf1f7ca",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd",
-      "line_start": 259,
-      "line_end": 264,
-      "text": "The branch ensemble also limits the interpretation. A branch at 0.180 s begins before reversal and crosses negative at 0.185 s. Branches initiated from 0.190 through 0.220 s remain negative for the full 50 ms window. The 0.240 s branch remains negative for 37.25 ms before changing sign. Passive persistence is therefore state dependent and finite; it is not an invariant property of the club or grip.",
-      "text_sha256": "1650d3880924e8169bc48bfce7b6e7e6a63c52c6ca5bcc4dd1c3d8d50755f858",
+      "line_start": 266,
+      "line_end": 271,
+      "text": "The branch ensemble also limits the interpretation. A branch at 0.180 s begins before reversal and crosses negative at 0.185 s. Branches initiated from 0.190 through 0.220 s remain negative for the full 50 ms window. The 0.240 s branch remains negative for 37.25 ms before changing sign. Zero-command persistence is therefore state dependent and finite; it is not an invariant property of the club or grip.",
+      "text_sha256": "8cd0713aff711b5372dcbca9014b7cabf57b9fbdecd3d01c3d12b6afc7db3973",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": true,
@@ -6242,8 +6258,8 @@
     {
       "candidate_id": "PD-CAND-a16367707b70edc4",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd",
-      "line_start": 268,
-      "line_end": 274,
+      "line_start": 275,
+      "line_end": 281,
       "text": "@fig-forward-two-hand-force-geometry displays the actual hand-on-club force vectors with one common scale. Between 0.180 and 0.240 s, the club and arm geometry change the signed moment arms and the tangential components of the two forces. The couple reversal is generated by that evolving vector geometry, not by force magnitude alone. At 0.300 s the force directions and club orientation have changed again, illustrating why a static instruction such as \"pull harder\" cannot specify the sign of $M_F$.",
       "text_sha256": "966d16912cc427faaff6f28c10eb54c105bc3d7bf0a856b6bb3bb7e40b0abafa",
       "citation_keys": [],
@@ -6258,8 +6274,8 @@
     {
       "candidate_id": "PD-CAND-7d44ebaa4cca5310",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd",
-      "line_start": 276,
-      "line_end": 279,
+      "line_start": 283,
+      "line_end": 286,
       "text": "![Two-Hand Force Vectors Through the Couple Reversal. Blue and red arrows are the right- and left-hand forces on the club; all panels use the same force scale. Black denotes the floating club, colored links denote the two arms, and the black point is the declared club center.](figures/fig_forward_two_hand_force_geometry.pdf){#fig-forward-two-hand-force-geometry}",
       "text_sha256": "bead0713b0d90b68f52245ce21130a6548c1f9d59b078f21b8e01b6d2c85ea7b",
       "citation_keys": [],
@@ -6272,8 +6288,8 @@
     {
       "candidate_id": "PD-CAND-69ab5a463b762fdd",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd",
-      "line_start": 281,
-      "line_end": 285,
+      "line_start": 288,
+      "line_end": 292,
       "text": "The zero-moment-arm intervention makes the geometric requirement explicit. When both grip points coincide with the club center, the maximum absolute force-generated couple is exactly 0 N m to machine representation. Contact force alone is insufficient; a nonzero signed lever arm and a transverse force component are jointly necessary.",
       "text_sha256": "3f2c43c3eec2d2ce9656db80020b560c9416c08f524ce6b2208fe1e91d6c1ab9",
       "citation_keys": [],
@@ -6287,26 +6303,27 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-f439740b24a63d6e",
+      "candidate_id": "PD-CAND-77d8a6347e17ff47",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd",
-      "line_start": 289,
-      "line_end": 295,
-      "text": "The reference trajectory retains constraint rank four. The maximum position constraint residual is $9.51\\times10^{-11}$ m, the maximum velocity residual is $3.99\\times10^{-15}$ m/s, the KKT residual is below $3.77\\times10^{-13}$, and the acceleration-constraint residual is below $3.43\\times10^{-13}$. Over the 0.400 s interval, mechanical energy rises by 203.714 J and integrated applied-control work is 203.618 J, leaving a 0.096 J physical work--energy residual at the 0.25 ms reporting step.",
-      "text_sha256": "0a4bb13c15a3282632d5b516cab393294507df8fa9281809ea8cf14f46fce9d0",
+      "line_start": 296,
+      "line_end": 305,
+      "text": "The reference trajectory retains constraint rank four. The maximum position constraint residual is $9.51\\times10^{-11}$ m, the maximum velocity residual is $5.03\\times10^{-15}$ m/s, the KKT residual is below $4.41\\times10^{-13}$, and the acceleration-constraint residual is below $2.57\\times10^{-13}$. Complete two-sided ideal-constraint power, $\\lambda^\\mathsf T J\\dot q$, remains below $1.27\\times10^{-12}$ W; this is distinct from the one-sided contact power delivered to the club. Over the 0.400 s interval, mechanical energy rises by 203.714 J and integrated applied-control work is 203.618 J, leaving a 0.096 J numerical work--energy residual at the 0.25 ms reporting step.",
+      "text_sha256": "f177a6515a0db963c4584515084f9487549eb25fedd3f78c75a339c3f0c1904e",
       "citation_keys": [],
       "has_numeric_content": true,
-      "has_assertive_language": false,
-      "priority_score": 2,
+      "has_assertive_language": true,
+      "priority_score": 4,
       "triage_flags": [
-        "numeric"
+        "numeric",
+        "assertive_language"
       ],
       "review_state": "unadjudicated"
     },
     {
       "candidate_id": "PD-CAND-c31033ccaad15dda",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd",
-      "line_start": 297,
-      "line_end": 301,
+      "line_start": 307,
+      "line_end": 311,
       "text": "![Forward Solver Closure and Sensitivity Audit. Work--energy residual and maximum projection correction contract under timestep refinement (top). Integrated control work overlays the mechanical-energy change, while the closed-loop position residual remains below its declared limit (bottom).](figures/fig_forward_two_hand_numerical_audit.pdf){#fig-forward-two-hand-numerical-audit}",
       "text_sha256": "01a5f7481f779d19c3dc4e8e23f5b5997f67b2dd58166cc71e5679290c4885dc",
       "citation_keys": [],
@@ -6321,8 +6338,8 @@
     {
       "candidate_id": "PD-CAND-6e880d7370ae81b1",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd",
-      "line_start": 303,
-      "line_end": 310,
+      "line_start": 313,
+      "line_end": 320,
       "text": "The work--energy residual decreases from 0.695 to 0.373 to 0.191 J as the step is refined from 2.0 to 1.0 to 0.5 ms. The maximum projection correction falls from 190 to 24.4 to 3.08 $\\mu$m over the same sequence. Negative-couple onset is 0.1980, 0.1980, and 0.1985 s, a spread of only 0.5 ms. Tightening the projection tolerance by two orders of magnitude changes the 1.0 ms minimum couple by less than $5\\times10^{-8}$ N m and leaves onset unchanged. The reported reversal is therefore resolved relative to both timestep and projection tolerance in this model.",
       "text_sha256": "4e9a66371ebdbc1152feef26445178d50ff7637ded037ab6db71d9e45a96b75c",
       "citation_keys": [],
@@ -6336,24 +6353,26 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-997f7fec96771665",
+      "candidate_id": "PD-CAND-2784c2edf6f0be18",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd",
-      "line_start": 312,
-      "line_end": 315,
-      "text": "The accumulated projection-energy diagnostic is negative and converges toward zero with timestep refinement. It is not added to or subtracted from the physical work budget. Reporting it separately prevents numerical stabilization from being mistaken for passive energy transfer.",
-      "text_sha256": "72d50e6509bb1e3c07edce56d83685d44c469c593bb8dd94579aa77f50ea922b",
+      "line_start": 322,
+      "line_end": 329,
+      "text": "The baseline projections change mechanical energy by -0.778 J in signed sum (0.778 J in absolute sum), with no individual correction larger than 0.00446 J. This cumulative correction is larger than the raw 0.096 J work--energy residual, so the latter is not the complete integration-error budget. The projection-energy diagnostic is negative and converges toward zero with timestep refinement. It is not added to or subtracted from the physical work budget; reporting both prevents numerical stabilization and cancellation from being mistaken for passive energy transfer or exact closure.",
+      "text_sha256": "ecd12b1d467facd68e19c01dbba6d924237638eb8f28ffca5baf211210d8faa0",
       "citation_keys": [],
-      "has_numeric_content": false,
+      "has_numeric_content": true,
       "has_assertive_language": false,
-      "priority_score": 0,
-      "triage_flags": [],
+      "priority_score": 2,
+      "triage_flags": [
+        "numeric"
+      ],
       "review_state": "unadjudicated"
     },
     {
       "candidate_id": "PD-CAND-7675499079461c8c",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd",
-      "line_start": 319,
-      "line_end": 324,
+      "line_start": 333,
+      "line_end": 338,
       "text": "The forward calculation strengthens the archived pointwise result in one specific way: it demonstrates that an achieved state can carry a negative force-generated two-hand couple forward for a finite interval after all applied joint torques are removed. The negative control shows that the effect requires grip geometry, and the convergence studies show that it is not a timestep or projection-tolerance artifact at the declared resolution.",
       "text_sha256": "c93b9d5bae11957ac6cb0b8ce27b7386ab18010e2e653b8c153155d71013a26a",
       "citation_keys": [],
@@ -6368,8 +6387,8 @@
     {
       "candidate_id": "PD-CAND-801cd3bfc533926a",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd",
-      "line_start": 326,
-      "line_end": 332,
+      "line_start": 340,
+      "line_end": 346,
       "text": "It does **not** establish that the negative couple is wholly passive in a human swing. The baseline state was created by prior applied torques; after the cut, gravity, velocity-dependent interaction terms, and constraint reactions remain. \"Passive\" here means zero *applied model command after the branch*, not absence of force, momentum, gravity, stored energy, or biological activation. Nor does the model include a moving torso, out-of-plane rotations, compliant wrists, a distributed shaft, hand-contact compliance, or ground reaction pathways.",
       "text_sha256": "aeeb97aeef194a31f638f9cd392b0de2b533c5af952bd3795d4c1f02ca8ab636",
       "citation_keys": [],
@@ -6384,8 +6403,8 @@
     {
       "candidate_id": "PD-CAND-db4b880cc306f553",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch05b_forward_two_hand.qmd",
-      "line_start": 334,
-      "line_end": 341,
+      "line_start": 348,
+      "line_end": 355,
       "text": "For strategy, the result supports a conditional mechanical statement rather than a coaching prescription: club acceleration can coexist with a negative hand-force couple when the current state and grip geometry make the coupled reaction favorable. Consequently, maximizing positive wrist torque at every instant is not a necessary condition for increasing distal speed. Whether a specific golfer should reduce, reverse, or maintain wrist torque requires the higher-order moving-base, flexible-shaft, three-dimensional, and human-data tests that follow in the completion program.",
       "text_sha256": "d96ada34432443cdb36429ac464bfe45f1832b29e30275fbfad4e1d0fb2c48b4",
       "citation_keys": [],
