@@ -164,12 +164,14 @@ transition.
 
 The persistent program has a post-transition absolute torque-error impulse of
 0.08998 N m s, versus 0.09084 N m s for complete reversal. The numerical
-difference is small, model-dependent, and not a performance claim. Its value is
-logical: activation and series-force states make role history observable even
-when pre- and post-transition net moments match. The result is consistent with
-the broader proposition that maintaining load direction can preserve an
-already-developed transmission state. It neither proves a scapular mechanism
-nor establishes the wrist as passive.
+difference is 0.94% at the published 0.2 ms step, model-dependent, and not a
+performance claim. Refinement from 1.0 to 0.05 ms preserves its direction but
+reduces its magnitude from 0.00277 to 0.000514 N m s; the advantage is therefore
+not numerically converged. Its defensible value is logical: activation and
+series-force states make role history observable even when pre- and
+post-transition net moments match. This example motivates a preparation-history
+hypothesis but does not establish a robust benefit, a scapular mechanism, or a
+passive wrist.
 
 The biological term *slack* should therefore be avoided unless the measured
 quantity is named. Appropriate alternatives include contact gap, tendon slack
@@ -262,8 +264,11 @@ The current repository makes the following extensions actionable now:
    available.
 
 The reduced prediction is refuted if its matched moments do not close, its
-coordinate transformations alter power, the preparation effect disappears
-under plausible parameter and timestep variation, or measured participants do
-not exhibit the predicted force/stiffness history. Backend disagreement should
+coordinate transformations alter power, or the sign of the preparation effect
+disappears under a preregistered parameter and timestep domain. Its magnitude
+must not be used quantitatively until a convergence study and parameter
+uncertainty analysis establish a stable interval. A proposed human mechanism is
+separately refuted if measured participants do not exhibit its preregistered
+force, stiffness, and activation history. Backend disagreement should
 first be classified as a convention, numerical, structural, parameter, or data
 discrepancy; it is not automatically biological evidence.

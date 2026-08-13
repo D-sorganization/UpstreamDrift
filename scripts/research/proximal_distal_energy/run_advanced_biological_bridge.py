@@ -10,6 +10,7 @@ import numpy as np
 
 from scripts.research.proximal_distal_energy.advanced_biological_bridge import (
     BiologicalProgramResult,
+    build_biological_timestep_audit,
     build_frame_invariance_audit,
     build_pose_adapter_audit,
     build_redundancy_surface,
@@ -66,6 +67,7 @@ def build_study() -> tuple[dict[str, object], dict[str, np.ndarray]]:
     pose_adapters = build_pose_adapter_audit()
     redundancy = build_redundancy_surface()
     program_study = simulate_biological_programs()
+    timestep_audit = build_biological_timestep_audit()
     programs = program_study.programs
     record: dict[str, object] = {
         "schema_version": "1.0.0",
@@ -94,6 +96,30 @@ def build_study() -> tuple[dict[str, object], dict[str, np.ndarray]]:
         },
         "biological_programs": {
             name: _program_record(result) for name, result in programs.items()
+        },
+        "biological_timestep_audit": {
+            "step_s": timestep_audit.step_s.tolist(),
+            "persistent_error_impulse_nms": (
+                timestep_audit.persistent_error_impulse_nms.tolist()
+            ),
+            "reversal_error_impulse_nms": (
+                timestep_audit.reversal_error_impulse_nms.tolist()
+            ),
+            "reversal_minus_persistent_nms": (
+                timestep_audit.reversal_minus_persistent_nms.tolist()
+            ),
+            "direction_preserved": bool(
+                np.all(timestep_audit.reversal_minus_persistent_nms > 0.0)
+            ),
+            "published_step_relative_difference": float(
+                timestep_audit.reversal_minus_persistent_nms[2]
+                / timestep_audit.reversal_error_impulse_nms[2]
+            ),
+            "numerical_boundary": (
+                "The direction is preserved over the declared step grid, but the "
+                "difference magnitude is not step-converged and is not a robust "
+                "physiological or performance effect."
+            ),
         },
         "engine_ladder": {
             "mujoco": {
@@ -148,6 +174,16 @@ def build_study() -> tuple[dict[str, object], dict[str, np.ndarray]]:
         "redundancy__series_elastic_energy_j": redundancy.series_elastic_energy_j,
         **_program_arrays("persistent_direction", programs["persistent_direction"]),
         **_program_arrays("complete_role_reversal", programs["complete_role_reversal"]),
+        "timestep_audit__step_s": timestep_audit.step_s,
+        "timestep_audit__persistent_error_impulse_nms": (
+            timestep_audit.persistent_error_impulse_nms
+        ),
+        "timestep_audit__reversal_error_impulse_nms": (
+            timestep_audit.reversal_error_impulse_nms
+        ),
+        "timestep_audit__reversal_minus_persistent_nms": (
+            timestep_audit.reversal_minus_persistent_nms
+        ),
     }
     return record, arrays
 

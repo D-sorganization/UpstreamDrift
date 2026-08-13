@@ -452,7 +452,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, left=2mm, opacityback=0, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, leftrule=.75mm, colframe=quarto-callout-note-color-frame, colback=white, bottomtitle=1mm, opacitybacktitle=0.6, breakable, rightrule=.15mm, toptitle=1mm, titlerule=0mm, toprule=.15mm, bottomrule=.15mm, arc=.35mm, colbacktitle=quarto-callout-note-color!10!white, coltitle=black]
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, breakable, titlerule=0mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, leftrule=.75mm, bottomrule=.15mm, bottomtitle=1mm, colframe=quarto-callout-note-color-frame, opacityback=0, left=2mm, colback=white, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, rightrule=.15mm, arc=.35mm, toprule=.15mm, opacitybacktitle=0.6]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -7786,14 +7786,23 @@ uniqueness, and absence of identity fields. Deliberate identity, unit,
 hash, synchronization, split, and governance violations fail closed in
 tests.
 
-No governed human dataset was available in this phase. Accordingly,
-EXP-H1 through EXP-H4 remain
-\texttt{untested\_no\_governed\_human\_data}. Evaluation begins only
-after an ethics/oversight reference, consent and reuse basis, private
-data authority, synchronized streams, calibration records, frozen
-participant split, and analysis-release authorization pass the same
-validator. The protocol removes analytical discretion; it does not
-remove the need for measurements.
+No governed human dataset was available in this phase or found in the
+subsequent workspace and public-data search recorded in
+\href{https://github.com/D-sorganization/UpstreamDrift/issues/8556}{UpstreamDrift
+\#8556}. Published instrumented-grip studies by
+\href{https://mdpi-res.com/d_attachment/sensors/sensors-20-03672/article_deploy/sensors-20-03672-v2.pdf}{Choi
+and Park} and
+\href{https://ojs.ub.uni-konstanz.de/cpa/article/download/6828/6125}{Koike}
+do not provide a governed participant-level deposit satisfying the
+synchronized bilateral six-axis grip-wrench contract. Accordingly,
+EXP-H1 through EXP-H6 remain
+\texttt{untested\_no\_governed\_human\_data}. Synthetic traces,
+digitized figures, and publication-level aggregates are not substitutes.
+Evaluation begins only after an ethics/oversight reference, consent and
+reuse basis, private data authority, synchronized streams, calibration
+records, frozen participant split, and analysis-release authorization
+pass the same validator. The protocol removes analytical discretion; it
+does not remove the need for measurements.
 
 \chapter{Open-Resource Release and Reviewer
 Qualification}\label{sec-open-release}
@@ -8733,13 +8742,15 @@ Through Persistent and Role-Reversal Programs}
 
 The persistent program has a post-transition absolute torque-error
 impulse of 0.08998 N m s, versus 0.09084 N m s for complete reversal.
-The numerical difference is small, model-dependent, and not a
-performance claim. Its value is logical: activation and series-force
-states make role history observable even when pre- and post-transition
-net moments match. The result is consistent with the broader proposition
-that maintaining load direction can preserve an already-developed
-transmission state. It neither proves a scapular mechanism nor
-establishes the wrist as passive.
+The numerical difference is 0.94\% at the published 0.2 ms step,
+model-dependent, and not a performance claim. Refinement from 1.0 to
+0.05 ms preserves its direction but reduces its magnitude from 0.00277
+to 0.000514 N m s; the advantage is therefore not numerically converged.
+Its defensible value is logical: activation and series-force states make
+role history observable even when pre- and post-transition net moments
+match. This example motivates a preparation-history hypothesis but does
+not establish a robust benefit, a scapular mechanism, or a passive
+wrist.
 
 The biological term \emph{slack} should therefore be avoided unless the
 measured quantity is named. Appropriate alternatives include contact
@@ -8906,12 +8917,15 @@ The current repository makes the following extensions actionable now:
 \end{enumerate}
 
 The reduced prediction is refuted if its matched moments do not close,
-its coordinate transformations alter power, the preparation effect
-disappears under plausible parameter and timestep variation, or measured
-participants do not exhibit the predicted force/stiffness history.
-Backend disagreement should first be classified as a convention,
-numerical, structural, parameter, or data discrepancy; it is not
-automatically biological evidence.
+its coordinate transformations alter power, or the sign of the
+preparation effect disappears under a preregistered parameter and
+timestep domain. Its magnitude must not be used quantitatively until a
+convergence study and parameter uncertainty analysis establish a stable
+interval. A proposed human mechanism is separately refuted if measured
+participants do not exhibit its preregistered force, stiffness, and
+activation history. Backend disagreement should first be classified as a
+convention, numerical, structural, parameter, or data discrepancy; it is
+not automatically biological evidence.
 
 \chapter{Transmission Pathways, Robust Speed, and Task
 Stability}\label{sec-transmission-robustness}
