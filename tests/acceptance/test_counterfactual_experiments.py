@@ -154,7 +154,7 @@ class TestZVCFCounterfactual:
         """ZVCF should have no Coriolis/centrifugal contribution.
 
         With v=0, the Coriolis matrix C(q,v)·v = 0, so ZVCF isolates
-        gravity and control effects only.
+        retained zero-control configuration effects.
         """
         engine = pendulum_engine
 

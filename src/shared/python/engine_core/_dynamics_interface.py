@@ -266,18 +266,17 @@ class DynamicsInterface(Protocol):
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
         """Zero-Velocity Counterfactual (ZVCF) - Guideline G2.
 
-        Compute acceleration with joint velocities set to zero, preserving configuration.
-        This isolates configuration-dependent effects (gravity, constraints)
-        from velocity-dependent effects (Coriolis, centrifugal).
+        Compute instantaneous acceleration at fixed configuration/internal
+        state with velocity and declared applied control set to zero.
 
         **Purpose**: Answer "What acceleration would occur if motion FROZE instantaneously?"
 
         **Physics**: With v=0, acceleration has no velocity-dependent terms:
-            q̈_ZVCF = M(q)⁻¹ · (g(q) + τ + J^T·λ)
+            q̈_ZVCF = M(q)⁻¹ · (-h(q, 0) + J^T·λ)
 
         **Causal Interpretation**:
-            Δa_velocity = a_full - a_ZVCF
-            This is the acceleration *attributed to* Coriolis/centrifugal effects.
+            ZVCF is a distinct intervention, not an additive control or
+            velocity component. Use a same-state affine split for attribution.
 
         Preconditions:
             - Engine must be in INITIALIZED state
@@ -287,7 +286,7 @@ class DynamicsInterface(Protocol):
         Postconditions:
             - a_zvcf.shape == (n_v,)
             - All values are finite
-            - No velocity-dependent terms in result
+            - No declared velocity-dependent or applied-control term in result
 
         **Example Use Case** (Golf Swing):
             During downswing, compute ZVCF to separate gravitational pull
@@ -297,7 +296,7 @@ class DynamicsInterface(Protocol):
             q: Joint positions (n_v,) [rad or m]
 
         Returns:
-            q̈_ZVCF: Acceleration with v=0 (n_v,) [rad/s² or m/s²]
+            q̈_ZVCF: Acceleration with v=0 and u=0 (n_v,) [rad/s² or m/s²]
 
         Raises:
             StateError: If engine is not initialized

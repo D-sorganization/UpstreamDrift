@@ -1,13 +1,10 @@
-"""ZVCF actuation-awareness and OpenSim analytic-Jacobian tests (#7051).
+"""Canonical ZVCF and OpenSim analytic-Jacobian tests (#7051, #8586).
 
 Two acceptance criteria from issue #7051:
 
-1. **Drake ZVCF honours nonzero actuation.** ``compute_zvcf`` previously
-   hardcoded ``tau = 0`` ("assume current actuation is zero"). It now reads the
-   fixed actuation from the input port and maps it through the actuation matrix
-   ``B``. With v = 0 the ZVCF identity is ``a = M^-1 (B u - g)``, so applying a
-   nonzero control ``u`` must shift the ZVCF by exactly ``M^-1 (B u)`` relative
-   to the zero-control ZVCF.
+1. **Drake ZVCF zeros nonzero actuation.** Under the ratified terminology
+   contract, ``compute_zvcf`` fixes configuration and zeros both velocity and
+   declared applied control. Nonzero control therefore cannot change ZVCF.
 
 2. **OpenSim Jacobian is analytic.** ``compute_jacobian`` now uses Simbody's
    analytic station/system Jacobian; this is regression-checked against the
@@ -62,8 +59,8 @@ _ACTUATED_PENDULUM_URDF = """<?xml version="1.0"?>
 
 @pytest.mark.requires_drake
 @pytest.mark.skipif(not is_engine_available("drake"), reason="pydrake not installed")
-def test_drake_zvcf_honours_nonzero_actuation() -> None:
-    """Nonzero control shifts Drake ZVCF by exactly M^-1 (B u) (#7051)."""
+def test_drake_zvcf_is_independent_of_applied_actuation() -> None:
+    """Canonical Drake ZVCF zeros the declared applied-control channel."""
     from src.engines.physics_engines.drake.python.drake_physics_engine import (
         DrakePhysicsEngine,
     )
@@ -87,16 +84,7 @@ def test_drake_zvcf_honours_nonzero_actuation() -> None:
     engine.set_control(u)
     a_ctrl = np.atleast_1d(engine.compute_zvcf(q))
 
-    # The two ZVCFs must differ (the fix is live, not tau=0 hardcoded).
-    assert not np.allclose(a_zero, a_ctrl), (
-        "ZVCF ignored the applied actuation — the tau=0 hardcode regressed."
-    )
-
-    # Quantitative identity: delta_a == M^-1 (B u).
-    m_mat = np.atleast_2d(engine.compute_mass_matrix())
-    b_matrix = np.asarray(engine.plant.MakeActuationMatrix(), dtype=np.float64)
-    expected_delta = np.linalg.solve(m_mat, b_matrix @ u)
-    np.testing.assert_allclose(a_ctrl - a_zero, expected_delta, atol=1e-9)
+    np.testing.assert_allclose(a_ctrl, a_zero, atol=1e-12)
 
 
 @pytest.mark.requires_opensim

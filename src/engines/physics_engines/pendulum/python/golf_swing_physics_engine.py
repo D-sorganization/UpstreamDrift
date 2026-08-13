@@ -466,7 +466,7 @@ class GolfSwingPendulumEngine(BasePhysicsEngine):
             self._state = orig
 
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
-        """Zero-Velocity Counterfactual at position q with current control."""
+        """Canonical zero-velocity, zero-control acceleration at position q."""
         if q is None:
             raise ValueError("q must be provided")
         if not self._is_initialized or len(q) < 2:
@@ -477,7 +477,7 @@ class GolfSwingPendulumEngine(BasePhysicsEngine):
             self._state = np.array([float(q[0]), float(q[1]), 0.0, 0.0])
             g = self.compute_gravity_forces()
             M = self.compute_mass_matrix()
-            rhs = -g + self._tau
+            rhs = -g
             # ⚡ Bolt: Replace np.linalg.solve with explicit 2x2 inverse for ~5x speedup
             det = M[0, 0] * M[1, 1] - M[0, 1] * M[1, 0]
             inv_det = 1.0 / det

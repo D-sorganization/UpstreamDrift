@@ -442,13 +442,14 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
         """Zero-Velocity Counterfactual (ZVCF) - Guideline G2.
 
-        Compute acceleration with joint velocities set to zero.
+        Compute acceleration with joint velocities and declared applied
+        control set to zero.
 
         Args:
             q: Joint positions (n_q,) [rad or m]
 
         Returns:
-            q_ddot_ZVCF: Acceleration with v=0 (n_v,)
+            q_ddot_ZVCF: Acceleration with v=0 and u=0 (n_v,)
         """
 
         if not (q is not None):
@@ -460,8 +461,8 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
 
         v_zero = np.zeros(self.model.nv)
 
-        # Use current control (preserved for ZVCF)
-        tau = self.tau.copy()
+        # Canonical ZVCF zeros the declared applied-control channel.
+        tau = np.zeros(self.model.nv)
 
         a_zvcf = pin.aba(self.model, self.data, q_arr, v_zero, tau)
 

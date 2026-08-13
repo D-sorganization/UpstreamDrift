@@ -117,7 +117,7 @@ and the signed along-path components are
 
 $$
 F_{\parallel,k}=\mathbf F_k\cdot\mathbf e_t,
-\qquad k\in\{\mathrm{total},\mathrm{drift},\mathrm{control},\mathrm{ZVCF}\}.
+\qquad k\in\{\mathrm{total},\mathrm{drift},\mathrm{control},\mathrm{ZVCP}\}.
 $$ {#eq-path-projection-components}
 
 The tangent is taken from the achieved trajectory for all pointwise additive
@@ -253,12 +253,13 @@ scaled up to a full downswing.
 @tbl-hand-path-primary-results reports the MacKenzie-compatible primary
 estimand at the wrist for the open-chain models and at the mid-grip resultant
 for the closed loop. Drift is the stitched pointwise ZTCF contribution. Total
-equals drift plus control at the achieved state. ZVCF is displayed in a
-separate column because it is not an additive component of that equality; its
-force is projected on the achieved velocity only to make the diagnostic
-comparable in units.
+equals drift plus control at the achieved state. The zero-velocity
+control-preserved evaluation (ZVCP) is displayed in a separate column because
+it is not an additive component of that equality; its force is projected on
+the achieved velocity only to make the diagnostic comparable in units. ZVCP
+is not canonical ZVCF.
 
-| Model Tier | Path (m) | Total Work (J) | Drift Work (J) | Control Work (J) | ZVCF Projected Diagnostic (J) | $\overline F_{\parallel}$ Total / Drift / Control (N) |
+| Model Tier | Path (m) | Total Work (J) | Drift Work (J) | Control Work (J) | ZVCP Projected Diagnostic (J) | $\overline F_{\parallel}$ Total / Drift / Control (N) |
 |---|---:|---:|---:|---:|---:|---:|
 | Double pendulum | 2.2241 | 130.794 | 132.375 | -1.580 | -1.588 | 58.807 / 59.517 / -0.711 |
 | One-arm three-link | 2.7336 | 27.802 | 28.781 | -0.979 | -1.827 | 10.170 / 10.528 / -0.358 |
@@ -291,10 +292,10 @@ inferred from a force peak alone. In the double pendulum, the late positive
 rise is almost entirely drift. In the one-arm model, drift changes sign and
 then becomes strongly positive while control remains opposing late. In the
 two-arm local sweep, much larger opposing drift and control components leave a
-small net resultant. The dashed ZVCF trace stays distinct from the control
+small net resultant. The dashed ZVCP trace stays distinct from the control
 increment even when the two happen to be close over part of a history.
 
-![Total, Drift, Control, and ZVCF Force Vectors at Normalized Time Quartiles](data/hand_path_attribution/figures/fig_hand_path_force_vectors.pdf){#fig-hand-path-force-vectors width=100%}
+![Total, Drift, Control, and Zero-Velocity Control-Preserved Force Vectors at Normalized Time Quartiles](data/hand_path_attribution/figures/fig_hand_path_force_vectors.pdf){#fig-hand-path-force-vectors width=100%}
 
 @fig-hand-path-force-vectors retains vector direction rather than only
 the along-path scalar. All four splits use one force-arrow scale within each

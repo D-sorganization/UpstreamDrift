@@ -1,7 +1,7 @@
-"""Generate deterministic hand-path drift/control/ZVCF attribution evidence.
+"""Generate deterministic hand-path drift/control attribution evidence.
 
 The model ladder deliberately distinguishes pointwise drift/control attribution
-from a same-configuration zero-velocity evaluation (ZVCF).  The two-arm tier
+from a zero-velocity control-preserved evaluation. The two-arm tier
 uses prescribed, constraint-consistent kinematics; it is not a forward
 simulation or a measured golfer trajectory.
 """
@@ -57,7 +57,7 @@ from src.shared.python.pendulum_simulator.simulation_triple import run_simulatio
 from src.shared.python.simulation_backends import GolfModelParams
 
 SCHEMA_VERSION = "hand-path-attribution-evidence-v1"
-ZVCF_PROTOCOL = (
+ZERO_VELOCITY_CONTROL_PRESERVED_PROTOCOL = (
     "Same configuration and applied control; zero generalized velocity; "
     "gravity retained; velocity-dependent damping evaluates at zero."
 )
@@ -85,7 +85,7 @@ _SPLIT_COLORS = {
 
 
 def _split_label(split: str) -> str:
-    return "ZVCF" if split == "zvcf" else split.title()
+    return "Zero-Velocity Control-Preserved" if split == "zvcf" else split.title()
 
 
 def _source_root() -> Path:
@@ -401,7 +401,8 @@ def _primary_estimand(
             split: work / path_length for split, work in force_work.items()
         },
         "zvcf_projection_note": (
-            "ZVCF force is projected on the achieved mid-grip path only for this "
+            "Zero-velocity control-preserved force is projected on the achieved "
+            "mid-grip path only for this "
             "diagnostic; the zero-velocity evaluation itself has no traversed path."
         ),
         "final_half_drift_diagnostic": {
@@ -564,13 +565,15 @@ def _analyze(
             if key == "two_arm"
             else "Integrated along a forward-simulated trajectory."
         ),
-        "zvcf": {
+        "zero_velocity_control_preserved": {
             "status": "available",
-            "protocol": ZVCF_PROTOCOL,
+            "protocol": ZERO_VELOCITY_CONTROL_PRESERVED_PROTOCOL,
             "interpretation": (
-                "A same-configuration diagnostic; not the control contribution and "
-                "not a forward counterfactual trajectory."
+                "A same-configuration diagnostic that preserves applied control; "
+                "not canonical ZVCF, not the control contribution, and not a "
+                "forward counterfactual trajectory."
             ),
+            "legacy_array_suffix": "zvcf",
         },
         "path_weighted_mean_force": _json_value(asdict(mean_force)),
         "instantaneous_power_share": {

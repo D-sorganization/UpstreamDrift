@@ -67,7 +67,8 @@ def test_components_close_and_counterfactuals_retain_external_load() -> None:
         + result.external_reaction,
     )
     np.testing.assert_allclose(result.ztcf_reaction, [6.0])
-    np.testing.assert_allclose(result.zvcf_reaction, [2.0])
+    np.testing.assert_allclose(result.zvcf_reaction, [4.0])
+    np.testing.assert_allclose(result.zero_velocity_control_preserved_reaction, [2.0])
     assert not np.allclose(
         result.ztcf_reaction + result.zvcf_reaction,
         result.total_reaction,

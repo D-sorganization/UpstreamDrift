@@ -78,6 +78,7 @@ class DriftControlMixin:
             return np.array([])
 
         q_saved, v_saved = self.get_state()
+        ctrl_saved = self.sim.data.ctrl.copy()
 
         try:
             n_v = len(v_saved) if hasattr(v_saved, "__len__") else 1
@@ -86,9 +87,11 @@ class DriftControlMixin:
 
         try:
             self.set_state(q, np.zeros(n_v))
+            self.sim.data.ctrl[:] = 0.0
             self.sim.forward()
             a_zvcf = np.array(self.sim.data.qacc)
         finally:
+            self.sim.data.ctrl[:] = ctrl_saved
             self.set_state(q_saved, v_saved)
         return a_zvcf
 

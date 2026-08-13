@@ -104,6 +104,7 @@ class SupportReactionDecomposition:
     control: np.ndarray
     ztcf: np.ndarray
     zvcf: np.ndarray
+    zero_velocity_control_preserved: np.ndarray
     force_direction: str = "support_on_mechanism"
     frame: str = "inclined_swing_plane_cartesian_x_target_y_up"
     units: str = "SI"
@@ -120,6 +121,7 @@ class SupportReactionDecomposition:
                 "control",
                 "ztcf",
                 "zvcf",
+                "zero_velocity_control_preserved",
             )
         }
         if time.size < 2 or np.any(np.diff(time) <= 0.0):
@@ -141,9 +143,9 @@ def double_pendulum_support_reaction_decomposition(
     """Decompose the fixed shoulder's planar support reaction pointwise.
 
     The velocity component is ``ZTCF - configuration`` and the control
-    component is ``total - ZTCF``.  The independently evaluated ZVCF provides
-    a falsification check: it must equal ``configuration + control`` for this
-    control-affine rigid mechanism.
+    component is ``total - ZTCF``. Canonical ZVCF is the zero-velocity,
+    zero-control configuration reaction. The former control-preserved
+    zero-velocity diagnostic is retained under its explicit name.
     """
     time_array, q_array, v_array, control_array = _trace_arrays(time, q, v, controls)
     inertials = PlanarInertials.from_params(params)
@@ -163,18 +165,23 @@ def double_pendulum_support_reaction_decomposition(
 
     total_qdd = accelerations(v_array, control_array)
     ztcf_qdd = accelerations(v_array, zero_control)
-    zvcf_qdd = accelerations(zero_velocity, control_array)
+    control_preserved_qdd = accelerations(zero_velocity, control_array)
     configuration_qdd = accelerations(zero_velocity, zero_control)
     total = _joint_forces(inertials, q_array, v_array, total_qdd)[:, 0]
     ztcf = _joint_forces(inertials, q_array, v_array, ztcf_qdd)[:, 0]
-    zvcf = _joint_forces(inertials, q_array, zero_velocity, zvcf_qdd)[:, 0]
+    control_preserved = _joint_forces(
+        inertials, q_array, zero_velocity, control_preserved_qdd
+    )[:, 0]
     configuration = _joint_forces(inertials, q_array, zero_velocity, configuration_qdd)[
         :, 0
     ]
     velocity = ztcf - configuration
     control = total - ztcf
-    if not np.allclose(zvcf, configuration + control, atol=1e-10, rtol=1e-10):
-        raise RuntimeError("support-reaction ZVCF closure failed")
+    zvcf = configuration.copy()
+    if not np.allclose(
+        control_preserved, configuration + control, atol=1e-10, rtol=1e-10
+    ):
+        raise RuntimeError("control-preserved zero-velocity closure failed")
     return SupportReactionDecomposition(
         time=time_array,
         total=total,
@@ -183,6 +190,7 @@ def double_pendulum_support_reaction_decomposition(
         control=control,
         ztcf=ztcf,
         zvcf=zvcf,
+        zero_velocity_control_preserved=control_preserved,
     )
 
 

@@ -161,6 +161,11 @@ def test_support_reaction_decomposition_closes_pointwise(
     )
     np.testing.assert_allclose(
         result.zvcf,
+        result.configuration,
+        atol=1e-10,
+    )
+    np.testing.assert_allclose(
+        result.zero_velocity_control_preserved,
         result.configuration + result.control,
         atol=1e-10,
     )

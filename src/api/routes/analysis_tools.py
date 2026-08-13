@@ -52,7 +52,7 @@ logger = get_module_logger(__name__)
 
 
 class DriftControlRatioRequest(BaseModel):
-    """Request body for generalized-force drift-control ratio analysis."""
+    """Request body for realized drift-to-input ratio analysis."""
 
     drift_generalized_force: list[list[float]] = Field(min_length=1)
     control_generalized_force: list[list[float]] = Field(min_length=1)
@@ -207,7 +207,7 @@ def _collect_metrics(engine_manager: EngineManager) -> dict[str, Any]:
 async def compute_drift_control_ratio(
     request: DriftControlRatioRequest,
 ) -> dict[str, Any]:
-    """Compute rho(t)=||f(x)||/||g(x)u|| from generalized-force arrays."""
+    """Compute DIR(t)=||f(x)||/||G(x)u|| from realized-force arrays."""
     try:
         analyzer = DriftControlAnalyzer(epsilon=request.epsilon)
         ratio = analyzer.compute_ratio_from_arrays(
@@ -215,6 +215,7 @@ async def compute_drift_control_ratio(
             request.control_generalized_force,
         )
         return {
+            "quantity": "realized_drift_to_input_ratio",
             "ratio": ratio.tolist(),
             "summary": analyzer.summarize_ratio(ratio),
         }

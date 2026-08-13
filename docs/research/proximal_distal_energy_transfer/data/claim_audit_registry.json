@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "6f14f480796276c8b582cea1f985bc126963ac44725f68b379cb82c25a0010f1",
+    "source_digest": "37398e2931bd6c9e655dde7b9f9d076e36471214a077a64560c781a0d4898dbe",
     "baseline_commit": "13ea6a69585a42dc1db4b3959440ed95787c9779"
   },
   "audit_scope": {
@@ -1562,7 +1562,7 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-23168ab506bb06d8",
+      "candidate_id": "PD-CAND-9ab24a22e2f9fe0a",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-066"
@@ -1572,7 +1572,7 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-cb6fc687396dc149",
+      "candidate_id": "PD-CAND-3050f2d4cee21790",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "Equation or table lead-in, table body, or figure/table caption rather than an independent scientific proposition.",
@@ -1624,7 +1624,7 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-f56fc076988a3833",
+      "candidate_id": "PD-CAND-7582fc4b9af7eb34",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-066"
@@ -1634,7 +1634,7 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-fa95b3555b50d8d0",
+      "candidate_id": "PD-CAND-a3e29b1698ecad08",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "Equation or table lead-in, table body, or figure/table caption rather than an independent scientific proposition.",
@@ -2078,7 +2078,7 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-54920f8d0d93a336",
+      "candidate_id": "PD-CAND-33f3767b282d44f9",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-076"
@@ -2128,7 +2128,7 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-fc27a006b33a5d58",
+      "candidate_id": "PD-CAND-c159a38fee1ec15d",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-077"
@@ -2608,7 +2608,7 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-1131ac9552d7cf81",
+      "candidate_id": "PD-CAND-28b8d09be894b817",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-095"
@@ -10163,10 +10163,10 @@
     {
       "claim_id": "PD-CLAIM-066",
       "candidate_ids": [
-        "PD-CAND-23168ab506bb06d8",
+        "PD-CAND-9ab24a22e2f9fe0a",
         "PD-CAND-7874a600cacb23fc",
         "PD-CAND-4cdefcc08809cd8f",
-        "PD-CAND-f56fc076988a3833",
+        "PD-CAND-7582fc4b9af7eb34",
         "PD-CAND-fd04a39c449484a9"
       ],
       "statement": "In the registered open-chain reference cases, pointwise drift supplies 101.2 and 103.5 percent of signed wrist force work because the contemporaneous control increment is opposing; in the two-arm local sweep, drift and control largely cancel, so none of these percentages is evidence of control-free state creation or biological effort.",
@@ -10584,7 +10584,7 @@
       "claim_id": "PD-CLAIM-076",
       "candidate_ids": [
         "PD-CAND-bc33ab0c3549456c",
-        "PD-CAND-54920f8d0d93a336",
+        "PD-CAND-33f3767b282d44f9",
         "PD-CAND-43048748dad5d9d4",
         "PD-CAND-85073389f5c8911e"
       ],
@@ -10628,7 +10628,7 @@
       "candidate_ids": [
         "PD-CAND-694d7d5d4aae7e5d",
         "PD-CAND-46c7f3046dc81327",
-        "PD-CAND-fc27a006b33a5d58",
+        "PD-CAND-c159a38fee1ec15d",
         "PD-CAND-5434a027df5d6714",
         "PD-CAND-941e2fb53fb74477"
       ],
@@ -11360,7 +11360,7 @@
       "claim_id": "PD-CLAIM-095",
       "candidate_ids": [
         "PD-CAND-97a1283cdfccec20",
-        "PD-CAND-1131ac9552d7cf81",
+        "PD-CAND-28b8d09be894b817",
         "PD-CAND-d2c317170171468b"
       ],
       "statement": "For the declared affine mechanical system, pointwise zero-torque acceleration is M(q)^-1[-b(q,qdot)], control acceleration is M(q)^-1 tau, and the full acceleration equals their sum at the same state when the same constraints and bias convention are retained.",

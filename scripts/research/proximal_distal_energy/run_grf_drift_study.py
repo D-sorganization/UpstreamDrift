@@ -48,6 +48,7 @@ COLORS = {
     "control": "#D55E00",
     "ztcf": "#009E73",
     "zvcf": "#CC79A7",
+    "zero_velocity_control_preserved": "#E69F00",
 }
 
 
@@ -121,6 +122,7 @@ def build_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
         "control": result.control,
         "ztcf": result.ztcf,
         "zvcf": result.zvcf,
+        "zero_velocity_control_preserved": (result.zero_velocity_control_preserved),
     }
     inertials = PlanarInertials.from_params(params)
     total_mass = float(inertials.m1 + inertials.m2)
@@ -136,12 +138,22 @@ def build_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
     total_impulse = np.trapezoid(result.total, time, axis=0)
     component_impulses = {
         name: np.trapezoid(arrays[name], time, axis=0)
-        for name in ("configuration", "velocity", "control", "ztcf", "zvcf")
+        for name in (
+            "configuration",
+            "velocity",
+            "control",
+            "ztcf",
+            "zvcf",
+            "zero_velocity_control_preserved",
+        )
     }
     total_closure = result.total - (
         result.configuration + result.velocity + result.control
     )
-    zvcf_closure = result.zvcf - (result.configuration + result.control)
+    zvcf_closure = result.zvcf - result.configuration
+    control_preserved_closure = result.zero_velocity_control_preserved - (
+        result.configuration + result.control
+    )
     record: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
         "evidence_class": "model_internal_falsification_benchmark",
@@ -158,7 +170,8 @@ def build_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
         "counterfactual_contract": {
             "pointwise": True,
             "ztcf": "configuration plus velocity reaction at zero applied control",
-            "zvcf": "configuration plus control reaction after algebraically zeroing declared velocity-dependent terms",
+            "zvcf": "configuration reaction at zero generalized velocity and zero declared applied control",
+            "zero_velocity_control_preserved": "configuration plus control reaction after algebraically zeroing declared velocity-dependent terms",
             "zvcf_validity": (
                 "autonomous holonomic constraint with velocity_bias(q, 0) = 0 "
                 "and constraint_bias(q, 0) = 0"
@@ -200,6 +213,9 @@ def build_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
         "closure": {
             "max_abs_total_N": float(np.max(np.abs(total_closure))),
             "max_abs_zvcf_N": float(np.max(np.abs(zvcf_closure))),
+            "max_abs_zero_velocity_control_preserved_N": float(
+                np.max(np.abs(control_preserved_closure))
+            ),
         },
         "non_identifiable": [
             "bilateral foot-force allocation",
@@ -240,8 +256,22 @@ def _make_figures(
     phase = 100.0 * (time - time[0]) / (time[-1] - time[0])
     fig, axes = plt.subplots(2, 1, figsize=(8.2, 6.3), sharex=True)
     for component, axis in enumerate(axes):
-        for name in ("total", "configuration", "velocity", "control", "ztcf", "zvcf"):
-            label = name.upper() if name in {"ztcf", "zvcf"} else name.title()
+        for name in (
+            "total",
+            "configuration",
+            "velocity",
+            "control",
+            "ztcf",
+            "zvcf",
+            "zero_velocity_control_preserved",
+        ):
+            label = (
+                name.upper()
+                if name in {"ztcf", "zvcf"}
+                else "Zero-Velocity Control-Preserved"
+                if name == "zero_velocity_control_preserved"
+                else name.title()
+            )
             axis.plot(
                 phase,
                 arrays[name][:, component],

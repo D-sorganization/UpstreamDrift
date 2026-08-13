@@ -1,14 +1,16 @@
 {
   "closure": {
     "max_abs_total_N": 5.684341886080802e-14,
-    "max_abs_zvcf_N": 1.8474111129762605e-13
+    "max_abs_zero_velocity_control_preserved_N": 1.8474111129762605e-13,
+    "max_abs_zvcf_N": 0.0
   },
   "counterfactual_contract": {
     "overlap_warning": "ZTCF and ZVCF share configuration reaction and are not additive",
     "pointwise": true,
     "rheonomic_warning": "recompute and retain any time-dependent constraint bias that remains when generalized velocity is zero",
+    "zero_velocity_control_preserved": "configuration plus control reaction after algebraically zeroing declared velocity-dependent terms",
     "ztcf": "configuration plus velocity reaction at zero applied control",
-    "zvcf": "configuration plus control reaction after algebraically zeroing declared velocity-dependent terms",
+    "zvcf": "configuration reaction at zero generalized velocity and zero declared applied control",
     "zvcf_validity": "autonomous holonomic constraint with velocity_bias(q, 0) = 0 and constraint_bias(q, 0) = 0"
   },
   "drift_only_prediction": {
@@ -17,8 +19,11 @@
       "configuration": [-1.3751560208767404, 12.578707663999076],
       "control": [5.012891947704882, -24.927852760167227],
       "velocity": [19.28343337274024, 47.54599314781478],
+      "zero_velocity_control_preserved": [
+        3.637735926828143, -12.349145096168133
+      ],
       "ztcf": [17.908277351863514, 60.12470081181387],
-      "zvcf": [3.637735926828143, -12.349145096168133]
+      "zvcf": [-1.3751560208767404, 12.578707663999076]
     },
     "component_names": ["target_horizontal", "swing_plane_vertical"],
     "impulse_error_Ns": [-5.012891947704882, 24.927852760167227],
@@ -68,15 +73,15 @@
   "source_manifest": [
     {
       "path": "scripts/research/proximal_distal_energy/run_grf_drift_study.py",
-      "sha256": "c9fb9f290ebd8c015b054cbeb7b001cfe35d71b49144138a1f4a3304b203dbd3"
+      "sha256": "fcb2205941228a70fc0c108d3dad460f596733112fe99b1d02240aeca44a8d17"
     },
     {
       "path": "scripts/research/proximal_distal_energy/double_pendulum_attribution.py",
-      "sha256": "615b84e6579aae7dd8fadd25be221cf6b989444d860ff5fdbf35ca455547655b"
+      "sha256": "e3603df2c93eb5133b541eb0431d7005b7d342844bad6b9d33b13a6f44fa8981"
     },
     {
       "path": "src/shared/python/physics/contact_reaction_decomposition.py",
-      "sha256": "e45eba83c03c6412f6eb4d7519db0eff0188129b687004bccc90c751513b0751"
+      "sha256": "9f2abd71d3619edf1f693aee8f47417964066b6a77e8c57a15708a5f25574309"
     }
   ]
 }

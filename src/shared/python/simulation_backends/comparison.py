@@ -691,16 +691,8 @@ def _ztcf_series(run: EngineRun) -> np.ndarray | None:
 def _zvcf_series(run: EngineRun) -> np.ndarray | None:
     if not isinstance(run.engine, DynamicsProvider):
         return None
-    tau = run.trace.torques
-    if tau is None:
-        tau = run.trace.u
-    if tau is None:
-        tau = np.zeros_like(run.trace.q)
-    tau_arr = _as_matrix("tau", tau)
-    if tau_arr.shape[1] != run.trace.q.shape[1]:
-        return None
-    rows = min(run.trace.q.shape[0], tau_arr.shape[0])
+    rows = run.trace.q.shape[0]
     out = np.empty((rows, run.trace.q.shape[1]), dtype=float)
     for idx in range(rows):
-        out[idx] = zvcf_acceleration(run.engine, run.trace.q[idx], tau_arr[idx])
+        out[idx] = zvcf_acceleration(run.engine, run.trace.q[idx])
     return out
