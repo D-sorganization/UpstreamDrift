@@ -20,6 +20,14 @@ relative hand--club displacement and velocity. The common contact law,
 reference driver, timestep, and output convention are held fixed so that
 engine implementation is the principal changed factor.
 
+The independence claim is component-specific. MuJoCo and Pinocchio
+independently supply mass, gravity, rigid-body kinematics, spatial-force
+mapping, and continuous-time acceleration. They intentionally share the
+Kelvin--Voigt constitutive law, grounded driver, and semi-implicit state update.
+Agreement tests transport of one declared reduced mechanism across two native
+dynamics engines; it is not independent confirmation of the contact law or
+time integrator.
+
 This result closes the *reduced forward-contact* gate, not the anatomical or
 human gate. The hand bodies are finite-mass translational carriages, not arms;
 the grounded driver is not muscle; and the grip parameters are declared rather
@@ -96,6 +104,14 @@ U_{c,i}=\frac{1}{2}k_c
 P_{d,i}=-c_c
 \lVert\dot{\mathbf h}_i-\dot{\mathbf p}_i\rVert^2.
 $$ {#eq-spatial-forward-contact-energy}
+
+The executed record also audits the complete interface-power identity. Across
+both engines and both branches, pointwise body power plus storage-rate minus
+dissipation closes within $1.56\times10^{-14}$ W. Mapping the club-side point
+forces to the reference wrench preserves power within
+$5.51\times10^{-14}$ W. These checks are independent of the exact
+equal-and-opposite force sum and expose velocity-frame, moment-arm, and sign
+errors that force closure alone cannot detect.
 
 A world-referenced trajectory moves the finite hand carriages through a
 grounded spring--damper driver,
@@ -195,6 +211,8 @@ merely setting a named distal torque to zero.
 
 After the killswitch, both engines retain a negative force-generated
 swing-normal couple for 37.5 ms and reach approximately -0.409 N m. The branch
+duration is the longest contiguous negative interval after the cut, not a sum
+of disconnected negative samples. The branch
 also retains 7.55 degrees of club-axis out-of-plane evolution, a peak
 club-long-axis rotation rate of 13.59 rad/s, and a peak force-generated
 long-axis couple of 0.242 N m. These observables are separated deliberately:
@@ -249,7 +267,9 @@ The committed record fails closed if any of these conditions occurs:
 6. reversed moment arms do not reverse couple sign;
 7. baseline and killswitch states differ before the branch sample;
 8. the post-killswitch negative interval is shorter than 30 ms; or
-9. the work--energy residual fails to decrease under timestep refinement.
+9. the work--energy residual fails to decrease under timestep refinement; or
+10. interface storage/dissipation power or point-force/wrench power fails to
+    close.
 
 The experiment would therefore reject the stated reduced mechanism if a
 second native solver does not transport it or if it depends on hidden direct

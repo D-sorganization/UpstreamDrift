@@ -452,7 +452,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, left=2mm, titlerule=0mm, opacityback=0, coltitle=black, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, toptitle=1mm, colframe=quarto-callout-note-color-frame, breakable, bottomtitle=1mm, arc=.35mm, leftrule=.75mm, rightrule=.15mm, bottomrule=.15mm, opacitybacktitle=0.6, colback=white, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, left=2mm, opacityback=0, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, leftrule=.75mm, colframe=quarto-callout-note-color-frame, colback=white, bottomtitle=1mm, opacitybacktitle=0.6, breakable, rightrule=.15mm, toptitle=1mm, titlerule=0mm, toprule=.15mm, bottomrule=.15mm, arc=.35mm, colbacktitle=quarto-callout-note-color!10!white, coltitle=black]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -6976,6 +6976,14 @@ displacement and velocity. The common contact law, reference driver,
 timestep, and output convention are held fixed so that engine
 implementation is the principal changed factor.
 
+The independence claim is component-specific. MuJoCo and Pinocchio
+independently supply mass, gravity, rigid-body kinematics, spatial-force
+mapping, and continuous-time acceleration. They intentionally share the
+Kelvin--Voigt constitutive law, grounded driver, and semi-implicit state
+update. Agreement tests transport of one declared reduced mechanism
+across two native dynamics engines; it is not independent confirmation
+of the contact law or time integrator.
+
 This result closes the \emph{reduced forward-contact} gate, not the
 anatomical or human gate. The hand bodies are finite-mass translational
 carriages, not arms; the grounded driver is not muscle; and the grip
@@ -7068,6 +7076,14 @@ U_{c,i}=\frac{1}{2}k_c
 P_{d,i}=-c_c
 \lVert\dot{\mathbf h}_i-\dot{\mathbf p}_i\rVert^2.
 }\end{equation}
+
+The executed record also audits the complete interface-power identity.
+Across both engines and both branches, pointwise body power plus
+storage-rate minus dissipation closes within \(1.56\times10^{-14}\) W.
+Mapping the club-side point forces to the reference wrench preserves
+power within \(5.51\times10^{-14}\) W. These checks are independent of
+the exact equal-and-opposite force sum and expose velocity-frame,
+moment-arm, and sign errors that force closure alone cannot detect.
 
 A world-referenced trajectory moves the finite hand carriages through a
 grounded spring--damper driver,
@@ -7210,13 +7226,15 @@ Interaction Dynamics Persist Without Direct Club Actuation}
 
 After the killswitch, both engines retain a negative force-generated
 swing-normal couple for 37.5 ms and reach approximately -0.409 N m. The
-branch also retains 7.55 degrees of club-axis out-of-plane evolution, a
-peak club-long-axis rotation rate of 13.59 rad/s, and a peak
-force-generated long-axis couple of 0.242 N m. These observables are
-separated deliberately: the negative quantity is a projection of contact
-moment on the instantaneous swing normal, while long-axis couple and
-rotation report torsional evolution. Calling either projection ``the
-club torque'' without naming its axis would be ambiguous.
+branch duration is the longest contiguous negative interval after the
+cut, not a sum of disconnected negative samples. The branch also retains
+7.55 degrees of club-axis out-of-plane evolution, a peak club-long-axis
+rotation rate of 13.59 rad/s, and a peak force-generated long-axis
+couple of 0.242 N m. These observables are separated deliberately: the
+negative quantity is a projection of contact moment on the instantaneous
+swing normal, while long-axis couple and rotation report torsional
+evolution. Calling either projection ``the club torque'' without naming
+its axis would be ambiguous.
 
 The ground-pathway proxy reaches 56.85 N in resultant force and 62.61 N
 m in moment before the branch. It becomes exactly zero with the driver
@@ -7300,7 +7318,11 @@ The committed record fails closed if any of these conditions occurs:
 \item
   the post-killswitch negative interval is shorter than 30 ms; or
 \item
-  the work--energy residual fails to decrease under timestep refinement.
+  the work--energy residual fails to decrease under timestep refinement;
+  or
+\item
+  interface storage/dissipation power or point-force/wrench power fails
+  to close.
 \end{enumerate}
 
 The experiment would therefore reject the stated reduced mechanism if a

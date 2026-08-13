@@ -50,6 +50,8 @@ class SpatialForwardTrace:
     native_mechanical_energy: FloatArray
     total_energy: FloatArray
     action_reaction_force_residual: FloatArray
+    interface_power_residual: FloatArray
+    wrench_power_residual: FloatArray
     coincident_couple: FloatArray
     reversed_couple: FloatArray
     energy_balance_residual: FloatArray
@@ -113,6 +115,8 @@ def run_engine_trace(
         "native_mechanical_energy": np.zeros(steps + 1),
         "total_energy": np.zeros(steps + 1),
         "action_reaction_force_residual": np.zeros(steps + 1),
+        "interface_power_residual": np.zeros(steps + 1),
+        "wrench_power_residual": np.zeros(steps + 1),
         "coincident_couple": np.zeros(steps + 1),
         "reversed_couple": np.zeros(steps + 1),
     }
@@ -199,6 +203,28 @@ def run_engine_trace(
         arrays["action_reaction_force_residual"][index] = float(
             np.linalg.norm(np.sum(contact_forces + (-contact_forces), axis=0))
         )
+        total_contact_body_power = float(
+            np.sum(contact_forces * club_point_velocities)
+            - np.sum(contact_forces * state.hand_velocities)
+        )
+        storage_rate = 0.0
+        for hand_index in range(2):
+            displacement = state.hand_positions[hand_index] - club_points[hand_index]
+            relative_velocity = (
+                state.hand_velocities[hand_index] - club_point_velocities[hand_index]
+            )
+            storage_rate += params.contact_stiffness * float(
+                displacement @ relative_velocity
+            )
+        arrays["interface_power_residual"][index] = (
+            total_contact_body_power + storage_rate - contact_dissipation
+        )
+        wrench_power = float(
+            wrench[:3] @ state.club_linear_velocity
+            + wrench[3:] @ state.club_angular_velocity
+        )
+        point_power = float(np.sum(contact_forces * club_point_velocities))
+        arrays["wrench_power_residual"][index] = wrench_power - point_power
         arrays["coincident_couple"][index] = float(swing_normal @ coincident_wrench[3:])
         arrays["reversed_couple"][index] = float(swing_normal @ reversed_wrench[3:])
 
@@ -240,8 +266,17 @@ def _quaternion_angle_error(left: FloatArray, right: FloatArray) -> FloatArray:
 
 
 def _negative_duration(trace: SpatialForwardTrace, start_time: float) -> float:
+    """Return the longest contiguous negative interval after ``start_time``."""
+
     mask = (trace.time >= start_time) & (trace.swing_normal_couple < 0.0)
-    return float(np.count_nonzero(mask) * (trace.time[1] - trace.time[0]))
+    padded = np.concatenate(([False], mask, [False])).astype(np.int8)
+    edges = np.diff(padded)
+    starts = np.flatnonzero(edges == 1)
+    stops = np.flatnonzero(edges == -1)
+    if starts.size == 0:
+        return 0.0
+    longest_samples = int(np.max(stops - starts))
+    return float(longest_samples * (trace.time[1] - trace.time[0]))
 
 
 def compare_engine_traces(
@@ -352,6 +387,12 @@ def summarize_trace(
         ),
         "action_reaction_force_residual_max_n": float(
             np.max(trace.action_reaction_force_residual)
+        ),
+        "interface_power_residual_max_w": float(
+            np.max(np.abs(trace.interface_power_residual))
+        ),
+        "wrench_power_residual_max_w": float(
+            np.max(np.abs(trace.wrench_power_residual))
         ),
         "energy_balance_residual_max_j": float(
             np.max(np.abs(trace.energy_balance_residual))

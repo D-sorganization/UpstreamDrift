@@ -6,6 +6,37 @@ Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
 
+- **#8557 spatial forward-contact audit** — based on spatial common-state PR
+  #8580, protected-squash-merged at exact remote main
+  `f23e8f614b563647deb7cca58da6acabef988eb3`.
+  Ready PR [#8581](https://github.com/D-sorganization/UpstreamDrift/pull/8581)
+  from branch `research/8557-spatial-forward-contact-audit` is the active
+  nineteenth fail-closed slice at implementation commit
+  `c5328bea5cd328325b179bf8d230b91467437dc7`. WSL-native MuJoCo 3.8.0 and
+  Pinocchio 3.8.0 regenerated
+  the complete evidence and six focused tests pass. All 40 chapter candidates
+  are reviewed as PD-CLAIM-184 through PD-CLAIM-193, with the public release
+  claim PD-CLAIM-005 remapped to the current passage. The chapter now states
+  that native rigid-body dynamics and force mapping are independent while the
+  contact law and semi-implicit update are shared. Interface virtual work
+  closes to 1.56e-14 W, point-force/wrench power to 5.51e-14 W, and persistence
+  is the longest contiguous 37.5 ms interval. Current authority: 920
+  candidates, 633 reviewed, 193 atomic claims, 287 unadjudicated. Remaining
+  gates are protected publication and exact remote-main verification. The
+  complete paper renders as a visually inspected
+  202-page, 1,398,880-byte PDF with 183 URI links and 235 outline entries;
+  physical pages 128--133 were inspected, and the 371-artifact release bundle
+  validates with zero mismatches. WSL Matplotlib has a mixed-install
+  Axes3D failure, so model evidence and native tests ran in WSL while figures
+  were deterministically regenerated from those arrays with the qualified
+  Windows graphics stack.
+  The required Tools side task remains active at live revision 35. Its latest
+  hosted full-window PyQt failure identified a missing declared `pandas`
+  runtime dependency when Launch Monitor Analytics is reached; that exact
+  dependency and workflow contract are being corrected before another head
+  update. Protected publication and exact remote-main verification remain the
+  completion boundary for both slices.
+
 - **#8557 spatial common-state audit** — PR #8579 protected-squash-merged at
   exact remote main `fad3191503c99dc8d1f9b975fb8232d929a51da2`. Ready PR
   [#8580](https://github.com/D-sorganization/UpstreamDrift/pull/8580) from

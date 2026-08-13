@@ -62,11 +62,13 @@
         "energy_balance_residual_max_j": 0.040992299662996334,
         "ground_pathway_force_peak_n": 56.847106132504486,
         "ground_pathway_moment_peak_nm": 62.61199074895776,
+        "interface_power_residual_max_w": 1.176836406102666e-14,
         "minimum_post_killswitch_couple_nm": -0.9444009316468268,
         "minimum_swing_normal_couple_nm": -0.9444009316468268,
         "peak_long_axis_couple_abs_nm": 0.38475715692715606,
         "post_killswitch_negative_duration_s": 0.06025,
-        "reversed_geometry_sign_residual_nm": 4.440892098500626e-16
+        "reversed_geometry_sign_residual_nm": 4.440892098500626e-16,
+        "wrench_power_residual_max_w": 5.3290705182007514e-14
       },
       "mujoco_killswitch": {
         "action_reaction_force_residual_max_n": 0.0,
@@ -76,11 +78,13 @@
         "energy_balance_residual_max_j": 0.030523226525231983,
         "ground_pathway_force_peak_n": 56.847106132504486,
         "ground_pathway_moment_peak_nm": 62.61199074895776,
+        "interface_power_residual_max_w": 1.176836406102666e-14,
         "minimum_post_killswitch_couple_nm": -0.4092851000343657,
         "minimum_swing_normal_couple_nm": -0.4092851000343657,
         "peak_long_axis_couple_abs_nm": 0.24175208162485573,
         "post_killswitch_negative_duration_s": 0.0375,
-        "reversed_geometry_sign_residual_nm": 9.159339953157541e-16
+        "reversed_geometry_sign_residual_nm": 9.159339953157541e-16,
+        "wrench_power_residual_max_w": 5.3290705182007514e-14
       },
       "pinocchio_baseline": {
         "action_reaction_force_residual_max_n": 0.0,
@@ -90,11 +94,13 @@
         "energy_balance_residual_max_j": 0.046041224047407514,
         "ground_pathway_force_peak_n": 56.845736671753954,
         "ground_pathway_moment_peak_nm": 62.611249576375336,
+        "interface_power_residual_max_w": 1.554312234475219e-14,
         "minimum_post_killswitch_couple_nm": -0.9451912709677093,
         "minimum_swing_normal_couple_nm": -0.9451912709677093,
         "peak_long_axis_couple_abs_nm": 0.38475715692716056,
         "post_killswitch_negative_duration_s": 0.06025,
-        "reversed_geometry_sign_residual_nm": 4.440892098500626e-16
+        "reversed_geometry_sign_residual_nm": 4.440892098500626e-16,
+        "wrench_power_residual_max_w": 5.5067062021407764e-14
       },
       "pinocchio_killswitch": {
         "action_reaction_force_residual_max_n": 0.0,
@@ -104,11 +110,13 @@
         "energy_balance_residual_max_j": 0.03494299323724581,
         "ground_pathway_force_peak_n": 56.845736671753954,
         "ground_pathway_moment_peak_nm": 62.611249576375336,
+        "interface_power_residual_max_w": 1.554312234475219e-14,
         "minimum_post_killswitch_couple_nm": -0.4092839624648751,
         "minimum_swing_normal_couple_nm": -0.4092839624648751,
         "peak_long_axis_couple_abs_nm": 0.241752081624878,
         "post_killswitch_negative_duration_s": 0.0375,
-        "reversed_geometry_sign_residual_nm": 8.465450562766819e-16
+        "reversed_geometry_sign_residual_nm": 8.465450562766819e-16,
+        "wrench_power_residual_max_w": 5.5067062021407764e-14
       }
     },
     "coincident_grip_couple_max_nm": 0.0,
@@ -125,8 +133,16 @@
     },
     "canonical_record": {
       "club_direct_actuation": "none",
-      "club_inertia": [0.0012, 0.025, 0.025],
-      "club_initial_position": [0.65, 0.0, 1.05],
+      "club_inertia": [
+        0.0012,
+        0.025,
+        0.025
+      ],
+      "club_initial_position": [
+        0.65,
+        0.0,
+        1.05
+      ],
       "club_mass": 0.32,
       "comparison_stride": 4,
       "contact_damping": 18.0,
@@ -140,14 +156,26 @@
       "driver_damping": 24.0,
       "driver_stiffness": 420.0,
       "duration": 0.24,
-      "gravity": [0.0, 0.0, -9.81],
+      "gravity": [
+        0.0,
+        0.0,
+        -9.81
+      ],
       "hand_inertia": 0.0008,
       "hand_mass": 0.55,
       "killswitch_time": 0.18,
-      "lead_grip_offset": [-0.08, 0.015, 0.0],
+      "lead_grip_offset": [
+        -0.08,
+        0.015,
+        0.0
+      ],
       "model_name": "spatial-two-hand-carriage-club-v1",
       "time_step": 0.00025,
-      "trail_grip_offset": [0.08, -0.015, 0.0]
+      "trail_grip_offset": [
+        0.08,
+        -0.015,
+        0.0
+      ]
     },
     "digest_match": true,
     "sha256": "65a6d80d4366c7874bfaef01ec7592ba1067db4a5952cf95f0ad274b6f10491a"
@@ -164,9 +192,9 @@
       },
       "energy_gate_passed": true,
       "observed_metrics": {
-        "club_orientation_max_rad": 8.940696716308595e-8,
-        "club_position_max_m": 3.79461344904858e-5,
-        "club_position_rms_m": 1.2753197482136776e-5,
+        "club_orientation_max_rad": 8.940696716308595e-08,
+        "club_position_max_m": 3.79461344904858e-05,
+        "club_position_rms_m": 1.2753197482136776e-05,
         "contact_wrench_relative_rms": 0.00256335098739382,
         "contact_wrench_rms": 0.010012101370899116,
         "normalized_energy_discrepancy": 0.00023455972979492614
@@ -186,9 +214,9 @@
       },
       "energy_gate_passed": true,
       "observed_metrics": {
-        "club_orientation_max_rad": 9.424321830774485e-8,
-        "club_position_max_m": 7.789261685804944e-5,
-        "club_position_rms_m": 1.69647504991969e-5,
+        "club_orientation_max_rad": 9.424321830774485e-08,
+        "club_position_max_m": 7.789261685804944e-05,
+        "club_position_rms_m": 1.69647504991969e-05,
         "contact_wrench_relative_rms": 0.002735672699938936,
         "contact_wrench_rms": 0.009141100981486858,
         "normalized_energy_discrepancy": 0.0004611575683746604
@@ -203,18 +231,24 @@
   "schema_version": "spatial-forward-contact-evidence-v1",
   "source_sha256": {
     "scripts/research/proximal_distal_energy/make_spatial_forward_contact_figures.py": "39ddf766310b6c70692e2f5927f0e6ace654e09fde21159e95227271d58b8a82",
-    "scripts/research/proximal_distal_energy/run_spatial_forward_contact_study.py": "fa397e8f5fbe77e445b96823cd8b185c394a8b1c199d7c6263f5963b372a5c0a",
+    "scripts/research/proximal_distal_energy/run_spatial_forward_contact_study.py": "a3709feb1fcc85643b9ee7254cd090f093908c4975c152e350e92014a33abc74",
     "scripts/research/proximal_distal_energy/spatial_forward_contract.py": "8803ff4922223870953999489f4e133a89b024a18c253b1764cfa218a4980ef7",
     "scripts/research/proximal_distal_energy/spatial_forward_engines.py": "dd5c9b29c2fbc8df8003068446190e3cb50cf34adf6e8627caf08d06ccb47456",
-    "scripts/research/proximal_distal_energy/spatial_forward_study.py": "ba9d718d4b8751d19d281a317fd310bf8805c9be8c1e7edc3e65dc0e71485daf"
+    "scripts/research/proximal_distal_energy/spatial_forward_study.py": "8b9588d28c7a532a79e2177135e8fd27fe49c9be512937aad562e4e4c07c1825"
   },
   "study_id": "spatial-forward-two-engine-contact-v1",
   "timestep_refinement": {
     "maximum_work_energy_residual_j": [
-      0.06106448708794865, 0.030523226525231983, 0.015259379819487773
+      0.06106448708794865,
+      0.030523226525231983,
+      0.015259379819487773
     ],
     "monotone_residual_reduction": true,
-    "time_step_s": [0.0005, 0.00025, 0.000125]
+    "time_step_s": [
+      0.0005,
+      0.00025,
+      0.000125
+    ]
   },
   "trajectory_kind": "independently_integrated_native_forward_dynamics"
 }
