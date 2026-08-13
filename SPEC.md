@@ -2910,3 +2910,19 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Persistent-direction benefit shall remain conditional on positive dead-zone
   behavior; zero-dead-zone equivalence and the absence of governed human
   validation shall remain visible.
+
+### F-8557.17: Original Results Reconciliation and Scope Audit
+
+- Every selected program, displayed percentage, work ledger, exclusion count,
+  and robustness statement in the original results chapter shall reconcile to
+  a deterministic report built from the committed evidence arrays.
+- Effect sizes shall be reported separately by tested shoulder-torque level;
+  repeated ordering shall not imply a constant effect size.
+- Registered delivery-zone maxima shall be called grid-selected, not global
+  optima, and one-at-a-time perturbations shall not be called a population or
+  joint uncertainty distribution.
+- Joint-force and wrist-moment powers shall remain mechanical interface
+  channels and shall not be relabeled as muscle intent, biological passivity,
+  or an independently validated human pathway.
+- The planar pointwise drift/control split shall remain distinct from a forward
+  zero-command rollout and from human strategy or coaching advice.

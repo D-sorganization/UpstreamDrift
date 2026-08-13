@@ -28,7 +28,7 @@ baseline.](figures/fig_e1_onset_sweep.pdf){#fig-sweep}
 
 : Representative programs at $\tau_s = 60$ N·m. {#tbl-representatives}
 
-Three findings, consistent across both torque levels:
+Three findings were observed at both tested shoulder-torque levels:
 
 1. **Driving the wrist from the top is the lowest-speed accepted program.** At
    $\tau_s = 60$ N·m the early-drive program reaches 28.9 m/s versus
@@ -38,11 +38,14 @@ Three findings, consistent across both torque levels:
    sweep. At $\tau_s = 100$ N·m the pattern repeats (early drive is the
    minimum of its profile curve; passive baseline 43.1 m/s).
 
-2. **The same wrist torque, applied late, is worth +12%.** Clubhead
+2. **The same commanded wrist-torque magnitude, applied late, produces more
+   impact speed than the passive-wrist program in both tested cases.** Clubhead
    speed rises monotonically with onset time until an interior optimum
    ($t_{\mathrm{on}} = 0.200$ s at 60 N·m, 0.175 s at 100 N·m —
    roughly the middle of the downswing, with drive active through the
-   final ~40%), reaching 38.4 and 46.5 m/s respectively.
+   final ~40%), reaching 38.4 and 46.5 m/s respectively. Relative to the
+   corresponding passive programs, the increases are 12.4% and 7.8%; the
+   ordering repeats, but its effect size does not.
 
 3. **Retain-early-then-drive is highest among the tested programs.** Programs that apply a
    *negative* (cock-retaining) wrist torque early and the identical
@@ -63,8 +66,8 @@ torque falls with shortening velocity, shrinking the late-drive window
 [@sprigings2000]. E1b re-runs the sweep with a linear torque-velocity
 bound on both concentric drives (shoulder: 100 N·m isometric, zero at
 20 rad/s of arm speed; wrist: 20 N·m isometric, zero at 30 rad/s of
-opening speed; restraint left constant, as eccentric torque does not
-taper with shortening velocity), integrated closed-loop with the same
+opening speed; restraint left constant as a declared modeling choice because
+eccentric force--velocity behavior was not modeled), integrated closed-loop with the same
 RK4 settings (@fig-e1b). The ordering survives intact: early drive
 28.8 m/s < passive 30.8 < best late drive 34.6 (onset 0.175 s) < best
 restrain-then-drive 34.8 (R = 10 N·m until 0.100 s). Effect sizes
@@ -72,8 +75,9 @@ compress — late drive is worth +12.2% over passive and the restraint
 margin narrows to +0.2 m/s — precisely the compression bounded-actuator
 theory predicts, while the grid-selected onsets move slightly *earlier*
 (0.175–0.100 s versus 0.200–0.100 s), since a velocity-limited wrist
-needs a slightly longer window to deliver its work. The S2 ordering is
-therefore not an artifact of unbounded actuators.
+needs a slightly longer window to deliver its work. The ordering is therefore
+not removed by this one linear concentric bound; the experiment does not
+establish robustness to a calibrated human capacity surface.
 
 ![E1b: the timing sweep repeated with linear torque-velocity bounds on
 the shoulder and wrist drives.](figures/fig_e1b_bounded_sweep.pdf){#fig-e1b}
@@ -83,8 +87,9 @@ the shoulder and wrist drives.](figures/fig_e1b_bounded_sweep.pdf){#fig-e1b}
 @fig-kinseq shows arm and club angular-speed traces. All four programs
 produce the qualitative P→D pattern — arm speed peaks, then club speed
 peaks higher — as expected from interaction dynamics alone
-(@sec-summation). The programs differ exactly where the skill
-literature says they should (@sec-skill): the early-drive swing opens
+(@sec-summation). The programs differ in ways that are qualitatively
+comparable with, but do not validate, the skill literature (@sec-skill): the
+early-drive swing opens
 the club immediately, its arm peak is depressed, and its club peak is
 the lowest of the four; the retain-then-drive swing holds the club
 folded longest, achieves the highest arm speed before release, and
@@ -107,16 +112,17 @@ steps).](figures/fig_swing_montage.pdf){#fig-montage}
 ## Segment Energies {#sec-results-energies}
 
 @fig-energies shows arm and club kinetic-energy time courses, and
-@fig-budget the early-half/late-half budget. The energetic story is
-unambiguous:
+@fig-budget the early-half/late-half budget. The energy ledger for these four
+selected traces is:
 
 - **Early half.** The two grid-selected programs put the *least* energy into
   the club early: 5.0 J (selected restrain) and 7.3 J (selected drive-only) versus
   23.0 J for the early-drive program (passive: 7.9 J). Meanwhile they
   bank more energy in the arm: early-half shoulder work is 55.1 J
-  (selected restrain) and 52.0 J (selected drive) versus 34.0 J (early drive) —
-  the early-driven club back-reacts on the arm and *steals its
-  runway*.
+  (selected restrain) and 52.0 J (selected drive) versus 34.0 J (early drive).
+  The early-driven club's larger early energy gain coincides with less shoulder
+  work and arm-energy accumulation. This model-local association does not by
+  itself identify a human causal strategy.
 - **Late half.** The ordering inverts: late club kinetic-energy gain is
   180.5 J (selected restrain) and 174.2 J (selected drive) versus 84.3 J
   (early drive) and 136.3 J (passive).
@@ -142,11 +148,13 @@ representative programs.](figures/fig_energy_budget.pdf){#fig-budget}
 the grid-selected restrain-then-drive swing. The joint-force power — energy
 carried into the club *through the joint force*, the pathway that
 requires no wrist torque at all — is small and briefly negative early,
-then surges in the final ~0.1 s to dominate the club's energy supply
+then surges in the final ~0.1 s to dominate the two reported interface
+channels supplying the club
 (late-half integral 131.7 J versus 25.7 J of late wrist actuator work).
-The wrist moment channel contributes a brief late pulse, exactly the
-"latter stages" window identified by Sprigings and Neal
-[@sprigings2000]. The right panel verifies the accounting: the club's
+The wrist moment channel contributes a brief late pulse, qualitatively
+consistent with the late window modeled by Sprigings and Neal
+[@sprigings2000]; this timing resemblance is not an independent validation.
+The right panel verifies the accounting: the club's
 mechanical-energy rate tracks the sum of joint-force and moment power
 across the swing pointwise after analytic COM acceleration replaces sampled
 velocity differentiation, confirming the implementation of the segmental balance
@@ -222,12 +230,13 @@ global optimum.
 
 Within this model class and finite tested command family, under matched proximal effort and a
 consistently defined first-pass impact: (i) early distal drive is lower
-than the passive condition (−15% in the baseline case);
-(ii) identical distal effort applied late is worth +12%; (iii) a timed
+than the passive condition (−15.3% at 60 N·m and −10.7% at 100 N·m);
+(ii) the same distal command applied late is +12.4% and +7.8% above the
+corresponding passive programs; (iii) a timed
 restrain-then-drive command is highest at both effort levels,
-with its early-phase modeled wrist work negative; (iv) the late club
-energy supply is dominated by the passive joint-force/parametric
-pathway, not the wrist actuator; (v) the counterfactual split shows
+with its early-phase modeled wrist work negative; (iv) the late club energy
+supply in the reported interface ledger is dominated by joint-force power
+rather than the applied wrist-moment channel; (v) the counterfactual split shows
 control acting early as restraint and drift delivering late — the S2
 pattern of @sec-hypothesis in full; and (vi) the entire ordering
 survives linear torque-velocity bounds, alternative scoring definitions,

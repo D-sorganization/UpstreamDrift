@@ -6,6 +6,24 @@ Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
 
+- **#8557 original-results reconciliation** — branch
+  `research/8557-results-audit` is ready PR
+  [#8585](https://github.com/D-sorganization/UpstreamDrift/pull/8585) at
+  implementation commit `49cb95bd2fd7c872df7ae625d5a26e2872a9cd6b`
+  and is the active twenty-second fail-closed slice.
+  All 30 current chapter candidates are adjudicated as PD-CLAIM-207 through
+  PD-CLAIM-214. An independent deterministic audit reconciles all 92 attempted
+  programs, the 63 accepted and 29 excluded deliveries, selected traces,
+  interface-power closure, 13 parameter cases, five impact families, and four
+  command-rise constants. It corrected the late-drive headline from a blanket
+  +12% to +12.4% at 60 N m and +7.8% at 100 N m, and narrowed causal and
+  physiological language. Current authority: 921 candidates, 742 reviewed,
+  213 atomic claims, and 179 unadjudicated. Two focused tests and Ruff pass.
+  The visually inspected regenerated paper is 203 pages and 1,401,835 bytes,
+  with 186 URI links and 235 outline entries; its 376-artifact qualified
+  release has zero mismatches. Remaining gates are the combined focused and
+  repository checks, protected publication, and exact remote-main verification.
+
 - **#8557 torque-allocation and transmission audit** — branch
   `research/8557-torque-allocation-audit` is ready PR
   [#8584](https://github.com/D-sorganization/UpstreamDrift/pull/8584) at
