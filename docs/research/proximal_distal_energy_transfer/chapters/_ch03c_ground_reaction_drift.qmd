@@ -125,11 +125,18 @@ $$
 
 For an autonomous holonomic constraint, with $h_v(q,0)=0$ and
 $\gamma(q,0)=0$, the ground-reaction zero-velocity counterfactual (ZVCF)
-evaluates the same configuration and applied inputs with velocity set to zero:
+evaluates the same configuration with both velocity and declared applied
+control set to zero:
 
 $$
-\lambda_{\mathrm{ZVCF}}=\lambda_0+\lambda_u+\lambda_e.
+\lambda_{\mathrm{ZVCF}}=\lambda_0+\lambda_e.
 $$
+
+The formerly labeled quantity
+$\lambda_0+\lambda_u+\lambda_e$ is retained as the explicitly named
+**zero-velocity control-preserved reaction**. This distinction prevents a
+control-retaining intervention from being mistaken for a zero-control
+counterfactual.
 
 For a rheonomic contact or any convention in which a velocity-zero constraint
 bias remains, the reaction must instead be recomputed with that retained term;
@@ -161,7 +168,8 @@ degrees of freedom.
 ![Pointwise Support-Reaction Attribution](data/grf_drift/figures/fig_grf_drift_components.pdf){#fig-grf-drift-components width=100%}
 
 The additive identities close to $5.7\times10^{-14}$ N for the total split and
-$1.9\times10^{-13}$ N for the independently evaluated ZVCF identity. Treating
+$1.9\times10^{-13}$ N for the independently evaluated zero-velocity
+control-preserved identity. Treating
 ZTCF as a drift-only predictor of the modeled total support reaction gives
 $R^2=0.871$ in the target-horizontal component and $R^2=0.814$ in the
 swing-plane vertical component. These are fixed-prediction coefficients of

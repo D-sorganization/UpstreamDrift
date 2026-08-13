@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "2165cec1afc0c1be151f387c45969b66cca2b322a0c70f03509dab9721a7f0f2",
+    "source_digest": "d6602b5c6f2743a71ce0b90dc2b433e5cac8320f86e1b773f85487ae1ace29e6",
     "baseline_commit": "13ea6a69585a42dc1db4b3959440ed95787c9779"
   },
   "audit_scope": {
@@ -1562,24 +1562,6 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-23168ab506bb06d8",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-066"
-      ],
-      "rationale": "The candidate contributes to the bounded hand-path attribution claim family PD-CLAIM-066.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13"
-    },
-    {
-      "candidate_id": "PD-CAND-cb6fc687396dc149",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Equation or table lead-in, table body, or figure/table caption rather than an independent scientific proposition.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13"
-    },
-    {
       "candidate_id": "PD-CAND-b12e67811037d1b1",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
@@ -1617,24 +1599,6 @@
     },
     {
       "candidate_id": "PD-CAND-5e85e8c153465091",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Equation or table lead-in, table body, or figure/table caption rather than an independent scientific proposition.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13"
-    },
-    {
-      "candidate_id": "PD-CAND-f56fc076988a3833",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-066"
-      ],
-      "rationale": "The candidate contributes to the bounded hand-path attribution claim family PD-CLAIM-066.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13"
-    },
-    {
-      "candidate_id": "PD-CAND-fa95b3555b50d8d0",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "Equation or table lead-in, table body, or figure/table caption rather than an independent scientific proposition.",
@@ -2078,16 +2042,6 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-54920f8d0d93a336",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-076"
-      ],
-      "rationale": "States the autonomous-constraint ZVCF validity conditions in PD-CLAIM-076.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13"
-    },
-    {
       "candidate_id": "PD-CAND-43048748dad5d9d4",
       "disposition": "material_claims_mapped",
       "claim_ids": [
@@ -2124,16 +2078,6 @@
         "PD-CLAIM-077"
       ],
       "rationale": "The figure visualizes registered pointwise benchmark evidence for PD-CLAIM-077.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13"
-    },
-    {
-      "candidate_id": "PD-CAND-fc27a006b33a5d58",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-077"
-      ],
-      "rationale": "Reports closure, fixed-prediction R-squared, bias, and RMSE for PD-CLAIM-077.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
     },
@@ -2599,16 +2543,6 @@
     },
     {
       "candidate_id": "PD-CAND-97a1283cdfccec20",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-095"
-      ],
-      "rationale": "Adjudicated within PD-CLAIM-095; the candidate is bounded to the declared source, model, intervention, or nonclaim contract.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13"
-    },
-    {
-      "candidate_id": "PD-CAND-1131ac9552d7cf81",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-095"
@@ -7810,6 +7744,72 @@
       "last_verified_on": "2026-08-13"
     },
     {
+      "candidate_id": "PD-CAND-9ab24a22e2f9fe0a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-066"
+      ],
+      "rationale": "The candidate contributes to the bounded hand-path attribution claim family PD-CLAIM-066.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-3050f2d4cee21790",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Equation or table lead-in, table body, or figure/table caption rather than an independent scientific proposition.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-7582fc4b9af7eb34",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-066"
+      ],
+      "rationale": "The candidate contributes to the bounded hand-path attribution claim family PD-CLAIM-066.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-a3e29b1698ecad08",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Equation or table lead-in, table body, or figure/table caption rather than an independent scientific proposition.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-33f3767b282d44f9",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-076"
+      ],
+      "rationale": "States the autonomous-constraint ZVCF validity conditions in PD-CLAIM-076.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-c159a38fee1ec15d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-077"
+      ],
+      "rationale": "Reports closure, fixed-prediction R-squared, bias, and RMSE for PD-CLAIM-077.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-28b8d09be894b817",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-095"
+      ],
+      "rationale": "Adjudicated within PD-CLAIM-095; the candidate is bounded to the declared source, model, intervention, or nonclaim contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
       "candidate_id": "PD-CAND-c4a663f4579b7302",
       "disposition": "material_claims_mapped",
       "claim_ids": [
@@ -10663,10 +10663,10 @@
     {
       "claim_id": "PD-CLAIM-066",
       "candidate_ids": [
-        "PD-CAND-23168ab506bb06d8",
+        "PD-CAND-9ab24a22e2f9fe0a",
         "PD-CAND-7874a600cacb23fc",
         "PD-CAND-4cdefcc08809cd8f",
-        "PD-CAND-f56fc076988a3833",
+        "PD-CAND-7582fc4b9af7eb34",
         "PD-CAND-fd04a39c449484a9"
       ],
       "statement": "In the registered open-chain reference cases, pointwise drift supplies 101.2 and 103.5 percent of signed wrist force work because the contemporaneous control increment is opposing; in the two-arm local sweep, drift and control largely cancel, so none of these percentages is evidence of control-free state creation or biological effort.",
@@ -11084,7 +11084,7 @@
       "claim_id": "PD-CLAIM-076",
       "candidate_ids": [
         "PD-CAND-bc33ab0c3549456c",
-        "PD-CAND-54920f8d0d93a336",
+        "PD-CAND-33f3767b282d44f9",
         "PD-CAND-43048748dad5d9d4",
         "PD-CAND-85073389f5c8911e"
       ],
@@ -11128,7 +11128,7 @@
       "candidate_ids": [
         "PD-CAND-694d7d5d4aae7e5d",
         "PD-CAND-46c7f3046dc81327",
-        "PD-CAND-fc27a006b33a5d58",
+        "PD-CAND-c159a38fee1ec15d",
         "PD-CAND-5434a027df5d6714",
         "PD-CAND-941e2fb53fb74477"
       ],
@@ -11860,7 +11860,7 @@
       "claim_id": "PD-CLAIM-095",
       "candidate_ids": [
         "PD-CAND-97a1283cdfccec20",
-        "PD-CAND-1131ac9552d7cf81",
+        "PD-CAND-28b8d09be894b817",
         "PD-CAND-d2c317170171468b"
       ],
       "statement": "For the declared affine mechanical system, pointwise zero-torque acceleration is M(q)^-1[-b(q,qdot)], control acceleration is M(q)^-1 tau, and the full acceleration equals their sum at the same state when the same constraints and bias convention are retained.",

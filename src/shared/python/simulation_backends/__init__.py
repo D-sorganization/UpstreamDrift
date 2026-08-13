@@ -75,6 +75,7 @@ from .ztcf_zvcf import (
     ZtcfZvcfResult,
     evaluate_ztcf_zvcf_on_canonical_trajectory,
     persist_ztcf_zvcf_analysis,
+    zero_velocity_control_preserved_acceleration,
 )
 from .wrench_extractor import (
     WrenchImpulses,
@@ -133,6 +134,7 @@ __all__ = [
     "has_warp",
     "make_backend",
     "persist_ztcf_zvcf_analysis",
+    "zero_velocity_control_preserved_acceleration",
     "render_markdown_report",
     "require_mujoco",
     "require_mjx",

@@ -455,7 +455,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, bottomtitle=1mm, leftrule=.75mm, left=2mm, coltitle=black, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, bottomrule=.15mm, titlerule=0mm, opacitybacktitle=0.6, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, rightrule=.15mm, breakable, arc=.35mm, colback=white, colframe=quarto-callout-note-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, bottomrule=.15mm, bottomtitle=1mm, arc=.35mm, opacitybacktitle=0.6, coltitle=black, colback=white, colframe=quarto-callout-note-color-frame, left=2mm, rightrule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, breakable, titlerule=0mm, opacityback=0, toprule=.15mm, leftrule=.75mm, toptitle=1mm, colbacktitle=quarto-callout-note-color!10!white]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -528,12 +528,13 @@ Two decompositions are evaluated: the \textbf{zero-torque counterfactual
 instant if all applied joint torques were removed, isolating what
 accumulated motion, gravity, and inter-segment coupling produce on their
 own --- and the \textbf{zero-velocity counterfactual (ZVCF)} --- the
-acceleration the applied torques, together with gravity, would produce
-at the current pose from rest, removing all motion-dependent effects.
-Preliminary torque-removal analyses motivated the hypothesis examined
-throughout this document: that \emph{restraining} the P→D handoff early
-in the downswing and accelerating it late may be the more effective
-strategy.
+instantaneous acceleration at the fixed pose and retained internal state
+after both generalized velocity and the declared applied control are set
+to zero. A zero-velocity evaluation that preserves applied control is a
+separate, explicitly named diagnostic. Preliminary torque-removal
+analyses motivated the hypothesis examined throughout this document:
+that \emph{restraining} the P→D handoff early in the downswing and
+accelerating it late may be the more effective strategy.
 
 \section{Research Questions}\label{research-questions}
 
@@ -1946,7 +1947,7 @@ and the signed along-path components are
 
 \begin{equation}\phantomsection\label{eq-path-projection-components}{
 F_{\parallel,k}=\mathbf F_k\cdot\mathbf e_t,
-\qquad k\in\{\mathrm{total},\mathrm{drift},\mathrm{control},\mathrm{ZVCF}\}.
+\qquad k\in\{\mathrm{total},\mathrm{drift},\mathrm{control},\mathrm{ZVCP}\}.
 }\end{equation}
 
 The tangent is taken from the achieved trajectory for all pointwise
@@ -2100,9 +2101,11 @@ Table~\ref{tbl-hand-path-primary-results} reports the
 MacKenzie-compatible primary estimand at the wrist for the open-chain
 models and at the mid-grip resultant for the closed loop. Drift is the
 stitched pointwise ZTCF contribution. Total equals drift plus control at
-the achieved state. ZVCF is displayed in a separate column because it is
-not an additive component of that equality; its force is projected on
-the achieved velocity only to make the diagnostic comparable in units.
+the achieved state. The zero-velocity control-preserved evaluation
+(ZVCP) is displayed in a separate column because it is not an additive
+component of that equality; its force is projected on the achieved
+velocity only to make the diagnostic comparable in units. ZVCP is not
+canonical ZVCF.
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1111}}
@@ -2126,7 +2129,7 @@ Drift Work (J)
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
 Control Work (J)
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
-ZVCF Projected Diagnostic (J)
+ZVCP Projected Diagnostic (J)
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
 \(\overline F_{\parallel}\) Total / Drift / Control (N)
 \end{minipage} \\
@@ -2144,7 +2147,7 @@ Drift Work (J)
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
 Control Work (J)
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
-ZVCF Projected Diagnostic (J)
+ZVCP Projected Diagnostic (J)
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
 \(\overline F_{\parallel}\) Total / Drift / Control (N)
 \end{minipage} \\
@@ -2198,7 +2201,7 @@ cannot be inferred from a force peak alone. In the double pendulum, the
 late positive rise is almost entirely drift. In the one-arm model, drift
 changes sign and then becomes strongly positive while control remains
 opposing late. In the two-arm local sweep, much larger opposing drift
-and control components leave a small net resultant. The dashed ZVCF
+and control components leave a small net resultant. The dashed ZVCP
 trace stays distinct from the control increment even when the two happen
 to be close over part of a history.
 
@@ -2211,7 +2214,8 @@ to be close over part of a history.
 }
 
 \caption{\label{fig-hand-path-force-vectors}Total, Drift, Control, and
-ZVCF Force Vectors at Normalized Time Quartiles}
+Zero-Velocity Control-Preserved Force Vectors at Normalized Time
+Quartiles}
 
 \end{figure}%
 
@@ -2732,12 +2736,17 @@ external loads:
 
 For an autonomous holonomic constraint, with \(h_v(q,0)=0\) and
 \(\gamma(q,0)=0\), the ground-reaction zero-velocity counterfactual
-(ZVCF) evaluates the same configuration and applied inputs with velocity
-set to zero:
+(ZVCF) evaluates the same configuration with both velocity and declared
+applied control set to zero:
 
 \[
-\lambda_{\mathrm{ZVCF}}=\lambda_0+\lambda_u+\lambda_e.
+\lambda_{\mathrm{ZVCF}}=\lambda_0+\lambda_e.
 \]
+
+The formerly labeled quantity \(\lambda_0+\lambda_u+\lambda_e\) is
+retained as the explicitly named \textbf{zero-velocity control-preserved
+reaction}. This distinction prevents a control-retaining intervention
+from being mistaken for a zero-control counterfactual.
 
 For a rheonomic contact or any convention in which a velocity-zero
 constraint bias remains, the reaction must instead be recomputed with
@@ -2784,17 +2793,17 @@ Attribution}
 \end{figure}%
 
 The additive identities close to \(5.7\times10^{-14}\) N for the total
-split and \(1.9\times10^{-13}\) N for the independently evaluated ZVCF
-identity. Treating ZTCF as a drift-only predictor of the modeled total
-support reaction gives \(R^2=0.871\) in the target-horizontal component
-and \(R^2=0.814\) in the swing-plane vertical component. These are
-fixed-prediction coefficients of determination, not squared correlations
-or fitted-regression results. The corresponding RMSE values are 64.6 N
-and 89.8 N, with biases of -14.2 N and +71.1 N. The RMSE values are 1.02
-and 1.42 times the model's projected planar-weight scale, respectively.
-The predictor captures substantial waveform variance but fails an
-absolute-error adequacy screen; \(R^2\) alone would overstate
-performance.
+split and \(1.9\times10^{-13}\) N for the independently evaluated
+zero-velocity control-preserved identity. Treating ZTCF as a drift-only
+predictor of the modeled total support reaction gives \(R^2=0.871\) in
+the target-horizontal component and \(R^2=0.814\) in the swing-plane
+vertical component. These are fixed-prediction coefficients of
+determination, not squared correlations or fitted-regression results.
+The corresponding RMSE values are 64.6 N and 89.8 N, with biases of
+-14.2 N and +71.1 N. The RMSE values are 1.02 and 1.42 times the model's
+projected planar-weight scale, respectively. The predictor captures
+substantial waveform variance but fails an absolute-error adequacy
+screen; \(R^2\) alone would overstate performance.
 
 The total vector impulse is \((22.92,35.20)\) N s. ZTCF contributes
 \((17.91,60.12)\) N s, while control contributes \((5.01,-24.93)\) N s.
@@ -9572,8 +9581,8 @@ measured state \((q, \dot q, \tau)\) of a swing:
 
 \begin{equation}\phantomsection\label{eq-zvcf}{
 \ddot q_{\mathrm{ZVCF}}
-  \;=\; M(q)^{-1}\,\bigl(\tau \;-\; b(q,\mathbf{0})\bigr)
-  \;=\; M(q)^{-1}\,\bigl(\tau \;-\; g(q)\bigr),
+  \;=\; M(q)^{-1}\,\bigl(-b(q,\mathbf{0})\bigr)
+  \;=\; M(q)^{-1}\,\bigl(-g(q)\bigr),
 }\end{equation}
 
 where the simplification in Equation~\ref{eq-zvcf} holds for the
@@ -9585,15 +9594,14 @@ be checked rather than assuming this reduction. The ZTCF
 (Equation~\ref{eq-ztcf}) answers \emph{``what would the declared model
 do right now if every included actuator switched off while the state and
 constraint set stayed fixed?''} --- it is the \textbf{drift} field of
-the affine control system, containing gravity plus all motion-dependent
-interaction dynamics. The ZVCF (Equation~\ref{eq-zvcf}) answers
-\emph{``what would the currently applied torques, together with gravity,
-produce from a standstill in this pose?''} --- it removes every
-motion-dependent term but is \emph{not} the pure control contribution,
-since gravity remains in Equation~\ref{eq-zvcf}; the pure torque term is
-\(M^{-1}\tau\) in the split below. Because Equation~\ref{eq-eom} is
-affine in \(\tau\) at a fixed state and unchanged constraint set, the
-actual acceleration superposes exactly:
+the affine control system, containing gravity plus all retained
+autonomous plant dynamics. The ZVCF (Equation~\ref{eq-zvcf}) answers
+\emph{``what instantaneous acceleration remains at this pose when
+velocity and the declared applied control are both zero?''} It is not
+the pure control contribution. The separately named zero-velocity
+control-preserved evaluation is \(M^{-1}(\tau-b(q,0))\). Because
+Equation~\ref{eq-eom} is affine in \(\tau\) at a fixed state and
+unchanged constraint set, the actual acceleration superposes exactly:
 
 \begin{equation}\phantomsection\label{eq-superposition}{
 \ddot q \;=\;

@@ -12,7 +12,11 @@ Definitions (pointwise, at a single measured state ``(q, v)`` with control
 ``tau``)::
 
     ZTCF accel:  qddot = solve(M(q), -bias(q, v))         # the drift field f(x)
-    ZVCF accel:  qddot = solve(M(q),  tau - bias(q, 0))   # velocity zeroed
+    ZVCF accel:  qddot = solve(M(q), -bias(q, 0)) # velocity and control zeroed
+
+The distinct control-preserved diagnostic is named
+``zero_velocity_control_preserved_acceleration``. It must not be abbreviated
+as ZVCF because it answers a different intervention question.
 
 For the planar double pendulum the bias force is ``C(q, v) v + g(q) + d(v)``.
 At ``v = 0`` the Coriolis term (quadratic in velocity) and the viscous damping
@@ -56,6 +60,7 @@ __all__ = [
     "evaluate_ztcf_along_trajectory",
     "evaluate_ztcf_zvcf_on_canonical_trajectory",
     "persist_ztcf_zvcf_analysis",
+    "zero_velocity_control_preserved_acceleration",
     "ztcf_acceleration",
     "zvcf_acceleration",
 ]
@@ -63,7 +68,7 @@ __all__ = [
 _CANONICAL_V2 = "canonical-v2"
 _WORLD_Z_UP = "world_Zup"
 _SI_UNITS = "SI"
-_ANALYSIS_SCHEMA_VERSION = "2.0.0"
+_ANALYSIS_SCHEMA_VERSION = "3.0.0"
 
 
 @dataclass(frozen=True)
@@ -160,6 +165,7 @@ class ZtcfZvcfResult:
     t: np.ndarray
     ztcf_acceleration: np.ndarray
     zvcf_acceleration: np.ndarray
+    zero_velocity_control_preserved_acceleration: np.ndarray
     drift_acceleration: np.ndarray
     control_acceleration: np.ndarray
     convention: str = _CANONICAL_V2
@@ -171,6 +177,9 @@ class ZtcfZvcfResult:
         arrays = {
             "ztcf_acceleration": np.asarray(self.ztcf_acceleration, dtype=float),
             "zvcf_acceleration": np.asarray(self.zvcf_acceleration, dtype=float),
+            "zero_velocity_control_preserved_acceleration": np.asarray(
+                self.zero_velocity_control_preserved_acceleration, dtype=float
+            ),
             "drift_acceleration": np.asarray(self.drift_acceleration, dtype=float),
             "control_acceleration": np.asarray(self.control_acceleration, dtype=float),
         }
@@ -326,39 +335,45 @@ def ztcf_acceleration(
     return _solve_mass(provider, q_arr, -bias)
 
 
-def zvcf_acceleration(
+def zvcf_acceleration(provider: DynamicsProvider, q: np.ndarray) -> np.ndarray:
+    """Canonical ZVCF acceleration at one fixed configuration/internal state.
+
+    ZVCF is instantaneous and sets both velocity and the declared applied
+    generalized-control channel to zero::
+
+        qddot = solve(M(q), -bias(q, 0))
+
+    Passive elements and internal states retained in the declared effective
+    plant remain in ``bias``. This is not a forward trajectory.
+    """
+    q_arr = _as_state_vector("q", q)
+    mass = np.asarray(provider.mass_matrix(q_arr), dtype=float)
+    require(
+        mass.ndim == 2 and mass.shape[0] == mass.shape[1],
+        "mass_matrix(q) must be square",
+        value=mass.shape,
+    )
+    zero_velocity = np.zeros(mass.shape[0])
+    _require_compatible_configuration_shape(
+        q=q_arr, tangent=zero_velocity, tangent_name="zero velocity"
+    )
+    bias_zero_v = np.asarray(provider.bias_forces(q_arr, zero_velocity), dtype=float)
+    require(
+        bias_zero_v.shape == zero_velocity.shape,
+        f"bias_forces(q, 0) must be {zero_velocity.shape}; got {bias_zero_v.shape}",
+        value=bias_zero_v.shape,
+    )
+    return _solve_mass(provider, q_arr, -bias_zero_v)
+
+
+def zero_velocity_control_preserved_acceleration(
     provider: DynamicsProvider, q: np.ndarray, tau: np.ndarray
 ) -> np.ndarray:
-    """Zero-velocity counterfactual (ZVCF) acceleration at a single state.
+    """Evaluate zero-velocity acceleration while preserving applied control.
 
-    Computes the *instantaneous* acceleration with the **velocity zeroed but the
-    applied control preserved**::
+    This retains the former repository behavior under an explicit name::
 
         qddot = solve(M(q), tau - bias(q, 0))
-
-    With ``v = 0`` the Coriolis and viscous-damping contributions vanish, so
-    ``bias(q, 0)`` reduces to the gravity vector ``g(q)`` -- this matches
-    :meth:`PendulumPhysicsEngine.compute_zvcf` (which uses ``-g(q) + tau``)
-    exactly.
-
-    # AGENT-NOTE: Pointwise / instantaneous, evaluated at the supplied measured
-    # position with velocity set to zero. This is NOT a forward-integrated
-    # zero-velocity rollout.
-
-    Args:
-        provider: Backend exposing ``mass_matrix`` and ``bias_forces`` (the
-            :class:`DynamicsProvider` Protocol; ODE or MuJoCo CPU backend).
-        q: Joint positions ``(n,)`` [rad].
-        tau: Applied generalised control/torque ``(n,)`` [N*m].
-
-    Returns:
-        Zero-velocity acceleration ``(n,)`` [rad/s^2].
-
-    Postcondition:
-        Result has shape ``(n,)`` and is finite.
-
-    Raises:
-        ValueError: If ``q``/``tau`` are empty, non-finite, or differ in length.
     """
     q_arr = _as_state_vector("q", q)
     tau_arr = _as_state_vector("tau", tau)
@@ -442,7 +457,7 @@ def drift_and_control_split(
     * the **control** term ``solve(M(q), tau)``.
 
     Their sum is the actual acceleration under ``tau``, so this is the
-    instantaneous ``qddot = f(x) + g(x) u`` decomposition at the measured state.
+    instantaneous ``qddot = f(x) + G(x) u`` decomposition at the measured state.
 
     # AGENT-NOTE: Pointwise / instantaneous decomposition at a single measured
     # state -- NOT a forward-integrated counterfactual. Do not turn this into a
@@ -497,6 +512,7 @@ def evaluate_ztcf_zvcf_on_canonical_trajectory(
     tau = trajectory.controls_or_zeros()
     ztcf = np.empty_like(trajectory.v)
     zvcf = np.empty_like(trajectory.v)
+    control_preserved = np.empty_like(trajectory.v)
     drift = np.empty_like(trajectory.v)
     control = np.empty_like(trajectory.v)
 
@@ -505,13 +521,17 @@ def evaluate_ztcf_zvcf_on_canonical_trajectory(
         v_i = trajectory.v[idx]
         tau_i = tau[idx]
         ztcf[idx] = ztcf_acceleration(provider, q_i, v_i)
-        zvcf[idx] = zvcf_acceleration(provider, q_i, tau_i)
+        zvcf[idx] = zvcf_acceleration(provider, q_i)
+        control_preserved[idx] = zero_velocity_control_preserved_acceleration(
+            provider, q_i, tau_i
+        )
         drift[idx], control[idx] = drift_and_control_split(provider, q_i, v_i, tau_i)
 
     return ZtcfZvcfResult(
         t=trajectory.t,
         ztcf_acceleration=ztcf,
         zvcf_acceleration=zvcf,
+        zero_velocity_control_preserved_acceleration=control_preserved,
         drift_acceleration=drift,
         control_acceleration=control,
         convention=trajectory.convention,
@@ -547,9 +567,9 @@ def persist_ztcf_zvcf_analysis(
 
     The file uses the shared CC-4 root attributes and required ``t``/``q``/``v``
     datasets, then adds the analysis datasets ``ztcf_acceleration``,
-    ``zvcf_acceleration``, ``drift_acceleration``, and
-    ``control_acceleration``. It is intentionally an analysis artifact rather
-    than a forward rollout trace.
+    ``zvcf_acceleration``, ``zero_velocity_control_preserved_acceleration``,
+    ``drift_acceleration``, and ``control_acceleration``. It is intentionally
+    an analysis artifact rather than a forward rollout trace.
     """
     require(
         isinstance(trajectory, CanonicalDynamicsTrajectory),
@@ -593,5 +613,9 @@ def persist_ztcf_zvcf_analysis(
         handle.create_dataset("u", data=trajectory.controls_or_zeros())
         handle.create_dataset("ztcf_acceleration", data=result.ztcf_acceleration)
         handle.create_dataset("zvcf_acceleration", data=result.zvcf_acceleration)
+        handle.create_dataset(
+            "zero_velocity_control_preserved_acceleration",
+            data=result.zero_velocity_control_preserved_acceleration,
+        )
         handle.create_dataset("drift_acceleration", data=result.drift_acceleration)
         handle.create_dataset("control_acceleration", data=result.control_acceleration)

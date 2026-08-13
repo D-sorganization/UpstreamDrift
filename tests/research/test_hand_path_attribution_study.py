@@ -59,14 +59,16 @@ def test_study_is_deterministic_and_declares_prescribed_kinematics(
         ]
 
 
-def test_zvcf_is_separate_from_control_and_uses_a_declared_protocol(
+def test_control_preserved_evaluation_is_explicit_and_separate_from_control(
     study: tuple[dict[str, object], dict[str, np.ndarray]],
 ) -> None:
     record, arrays = study
     for model_name, model in record["models"].items():
-        assert model["zvcf"]["status"] == "available"
-        assert "same configuration" in model["zvcf"]["protocol"].lower()
-        assert "zero generalized velocity" in model["zvcf"]["protocol"].lower()
+        diagnostic = model["zero_velocity_control_preserved"]
+        assert diagnostic["status"] == "available"
+        assert "same configuration" in diagnostic["protocol"].lower()
+        assert "zero generalized velocity" in diagnostic["protocol"].lower()
+        assert "not canonical zvcf" in diagnostic["interpretation"].lower()
         assert f"{model_name}__force_zvcf" in arrays
         assert not np.array_equal(
             arrays[f"{model_name}__force_zvcf"],

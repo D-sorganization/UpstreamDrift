@@ -464,7 +464,8 @@ class CounterfactualComputable(Protocol):
         """Zero-Torque Counterfactual (ZTCF) - Guideline G1.
 
         Compute acceleration with applied torques set to zero.
-        Isolates drift (gravity + Coriolis + constraints) from control.
+        Returns the complete autonomous acceleration of the declared plant,
+        including every retained passive, contact, and constraint effect.
 
         Args:
             q: Joint positions (n_q,).
@@ -479,14 +480,14 @@ class CounterfactualComputable(Protocol):
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
         """Zero-Velocity Counterfactual (ZVCF) - Guideline G2.
 
-        Compute acceleration with joint velocities set to zero.
-        Isolates configuration-dependent effects from velocity-dependent.
+        Compute instantaneous acceleration at fixed configuration/internal
+        state with joint velocities and declared applied control set to zero.
 
         Args:
             q: Joint positions (n_q,).
 
         Returns:
-            q_ddot_ZVCF: Acceleration with v=0 (n_v,).
+            q_ddot_ZVCF: Acceleration with v=0 and u=0 (n_v,).
         """
         ...
 

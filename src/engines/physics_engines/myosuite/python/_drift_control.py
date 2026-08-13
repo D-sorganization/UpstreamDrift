@@ -28,13 +28,14 @@ class DriftControlMixin:
             logger.warning("Simulation not initialized")
             return np.array([])
 
-        ctrl_saved = self.sim.data.ctrl.copy()
+        data = self.sim.data
+        ctrl_saved = data.ctrl.copy()
         try:
-            self.sim.data.ctrl[:] = 0.0
+            data.ctrl[:] = 0.0
             self.sim.forward()
-            a_drift: np.ndarray = np.array(self.sim.data.qacc)
+            a_drift: np.ndarray = np.array(data.qacc)
         finally:
-            self.sim.data.ctrl[:] = ctrl_saved
+            data.ctrl[:] = ctrl_saved
             self.sim.forward()
         return a_drift
 
@@ -78,6 +79,7 @@ class DriftControlMixin:
             return np.array([])
 
         q_saved, v_saved = self.get_state()
+        ctrl_saved = self.sim.data.ctrl.copy()
 
         try:
             n_v = len(v_saved) if hasattr(v_saved, "__len__") else 1
@@ -86,9 +88,11 @@ class DriftControlMixin:
 
         try:
             self.set_state(q, np.zeros(n_v))
+            self.sim.data.ctrl[:] = 0.0
             self.sim.forward()
             a_zvcf = np.array(self.sim.data.qacc)
         finally:
+            self.sim.data.ctrl[:] = ctrl_saved
             self.set_state(q_saved, v_saved)
         return a_zvcf
 
