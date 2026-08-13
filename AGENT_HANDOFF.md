@@ -16,7 +16,9 @@ Update this file with every PR and every push to main.
   six-axis grip wrenches was found. Literature-only and synthetic evidence are
   prohibited substitutes. Tools #4430 owns the companion GUI and is stacked
   after runner-pending PR #4411. The active twentieth claim-audit slice is
-  `research/8557-frames-biology-audit`; it is adding timestep refinement to the
+  ready PR [#8582](https://github.com/D-sorganization/UpstreamDrift/pull/8582)
+  from `research/8557-frames-biology-audit` at implementation commit
+  `cca513c27594d553ab68424c1ca79dbcd2ecda26`; it adds timestep refinement to the
   reduced preparation-history comparison because the sign persists but its
   sub-percent magnitude is not converged. Both the frame/biological and human
   protocol chapters are now fully adjudicated as PD-CLAIM-194 through
