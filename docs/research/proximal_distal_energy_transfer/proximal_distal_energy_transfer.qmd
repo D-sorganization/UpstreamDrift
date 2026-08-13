@@ -75,11 +75,13 @@ abstract: |
   pulse exposes sixty times more RMS response discrepancy than a slow pulse.
   This is structural verification, not equipment calibration. A subsequent
   planar experiment couples three transported shaft modes into the moving-base,
-  two-hand forward solve. The declared baseline stays within a 5% deflection
-  screen; the zero-command grip couple remains negative for 30 ms; coincident
-  and reversed moment-arm controls close exactly; and work--energy error
-  decreases under timestep refinement. The result supports only the declared
-  synthetic planar mechanism. A common-observable model ladder then carries
+  two-hand forward solve. The current baseline reaches a 13.48% tip-deflection
+  ratio and therefore fails its declared 5% small-deflection screen. It is
+  retained only as an out-of-domain numerical stress test: the zero-command
+  grip couple remains negative for about 25 ms, coincident and reversed
+  moment-arm controls close exactly, and work--energy error decreases under
+  timestep refinement. These checks support numerical coupling and qualitative
+  force-couple geometry, not quantitative shaft response. A common-observable model ladder then carries
   reference-explicit force, couple, velocity, angular velocity, and power
   through a third coordinate, prescribed hub motion, two-hand constraint
   geometry, and proper 3-D frame transformations. A reduced full-body

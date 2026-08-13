@@ -6,6 +6,21 @@ Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
 
+- **#8557 forward modal-shaft reconciliation** — branch
+  `research/8557-forward-modal-audit` is the active twenty-fourth fail-closed
+  slice. All 26 chapter candidates are adjudicated as PD-CLAIM-223 through
+  PD-CLAIM-229. Regeneration changed only a stale source hash, confirming the
+  committed numerical authority, but the prose described an obsolete run.
+  The current 0.13476 tip-deflection ratio fails the preregistered 0.05 screen;
+  quantitative linear-beam inference is therefore rejected while numerical
+  coupling, force-couple geometry, and convergence observations remain.
+  Current authority: 923 candidates, 796 reviewed, 228 atomic claims, and 127
+  unadjudicated. Fifty-five focused scientific/governance tests and Ruff pass. The regenerated,
+  visually inspected paper is 203 pages and 1,403,717 bytes with 186 URI links,
+  235 outline entries, and 380 qualified release artifacts. Remaining gates are
+  combined governance tests, protected publication,
+  and exact remote-main verification.
+
 - **#8557 uncertainty and stability audit** — ready PR
   [#8587](https://github.com/D-sorganization/UpstreamDrift/pull/8587) from
   `research/8557-uncertainty-audit` at implementation commit
