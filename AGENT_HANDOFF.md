@@ -8,7 +8,9 @@ Update this file with every PR and every push to main.
 - **#8557 Comprehensive Scientific Claim Audit and Open Golf Modeling
   Program** — PRs #8558–#8570 are on `main`; exact remote-main tip after #8570
   is `64d9667168fbc2481907affae12c6eeb2b9fe58e`. Branch
-  `research/8557-counterfactual-audit` is the twelfth fail-closed audit slice.
+  `research/8557-counterfactual-audit` is ready PR **#8571** at initial exact
+  head `6c4cab3de8268ed1e0cf9f32e906f03d4f0e1e81` and is the twelfth
+  fail-closed audit slice.
   It corrects the legacy MATLAB killswitch from a forward-counterfactual label
   to a rerun-based pointwise sampler; rejects its residual-force dotted with
   residual-velocity `DELTA` work as an additive pathway partition; fixes
