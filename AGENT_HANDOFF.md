@@ -1,9 +1,14 @@
 # Agent Handoff — UpstreamDrift
 
 Last updated: 2026-08-13
+
+Last updated: 2026-08-11
 Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
+
+<<<<<<< HEAD
+<<<<<<< HEAD
 
 - **#8557 Comprehensive Scientific Claim Audit and Open Golf Modeling
   Program** — PR **#8574** merged through protected checks at exact remote-main
@@ -175,6 +180,10 @@ Update this file with every PR and every push to main.
   present `chat/_qt/runtime.py`; changed-file mypy also timed out under Python
   3.12 after the Python 3.13 run stopped in NumPy's version-gated stub.
 
+=======
+
+> > > > > > > pr-8482
+
 - **Launcher-diagnostics size slice (local, no publish)** — branch
   `fix/launcher-diagnostics-size-decomposition` starts at exact draft PR #8480
   head `971649efd5ad2e5793240a5237a0314d45cc2faf`. It moves the local
@@ -224,6 +233,28 @@ Update this file with every PR and every push to main.
   nor widens them. #8472 owns only the chat-dock split; the remaining modules
   need accurate open tracking rather than being attributed to that issue.
 
+=======
+
+- **#4262 immutable Tools provider source** — draft UpstreamDrift PR
+  [#8475](https://github.com/D-sorganization/UpstreamDrift/pull/8475) publishes
+  branch `feat/4262-pinned-tools-provider-resolution` from independently
+  reviewed implementation head `93350cc03649b411403814911f6fb6a1620297e8`
+  on exact `main` `69eb7e9d`. The five `provider: tools` launcher entries resolve
+  exclusively to `vendor/ud-tools` at the already-declared gitlink SHA
+  `ff4240217005e1415ca409fd124e50b64ee642d2`. Follow-up hardening makes the
+  Tools provider win over conflicting installed-package or sibling metadata,
+  requires an initialized, exact-HEAD, clean gitlink attached to this
+  superproject, rejects reparse-point replacements and all resolved path
+  escapes, and normalizes failure to `provider_unavailable`. The authority
+  inspection is decomposed into bounded index, checkout-layout, identity, and
+  cleanliness checks so it satisfies the changed-file architecture budget.
+  Canonical SPEC version `1.0.497` now matches the changelog. Mutable
+  `../Tools` roots are no longer serialized and unrelated sibling providers
+  retain their existing resolution. The branch deliberately does not change
+  the gitlink pin or add `TOOLS_REPO_PATH`. #4262 remains open for any future
+  pin update, an identity-validated development override, broader consumer
+  migration, protected current-head CI/review, and integration.
+  > > > > > > > pr-8475
 - **#8458 hand-path drift/control attribution** — consolidated branch
   `feat/hand-path-drift-control-attribution` defines the canonical same-state
   ZTCF/control/ZVCF contract; implements exact double-pendulum, one-arm, and

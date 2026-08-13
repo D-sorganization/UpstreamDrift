@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 from src.config.launcher_manifest_loader import (
@@ -318,6 +319,7 @@ models:
     def test_manifest_loads_utility_provider_tiles_from_known_roots_without_env(
         self,
         tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         """Utility repos should be discoverable through the shared launch path."""
         workspace_root = tmp_path
@@ -333,6 +335,11 @@ models:
 
         tools_root = workspace_root / "Tools"
         tools_root.mkdir(parents=True)
+        (repo_root / "vendor" / "ud-tools" / "src").mkdir(parents=True)
+        monkeypatch.setattr(
+            "src.config.launcher_manifest_loader.inspect_tools_vendor_authority",
+            lambda _repo_root: SimpleNamespace(available=True),
+        )
         (tools_root / "model_pack.yaml").write_text(
             """
 manifest_version: "1.0.0"
@@ -371,6 +378,7 @@ models:
     def test_manifest_loads_tools_nested_pendulum_provider_manifest(
         self,
         tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         """Tools Pendulum Simulator is exposed from its nested provider manifest."""
         workspace_root = tmp_path
@@ -387,6 +395,11 @@ models:
         tools_root = workspace_root / "Tools"
         pendulum_root = tools_root / "src" / "pendulum_simulator"
         pendulum_root.mkdir(parents=True)
+        (repo_root / "vendor" / "ud-tools" / "src").mkdir(parents=True)
+        monkeypatch.setattr(
+            "src.config.launcher_manifest_loader.inspect_tools_vendor_authority",
+            lambda _repo_root: SimpleNamespace(available=True),
+        )
         (pendulum_root / "model_pack.yaml").write_text(
             """
 manifest_version: "1.0.0"
@@ -419,7 +432,7 @@ models:
         assert tile is not None, "Assertion failed: tile is not None"
         assert tile.status == "provider_ready"
         assert tile.web_route == "/tools/pendulum-simulator"
-        assert tile.source_root == str(pendulum_root)
+        assert tile.source_root is None
 
     def test_manifest_ignores_provider_tiles_when_disabled(
         self,

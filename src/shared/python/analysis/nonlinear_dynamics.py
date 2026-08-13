@@ -501,7 +501,8 @@ class NonlinearDynamicsMixin:
         probs = counts / M
         probs = probs[probs > 0]
 
-        pe = -np.sum(probs * np.log2(probs))
+        # ⚡ Bolt: np.vdot avoids intermediate array allocation and is faster than np.sum(probs * np.log2(probs))
+        pe = -np.vdot(probs, np.log2(probs))
         result = float(pe)
         ensure(result >= 0, "permutation entropy must be non-negative", result)
         return result
