@@ -423,9 +423,18 @@ proxy relative to clock timing but raises peak hand force; higher
 impedance changes the tradeoff, and all four registered programs remain
 Pareto-nondominated. A local task-Jacobian partition exposes five
 task-null input directions, but this is a model property rather than
-evidence of a neural synergy or human self-stabilization. References,
-analysis code, machine-readable results, and provenance are available
-with the document for independent inspection and reuse.
+evidence of a neural synergy or human self-stabilization. A
+phase-resolved proximal-velocity study then evaluates 90 exact
+same-state cases under relative- and absolute-club-rate matching. High
+proximal-link speed strongly increases late drift power in some states,
+but the sign reverses earlier and in the delivery state under
+absolute-rate matching. A separate 60-program trajectory grid is more
+adversarial: among 26 valid impacts, release-state proximal velocity
+correlates negatively with impact speed and positively with negative
+grip work. The combined result rejects proximal speed as a standalone
+release rule and motivates a rotating-base, two-hand falsification tier.
+References, analysis code, machine-readable results, and provenance are
+available with the document for independent inspection and reuse.
 \end{abstract}
 
 \renewcommand*\contentsname{Table of contents}
@@ -436,7 +445,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, left=2mm, toprule=.15mm, opacitybacktitle=0.6, leftrule=.75mm, titlerule=0mm, breakable, colbacktitle=quarto-callout-note-color!10!white, rightrule=.15mm, bottomrule=.15mm, toptitle=1mm, colframe=quarto-callout-note-color-frame, arc=.35mm, bottomtitle=1mm, colback=white, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, arc=.35mm, colframe=quarto-callout-note-color-frame, breakable, opacityback=0, rightrule=.15mm, toprule=.15mm, leftrule=.75mm, titlerule=0mm, colback=white, bottomtitle=1mm, coltitle=black, toptitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, bottomrule=.15mm, left=2mm, opacitybacktitle=0.6, colbacktitle=quarto-callout-note-color!10!white]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -2520,6 +2529,386 @@ component impulses, closure errors, prediction metrics, nonidentifiable
 quantities, and source hashes. This separates the demonstrated algebra
 and planar benchmark from the still-unmeasured human hypothesis.
 
+\chapter{Proximal Velocity, Geometry, and Drift-Mediated
+Transfer}\label{sec-shoulder-velocity-transfer}
+
+\section{The Question Must Be Posed as a State-Matched
+Counterfactual}\label{the-question-must-be-posed-as-a-state-matched-counterfactual}
+
+The practical observation motivating this study is that releasing while
+the proximal system is moving rapidly can feel more like a ``fling'':
+the club gains speed while the hands appear to do less negative work.
+That observation is mechanically plausible, but the phrase \emph{high
+shoulder velocity} conflates at least four quantities: thorax angular
+velocity, shoulder-joint velocity, hand path velocity, and the angular
+velocity of the proximal link in a reduced pendulum. This section tests
+only the last quantity. In the model, \(\dot q_1\) is the angular
+velocity of the proximal rigid link about a fixed hub. It is neither
+measured thorax rotation nor an anatomical shoulder-joint coordinate.
+
+The distinction matters empirically. Upper-body kinematic studies report
+large thorax speed and strong coupling between thorax and pelvis, but
+those observations do not identify a causal club-transfer mechanism
+(\citeproc{ref-horan2012}{Horan and Kavanagh 2012};
+\citeproc{ref-bourgain2022}{Bourgain et al. 2022}). Bilateral grip-force
+measurements also show that the hands can supply different force and
+moment histories, so a net grip load does not identify how the player
+produced it (\citeproc{ref-koike2020}{Choi and Park 2020}). The present
+result is therefore a model-level map from achieved state to
+instantaneous acceleration, force, and power contributions. It is not a
+coaching rule.
+
+At a fixed configuration \(q\) and applied torque \(u\), the equations
+are
+
+\[
+M(q)\ddot q = h(q,\dot q) + B u,
+\qquad
+\ddot q = \ddot q_{\mathrm{drift}} + \ddot q_{\mathrm{control}},
+\]
+
+where the drift term is evaluated at the achieved state with the modeled
+controls zeroed. It includes velocity-dependent, gravitational, and
+constraint effects represented by this model. It does \textbf{not} mean
+passive human motion. Reaction-force and grip-power contributions are
+reconstructed from the same pointwise split and must satisfy
+componentwise closure before a sample is admitted.
+
+\section{Two Velocity-Matching Rules}\label{two-velocity-matching-rules}
+
+Changing \(\dot q_1\) alone is not a unique intervention because the
+distal angular rate may be expressed either relative to the proximal
+link or in the laboratory frame. We therefore evaluate two declared
+counterfactual families:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Preserve Relative Club Rate:} hold \(\dot q_2-\dot q_1\) fixed
+  while changing \(\dot q_1\). This co-transports the club with the
+  proximal link and asks what happens when the whole angular velocity
+  state is shifted.
+\item
+  \textbf{Preserve Absolute Club Rate:} hold \(\dot q_2\) fixed while
+  changing \(\dot q_1\). This changes the relative rate and asks whether
+  proximal speed alone improves the transfer when distal
+  laboratory-frame speed is matched.
+\end{enumerate}
+
+For each of five downswing phases, nine proximal rates spanning
+20--180\% of the reference magnitude are evaluated. Configuration,
+torque command, mass, inertia, lengths, and gravity are held fixed
+within a phase. This is a local state sweep, not a realizable trajectory
+optimization. Its purpose is to test the sign and sensitivity of the
+proposed mechanism before adding more degrees of freedom.
+
+\section{Phase-Resolved Results}\label{phase-resolved-results}
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{data/shoulder_velocity_transfer/figures/fig_shoulder_velocity_drift_power.pdf}
+
+}
+
+\caption{\label{fig-shoulder-velocity-drift-power}Drift grip power
+across proximal angular-velocity sweeps. Each panel states the
+velocity-matching rule; the large late-swing benefit is not invariant to
+that rule.}
+
+\end{figure}%
+
+The result rejects a phase-independent benefit. Under relative-rate
+matching, the slope of drift grip power with proximal rate is \(+9.72\)
+W/(rad/s) at transition, \(-1.12\) in early downswing, \(-8.25\) in
+mid-downswing, \(+65.06\) in delivery, and \(+283.74\) before impact.
+Under absolute-rate matching, the corresponding slopes are \(+0.12\),
+\(-0.43\), \(-18.78\), \(-5.96\), and \(+184.58\) W/(rad/s). Thus the
+largest late-swing benefit survives both matching rules only in the
+pre-impact state. The delivery-state claim survives when relative club
+rate is preserved but reverses when absolute club rate is preserved.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{data/shoulder_velocity_transfer/figures/fig_shoulder_velocity_braking_map.pdf}
+
+}
+
+\caption{\label{fig-shoulder-velocity-braking-map}Negative grip power
+across phase and velocity-matching rule. Shading marks states in which
+the grip reaction removes modeled mechanical energy from the club at
+that instant.}
+
+\end{figure}%
+
+The braking map supplies the sharper test of the motivating observation.
+Higher proximal velocity does not uniformly reduce braking.
+Mid-downswing contains the strongest opposing region: minimum pointwise
+grip power reaches \(-148.8\) W under relative-rate matching and
+\(-296.5\) W under absolute-rate matching. In delivery, relative-rate
+matching contains no negative grip-power sample, whereas absolute-rate
+matching reaches \(-130.2\) W. The apparent ``clean fling'' is therefore
+a relationship among phase, configuration, and relative motion, not a
+consequence of proximal speed in isolation.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{data/shoulder_velocity_transfer/figures/fig_shoulder_velocity_phase_sensitivity.pdf}
+
+}
+
+\caption{\label{fig-shoulder-velocity-phase-sensitivity}Signed slope of
+drift grip power with proximal angular velocity. Positive cells indicate
+that faster proximal motion increases drift-mediated grip power within
+the declared local sweep.}
+
+\end{figure}%
+
+\section{Trajectory-Level Strategy
+Search}\label{trajectory-level-strategy-search}
+
+The pointwise sweep does not show whether a control program can reach a
+favorable state. A second experiment therefore varies three
+trajectory-level decisions: the time at which the 60 N m proximal drive
+is reduced (0.12, 0.18, 0.24, or 0.30 s), the post-cut proximal torque
+(0, 30, or 60 N m), and the wrist release time (0.10, 0.14, 0.18, 0.22,
+or 0.26 s). Every program uses a 10 N m opposing wrist command before
+release and a 15 N m drive afterward. All 60 attempted programs are
+retained; only 26 cross club vertical inside the registered delivery
+window.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{data/shoulder_velocity_transfer/figures/fig_shoulder_velocity_strategy_associations.pdf}
+
+}
+
+\caption{\label{fig-shoulder-velocity-strategy-associations}Release-state
+proximal velocity against impact speed and negative grip work for every
+valid-impact trajectory. Color denotes release time, exposing the timing
+confound.}
+
+\end{figure}%
+
+Within this finite grid, the empirical premise does not survive as a
+standalone model rule. Proximal-link velocity at release correlates with
+lower impact speed (\(r=-0.692\)) and greater post-release negative grip
+work (\(r=+0.943\)) among the valid trials. In a descriptive
+standardized regression that also includes release time, proximal-drive
+cut time, and post-cut proximal torque, the release-velocity coefficient
+remains negative (\(\beta=-0.514\)). This is not a causal estimate: the
+regressors are mechanically coupled, the grid is small, and conditioning
+on valid impact creates selection. It nevertheless rejects the claim
+that waiting for the modeled proximal link to attain a larger angular
+velocity is sufficient to improve transfer.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{data/shoulder_velocity_transfer/figures/fig_shoulder_velocity_strategy_grid.pdf}
+
+}
+
+\caption{\label{fig-shoulder-velocity-strategy-grid}Registered impact
+speed across the complete timing grid. An X denotes a program that fails
+to reach club vertical inside the declared delivery window.}
+
+\end{figure}%
+
+The highest-speed valid program releases at 0.10 s, retains the full 60
+N m proximal drive, and reaches 38.85 m/s. Its post-release grip-force
+work is 127.21 J, decomposed into 132.08 J drift and -4.87 J control,
+with 6.11 J of negative grip work and a 315.39 N peak grip force. The
+exact work-closure residual is \(2.1\times10^{-14}\) J. The large peak
+load makes clear why speed alone is an incomplete objective.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=0.88\linewidth,height=\textheight,keepaspectratio]{data/shoulder_velocity_transfer/figures/fig_shoulder_velocity_strategy_pareto.pdf}
+
+}
+
+\caption{\label{fig-shoulder-velocity-strategy-pareto}Nondominated
+speed, braking-work, and peak-force outcomes. Open red markers identify
+programs for which no sampled alternative is at least as good on all
+three objectives and strictly better on one.}
+
+\end{figure}%
+
+No single program dominates the registered objectives. Faster candidates
+generally demand more peak grip force, while low-force candidates
+sacrifice speed or accept more braking work. Several nominally different
+programs are trajectory-equivalent because their proximal-drive cut
+occurs after impact; they are retained for auditability rather than
+silently deduplicated. The result is a Pareto set, not a unique optimum.
+
+\section{A Control Strategy Stated as Testable
+Conditions}\label{a-control-strategy-stated-as-testable-conditions}
+
+Within this model tier, a strategy for exploiting drift-mediated
+transfer is better stated as five conditions than as a command to
+maximize torso speed:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Build Proximal Speed Before the Favorable Geometry.}
+  Additional proximal speed has its largest positive association with
+  drift grip power in the late states. Acceleration history matters
+  because the target velocity must be reached without imposing a
+  compensating distal rate that changes the counterfactual.
+\item
+  \textbf{Enter Delivery With Compatible Relative Motion.} The delivery
+  result changes sign across the two velocity-matching rules. The
+  proximal link and club must arrive with a relative angular rate that
+  lets the interaction force do positive work; proximal speed alone is
+  insufficient.
+\item
+  \textbf{Avoid Sustained Negative Grip Power.} The measurable adverse
+  outcome is not a vaguely defined ``braking force'' but negative grip
+  power and its time integral. A high force perpendicular to hand or
+  club velocity can transmit little power, whereas a smaller force
+  aligned against velocity can remove energy.
+\item
+  \textbf{Reduce Direct Distal Opposition Only When Drift Transfer Is
+  Positive.} A wrist-torque reduction is useful only if the
+  state-matched drift term is already accelerating the club and the
+  resulting grip power is nonnegative. Releasing earlier can enter the
+  adverse mid-downswing region.
+\item
+  \textbf{Treat Torso Speed as a Boundary Condition, Not the Objective.}
+  A player can influence pelvis/thorax torque, hand-path curvature, arm
+  configuration, bilateral force allocation, and wrist moment. The
+  optimization objective is club delivery speed subject to
+  negative-work, peak-force, face/path, robustness, and anatomical
+  constraints; torso angular velocity is one state variable in that
+  constrained problem.
+\end{enumerate}
+
+These conditions distinguish \emph{velocity at transfer} from
+\emph{continued positive proximal torque}. A proximal segment may be
+moving rapidly while decelerating. Indeed, outward energy flow can
+coincide with proximal deceleration, but deceleration itself does not
+prove transfer: energy may leave through the base, gravity, damping, or
+an actuator. A trajectory-level study must therefore report proximal
+actuator power, grip-interface power, club energy change, and external
+work together.
+
+\section{Critical Variables for the Two-Hand
+Extension}\label{critical-variables-for-the-two-hand-extension}
+
+The double pendulum cannot decide how two hands should create or resist
+the club moment. The next mechanically closed tier must preserve the
+following variables rather than collapsing them into one wrist torque:
+
+\begin{itemize}
+\tightlist
+\item
+  thorax or hub angular velocity and acceleration;
+\item
+  common-mode hand velocity, which largely transports the grip;
+\item
+  differential hand velocity and separation, which create a
+  force-generated couple;
+\item
+  lead- and trail-hand force vectors and their points of application;
+\item
+  direct wrist moments, separated from the moment of hand forces;
+\item
+  arm configuration and hand-path curvature;
+\item
+  club relative angle, relative angular velocity, and shaft deformation;
+\item
+  bilateral negative work, peak force, constraint residual, and delivery
+  speed.
+\end{itemize}
+
+A candidate two-hand strategy is Pareto-optimal only if no alternative
+raises delivery speed without worsening at least one registered cost.
+This prevents a large speed gain obtained through excessive grip load,
+opposing hand work, or an unstable timing boundary from being called
+optimal. The existing fixed-shoulder two-arm model can test force
+allocation and force-generated couple, while the moving-base flexible
+tier can test translation and shaft response. Neither has an anatomical
+rotating torso. A forward, rotating-base, two-hand model is required
+before the torso-velocity question can be tested as posed.
+
+\section{Falsification Criteria and Experimental
+Observables}\label{falsification-criteria-and-experimental-observables}
+
+The high-proximal-velocity hypothesis is weakened or rejected if any of
+the following occurs in a registered, held-out analysis:
+
+\begin{itemize}
+\tightlist
+\item
+  drift grip power fails to increase with proximal velocity in the
+  declared delivery state;
+\item
+  the sign changes under small, physiologically plausible perturbations
+  of configuration or parameter estimates;
+\item
+  negative grip work or peak grip force increases enough to dominate the
+  club-energy gain;
+\item
+  the effect disappears when the same distal laboratory-frame state is
+  matched;
+\item
+  a two-hand model attributes the gain to direct wrist work rather than
+  the force-generated interaction term; or
+\item
+  synchronized human measurements show no within-player association
+  after conditioning on club state, hand path, and phase.
+\end{itemize}
+
+The minimum experimental record is synchronized pelvis and thorax
+kinematics, upper-arm and hand kinematics, club pose and twist,
+bilateral six-axis grip wrenches, ground reaction, and launch
+conditions. The preregistered estimands should include phase-resolved
+grip power, bilateral common/differential-mode power, proximal
+actuator-power proxies, club kinetic-energy change, and the conditional
+effect of thorax velocity at matched club state. Because published golf
+kinematic methods remain heterogeneous
+(\citeproc{ref-bourgain2022}{Bourgain et al. 2022}), coordinate
+definitions, filtering, event timing, and reference-point transport must
+be declared before examining outcomes.
+
+\section{Reproducibility and Claim
+Boundary}\label{reproducibility-and-claim-boundary}
+
+The committed evidence contains 90 pointwise cases (five phases, two
+velocity-matching rules, and nine proximal rates) and all 60 attempted
+trajectory programs. The machine-readable JSON files record every row,
+phase summary, closure test, invalid-impact attempt, Pareto membership,
+model-tier statement, falsifier, limitation, and source hash; paired NPZ
+files preserve the numerical arrays. The pointwise generating scripts
+are \texttt{shoulder\_velocity\_transfer.py},
+\texttt{run\_shoulder\_velocity\_transfer\_study.py}, and
+\texttt{make\_shoulder\_velocity\_transfer\_figures.py}. The trajectory
+scripts are \texttt{shoulder\_velocity\_strategy\_search.py},
+\texttt{run\_shoulder\_velocity\_strategy\_study.py}, and
+\texttt{make\_shoulder\_velocity\_strategy\_figures.py}.
+
+The supported conclusion is narrow: in the reference fixed-hub planar
+model, high proximal-link angular velocity can markedly increase late
+drift-mediated grip power, but the effect is phase- and
+state-definition-dependent and can reverse earlier in the downswing. The
+study does not establish an optimal human torso velocity, a causal
+shoulder strategy, or a universal instruction to release while rotating
+rapidly.
+
 \chapter{Matched-State Counterfactual
 Persistence}\label{sec-killswitch-ensemble}
 
@@ -3854,6 +4243,43 @@ increasing distal speed. Whether a specific golfer should reduce,
 reverse, or maintain wrist torque requires the higher-order moving-base,
 flexible-shaft, three-dimensional, and human-data tests that follow in
 the completion program.
+
+\chapter{Interactive Proximal--Distal Dynamics
+Workbench}\label{sec-interactive-workbench}
+
+An open-source interactive workbench accompanies the scripted analyses.
+It provides PyQt6 and React/Tauri interfaces for the double-pendulum,
+triple-pendulum, and bilateral golfer models. Both interfaces consume
+one machine-readable experiment and glossary catalog from the canonical
+\href{https://github.com/D-sorganization/Tools/tree/main/src/pendulum_simulator}{Tools
+pendulum simulator}, so experiment names, hypotheses, falsifiers,
+limitations, and definitions do not diverge between applications.
+
+The guide exposes six bounded experiments: passive two-link transfer,
+distal-torque onset, a three-link cascade, the two-hand
+equivalent-couple mechanism, pointwise versus forward zero-torque
+counterfactuals, and a parameter-robustness envelope. Each experiment
+names an observation that would weaken or reject its proposed
+interpretation. The interfaces expose force and moment vectors, energy
+and power histories, counterfactual comparisons, and parameter
+perturbations; hover help and a searchable glossary define the terms at
+the point of use.
+
+The workbench is not the authority for numerical claims in this
+document. Interactive states are intentionally exploratory and carry the
+evidence status \texttt{exploratory\_model\_output}. Publication
+evidence must be reproduced by the committed scripts, frozen parameters,
+matched controls, convergence and closure checks, and machine-readable
+outputs described in Section~\ref{sec-methods}. This separation allows a
+reader to discover and challenge mechanisms without converting an
+unrecorded GUI configuration into evidence.
+
+Installation, launch commands, the guided-experiment matrix, and
+interpretation boundaries are provided in the
+\href{../COMPANION_WORKBENCH.md}{workbench guide}. UpstreamDrift
+consumes the Tools provider rather than maintaining a second
+implementation, and its immutable vendor pin identifies the reviewed
+provider revision.
 
 \chapter{Gravity, Momentum, Damping, and Shaft-Flex
 Contributions}\label{sec-shaft-contributions}
@@ -9766,6 +10192,12 @@ Herring, R. M., and A. E. Chapman. 1992. {``Effects of Changes in
 Segmental Values and Timing of Both Torque and Torque Reversal in
 Simulated Throws.''} \emph{Journal of Biomechanics} 25 (10): 1173--84.
 \url{https://doi.org/10.1016/0021-9290(92)90073-A}.
+
+\bibitem[\citeproctext]{ref-horan2012}
+Horan, Sean A., and Justin J. Kavanagh. 2012. {``The Control of Upper
+Body Segment Speed and Velocity During the Golf Swing.''} \emph{Sports
+Biomechanics} 11 (2): 165--74.
+\url{https://doi.org/10.1080/14763141.2011.638390}.
 
 \bibitem[\citeproctext]{ref-hume2005}
 Hume, Patria A., Justin Keogh, and Duncan Reid. 2005. {``The Role of

@@ -30,8 +30,14 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         "uncertainty_control",
         "experimental_readiness",
         "advanced_biological_bridge",
+        "transmission_robustness",
+        "shoulder_velocity_pointwise",
+        "shoulder_velocity_strategy",
     ]
     assert manifest["claims"]["human_experimental"] == "untested"
+    assert manifest["claims"]["high_proximal_velocity_universally_beneficial"] == (
+        "falsified_at_declared_planar_tiers"
+    )
     assert (
         manifest["claims"]["distributed_shaft_modal_reduction"]
         == "supported_on_synthetic_structural_case"
@@ -68,6 +74,10 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         == "pending_external_archive"
     )
     assert manifest["resource_framing"] == "neutral_open_research_resource"
+    assert any(
+        path.endswith("fig_shoulder_velocity_strategy_pareto.pdf")
+        for path in manifest["artifacts"]
+    )
 
 
 def test_committed_release_manifest_matches_builder_and_validates() -> None:

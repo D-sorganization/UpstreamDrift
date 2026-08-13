@@ -152,6 +152,15 @@ abstract: |
   local task-Jacobian partition exposes five task-null input directions, but
   this is a model property rather than evidence of a neural synergy or human
   self-stabilization.
+  A phase-resolved proximal-velocity study then evaluates 90 exact same-state
+  cases under relative- and absolute-club-rate matching. High proximal-link
+  speed strongly increases late drift power in some states, but the sign
+  reverses earlier and in the delivery state under absolute-rate matching. A
+  separate 60-program trajectory grid is more adversarial: among 26 valid
+  impacts, release-state proximal velocity correlates negatively with impact
+  speed and positively with negative grip work. The combined result rejects
+  proximal speed as a standalone release rule and motivates a rotating-base,
+  two-hand falsification tier.
   References, analysis code,
   machine-readable results, and provenance are available with the document for
   independent inspection and reuse.
@@ -208,6 +217,8 @@ format:
 {{< include chapters/_ch03b_hand_path_attribution.qmd >}}
 
 {{< include chapters/_ch03c_ground_reaction_drift.qmd >}}
+
+{{< include chapters/_ch03d_shoulder_velocity_transfer.qmd >}}
 
 {{< include chapters/_ch04_counterfactual_ensemble.qmd >}}
 
