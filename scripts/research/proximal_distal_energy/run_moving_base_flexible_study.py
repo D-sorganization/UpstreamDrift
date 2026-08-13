@@ -24,6 +24,7 @@ from scripts.research.proximal_distal_energy.moving_base_flexible_club import (
     MovingBaseFlexibleConfig,
     MovingBaseFlexibleParams,
     MovingBaseFlexibleTrace,
+    constraint_acceleration_bias_audit,
     initial_state,
     rollout,
 )
@@ -114,6 +115,9 @@ def _closure(trace: MovingBaseFlexibleTrace) -> dict[str, float | int]:
         "contact_power_identity_max_w": float(
             np.max(np.abs(trace.contact_power_identity_residual_w))
         ),
+        "constraint_two_sided_power_residual_max_w": float(
+            np.max(np.abs(trace.constraint_two_sided_power_residual_w))
+        ),
         "mechanical_energy_change_j": energy_change,
         "applied_control_work_j": float(
             np.trapezoid(trace.applied_control_power_w, x=trace.time)
@@ -125,6 +129,12 @@ def _closure(trace: MovingBaseFlexibleTrace) -> dict[str, float | int]:
         "work_energy_residual_abs_j": abs(energy_change - work),
         "projection_energy_change_sum_j": float(
             np.sum(trace.projection_energy_change_j)
+        ),
+        "projection_energy_change_absolute_sum_j": float(
+            np.sum(np.abs(trace.projection_energy_change_j))
+        ),
+        "projection_energy_change_max_abs_j": float(
+            np.max(np.abs(trace.projection_energy_change_j))
         ),
         "projection_correction_max_m": float(
             np.max(trace.projection_correction_norm_m)
@@ -175,6 +185,7 @@ def _trace_arrays(prefix: str, trace: MovingBaseFlexibleTrace) -> dict[str, np.n
         "contact_power_w",
         "contact_wrench_power_w",
         "contact_power_identity_residual_w",
+        "constraint_two_sided_power_residual_w",
         "shaft_elastic_moment_nm",
         "shaft_damping_moment_nm",
         "shaft_strain_energy_j",
@@ -266,7 +277,7 @@ def run_study() -> tuple[dict, dict[str, np.ndarray]]:
     sensitivity = []
     for parameter, value in sensitivity_declarations:
         params = _replace_sensitivity_parameter(reference, parameter, value)
-        trace = _run(params, BASELINE_DURATION_S, 0.001)
+        trace = _run(params, BASELINE_DURATION_S, BASELINE_STEP_S)
         summary = _summary(trace)
         sensitivity.append(
             {
@@ -328,6 +339,16 @@ def run_study() -> tuple[dict, dict[str, np.ndarray]]:
         ),
         "reference_parameters": json.loads(json.dumps(asdict(reference))),
         "baseline": _summary(baseline),
+        "constraint_acceleration_bias_audit": {
+            "method": "exact centripetal expression versus centered directional derivative of J",
+            "tolerance_m_s2": 1.0e-7,
+            "maximum_residual_m_s2": float(
+                max(
+                    constraint_acceleration_bias_audit(q, qdot, reference)
+                    for q, qdot in zip(baseline.q, baseline.qdot, strict=True)
+                )
+            ),
+        },
         "zero_command_branch": {
             "cut_index": cut_index,
             "cut_time_s": float(baseline.time[cut_index]),
@@ -376,6 +397,10 @@ def run_study() -> tuple[dict, dict[str, np.ndarray]]:
             {
                 "claim": "reported transfer respects ideal-contact power equivalence",
                 "failure_condition": "two-point and transported-wrench powers differ beyond numerical tolerance",
+            },
+            {
+                "claim": "ideal hand-grip constraints do no net work on the complete system",
+                "failure_condition": "the two-sided multiplier power exceeds numerical tolerance",
             },
             {
                 "claim": "numerical conclusions are resolution-stable",

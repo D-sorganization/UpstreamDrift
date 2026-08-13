@@ -2,50 +2,36 @@
 
 Last updated: 2026-08-13
 
-Last updated: 2026-08-11
 Update this file with every PR and every push to main.
 
 ## Where the Repo Is Heading
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-
 - **#8557 Comprehensive Scientific Claim Audit and Open Golf Modeling
-  Program** — PR **#8574** merged through protected checks at exact remote-main
-  commit `4bc09936a0b6d73aa59f5cd970782629e3666f5e`, completing the
-  common-observable model-ladder slice. Branch
-  `research/8557-shaft-contribution-audit` is the active fifteenth fail-closed
-  slice. It maps all 48 shaft-contribution candidates to PD-CLAIM-133 through
-  PD-CLAIM-146, with one content-identical candidate shared reciprocally with
-  PD-CLAIM-002. It replaces stale commit provenance with three source hashes,
-  derives clubhead velocity analytically, records the position-gradient audit,
-  closes the Christoffel mass-matrix-rate identity, and retains both sides of
-  the compliant-joint port. The prior 106.69 W distal-side value is now
-  distinguished from the 0.682 W two-sided relative-coordinate power. A
-  balanced-grid main-effect decomposition also corrects the prior qualitative
-  stiffness claim: damping slightly exceeds stiffness for peak strain-energy
-  main-effect share, while cut time explains 99.14% of speed variation in the
-  declared grid. The robustness heatmaps now disclose that they are a
-  fixed-damping slice, distinct from the full-factorial attribution. Evidence
-  JSON replays byte-identically at ten significant digits; all 185 trace arrays
-  replay by key within the declared 1e-6 absolute tolerance after 1e-7 storage
-  canonicalization. Current authority: 897 candidates, 470 uniquely reviewed,
-  146 atomic claims, and 427 unadjudicated. The 199-page PDF was rebuilt and
-  losslessly optimized to 1,366,049 bytes with 183 URI links and 234 outline
-  entries; physical pages 89--99 were visually inspected with no clipping or
-  unreadable content. The 362-artifact open-release bundle validates. Remaining
-  gates: scoped pre-commit, protected PR, and exact remote-main verification.
-  The required Tools side task remains active and not release-ready. At live
-  revision 27 its independent review found that paired-producer hashes were not
-  recomputably bound and could permit cross-design evidence relabeling; it is
-  adding canonical design/request/pair bindings, swap tests, and a separate
-  full-import MyPy fix before publication. It is still in progress. Completion
-  still requires protected merge,
-  immutable UpstreamDrift pinning, typed no-impact retention, deterministic
-  ensemble replay, sensitivity adequacy, and PyQt6/React parity. Biomechanics
-  and Nonlinear Control NotebookLM collections remain blocked on manual
-  reauthentication; treat them only as research indexes and verify original
-  sources independently.
+  Program** — PR **#8576** and the concurrent rotating-base integration are on
+  exact remote main `820f1e79f68ad0b56ce7b248ac3886762f3fe609`. Branch
+  `research/8557-coupled-base-compliance-audit` is the active sixteenth
+  fail-closed slice. It maps all 43 coupled-base/compliant-club candidates to
+  PD-CLAIM-147 through PD-CLAIM-160. The primary acceleration-constraint bias
+  is now analytic and independently directionally audited; all five sensitivity
+  trajectories use the same 0.5 ms step. The reference evidence separately
+  closes club-side point/wrench power to 1.28e-13 W and complete two-sided
+  ideal-constraint power to 2.65e-13 W. Projection energy is retained alongside
+  the raw work--energy residual so numerical cancellation cannot masquerade as
+  total error closure. Current authority: 914 candidates, 513 uniquely
+  reviewed, 160 atomic claims, and 401 unadjudicated. The regenerated
+  202-page, 1,395,245-byte PDF retains 183 URI links and 235 outline entries;
+  physical pages 102--107 passed visual inspection. The 371-artifact release
+  bundle validates. Remaining slice gates are scoped pre-commit, protected PR,
+  and exact remote-main verification.
+  The required Tools side task remains active at live revision 31. Its paired
+  archive correction now strictly rejects unknown runtime fields and duplicate
+  JSON keys, including escape-equivalent duplicates at any nesting level; 925
+  React tests and production browser coverage are green, with independent
+  re-review next. Completion still requires its protected merge, immutable
+  UpstreamDrift pin, typed no-impact retention, deterministic ensemble replay,
+  sensitivity adequacy, and PyQt6/React parity. Biomechanics and Nonlinear Control NotebookLM collections
+  remain blocked on manual reauthentication; treat them only as research
+  indexes and verify original sources independently.
 
 - **#8511 interactive proximal--distal dynamics workbench** — branch
   `feat/proximal-distal-workbench-integration` makes the pendulum launcher
@@ -180,10 +166,6 @@ Update this file with every PR and every push to main.
   present `chat/_qt/runtime.py`; changed-file mypy also timed out under Python
   3.12 after the Python 3.13 run stopped in NumPy's version-gated stub.
 
-=======
-
-> > > > > > > pr-8482
-
 - **Launcher-diagnostics size slice (local, no publish)** — branch
   `fix/launcher-diagnostics-size-decomposition` starts at exact draft PR #8480
   head `971649efd5ad2e5793240a5237a0314d45cc2faf`. It moves the local
@@ -232,8 +214,6 @@ Update this file with every PR and every push to main.
   exceptions remain an inherited release blocker: this branch neither renews
   nor widens them. #8472 owns only the chat-dock split; the remaining modules
   need accurate open tracking rather than being attributed to that issue.
-
-=======
 
 - **#4262 immutable Tools provider source** — draft UpstreamDrift PR
   [#8475](https://github.com/D-sorganization/UpstreamDrift/pull/8475) publishes

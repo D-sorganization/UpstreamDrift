@@ -226,6 +226,7 @@ class MovingBaseFlexibleTrace:
     contact_power_w: FloatArray
     contact_wrench_power_w: FloatArray
     contact_power_identity_residual_w: FloatArray
+    constraint_two_sided_power_residual_w: FloatArray
     shaft_elastic_moment_nm: FloatArray
     shaft_damping_moment_nm: FloatArray
     shaft_strain_energy_j: FloatArray
@@ -478,15 +479,46 @@ def constraint_jacobian(q: object, params: MovingBaseFlexibleParams) -> FloatArr
 def _constraint_acceleration_bias(
     q: FloatArray, qdot: FloatArray, params: MovingBaseFlexibleParams
 ) -> FloatArray:
-    speed = float(np.linalg.norm(qdot))
+    """Return the exact autonomous-constraint bias ``Jdot(q, qdot) qdot``."""
+    result = np.zeros(N_CONSTRAINTS)
+    alpha_rate = qdot[8]
+    for row, shoulder_index, elbow_index, grip_offset in (
+        (0, 0, 1, params.right_grip_offset_m),
+        (2, 2, 3, params.left_grip_offset_m),
+    ):
+        shoulder = q[shoulder_index]
+        forearm = shoulder + q[elbow_index]
+        forearm_rate = qdot[shoulder_index] + qdot[elbow_index]
+        result[row : row + 2] = (
+            -params.upper_length_m * qdot[shoulder_index] ** 2 * _direction(shoulder)
+            - params.forearm_length_m * forearm_rate**2 * _direction(forearm)
+            + grip_offset * alpha_rate**2 * _direction(q[8])
+        )
+    return result
+
+
+def constraint_acceleration_bias_audit(
+    q: object,
+    qdot: object,
+    params: MovingBaseFlexibleParams,
+) -> float:
+    """Compare the exact bias with an independent directional derivative."""
+    state = _state("q", q)
+    velocity = _state("qdot", qdot)
+    speed = float(np.linalg.norm(velocity))
     if speed == 0.0:
-        return np.zeros(N_CONSTRAINTS)
+        return 0.0
     step = 1e-6 / max(1.0, speed)
-    derivative = (
-        constraint_jacobian(q + step * qdot, params)
-        - constraint_jacobian(q - step * qdot, params)
+    directional = (
+        constraint_jacobian(state + step * velocity, params)
+        - constraint_jacobian(state - step * velocity, params)
     ) / (2.0 * step)
-    return derivative @ qdot
+    return float(
+        np.linalg.norm(
+            _constraint_acceleration_bias(state, velocity, params)
+            - directional @ velocity
+        )
+    )
 
 
 def control_generalized_force(control: TwoArmControl) -> FloatArray:
@@ -754,6 +786,7 @@ def rollout(
     direct_wrist = np.empty(samples)
     contact_power = np.empty(samples)
     wrench_power = np.empty(samples)
+    constraint_power = np.empty(samples)
     applied_power = np.empty(samples)
     dissipation_power = np.empty(samples)
     clubhead = np.empty((samples, 2))
@@ -788,6 +821,12 @@ def rollout(
         wrench_power[index] = (contacts[index, 0] + contacts[index, 1]) @ velocity[
             6:8
         ] + force_couple[index] * velocity[8]
+        # J maps generalized velocity to hand-minus-grip relative velocity.
+        # Therefore lambda^T J qdot is the complete action--reaction power of
+        # the ideal bilateral interface, not merely the club-side power.
+        constraint_power[index] = solved.multipliers_n @ (
+            constraint_jacobian(state, params) @ velocity
+        )
         generalized_control = control_generalized_force(control)
         applied_power[index] = generalized_control @ velocity
         damping = _damping_force(velocity, params)
@@ -809,6 +848,7 @@ def rollout(
         contact_power_w=contact_power,
         contact_wrench_power_w=wrench_power,
         contact_power_identity_residual_w=contact_power - wrench_power,
+        constraint_two_sided_power_residual_w=constraint_power,
         shaft_elastic_moment_nm=-params.shaft_stiffness_nm_rad * flex,
         shaft_damping_moment_nm=-params.shaft_damping_nms_rad * flex_rate,
         shaft_strain_energy_j=0.5 * params.shaft_stiffness_nm_rad * flex**2,
@@ -832,6 +872,7 @@ __all__ = [
     "MovingBaseFlexibleParams",
     "MovingBaseFlexibleTrace",
     "constraint_jacobian",
+    "constraint_acceleration_bias_audit",
     "constraint_vector",
     "control_generalized_force",
     "initial_state",

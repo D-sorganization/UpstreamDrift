@@ -66,6 +66,16 @@ def _save(fig: plt.Figure, output_dir: Path, stem: str) -> list[Path]:
             format=suffix,
             metadata={"Creator": "UpstreamDrift Reproducible Research"},
         )
+        if suffix == "svg":
+            # Matplotlib emits path-data continuation lines with insignificant
+            # trailing spaces. Canonicalize the committed text artifact so
+            # repository whitespace gates remain clean across render hosts.
+            svg = path.read_text(encoding="utf-8")
+            path.write_text(
+                "\n".join(line.rstrip() for line in svg.splitlines()) + "\n",
+                encoding="utf-8",
+                newline="\n",
+            )
         outputs.append(path)
     plt.close(fig)
     return outputs

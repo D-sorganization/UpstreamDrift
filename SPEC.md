@@ -2789,6 +2789,25 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   keys and replay within a declared absolute tolerance no larger than
   \(10^{-6}\), so platform-level floating reduction noise is not mislabeled as
   physical nondeterminism.
+- **F-8557.11:** The coupled moving-base/compliant-club tier shall retain a
+  finite-mass translational base, two independently constrained hands, two
+  separated point contacts, a proximal club coordinate, and one endogenous
+  shaft-deflection coordinate in one forward KKT system. The primary
+  autonomous acceleration-constraint bias shall be analytic and shall agree
+  with an independent directional-derivative audit within \(10^{-7}\)
+  m/s². Contact-force power shall close both as a club-side point-force versus
+  transported-wrench identity and as complete two-sided multiplier power; the
+  latter shall remain below \(10^{-9}\) W before an ideal-constraint zero-work
+  statement is published. Position and velocity projections shall expose both
+  geometric corrections and signed, absolute, and maximum energy changes; a
+  raw work--energy residual shall not be promoted to the complete numerical
+  error budget. Reference and sensitivity trajectories shall use a matched
+  0.5 ms step so parameter effects are not confounded with resolution. A
+  same-state zero-command branch, coincident-grip negative control, timestep
+  refinement, and local parameter variations shall remain executable
+  falsifiers. All findings remain conditional mechanical possibilities: the
+  tier shall not infer passive musculature, calibrated equipment, human
+  prevalence, coaching strategy, safety, optimality, or impact benefit.
 - **F-8555:** Torso-velocity transfer claims shall be tested in a forward,
   finite-inertia rotating-base model with two independently observable hand
   reactions, separated grip points, bilateral loop closure, and a compliant
