@@ -9,8 +9,10 @@ Update this file with every PR and every push to main.
 - **#8557 Comprehensive Scientific Claim Audit and Open Golf Modeling
   Program** — coupled-base/compliance PR **#8578** protected-squash-merged at
   exact remote main `16a767a8386b52e52a7a24ea718e7d54b91cd8ae`.
-  Branch `research/8557-forward-two-hand-audit` is the active seventeenth
-  fail-closed slice. It maps all 42 candidates in the forward constrained
+  Ready PR [#8579](https://github.com/D-sorganization/UpstreamDrift/pull/8579)
+  from branch `research/8557-forward-two-hand-audit` is the active seventeenth
+  fail-closed slice at reviewed implementation commit
+  `c3b9d34c79c29beb825790540066c1fdc60d1489`. It maps all 42 candidates in the forward constrained
   two-hand chapter to PD-CLAIM-161 through PD-CLAIM-174, preserving one
   content-identical candidate's reciprocal mapping to PD-CLAIM-003. The primary
   constraint bias is analytic and the five-point directional audit closes to
@@ -22,8 +24,9 @@ Update this file with every PR and every push to main.
   atomic claims, and 361 unadjudicated. The full paper renders as a visually
   inspected 202-page, 1,396,091-byte PDF with 183 live URI links and 235
   outline entries; physical pages 84--90 were inspected, and the 371-artifact
-  release bundle validates with no mismatches. Remaining slice gates are scoped
-  repository checks, protected PR, and exact remote-main verification.
+  release bundle validates with no mismatches. Local and push-time repository
+  checks passed. Remaining slice gates are protected CI/merge and exact
+  remote-main verification.
   The required Tools side task remains active at live revision 32. Its strict
   audit foundation now includes noncoercive cross-runtime manifest readers,
   exact unique leaf locators, ancestor clipping, manifest-owned thresholds,
