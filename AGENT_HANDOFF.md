@@ -15,6 +15,9 @@ Update this file with every PR and every push to main.
   and `data/momentum_transfer_question_registry.json`. The registry requires
   named estimands, negative controls, falsifiers, governing issues, and model
   versus human evidence boundaries for every question.
+- Ready PR #8596 publishes exact implementation commit `75490ce77` and the
+  follow-up specification commit on `research/8595-momentum-agenda`; protected
+  squash auto-merge is enabled.
 - Focused registry tests, Ruff, and changed-document title capitalization pass.
   Before publication, regenerate/validate the open-release manifest, run the
   relevant research/governance gates, update this handoff with the ready PR,
