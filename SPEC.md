@@ -2638,7 +2638,7 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 ### Performance Improvements
 
 - Optimize trajectory evaluation constraints in drake optimization by replacing `np.sum(arr)` with `arr.sum()` and skipping numpy array dispatch overhead (spec-exempt: micro-optimization).
-
+- Replaced `np.sum(weights)` with `weights.sum()` in `keypoint_offsets.py` to bypass array conversion checks and improve execution speed. (spec-exempt: micro-optimization)
 - Consolidated focused ndarray reductions and small-vector norm calculations in
   recurrence analysis, terrain and pendulum geometry, screw-theory transforms,
   trajectory end-effector speed, clubhead diagnostics, and convex-distance
