@@ -1,0 +1,60 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import pytest
+
+
+ROOT = Path(__file__).resolve().parents[2]
+REGISTRY = (
+    ROOT
+    / "docs"
+    / "research"
+    / "proximal_distal_energy_transfer"
+    / "data"
+    / "momentum_transfer_question_registry.json"
+)
+
+pytestmark = pytest.mark.unit
+
+
+def test_momentum_transfer_registry_is_complete_and_falsifiable() -> None:
+    payload = json.loads(REGISTRY.read_text(encoding="utf-8"))
+
+    assert payload["schema_version"] == "momentum-transfer-question-registry/v1"
+    assert payload["parent_epic"] == 8557
+    assert payload["program_issue"] == 8595
+
+    questions = payload["questions"]
+    assert [question["id"] for question in questions] == [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4",
+        "Q5",
+        "Q6",
+        "Q7",
+    ]
+    assert len({question["slug"] for question in questions}) == len(questions)
+
+    for question in questions:
+        assert question["question"].endswith("?")
+        assert question["status"]
+        assert len(question["required_estimands"]) >= 3
+        assert len(question["required_controls"]) >= 3
+        assert len(question["falsifier"].split()) >= 10
+        assert 8595 in question["issues"]
+        assert all(isinstance(issue, int) and issue > 0 for issue in question["issues"])
+
+
+def test_registry_preserves_critical_scientific_distinctions() -> None:
+    payload = json.loads(REGISTRY.read_text(encoding="utf-8"))
+    by_id = {question["id"]: question for question in payload["questions"]}
+
+    assert "cancellation indicator" in by_id["Q1"]["required_controls"]
+    assert "alternative casting criteria" in by_id["Q3"]["required_controls"]
+    assert "observer-delay sensitivity" in by_id["Q4"]["required_estimands"]
+    assert "attraction-region size" in by_id["Q5"]["required_estimands"]
+    assert "interior-optimum search" in by_id["Q6"]["required_controls"]
+    assert "one slack class at a time" in by_id["Q7"]["required_controls"]
