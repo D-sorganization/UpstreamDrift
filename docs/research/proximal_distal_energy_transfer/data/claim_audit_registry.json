@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "79ef93c2d33a79ac619a0dd1fcd7718fb548d731270c0ec9d18d2b4d32111a08",
+    "source_digest": "c4d94a9614add91db8f5ae8cb60488c655a2759972c7637d1a93e4c382ade4e7",
     "baseline_commit": "13ea6a69585a42dc1db4b3959440ed95787c9779"
   },
   "audit_scope": {
@@ -126,6 +126,16 @@
     {
       "release_claim_key": "shoulder_velocity_control_strategy",
       "published_status": "conditional_on_phase_geometry_wrist_state_and_objective",
+      "audit_state": "pending"
+    },
+    {
+      "release_claim_key": "rotating_base_torso_velocity_transfer",
+      "published_status": "supported_conditionally_at_declared_reduced_model_tier",
+      "audit_state": "pending"
+    },
+    {
+      "release_claim_key": "human_torso_velocity_strategy",
+      "published_status": "untested",
       "audit_state": "pending"
     }
   ],
@@ -2086,10 +2096,10 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-d4b441a5d98c8250",
+      "candidate_id": "PD-CAND-7594a6bd71e63d43",
       "disposition": "material_claims_mapped",
       "claim_ids": ["PD-CLAIM-090"],
-      "rationale": "Defines the sampled nondominance rule and rotating-base evidence gap in PD-CLAIM-090.",
+      "rationale": "Retains the sampled nondominance definition; the rotating-base requirement is now executed separately but remains unvalidated in humans.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
     },
@@ -4112,7 +4122,7 @@
     {
       "claim_id": "PD-CLAIM-006",
       "candidate_ids": ["PD-CAND-96f95833c562cb11"],
-      "statement": "In Fradkin and colleagues' sample of 45 male golfers aged 18\u00e2\u20ac\u201c80 with handicaps 2\u00e2\u20ac\u201c27, clubhead speed was strongly associated with handicap (reported r = 0.950).",
+      "statement": "In Fradkin and colleagues' sample of 45 male golfers aged 18Ã¢â‚¬â€œ80 with handicaps 2Ã¢â‚¬â€œ27, clubhead speed was strongly associated with handicap (reported r = 0.950).",
       "classification": "external_empirical_association",
       "published_status": "supported_after_scope_narrowing",
       "audit_status": "original_abstract_checked_population_limited",
@@ -4123,7 +4133,7 @@
         "https://pubmed.ncbi.nlm.nih.gov/15712503/",
         "https://doi.org/10.1016/S1440-2440(04)80265-2"
       ],
-      "model_domain": "Cross-sectional association in 45 male golfers, handicaps 2\u00e2\u20ac\u201c27, ten recorded swings per golfer, with clubhead speed estimated from high-speed video.",
+      "model_domain": "Cross-sectional association in 45 male golfers, handicaps 2Ã¢â‚¬â€œ27, ten recorded swings per golfer, with clubhead speed estimated from high-speed video.",
       "uncertainty_boundary": "Does not establish drive distance, scoring causality, women, elite-only populations, launch conditions, or a universal performance metric.",
       "competing_explanations": [
         "Handicap-related differences in technique, strength, equipment, and practice exposure",
@@ -4216,7 +4226,7 @@
     {
       "claim_id": "PD-CLAIM-009",
       "candidate_ids": ["PD-CAND-7570c40d01e68acd", "PD-CAND-a16c50fe1b7a7571"],
-      "statement": "In Nesbit and Serrano's four subject-specific inverse-dynamics models, the reported work partition was 68.7\u00e2\u20ac\u201c72.2% for the trunk complex, 24.3\u00e2\u20ac\u201c28% for shoulder and arm joints, and 3.3\u00e2\u20ac\u201c3.8% for modeled leg joints.",
+      "statement": "In Nesbit and Serrano's four subject-specific inverse-dynamics models, the reported work partition was 68.7Ã¢â‚¬â€œ72.2% for the trunk complex, 24.3Ã¢â‚¬â€œ28% for shoulder and arm joints, and 3.3Ã¢â‚¬â€œ3.8% for modeled leg joints.",
       "classification": "external_model_derived_quantitative_result",
       "published_status": "supported_with_model_partition_qualification",
       "audit_status": "source_values_checked_independent_recomputation_open",
@@ -7164,16 +7174,16 @@
       "candidate_ids": [
         "PD-CAND-9ff680105a9d278a",
         "PD-CAND-3f4317b565b0613f",
-        "PD-CAND-d4b441a5d98c8250"
+        "PD-CAND-7594a6bd71e63d43"
       ],
-      "statement": "The fixed-hub double pendulum cannot determine bilateral hand strategy or anatomical torso control; testing those questions requires a forward rotating-base two-hand tier that preserves common and differential hand motion, separated force moments and wrist moments, club state and compliance, base work, subject scaling, and registered load, work, delivery, and robustness outcomes.",
+      "statement": "A sampled two-hand strategy is nondominated only if no sampled alternative raises delivery speed without worsening a registered cost; the fixed-hub double pendulum itself cannot determine bilateral hand strategy or anatomical torso control.",
       "classification": "next_tier_mechanical_requirements",
-      "published_status": "untested_research_requirement",
-      "audit_status": "current_model_capabilities_and_missing_variables_checked",
+      "published_status": "mixed_definition_and_model_boundary",
+      "audit_status": "definition_and_remaining_anatomical_boundary_checked",
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:218",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:222",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:233"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:357"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.json",
@@ -7181,7 +7191,7 @@
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.json"
       ],
       "model_domain": "Gap analysis across current fixed-hub, fixed-shoulder two-arm, and abstract two-hand transmission tiers.",
-      "uncertainty_boundary": "The required rotating-base, subject-scaled two-hand forward tier has not yet been executed for this hypothesis.",
+      "uncertainty_boundary": "A rotating-base two-hand model tier has now executed the mechanics question, but it remains reduced, synthetic, and nonanatomical; human validation is still untested.",
       "competing_explanations": [
         "direct wrist work",
         "force-generated couple",
@@ -7196,7 +7206,7 @@
         "base-work ledger"
       ],
       "falsifier": "A lower-order model is presented as identifying bilateral anatomy, or the proposed higher tier cannot close work and wrench balances under its negative controls.",
-      "adjudication": "The section is a repo-managed next-tier specification and remains explicitly untested for anatomical torso strategy.",
+      "adjudication": "The nondominance definition remains registered. A forward rotating-base two-hand tier now addresses part of the mechanics gap, while bilateral anatomy and human strategy remain explicitly unvalidated.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
     },

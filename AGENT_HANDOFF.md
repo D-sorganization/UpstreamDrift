@@ -407,8 +407,19 @@ The active branches are independent topic branches off `main` unless noted:
 
 - `feat/hand-path-drift-control-attribution` — consolidated implementation for
   epic #8458 and children #8459–#8471; target `main` after local render/gates.
-- `research/shoulder-velocity-drift-transfer` — active implementation for epic
-  #8551. The TDD implementation adds a 90-case, five-phase, two-counterfactual
+- `research/8555-torso-velocity` — active implementation for #8555 and the
+  outcome-blind #8556 registration under epic #8551. It adds a seven-coordinate
+  finite-inertia rotating-base model with two arm constraints, separated hand
+  reactions, direct wrist channels, and a compliant distal club. The registered
+  18-case grid covers two matching rules and three torso-command histories;
+  exact torso/arm/wrist killswitches, coincident/reversed moment-arm controls,
+  shaft/anthropometry/grip/timing/damping perturbations, aligned JSON/NPZ
+  trajectories, three figures, and paper/release updates are included. Human
+  validation remains blocked on governed synchronized bilateral six-axis grip
+  wrench and kinematic data; the committed #8556 amendment freezes its held-out
+  null, braking, adverse-load, and sensitivity tests without fabricating results.
+- `research/shoulder-velocity-drift-transfer` — merged implementation for epic
+  #8551. The TDD implementation added a 90-case, five-phase, two-counterfactual
   fixed-hub velocity sweep, exact drift/control and reaction-force closure,
   plus a 60-program trajectory search varying proximal-drive cut, residual
   proximal torque, and wrist release. All invalid impact attempts remain in
@@ -418,8 +429,9 @@ The active branches are independent topic branches off `main` unless noted:
   link angular velocity, not anatomical shoulder or thorax velocity. The
   trajectory grid contradicts proximal speed as a standalone release rule.
   Tools #4406 supplies the model-neutral metrics and PyQt Drift Transfer tab;
-  AffineDrift #3817 supplies the publication surface. A rotating-base two-hand
-  tier remains the next model required for a causal torso-velocity test.
+  AffineDrift #3817 supplies the publication surface. The rotating-base two-hand
+  follow-up is implemented on `research/8555-torso-velocity`; neither tier is a
+  causal human torso-velocity test.
 - `research/two-hand-passive-couple` — full PR **#8454** for #8446 under epic
   #8443; direct WSCG table reconstruction and passive equivalent-couple audit.
 - `research/counterfactual-killswitch-ensemble` — full PR **#8453** for #8445

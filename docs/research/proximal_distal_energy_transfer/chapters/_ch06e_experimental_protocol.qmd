@@ -89,6 +89,27 @@ provenance cannot be silently excluded after outcomes are known.
 
 ## Executed Dry Run and Open Gate
 
+### Torso-Velocity Validation Amendment
+
+The rotating-base study adds a frozen, outcome-blind amendment,
+`torso-velocity-human-validation-registration-v1`. Its primary null is that
+measured thorax velocity adds no participant-held-out prediction of distal
+energy gain after conditioning on release geometry, club angular velocity,
+bilateral wrist state, shaft state, hand-path velocity and curvature, phase,
+and measured control-work proxies. A second test estimates the matched high-
+minus-low thorax-velocity contrast in negative bilateral grip work. The adverse
+test estimates the corresponding peak-wrench contrast at equal clubhead speed.
+
+All three tests require full-body, club, and ground-reaction measurements plus
+bilateral six-axis hand wrenches; launch outcome is also required. Registered
+sensitivities vary filtering, wrench reference and coordinate frame, inverse-
+dynamics residual threshold, synchronization extremes, shaft-state inclusion,
+and the participant-level holdout assignment frozen before outcomes. Failure
+to improve held-out prediction, an interval overlapping the negligible region,
+increased braking, or increased peak load weakens the proposed strategy. Even
+a positive held-out result would remain observational and would not establish
+a causal coaching instruction.
+
 The synthetic record contains two pseudonymous fixture participants separated
 at participant level and all six modality descriptors. The validator confirms
 units, hashes, sampling, synchronization, split uniqueness, and absence of

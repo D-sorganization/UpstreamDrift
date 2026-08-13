@@ -2787,8 +2787,27 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   falsification gates. JSON observables shall replay byte-identically at the
   declared reporting precision; trajectory arrays shall enumerate identical
   keys and replay within a declared absolute tolerance no larger than
-  (10^{-6}), so platform-level floating reduction noise is not mislabeled as
+  \(10^{-6}\), so platform-level floating reduction noise is not mislabeled as
   physical nondeterminism.
+- **F-8555:** Torso-velocity transfer claims shall be tested in a forward,
+  finite-inertia rotating-base model with two independently observable hand
+  reactions, separated grip points, bilateral loop closure, and a compliant
+  distal club. The study shall retain both relative- and absolute-club-rate
+  matching, accelerating/zero/decelerating torso commands, exact same-state
+  torso/arm/wrist killswitches, coincident and sign-reversed moment-arm controls,
+  compliance and parameter sensitivity, null/adverse rows, force and work
+  outcomes, constraint closure, and work-energy/contact-power audits.
+- **F-8555.1:** The rotating-base coordinate shall remain explicitly reduced
+  and nonanatomical. Model associations may not be promoted to a human thorax,
+  scapular, safety, or coaching claim; GUI and release surfaces shall expose the
+  model tier, matching rule, validity reasons, and falsifiers.
+- **F-8556:** Human torso-velocity validation shall be frozen before governed
+  outcomes, split by participant, require synchronized bilateral six-axis grip
+  wrenches and segment/club/ground/launch measurements, and test incremental
+  held-out prediction after full-state conditioning, negative grip work, and an
+  equal-speed peak-load adverse outcome under filtering, frame, residual,
+  synchronization, and shaft-state sensitivity. Synthetic qualification shall
+  never satisfy the human validation gate.
 - `spec-exempt` (#8483): Moved Sidekick readiness monitoring, degradation reporting, and workspace seeding from the main launcher facade into the existing launcher-owned `SidekickSidebarManager`.
 - (spec-exempt: security fix) Fixed user enumeration via timing attack in `/login` endpoint by ensuring a dummy password verification is performed even if the user is not found, to normalize response time.
 - (spec-exempt: micro-optimization) Replaced `np.sum` and `np.mean` calls with `np.vdot` and `np.einsum` to optimize array reductions and avoid temporary allocations.

@@ -1,0 +1,60 @@
+{
+  "schema_version": "torso-velocity-human-validation-registration-v1",
+  "parent_protocol_id": "proximal-distal-human-falsification-v1",
+  "registration_status": "frozen_before_governed_human_outcomes",
+  "dataset_status": "not_acquired",
+  "primary_split_unit": "participant",
+  "required_modalities": [
+    "full_body_kinematics",
+    "bilateral_hand_wrenches",
+    "club_kinematics",
+    "ground_reaction",
+    "launch_monitor"
+  ],
+  "primary_outcomes": [
+    "distal_energy_gain_j",
+    "negative_grip_work_j",
+    "negative_along_path_impulse_ns",
+    "peak_bilateral_grip_wrench",
+    "clubhead_speed_m_s"
+  ],
+  "conditioning_variables": [
+    "release_geometry",
+    "club_angular_velocity",
+    "bilateral_wrist_state",
+    "shaft_deflection_state",
+    "hand_path_velocity_and_curvature",
+    "phase",
+    "measured_control_work_proxies"
+  ],
+  "preregistered_tests": [
+    {
+      "test_id": "TV-H1",
+      "estimand": "Participant-held-out change in distal-energy-gain prediction when measured thorax velocity is added after full-state conditioning.",
+      "null": "Thorax velocity adds no held-out predictive value after the registered conditioning set.",
+      "falsifier": "Held-out error does not improve or improvement changes sign across registered filter and frame variants."
+    },
+    {
+      "test_id": "TV-H2",
+      "estimand": "Matched high-minus-low thorax-velocity contrast in negative bilateral grip work.",
+      "null": "The conditional contrast is zero within propagated synchronization and inverse-dynamics uncertainty.",
+      "falsifier": "Higher thorax velocity increases braking work or the interval overlaps the negligible region."
+    },
+    {
+      "test_id": "TV-H3",
+      "estimand": "Matched high-minus-low thorax-velocity contrast in peak bilateral grip wrench at equal clubhead speed.",
+      "null": "The conditional peak-load contrast is zero.",
+      "falsifier": "Peak load increases beyond the preregistered adverse margin."
+    }
+  ],
+  "sensitivity_axes": [
+    "filter_cutoff_plus_or_minus_20_percent",
+    "laboratory_club_and_hand_reference_frames",
+    "inverse_dynamics_residual_threshold",
+    "synchronization_extremes",
+    "shaft_state_included_or_omitted",
+    "participant_holdout_seed_frozen_before_outcomes"
+  ],
+  "completion_gate": "Requires governed synchronized human data and participant-held-out results; synthetic dry runs do not satisfy this registration.",
+  "claim_boundary": "Observed held-out prediction or association does not establish a causal coaching strategy."
+}
