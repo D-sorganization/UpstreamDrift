@@ -23,6 +23,22 @@ Update this file with every PR and every push to main.
   combined governance tests, protected publication,
   and exact remote-main verification.
 
+- **#8586 cross-repository terminology contract** — branch
+  `docs/3834-cross-repo-terminology` implements the AffineDrift #3834
+  definitional-integrity slice of #8426. Canonical ZVCF now zeros generalized
+  velocity and declared applied control; schema 3.0.0 preserves the former
+  control-retaining diagnostic under an explicit name. The proximal-distal
+  paper, GRF and hand-path evidence, engine protocol, shared backend, and
+  regression controls are regenerated and validated before protected
+  publication. Focused terminology, backend, engine, API, evidence, and
+  publication tests pass; Ruff passes; title capitalization passes for all
+  changed documents. After rebasing onto current remote main, the rendered and
+  optimized paper is 203 pages and 1,403,911 bytes with 186 URI links and 235
+  outline entries; affected definition, GRF, force-vector, and appendix pages
+  retain the visually approved layout. The 380-artifact release manifest has
+  zero mismatches. No human or physiological inference is added by this
+  semantic migration.
+
 - **#8557 uncertainty and stability audit** — ready PR
   [#8587](https://github.com/D-sorganization/UpstreamDrift/pull/8587) from
   `research/8557-uncertainty-audit` at implementation commit

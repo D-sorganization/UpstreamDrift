@@ -878,8 +878,8 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
         """Zero-Velocity Counterfactual (ZVCF) - Guideline G2.
 
-        Compute acceleration with joint velocities set to zero, preserving configuration
-        and controls. This isolates configuration-dependent effects (gravity, constraints).
+        Compute acceleration at fixed configuration with joint velocities and
+        declared applied controls set to zero.
 
         Args:
             q: Joint positions (n_v,)
@@ -893,14 +893,16 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
             return np.array([])
 
         try:
-            # Save current state
+            # Save current state and controls
             q_saved, v_saved = self.get_state()
+            controls_saved = opensim.Vector(self._model.updControls(self._state))
 
             # Set state with zero velocity
             n_u = self._model.getNumSpeeds()
             self.set_state(q, np.zeros(n_u))
 
-            # Controls are preserved in state
+            # Canonical ZVCF zeros the declared applied-control channel.
+            self.set_control(np.zeros(self._model.getNumControls()))
             # Compute forward dynamics
             self._model.realizeDynamics(self._state)
 
@@ -908,7 +910,8 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
             udot = self._state.getUDot()
             a_zvcf = np.array([udot.get(i) for i in range(n_u)])
 
-            # Restore state
+            # Restore state and controls
+            self._model.updControls(self._state).update(controls_saved)
             self.set_state(q_saved, v_saved)
 
             return a_zvcf

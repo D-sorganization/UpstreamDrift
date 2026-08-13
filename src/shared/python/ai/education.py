@@ -426,24 +426,22 @@ def _build_validation_analysis_entries() -> dict[str, GlossaryEntry]:
             category="analysis",
             definitions={
                 ExpertiseLevel.BEGINNER: (
-                    "A way to understand which part of motion is 'passive' "
-                    "(would happen without muscles) versus 'controlled' "
-                    "(actively driven by muscles). Helps identify when "
-                    "muscles are really working versus just going along for the ride."
+                    "A model-based split between the autonomous motion of a "
+                    "declared plant and the contribution of its declared applied "
+                    "control. It does not identify muscle activity by itself."
                 ),
                 ExpertiseLevel.INTERMEDIATE: (
-                    "Separating motion into: drift (gravity, inertia, "
-                    "passive dynamics) and control (active muscle contribution). "
-                    "The DCR indicates how much active control a movement requires."
+                    "Drift contains every retained autonomous plant term; control "
+                    "is G(x)u. DCR compares drift with bounded admissible control "
+                    "capacity in one declared metric."
                 ),
                 ExpertiseLevel.ADVANCED: (
-                    "Affine decomposition: q̈ = drift(q, q̇) + B(q)u. "
-                    "Control contribution from null-space of drift solutions. "
-                    "DCR = ||control|| / (||drift|| + ||control||). "
-                    "Low DCR → gravity-assisted; High DCR → muscle-dominated."
+                    "Affine decomposition: xdot = f(x) + G(x)u. "
+                    "DCR_W,U = ||Wf||/(sup_{u in U(x)}||WGu|| + epsilon). "
+                    "A realized-input denominator defines DIR, not DCR."
                 ),
             },
-            formula="DCR = ||control|| / (||drift|| + ||control||)",
+            formula="DCR_W,U = ||Wf|| / (sup_{u in U(x)} ||WGu|| + epsilon)",
             related_terms=["inverse_dynamics", "muscle_contribution", "energy"],
         ),
     }

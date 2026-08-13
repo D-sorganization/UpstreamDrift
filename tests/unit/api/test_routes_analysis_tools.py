@@ -169,6 +169,7 @@ def test_compute_drift_control_ratio(client: TestClient) -> None:
 
     assert response.status_code == 200
     data = response.json()
+    assert data["quantity"] == "realized_drift_to_input_ratio"
     assert data["ratio"] == [1.0]
     assert data["summary"]["mean"] == 1.0
 

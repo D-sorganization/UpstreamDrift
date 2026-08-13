@@ -134,6 +134,7 @@ class ContactReactionDecomposition:
     total_reaction: np.ndarray
     ztcf_reaction: np.ndarray
     zvcf_reaction: np.ndarray
+    zero_velocity_control_preserved_reaction: np.ndarray
     contact_matrix_condition: float
     frame: str
     units: str
@@ -147,12 +148,9 @@ def decompose_contact_reaction(
     """Solve and attribute the unique constrained-contact reaction.
 
     ZTCF means zero controllable torque while retaining declared external loads.
-    ZVCF here means the declared velocity-dependent bias and constraint term are
-    algebraically zeroed while retaining configuration, control, and
-    external-load terms.  This equals a physical zero-velocity evaluation only
-    under the input contract documented by :class:`ContactReactionInputs`.
-    ZTCF and ZVCF overlap and therefore must not be added together as if they
-    were complementary causes.
+    ZVCF sets declared velocity and control to zero while retaining the fixed
+    configuration/internal state and non-control external-load inventory. The
+    former control-preserved zero-velocity evaluation is returned separately.
     """
     require(
         isinstance(inputs, ContactReactionInputs),
@@ -191,8 +189,18 @@ def decompose_contact_reaction(
     external = reaction(-inputs.external_generalized_force)
     total = configuration + velocity + control + external
     ztcf = configuration + velocity + external
-    zvcf = configuration + control + external
-    for value in (configuration, velocity, control, external, total, ztcf, zvcf):
+    zvcf = configuration + external
+    control_preserved = configuration + control + external
+    for value in (
+        configuration,
+        velocity,
+        control,
+        external,
+        total,
+        ztcf,
+        zvcf,
+        control_preserved,
+    ):
         require(check_finite(value), "reaction solve produced non-finite values")
     return ContactReactionDecomposition(
         configuration_reaction=configuration,
@@ -202,6 +210,7 @@ def decompose_contact_reaction(
         total_reaction=total,
         ztcf_reaction=ztcf,
         zvcf_reaction=zvcf,
+        zero_velocity_control_preserved_reaction=control_preserved,
         contact_matrix_condition=condition,
         frame=inputs.frame,
         units=inputs.units,
