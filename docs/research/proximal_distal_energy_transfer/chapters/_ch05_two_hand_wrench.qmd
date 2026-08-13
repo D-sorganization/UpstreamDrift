@@ -42,8 +42,12 @@ The archived simulation supplies three synchronized tables:
   designated damping terms are set to zero at each achieved BASE state; and
 - **DELTA** is the stored operational difference, BASE minus ZTCF.
 
-The ZTCF table is an instantaneous, state-matched attribution. It is not a
-single torque-free forward swing. This distinction is the same one developed in
+The ZTCF table is an instantaneous attribution evaluated on an exported state
+that matches BASE to the cache precision: maximum contact-position,
+contact-velocity, and clubhead-speed differences are $1.85\times10^{-7}$ m,
+$8.93\times10^{-6}$ m/s, and $3.67\times10^{-5}$ mph, respectively. Those
+residuals are registered rather than rounded to exact zero. It is not a single
+torque-free forward swing. This distinction is the same one developed in
 @sec-killswitch-ensemble: a pointwise counterfactual can identify which part of
 the acceleration or reaction is present without current command, but it cannot
 by itself state how long that behavior would persist after commands were
@@ -52,8 +56,9 @@ actuation sense: the ZTCF contact moment exists while the evaluated command
 torques are exactly zero. It does not mean that the state was reached without
 earlier active work.
 
-The binary input tables are registered by SHA-256 and exported to ordinary CSV
-by
+The binary input tables, portable CSV caches, and three executable export and
+analysis sources are registered by nine SHA-256 records. The tables are
+exported to ordinary CSV by
 [`export_two_hand_wscg_tables.m`](https://github.com/D-sorganization/UpstreamDrift/blob/main/scripts/research/proximal_distal_energy/export_two_hand_wscg_tables.m).
 The exported cache makes the audit usable without MATLAB; the MATLAB function
 exists to prove where every column came from. The original MAT files and source
@@ -82,10 +87,12 @@ $$
 $$ {#eq-model-plane-normal}
 
 and $\mathbf e_y=\mathbf e_z\times\mathbf e_x$. Projection of the stored global
-forces onto this basis reproduces the stored local axial and normal components.
-The maximum out-of-plane hand-force component is 1.78 N, small relative to
-in-plane peaks of several hundred newtons. Thus the archived result is
-numerically planar even though its vectors are stored in three coordinates.
+forces onto this basis reproduces the stored local axial and normal components
+to a maximum 1.05 N cache discrepancy across BASE, ZTCF, and DELTA. The maximum
+out-of-plane hand-force component is 1.78 N; the largest case-level ratio to
+the in-plane peak is 0.215%. Thus the archived result is numerically near-planar
+under this declared tolerance even though its vectors are stored in three
+coordinates.
 
 Changing any one of force direction, hand labeling, axis direction, or moment
 sign reverses part of the interpretation. Those conventions are therefore data,
@@ -218,11 +225,14 @@ magnitude above floating-point noise but far below the negative-couple peak.
 @fig-two-hand-couple-decomposition provides the decisive decomposition. In
 BASE, the equivalent couple reaches a minimum of -22.79 N·m at 0.2151 s. At
 that instant, -18.60 N·m comes from separated contact forces and -4.22 N·m
-comes from applied free torque. In pointwise ZTCF, all command torque and kill
-damping are zero, yet the equivalent couple reaches -19.63 N·m at 0.2148 s.
-The reconstructed free-torque contribution there is below
-$3.1\times10^{-13}$ N·m; the negative couple is therefore entirely a contact
-force moment to the resolution of the archive.
+comes from applied free torque. In pointwise ZTCF, both individual
+command-torque columns and kill damping are zero, yet the equivalent couple
+reaches -19.63 N·m at 0.2148 s. The reconstructed free-torque contribution
+there is below $3.1\times10^{-13}$ N·m. The reconstructed free torque agrees
+with the sum of the two command columns to the same bound; the negative couple
+is therefore entirely a contact-force moment to the resolution of the archive.
+Checking each command separately is essential because checking only their net
+could hide equal and opposite nonzero commands.
 
 At the time of the BASE minimum, the ZTCF couple retains 86.1% of the BASE
 magnitude. DELTA is exact by construction, but its peak negative couple is only
@@ -239,9 +249,10 @@ partition in a human swing.
 
 All three cases contain an early positive-to-negative crossing and a later
 negative-to-positive crossing. For BASE, the negative interval begins at
-0.180172 s and ends at 0.270824 s. For ZTCF, it begins at 0.181823 s and ends at
+0.180172 s and ends at 0.270824 s. For ZTCF, it begins at 0.181894 s and ends at
 0.270016 s. Thus the late BASE and ZTCF reversals differ by 0.808 ms. Their
-respective negative intervals last approximately 90.7 and 88.2 ms.
+crossing-to-crossing negative intervals last 90.652 and 88.122 ms,
+respectively.
 
 The archived sample interval is 0.1 ms. After downsampling to effective steps
 as large as 2 ms and repeating every phase offset, the largest shift in the
@@ -341,30 +352,38 @@ P_F=\mathbf F_L\cdot\mathbf v_L+\mathbf F_T\cdot\mathbf v_T
 $$ {#eq-two-contact-power}
 
 The relative-velocity term can be separated into rigid rotation and a small
-contact-deformation remainder. The implemented identity closes within
-$2.0\times10^{-11}$ W. In ZTCF, the maximum magnitude of the relative-contact
-remainder is only 0.188 W, compared with contact-force power peaks above 4 kW;
-the grip-contact kinematics are effectively rigid for this calculation.
+contact-deformation remainder. The implemented identity closes internally
+within $2.0\times10^{-11}$ W. It is not an exact reproduction of the archive's
+separately stored linear-power columns: the maximum ZTCF discrepancy is 72.8 W.
+That discrepancy is retained as an evidence limit rather than silently treating
+the source power as a ground truth. In ZTCF, the maximum magnitude of the
+relative-contact remainder is only 0.188 W, compared with reconstructed
+contact-force power peaks above 4 kW; the grip-contact kinematics are
+effectively rigid for this calculation.
 
 ![Negative Couple Sign Does Not Alone Determine Energy-Transfer Sign](figures/fig_two_hand_power_decomposition.pdf){#fig-two-hand-power width=100%}
 
 At the ZTCF negative-couple minimum, the reconstructed grip angular velocity is
-36.21 rad/s and the total contact-force power is -2.08 kW. Clubhead speed is
-already about 110.0 mph, close to the archived 115.1 mph maximum at 0.1925 s.
-Across the entire negative-couple interval, contact-force power is negative for
-approximately 85% of samples and integrates to about -149 J. In this particular
-trace, the passive negative couple is principally associated with late
-redirection and deceleration after peak speed, not with a direct positive-power
-boost to the club.
+36.21 rad/s and the reconstructed contact-force power is -2.08 kW. Clubhead
+speed is already about 110.0 mph, close to the archived 115.1 mph maximum at
+0.1933 s. Across the interpolated 88.122 ms negative-couple interval,
+reconstructed contact-force power is negative at 84.95% of the interval samples
+and integrates to -149.42 J. The archived linear-power columns retain the same
+sign throughout those samples and integrate to -149.45 J despite their larger
+pointwise discrepancy elsewhere. In this particular trace, the negative
+zero-command couple is principally associated with late redirection and
+deceleration after peak speed, not with a direct positive-power boost to the
+club.
 
-That finding sharpens, rather than rejects, the proposed mechanism. Passive
-negative torquing can be a consequence of momentum and constraint geometry
-without being the source of positive club work. Its strategic value, if any,
-would be indirect: allowing the system to reach a favorable high-speed state,
-controlling orientation, and avoiding unnecessary active opposition to the
-natural late reaction. Whether that improves impact delivery requires an
-optimization with impact timing, face orientation, actuator limits, and shaft
-stress—not inspection of the torque sign alone.
+That finding sharpens, rather than rejects, the proposed mechanism. A
+zero-command negative couple can arise from state-dependent dynamics and
+constraint geometry without being the source of positive club work. This
+archive does not isolate momentum from every other state-dependent term. Any
+strategic value would therefore be an indirect hypothesis involving the
+high-speed state, orientation, and active opposition to the late reaction.
+Whether it improves impact delivery requires an optimization with impact
+timing, face orientation, actuator limits, and shaft stress—not inspection of
+the torque sign alone.
 
 ## Mechanistic Interpretation by Phase {#sec-two-hand-phases}
 
@@ -404,12 +423,15 @@ instruction:
   earlier motion has created large velocities and a particular geometry.
 - **Track differential normal force, not net force alone.** The opposed mode is
   the direct geometric source of the two-hand couple.
-- **Separate speed production from impact management.** Positive power earlier
-  in the downswing creates speed; the late passive negative couple in this trace
-  mostly accompanies energy removal and orientation control after peak speed.
-- **Do not fight a passive reaction by default.** Adding positive command solely
-  to cancel a negative measured couple could increase loading or disrupt impact
-  orientation. The appropriate response is an optimization question.
+- **Separate modeled speed production from impact management.** In this trace,
+  positive club power precedes the late negative-couple interval, while the
+  interval itself is predominantly negative in reconstructed contact-force
+  power. That ordering does not identify which actuator or force pathway caused
+  the earlier speed gain.
+- **Test rather than prescribe reaction opposition.** Adding positive command
+  solely to cancel the modeled negative couple could change loading, impact
+  orientation, or both. Whether opposition helps is a registered optimization
+  hypothesis, not a technique recommendation from this single trajectory.
 - **Constrain the endpoint.** A credible optimization must evaluate clubhead
   speed at impact together with face/path orientation, grip loads, shaft stress,
   actuator work, and sensitivity to timing errors.
@@ -424,8 +446,11 @@ The strongest current result is internal: the archived model's negative ZTCF
 couple reconstructs from separated contact forces with zero current command.
 Several limitations bound external interpretation:
 
-- ZTCF is pointwise along the commanded state history, not a forward
-  two-hand killswitch rollout.
+- ZTCF is pointwise along the commanded state history, not a forward two-hand
+  killswitch rollout. Its exported contact state matches BASE only to the
+  registered cache precision, with maximum position, velocity, and clubhead-
+  speed residuals of $1.85\times10^{-7}$ m, $8.93\times10^{-6}$ m/s, and
+  $3.67\times10^{-5}$ mph.
 - The source is one deterministic planar simulation and one parameter set.
 - The model uses idealized wrist contacts and does not resolve pressure across
   the hands or grip.
@@ -433,6 +458,9 @@ Several limitations bound external interpretation:
   yet been separated by matched rigid/flexible reruns.
 - Downsampling verifies interpolation stability, not solver-tolerance or
   constraint-stabilization independence.
+- The reconstructed two-contact force-power identity closes internally, but
+  the archived ZTCF linear-power columns differ by as much as 72.8 W. Agreement
+  of interval sign and work does not erase that pointwise source discrepancy.
 - No synchronized human hand-force and full-body kinematic data are used.
 
 The mechanism would be materially weakened if a like-for-like rerun showed any

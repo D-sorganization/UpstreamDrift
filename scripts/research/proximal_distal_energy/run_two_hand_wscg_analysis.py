@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -30,18 +29,9 @@ MATLAB_TABLE_DIR = (
 )
 CASE_NAMES = ("base", "ztcf", "delta")
 OUT_OF_PLANE_AXIS = np.array([0.0, -1.0, 1.0]) / np.sqrt(2.0)
-
-
-def _git_sha() -> str:
-    result = subprocess.run(
-        ["git", "rev-parse", "--short", "HEAD"],
-        cwd=REPO_ROOT,
-        check=False,
-        capture_output=True,
-        text=True,
-        timeout=10,
-    )
-    return result.stdout.strip() if result.returncode == 0 else "unknown"
+SCHEMA_VERSION = "wscg-two-hand-wrench-audit-v2"
+JSON_PATH = DATA_DIR / "two_hand_wscg_analysis.json"
+NPZ_PATH = DATA_DIR / "two_hand_wscg_analysis.npz"
 
 
 def _sha256(path: Path) -> str:
@@ -50,6 +40,20 @@ def _sha256(path: Path) -> str:
         for block in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(block)
     return digest.hexdigest().upper()
+
+
+def _source_hashes() -> dict[str, str]:
+    """Hash the original tables, portable caches, and executable audit closure."""
+    paths = (
+        *(MATLAB_TABLE_DIR / f"{name.upper()}.mat" for name in CASE_NAMES),
+        *(RAW_DIR / f"{name}.csv" for name in CASE_NAMES),
+        REPO_ROOT
+        / "scripts/research/proximal_distal_energy/export_two_hand_wscg_tables.m",
+        REPO_ROOT
+        / "scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py",
+        REPO_ROOT / "scripts/research/proximal_distal_energy/two_hand_wrench.py",
+    )
+    return {path.relative_to(REPO_ROOT).as_posix(): _sha256(path) for path in paths}
 
 
 def _load_case(name: str) -> np.ndarray:
@@ -129,6 +133,48 @@ def _resampling_sensitivity(
     }
 
 
+def _interval_signal_metrics(
+    time: np.ndarray,
+    crossing: dict[str, Any],
+    reconstructed_power: np.ndarray,
+    archived_power: np.ndarray,
+) -> dict[str, float]:
+    """Integrate both power records over the interpolated negative-couple interval."""
+    start = float(crossing["all"][0]["time_s"])
+    stop = float(crossing["late"]["time_s"])
+    interior = (time > start) & (time < stop)
+    interval_time = np.concatenate(([start], time[interior], [stop]))
+    reconstructed = np.concatenate(
+        (
+            [np.interp(start, time, reconstructed_power)],
+            reconstructed_power[interior],
+            [np.interp(stop, time, reconstructed_power)],
+        )
+    )
+    archived = np.concatenate(
+        (
+            [np.interp(start, time, archived_power)],
+            archived_power[interior],
+            [np.interp(stop, time, archived_power)],
+        )
+    )
+    return {
+        "negative_interval_duration_s": stop - start,
+        "negative_interval_reconstructed_force_work_j": float(
+            np.trapezoid(reconstructed, interval_time)
+        ),
+        "negative_interval_archived_linear_work_j": float(
+            np.trapezoid(archived, interval_time)
+        ),
+        "negative_interval_reconstructed_force_power_negative_fraction": float(
+            np.mean(reconstructed < 0.0)
+        ),
+        "negative_interval_force_power_sign_disagreement_fraction": float(
+            np.mean(np.sign(reconstructed) != np.sign(archived))
+        ),
+    }
+
+
 def _analyze_case(
     name: str, data: np.ndarray, geometry: np.ndarray
 ) -> tuple[dict[str, Any], dict[str, np.ndarray]]:
@@ -156,6 +202,21 @@ def _analyze_case(
     trail_normal = np.sum(trail_force * normal_axis, axis=1)
     lead_out = lead_force @ OUT_OF_PLANE_AXIS
     trail_out = trail_force @ OUT_OF_PLANE_AXIS
+    reconstructed_local_forces = np.stack(
+        (
+            np.column_stack((lead_axial, lead_normal, lead_out)),
+            np.column_stack((trail_axial, trail_normal, trail_out)),
+        )
+    )
+    archived_local_forces = np.stack(
+        (
+            _vector(data, "lead_force_local_source", "n"),
+            _vector(data, "trail_force_local_source", "n"),
+        )
+    )
+    maximum_in_plane_force = float(
+        np.max(np.linalg.norm(reconstructed_local_forces[..., :2], axis=2))
+    )
 
     resultant = lead_force + trail_force
     force_moment_global = np.cross(lead_position - midpoint, lead_force) + np.cross(
@@ -195,6 +256,11 @@ def _analyze_case(
     minimum_index = int(np.argmin(equivalent_couple))
     negative = equivalent_couple < 0.0
     negative_impulse = float(np.trapezoid(np.minimum(equivalent_couple, 0.0), time))
+    lead_command = data["lead_command_torque_nm"]
+    trail_command = data["trail_command_torque_nm"]
+    interval_metrics = _interval_signal_metrics(
+        time, crossing, contact_force_power, source_linear_power
+    )
     metrics: dict[str, Any] = {
         "sample_count": int(time.size),
         "time_step_s": float(np.median(np.diff(time))),
@@ -212,10 +278,18 @@ def _analyze_case(
         "maximum_out_of_plane_hand_force_n": float(
             max(np.max(np.abs(lead_out)), np.max(np.abs(trail_out)))
         ),
-        "maximum_force_power_identity_residual_w": float(
+        "maximum_in_plane_hand_force_n": maximum_in_plane_force,
+        "maximum_out_of_plane_to_in_plane_force_ratio": float(
+            max(np.max(np.abs(lead_out)), np.max(np.abs(trail_out)))
+            / maximum_in_plane_force
+        ),
+        "maximum_local_force_projection_residual_n": float(
+            np.max(np.abs(reconstructed_local_forces - archived_local_forces))
+        ),
+        "maximum_internal_force_power_identity_residual_w": float(
             np.max(np.abs(contact_force_power - decomposed_force_power))
         ),
-        "maximum_source_linear_power_residual_w": float(
+        "maximum_archived_linear_power_discrepancy_w": float(
             np.max(np.abs(contact_force_power - source_linear_power))
         ),
         "maximum_abs_deformation_power_w": float(np.max(np.abs(deformation_power))),
@@ -223,17 +297,32 @@ def _analyze_case(
         "minimum_couple_time_s": float(time[minimum_index]),
         "force_moment_at_minimum_nm": float(force_moment[minimum_index]),
         "free_torque_at_minimum_nm": float(free_torque[minimum_index]),
+        "reconstructed_force_power_at_minimum_w": float(
+            contact_force_power[minimum_index]
+        ),
+        "clubhead_speed_at_minimum_mph": float(
+            data["clubhead_speed_mph"][minimum_index]
+        ),
+        "maximum_clubhead_speed_mph": float(np.max(data["clubhead_speed_mph"])),
+        "maximum_clubhead_speed_time_s": float(
+            time[int(np.argmax(data["clubhead_speed_mph"]))]
+        ),
         "negative_duration_s": float(np.sum(negative) * np.median(np.diff(time))),
         "negative_angular_impulse_nm_s": negative_impulse,
         "crossings": crossing,
         "late_crossing_resampling": _resampling_sensitivity(
             time, equivalent_couple, float(crossing["late"]["time_s"])
         ),
-        "maximum_abs_command_torque_nm": float(
-            np.max(
-                np.abs(data["lead_command_torque_nm"] + data["trail_command_torque_nm"])
-            )
+        "maximum_abs_individual_command_torque_nm": float(
+            max(np.max(np.abs(lead_command)), np.max(np.abs(trail_command)))
         ),
+        "maximum_abs_net_command_torque_nm": float(
+            np.max(np.abs(lead_command + trail_command))
+        ),
+        "maximum_free_torque_command_residual_nm": float(
+            np.max(np.abs(free_torque - lead_command - trail_command))
+        ),
+        **interval_metrics,
     }
     arrays = {
         "time": time,
@@ -342,8 +431,9 @@ def build_outputs() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
         )
     )
     record: dict[str, Any] = {
+        "schema_version": SCHEMA_VERSION,
+        "source_sha256": _source_hashes(),
         "provenance": {
-            "git_sha": _git_sha(),
             "source": "Archived WSCG/Simscape output tables",
             "source_table_sha256": {
                 name.upper(): _sha256(MATLAB_TABLE_DIR / f"{name.upper()}.mat")
@@ -375,6 +465,46 @@ def build_outputs() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
     base_couple = case_arrays["base"]["equivalent_couple"]
     ztcf_couple = case_arrays["ztcf"]["equivalent_couple"]
     delta_couple = case_arrays["delta"]["equivalent_couple"]
+    record["state_match"] = {
+        "maximum_contact_position_difference_m": float(
+            max(
+                np.max(
+                    np.abs(
+                        _vector(loaded["base"], name, "m")
+                        - _vector(loaded["ztcf"], name, "m")
+                    )
+                )
+                for name in (
+                    "lead_position",
+                    "trail_position",
+                    "midpoint_position",
+                )
+            )
+        ),
+        "maximum_contact_velocity_difference_m_s": float(
+            max(
+                np.max(
+                    np.abs(
+                        _vector(loaded["base"], name, "m_s")
+                        - _vector(loaded["ztcf"], name, "m_s")
+                    )
+                )
+                for name in ("lead_velocity_global", "trail_velocity_global")
+            )
+        ),
+        "maximum_clubhead_speed_difference_mph": float(
+            np.max(
+                np.abs(
+                    loaded["base"]["clubhead_speed_mph"]
+                    - loaded["ztcf"]["clubhead_speed_mph"]
+                )
+            )
+        ),
+        "interpretation": (
+            "The exported ZTCF state matches BASE to the recorded cache precision; "
+            "the residuals are reported rather than rounded to exact zero."
+        ),
+    }
     record["decomposition"] = {
         "maximum_abs_base_minus_ztcf_minus_delta_couple_residual_nm": float(
             np.max(np.abs(base_couple - ztcf_couple - delta_couple))
@@ -407,15 +537,22 @@ def build_outputs() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
     return record, arrays
 
 
-def main() -> None:
+def write_outputs(output_dir: Path = DATA_DIR) -> tuple[Path, Path]:
     """Write JSON metrics and compressed plot arrays."""
     record, arrays = build_outputs()
-    with (DATA_DIR / "two_hand_wscg_analysis.json").open(
-        "w", encoding="utf-8"
-    ) as stream:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    json_path = output_dir / JSON_PATH.name
+    npz_path = output_dir / NPZ_PATH.name
+    with json_path.open("w", encoding="utf-8") as stream:
         json.dump(record, stream, indent=2)
         stream.write("\n")
-    np.savez_compressed(DATA_DIR / "two_hand_wscg_analysis.npz", **arrays)
+    np.savez_compressed(npz_path, **arrays)
+    return json_path, npz_path
+
+
+def main() -> None:
+    """Write JSON metrics and compressed plot arrays."""
+    write_outputs()
 
 
 if __name__ == "__main__":

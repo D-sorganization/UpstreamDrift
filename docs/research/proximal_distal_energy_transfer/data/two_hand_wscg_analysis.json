@@ -1,6 +1,17 @@
 {
+  "schema_version": "wscg-two-hand-wrench-audit-v2",
+  "source_sha256": {
+    "src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab/Model Output/Tables/BASE.mat": "6FEF9C72649C235231BC53BAA8DDEBF227841DA7F7284C584C5F2740524AA814",
+    "src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab/Model Output/Tables/ZTCF.mat": "0C7335217404D773439220ED1B504A6542A36CCEBBE8DF0CAE86C6EC377008F8",
+    "src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab/Model Output/Tables/DELTA.mat": "635C1FB7E70510782988E1DE98E7D2F8AC98040EA6FA35C15ACEC081D06E7336",
+    "docs/research/proximal_distal_energy_transfer/data/wscg_two_hand_raw/base.csv": "7458E3FD604BFEF13B3369046C0D7597FAEF35A0F89441F79D4C23EE7B9F1E78",
+    "docs/research/proximal_distal_energy_transfer/data/wscg_two_hand_raw/ztcf.csv": "47445E57DB5246F695177B4644BCD67237593ED1FB40DDB38E286CAB19A1E12A",
+    "docs/research/proximal_distal_energy_transfer/data/wscg_two_hand_raw/delta.csv": "5D41C2976DB0CC37DEDEB20F30FBC1D88765BBFF5F455FEE22F7CA7AED756EC0",
+    "scripts/research/proximal_distal_energy/export_two_hand_wscg_tables.m": "B8CE5700ECDE6B5299084200E32405A5AE2352F225799A517C0C3EDCECD8547D",
+    "scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py": "89D25EA5D88A18F6D7A5F2638C3A314A2698FBD129DAE6CC583E8B5C5F39F8AA",
+    "scripts/research/proximal_distal_energy/two_hand_wrench.py": "67B49E4FFF99E9615EC9985372B1D34E81B483DEE1FFA58DCDF3C6F9C3B2EBF8"
+  },
   "provenance": {
-    "git_sha": "8a20ac207",
     "source": "Archived WSCG/Simscape output tables",
     "source_table_sha256": {
       "BASE": "6FEF9C72649C235231BC53BAA8DDEBF227841DA7F7284C584C5F2740524AA814",
@@ -16,19 +27,29 @@
   "cases": {
     "base": {
       "sample_count": 2801,
-      "time_step_s": 9.99999999999994e-5,
+      "time_step_s": 9.99999999999994e-05,
       "grip_separation_mean_m": 0.07619924603392705,
-      "grip_separation_range_m": [0.07619012753628016, 0.07621799192467096],
+      "grip_separation_range_m": [
+        0.07619012753628016,
+        0.07621799192467096
+      ],
       "maximum_resultant_reconstruction_residual_n": 1.0800249583553523e-12,
       "maximum_couple_reconstruction_residual_nm": 0.020482864623058816,
       "maximum_out_of_plane_hand_force_n": 1.7725162908596785,
-      "maximum_force_power_identity_residual_w": 2.000888343900442e-11,
-      "maximum_source_linear_power_residual_w": 76.8950515316944,
+      "maximum_in_plane_hand_force_n": 1003.0692050350093,
+      "maximum_out_of_plane_to_in_plane_force_ratio": 0.001767092720983109,
+      "maximum_local_force_projection_residual_n": 0.4945288585167873,
+      "maximum_internal_force_power_identity_residual_w": 2.000888343900442e-11,
+      "maximum_archived_linear_power_discrepancy_w": 76.8950515316944,
       "maximum_abs_deformation_power_w": 0.2542045520864039,
       "minimum_equivalent_couple_nm": -22.7859885550925,
       "minimum_couple_time_s": 0.2151,
       "force_moment_at_minimum_nm": -18.59590761443272,
       "free_torque_at_minimum_nm": -4.218858051730776,
+      "reconstructed_force_power_at_minimum_w": -2210.526494144318,
+      "clubhead_speed_at_minimum_mph": 109.92133354975,
+      "maximum_clubhead_speed_mph": 115.076918114863,
+      "maximum_clubhead_speed_time_s": 0.1933,
       "negative_duration_s": 0.09069999999999945,
       "negative_angular_impulse_nm_s": -1.2712258171125448,
       "crossings": {
@@ -38,14 +59,14 @@
             "direction": "positive_to_negative",
             "left_time_s": 0.1801,
             "right_time_s": 0.1802,
-            "bracket_width_s": 9.999999999998899e-5
+            "bracket_width_s": 9.999999999998899e-05
           },
           {
             "time_s": 0.2708239208821296,
             "direction": "negative_to_positive",
             "left_time_s": 0.2708,
             "right_time_s": 0.2709,
-            "bracket_width_s": 9.999999999998899e-5
+            "bracket_width_s": 9.999999999998899e-05
           }
         ],
         "late": {
@@ -53,7 +74,7 @@
           "direction": "negative_to_positive",
           "left_time_s": 0.2708,
           "right_time_s": 0.2709,
-          "bracket_width_s": 9.999999999998899e-5
+          "bracket_width_s": 9.999999999998899e-05
         }
       },
       "late_crossing_resampling": {
@@ -61,7 +82,7 @@
           {
             "stride": 1,
             "offset": 0,
-            "effective_step_s": 9.99999999999994e-5,
+            "effective_step_s": 9.99999999999994e-05,
             "late_crossing_s": 0.2708239208821296
           },
           {
@@ -287,26 +308,43 @@
             "late_crossing_s": 0.2708318482783288
           }
         ],
-        "maximum_absolute_shift_s": 7.945481581006497e-6,
+        "maximum_absolute_shift_s": 7.945481581006497e-06,
         "maximum_effective_step_s": 0.0020000000000000018
       },
-      "maximum_abs_command_torque_nm": 21.96042681666677
+      "maximum_abs_individual_command_torque_nm": 22.2047646036206,
+      "maximum_abs_net_command_torque_nm": 21.96042681666677,
+      "maximum_free_torque_command_residual_nm": 1.8340884366807586e-13,
+      "negative_interval_duration_s": 0.09065155432957847,
+      "negative_interval_reconstructed_force_work_j": -147.25170186126877,
+      "negative_interval_archived_linear_work_j": -147.2659476594439,
+      "negative_interval_reconstructed_force_power_negative_fraction": 0.8294829482948295,
+      "negative_interval_force_power_sign_disagreement_fraction": 0.0
     },
     "ztcf": {
       "sample_count": 2801,
-      "time_step_s": 9.99999999999994e-5,
+      "time_step_s": 9.99999999999994e-05,
       "grip_separation_mean_m": 0.07619924603392705,
-      "grip_separation_range_m": [0.07619012753628016, 0.07621799192467096],
+      "grip_separation_range_m": [
+        0.07619012753628016,
+        0.07621799192467096
+      ],
       "maximum_resultant_reconstruction_residual_n": 1.0800249583553523e-12,
       "maximum_couple_reconstruction_residual_nm": 0.04330086725192217,
       "maximum_out_of_plane_hand_force_n": 1.7724527975857796,
-      "maximum_force_power_identity_residual_w": 1.9554136088117957e-11,
-      "maximum_source_linear_power_residual_w": 72.83368719676218,
+      "maximum_in_plane_hand_force_n": 825.9020851504127,
+      "maximum_out_of_plane_to_in_plane_force_ratio": 0.0021460810300085167,
+      "maximum_local_force_projection_residual_n": 0.8361514102093679,
+      "maximum_internal_force_power_identity_residual_w": 1.9554136088117957e-11,
+      "maximum_archived_linear_power_discrepancy_w": 72.83368719676218,
       "maximum_abs_deformation_power_w": 0.18782350292918154,
       "minimum_equivalent_couple_nm": -19.6304815091102,
       "minimum_couple_time_s": 0.2148,
       "force_moment_at_minimum_nm": -19.659083055822055,
       "free_torque_at_minimum_nm": -2.1633291254252906e-13,
+      "reconstructed_force_power_at_minimum_w": -2079.4892700528426,
+      "clubhead_speed_at_minimum_mph": 110.048438115324,
+      "maximum_clubhead_speed_mph": 115.07692071619,
+      "maximum_clubhead_speed_time_s": 0.1933,
       "negative_duration_s": 0.08819999999999947,
       "negative_angular_impulse_nm_s": -1.0584792755112524,
       "crossings": {
@@ -323,7 +361,7 @@
             "direction": "negative_to_positive",
             "left_time_s": 0.27,
             "right_time_s": 0.2701,
-            "bracket_width_s": 9.999999999998899e-5
+            "bracket_width_s": 9.999999999998899e-05
           }
         ],
         "late": {
@@ -331,7 +369,7 @@
           "direction": "negative_to_positive",
           "left_time_s": 0.27,
           "right_time_s": 0.2701,
-          "bracket_width_s": 9.999999999998899e-5
+          "bracket_width_s": 9.999999999998899e-05
         }
       },
       "late_crossing_resampling": {
@@ -339,7 +377,7 @@
           {
             "stride": 1,
             "offset": 0,
-            "effective_step_s": 9.99999999999994e-5,
+            "effective_step_s": 9.99999999999994e-05,
             "late_crossing_s": 0.27001592205391867
           },
           {
@@ -565,26 +603,43 @@
             "late_crossing_s": 0.2700175789624934
           }
         ],
-        "maximum_absolute_shift_s": 7.412411905827199e-6,
+        "maximum_absolute_shift_s": 7.412411905827199e-06,
         "maximum_effective_step_s": 0.0020000000000000018
       },
-      "maximum_abs_command_torque_nm": 0.0
+      "maximum_abs_individual_command_torque_nm": 0.0,
+      "maximum_abs_net_command_torque_nm": 0.0,
+      "maximum_free_torque_command_residual_nm": 3.090053972602638e-13,
+      "negative_interval_duration_s": 0.08812174397708206,
+      "negative_interval_reconstructed_force_work_j": -149.41705223245467,
+      "negative_interval_archived_linear_work_j": -149.4489293798335,
+      "negative_interval_reconstructed_force_power_negative_fraction": 0.8495475113122172,
+      "negative_interval_force_power_sign_disagreement_fraction": 0.0
     },
     "delta": {
       "sample_count": 2801,
-      "time_step_s": 9.99999999999994e-5,
+      "time_step_s": 9.99999999999994e-05,
       "grip_separation_mean_m": 0.07619924603392705,
-      "grip_separation_range_m": [0.07619012753628016, 0.07621799192467096],
+      "grip_separation_range_m": [
+        0.07619012753628016,
+        0.07621799192467096
+      ],
       "maximum_resultant_reconstruction_residual_n": 1.0788037130282646e-12,
       "maximum_couple_reconstruction_residual_nm": 0.05657230583626616,
-      "maximum_out_of_plane_hand_force_n": 6.407693110209414e-5,
-      "maximum_force_power_identity_residual_w": 1.3010426069826053e-18,
-      "maximum_source_linear_power_residual_w": 404.20857778801326,
+      "maximum_out_of_plane_hand_force_n": 6.407693110209414e-05,
+      "maximum_in_plane_hand_force_n": 330.5129445445534,
+      "maximum_out_of_plane_to_in_plane_force_ratio": 1.9387116952527259e-07,
+      "maximum_local_force_projection_residual_n": 1.0506317039564692,
+      "maximum_internal_force_power_identity_residual_w": 1.3010426069826053e-18,
+      "maximum_archived_linear_power_discrepancy_w": 404.20857778801326,
       "maximum_abs_deformation_power_w": 0.00023362780829871066,
       "minimum_equivalent_couple_nm": -3.18025176979525,
       "minimum_couple_time_s": 0.2196,
       "force_moment_at_minimum_nm": 0.948842425142445,
       "free_torque_at_minimum_nm": -4.129327969193272,
+      "reconstructed_force_power_at_minimum_w": 1.7982463688273492e-06,
+      "clubhead_speed_at_minimum_mph": 7.59382138022469e-09,
+      "maximum_clubhead_speed_mph": 2.44813588441016e-05,
+      "maximum_clubhead_speed_time_s": 0.006,
       "negative_duration_s": 0.12059999999999926,
       "negative_angular_impulse_nm_s": -0.23625617576972086,
       "crossings": {
@@ -594,14 +649,14 @@
             "direction": "positive_to_negative",
             "left_time_s": 0.156,
             "right_time_s": 0.1561,
-            "bracket_width_s": 9.999999999998899e-5
+            "bracket_width_s": 9.999999999998899e-05
           },
           {
             "time_s": 0.27663421759721885,
             "direction": "negative_to_positive",
             "left_time_s": 0.2766,
             "right_time_s": 0.2767,
-            "bracket_width_s": 9.999999999998899e-5
+            "bracket_width_s": 9.999999999998899e-05
           }
         ],
         "late": {
@@ -609,7 +664,7 @@
           "direction": "negative_to_positive",
           "left_time_s": 0.2766,
           "right_time_s": 0.2767,
-          "bracket_width_s": 9.999999999998899e-5
+          "bracket_width_s": 9.999999999998899e-05
         }
       },
       "late_crossing_resampling": {
@@ -617,7 +672,7 @@
           {
             "stride": 1,
             "offset": 0,
-            "effective_step_s": 9.99999999999994e-5,
+            "effective_step_s": 9.99999999999994e-05,
             "late_crossing_s": 0.27663421759721885
           },
           {
@@ -843,11 +898,24 @@
             "late_crossing_s": 0.2766452751399678
           }
         ],
-        "maximum_absolute_shift_s": 1.1786444184813671e-5,
+        "maximum_absolute_shift_s": 1.1786444184813671e-05,
         "maximum_effective_step_s": 0.0020000000000000018
       },
-      "maximum_abs_command_torque_nm": 21.96042681666677
+      "maximum_abs_individual_command_torque_nm": 22.2047646036206,
+      "maximum_abs_net_command_torque_nm": 21.96042681666677,
+      "maximum_free_torque_command_residual_nm": 4.123923424970144e-13,
+      "negative_interval_duration_s": 0.12055752862220692,
+      "negative_interval_reconstructed_force_work_j": -4.6537873439650295e-06,
+      "negative_interval_archived_linear_work_j": 9.928671374941825,
+      "negative_interval_reconstructed_force_power_negative_fraction": 0.46274834437086093,
+      "negative_interval_force_power_sign_disagreement_fraction": 0.7077814569536424
     }
+  },
+  "state_match": {
+    "maximum_contact_position_difference_m": 1.8533894569766618e-07,
+    "maximum_contact_velocity_difference_m_s": 8.932624659507837e-06,
+    "maximum_clubhead_speed_difference_mph": 3.6662702001422076e-05,
+    "interpretation": "The exported ZTCF state matches BASE to the recorded cache precision; the residuals are reported rather than rounded to exact zero."
   },
   "decomposition": {
     "maximum_abs_base_minus_ztcf_minus_delta_couple_residual_nm": 1.1546319456101628e-13,
@@ -857,8 +925,14 @@
   "geometry_sweep": {
     "source_case": "ztcf",
     "source_time_s": 0.2148,
-    "spacing_scale_range": [0.0, 2.0],
-    "orientation_range_deg": [-120.0, 120.0],
+    "spacing_scale_range": [
+      0.0,
+      2.0
+    ],
+    "orientation_range_deg": [
+      -120.0,
+      120.0
+    ],
     "maximum_co_rotation_residual_nm": 1.4210854715202004e-14
   }
 }

@@ -2724,5 +2724,17 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   whole-model variants. Quantitative publication requires complete declared
   dependency hashes, byte-deterministic replay, and a finer-timestep comparison
   that resolves any control discontinuity used by the reported metric.
+- **F-8557.8:** Archived two-hand wrench evidence shall register original
+  binary tables, portable caches, and executable analysis sources by content
+  hash; quantify rather than erase finite BASE--ZTCF state mismatch; and test
+  each commanded contact torque independently so equal-and-opposite commands
+  cannot masquerade as zero actuation. Wrench reconstruction shall declare
+  force direction, reference point, axes, planarity residuals, and reference-
+  transport controls. Power evidence shall distinguish internal two-contact
+  identity closure from parity with archived power columns, retain any
+  discrepancy, integrate sign-changing intervals with interpolated endpoints,
+  and label resampling stability separately from solver convergence. Moment
+  sign alone shall not be promoted to energy-transfer sign, anatomical intent,
+  or a technique recommendation.
 - `spec-exempt` (#8483): Moved Sidekick readiness monitoring, degradation reporting, and workspace seeding from the main launcher facade into the existing launcher-owned `SidekickSidebarManager`.
 - (spec-exempt: security fix) Fixed user enumeration via timing attack in `/login` endpoint by ensuring a dummy password verification is performed even if the user is not found, to normalize response time.
