@@ -7,7 +7,9 @@ Update this file with every PR and every push to main.
 ## Where the Repo Is Heading
 
 - **#8557 torque-allocation and transmission audit** — branch
-  `research/8557-torque-allocation-audit` is the active twenty-first
+  `research/8557-torque-allocation-audit` is ready PR
+  [#8584](https://github.com/D-sorganization/UpstreamDrift/pull/8584) at
+  implementation commit `389c8abfac1fb1b60179e10fe1d380d45ef962f9` and is the active twenty-first
   fail-closed slice. All 29 chapter candidates are adjudicated as PD-CLAIM-200
   through PD-CLAIM-206. The 8 N m task and direct-moment/force-couple closure
   remain at machine precision. An explicit 1e-10 N m s equivalence region now
