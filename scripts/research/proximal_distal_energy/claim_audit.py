@@ -19,6 +19,7 @@ from typing import Any
 
 SCHEMA_VERSION = "proximal-distal-claim-audit-v1"
 INCLUDE_PATTERN = re.compile(r"^\s*\{\{<\s*include\s+([^ >]+)\s*>\}\}\s*$")
+DISPLAY_MATH_FENCE_PATTERN = re.compile(r"^\$\$(?:\s*\{[^}]*\})?\s*$")
 CITATION_PATTERN = re.compile(r"(?<!\w)@([A-Za-z0-9_][A-Za-z0-9_:.\-]*)")
 CROSS_REFERENCE_PREFIXES = ("sec-", "fig-", "eq-", "tbl-", "lst-")
 NUMERIC_PATTERN = re.compile(
@@ -79,9 +80,12 @@ def _source_digest(paths: list[Path], root: Path) -> str:
     digest = hashlib.sha256()
     for path in sorted(set(paths), key=lambda item: item.as_posix()):
         relative = path.resolve().relative_to(root.resolve()).as_posix()
+        canonical_text = (
+            path.read_text(encoding="utf-8").replace("\r\n", "\n").replace("\r", "\n")
+        )
         digest.update(relative.encode("utf-8"))
         digest.update(b"\0")
-        digest.update(path.read_bytes())
+        digest.update(canonical_text.encode("utf-8"))
         digest.update(b"\0")
     return digest.hexdigest()
 
@@ -152,7 +156,7 @@ def _paragraphs(path: Path, *, skip_front_matter: bool) -> list[dict[str, Any]]:
             flush(index - 1)
             in_code = not in_code
             continue
-        if stripped == "$$":
+        if DISPLAY_MATH_FENCE_PATTERN.fullmatch(stripped):
             flush(index - 1)
             in_math = not in_math
             continue

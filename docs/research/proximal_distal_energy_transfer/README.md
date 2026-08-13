@@ -116,6 +116,10 @@ coincide with a simple proximal-to-distal ordering of peak times. It also uses
 content-stable candidate identifiers so unrelated line insertions no longer
 invalidate completed reviews, and it records explicit falsifiers and scope
 limits for torso-pelvis, X-factor, timing, and casting claims.
+The inventory parser also treats labeled Quarto display-math closers correctly
+and canonicalizes line endings in its source digest. This repair exposed 308
+previously omitted narrative paragraphs, raising the fail-closed audit queue
+from 567 to 875 candidates without invalidating the 18 completed reviews.
 The hand-path attribution, two-hand redundancy, and preactivation validation
 program is tracked in
 [#8458](https://github.com/D-sorganization/UpstreamDrift/issues/8458).

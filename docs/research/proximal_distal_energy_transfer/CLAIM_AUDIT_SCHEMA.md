@@ -28,6 +28,11 @@ paragraph with:
 - a deterministic review-priority score and transparent triage flags; and
 - an initial `unadjudicated` review state.
 
+Display equations and fenced code are excluded, but parsing resumes after their
+closing delimiters. Quarto equation labels on display-math closers are supported,
+including `$$ {#eq-label}`. The source digest canonicalizes CRLF and CR line
+endings to LF so checkout platform does not change scientific content identity.
+
 The inventory is deliberately overinclusive. A question, transition, caption,
 or limitation may not be a scientific claim, but it remains visible until a
 reviewer marks it non-material. Automated extraction is a queue generator, not

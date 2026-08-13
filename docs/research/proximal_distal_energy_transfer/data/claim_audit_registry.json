@@ -2,14 +2,14 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "8db3f74dfb0e7956fb26788fcc0509f31078009738000eacdaa3d647a8922948",
+    "source_digest": "1ed657b1e63f7c1c1313b298f0693dee69fd77377b6cd0fe8ea89855e3b641d6",
     "baseline_commit": "13ea6a69585a42dc1db4b3959440ed95787c9779"
   },
   "audit_scope": {
     "completion_status": "in_progress",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "Stable claim-identity migration and two high-risk external-evidence slices covering framing, ground mechanics, kinetic-energy sequencing, torso-pelvis associations, method sensitivity, timing, and causal limitations. The complete 567-candidate paper audit remains in progress."
+    "current_scope": "Stable claim identity, cross-platform source digests, complete post-equation narrative parsing, and two high-risk external-evidence slices covering framing, ground mechanics, kinetic-energy sequencing, torso-pelvis associations, method sensitivity, timing, and causal limitations. The complete 875-candidate paper audit remains in progress."
   },
   "dependencies": [
     {
