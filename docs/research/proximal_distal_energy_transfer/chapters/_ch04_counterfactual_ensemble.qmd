@@ -47,7 +47,7 @@ A counterfactual effect is not a property of a trajectory in the abstract. It
 depends on *when* the intervention occurs and *how long* the futures are allowed
 to diverge. A short early killswitch mostly tests the immediate acceleration
 change. A long late killswitch also changes geometry, club angular velocity,
-and the velocity-squared force terms. Figure @fig-counterfactual-divergence-maps
+and the velocity-squared force terms. @fig-counterfactual-divergence-maps
 shows this dependence directly.
 
 ![Matched-State Counterfactual Divergence by Cut Time and Horizon](figures/fig_counterfactual_divergence_maps.pdf){#fig-counterfactual-divergence-maps width=100%}
@@ -70,7 +70,7 @@ mechanism is phase dependent.
 
 ## Separation of State, Force, and Power {#sec-future-separation}
 
-Figure @fig-counterfactual-selected-futures follows three representative cuts
+@fig-counterfactual-selected-futures follows three representative cuts
 for 80 ms. The curves coincide at the vertical dotted line by construction.
 Their slopes then separate because acceleration differs. Force and power can
 diverge faster than angle because both depend directly on acceleration and

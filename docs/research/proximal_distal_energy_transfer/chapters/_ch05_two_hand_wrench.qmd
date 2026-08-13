@@ -161,7 +161,7 @@ $$
 =-\mathbf d\times\mathbf F_d.
 $$ {#eq-differential-force-couple}
 
-Equation @eq-differential-force-couple is the central two-hand mechanism. The
+@eq-differential-force-couple is the central two-hand mechanism. The
 common mode controls the resultant. The differential, or opposed, mode controls
 the couple. A large $\lVert\mathbf F_d\rVert$ may therefore be nearly invisible
 in $\lVert\mathbf R\rVert$.

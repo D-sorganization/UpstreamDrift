@@ -75,7 +75,7 @@ when the contact rows are dependent. A pseudoinverse could return one
 minimum-norm allocation, but that numerical choice would not make the physical
 left/right allocation identifiable.
 
-Equation @eq-grf-reaction gives four additive terms:
+@eq-grf-reaction gives four additive terms:
 
 $$
 \lambda=\lambda_0+\lambda_v+\lambda_u+\lambda_e,

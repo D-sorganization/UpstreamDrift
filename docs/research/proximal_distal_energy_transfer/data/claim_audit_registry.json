@@ -2,14 +2,14 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "753dbd5508d5324c27b9f1f1107945f80124c61335a011c4ba81e8705d99ee0f",
+    "source_digest": "e442179fdae2d113a1c523ee5fe332c6eab47dc2f2bdd37a10f63f69725140a0",
     "baseline_commit": "13ea6a69585a42dc1db4b3959440ed95787c9779"
   },
   "audit_scope": {
     "completion_status": "in_progress",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "Stable claim identity, cross-platform source digests, complete post-equation narrative parsing, and six high-risk external-evidence slices covering framing, ground mechanics, kinetic-energy sequencing, torso-pelvis associations, method sensitivity, timing, delayed release, wrist torque, passive transfer, hub-path models, foundational linked-segment mechanics, energy accounting, kinematic proxies, planarity, optimal-control lineages, spatial forward optimization, and causal limitations. The complete 895-candidate paper audit remains in progress; 54 candidates are reviewed and 841 remain unadjudicated."
+    "current_scope": "Stable claim identity, cross-platform source digests, complete post-equation narrative parsing, and seven high-risk evidence slices covering framing, ground mechanics, kinetic-energy sequencing, torso-pelvis associations, method sensitivity, timing, delayed release, wrist torque, passive transfer, hub-path models, foundational linked-segment mechanics, energy accounting, kinematic proxies, planarity, double-pendulum interaction-force identities and numerical evidence, counterfactual contracts, optimal-control lineages, spatial forward optimization, and causal limitations. Chapters 2 and 3 are fully adjudicated. The complete 895-candidate paper audit remains in progress; 116 candidates are reviewed and 779 remain unadjudicated."
   },
   "dependencies": [
     {
@@ -609,6 +609,502 @@
       "disposition": "material_claims_mapped",
       "claim_ids": ["PD-CLAIM-050"],
       "rationale": "The recommendation operationalizes falsifiability by pairing a declared kinematic sequence with power accounting, sensitivity, and spatial residuals.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-9fcbd3f297367ba2",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-051"],
+      "rationale": "The paragraph bounds the historical double-pendulum lineage to an analytically useful reduced model rather than human validation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-69167cc6868dc15b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-052"],
+      "rationale": "The candidate contributes to the declared club free-body, compatible sign convention, or complete kinetic-energy-rate balance.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-46cd3a78c0447fe9",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-052"],
+      "rationale": "The candidate contributes to the declared club free-body, compatible sign convention, or complete kinetic-energy-rate balance.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-5edec63ffb02d66b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-052"],
+      "rationale": "The candidate contributes to the declared club free-body, compatible sign convention, or complete kinetic-energy-rate balance.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-df19fc9f1af3c227",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-052"],
+      "rationale": "The candidate contributes to the declared club free-body, compatible sign convention, or complete kinetic-energy-rate balance.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-11a64d4477bfe35e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-052"],
+      "rationale": "The candidate contributes to the declared club free-body, compatible sign convention, or complete kinetic-energy-rate balance.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-5015c5baf1e0f5fc",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-052"],
+      "rationale": "The candidate contributes to the declared club free-body, compatible sign convention, or complete kinetic-energy-rate balance.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-1651d0dca122c63d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-052"],
+      "rationale": "The candidate contributes to the declared club free-body, compatible sign convention, or complete kinetic-energy-rate balance.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-bfaff2110d2688c7",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-052"],
+      "rationale": "The candidate contributes to the declared club free-body, compatible sign convention, or complete kinetic-energy-rate balance.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-036c2a51c5001f55",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-053"],
+      "rationale": "The candidate contributes to the exact Newton-Euler wrist-force decomposition and moment-balance verification.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-cba28ae0f55a4d0c",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-053"],
+      "rationale": "The candidate contributes to the exact Newton-Euler wrist-force decomposition and moment-balance verification.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-507d7b4aafa84f08",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-053"],
+      "rationale": "The candidate contributes to the exact Newton-Euler wrist-force decomposition and moment-balance verification.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-a737ea3697072d41",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-053"],
+      "rationale": "The candidate contributes to the exact Newton-Euler wrist-force decomposition and moment-balance verification.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-243331582799cbe6",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-053"],
+      "rationale": "The candidate contributes to the exact Newton-Euler wrist-force decomposition and moment-balance verification.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-d5140a409ecb76bb",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-053"],
+      "rationale": "The candidate contributes to the exact Newton-Euler wrist-force decomposition and moment-balance verification.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-2b5501da7ad60325",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-054"],
+      "rationale": "The candidate defines the state-matched zero-command intervention and its exact affine force split for the declared unconstrained model.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-aa0ee7df7e9f1ece",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-054"],
+      "rationale": "The candidate defines the state-matched zero-command intervention and its exact affine force split for the declared unconstrained model.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-9ca23eef1e2c491c",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-054"],
+      "rationale": "The candidate defines the state-matched zero-command intervention and its exact affine force split for the declared unconstrained model.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-bfcf16ab287850ef",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-054"],
+      "rationale": "The candidate defines the state-matched zero-command intervention and its exact affine force split for the declared unconstrained model.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-e85a0db9280e7e80",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-054"],
+      "rationale": "The candidate defines the state-matched zero-command intervention and its exact affine force split for the declared unconstrained model.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-8499f5719041bc3e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-054"],
+      "rationale": "The candidate defines the state-matched zero-command intervention and its exact affine force split for the declared unconstrained model.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-7f76f5574fe9d28a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-055"],
+      "rationale": "The candidate derives or bounds the signed force-power projection gates and their fixed-hub limitation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-f558756849fdc515",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-055"],
+      "rationale": "The candidate derives or bounds the signed force-power projection gates and their fixed-hub limitation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-68585338f207b890",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-055"],
+      "rationale": "The candidate derives or bounds the signed force-power projection gates and their fixed-hub limitation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-b9133932f71becc6",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-055"],
+      "rationale": "The candidate derives or bounds the signed force-power projection gates and their fixed-hub limitation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-43411633f5a4d09b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-055"],
+      "rationale": "The candidate derives or bounds the signed force-power projection gates and their fixed-hub limitation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-a610b02b7355a6ca",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-055"],
+      "rationale": "The candidate derives or bounds the signed force-power projection gates and their fixed-hub limitation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-f193ac1ccce9a87a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-056"],
+      "rationale": "The candidate reports a reproducible reference-program force metric and its norm- and model-specific interpretation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-ebd1209657126a36",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-056"],
+      "rationale": "The candidate reports a reproducible reference-program force metric and its norm- and model-specific interpretation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-328f112ed18dcd98",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-056"],
+      "rationale": "The candidate reports a reproducible reference-program force metric and its norm- and model-specific interpretation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-4e1e71b222d045c6",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-057"],
+      "rationale": "The candidate reports or interprets the registered signed force-work decomposition through impact.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-bd715f7ce6db6546",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-057"],
+      "rationale": "The candidate reports or interprets the registered signed force-work decomposition through impact.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-da3c0e3b9e45e4dd",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-058"],
+      "rationale": "The candidate distinguishes pointwise attribution from a matched-state forward killswitch and states the persistence requirement.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-f120b0f493750f4b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-058"],
+      "rationale": "The candidate distinguishes pointwise attribution from a matched-state forward killswitch and states the persistence requirement.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-16867bfa4429df68",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-058"],
+      "rationale": "The candidate distinguishes pointwise attribution from a matched-state forward killswitch and states the persistence requirement.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-1e409d963952b9f7",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-058"],
+      "rationale": "The candidate distinguishes pointwise attribution from a matched-state forward killswitch and states the persistence requirement.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-cd820834c6adee85",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-059"],
+      "rationale": "The candidate frames model outputs as preregisterable hypotheses with explicit objectives, validity gates, and extension boundaries.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-7fb7c30149db8efc",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-059"],
+      "rationale": "The candidate frames model outputs as preregisterable hypotheses with explicit objectives, validity gates, and extension boundaries.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-3533683351a3100a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-059"],
+      "rationale": "The candidate frames model outputs as preregisterable hypotheses with explicit objectives, validity gates, and extension boundaries.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-89502e860e9b0c6d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-060"],
+      "rationale": "The candidate defines the two-hand equivalent wrench, project-source evidence boundary, and controls required to test a passive negative couple.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-8eae7b5060f7d919",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-060"],
+      "rationale": "The candidate defines the two-hand equivalent wrench, project-source evidence boundary, and controls required to test a passive negative couple.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-117afba78b695aee",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-060"],
+      "rationale": "The candidate defines the two-hand equivalent wrench, project-source evidence boundary, and controls required to test a passive negative couple.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-43856f97e77a64fb",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-060"],
+      "rationale": "The candidate defines the two-hand equivalent wrench, project-source evidence boundary, and controls required to test a passive negative couple.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-cbd4a001171b64ab",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-061"],
+      "rationale": "The candidate states the chapter-level supported claims, nonclaims, countertests, and inference boundary.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-9a5ad59f7a330cbe",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-061"],
+      "rationale": "The candidate states the chapter-level supported claims, nonclaims, countertests, and inference boundary.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-e78a86a4507afb39",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-061"],
+      "rationale": "The candidate states the chapter-level supported claims, nonclaims, countertests, and inference boundary.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-923992a279d81f15",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-061"],
+      "rationale": "The candidate states the chapter-level supported claims, nonclaims, countertests, and inference boundary.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-e36669a37f7670df",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This candidate is a question list, equation/table lead-in, figure/table caption, or claim-list header rather than an independent scientific proposition.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-0b8dad232e52948c",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This candidate is a question list, equation/table lead-in, figure/table caption, or claim-list header rather than an independent scientific proposition.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-6e10b9cfcc124d3f",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This candidate is a question list, equation/table lead-in, figure/table caption, or claim-list header rather than an independent scientific proposition.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-9d72ba66c2ee0ea0",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This candidate is a question list, equation/table lead-in, figure/table caption, or claim-list header rather than an independent scientific proposition.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-a5a89c59c70cd1f6",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This candidate is a question list, equation/table lead-in, figure/table caption, or claim-list header rather than an independent scientific proposition.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-534ca775512533d6",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This candidate is a question list, equation/table lead-in, figure/table caption, or claim-list header rather than an independent scientific proposition.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-5bdeb95e27f9a8a2",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This candidate is a question list, equation/table lead-in, figure/table caption, or claim-list header rather than an independent scientific proposition.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-6922ad51eb03401d",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This candidate is a question list, equation/table lead-in, figure/table caption, or claim-list header rather than an independent scientific proposition.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-d144fecd6e842cbf",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This candidate is a question list, equation/table lead-in, figure/table caption, or claim-list header rather than an independent scientific proposition.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-5c88b8854064c957",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This candidate is a question list, equation/table lead-in, figure/table caption, or claim-list header rather than an independent scientific proposition.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-8c2e44893f293dc4",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This candidate is a question list, equation/table lead-in, figure/table caption, or claim-list header rather than an independent scientific proposition.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-1b7c821560db3c9d",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This candidate is a question list, equation/table lead-in, figure/table caption, or claim-list header rather than an independent scientific proposition.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-8bb0d5d3a955f2c9",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This candidate is a question list, equation/table lead-in, figure/table caption, or claim-list header rather than an independent scientific proposition.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-453fbe11b5a274f8",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This paragraph is a chapter roadmap linking the formalism, evidence, optimization, and energy-accounting sections rather than an independent scientific proposition.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-bca6c8b9a7c3d7d5",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This sentence introduces the displayed manipulator equation; the substantive identity and its assumptions are adjudicated in PD-CLAIM-035 and PD-CLAIM-036.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
     }
@@ -2264,6 +2760,434 @@
       ],
       "falsifier": "A validated analysis demonstrates that peak order alone uniquely determines energy flow and control attribution across definitions, states, and spatial models.",
       "adjudication": "The paper now states a testable measurement bundle and withholds energetic or control conclusions from kinematics alone.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-051",
+      "candidate_ids": ["PD-CAND-9fcbd3f297367ba2"],
+      "statement": "The two-lever, one-hinge golf model is a historically established analytical model lineage, but that lineage does not empirically validate a fixed hub, planar rigid shaft, or human wrist-control program.",
+      "classification": "external_model_lineage_and_transport_boundary",
+      "published_status": "supported_as_model_lineage_not_human_validation",
+      "audit_status": "publisher_records_and_review_scope_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:137"
+      ],
+      "evidence_artifacts": [
+        "https://doi.org/10.1119/1.1976419",
+        "https://doi.org/10.1088/0034-4885/66/2/202"
+      ],
+      "model_domain": "Historical analytical and review literature on reduced golf-swing models.",
+      "uncertainty_boundary": "Books and analytical papers establish use and utility, not population validity or physiological control.",
+      "competing_explanations": [
+        "Alternative hub-path models",
+        "Flexible-shaft dynamics",
+        "Three-dimensional anatomical motion"
+      ],
+      "negative_controls": [
+        "Moving-hub comparison",
+        "Flexible-shaft comparison",
+        "Human torque and kinematic measurement"
+      ],
+      "falsifier": "The cited records do not use or review the stated reduced model lineage, or the paper treats model history as empirical human validation.",
+      "adjudication": "The chapter now preserves the model's analytical role while explicitly withholding human and structural validation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-052",
+      "candidate_ids": [
+        "PD-CAND-69167cc6868dc15b",
+        "PD-CAND-46cd3a78c0447fe9",
+        "PD-CAND-5edec63ffb02d66b",
+        "PD-CAND-df19fc9f1af3c227",
+        "PD-CAND-11a64d4477bfe35e",
+        "PD-CAND-5015c5baf1e0f5fc",
+        "PD-CAND-1651d0dca122c63d",
+        "PD-CAND-bfaff2110d2688c7"
+      ],
+      "statement": "For the declared planar club free body, the club kinetic-energy rate equals wrist-force power plus wrist-moment power plus gravity power, with all vectors, angular rates, and signs evaluated for the club.",
+      "classification": "rigid_body_energy_balance_identity",
+      "published_status": "supported_for_declared_free_body_and_conventions",
+      "audit_status": "analytic_identity_and_executable_moment_balance_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:17",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:43",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:66"
+      ],
+      "evidence_artifacts": [
+        "scripts/research/proximal_distal_energy/interaction_forces.py",
+        "tests/unit/research/test_interaction_force_mechanisms.py"
+      ],
+      "model_domain": "Rigid planar club segment acted on by a wrist wrench and gravity under the declared coordinate convention.",
+      "uncertainty_boundary": "The identity does not include shaft strain energy, aerodynamic work, impact, out-of-plane power, or soft-tissue work.",
+      "competing_explanations": [
+        "Omitted compliant energy",
+        "Reference-frame mismatch",
+        "Unmodeled external work"
+      ],
+      "negative_controls": [
+        "Newton-Euler moment balance",
+        "Whole-club energy residual",
+        "Sign-convention reversal"
+      ],
+      "falsifier": "The executable Newton-Euler and energy balances fail under the declared convention or a term is evaluated with an incompatible point or angular rate.",
+      "adjudication": "The text now describes positive force power as power delivered to the club and retains the complete moment and gravity channels.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-053",
+      "candidate_ids": [
+        "PD-CAND-036c2a51c5001f55",
+        "PD-CAND-cba28ae0f55a4d0c",
+        "PD-CAND-507d7b4aafa84f08",
+        "PD-CAND-a737ea3697072d41",
+        "PD-CAND-243331582799cbe6",
+        "PD-CAND-d5140a409ecb76bb"
+      ],
+      "statement": "Differentiating the declared fixed-hub double-pendulum kinematics and applying Newton's second law yields five exact wrist-force components whose sum reconstructs the total club reaction force without fitted regression or sampled acceleration differentiation.",
+      "classification": "analytic_force_decomposition_identity",
+      "published_status": "supported_for_declared_planar_model",
+      "audit_status": "machine_precision_reconstruction_and_moment_balance_pass",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:81",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:88",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:104",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:110"
+      ],
+      "evidence_artifacts": [
+        "scripts/research/proximal_distal_energy/interaction_forces.py",
+        "tests/unit/research/test_interaction_force_mechanisms.py"
+      ],
+      "model_domain": "Fixed-hub two-link planar rigid-body kinematics with analytic acceleration supplied by forward dynamics.",
+      "uncertainty_boundary": "Named centripetal and tangential terms are decomposition labels, not independent physical agents or unique causal sources.",
+      "competing_explanations": [
+        "Alternative coordinate decomposition",
+        "Hub translation",
+        "Flexible or distributed club dynamics"
+      ],
+      "negative_controls": [
+        "Component-sum reconstruction",
+        "Newton balance",
+        "Club-centre moment balance"
+      ],
+      "falsifier": "The five components do not reconstruct mass times club-COM acceleration minus gravity to numerical tolerance.",
+      "adjudication": "The exact decomposition is retained and the prose prevents centripetal labels and gravity bookkeeping from being treated as separate agents.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-054",
+      "candidate_ids": [
+        "PD-CAND-2b5501da7ad60325",
+        "PD-CAND-aa0ee7df7e9f1ece",
+        "PD-CAND-9ca23eef1e2c491c",
+        "PD-CAND-bfcf16ab287850ef",
+        "PD-CAND-e85a0db9280e7e80",
+        "PD-CAND-8499f5719041bc3e"
+      ],
+      "statement": "At one fixed state of the declared unconstrained manipulator model, zero commanded generalized torque can retain nonzero acceleration and reaction force, and total reaction force splits exactly into a zero-command drift force plus the same-state control increment.",
+      "classification": "state_matched_counterfactual_identity",
+      "published_status": "supported_for_declared_intervention_and_model",
+      "audit_status": "analytic_split_and_machine_precision_superposition_pass",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:134",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:140",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:153",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:162"
+      ],
+      "evidence_artifacts": [
+        "scripts/research/proximal_distal_energy/interaction_forces.py",
+        "tests/unit/research/test_interaction_force_mechanisms.py"
+      ],
+      "model_domain": "Unconstrained two-coordinate manipulator with passive damping inside the drift term and a same-state zero-command intervention.",
+      "uncertainty_boundary": "The split is not a muscle-force partition and requires separate treatment of imposed constraints, contacts, other actuators, and diverged future states.",
+      "competing_explanations": [
+        "Gravity contribution",
+        "Velocity-dependent interaction dynamics",
+        "Passive damping"
+      ],
+      "negative_controls": [
+        "Zero all commanded torques at identical state",
+        "Reconstruct total from drift plus increment",
+        "Integrate a separate killswitch future"
+      ],
+      "falsifier": "Same-state zero command always produces zero force in the declared nonzero-drift states or drift plus control fails to reconstruct total force.",
+      "adjudication": "The revision explicitly declares the unconstrained domain, retains passive damping in drift, and separates generalized control from muscle action.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-055",
+      "candidate_ids": [
+        "PD-CAND-7f76f5574fe9d28a",
+        "PD-CAND-f558756849fdc515",
+        "PD-CAND-68585338f207b890",
+        "PD-CAND-b9133932f71becc6",
+        "PD-CAND-43411633f5a4d09b",
+        "PD-CAND-a610b02b7355a6ca"
+      ],
+      "statement": "For the declared fixed circular hub, wrist-force power is a signed velocity projection: the proximal centripetal component is orthogonal to wrist velocity, while distal centripetal and tangential projections carry minus-sine and cosine relative-angle gates whose amplitudes also depend on the state rates and accelerations.",
+      "classification": "analytic_geometry_power_identity",
+      "published_status": "supported_for_fixed_hub_planar_model",
+      "audit_status": "symbolic_expression_and_numerical_component_sum_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:189",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:195",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:211",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:218",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:224"
+      ],
+      "evidence_artifacts": [
+        "scripts/research/proximal_distal_energy/interaction_forces.py",
+        "tests/unit/research/test_interaction_force_mechanisms.py",
+        "https://www.jssm.org/volume08/iss2/cap/jssm-08-235.pdf"
+      ],
+      "model_domain": "Planar rigid double pendulum with fixed circular hub and compatible swing-plane force and velocity vectors.",
+      "uncertainty_boundary": "A moving hub breaks the proximal radial-tangential orthogonality; gate coefficients alone do not establish term dominance or favorable work.",
+      "competing_explanations": [
+        "Hub radial velocity",
+        "Different acceleration histories",
+        "Shaft compliance and spatial rotation"
+      ],
+      "negative_controls": [
+        "Mobile-hub reconstruction",
+        "Component power-sum identity",
+        "Angle sweep at state-matched rates"
+      ],
+      "falsifier": "The fixed-hub dot products do not reduce to the stated zero, sine, and cosine projections, or the text infers dominance from geometry alone.",
+      "adjudication": "The revision preserves exact gates but removes the unsupported claim that geometry by itself rotates the dominant pathway.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-056",
+      "candidate_ids": [
+        "PD-CAND-f193ac1ccce9a87a",
+        "PD-CAND-ebd1209657126a36",
+        "PD-CAND-328f112ed18dcd98"
+      ],
+      "statement": "The registered 60/-10/+15 N m reference program reaches the declared delivery event at 0.3493 s and 38.85 m/s, with 315.4 N peak total wrist force, 310.6 N peak pointwise drift force, and an RMS control-force increment equal to 16.3 percent of RMS total force before impact.",
+      "classification": "model_conditional_quantitative_result",
+      "published_status": "supported_at_declared_model_tier",
+      "audit_status": "deterministically_regenerated_and_pinned_by_tests",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:246",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:252",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:264"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/interaction_force_summary.json",
+        "scripts/research/proximal_distal_energy/run_interaction_force_study.py",
+        "tests/unit/research/test_interaction_force_mechanisms.py"
+      ],
+      "model_domain": "Default fixed-hub planar double pendulum, fixed-step RK4, first valid upward club-vertical crossing, and the registered piecewise torque program.",
+      "uncertainty_boundary": "The RMS comparison is norm-, interval-, state-history-, and model-specific and is not biological effort or a population load estimate.",
+      "competing_explanations": [
+        "Prior control shaped the state",
+        "Alternative norm or interval",
+        "Different torque and damping history"
+      ],
+      "negative_controls": [
+        "Recompute from canonical script",
+        "Alter norm and window",
+        "Matched-state forward killswitch"
+      ],
+      "falsifier": "Deterministic regeneration differs beyond registered tolerances or the paper generalizes the RMS ratio to biological importance.",
+      "adjudication": "The values are retained while their interpretation is narrowed to one pointwise decomposition and RMS norm.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-057",
+      "candidate_ids": ["PD-CAND-4e1e71b222d045c6", "PD-CAND-bd715f7ce6db6546"],
+      "statement": "In the registered reference program, wrist-force work to impact is 130.7 J; the late half contributes 131.7 J, signed positive and negative work are 136.8 J and -6.1 J, and pointwise zero-command drift force integrates to 132.2 J along the commanded states.",
+      "classification": "model_conditional_work_decomposition",
+      "published_status": "supported_at_declared_model_tier",
+      "audit_status": "deterministically_regenerated_with_component_power_closure",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:272",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:281"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/interaction_force_summary.json",
+        "docs/research/proximal_distal_energy_transfer/data/interaction_force_mechanisms.npz",
+        "tests/unit/research/test_interaction_force_mechanisms.py"
+      ],
+      "model_domain": "Signed wrist-force line integral along the registered commanded trajectory through its first valid delivery event.",
+      "uncertainty_boundary": "Drift work evaluated along commanded states is an attribution diagnostic, not work from a realizable torque-free trajectory.",
+      "competing_explanations": [
+        "Cancellation of signed components",
+        "Alternative event truncation",
+        "Diverged zero-command future"
+      ],
+      "negative_controls": [
+        "Positive-negative work reconciliation",
+        "Component-sum power closure",
+        "Forward killswitch work comparison"
+      ],
+      "falsifier": "The canonical data do not reproduce the signed integrals or component powers fail to sum to total wrist-force power.",
+      "adjudication": "The chapter retains the late signed-work result and visibly separates pointwise attribution from a zero-command future.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-058",
+      "candidate_ids": [
+        "PD-CAND-da3c0e3b9e45e4dd",
+        "PD-CAND-f120b0f493750f4b",
+        "PD-CAND-16867bfa4429df68",
+        "PD-CAND-1e409d963952b9f7"
+      ],
+      "statement": "A pointwise zero-torque counterfactual recomputes acceleration and reaction at independently state-matched samples, whereas a matched-state killswitch integrates a separate zero-command future; at the registered 0.251 s cut and 0.120 s horizon the futures separate by 0.540 rad and 8.49 rad/s.",
+      "classification": "counterfactual_contract_and_model_result",
+      "published_status": "supported_for_declared_interventions",
+      "audit_status": "initial_state_identity_timestep_convergence_and_metrics_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:293",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:299",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:305",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:317"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/interaction_force_summary.json",
+        "scripts/research/proximal_distal_energy/counterfactual_ensemble.py",
+        "tests/unit/research/test_interaction_force_mechanisms.py"
+      ],
+      "model_domain": "Same-state zero-command interventions in the default planar forward model with explicit cut time, horizon, and timestep.",
+      "uncertainty_boundary": "Neither intervention identifies human intent; persistence varies with cut, horizon, state, integrator, and model.",
+      "competing_explanations": [
+        "Short-lived favorable drift",
+        "Continued control dependence",
+        "Numerical or event sensitivity"
+      ],
+      "negative_controls": [
+        "Matched initial state equality",
+        "Initial drift-acceleration equality",
+        "Cut-time horizon and timestep ensemble"
+      ],
+      "falsifier": "The killswitch does not start at the exact source state, initial zero-command acceleration differs from pointwise drift, or the registered separation fails to reproduce.",
+      "adjudication": "The two counterfactuals are now named and interpreted as noninterchangeable estimands with an explicit persistence requirement.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-059",
+      "candidate_ids": [
+        "PD-CAND-cd820834c6adee85",
+        "PD-CAND-7fb7c30149db8efc",
+        "PD-CAND-3533683351a3100a"
+      ],
+      "statement": "The double-pendulum mechanism yields testable hypotheses about early state, projection, pathway rotation, control history, and constrained objectives, but none is a technique instruction or universal timing rule.",
+      "classification": "prospective_falsifiable_model_hypotheses",
+      "published_status": "hypotheses_not_human_findings",
+      "audit_status": "estimands_and_failure_conditions_declared_experiments_open",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:326",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:329",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:350"
+      ],
+      "evidence_artifacts": [
+        "https://doi.org/10.1046/j.1460-2687.1999.00028.x",
+        "https://doi.org/10.1123/jab.16.4.356",
+        "docs/research/proximal_distal_energy_transfer/data/interaction_force_summary.json"
+      ],
+      "model_domain": "Prospective perturbation studies across angle, rate, acceleration, hub path, compliance, command history, load, and delivery validity.",
+      "uncertainty_boundary": "Model predictions do not establish participant benefit, safety, intent, learning, or one optimum.",
+      "competing_explanations": [
+        "State confounding",
+        "Alternative actuator history",
+        "Load-speed-accuracy tradeoff"
+      ],
+      "negative_controls": [
+        "State-matched angle sweep",
+        "Report invalid deliveries",
+        "Pareto objective analysis"
+      ],
+      "falsifier": "State-matched perturbations fail to produce the predicted signed changes or the effects reverse across plausible model extensions.",
+      "adjudication": "The former strategy section is now a preregisterable hypothesis set rather than coaching language.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-060",
+      "candidate_ids": [
+        "PD-CAND-89502e860e9b0c6d",
+        "PD-CAND-8eae7b5060f7d919",
+        "PD-CAND-117afba78b695aee",
+        "PD-CAND-43856f97e77a64fb"
+      ],
+      "statement": "Separated hand forces can have a modest resultant while producing a substantial equivalent couple, so a negative net couple does not identify active negative wrist torque; the WSCG series are registered project-source observations that motivate, but do not independently validate, a passive two-contact mechanism.",
+      "classification": "wrench_identity_and_project_source_boundary",
+      "published_status": "analytic_identity_with_hypothesis_evidence_only",
+      "audit_status": "source_hash_and_series_completeness_checked_forward_controls_elsewhere",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:358",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:371",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:380",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:387"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/sources/wscg_2024/SOURCE_REGISTER.md",
+        "docs/research/proximal_distal_energy_transfer/data/wscg_2024_source_provenance.json",
+        "scripts/research/proximal_distal_energy/extract_wscg_charts.py",
+        "tests/unit/research/test_interaction_force_mechanisms.py"
+      ],
+      "model_domain": "Planar equivalent wrench of two separated hand contacts plus registered source-deck time series.",
+      "uncertainty_boundary": "The source decks are project-originated hypothesis evidence, not independent physiology, human validation, or reproduction of the underlying Simscape solve.",
+      "competing_explanations": [
+        "Actively commanded wrist moment",
+        "Contact allocation convention",
+        "Gravity damping shaft or numerical effects"
+      ],
+      "negative_controls": [
+        "Coincident hands",
+        "Reversed hand moment arm",
+        "Independent forward two-contact solve"
+      ],
+      "falsifier": "The equivalent-wrench identity fails, source hashes or series are incomplete, or the negative couple disappears under the declared forward controls.",
+      "adjudication": "The text now labels the constraint-force explanation as a model hypothesis and keeps the source series distinct from reproduction.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-061",
+      "candidate_ids": [
+        "PD-CAND-cbd4a001171b64ab",
+        "PD-CAND-9a5ad59f7a330cbe",
+        "PD-CAND-e78a86a4507afb39",
+        "PD-CAND-923992a279d81f15"
+      ],
+      "statement": "The audited double-pendulum chapter supports only reaction-force existence under zero command, signed velocity-projection transfer, fixed-hub geometric gates, and registered reference-program timing; it withholds human torque, universal lag, passive two-hand, population, and coaching conclusions.",
+      "classification": "chapter_level_claim_boundary_and_falsification_contract",
+      "published_status": "supported_with_explicit_nonclaims",
+      "audit_status": "all_chapter_candidates_adjudicated_model_extensions_and_human_tests_open",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:399",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:407",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:412",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd:421"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/interaction_force_summary.json",
+        "tests/unit/research/test_interaction_force_mechanisms.py",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06e_experimental_protocol.qmd"
+      ],
+      "model_domain": "Synthesis of the declared fixed-hub double-pendulum analytic and numerical evidence.",
+      "uncertainty_boundary": "The synthesis does not complete moving-hub, flexible, spatial, two-hand, biological, or human validation tiers.",
+      "competing_explanations": [
+        "Model-order reversal",
+        "Participant-specific control",
+        "Measurement-estimation mismatch"
+      ],
+      "negative_controls": [
+        "Killswitch ensemble",
+        "Two-hand ablations",
+        "Spatial and human falsification protocols"
+      ],
+      "falsifier": "Any narrow support claim fails its analytic or numerical gate, or the chapter presents a withheld conclusion as established.",
+      "adjudication": "Every chapter candidate is now mapped to a bounded claim or editorial disposition, and the concluding falsifiers match the actual evidence tier.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
     }

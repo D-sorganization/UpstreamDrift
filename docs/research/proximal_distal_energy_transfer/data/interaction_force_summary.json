@@ -1,6 +1,6 @@
 {
   "provenance": {
-    "git_sha": "e7441d3b4",
+    "git_sha": "ad74e9a97",
     "backend": "ode",
     "integrator": "fixed-step RK4",
     "dt_s": 0.001,

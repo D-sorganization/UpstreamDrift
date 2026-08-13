@@ -280,7 +280,7 @@ the cancellation index are therefore the defensible summary.
 
 ![Signed Force Along the Achieved Hand Path for the Three Reference Cases](data/hand_path_attribution/figures/fig_hand_path_components.pdf){#fig-hand-path-components width=100%}
 
-Figure @fig-hand-path-components shows why the integrated results cannot be
+@fig-hand-path-components shows why the integrated results cannot be
 inferred from a force peak alone. In the double pendulum, the late positive
 rise is almost entirely drift. In the one-arm model, drift changes sign and
 then becomes strongly positive while control remains opposing late. In the
@@ -290,7 +290,7 @@ increment even when the two happen to be close over part of a history.
 
 ![Total, Drift, Control, and ZVCF Force Vectors at Normalized Time Quartiles](data/hand_path_attribution/figures/fig_hand_path_force_vectors.pdf){#fig-hand-path-force-vectors width=100%}
 
-Figure @fig-hand-path-force-vectors retains vector direction rather than only
+@fig-hand-path-force-vectors retains vector direction rather than only
 the along-path scalar. All four splits use one force-arrow scale within each
 model row, and both two-hand contacts are shown. The achieved path tangent is a
 geometric reference, not an additional force. A control vector can therefore
@@ -299,7 +299,7 @@ normal component, and future geometric effect remain separately identifiable.
 
 ![Signed Target-Direction Impulse and Force-Work Attribution](data/hand_path_attribution/figures/fig_hand_path_impulse_work.pdf){#fig-hand-path-impulse-work width=100%}
 
-Figure @fig-hand-path-impulse-work separates the target-direction component of
+@fig-hand-path-impulse-work separates the target-direction component of
 global vector impulse from force work. For example, the two-arm sweep has a
 positive 5.57 N s target-direction resultant assembled from -0.40 N s drift
 and +5.97 N s control, yet its net force work is nearly zero because work also
@@ -309,7 +309,7 @@ same-configuration projections, not a third additive share.
 ### Every Joint and Time Window {#sec-attribution-joint-atlas}
 
 The joint atlas uses total-wrench work, including both force and couple power.
-Each horizontal bar in Figure @fig-hand-path-phase-shares is
+Each horizontal bar in @fig-hand-path-phase-shares is
 $|W_d|/(|W_d|+|W_c|)$ for one joint and one normalized time quartile. The cross
 is plotted at the corresponding cancellation index when that index is at least
 0.25. This presentation keeps all 36 model--joint--window combinations visible
@@ -336,7 +336,7 @@ m_{P,d}(t)=\frac{|P_d(t)|}{|P_d(t)|+|P_c(t)|},
 \chi_P(t)=1-\frac{|P_d(t)+P_c(t)|}{|P_d(t)|+|P_c(t)|}.
 $$ {#eq-power-share-cancellation}
 
-Near-zero denominators are undefined and masked. Figure
+Near-zero denominators are undefined and masked.
 @fig-hand-path-power-shares plots $m_{P,d}$ for every joint; crosses identify
 samples with $\chi_P\geq0.25$. The rapid excursions are a substantive result:
 an integrated work share can be stable even though the instantaneous power
@@ -397,7 +397,7 @@ with substantially different hand torques and internal squeeze
 
 ![Common-Resultant and Differential Two-Hand Force Modes](data/hand_path_attribution/figures/fig_two_hand_common_differential.pdf){#fig-two-hand-common-differential width=100%}
 
-Figure @fig-two-hand-common-differential makes the hidden mode visible in the
+@fig-two-hand-common-differential makes the hidden mode visible in the
 declared local sweep. The common resultant is largely control supplied while
 the drift contribution remains smaller. The differential-mode magnitudes are
 larger and diverge late, so the same interval can support a modest net
@@ -487,7 +487,7 @@ from 9 to 35 ms and reduced residual-tracking error by 46.1% to 79.4%.
 
 ![Residual-Couple Preview Test for the Archived Two-Hand Model](figures/fig_two_hand_preactivation_hypothesis.pdf){#fig-two-hand-preactivation-hypothesis width=100%}
 
-Figure @fig-two-hand-preactivation-hypothesis establishes a narrow signal-
+@fig-two-hand-preactivation-hypothesis establishes a narrow signal-
 tracking result: anticipation can compensate a declared first-order delay when
 the command targets BASE minus drift. It does not evaluate clubhead speed,
 muscle activation, metabolic cost, or a forward coupled golfer trajectory. The

@@ -6,9 +6,9 @@ specific. A distal segment gains mechanical energy when forces acting at its
 moving joint and moments acting on it do positive power. Those forces can grow
 without a large distal actuator torque because the segment must satisfy the
 acceleration constraints imposed by the moving chain. Their capacity to do work
-depends on orientation: a large force perpendicular to joint velocity transmits
-no instantaneous power, while a smaller force aligned with that velocity can be
-effective. This chapter derives those statements exactly for the double
+depends on orientation: a large force perpendicular to joint-point velocity
+transmits no instantaneous translational power at that point, while a smaller
+force aligned with that velocity can be effective. This chapter derives those statements exactly for the double
 pendulum, tests them numerically, and identifies which conclusions survive when
 the commanded torques are removed.
 
@@ -28,7 +28,7 @@ where $\mathbf F_W$ is the wrist force acting on the club,
 $\mathbf v_W$ is the velocity of the wrist point,
 $M_W$ is the net moment acting on the club at the wrist, and
 $\omega_2^{\mathrm{abs}}=\dot\theta_1+\dot\theta_2$ is the club's absolute
-angular velocity. Equation @eq-club-power-balance separates three questions:
+angular velocity. @eq-club-power-balance separates three questions:
 
 1. What creates a large wrist force?
 2. What orients that force so it has a useful projection onto wrist velocity?
@@ -54,11 +54,12 @@ $$
 $$ {#eq-unit-basis}
 
 $\mathbf u$ points along a link and $\mathbf u_\perp$ points in its positive
-angular-velocity direction. Figure @fig-interaction-free-body declares the
+angular-velocity direction. @fig-interaction-free-body declares the
 free-body convention used in every calculation. $\mathbf F_W$ is the force *on
 the club*; the equal-and-opposite force acts on the arm. Positive
-$\mathbf F_W\cdot\mathbf v_W$ therefore means energy crosses the wrist
-interface into the club.
+$\mathbf F_W\cdot\mathbf v_W$ therefore means that the wrist force delivers
+positive instantaneous power to the club. The complete club balance still
+includes wrist-moment and gravity power.
 
 ![Double-Pendulum Club Free-Body Diagram](figures/fig_interaction_free_body.pdf){#fig-interaction-free-body width=88%}
 
@@ -141,13 +142,16 @@ $\ddot q_{0}=-M^{-1}b$, which is generally nonzero whenever gravity,
 velocity-dependent coupling, or damping is present. Substitution of
 $\ddot q_0$ into @eq-club-com-acceleration yields a nonzero centre-of-mass
 acceleration and therefore a nonzero wrist reaction force. This is the precise
-mechanical basis for the WSCG presentation's statement that zero joint torque
-does not mean zero interaction force [@olson2024wscg]. It also follows directly
+mechanical basis, for this declared unconstrained manipulator model, for the
+WSCG presentation's statement that zero *commanded* joint torque does not mean
+zero interaction force [@olson2024wscg]. Passive damping remains inside $b$;
+imposed constraints or external contacts would require their reaction terms to
+be retained separately. The result also follows directly
 from standard linked-segment dynamics [@putnam1991; @putnam1993;
 @featherstone2008].
 
-Because the equations are affine in torque, the *instantaneous* acceleration
-has an exact split:
+For this unconstrained model, because the equations are affine in the declared
+generalized torque, the *instantaneous* acceleration has an exact split:
 
 $$
 \ddot q_{\mathrm{total}}
@@ -165,12 +169,14 @@ $$
 $$ {#eq-force-superposition}
 
 where $\mathbf F_{\mathrm{drift}}$ is evaluated at zero commanded torque and
-$\mathbf F_{\mathrm{control}}$ is the change induced by the commanded torque.
-This is a local superposition at one state. Once two futures are integrated,
+$\mathbf F_{\mathrm{control}}:=\mathbf F_{\mathrm{total}}-
+\mathbf F_{\mathrm{drift}}$ is the change induced by the commanded torque at
+that same state. This is a local superposition at one state and under one
+intervention definition. It is not a muscle-force partition. Once two futures are integrated,
 their states diverge and the equality cannot be applied across time by
 subtracting unrelated samples.
 
-Figure @fig-interaction-vector-montage shows this decomposition at six phases
+@fig-interaction-vector-montage shows this decomposition at six phases
 of the reference swing. The force scale is fixed across panels. The pointwise
 zero-torque force becomes large late even though the commanded torque is set to
 zero in that calculation; accumulated angular velocity and changing geometry
@@ -200,7 +206,7 @@ P_{g\text{-reaction}}&=m_2g_{\mathrm{proj}}l_1\dot\theta_1\sin\theta_1.
 \end{aligned}
 $$ {#eq-component-powers}
 
-Equation @eq-component-powers gives several strong results.
+@eq-component-powers gives several strong results.
 
 **The proximal centripetal term does no work at a fixed circular hub path.** It
 is radial to the arm while wrist velocity is tangential. It can be large in a
@@ -218,18 +224,22 @@ As the links align, this coefficient falls to zero.
 **The distal tangential term has the complementary gate.** Its coefficient is
 $\cos\theta_2$: near a 90° wrist cock its projection is small, while it becomes
 large as the links align. The changing wrist angle therefore rotates the
-dominant transfer pathway from one inertial component toward another.
+two projection gates toward and away from the hand-velocity direction. Which
+term dominates also depends on $\ddot\phi$, $\dot\phi^2$, $\dot\theta_1$, and
+the declared state; geometry alone does not determine the dominant pathway.
 
 ![Geometry Controls Which Inertial Forces Can Transfer Power](figures/fig_interaction_geometry_coefficients.pdf){#fig-interaction-geometry width=88%}
 
-This complementarity is the geometric core of the handoff. Early in the
-downswing, a compact configuration permits high proximal angular acceleration
-without forcing the club to acquire its final angular velocity immediately.
-As the wrist opens, the projection factors change while $\dot\phi^2$ grows.
-The force can therefore rise rapidly and rotate into a direction that performs
-positive work at the wrist. White's parametric-transfer description and
-Miura's hand-path analysis are consistent with this power-level account, but
-they emphasize different model freedoms [@white2006; @miura2001].
+This complementarity is one geometric mechanism available to the handoff. A
+compact configuration admits a large relative angle and therefore different
+proximal and distal absolute rates, but it does not guarantee high proximal
+acceleration or delayed club acceleration. As the wrist opens, the projection
+factors change and $\dot\phi^2$ may grow; whether force rises and performs
+positive wrist-force work must be calculated for the state and control history.
+White studied transfer efficiency in a reduced swing model, whereas Miura
+studied inward hand-path pull and parametric acceleration. They motivate
+separate fixed-hub and moving-hub hypotheses rather than jointly validating the
+present result [@white2006; @miura2001].
 
 ## Numerical Mechanism Audit {#sec-force-audit}
 
@@ -244,13 +254,14 @@ The exact force reconstruction reaches a peak wrist-force magnitude of
 the root-mean-square magnitude of the control-force increment is 16.3% of the
 root-mean-square total-force magnitude. The similarity is not evidence that
 torque is unimportant: prior torque shaped the state, and the present torque
-still changes the future. It does show that the late force demand at the
-observed state is dominated by the moving system's inertial and gravitational
-drift rather than by the instantaneous control increment.
+still changes the future. Under this pointwise decomposition and RMS norm, the
+instantaneous control-force increment is small relative to total force over the
+sampled interval; that result does not identify biological effort or establish
+the same ordering under another norm, state history, or model.
 
 ![Exact Inertial Components and Total Wrist Force](figures/fig_interaction_force_components.pdf){#fig-interaction-force-components width=100%}
 
-Figure @fig-interaction-force-components exposes the mechanism behind the late
+@fig-interaction-force-components exposes the mechanism behind the late
 rise. The distal centripetal term grows approximately with $\dot\phi^2$ and is
 the largest component near impact. Its effect on transfer is then determined by
 the wrist-angle projection in @eq-component-powers. The discontinuity in
@@ -297,7 +308,7 @@ kill switches at successive states and compiling the resulting values
 At a 0.251 s cut, the two rollouts begin with identical position and velocity,
 and the initial zero-torque acceleration exactly matches the pointwise drift
 calculation. After 0.120 s, their generalized positions differ by 0.540 rad and
-their generalized velocities by 8.49 rad/s. Figure @fig-interaction-killswitch
+their generalized velocities by 8.49 rad/s. @fig-interaction-killswitch
 shows why a pointwise ZTCF trace cannot be interpreted as a torque-free replay
 of the measured motion.
 
@@ -310,30 +321,31 @@ of passive late-swing transfer should be supported by both: large favorable
 pointwise drift power and persistence of the predicted behavior over a stated
 killswitch horizon.
 
-## Implications for Clubhead-Speed Strategy {#sec-force-strategy}
+## Mechanistic Hypotheses for Delivery-Speed Studies {#sec-force-strategy}
 
-Within this model class, the mechanism suggests a conditional strategy rather
-than a universal timing command.
+Within this model class, the mechanism generates five testable hypotheses. They
+are experimental factors, not technique instructions.
 
-1. **Build proximal motion while the system is compact.** Early shoulder work
-   increases $\dot\theta_1$ and establishes the state on which later inertial
-   forces depend. Premature distal drive can open the wrist before the favorable
-   velocity-squared terms have grown.
-2. **Preserve a useful relative angle long enough for inertial loading to
-   develop.** Near a 90° lag angle, the distal centripetal force has a strong
-   projection onto hand velocity. This is a mechanical condition, not a claim
-   that a fixed angle should be copied across golfers.
-3. **Allow geometry to redirect the transfer pathway.** As the wrist opens,
-   centripetal projection falls and tangential projection rises. A productive
-   release coordinates this rotation with increasing club angular speed.
-4. **Use late wrist moment as a supplement, not as the sole explanation.** The
-   tested late drive improves speed, yet most wrist-force work at the achieved
-   states remains in the zero-torque drift term. Active torque helps create and
-   steer the state; it need not directly account for most late transfer power.
-5. **Judge a strategy at impact under constraints.** Maximizing an intermediate
-   force, angular acceleration, or lag angle can delay delivery or create an
-   invalid second-pass solution. Clubhead speed, orientation, actuator bounds,
-   and robustness must be evaluated together [@pickering1999; @sprigings2000].
+1. **Early-State Hypothesis.** At matched initial conditions, programs that
+   preserve a larger relative angle while increasing proximal rate should alter
+   later drift-force and drift-power distributions. A preregistered comparison
+   must report failures to reach the delivery event.
+2. **Projection Hypothesis.** Around $\theta_2=-90^\circ$, the distal
+   centripetal coefficient is near its positive maximum, but favorable work is
+   predicted only when the remaining signed rate terms also agree. Sweeping
+   angle without matching state is not a causal test.
+3. **Pathway-Rotation Hypothesis.** As $\theta_2$ approaches zero, the
+   centripetal projection decreases and the tangential projection increases.
+   Their actual power crossover should move when acceleration, hub path, or
+   shaft compliance is perturbed.
+4. **Control-History Hypothesis.** Late wrist drive can improve delivery in the
+   reference program even when pointwise drift accounts for most force work at
+   the achieved states. Matched-history and killswitch comparisons can separate
+   state preparation from instantaneous contribution.
+5. **Constrained-Objective Hypothesis.** Maximizing an intermediate force,
+   angular acceleration, or relative angle need not maximize valid delivery.
+   Speed, orientation, actuator bounds, load, robustness, and event validity
+   must be evaluated together [@pickering1999; @sprigings2000].
 
 These conclusions are model-conditional. A mobile hub adds radial hand
 velocity, a flexible shaft adds stored elastic energy, three-dimensional motion
@@ -359,8 +371,9 @@ $$ {#eq-two-hand-wrench}
 Opposing hand-force components can cancel in $\mathbf F_{\mathrm{net}}$ while
 adding in $M_O$. Consequently, a negative equivalent couple near impact does
 not by itself prove an actively commanded negative wrist torque. It can arise
-as the pair of constraint forces needed to enforce two moving hand contacts on
-the club. The WSCG two-hand planar simulation reported precisely this pattern:
+in a model from the pair of constraint forces needed to enforce two separated
+moving hand contacts on the club. That is a mechanism hypothesis, not a
+physiological inference. The WSCG two-hand planar simulation reported this pattern:
 similar BASE and zero-torque net club forces, substantial opposing local hand
 forces, and a late reversal of the equivalent couple [@olson2024wscg].
 
