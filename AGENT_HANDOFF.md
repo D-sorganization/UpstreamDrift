@@ -7,9 +7,11 @@ Update this file with every PR and every push to main.
 ## Where the Repo Is Heading
 
 - **#8557 spatial common-state audit** — PR #8579 protected-squash-merged at
-  exact remote main `fad3191503c99dc8d1f9b975fb8232d929a51da2`. Branch
-  `research/8557-spatial-cross-audit` is the active eighteenth fail-closed
-  slice. It has reviewed all 41 current candidates in the spatial common-state
+  exact remote main `fad3191503c99dc8d1f9b975fb8232d929a51da2`. Ready PR
+  [#8580](https://github.com/D-sorganization/UpstreamDrift/pull/8580) from
+  branch `research/8557-spatial-cross-audit` is the active eighteenth
+  fail-closed slice at reviewed implementation commit
+  `57e57253bfe2361473aede8fccefc06e57884252`. It has reviewed all 41 current candidates in the spatial common-state
   chapter as PD-CLAIM-175 through PD-CLAIM-183. The shared model hash now owns
   interface indices as well as joints/bodies; separate native/analytical audits
   close mass matrices to 2.49e-14 absolute and bias forces to 1.25e-9, while a
