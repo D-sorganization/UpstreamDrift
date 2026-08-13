@@ -26,6 +26,9 @@ from typing import Any
 from src.launchers.launcher_provider_compatibility import is_engine_runtime_available
 from src.shared.python.config.model_pack_manifest import LauncherPresentationMetadata
 from src.shared.python.config.model_registry import ModelConfig, ModelRegistry
+from src.shared.python.config.tools_vendor_authority import (
+    inspect_tools_vendor_authority,
+)
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -35,6 +38,7 @@ CONFIG_DIR = Path(__file__).parent
 MANIFEST_PATH = CONFIG_DIR / "launcher_manifest.json"
 ASSETS_DIR = Path(__file__).parent.parent.parent / "assets" / "logos"
 REGISTRY_PATH = CONFIG_DIR / "models.yaml"
+REPO_ROOT = CONFIG_DIR.parents[1]
 _DEFAULT_PROVIDER_LOGO = "golf_logo.svg"
 _ENGINE_LOGOS = {
     "drake": "drake.svg",
@@ -96,17 +100,30 @@ def _legacy_launcher_metadata(model: ModelConfig) -> LauncherPresentationMetadat
     )
 
 
-def _build_provider_tile(model: ModelConfig) -> LauncherTile:
+def _provider_status(
+    model: ModelConfig,
+    status: str,
+    repo_root: Path,
+    *,
+    check_runtime: bool = True,
+) -> str:
+    """Return an availability-aware status without exposing resolved paths."""
+    if model.provider == "tools":
+        if not inspect_tools_vendor_authority(repo_root).available:
+            return "provider_unavailable"
+    elif isinstance(model.source_root, str) and not Path(model.source_root).exists():
+        return "provider_unavailable"
+    if check_runtime and not is_engine_runtime_available(model.engine_type):
+        return "runtime_unavailable"
+    return status
+
+
+def _build_provider_tile(
+    model: ModelConfig, *, repo_root: Path = REPO_ROOT
+) -> LauncherTile:
     """Adapt a provider-backed model registry entry into a launcher tile."""
     metadata = model.launcher or _legacy_launcher_metadata(model)
-    status = metadata.status
-    source_root = (
-        Path(model.source_root) if isinstance(model.source_root, str) else None
-    )
-    if source_root is not None and not source_root.exists():
-        status = "provider_unavailable"
-    elif not is_engine_runtime_available(model.engine_type):
-        status = "runtime_unavailable"
+    status = _provider_status(model, metadata.status, repo_root)
 
     return LauncherTile(
         id=model.id,
@@ -121,7 +138,7 @@ def _build_provider_tile(model: ModelConfig) -> LauncherTile:
         order=model.order,
         engine_type=model.engine_type,
         provider=model.provider,
-        source_root=model.source_root,
+        source_root=None if model.provider == "tools" else model.source_root,
         web_route=metadata.web_route,
         web=WebLaunchContract.derive(
             web_route=metadata.web_route,
@@ -135,7 +152,7 @@ def _build_provider_tile(model: ModelConfig) -> LauncherTile:
 
 
 def _with_native_pyqt6_semantics(
-    tile: LauncherTile, model: ModelConfig | None
+    tile: LauncherTile, model: ModelConfig | None, *, repo_root: Path = REPO_ROOT
 ) -> LauncherTile:
     """Derive shared tile semantics from the primary PyQt6 registry entry.
 
@@ -150,7 +167,9 @@ def _with_native_pyqt6_semantics(
     return replace(
         tile,
         category=model.launcher.category,
-        status=model.launcher.status,
+        status=_provider_status(
+            model, model.launcher.status, repo_root, check_runtime=False
+        ),
         type=model.type,
         path=model.path,
         engine_type=model.engine_type,
@@ -494,10 +513,13 @@ class LauncherManifest:
             raise ValueError("Manifest 'tiles' must be a list")
 
         tiles = [LauncherTile.from_dict(t) for t in tiles_raw]
+        manifest_repo_root = manifest_path.parents[2]
         registry = ModelRegistry(config_path=registry_path or REGISTRY_PATH)
         native_models = {model.id: model for model in registry.get_all_models()}
         tiles = [
-            _with_native_pyqt6_semantics(tile, native_models.get(tile.id))
+            _with_native_pyqt6_semantics(
+                tile, native_models.get(tile.id), repo_root=manifest_repo_root
+            )
             for tile in tiles
         ]
         if include_provider_tiles:
@@ -505,6 +527,7 @@ class LauncherManifest:
                 cls._load_provider_tiles(
                     registry=registry,
                     existing_ids={tile.id for tile in tiles},
+                    repo_root=manifest_repo_root,
                 )
             )
 
@@ -539,6 +562,7 @@ class LauncherManifest:
         existing_ids: set[str],
         registry: ModelRegistry | None = None,
         registry_path: Path | None = None,
+        repo_root: Path = REPO_ROOT,
     ) -> list[LauncherTile]:
         """Load dynamic provider-backed tiles from the shared model registry."""
         if registry is None:
@@ -552,7 +576,7 @@ class LauncherManifest:
         for model in registry.get_all_models():
             if model.id in existing_ids or not _has_provider_metadata(model):
                 continue
-            provider_tiles.append(_build_provider_tile(model))
+            provider_tiles.append(_build_provider_tile(model, repo_root=repo_root))
 
         if provider_tiles:
             logger.info(
