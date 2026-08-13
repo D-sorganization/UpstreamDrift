@@ -7,7 +7,8 @@ Update this file with every PR and every push to main.
 ## Where the Repo Is Heading
 
 - **#8586 cross-repository terminology contract** — branch
-  `docs/3834-cross-repo-terminology` implements the AffineDrift #3834
+  `docs/3834-cross-repo-terminology`, PR
+  [#8588](https://github.com/D-sorganization/UpstreamDrift/pull/8588), implements the AffineDrift #3834
   definitional-integrity slice of #8426. Canonical ZVCF now zeros generalized
   velocity and declared applied control; schema 3.0.0 preserves the former
   control-retaining diagnostic under an explicit name. The proximal-distal
