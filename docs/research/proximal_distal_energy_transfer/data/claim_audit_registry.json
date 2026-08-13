@@ -2,14 +2,14 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "1ed657b1e63f7c1c1313b298f0693dee69fd77377b6cd0fe8ea89855e3b641d6",
+    "source_digest": "a4e0bd566ee0424a3faa31bdfff4f04cffe69c63d1a91e6ad3bafbca8bfd4b07",
     "baseline_commit": "13ea6a69585a42dc1db4b3959440ed95787c9779"
   },
   "audit_scope": {
     "completion_status": "in_progress",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "Stable claim identity, cross-platform source digests, complete post-equation narrative parsing, and two high-risk external-evidence slices covering framing, ground mechanics, kinetic-energy sequencing, torso-pelvis associations, method sensitivity, timing, and causal limitations. The complete 875-candidate paper audit remains in progress."
+    "current_scope": "Stable claim identity, cross-platform source digests, complete post-equation narrative parsing, and three high-risk external-evidence slices covering framing, ground mechanics, kinetic-energy sequencing, torso-pelvis associations, method sensitivity, timing, delayed release, wrist torque, passive transfer, hub-path models, and causal limitations. The complete 879-candidate paper audit remains in progress; 27 candidates are reviewed and 852 remain unadjudicated."
   },
   "dependencies": [
     {
@@ -281,6 +281,101 @@
         "PD-CLAIM-021"
       ],
       "rationale": "The synthesis combines the audited model and external evidence while explicitly withholding causal claims about a dominant human pathway or the cause of amateur casting.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "candidate_id": "PD-CAND-659b3feb9e8aaf8d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-022", "PD-CLAIM-025"],
+      "rationale": "The paragraph contrasts Pickering and Vickers' delayed-release sweep with White's materially different sensitivity result and explicitly limits model transport.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "candidate_id": "PD-CAND-71a231b29bec82b3",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-023", "PD-CLAIM-024"],
+      "rationale": "The paragraph separates the approximately 9 percent wrist-generator contrast from the 1.6 percent forced-delay contrast and the post-release torque ablation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "candidate_id": "PD-CAND-56b9141833f172f4",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-025",
+        "PD-CLAIM-026",
+        "PD-CLAIM-027",
+        "PD-CLAIM-028"
+      ],
+      "rationale": "The paragraph distinguishes White's passive transfer result, Miura's prescribed inward-pull emulation, and two small-sample Nesbit-McGinnis hub-path studies.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "candidate_id": "PD-CAND-922607fe383df435",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-022",
+        "PD-CLAIM-023",
+        "PD-CLAIM-024",
+        "PD-CLAIM-025",
+        "PD-CLAIM-029"
+      ],
+      "rationale": "The synthesis now records model disagreement and treats retain-early/release-late as a testable hypothesis rather than a literature-proven universal ordering.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "candidate_id": "PD-CAND-306557943f3eadc5",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This sentence introduces the source-level contrast matrix and explains its organizational purpose.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "candidate_id": "PD-CAND-9745bfe1d7becca7",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This is the source-level contrast matrix header rather than a scientific proposition.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "candidate_id": "PD-CAND-f7367774e924b493",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-022",
+        "PD-CLAIM-023",
+        "PD-CLAIM-024",
+        "PD-CLAIM-025",
+        "PD-CLAIM-029"
+      ],
+      "rationale": "The matrix records the distinct estimands, results, and boundaries of five primary modeling sources.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "candidate_id": "PD-CAND-ad5bd48a3098adb7",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This is a project-governance rule for future comparisons rather than a reported scientific result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "candidate_id": "PD-CAND-462476573c0cf4be",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-022",
+        "PD-CLAIM-023",
+        "PD-CLAIM-024",
+        "PD-CLAIM-025",
+        "PD-CLAIM-029"
+      ],
+      "rationale": "The paragraph replaces a false uniform-consensus claim with the source-verified model disagreement that motivates the falsification program.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-12"
     }
@@ -977,6 +1072,290 @@
       ],
       "falsifier": "A preregistered intervention with complete club, hand-wrench, body, and impact measurements isolates early distal transfer as the dominant pathway and establishes its causal role in casting.",
       "adjudication": "The former synthesis overreached from model feasibility and heterogeneous associations. The revised text preserves the hypothesis while withholding dominant-pathway and casting-causation claims.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "claim_id": "PD-CLAIM-022",
+      "candidate_ids": [
+        "PD-CAND-659b3feb9e8aaf8d",
+        "PD-CAND-922607fe383df435",
+        "PD-CAND-f7367774e924b493",
+        "PD-CAND-462476573c0cf4be"
+      ],
+      "statement": "Pickering and Vickers' driven fixed-hub double-pendulum sweep found higher impact clubhead velocity with later release and minimum golfer-supplied energy for natural release.",
+      "classification": "external_computational_model_result",
+      "published_status": "supported_with_model_and_estimand_qualification",
+      "audit_status": "publisher_abstract_checked_full_reimplementation_open",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:91",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:164",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactuals.qmd:20"
+      ],
+      "evidence_artifacts": [
+        "https://doi.org/10.1046/j.1460-2687.1999.00028.x",
+        "https://onlinelibrary.wiley.com/doi/abs/10.1046/j.1460-2687.1999.00028.x"
+      ],
+      "model_domain": "Driven planar fixed-hub double pendulum evaluated over a range of release angles, with release defined as the wrist joint becoming free and ball contact evaluated at a declared downswing location.",
+      "uncertainty_boundary": "The publisher abstract does not expose the full parameter grid or numerical sensitivity; no human intervention, moving hub, flexible shaft, bilateral hand model, or population inference is established.",
+      "competing_explanations": [
+        "Impact-location definition",
+        "Fixed-hub and rigid-link simplification",
+        "Prescribed driving torque and free-hinge release rule"
+      ],
+      "negative_controls": [
+        "Natural release versus imposed release angles",
+        "Equivalent sweeps with moving hubs and flexible shafts",
+        "Matched-energy rather than matched-torque comparisons"
+      ],
+      "falsifier": "A faithful reimplementation of the published equations and parameters fails to reproduce the reported monotonic delayed-release result or natural-release energy minimum.",
+      "adjudication": "The primary publisher abstract supports both findings within the declared model. The manuscript now rejects the former universal 'strictly inferior' extrapolation.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "claim_id": "PD-CLAIM-023",
+      "candidate_ids": [
+        "PD-CAND-71a231b29bec82b3",
+        "PD-CAND-922607fe383df435",
+        "PD-CAND-f7367774e924b493",
+        "PD-CAND-462476573c0cf4be"
+      ],
+      "statement": "Sprigings and Neal's three-segment simulation reported an approximately 9 percent clubhead-speed gain when an active wrist-torque generator was enabled late rather than disabled, with optimum activation near 30 degrees below horizontal and strong dependence on torque-profile shape.",
+      "classification": "external_actuator_bounded_simulation_result",
+      "published_status": "corrected_and_supported_with_model_qualification",
+      "audit_status": "primary_publisher_record_checked_independent_reimplementation_open",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:101",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:164",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactuals.qmd:20"
+      ],
+      "evidence_artifacts": [
+        "https://doi.org/10.1123/jab.16.4.356",
+        "https://journals.humankinetics.com/view/journals/jab/16/4/article-p356.xml"
+      ],
+      "model_domain": "Planar three-segment torso-left-arm-club simulation with activation and force-velocity-constrained torque generators, comparing wrist generator enabled and disabled conditions under the authors' optimization and impact constraints.",
+      "uncertainty_boundary": "The contrast is not a forced-release-delay effect, human treatment effect, or reusable timing prescription; the source explicitly states timing sensitivity to torque-profile shape.",
+      "competing_explanations": [
+        "Torque-profile parameterization",
+        "Impact pose constraint",
+        "Planar segment and muscle-generator simplification"
+      ],
+      "negative_controls": [
+        "Wrist generator disabled condition",
+        "Alternative admissible torque-profile families",
+        "Held-out impact events and anatomical models"
+      ],
+      "falsifier": "The original simulations or a faithful reimplementation do not yield the reported enabled-versus-disabled contrast and activation region.",
+      "adjudication": "The manuscript's former approximately 4 percent value was incorrect. The primary publisher record reports approximately 9 percent and explicitly conditions optimum timing on the torque profile.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "claim_id": "PD-CLAIM-024",
+      "candidate_ids": [
+        "PD-CAND-71a231b29bec82b3",
+        "PD-CAND-922607fe383df435",
+        "PD-CAND-f7367774e924b493",
+        "PD-CAND-462476573c0cf4be"
+      ],
+      "statement": "Sprigings and MacKenzie's optimized three-segment model produced 44.7 m/s with a 50 ms actively resisted delay plus post-release wrist torque, 44.0 m/s without the forced delay, and 38.9 m/s when post-release wrist torque was removed after the delay.",
+      "classification": "external_model_derived_quantitative_result",
+      "published_status": "supported_with_separated_contrasts",
+      "audit_status": "original_full_text_checked_independent_reimplementation_open",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:101",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:164",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactuals.qmd:20"
+      ],
+      "evidence_artifacts": [
+        "https://doi.org/10.1046/j.1460-2687.2002.00094.x",
+        "https://sashomackenzie.com/publications/delayedrelease.pdf"
+      ],
+      "model_domain": "Planar torso-arm-club model with activation-rate and force-velocity-constrained torque generators, Powell optimization, a vertical-shaft impact constraint, and three declared simulation conditions.",
+      "uncertainty_boundary": "The forced-delay benefit is 1.6 percent in this model and is distinct from the much larger post-release torque ablation; the model omitted legs, torso translation, right-arm extension, and forearm long-axis rotation.",
+      "competing_explanations": [
+        "Optimization parameterization and local optima",
+        "Vertical-shaft impact constraint",
+        "Omitted body and club degrees of freedom"
+      ],
+      "negative_controls": [
+        "SIM-1 without forced delay",
+        "SIM-3 without post-release wrist torque",
+        "Alternative impact and actuator constraints"
+      ],
+      "falsifier": "The original result tables or a faithful reconstruction fail to reproduce 44.7, 44.0, and 38.9 m/s under the three declared conditions.",
+      "adjudication": "Full-text methods and results were checked. The revised paper no longer merges the small forced-delay effect with the active-wrist-torque contribution.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "claim_id": "PD-CLAIM-025",
+      "candidate_ids": [
+        "PD-CAND-659b3feb9e8aaf8d",
+        "PD-CAND-56b9141833f172f4",
+        "PD-CAND-922607fe383df435",
+        "PD-CAND-f7367774e924b493",
+        "PD-CAND-462476573c0cf4be"
+      ],
+      "statement": "White's undriven double-pendulum model demonstrates geometry-mediated redistribution of kinetic energy, while his driven constant-shoulder-torque sensitivity model gives a second-order release-timing effect and decreasing predicted distance with increasing constant positive wrist torque.",
+      "classification": "external_analytical_and_computational_model_result",
+      "published_status": "corrected_and_supported_with_internal_model_distinction",
+      "audit_status": "original_full_text_checked_independent_reimplementation_open",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:91",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:116",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:143",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:164",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactuals.qmd:20"
+      ],
+      "evidence_artifacts": [
+        "https://doi.org/10.1119/1.2346688",
+        "https://waddengolfacademy.com/biomechanics/White%202006%20On%20the%20efficiency%20of%20the%20golf%20swing.pdf"
+      ],
+      "model_domain": "Undriven point-mass double pendulum for analytical transfer and a driven planar rigid-link double pendulum with constant shoulder torque for parameter sensitivity.",
+      "uncertainty_boundary": "The passive analysis is not an estimate of human joint-force power, and the driven sensitivity result depends on downswing angle, impact-at-peak-speed, constant torque, rigid links, and a fixed hub.",
+      "competing_explanations": [
+        "Downswing-angle reduction offsets transfer efficiency",
+        "Impact-event and backswing definition",
+        "Selective late torque differs from constant positive torque"
+      ],
+      "negative_controls": [
+        "Undriven versus driven formulations",
+        "Advanced and delayed release around natural release",
+        "Constant versus selectively timed wrist torque"
+      ],
+      "falsifier": "The analytical conservation result fails under the published assumptions or faithful reproduction of the driven sensitivity curves does not show the reported release-timing and wrist-torque behavior.",
+      "adjudication": "The former consensus synthesis cited White in the opposite direction from part of White's driven-model result. The revised paper exposes the disagreement and preserves the passive-transfer result within its proper domain.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "claim_id": "PD-CLAIM-026",
+      "candidate_ids": ["PD-CAND-56b9141833f172f4"],
+      "statement": "Miura's prescribed moving-pivot and modified double-link models predict that an inward hub pull near impact can increase clubhead kinetic energy and velocity when the modeled centrifugal force is developed.",
+      "classification": "external_analytical_and_emulation_model_result",
+      "published_status": "supported_with_prescribed_geometry_qualification",
+      "audit_status": "publisher_abstract_and_original_full_text_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:116"
+      ],
+      "evidence_artifacts": [
+        "https://doi.org/10.1046/j.1460-2687.2001.00071.x",
+        "https://people.stfx.ca/smackenz/Courses/DirectedStudy/Articles/Miura%202001%20Parametric%20acceleration%20effect%20of%20inward%20pull.pdf"
+      ],
+      "model_domain": "Analytical moving-pivot mass model and prescribed modified planar double-link golf-swing emulation without direct human force intervention.",
+      "uncertainty_boundary": "The study motivates a mechanism but does not isolate its magnitude in measured golfers, establish optimal pull timing, or identify the anatomical action that produces the hub motion.",
+      "competing_explanations": [
+        "Tangential hand work",
+        "Impact-event placement",
+        "Other coupled hub translations and rotations"
+      ],
+      "negative_controls": [
+        "No inward pivot motion",
+        "Outward pivot motion",
+        "Matched hand work with alternative path geometry"
+      ],
+      "falsifier": "A faithful solution of the published equations and emulation does not produce the stated energy and velocity increase under the declared inward-pull condition.",
+      "adjudication": "The source supports a model prediction. The manuscript now avoids presenting it as a measured human energy-transfer mechanism.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "claim_id": "PD-CLAIM-027",
+      "candidate_ids": ["PD-CAND-56b9141833f172f4"],
+      "statement": "Nesbit and McGinnis found non-circular hand paths with a common three-phase radius pattern and substantial geometric differences in one selected driver swing from each of four diverse amateur golfers.",
+      "classification": "external_small_sample_kinematic_and_model_result",
+      "published_status": "supported_with_sample_and_selection_qualification",
+      "audit_status": "original_full_text_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:116"
+      ],
+      "evidence_artifacts": [
+        "https://www.jssm.org/volume08/iss2/cap/jssm-08-235.pdf"
+      ],
+      "model_domain": "One participant-selected representative driver swing from three male and one female right-handed amateur golfers with handicaps 0, 5, 13, and 18, mapped to a planar rigid-club inverse model.",
+      "uncertainty_boundary": "Four selected swings, no population interval, planar mapping, numerical differentiation, and participant selection of the analyzed trial.",
+      "competing_explanations": [
+        "Individual anthropometry and style",
+        "Trial-selection effects",
+        "Swing-plane mapping and smoothing"
+      ],
+      "negative_controls": [
+        "All acceptable trials rather than one selected trial",
+        "Three-dimensional hand-path analysis",
+        "Independent mixed-skill replication"
+      ],
+      "falsifier": "The original trajectories do not show the reported non-circular and three-phase features or a faithful reanalysis shows they arise from processing choices.",
+      "adjudication": "The full paper supports the small-sample geometric observation. The revised text reports the exact sample structure and no longer generalizes it to skilled golfers broadly.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "claim_id": "PD-CLAIM-028",
+      "candidate_ids": ["PD-CAND-56b9141833f172f4"],
+      "statement": "Nesbit and McGinnis' two-dimensional constrained optimization predicted higher impact clubhead speed for four subjects through combined hand-path and club-angular-trajectory changes within each subject's modeled kinetic limits, with subject-dependent changes and limiting quantities.",
+      "classification": "external_subject_specific_optimization_result",
+      "published_status": "supported_with_model_and_subject_qualification",
+      "audit_status": "open_access_full_text_checked_independent_reimplementation_open",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:116"
+      ],
+      "evidence_artifacts": [
+        "https://www.jssm.org/volume13/iss4/cap/jssm-13-859.pdf",
+        "https://pubmed.ncbi.nlm.nih.gov/25435779/"
+      ],
+      "model_domain": "Four subject-specific prescribed two-dimensional club and hub trajectories optimized within force, torque, work, and power maxima derived from each subject's analyzed swing.",
+      "uncertainty_boundary": "The optimization altered hand path and club angular trajectory jointly, so it does not isolate inward pull; constraints came from selected subject swings and do not represent physiological feasibility distributions.",
+      "competing_explanations": [
+        "Joint changes in hub and club trajectories",
+        "Constraint selection from a single analyzed swing",
+        "Planar rigid-club approximation"
+      ],
+      "negative_controls": [
+        "Hub-only and club-angle-only interventions",
+        "Held-out repeated swings",
+        "Three-dimensional forward-dynamics reproduction"
+      ],
+      "falsifier": "Faithful reconstruction fails to improve impact speed within the stated constraints or separated interventions show the attributed hub-path contribution is absent.",
+      "adjudication": "The source supports subject-specific joint trajectory optimization, not a universal inward-pull prescription. The revised text keeps the intervention components and limitations explicit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-12"
+    },
+    {
+      "claim_id": "PD-CLAIM-029",
+      "candidate_ids": [
+        "PD-CAND-922607fe383df435",
+        "PD-CAND-f7367774e924b493",
+        "PD-CAND-462476573c0cf4be"
+      ],
+      "statement": "Sharp's parameterized arm-club optimization produced a near-optimal program with an early negative wrist torque that switched positive before impact, while the paper explicitly identified fixed-hub, kinematic-fit, and historical-data limitations.",
+      "classification": "external_optimization_model_result",
+      "published_status": "supported_with_model_limitation",
+      "audit_status": "original_full_text_checked_independent_reimplementation_open",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:143",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:164",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactuals.qmd:20"
+      ],
+      "evidence_artifacts": [
+        "https://doi.org/10.1098/rspa.2008.0304",
+        "https://people.stfx.ca/smackenz/courses/DirectedStudy/Articles/Sharp%202008%20Mechanics%20of%20golf.pdf"
+      ],
+      "model_domain": "Parameterized planar fixed-hub arm-club and shoulder-arm-club models fitted to sparse historical expert trajectories and optimized within declared torque bounds and impact geometry.",
+      "uncertainty_boundary": "A near-optimal program in this model is not a unique global optimum, measured human torque strategy, muscle command, or validation of the same program in a moving-base spatial model.",
+      "competing_explanations": [
+        "Parametric torque-family restriction",
+        "Compensating errors in kinematic fitting",
+        "Historical measurement sparsity and off-axis imaging"
+      ],
+      "negative_controls": [
+        "Alternative torque parameterizations",
+        "Moving-hub and spatial models",
+        "Modern six-degree-of-freedom club and bilateral hand data"
+      ],
+      "falsifier": "A faithful reconstruction does not yield the negative-to-positive wrist-torque switch or the ordering disappears under a preregistered broader admissible control family.",
+      "adjudication": "The primary paper supports the model program and also supplies its limitations. The revised manuscript uses Sharp as model-conditional evidence rather than proof of a human universal strategy.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-12"
     }

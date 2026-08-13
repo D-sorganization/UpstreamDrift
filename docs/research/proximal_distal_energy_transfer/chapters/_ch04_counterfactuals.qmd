@@ -17,28 +17,38 @@ interface — joint-force power plus moment power, in the sense of
   proximal torques maximize $E_p$; then allow or drive a large
   $P_{\mathrm{w}}$ concentrated in the final phase.
 
-The double-pendulum, delayed-release and optimal-control literatures
-reviewed in @sec-mechanics uniformly favor S2 within their model classes
-[@milburn1982; @pickering1999; @sprigings2000; @sprigings2002;
-@sharp2009; @white2006]. The mechanistic reasons compose into a coherent
-account:
+The double-pendulum and optimal-control studies reviewed in
+@sec-mechanics provide mixed, model-dependent evidence relevant to S2.
+Several favor delayed release, late wrist drive, or an early negative and
+late positive wrist-torque program [@pickering1999; @sprigings2000;
+@sprigings2002; @sharp2009]. White supports passive
+geometry-mediated transfer but reports only a second-order release-timing
+effect and a distance penalty for increasing constant positive wrist
+torque in his driven model [@white2006]. The following mechanisms are
+therefore hypotheses to separate experimentally and computationally, not
+a consensus proof:
 
 1. **Inertia management.** With the wrist cocked, the system's moment of
    inertia about the hub is small, so proximal torque buys angular
    velocity cheaply; early release raises the inertia while proximal
    torque is still accelerating the system [@white2006; @jorgensen1999].
-2. **Actuator physiology.** Torque-velocity limits mean the wrist's
-   small muscles add meaningful power only while wrist angular velocity
-   is modest; early wrist torque squanders that window and can even
-   require *negative* (restraining) torque later [@sprigings2000].
-3. **Parametric transfer needs developed centrifugal loading.** The
-   passive outward energy flow at release, and the inward-pull gain,
-   scale with the centrifugal field established by proximal rotation —
-   weak early, strong late [@white2006; @miura2001].
-4. **Interaction torques do the late work for free.** Motion-dependent
-   torques accelerate the distal segment and decelerate the proximal one
-   automatically once release begins; the golfer's job is to *time* this
-   cascade, not to muscle it [@putnam1993; @herring1992].
+2. **Actuator timing and limits.** In Sprigings and Neal's declared
+   torque-generator model, the optimum placed active wrist torque late,
+   but its timing depended strongly on the assumed torque-profile shape
+   [@sprigings2000]. Sprigings and MacKenzie separately found a small
+   benefit from a 50 ms actively resisted delay and a much larger penalty
+   when post-release wrist torque was removed [@sprigings2002]. These
+   simulations do not identify a muscle-level strategy.
+3. **Geometry-mediated transfer.** White's undriven model demonstrates
+   energy redistribution as the club unfolds, while Miura's translating-
+   hub model predicts an inward-pull gain under its prescribed geometry
+   [@white2006; @miura2001]. Whether either mechanism dominates a measured
+   human swing requires state-resolved force and power data.
+4. **Interaction dynamics can redistribute acceleration and power.**
+   Motion-dependent terms can accelerate a distal segment while opposing
+   a proximal segment, but they are consequences of the evolving state
+   and prior actuator work—not free energy [@putnam1993; @herring1992].
+   Their contribution must be evaluated from a declared decomposition.
 
 Empirically, S2-like signatures separate skill groups (@sec-skill),
 while the within-expert null result on inter-peak lags [@neal2007]
