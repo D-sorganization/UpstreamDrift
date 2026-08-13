@@ -21,6 +21,14 @@ its purpose, hypothesis, observables, workflow, interpretation tips, falsifier,
 and limitations. Run manifests also record the catalog version, model,
 experiment, parameters, units, and `exploratory_model_output` evidence status.
 
+The publication bundle also exposes the qualified
+`rotating_base_torso_velocity` scripted preset. Its seven-coordinate constrained
+model and registered grid are currently article-side reproducible analyses, not
+yet a workbench physics engine. A future GUI adapter must consume the same
+machine-readable evidence and preserve matching-rule, validity, and claim-tier
+labels; it must not substitute the existing fixed-hub proximal coordinate and
+call it torso velocity.
+
 ## Running the Desktop Interface
 
 From a sibling checkout of `Tools`:

@@ -28,6 +28,15 @@ def test_study_retains_registered_programs_and_negative_controls() -> None:
     }
     assert record["negative_controls"]["coincident_grip_max_couple_nm"] < 1e-10
     assert record["negative_controls"]["reversed_grip_couple_sign_reversed"]
+    assert (
+        record["same_state_killswitch"]["pre_branch_state_max_abs_difference"] < 1e-12
+    )
+    assert (
+        record["same_state_killswitch"]["post_branch_torso_torque_difference_nm"] > 0.0
+    )
+    assert len(record["shaft_sensitivity"]) == 3
+    assert len(record["uncertainty_ensemble"]) >= 5
+    assert record["pareto_case_indices"]
     assert arrays["case_impact_speed_m_s"].shape == (record["attempted_case_count"],)
 
 

@@ -159,8 +159,14 @@ abstract: |
   separate 60-program trajectory grid is more adversarial: among 26 valid
   impacts, release-state proximal velocity correlates negatively with impact
   speed and positively with negative grip work. The combined result rejects
-  proximal speed as a standalone release rule and motivates a rotating-base,
-  two-hand falsification tier.
+  proximal speed as a standalone release rule. The resulting rotating-base,
+  two-hand tier uses finite torso inertia, two closed arm--grip constraints,
+  separated reactions, and a compliant distal club. Its 18-program matched-
+  state grid finds that higher initial torso rate can accompany greater delivery
+  speed but does not uniformly reduce braking work; exact torso, arm, and wrist
+  killswitches are nonmonotonic. This remains a planar mechanism result. A frozen
+  participant-held-out bilateral-wrench protocol defines the human falsifier,
+  but no governed human outcome is available.
   References, analysis code,
   machine-readable results, and provenance are available with the document for
   independent inspection and reuse.

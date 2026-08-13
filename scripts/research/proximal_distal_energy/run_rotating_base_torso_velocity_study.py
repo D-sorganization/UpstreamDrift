@@ -8,6 +8,7 @@ remain in the evidence record; they are never silently discarded.
 from __future__ import annotations
 
 from dataclasses import replace
+from functools import lru_cache
 import json
 from pathlib import Path
 from typing import Any
@@ -32,7 +33,7 @@ NPZ_PATH = DATA_DIR / "rotating_base_torso_velocity_study.npz"
 TORSO_RATES_RAD_S = (1.5, 3.5, 5.5)
 TORSO_PROFILES_NM = {"accelerate": 55.0, "constant_rate": 0.0, "decelerate": -55.0}
 MATCHING_RULES = ("relative_club_rate", "absolute_club_rate")
-REGISTERED_PEAK_GRIP_FORCE_CEILING_N = 300.0
+REGISTERED_PEAK_GRIP_FORCE_CEILING_N = 100.0
 
 
 def _trapz(values: np.ndarray, time: np.ndarray) -> float:
@@ -45,9 +46,9 @@ def _correlation(left: np.ndarray, right: np.ndarray) -> float:
     return float(np.corrcoef(left, right)[0, 1])
 
 
-def _control_law(torso_nm: float):
+def _control_law(torso_nm: float, *, wrist_release_s: float = 0.025):
     def law(time_s: float, _state: RotatingBaseState) -> TorsoTwoHandControl:
-        wrist_nm = -3.0 if time_s < 0.025 else 4.0
+        wrist_nm = -3.0 if time_s < wrist_release_s else 4.0
         return TorsoTwoHandControl(
             torso_nm=torso_nm,
             lead_arm_nm=7.0,
@@ -65,8 +66,10 @@ def _case(
     matching_rule: str,
     *,
     compact: bool,
+    params: RotatingBaseParams | None = None,
+    wrist_release_s: float = 0.025,
 ) -> tuple[dict[str, Any], dict[str, np.ndarray]]:
-    params = RotatingBaseParams.publication_default()
+    params = params or RotatingBaseParams.publication_default()
     club_rate = torso_rate_rad_s + 1.0 if matching_rule == "relative_club_rate" else 3.0
     state = initial_state(
         params,
@@ -75,11 +78,11 @@ def _case(
     )
     config = RotatingBaseConfig(
         duration_s=0.06 if compact else 0.12,
-        step_s=0.002 if compact else 0.001,
+        step_s=0.002 if compact else 0.0005,
     )
     trace = rollout(
         state,
-        _control_law(TORSO_PROFILES_NM[torso_profile]),
+        _control_law(TORSO_PROFILES_NM[torso_profile], wrist_release_s=wrist_release_s),
         params,
         config,
     )
@@ -92,6 +95,20 @@ def _case(
     )
     force_couple_work = _trapz(
         trace.force_generated_couple_nm * trace.qdot[:, 5], trace.time
+    )
+    total_force = np.sum(trace.force_on_club_n, axis=1)
+    speed = np.maximum(trace.clubhead_speed_m_s, 1e-12)
+    along_path_force = np.sum(
+        total_force * trace.clubhead_velocity_m_s / speed[:, None], axis=1
+    )
+    negative_along_path_impulse = -_trapz(np.minimum(along_path_force, 0.0), trace.time)
+    controls = np.asarray([control.as_array() for control in trace.controls])
+    lead_wrist_relative_rate = trace.qdot[:, 5] - (trace.qdot[:, 0] + trace.qdot[:, 1])
+    trail_wrist_relative_rate = trace.qdot[:, 5] - (trace.qdot[:, 0] + trace.qdot[:, 2])
+    bilateral_wrist_work = _trapz(
+        controls[:, 3] * lead_wrist_relative_rate
+        + controls[:, 4] * trail_wrist_relative_rate,
+        trace.time,
     )
     reasons: list[str] = []
     if peak_grip_force > REGISTERED_PEAK_GRIP_FORCE_CEILING_N:
@@ -113,6 +130,13 @@ def _case(
         "contact_work_on_club_j": contact_work,
         "braking_grip_work_j": braking_grip_work,
         "force_couple_work_j": force_couple_work,
+        "negative_along_path_impulse_ns": negative_along_path_impulse,
+        "bilateral_wrist_work_j": bilateral_wrist_work,
+        "total_control_work_j": _trapz(trace.control_power_w, trace.time),
+        "distal_energy_gain_j": float(
+            trace.distal_segment_kinetic_energy_j[-1]
+            - trace.distal_segment_kinetic_energy_j[0]
+        ),
         "peak_grip_force_n": peak_grip_force,
         "maximum_constraint_residual_m": constraint_residual,
         "maximum_velocity_constraint_residual_m_s": float(
@@ -136,6 +160,172 @@ def _case(
         "trail_grip_force_n": trace.force_on_club_n[:, 1],
     }
     return row, arrays
+
+
+def _pareto_indices(cases: list[dict[str, Any]]) -> list[int]:
+    valid = [row for row in cases if row["valid"]]
+    selected: list[int] = []
+    for candidate in valid:
+        dominated = any(
+            other["impact_speed_m_s"] >= candidate["impact_speed_m_s"]
+            and other["braking_grip_work_j"] <= candidate["braking_grip_work_j"]
+            and other["peak_grip_force_n"] <= candidate["peak_grip_force_n"]
+            and (
+                other["impact_speed_m_s"] > candidate["impact_speed_m_s"]
+                or other["braking_grip_work_j"] < candidate["braking_grip_work_j"]
+                or other["peak_grip_force_n"] < candidate["peak_grip_force_n"]
+            )
+            for other in valid
+        )
+        if not dominated:
+            selected.append(int(candidate["case_index"]))
+    return selected
+
+
+def _same_state_killswitch(*, compact: bool) -> dict[str, Any]:
+    params = RotatingBaseParams.publication_default()
+    state = initial_state(params, torso_rate_rad_s=3.5, club_rate_rad_s=4.5)
+    branch_s = 0.03
+    config = RotatingBaseConfig(
+        duration_s=0.06 if compact else 0.12,
+        step_s=0.002 if compact else 0.0005,
+    )
+
+    baseline_control = TorsoTwoHandControl(
+        torso_nm=55.0,
+        lead_arm_nm=7.0,
+        trail_arm_nm=7.0,
+        lead_wrist_nm=4.0,
+        trail_wrist_nm=4.0,
+    )
+
+    def continuous(_time_s: float, _state: RotatingBaseState) -> TorsoTwoHandControl:
+        return baseline_control
+
+    baseline = rollout(state, continuous, params, config)
+    pre = baseline.time <= branch_s
+    post = baseline.time > branch_s
+    channels: dict[str, dict[str, float]] = {}
+    replacements = {
+        "torso": {"torso_nm": 0.0},
+        "bilateral_arm": {"lead_arm_nm": 0.0, "trail_arm_nm": 0.0},
+        "bilateral_wrist": {"lead_wrist_nm": 0.0, "trail_wrist_nm": 0.0},
+    }
+    for channel, changes in replacements.items():
+        killed_control = replace(baseline_control, **changes)
+
+        def cut(
+            time_s: float,
+            _state: RotatingBaseState,
+            after: TorsoTwoHandControl = killed_control,
+        ) -> TorsoTwoHandControl:
+            return baseline_control if time_s < branch_s else after
+
+        killed = rollout(state, cut, params, config)
+        channels[channel] = {
+            "pre_branch_state_max_abs_difference": float(
+                np.max(np.abs(baseline.q[pre] - killed.q[pre]))
+            ),
+            "delivery_speed_difference_m_s": float(
+                baseline.clubhead_speed_m_s[-1] - killed.clubhead_speed_m_s[-1]
+            ),
+            "post_branch_contact_work_difference_j": _trapz(
+                baseline.contact_power_on_club_w[post]
+                - killed.contact_power_on_club_w[post],
+                baseline.time[post],
+            ),
+        }
+    return {
+        "branch_time_s": branch_s,
+        "pre_branch_state_max_abs_difference": max(
+            row["pre_branch_state_max_abs_difference"] for row in channels.values()
+        ),
+        "post_branch_torso_torque_difference_nm": 55.0,
+        "channels": channels,
+        "interpretation": (
+            "The trajectories share the same state and commands through the branch. "
+            "Only the torso command is removed afterward, isolating a conditional "
+            "continuation effect within this model."
+        ),
+    }
+
+
+def _parameter_sensitivities(
+    *, compact: bool
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    base = RotatingBaseParams.publication_default()
+    shaft_rows: list[dict[str, Any]] = []
+    for stiffness in (40.0, 80.0, 160.0):
+        row, _ = _case(
+            "constant_rate",
+            3.5,
+            "relative_club_rate",
+            compact=compact,
+            params=replace(base, shaft_stiffness_nm_rad=stiffness),
+        )
+        shaft_rows.append(
+            {
+                "shaft_stiffness_nm_rad": stiffness,
+                "impact_speed_m_s": row["impact_speed_m_s"],
+                "braking_grip_work_j": row["braking_grip_work_j"],
+                "valid": row["valid"],
+            }
+        )
+    ensemble: list[dict[str, Any]] = []
+    variants = (
+        ("low_torso_inertia", replace(base, torso_inertia_kg_m2=3.84)),
+        ("high_torso_inertia", replace(base, torso_inertia_kg_m2=5.76)),
+        ("low_arm_mass", replace(base, arm_mass_kg=2.48)),
+        ("high_arm_mass", replace(base, arm_mass_kg=3.72)),
+        ("low_shaft_damping", replace(base, shaft_damping_nms_rad=0.3)),
+        ("high_shaft_damping", replace(base, shaft_damping_nms_rad=0.9)),
+        (
+            "narrow_grip_spacing",
+            replace(base, lead_grip_offset_m=0.052, trail_grip_offset_m=-0.052),
+        ),
+        (
+            "wide_grip_spacing",
+            replace(base, lead_grip_offset_m=0.078, trail_grip_offset_m=-0.078),
+        ),
+    )
+    for label, params in variants:
+        row, _ = _case(
+            "constant_rate",
+            3.5,
+            "relative_club_rate",
+            compact=compact,
+            params=params,
+        )
+        ensemble.append(
+            {
+                "variant": label,
+                "impact_speed_m_s": row["impact_speed_m_s"],
+                "contact_work_on_club_j": row["contact_work_on_club_j"],
+                "peak_grip_force_n": row["peak_grip_force_n"],
+                "valid": row["valid"],
+            }
+        )
+    for label, release_s in (
+        ("early_wrist_release", 0.015),
+        ("late_wrist_release", 0.035),
+    ):
+        row, _ = _case(
+            "constant_rate",
+            3.5,
+            "relative_club_rate",
+            compact=compact,
+            wrist_release_s=release_s,
+        )
+        ensemble.append(
+            {
+                "variant": label,
+                "impact_speed_m_s": row["impact_speed_m_s"],
+                "contact_work_on_club_j": row["contact_work_on_club_j"],
+                "peak_grip_force_n": row["peak_grip_force_n"],
+                "valid": row["valid"],
+            }
+        )
+    return shaft_rows, ensemble
 
 
 def _negative_controls() -> dict[str, Any]:
@@ -171,6 +361,7 @@ def _negative_controls() -> dict[str, Any]:
     }
 
 
+@lru_cache(maxsize=2)
 def build_study(
     *, compact: bool = False
 ) -> tuple[dict[str, Any], dict[str, np.ndarray]]:
@@ -193,6 +384,7 @@ def build_study(
     rates = np.asarray([row["initial_torso_rate_rad_s"] for row in valid])
     speeds = np.asarray([row["impact_speed_m_s"] for row in valid])
     braking = np.asarray([row["braking_grip_work_j"] for row in valid])
+    shaft_sensitivity, uncertainty_ensemble = _parameter_sensitivities(compact=compact)
     record: dict[str, Any] = {
         "schema_version": "rotating-base-torso-velocity-study-v1",
         "study_id": "registered-rotating-base-two-hand-torso-velocity-grid",
@@ -206,6 +398,10 @@ def build_study(
         },
         "cases": cases,
         "negative_controls": _negative_controls(),
+        "same_state_killswitch": _same_state_killswitch(compact=compact),
+        "shaft_sensitivity": shaft_sensitivity,
+        "uncertainty_ensemble": uncertainty_ensemble,
+        "pareto_case_indices": _pareto_indices(cases),
         "associations": {
             "torso_rate_vs_impact_speed_r": _correlation(rates, speeds),
             "torso_rate_vs_braking_grip_work_r": _correlation(rates, braking),

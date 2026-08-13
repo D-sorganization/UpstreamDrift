@@ -215,6 +215,7 @@ class RotatingBaseTrace:
     contact_power_identity_residual_w: FloatArray
     clubhead_velocity_m_s: FloatArray
     clubhead_speed_m_s: FloatArray
+    distal_segment_kinetic_energy_j: FloatArray
     mechanical_energy_j: FloatArray
     control_power_w: FloatArray
     dissipation_power_w: FloatArray
@@ -374,6 +375,20 @@ def mechanical_energy(state: RotatingBaseState, params: RotatingBaseParams) -> f
     return float(
         0.5 * state.qdot @ mass_matrix(state.q, params) @ state.qdot
         + potential_energy(state.q, params)
+    )
+
+
+def distal_segment_kinetic_energy(
+    state: RotatingBaseState, params: RotatingBaseParams
+) -> float:
+    """Return distal-club translational plus rotational kinetic energy."""
+    distal = _body_jacobians(state.q, params)[3]
+    _mass, linear_jacobian, angular_jacobian = distal
+    linear_velocity = linear_jacobian @ state.qdot
+    angular_velocity = float(angular_jacobian @ state.qdot)
+    return float(
+        0.5 * params.distal_club_mass_kg * linear_velocity @ linear_velocity
+        + 0.5 * params.distal_club_inertia_kg_m2 * angular_velocity**2
     )
 
 
@@ -625,6 +640,7 @@ def rollout(
     identity_residual = np.empty(samples)
     clubhead_velocity = np.empty((samples, 2))
     energy = np.empty(samples)
+    distal_energy = np.empty(samples)
     control_power = np.empty(samples)
     dissipation_power = np.empty(samples)
     position_residual = np.empty(samples)
@@ -649,6 +665,7 @@ def rollout(
         identity_residual[index] = contact_power[index] - wrench_power
         clubhead_velocity[index] = clubhead_jacobian @ state.qdot
         energy[index] = mechanical_energy(state, params)
+        distal_energy[index] = distal_segment_kinetic_energy(state, params)
         control_power[index] = control_generalized_force(control) @ state.qdot
         dissipation_power[index] = -(
             params.torso_damping_nms_rad * state.qdot[0] ** 2
@@ -676,6 +693,7 @@ def rollout(
         contact_power_identity_residual_w=identity_residual,
         clubhead_velocity_m_s=clubhead_velocity,
         clubhead_speed_m_s=np.linalg.norm(clubhead_velocity, axis=1),
+        distal_segment_kinetic_energy_j=distal_energy,
         mechanical_energy_j=energy,
         control_power_w=control_power,
         dissipation_power_w=dissipation_power,
@@ -695,6 +713,7 @@ __all__ = [
     "constraint_jacobian",
     "constraint_vector",
     "control_generalized_force",
+    "distal_segment_kinetic_energy",
     "initial_state",
     "kinematics",
     "mass_matrix",

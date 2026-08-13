@@ -115,6 +115,10 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
                 "command": "python -m scripts.research.proximal_distal_energy.run_shoulder_velocity_strategy_study",
                 "tier": "planar_fixed_hub_control_program_search",
             },
+            "rotating_base_torso_velocity": {
+                "command": "python -m scripts.research.proximal_distal_energy.run_rotating_base_torso_velocity_study",
+                "tier": "planar_rotating_base_two_hand_compliant_club",
+            },
         },
         "claims": {
             "interaction_dynamics_planar": "supported_at_declared_model_tier",
@@ -149,6 +153,10 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
             "shoulder_velocity_control_strategy": (
                 "conditional_on_phase_geometry_wrist_state_and_objective"
             ),
+            "rotating_base_torso_velocity_transfer": (
+                "supported_conditionally_at_declared_reduced_model_tier"
+            ),
+            "human_torso_velocity_strategy": "untested",
         },
         "known_open_gates": [
             "subject-scaled articulated spatial contact with calibrated grip and distributed shaft",
