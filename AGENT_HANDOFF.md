@@ -6,8 +6,8 @@ Update this file with every PR and every push to main.
 ## Where the Repo Is Heading
 
 - **#8557 Comprehensive Scientific Claim Audit and Open Golf Modeling
-  Program** — PRs #8558–#8568 are on `main`; branch
-  `research/8557-ground-reaction-audit` continues the fail-closed audit
+  Program** — PRs #8558–#8569 are on `main`; branch
+  `research/8557-shoulder-velocity-audit` continues the fail-closed audit
   authority. It inventories all 895 narrative candidates across the 32-source
   Quarto paper and reconciles all 18 public release-claim keys without calling
   the review complete. The registry records that the Biomechanics and Nonlinear Control
@@ -65,20 +65,29 @@ scripts.research.proximal_distal_energy.claim_audit inventory`, then
   attribution, and labels future-residual preview as an offline oracle rather
   than an implementable or physiological controller. PR #8568 merged as exact
   remote-main commit `4ec060c8b51dc2d03fc16ffeb9518ef39bc171f5`. The tenth
-  local slice fully adjudicates the ground-reaction chapter, corrects three
+  merged slice fully adjudicates the ground-reaction chapter, corrects three
   bibliographic author lists, distinguishes algebraic velocity-term killing
   from a physical ZVCF under rheonomic constraints, defines fixed-prediction
   R-squared beside bias and absolute error, and makes whole-system
-  center-of-mass force closure a required Newton--Euler identity. Current local
-  authority: 895 candidates, 214 reviewed, 80 registered atomic claims, and 681
-  unadjudicated candidates. Registry validation must pass; render,
-  inspect, release-validate, and protected-merge this slice before treating the
-  new counts as remote-main evidence.
+  center-of-mass force closure a required Newton--Euler identity. PR #8569
+  merged as exact remote-main commit
+  `f3d80141eb9a4cc84b092dd2d49ac3bcbf996427`. PR #8570 at exact head
+  `68f336340` is the eleventh slice and fully adjudicates the proximal-velocity
+  chapter. It corrects the displayed relative
+  versus absolute coordinate formulas and the actual reference-centered sweep,
+  adds local and finite-range sensitivity adequacy, complete dependency hashes,
+  byte-deterministic evidence, grid-selection and Pareto-coverage diagnostics,
+  fixed-program timestep refinement, a corrected Choi--Park bibliography
+  record, and net-interface-versus-anatomical-hand boundaries. Current local
+  authority: 895 candidates, 244 reviewed, 92 registered atomic claims, and 651
+  unadjudicated candidates. Local registry, render, visual, release, and focused
+  test gates pass; protected-merge PR #8570 before treating the new counts as
+  remote-main evidence.
   The required Tools side task is not complete. Its dispersion slice received
   final independent approval at `125d47d4`. Its live integration has GO-level
-  ellipsoid-mesh evidence at `45800fee` and localized React execution authority
-  at `84498e2d`; those slices are being integrated linearly above the published
-  #4415 head before new draft PRs are created.
+  ellipsoid-mesh evidence at `45800fee`; draft PR #4416 is published at exact
+  head `0b38346c` above #4415, and localized React execution authority at
+  `84498e2d` is being integrated above #4416.
   Completion still requires protected merge, immutable pinning, deterministic
   replay, sensitivity adequacy, and PyQt6/React parity.
 

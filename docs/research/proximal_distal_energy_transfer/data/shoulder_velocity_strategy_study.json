@@ -1,5 +1,5 @@
 {
-  "schema_version": "shoulder-velocity-strategy-evidence-v1",
+  "schema_version": "shoulder-velocity-strategy-evidence-v2",
   "study_id": "fixed-hub-proximal-drive-and-wrist-release-grid",
   "model_tier": "exact_planar_double_pendulum_fixed_hub",
   "program_count": 60,
@@ -1277,17 +1277,33 @@
   "pareto_program_indices": [
     0, 1, 3, 4, 5, 6, 10, 15, 16, 20, 21, 25, 30, 31, 35, 36, 40, 45, 50, 51, 55
   ],
+  "pareto_diagnostics": {
+    "valid_program_count": 26,
+    "nondominated_program_count": 21,
+    "nondominated_fraction": 0.8076923076923077,
+    "screen_is_weakly_discriminating": true
+  },
   "associations_valid_impact_only": {
     "release_velocity_vs_impact_speed_pearson_r": -0.6924811031357555,
     "release_velocity_vs_braking_work_pearson_r": 0.9432229204249265,
+    "release_velocity_vs_peak_force_pearson_r": -0.6085210776850175,
     "standardized_speed_regression": {
       "proximal_velocity_at_release_rad_s": -0.514014209797318,
       "wrist_release_s": -0.13419143376775777,
       "shoulder_cut_s": 0.3087283949538456,
       "shoulder_torque_after_nm": 0.5088197868874491
+    },
+    "standardized_speed_regression_diagnostics": {
+      "observation_count": 26,
+      "parameter_count_including_intercept": 5,
+      "matrix_rank": 5,
+      "condition_number": 3.5148241505479976,
+      "selection_rule": "valid_impact_only",
+      "uncertainty_intervals_reported": false,
+      "causal_estimand": false
     }
   },
-  "analysis_boundary": "Grid associations are descriptive model associations, not causal human effects or a continuous optimal-control solution.",
+  "analysis_boundary": "Grid associations are descriptive model associations, not causal human effects or a continuous optimal-control solution; conditioning on the valid-impact selection rule can bias the associations.",
   "claim_status": {
     "proximal_link_velocity": "tested_model_coordinate",
     "anatomical_shoulder_velocity": "not_tested",
@@ -1298,14 +1314,35 @@
     "maximize": ["impact_speed_m_s"],
     "minimize": ["braking_grip_work_j", "peak_grip_force_n"]
   },
+  "interface_force_boundary": "peak_grip_force_n is the net modeled planar wrist-interface force on the club, not either hand's anatomical grip force.",
+  "fixed_program_timestep_sensitivity": {
+    "program_index": 10,
+    "reference_dt_s": 0.001,
+    "refined_dt_s": 0.0005,
+    "same_valid_impact_classification": true,
+    "absolute_impact_speed_difference_m_s": 0.00035121319944408924,
+    "absolute_total_grip_work_difference_j": 0.0022989035152534143,
+    "absolute_peak_interface_force_difference_n": 9.20438196772011e-8,
+    "selection_was_not_reoptimized": true
+  },
   "falsification_tests": [
     "A speed association that vanishes after timing and drive controls weakens the high-velocity interpretation.",
     "A candidate dominated on speed, braking work, and peak force is not an optimal strategy.",
     "A rotating-base two-hand model that reverses the result rejects transfer to torso strategy."
   ],
   "source_sha256": {
-    "scripts/research/proximal_distal_energy/run_shoulder_velocity_strategy_study.py": "972b2026b9492651904bea7e5ebd3534efa43f0dbc295c9029efa583b63e1d4e",
-    "scripts/research/proximal_distal_energy/shoulder_velocity_strategy_search.py": "4eef8fc6fd90bf68fd95efb713163b0d34e1791219c21ca58bf3ec463ae4d7b9"
+    "scripts/research/proximal_distal_energy/double_pendulum_attribution.py": "615b84e6579aae7dd8fadd25be221cf6b989444d860ff5fdbf35ca455547655b",
+    "scripts/research/proximal_distal_energy/interaction_forces.py": "813088e7d6cb1c205d514fc5c4f63465567ded5c6616a7a343847660f9d7bb77",
+    "scripts/research/proximal_distal_energy/run_experiments.py": "650cc17c3d4877dcd8f89841c9dc31617c2ee6c09df7b73a4adae6f93403a742",
+    "scripts/research/proximal_distal_energy/run_shoulder_velocity_strategy_study.py": "7b78660606fd7fc559cd4083f46f8b0531839efc214f155494e2850b6bd7159f",
+    "scripts/research/proximal_distal_energy/shoulder_velocity_strategy_search.py": "c33e6926b8ee636f41b263b8c0d5ef2796ee7b36db490c63a42dd7d653541a34",
+    "scripts/research/proximal_distal_energy/swing_model.py": "47331e991cc5a0fac195044e664ab24f90e03e6a4d46962194ac69881b443d63",
+    "src/engines/pendulum_models/python/double_pendulum_model/physics/double_pendulum.py": "3c516a8d2812ac2d1a0390de802ccd4d6df622cba90f02a45aebfb0b2b053935",
+    "src/shared/python/biomechanics/drift_control_transfer.py": "088bc492901adfa080366842c7a6f1e59a4e281bd60b40630075364bea771f83",
+    "src/shared/python/simulation_backends/factory.py": "49f90d5525a84b3bdbd0989264e25b77c7ccc235c6d91a5bf7dbcd1f18c31711",
+    "src/shared/python/simulation_backends/model_params.py": "78aeb9c060f4b455b34b5dff5fcfe49847e7a2a3e545ec71060528a55e16be10",
+    "src/shared/python/simulation_backends/ode_backend.py": "08a548780f6b4ea9d769146200b80c434345d35a3b53c10d726a3d60f3eaf66c",
+    "src/shared/python/simulation_backends/protocol.py": "d4330b8cce3d25f754ea134dcf07c3bf8e72ef18a745d816b08c1709b9d44f1f"
   },
   "array_artifact": "shoulder_velocity_strategy_study.npz"
 }

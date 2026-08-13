@@ -61,6 +61,18 @@ def test_small_trajectory_search_reports_closed_transfer_metrics() -> None:
         assert outcome.peak_grip_force_n >= 0.0
 
 
+def test_fixed_program_supports_timestep_refinement() -> None:
+    program = ShoulderVelocityProgram(0.12, 60.0, 60.0, 0.10, 10.0, 15.0)
+
+    reference = evaluate_programs((program,), GolfModelParams.default())[0]
+    refined = evaluate_programs((program,), GolfModelParams.default(), dt_s=0.0005)[0]
+
+    assert reference.valid_impact is refined.valid_impact is True
+    assert refined.impact_speed_m_s == pytest.approx(
+        reference.impact_speed_m_s, abs=0.01
+    )
+
+
 def test_pareto_programs_balance_speed_braking_and_peak_force() -> None:
     values = np.array(
         [

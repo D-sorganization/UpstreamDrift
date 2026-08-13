@@ -2,14 +2,14 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "d2631846cb51b402366ee264e8d2c7eeaea6f41f459ed4a22137647d0c782b71",
+    "source_digest": "6ae1ff2f2b7d72835e00f5b397b02e20eb1b9c5a40995d23237ff76a9dfc8138",
     "baseline_commit": "13ea6a69585a42dc1db4b3959440ed95787c9779"
   },
   "audit_scope": {
     "completion_status": "in_progress",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "Stable claim identity, cross-platform source digests, complete post-equation narrative parsing, and eight high-risk evidence slices covering framing, ground mechanics, kinetic-energy sequencing, torso-pelvis associations, method sensitivity, timing, delayed release, wrist torque, passive transfer, hub-path models, foundational linked-segment mechanics, energy accounting, kinematic proxies, planarity, double-pendulum interaction-force identities, hand-path attribution, two-hand redundancy, oracle-preview boundaries, counterfactual contracts, optimal-control lineages, spatial forward optimization, and causal limitations. Chapters 2, 3, and 4 are fully adjudicated. The complete 895-candidate paper audit remains in progress; 188 candidates are reviewed and 707 remain unadjudicated."
+    "current_scope": "Stable claim identity, cross-platform source digests, complete post-equation narrative parsing, and eleven high-risk evidence slices covering framing, ground mechanics, kinetic-energy sequencing, torso-pelvis associations, method sensitivity, timing, delayed release, wrist torque, passive transfer, hub-path models, foundational linked-segment mechanics, energy accounting, kinematic proxies, planarity, double-pendulum interaction-force identities, hand-path attribution, two-hand redundancy, oracle-preview boundaries, counterfactual contracts, optimal-control lineages, spatial forward optimization, ground-reaction attribution, proximal-velocity coordinate conventions, finite-grid association adequacy, and causal limitations. Chapters 2 through 5 and the proximal-velocity chapter are fully adjudicated. The complete 895-candidate paper audit remains in progress; 244 candidates are reviewed and 651 remain unadjudicated."
   },
   "dependencies": [
     {
@@ -1889,6 +1889,246 @@
       "disposition": "material_claims_mapped",
       "claim_ids": ["PD-CLAIM-080"],
       "rationale": "Defines the machine-readable evidence and chapter nonclaim boundary in PD-CLAIM-080.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-159f08a2959d68a7",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-081"],
+      "rationale": "Separates the motivating hypothesis from anatomical and subjective observables in PD-CLAIM-081.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-06f453e1123b9ee9",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-081"],
+      "rationale": "Bounds the three human evidence sources and bilateral-identifiability inference in PD-CLAIM-081.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-67f4c998db29920e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-082"],
+      "rationale": "Introduces the sign-explicit equations registered in PD-CLAIM-082.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-601bb301bb4a3677",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-082"],
+      "rationale": "Defines the pointwise drift, interface-force, power, and closure boundaries in PD-CLAIM-082.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-3092ca6e7cbf1baf",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-083"],
+      "rationale": "Introduces the nonunique velocity-intervention problem in PD-CLAIM-083.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-2e9bf16c5b86c696",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-083"],
+      "rationale": "States the corrected relative and absolute coordinate contracts in PD-CLAIM-083.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-9257643cde05533c",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-083"],
+      "rationale": "Defines the reference-centered sweep, model-time phase labels, and unequal-energy boundary in PD-CLAIM-083.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-5fb8f4750b374efb",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-084"],
+      "rationale": "Visualizes the phase- and matching-rule-dependent pointwise result in PD-CLAIM-084.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-c2bbd47e6a658405",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-084"],
+      "rationale": "Reports range slopes, fit adequacy, local slopes, and endpoint signs in PD-CLAIM-084.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-4a250638a8dbc0a6",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-084"],
+      "rationale": "Visualizes negative interface-power regions registered in PD-CLAIM-084.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-0cc2622a21e328bb",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-084"],
+      "rationale": "Reports braking minima and the conditional interpretation in PD-CLAIM-084.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-4a3f2bec10561f17",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-084"],
+      "rationale": "Visualizes finite-range signed slopes for PD-CLAIM-084.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-fb4a20c247769775",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-085"],
+      "rationale": "Defines the complete 60-program finite control grid and 26 valid impacts in PD-CLAIM-085.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-ee384d3411f8ab95",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-086"],
+      "rationale": "Visualizes selected-grid associations and their timing confound for PD-CLAIM-086.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-d3836fd69ef51b0f",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-086"],
+      "rationale": "Reports correlation, regression, rank, conditioning, and selection limits in PD-CLAIM-086.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-54f75367bf9c0ac8",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-085"],
+      "rationale": "Visualizes every valid and invalid timing-grid outcome for PD-CLAIM-085.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-b71f2d261aac5e39",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-087"],
+      "rationale": "Reports the best sampled program, interface metrics, closure, and fixed-program timestep refinement in PD-CLAIM-087.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-cd6bf15bc648e95b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-088"],
+      "rationale": "Visualizes the sampled multiobjective frontier in PD-CLAIM-088.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-80aa858c9b257ffd",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-088"],
+      "rationale": "Reports Pareto coverage, force-speed association, and weak discrimination in PD-CLAIM-088.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-3304ba950f691409",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-089"],
+      "rationale": "Introduces the bounded design hypotheses in PD-CLAIM-089.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-dadc015679f340bd",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-089"],
+      "rationale": "Maps the five nonprescriptive trajectory-design hypotheses to PD-CLAIM-089.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-3ac99ec4b6d9a055",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-089"],
+      "rationale": "Separates proximal deceleration from proved energy transfer in PD-CLAIM-089.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-9ff680105a9d278a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-090"],
+      "rationale": "States the double-pendulum bilateral-allocation limitation in PD-CLAIM-090.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-3f4317b565b0613f",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-090"],
+      "rationale": "Enumerates the variables required by the next two-hand tier in PD-CLAIM-090.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-d4b441a5d98c8250",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-090"],
+      "rationale": "Defines the sampled nondominance rule and rotating-base evidence gap in PD-CLAIM-090.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-9da1bcd18655de49",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-091"],
+      "rationale": "Introduces the prospective rejection conditions in PD-CLAIM-091.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-fd71d1faa57eb3dc",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-091"],
+      "rationale": "Enumerates state, robustness, allocation, and human falsifiers in PD-CLAIM-091.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-3f386753790a7150",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-091"],
+      "rationale": "Defines the instrumentation, identifiability, estimand, and preregistration requirements in PD-CLAIM-091.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-8070f5ed959dfb2e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-092"],
+      "rationale": "Defines the deterministic evidence and provenance boundary in PD-CLAIM-092.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-72798b883055332f",
+      "disposition": "material_claims_mapped",
+      "claim_ids": ["PD-CLAIM-092"],
+      "rationale": "States the supported model conclusion and explicit human nonclaims in PD-CLAIM-092.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
     }
@@ -4762,6 +5002,474 @@
       ],
       "falsifier": "The evidence package contains an unregistered human outcome, a stated nonidentifiable quantity is presented as identified, or any canonical benchmark gate fails.",
       "adjudication": "Every chapter candidate is mapped to a bounded claim, and all human interpretation remains explicitly prospective.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-081",
+      "candidate_ids": ["PD-CAND-159f08a2959d68a7", "PD-CAND-06f453e1123b9ee9"],
+      "statement": "The chapter tests a fixed-hub first-link angular rate, not anatomical shoulder or thorax velocity; Horan's 14-professional kinematic association, Bourgain's 92-study methods review, and Choi and Park's nine-professional divided-grip study motivate measurement boundaries but do not identify a causal club-transfer mechanism or bilateral hand allocation from a net wrench.",
+      "classification": "human_evidence_scope_and_coordinate_nonidentity",
+      "published_status": "supported_with_primary_source_and_nonclaim_boundaries",
+      "audit_status": "primary_records_sample_methods_and_inference_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:5",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:16"
+      ],
+      "evidence_artifacts": [
+        "https://doi.org/10.1080/14763141.2011.638390",
+        "https://doi.org/10.3390/sports10060091",
+        "https://doi.org/10.3390/s20133672",
+        "docs/research/proximal_distal_energy_transfer/references.bib"
+      ],
+      "model_domain": "Comparison of one reduced planar coordinate with published upper-body kinematics and divided-grip inverse dynamics.",
+      "uncertainty_boundary": "None of the three cited studies validates the present pointwise model or supplies causal intervention evidence.",
+      "competing_explanations": [
+        "coordinate-definition differences",
+        "participant and skill selection",
+        "shared drive without mechanical transfer",
+        "and nonunique bilateral allocation"
+      ],
+      "negative_controls": [
+        "anatomical-coordinate nonidentity",
+        "sample sizes",
+        "methods-review generalization warning",
+        "and net-wrench allocation warning"
+      ],
+      "falsifier": "The primary records do not support the stated samples or measurement methods, or the chapter treats the first-link rate as a measured anatomical variable.",
+      "adjudication": "The bibliography now carries the correct Choi and Park author names, issue, article number, and DOI, and all human evidence is bounded to association and measurement context.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-082",
+      "candidate_ids": ["PD-CAND-67f4c998db29920e", "PD-CAND-601bb301bb4a3677"],
+      "statement": "For the implemented fixed-hub model, M qdd + b = B u gives drift acceleration -M^-1 b and control acceleration M^-1 B u; the corresponding planar wrist-interface force and same-point force power close pointwise but do not represent passive human motion.",
+      "classification": "sign_explicit_pointwise_mechanics_identity",
+      "published_status": "supported_by_implementation_and_closure_tests",
+      "audit_status": "equation_sign_force_point_and_power_convention_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:31",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:44"
+      ],
+      "evidence_artifacts": [
+        "src/shared/python/simulation_backends/ode_backend.py",
+        "scripts/research/proximal_distal_energy/interaction_forces.py",
+        "scripts/research/proximal_distal_energy/shoulder_velocity_transfer.py",
+        "tests/research/test_shoulder_velocity_transfer.py"
+      ],
+      "model_domain": "Exact analytical planar double pendulum with a fixed pivot and one modeled wrist interface.",
+      "uncertainty_boundary": "The split is algebraic at an achieved state and contains no muscle, activation, tissue, or bilateral-hand state.",
+      "competing_explanations": [
+        "different sign convention",
+        "unmodeled base work",
+        "unmodeled compliance",
+        "and anatomical actuation"
+      ],
+      "negative_controls": [
+        "zero applied control",
+        "acceleration closure",
+        "force closure",
+        "same-point velocity projection"
+      ],
+      "falsifier": "Direct backend evaluation disagrees with the displayed signs, or acceleration, force, or power fails drift-plus-control closure.",
+      "adjudication": "The paper now mirrors the backend's bias-force sign rather than hiding it inside an ambiguous h term.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-083",
+      "candidate_ids": [
+        "PD-CAND-3092ca6e7cbf1baf",
+        "PD-CAND-2e9bf16c5b86c696",
+        "PD-CAND-9257643cde05533c"
+      ],
+      "statement": "Because q2 is the club angle relative to link 1, relative-rate matching holds qdot2 fixed and absolute-rate matching holds qdot1 + qdot2 fixed; each nine-state family is centered on the achieved qdot1 with plus or minus 75 percent of max(abs(reference rate), 4 rad/s), includes the reference state, and changes stored kinetic energy.",
+      "classification": "counterfactual_coordinate_and_sweep_contract",
+      "published_status": "supported_after_formula_and_range_correction",
+      "audit_status": "coordinate_definition_code_grid_and_reference_inclusion_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:54",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:58",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:67"
+      ],
+      "evidence_artifacts": [
+        "scripts/research/proximal_distal_energy/shoulder_velocity_transfer.py",
+        "scripts/research/proximal_distal_energy/run_shoulder_velocity_transfer_study.py",
+        "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_transfer_study.json",
+        "tests/research/test_shoulder_velocity_transfer.py",
+        "tests/research/test_shoulder_velocity_transfer_study.py"
+      ],
+      "model_domain": "Pointwise velocity sweeps at five samples of one fixed-hub reference trajectory.",
+      "uncertainty_boundary": "The phase labels are model-time fractions, the sweep is not equal-energy, and the finite range is not a physiological distribution.",
+      "competing_explanations": [
+        "absolute-versus-relative coordinate confusion",
+        "range selection",
+        "kinetic-energy change",
+        "and event-definition differences"
+      ],
+      "negative_controls": [
+        "both matching rules",
+        "reference state in every grid",
+        "machine-readable scale",
+        "coordinate regression tests"
+      ],
+      "falsifier": "Any relative-rate row changes qdot2, any absolute-rate row changes qdot1 + qdot2, the achieved state is absent, or prose and implementation disagree again.",
+      "adjudication": "The earlier displayed formulas and 20--180 percent description were contradicted by the implementation and have been replaced by the exact coordinate and range contract.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-084",
+      "candidate_ids": [
+        "PD-CAND-5fb8f4750b374efb",
+        "PD-CAND-c2bbd47e6a658405",
+        "PD-CAND-4a250638a8dbc0a6",
+        "PD-CAND-0cc2622a21e328bb",
+        "PD-CAND-4a3f2bec10561f17"
+      ],
+      "statement": "Across the corrected 90-state sweep, finite-range drift-interface-power slopes are phase and matching-rule dependent: pre-impact is strongly positive under both rules, delivery is positive under relative-rate and negative under absolute-rate matching, mid-downswing is negative under both, and low linear-fit R-squared values in two families show that a single range slope can be a poor local summary.",
+      "classification": "model_conditional_pointwise_sensitivity_result",
+      "published_status": "supported_with_range_and_nonlinearity_qualifications",
+      "audit_status": "canonical_replay_local_and_global_slopes_braking_and_figures_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:82",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:86",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:103",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:107",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:118"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_transfer_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_transfer_study.npz",
+        "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_transfer/figures/fig_shoulder_velocity_drift_power.pdf",
+        "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_transfer/figures/fig_shoulder_velocity_braking_map.pdf",
+        "tests/research/test_shoulder_velocity_transfer_study.py"
+      ],
+      "model_domain": "Corrected finite-range pointwise atlas in one fixed-hub planar parameter set.",
+      "uncertainty_boundary": "Slopes are range summaries, not causal effects, physiological derivatives, or forward speed gains.",
+      "competing_explanations": [
+        "range-dependent nonlinearity",
+        "changed stored energy",
+        "reference-state geometry",
+        "and omitted base or bilateral dynamics"
+      ],
+      "negative_controls": [
+        "relative and absolute matching",
+        "reference-centered slope",
+        "full-range fit R-squared",
+        "negative-power retention"
+      ],
+      "falsifier": "Canonical regeneration changes the registered signs or values, closure fails, or the result is presented as a trajectory or human effect.",
+      "adjudication": "The corrected range materially changes transition and early-state summaries; the paper now reports range slopes beside local slopes and fit adequacy.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-085",
+      "candidate_ids": ["PD-CAND-fb4a20c247769775", "PD-CAND-54f75367bf9c0ac8"],
+      "statement": "The trajectory experiment retains all 60 combinations of four proximal-drive cut times, three post-cut torques, and five wrist-release times; 26 first club-vertical crossings satisfy the declared arm-angle delivery criterion and 34 remain explicit invalid outcomes.",
+      "classification": "finite_grid_design_and_selection_record",
+      "published_status": "supported_by_complete_machine_inventory",
+      "audit_status": "grid_cardinality_controls_event_rule_and_invalid_retention_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:124",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:151"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.json",
+        "scripts/research/proximal_distal_energy/run_shoulder_velocity_strategy_study.py",
+        "scripts/research/proximal_distal_energy/shoulder_velocity_strategy_search.py",
+        "scripts/research/proximal_distal_energy/swing_model.py",
+        "tests/research/test_shoulder_velocity_strategy_study.py"
+      ],
+      "model_domain": "Piecewise-constant torque programs in one fixed-hub planar model over a 0.9 s integration window.",
+      "uncertainty_boundary": "The delivery criterion is a registered model selection rule, not measured ball impact, and the grid is not continuous optimization.",
+      "competing_explanations": [
+        "delivery-window selection",
+        "coarse timing grid",
+        "piecewise command artifacts",
+        "and fixed-hub dynamics"
+      ],
+      "negative_controls": [
+        "all invalid attempts retained",
+        "first crossing only",
+        "declared arm-angle threshold",
+        "complete program index"
+      ],
+      "falsifier": "Any attempted program is missing, counts disagree with the Cartesian grid, or impact validity cannot be reconstructed from the declared event rule.",
+      "adjudication": "The study is a complete finite-grid record with an explicit selection mechanism, not an optimizer result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-086",
+      "candidate_ids": ["PD-CAND-ee384d3411f8ab95", "PD-CAND-d3836fd69ef51b0f"],
+      "statement": "Among the 26 selected valid programs, release-state proximal rate correlates with lower impact speed (r = -0.692), greater negative interface work (r = 0.943), and lower peak net interface force (r = -0.609); its standardized speed coefficient is -0.514 in a full-rank five-parameter design with condition number 3.51, but the deterministic selected grid supplies neither causal identification nor sampling uncertainty.",
+      "classification": "descriptive_selected_grid_association",
+      "published_status": "supported_as_model_counterexample_not_causal_estimate",
+      "audit_status": "correlations_design_rank_conditioning_and_selection_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:133",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:137"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.json",
+        "scripts/research/proximal_distal_energy/run_shoulder_velocity_strategy_study.py",
+        "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_transfer/figures/fig_shoulder_velocity_strategy_associations.pdf",
+        "tests/research/test_shoulder_velocity_strategy_study.py"
+      ],
+      "model_domain": "Descriptive association inside the valid-impact subset of one deterministic finite grid.",
+      "uncertainty_boundary": "Regressors are mechanically coupled, valid-impact conditioning can bias association, and no resampled or human population exists.",
+      "competing_explanations": [
+        "release-time confounding",
+        "collider selection",
+        "post-cut torque",
+        "and coarse grid geometry"
+      ],
+      "negative_controls": [
+        "design rank",
+        "condition number",
+        "selection flag",
+        "no causal-estimand flag"
+      ],
+      "falsifier": "Recomputed metrics disagree, the design is rank deficient, or the coefficient is interpreted as a human causal effect.",
+      "adjudication": "The association rejects sufficiency within this grid while remaining explicitly noncausal and selection-conditioned.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-087",
+      "candidate_ids": ["PD-CAND-b71f2d261aac5e39"],
+      "statement": "The highest-speed valid sampled program reaches 38.85 m/s with 127.21 J total post-release interface-force work, 132.08 J drift work, -4.87 J control work, 6.11 J opposing work, and 315.39 N peak net planar wrist-interface force; fixed-program refinement from 1.0 to 0.5 ms changes speed by 0.00035 m/s and work by 0.0023 J.",
+      "classification": "model_conditional_best_sample_and_numerical_refinement",
+      "published_status": "supported_with_interface_and_nonoptimization_boundaries",
+      "audit_status": "canonical_replay_closure_force_meaning_and_timestep_refinement_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:155"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.npz",
+        "tests/research/test_shoulder_velocity_strategy_search.py",
+        "tests/research/test_shoulder_velocity_strategy_study.py"
+      ],
+      "model_domain": "Best valid member of the declared 60-program fixed-hub torque grid.",
+      "uncertainty_boundary": "The 315.39 N result is a net planar model-interface force, not either anatomical hand force; the grid was not reoptimized at the refined timestep.",
+      "competing_explanations": [
+        "coarse-grid selection",
+        "unmodeled bilateral allocation",
+        "unmodeled compliance",
+        "and alternative objectives"
+      ],
+      "negative_controls": [
+        "work closure",
+        "fixed-program timestep refinement",
+        "impact-validity invariance",
+        "interface-force label"
+      ],
+      "falsifier": "Canonical replay or timestep refinement exceeds the declared differences, closure fails, or the net interface force is relabeled as a measured hand load.",
+      "adjudication": "The numerical result is stable for the fixed sampled program but is neither a continuous optimum nor an anatomical-load estimate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-088",
+      "candidate_ids": ["PD-CAND-cd6bf15bc648e95b", "PD-CAND-80aa858c9b257ffd"],
+      "statement": "Twenty-one of 26 valid programs are nondominated on sampled impact speed, opposing interface work, and peak net interface force, while speed and peak force correlate at r = 0.977; the 80.8 percent frontier coverage makes this a weakly discriminating finite-grid Pareto screen, not evidence of 21 distinct optimal human strategies.",
+      "classification": "finite_grid_multiobjective_result",
+      "published_status": "supported_with_weak_discrimination_boundary",
+      "audit_status": "dominance_logic_coverage_and_force_speed_association_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:166",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:170"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_transfer/figures/fig_shoulder_velocity_strategy_pareto.pdf",
+        "scripts/research/proximal_distal_energy/shoulder_velocity_transfer.py",
+        "tests/research/test_shoulder_velocity_strategy_study.py"
+      ],
+      "model_domain": "Mixed-direction nondominance among valid members of one three-objective finite grid.",
+      "uncertainty_boundary": "Objective scales, omitted objectives, equivalent programs, and coarse sampling can all change frontier membership.",
+      "competing_explanations": [
+        "sparse coverage",
+        "objective redundancy",
+        "trajectory equivalence",
+        "and omitted robustness costs"
+      ],
+      "negative_controls": [
+        "explicit maximize and minimize directions",
+        "frontier fraction",
+        "equivalent-program retention",
+        "no unique-optimum claim"
+      ],
+      "falsifier": "Dominance recomputation changes membership or a sampled dominated program is called optimal.",
+      "adjudication": "The frontier is retained for transparent tradeoff visualization while its low selectivity is now reported quantitatively.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-089",
+      "candidate_ids": [
+        "PD-CAND-3304ba950f691409",
+        "PD-CAND-dadc015679f340bd",
+        "PD-CAND-3ac99ec4b6d9a055"
+      ],
+      "statement": "The chapter's five conditions are testable design hypotheses rather than instructions: favorable drift acceleration alone is insufficient, proximal rate must be interpreted with relative motion and interface power, and proximal deceleration does not prove outward transfer without actuator, interface, club-energy, and external-work accounting.",
+      "classification": "mechanical_interpretation_and_nonprescription",
+      "published_status": "supported_as_bookkeeping_requirements_and_hypotheses",
+      "audit_status": "energy_pathway_logic_and_prescriptive_language_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:181",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:184",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:208"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_transfer_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.json",
+        "src/shared/python/biomechanics/drift_control_transfer.py"
+      ],
+      "model_domain": "Energy and power bookkeeping implications of the pointwise atlas and finite forward grid.",
+      "uncertainty_boundary": "No hypothesis is a validated motor-control policy or technique prescription.",
+      "competing_explanations": [
+        "base work",
+        "gravity",
+        "damping",
+        "direct actuator work",
+        "and changed stored energy"
+      ],
+      "negative_controls": [
+        "force versus power distinction",
+        "pointwise versus forward distinction",
+        "full energy-pathway reporting",
+        "human nonclaim"
+      ],
+      "falsifier": "A proposed transfer interpretation fails work-energy closure or attributes deceleration to a unique outward pathway without excluding alternatives.",
+      "adjudication": "Prescriptive language was replaced by registered design hypotheses and a complete pathway-accounting requirement.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-090",
+      "candidate_ids": [
+        "PD-CAND-9ff680105a9d278a",
+        "PD-CAND-3f4317b565b0613f",
+        "PD-CAND-d4b441a5d98c8250"
+      ],
+      "statement": "The fixed-hub double pendulum cannot determine bilateral hand strategy or anatomical torso control; testing those questions requires a forward rotating-base two-hand tier that preserves common and differential hand motion, separated force moments and wrist moments, club state and compliance, base work, subject scaling, and registered load, work, delivery, and robustness outcomes.",
+      "classification": "next_tier_mechanical_requirements",
+      "published_status": "untested_research_requirement",
+      "audit_status": "current_model_capabilities_and_missing_variables_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:218",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:222",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:233"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/two_hand_preactivation_hypothesis.json",
+        "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.json"
+      ],
+      "model_domain": "Gap analysis across current fixed-hub, fixed-shoulder two-arm, and abstract two-hand transmission tiers.",
+      "uncertainty_boundary": "The required rotating-base, subject-scaled two-hand forward tier has not yet been executed for this hypothesis.",
+      "competing_explanations": [
+        "direct wrist work",
+        "force-generated couple",
+        "base translation and rotation",
+        "shaft compliance",
+        "and anatomical load sharing"
+      ],
+      "negative_controls": [
+        "coincident hand points",
+        "reversed moment arm",
+        "direct-moment separation",
+        "base-work ledger"
+      ],
+      "falsifier": "A lower-order model is presented as identifying bilateral anatomy, or the proposed higher tier cannot close work and wrench balances under its negative controls.",
+      "adjudication": "The section is a repo-managed next-tier specification and remains explicitly untested for anatomical torso strategy.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-091",
+      "candidate_ids": [
+        "PD-CAND-9da1bcd18655de49",
+        "PD-CAND-fd71d1faa57eb3dc",
+        "PD-CAND-3f386753790a7150"
+      ],
+      "statement": "A human test of thorax-rate-conditioned transfer requires synchronized declared-frame body and club kinematics, bilateral identified hand wrenches, ground reaction and launch outcomes, participant-held-out estimation, matched club state and phase, pathway power and energy observables, perturbation robustness, and preregistered rejection thresholds.",
+      "classification": "prospective_human_falsification_protocol",
+      "published_status": "untested_protocol",
+      "audit_status": "instrumentation_identifiability_holdout_estimands_and_falsifiers_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:245",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:248",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:261"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/EXPERIMENTAL_FALSIFICATION_PROTOCOL.md",
+        "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_transfer_study.json",
+        "https://doi.org/10.3390/sports10060091",
+        "https://doi.org/10.3390/s20133672"
+      ],
+      "model_domain": "Prospective participant-level falsification of the transition from a reduced coordinate to measured human thorax and hand mechanics.",
+      "uncertainty_boundary": "No human outcome has been collected or analyzed for this chapter.",
+      "competing_explanations": [
+        "hand-path geometry",
+        "club-state mismatch",
+        "bilateral allocation",
+        "participant strategy",
+        "and measurement error"
+      ],
+      "negative_controls": [
+        "participant holdout",
+        "absolute-state matching",
+        "small parameter and configuration perturbations",
+        "direct-wrist-work comparator"
+      ],
+      "falsifier": "Any preregistered state-matching, robustness, pathway, load, or held-out human criterion fails.",
+      "adjudication": "The protocol makes model-to-human transfer rejectable and explicitly requires bilateral identifiability rather than assuming it from a net club wrench.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-092",
+      "candidate_ids": ["PD-CAND-8070f5ed959dfb2e", "PD-CAND-72798b883055332f"],
+      "statement": "The chapter evidence consists of 90 corrected pointwise cases and all 60 forward programs with byte-deterministic JSON and NPZ, expanded dependency hashes, closure and numerical diagnostics, and no human outcome; it supports only a phase-, range-, and state-definition-dependent fixed-hub mechanism plus a finite-grid counterexample to proximal rate as a standalone rule.",
+      "classification": "chapter_level_evidence_and_nonclaim_contract",
+      "published_status": "supported_with_human_and_higher_tier_questions_open",
+      "audit_status": "all_chapter_candidates_adjudicated_artifact_determinism_and_nonclaims_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:275",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:289"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_transfer_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_transfer_study.npz",
+        "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.npz",
+        "tests/research/test_shoulder_velocity_transfer_study.py",
+        "tests/research/test_shoulder_velocity_strategy_study.py"
+      ],
+      "model_domain": "Synthesis of the corrected pointwise atlas and finite trajectory grid at the fixed-hub planar tier.",
+      "uncertainty_boundary": "No anatomical shoulder, thorax, bilateral hand, subject-calibrated, or human causal result is present.",
+      "competing_explanations": [
+        "model order",
+        "sweep range",
+        "selection",
+        "unmodeled base work",
+        "and human heterogeneity"
+      ],
+      "negative_controls": [
+        "byte-deterministic artifacts",
+        "complete dependency hashes",
+        "closure tests",
+        "fixed-program timestep refinement",
+        "human-data absence flags"
+      ],
+      "falsifier": "Repeated generation differs, a dependency is omitted, a chapter candidate is unmapped, a closure gate fails, or any human or universal technique claim is inferred from this tier.",
+      "adjudication": "Every shoulder-velocity chapter candidate is mapped to a bounded atomic claim, with corrected formulas, ranges, metrics, and human nonclaims.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
     }

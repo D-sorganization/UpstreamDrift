@@ -5,8 +5,12 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-import matplotlib.pyplot as plt
+import matplotlib
 import numpy as np
+
+matplotlib.use("Agg")
+matplotlib.rcParams["svg.hashsalt"] = "proximal-distal-shoulder-strategy-v2"
+import matplotlib.pyplot as plt  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 ARTICLE_ROOT = REPO_ROOT / "docs" / "research" / "proximal_distal_energy_transfer"
@@ -16,8 +20,16 @@ FIGURE_DIR = ARTICLE_ROOT / "data" / "shoulder_velocity_transfer" / "figures"
 
 def _save(figure: plt.Figure, name: str) -> None:
     FIGURE_DIR.mkdir(parents=True, exist_ok=True)
-    for suffix in ("pdf", "svg"):
-        figure.savefig(FIGURE_DIR / f"{name}.{suffix}", bbox_inches="tight")
+    figure.savefig(
+        FIGURE_DIR / f"{name}.pdf",
+        bbox_inches="tight",
+        metadata={"CreationDate": None, "ModDate": None},
+    )
+    figure.savefig(
+        FIGURE_DIR / f"{name}.svg",
+        bbox_inches="tight",
+        metadata={"Date": None},
+    )
     plt.close(figure)
 
 
@@ -40,7 +52,7 @@ def make_association_figure(record: dict) -> None:
     figure.colorbar(scatter, ax=axes[0], label="Wrist Release Time (s)")
     axes[1].scatter(velocity, braking, c=release, cmap="viridis", s=48)
     axes[1].set_xlabel("Proximal-Link Velocity at Release (rad/s)")
-    axes[1].set_ylabel("Negative Grip Work After Release (J)")
+    axes[1].set_ylabel("Negative Interface Work After Release (J)")
     axes[1].set_title("Later High-Velocity Releases Increase Braking Exposure")
     for axis in axes:
         axis.grid(alpha=0.25)
@@ -69,7 +81,7 @@ def make_pareto_figure(record: dict) -> None:
         linewidths=1.5,
         label="Nondominated",
     )
-    axis.set_xlabel("Negative Grip Work After Release (J; Minimize)")
+    axis.set_xlabel("Negative Interface Work After Release (J; Minimize)")
     axis.set_ylabel("Impact Speed (m/s; Maximize)")
     axis.set_title("Speed, Braking, and Peak-Force Objectives Remain in Tension")
     axis.grid(alpha=0.25)
@@ -77,7 +89,7 @@ def make_pareto_figure(record: dict) -> None:
     axis.text(
         0.98,
         0.03,
-        "Marker size scales with peak grip force",
+        "Marker size scales with peak net interface force",
         transform=axis.transAxes,
         ha="right",
         va="bottom",
