@@ -7,7 +7,7 @@ Update this file with every PR and every push to main.
 
 - **#8557 comprehensive scientific claim audit and open golf modeling
   program** — branch `feat/8557-claim-audit` starts the fail-closed audit
-  authority. It inventories all 566 narrative candidates across the 32-source
+  authority. It inventories all 567 narrative candidates across the 32-source
   Quarto paper, reconciles all 18 public release-claim keys, and supplies five
   initial high-risk quantitative adjudications without calling the review
   complete. The registry records that the Biomechanics and Nonlinear Control

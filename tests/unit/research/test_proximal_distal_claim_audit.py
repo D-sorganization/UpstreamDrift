@@ -40,6 +40,30 @@ def test_candidate_inventory_expands_includes_with_source_locations(
 
 
 @pytest.mark.unit
+def test_candidate_inventory_includes_quarto_abstract(tmp_path: Path) -> None:
+    master = tmp_path / "paper.qmd"
+    master.write_text(
+        "---\n"
+        'title: "Paper"\n'
+        "abstract: |\n"
+        "  The registered model reaches 18.2 m/s.\n"
+        "  This result remains conditional [@study].\n"
+        "keywords:\n"
+        "  - mechanics\n"
+        "---\n\n"
+        "Body text without a separate quantitative claim.\n",
+        encoding="utf-8",
+    )
+
+    inventory = build_candidate_inventory(master, repository_root=tmp_path)
+
+    abstract = next(item for item in inventory["candidates"] if item["line_start"] == 4)
+    assert abstract["line_end"] == 5
+    assert abstract["citation_keys"] == ["study"]
+    assert "18.2 m/s" in abstract["text"]
+
+
+@pytest.mark.unit
 def test_registry_rejects_duplicate_claim_identifiers(tmp_path: Path) -> None:
     registry = {
         "schema_version": "proximal-distal-claim-audit-v1",
