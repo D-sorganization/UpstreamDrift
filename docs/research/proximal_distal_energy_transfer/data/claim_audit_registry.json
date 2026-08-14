@@ -2,14 +2,14 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "36086d2c6064c143830a5946c2a3cee7c02d2bc1c02ef72e55efef57c879311a",
+    "source_digest": "626f603db48b9bceb8179cc143eef17b07739a723406b15ec54195eb543e8ebb",
     "baseline_commit": "13ea6a69585a42dc1db4b3959440ed95787c9779"
   },
   "audit_scope": {
     "completion_status": "complete",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "The complete 935-candidate paper inventory is adjudicated. The critical-question chapter maps ten new candidates to four bounded claims and retains all human-data gates."
+    "current_scope": "The complete 937-candidate paper inventory is adjudicated. The critical-question chapter maps twelve candidates to five bounded claims and retains all human-data gates."
   },
   "dependencies": [
     {
@@ -9437,7 +9437,7 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-33125571ea38bd1e",
+      "candidate_id": "PD-CAND-c1ecd66f8c4e9cb7",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-243"
@@ -9467,10 +9467,30 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-17632d2f70c8422d",
+      "candidate_id": "PD-CAND-10eb3da872358d30",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-244"
+      ],
+      "rationale": "This passage states or bounds a registered critical-question conclusion.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-05fb768fef0fe143",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-244"
+      ],
+      "rationale": "This passage states or bounds a registered critical-question conclusion.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-17632d2f70c8422d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-245"
       ],
       "rationale": "This passage states or bounds a registered critical-question conclusion.",
       "reviewer": "Codex technical audit",
@@ -9480,7 +9500,7 @@
       "candidate_id": "PD-CAND-db74be00a06f8889",
       "disposition": "material_claims_mapped",
       "claim_ids": [
-        "PD-CLAIM-244"
+        "PD-CLAIM-245"
       ],
       "rationale": "This passage states or bounds a registered critical-question conclusion.",
       "reviewer": "Codex technical audit",
@@ -9490,7 +9510,7 @@
       "candidate_id": "PD-CAND-ce5ed5ff62ef6edd",
       "disposition": "material_claims_mapped",
       "claim_ids": [
-        "PD-CLAIM-244"
+        "PD-CLAIM-245"
       ],
       "rationale": "This passage states or bounds a registered critical-question conclusion.",
       "reviewer": "Codex technical audit",
@@ -9500,7 +9520,7 @@
       "candidate_id": "PD-CAND-49c472fa030a2018",
       "disposition": "material_claims_mapped",
       "claim_ids": [
-        "PD-CLAIM-245"
+        "PD-CLAIM-246"
       ],
       "rationale": "This passage states or bounds a registered critical-question conclusion.",
       "reviewer": "Codex technical audit",
@@ -20147,7 +20167,7 @@
     {
       "claim_id": "PD-CLAIM-243",
       "candidate_ids": [
-        "PD-CAND-33125571ea38bd1e",
+        "PD-CAND-c1ecd66f8c4e9cb7",
         "PD-CAND-12fabdf06bcc96aa",
         "PD-CAND-b49f0e860e9eab2b"
       ],
@@ -20188,6 +20208,45 @@
     {
       "claim_id": "PD-CLAIM-244",
       "candidate_ids": [
+        "PD-CAND-10eb3da872358d30",
+        "PD-CAND-05fb768fef0fe143"
+      ],
+      "statement": "A paired 15-case planar screen found sustained half-error recovery in 13--20 percent of cases, with no decisive policy separation; transient threshold crossing is not self-correction.",
+      "classification": "trajectory_recovery_screen",
+      "published_status": "no_policy_recovery_advantage_established",
+      "audit_status": "evidence_boundary_and_falsification_contract_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:46",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:57"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
+        "docs/research/proximal_distal_energy_transfer/MOMENTUM_TRANSFER_QUESTION_PROGRAM.md",
+        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_question_registry.json",
+        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_experiment_registry.json"
+      ],
+      "model_domain": "Cross-tier synthesis and prospective experiment governance.",
+      "uncertainty_boundary": "The result is limited to a small engineering envelope and a simple delayed observer; it does not estimate human correction.",
+      "competing_explanations": [
+        "model-tier dependence",
+        "estimand choice",
+        "matching rule",
+        "measurement uncertainty"
+      ],
+      "negative_controls": [
+        "same-state killswitch",
+        "geometry null and reversal",
+        "matched work and state",
+        "participant holdout"
+      ],
+      "falsifier": "A policy advantage emerges under expanded preregistered attraction-region, external-load, or participant-held-out tests.",
+      "adjudication": "Reconciled to the existing claim audit, machine-readable question registry, and prospective experiment contract without promoting model evidence to human evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-245",
+      "candidate_ids": [
         "PD-CAND-17632d2f70c8422d",
         "PD-CAND-db74be00a06f8889",
         "PD-CAND-ce5ed5ff62ef6edd"
@@ -20197,9 +20256,9 @@
       "published_status": "proximal_rule_rejected_at_planar_tiers_slack_mostly_open",
       "audit_status": "evidence_boundary_and_falsification_contract_checked",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:48",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:57",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:64"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:63",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:72",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:79"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
@@ -20227,7 +20286,7 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "claim_id": "PD-CLAIM-245",
+      "claim_id": "PD-CLAIM-246",
       "candidate_ids": [
         "PD-CAND-49c472fa030a2018"
       ],
@@ -20236,7 +20295,7 @@
       "published_status": "human_validation_blocked",
       "audit_status": "evidence_boundary_and_falsification_contract_checked",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:72"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:87"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",

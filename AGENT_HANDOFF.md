@@ -2,769 +2,93 @@
 
 Last updated: 2026-08-13
 
-Update this file with every PR and every push to main.
+Update this current-state file with every PR and push to `main`; history belongs
+in git and GitHub.
 
-## Timing and Failure-Mode Factorial
+## Active Research Program
 
-- `research/8595-timing-factorial`: 27 fixed-hub cases independently vary
-  proximal acceleration, braking, and distal release. Angle/rate casting
-  events disagree in every case. Work is unmatched, so the fastest case is
-  descriptive, not a causal optimum or human strategy.
+- Epic [#8557](https://github.com/D-sorganization/UpstreamDrift/issues/8557)
+  governs the proximal-to-distal research program. Critical-question issue
+  [#8595](https://github.com/D-sorganization/UpstreamDrift/issues/8595) remains
+  open until its spatial, subject-scaled, and human falsification stages are
+  complete.
+- Canonical question sources are
+  `docs/research/proximal_distal_energy_transfer/MOMENTUM_TRANSFER_QUESTION_PROGRAM.md`,
+  `data/momentum_transfer_question_registry.json`, and
+  `data/momentum_transfer_experiment_registry.json`.
+- #8556 remains open: no qualifying governed participant dataset with
+  synchronized bilateral six-axis grip wrenches has been acquired. Synthetic
+  traces must not substitute for the registered human test.
 
-## Typed Slack Constitutive Suite
+## Current Branch
 
-- Branch `research/8595-typed-slack` implements separate scalar contracts for
-  contact disengagement, transmission backlash, structural preload,
-  biological series compliance, and control deadband. Tests enforce distinct
-  states, prevent preload leakage between classes, and close the energy ledger
-  under refinement. The evidence is a constitutive screen, not a performance
-  or human-strategy result.
+- `research/8595-observer-recovery` adds a paired 15-case delayed-observer and
+  trajectory-recovery screen for Q4/Q5. Clock, perfect-state, delayed/noisy,
+  and higher-impedance policies receive common nuisance parameters and sensor
+  realizations.
+- Recovery requires normalized state error to fall below half its initial
+  value and remain there through delivery. Fractions are 0.20 for clock and
+  delayed/noisy policies and 0.13 for perfect-state and higher-impedance
+  policies; median terminal error remains 0.79–0.84. No policy or human
+  self-correction advantage is established.
+- The study reports recovery trajectories, times, viable-set return, terminal
+  delivery, individual-hand force, and effort. The paper includes the result
+  and a visually checked figure. The claim audit is complete at 937/937
+  candidates and 245 atomic claims.
+- The rebuilt, losslessly optimized paper is 206 pages and 1,423,668 bytes,
+  with 186 URI links and 241 outline entries. Pages 185–186 were visually
+  checked for clipping, legibility, captioning, and figure layout.
 
-## Momentum Transfer Human Registration
+## Recently Merged #8595 Slices
 
-- Branch `research/8595-human-registration` freezes participant-held-out human
-  tests for Q1--Q7, including required bilateral six-axis grip wrenches,
-  measurable events, nulls, falsifiers, sensitivities, negative controls,
-  adverse margins, missing-data rules, and identity safety. The dataset remains
-  not acquired, and synthetic traces cannot satisfy the registration.
+- #8596/#8597: question registry, specification, and initial handoff.
+- #8598: prospective experiment registry MT-E01 through MT-E06 and MT-H01.
+- #8599: reader-facing critical-question chapter and paper integration.
+- #8600: participant-held-out human preregistration with fail-closed data gate.
+- #8601/#8602: typed-slack constitutive screen and document-budget repair.
+- #8603: 27-case timing/casting factorial; angle and rate casting definitions
+  disagreed in all cases, so no universal casting event or optimum is claimed.
 
-## Momentum Transfer Paper Integration
+## Remaining Scientific Work
 
-- Branch `docs/8595-paper-agenda` integrates the Q1--Q7 assessment into the
-  rendered article as a scientific question/falsification chapter. It avoids
-  universal transfer fractions and coaching prescriptions, operationalizes
-  timing demand and self-correction, rejects proximal velocity as a presumed
-  maximum, separates five slack mechanisms, and retains the governed-human
-  data blocker. The rebuilt 206-page PDF was visually checked across the new
-  chapter; the claim audit is complete at 935/935 candidates and 244 atomic
-  claims.
+1. Complete the geometry atlas with null, orthogonal, coincident-grip, and
+   reversed-moment-arm controls across planar and spatial tiers.
+2. Add matched-work and matched-delivery controls to the timing factorial.
+3. Expand observer recovery into a phase-volume and attraction-region study,
+   including adverse external loads and identified observer alternatives.
+4. Build matched rate/acceleration dose-response surfaces for proximal motion.
+5. Extend each typed-slack law into higher-order delivery models without
+   conflating contact, backlash, preload, series compliance, or deadband.
+6. Repeat the registry in subject-scaled spatial models and independent engines.
+7. Execute the frozen participant-held-out protocol only after qualifying data
+   acquisition and governance approval.
 
-## Momentum Transfer Experiment Registration
+## Required Gates
 
-- Branch `research/8595-experiment-registry` continues #8595 after #8596 and
-  #8597 merged. It adds an implementation-level registry for Q1--Q7 and the
-  governed participant-held-out stage. Every record declares model tiers,
-  interventions, controls, outcomes, uncertainty, a falsifier, required data,
-  and honest execution status. Qualifying bilateral-wrench human data remain
-  unavailable; synthetic work cannot close that evidence boundary.
-
-## Momentum Transfer Critical-Question Program
-
-- Branch `research/8595-momentum-agenda` implements issue #8595 under research
-  epic #8557. The photographed agenda is now a durable seven-question program
-  covering drift attribution, geometry, timing/casting, timing demand,
-  self-correction/robustness, proximal-velocity dose response, and typed slack.
-- Canonical sources are
-  `docs/research/proximal_distal_energy_transfer/MOMENTUM_TRANSFER_QUESTION_PROGRAM.md`
-  and `data/momentum_transfer_question_registry.json`. The registry requires
-  named estimands, negative controls, falsifiers, governing issues, and model
-  versus human evidence boundaries for every question.
-- Ready PR #8596 publishes exact implementation commit `75490ce77` and the
-  follow-up specification commit on `research/8595-momentum-agenda`; protected
-  squash auto-merge is enabled.
-- Focused registry tests, Ruff, and changed-document title capitalization pass.
-  Before publication, regenerate/validate the open-release manifest, run the
-  relevant research/governance gates, update this handoff with the ready PR,
-  and preserve #8556 as an open external human-data gate.
-
-## Complete Paper-Wide Claim Adjudication
-
-- Branch `research/8557-post-terminology-audit` completes the epic #8557 paper
-  audit after terminology unification: 925/925 narrative candidates reviewed,
-  zero unadjudicated, and 240 atomic claims.
-- Added deterministic registration authority at
-  `scripts/research/proximal_distal_energy/register_remaining_claim_reviews.py`
-  and seven missing primary contracts (PD-CLAIM-235 through PD-CLAIM-241) for
-  the rotating-base torso tier, isolated synthetic beam study, and
-  workbench/open-release boundary.
-- Side-task state is preserved: #8555/PR #8577 is merged at `967c40f...`;
-  #8556 remains open because no qualifying governed bilateral six-axis human
-  grip-wrench dataset exists; Tools #4430 remains dependency-gated.
-- Focused validation: registry complete with zero unadjudicated candidates;
-  19 claim/torso/beam tests and 18 governance/release tests pass. The 203-page
-  PDF renders and losslessly compacts to 1,405,573 bytes with 186 URI links and
-  235 outline entries; visual checks of the title, interior figure/text, and
-  final bibliography pages are clean. The qualified release contains 385
-  artifacts with zero mismatches. Protected squash merge remains for this
-  branch.
-
-## Where the Repo Is Heading
-
-- **#8557 transmission robustness audit** — ready PR
-  [#8590](https://github.com/D-sorganization/UpstreamDrift/pull/8590) from
-  `research/8557-transmission-audit` at implementation commit
-  `efce6bb3d7fe96041387606250b5639094d3b30e` is the active twenty-fifth fail-closed
-  slice. The chapter is being adjudicated as PD-CLAIM-230 through PD-CLAIM-234.
-  All four programs remain nondominated in all 15 leave-one-held-out-case
-  recomputations. The local Jacobian's raw rank is three, but effective rank is
-  two at 1--5% and one at 10--20% of its leading singular value; held-out
-  linear RMSE is 0.115 m/s, 2.69 degrees, and 7.48 N. Regeneration repaired a
-  stale source hash with only floating-point noise. Current authority: 924
-  candidates, 820 reviewed, 233 atomic claims, and 104 unadjudicated.
-  Fifty-nine focused scientific/governance tests and Ruff pass. The qualified
-  paper is 203 pages and 1,404,704 bytes with 186 URI links, 235 outline
-  entries, and 383 release artifacts; the edited pages were visually inspected.
-  Remaining gates are protected publication and
-  exact remote-main verification.
-
-- **#8557 forward modal-shaft reconciliation** — ready PR
-  [#8589](https://github.com/D-sorganization/UpstreamDrift/pull/8589) from
-  `research/8557-forward-modal-audit` at implementation commit
-  `e00eb74c0d5bf8331df68dde8fc04e17cc6af453` is the active twenty-fourth
-  fail-closed slice. All 26 chapter candidates are adjudicated as PD-CLAIM-223 through
-  PD-CLAIM-229. Regeneration changed only a stale source hash, confirming the
-  committed numerical authority, but the prose described an obsolete run.
-  The current 0.13476 tip-deflection ratio fails the preregistered 0.05 screen;
-  quantitative linear-beam inference is therefore rejected while numerical
-  coupling, force-couple geometry, and convergence observations remain.
-  Current authority: 923 candidates, 796 reviewed, 228 atomic claims, and 127
-  unadjudicated. Fifty-five focused scientific/governance tests and Ruff pass. The regenerated,
-  visually inspected paper is 203 pages and 1,403,717 bytes with 186 URI links,
-  235 outline entries, and 380 qualified release artifacts. Remaining gates are
-  combined governance tests, protected publication,
-  and exact remote-main verification.
-
-- **#8586 cross-repository terminology contract** — branch
-  `docs/3834-cross-repo-terminology`, PR
-  [#8588](https://github.com/D-sorganization/UpstreamDrift/pull/8588), implements the AffineDrift #3834
-  definitional-integrity slice of #8426. Canonical ZVCF now zeros generalized
-  velocity and declared applied control; schema 3.0.0 preserves the former
-  control-retaining diagnostic under an explicit name. The proximal-distal
-  paper, GRF and hand-path evidence, engine protocol, shared backend, and
-  regression controls are regenerated and validated before protected
-  publication. Focused terminology, backend, engine, API, evidence, and
-  publication tests pass; Ruff passes; title capitalization passes for all
-  changed documents. After rebasing onto current remote main, the rendered and
-  optimized paper is 203 pages and 1,404,572 bytes with 186 URI links and 235
-  outline entries; affected definition, GRF, force-vector, and appendix pages
-  retain the visually approved layout. The combined post-rebase claim authority
-  contains 924 candidates, 796 reviewed candidates, and 228 registered claims;
-  the 381-artifact release manifest has zero mismatches. The first hosted
-  required quality-gate run identified two
-  new Law-of-Demeter occurrences in the MyoSuite drift adapter; the adapter now
-  binds the simulation data object once without changing its zero-control
-  semantics. The exact no-growth scan, Ruff, and all 55 focused MyoSuite tests
-  pass locally before the corrective push. No human or physiological inference
-  is added by this semantic migration.
-
-- **#8557 uncertainty and stability audit** — ready PR
-  [#8587](https://github.com/D-sorganization/UpstreamDrift/pull/8587) from
-  `research/8557-uncertainty-audit` at implementation commit
-  `9c573ce4c4d4be45a23f3de2f854718fe5b8046e` is the active twenty-third
-  fail-closed slice. All 28 chapter candidates are adjudicated as PD-CLAIM-215 through
-  PD-CLAIM-222. A new stability audit performs 24 leave-one-out PRCC screens,
-  six held-out Pareto jackknives, and four singular-value threshold checks.
-  Five PRCC leaders are omission-stable, but the hand-force leader splits
-  12/9/3 among limb mass, activation time constant, and activation delay;
-  several weaker signs flip. Full-sample held-out nondominance is not uniformly
-  omission-stable, and practical rank falls from six to five at a 20% threshold.
-  The full uncertainty study was regenerated against the current model source
-  after its provenance guard exposed a stale source hash; the new source hash
-  is authoritative and all numerical changes are floating-point noise (maximum
-  absolute change about 1.3e-8), so no registered conclusion changed.
-  Current authority: 923 candidates, 770 reviewed, 221 atomic claims, and 153
-  unadjudicated. Sixty-five focused/governance tests and Ruff pass. The
-  regenerated, visually inspected paper is 203 pages and 1,403,053 bytes, with 186 URI links and 235
-  outline entries; its 379-artifact qualified release has zero mismatches.
-  Remaining gates are combined tests, protected publication, and remote-main
-  verification.
-
-- **#8557 original-results reconciliation** — branch
-  `research/8557-results-audit` is ready PR
-  [#8585](https://github.com/D-sorganization/UpstreamDrift/pull/8585) at
-  implementation commit `49cb95bd2fd7c872df7ae625d5a26e2872a9cd6b`
-  and is the active twenty-second fail-closed slice.
-  All 30 current chapter candidates are adjudicated as PD-CLAIM-207 through
-  PD-CLAIM-214. An independent deterministic audit reconciles all 92 attempted
-  programs, the 63 accepted and 29 excluded deliveries, selected traces,
-  interface-power closure, 13 parameter cases, five impact families, and four
-  command-rise constants. It corrected the late-drive headline from a blanket
-  +12% to +12.4% at 60 N m and +7.8% at 100 N m, and narrowed causal and
-  physiological language. Current authority: 921 candidates, 742 reviewed,
-  213 atomic claims, and 179 unadjudicated. Two focused tests and Ruff pass.
-  The visually inspected regenerated paper is 203 pages and 1,401,835 bytes,
-  with 186 URI links and 235 outline entries; its 376-artifact qualified
-  release has zero mismatches. Remaining gates are the combined focused and
-  repository checks, protected publication, and exact remote-main verification.
-
-- **#8557 torque-allocation and transmission audit** — branch
-  `research/8557-torque-allocation-audit` is ready PR
-  [#8584](https://github.com/D-sorganization/UpstreamDrift/pull/8584) at
-  implementation commit `389c8abfac1fb1b60179e10fe1d380d45ef962f9` and is the active twenty-first
-  fail-closed slice. All 29 chapter candidates are adjudicated as PD-CLAIM-200
-  through PD-CLAIM-206. The 8 N m task and direct-moment/force-couple closure
-  remain at machine precision. An explicit 1e-10 N m s equivalence region now
-  classifies the transmission grid as nine positive-dead-zone cases favoring
-  persistent direction, three zero-dead-zone equivalent cases, and no reversal
-  wins. Reported 11.5 ms and 22.0 ms zero-transmission occupancies now carry
-  0.1 ms resolution and 11.4--11.6/21.9--22.1 ms boundary brackets. Current
-  authority: 921 candidates, 713 reviewed, 206 atomic claims, and 208
-  unadjudicated. The biological and human-strategy boundaries remain explicit.
-  Eleven focused tests and Ruff pass. The regenerated, visually inspected
-  paper remains 202 pages and is 1,400,701 bytes, with 186 URI links and 235
-  outline entries. Its qualified release contains 373 artifacts with zero
-  mismatches. Remaining gates are the full repository checks, protected
-  publication, and exact remote-main verification.
-
-- **#8557 side-task integration and frame/biological audit** — torso-velocity
-  issue [#8555](https://github.com/D-sorganization/UpstreamDrift/issues/8555)
-  is complete through PR #8577; merge commit
-  `967c40f54cc03f8cae89cde09268d62771d220fe` remains an ancestor of remote
-  `main`. Human validation #8556 is legitimately open: its participant-held-out
-  registration, null/adverse tests, sensitivities, and fail-closed controls are
-  implemented, but no governed participant dataset with synchronized bilateral
-  six-axis grip wrenches was found. Literature-only and synthetic evidence are
-  prohibited substitutes. Tools #4430 owns the companion GUI and is stacked
-  after runner-pending PR #4411. The active twentieth claim-audit slice is
-  ready PR [#8582](https://github.com/D-sorganization/UpstreamDrift/pull/8582)
-  from `research/8557-frames-biology-audit` at implementation commit
-  `cca513c27594d553ab68424c1ca79dbcd2ecda26`; it adds timestep refinement to the
-  reduced preparation-history comparison because the sign persists but its
-  sub-percent magnitude is not converged. Both the frame/biological and human
-  protocol chapters are now fully adjudicated as PD-CLAIM-194 through
-  PD-CLAIM-199. Current authority: 920 candidates, 684 reviewed, 199 atomic
-  claims, and 236 unadjudicated. Twenty-four focused tests pass. The regenerated
-  202-page PDF is 1,399,967 bytes with 186 URI links and 235 outline entries;
-  affected experimental and biological pages were visually inspected. The
-  qualified release contains 372 artifacts with zero mismatches.
-
-- **#8557 spatial forward-contact audit** — based on spatial common-state PR
-  #8580, protected-squash-merged at exact remote main
-  `f23e8f614b563647deb7cca58da6acabef988eb3`.
-  Ready PR [#8581](https://github.com/D-sorganization/UpstreamDrift/pull/8581)
-  from branch `research/8557-spatial-forward-contact-audit` is the active
-  nineteenth fail-closed slice at implementation commit
-  `c5328bea5cd328325b179bf8d230b91467437dc7`. WSL-native MuJoCo 3.8.0 and
-  Pinocchio 3.8.0 regenerated
-  the complete evidence and six focused tests pass. All 40 chapter candidates
-  are reviewed as PD-CLAIM-184 through PD-CLAIM-193, with the public release
-  claim PD-CLAIM-005 remapped to the current passage. The chapter now states
-  that native rigid-body dynamics and force mapping are independent while the
-  contact law and semi-implicit update are shared. Interface virtual work
-  closes to 1.56e-14 W, point-force/wrench power to 5.51e-14 W, and persistence
-  is the longest contiguous 37.5 ms interval. Current authority: 920
-  candidates, 633 reviewed, 193 atomic claims, 287 unadjudicated. Remaining
-  gates are protected publication and exact remote-main verification. The
-  complete paper renders as a visually inspected
-  202-page, 1,398,880-byte PDF with 183 URI links and 235 outline entries;
-  physical pages 128--133 were inspected, and the 371-artifact release bundle
-  validates with zero mismatches. WSL Matplotlib has a mixed-install
-  Axes3D failure, so model evidence and native tests ran in WSL while figures
-  were deterministically regenerated from those arrays with the qualified
-  Windows graphics stack.
-  The required Tools side task remains active at live revision 35. Its latest
-  hosted full-window PyQt failure identified a missing declared `pandas`
-  runtime dependency when Launch Monitor Analytics is reached; that exact
-  dependency and workflow contract are being corrected before another head
-  update. Protected publication and exact remote-main verification remain the
-  completion boundary for both slices.
-
-- **#8557 spatial common-state audit** — PR #8579 protected-squash-merged at
-  exact remote main `fad3191503c99dc8d1f9b975fb8232d929a51da2`. Ready PR
-  [#8580](https://github.com/D-sorganization/UpstreamDrift/pull/8580) from
-  branch `research/8557-spatial-cross-audit` is the active eighteenth
-  fail-closed slice at reviewed implementation commit
-  `57e57253bfe2361473aede8fccefc06e57884252`. It has reviewed all 41 current candidates in the spatial common-state
-  chapter as PD-CLAIM-175 through PD-CLAIM-183. The shared model hash now owns
-  interface indices as well as joints/bodies; separate native/analytical audits
-  close mass matrices to 2.49e-14 absolute and bias forces to 1.25e-9, while a
-  deliberately wrong external-load convention produces a 26.3% mismatch.
-  Generalized point-force power closes to 2.67e-15 W and reference-shifted
-  wrench/twist power to 8.88e-16 W. Current authority: 918 candidates, 594
-  reviewed, 183 atomic claims, 324 unadjudicated. Eighteen focused scientific
-  and claim-registry tests pass. The full paper renders as a visually inspected
-  202-page, 1,397,382-byte PDF with 183 URI links and 235 outline entries;
-  physical pages 122--126 were inspected, and the 371-artifact release bundle
-  validates without mismatches. Remaining gates are protected publication and
-  exact remote-main verification.
-  The required Tools side task remains active at live revision 33; its stricter
-  180 px mobile rule exposed six genuine narrow-layout failures, which it is
-  correcting without weakening the threshold.
-
-- **#8557 Comprehensive Scientific Claim Audit and Open Golf Modeling
-  Program** — coupled-base/compliance PR **#8578** protected-squash-merged at
-  exact remote main `16a767a8386b52e52a7a24ea718e7d54b91cd8ae`.
-  Ready PR [#8579](https://github.com/D-sorganization/UpstreamDrift/pull/8579)
-  from branch `research/8557-forward-two-hand-audit` is the active seventeenth
-  fail-closed slice at reviewed implementation commit
-  `c3b9d34c79c29beb825790540066c1fdc60d1489`. It maps all 42 candidates in the forward constrained
-  two-hand chapter to PD-CLAIM-161 through PD-CLAIM-174, preserving one
-  content-identical candidate's reciprocal mapping to PD-CLAIM-003. The primary
-  constraint bias is analytic and the five-point directional audit closes to
-  1.04e-9 m/s². Club-side point/wrench power closes to 6.68e-13 W and complete
-  two-sided constraint power to 1.27e-12 W. The chapter now discloses that the
-  0.778 J absolute cumulative projection correction exceeds the 0.096 J raw
-  work--energy residual and uses “zero-command persistence,” not biological
-  passivity. Current authority: 915 candidates, 554 uniquely reviewed, 174
-  atomic claims, and 361 unadjudicated. The full paper renders as a visually
-  inspected 202-page, 1,396,091-byte PDF with 183 live URI links and 235
-  outline entries; physical pages 84--90 were inspected, and the 371-artifact
-  release bundle validates with no mismatches. Local and push-time repository
-  checks passed. Remaining slice gates are protected CI/merge and exact
-  remote-main verification.
-  The required Tools side task remains active at live revision 32. Its strict
-  audit foundation now includes noncoercive cross-runtime manifest readers,
-  exact unique leaf locators, ancestor clipping, manifest-owned thresholds,
-  per-tab control ordering, a real PyQt launch-scatter preview, the Variation
-  landing canvas, expanded overlap checks, and 18 diagnostic images across both
-  DPI scales. Completion still requires its protected merge, immutable
-  UpstreamDrift pin, typed no-impact retention, deterministic ensemble replay,
-  sensitivity adequacy, and PyQt6/React parity. Biomechanics and Nonlinear Control NotebookLM collections
-  remain blocked on manual reauthentication; treat them only as research
-  indexes and verify original sources independently.
-
-- **#8511 interactive proximal--distal dynamics workbench** — branch
-  `feat/proximal-distal-workbench-integration` makes the pendulum launcher
-  consume the canonical sibling Tools provider and dockable adapter. Tools
-  owns both PyQt6 and React/Tauri clients plus the shared experiment/glossary
-  catalog; UpstreamDrift owns the article integration, provider resolution,
-  immutable vendor pin, and evidence boundary. Focused launcher tests pass.
-  Remaining gates: merge Tools, pin its exact main commit, publish the
-  AffineDrift reader page, run scoped repository gates, then protected merge.
-
-- **#8490 launcher UI-setup size slice — ready PR
-  [#8492](https://github.com/D-sorganization/UpstreamDrift/pull/8492)** — branch
-  `codex/launcher-ui-setup-decomposition` moves sidebar/navigation/menu construction into `_launcher_navigation_ui.py` and top-bar status/search/runtime/view/zoom construction plus the historical widget types into `_launcher_top_bar_ui.py`.
-
-- **Launcher-settings size slice — ready PR
-  [#8489](https://github.com/D-sorganization/UpstreamDrift/pull/8489)** — branch
-  `codex/settings-dialog-size-decomposition` extracts runtime dependency probes into `settings_runtime.py`.
-
-- **#8485 Simscape 3D-viewer size slice — ready PR
-  [#8486](https://github.com/D-sorganization/UpstreamDrift/pull/8486)** — branch
-  `fix/viewer-3d-module-size-decomposition` moves user-defined body-segment shape construction into `_viewer_3d_segments.UserSegmentRenderer`.
-
-- **#8483 main-launcher size slice — ready PR
-  [#8484](https://github.com/D-sorganization/UpstreamDrift/pull/8484)** — branch
-  `fix/upstream-launcher-module-size-decomposition` moves Sidekick API-readiness into `SidekickSidebarManager`.
-
-- **#8476 Sentinel fix** — branch
-  `fix/auth-timing-attack-16287999036686770098` fixes user enumeration via timing attack in login endpoint.
-- **#8490 launcher UI-setup size slice — ready PR
-  [#8492](https://github.com/D-sorganization/UpstreamDrift/pull/8492)** — branch
-  `codex/launcher-ui-setup-decomposition` starts at exact PR #8489 head
-  `2f664d2beaddf7444b12f90080ae9897aea24fcc`; reviewed implementation commit
-  `ff7d937ccce767c432c53ef21e2193807ee77fdb` is published. It moves
-  sidebar/navigation/menu construction into `_launcher_navigation_ui.py` and
-  top-bar status/search/runtime/view/zoom construction plus the historical
-  widget types into `_launcher_top_bar_ui.py`. `UISetupManager` keeps all 62
-  historical methods exactly once across the facade and two inherited mixins;
-  the public widget exports, dynamic manager-to-launcher method rebinding,
-  monkeypatch-sensitive zoom description/window-control seams, and zero-argument
-  `super()` behavior remain compatible. Independent-review regressions now
-  prove that runtime zoom/menu builders dispatch through narrow facade hooks;
-  the private mixins retain standalone defaults without importing the facade.
-  The responsive source contract inspects the extracted search/zoom helper
-  owners while retaining its original clipping assertions. The facade is now
-  995 lines (down from 2,263), and its file-size/module-size exceptions plus
-  four moved long-function exceptions are removed without renewal. The module-size,
-  file-size, architecture, error-handling, suppression, TODO, and LoD gates are
-  green, as are the focused decomposition and launcher source-contract tests.
-  The official repository MyPy wrapper excludes `launcher_ui_setup.py`,
-  `_launcher_navigation_ui.py`, and `_launcher_top_bar_ui.py`; the clean wrapper
-  skip is not evidence that these modules are type-safe.
-  The broader launcher contract selection has the same 15 failures as the exact
-  parent, all caused by pre-existing shared theme/style export drift. The
-  suite-marker and DRY duplication gates also fail identically to that exact
-  parent. The suite-marker output is 275 lines with identical SHA-256
-  `a47813dfc45d70ebf231c1a4fd5a9dd89d9b5931f2fe563c275ed614b4dfa391`;
-  the duplication output is 1,571 lines with identical SHA-256
-  `73efdb450b2dadcd6261ab27b91d01c7bdf44c2f053e703ceda49bbc24a44fb3`.
-  Two independent review passes found and then verified closure of the
-  responsive-source, facade-seam, and MyPy-disclosure defects. The ready PR is
-  not released: protected CI, required human approval, and parent #8489 remain
-  open. Issue [#8490](https://github.com/D-sorganization/UpstreamDrift/issues/8490)
-  closes only after an ordinary protected merge; do not reuse closed #5922 or
-  #7399.
-
-- **Launcher-settings size slice — ready PR
-  [#8489](https://github.com/D-sorganization/UpstreamDrift/pull/8489)** — branch
-  `codex/settings-dialog-size-decomposition` starts at exact PR #8486 head
-  `624043537a5ab10aa7ef56dc61685a004b872c0c`; published head
-  `832969ebbd6c58c9892dc16f82638e67a05b20dc` is tracked by
-  [#8487](https://github.com/D-sorganization/UpstreamDrift/issues/8487). It
-  extracts runtime dependency probes and the WSL setup dialog into
-  `settings_runtime.py`, and extracts
-  diagnostics, log synchronization, and process-management behavior into the
-  private `_settings_auxiliary_tabs.py` mixin. `SettingsWidget` preserves its
-  constructor, signal, tab constants, control attributes, historical methods,
-  and runtime compatibility imports. `settings_dialog.py` is now 1,124 lines
-  (down from 2,190); its file-size and expired module-size exceptions plus the
-  obsolete `WslScriptDialog._setup_ui` long-function exception are removed
-  without renewal. All 44 focused settings/launcher contract tests pass, as do
-  changed-file Ruff/format/compile, architecture, file-size, and error-ratchet
-  gates. A wider 166-test launcher selection is 148 passed and 18 inherited
-  failures caused by shared theme/UI export drift; the exact parent produces
-  the same 18 failures (145 passed without the three new decomposition tests).
-  The unrestricted launcher suite also reaches the same Windows access
-  violation in `test_run_launcher` on the exact parent. The official Python
-  3.12 MyPy wrapper excludes all three launcher modules by repository policy.
-  The only remaining global module-size failure is the parent-identical expired
-  `launcher_ui_setup.py` exception. The cited #5922 and #7341/#7342 issues are
-  closed or unrelated; #8487 is now the truthful tracker. Independent review
-  found no actionable regression and reran all 44 focused tests successfully.
-  PR #8489 is ready for review, but required protected CI, approval, parent
-  dependency, issue completion, and release state remain unresolved; do not
-  claim any of them before normal protected repository behavior confirms them.
-
-- **#8485 Simscape 3D-viewer size slice — ready PR
-  [#8486](https://github.com/D-sorganization/UpstreamDrift/pull/8486)** — branch
-  `fix/viewer-3d-module-size-decomposition` is stacked on ready PR #8484 at
-  exact base head `89f87590981f789755c2b45e1b03ed2ee57247a3`; its exact current
-  published head is `624043537a5ab10aa7ef56dc61685a004b872c0c`.
-  It moves user-defined body-segment shape construction, fitting,
-  library/theme resolution, artist lifecycle, and per-frame updates into the private
-  `_viewer_3d_segments.UserSegmentRenderer`; `Viewer3DTab` retains its existing
-  public segment methods as thin delegates. The viewer facade is now 1,127
-  lines (down from 1,413), and both its file-size and expired module-size
-  exceptions are removed without renewal. All 71 focused viewer/UI and 31
-  budget-contract tests pass after initializing the repository's pinned
-  `vendor/ud-tools` gitlink; the broader C3D/UI selection is 159 passed, 6
-  skipped, and one parent-identical stale loader-message assertion. Protected
-  CI remains incomplete with queued and cancelled contexts, so this is not yet
-  merge-ready. The module-size gate still
-  reports only the inherited `launcher_ui_setup.py` and `settings_dialog.py`
-  violations.
-
-- **#8483 main-launcher size slice (local, no publish)** — branch
-  `fix/upstream-launcher-module-size-decomposition` starts at exact draft PR
-  #8482 head `73dd11df09a2f37ea150835930134ae4354ee5a7`. It moves the
-  Sidekick API-readiness state machine, terminal degradation report, and
-  workspace-registry seeding into the existing `SidekickSidebarManager`, while
-  preserving the historical `UpstreamDriftLauncher` methods as thin delegates
-  through the single manager owned by the launcher, and keeping the clock,
-  readiness probe, and Qt scheduler injectable. The
-  launcher facade is now 1,198 lines (down from 1,315), and its file-size
-  exception is removed without renewal. The module-size gate now reports three
-  inherited oversized modules rather than four. Issue #8483 now provides
-  accurate tracking; the retired exception had cited #7399, which is a closed,
-  unrelated body-part-visualization PR. Remaining module-size failures are
-  `launcher_ui_setup.py`,
-  `settings_dialog.py`, and `viewer_3d_tab.py` with expired exceptions. The 25
-  focused Sidekick-startup tests pass. The broader launcher selection remains
-  blocked by the parent-identical Tools ownership mismatch for the already
-  present `chat/_qt/runtime.py`; changed-file mypy also timed out under Python
-  3.12 after the Python 3.13 run stopped in NumPy's version-gated stub.
-
-- **Launcher-diagnostics size slice (local, no publish)** — branch
-  `fix/launcher-diagnostics-size-decomposition` starts at exact draft PR #8480
-  head `971649efd5ad2e5793240a5237a0314d45cc2faf`. It moves the local
-  `vendor/ud-tools` pin/checkout/sibling/remote comparison into the focused
-  `launcher_shared_tools_diagnostics` module while retaining
-  `LauncherDiagnostics.check_shared_tools_freshness()` as the public recording
-  boundary. `launcher_diagnostics.py` is now 1,196 lines, and its expired
-  module-size exception plus its file-size and long-function exceptions are
-  removed without renewal or policy widening. Do not describe this as closing
-  an issue: cited maintainability issue #5922 is closed, cited #7341/#7342 are
-  closed and concern Docker cancellation/layout reset, and open #8472 is scoped
-  specifically to the chat dock. Confirm or create accurate tracking before
-  publication. Three expired exceptions and four oversized production modules
-  remain in the module-size release gate. The legacy
-  `tests/unit/test_launcher_diagnostics.py` also has three parent-identical
-  stale assertions (17 versus the current 48 models and the former product
-  title); keep that separate from this structural slice.
-
-- **#8472 chat-dock decomposition (local stacked candidate)** — branch
-  `fix/8472-chat-dock-decomposition` is stacked directly on the #8479 parent
-  commit `2c98644d3ef3e32820eb6c2df80e75250593392b`. It moves WebSocket event
-  routing, terminal-mode mechanics, streaming-state initialization, and
-  collapsed-view mutation into `chat._qt.runtime`, retaining the historical
-  `ChatDockWidget` methods as thin delegates. The compatibility shell is now
-  1,150 lines, and both its file-size and expired module-size exceptions are
-  removed without renewal or policy widening. Focused behavior tests and the
-  file-size gate pass. The parent already fails the Tools drift sentinel for
-  `_chat_dock_widget_qt.py` and `models.py`; synchronize this decomposition to
-  the canonical Tools source before updating that hash. After the local
-  launcher-diagnostics slice, the repository module gate remains red with
-  three expired exceptions/four oversized modules: launcher UI, settings, the
-  main launcher, and the Simscape 3D viewer.
-
-- **Exact-main release-gate unblocker candidate (local only)** — branch
-  `fix/current-main-release-gate-unblockers` starts at exact `main`
-  `69eb7e9db32ccd17e45824619315b1d04b400c27`. It repairs the two
-  `CanonicalCoreShell` ESLint violations without suppressions, rejects stale
-  status responses across mode changes, corrects the stale durable-task-manager
-  SPEC paths after #8322 removed that implementation, and locks the three
-  vulnerable transitive npm packages to patched same-range releases. It also
-  restores the engine-store unload tests' mocked backend boundary after the
-  earlier `apiFetch` migration left two tests attempting relative-URL network
-  calls under Node. Focused React regression tests, the full React suite, lint,
-  type-check, build, audit, and SPEC path checks must be green before
-  publication. The expired/oversized Python module-size
-  exceptions remain an inherited release blocker: this branch neither renews
-  nor widens them. #8472 owns only the chat-dock split; the remaining modules
-  need accurate open tracking rather than being attributed to that issue.
-
-- **#4262 immutable Tools provider source** — draft UpstreamDrift PR
-  [#8475](https://github.com/D-sorganization/UpstreamDrift/pull/8475) publishes
-  branch `feat/4262-pinned-tools-provider-resolution` from independently
-  reviewed implementation head `93350cc03649b411403814911f6fb6a1620297e8`
-  on exact `main` `69eb7e9d`. The five `provider: tools` launcher entries resolve
-  exclusively to `vendor/ud-tools` at the already-declared gitlink SHA
-  `ff4240217005e1415ca409fd124e50b64ee642d2`. Follow-up hardening makes the
-  Tools provider win over conflicting installed-package or sibling metadata,
-  requires an initialized, exact-HEAD, clean gitlink attached to this
-  superproject, rejects reparse-point replacements and all resolved path
-  escapes, and normalizes failure to `provider_unavailable`. The authority
-  inspection is decomposed into bounded index, checkout-layout, identity, and
-  cleanliness checks so it satisfies the changed-file architecture budget.
-  Canonical SPEC version `1.0.497` now matches the changelog. Mutable
-  `../Tools` roots are no longer serialized and unrelated sibling providers
-  retain their existing resolution. The branch deliberately does not change
-  the gitlink pin or add `TOOLS_REPO_PATH`. #4262 remains open for any future
-  pin update, an identity-validated development override, broader consumer
-  migration, protected current-head CI/review, and integration.
-  > > > > > > > pr-8475
-- **#8458 hand-path drift/control attribution** — consolidated branch
-  `feat/hand-path-drift-control-attribution` defines the canonical same-state
-  ZTCF/control/ZVCF contract; implements exact double-pendulum, one-arm, and
-  mechanically closed two-arm adapters; and generates a deterministic
-  joint/time-resolved evidence package with force vectors, impulse, power,
-  work, cancellation-safe shares, common/differential two-hand modes, source
-  hashes, and numerical closure. The two forward cases attribute 101.2% and
-  103.5% of signed primary force work to drift because control is opposing. The
-  prescribed two-arm local sweep instead has a 0.962 drift/control cancellation
-  index. A separate bounded residual-couple preview test reduces the declared
-  30 ms actuator RMSE by 57.6%; it is a signal-delay hypothesis, not evidence
-  of muscle preactivation or human performance. The seven generated evidence
-  figures and all pages of the final 106-page PDF have been visually inspected.
-  Lossless object-stream compaction yields 792,985 bytes while preserving 110
-  URI links and 122 outline entries. Remaining handoff: run the final repository
-  gates, merge the protected PR, then pin the compact consumer snapshot and
-  SVGs in AffineDrift to the actual merged commit. The unrelated chat-dock size
-  exception had expired on `main`; #8472 now owns a final renewal through
-  2026-08-31 so the all-files CI gate remains truthful and operational.
-
-- **#8461 WSCG 2024 legacy-evidence audit** — both archived source decks were
-  hash-matched to the user-supplied originals and all 12 slides were inspected.
-  `docs/research/proximal_distal_energy_transfer/WSCG_2024_LEGACY_EVIDENCE_AUDIT.md`
-  records the exact claims, pointwise ZTCF construction, two-hand couple
-  mechanism, OOXML chart-cache provenance, and publication boundaries. The
-  evidence supports passive late-downswing negative-torque plausibility in the
-  planar model, not momentum isolation or human validation. No legacy image was
-  reused: slides 7–10 are static JPEGs, the chart's source workbook is absent,
-  and the slide-3 composite has no license note.
-
-- **#8448 higher-order mechanism ladder** — first slice merged in full PR
-  **#8456** at remote-main commit `85eae6a8ef1b132f93eda87bef2a2d6d51280c49`.
-  The executed slice adds a
-  common frame/reference-explicit wrench-power schema, exact frame and
-  reference-transport audits, prescribed mobile-hub inverse dynamics, planar
-  two-hand constraint rank/nullspace diagnostics, seven figures, and a model
-  discrepancy table. The evidence record deliberately marks full-body
-  cross-engine dynamics `not_executed`; capability is not reported as a result.
-  Follow-up full PR **#8457** losslessly compacts the 90-page PDF with page,
-  link, outline, and visual-equivalence checks. The later publication policy
-  removed the obsolete 1 MiB ceiling while retaining artifact-integrity and
-  GitHub hard-boundary controls.
-
-- **#8447 gravity, momentum, damping, and shaft-flex separation** — full PR
-  **#8455** on `research/momentum-gravity-shaft-flex`. A tested three-coordinate point-mass
-  surrogate now has an exact matched rigid reduction, termwise acceleration and
-  power attribution, interface force/moment accounting, closed work--energy
-  balance, gravity and damping ablations, a 120-case
-  stiffness/damping/torque-cut grid, impact-window and timestep sensitivity,
-  eight figures, and a new publication chapter. The bounded reference result is
-  +0.108 m/s flexible-minus-rigid delivery speed with 0.720 J peak shaft strain
-  energy; gravity and joint-damping ablations are substantially larger. This is
-  not a calibrated shaft or human-subject model.
-
-- **#8446 two-hand passive-couple reproduction** — full PR **#8454** on branch
-  `research/two-hand-passive-couple`. The archived 2,801-sample
-  BASE/ZTCF/DELTA tables now have hash-traceable portable exports, a tested
-  frame-explicit wrench and power audit, reversal/downsampling sensitivity,
-  grip-separation and relative-orientation counterfactuals, eight figures, and
-  a publication chapter. The key bounded finding is a -19.63 N m pointwise ZTCF
-  midpoint couple generated entirely by separated contact forces; it is not yet
-  a forward two-hand killswitch or human validation result.
-
-- **#8445 counterfactual persistence** — full PR **#8453** on branch
-  `research/counterfactual-killswitch-ensemble` adds a deterministic
-  matched-state API; 96 cut/horizon/timestep cases; gravity, damping, and
-  torque-switch audits; WSCG DELTA convention checks; four figures; and a
-  visually verified 58-page article. Pointwise ZTCF is explicitly limited to
-  instantaneous attribution; killswitch claims always state a forward horizon.
-
-- **#8443 / #8444 interaction-force mechanisms** — full PR **#8452** on branch
-  `research/interaction-force-transfer` adds an exact and tested
-  double-pendulum wrist-force/power decomposition, matched-state torque
-  killswitch, seven vector/mechanism figures, hash-registered WSCG 2024 source
-  decks, and a 52-page rendered article. The source presentation is treated as
-  project-originated hypothesis evidence, not independent validation. Follow-on
-  issues #8445–#8451 cover counterfactual ensembles, two-hand equivalent-couple
-  reproduction, gravity/flex separation, higher-order models, optimization,
-  human validation, and the 90–110-page open monograph release.
-
-- **Document title capitalization** — this branch normalizes the
-  Proximal-to-Distal article headings and regenerated PDF/LaTeX, adds a
-  changed-document gate to pre-commit and Docs Governance CI, and records the
-  fleet convention in `AGENTS.md`. The full tracked-document audit command is
-  `python scripts/check_document_title_case.py`.
-
-- **Tools #4276** — PR **#8440** remains a partial, headless, fail-closed
-  consumer for the canonical Tools ground v1 façade while preserving Tools
-  records/provenance. Its exact published head `e2f436beebc3c2739dcc5f06b5efe5e130513c65`
-  has been reconciled locally by a normal merge of current `main`
-  `69eb7e9db32ccd17e45824619315b1d04b400c27`; the resulting local candidate is
-  not published or release-qualified. Final Tools merges and exact vendor/Cargo
-  pins, FastAPI/PyQt/React parity, clean-install smokes, protected CI, and
-  independent current-head review remain open.
-
-- **#8432** (`feat/launch-monitor-flexible-analysis`, replacing draft #8369)
-  adds a versioned,
-  vendor-neutral flexible-analysis contract with matched FastAPI and PyQt
-  surfaces. It keeps aggregate observations out of regression, labels
-  association as non-causal, validates option enums at the API boundary, and
-  records deterministic dataset lineage. React/Vite parity and the final
-  canonical Tools dependency pin remain tracked work rather than implied
-  capabilities.
-
-- **#8426** ("Proximal-to-distal swing mechanics — validation and open resource
-  roadmap") — open. Full PR **#8428** neutralizes the reader-facing report, adds
-  a 13-case model-parameter sensitivity analysis, and updates the rendered PDF.
-  Remaining counterfactual-parity, model-fidelity, and human-data work stays open.
-- **#8345** ("EPIC: 3-D Putt Simulation") — open. P2/P3/P4 are implemented in
-  full PR **#8352** (`feat/putting-dynamics`): an advanced
-  surface/friction/mode-machine package,
-  finite-mass collision with loft and adjustable-hosel wrench/twist outputs, and the
-  public-data review in `docs/physics/PUTTING_KINEMATICS_KINETICS_REVIEW.md`.
-  Local evidence: 70 focused pytest tests, Ruff clean, and Python 3.12 mypy clean.
-  P1 is implemented in full PR **#8354** (`feat/putting-3d-scene`): canonical FastAPI
-  playback DTOs, generated TypeScript types, Zustand/TanStack state, theme-token R3F
-  scene, visible ball spin and putter slowdown, orbit/playback controls, adjustable
-  hosel/CG view, and desktop/mobile rendered QA. P5 public sharing remains.
-- **#8339** ("Rate of Closure Impact Explorer") — merged. `vendor/ud-tools` submodule
-  pin was provisional pending Tools#4092; confirm the submodule now points at the
-  squash-merge commit on Tools `main`, not the old branch-head SHA, before relying on it.
-- **#8353** (`fix/classic-launcher-missing-tools`) — full PR. Fixes classic-launcher startup
-  from nested worktrees by locating the workspace-level Tools checkout. If no valid
-  implicit Tools runtime exists, only the optional Sidekick sidebar is disabled;
-  explicit `TOOLS_REPO_PATH` selections remain fail-closed. Commit `6699380d9` has
-  28 focused launcher/overlay tests plus clean Ruff checks.
-- `chore/consolidate-open-pr-backlog` (full PR **#8431**) consolidates the still-applicable changes from
-  micro-optimization PRs #8335, #8371, #8408-#8411, and #8424 together with the
-  GitHub Actions updates from #8329-#8332. Superseded or duplicate PRs are closed
-  only after their exact replacement is linked.
-- #8344 — physics fix (impact friction spin axis / gear-effect offset), independent.
-- PR #8422 is independently synchronized to current `main` and retains only its
-  focused ground-reaction-force reduction change plus the required SPEC entry.
-
-## Must-Read Architecture Pointers
-
-1. `CLAUDE.md` — authoritative contributor/agent policy: gate commands, CI requirements,
-   error-handling ratchet, feature-parity registry, physics-engine gotchas.
-2. `AGENTS.md` — shared infrastructure catalog (FK, reference poses, mocap loaders, theme,
-   rendering helpers); **discovery-first** workflow: grep `src/shared/python/` then
-   `src/tools/` + launchers before writing anything new.
-3. `docs/adr/0013-launcher-composability.md` — embeddable-tool contract/registry design.
-4. `docs/adr/0007-motion-pipeline-architecture.md` — mocap → tracked-motion CIR pipeline.
-5. `docs/adr/0016-*` (error handling) — see `scripts/ci/check_error_handling_ratchet.py`
-   and `scripts/config/error_handling_baseline.json`.
-
-## In-Flight Branches (What Stacks on What)
-
-The active branches are independent topic branches off `main` unless noted:
-
-- `feat/hand-path-drift-control-attribution` — consolidated implementation for
-  epic #8458 and children #8459–#8471; target `main` after local render/gates.
-- `research/8555-torso-velocity` — active implementation for #8555 and the
-  outcome-blind #8556 registration under epic #8551. It adds a seven-coordinate
-  finite-inertia rotating-base model with two arm constraints, separated hand
-  reactions, direct wrist channels, and a compliant distal club. The registered
-  18-case grid covers two matching rules and three torso-command histories;
-  exact torso/arm/wrist killswitches, coincident/reversed moment-arm controls,
-  shaft/anthropometry/grip/timing/damping perturbations, aligned JSON/NPZ
-  trajectories, three figures, and paper/release updates are included. Human
-  validation remains blocked on governed synchronized bilateral six-axis grip
-  wrench and kinematic data; the committed #8556 amendment freezes its held-out
-  null, braking, adverse-load, and sensitivity tests without fabricating results.
-- `research/shoulder-velocity-drift-transfer` — merged implementation for epic
-  #8551. The TDD implementation added a 90-case, five-phase, two-counterfactual
-  fixed-hub velocity sweep, exact drift/control and reaction-force closure,
-  plus a 60-program trajectory search varying proximal-drive cut, residual
-  proximal torque, and wrist release. All invalid impact attempts remain in
-  the evidence; speed, negative grip work, and peak force define the Pareto
-  objectives. Six generated figures and the paper chapter
-  `#sec-shoulder-velocity-transfer`. The current model coordinate is proximal
-  link angular velocity, not anatomical shoulder or thorax velocity. The
-  trajectory grid contradicts proximal speed as a standalone release rule.
-  Tools #4406 supplies the model-neutral metrics and PyQt Drift Transfer tab;
-  AffineDrift #3817 supplies the publication surface. The rotating-base two-hand
-  follow-up is implemented on `research/8555-torso-velocity`; neither tier is a
-  causal human torso-velocity test.
-- `research/two-hand-passive-couple` — full PR **#8454** for #8446 under epic
-  #8443; direct WSCG table reconstruction and passive equivalent-couple audit.
-- `research/counterfactual-killswitch-ensemble` — full PR **#8453** for #8445
-  under epic #8443; multi-phase persistence and numerical/physics sensitivity.
-- `research/interaction-force-transfer` — full PR **#8452** for #8444 under
-  epic #8443; exact interaction-force mechanics and first detailed article
-  treatment.
-- `fix/8429-private-launch-data` — issue #8429, full PR **#8430**. Removes the
-  public 832-shot launch-monitor CSV and resolves it through the authenticated
-  private data authority. Focused validation:
-  `tests/unit/validation_pkg/test_kaggle_validation.py`.
-- `feat/putting-3d-scene` — #8345 P1, full PR **#8354** to `main`
-  after #8352 merged. Scoped evidence: 80 Python tests and 17 UI/theme tests pass; strict
-  API mypy, Ruff, generated-type freshness, ESLint, TypeScript, color guard, and
-  production build pass. The full UI baseline remains 781 passed / 2 unrelated
-  `useEngineStore` unload failures, reproduced on the parent checkout.
-- `fix/impact-friction-spin-axis-and-gear-offset` (#8344) — off `main`.
-- `chore/consolidate-open-pr-backlog` (full PR **#8431**) — clean branch from current `main`; replaces
-  the applicable micro-optimization and Dependabot branches listed above without
-  carrying their stale historical merge differences.
-- `feat/4276-ground-consumer-adapter` — PR **#8440**, a partial Tools #4276
-  consumer slice locally reconciled onto `main` `69eb7e9d`; no vendor pin,
-  current-head review, or release claim until the protected Tools ground stack
-  lands and the remaining consumer surfaces are qualified.
-
-## Gate Commands (Run These Before Opening/Updating a PR)
-
-```bash
-python3 -m ruff check .                            # lint
-python3 -m ruff format --check .                   # format check (separate CI step)
-python3 -m pytest -n auto --timeout=60              # full test suite
-python3 -m pytest -m unit -n auto --timeout=60      # unit tests only
-python3 -m pytest -m "not slow and not live_simulation" -n auto --timeout=60
-python3 scripts/ci/check_file_size_budget.py        # 1200-line file budget
-python3 scripts/ci/check_error_handling_ratchet.py  # error-handling anti-pattern ratchet
-python3 scripts/check_docs_governance.py            # docs-only PR gate (docs-ci.yml)
-python3 -m scripts.generate_feature_parity_matrix   # after editing feature_parity.json
-maturin develop                                     # build Rust extensions locally
-# Ground consumer focus:
-python3 -m pytest tests/unit/ground_model/test_consumer_gateway.py -q
+```powershell
+python -m pytest tests/research/test_observer_recovery_study.py `
+  tests/research/test_momentum_transfer_experiment_registry.py -q
+python -m ruff check scripts/research/proximal_distal_energy/run_observer_recovery_study.py `
+  tests/research/test_observer_recovery_study.py
+python -m scripts.research.proximal_distal_energy.claim_audit validate
+python -m scripts.research.proximal_distal_energy.qualify_open_release validate
+python scripts/check_document_title_case.py --changed-from origin/main
+python scripts/check_doc_size_budget.py
 ```
 
-CI entry points: `.github/workflows/ci-standard.yml` (full matrix: `code-quality`,
-`security-scans`, `repo-structure-gates`, `unit-test-gate`, `quality-gate`, `tests`,
-`rust-quality-gate`, etc.) and `.github/workflows/docs-ci.yml` (docs-only PRs, requires
-`quality-gate` + SPEC.md freshness).
+For publication, render the Quarto PDF, run
+`optimize_article_pdf`, inspect affected pages as PNGs, write and validate the
+open-release manifest, and verify the protected squash merge commit on remote
+`main`.
 
-## Do-Not List
+## Do Not
 
-- **Do not edit `vendor/ud-tools/`** — it is vendored from Tools; changes are erased on
-  the next `git submodule update`/vendor bump. Fix upstream in Tools instead.
-- **Do not import `upstream_drift_tools`** in new `src/`/`tests/` code — it is a
-  deprecated compat alias; use `sidekick` (enforced by
-  `tests/unit/repo_hygiene/test_no_deprecated_imports.py`).
-- **Do not let Tools import UpstreamDrift** — dependency arrow is one-way (UD vendors
-  Tools; Tools cannot import UD). If Tools needs UD physics, promote via the documented
-  vendor pattern; do not create a cycle.
-- **Do not grow files past 1200 lines** (`scripts/config/file_size_budget.json` holds
-  exceptions) or modules past the `module_size_budget_baseline.json` ratchet.
-- **Do not add `try/except Exception: pass`, bare `subprocess.Popen`, unchecked
-  `asyncio.gather`, or generic `RuntimeError`** — use the `core.process_safety` /
-  `core.contracts.exceptions` helpers (see CLAUDE.md "Error handling").
-- **Do not skip the agent-lease protocol** — this repo is touched by multiple agents
-  (`claude`, `codex`, `jules`, `local`, `gaai`, `maxwell-daemon`); check/post a lease via
-  `Repository_Management` scripts before starting work on a numbered issue (see
-  CLAUDE.md "Multi-agent coordination").
-- **Do not open PRs as drafts** — every PR must open ready-for-review (fleet policy,
-  Repository_Management#1390).
-- **Do not batch a day's work into one commit** — commit small, frequent, conventional
-  commits.
-
-## Current Roadmap Authority
-
-Use open GitHub issues and dependency-ordered PRs as the current roadmap. The
-older numbered list formerly here described already-merged 2026-08 work and
-was removed to keep this handoff within its governed size budget.
+- Do not infer human technique, muscle action, injury benefit, or neural timing
+  demand from the synthetic studies.
+- Do not call terminal dispersion, a transient threshold crossing, or open-loop
+  repeatability “self-correction.”
+- Do not collapse pointwise drift, forward killswitch persistence, and
+  statistical mediation into one estimand.
+- Do not close #8556 or #8595 without their declared evidence boundary.
+- Do not bypass reviews/checks, force-push, admin-merge, or rerun unchanged
+  runner-capacity failures.

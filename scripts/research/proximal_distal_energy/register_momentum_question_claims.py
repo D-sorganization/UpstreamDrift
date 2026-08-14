@@ -28,8 +28,9 @@ def main() -> None:
     groups = {
         "PD-CLAIM-242": [by_line[line]["candidate_id"] for line in (3, 12, 22)],
         "PD-CLAIM-243": [by_line[line]["candidate_id"] for line in (14, 28, 38)],
-        "PD-CLAIM-244": [by_line[line]["candidate_id"] for line in (48, 57, 64)],
-        "PD-CLAIM-245": [by_line[72]["candidate_id"]],
+        "PD-CLAIM-244": [by_line[line]["candidate_id"] for line in (46, 57)],
+        "PD-CLAIM-245": [by_line[line]["candidate_id"] for line in (63, 72, 79)],
+        "PD-CLAIM-246": [by_line[87]["candidate_id"]],
     }
     definitions = {
         "PD-CLAIM-242": (
@@ -47,13 +48,20 @@ def main() -> None:
             "Repeatability or open-loop sensitivity is relabeled self-correction or human timing economy.",
         ),
         "PD-CLAIM-244": (
+            "A paired 15-case planar screen found sustained half-error recovery in 13--20 percent of cases, with no decisive policy separation; transient threshold crossing is not self-correction.",
+            "trajectory_recovery_screen",
+            "no_policy_recovery_advantage_established",
+            "The result is limited to a small engineering envelope and a simple delayed observer; it does not estimate human correction.",
+            "A policy advantage emerges under expanded preregistered attraction-region, external-load, or participant-held-out tests.",
+        ),
+        "PD-CLAIM-245": (
             "The planar evidence rejects maximizing proximal velocity as a general rule at those tiers, while five distinct slack classes require separate state, energy, and measurement tests.",
             "nonmonotonic_velocity_and_typed_slack_boundary",
             "proximal_rule_rejected_at_planar_tiers_slack_mostly_open",
             "Only a phenomenological transmission dead zone has been directly exercised; no human optimum is identified.",
             "A planar reversal is promoted to a human optimum or one slack class is inferred from another.",
         ),
-        "PD-CLAIM-245": (
+        "PD-CLAIM-246": (
             "Synthetic studies can falsify declared model mechanisms and qualify software but cannot establish coaching or human-control strategies; governed participant-held-out bilateral-wrench data remain required.",
             "human_evidence_boundary",
             "human_validation_blocked",
@@ -121,7 +129,7 @@ def main() -> None:
     registry["paper"]["source_digest"] = inventory["source_digest"]
     registry["audit_scope"]["completion_status"] = "complete"
     registry["audit_scope"]["current_scope"] = (
-        "The complete 935-candidate paper inventory is adjudicated. The critical-question chapter maps ten new candidates to four bounded claims and retains all human-data gates."
+        "The complete 937-candidate paper inventory is adjudicated. The critical-question chapter maps twelve candidates to five bounded claims and retains all human-data gates."
     )
     REGISTRY.write_text(json.dumps(registry, indent=2) + "\n", encoding="utf-8")
 

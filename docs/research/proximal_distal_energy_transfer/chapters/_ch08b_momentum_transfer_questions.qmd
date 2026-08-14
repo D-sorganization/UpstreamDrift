@@ -14,8 +14,8 @@ and their broader rationale is documented in the open
 | How much transfer is drift-mediated? | Conditional on the observable, coordinate and frame, event window, model, and decomposition. Signed drift shares may exceed 100% when control opposes the pathway; pointwise attribution is not forward persistence. | A common acceleration/force/impulse/power/work ledger across tiers, same-state killswitches, uncertainty propagation, and participant-held-out bilateral-wrench evaluation. |
 | Which geometry matters? | Relative link angle, force direction, velocity direction, reference point, grip separation, swing-plane orientation, and contact moment arm can gate magnitude and sign. | A subject-scaled spatial atlas with zero, orthogonal, coincident-grip, and reversed-moment-arm controls reproduced in an independent engine. |
 | Which timing patterns matter? | Early distal release changes the available geometry; proximal rate, acceleration, braking, and release timing interact nonmonotonically. “Casting” is not one universal event. | Factorial interventions on proximal acceleration, distal release, and braking under matched state and work, with multiple preregistered casting definitions and adverse-load tests. |
-| Does a drift-mediated strategy require less timing precision? | Unresolved for people. State triggering improves selected synthetic outcomes but assumes state access and does not prove reduced neural timing demand. | Clock, state, impedance, and delayed-observer policies compared by viable timing-region volume, lower-tail outcome, phase error, delay, saturation, force, and effort. |
-| Is a strategy self-correcting? | Not established. Low perturbation sensitivity is not self-correction without a recovery mechanism. | Matched perturbations demonstrating error decay, recovery time, viable-set return probability, attraction-region size, and no hidden load-cost increase. |
+| Does a drift-mediated strategy require less timing precision? | Unresolved for people. In a 15-case paired planar screen, neither perfect nor delayed/noisy state triggering established a recovery advantage over the clock policy; this is not evidence about neural timing demand. | Viable timing-region and phase-error studies under matched work, force, and effort, then participant-held-out perturbation trials. |
+| Is a strategy self-correcting? | Not established. Requiring error to remain below half its initial value through delivery produced recovery in only 13–20% of the engineering cases, with no policy separating decisively. | Larger attraction-region sweeps, adverse external loads, independently identified observers, and human perturbations without hidden load-cost increase. |
 | Should proximal velocity be maximized? | No general rule is supported. The reduced studies contain phase dependence, matching-rule dependence, nonmonotonic killswitch effects, and adverse braking associations. | Dose-response surfaces for rate and acceleration with matched state, work, load, and impact definitions, extended across spatial and subject-scaled models and held-out participants. |
 | Is slack beneficial or necessary? | Unanswered until the mechanism is named. Contact loss, backlash, elastic preload, muscle-tendon series compliance, and control deadband are not interchangeable. | One slack class at a time, with a state and constitutive law, matched initial energy, passivity and closure checks, hysteresis sweeps, and a measurement strategy. |
 
@@ -42,6 +42,21 @@ error, lower-tail performance, and degradation under observer delay and
 noise. Self-correction has the stronger requirement that a declared physical
 or feedback mechanism return a perturbed state toward a viable set. Repeatable
 open-loop behavior does not meet that definition.
+
+The delayed-observer experiment makes that distinction executable. Each
+policy received the same nuisance parameters and deterministic sensor-noise
+realization in an unperturbed reference and a matched initial-state
+perturbation. All policies briefly crossed the half-error threshold in most
+cases, but most later left it. Requiring sustained recovery through delivery
+reduced return fractions to 0.20 for the clock and delayed/noisy policies and
+0.13 for perfect-state and higher-impedance policies. Median terminal error
+remained 0.79--0.84 of the initial perturbation. @fig-observer-recovery thus
+rejects the shortcut from transient error reduction or low outcome variance
+to self-correction; it does not rank human strategies.
+
+![Trajectory-Level Recovery Under Matched Initial-State Perturbations. Bands
+show the held-out engineering envelope; labels above the recovery bars give
+90th-percentile individual-hand force.](figures/fig_observer_recovery.pdf){#fig-observer-recovery width=100%}
 
 ## Proximal Velocity as a Dose, Not a Maxim
 
