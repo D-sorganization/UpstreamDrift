@@ -68,7 +68,13 @@ contact Jacobian, yet the prescribed anatomical hand points remain
 substitute for closed feasible anatomy. The next articulated spatial tier must
 solve bilateral closed-contact inverse kinematics with joint-limit and
 collision checks before its forward contact, timing, recovery, or slack
-results can be interpreted.
+results can be interpreted. The registered inverse-kinematics follow-up now
+clears that reduced-tree gate in all 234 profile/span/phase samples while
+holding the club pose fixed. Its minimum engineering-limit margin is 0.103 rad
+and its minimum coarse bounding-sphere clearance is 30.9 mm. These are
+screening results, not measured anatomical ranges or mesh-level clearance;
+they advance the next test to calibrated compliant forward contact from the
+closed states.
 
 The reduced spatial forward-contact extension resolves that narrower mechanism
 gate. Native MuJoCo and Pinocchio independently integrate two finite-mass hand
@@ -112,8 +118,9 @@ order:
 
 1. **Articulated Spatial Forward-Contact Counterfactual.** Replace the executed
    hand-carriage reference with subject-scaled articulated arms and calibrated
-   grip interfaces. First require bilateral closed-contact inverse kinematics,
-   joint-limit and collision qualification, then preserve the two-engine
+   grip interfaces. Start from the executed bilateral closed-contact,
+   engineering-limit, and coarse collision-qualified configurations, replace
+   those screens with subject-specific anatomy where available, then preserve the two-engine
    same-state killswitch, force, couple, power, work, pathway, and closure
    observables.
 2. **Calibrated Uncertainty and Constrained Control.** Extend the executed

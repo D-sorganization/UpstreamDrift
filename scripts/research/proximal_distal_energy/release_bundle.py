@@ -90,6 +90,10 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
                 "command": "python -m scripts.research.proximal_distal_energy.run_subject_scaled_spatial_geometry",
                 "tier": "prescribed_subject_scaled_contact_closure_audit",
             },
+            "subject_scaled_closed_contact": {
+                "command": "python -m scripts.research.proximal_distal_energy.run_subject_scaled_closed_contact",
+                "tier": "subject_scaled_bounded_closed_contact_inverse_kinematics",
+            },
             "spatial_forward_contact": {
                 "command": "python -m scripts.research.proximal_distal_energy.run_spatial_forward_contact_study",
                 "tier": "reduced_two_engine_forward_contact",
@@ -196,6 +200,9 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
             "physical_bilateral_six_axis_device_validation": "untested",
             "subject_scaled_spatial_contact_feasibility": (
                 "prescribed_states_rejected_closed_contact_forward_test_open"
+            ),
+            "subject_scaled_closed_contact_feasibility": (
+                "reduced_tree_closed_contact_screen_passed_compliant_forward_test_open"
             ),
         },
         "known_open_gates": [

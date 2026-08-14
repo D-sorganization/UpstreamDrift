@@ -294,10 +294,38 @@ These positive algebraic controls do not rescue anatomical feasibility; they
 show that measurement rank, local kinematic rank, contact closure, and forward
 contact dynamics are four distinct gates.
 
-This result narrows the next spatial experiment. A subject-scaled model must
-first solve bilateral closed-contact inverse kinematics with joint-limit and
-collision checks. It must then integrate calibrated compliant contact from the
-same closed initial state, expose contact loss or tissue/shaft compliance as
+### Closed-Contact Inverse-Kinematics Gate
+
+The next registered rung solves rather than prescribes the body and arm
+coordinates. For each of the six profiles, three grip spans, and 13 samples
+from 0.00 through 0.24 s, a bounded least-squares solve holds all six club
+coordinates at their prescribed values and adjusts the 14 pelvis, torso,
+shoulder, elbow, and wrist coordinates. Bilateral point errors are the primary
+residual; a weak reference-posture term selects one solution from the
+underdetermined family. An unreachable 2.0 m grip span is retained as an
+adverse control and correctly fails the closure gate.
+
+![Subject-Scaled Bilateral Closed-Contact Feasibility](figures/fig_subject_scaled_closed_contact.pdf){#fig-subject-scaled-closed-contact width=100%}
+
+All 234 registered samples close both contacts. The largest bilateral error is
+$1.16\times10^{-10}$ m, every achieved constraint Jacobian retains rank six,
+and the maximum adjacent-sample change across the 20 ms continuation grid is
+0.0256 rad. The smallest margin to the declared reduced-model joint bounds is
+0.103 rad, and the smallest nonexempt bounding-sphere clearance is 30.9 mm.
+The result therefore rejects the earlier prescribed trajectories without
+showing that the grip geometry itself is unreachable in this reduced tree.
+
+Those favorable checks remain a necessary-condition result. The broad bounds
+are engineering guards, not measured clinical ranges. Bounding spheres omit
+mesh-level anatomy; connected segments and intended hand--grip contacts are
+exempt. The tree has no explicit scapular glide, forearm
+pronation--supination, multi-axis wrist, fingers, or distributed tissue
+contact. Inverse kinematics supplies neither force nor work and cannot test
+passivity, timing demand, self-correction, proximal-speed benefit, or any
+class of slack.
+
+The next spatial experiment must now integrate calibrated compliant contact
+from these closed states, expose contact loss and tissue/shaft compliance as
 typed states, and repeat the coincident, reversal, killswitch, power, and
 work--energy controls in two independent engines. Only trajectories passing
 those gates may be used to test whether drift-mediated transfer reduces timing
@@ -335,8 +363,9 @@ Four stronger statements remain open:
   result.
 - **Anatomical Magnitude Is Unsupported.** The reduced tree and spherical
   inertias are not subject-specific anatomy, muscle, or tissue mechanics. The
-  subject-scaled audit further shows that its prescribed states do not close
-  the anatomical hands on the declared grip points.
+  subject-scaled audit shows that its prescribed states do not close the
+  anatomical hands on the declared grip points; the bounded follow-up closes
+  only a reduced tree under engineering-limit and coarse collision screens.
 - **Human Strategy Is Unsupported.** No measured trajectory or force record is
   held out for validation, and no coaching prescription follows from this
   mechanism experiment.

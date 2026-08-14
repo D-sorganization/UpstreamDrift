@@ -48,7 +48,18 @@ in git and GitHub.
 
 ## Current Program State
 
-- The claim inventory is adjudicated at 982/982 candidates and 261 atomic
+- The MT-E08 closed-contact follow-up solves all 234 combinations of six
+  synthetic profiles, three grip spans, and 13 phase samples while fixing the
+  six club coordinates. Worst bilateral closure error is
+  `1.15817e-10 m`; every achieved constraint Jacobian has rank six.
+- The minimum broad engineering-limit margin is `0.103452 rad`, the minimum
+  coarse nonadjacent-body bounding-sphere clearance is `0.0308571 m`, and the
+  maximum adjacent-sample configuration change is `0.0255737 rad`.
+- Those screens do not establish clinical range of motion, mesh-level anatomy,
+  grip force, passive transfer, timing benefit, slack benefit, or human use.
+  The next spatial gate is calibrated compliant forward contact initialized
+  from the closed configurations.
+- The claim inventory is adjudicated at 987/987 candidates and 263 atomic
   claims, including the adverse subject-scaled contact-closure result.
 - The handwritten agenda retains bounded model answers for eight points and a
   construct-level unresolved boundary for human intentional slack.
@@ -61,9 +72,10 @@ in git and GitHub.
 
 ## Remaining Scientific Work
 
-1. Solve subject-scaled bilateral closed-contact inverse kinematics with joint
-   limits and collision checks; reject trajectories that do not close.
-2. Integrate calibrated compliant contact from those closed states, then repeat
+1. Replace the executed broad engineering bounds and bounding-sphere collision
+   screen with subject-specific joint geometry, clinical ranges where governed,
+   and mesh-level collision/contact qualification.
+2. Integrate calibrated compliant contact from the closed states, then repeat
    coincident, reversal, killswitch, power, and work--energy controls in two
    independent forward engines.
 3. Qualify MT-E07 with a traceably calibrated bilateral six-axis device,
@@ -83,7 +95,10 @@ in git and GitHub.
 ```powershell
 python -m scripts.research.proximal_distal_energy.run_subject_scaled_spatial_geometry
 python -m scripts.research.proximal_distal_energy.make_subject_scaled_spatial_geometry_figures
+python -m scripts.research.proximal_distal_energy.run_subject_scaled_closed_contact
+python -m scripts.research.proximal_distal_energy.make_subject_scaled_closed_contact_figures
 python -m pytest tests/research/test_subject_scaled_spatial_geometry.py `
+  tests/research/test_subject_scaled_closed_contact.py `
   tests/research/test_momentum_transfer_experiment_registry.py `
   tests/unit/research/test_momentum_question_readiness.py `
   tests/research/test_proximal_distal_release_bundle.py -q
@@ -91,7 +106,11 @@ python -m ruff check scripts/research/proximal_distal_energy/subject_scaled_spat
   scripts/research/proximal_distal_energy/run_subject_scaled_spatial_geometry.py `
   scripts/research/proximal_distal_energy/make_subject_scaled_spatial_geometry_figures.py `
   scripts/research/proximal_distal_energy/register_subject_scaled_spatial_geometry_claims.py `
-  tests/research/test_subject_scaled_spatial_geometry.py
+  tests/research/test_subject_scaled_spatial_geometry.py `
+  scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py `
+  scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py `
+  scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py `
+  tests/research/test_subject_scaled_closed_contact.py
 python -m scripts.research.proximal_distal_energy.claim_audit validate
 python -m scripts.research.proximal_distal_energy.momentum_question_readiness validate
 python -m scripts.research.proximal_distal_energy.qualify_open_release validate

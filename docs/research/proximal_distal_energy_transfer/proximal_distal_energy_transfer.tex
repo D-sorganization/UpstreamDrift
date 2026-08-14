@@ -362,19 +362,25 @@ remove it exactly. Because contact loads are prescribed, passive spatial
 contact remains inconclusive at that tier. A six-profile subject-scaled
 audit then shows why local rank is insufficient: its prescribed
 anatomical hand points miss the declared grips by 0.171--0.616 m even
-though every local contact Jacobian has rank six. A subsequent reduced
-forward-contact experiment independently integrates MuJoCo and Pinocchio
-with two finite-mass hand carriages, paired compliant interfaces, and no
-direct club actuation. Its exact same-state driver-killswitch branch
-retains a negative swing-normal contact couple for 37.5 ms; coincident
-and reversed-moment-arm controls close exactly, trajectory and wrench
-gates pass, and work--energy residual decreases under timestep
-refinement. This supports a reduced spatial mechanism, not anatomical
-arms, muscle coordination, human strategy, or equipment calibration. A
-coupled uncertainty and control experiment then varies 12 inputs
-simultaneously, audits structural and practical identifiability, and
-compares eight preselected delayed-command programs on separate training
-and held-out ensembles. The net planar wrench leaves one
+though every local contact Jacobian has rank six. A bounded
+inverse-kinematics continuation then closes all 234 registered
+subject-scaled configurations while holding the club pose fixed; every
+sample retains rank six, stays inside broad reduced-model engineering
+limits, and passes a coarse nonadjacent-body bounding-sphere screen.
+This establishes reduced-tree geometric feasibility, not anatomical
+validity, contact force, passivity, timing benefit, or human strategy. A
+subsequent reduced forward-contact experiment independently integrates
+MuJoCo and Pinocchio with two finite-mass hand carriages, paired
+compliant interfaces, and no direct club actuation. Its exact same-state
+driver-killswitch branch retains a negative swing-normal contact couple
+for 37.5 ms; coincident and reversed-moment-arm controls close exactly,
+trajectory and wrench gates pass, and work--energy residual decreases
+under timestep refinement. This supports a reduced spatial mechanism,
+not anatomical arms, muscle coordination, human strategy, or equipment
+calibration. A coupled uncertainty and control experiment then varies 12
+inputs simultaneously, audits structural and practical identifiability,
+and compares eight preselected delayed-command programs on separate
+training and held-out ensembles. The net planar wrench leaves one
 individual-hand-force mode unidentified, the six summary observables
 cannot identify the full 12-parameter vector, and all eight programs are
 nondominated on held-out samples. An early opposing command improves
@@ -465,7 +471,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, arc=.35mm, opacityback=0, colframe=quarto-callout-note-color-frame, coltitle=black, breakable, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, colbacktitle=quarto-callout-note-color!10!white, rightrule=.15mm, toptitle=1mm, bottomtitle=1mm, leftrule=.75mm, bottomrule=.15mm, toprule=.15mm, titlerule=0mm, left=2mm, colback=white, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, opacityback=0, left=2mm, colback=white, opacitybacktitle=0.6, colbacktitle=quarto-callout-note-color!10!white, toprule=.15mm, bottomtitle=1mm, toptitle=1mm, titlerule=0mm, coltitle=black, breakable, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, arc=.35mm, leftrule=.75mm, rightrule=.15mm, colframe=quarto-callout-note-color-frame, bottomrule=.15mm]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -7307,15 +7313,57 @@ anatomical feasibility; they show that measurement rank, local kinematic
 rank, contact closure, and forward contact dynamics are four distinct
 gates.
 
-This result narrows the next spatial experiment. A subject-scaled model
-must first solve bilateral closed-contact inverse kinematics with
-joint-limit and collision checks. It must then integrate calibrated
-compliant contact from the same closed initial state, expose contact
-loss or tissue/shaft compliance as typed states, and repeat the
-coincident, reversal, killswitch, power, and work--energy controls in
-two independent engines. Only trajectories passing those gates may be
-used to test whether drift-mediated transfer reduces timing demand,
-creates recovery, benefits from slack, or supports a human strategy.
+\subsection{Closed-Contact Inverse-Kinematics
+Gate}\label{closed-contact-inverse-kinematics-gate}
+
+The next registered rung solves rather than prescribes the body and arm
+coordinates. For each of the six profiles, three grip spans, and 13
+samples from 0.00 through 0.24 s, a bounded least-squares solve holds
+all six club coordinates at their prescribed values and adjusts the 14
+pelvis, torso, shoulder, elbow, and wrist coordinates. Bilateral point
+errors are the primary residual; a weak reference-posture term selects
+one solution from the underdetermined family. An unreachable 2.0 m grip
+span is retained as an adverse control and correctly fails the closure
+gate.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_subject_scaled_closed_contact.pdf}
+
+}
+
+\caption{\label{fig-subject-scaled-closed-contact}Subject-Scaled
+Bilateral Closed-Contact Feasibility}
+
+\end{figure}%
+
+All 234 registered samples close both contacts. The largest bilateral
+error is \(1.16\times10^{-10}\) m, every achieved constraint Jacobian
+retains rank six, and the maximum adjacent-sample change across the 20
+ms continuation grid is 0.0256 rad. The smallest margin to the declared
+reduced-model joint bounds is 0.103 rad, and the smallest nonexempt
+bounding-sphere clearance is 30.9 mm. The result therefore rejects the
+earlier prescribed trajectories without showing that the grip geometry
+itself is unreachable in this reduced tree.
+
+Those favorable checks remain a necessary-condition result. The broad
+bounds are engineering guards, not measured clinical ranges. Bounding
+spheres omit mesh-level anatomy; connected segments and intended
+hand--grip contacts are exempt. The tree has no explicit scapular glide,
+forearm pronation--supination, multi-axis wrist, fingers, or distributed
+tissue contact. Inverse kinematics supplies neither force nor work and
+cannot test passivity, timing demand, self-correction, proximal-speed
+benefit, or any class of slack.
+
+The next spatial experiment must now integrate calibrated compliant
+contact from these closed states, expose contact loss and tissue/shaft
+compliance as typed states, and repeat the coincident, reversal,
+killswitch, power, and work--energy controls in two independent engines.
+Only trajectories passing those gates may be used to test whether
+drift-mediated transfer reduces timing demand, creates recovery,
+benefits from slack, or supports a human strategy.
 
 \section{Falsifiability Gained and Claims Still
 Open}\label{sec-spatial-claim-boundary}
@@ -7356,8 +7404,10 @@ Four stronger statements remain open:
 \item
   \textbf{Anatomical Magnitude Is Unsupported.} The reduced tree and
   spherical inertias are not subject-specific anatomy, muscle, or tissue
-  mechanics. The subject-scaled audit further shows that its prescribed
-  states do not close the anatomical hands on the declared grip points.
+  mechanics. The subject-scaled audit shows that its prescribed states
+  do not close the anatomical hands on the declared grip points; the
+  bounded follow-up closes only a reduced tree under engineering-limit
+  and coarse collision screens.
 \item
   \textbf{Human Strategy Is Unsupported.} No measured trajectory or
   force record is held out for validation, and no coaching prescription
@@ -10981,12 +11031,13 @@ Which geometry matters? & Relative-link and force--velocity angles
 create exact sine/cosine gates; bilateral couple varies with signed grip
 separation and transverse differential force. Existing moving-base and
 two-engine spatial controls reproduce coincident-grip zeros and
-moment-arm reversals. A six-profile subject-scaled audit finds that the
-prescribed spatial states miss bilateral grip closure by 0.171--0.616 m
-despite a full-rank local constraint Jacobian. & Closed-contact inverse
-kinematics with joint-limit and collision checks, calibrated contact
-compliance, equipment geometry, and held-out digital twins and human
-bilateral wrenches. \\
+moment-arm reversals. A six-profile audit rejects prescribed states that
+miss closure by 0.171--0.616 m; a bounded follow-up closes all 234
+registered reduced-tree configurations while retaining rank,
+engineering-limit, and coarse collision gates. & Calibrated compliant
+forward contact from the closed states, equipment geometry,
+subject-specific anatomy, and held-out digital twins and human bilateral
+wrenches. \\
 Which timing patterns matter? & Early distal release changes the
 available geometry; proximal rate, acceleration, braking, and release
 timing interact nonmonotonically. ``Casting'' is not one universal
@@ -11068,6 +11119,15 @@ Section~\ref{sec-subject-scaled-contact-closure} makes that distinction
 quantitative: all local constraint Jacobians retain rank six, yet the
 prescribed anatomical hand points remain 0.171--0.616 m from the grips.
 Full local rank is not contact closure.
+
+The bounded inverse-kinematics follow-up separates unclosed prescription
+from reduced-tree reachability. All 234 profile/span/phase
+configurations close both point contacts with fixed club coordinates,
+rank-six achieved constraint Jacobians, positive engineering-limit
+margins, and positive coarse bounding-sphere clearances. That result
+clears only the next geometric gate: the bounds are not clinical ranges,
+the collision screen is not anatomy, and no contact forces or delivery
+outcomes are solved.
 
 \section{Timing and Common Failure
 Descriptions}\label{timing-and-common-failure-descriptions}
@@ -11419,6 +11479,13 @@ conditioning therefore cannot substitute for closed feasible anatomy.
 The next articulated spatial tier must solve bilateral closed-contact
 inverse kinematics with joint-limit and collision checks before its
 forward contact, timing, recovery, or slack results can be interpreted.
+The registered inverse-kinematics follow-up now clears that reduced-tree
+gate in all 234 profile/span/phase samples while holding the club pose
+fixed. Its minimum engineering-limit margin is 0.103 rad and its minimum
+coarse bounding-sphere clearance is 30.9 mm. These are screening
+results, not measured anatomical ranges or mesh-level clearance; they
+advance the next test to calibrated compliant forward contact from the
+closed states.
 
 The reduced spatial forward-contact extension resolves that narrower
 mechanism gate. Native MuJoCo and Pinocchio independently integrate two
@@ -11467,9 +11534,10 @@ order:
 \item
   \textbf{Articulated Spatial Forward-Contact Counterfactual.} Replace
   the executed hand-carriage reference with subject-scaled articulated
-  arms and calibrated grip interfaces. First require bilateral
-  closed-contact inverse kinematics, joint-limit and collision
-  qualification, then preserve the two-engine same-state killswitch,
+  arms and calibrated grip interfaces. Start from the executed bilateral
+  closed-contact, engineering-limit, and coarse collision-qualified
+  configurations, replace those screens with subject-specific anatomy
+  where available, then preserve the two-engine same-state killswitch,
   force, couple, power, work, pathway, and closure observables.
 \item
   \textbf{Calibrated Uncertainty and Constrained Control.} Extend the

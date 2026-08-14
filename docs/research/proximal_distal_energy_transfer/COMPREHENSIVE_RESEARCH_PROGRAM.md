@@ -146,7 +146,8 @@ remain subject to the model and human-evidence boundaries below.
 4. **Reusable Uncertainty Authority:** Tools #4142 merged, pinned, and parity
    verified.
 5. **Articulated Spatial Model:** calibrated grip and club, whole-body contact,
-   closed-contact inverse kinematics, joint-limit and collision checks,
+   executed closed-contact inverse kinematics, subject-specific joint-limit and
+   mesh-level collision replacement,
    independent-engine comparison, and discrepancy report. The first
    subject-scaled atlas is complete and rejects the current prescribed common
    states as anatomical contact configurations: hand-to-grip error is

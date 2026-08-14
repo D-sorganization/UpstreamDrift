@@ -10,7 +10,6 @@ from scripts.research.proximal_distal_energy.release_bundle import (
     validate_release_manifest,
 )
 
-
 ROOT = Path(__file__).resolve().parents[2]
 ARTICLE = ROOT / "docs/research/proximal_distal_energy_transfer"
 pytestmark = pytest.mark.unit
@@ -27,6 +26,7 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         "torque_allocation_preload",
         "spatial_common_state",
         "subject_scaled_spatial_geometry",
+        "subject_scaled_closed_contact",
         "spatial_forward_contact",
         "uncertainty_control",
         "experimental_readiness",
