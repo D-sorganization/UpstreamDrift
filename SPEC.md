@@ -3,7 +3,7 @@
 ## Current Scientific Audit State (2026-08-13)
 
 Epic #8557 has completed the paper-wide candidate adjudication contract:
-935/935 candidates, 244 atomic claims, and zero unadjudicated entries. The
+956/956 candidates, 250 atomic claims, and zero unadjudicated entries. The
 registry is `complete` for the present paper state. This status does not waive
 open empirical or model-fidelity gates; #8556 remains blocked on governed human
 bilateral six-axis grip-wrench acquisition, and all new scientific content must
@@ -49,7 +49,7 @@ reviewed.
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.519 |
+| **Spec Version** | 1.0.520 |
 | **Last Spec Update** | 2026-08-14 |
 
 ## 2. Purpose & Mission
@@ -80,6 +80,16 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ## 4. Architecture Overview
 
 ### Recent Spec Updates
+
+- **2026-08-14** - Added the #8557 handwritten momentum-transfer agenda
+  readiness contract. Nine independently testable points now retain their
+  present answer state, decisive next test, falsifier, data gate, model plan,
+  and participant-held-out human stage in a generated fail-closed audit. Five
+  have bounded model answers, partial answers, or a supported rejection of a
+  general rule; casting as one construct, timing precision, self-correction,
+  and typed slack remain unresolved or definition-gated. The paper audit now
+  covers 956 candidates and 250 claims, while #8556 remains the human-data
+  blocker.
 
 - **2026-08-13** - Adjudicated the transmission robustness chapter for #8557.
   All four registered programs remain nondominated in every held-out
@@ -2191,6 +2201,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-14 | 1.0.520 | Registered all nine points from the handwritten momentum-transfer agenda with answer state, decisive next test, falsifier, data gate, model plan, and participant-held-out human stage; added a generated fail-closed readiness audit; expanded the paper claim audit to 956 candidates and 250 claims; and retained #8556 as the governed bilateral-wrench human-data blocker. |
 | 2026-08-14 | 1.0.519 | Removed eleven orphaned `.codex-worktrees/` gitlinks that PR #8583 introduced without matching `.gitmodules` stanzas, which made `git submodule update --init --recursive` and `git submodule status` exit non-zero on a fresh clone even though that command is the documented setup step and is emitted in runtime error messages from the engine loaders, pendulum engine, and model explorer. Added `.codex-worktrees/` to `.gitignore` beside the existing Claude agent-worktree entry, and added `tests/unit/repo_hygiene/test_no_orphaned_gitlinks.py` asserting that every tracked gitlink is declared in `.gitmodules`. Path-scoped submodule commands were unaffected, so vendor-freshness CI never regressed, and PR #8575's code changes remain intact on main. |
 | 2026-08-13 | 1.0.512 | Ratified the AffineDrift-conforming terminology profile; migrated ZVCF to zero velocity and zero applied control; preserved the prior diagnostic under an explicit control-preserved name and schema; regenerated affected evidence and publication figures; and added regression controls. |
 | 2026-08-12 | 1.0.511 | Added phase-resolved proximal-link velocity falsification and forward control-program search for drift-mediated transfer; registered exact same-state matching, drift/control work closure, negative grip-work and force tradeoffs, multi-objective Pareto reporting, deterministic evidence artifacts, and the explicit boundary that the fixed-hub coordinate does not identify torso or anatomical shoulder strategy. |
