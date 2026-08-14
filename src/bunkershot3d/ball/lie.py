@@ -483,10 +483,9 @@ def compute_exposed_cap_area(lie: BallLie, ball: BallProperties) -> float:
     if d >= ball.diameter_m:
         # Fully buried
         return 0.0
-    # Gradual decrease as ball sinks into sand
-    # At depth=0: hemisphere area = 2*pi*r^2
-    # At depth=diameter: area = 0
-    # The exposed cap height decreases linearly with depth
-    # exposed_height = diameter - depth, clamped to [0, diameter]
-    h_exposed = ball.diameter_m - d
-    return 2.0 * math.pi * r * h_exposed
+    # Linear interpolation: hemisphere area at d=0, zero at d=diameter
+    # This avoids the discontinuity from using h_exposed = diameter - d
+    # with the spherical cap formula (which would give 4*pi*r^2 at d=epsilon)
+    hemisphere_area = 2.0 * math.pi * r**2
+    fraction_exposed = 1.0 - d / ball.diameter_m
+    return hemisphere_area * fraction_exposed
