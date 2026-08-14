@@ -61,6 +61,7 @@ from . import (
     sand,
     solvers,
     units,
+    vandv,
 )
 
 # Ball model: promoted to the flat surface because a bunker shot's whole point
@@ -248,4 +249,5 @@ __all__: list[str] = [
     "to_post_impact_state",
     "units",
     "usga_reference_sand",
+    "vandv",
 ]
