@@ -16,8 +16,10 @@ in git and GitHub.
   inspectable evidence links, and separates candidate-census completion from
   the then-open release reviews. PR
   [#8652](https://github.com/D-sorganization/UpstreamDrift/pull/8652) adds the
-  deterministic 31-claim review authority and is awaiting protected
-  publication.
+  deterministic 31-claim review authority; it merged as
+  `001e2d56bdd7fcfa79d591acdd9768c03276b563`. SPEC follow-up
+  [#8653](https://github.com/D-sorganization/UpstreamDrift/pull/8653) merged as
+  `f797b33924d8a36ee91979f5353ffd201597d98c`, the current remote `main`.
 - Canonical question, experiment, and readiness registries live under
   `docs/research/proximal_distal_energy_transfer/data/`. MT-E01 through MT-E09
   are model studies; MT-H01 is the governed participant-held-out stage.
