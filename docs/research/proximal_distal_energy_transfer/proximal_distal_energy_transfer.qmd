@@ -155,14 +155,17 @@ abstract: |
   local task-Jacobian partition exposes five task-null input directions, but
   this is a model property rather than evidence of a neural synergy or human
   self-stabilization.
-  A phase-resolved proximal-velocity study then evaluates 90 exact same-state
-  cases under relative- and absolute-club-rate matching. High proximal-link
-  speed strongly increases late drift power in some states, but the sign
-  reverses earlier and in the delivery state under absolute-rate matching. A
-  separate 60-program trajectory grid is more adversarial: among 26 valid
+  A phase-resolved proximal-motion study evaluates 126 rate cases under
+  relative-rate, absolute-rate, and exact total-kinetic-energy matching, plus
+  45 identical-state acceleration interventions. The large pre-impact rate
+  trend nearly vanishes under energy matching, and increasing proximal
+  acceleration raises interface power while reducing club angular acceleration
+  before impact. A separate 60-program grid is more adversarial: among 26 valid
   impacts, release-state proximal velocity correlates negatively with impact
-  speed and positively with negative grip work. The combined result rejects
-  proximal speed as a standalone release rule. The resulting rotating-base,
+  speed and positively with negative grip work. Eight approximate actuator-
+  work matches all favor the lower-rate member, although none also matches
+  interface load. The combined result rejects proximal speed as a standalone
+  release rule while retaining the joint work/load test as open. The resulting rotating-base,
   two-hand tier uses finite torso inertia, two closed arm--grip constraints,
   separated reactions, and a compliant distal club. Its 18-program matched-
   state grid finds that higher initial torso rate can accompany greater delivery

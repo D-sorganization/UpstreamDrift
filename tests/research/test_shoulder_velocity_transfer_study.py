@@ -16,7 +16,7 @@ pytestmark = pytest.mark.scientific
 def test_study_covers_all_declared_phases_and_velocity_constraints() -> None:
     record, arrays = run_study()
 
-    assert record["schema_version"] == "shoulder-velocity-transfer-evidence-v2"
+    assert record["schema_version"] == "shoulder-velocity-transfer-evidence-v3"
     assert record["model_tier"] == "exact_planar_double_pendulum"
     assert set(record["phase_labels"]) == {
         "Transition",
@@ -28,15 +28,32 @@ def test_study_covers_all_declared_phases_and_velocity_constraints() -> None:
     assert set(record["velocity_constraints"]) == {
         "preserve_relative_club_rate",
         "preserve_absolute_club_rate",
+        "preserve_total_kinetic_energy",
     }
-    assert arrays["proximal_velocity_rad_s"].size == 90
+    assert arrays["proximal_velocity_rad_s"].size == 126
     assert np.max(np.abs(arrays["acceleration_closure_residual_rad_s2"])) < 1e-10
     assert np.max(np.abs(arrays["force_closure_residual_n"])) < 1e-10
+    energy_rows = [
+        row
+        for row in record["rows"]
+        if row["velocity_constraint"] == "preserve_total_kinetic_energy"
+    ]
+    assert len(energy_rows) == 36
+    assert {row["phase"] for row in energy_rows} == {
+        "Early Downswing",
+        "Mid-Downswing",
+        "Delivery and Release",
+        "Pre-Impact",
+    }
+    assert max(abs(row["kinetic_energy_residual_j"]) for row in energy_rows) < 1e-10
 
     sweep = record["velocity_sweep_contract"]
     assert sweep["reference_state_included"] is True
     assert sweep["offset_fraction_of_scale"] == pytest.approx(0.75)
     assert sweep["minimum_scale_rad_s"] == pytest.approx(4.0)
+    assert sweep["stored_energy_is_matched_only_for"] == (
+        "preserve_total_kinetic_energy"
+    )
 
     for summary in record["phase_summaries"]:
         selected = [

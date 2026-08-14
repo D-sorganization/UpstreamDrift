@@ -16,13 +16,18 @@ pytestmark = pytest.mark.scientific
 def test_strategy_study_keeps_every_attempt_and_pareto_tradeoff() -> None:
     record, arrays = run_study()
 
-    assert record["schema_version"] == "shoulder-velocity-strategy-evidence-v2"
+    assert record["schema_version"] == "shoulder-velocity-strategy-evidence-v3"
     assert len(record["programs"]) == 60
     assert record["valid_impact_count"] > 0
     assert record["pareto_program_indices"]
     assert arrays["impact_speed_m_s"].shape == (60,)
     assert np.all(np.isfinite(arrays["transfer_work_closure_residual_j"]))
     assert np.max(np.abs(arrays["transfer_work_closure_residual_j"])) < 1e-8
+    assert np.allclose(
+        arrays["total_actuator_work_j"],
+        arrays["proximal_actuator_work_j"] + arrays["distal_actuator_work_j"],
+        atol=1e-10,
+    )
     assert record["pareto_diagnostics"]["valid_program_count"] == 26
     assert record["pareto_diagnostics"]["nondominated_program_count"] == 21
     assert record["pareto_diagnostics"]["nondominated_fraction"] == pytest.approx(
@@ -60,6 +65,20 @@ def test_strategy_association_records_design_adequacy() -> None:
     assert association["release_velocity_vs_peak_force_pearson_r"] == pytest.approx(
         -0.6085210777
     )
+
+
+def test_strategy_study_reports_work_matching_without_hiding_load_mismatch() -> None:
+    record, _ = run_study()
+
+    screen = record["matched_work_screen"]
+    assert screen["matched_work_pair_count"] == 8
+    assert screen["also_peak_force_matched_pair_count"] == 0
+    assert screen["higher_velocity_faster_pair_count"] == 0
+    assert screen["higher_velocity_speed_difference_range_m_s"] == pytest.approx(
+        [-9.2834885244, -4.3096406730]
+    )
+    assert screen["pairs_are_not_independent"] is True
+    assert screen["causal_estimand"] is False
 
 
 def test_strategy_study_hashes_every_declared_computational_dependency() -> None:

@@ -208,7 +208,9 @@
         "matched_initial_state",
         "matched_relative_rate",
         "matched_absolute_rate",
+        "matched_total_kinetic_energy",
         "matched_work",
+        "matched_peak_interface_load",
         "matched_impact_definition"
       ],
       "outcomes": [
@@ -233,7 +235,7 @@
         "bilateral_wrenches",
         "impact_outcomes"
       ],
-      "execution_status": "reduced_model_nonmonotonicity_demonstrated_human_test_open"
+      "execution_status": "planar_rate_energy_work_and_pointwise_acceleration_controls_complete_joint_forward_load_spatial_subject_and_human_tests_open"
     },
     {
       "id": "MT-E06",

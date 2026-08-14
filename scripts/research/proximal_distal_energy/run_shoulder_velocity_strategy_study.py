@@ -138,6 +138,78 @@ def _association_record(valid_rows: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def _relative_difference(left: float, right: float) -> float:
+    scale = max(0.5 * (abs(left) + abs(right)), 1e-12)
+    return abs(left - right) / scale
+
+
+def _matched_work_screen(valid_rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """Compare sampled high/low-rate programs under declared work tolerances."""
+    pairs: list[dict[str, Any]] = []
+    load_matched_count = 0
+    for left_index, left in enumerate(valid_rows):
+        for right in valid_rows[left_index + 1 :]:
+            low, high = sorted(
+                (left, right), key=lambda row: row["proximal_velocity_at_release_rad_s"]
+            )
+            velocity_difference = (
+                high["proximal_velocity_at_release_rad_s"]
+                - low["proximal_velocity_at_release_rad_s"]
+            )
+            net_work_difference = _relative_difference(
+                low["total_actuator_work_j"], high["total_actuator_work_j"]
+            )
+            positive_work_difference = _relative_difference(
+                low["positive_actuator_work_j"], high["positive_actuator_work_j"]
+            )
+            if (
+                velocity_difference < 1.0
+                or net_work_difference > 0.05
+                or positive_work_difference > 0.05
+            ):
+                continue
+            load_difference = _relative_difference(
+                low["peak_grip_force_n"], high["peak_grip_force_n"]
+            )
+            load_matched = load_difference <= 0.10
+            load_matched_count += int(load_matched)
+            pairs.append(
+                {
+                    "lower_velocity_program_index": low["program_index"],
+                    "higher_velocity_program_index": high["program_index"],
+                    "release_velocity_difference_rad_s": velocity_difference,
+                    "relative_net_actuator_work_difference": net_work_difference,
+                    "relative_positive_actuator_work_difference": positive_work_difference,
+                    "relative_peak_interface_force_difference": load_difference,
+                    "peak_interface_force_matched": load_matched,
+                    "impact_speed_difference_higher_minus_lower_m_s": (
+                        high["impact_speed_m_s"] - low["impact_speed_m_s"]
+                    ),
+                }
+            )
+    differences = np.asarray(
+        [row["impact_speed_difference_higher_minus_lower_m_s"] for row in pairs],
+        dtype=float,
+    )
+    return {
+        "minimum_release_velocity_separation_rad_s": 1.0,
+        "maximum_relative_net_actuator_work_difference": 0.05,
+        "maximum_relative_positive_actuator_work_difference": 0.05,
+        "maximum_relative_peak_interface_force_difference": 0.10,
+        "matched_work_pair_count": len(pairs),
+        "also_peak_force_matched_pair_count": load_matched_count,
+        "higher_velocity_speed_difference_range_m_s": (
+            [float(np.min(differences)), float(np.max(differences))]
+            if differences.size
+            else []
+        ),
+        "higher_velocity_faster_pair_count": int(np.sum(differences > 0.0)),
+        "pairs_are_not_independent": True,
+        "causal_estimand": False,
+        "pairs": pairs,
+    }
+
+
 def _provenance() -> dict[str, str]:
     source_paths = (
         "scripts/research/proximal_distal_energy/double_pendulum_attribution.py",
@@ -172,7 +244,7 @@ def _record(rows: list[dict[str, Any]]) -> dict[str, Any]:
         (best_program,), GolfModelParams.default(), dt_s=DT / 2.0
     )[0]
     return {
-        "schema_version": "shoulder-velocity-strategy-evidence-v2",
+        "schema_version": "shoulder-velocity-strategy-evidence-v3",
         "study_id": "fixed-hub-proximal-drive-and-wrist-release-grid",
         "model_tier": "exact_planar_double_pendulum_fixed_hub",
         "program_count": len(rows),
@@ -196,6 +268,7 @@ def _record(rows: list[dict[str, Any]]) -> dict[str, Any]:
             ),
         },
         "associations_valid_impact_only": _association_record(valid_rows),
+        "matched_work_screen": _matched_work_screen(valid_rows),
         "analysis_boundary": (
             "Grid associations are descriptive model associations, not causal human "
             "effects or a continuous optimal-control solution; conditioning on the "
@@ -237,6 +310,7 @@ def _record(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "A speed association that vanishes after timing and drive controls weakens the high-velocity interpretation.",
             "A candidate dominated on speed, braking work, and peak force is not an optimal strategy.",
             "A rotating-base two-hand model that reverses the result rejects transfer to torso strategy.",
+            "A work- and load-matched higher-rate program that is faster would contradict this grid's adverse work-matched direction.",
         ],
         "source_sha256": _provenance(),
         "array_artifact": NPZ_PATH.name,
@@ -254,6 +328,11 @@ def _arrays(rows: list[dict[str, Any]]) -> dict[str, np.ndarray]:
         "transfer_work_closure_residual_j",
         "braking_grip_work_j",
         "peak_grip_force_n",
+        "total_actuator_work_j",
+        "proximal_actuator_work_j",
+        "distal_actuator_work_j",
+        "positive_actuator_work_j",
+        "negative_actuator_work_j",
     )
     result = {
         key: np.asarray([row[key] for row in rows], dtype=float) for key in array_keys
