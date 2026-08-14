@@ -99,6 +99,12 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         == "pending_external_archive"
     )
     assert manifest["resource_framing"] == "neutral_open_research_resource"
+    assert manifest["integrity_authorities"]["claim_evidence_manifest"].startswith(
+        "deterministic_self_excluded"
+    )
+    assert not any(
+        path.endswith("claim_evidence_manifest.json") for path in manifest["artifacts"]
+    )
     assert any(
         path.endswith("fig_shoulder_velocity_strategy_pareto.pdf")
         for path in manifest["artifacts"]

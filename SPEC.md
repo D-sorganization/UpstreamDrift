@@ -2233,6 +2233,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-14 | 1.0.527 | Added fail-closed scientific-support integrity for the proximal-to-distal program: all claim source locators must resolve to an in-range repository line; every registered local evidence artifact is SHA-256/size pinned; every external support URL is inventoried without being promoted to scientific validation; omission and tamper controls are executable; and the critical-question roadmap now maps each handwritten question to its bounded current answer, decisive model/measurement gate, and independently checked scapulothoracic, EMG, and distributed-grip acquisition leads. |
 | 2026-08-14 | 1.0.525 | Added the MT-E08 subject-scaled spatial contact-closure audit: six deterministic de Leva engineering profiles, three grip spans, and 61 states per case fail the 5 mm bilateral closure tolerance despite full local contact-Jacobian rank. The governed evidence, release claims, and scientific boundary now distinguish measurement rank, local kinematic rank, geometric closure, and forward contact dynamics, and require closed-contact inverse kinematics with joint-limit/collision checks before anatomical or human-strategy inference. |
 | 2026-08-14 | 1.0.526 | Added the MT-E08 subject-scaled closed-contact inverse-kinematics screen: all 234 profile, grip-span, and phase configurations close with the club pose fixed, full achieved constraint rank, positive broad engineering-limit margins, positive coarse bounding-sphere clearances, and continuous solved paths. The contract preserves these as reduced-tree necessary conditions and advances the next gate to subject-specific anatomy and calibrated compliant forward contact. |
 | 2026-08-14 | 1.0.524 | Added trajectory-level synthetic qualification for the MT-E07 bilateral point-force estimator: 301 samples and 32 seeded trials exercise normalized noise, cross-talk, calibration residual, and contact-center migration controls; a manufactured net-wrench-only failure demonstrates that resultant closure does not identify allocation; and the paper, registries, claim audit, figure, evidence, tests, and handoff retain explicit full-device, distributed-contact, anatomical, and governed-human gates. |
@@ -3124,3 +3125,23 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   closed states, replace screening geometry with subject-specific anatomy where
   available, and retain conservation, null/reversal, killswitch, and
   independent-engine gates.
+
+### F-8557.22: Claim-Evidence Integrity and Critical-Question Completion
+
+- Every claim source locator shall use a repository-relative `path:line`
+  contract and fail on malformed, escaping, missing, or out-of-range locations.
+- Every local evidence artifact referenced by an atomic claim shall have a
+  deterministic SHA-256 digest, byte size, and reciprocal claim list. Every
+  external evidence URL shall be inventoried with its referring claims.
+- Content identity shall not be called source independence, empirical
+  validation, or scientific correctness. URL inventory shall not be called
+  availability or source verification, and deterministic validation shall not
+  require network access.
+- Each handwritten momentum-transfer question shall retain a bounded current
+  answer, unresolved boundary, decisive next model or measurement, negative
+  controls, uncertainty treatment, and participant-held-out completion gate.
+- Scapulothoracic, EMG, and distributed-grip literature shall inform model and
+  acquisition design only after checking the original source. Surface EMG
+  shall not identify grip wrench, activation onset shall retain baseline and
+  threshold sensitivity, and proceedings-level grip studies shall not satisfy
+  the governed human-data gate.

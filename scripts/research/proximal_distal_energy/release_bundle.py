@@ -7,7 +7,13 @@ from pathlib import Path
 from typing import Any
 
 ARTICLE_REL = Path("docs/research/proximal_distal_energy_transfer")
-_EXCLUDED = frozenset({"release_manifest.json", "CHECKSUMS.sha256"})
+_EXCLUDED = frozenset(
+    {
+        "release_manifest.json",
+        "claim_evidence_manifest.json",
+        "CHECKSUMS.sha256",
+    }
+)
 
 
 def _sha256(path: Path) -> str:
@@ -57,6 +63,11 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
         "schema_version": "proximal-distal-open-release-v1",
         "release_id": "proximal-distal-model-ladder-2026-08",
         "resource_framing": "neutral_open_research_resource",
+        "integrity_authorities": {
+            "claim_evidence_manifest": (
+                "deterministic_self_excluded_authority_to_avoid_recursive_hashing"
+            )
+        },
         "presets": {
             "double_pendulum": {
                 "command": "python -m scripts.research.proximal_distal_energy.run_experiments",

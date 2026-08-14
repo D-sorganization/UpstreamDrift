@@ -128,6 +128,44 @@ retry again redirected to manual Google authentication; no credentials or
 authentication dialogs were automated. Repository evidence and independently
 checked original sources therefore remain the current authority.
 
+## Independently Checked Biomechanics Leads
+
+The following original sources sharpen the next tests without being treated as
+confirmation of the proposed transfer mechanism:
+
+| Source                                                                        | What It Contributes                                                                                                                            | Registered Use and Boundary                                                                                                                                                                                                       |
+| ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Seth et al. (2016)](https://doi.org/10.1371/journal.pone.0141028)            | An OpenSim shoulder complex with a four-degree-of-freedom scapula constrained on an ellipsoidal thorax and comparison with bone-pin kinematics | Use as the first articulated scapulothoracic implementation candidate; repeat contact closure, moment-arm reversal, and killswitch studies. Its kinematic agreement does not identify golf muscle force or a preferred technique. |
+| [Verikas et al. (2016)](https://doi.org/10.3390/s16040592)                    | Bilateral forearm, rhomboid, and trapezius EMG onset and peak measurements in elite golfers                                                    | Use to define candidate channels and synchronization bandwidth for MT-H01. The small observational sample and surface EMG do not identify bilateral grip wrench or causal muscle contribution.                                    |
+| [Silva et al. (2013)](https://doi.org/10.1016/j.jelekin.2013.05.007)          | Demonstrates that golf-swing EMG onset depends on the selected baseline, threshold, and muscle                                                 | Preregister onset-definition sensitivity and prohibit a single threshold from deciding preactivation, passive resistance, or role reversal.                                                                                       |
+| [Mizoguchi and Yoneyama (2005)](https://doi.org/10.1299/jsmesports.2005.0_35) | Distributed radial, tangential, and axial grip-force measurements across fingers and palm                                                      | Add pressure/contact-distribution sensing to the bilateral six-axis wrench plan and test whether point-contact reduction hides internal modes. A proceedings paper is not a governed participant dataset.                         |
+
+The corresponding acquisition minimum is synchronized motion, ground reaction,
+club/shaft state, bilateral six-axis grip wrenches, distributed grip pressure,
+and bilateral forearm/scapular EMG. The analysis must report at least two EMG
+onset definitions, electromechanical-delay sensitivity, contact-center
+migration, and participant-held-out prediction. These additions can distinguish
+several proposed mechanisms; they still cannot make activation, intent, or
+tissue slack uniquely identifiable without an explicit model and adverse
+controls.
+
+## Critical-Question Completion Map
+
+| Handwritten Question                                     | Current Answer                                                                                                                                        | Decisive Completion Path                                                                                                                                      |
+| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| How much is drift?                                       | Exactly defined and computed at declared planar states and windows; no model-independent or human fraction exists.                                    | Repeat the work/impulse attribution in articulated spatial forward dynamics and held-out participants with uncertainty intervals and cancellation reporting.  |
+| What are the geometry dependencies?                      | Moment arm, force--velocity projection, reference point, grip span, and constraint conditioning can change magnitude or sign in current tiers.        | Subject-specific scapula/arms, calibrated grip/contact, distributed shaft, null and sign-reversal controls in two engines.                                    |
+| What is the timing of momentum flow?                     | Phase-resolved model windows exist; clock versus state-trigger results are conditional and no sustained recovery was observed in 60 registered cases. | Independent proximal acceleration, braking, and distal-release interventions with common-phase event definitions, observer delay, and held-out perturbations. |
+| What constitutes casting or early body deceleration?     | Definition-dependent model events are registered; no unique physiological event has been established.                                                 | Preregister competing event definitions and require agreement or report disagreement against motion, wrench, shaft, and impact measurements.                  |
+| Does passive drift reduce timing demand or self-correct? | Not established; the registered screen did not show sustained half-error recovery.                                                                    | Estimate attraction/recovery regions under delay, saturation, contact loads, and subject scaling, then test the frozen human endpoint.                        |
+| Does maximizing proximal velocity maximize transfer?     | No universal rule is supported; rate effects are nonmonotonic and matching-rule dependent.                                                            | Full-delivery-state matching with speed, braking work, load, face/path, strike, and robustness Pareto outcomes.                                               |
+| Is slack useful or necessary?                            | There is no global answer; five distinct slack classes are separated and intentional slack remains unidentifiable.                                    | Embed each class separately in higher-order models, measure the corresponding state, and test benefit, harm, and null regions without cross-class inference.  |
+
+This map distinguishes a bounded model answer from project completion. A row is
+complete only when its registered model, measurement, uncertainty, negative
+control, and participant-holdout gates pass; narrative coverage alone is not a
+completion criterion.
+
 ## Delivery Milestones
 
 The photographed momentum-transfer agenda is governed by
@@ -138,7 +176,9 @@ robustness, proximal-velocity dose response, and typed slack. Those questions
 remain subject to the model and human-evidence boundaries below.
 
 1. **Audit Infrastructure:** deterministic candidate inventory, strict claim
-   schema, release reconciliation, link/source checks, and figure-data checks.
+   schema, resolvable `path:line` checks, hash-pinned local support, external-URL
+   inventory, release reconciliation, link/source checks, and figure-data
+   checks.
 2. **Paper Adjudication:** every material claim classified and reviewed; every
    number and figure regenerated; weak claims narrowed, relabeled, or removed.
 3. **Research Map:** source manifests, coverage gaps, competing hypotheses,
@@ -169,7 +209,7 @@ scientific contract.
 
 ## Completed Paper-Wide Claim Audit
 
-The current audit adjudicates all 982 narrative candidates against 261
+The current audit adjudicates all 987 narrative candidates against 263
 atomic claim contracts; no candidate remains unreviewed. Repeated methods,
 summary, limitation, and release passages point back to their primary claim
 instead of acquiring stronger authority through repetition. The final pass
@@ -197,3 +237,9 @@ results, found scale-dependent practical rank in the allocation/transmission
 map, and preserves #8556 as an external human-data acquisition gate. Future
 milestones must create new claim records and falsifiers before new conclusions
 enter summaries or conclusions.
+
+The separate claim-evidence integrity manifest covers all 1,541 evidence
+references. It hash-pins 193 distinct repository artifacts and inventories 85
+external URLs. Hash agreement establishes content identity, not independence
+or correctness; URL inventory establishes traceability, not availability or
+scientific validity.
