@@ -45,17 +45,30 @@ Do not create new worktrees on C:. See "Blockers" below.
 - Epic #8607 filed with 11 child issues #8608-#8618, all linked, with research findings
   attached as comments on #8609, #8610, #8611, #8613, #8614, #8616.
 
-### Wave 1 — running (each on its own branch, none pushed, none merged)
+### Wave 1 — merged into `feat/bunkershot-pro-epic` (pushed)
 
-| Issue | Workstream                     | Branch                 | Worktree                       |
-| ----- | ------------------------------ | ---------------------- | ------------------------------ |
-| #8609 | W2 parametric wedge geometry   | `feat/bunker-geometry` | `D:\bunker-worktrees\geometry` |
-| #8610 | W3 sand state model            | `feat/bunker-sand`     | `D:\bunker-worktrees\sand`     |
-| #8617 | W10 result schema + provenance | `feat/bunker-schema`   | `D:\bunker-worktrees\schema`   |
-| #8612 | W5 backend correctness         | `feat/bunker-backends` | `D:\bunker-worktrees\backends` |
-| #8615 | W8 study layer (DOE/Sobol/GP)  | `feat/bunker-study`    | `D:\bunker-worktrees\study`    |
+| Issue | Workstream                        | Status                                                           |
+| ----- | --------------------------------- | ---------------------------------------------------------------- |
+| #8617 | W10 result schema v2 + provenance | **merged** — commit `b445a128c`                                  |
+| #8610 | W3 sand state model               | **merged** — commit `5b1783e49`                                  |
+| #8609 | W2 parametric wedge geometry      | running (`feat/bunker-geometry`, `D:/bunker-worktrees/geometry`) |
+| #8612 | W5 backend correctness            | running (`feat/bunker-backends`, `D:/bunker-worktrees/backends`) |
+| #8615 | W8 study layer (DOE/Sobol/GP)     | running (`feat/bunker-study`, `D:/bunker-worktrees/study`)       |
 
-File ownership is disjoint by design so the branches merge cleanly. Respect it.
+Suite after the two merges: **729 passed, 5 skipped**.
+Merge order for the rest: geometry, backends, study.
+
+Two follow-ups the merges created:
+
+- **Drivers do not yet pass a run manifest.** `BunkerShotResultWriter` takes `manifest=` /
+  `set_manifest()`; wiring is one line per driver once #8612 lands. Until then result files
+  carry `schema_version` but no provenance.
+- **`src/bunkershot3d/__init__.py` does not re-export the sand package** — consumers must
+  `from bunkershot3d.sand import ...`. One-line follow-up.
+- **SPEC.md**: the `spec-check` workflow blocks PRs that touch `src/**` without updating
+  SPEC.md. It fires on pull_request only, so merging workstreams into the epic branch is
+  unaffected. Do **one** coordinated SPEC.md update when the epic PRs to `main`, not five
+  conflicting ones.
 
 ### Wave 2 — not started (depends on wave 1)
 
