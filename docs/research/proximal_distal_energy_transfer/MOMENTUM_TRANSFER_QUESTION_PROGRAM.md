@@ -33,6 +33,34 @@ available; it is not a favorable-result label.
 | Q6  | Must proximal velocity be maximized to maximize transfer?                                                              | **No general rule is supported.** Exact equal-energy rate sweeps are nonmonotonic; a 216-program forward screen yields 46 independent work- and load-matched pairs with both favorable and adverse higher-rate outcomes; the identical-state acceleration response also reverses before impact. | Three rate-matching rules, 45 acceleration interventions, full actuator-work ledgers, 46 disjoint work/load matches, rotating-base study, killswitches, braking and load outcomes.            | The forward pairs differ in actuator commands and use greedy finite-grid matching; acceleration is pointwise; no ball outcome, anatomical capacity, subject calibration, or human validation. | Add full-delivery-state matching and independent rate/acceleration interventions; then locate interior optima and reversals across spatial, subject-scaled, and held-out human tiers.                                                                  |
 | Q7  | Is slack beneficial, harmful, or required?                                                                             | **Unanswered until slack is typed.** Contact disengagement, backlash, compliant preload, muscle–tendon series compliance, and control deadband/co-contraction are different states and cannot share one conclusion.                                                                             | Preload/dead-zone sensitivity, compliant shaft and contact models, reduced muscle–tendon history bridge, explicit warning against unspecified “slack.”                                        | No unified slack state vector, calibrated transmission/contact properties, reflex model, or human measurement.                                                                                | Introduce one slack class at a time with energy/passivity accounting; sweep onset, magnitude, and hysteresis; test contact loss, backlash, tendon compliance, and activation deadband separately; estimate each from governed data where identifiable. |
 
+## Source-Agenda Readiness
+
+The reviewed handwritten agenda resolves to nine points because the timing
+bullet contains three distinct questions. The generated
+[`data/momentum_transfer_readiness_audit.json`](data/momentum_transfer_readiness_audit.json)
+is the completion authority for this transcription and planning layer.
+
+- Five points have a bounded model answer, partial answer, or a supported
+  rejection of a general maximization rule.
+- Four points remain unresolved or definition-gated: casting as a single
+  construct, human timing demand, self-correction, and the value of typed
+  slack.
+- Every point maps to at least one model experiment, a decisive falsifier, and
+  the participant-held-out human stage.
+- Human execution remains blocked because no qualifying governed dataset with
+  synchronized bilateral six-axis grip wrenches is available.
+
+Run the readiness gate with:
+
+```text
+python -m scripts.research.proximal_distal_energy.momentum_question_readiness build
+python -m scripts.research.proximal_distal_energy.momentum_question_readiness validate
+```
+
+The validator fails if any of the nine source points is omitted, if a point is
+linked to an experiment that does not cover its parent question, or if an
+answer, decisive test, falsifier, data gate, or human stage is absent.
+
 ## Required Definitions
 
 ### Drift Attribution

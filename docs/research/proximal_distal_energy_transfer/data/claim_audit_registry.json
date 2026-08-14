@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "2a9d7eabf6d3c5c1a70792f15dd24dc81af8aba6439e965fbb24f28f2da6e737",
+    "source_digest": "4e4a65611e3c98bd7a8ee12169423dfe4aef4ede7d77c92263facfb8ee679f51",
     "baseline_commit": "13ea6a69585a42dc1db4b3959440ed95787c9779"
   },
   "audit_scope": {
@@ -9667,6 +9667,56 @@
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-248"
+      ],
+      "rationale": "This passage states or bounds a registered critical-question conclusion.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-8b34957ef82ca8cb",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-251"
+      ],
+      "rationale": "This passage states or bounds a registered critical-question conclusion.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-51f73ab4ac4d57de",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-251"
+      ],
+      "rationale": "This passage states or bounds a registered critical-question conclusion.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-f541b22b572afbb2",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-251"
+      ],
+      "rationale": "This passage states or bounds a registered critical-question conclusion.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-640befe2d6c188d2",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-251"
+      ],
+      "rationale": "This passage states or bounds a registered critical-question conclusion.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-1746f6ac68698fb0",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-251"
       ],
       "rationale": "This passage states or bounds a registered critical-question conclusion.",
       "reviewer": "Codex technical audit",
@@ -20522,7 +20572,8 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
         "docs/research/proximal_distal_energy_transfer/MOMENTUM_TRANSFER_QUESTION_PROGRAM.md",
         "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_question_registry.json",
-        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_experiment_registry.json"
+        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_experiment_registry.json",
+        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_readiness_audit.json"
       ],
       "model_domain": "Cross-tier synthesis and prospective experiment governance.",
       "uncertainty_boundary": "The map summarizes existing adjudicated evidence and prospective tests; it is not new experimental evidence.",
@@ -20559,7 +20610,8 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
         "docs/research/proximal_distal_energy_transfer/MOMENTUM_TRANSFER_QUESTION_PROGRAM.md",
         "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_question_registry.json",
-        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_experiment_registry.json"
+        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_experiment_registry.json",
+        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_readiness_audit.json"
       ],
       "model_domain": "Cross-tier synthesis and prospective experiment governance.",
       "uncertainty_boundary": "A table entry is a synthesis of registered evidence rather than an independent experiment.",
@@ -20600,7 +20652,8 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
         "docs/research/proximal_distal_energy_transfer/MOMENTUM_TRANSFER_QUESTION_PROGRAM.md",
         "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_question_registry.json",
-        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_experiment_registry.json"
+        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_experiment_registry.json",
+        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_readiness_audit.json"
       ],
       "model_domain": "Cross-tier synthesis and prospective experiment governance.",
       "uncertainty_boundary": "The identities and model controls do not establish feasible or preferred subject-scaled human geometry.",
@@ -20639,7 +20692,8 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
         "docs/research/proximal_distal_energy_transfer/MOMENTUM_TRANSFER_QUESTION_PROGRAM.md",
         "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_question_registry.json",
-        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_experiment_registry.json"
+        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_experiment_registry.json",
+        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_readiness_audit.json"
       ],
       "model_domain": "Cross-tier synthesis and prospective experiment governance.",
       "uncertainty_boundary": "Observer, recovery, and participant experiments have not been completed.",
@@ -20678,7 +20732,8 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
         "docs/research/proximal_distal_energy_transfer/MOMENTUM_TRANSFER_QUESTION_PROGRAM.md",
         "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_question_registry.json",
-        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_experiment_registry.json"
+        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_experiment_registry.json",
+        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_readiness_audit.json"
       ],
       "model_domain": "Cross-tier synthesis and prospective experiment governance.",
       "uncertainty_boundary": "The result is limited to a small engineering envelope and a simple delayed observer; it does not estimate human correction.",
@@ -20719,7 +20774,8 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
         "docs/research/proximal_distal_energy_transfer/MOMENTUM_TRANSFER_QUESTION_PROGRAM.md",
         "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_question_registry.json",
-        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_experiment_registry.json"
+        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_experiment_registry.json",
+        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_readiness_audit.json"
       ],
       "model_domain": "Cross-tier synthesis and prospective experiment governance.",
       "uncertainty_boundary": "The acceleration intervention is pointwise, forward pairs do not match the full delivery state, and only a phenomenological transmission dead zone has been directly exercised; no human optimum is identified.",
@@ -20756,7 +20812,8 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
         "docs/research/proximal_distal_energy_transfer/MOMENTUM_TRANSFER_QUESTION_PROGRAM.md",
         "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_question_registry.json",
-        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_experiment_registry.json"
+        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_experiment_registry.json",
+        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_readiness_audit.json"
       ],
       "model_domain": "Cross-tier synthesis and prospective experiment governance.",
       "uncertainty_boundary": "No qualifying governed participant-level dataset is available.",
@@ -20773,6 +20830,52 @@
         "participant holdout"
       ],
       "falsifier": "Synthetic traces are substituted for the registered human stage.",
+      "adjudication": "Reconciled to the existing claim audit, machine-readable question registry, and prospective experiment contract without promoting model evidence to human evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-251",
+      "candidate_ids": [
+        "PD-CAND-8b34957ef82ca8cb",
+        "PD-CAND-51f73ab4ac4d57de",
+        "PD-CAND-f541b22b572afbb2",
+        "PD-CAND-640befe2d6c188d2",
+        "PD-CAND-1746f6ac68698fb0"
+      ],
+      "statement": "The reviewed handwritten agenda resolves to nine separately tracked points: five have bounded model answers or a negative general-rule result, four remain unresolved or definition-gated, and all nine have a decisive model test, falsifier, data gate, and participant-held-out stage.",
+      "classification": "source_agenda_readiness_audit",
+      "published_status": "planning_coverage_complete_scientific_questions_partly_open",
+      "audit_status": "evidence_boundary_and_falsification_contract_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:138",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:148",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:150",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:160",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:164"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
+        "docs/research/proximal_distal_energy_transfer/MOMENTUM_TRANSFER_QUESTION_PROGRAM.md",
+        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_question_registry.json",
+        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_experiment_registry.json",
+        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_readiness_audit.json"
+      ],
+      "model_domain": "Cross-tier synthesis and prospective experiment governance.",
+      "uncertainty_boundary": "This is a completeness and evidence-readiness result, not new mechanical or human evidence; the human stage remains blocked by the bilateral-wrench data boundary.",
+      "competing_explanations": [
+        "model-tier dependence",
+        "estimand choice",
+        "matching rule",
+        "measurement uncertainty"
+      ],
+      "negative_controls": [
+        "same-state killswitch",
+        "geometry null and reversal",
+        "matched work and state",
+        "participant holdout"
+      ],
+      "falsifier": "Any source point is omitted, lacks a falsifier or decisive test, is linked to an experiment that does not cover it, or is presented as a completed human conclusion.",
       "adjudication": "Reconciled to the existing claim audit, machine-readable question registry, and prospective experiment contract without promoting model evidence to human evidence.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
