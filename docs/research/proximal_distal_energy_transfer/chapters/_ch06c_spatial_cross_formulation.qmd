@@ -324,6 +324,53 @@ contact. Inverse kinematics supplies neither force nor work and cannot test
 passivity, timing demand, self-correction, proximal-speed benefit, or any
 class of slack.
 
+### Paired Scapula-on-Ellipsoid Geometry Screen
+
+The fixed shoulder centers are the next explicit structural intervention. A
+paired arm-only screen holds the prescribed trunk and club pose fixed and
+compares the existing fixed centers with four bounded scapular coordinates per
+side: protraction, elevation, upward rotation, and winging. Protraction and
+elevation move the shoulder center on a declared thoracic ellipsoid; upward
+rotation and winging precede the three glenohumeral rotations. The construction
+is informed by the ellipsoid-constrained OpenSim shoulder complex of
+@seth2016, but it is a reduced kinematic surrogate rather than a reproduction
+of that model.
+
+The screen uses the same six deterministic profiles and three grip spans at
+0.00, 0.12, and 0.24 s, yielding 54 paired states. Only the two arms move; the
+trunk and all six club coordinates remain fixed. The fixed-shoulder problem has
+eight arm coordinates, whereas the scapular problem has sixteen. The fixed
+solution is embedded exactly at zero scapular coordinates, so a larger residual
+in the mobile branch would be a numerical failure rather than a geometric
+finding.
+
+![Scapular Mobility and Bilateral Contact Geometry](figures/fig_scapulothoracic_contact_screen.pdf){#fig-scapulothoracic-contact-screen width=100%}
+
+No fixed-shoulder arm-only state reaches the 0.5 mm bilateral tolerance. The
+mobile-scapula branch reaches that residual in 31 of 54 states, but only 16 of
+54 also receive a successful optimizer termination. Twenty-eight states place
+at least one coordinate on its declared screening bound, and the largest
+shoulder-center excursion is 0.101 m. The retained 2.0 m adverse grip span
+still fails, with 0.480 m maximum bilateral error. These counts expose a
+model-structure effect and a numerical/range boundary; they do not establish
+that the remaining states are anatomically infeasible.
+
+Both paired contact Jacobians have rank six at every registered state. The
+fixed branch therefore has a two-dimensional local coordinate null space and
+the scapular branch has a ten-dimensional null space. Bilateral contact
+position alone cannot allocate motion uniquely among scapular and
+glenohumeral coordinates. Adding scapular mobility materially changes the
+geometric screen while simultaneously increasing allocation
+non-identifiability.
+
+This result advances the model ladder without identifying a human mechanism.
+The ellipsoid radii and angular bounds are engineering values, the screen has
+no subject-specific bone or muscle geometry, and no contact force, power,
+work, passivity, tissue load, or club-delivery outcome is solved. The decisive
+next test replaces this surrogate with the independently validated articulated
+shoulder model, subject-specific anatomy where governed, calibrated grip
+contact, and paired forward dynamics.
+
 The next spatial experiment must now integrate calibrated compliant contact
 from these closed states, expose contact loss and tissue/shaft compliance as
 typed states, and repeat the coincident, reversal, killswitch, power, and

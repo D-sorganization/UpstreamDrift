@@ -105,6 +105,10 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
                 "command": "python -m scripts.research.proximal_distal_energy.run_subject_scaled_closed_contact",
                 "tier": "subject_scaled_bounded_closed_contact_inverse_kinematics",
             },
+            "scapulothoracic_contact_screen": {
+                "command": "python -m scripts.research.proximal_distal_energy.run_scapulothoracic_contact_screen",
+                "tier": "paired_arm_only_scapula_on_ellipsoid_geometry_screen",
+            },
             "spatial_forward_contact": {
                 "command": "python -m scripts.research.proximal_distal_energy.run_spatial_forward_contact_study",
                 "tier": "reduced_two_engine_forward_contact",
@@ -214,6 +218,9 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
             ),
             "subject_scaled_closed_contact_feasibility": (
                 "reduced_tree_closed_contact_screen_passed_compliant_forward_test_open"
+            ),
+            "scapulothoracic_contact_geometry": (
+                "partial_reachability_with_high_allocation_nullity_forward_test_open"
             ),
         },
         "known_open_gates": [

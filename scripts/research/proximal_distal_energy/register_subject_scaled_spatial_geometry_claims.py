@@ -17,6 +17,9 @@ NEW_CLAIM_IDS = {
     "PD-CLAIM-262",
     "PD-CLAIM-263",
     "PD-CLAIM-264",
+    "PD-CLAIM-265",
+    "PD-CLAIM-266",
+    "PD-CLAIM-267",
 }
 ARTIFACTS = [
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
@@ -33,6 +36,13 @@ ARTIFACTS = [
     "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
     "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
     "tests/research/test_subject_scaled_closed_contact.py",
+    "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
+    "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz",
+    "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf",
+    "scripts/research/proximal_distal_energy/scapulothoracic_contact_screen.py",
+    "scripts/research/proximal_distal_energy/run_scapulothoracic_contact_screen.py",
+    "scripts/research/proximal_distal_energy/make_scapulothoracic_contact_figures.py",
+    "tests/research/test_scapulothoracic_contact_screen.py",
 ]
 
 
@@ -236,6 +246,31 @@ def main() -> None:
         "_ch09_conclusions.qmd",
         "The subject-scaled contact-closure audit rejects",
     )
+    scap_design = _find(
+        candidates,
+        "_ch06c_spatial_cross_formulation.qmd",
+        "The fixed shoulder centers are the next explicit structural intervention.",
+    )
+    scap_result = _find(
+        candidates,
+        "_ch06c_spatial_cross_formulation.qmd",
+        "No fixed-shoulder arm-only state reaches",
+    )
+    scap_rank = _find(
+        candidates,
+        "_ch06c_spatial_cross_formulation.qmd",
+        "Both paired contact Jacobians have rank six",
+    )
+    scap_boundary = _find(
+        candidates,
+        "_ch06c_spatial_cross_formulation.qmd",
+        "This result advances the model ladder without identifying a human mechanism.",
+    )
+    scap_conclusion = _find(
+        candidates,
+        "_ch09_conclusions.qmd",
+        "A paired arm-only intervention now isolates one omitted structure.",
+    )
     claims = [
         _claim(
             "PD-CLAIM-260",
@@ -284,6 +319,36 @@ def main() -> None:
             falsifier="A force, transfer, timing, slack, or human claim is attributed to this inverse-kinematics evidence alone.",
             model_domain="Reduced-tree inverse-kinematics and screening outputs only.",
         ),
+        _claim(
+            "PD-CLAIM-265",
+            [scap_design, scap_result, scap_conclusion],
+            statement="With trunk and club pose fixed across 54 paired arm-only states, fixed shoulder centers close 0 states, while the scapula-on-ellipsoid surrogate reaches the 0.5 mm residual in 31 states and also satisfies solver termination in 16; 28 states activate a bound, maximum shoulder-center excursion is 0.101 m, and the 2.0 m adverse span fails at 0.480 m residual.",
+            classification="scapulothoracic_contact_geometry_screen",
+            status="partial_closure_with_numerical_and_range_boundaries",
+            boundary="The ellipsoid and ranges are declared engineering surrogates; residual closure and solver termination are separate gates, and active bounds do not prove anatomical infeasibility.",
+            falsifier="Regeneration changes the paired closure, termination, active-bound, excursion, or adverse-span results beyond declared tolerances.",
+            model_domain="Six synthetic profiles, three grip spans, and three phases in paired arm-only fixed-trunk, fixed-club geometry screens.",
+        ),
+        _claim(
+            "PD-CLAIM-266",
+            [scap_rank, scap_conclusion],
+            statement="Both paired contact Jacobians have rank six, but adding eight scapular coordinates increases local coordinate nullity from two to ten, so bilateral contact position does not identify scapular and glenohumeral allocation.",
+            classification="scapular_glenohumeral_geometric_nonidentifiability",
+            status="supported_in_declared_local_linearization",
+            boundary="Full task rank establishes only local contact authority; it does not select an anatomical coordinate allocation or motor strategy.",
+            falsifier="The registered Jacobians do not reproduce rank six and nullities two and ten at every state.",
+            model_domain="Local bilateral hand-position Jacobians in the paired reduced kinematic screens.",
+        ),
+        _claim(
+            "PD-CLAIM-267",
+            [scap_design, scap_boundary, scap_conclusion],
+            statement="The scapula-on-ellipsoid intervention is informed by, but does not reproduce, an articulated scapulothoracic model and cannot establish anatomy, muscle action, contact force, power, work, passivity, tissue load, club delivery, or human strategy.",
+            classification="scapulothoracic_surrogate_inference_boundary",
+            status="explicitly_bounded",
+            boundary="Subject-specific anatomy, articulated shoulder validation, calibrated distributed grip contact, muscle actuation, and forward dynamics remain open.",
+            falsifier="Any anatomical, muscular, transfer, or strategy conclusion is attributed to this reduced geometry screen alone.",
+            model_domain="Reduced scapula-on-ellipsoid kinematic surrogate only.",
+        ),
     ]
     registry["claims"].extend(claims)
     for claim in claims:
@@ -295,6 +360,7 @@ def main() -> None:
     for figure_prefix in (
         "![Subject-Scaled Spatial Contact-Geometry Audit]",
         "![Subject-Scaled Bilateral Closed-Contact Feasibility]",
+        "![Scapular Mobility and Bilateral Contact Geometry]",
     ):
         figure = _find(
             candidates,
@@ -368,6 +434,11 @@ def main() -> None:
         "published_status": "reduced_tree_closed_contact_screen_passed_compliant_forward_test_open",
         "audit_state": "reviewed_as_necessary_condition_result",
     }
+    release_entries["scapulothoracic_contact_geometry"] = {
+        "release_claim_key": "scapulothoracic_contact_geometry",
+        "published_status": "partial_reachability_with_high_allocation_nullity_forward_test_open",
+        "audit_state": "reviewed_as_paired_geometry_screen_with_explicit_boundaries",
+    }
     registry["release_claim_inventory"] = list(release_entries.values())
     registry["paper"]["source_digest"] = inventory["source_digest"]
     registry["audit_scope"]["completion_status"] = "complete"
@@ -376,7 +447,9 @@ def main() -> None:
         "adjudicated. The subject-scaled spatial audit retains its adverse "
         "prescribed-state contact-closure result and favorable algebraic controls. "
         "The bounded closed-contact follow-up passes the declared reduced-tree "
-        "screen while calibrated articulated forward contact remains unexecuted."
+        "screen. The paired scapulothoracic surrogate improves reachability but "
+        "retains termination, active-bound, and allocation-nullity boundaries while "
+        "calibrated articulated forward contact remains unexecuted."
     )
     REGISTRY.write_text(json.dumps(registry, indent=2) + "\n", encoding="utf-8")
 

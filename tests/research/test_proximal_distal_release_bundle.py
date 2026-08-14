@@ -27,6 +27,7 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         "spatial_common_state",
         "subject_scaled_spatial_geometry",
         "subject_scaled_closed_contact",
+        "scapulothoracic_contact_screen",
         "spatial_forward_contact",
         "uncertainty_control",
         "experimental_readiness",
@@ -81,6 +82,9 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
     )
     assert manifest["claims"]["scapular_or_muscle_strategy_identification"] == (
         "unsupported"
+    )
+    assert manifest["claims"]["scapulothoracic_contact_geometry"] == (
+        "partial_reachability_with_high_allocation_nullity_forward_test_open"
     )
     assert manifest["claims"]["canonical_pose_adapter_round_trip"] == (
         "supported_for_coordinate_representation_only"

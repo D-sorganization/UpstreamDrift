@@ -2,14 +2,14 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "0acb5e28428ca76a25650ab1c982a51af80c8ad4d1e69fef599191ab1b9470eb",
+    "source_digest": "267de8bda7b0d9052ecd6d1555342b54fa9e9aa4fe41357d477db695995b30ec",
     "baseline_commit": "a4b53e39b"
   },
   "audit_scope": {
     "completion_status": "complete",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "The complete 987-candidate paper inventory is adjudicated. The subject-scaled spatial audit retains its adverse prescribed-state contact-closure result and favorable algebraic controls. The bounded closed-contact follow-up passes the declared reduced-tree screen while calibrated articulated forward contact remains unexecuted."
+    "current_scope": "The complete 994-candidate paper inventory is adjudicated. The subject-scaled spatial audit retains its adverse prescribed-state contact-closure result and favorable algebraic controls. The bounded closed-contact follow-up passes the declared reduced-tree screen. The paired scapulothoracic surrogate improves reachability but retains termination, active-bound, and allocation-nullity boundaries while calibrated articulated forward contact remains unexecuted."
   },
   "dependencies": [
     {
@@ -187,6 +187,11 @@
       "release_claim_key": "subject_scaled_closed_contact_feasibility",
       "published_status": "reduced_tree_closed_contact_screen_passed_compliant_forward_test_open",
       "audit_state": "reviewed_as_necessary_condition_result"
+    },
+    {
+      "release_claim_key": "scapulothoracic_contact_geometry",
+      "published_status": "partial_reachability_with_high_allocation_nullity_forward_test_open",
+      "audit_state": "reviewed_as_paired_geometry_screen_with_explicit_boundaries"
     }
   ],
   "candidate_reviews": [
@@ -10071,6 +10076,77 @@
     },
     {
       "candidate_id": "PD-CAND-36a661af65c9ae1d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-262"
+      ],
+      "rationale": "This revised synthesis passage carries the registered contact-feasibility boundary or its next-test consequence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-d6d5f4bbd42571e4",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-265",
+        "PD-CLAIM-267"
+      ],
+      "rationale": "This passage states or bounds the subject-scaled contact-geometry audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-6c02100a0f5c73eb",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-265"
+      ],
+      "rationale": "This passage states or bounds the subject-scaled contact-geometry audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-1caf11fb82f2f6aa",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-265",
+        "PD-CLAIM-266",
+        "PD-CLAIM-267"
+      ],
+      "rationale": "This passage states or bounds the subject-scaled contact-geometry audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-2b73f9c6cbe6873a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-266"
+      ],
+      "rationale": "This passage states or bounds the subject-scaled contact-geometry audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-e7dde156e2ab6cec",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-267"
+      ],
+      "rationale": "This passage states or bounds the subject-scaled contact-geometry audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-60b8207530657651",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "The figure include points to registered evidence but asserts no standalone scientific result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-c3105f94a0a046da",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-262"
@@ -21703,7 +21779,14 @@
         "scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py",
         "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
         "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
-        "tests/research/test_subject_scaled_closed_contact.py"
+        "tests/research/test_subject_scaled_closed_contact.py",
+        "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
+        "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf",
+        "scripts/research/proximal_distal_energy/scapulothoracic_contact_screen.py",
+        "scripts/research/proximal_distal_energy/run_scapulothoracic_contact_screen.py",
+        "scripts/research/proximal_distal_energy/make_scapulothoracic_contact_figures.py",
+        "tests/research/test_scapulothoracic_contact_screen.py"
       ],
       "model_domain": "Six deterministic de Leva design profiles, three grip spans, and 61 prescribed states in the reduced 20-coordinate spatial tree.",
       "uncertainty_boundary": "The profiles are synthetic regression-based design points and the trajectories are prescribed rather than solved for bilateral contact.",
@@ -21750,7 +21833,14 @@
         "scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py",
         "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
         "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
-        "tests/research/test_subject_scaled_closed_contact.py"
+        "tests/research/test_subject_scaled_closed_contact.py",
+        "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
+        "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf",
+        "scripts/research/proximal_distal_energy/scapulothoracic_contact_screen.py",
+        "scripts/research/proximal_distal_energy/run_scapulothoracic_contact_screen.py",
+        "scripts/research/proximal_distal_energy/make_scapulothoracic_contact_figures.py",
+        "tests/research/test_scapulothoracic_contact_screen.py"
       ],
       "model_domain": "Six deterministic de Leva design profiles, three grip spans, and 61 prescribed states in the reduced 20-coordinate spatial tree.",
       "uncertainty_boundary": "The forces and contact points are prescribed and do not arise from anatomical compliant forward contact.",
@@ -21777,17 +21867,19 @@
         "PD-CAND-f35adbe08b937d77",
         "PD-CAND-54446a28f977e4fa",
         "PD-CAND-c063936829317748",
-        "PD-CAND-36a661af65c9ae1d"
+        "PD-CAND-36a661af65c9ae1d",
+        "PD-CAND-c3105f94a0a046da"
       ],
       "statement": "Articulated spatial timing, recovery, and slack claims require calibrated compliant forward contact from closed states plus independent-engine controls before interpretation; reduced-tree inverse-kinematics screening alone is insufficient.",
       "classification": "articulated_spatial_completion_gate",
       "published_status": "closed_contact_screen_complete_forward_contact_not_executed",
       "audit_status": "deterministic_subject_scaling_closure_rank_and_geometry_controls_checked",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:327",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:374",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:119",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:356"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:128",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:403",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:339"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
@@ -21803,7 +21895,14 @@
         "scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py",
         "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
         "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
-        "tests/research/test_subject_scaled_closed_contact.py"
+        "tests/research/test_subject_scaled_closed_contact.py",
+        "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
+        "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf",
+        "scripts/research/proximal_distal_energy/scapulothoracic_contact_screen.py",
+        "scripts/research/proximal_distal_energy/run_scapulothoracic_contact_screen.py",
+        "scripts/research/proximal_distal_energy/make_scapulothoracic_contact_figures.py",
+        "tests/research/test_scapulothoracic_contact_screen.py"
       ],
       "model_domain": "Six deterministic de Leva design profiles, three grip spans, and 61 prescribed states in the reduced 20-coordinate spatial tree.",
       "uncertainty_boundary": "This is a dependency-ordered falsification contract, not evidence that compliant articulated dynamics will support the proposed mechanism.",
@@ -21858,7 +21957,14 @@
         "scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py",
         "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
         "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
-        "tests/research/test_subject_scaled_closed_contact.py"
+        "tests/research/test_subject_scaled_closed_contact.py",
+        "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
+        "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf",
+        "scripts/research/proximal_distal_energy/scapulothoracic_contact_screen.py",
+        "scripts/research/proximal_distal_energy/run_scapulothoracic_contact_screen.py",
+        "scripts/research/proximal_distal_energy/make_scapulothoracic_contact_figures.py",
+        "tests/research/test_scapulothoracic_contact_screen.py"
       ],
       "model_domain": "Six deterministic de Leva design profiles, three grip spans, and 13 phase samples in a reduced 20-coordinate tree with six fixed club coordinates.",
       "uncertainty_boundary": "The joint bounds are broad engineering guards and collision uses bounding spheres with declared exemptions; neither is subject-specific anatomical qualification.",
@@ -21893,7 +21999,7 @@
       "audit_status": "deterministic_subject_scaling_closure_rank_and_geometry_controls_checked",
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:318",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:327",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:374",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:55",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:64"
       ],
@@ -21911,7 +22017,14 @@
         "scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py",
         "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
         "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
-        "tests/research/test_subject_scaled_closed_contact.py"
+        "tests/research/test_subject_scaled_closed_contact.py",
+        "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
+        "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf",
+        "scripts/research/proximal_distal_energy/scapulothoracic_contact_screen.py",
+        "scripts/research/proximal_distal_energy/run_scapulothoracic_contact_screen.py",
+        "scripts/research/proximal_distal_energy/make_scapulothoracic_contact_figures.py",
+        "tests/research/test_scapulothoracic_contact_screen.py"
       ],
       "model_domain": "Reduced-tree inverse-kinematics and screening outputs only.",
       "uncertainty_boundary": "Scapular glide, forearm pronation-supination, multi-axis wrist, fingers, distributed tissue contact, calibrated compliance, and participant measurements are absent.",
@@ -21928,6 +22041,178 @@
         "point-force wrench-map rank and axial augmentation"
       ],
       "falsifier": "A force, transfer, timing, slack, or human claim is attributed to this inverse-kinematics evidence alone.",
+      "adjudication": "The executable atlas was regenerated from canonical anthropometrics and the shared spatial model; favorable rank and couple-scaling controls are retained alongside the adverse contact-closure result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "claim_id": "PD-CLAIM-265",
+      "candidate_ids": [
+        "PD-CAND-d6d5f4bbd42571e4",
+        "PD-CAND-6c02100a0f5c73eb",
+        "PD-CAND-1caf11fb82f2f6aa"
+      ],
+      "statement": "With trunk and club pose fixed across 54 paired arm-only states, fixed shoulder centers close 0 states, while the scapula-on-ellipsoid surrogate reaches the 0.5 mm residual in 31 states and also satisfies solver termination in 16; 28 states activate a bound, maximum shoulder-center excursion is 0.101 m, and the 2.0 m adverse span fails at 0.480 m residual.",
+      "classification": "scapulothoracic_contact_geometry_screen",
+      "published_status": "partial_closure_with_numerical_and_range_boundaries",
+      "audit_status": "deterministic_subject_scaling_closure_rank_and_geometry_controls_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:329",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:349",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:79"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_subject_scaled_spatial_geometry.pdf",
+        "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
+        "scripts/research/proximal_distal_energy/run_subject_scaled_spatial_geometry.py",
+        "scripts/research/proximal_distal_energy/make_subject_scaled_spatial_geometry_figures.py",
+        "tests/research/test_subject_scaled_spatial_geometry.py",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_subject_scaled_closed_contact.pdf",
+        "scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py",
+        "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
+        "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
+        "tests/research/test_subject_scaled_closed_contact.py",
+        "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
+        "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf",
+        "scripts/research/proximal_distal_energy/scapulothoracic_contact_screen.py",
+        "scripts/research/proximal_distal_energy/run_scapulothoracic_contact_screen.py",
+        "scripts/research/proximal_distal_energy/make_scapulothoracic_contact_figures.py",
+        "tests/research/test_scapulothoracic_contact_screen.py"
+      ],
+      "model_domain": "Six synthetic profiles, three grip spans, and three phases in paired arm-only fixed-trunk, fixed-club geometry screens.",
+      "uncertainty_boundary": "The ellipsoid and ranges are declared engineering surrogates; residual closure and solver termination are separate gates, and active bounds do not prove anatomical infeasibility.",
+      "competing_explanations": [
+        "prescribed state is not a closed-contact inverse-kinematics solution",
+        "reduced scapular, shoulder, wrist, and hand geometry",
+        "anthropometric regression rather than subject measurement",
+        "unmodeled contact, tissue, and shaft compliance"
+      ],
+      "negative_controls": [
+        "bilateral distance-to-contact closure",
+        "constraint Jacobian rank and singular values",
+        "grip-span sweep",
+        "point-force wrench-map rank and axial augmentation"
+      ],
+      "falsifier": "Regeneration changes the paired closure, termination, active-bound, excursion, or adverse-span results beyond declared tolerances.",
+      "adjudication": "The executable atlas was regenerated from canonical anthropometrics and the shared spatial model; favorable rank and couple-scaling controls are retained alongside the adverse contact-closure result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "claim_id": "PD-CLAIM-266",
+      "candidate_ids": [
+        "PD-CAND-2b73f9c6cbe6873a",
+        "PD-CAND-1caf11fb82f2f6aa"
+      ],
+      "statement": "Both paired contact Jacobians have rank six, but adding eight scapular coordinates increases local coordinate nullity from two to ten, so bilateral contact position does not identify scapular and glenohumeral allocation.",
+      "classification": "scapular_glenohumeral_geometric_nonidentifiability",
+      "published_status": "supported_in_declared_local_linearization",
+      "audit_status": "deterministic_subject_scaling_closure_rank_and_geometry_controls_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:358",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:79"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_subject_scaled_spatial_geometry.pdf",
+        "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
+        "scripts/research/proximal_distal_energy/run_subject_scaled_spatial_geometry.py",
+        "scripts/research/proximal_distal_energy/make_subject_scaled_spatial_geometry_figures.py",
+        "tests/research/test_subject_scaled_spatial_geometry.py",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_subject_scaled_closed_contact.pdf",
+        "scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py",
+        "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
+        "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
+        "tests/research/test_subject_scaled_closed_contact.py",
+        "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
+        "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf",
+        "scripts/research/proximal_distal_energy/scapulothoracic_contact_screen.py",
+        "scripts/research/proximal_distal_energy/run_scapulothoracic_contact_screen.py",
+        "scripts/research/proximal_distal_energy/make_scapulothoracic_contact_figures.py",
+        "tests/research/test_scapulothoracic_contact_screen.py"
+      ],
+      "model_domain": "Local bilateral hand-position Jacobians in the paired reduced kinematic screens.",
+      "uncertainty_boundary": "Full task rank establishes only local contact authority; it does not select an anatomical coordinate allocation or motor strategy.",
+      "competing_explanations": [
+        "prescribed state is not a closed-contact inverse-kinematics solution",
+        "reduced scapular, shoulder, wrist, and hand geometry",
+        "anthropometric regression rather than subject measurement",
+        "unmodeled contact, tissue, and shaft compliance"
+      ],
+      "negative_controls": [
+        "bilateral distance-to-contact closure",
+        "constraint Jacobian rank and singular values",
+        "grip-span sweep",
+        "point-force wrench-map rank and axial augmentation"
+      ],
+      "falsifier": "The registered Jacobians do not reproduce rank six and nullities two and ten at every state.",
+      "adjudication": "The executable atlas was regenerated from canonical anthropometrics and the shared spatial model; favorable rank and couple-scaling controls are retained alongside the adverse contact-closure result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "claim_id": "PD-CLAIM-267",
+      "candidate_ids": [
+        "PD-CAND-d6d5f4bbd42571e4",
+        "PD-CAND-e7dde156e2ab6cec",
+        "PD-CAND-1caf11fb82f2f6aa"
+      ],
+      "statement": "The scapula-on-ellipsoid intervention is informed by, but does not reproduce, an articulated scapulothoracic model and cannot establish anatomy, muscle action, contact force, power, work, passivity, tissue load, club delivery, or human strategy.",
+      "classification": "scapulothoracic_surrogate_inference_boundary",
+      "published_status": "explicitly_bounded",
+      "audit_status": "deterministic_subject_scaling_closure_rank_and_geometry_controls_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:329",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:366",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:79"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_subject_scaled_spatial_geometry.pdf",
+        "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
+        "scripts/research/proximal_distal_energy/run_subject_scaled_spatial_geometry.py",
+        "scripts/research/proximal_distal_energy/make_subject_scaled_spatial_geometry_figures.py",
+        "tests/research/test_subject_scaled_spatial_geometry.py",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_subject_scaled_closed_contact.pdf",
+        "scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py",
+        "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
+        "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
+        "tests/research/test_subject_scaled_closed_contact.py",
+        "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
+        "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf",
+        "scripts/research/proximal_distal_energy/scapulothoracic_contact_screen.py",
+        "scripts/research/proximal_distal_energy/run_scapulothoracic_contact_screen.py",
+        "scripts/research/proximal_distal_energy/make_scapulothoracic_contact_figures.py",
+        "tests/research/test_scapulothoracic_contact_screen.py"
+      ],
+      "model_domain": "Reduced scapula-on-ellipsoid kinematic surrogate only.",
+      "uncertainty_boundary": "Subject-specific anatomy, articulated shoulder validation, calibrated distributed grip contact, muscle actuation, and forward dynamics remain open.",
+      "competing_explanations": [
+        "prescribed state is not a closed-contact inverse-kinematics solution",
+        "reduced scapular, shoulder, wrist, and hand geometry",
+        "anthropometric regression rather than subject measurement",
+        "unmodeled contact, tissue, and shaft compliance"
+      ],
+      "negative_controls": [
+        "bilateral distance-to-contact closure",
+        "constraint Jacobian rank and singular values",
+        "grip-span sweep",
+        "point-force wrench-map rank and axial augmentation"
+      ],
+      "falsifier": "Any anatomical, muscular, transfer, or strategy conclusion is attributed to this reduced geometry screen alone.",
       "adjudication": "The executable atlas was regenerated from canonical anthropometrics and the shared spatial model; favorable rank and couple-scaling controls are retained alongside the adverse contact-closure result.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-14"

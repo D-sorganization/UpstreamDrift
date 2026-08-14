@@ -12,7 +12,7 @@ in git and GitHub.
   [#8595](https://github.com/D-sorganization/UpstreamDrift/issues/8595) retains
   the photographed nine-point momentum-transfer agenda.
 - Canonical question, experiment, and readiness registries live under
-  `docs/research/proximal_distal_energy_transfer/data/`. MT-E01 through MT-E07
+  `docs/research/proximal_distal_energy_transfer/data/`. MT-E01 through MT-E09
   are model studies; MT-H01 is the governed participant-held-out stage.
 - [#8556](https://github.com/D-sorganization/UpstreamDrift/issues/8556) remains
   open. No qualifying participant dataset with synchronized bilateral six-axis
@@ -48,6 +48,15 @@ in git and GitHub.
 
 ## Current Program State
 
+- MT-E09 holds trunk and club pose fixed across 54 paired arm-only states.
+  Fixed shoulder centers close 0 states; the scapula-on-ellipsoid surrogate
+  reaches the 0.5 mm residual in 31 and also passes optimizer termination in 16. Twenty-eight states activate a bound, maximum shoulder-center excursion
+  is `0.1011905 m`, and the 2.0 m adverse span fails at `0.4801423 m`.
+- Both paired contact Jacobians have rank six, while coordinate nullity rises
+  from two to ten. The result exposes geometry sensitivity and allocation
+  non-identifiability; it does not establish anatomy, muscle action, passive
+  transfer, delivery benefit, or human strategy.
+
 - The MT-E08 closed-contact follow-up solves all 234 combinations of six
   synthetic profiles, three grip spans, and 13 phase samples while fixing the
   six club coordinates. Worst bilateral closure error is
@@ -59,11 +68,11 @@ in git and GitHub.
   grip force, passive transfer, timing benefit, slack benefit, or human use.
   The next spatial gate is calibrated compliant forward contact initialized
   from the closed configurations.
-- The claim inventory is adjudicated at 987/987 candidates and 263 atomic
+- The claim inventory is adjudicated at 994/994 candidates and 266 atomic
   claims, including the adverse subject-scaled contact-closure result.
 - Every one of 1,064 claim source locators now resolves to an existing
   repository file and in-range line. The claim-evidence integrity authority
-  covers all 1,541 support references, hash-pins 193 distinct local artifacts,
+  covers all 1,639 support references, hash-pins 200 distinct local artifacts,
   and inventories 85 external URLs without treating link presence as
   independent scientific validation.
 - The handwritten agenda retains bounded model answers for eight points and a
@@ -94,10 +103,11 @@ in git and GitHub.
    impact, and an independent dynamics engine.
 8. Execute MT-H01 only after governed bilateral-wrench acquisition and the
    frozen participant split.
-9. Implement the Seth et al. scapulothoracic model candidate, EMG onset-
-   definition sensitivity, and distributed-grip contact measurements described
-   in the independently checked biomechanics plan; retain each as a model or
-   acquisition design until its prospective gates pass.
+9. Replace the executed Seth-informed reduced scapulothoracic surrogate with an
+   independently validated articulated implementation; execute EMG onset-
+   definition sensitivity and distributed-grip contact measurements described
+   in the biomechanics plan; retain each as a model or acquisition design until
+   its prospective gates pass.
 
 ## Required Gates
 
@@ -106,8 +116,11 @@ python -m scripts.research.proximal_distal_energy.run_subject_scaled_spatial_geo
 python -m scripts.research.proximal_distal_energy.make_subject_scaled_spatial_geometry_figures
 python -m scripts.research.proximal_distal_energy.run_subject_scaled_closed_contact
 python -m scripts.research.proximal_distal_energy.make_subject_scaled_closed_contact_figures
+python -m scripts.research.proximal_distal_energy.run_scapulothoracic_contact_screen
+python -m scripts.research.proximal_distal_energy.make_scapulothoracic_contact_figures
 python -m pytest tests/research/test_subject_scaled_spatial_geometry.py `
   tests/research/test_subject_scaled_closed_contact.py `
+  tests/research/test_scapulothoracic_contact_screen.py `
   tests/research/test_momentum_transfer_experiment_registry.py `
   tests/unit/research/test_momentum_question_readiness.py `
   tests/research/test_proximal_distal_release_bundle.py -q
@@ -120,6 +133,10 @@ python -m ruff check scripts/research/proximal_distal_energy/subject_scaled_spat
   scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py `
   scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py `
   tests/research/test_subject_scaled_closed_contact.py
+python -m ruff check scripts/research/proximal_distal_energy/scapulothoracic_contact_screen.py `
+  scripts/research/proximal_distal_energy/run_scapulothoracic_contact_screen.py `
+  scripts/research/proximal_distal_energy/make_scapulothoracic_contact_figures.py `
+  tests/research/test_scapulothoracic_contact_screen.py
 python -m scripts.research.proximal_distal_energy.claim_audit validate
 python -m scripts.research.proximal_distal_energy.claim_evidence_integrity validate
 python -m scripts.research.proximal_distal_energy.momentum_question_readiness validate
