@@ -2905,6 +2905,7 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - `spec-exempt` (#8483): Moved Sidekick readiness monitoring, degradation reporting, and workspace seeding from the main launcher facade into the existing launcher-owned `SidekickSidebarManager`.
 - (spec-exempt: security fix) Fixed user enumeration via timing attack in `/login` endpoint by ensuring a dummy password verification is performed even if the user is not found, to normalize response time.
 - (spec-exempt: micro-optimization) Replaced `np.sum` and `np.mean` calls with `np.vdot` and `np.einsum` to optimize array reductions and avoid temporary allocations.
+- (spec-exempt: micro-optimization) Replaced `.iterrows()` loops with vectorized pandas column assignments in motion capture data loading paths to optimize performance and prevent excessive Series creation overhead.
 
 ### F-8557.13: Spatial Common-State Component and Virtual-Work Audit
 
