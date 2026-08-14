@@ -1,0 +1,79 @@
+# Critical Momentum-Transfer Questions {#sec-critical-momentum-questions}
+
+The model ladder now permits bounded answers to several recurring questions,
+but it does not support a single transfer percentage, a universal release
+time, or a preferred human technique. @tbl-momentum-question-status
+separates present results from the observations needed to change them. The
+prospective experiment definitions are machine-readable in
+[`momentum_transfer_experiment_registry.json`](../data/momentum_transfer_experiment_registry.json),
+and their broader rationale is documented in the open
+[`question program`](../MOMENTUM_TRANSFER_QUESTION_PROGRAM.md).
+
+| Question | Present Assessment | What Would Change the Assessment? |
+|---|---|---|
+| How much transfer is drift-mediated? | Conditional on the observable, coordinate and frame, event window, model, and decomposition. Signed drift shares may exceed 100% when control opposes the pathway; pointwise attribution is not forward persistence. | A common acceleration/force/impulse/power/work ledger across tiers, same-state killswitches, uncertainty propagation, and participant-held-out bilateral-wrench evaluation. |
+| Which geometry matters? | Relative link angle, force direction, velocity direction, reference point, grip separation, swing-plane orientation, and contact moment arm can gate magnitude and sign. | A subject-scaled spatial atlas with zero, orthogonal, coincident-grip, and reversed-moment-arm controls reproduced in an independent engine. |
+| Which timing patterns matter? | Early distal release changes the available geometry; proximal rate, acceleration, braking, and release timing interact nonmonotonically. “Casting” is not one universal event. | Factorial interventions on proximal acceleration, distal release, and braking under matched state and work, with multiple preregistered casting definitions and adverse-load tests. |
+| Does a drift-mediated strategy require less timing precision? | Unresolved for people. State triggering improves selected synthetic outcomes but assumes state access and does not prove reduced neural timing demand. | Clock, state, impedance, and delayed-observer policies compared by viable timing-region volume, lower-tail outcome, phase error, delay, saturation, force, and effort. |
+| Is a strategy self-correcting? | Not established. Low perturbation sensitivity is not self-correction without a recovery mechanism. | Matched perturbations demonstrating error decay, recovery time, viable-set return probability, attraction-region size, and no hidden load-cost increase. |
+| Should proximal velocity be maximized? | No general rule is supported. The reduced studies contain phase dependence, matching-rule dependence, nonmonotonic killswitch effects, and adverse braking associations. | Dose-response surfaces for rate and acceleration with matched state, work, load, and impact definitions, extended across spatial and subject-scaled models and held-out participants. |
+| Is slack beneficial or necessary? | Unanswered until the mechanism is named. Contact loss, backlash, elastic preload, muscle-tendon series compliance, and control deadband are not interchangeable. | One slack class at a time, with a state and constitutive law, matched initial energy, passivity and closure checks, hysteresis sweeps, and a measurement strategy. |
+
+: Current answer and falsification map for the critical momentum-transfer
+questions. “Conditional” denotes model- and estimand-bounded evidence rather
+than a human strategy. {#tbl-momentum-question-status tbl-colwidths="20,38,42"}
+
+## Timing and Common Failure Descriptions
+
+The terms *casting*, *weak early body acceleration*, and *late release* are
+useful only after translation into observables. The registered timing study
+therefore treats at least four quantities independently: proximal-acceleration
+onset, distal-angle or distal-rate threshold crossing, proximal-braking onset,
+and the impact or delivery event. A result is not robust if it depends on one
+arbitrary casting threshold. Work-matched and delivery-state-matched controls
+are both required because either matching rule can alter the apparent benefit.
+
+## Timing Demand and Self-Correction
+
+A mechanism can be mechanically passive at an instant while its preparation
+or regulation remains demanding. Timing demand is therefore reported as the
+width or volume of a viable event-time region, outcome sensitivity to phase
+error, lower-tail performance, and degradation under observer delay and
+noise. Self-correction has the stronger requirement that a declared physical
+or feedback mechanism return a perturbed state toward a viable set. Repeatable
+open-loop behavior does not meet that definition.
+
+## Proximal Velocity as a Dose, Not a Maxim
+
+The existing planar evidence is sufficient to reject the rule “maximize
+proximal velocity” at those declared tiers, but not to specify a human optimum.
+An apparent speed benefit must be considered together with relative motion,
+control work, interface power, braking work, bilateral load, club orientation,
+and the matching rule. The registered analysis searches explicitly for
+plateaus, interior optima, and reversals rather than forcing a monotonic fit.
+
+## Five Distinct Slack Hypotheses
+
+1. **Contact slack** is temporary loss or weakening of a hand-grip constraint.
+2. **Transmission slack** is backlash or a dead zone before torque transmission.
+3. **Structural slack** is compliant preload and elastic deformation.
+4. **Biological series compliance** is a muscle-tendon state with stored and
+   released energy.
+5. **Control slack** is an activation deadband, delay, or co-contraction reserve.
+
+Only the declared phenomenological transmission dead zone has been exercised
+directly in the present allocation study. The other classes remain separate
+experiments. Any proposed benefit must survive matched-energy, zero-slack,
+direction-reversal, passivity, and work-energy closure controls before it can
+be interpreted as a transfer mechanism.
+
+## Evidential Boundary
+
+These experiments are designed to make the framework easier to disprove.
+Synthetic studies can reject a mechanism within a declared model and can
+qualify software, but they cannot establish a coaching instruction or human
+control strategy. The participant-held-out stage remains blocked until a
+governed dataset contains synchronized full-body and club kinematics, force
+plates, bilateral six-axis grip wrenches, grip/contact state, and impact
+outcomes. Substituting synthetic traces would erase the question the human
+stage is intended to answer.

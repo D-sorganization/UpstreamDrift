@@ -2,14 +2,14 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "d6602b5c6f2743a71ce0b90dc2b433e5cac8320f86e1b773f85487ae1ace29e6",
+    "source_digest": "36086d2c6064c143830a5946c2a3cee7c02d2bc1c02ef72e55efef57c879311a",
     "baseline_commit": "13ea6a69585a42dc1db4b3959440ed95787c9779"
   },
   "audit_scope": {
     "completion_status": "complete",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "The complete 925-candidate paper inventory is adjudicated. Repeated methods, summary, limitation, provenance, and model-tier passages inherit the primary claim boundaries; editorial anchors are explicitly classified as nonclaims."
+    "current_scope": "The complete 935-candidate paper inventory is adjudicated. The critical-question chapter maps ten new candidates to four bounded claims and retains all human-data gates."
   },
   "dependencies": [
     {
@@ -9403,6 +9403,106 @@
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "This heading, equation fragment, figure/table anchor, command block, navigation statement, or repository pointer asserts no standalone scientific result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-ffa85e57b63527d5",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-242"
+      ],
+      "rationale": "This passage states or bounds a registered critical-question conclusion.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-793095ba1f86b6c8",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-242"
+      ],
+      "rationale": "This passage states or bounds a registered critical-question conclusion.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-a252b335ad5db68f",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-242"
+      ],
+      "rationale": "This passage states or bounds a registered critical-question conclusion.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-33125571ea38bd1e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-243"
+      ],
+      "rationale": "This passage states or bounds a registered critical-question conclusion.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-12fabdf06bcc96aa",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-243"
+      ],
+      "rationale": "This passage states or bounds a registered critical-question conclusion.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-b49f0e860e9eab2b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-243"
+      ],
+      "rationale": "This passage states or bounds a registered critical-question conclusion.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-17632d2f70c8422d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-244"
+      ],
+      "rationale": "This passage states or bounds a registered critical-question conclusion.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-db74be00a06f8889",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-244"
+      ],
+      "rationale": "This passage states or bounds a registered critical-question conclusion.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-ce5ed5ff62ef6edd",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-244"
+      ],
+      "rationale": "This passage states or bounds a registered critical-question conclusion.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-49c472fa030a2018",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-245"
+      ],
+      "rationale": "This passage states or bounds a registered critical-question conclusion.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
     }
@@ -20002,6 +20102,166 @@
       "model_domain": "Provider-pinned PyQt/React exploration and hash-pinned static evidence bundle.",
       "uncertainty_boundary": "Interface availability and checksums do not validate physical claims or substitute for governed human data.",
       "falsifier": "Interactive output is promoted as publication authority, provider identity drifts, or bundle validation permits artifact drift."
+    },
+    {
+      "claim_id": "PD-CLAIM-242",
+      "candidate_ids": [
+        "PD-CAND-ffa85e57b63527d5",
+        "PD-CAND-793095ba1f86b6c8",
+        "PD-CAND-a252b335ad5db68f"
+      ],
+      "statement": "The seven-question map reports model- and estimand-bounded answers rather than a universal transfer fraction, release time, or human technique.",
+      "classification": "question_map_scope",
+      "published_status": "supported_as_scientific_governance",
+      "audit_status": "evidence_boundary_and_falsification_contract_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:3",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:12",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:22"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
+        "docs/research/proximal_distal_energy_transfer/MOMENTUM_TRANSFER_QUESTION_PROGRAM.md",
+        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_question_registry.json",
+        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_experiment_registry.json"
+      ],
+      "model_domain": "Cross-tier synthesis and prospective experiment governance.",
+      "uncertainty_boundary": "The map summarizes existing adjudicated evidence and prospective tests; it is not new experimental evidence.",
+      "competing_explanations": [
+        "model-tier dependence",
+        "estimand choice",
+        "matching rule",
+        "measurement uncertainty"
+      ],
+      "negative_controls": [
+        "same-state killswitch",
+        "geometry null and reversal",
+        "matched work and state",
+        "participant holdout"
+      ],
+      "falsifier": "A conditional entry is presented as a universal or human conclusion.",
+      "adjudication": "Reconciled to the existing claim audit, machine-readable question registry, and prospective experiment contract without promoting model evidence to human evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-243",
+      "candidate_ids": [
+        "PD-CAND-33125571ea38bd1e",
+        "PD-CAND-12fabdf06bcc96aa",
+        "PD-CAND-b49f0e860e9eab2b"
+      ],
+      "statement": "Casting, timing demand, and self-correction require measurable event, sensitivity, and perturbation-recovery definitions; state-triggered synthetic performance does not establish reduced human timing demand.",
+      "classification": "operational_timing_and_recovery_contract",
+      "published_status": "registered_and_human_unresolved",
+      "audit_status": "evidence_boundary_and_falsification_contract_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:28",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:38"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
+        "docs/research/proximal_distal_energy_transfer/MOMENTUM_TRANSFER_QUESTION_PROGRAM.md",
+        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_question_registry.json",
+        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_experiment_registry.json"
+      ],
+      "model_domain": "Cross-tier synthesis and prospective experiment governance.",
+      "uncertainty_boundary": "Observer, recovery, and participant experiments have not been completed.",
+      "competing_explanations": [
+        "model-tier dependence",
+        "estimand choice",
+        "matching rule",
+        "measurement uncertainty"
+      ],
+      "negative_controls": [
+        "same-state killswitch",
+        "geometry null and reversal",
+        "matched work and state",
+        "participant holdout"
+      ],
+      "falsifier": "Repeatability or open-loop sensitivity is relabeled self-correction or human timing economy.",
+      "adjudication": "Reconciled to the existing claim audit, machine-readable question registry, and prospective experiment contract without promoting model evidence to human evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-244",
+      "candidate_ids": [
+        "PD-CAND-17632d2f70c8422d",
+        "PD-CAND-db74be00a06f8889",
+        "PD-CAND-ce5ed5ff62ef6edd"
+      ],
+      "statement": "The planar evidence rejects maximizing proximal velocity as a general rule at those tiers, while five distinct slack classes require separate state, energy, and measurement tests.",
+      "classification": "nonmonotonic_velocity_and_typed_slack_boundary",
+      "published_status": "proximal_rule_rejected_at_planar_tiers_slack_mostly_open",
+      "audit_status": "evidence_boundary_and_falsification_contract_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:48",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:57",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:64"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
+        "docs/research/proximal_distal_energy_transfer/MOMENTUM_TRANSFER_QUESTION_PROGRAM.md",
+        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_question_registry.json",
+        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_experiment_registry.json"
+      ],
+      "model_domain": "Cross-tier synthesis and prospective experiment governance.",
+      "uncertainty_boundary": "Only a phenomenological transmission dead zone has been directly exercised; no human optimum is identified.",
+      "competing_explanations": [
+        "model-tier dependence",
+        "estimand choice",
+        "matching rule",
+        "measurement uncertainty"
+      ],
+      "negative_controls": [
+        "same-state killswitch",
+        "geometry null and reversal",
+        "matched work and state",
+        "participant holdout"
+      ],
+      "falsifier": "A planar reversal is promoted to a human optimum or one slack class is inferred from another.",
+      "adjudication": "Reconciled to the existing claim audit, machine-readable question registry, and prospective experiment contract without promoting model evidence to human evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-245",
+      "candidate_ids": [
+        "PD-CAND-49c472fa030a2018"
+      ],
+      "statement": "Synthetic studies can falsify declared model mechanisms and qualify software but cannot establish coaching or human-control strategies; governed participant-held-out bilateral-wrench data remain required.",
+      "classification": "human_evidence_boundary",
+      "published_status": "human_validation_blocked",
+      "audit_status": "evidence_boundary_and_falsification_contract_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:72"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
+        "docs/research/proximal_distal_energy_transfer/MOMENTUM_TRANSFER_QUESTION_PROGRAM.md",
+        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_question_registry.json",
+        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_experiment_registry.json"
+      ],
+      "model_domain": "Cross-tier synthesis and prospective experiment governance.",
+      "uncertainty_boundary": "No qualifying governed participant-level dataset is available.",
+      "competing_explanations": [
+        "model-tier dependence",
+        "estimand choice",
+        "matching rule",
+        "measurement uncertainty"
+      ],
+      "negative_controls": [
+        "same-state killswitch",
+        "geometry null and reversal",
+        "matched work and state",
+        "participant holdout"
+      ],
+      "falsifier": "Synthetic traces are substituted for the registered human stage.",
+      "adjudication": "Reconciled to the existing claim audit, machine-readable question registry, and prospective experiment contract without promoting model evidence to human evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
     }
   ]
 }

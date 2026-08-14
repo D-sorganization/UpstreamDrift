@@ -1,9 +1,9 @@
 {
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper_source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-  "source_digest": "d6602b5c6f2743a71ce0b90dc2b433e5cac8320f86e1b773f85487ae1ace29e6",
-  "source_count": 32,
-  "candidate_count": 925,
+  "source_digest": "36086d2c6064c143830a5946c2a3cee7c02d2bc1c02ef72e55efef57c879311a",
+  "source_count": 33,
+  "candidate_count": 935,
   "candidates": [
     {
       "candidate_id": "PD-CAND-384556ac26fc8724",
@@ -14706,6 +14706,172 @@
         "numeric",
         "assertive_language",
         "external_citation",
+        "causal_or_generalizing_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-ffa85e57b63527d5",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
+      "line_start": 3,
+      "line_end": 10,
+      "text": "The model ladder now permits bounded answers to several recurring questions, but it does not support a single transfer percentage, a universal release time, or a preferred human technique. @tbl-momentum-question-status separates present results from the observations needed to change them. The prospective experiment definitions are machine-readable in [`momentum_transfer_experiment_registry.json`](../data/momentum_transfer_experiment_registry.json), and their broader rationale is documented in the open [`question program`](../MOMENTUM_TRANSFER_QUESTION_PROGRAM.md).",
+      "text_sha256": "09651ce131ba7868bbce47c219a873e7ea7dae0cc441d5e35644ce8928a564dd",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": true,
+      "priority_score": 5,
+      "triage_flags": [
+        "assertive_language",
+        "causal_or_generalizing_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-793095ba1f86b6c8",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
+      "line_start": 12,
+      "line_end": 12,
+      "text": "| Question | Present Assessment | What Would Change the Assessment? |",
+      "text_sha256": "35c26ddc43fe24af1f9eb6aa4c19703b12342519efd6894938e28c398e41101e",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": false,
+      "priority_score": 0,
+      "triage_flags": [],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-33125571ea38bd1e",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
+      "line_start": 14,
+      "line_end": 20,
+      "text": "| How much transfer is drift-mediated? | Conditional on the observable, coordinate and frame, event window, model, and decomposition. Signed drift shares may exceed 100% when control opposes the pathway; pointwise attribution is not forward persistence. | A common acceleration/force/impulse/power/work ledger across tiers, same-state killswitches, uncertainty propagation, and participant-held-out bilateral-wrench evaluation. | | Which geometry matters? | Relative link angle, force direction, velocity direction, reference point, grip separation, swing-plane orientation, and contact moment arm can gate magnitude and sign. | A subject-scaled spatial atlas with zero, orthogonal, coincident-grip, and reversed-moment-arm controls reproduced in an independent engine. | | Which timing patterns matter? | Early distal release changes the available geometry; proximal rate, acceleration, braking, and release timing interact nonmonotonically. \u201cCasting\u201d is not one universal event. | Factorial interventions on proximal acceleration, distal release, and braking under matched state and work, with multiple preregistered casting definitions and adverse-load tests. | | Does a drift-mediated strategy require less timing precision? | Unresolved for people. State triggering improves selected synthetic outcomes but assumes state access and does not prove reduced neural timing demand. | Clock, state, impedance, and delayed-observer policies compared by viable timing-region volume, lower-tail outcome, phase error, delay, saturation, force, and effort. | | Is a strategy self-correcting? | Not established. Low perturbation sensitivity is not self-correction without a recovery mechanism. | Matched perturbations demonstrating error decay, recovery time, viable-set return probability, attraction-region size, and no hidden load-cost increase. | | Should proximal velocity be maximized? | No general rule is supported. The reduced studies contain phase dependence, matching-rule dependence, nonmonotonic killswitch effects, and adverse braking associations. | Dose-response surfaces for rate and acceleration with matched state, work, load, and impact definitions, extended across spatial and subject-scaled models and held-out participants. | | Is slack beneficial or necessary? | Unanswered until the mechanism is named. Contact loss, backlash, elastic preload, muscle-tendon series compliance, and control deadband are not interchangeable. | One slack class at a time, with a state and constitutive law, matched initial energy, passivity and closure checks, hysteresis sweeps, and a measurement strategy. |",
+      "text_sha256": "8faa93c1cfb2e932ba1a122eed1918eaeb4caf052f88b021f8bf96ce753eaa6d",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": true,
+      "priority_score": 7,
+      "triage_flags": [
+        "numeric",
+        "assertive_language",
+        "causal_or_generalizing_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-a252b335ad5db68f",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
+      "line_start": 22,
+      "line_end": 24,
+      "text": ": Current answer and falsification map for the critical momentum-transfer questions. \u201cConditional\u201d denotes model- and estimand-bounded evidence rather than a human strategy. {#tbl-momentum-question-status tbl-colwidths=\"20,38,42\"}",
+      "text_sha256": "49503926636523fa5a2e4cd017c8d35b1d2d8e885924f308e72e49322ffb5d26",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": true,
+      "priority_score": 4,
+      "triage_flags": [
+        "numeric",
+        "assertive_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-12fabdf06bcc96aa",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
+      "line_start": 28,
+      "line_end": 34,
+      "text": "The terms *casting*, *weak early body acceleration*, and *late release* are useful only after translation into observables. The registered timing study therefore treats at least four quantities independently: proximal-acceleration onset, distal-angle or distal-rate threshold crossing, proximal-braking onset, and the impact or delivery event. A result is not robust if it depends on one arbitrary casting threshold. Work-matched and delivery-state-matched controls are both required because either matching rule can alter the apparent benefit.",
+      "text_sha256": "db39d9f130de4e5d128c14c57af8183a70b1152b3971688dac4feb9c242b2804",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": true,
+      "priority_score": 2,
+      "triage_flags": [
+        "assertive_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-b49f0e860e9eab2b",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
+      "line_start": 38,
+      "line_end": 44,
+      "text": "A mechanism can be mechanically passive at an instant while its preparation or regulation remains demanding. Timing demand is therefore reported as the width or volume of a viable event-time region, outcome sensitivity to phase error, lower-tail performance, and degradation under observer delay and noise. Self-correction has the stronger requirement that a declared physical or feedback mechanism return a perturbed state toward a viable set. Repeatable open-loop behavior does not meet that definition.",
+      "text_sha256": "8ce9e7c0e011d3fdf6197ead4c2e1e2104f18cd5a2fda4d6b367879cce996c25",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": true,
+      "priority_score": 5,
+      "triage_flags": [
+        "assertive_language",
+        "causal_or_generalizing_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-17632d2f70c8422d",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
+      "line_start": 48,
+      "line_end": 53,
+      "text": "The existing planar evidence is sufficient to reject the rule \u201cmaximize proximal velocity\u201d at those declared tiers, but not to specify a human optimum. An apparent speed benefit must be considered together with relative motion, control work, interface power, braking work, bilateral load, club orientation, and the matching rule. The registered analysis searches explicitly for plateaus, interior optima, and reversals rather than forcing a monotonic fit.",
+      "text_sha256": "67549c9005130604c2479943d9a4fb2844cc05523684bf25943ecc99dcb8f613",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": true,
+      "priority_score": 5,
+      "triage_flags": [
+        "assertive_language",
+        "causal_or_generalizing_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-db74be00a06f8889",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
+      "line_start": 57,
+      "line_end": 62,
+      "text": "1. **Contact slack** is temporary loss or weakening of a hand-grip constraint. 2. **Transmission slack** is backlash or a dead zone before torque transmission. 3. **Structural slack** is compliant preload and elastic deformation. 4. **Biological series compliance** is a muscle-tendon state with stored and released energy. 5. **Control slack** is an activation deadband, delay, or co-contraction reserve.",
+      "text_sha256": "1f09000d7a638e22f8b9b8048674d2932c6317e8a69ea8af3b0629e7ae98eed7",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": false,
+      "priority_score": 2,
+      "triage_flags": [
+        "numeric"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-ce5ed5ff62ef6edd",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
+      "line_start": 64,
+      "line_end": 68,
+      "text": "Only the declared phenomenological transmission dead zone has been exercised directly in the present allocation study. The other classes remain separate experiments. Any proposed benefit must survive matched-energy, zero-slack, direction-reversal, passivity, and work-energy closure controls before it can be interpreted as a transfer mechanism.",
+      "text_sha256": "1359d7ac0e731cd72db5e1206f00efb955324718c00a0feb3514544f4bf5915a",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": true,
+      "priority_score": 5,
+      "triage_flags": [
+        "assertive_language",
+        "causal_or_generalizing_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-49c472fa030a2018",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
+      "line_start": 72,
+      "line_end": 79,
+      "text": "These experiments are designed to make the framework easier to disprove. Synthetic studies can reject a mechanism within a declared model and can qualify software, but they cannot establish a coaching instruction or human control strategy. The participant-held-out stage remains blocked until a governed dataset contains synchronized full-body and club kinematics, force plates, bilateral six-axis grip wrenches, grip/contact state, and impact outcomes. Substituting synthetic traces would erase the question the human stage is intended to answer.",
+      "text_sha256": "4ccf1e49bbec9741ca71479ff1bcd5c917d918321efc621f105c4dfaa88a832d",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": true,
+      "priority_score": 5,
+      "triage_flags": [
+        "assertive_language",
         "causal_or_generalizing_language"
       ],
       "review_state": "unadjudicated"

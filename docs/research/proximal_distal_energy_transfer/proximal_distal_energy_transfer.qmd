@@ -275,6 +275,8 @@ format:
 
 {{< include chapters/_ch08_discussion.qmd >}}
 
+{{< include chapters/_ch08b_momentum_transfer_questions.qmd >}}
+
 {{< include chapters/_ch09_conclusions.qmd >}}
 
 {{< include chapters/_appendices.qmd >}}

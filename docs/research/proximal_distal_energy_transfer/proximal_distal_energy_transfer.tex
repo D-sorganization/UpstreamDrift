@@ -455,7 +455,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, toprule=.15mm, bottomtitle=1mm, bottomrule=.15mm, titlerule=0mm, toptitle=1mm, rightrule=.15mm, breakable, colback=white, coltitle=black, colframe=quarto-callout-note-color-frame, leftrule=.75mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, left=2mm, opacitybacktitle=0.6, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm, opacitybacktitle=0.6, left=2mm, opacityback=0, arc=.35mm, bottomtitle=1mm, breakable, rightrule=.15mm, titlerule=0mm, leftrule=.75mm, toptitle=1mm, colback=white, coltitle=black, toprule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -10534,6 +10534,168 @@ functional timing variability (\citeproc{ref-cole2016}{Cole and Grimshaw
 \citeproc{ref-neal2007}{Neal et al. 2007};
 \citeproc{ref-langdown2012}{Langdown, Bridge, and Li 2012};
 \citeproc{ref-glazier2011}{Glazier 2011}).
+
+\chapter{Critical Momentum-Transfer
+Questions}\label{sec-critical-momentum-questions}
+
+The model ladder now permits bounded answers to several recurring
+questions, but it does not support a single transfer percentage, a
+universal release time, or a preferred human technique.
+Table~\ref{tbl-momentum-question-status} separates present results from
+the observations needed to change them. The prospective experiment
+definitions are machine-readable in
+\href{../data/momentum_transfer_experiment_registry.json}{\texttt{momentum\_transfer\_experiment\_registry.json}},
+and their broader rationale is documented in the open
+\href{../MOMENTUM_TRANSFER_QUESTION_PROGRAM.md}{\texttt{question\ program}}.
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3800}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4200}}@{}}
+\caption{Current answer and falsification map for the critical
+momentum-transfer questions. ``Conditional'' denotes model- and
+estimand-bounded evidence rather than a human
+strategy.}\label{tbl-momentum-question-status}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Question
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Present Assessment
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+What Would Change the Assessment?
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Question
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Present Assessment
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+What Would Change the Assessment?
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+How much transfer is drift-mediated? & Conditional on the observable,
+coordinate and frame, event window, model, and decomposition. Signed
+drift shares may exceed 100\% when control opposes the pathway;
+pointwise attribution is not forward persistence. & A common
+acceleration/force/impulse/power/work ledger across tiers, same-state
+killswitches, uncertainty propagation, and participant-held-out
+bilateral-wrench evaluation. \\
+Which geometry matters? & Relative link angle, force direction, velocity
+direction, reference point, grip separation, swing-plane orientation,
+and contact moment arm can gate magnitude and sign. & A subject-scaled
+spatial atlas with zero, orthogonal, coincident-grip, and
+reversed-moment-arm controls reproduced in an independent engine. \\
+Which timing patterns matter? & Early distal release changes the
+available geometry; proximal rate, acceleration, braking, and release
+timing interact nonmonotonically. ``Casting'' is not one universal
+event. & Factorial interventions on proximal acceleration, distal
+release, and braking under matched state and work, with multiple
+preregistered casting definitions and adverse-load tests. \\
+Does a drift-mediated strategy require less timing precision? &
+Unresolved for people. State triggering improves selected synthetic
+outcomes but assumes state access and does not prove reduced neural
+timing demand. & Clock, state, impedance, and delayed-observer policies
+compared by viable timing-region volume, lower-tail outcome, phase
+error, delay, saturation, force, and effort. \\
+Is a strategy self-correcting? & Not established. Low perturbation
+sensitivity is not self-correction without a recovery mechanism. &
+Matched perturbations demonstrating error decay, recovery time,
+viable-set return probability, attraction-region size, and no hidden
+load-cost increase. \\
+Should proximal velocity be maximized? & No general rule is supported.
+The reduced studies contain phase dependence, matching-rule dependence,
+nonmonotonic killswitch effects, and adverse braking associations. &
+Dose-response surfaces for rate and acceleration with matched state,
+work, load, and impact definitions, extended across spatial and
+subject-scaled models and held-out participants. \\
+Is slack beneficial or necessary? & Unanswered until the mechanism is
+named. Contact loss, backlash, elastic preload, muscle-tendon series
+compliance, and control deadband are not interchangeable. & One slack
+class at a time, with a state and constitutive law, matched initial
+energy, passivity and closure checks, hysteresis sweeps, and a
+measurement strategy. \\
+\end{longtable}
+
+\section{Timing and Common Failure
+Descriptions}\label{timing-and-common-failure-descriptions}
+
+The terms \emph{casting}, \emph{weak early body acceleration}, and
+\emph{late release} are useful only after translation into observables.
+The registered timing study therefore treats at least four quantities
+independently: proximal-acceleration onset, distal-angle or distal-rate
+threshold crossing, proximal-braking onset, and the impact or delivery
+event. A result is not robust if it depends on one arbitrary casting
+threshold. Work-matched and delivery-state-matched controls are both
+required because either matching rule can alter the apparent benefit.
+
+\section{Timing Demand and
+Self-Correction}\label{timing-demand-and-self-correction}
+
+A mechanism can be mechanically passive at an instant while its
+preparation or regulation remains demanding. Timing demand is therefore
+reported as the width or volume of a viable event-time region, outcome
+sensitivity to phase error, lower-tail performance, and degradation
+under observer delay and noise. Self-correction has the stronger
+requirement that a declared physical or feedback mechanism return a
+perturbed state toward a viable set. Repeatable open-loop behavior does
+not meet that definition.
+
+\section{Proximal Velocity as a Dose, Not a
+Maxim}\label{proximal-velocity-as-a-dose-not-a-maxim}
+
+The existing planar evidence is sufficient to reject the rule ``maximize
+proximal velocity'' at those declared tiers, but not to specify a human
+optimum. An apparent speed benefit must be considered together with
+relative motion, control work, interface power, braking work, bilateral
+load, club orientation, and the matching rule. The registered analysis
+searches explicitly for plateaus, interior optima, and reversals rather
+than forcing a monotonic fit.
+
+\section{Five Distinct Slack
+Hypotheses}\label{five-distinct-slack-hypotheses}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Contact slack} is temporary loss or weakening of a hand-grip
+  constraint.
+\item
+  \textbf{Transmission slack} is backlash or a dead zone before torque
+  transmission.
+\item
+  \textbf{Structural slack} is compliant preload and elastic
+  deformation.
+\item
+  \textbf{Biological series compliance} is a muscle-tendon state with
+  stored and released energy.
+\item
+  \textbf{Control slack} is an activation deadband, delay, or
+  co-contraction reserve.
+\end{enumerate}
+
+Only the declared phenomenological transmission dead zone has been
+exercised directly in the present allocation study. The other classes
+remain separate experiments. Any proposed benefit must survive
+matched-energy, zero-slack, direction-reversal, passivity, and
+work-energy closure controls before it can be interpreted as a transfer
+mechanism.
+
+\section{Evidential Boundary}\label{evidential-boundary}
+
+These experiments are designed to make the framework easier to disprove.
+Synthetic studies can reject a mechanism within a declared model and can
+qualify software, but they cannot establish a coaching instruction or
+human control strategy. The participant-held-out stage remains blocked
+until a governed dataset contains synchronized full-body and club
+kinematics, force plates, bilateral six-axis grip wrenches, grip/contact
+state, and impact outcomes. Substituting synthetic traces would erase
+the question the human stage is intended to answer.
 
 \chapter{Conclusions and Research Priorities}\label{sec-conclusions}
 

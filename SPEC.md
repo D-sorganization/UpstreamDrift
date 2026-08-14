@@ -3,7 +3,7 @@
 ## Current Scientific Audit State (2026-08-13)
 
 Epic #8557 has completed the paper-wide candidate adjudication contract:
-925/925 candidates, 240 atomic claims, and zero unadjudicated entries. The
+935/935 candidates, 244 atomic claims, and zero unadjudicated entries. The
 registry is `complete` for the present paper state. This status does not waive
 open empirical or model-fidelity gates; #8556 remains blocked on governed human
 bilateral six-axis grip-wrench acquisition, and all new scientific content must
@@ -49,7 +49,7 @@ reviewed.
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.514 |
+| **Spec Version** | 1.0.515 |
 | **Last Spec Update** | 2026-08-13 |
 
 ## 2. Purpose & Mission
@@ -3002,3 +3002,6 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   execution status before new preferred results are selected. The governed
   human stage shall remain blocked until a qualifying participant-level
   dataset exists; synthetic traces shall not satisfy that stage.
+- The article shall expose the current answer, unresolved boundary, and
+  decisive falsification path for every registered momentum-transfer question;
+  project-management labels shall not appear as scientific conclusions.
