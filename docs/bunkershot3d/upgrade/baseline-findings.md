@@ -32,6 +32,27 @@ constraint to design around — it forces the multi-fidelity architecture (fast 
 
 - optional high-fidelity reference), rather than "make the DEM backends work".
 
+## Corrections to this audit
+
+**B5 was real but LATENT, not active** — my original characterisation was wrong about when it
+fires. MuJoCo orders a contact pair by **collider type, not geom id**. Verified directly: a box
+declared first against a sphere declared second is reported as `geom1=sphere, geom2=box`,
+regardless of declaration order; box-against-box preserves declaration order. Since the shipped
+MJCF has a box clubhead and sphere grains, the clubhead was _always_ geom2, so the unsigned sum
+happened to be correct for grain contacts. The defect activates for any box-vs-box or mesh pair —
+wall contacts today, and W2's parametric wedge mesh (#8609) the moment it lands. Fixed in #8612
+with an explicit sign, and the regression test forces the box-vs-box ordering rather than relying
+on the accidental escape. Two-contact red proof: unsigned sum reported 94.1 N against a true
+35.3 N.
+
+**B32 (new, found while fixing B30): `canonical.yaml` numbers were parsing as strings.**
+YAML 1.1 requires a signed exponent, so `1.0e7` is a _string_, not a float — silently coerced by
+pydantic. Rewritten as `7.0e+10` / `4.0e-4`, with a test pinning `isinstance(..., float)`.
+
+**B33 (new): `canonical.yaml` points at a `reference_swing.csv` that does not exist.**
+Previously this fell through to the silent 5 m/s substitution (B10). It is now a loud
+`TrajectoryUnavailableError` naming every candidate path tried.
+
 ## P1 — physics / numerics wrong
 
 | #   | Finding                                                                                                                                                                                                                                                                                   | Evidence                                       |
