@@ -21,6 +21,8 @@ from bunkershot3d.ball.splash import (
     compute_splash_impulse,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestSandEjectaVelocity:
     """Tests for sand ejecta velocity model."""

@@ -18,6 +18,8 @@ from bunkershot3d.ball.lie import (
     compute_exposed_cap_area,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestBallLieType:
     """Tests for lie type enumeration."""

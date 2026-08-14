@@ -21,6 +21,8 @@ from bunkershot3d.ball.pipeline import (
 )
 from src.shared.python.physics.impact_model import PostImpactState
 
+pytestmark = pytest.mark.unit
+
 
 class TestBunkerShotState:
     """Tests for bunker shot state specification."""
