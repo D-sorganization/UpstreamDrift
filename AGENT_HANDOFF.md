@@ -4,6 +4,15 @@ Last updated: 2026-08-13
 
 Update this file with every PR and every push to main.
 
+## Typed Slack Constitutive Suite
+
+- Branch `research/8595-typed-slack` implements separate scalar contracts for
+  contact disengagement, transmission backlash, structural preload,
+  biological series compliance, and control deadband. Tests enforce distinct
+  states, prevent preload leakage between classes, and close the energy ledger
+  under refinement. The evidence is a constitutive screen, not a performance
+  or human-strategy result.
+
 ## Momentum Transfer Human Registration
 
 - Branch `research/8595-human-registration` freezes participant-held-out human
