@@ -15,6 +15,7 @@ ARTIFACTS = [
     "docs/research/proximal_distal_energy_transfer/MOMENTUM_TRANSFER_QUESTION_PROGRAM.md",
     "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_question_registry.json",
     "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_experiment_registry.json",
+    "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_readiness_audit.json",
 ]
 
 
@@ -33,6 +34,9 @@ def main() -> None:
         "PD-CLAIM-246": [by_line[line]["candidate_id"] for line in (71, 82)],
         "PD-CLAIM-247": [by_line[line]["candidate_id"] for line in (88, 112, 119)],
         "PD-CLAIM-248": [by_line[127]["candidate_id"]],
+        "PD-CLAIM-251": [
+            by_line[line]["candidate_id"] for line in (138, 148, 150, 160, 164)
+        ],
     }
     definitions = {
         "PD-CLAIM-242": (
@@ -83,6 +87,13 @@ def main() -> None:
             "human_validation_blocked",
             "No qualifying governed participant-level dataset is available.",
             "Synthetic traces are substituted for the registered human stage.",
+        ),
+        "PD-CLAIM-251": (
+            "The reviewed handwritten agenda resolves to nine separately tracked points: five have bounded model answers or a negative general-rule result, four remain unresolved or definition-gated, and all nine have a decisive model test, falsifier, data gate, and participant-held-out stage.",
+            "source_agenda_readiness_audit",
+            "planning_coverage_complete_scientific_questions_partly_open",
+            "This is a completeness and evidence-readiness result, not new mechanical or human evidence; the human stage remains blocked by the bilateral-wrench data boundary.",
+            "Any source point is omitted, lacks a falsifier or decisive test, is linked to an experiment that does not cover it, or is presented as a completed human conclusion.",
         ),
     }
     old_ids = set(groups)

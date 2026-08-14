@@ -9,21 +9,24 @@ in git and GitHub.
 
 - Epic [#8557](https://github.com/D-sorganization/UpstreamDrift/issues/8557)
   governs the proximal-to-distal research program. Critical-question issue
-  [#8595](https://github.com/D-sorganization/UpstreamDrift/issues/8595) remains
-  open until its spatial, subject-scaled, and human falsification stages are
-  complete.
+  [#8595](https://github.com/D-sorganization/UpstreamDrift/issues/8595) is
+  closed as the completed planning/initial-model slice; unresolved spatial,
+  subject-scaled, and human work remains governed by #8557 and its child
+  issues.
 - Canonical question sources are
   `docs/research/proximal_distal_energy_transfer/MOMENTUM_TRANSFER_QUESTION_PROGRAM.md`,
   `data/momentum_transfer_question_registry.json`, and
-  `data/momentum_transfer_experiment_registry.json`.
+  `data/momentum_transfer_experiment_registry.json`. The generated
+  `data/momentum_transfer_readiness_audit.json` preserves all nine points from
+  the 2026-08-13 handwritten agenda and fails closed on missing coverage.
 - #8556 remains open: no qualifying governed participant dataset with
   synchronized bilateral six-axis grip wrenches has been acquired. Synthetic
   traces must not substitute for the registered human test.
 
 ## Current Branch
 
-- `research/8595-forward-match` executes the remaining planar Q6 forward
-  work/load matching control.
+- `research/8557-claim-audit-expansion` adds the source-agenda readiness gate
+  and paper/epic integration on top of the merged Q6 forward matching control.
   The velocity atlas now has 126 pointwise cases: 90 relative/absolute-rate
   cases plus 36 exact total-kinetic-energy matches. The zero-energy transition
   dose is correctly non-identifiable rather than energy injected.
@@ -41,10 +44,13 @@ in git and GitHub.
   positive while club-angular-acceleration response reverses; required proximal
   torque spans -69 to +189 N m. This is pointwise model evidence, not a human
   acceleration strategy.
-- The rebuilt paper is 209 pages and 1,500,740 bytes with 186 retained URI
-  annotations and 243 outline entries. The new figure and paper pages 56–58
-  were visually checked. The claim audit is complete at 951/951 candidates and
-  249 claims; the open release validates 416 checksum-verified artifacts.
+- The rebuilt paper is 210 pages and 1,504,200 bytes with 186 retained URI
+  annotations and 244 outline entries. The source agenda now has nine
+  registered points: five bounded/partial/negative-rule answers and four
+  unresolved or definition-gated questions. The claim inventory is complete
+  at 956/956 candidates and 250 claims. Paper pages 187--191 (PDF pages
+  191--195), including the split readiness table and chapter transition, were
+  visually inspected without clipping, overlap, or unreadable content.
 
 ## Recently Merged #8595 Slices
 
@@ -87,6 +93,7 @@ python -m pytest tests/research/test_shoulder_velocity_transfer.py `
 python -m ruff check scripts/research/proximal_distal_energy/proximal_acceleration_transfer.py `
   scripts/research/proximal_distal_energy/run_proximal_acceleration_transfer_study.py
 python -m scripts.research.proximal_distal_energy.claim_audit validate
+python -m scripts.research.proximal_distal_energy.momentum_question_readiness validate
 python -m scripts.research.proximal_distal_energy.qualify_open_release validate
 python scripts/check_document_title_case.py --changed-from origin/main
 python scripts/check_doc_size_budget.py
@@ -105,6 +112,6 @@ open-release manifest, and verify the protected squash merge commit on remote
   repeatability “self-correction.”
 - Do not collapse pointwise drift, forward killswitch persistence, and
   statistical mediation into one estimand.
-- Do not close #8556 or #8595 without their declared evidence boundary.
+- Do not close #8556 or #8557 without their declared evidence boundary.
 - Do not bypass reviews/checks, force-push, admin-merge, or rerun unchanged
   runner-capacity failures.

@@ -462,7 +462,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, left=2mm, toptitle=1mm, colback=white, leftrule=.75mm, rightrule=.15mm, bottomrule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, colbacktitle=quarto-callout-note-color!10!white, colframe=quarto-callout-note-color-frame, coltitle=black, toprule=.15mm, arc=.35mm, bottomtitle=1mm, opacitybacktitle=0.6, titlerule=0mm, opacityback=0, breakable]
+\begin{tcolorbox}[enhanced jigsaw, left=2mm, titlerule=0mm, toprule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, opacitybacktitle=0.6, colframe=quarto-callout-note-color-frame, arc=.35mm, breakable, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm, coltitle=black, opacityback=0, bottomtitle=1mm, rightrule=.15mm, toptitle=1mm, leftrule=.75mm, colback=white]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -10957,6 +10957,77 @@ until a governed dataset contains synchronized full-body and club
 kinematics, force plates, bilateral six-axis grip wrenches, grip/contact
 state, and impact outcomes. Substituting synthetic traces would erase
 the question the human stage is intended to answer.
+
+\section{Point-by-Point Readiness
+Audit}\label{point-by-point-readiness-audit}
+
+The handwritten agenda contains nine testable points after its nested
+timing examples are separated: drift contribution; geometry; casting;
+early-downswing proximal acceleration; segment release; timing
+precision; self-correction and noise robustness; proximal-velocity
+maximization; and slack. The executable readiness audit preserves all
+nine rather than allowing a broad question to hide an unplanned
+subquestion. Five presently have a model-bounded answer or a negative
+general-rule result. Four remain unresolved or definition-gated. All
+nine have a registered model experiment and a participant-held-out human
+stage, but the latter remains blocked by the bilateral-wrench data
+boundary.
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2400}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3600}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4000}}@{}}
+\caption{Readiness assessment for every point transcribed from the
+source agenda. ``Partly answered'' never denotes a human or coaching
+conclusion. }\label{tbl-momentum-source-readiness}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Source Point
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Present Scientific State
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Next Decisive Model Test
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Source Point
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Present Scientific State
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Next Decisive Model Test
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Drift contribution & Partly answered; observable- and window-specific
+only & Common cross-tier estimand table with uncertainty \\
+Geometry dependencies & Partly answered through reduced spatial controls
+& Subject-scaled articulated geometry and calibrated contact \\
+Casting & Unresolved as a single construct & Multiple preregistered
+event definitions under matched controls \\
+Early proximal acceleration & Partly answered pointwise; nonmonotonic &
+Forward factorial intervention with full-state/work/load matching \\
+Segment release & Partly answered; objective- and constraint-dependent &
+Viable-region mapping across proximal and distal control families \\
+Timing precision & Unresolved & Matched viable-volume and phase-error
+comparison \\
+Self-correction and noise robustness & Unresolved & Attraction-region
+and adverse-load recovery study \\
+Proximal-velocity maximization & Not supported as a general planar rule
+& Causal full-delivery-state-matched spatial dose response \\
+Slack & Unresolved until typed & One-class-at-a-time passivity,
+hysteresis, and identifiability suite \\
+\end{longtable}
+
+The machine-readable authority is
+\href{../data/momentum_transfer_readiness_audit.json}{\texttt{momentum\_transfer\_readiness\_audit.json}}.
+It is regenerated from the question and experiment registries and
+validated in CI. A missing source point, missing falsifier, invalid
+evidence status, absent human stage, or experiment linked to the wrong
+question is a hard failure.
 
 \chapter{Conclusions and Research Priorities}\label{sec-conclusions}
 
