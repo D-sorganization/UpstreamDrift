@@ -6,18 +6,22 @@ Epic: https://github.com/D-sorganization/UpstreamDrift/issues/8607
 
 ## Where everything lives
 
-| Thing                                    | Path                                                             |
-| ---------------------------------------- | ---------------------------------------------------------------- |
-| Integration branch                       | `feat/bunkershot-pro-epic` (pushed)                              |
-| Integration worktree                     | `C:\Users\diete\Repositories\UpstreamDrift-worktrees\bunker-pro` |
-| Agent worktrees                          | `D:\bunker-worktrees\{geometry,sand,schema,backends,study}`      |
-| Defect audit (B1-B31)                    | `_review/bunkershot-pro-2026-08-13/baseline-findings.md`         |
-| Research digest                          | `_review/bunkershot-pro-2026-08-13/research-digest.md`           |
-| **Research addendum (wins on conflict)** | `_review/bunkershot-pro-2026-08-13/research-digest-addendum.md`  |
-| ADR                                      | `docs/adr/0032-bunkershot3d-club-design-architecture.md`         |
+| Thing                                    | Path                                                        |
+| ---------------------------------------- | ----------------------------------------------------------- |
+| Integration branch                       | `feat/bunkershot-pro-epic` (pushed)                         |
+| Integration worktree                     | `D:/bunker-worktrees/integration`                           |
+| Agent worktrees                          | `D:/bunker-worktrees/{geometry,sand,schema,backends,study}` |
+| Defect audit (B1-B33)                    | `docs/bunkershot3d/upgrade/baseline-findings.md`            |
+| Research digest                          | `docs/bunkershot3d/upgrade/research-digest.md`              |
+| **Research addendum (wins on conflict)** | `docs/bunkershot3d/upgrade/research-digest-addendum.md`     |
+| ADR                                      | `docs/adr/0032-bunkershot3d-club-design-architecture.md`    |
 
-**Agent worktrees are on D: deliberately — C: is at 100% (about 600 MB free of 953 GB).**
-Do not create new worktrees on C:. See "Blockers" below.
+**Keep every worktree for this epic on D:.** The original integration worktree lived at
+`C:\Users\diete\Repositories\UpstreamDrift-worktrees\bunker-pro` and was **deleted mid-run
+by a fleet worktree cleanup** that freed ~100 GB on C: (604 MB free → 102 GB free). Nothing
+was lost — worktrees share the main repo's object store, so every merge commit survived and
+was simply re-checked-out on D: — but do not put work-in-progress on C: and assume it will
+still be there. See "Blockers" below.
 
 ## Environment gotchas that cost time if rediscovered
 
