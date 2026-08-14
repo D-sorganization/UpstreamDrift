@@ -57,6 +57,7 @@ __all__ = [
     "RFT_QUASI_STATIC_FROUDE_CEILING",
     "Caveat",
     "DimensionlessGroups",
+    "EnvelopeContext",
     "EnvelopeStatus",
     "FeatureScale",
     "RefusalPolicy",
@@ -325,6 +326,59 @@ class DimensionlessGroups:
         )
 
 
+@dataclass(frozen=True, slots=True)
+class EnvelopeContext:
+    """What the *judging solver* brings to a verdict, not the query.
+
+    Every other argument of :func:`evaluate_envelope` is a measurement of
+    the intrusion being judged.  These three are supplied by the solver
+    around it: the field its dimensionless groups are formed in, how much
+    of its own surface it had to bend to stay inside the fitted domain,
+    and anything further it wants said about the answer.  They travel
+    together because they are all carried onto the verdict rather than
+    judged, and grouping them puts two invariants on a constructor that
+    previously rode all the way onto a public value object unchecked --
+    a clamped fraction outside ``[0, 1]``, and a caveat list holding
+    something that is not a :class:`Caveat` (which used to surface only
+    as a ``KeyError`` from :meth:`ValidityVerdict.summary`).
+
+    Attributes:
+        gravity_m_s2: Gravitational acceleration the groups are formed
+            in. Defaults to :data:`GRAVITY_M_S2`.
+        clamped_area_fraction: Share of the active area whose orientation
+            fell outside the fitted domain of the 3D-RFT polynomial and
+            had to be clamped to the vertical-wall limit.
+        extra_caveats: Further caveats the caller raises itself.
+    """
+
+    gravity_m_s2: float = GRAVITY_M_S2
+    clamped_area_fraction: float = 0.0
+    extra_caveats: tuple[Caveat, ...] = ()
+
+    def __post_init__(self) -> None:
+        if not math.isfinite(self.gravity_m_s2) or self.gravity_m_s2 <= 0.0:
+            raise SolverInputError(
+                f"gravity must be positive, got {self.gravity_m_s2!r}"
+            )
+        fraction = float(self.clamped_area_fraction)
+        if not math.isfinite(fraction) or not 0.0 <= fraction <= 1.0:
+            raise SolverInputError(
+                f"clamped_area_fraction must lie in [0, 1], got "
+                f"{self.clamped_area_fraction!r}"
+            )
+        caveats = tuple(self.extra_caveats)
+        offenders = [item for item in caveats if not isinstance(item, Caveat)]
+        if offenders:
+            raise SolverInputError(
+                f"extra_caveats must all be Caveat, got {offenders!r}"
+            )
+        object.__setattr__(self, "extra_caveats", caveats)
+
+
+_DEFAULT_CONTEXT = EnvelopeContext()
+"""The context of a query judged at standard gravity with nothing clamped."""
+
+
 def dimensionless_groups(
     *,
     speed_m_s: float,
@@ -550,45 +604,15 @@ def _status_for(
     return status
 
 
-def evaluate_envelope(
+def _groups_for(
     *,
     speed_m_s: float,
     feature_lengths_m: Mapping[str, float],
     grain_diameter_m: float,
     element_size_m: float,
-    dynamic_terms_active: bool,
-    submerged_depth_m: float = 0.0,
-    clamped_area_fraction: float = 0.0,
-    structural_correction_calibrated: bool = False,
-    extra_caveats: Iterable[Caveat] = (),
-    gravity_m_s2: float = GRAVITY_M_S2,
-) -> ValidityVerdict:
-    """Judge a query at every supplied feature scale.
-
-    The governing scale is the *smallest* one that reaches the worst
-    status, because the physics fails at the small end first: at 25 m/s
-    the 5 mm leading edge is at ``I = 11.3`` while the 100 mm clubhead is
-    at ``I = 0.126``.
-
-    Args:
-        speed_m_s: Intrusion speed.
-        feature_lengths_m: Named geometric scales, e.g. ``{"clubhead":
-            0.1, "sole width": 0.03, "leading edge": 0.005}``.
-        grain_diameter_m: Median grain diameter.
-        element_size_m: Surface discretisation length.
-        dynamic_terms_active: Whether the DRFT inertial term is on.
-        submerged_depth_m: Deepest submerged point, positive downward.
-        clamped_area_fraction: Share of active area whose orientation fell
-            outside the fitted domain.
-        structural_correction_calibrated: Whether ``delta_h`` has been
-            calibrated for this body. It has not been, for any wedge.
-        extra_caveats: Additional caveats raised by the caller.
-        gravity_m_s2: Gravitational acceleration.
-
-    Returns:
-        The verdict. Nothing is raised here; refusal is a *value*, and
-        :meth:`ValidityVerdict.require_usable` turns it into an exception
-        at the point a caller has declared a policy.
+    gravity_m_s2: float,
+) -> tuple[DimensionlessGroups, ...]:
+    """Form the groups at every supplied scale, smallest feature first.
 
     Raises:
         SolverInputError: If ``feature_lengths_m`` is empty or malformed.
@@ -599,7 +623,7 @@ def evaluate_envelope(
             "scale at all is how a solver reports a flattering number"
         )
     ordered = sorted(feature_lengths_m.items(), key=lambda item: item[1])
-    groups = tuple(
+    return tuple(
         dimensionless_groups(
             speed_m_s=speed_m_s,
             feature_length_m=length,
@@ -611,27 +635,36 @@ def evaluate_envelope(
         for name, length in ordered
     )
 
-    reasons: list[str] = []
-    caveats: list[Caveat] = list(STANDING_CAVEATS)
-    statuses = [
-        _status_for(
-            group,
-            dynamic_terms_active=dynamic_terms_active,
-            reasons=reasons,
-            caveats=caveats,
-        )
-        for group in groups
-    ]
-    worst_rank = max(_STATUS_ORDER.index(status) for status in statuses)
-    governing_index = next(
-        index
-        for index, status in enumerate(statuses)
-        if _STATUS_ORDER.index(status) == worst_rank
-    )
 
-    # Scale-independent rules live here so their finding is stated once,
-    # not repeated at every feature length.
-    governing = groups[governing_index]
+def _apply_global_rules(
+    governing: DimensionlessGroups,
+    worst_rank: int,
+    *,
+    submerged_depth_m: float,
+    structural_correction_calibrated: bool,
+    context: EnvelopeContext,
+    reasons: list[str],
+    caveats: list[Caveat],
+) -> int:
+    """Judge the rules that do not depend on the feature scale.
+
+    They live apart from :func:`_status_for` so that their finding is
+    stated once against the governing scale, rather than repeated at
+    every feature length.
+
+    Args:
+        governing: Groups at the scale that set the status.
+        worst_rank: Rank in :data:`_STATUS_ORDER` reached so far.
+        submerged_depth_m: Deepest submerged point, positive downward.
+        structural_correction_calibrated: Whether ``delta_h`` has been
+            calibrated for this body.
+        context: What the judging solver brings to the verdict.
+        reasons: Findings, appended in place.
+        caveats: Caveats, appended in place.
+
+    Returns:
+        The rank after these rules, never below ``worst_rank``.
+    """
     if governing.speed_m_s > MAX_VALIDATED_SPEED_M_S:
         caveats.append(Caveat.BEYOND_PUBLISHED_SPEED)
         reasons.append(
@@ -652,16 +685,93 @@ def evaluate_envelope(
         worst_rank = max(worst_rank, _STATUS_ORDER.index(EnvelopeStatus.EXTRAPOLATED))
     if not structural_correction_calibrated:
         caveats.append(Caveat.UNCALIBRATED_STRUCTURAL_CORRECTION)
-    if clamped_area_fraction > 0.0:
+    if context.clamped_area_fraction > 0.0:
         caveats.append(Caveat.UPWARD_FACING_LEADING_EDGE)
-    shallow_limit = 2.0 * grain_diameter_m
+    shallow_limit = 2.0 * governing.grain_diameter_m
     if 0.0 < submerged_depth_m < shallow_limit:
         caveats.append(Caveat.SHALLOW_INTRUSION)
         reasons.append(
             f"deepest submerged point is {submerged_depth_m * 1e3:.3g} mm, under "
             f"{shallow_limit * 1e3:.3g} mm (two grain diameters)"
         )
-    caveats.extend(extra_caveats)
+    caveats.extend(context.extra_caveats)
+    return worst_rank
+
+
+def evaluate_envelope(
+    *,
+    speed_m_s: float,
+    feature_lengths_m: Mapping[str, float],
+    grain_diameter_m: float,
+    element_size_m: float,
+    dynamic_terms_active: bool,
+    submerged_depth_m: float = 0.0,
+    structural_correction_calibrated: bool = False,
+    context: EnvelopeContext = _DEFAULT_CONTEXT,
+) -> ValidityVerdict:
+    """Judge a query at every supplied feature scale.
+
+    The governing scale is the *smallest* one that reaches the worst
+    status, because the physics fails at the small end first: at 25 m/s
+    the 5 mm leading edge is at ``I = 11.3`` while the 100 mm clubhead is
+    at ``I = 0.126``.
+
+    Args:
+        speed_m_s: Intrusion speed.
+        feature_lengths_m: Named geometric scales, e.g. ``{"clubhead":
+            0.1, "sole width": 0.03, "leading edge": 0.005}``.
+        grain_diameter_m: Median grain diameter.
+        element_size_m: Surface discretisation length.
+        dynamic_terms_active: Whether the DRFT inertial term is on.
+        submerged_depth_m: Deepest submerged point, positive downward.
+        structural_correction_calibrated: Whether ``delta_h`` has been
+            calibrated for this body. It has not been, for any wedge.
+        context: Gravity, the clamped area fraction and any caveats the
+            judging solver raises itself. Defaults to standard gravity
+            with nothing clamped.
+
+    Returns:
+        The verdict. Nothing is raised here; refusal is a *value*, and
+        :meth:`ValidityVerdict.require_usable` turns it into an exception
+        at the point a caller has declared a policy.
+
+    Raises:
+        SolverInputError: If ``feature_lengths_m`` is empty or malformed.
+    """
+    groups = _groups_for(
+        speed_m_s=speed_m_s,
+        feature_lengths_m=feature_lengths_m,
+        grain_diameter_m=grain_diameter_m,
+        element_size_m=element_size_m,
+        gravity_m_s2=context.gravity_m_s2,
+    )
+
+    reasons: list[str] = []
+    caveats: list[Caveat] = list(STANDING_CAVEATS)
+    statuses = [
+        _status_for(
+            group,
+            dynamic_terms_active=dynamic_terms_active,
+            reasons=reasons,
+            caveats=caveats,
+        )
+        for group in groups
+    ]
+    worst_rank = max(_STATUS_ORDER.index(status) for status in statuses)
+    governing_index = next(
+        index
+        for index, status in enumerate(statuses)
+        if _STATUS_ORDER.index(status) == worst_rank
+    )
+    worst_rank = _apply_global_rules(
+        groups[governing_index],
+        worst_rank,
+        submerged_depth_m=submerged_depth_m,
+        structural_correction_calibrated=structural_correction_calibrated,
+        context=context,
+        reasons=reasons,
+        caveats=caveats,
+    )
 
     return ValidityVerdict(
         status=_STATUS_ORDER[worst_rank],
@@ -669,7 +779,7 @@ def evaluate_envelope(
         caveats=tuple(dict.fromkeys(caveats)),
         reasons=tuple(dict.fromkeys(reasons)),
         governing_index=governing_index,
-        clamped_area_fraction=float(clamped_area_fraction),
+        clamped_area_fraction=float(context.clamped_area_fraction),
         details={
             "submerged_depth_m": float(submerged_depth_m),
             "grain_diameter_m": float(grain_diameter_m),

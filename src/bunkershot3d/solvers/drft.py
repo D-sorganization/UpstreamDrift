@@ -60,7 +60,7 @@ from .coefficients import MaterialResponse, generic_alpha
 from .elements import SurfaceElements
 from .envelope import (
     GRAVITY_M_S2,
-    Caveat,
+    EnvelopeContext,
     RefusalPolicy,
     ValidityVerdict,
     evaluate_envelope,
@@ -81,6 +81,7 @@ _UP = np.array([0.0, 0.0, 1.0], dtype=np.float64)
 _HORIZONTAL_MASK = np.array([1.0, 1.0, 0.0], dtype=np.float64)
 _FALLBACK_RADIAL = np.array([1.0, 0.0, 0.0], dtype=np.float64)
 _NO_ELEMENTS = np.zeros(0, dtype=np.int64)
+_NO_VECTORS = np.zeros((0, 3), dtype=np.float64)
 
 DEFAULT_FEATURE_SCALES_M: Mapping[str, float] = {
     "clubhead": 0.100,
@@ -124,6 +125,108 @@ class ElementResponse:
     depth_traction_pa: NDArray[np.float64]
     inertial_traction_pa: NDArray[np.float64]
     was_clamped: NDArray[np.bool_]
+
+
+@dataclass(frozen=True)
+class _ActiveElements:
+    """The elements one query actually loads, and how they are moving.
+
+    An element is active when it is **both** submerged with a non-zero
+    area and leading-edge (``v . n >= 0``).
+
+    Attributes:
+        index: Indices of the active elements in the body's element
+            arrays, ascending. Empty when nothing is loaded.
+        max_speed_m_s: Fastest element speed anywhere on the body. The
+            envelope is judged on the whole body, not on the active set,
+            so this is deliberately not restricted to ``index``.
+        velocities_m_s: ``(k, 3)`` velocities of the active elements.
+        direction: ``(k, 3)`` unit velocity directions of the same.
+    """
+
+    index: NDArray[np.int64]
+    max_speed_m_s: float
+    velocities_m_s: NDArray[np.float64]
+    direction: NDArray[np.float64]
+
+
+def _select_active_elements(
+    state: IntrusionState, submerged: NDArray[np.bool_]
+) -> _ActiveElements:
+    """Pick the loaded elements and form their velocity direction.
+
+    The leading-edge test only needs the *sign* of ``v . n``, so it is
+    taken on the unnormalised velocity and the unit direction is formed
+    for the surviving elements alone.  On a 600-face head that is one
+    fewer full-body division per timestep.
+
+    Args:
+        state: The intrusion query.
+        submerged: Per-element mask of elements below the free surface
+            with a non-zero area.
+
+    Returns:
+        The active set. ``velocities_m_s`` and ``direction`` are empty
+        ``(0, 3)`` arrays whenever ``index`` is empty, because nothing
+        downstream reads them in that case.
+    """
+    elements = state.elements
+    if state.has_uniform_velocity:
+        max_speed = state.speed_m_s
+        moving = max_speed > _SPEED_FLOOR_M_S
+        leading = (elements.normals @ state.velocity_m_s) >= 0.0
+        index = np.flatnonzero(submerged & leading) if moving else _NO_ELEMENTS
+        if index.size == 0:
+            return _ActiveElements(index, max_speed, _NO_VECTORS, _NO_VECTORS)
+        shape = (int(index.size), 3)
+        return _ActiveElements(
+            index,
+            max_speed,
+            np.broadcast_to(state.velocity_m_s, shape),
+            np.broadcast_to(state.velocity_m_s / max_speed, shape),
+        )
+
+    velocities = state.element_velocities_m_s()
+    speeds = np.sqrt(np.einsum("ij,ij->i", velocities, velocities))
+    max_speed = float(speeds.max()) if speeds.size else 0.0
+    leading = np.einsum("ij,ij->i", velocities, elements.normals) >= 0.0
+    index = np.flatnonzero(submerged & leading & (speeds > _SPEED_FLOOR_M_S))
+    if index.size == 0:
+        return _ActiveElements(index, max_speed, _NO_VECTORS, _NO_VECTORS)
+    active_velocities = velocities[index]
+    return _ActiveElements(
+        index,
+        max_speed,
+        active_velocities,
+        active_velocities / speeds[index][:, None],
+    )
+
+
+def _clamped_area_fraction(
+    active_areas_m2: NDArray[np.float64], was_clamped: NDArray[np.bool_]
+) -> float:
+    """Share of the active area whose orientation had to be clamped."""
+    total_area = float(active_areas_m2.sum())
+    if total_area <= 0.0:
+        return 0.0
+    return float(active_areas_m2[was_clamped].sum()) / total_area
+
+
+def _empty_response(index: NDArray[np.int64]) -> ElementResponse:
+    """The response of a query that loads no element at all."""
+    empty = np.zeros(0, dtype=np.float64)
+    return ElementResponse(
+        index=index,
+        beta_rad=empty,
+        gamma_rad=empty,
+        psi_rad=empty,
+        depth_m=empty,
+        effective_depth_m=empty,
+        normal_speed_m_s=empty,
+        depth_traction_pa=np.zeros((0, 3)),
+        inertial_traction_pa=np.zeros((0, 3)),
+        was_clamped=np.zeros(0, dtype=bool),
+    )
 
 
 def _cross_sum(
@@ -392,7 +495,6 @@ class DRFTSolver:
         clamped_area_fraction: float,
     ) -> ValidityVerdict:
         """Assemble the validity verdict for one query."""
-        extra: list[Caveat] = []
         return evaluate_envelope(
             speed_m_s=speed_m_s,
             feature_lengths_m=self.feature_scales_m,
@@ -400,12 +502,13 @@ class DRFTSolver:
             element_size_m=max(element_size_m, self.material.grain_diameter_m),
             dynamic_terms_active=self.dynamic_terms_active,
             submerged_depth_m=submerged_depth_m,
-            clamped_area_fraction=clamped_area_fraction,
             structural_correction_calibrated=(
                 self.structural_correction.is_calibrated_for_wedge
             ),
-            extra_caveats=extra,
-            gravity_m_s2=self.gravity_m_s2,
+            context=EnvelopeContext(
+                gravity_m_s2=self.gravity_m_s2,
+                clamped_area_fraction=clamped_area_fraction,
+            ),
         )
 
     def _evaluate(
@@ -417,59 +520,47 @@ class DRFTSolver:
         submerged = (depths > 0.0) & (elements.areas_m2 > 0.0)
         submerged_depth = max(float(depths.max()) if depths.size else 0.0, 0.0)
 
-        # The leading-edge test only needs the *sign* of v . n, so it is
-        # taken on the unnormalised velocity and the direction is formed
-        # for the surviving elements alone. On a 600-face head that is
-        # one fewer full-body division per timestep.
-        if state.has_uniform_velocity:
-            max_speed = state.speed_m_s
-            moving = max_speed > _SPEED_FLOOR_M_S
-            leading = (elements.normals @ state.velocity_m_s) >= 0.0
-            index = np.flatnonzero(submerged & leading) if moving else _NO_ELEMENTS
-            velocities = None
-            unit = state.velocity_m_s / max_speed if moving else None
+        active = _select_active_elements(state, submerged)
+        if active.index.size == 0:
+            response = _empty_response(active.index)
+            clamped_fraction = 0.0
         else:
-            velocities = state.element_velocities_m_s()
-            speeds = np.sqrt(np.einsum("ij,ij->i", velocities, velocities))
-            max_speed = float(speeds.max()) if speeds.size else 0.0
-            leading = np.einsum("ij,ij->i", velocities, elements.normals) >= 0.0
-            index = np.flatnonzero(submerged & leading & (speeds > _SPEED_FLOOR_M_S))
-            unit = None
-
-        if index.size == 0:
-            empty = np.zeros(0, dtype=np.float64)
-            response = ElementResponse(
-                index=index,
-                beta_rad=empty,
-                gamma_rad=empty,
-                psi_rad=empty,
-                depth_m=empty,
-                effective_depth_m=empty,
-                normal_speed_m_s=empty,
-                depth_traction_pa=np.zeros((0, 3)),
-                inertial_traction_pa=np.zeros((0, 3)),
-                was_clamped=np.zeros(0, dtype=bool),
+            response = self._loaded_response(
+                active,
+                depths[active.index],
+                elements.normals[active.index],
             )
-            verdict = self._verdict(
-                speed_m_s=max_speed,
-                element_size_m=elements.characteristic_length_m,
-                submerged_depth_m=submerged_depth,
-                clamped_area_fraction=0.0,
+            clamped_fraction = _clamped_area_fraction(
+                elements.areas_m2[active.index], response.was_clamped
             )
-            return response, verdict
 
-        normals = elements.normals[index]
-        active_depths = depths[index]
-        active_areas = elements.areas_m2[index]
-        if unit is not None:
-            active_velocities = np.broadcast_to(state.velocity_m_s, normals.shape)
-            direction = np.broadcast_to(unit, normals.shape)
-        else:
-            active_velocities = velocities[index]  # type: ignore[index]
-            direction = active_velocities / speeds[index][:, None]
+        verdict = self._verdict(
+            speed_m_s=active.max_speed_m_s,
+            element_size_m=elements.characteristic_length_m,
+            submerged_depth_m=submerged_depth,
+            clamped_area_fraction=clamped_fraction,
+        )
+        return response, verdict
 
-        radial, tangential = _local_frame(direction, normals)
-        gamma_rad = np.arcsin(np.clip(-direction[:, 2], -1.0, 1.0))
+    def _loaded_response(
+        self,
+        active: _ActiveElements,
+        depth_m: NDArray[np.float64],
+        normals: NDArray[np.float64],
+    ) -> ElementResponse:
+        """Form the per-element response over a non-empty active set.
+
+        Args:
+            active: The active elements and their motion.
+            depth_m: ``(k,)`` positive depths below the undisturbed
+                free surface.
+            normals: ``(k, 3)`` unit outward normals of the same.
+
+        Returns:
+            The per-element response, in the order of ``active.index``.
+        """
+        radial, tangential = _local_frame(active.direction, normals)
+        gamma_rad = np.arcsin(np.clip(-active.direction[:, 2], -1.0, 1.0))
         beta_rad, psi_rad, fitted_normals, was_clamped = _orientation_angles(
             normals, radial, tangential
         )
@@ -483,29 +574,14 @@ class DRFTSolver:
         capped = self._apply_surface_friction_cutoff(alpha_vector, fitted_normals)
 
         normal_speed = np.maximum(
-            np.einsum("ij,ij->i", active_velocities, normals), 0.0
+            np.einsum("ij,ij->i", active.velocities_m_s, normals), 0.0
         )
         depth_stress_scale = self.material.normal_stress_scale_pa_per_m * np.sqrt(
             np.einsum("ij,ij->i", capped, capped)
         )
-        depression = self.structural_correction.depression_m(
-            DepressionInputs(
-                depth_m=active_depths,
-                normal_speed_m_s=normal_speed,
-                depth_stress_scale_pa_per_m=depth_stress_scale,
-                inertial_stress_scale_pa_s2_per_m2=(
-                    self.material.inertial_stress_scale_pa_s2_per_m2
-                ),
-                gravity_m_s2=self.gravity_m_s2,
-            )
+        effective_depth = self._effective_depth(
+            depth_m, normal_speed, depth_stress_scale
         )
-        if np.any(depression < 0.0):
-            raise SolverInputError(
-                f"structural correction '{self.structural_correction.name}' "
-                "returned a negative depression; delta_h lowers the effective "
-                "free surface and cannot be negative"
-            )
-        effective_depth = np.maximum(active_depths - depression, 0.0)
 
         depth_traction = (
             self.material.normal_stress_scale_pa_per_m
@@ -522,29 +598,58 @@ class DRFTSolver:
         else:
             inertial_traction = np.zeros_like(depth_traction)
 
-        clamped_area = float(active_areas[was_clamped].sum())
-        total_area = float(active_areas.sum())
-        clamped_fraction = clamped_area / total_area if total_area > 0.0 else 0.0
-
-        response = ElementResponse(
-            index=index,
+        return ElementResponse(
+            index=active.index,
             beta_rad=beta_rad,
             gamma_rad=gamma_rad,
             psi_rad=psi_rad,
-            depth_m=active_depths,
+            depth_m=depth_m,
             effective_depth_m=effective_depth,
             normal_speed_m_s=normal_speed,
             depth_traction_pa=depth_traction,
             inertial_traction_pa=inertial_traction,
             was_clamped=was_clamped,
         )
-        verdict = self._verdict(
-            speed_m_s=max_speed,
-            element_size_m=elements.characteristic_length_m,
-            submerged_depth_m=submerged_depth,
-            clamped_area_fraction=clamped_fraction,
+
+    def _effective_depth(
+        self,
+        depth_m: NDArray[np.float64],
+        normal_speed_m_s: NDArray[np.float64],
+        depth_stress_scale_pa_per_m: NDArray[np.float64],
+    ) -> NDArray[np.float64]:
+        """Apply ``delta_h``: ``|z_tilde| = max(z - delta_h, 0)``.
+
+        Args:
+            depth_m: ``(k,)`` depths below the undisturbed free surface.
+            normal_speed_m_s: ``(k,)`` ``max(v . n_hat, 0)``.
+            depth_stress_scale_pa_per_m: ``(k,)`` depth-linear stress
+                scale the depression model balances against inertia.
+
+        Returns:
+            ``(k,)`` effective depths, never negative.
+
+        Raises:
+            SolverInputError: If the structural correction returns a
+                negative depression.
+        """
+        depression = self.structural_correction.depression_m(
+            DepressionInputs(
+                depth_m=depth_m,
+                normal_speed_m_s=normal_speed_m_s,
+                depth_stress_scale_pa_per_m=depth_stress_scale_pa_per_m,
+                inertial_stress_scale_pa_s2_per_m2=(
+                    self.material.inertial_stress_scale_pa_s2_per_m2
+                ),
+                gravity_m_s2=self.gravity_m_s2,
+            )
         )
-        return response, verdict
+        if np.any(depression < 0.0):
+            raise SolverInputError(
+                f"structural correction '{self.structural_correction.name}' "
+                "returned a negative depression; delta_h lowers the effective "
+                "free surface and cannot be negative"
+            )
+        return np.maximum(depth_m - depression, 0.0)
 
     def _apply_surface_friction_cutoff(
         self,

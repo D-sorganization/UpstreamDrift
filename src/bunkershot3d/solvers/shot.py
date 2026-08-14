@@ -33,7 +33,13 @@ from numpy.typing import ArrayLike, NDArray
 from .elements import SurfaceElements
 from .envelope import ValidityVerdict, worst_of
 from .exceptions import SolverInputError
-from .protocol import FidelityTier, GranularSolver, IntrusionState, Wrench
+from .protocol import (
+    FidelityTier,
+    GranularSolver,
+    IntrusionState,
+    SolverResult,
+    Wrench,
+)
 
 __all__ = ["HeadKinematics", "ShotResult", "ShotSettings", "simulate_shot"]
 
@@ -271,6 +277,183 @@ def _drop_to_surface(
     return position
 
 
+@dataclass(slots=True)
+class _Trace:
+    """The per-step columns of one shot, accumulated as Python lists.
+
+    Held as lists and converted once at the end: growing nine NumPy
+    arrays per step would reallocate on every step of a run whose whole
+    budget is 50 ms.
+    """
+
+    times_s: list[float] = field(default_factory=list)
+    positions_m: list[NDArray[np.float64]] = field(default_factory=list)
+    velocities_m_s: list[NDArray[np.float64]] = field(default_factory=list)
+    forces_n: list[NDArray[np.float64]] = field(default_factory=list)
+    torques_n_m: list[NDArray[np.float64]] = field(default_factory=list)
+    depths_m: list[float] = field(default_factory=list)
+    active_areas_m2: list[float] = field(default_factory=list)
+    inertial_fractions: list[float] = field(default_factory=list)
+    verdicts: list[ValidityVerdict] = field(default_factory=list)
+
+    def record(
+        self,
+        time_s: float,
+        position_m: NDArray[np.float64],
+        velocity_m_s: NDArray[np.float64],
+        result: SolverResult,
+    ) -> None:
+        """Append one sample. The pose arrays are copied, not aliased."""
+        self.verdicts.append(result.verdict)
+        self.times_s.append(time_s)
+        self.positions_m.append(position_m.copy())
+        self.velocities_m_s.append(velocity_m_s.copy())
+        self.forces_n.append(result.wrench.force_n.copy())
+        self.torques_n_m.append(result.wrench.torque_n_m.copy())
+        self.depths_m.append(result.max_depth_m)
+        self.active_areas_m2.append(result.active_area_m2)
+        self.inertial_fractions.append(result.inertial_fraction)
+
+    def to_result(self, *, fidelity_tier: FidelityTier, started_s: float) -> ShotResult:
+        """Freeze the columns into a :class:`ShotResult`.
+
+        Args:
+            fidelity_tier: The tier that produced the trace.
+            started_s: ``time.perf_counter()`` reading taken before the
+                march, against which the runtime is measured.
+
+        Returns:
+            The immutable trace, carrying the worst verdict over it.
+        """
+        return ShotResult(
+            fidelity_tier=fidelity_tier,
+            verdict=worst_of(self.verdicts),
+            times_s=np.asarray(self.times_s, dtype=np.float64),
+            positions_m=np.asarray(self.positions_m, dtype=np.float64).reshape(-1, 3),
+            velocities_m_s=np.asarray(self.velocities_m_s, dtype=np.float64).reshape(
+                -1, 3
+            ),
+            forces_n=np.asarray(self.forces_n, dtype=np.float64).reshape(-1, 3),
+            torques_n_m=np.asarray(self.torques_n_m, dtype=np.float64).reshape(-1, 3),
+            depths_m=np.asarray(self.depths_m, dtype=np.float64),
+            active_areas_m2=np.asarray(self.active_areas_m2, dtype=np.float64),
+            inertial_fractions=np.asarray(self.inertial_fractions, dtype=np.float64),
+            runtime_s=time.perf_counter() - started_s,
+        )
+
+
+def _validated_shot_inputs(
+    elements_body: SurfaceElements,
+    kinematics: HeadKinematics,
+    head_mass_kg: float,
+    settings: ShotSettings | None,
+) -> tuple[float, ShotSettings]:
+    """Check the arguments of one shot and resolve the default settings.
+
+    Returns:
+        ``(mass_kg, settings)``.
+
+    Raises:
+        SolverInputError: If an argument is malformed.
+    """
+    if not isinstance(elements_body, SurfaceElements):
+        raise SolverInputError(
+            f"elements_body must be a SurfaceElements, got "
+            f"{type(elements_body).__name__}"
+        )
+    if not isinstance(kinematics, HeadKinematics):
+        raise SolverInputError(
+            f"kinematics must be a HeadKinematics, got {type(kinematics).__name__}"
+        )
+    mass = float(head_mass_kg)
+    if not math.isfinite(mass) or mass <= 0.0:
+        raise SolverInputError(f"head_mass_kg must be positive, got {head_mass_kg!r}")
+    config = ShotSettings() if settings is None else settings
+    if not isinstance(config, ShotSettings):
+        raise SolverInputError(
+            f"settings must be a ShotSettings, got {type(config).__name__}"
+        )
+    return mass, config
+
+
+def _march(
+    solver: GranularSolver,
+    elements_body: SurfaceElements,
+    *,
+    mass_kg: float,
+    kinematics: HeadKinematics,
+    config: ShotSettings,
+) -> _Trace:
+    """Step the head until it leaves the sand, stops, or runs out of time.
+
+    The loop exits on the first step after contact with nothing engaged,
+    or once the head has effectively stopped; otherwise it runs to
+    ``config.max_steps``.
+
+    Args:
+        solver: Any solver implementing the ``GranularSolver`` protocol.
+        elements_body: Surface discretisation in the body frame.
+        mass_kg: Head mass.
+        kinematics: Entry pose and velocity.
+        config: Integration settings.
+
+    Returns:
+        The accumulated trace.
+
+    Raises:
+        OutOfEnvelopeError: If the solver refuses any step under a strict
+            refusal policy.
+    """
+    orientation = kinematics.orientation.copy()
+    position = (
+        _drop_to_surface(elements_body, kinematics, config.free_surface_height_m)
+        if config.start_at_first_contact
+        else kinematics.position_m.copy()
+    )
+    velocity = kinematics.velocity_m_s.copy()
+    rotating = bool(kinematics.angular_velocity_rad_s.any())
+    increment = (
+        _rotation_increment(kinematics.angular_velocity_rad_s, config.time_step_s)
+        if rotating
+        else None
+    )
+    # A non-rotating head is oriented once; only the translation changes
+    # per step, and translation cannot invalidate a normal or an area.
+    oriented = elements_body.transformed(rotation=orientation)
+    weight = np.array([0.0, 0.0, -config.gravity_m_s2 * mass_kg], dtype=np.float64)
+
+    trace = _Trace()
+    contacted = False
+    for step in range(config.max_steps + 1):
+        world = oriented.translated(position)
+        state = IntrusionState(
+            world,
+            velocity,
+            angular_velocity_rad_s=kinematics.angular_velocity_rad_s,
+            reference_point_m=position,
+            free_surface_height_m=config.free_surface_height_m,
+        )
+        result = solver.solve(state)
+        trace.record(step * config.time_step_s, position, velocity, result)
+
+        engaged = result.n_active_elements > 0
+        contacted = contacted or engaged
+        if contacted and not engaged:
+            break
+        speed = float(np.linalg.norm(velocity))
+        if contacted and speed < _MIN_SPEED_M_S:
+            break
+
+        total = result.wrench.force_n + (weight if config.include_gravity else 0.0)
+        velocity = velocity + (config.time_step_s / mass_kg) * total
+        position = position + config.time_step_s * velocity
+        if increment is not None:
+            orientation = increment @ orientation
+            oriented = elements_body.transformed(rotation=orientation)
+
+    return trace
+
+
 def simulate_shot(
     solver: GranularSolver,
     elements_body: SurfaceElements,
@@ -297,103 +480,19 @@ def simulate_shot(
         OutOfEnvelopeError: If the solver refuses any step under a strict
             refusal policy.
     """
-    if not isinstance(elements_body, SurfaceElements):
-        raise SolverInputError(
-            f"elements_body must be a SurfaceElements, got "
-            f"{type(elements_body).__name__}"
-        )
-    if not isinstance(kinematics, HeadKinematics):
-        raise SolverInputError(
-            f"kinematics must be a HeadKinematics, got {type(kinematics).__name__}"
-        )
-    mass = float(head_mass_kg)
-    if not math.isfinite(mass) or mass <= 0.0:
-        raise SolverInputError(f"head_mass_kg must be positive, got {head_mass_kg!r}")
-    config = ShotSettings() if settings is None else settings
-    if not isinstance(config, ShotSettings):
-        raise SolverInputError(
-            f"settings must be a ShotSettings, got {type(config).__name__}"
-        )
+    mass, config = _validated_shot_inputs(
+        elements_body, kinematics, head_mass_kg, settings
+    )
 
     started = time.perf_counter()
-    orientation = kinematics.orientation.copy()
-    position = (
-        _drop_to_surface(elements_body, kinematics, config.free_surface_height_m)
-        if config.start_at_first_contact
-        else kinematics.position_m.copy()
+    trace = _march(
+        solver,
+        elements_body,
+        mass_kg=mass,
+        kinematics=kinematics,
+        config=config,
     )
-    velocity = kinematics.velocity_m_s.copy()
-    rotating = bool(kinematics.angular_velocity_rad_s.any())
-    increment = (
-        _rotation_increment(kinematics.angular_velocity_rad_s, config.time_step_s)
-        if rotating
-        else None
-    )
-    # A non-rotating head is oriented once; only the translation changes
-    # per step, and translation cannot invalidate a normal or an area.
-    oriented = elements_body.transformed(rotation=orientation)
-    weight = np.array([0.0, 0.0, -config.gravity_m_s2 * mass], dtype=np.float64)
-
-    times: list[float] = []
-    positions: list[NDArray[np.float64]] = []
-    velocities: list[NDArray[np.float64]] = []
-    forces: list[NDArray[np.float64]] = []
-    torques: list[NDArray[np.float64]] = []
-    depths: list[float] = []
-    areas: list[float] = []
-    fractions: list[float] = []
-    verdicts: list[ValidityVerdict] = []
-
-    contacted = False
-    for step in range(config.max_steps + 1):
-        world = oriented.translated(position)
-        state = IntrusionState(
-            world,
-            velocity,
-            angular_velocity_rad_s=kinematics.angular_velocity_rad_s,
-            reference_point_m=position,
-            free_surface_height_m=config.free_surface_height_m,
-        )
-        result = solver.solve(state)
-        verdicts.append(result.verdict)
-
-        times.append(step * config.time_step_s)
-        positions.append(position.copy())
-        velocities.append(velocity.copy())
-        forces.append(result.wrench.force_n.copy())
-        torques.append(result.wrench.torque_n_m.copy())
-        depths.append(result.max_depth_m)
-        areas.append(result.active_area_m2)
-        fractions.append(result.inertial_fraction)
-
-        engaged = result.n_active_elements > 0
-        contacted = contacted or engaged
-        if contacted and not engaged:
-            break
-        speed = float(np.linalg.norm(velocity))
-        if contacted and speed < _MIN_SPEED_M_S:
-            break
-
-        total = result.wrench.force_n + (weight if config.include_gravity else 0.0)
-        velocity = velocity + (config.time_step_s / mass) * total
-        position = position + config.time_step_s * velocity
-        if increment is not None:
-            orientation = increment @ orientation
-            oriented = elements_body.transformed(rotation=orientation)
-
-    return ShotResult(
-        fidelity_tier=solver.fidelity_tier,
-        verdict=worst_of(verdicts),
-        times_s=np.asarray(times, dtype=np.float64),
-        positions_m=np.asarray(positions, dtype=np.float64).reshape(-1, 3),
-        velocities_m_s=np.asarray(velocities, dtype=np.float64).reshape(-1, 3),
-        forces_n=np.asarray(forces, dtype=np.float64).reshape(-1, 3),
-        torques_n_m=np.asarray(torques, dtype=np.float64).reshape(-1, 3),
-        depths_m=np.asarray(depths, dtype=np.float64),
-        active_areas_m2=np.asarray(areas, dtype=np.float64),
-        inertial_fractions=np.asarray(fractions, dtype=np.float64),
-        runtime_s=time.perf_counter() - started,
-    )
+    return trace.to_result(fidelity_tier=solver.fidelity_tier, started_s=started)
 
 
 def zero_wrench_at(position_m: ArrayLike) -> Wrench:
