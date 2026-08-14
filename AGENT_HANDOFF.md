@@ -23,6 +23,25 @@ in git and GitHub.
   synchronized bilateral six-axis grip wrenches has been acquired. Synthetic
   traces must not substitute for the registered human test.
 
+## Current #8623 Timing-Viability Slice
+
+- Child issue [#8623](https://github.com/D-sorganization/UpstreamDrift/issues/8623)
+  maps clock and delayed/noisy state-trigger policies onto one five-point
+  nominal phase coordinate in the moving-base two-hand compliant-club tier.
+- Sixty paired policy/load/phase cases preserve nominal, heavier-club,
+  lower-shaft-stiffness, longer-actuator-delay, larger-initial-perturbation,
+  and combined-adverse cohorts. Task viability uses common delivery-speed,
+  face/path, peak-hand-force, effort, and numerical guards.
+- The primary robust intersection retains 4/5 clock phase points and 45 ms of
+  contiguous sampled width, versus 1/5 and no multi-point span for the state
+  trigger. Strict, primary, and lenient guards keep the clock-larger ordering.
+- Sustained half-error recovery is absent in all 60 cases, so neither policy
+  has recovery-qualified viability. This falsifies a state-trigger timing or
+  self-correction advantage only in this registered model; it is not a human
+  timing or coaching result.
+- Representative half-step checks change delivery speed by 0.029--0.034 m/s,
+  keep peak-force differences below 2.7%, and reduce normalized residuals.
+
 ## Current Branch
 
 - `research/8557-claim-audit-expansion` adds the source-agenda readiness gate
@@ -71,8 +90,9 @@ in git and GitHub.
 1. Add full-delivery-state-matched forward rate and acceleration controls; work,
    positive work, common release time, and peak load are now jointly screened.
 2. Add matched-work and matched-delivery controls to the timing factorial.
-3. Expand observer recovery into a phase-volume and attraction-region study,
-   including adverse external loads and identified observer alternatives.
+3. Extend the completed discrete common-phase/adverse-load screen into
+   continuous attraction regions with independently identified observers,
+   external-contact loads, spatial impact, and subject scaling.
 4. Extend each typed-slack law into higher-order delivery models without
    conflating contact, backlash, preload, series compliance, or deadband.
 5. Repeat the registry in subject-scaled spatial models and independent engines.

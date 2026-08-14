@@ -10,8 +10,8 @@
   "program_issue": 8595,
   "summary": {
     "critical_point_count": 9,
-    "answered_or_partly_answered": 5,
-    "unresolved_or_definition_gated": 4,
+    "answered_or_partly_answered": 7,
+    "unresolved_or_definition_gated": 2,
     "model_plan_registered_for_all": true,
     "human_plan_registered_for_all": true,
     "human_execution_blocked": true,
@@ -57,8 +57,8 @@
       "id": "MTQ-03",
       "question_id": "Q3",
       "topic": "Casting",
-      "answer_state": "unresolved",
-      "model_plan_state": "registered",
+      "answer_state": "partly_answered",
+      "model_plan_state": "partly_executed",
       "human_plan_state": "blocked",
       "experiment_ids": ["MT-E03", "MT-H01"],
       "present_answer": "Casting is not one mechanism or event; distal-angle, distal-rate, wrist-angle, and event-window definitions can disagree, so no universal causal diagnosis is supported.",
@@ -100,23 +100,23 @@
       "model_plan_state": "registered",
       "human_plan_state": "blocked",
       "experiment_ids": ["MT-E04", "MT-H01"],
-      "present_answer": "Mechanical passivity at an instant does not imply low preparation or neural timing demand; the current delayed-observer screen establishes no recovery advantage.",
-      "decisive_next_test": "Measure viable timing-region volume and phase-error sensitivity for clock, state, impedance, and observer policies after matching work, force, and effort.",
+      "present_answer": "Mechanical passivity at an instant does not imply low preparation or neural timing demand. In the registered common-phase planar screen, the clock policy retained 4/5 robust task-viable phase points and 45 ms of contiguous width, versus 1/5 and no multi-point span for the delayed/noisy state trigger; this falsifies a state-trigger timing-volume advantage in that model, not in people.",
+      "decisive_next_test": "Repeat the common-phase viable-volume comparison with independently identified observers, continuous phase sampling, spatial impact outcomes, subject scaling, and participant-held-out perturbations.",
       "falsifier": "The drift-mediated policy has an equal or smaller viable region, worse lower-tail result, or greater delay/phase sensitivity than its comparator.",
-      "data_gate": "The policy comparison is executable in models; identified human delays and perturbation trials are unavailable."
+      "data_gate": "The moving-base two-hand planar comparison is executed under common speed, face/path, force, effort, and numerical guards; identified human delays, spatial impact, and participant perturbation trials remain unavailable."
     },
     {
       "id": "MTQ-07",
       "question_id": "Q5",
       "topic": "Self-Correction and Noise Robustness",
-      "answer_state": "unresolved",
+      "answer_state": "partly_answered",
       "model_plan_state": "partly_executed",
       "human_plan_state": "blocked",
       "experiment_ids": ["MT-E04", "MT-H01"],
-      "present_answer": "No tested policy has established a decisive attraction-region or sustained-recovery advantage; transient threshold crossing and low variance are insufficient.",
-      "decisive_next_test": "Expand attraction-region, adverse-load, delay, noise, and saturation sweeps with held-out disturbances and require recovery without hidden force or effort cost.",
+      "present_answer": "No tested policy has established self-correction. The expanded common-phase screen observed no sustained half-error recovery in any of 60 policy/load/phase cases, so neither clock nor state triggering has a recovery-qualified viable region in this model.",
+      "decisive_next_test": "Estimate continuous attraction regions with independently identified observers, stronger feedback families, saturation and external-contact disturbances, then test held-out spatial and human recovery without hidden force or effort cost.",
       "falsifier": "Perturbations do not decay, viable-set return is not more probable, or any benefit requires an undeclared load increase.",
-      "data_gate": "A small planar recovery screen exists; spatial and governed human perturbation data remain open."
+      "data_gate": "Small and expanded planar recovery screens exist; independently identified spatial observers and governed human perturbation data remain open."
     },
     {
       "id": "MTQ-08",

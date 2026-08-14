@@ -16,6 +16,11 @@ ARTIFACTS = [
     "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_question_registry.json",
     "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_experiment_registry.json",
     "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_readiness_audit.json",
+    "docs/research/proximal_distal_energy_transfer/data/timing_viability_study.json",
+    "docs/research/proximal_distal_energy_transfer/data/timing_viability_study.npz",
+    "docs/research/proximal_distal_energy_transfer/figures/fig_timing_viability_adverse_load.pdf",
+    "scripts/research/proximal_distal_energy/timing_viability.py",
+    "scripts/research/proximal_distal_energy/run_timing_viability_study.py",
 ]
 
 
@@ -32,10 +37,11 @@ def main() -> None:
         "PD-CLAIM-244": [by_line[line]["candidate_id"] for line in (28, 38, 41)],
         "PD-CLAIM-245": [by_line[line]["candidate_id"] for line in (53, 63)],
         "PD-CLAIM-246": [by_line[line]["candidate_id"] for line in (71, 82)],
-        "PD-CLAIM-247": [by_line[line]["candidate_id"] for line in (88, 112, 119)],
-        "PD-CLAIM-248": [by_line[127]["candidate_id"]],
+        "PD-CLAIM-252": [by_line[line]["candidate_id"] for line in (86, 95, 109)],
+        "PD-CLAIM-247": [by_line[line]["candidate_id"] for line in (116, 140, 147)],
+        "PD-CLAIM-248": [by_line[155]["candidate_id"]],
         "PD-CLAIM-251": [
-            by_line[line]["candidate_id"] for line in (138, 148, 150, 160, 164)
+            by_line[line]["candidate_id"] for line in (166, 176, 178, 188, 192)
         ],
     }
     definitions = {
@@ -73,6 +79,13 @@ def main() -> None:
             "no_policy_recovery_advantage_established",
             "The result is limited to a small engineering envelope and a simple delayed observer; it does not estimate human correction.",
             "A policy advantage emerges under expanded preregistered attraction-region, external-load, or participant-held-out tests.",
+        ),
+        "PD-CLAIM-252": (
+            "A 60-case common-phase moving-base screen found a larger sampled task-viability region for clock release than state-triggered release under every registered guard set, while sustained half-error recovery was absent for both policies.",
+            "common_phase_timing_viability_and_recovery_screen",
+            "state_trigger_advantage_not_supported_and_recovery_not_observed",
+            "The result is limited to five sampled phase offsets, six engineering load cohorts, declared task guards, and a reduced planar controller; it does not identify human timing demand, self-correction, or coaching strategy.",
+            "The ordering reverses under a preregistered continuous or spatial sweep, or governed participant-held-out data establish a state-triggered timing or recovery advantage.",
         ),
         "PD-CLAIM-247": (
             "Energy-, work-, and load-controlled planar evidence rejects maximizing proximal velocity as a general rule at those tiers, while five distinct slack classes require separate state, energy, and measurement tests.",
@@ -139,7 +152,7 @@ def main() -> None:
                 "falsifier": falsifier,
                 "adjudication": "Reconciled to the existing claim audit, machine-readable question registry, and prospective experiment contract without promoting model evidence to human evidence.",
                 "reviewer": "Codex technical audit",
-                "last_verified_on": "2026-08-13",
+                "last_verified_on": "2026-08-14",
             }
         )
         registry["candidate_reviews"].extend(
@@ -149,14 +162,14 @@ def main() -> None:
                 "claim_ids": [claim_id],
                 "rationale": "This passage states or bounds a registered critical-question conclusion.",
                 "reviewer": "Codex technical audit",
-                "last_verified_on": "2026-08-13",
+                "last_verified_on": "2026-08-14",
             }
             for item in members
         )
     registry["paper"]["source_digest"] = inventory["source_digest"]
     registry["audit_scope"]["completion_status"] = "complete"
     registry["audit_scope"]["current_scope"] = (
-        "The complete 951-candidate paper inventory is adjudicated. The critical-question chapter maps fifteen candidates to seven bounded claims and retains all human-data gates."
+        "The complete 959-candidate paper inventory is adjudicated. The critical-question chapter maps twenty candidates to nine bounded claims and retains all human-data gates."
     )
     REGISTRY.write_text(json.dumps(registry, indent=2) + "\n", encoding="utf-8")
 
