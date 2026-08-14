@@ -13,6 +13,45 @@ from scripts.research.proximal_distal_energy.claim_audit import (
 )
 
 
+def _minimal_registry(tmp_path: Path, source_location: str) -> Path:
+    master = tmp_path / "paper.qmd"
+    master.write_text("The registered result remains conditional.\n", encoding="utf-8")
+    (tmp_path / "result.json").write_text("{}\n", encoding="utf-8")
+    inventory = build_candidate_inventory(master, repository_root=tmp_path)
+    registry = {
+        "schema_version": "proximal-distal-claim-audit-v1",
+        "paper": {
+            "source": "paper.qmd",
+            "source_digest": inventory["source_digest"],
+        },
+        "audit_scope": {"completion_status": "in_progress"},
+        "release_claim_inventory": [],
+        "candidate_reviews": [],
+        "claims": [
+            {
+                "claim_id": "PD-CLAIM-001",
+                "statement": "The registered result remains conditional.",
+                "classification": "model_result",
+                "published_status": "conditional",
+                "audit_status": "provisional",
+                "source_locations": [source_location],
+                "evidence_artifacts": ["result.json"],
+                "model_domain": "Declared test model.",
+                "uncertainty_boundary": "No population inference.",
+                "competing_explanations": ["Implementation error"],
+                "negative_controls": ["Zero input"],
+                "falsifier": "Independent recomputation disagrees.",
+                "adjudication": "The claim remains conditional.",
+                "reviewer": "Test reviewer",
+                "last_verified_on": "2026-08-14",
+            }
+        ],
+    }
+    path = tmp_path / "registry.json"
+    path.write_text(json.dumps(registry), encoding="utf-8")
+    return path
+
+
 @pytest.mark.unit
 def test_candidate_inventory_expands_includes_with_source_locations(
     tmp_path: Path,
@@ -172,7 +211,7 @@ def test_registry_rejects_duplicate_claim_identifiers(tmp_path: Path) -> None:
 @pytest.mark.unit
 def test_registry_rejects_missing_local_evidence_artifact(tmp_path: Path) -> None:
     master = tmp_path / "paper.qmd"
-    master.write_text("", encoding="utf-8")
+    master.write_text("Evidence source line.\n", encoding="utf-8")
     inventory = build_candidate_inventory(master, repository_root=tmp_path)
     registry = {
         "schema_version": "proximal-distal-claim-audit-v1",
@@ -207,6 +246,25 @@ def test_registry_rejects_missing_local_evidence_artifact(tmp_path: Path) -> Non
     path.write_text(json.dumps(registry), encoding="utf-8")
 
     with pytest.raises(ValueError, match="missing local evidence artifact"):
+        validate_registry(path, repository_root=tmp_path, check_release_manifest=False)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ("source_location", "message"),
+    [
+        ("paper.qmd", "path:line"),
+        ("missing.qmd:1", "missing source location file"),
+        ("paper.qmd:2", "source location line is out of range"),
+        ("../outside.qmd:1", "source location escapes repository root"),
+    ],
+)
+def test_registry_rejects_unresolvable_source_locations(
+    tmp_path: Path, source_location: str, message: str
+) -> None:
+    path = _minimal_registry(tmp_path, source_location)
+
+    with pytest.raises(ValueError, match=message):
         validate_registry(path, repository_root=tmp_path, check_release_manifest=False)
 
 

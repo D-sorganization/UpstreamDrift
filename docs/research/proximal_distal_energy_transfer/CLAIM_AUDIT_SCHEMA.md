@@ -12,7 +12,9 @@ The machine-readable authorities are:
 - `data/claim_candidate_inventory.json`, the deterministic inventory of
   narrative paragraphs in the Quarto master and all included chapters; and
 - `data/claim_audit_registry.json`, the adjudicated claim records, release-claim
-  reconciliation, research-collection status, and external dependencies.
+  reconciliation, research-collection status, and external dependencies; and
+- `data/claim_evidence_manifest.json`, the deterministic coverage and content-
+  integrity record for every local and external evidence reference.
 
 ## Candidate Inventory
 
@@ -115,8 +117,18 @@ Run
 `python -m scripts.research.proximal_distal_energy.claim_audit validate`.
 Validation fails on stale paper bytes, duplicate identifiers, missing required
 adjudication fields, missing bibliography keys, non-reciprocal claim mappings,
-drift from the public release-claim inventory, or a `complete` status while any
-candidate remains unadjudicated or still requires splitting.
+unresolvable or out-of-range `path:line` source locators, drift from the public
+release-claim inventory, or a `complete` status while any candidate remains
+unadjudicated or still requires splitting.
+
+Run
+`python -m scripts.research.proximal_distal_energy.claim_evidence_integrity validate`
+to require exact claim coverage and current SHA-256/byte-size records for every
+local support artifact. External URLs are inventoried by exact URL and host but
+are not fetched by this deterministic gate. Consequently, a passing manifest
+proves that a reviewer can recover the exact registered local bytes and see
+every external lead; it does not establish source independence, live-link
+availability, empirical adequacy, or scientific correctness.
 
 Completion additionally requires recomputation of every quantitative claim,
 figure-data verification, original-source and live-link review, and an

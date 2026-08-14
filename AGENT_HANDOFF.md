@@ -61,6 +61,11 @@ in git and GitHub.
   from the closed configurations.
 - The claim inventory is adjudicated at 987/987 candidates and 263 atomic
   claims, including the adverse subject-scaled contact-closure result.
+- Every one of 1,064 claim source locators now resolves to an existing
+  repository file and in-range line. The claim-evidence integrity authority
+  covers all 1,541 support references, hash-pins 193 distinct local artifacts,
+  and inventories 85 external URLs without treating link presence as
+  independent scientific validation.
 - The handwritten agenda retains bounded model answers for eight points and a
   construct-level unresolved boundary for human intentional slack.
 - Typed slack remains separated into five classes; no global benefit,
@@ -89,6 +94,10 @@ in git and GitHub.
    impact, and an independent dynamics engine.
 8. Execute MT-H01 only after governed bilateral-wrench acquisition and the
    frozen participant split.
+9. Implement the Seth et al. scapulothoracic model candidate, EMG onset-
+   definition sensitivity, and distributed-grip contact measurements described
+   in the independently checked biomechanics plan; retain each as a model or
+   acquisition design until its prospective gates pass.
 
 ## Required Gates
 
@@ -112,6 +121,7 @@ python -m ruff check scripts/research/proximal_distal_energy/subject_scaled_spat
   scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py `
   tests/research/test_subject_scaled_closed_contact.py
 python -m scripts.research.proximal_distal_energy.claim_audit validate
+python -m scripts.research.proximal_distal_energy.claim_evidence_integrity validate
 python -m scripts.research.proximal_distal_energy.momentum_question_readiness validate
 python -m scripts.research.proximal_distal_energy.qualify_open_release validate
 python scripts/check_document_title_case.py --changed-from origin/main
