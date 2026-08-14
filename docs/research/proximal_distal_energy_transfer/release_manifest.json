@@ -78,6 +78,10 @@
     "bilateral_wrench_identifiability": {
       "command": "python -m scripts.research.proximal_distal_energy.run_bilateral_wrench_identifiability_study",
       "tier": "instantaneous_linear_structural_identifiability"
+    },
+    "bilateral_wrench_sensor_qualification": {
+      "command": "python -m scripts.research.proximal_distal_energy.run_bilateral_wrench_sensor_qualification",
+      "tier": "synthetic_trajectory_point_force_sensor_qualification"
     }
   },
   "claims": {
@@ -106,7 +110,9 @@
     "global_slack_benefit": "unsupported",
     "single_channel_slack_class_identification": "not_established",
     "individual_hand_allocation_from_net_wrench": "structurally_unidentifiable",
-    "bilateral_human_wrench_validation": "untested"
+    "bilateral_human_wrench_validation": "untested",
+    "synthetic_bilateral_point_force_sensor_qualification": "qualified_for_declared_synthetic_cases",
+    "physical_bilateral_six_axis_device_validation": "untested"
   },
   "known_open_gates": [
     "subject-scaled articulated spatial contact with calibrated grip and distributed shaft",
@@ -145,8 +151,8 @@
       "bytes": 6630
     },
     "docs/research/proximal_distal_energy_transfer/COMPREHENSIVE_RESEARCH_PROGRAM.md": {
-      "sha256": "d5b18bcd710635fd1b4ce791b4913df05aa90b78ffc99f052bf80b76e1928418",
-      "bytes": 12705
+      "sha256": "0a9571af7b3087d959f6623dd56a0f6097757d1fffff30153b698c9634b45b5a",
+      "bytes": 13032
     },
     "docs/research/proximal_distal_energy_transfer/CONTROL_AFFINE_TERMINOLOGY_CONTRACT.md": {
       "sha256": "82e81398a1b54f5063a6bb8b7ffccaac22c798cfd1af2538b4f94b83fa6b7a0d",
@@ -169,8 +175,8 @@
       "bytes": 10805
     },
     "docs/research/proximal_distal_energy_transfer/MODEL_COMPLETION_FALSIFICATION_MATRIX.md": {
-      "sha256": "a0f10fba82ecd748629c0a7fe7780f81eed80106eff8f56393548fd3e3270d47",
-      "bytes": 29612
+      "sha256": "87b62a5855a121201c2b73d2d17e5a173a498de0072e0b41a269627bb3d1c09e",
+      "bytes": 30542
     },
     "docs/research/proximal_distal_energy_transfer/MOMENTUM_TRANSFER_QUESTION_PROGRAM.md": {
       "sha256": "7fceb88df790c69eaf4a292d418c5ef31b69d9aa200df5f72e194545f43ba476",
@@ -181,8 +187,8 @@
       "bytes": 4139
     },
     "docs/research/proximal_distal_energy_transfer/README.md": {
-      "sha256": "b3fc748fef033282f1b8d7da364ceb7be1cb452e8845980ce38aef862473eac9",
-      "bytes": 25556
+      "sha256": "632f93a9a18651191e19531c6e0b0c76a7e629ec146915ed9167c5c82add3730",
+      "bytes": 26023
     },
     "docs/research/proximal_distal_energy_transfer/REVIEWER_WORKBENCH.md": {
       "sha256": "b864b26ec27a87759d2f977224942b9c3e312f13f9a8882342126de379be706e",
@@ -197,8 +203,8 @@
       "bytes": 15020
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd": {
-      "sha256": "68c03ef871f7edaf9af883a968b3251b6c63263a90078ac9fd1c1f3426ad4a71",
-      "bytes": 11794
+      "sha256": "c858d9123c9a4b122889e978aec96d25c48e8a4a484caaa92f05df512fd6f657",
+      "bytes": 11799
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch01_introduction.qmd": {
       "sha256": "239bf409b93845eb108db1305d2bf9605e956c3b1e44633de9c3fa4f373298ac",
@@ -241,8 +247,8 @@
       "bytes": 2160
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd": {
-      "sha256": "77f29b8ba9337d72bd7aad943f34ffd9ee3ad88c9946d1b79858438a6e48438a",
-      "bytes": 29999
+      "sha256": "27ce636ca993712391df96e68ae5a72bf538fc9907930147d942f72ea243903a",
+      "bytes": 32862
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch05a_interactive_workbench.qmd": {
       "sha256": "3dd351b06c621a3008ecdbd027b4b3c8b2f7bb20a6d29490ad1cd6c415c2ae56",
@@ -285,8 +291,8 @@
       "bytes": 15724
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd": {
-      "sha256": "3c02f44d47dbc0876c680b673dc6609135f547d614e0e6c2c58d752dc892996a",
-      "bytes": 11264
+      "sha256": "87848261d742a0d3758672a52f53a9e87f53c7517d32956b3301b37f8c7eb1c9",
+      "bytes": 11266
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch06e_experimental_protocol.qmd": {
       "sha256": "e6a029ef9e6cd81d5488adfd9f899a26de3e5b01099d84f7eb490ff57a95c06b",
@@ -336,13 +342,17 @@
       "sha256": "0ee8c67cead5b958e452a12ccfe82f5138253fec309fae55059ed82d7828ef3c",
       "bytes": 5392
     },
+    "docs/research/proximal_distal_energy_transfer/data/bilateral_wrench_sensor_qualification.json": {
+      "sha256": "61e68eb05146a29b85de1c196710d0492ad6fdb105f9d98ede4e60ae7c4193da",
+      "bytes": 3647
+    },
     "docs/research/proximal_distal_energy_transfer/data/claim_audit_registry.json": {
-      "sha256": "0e54cce51cadca0ba675cac635b125e29491edbc44919b5c1abfc7c6948724dc",
-      "bytes": 1099739
+      "sha256": "108f9a24243b20198b0de61ecd3a4c63cdadd574a49e2bfd2598eb60f34a79d6",
+      "bytes": 1110144
     },
     "docs/research/proximal_distal_energy_transfer/data/claim_candidate_inventory.json": {
-      "sha256": "9a5b2a9111d1850714dd15b59eb014365bdae927ca49b6797cf640c712b5db7e",
-      "bytes": 992434
+      "sha256": "94990438326632aa6379636a91f93d3845b9b7db9358df729efc17e6d8358a41",
+      "bytes": 998090
     },
     "docs/research/proximal_distal_energy_transfer/data/counterfactual_ensemble.json": {
       "sha256": "fe3157680189c1e0486085e104f77dbd79db056d44c63ed2aa3dd891003c41f5",
@@ -485,20 +495,20 @@
       "bytes": 86709
     },
     "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_experiment_registry.json": {
-      "sha256": "7e9c0519df18e70b2eefa910aed9eef81ea77d342998ea93086fb41e667d3762",
-      "bytes": 12304
+      "sha256": "ce8bc25a62895cf7cba2b1bdda77fc7ede0555007ad0e45a13e755083db36a07",
+      "bytes": 12505
     },
     "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_human_registration.json": {
       "sha256": "1f084fefeb0dbc4062a03e18229ce5a6336e39b5cb43c4d04934277b70065970",
       "bytes": 6255
     },
     "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_question_registry.json": {
-      "sha256": "c3e99a862fdbbb8bdda1cf4ab365c7cf1d77cfa4e2ebf5ba63387b743d6e187b",
-      "bytes": 16766
+      "sha256": "8a176d2fe9368eb6d9cc000025019800a36b1f071174a49983c2ffe926341dfd",
+      "bytes": 17152
     },
     "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_readiness_audit.json": {
-      "sha256": "45a77a0c26aefca7fb9f03dab47d093f0bc7dc42d2d73ac153894ae155856d89",
-      "bytes": 11447
+      "sha256": "13e46121e54d40559084d249873658c7b16ee54efd00038c16b32bd760a6fd6b",
+      "bytes": 11833
     },
     "docs/research/proximal_distal_energy_transfer/data/moving_base_flexible_study.json": {
       "sha256": "f9b4d4bc197e5279da298fe389c03c9358bf6bf17afa923274247c11b5fa7a26",
@@ -751,6 +761,14 @@
     "docs/research/proximal_distal_energy_transfer/figures/fig_bilateral_wrench_identifiability.svg": {
       "sha256": "04e03bac46fde4f1b8e0b81e088c1c5b6bfc2668c5f1d7f17aa0bbfc81df3ba6",
       "bytes": 91571
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_bilateral_wrench_sensor_qualification.pdf": {
+      "sha256": "c699d9a347123d74a6bc82ce6e02f13cd7cea7006450bcc358d816534506a634",
+      "bytes": 21081
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_bilateral_wrench_sensor_qualification.svg": {
+      "sha256": "bfe270e81dec3a83e68e090a334913bb46d530ce856b4c05fac5f245dfc58e08",
+      "bytes": 96800
     },
     "docs/research/proximal_distal_energy_transfer/figures/fig_biological_redundancy.pdf": {
       "sha256": "d03c735d52af01e2896806063a67001935743fe7625b471b790459a6ef7c84ff",
@@ -1401,8 +1419,8 @@
       "bytes": 71530
     },
     "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.pdf": {
-      "sha256": "59f9a75792110cacd9f960dd53368cbbd42fe542f83df240237d35a8ee6bc3b0",
-      "bytes": 1540534
+      "sha256": "4f29967047758ed69d2ed91a6317b7d7e212612eb0dc69c49c54bbf1e745437b",
+      "bytes": 1547365
     },
     "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd": {
       "sha256": "b5ee38434b998826e9010c32911a099487b3ac0eeebeb0a2472e63b0802cc0a9",
@@ -1435,6 +1453,10 @@
     "scripts/research/proximal_distal_energy/bilateral_wrench_identifiability.py": {
       "sha256": "bf9e965ba04f0dcfacd611588e7ce377ba5b8688c66c140b3f083ec671690cd1",
       "bytes": 4657
+    },
+    "scripts/research/proximal_distal_energy/bilateral_wrench_sensor_qualification.py": {
+      "sha256": "e879b7bf349df9217105873d2ddd24d81f33b1da87f03de55adc1729efb59383",
+      "bytes": 8858
     },
     "scripts/research/proximal_distal_energy/claim_audit.py": {
       "sha256": "503ab0e27f675a1f25d41b6b03ba55367d9dc04197fd04c9ae15812b72389924",
@@ -1612,6 +1634,10 @@
       "sha256": "92caca41b7cf67043ed45bdaae2628d614bf2582fbb521616b033244fcd8ee89",
       "bytes": 9264
     },
+    "scripts/research/proximal_distal_energy/register_bilateral_wrench_sensor_qualification_claims.py": {
+      "sha256": "5bb9426cc37e9a578231553a6394be908f86bbb61b809d7a94277c3e107735a7",
+      "bytes": 9807
+    },
     "scripts/research/proximal_distal_energy/register_forward_modal_claims.py": {
       "sha256": "95c6facda5b6757fdb396eb630e139f566503b6d2e080b2027609127d1363f88",
       "bytes": 7560
@@ -1649,8 +1675,8 @@
       "bytes": 9575
     },
     "scripts/research/proximal_distal_energy/release_bundle.py": {
-      "sha256": "ba4ca34e5c9529ed10a087eb922a19e962e81b3dc32338054515756b7b4d9bb4",
-      "bytes": 11262
+      "sha256": "5b0fc7238400b18a7d46fd88fc6d15a1d329b2d2bb2c030103ba94a0753de8a4",
+      "bytes": 11750
     },
     "scripts/research/proximal_distal_energy/rotating_base_two_hand.py": {
       "sha256": "a08641054a5ec58eaa9023ff123464c960b10833826f7ac9ba8dea68c26ab0d0",
@@ -1663,6 +1689,10 @@
     "scripts/research/proximal_distal_energy/run_bilateral_wrench_identifiability_study.py": {
       "sha256": "6dd6c1c8739ab1422acbefac43fad300a825675d073426722010916113247462",
       "bytes": 7946
+    },
+    "scripts/research/proximal_distal_energy/run_bilateral_wrench_sensor_qualification.py": {
+      "sha256": "c1334c30dcb89aab050eda22178ea2d21d98965eaf324337366a7b310c248a22",
+      "bytes": 6726
     },
     "scripts/research/proximal_distal_energy/run_counterfactual_ensemble.py": {
       "sha256": "306bac233c355e9ac9bf88729a639f98305033ef09771420d8a6c5e00e08ee0d",

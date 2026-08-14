@@ -2,9 +2,10 @@
 
 ## Current Scientific Audit State (2026-08-14)
 
-Epic #8557 has completed the paper-wide candidate adjudication contract:
-970/970 candidates, 255 atomic claims, and zero unadjudicated entries. The
-registry is `complete` for the present paper state. This status does not waive
+Epic #8557 has completed the current paper-wide candidate adjudication contract:
+975/975 candidates, 258 atomic claims, and zero unadjudicated entries. The
+trajectory-level bilateral point-force sensor qualification is included while
+retaining its synthetic scope. This status does not waive
 open empirical or model-fidelity gates; #8556 remains blocked on governed human
 bilateral six-axis grip-wrench acquisition, and all new scientific content must
 regenerate the inventory and reopen adjudication until every new candidate is
@@ -49,7 +50,7 @@ reviewed.
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.523 |
+| **Spec Version** | 1.0.524 |
 | **Last Spec Update** | 2026-08-14 |
 
 ## 2. Purpose & Mission
@@ -80,6 +81,14 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ## 4. Architecture Overview
 
 ### Recent Spec Updates
+
+- **2026-08-14** - Qualified the MT-E07 bilateral point-force estimator over
+  deterministic synthetic trajectories with normalized noise and cross-talk,
+  cross-talk calibration residual, contact-center migration, and tracked-contact
+  controls. Net-wrench-only inversion retains its manufactured axial allocation
+  error despite numerical resultant closure. This is not calibration of a
+  physical bilateral six-axis device and does not support anatomical or human
+  strategy claims.
 
 - **2026-08-14** - Added MT-E07 bilateral-wrench structural identifiability.
   Two separated three-axis point forces map to one net club wrench with rank 5
@@ -2211,6 +2220,8 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-14 | 1.0.524 | Added trajectory-level synthetic qualification for the MT-E07 bilateral point-force estimator: 301 samples and 32 seeded trials exercise normalized noise, cross-talk, calibration residual, and contact-center migration controls; a manufactured net-wrench-only failure demonstrates that resultant closure does not identify allocation; and the paper, registries, claim audit, figure, evidence, tests, and handoff retain explicit full-device, distributed-contact, anatomical, and governed-human gates. |
+| 2026-08-14 | 1.0.523 | Added bilateral-wrench structural identifiability: the separated point-force map has rank five and one axial null mode, the axial-scalar augmentation has rank six, and the full bilateral six-axis map has rank six and nullity six under declared scaling and geometry controls. |
 | 2026-08-14 | 1.0.522 | Added a two-excitation typed-slack dynamic audit that separates contact disengagement, transmission dead zone, structural preload, biological series compliance, and control deadband; enforces mechanical passivity and closure where applicable; reports scaled local sensitivity and pairwise output separation; and retains delivery, anatomical, class-identification, intentionality, and human conclusions as open. |
 | 2026-08-14 | 1.0.521 | Added a common-phase timing-viability and adverse-load-recovery experiment for the critical-question program: 60 paired cases and 120 trajectories compare clock and state-triggered release under five phase offsets and six load/perturbation cohorts, retain strict/primary/lenient task-viability definitions, test sustained half-error recovery, and register timestep sensitivity. The model screen found a larger clock-policy task-viability region and no sustained recovery in either policy; it explicitly does not identify human timing demand, self-correction, or coaching strategy. |
 | 2026-08-14 | 1.0.520 | Registered all nine points from the handwritten momentum-transfer agenda with answer state, decisive next test, falsifier, data gate, model plan, and participant-held-out human stage; added a generated fail-closed readiness audit; expanded the paper claim audit to 956 candidates and 250 claims; and retained #8556 as the governed bilateral-wrench human-data blocker. |

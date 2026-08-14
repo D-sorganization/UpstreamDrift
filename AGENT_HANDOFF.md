@@ -21,7 +21,7 @@ in git and GitHub.
   manual Google reauthentication. The 2026-08-14 token check failed closed;
   credentials and authentication dialogs were not automated.
 
-## Active Bilateral-Wrench Identifiability Slice
+## Active Bilateral-Wrench Sensor-Qualification Slice
 
 - Branch `research/8557-nonlinear-biomechanics-gap` adds MT-E07 and advances Q2
   without claiming a human result.
@@ -34,17 +34,26 @@ in git and GitHub.
 - A 49-case 0.06–0.30 m grip-span sweep preserves rank while changing
   normalized nonzero conditioning. Three proper rotations preserve singular
   values to `2.22e-16` under declared 1 N / 1 N m scaling.
-- These are instantaneous structural-identifiability results. Noise,
-  cross-talk, contact-center migration, practical estimation, muscle/scapular
-  action, intentionality, and human strategy remain unestablished.
-- Evidence is in `data/bilateral_wrench_identifiability_study.json`; the
-  backend, runner, tests, and publication figure are release artifacts. The
-  paper contains the derivation, sensing boundary, and explicit falsifiers.
+- The trajectory-level synthetic qualification exercises 301 samples across 32
+  deterministic trials. Net-wrench-only inversion retains 11.86 N allocation
+  RMSE and 29.05 N axial-mode RMSE despite numerical resultant-wrench closure.
+- In the registered combined synthetic case, the augmented point-force
+  estimator has 1.02 N allocation RMSE, 3.87 N 95th-percentile error, 0.0142
+  normalized net-wrench RMSE, and 0.351 N axial-mode RMSE.
+- Exact cross-talk calibration reduces the declared 1% normalized cross-talk
+  case from 0.942 N to 0.153 N allocation RMSE. Exact contact tracking reduces
+  the declared 8 mm migration case from 2.025 N to numerical closure.
+- These are synthetic point-force estimator results, not device calibration or
+  human evidence. Full bilateral moments, distributed contact, compliance,
+  muscle/scapular action, intentionality, and strategy remain unestablished.
+- Evidence is in `data/bilateral_wrench_sensor_qualification.json`; both
+  identifiability and sensor-qualification backends, runners, tests, and figures
+  are release artifacts.
 
 ## Current Program State
 
-- The claim inventory is adjudicated at 970/970 candidates and 255 atomic
-  claims, including three new bilateral-wrench claims.
+- The claim inventory is adjudicated at 975/975 candidates and 258 atomic
+  claims, including structural and synthetic bilateral-wrench qualification.
 - The handwritten agenda retains bounded model answers for eight points and a
   construct-level unresolved boundary for human intentional slack.
 - Typed slack remains separated into five classes; no global benefit,
@@ -56,8 +65,8 @@ in git and GitHub.
 
 ## Remaining Scientific Work
 
-1. Qualify MT-E07 under calibrated sensor noise, cross-talk, contact migration,
-   and trajectory-level practical identifiability.
+1. Qualify MT-E07 with a traceably calibrated bilateral six-axis device,
+   distributed time-varying contact, compliance, drift, and synchronization.
 2. Add full-delivery-state-matched forward rate/acceleration and timing controls
    across spatial and subject-scaled tiers.
 3. Estimate continuous attraction regions with identified observers, external
@@ -72,8 +81,11 @@ in git and GitHub.
 
 ```powershell
 python -m scripts.research.proximal_distal_energy.run_bilateral_wrench_identifiability_study
+python -m scripts.research.proximal_distal_energy.run_bilateral_wrench_sensor_qualification
 python -m pytest tests/research/test_bilateral_wrench_identifiability.py `
   tests/research/test_bilateral_wrench_identifiability_evidence.py `
+  tests/research/test_bilateral_wrench_sensor_qualification.py `
+  tests/research/test_bilateral_wrench_sensor_qualification_evidence.py `
   tests/research/test_momentum_transfer_experiment_registry.py `
   tests/unit/research/test_momentum_question_readiness.py `
   tests/research/test_proximal_distal_release_bundle.py -q

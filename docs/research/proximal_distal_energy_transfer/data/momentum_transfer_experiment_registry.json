@@ -303,7 +303,12 @@
         "reference_transport",
         "point_force_only",
         "point_force_plus_internal_axial_scalar",
-        "bilateral_six_axis_wrenches"
+        "bilateral_six_axis_wrenches",
+        "trajectory_level_noise",
+        "normalized_cross_talk",
+        "cross_talk_calibration_residual",
+        "contact_center_migration",
+        "tracked_contact_centers"
       ],
       "controls": [
         "manufactured_axial_null_mode",
@@ -337,7 +342,7 @@
         "sensor_calibration_and_cross_talk_matrix",
         "synchronization_record"
       ],
-      "execution_status": "instantaneous_point_force_and_full_wrench_structural_rank_complete_noise_contact_migration_subject_and_human_qualification_open"
+      "execution_status": "instantaneous_structural_and_synthetic_point_force_trajectory_sensor_qualification_complete_full_wrench_device_subject_and_human_qualification_open"
     },
     {
       "id": "MT-H01",
