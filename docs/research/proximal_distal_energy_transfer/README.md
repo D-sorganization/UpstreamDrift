@@ -33,8 +33,12 @@ claims explicitly open. A separate
 subject-scaled geometry audit now tests six deterministic de Leva design
 profiles and three grip spans. It finds 0.171--0.616 m anatomical
 hand-to-grip error despite a full-rank local constraint Jacobian, thereby
-requiring closed-contact inverse kinematics, joint-limit and collision checks,
-and calibrated forward contact before anatomical strategy claims. A three-tier
+rejecting the prescribed states. A bounded follow-up closes all 234 registered
+profile/span/phase configurations while preserving the club pose, achieved
+rank, broad engineering-limit margins, and coarse collision clearance. This
+clears a reduced-tree necessary condition and advances the open gate to
+subject-specific anatomy and calibrated forward contact; it does not establish
+forces, passivity, timing benefit, slack benefit, or human strategy. A three-tier
 hand-path attribution study separates stitched pointwise ZTCF drift,
 same-state control, and separately defined ZVCF reactions for force vectors,
 impulse, power, work, every modeled joint, and four neutral time windows. A
@@ -115,9 +119,9 @@ rank audit and a trajectory-level synthetic point-force qualification under
 noise, normalized cross-talk, calibration residual, and contact-center
 migration. It demonstrates that net-wrench closure does not establish force
 allocation and retains physical-device and human validation as open gates.
-MT-E08 now registers the dependency-ordered anatomical test: prescribed-state
-closure audit, closed-contact inverse kinematics, independently integrated
-articulated contact, and participant-held-out falsification.
+MT-E08 now executes the prescribed-state rejection and reduced-tree
+closed-contact screen, then retains independently integrated calibrated
+articulated contact and participant-held-out falsification as open gates.
 The first external-evidence audit slice narrows the introduction and empirical
 evidence synthesis, records reciprocal candidate dispositions, and separates
 sample-specific associations from causal mechanisms. In particular, it corrects

@@ -43,7 +43,7 @@ def test_key_failure_controls_are_explicit() -> None:
     assert "bilateral_contact_closure" in experiments["MT-E08"]["controls"]
     assert "joint_limit_and_collision_screen" in experiments["MT-E08"]["controls"]
     assert experiments["MT-E08"]["execution_status"].startswith(
-        "prescribed_subject_scaled_closure"
+        "prescribed_state_rejection_and_234_sample_reduced_tree_closed_contact"
     )
 
 

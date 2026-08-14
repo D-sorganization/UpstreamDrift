@@ -12,7 +12,7 @@ and their broader rationale is documented in the open
 | Question | Present Assessment | What Would Change the Assessment? |
 |---|---|---|
 | How much transfer is drift-mediated? | Conditional on the observable, coordinate and frame, event window, model, and decomposition. Signed drift shares may exceed 100% when control opposes the pathway; pointwise attribution is not forward persistence. | A common acceleration/force/impulse/power/work ledger across tiers, same-state killswitches, uncertainty propagation, and participant-held-out bilateral-wrench evaluation. |
-| Which geometry matters? | Relative-link and force–velocity angles create exact sine/cosine gates; bilateral couple varies with signed grip separation and transverse differential force. Existing moving-base and two-engine spatial controls reproduce coincident-grip zeros and moment-arm reversals. A six-profile subject-scaled audit finds that the prescribed spatial states miss bilateral grip closure by 0.171–0.616 m despite a full-rank local constraint Jacobian. | Closed-contact inverse kinematics with joint-limit and collision checks, calibrated contact compliance, equipment geometry, and held-out digital twins and human bilateral wrenches. |
+| Which geometry matters? | Relative-link and force–velocity angles create exact sine/cosine gates; bilateral couple varies with signed grip separation and transverse differential force. Existing moving-base and two-engine spatial controls reproduce coincident-grip zeros and moment-arm reversals. A six-profile audit rejects prescribed states that miss closure by 0.171–0.616 m; a bounded follow-up closes all 234 registered reduced-tree configurations while retaining rank, engineering-limit, and coarse collision gates. | Calibrated compliant forward contact from the closed states, equipment geometry, subject-specific anatomy, and held-out digital twins and human bilateral wrenches. |
 | Which timing patterns matter? | Early distal release changes the available geometry; proximal rate, acceleration, braking, and release timing interact nonmonotonically. “Casting” is not one universal event. | Factorial interventions on proximal acceleration, distal release, and braking under matched state and work, with multiple preregistered casting definitions and adverse-load tests. |
 | Does a drift-mediated strategy require less timing precision? | Not supported in the registered moving-base planar comparison. On a common nominal phase grid, the clock policy retained four of five robust task-viable points and 45 ms of contiguous width; the delayed/noisy state trigger retained one point and no multi-point span. This does not measure neural timing demand. | Continuous phase-volume studies with independently identified observers, spatial impact outcomes, subject scaling, and participant-held-out perturbations. |
 | Is a strategy self-correcting? | Not established. The earlier screen produced 13–20% sustained recovery, whereas the expanded phase/load screen produced none in 60 cases. No tested policy has a recovery-qualified viable region. | Continuous attraction-region studies with independently identified observers, stronger feedback families, external-contact disturbances, and human perturbations without hidden load-cost increase. |
@@ -51,6 +51,14 @@ feasible and used by people. The subject-scaled audit in
 local constraint Jacobians retain rank six, yet the prescribed anatomical hand
 points remain 0.171--0.616 m from the grips. Full local rank is not contact
 closure.
+
+The bounded inverse-kinematics follow-up separates unclosed prescription from
+reduced-tree reachability. All 234 profile/span/phase configurations close
+both point contacts with fixed club coordinates, rank-six achieved constraint
+Jacobians, positive engineering-limit margins, and positive coarse
+bounding-sphere clearances. That result clears only the next geometric gate:
+the bounds are not clinical ranges, the collision screen is not anatomy, and
+no contact forces or delivery outcomes are solved.
 
 ## Timing and Common Failure Descriptions
 

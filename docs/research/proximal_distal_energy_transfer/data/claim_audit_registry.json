@@ -2,14 +2,14 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "b5c4b2b9946bae564fe77f7ce2b1185d1652a081226137110427b9a2ea1c02f6",
+    "source_digest": "0acb5e28428ca76a25650ab1c982a51af80c8ad4d1e69fef599191ab1b9470eb",
     "baseline_commit": "a4b53e39b"
   },
   "audit_scope": {
     "completion_status": "complete",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "The complete 982-candidate paper inventory is adjudicated. The subject-scaled spatial audit retains its adverse contact-closure result, favorable algebraic controls, and unexecuted articulated forward-contact gate."
+    "current_scope": "The complete 987-candidate paper inventory is adjudicated. The subject-scaled spatial audit retains its adverse prescribed-state contact-closure result and favorable algebraic controls. The bounded closed-contact follow-up passes the declared reduced-tree screen while calibrated articulated forward contact remains unexecuted."
   },
   "dependencies": [
     {
@@ -182,6 +182,11 @@
       "release_claim_key": "subject_scaled_spatial_contact_feasibility",
       "published_status": "prescribed_states_rejected_closed_contact_forward_test_open",
       "audit_state": "reviewed_as_adverse_model_structure_result"
+    },
+    {
+      "release_claim_key": "subject_scaled_closed_contact_feasibility",
+      "published_status": "reduced_tree_closed_contact_screen_passed_compliant_forward_test_open",
+      "audit_state": "reviewed_as_necessary_condition_result"
     }
   ],
   "candidate_reviews": [
@@ -5688,16 +5693,6 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-b61fb84510b45440",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-183"
-      ],
-      "rationale": "This spatial common-state passage participates in a registered mechanics, component-parity, virtual-work, intervention, boundary, or falsification claim checked against regenerated evidence.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13"
-    },
-    {
       "candidate_id": "PD-CAND-bbac8d9885489dc6",
       "disposition": "material_claims_mapped",
       "claim_ids": [
@@ -8055,19 +8050,6 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-23248506c7708688",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-007",
-        "PD-CLAIM-008",
-        "PD-CLAIM-214",
-        "PD-CLAIM-260"
-      ],
-      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-14"
-    },
-    {
       "candidate_id": "PD-CAND-7b974d9981fbe9c6",
       "disposition": "material_claims_mapped",
       "claim_ids": [
@@ -8904,16 +8886,6 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-36fed2dc5e606fff",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-127"
-      ],
-      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13"
-    },
-    {
       "candidate_id": "PD-CAND-5f49580176ce4034",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
@@ -9591,16 +9563,6 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-1d6e9d2b25d84c81",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-243"
-      ],
-      "rationale": "This passage states or bounds a registered critical-question conclusion.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-14"
-    },
-    {
       "candidate_id": "PD-CAND-67fd82fb5c07f83b",
       "disposition": "material_claims_mapped",
       "claim_ids": [
@@ -9987,16 +9949,6 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-f970834d968c0425",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-260"
-      ],
-      "rationale": "This passage states or bounds the subject-scaled contact-geometry audit.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-14"
-    },
-    {
       "candidate_id": "PD-CAND-61fd28d25644237b",
       "disposition": "material_claims_mapped",
       "claim_ids": [
@@ -10007,20 +9959,123 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-b795f5b87e96726a",
+      "candidate_id": "PD-CAND-25e950386030ec2e",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "The figure include points to registered evidence but asserts no standalone scientific result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-2595bd0677ce26f9",
       "disposition": "material_claims_mapped",
       "claim_ids": [
-        "PD-CLAIM-262"
+        "PD-CLAIM-260",
+        "PD-CLAIM-263"
       ],
       "rationale": "This passage states or bounds the subject-scaled contact-geometry audit.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-25e950386030ec2e",
+      "candidate_id": "PD-CAND-9bdb0446f034d972",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-260",
+        "PD-CLAIM-263",
+        "PD-CLAIM-264"
+      ],
+      "rationale": "This passage states or bounds the subject-scaled contact-geometry audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-f35adbe08b937d77",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-262",
+        "PD-CLAIM-264"
+      ],
+      "rationale": "This passage states or bounds the subject-scaled contact-geometry audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-9c65c424209437d6",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-263"
+      ],
+      "rationale": "This passage states or bounds the subject-scaled contact-geometry audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-c39cc01504847772",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-263"
+      ],
+      "rationale": "This passage states or bounds the subject-scaled contact-geometry audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-9dd9306ab117189e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-263",
+        "PD-CLAIM-264"
+      ],
+      "rationale": "This passage states or bounds the subject-scaled contact-geometry audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-684ed6cb396eac0e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-264"
+      ],
+      "rationale": "This passage states or bounds the subject-scaled contact-geometry audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-7dafe186014d706a",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "The figure include points to registered evidence but asserts no standalone scientific result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-54446a28f977e4fa",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-262"
+      ],
+      "rationale": "This revised synthesis passage carries the registered contact-feasibility boundary or its next-test consequence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-c063936829317748",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-262"
+      ],
+      "rationale": "This revised synthesis passage carries the registered contact-feasibility boundary or its next-test consequence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-36a661af65c9ae1d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-262"
+      ],
+      "rationale": "This revised synthesis passage carries the registered contact-feasibility boundary or its next-test consequence.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-14"
     }
@@ -10216,7 +10271,6 @@
         "PD-CAND-3c12b7e2054e4237",
         "PD-CAND-eca9e7374e7231c3",
         "PD-CAND-61e9db608ffdbb62",
-        "PD-CAND-23248506c7708688",
         "PD-CAND-26221cfd905990fb"
       ],
       "statement": "Under commonly used segment and angular-velocity definitions, proximal-to-distal peak ordering is common in sampled skilled golfers but is not universal or measurement-definition invariant.",
@@ -10259,7 +10313,6 @@
       "candidate_ids": [
         "PD-CAND-96f95833c562cb11",
         "PD-CAND-efa294cfd5f1828d",
-        "PD-CAND-23248506c7708688",
         "PD-CAND-26221cfd905990fb"
       ],
       "statement": "The temporal order of segment angular-velocity peaks is not, by itself, a measurement of mechanical energy transfer.",
@@ -14547,7 +14600,6 @@
         "PD-CAND-acab20dfe1ad13f4",
         "PD-CAND-4b014ecc4e16a963",
         "PD-CAND-3a28f92e6b8aa6a3",
-        "PD-CAND-36fed2dc5e606fff",
         "PD-CAND-fa5f064559bb1c98"
       ],
       "statement": "The reduced MuJoCo/Pinocchio forward-contact tier removes the grounded driver at 0.180 s from an exact same state; both engines retain a negative swing-normal force couple for 37.5 ms with approximately -0.409 N m minimum, coincident grips give zero, reversed arms flip sign below 9.2e-16 N m, and trajectory/wrench/orientation/energy gates pass with monotone work-energy refinement.",
@@ -17019,7 +17071,6 @@
       "claim_id": "PD-CLAIM-183",
       "candidate_ids": [
         "PD-CAND-3ab6317faf735919",
-        "PD-CAND-b61fb84510b45440",
         "PD-CAND-bbac8d9885489dc6"
       ],
       "statement": "Passive contact origin, forward cross-engine contact, anatomical magnitude, and human strategy remain open and require contact, identifiability, uncertainty, and governed human-data tiers.",
@@ -18686,7 +18737,6 @@
       "claim_id": "PD-CLAIM-214",
       "candidate_ids": [
         "PD-CAND-c10fdeb10b48eb9b",
-        "PD-CAND-23248506c7708688",
         "PD-CAND-f405c095d850ac4f",
         "PD-CAND-82b5634777708c30",
         "PD-CAND-52a2c44f84a0278d",
@@ -20908,9 +20958,7 @@
     },
     {
       "claim_id": "PD-CLAIM-243",
-      "candidate_ids": [
-        "PD-CAND-1d6e9d2b25d84c81"
-      ],
+      "candidate_ids": [],
       "statement": "The seven-question table retains observable-specific drift attribution and bounded current answers after adding the geometry and recovery studies.",
       "classification": "critical_question_answer_map",
       "published_status": "model_and_estimand_bounded",
@@ -21624,11 +21672,11 @@
     {
       "claim_id": "PD-CLAIM-260",
       "candidate_ids": [
-        "PD-CAND-23248506c7708688",
+        "PD-CAND-2595bd0677ce26f9",
         "PD-CAND-bc0368729ddb9738",
         "PD-CAND-7b6cd5358472b395",
         "PD-CAND-80616653a4fc60a7",
-        "PD-CAND-f970834d968c0425"
+        "PD-CAND-9bdb0446f034d972"
       ],
       "statement": "Across six deterministic de Leva design profiles, three grip spans, and 61 prescribed states, anatomical hand points miss the declared grips by 0.171--0.616 m even though every local bilateral contact Jacobian has rank six and condition number 5.35--6.40.",
       "classification": "subject_scaled_spatial_contact_closure_audit",
@@ -21648,7 +21696,14 @@
         "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
         "scripts/research/proximal_distal_energy/run_subject_scaled_spatial_geometry.py",
         "scripts/research/proximal_distal_energy/make_subject_scaled_spatial_geometry_figures.py",
-        "tests/research/test_subject_scaled_spatial_geometry.py"
+        "tests/research/test_subject_scaled_spatial_geometry.py",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_subject_scaled_closed_contact.pdf",
+        "scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py",
+        "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
+        "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
+        "tests/research/test_subject_scaled_closed_contact.py"
       ],
       "model_domain": "Six deterministic de Leva design profiles, three grip spans, and 61 prescribed states in the reduced 20-coordinate spatial tree.",
       "uncertainty_boundary": "The profiles are synthetic regression-based design points and the trajectories are prescribed rather than solved for bilateral contact.",
@@ -21688,7 +21743,14 @@
         "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
         "scripts/research/proximal_distal_energy/run_subject_scaled_spatial_geometry.py",
         "scripts/research/proximal_distal_energy/make_subject_scaled_spatial_geometry_figures.py",
-        "tests/research/test_subject_scaled_spatial_geometry.py"
+        "tests/research/test_subject_scaled_spatial_geometry.py",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_subject_scaled_closed_contact.pdf",
+        "scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py",
+        "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
+        "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
+        "tests/research/test_subject_scaled_closed_contact.py"
       ],
       "model_domain": "Six deterministic de Leva design profiles, three grip spans, and 61 prescribed states in the reduced 20-coordinate spatial tree.",
       "uncertainty_boundary": "The forces and contact points are prescribed and do not arise from anatomical compliant forward contact.",
@@ -21712,14 +21774,20 @@
     {
       "claim_id": "PD-CLAIM-262",
       "candidate_ids": [
-        "PD-CAND-b795f5b87e96726a"
+        "PD-CAND-f35adbe08b937d77",
+        "PD-CAND-54446a28f977e4fa",
+        "PD-CAND-c063936829317748",
+        "PD-CAND-36a661af65c9ae1d"
       ],
-      "statement": "Articulated spatial timing, recovery, and slack claims require bilateral closed-contact inverse kinematics, joint-limit and collision qualification, calibrated compliant forward contact, and independent-engine controls before interpretation.",
+      "statement": "Articulated spatial timing, recovery, and slack claims require calibrated compliant forward contact from closed states plus independent-engine controls before interpretation; reduced-tree inverse-kinematics screening alone is insufficient.",
       "classification": "articulated_spatial_completion_gate",
-      "published_status": "registered_and_not_executed",
+      "published_status": "closed_contact_screen_complete_forward_contact_not_executed",
       "audit_status": "deterministic_subject_scaling_closure_rank_and_geometry_controls_checked",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:297"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:327",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:119",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:356"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
@@ -21728,10 +21796,17 @@
         "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
         "scripts/research/proximal_distal_energy/run_subject_scaled_spatial_geometry.py",
         "scripts/research/proximal_distal_energy/make_subject_scaled_spatial_geometry_figures.py",
-        "tests/research/test_subject_scaled_spatial_geometry.py"
+        "tests/research/test_subject_scaled_spatial_geometry.py",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_subject_scaled_closed_contact.pdf",
+        "scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py",
+        "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
+        "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
+        "tests/research/test_subject_scaled_closed_contact.py"
       ],
       "model_domain": "Six deterministic de Leva design profiles, three grip spans, and 61 prescribed states in the reduced 20-coordinate spatial tree.",
-      "uncertainty_boundary": "This is a dependency-ordered falsification contract, not evidence that the missing articulated experiment will support the proposed mechanism.",
+      "uncertainty_boundary": "This is a dependency-ordered falsification contract, not evidence that compliant articulated dynamics will support the proposed mechanism.",
       "competing_explanations": [
         "prescribed state is not a closed-contact inverse-kinematics solution",
         "reduced scapular, shoulder, wrist, and hand geometry",
@@ -21744,7 +21819,115 @@
         "grip-span sweep",
         "point-force wrench-map rank and axial augmentation"
       ],
-      "falsifier": "A broader anatomical claim is published from a state that fails closure, limits, collision, conservation, or independent-engine checks.",
+      "falsifier": "A broader anatomical or transfer claim is published without calibrated contact, conservation, and independent-engine checks.",
+      "adjudication": "The executable atlas was regenerated from canonical anthropometrics and the shared spatial model; favorable rank and couple-scaling controls are retained alongside the adverse contact-closure result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "claim_id": "PD-CLAIM-263",
+      "candidate_ids": [
+        "PD-CAND-2595bd0677ce26f9",
+        "PD-CAND-9c65c424209437d6",
+        "PD-CAND-c39cc01504847772",
+        "PD-CAND-9dd9306ab117189e",
+        "PD-CAND-9bdb0446f034d972"
+      ],
+      "statement": "All 234 registered profile, grip-span, and phase configurations close both point contacts while holding the club pose fixed; every achieved constraint Jacobian has rank six, the worst closure residual is 1.16e-10 m, the minimum engineering-limit margin is 0.103 rad, and the minimum coarse collision clearance is 30.9 mm.",
+      "classification": "subject_scaled_closed_contact_inverse_kinematics_screen",
+      "published_status": "supported_in_declared_reduced_tree",
+      "audit_status": "deterministic_subject_scaling_closure_rank_and_geometry_controls_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd:10",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:299",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:310",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:55",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:64"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_subject_scaled_spatial_geometry.pdf",
+        "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
+        "scripts/research/proximal_distal_energy/run_subject_scaled_spatial_geometry.py",
+        "scripts/research/proximal_distal_energy/make_subject_scaled_spatial_geometry_figures.py",
+        "tests/research/test_subject_scaled_spatial_geometry.py",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_subject_scaled_closed_contact.pdf",
+        "scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py",
+        "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
+        "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
+        "tests/research/test_subject_scaled_closed_contact.py"
+      ],
+      "model_domain": "Six deterministic de Leva design profiles, three grip spans, and 13 phase samples in a reduced 20-coordinate tree with six fixed club coordinates.",
+      "uncertainty_boundary": "The joint bounds are broad engineering guards and collision uses bounding spheres with declared exemptions; neither is subject-specific anatomical qualification.",
+      "competing_explanations": [
+        "prescribed state is not a closed-contact inverse-kinematics solution",
+        "reduced scapular, shoulder, wrist, and hand geometry",
+        "anthropometric regression rather than subject measurement",
+        "unmodeled contact, tissue, and shaft compliance"
+      ],
+      "negative_controls": [
+        "bilateral distance-to-contact closure",
+        "constraint Jacobian rank and singular values",
+        "grip-span sweep",
+        "point-force wrench-map rank and axial augmentation"
+      ],
+      "falsifier": "Regeneration loses any registered closure, rank, bound, collision, fixed-club, or continuity gate beyond numerical tolerance.",
+      "adjudication": "The executable atlas was regenerated from canonical anthropometrics and the shared spatial model; favorable rank and couple-scaling controls are retained alongside the adverse contact-closure result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "claim_id": "PD-CLAIM-264",
+      "candidate_ids": [
+        "PD-CAND-684ed6cb396eac0e",
+        "PD-CAND-f35adbe08b937d77",
+        "PD-CAND-9dd9306ab117189e",
+        "PD-CAND-9bdb0446f034d972"
+      ],
+      "statement": "Closed-contact inverse kinematics is a necessary geometric gate and does not establish anatomy, contact force, work, passivity, timing demand, self-correction, slack benefit, or human strategy.",
+      "classification": "closed_contact_inference_boundary",
+      "published_status": "explicitly_bounded",
+      "audit_status": "deterministic_subject_scaling_closure_rank_and_geometry_controls_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:318",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:327",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:55",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:64"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_subject_scaled_spatial_geometry.pdf",
+        "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
+        "scripts/research/proximal_distal_energy/run_subject_scaled_spatial_geometry.py",
+        "scripts/research/proximal_distal_energy/make_subject_scaled_spatial_geometry_figures.py",
+        "tests/research/test_subject_scaled_spatial_geometry.py",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_subject_scaled_closed_contact.pdf",
+        "scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py",
+        "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
+        "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
+        "tests/research/test_subject_scaled_closed_contact.py"
+      ],
+      "model_domain": "Reduced-tree inverse-kinematics and screening outputs only.",
+      "uncertainty_boundary": "Scapular glide, forearm pronation-supination, multi-axis wrist, fingers, distributed tissue contact, calibrated compliance, and participant measurements are absent.",
+      "competing_explanations": [
+        "prescribed state is not a closed-contact inverse-kinematics solution",
+        "reduced scapular, shoulder, wrist, and hand geometry",
+        "anthropometric regression rather than subject measurement",
+        "unmodeled contact, tissue, and shaft compliance"
+      ],
+      "negative_controls": [
+        "bilateral distance-to-contact closure",
+        "constraint Jacobian rank and singular values",
+        "grip-span sweep",
+        "point-force wrench-map rank and axial augmentation"
+      ],
+      "falsifier": "A force, transfer, timing, slack, or human claim is attributed to this inverse-kinematics evidence alone.",
       "adjudication": "The executable atlas was regenerated from canonical anthropometrics and the shared spatial model; favorable rank and couple-scaling controls are retained alongside the adverse contact-closure result.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-14"

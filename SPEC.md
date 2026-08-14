@@ -51,7 +51,7 @@ reviewed.
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.525 |
+| **Spec Version** | 1.0.526 |
 | **Last Spec Update** | 2026-08-14 |
 
 ## 2. Purpose & Mission
@@ -2234,6 +2234,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 2026-08-14 | 1.0.525 | Added the MT-E08 subject-scaled spatial contact-closure audit: six deterministic de Leva engineering profiles, three grip spans, and 61 states per case fail the 5 mm bilateral closure tolerance despite full local contact-Jacobian rank. The governed evidence, release claims, and scientific boundary now distinguish measurement rank, local kinematic rank, geometric closure, and forward contact dynamics, and require closed-contact inverse kinematics with joint-limit/collision checks before anatomical or human-strategy inference. |
+| 2026-08-14 | 1.0.526 | Added the MT-E08 subject-scaled closed-contact inverse-kinematics screen: all 234 profile, grip-span, and phase configurations close with the club pose fixed, full achieved constraint rank, positive broad engineering-limit margins, positive coarse bounding-sphere clearances, and continuous solved paths. The contract preserves these as reduced-tree necessary conditions and advances the next gate to subject-specific anatomy and calibrated compliant forward contact. |
 | 2026-08-14 | 1.0.524 | Added trajectory-level synthetic qualification for the MT-E07 bilateral point-force estimator: 301 samples and 32 seeded trials exercise normalized noise, cross-talk, calibration residual, and contact-center migration controls; a manufactured net-wrench-only failure demonstrates that resultant closure does not identify allocation; and the paper, registries, claim audit, figure, evidence, tests, and handoff retain explicit full-device, distributed-contact, anatomical, and governed-human gates. |
 | 2026-08-14 | 1.0.523 | Added bilateral-wrench structural identifiability: the separated point-force map has rank five and one axial null mode, the axial-scalar augmentation has rank six, and the full bilateral six-axis map has rank six and nullity six under declared scaling and geometry controls. |
 | 2026-08-14 | 1.0.522 | Added a two-excitation typed-slack dynamic audit that separates contact disengagement, transmission dead zone, structural preload, biological series compliance, and control deadband; enforces mechanical passivity and closure where applicable; reports scaled local sensitivity and pairwise output separation; and retains delivery, anatomical, class-identification, intentionality, and human conclusions as open. |
@@ -3102,3 +3103,24 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Contact closure, local rank, measurement rank, and forward contact dynamics
   shall remain four distinct gates. None alone establishes passive anatomical
   contact, reduced neural timing demand, useful slack, or a human strategy.
+
+### F-8557.21: Subject-Scaled Closed-Contact Feasibility Screen
+
+- The solver shall hold all six club coordinates fixed while solving the 14
+  reduced body and arm coordinates against bilateral point-contact residuals.
+- Every sample shall report solver convergence, bilateral closure, achieved
+  constraint rank, broad engineering-limit margin, coarse nonadjacent-body
+  collision clearance, solver effort, and adjacent-sample configuration change.
+- An unreachable grip span shall be retained as an adverse control; numerical
+  solver termination alone shall not count as feasible contact.
+- Joint bounds shall be labeled engineering guards rather than clinical or
+  subject-specific ranges. Bounding-sphere clearance with declared connected
+  and intended-contact exemptions shall not be called anatomical collision
+  qualification.
+- The screen shall not establish contact force, work, passivity, timing demand,
+  self-correction, proximal-speed benefit, typed-slack benefit, human strategy,
+  or coaching advice.
+- Calibrated compliant forward-contact experiments shall initialize from the
+  closed states, replace screening geometry with subject-specific anatomy where
+  available, and retain conservation, null/reversal, killswitch, and
+  independent-engine gates.

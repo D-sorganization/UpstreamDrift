@@ -11,7 +11,13 @@ ARTICLE = ROOT / "docs/research/proximal_distal_energy_transfer"
 REGISTRY = ARTICLE / "data/claim_audit_registry.json"
 INVENTORY = ARTICLE / "data/claim_candidate_inventory.json"
 DATE = "2026-08-14"
-NEW_CLAIM_IDS = {"PD-CLAIM-260", "PD-CLAIM-261", "PD-CLAIM-262"}
+NEW_CLAIM_IDS = {
+    "PD-CLAIM-260",
+    "PD-CLAIM-261",
+    "PD-CLAIM-262",
+    "PD-CLAIM-263",
+    "PD-CLAIM-264",
+}
 ARTIFACTS = [
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.npz",
@@ -20,6 +26,13 @@ ARTIFACTS = [
     "scripts/research/proximal_distal_energy/run_subject_scaled_spatial_geometry.py",
     "scripts/research/proximal_distal_energy/make_subject_scaled_spatial_geometry_figures.py",
     "tests/research/test_subject_scaled_spatial_geometry.py",
+    "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
+    "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+    "docs/research/proximal_distal_energy_transfer/figures/fig_subject_scaled_closed_contact.pdf",
+    "scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py",
+    "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
+    "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
+    "tests/research/test_subject_scaled_closed_contact.py",
 ]
 
 
@@ -74,6 +87,7 @@ def _claim(
     status: str,
     boundary: str,
     falsifier: str,
+    model_domain: str = "Six deterministic de Leva design profiles, three grip spans, and 61 prescribed states in the reduced 20-coordinate spatial tree.",
 ) -> dict[str, Any]:
     return {
         "claim_id": claim_id,
@@ -87,7 +101,7 @@ def _claim(
             for candidate in candidates
         ],
         "evidence_artifacts": ARTIFACTS,
-        "model_domain": "Six deterministic de Leva design profiles, three grip spans, and 61 prescribed states in the reduced 20-coordinate spatial tree.",
+        "model_domain": model_domain,
         "uncertainty_boundary": boundary,
         "competing_explanations": [
             "prescribed state is not a closed-contact inverse-kinematics solution",
@@ -195,7 +209,27 @@ def main() -> None:
     next_gate = _find(
         candidates,
         "_ch06c_spatial_cross_formulation.qmd",
-        "This result narrows the next spatial experiment.",
+        "The next spatial experiment must now integrate",
+    )
+    closed_design = _find(
+        candidates,
+        "_ch06c_spatial_cross_formulation.qmd",
+        "The next registered rung solves rather than prescribes",
+    )
+    closed_result = _find(
+        candidates,
+        "_ch06c_spatial_cross_formulation.qmd",
+        "All 234 registered samples close both contacts.",
+    )
+    closed_boundary = _find(
+        candidates,
+        "_ch06c_spatial_cross_formulation.qmd",
+        "Those favorable checks remain a necessary-condition result.",
+    )
+    closed_synthesis = _find(
+        candidates,
+        "_ch08b_momentum_transfer_questions.qmd",
+        "The bounded inverse-kinematics follow-up separates",
     )
     conclusion = _find(
         candidates,
@@ -224,11 +258,31 @@ def main() -> None:
         _claim(
             "PD-CLAIM-262",
             [next_gate],
-            statement="Articulated spatial timing, recovery, and slack claims require bilateral closed-contact inverse kinematics, joint-limit and collision qualification, calibrated compliant forward contact, and independent-engine controls before interpretation.",
+            statement="Articulated spatial timing, recovery, and slack claims require calibrated compliant forward contact from closed states plus independent-engine controls before interpretation; reduced-tree inverse-kinematics screening alone is insufficient.",
             classification="articulated_spatial_completion_gate",
-            status="registered_and_not_executed",
-            boundary="This is a dependency-ordered falsification contract, not evidence that the missing articulated experiment will support the proposed mechanism.",
-            falsifier="A broader anatomical claim is published from a state that fails closure, limits, collision, conservation, or independent-engine checks.",
+            status="closed_contact_screen_complete_forward_contact_not_executed",
+            boundary="This is a dependency-ordered falsification contract, not evidence that compliant articulated dynamics will support the proposed mechanism.",
+            falsifier="A broader anatomical or transfer claim is published without calibrated contact, conservation, and independent-engine checks.",
+        ),
+        _claim(
+            "PD-CLAIM-263",
+            [abstract, closed_design, closed_result, closed_synthesis, conclusion],
+            statement="All 234 registered profile, grip-span, and phase configurations close both point contacts while holding the club pose fixed; every achieved constraint Jacobian has rank six, the worst closure residual is 1.16e-10 m, the minimum engineering-limit margin is 0.103 rad, and the minimum coarse collision clearance is 30.9 mm.",
+            classification="subject_scaled_closed_contact_inverse_kinematics_screen",
+            status="supported_in_declared_reduced_tree",
+            boundary="The joint bounds are broad engineering guards and collision uses bounding spheres with declared exemptions; neither is subject-specific anatomical qualification.",
+            falsifier="Regeneration loses any registered closure, rank, bound, collision, fixed-club, or continuity gate beyond numerical tolerance.",
+            model_domain="Six deterministic de Leva design profiles, three grip spans, and 13 phase samples in a reduced 20-coordinate tree with six fixed club coordinates.",
+        ),
+        _claim(
+            "PD-CLAIM-264",
+            [closed_boundary, next_gate, closed_synthesis, conclusion],
+            statement="Closed-contact inverse kinematics is a necessary geometric gate and does not establish anatomy, contact force, work, passivity, timing demand, self-correction, slack benefit, or human strategy.",
+            classification="closed_contact_inference_boundary",
+            status="explicitly_bounded",
+            boundary="Scapular glide, forearm pronation-supination, multi-axis wrist, fingers, distributed tissue contact, calibrated compliance, and participant measurements are absent.",
+            falsifier="A force, transfer, timing, slack, or human claim is attributed to this inverse-kinematics evidence alone.",
+            model_domain="Reduced-tree inverse-kinematics and screening outputs only.",
         ),
     ]
     registry["claims"].extend(claims)
@@ -238,26 +292,47 @@ def main() -> None:
                 registry["candidate_reviews"], str(candidate_id), claim["claim_id"]
             )
 
-    figure = _find(
-        candidates,
-        "_ch06c_spatial_cross_formulation.qmd",
+    for figure_prefix in (
         "![Subject-Scaled Spatial Contact-Geometry Audit]",
-    )
-    if not any(
-        review["candidate_id"] == figure["candidate_id"]
-        for review in registry["candidate_reviews"]
+        "![Subject-Scaled Bilateral Closed-Contact Feasibility]",
     ):
-        registry["candidate_reviews"].append(
-            {
-                "candidate_id": figure["candidate_id"],
-                "disposition": "editorial_or_navigation",
-                "claim_ids": [],
-                "rationale": "The figure include points to registered evidence but asserts no standalone scientific result.",
-                "reviewer": "Codex technical audit",
-                "last_verified_on": DATE,
-            }
+        figure = _find(
+            candidates,
+            "_ch06c_spatial_cross_formulation.qmd",
+            figure_prefix,
         )
+        if not any(
+            review["candidate_id"] == figure["candidate_id"]
+            for review in registry["candidate_reviews"]
+        ):
+            registry["candidate_reviews"].append(
+                {
+                    "candidate_id": figure["candidate_id"],
+                    "disposition": "editorial_or_navigation",
+                    "claim_ids": [],
+                    "rationale": "The figure include points to registered evidence but asserts no standalone scientific result.",
+                    "reviewer": "Codex technical audit",
+                    "last_verified_on": DATE,
+                }
+            )
 
+    completion_claim = next(
+        claim for claim in claims if claim["claim_id"] == "PD-CLAIM-262"
+    )
+    for review in registry["candidate_reviews"]:
+        if (
+            review["disposition"] == "material_claims_mapped"
+            and not review["claim_ids"]
+        ):
+            review["claim_ids"] = ["PD-CLAIM-262"]
+            candidate_id = str(review["candidate_id"])
+            completion_claim["candidate_ids"].append(candidate_id)
+            candidate = next(
+                item for item in candidates if item["candidate_id"] == candidate_id
+            )
+            completion_claim["source_locations"].append(
+                f"{candidate['source_path']}:{candidate['line_start']}"
+            )
     reviewed = {review["candidate_id"] for review in registry["candidate_reviews"]}
     remaining = [
         candidate
@@ -275,8 +350,8 @@ def main() -> None:
                 "last_verified_on": DATE,
             }
         )
-        claims[-1]["candidate_ids"].append(candidate["candidate_id"])
-        claims[-1]["source_locations"].append(
+        completion_claim["candidate_ids"].append(candidate["candidate_id"])
+        completion_claim["source_locations"].append(
             f"{candidate['source_path']}:{candidate['line_start']}"
         )
 
@@ -288,14 +363,20 @@ def main() -> None:
         "published_status": "prescribed_states_rejected_closed_contact_forward_test_open",
         "audit_state": "reviewed_as_adverse_model_structure_result",
     }
+    release_entries["subject_scaled_closed_contact_feasibility"] = {
+        "release_claim_key": "subject_scaled_closed_contact_feasibility",
+        "published_status": "reduced_tree_closed_contact_screen_passed_compliant_forward_test_open",
+        "audit_state": "reviewed_as_necessary_condition_result",
+    }
     registry["release_claim_inventory"] = list(release_entries.values())
     registry["paper"]["source_digest"] = inventory["source_digest"]
     registry["audit_scope"]["completion_status"] = "complete"
     registry["audit_scope"]["current_scope"] = (
         f"The complete {inventory['candidate_count']}-candidate paper inventory is "
         "adjudicated. The subject-scaled spatial audit retains its adverse "
-        "contact-closure result, favorable algebraic controls, and unexecuted "
-        "articulated forward-contact gate."
+        "prescribed-state contact-closure result and favorable algebraic controls. "
+        "The bounded closed-contact follow-up passes the declared reduced-tree "
+        "screen while calibrated articulated forward contact remains unexecuted."
     )
     REGISTRY.write_text(json.dumps(registry, indent=2) + "\n", encoding="utf-8")
 
