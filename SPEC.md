@@ -3,9 +3,10 @@
 ## Current Scientific Audit State (2026-08-14)
 
 Epic #8557 has completed the current paper-wide candidate adjudication contract:
-975/975 candidates, 258 atomic claims, and zero unadjudicated entries. The
-trajectory-level bilateral point-force sensor qualification is included while
-retaining its synthetic scope. This status does not waive
+982/982 candidates, 261 atomic claims, and zero unadjudicated entries. The
+trajectory-level bilateral point-force sensor qualification and subject-scaled
+spatial contact-closure audit are included while retaining their synthetic and
+prescribed-state scopes. This status does not waive
 open empirical or model-fidelity gates; #8556 remains blocked on governed human
 bilateral six-axis grip-wrench acquisition, and all new scientific content must
 regenerate the inventory and reopen adjudication until every new candidate is
@@ -50,7 +51,7 @@ reviewed.
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.524 |
+| **Spec Version** | 1.0.525 |
 | **Last Spec Update** | 2026-08-14 |
 
 ## 2. Purpose & Mission
@@ -81,7 +82,18 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ## 4. Architecture Overview
 
 ### Recent Spec Updates
+
 - `src/shared/python/club_data/loader.py`: Replaced `.iterrows()` with `df.to_dict('records')` (spec-exempt: micro-optimization)
+
+- **2026-08-14** - Added MT-E08 subject-scaled spatial contact-closure audit.
+  Six deterministic de Leva engineering profiles, three grip spans, and 61
+  prescribed states per case expose hand-to-grip miss distances of
+  0.171--0.616 m, with no sample meeting the registered 5 mm tolerance. Every
+  local bilateral contact Jacobian still has rank six, demonstrating that local
+  correction rank does not establish geometric closure. Closed-contact inverse
+  kinematics with joint-limit and collision checks is now a precondition for
+  compliant forward-contact, anatomical, passive-timing, slack, or human-
+  strategy claims.
 
 - **2026-08-14** - Qualified the MT-E07 bilateral point-force estimator over
   deterministic synthetic trajectories with normalized noise and cross-talk,
@@ -2221,6 +2233,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-14 | 1.0.525 | Added the MT-E08 subject-scaled spatial contact-closure audit: six deterministic de Leva engineering profiles, three grip spans, and 61 states per case fail the 5 mm bilateral closure tolerance despite full local contact-Jacobian rank. The governed evidence, release claims, and scientific boundary now distinguish measurement rank, local kinematic rank, geometric closure, and forward contact dynamics, and require closed-contact inverse kinematics with joint-limit/collision checks before anatomical or human-strategy inference. |
 | 2026-08-14 | 1.0.524 | Added trajectory-level synthetic qualification for the MT-E07 bilateral point-force estimator: 301 samples and 32 seeded trials exercise normalized noise, cross-talk, calibration residual, and contact-center migration controls; a manufactured net-wrench-only failure demonstrates that resultant closure does not identify allocation; and the paper, registries, claim audit, figure, evidence, tests, and handoff retain explicit full-device, distributed-contact, anatomical, and governed-human gates. |
 | 2026-08-14 | 1.0.523 | Added bilateral-wrench structural identifiability: the separated point-force map has rank five and one axial null mode, the axial-scalar augmentation has rank six, and the full bilateral six-axis map has rank six and nullity six under declared scaling and geometry controls. |
 | 2026-08-14 | 1.0.522 | Added a two-excitation typed-slack dynamic audit that separates contact disengagement, transmission dead zone, structural preload, biological series compliance, and control deadband; enforces mechanical passivity and closure where applicable; reports scaled local sensitivity and pairwise output separation; and retains delivery, anatomical, class-identification, intentionality, and human conclusions as open. |
@@ -3071,3 +3084,21 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   Memoryless backlash and reduced biological-compliance surrogates shall be
   named as such, and no scalar constitutive screen shall establish delivery,
   intentionality, anatomical, injury, coaching, or human benefit.
+
+### F-8557.20: Subject-Scaled Spatial Contact-Closure Audit
+
+- Subject scaling shall use declared deterministic engineering profiles and
+  shall not be represented as a participant sample or population distribution.
+- Bilateral geometric closure shall be tested independently of local contact-
+  constraint rank. A full-row-rank Jacobian at an open state shall not be
+  represented as anatomical contact feasibility.
+- The audit shall retain hand-to-grip distances, a preregistered closure
+  tolerance, local singular values and conditioning, point-force wrench rank,
+  axial augmentation rank, and grip-span/couple scaling in machine-readable
+  evidence with deterministic replay tests.
+- Only trajectories passing subject-scaled bilateral closed-contact inverse
+  kinematics, joint-limit checks, and collision checks may seed calibrated
+  compliant forward-contact experiments.
+- Contact closure, local rank, measurement rank, and forward contact dynamics
+  shall remain four distinct gates. None alone establishes passive anatomical
+  contact, reduced neural timing demand, useful slack, or a human strategy.

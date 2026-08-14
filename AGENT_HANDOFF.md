@@ -21,10 +21,13 @@ in git and GitHub.
   manual Google reauthentication. The 2026-08-14 token check failed closed;
   credentials and authentication dialogs were not automated.
 
-## Active Subject-Scaled Spatial-Geometry Slice
+## Subject-Scaled Spatial-Geometry Slice
 
-- Branch `research/8557-spatial-geometry` adds MT-E08 and advances Q2, Q4, Q5,
-  and Q7 without claiming an anatomically feasible or human result.
+- PR #8637 merged MT-E08 as
+  `04e03b9248dc483737f7e96b7dc0523e63860284` and advances Q2, Q4, Q5, and Q7
+  without claiming an anatomically feasible or human result. Branch
+  `docs/8557-spatial-spec` records the corresponding SPEC contract required by
+  the separate freshness gate.
 - Six deterministic de Leva engineering profiles (female and male at 1.55,
   1.75, and 1.95 m) are evaluated at three grip spans and 61 states per case.
 - Anatomical hand points miss the prescribed grip contacts by 0.171--0.616 m
