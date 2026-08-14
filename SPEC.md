@@ -49,7 +49,7 @@ reviewed.
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.516 |
+| **Spec Version** | 1.0.517 |
 | **Last Spec Update** | 2026-08-13 |
 
 ## 2. Purpose & Mission
@@ -3005,6 +3005,10 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - The article shall expose the current answer, unresolved boundary, and
   decisive falsification path for every registered momentum-transfer question;
   project-management labels shall not appear as scientific conclusions.
+- Slack mechanisms shall be implemented and tested one class at a time with
+  distinct engagement, transmission, elastic-storage, and dissipation states.
+  The scalar constitutive screen shall not be represented as delivery,
+  physiological, or human-strategy evidence.
 - The Q1--Q7 human registration shall use participant holdout, synchronized
   bilateral six-axis grip wrenches, frozen nulls and adverse margins,
   alternative-frame/filter/synchronization sensitivities, and identity-safe

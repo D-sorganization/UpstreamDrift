@@ -131,8 +131,8 @@
       "bytes": 2789
     },
     "docs/research/proximal_distal_energy_transfer/DATA_DICTIONARY.md": {
-      "sha256": "fe8fe8bd557fc14f97c0c43e2269808f643c4cc29324ca9de943b1ea48e4295b",
-      "bytes": 6983
+      "sha256": "6e2704ceeb00e576c75ea6e3e4becf2f5586a3086ac9bc73f00063029edf6709",
+      "bytes": 7223
     },
     "docs/research/proximal_distal_energy_transfer/EVIDENCE_SCHEMA_V2.md": {
       "sha256": "43e5e9728e63f6c22bed3874c5149976df7b50ffbf20d1e28104033b8a3adc7e",
@@ -613,6 +613,10 @@
     "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.npz": {
       "sha256": "084b49ba093fe8a713e2d98b5fab24bebd7f352fe65a03e1dd0ed29cf1413239",
       "bytes": 2163151
+    },
+    "docs/research/proximal_distal_energy_transfer/data/typed_slack_study.json": {
+      "sha256": "a80186b5fa861c26f02454bd4c87905145e6e9cf3ece75c8194c625af6e769b5",
+      "bytes": 2359
     },
     "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_stability_audit.json": {
       "sha256": "38da966541c76887cee137e0e837bad23b1612277c94990258f487ff6ae2065f",
@@ -1594,6 +1598,10 @@
       "sha256": "89d25ea5d88a18f6d7a5f2638c3a314a2698fbd129dae6cc583e8b5c5f39f8aa",
       "bytes": 21885
     },
+    "scripts/research/proximal_distal_energy/run_typed_slack_study.py": {
+      "sha256": "11828371ac34cc6584557c169e8d5f0483de7d2f5e4e2b9547d72cb4e3204ba0",
+      "bytes": 2829
+    },
     "scripts/research/proximal_distal_energy/run_uncertainty_control_study.py": {
       "sha256": "7119232050483321d1761a1b9d47ee5bdf90c3abc8ddb58f1e385271df5bf02f",
       "bytes": 19194
@@ -1653,6 +1661,10 @@
     "scripts/research/proximal_distal_energy/two_hand_wrench.py": {
       "sha256": "67b49e4fff99e9615ec9985372b1d34e81b483dee1ffa58dcdf3c6f9c3b2ebf8",
       "bytes": 5545
+    },
+    "scripts/research/proximal_distal_energy/typed_slack.py": {
+      "sha256": "ac9e0efbce8e0b218c46e64ba7b7c447a10162deefe0dce8d50cc0cfcb2f5d13",
+      "bytes": 4986
     },
     "scripts/research/proximal_distal_energy/uncertainty_control.py": {
       "sha256": "443012e55b6cb1dd23bcd3595efbe68da07ae120735e8ee756085ac1f7e883e9",
