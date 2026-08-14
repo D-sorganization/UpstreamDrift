@@ -1,6 +1,6 @@
 # BunkerShot3D pro-grade upgrade — state ledger
 
-**Read this first on resumption.** Updated 2026-08-14 (13:32 UTC).
+**Read this first on resumption.** Updated 2026-08-14 (18:58 UTC).
 
 Epic: https://github.com/D-sorganization/UpstreamDrift/issues/8607
 
@@ -87,7 +87,7 @@ Follow-ups the merges created:
 | ----- | ----------------------------------------------- | --------------------------- |
 | #8611 | W4 **DRFT solver** — the default F0 tier        | **merged** (`1c857759c`)    |
 | #8613 | W6 the ball + `SwingBallFlightPipeline` handoff | **merged** (`577673cf8`)    |
-| #8614 | W7 designer metrics                             | not started                 |
+| #8614 | W7 designer metrics                             | **PR #8645** (CI running)   |
 | #8616 | W9 V&V suite + credibility statement            | not started                 |
 | #8618 | W11 designer workbench GUI                      | not started                 |
 | #8608 | W1 foundations (value objects, units)           | re-scope before starting    |
@@ -98,6 +98,20 @@ Follow-ups the merges created:
 - `src/bunkershot3d/solver/envelope.py` — validity envelope (Fr, I, d/L) enforcement
 - `src/bunkershot3d/solver/drft.py` — complete F0 solver with flat_plate_intrusion
 - 50 new tests, smoke test passes (~1550 N for 20×80 mm sole at 25 m/s)
+
+**#8614 (designer metrics) implemented.** PR #8645 adds:
+- `src/bunkershot3d/metrics/trajectory.py` — TrajectoryMetrics, DivotProfile, dig/skid index,
+  depth trace, entry/max/exit points
+- `src/bunkershot3d/metrics/energy.py` — EnergyPartition, club KE in/out/lost, energy-to-sand,
+  energy-to-ball, fraction accounting
+- `src/bunkershot3d/metrics/force.py` — ForceMetrics, peak/mean force, peak moment,
+  peak/mean deceleration, contact duration
+- `src/bunkershot3d/metrics/twist.py` — TwistMetrics, shaft-axis moment, CG moment, impulse,
+  net twist direction (opening/closing)
+- `src/bunkershot3d/metrics/forgiveness.py` — ForgivenessMetrics, SensitivityGradient,
+  finite-difference sensitivity analysis, forgiveness index
+- 42 new tests covering all metric categories
+- Computed from HDF5 result artifacts for fidelity-tier-agnostic (F0–F3) analysis
 
 ## How to resume
 
