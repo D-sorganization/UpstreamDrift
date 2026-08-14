@@ -207,6 +207,53 @@ matches peak interface force within 10%; peak-force differences are 34--46%.
 This is an adverse model counterexample under approximate work matching, not a
 load-matched causal estimate or a human optimum.
 
+### Joint Work- and Load-Matched Forward Screen
+
+The load confound is testable rather than merely acknowledged. A follow-on
+finite factorial fixes both proximal-drive cut and wrist-release time at 0.14
+s, then crosses six early proximal torques, four post-cut proximal torques,
+three opposing wrist torques, and three post-release wrist torques. All 216
+attempts remain in the record; 148 satisfy the same club-vertical impact
+definition. Candidate pairs must differ by at least 1.5 rad/s in proximal rate
+at release while matching net actuator work and positive actuator work within
+5% and peak modeled interface force within 10%.
+
+The primary screen contains 109 admissible candidate pairs. To prevent one
+trajectory from being counted repeatedly, a frozen greedy rule selects 46
+disjoint pairs, ordered first by the sum of the three relative mismatches and
+then by larger rate separation. The higher-rate member is faster in 20 pairs
+and slower in 26. Its speed difference ranges from -3.85 to +1.45 m/s, with a
+mean of -0.13 m/s. Thus, load matching removes the uniformly adverse result of
+the earlier eight reused work-only pairs, but it does not reveal a monotonic
+benefit. It exposes a mixed response: rate is one state coordinate within a
+coupled control and geometry history.
+
+![Independent primary matches retain favorable and adverse higher-rate
+outcomes. The sensitivity panel reports the mean higher-minus-lower rate speed
+difference and the number of favorable pairs over all independent pairs in
+each tolerance cell.](data/joint_matched_proximal_rate/figures/fig_joint_matched_proximal_rate.pdf){#fig-joint-matched-proximal-rate width=100%}
+
+| Work Tolerance | Load Tolerance | Independent Pairs | Higher Rate Faster | Higher Rate Slower | Mean Speed Difference (m/s) |
+|---:|---:|---:|---:|---:|---:|
+| 2.5% | 5% | 16 | 5 | 11 | -0.216 |
+| 2.5% | 10% | 27 | 11 | 16 | -0.105 |
+| 2.5% | 15% | 32 | 11 | 21 | -0.493 |
+| 5% | 5% | 30 | 11 | 19 | -0.274 |
+| 5% | 10% | 46 | 20 | 26 | -0.127 |
+| 5% | 15% | 49 | 22 | 27 | -0.115 |
+| 7.5% | 5% | 33 | 13 | 20 | -0.235 |
+| 7.5% | 10% | 49 | 23 | 26 | -0.060 |
+| 7.5% | 15% | 53 | 25 | 28 | -0.029 |
+
+Every tolerance cell retains both signs, and every cell has more slower than
+faster higher-rate members. This sign mixture is the important result; the
+small negative means are not estimates of a human effect. Programs can differ
+in several actuator commands, greedy matching is not a globally optimal
+assignment, and valid-impact conditioning remains a selection. A decisive
+next test must independently intervene on the achieved rate or acceleration,
+match the full delivery state and work/load ledgers, and repeat the contrast
+in spatial, subject-scaled, and held-out human tiers.
+
 ![Registered impact speed across the complete timing grid. An X denotes a
 program that fails to reach club vertical inside the declared delivery
 window.](data/shoulder_velocity_transfer/figures/fig_shoulder_velocity_strategy_grid.pdf){#fig-shoulder-velocity-strategy-grid width=100%}
@@ -458,8 +505,8 @@ declared before examining outcomes.
 
 The committed evidence contains 126 velocity cases (90 across five phase
 labels and two rate-matching rules, plus 36 energy-matched states across four
-nonzero-energy phases), 45 identical-state proximal-acceleration cases, and all 60 attempted
-trajectory programs. The machine-readable JSON files record every row, phase
+nonzero-energy phases), 45 identical-state proximal-acceleration cases, all 60
+timing-grid programs, and all 216 joint-matching programs. The machine-readable JSON files record every row, phase
 summary, closure test, invalid-impact attempt, Pareto membership,
 model-tier statement, falsifier, limitation, and dependency hash; paired NPZ
 files preserve the numerical arrays. Repeated generation is byte-identical for
@@ -468,6 +515,7 @@ both JSON and NPZ artifacts. The pointwise generating scripts are
 `run_shoulder_velocity_transfer_study.py`, and
 `make_shoulder_velocity_transfer_figures.py`. The trajectory scripts are
 `shoulder_velocity_strategy_search.py`,
+`run_joint_matched_proximal_rate_study.py`,
 `run_shoulder_velocity_strategy_study.py`, and
 `make_shoulder_velocity_strategy_figures.py`.
 

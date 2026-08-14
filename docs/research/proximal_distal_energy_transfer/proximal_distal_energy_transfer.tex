@@ -435,20 +435,23 @@ proximal acceleration raises interface power while reducing club angular
 acceleration before impact. A separate 60-program grid is more
 adversarial: among 26 valid impacts, release-state proximal velocity
 correlates negatively with impact speed and positively with negative
-grip work. Eight approximate actuator- work matches all favor the
-lower-rate member, although none also matches interface load. The
+grip work. Eight reused approximate actuator-work matches initially
+favor the lower-rate member but retain a load confound. A follow-on
+216-program common-time screen resolves that confound: 46 independent
+work/load-matched pairs contain 20 favorable and 26 adverse higher-rate
+outcomes, with both signs retained in all nine tolerance cells. The
 combined result rejects proximal speed as a standalone release rule
-while retaining the joint work/load test as open. The resulting
-rotating-base, two-hand tier uses finite torso inertia, two closed
-arm--grip constraints, separated reactions, and a compliant distal club.
-Its 18-program matched- state grid finds that higher initial torso rate
-can accompany greater delivery speed but does not uniformly reduce
-braking work; exact torso, arm, and wrist killswitches are nonmonotonic.
-This remains a planar mechanism result. A frozen participant-held-out
-bilateral-wrench protocol defines the human falsifier, but no governed
-human outcome is available. References, analysis code, machine-readable
-results, and provenance are available with the document for independent
-inspection and reuse.
+while retaining full-delivery-state and human tests as open. The
+resulting rotating-base, two-hand tier uses finite torso inertia, two
+closed arm--grip constraints, separated reactions, and a compliant
+distal club. Its 18-program matched- state grid finds that higher
+initial torso rate can accompany greater delivery speed but does not
+uniformly reduce braking work; exact torso, arm, and wrist killswitches
+are nonmonotonic. This remains a planar mechanism result. A frozen
+participant-held-out bilateral-wrench protocol defines the human
+falsifier, but no governed human outcome is available. References,
+analysis code, machine-readable results, and provenance are available
+with the document for independent inspection and reuse.
 \end{abstract}
 
 \renewcommand*\contentsname{Table of contents}
@@ -459,7 +462,7 @@ inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, opacitybacktitle=0.6, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, colback=white, toptitle=1mm, bottomtitle=1mm, leftrule=.75mm, titlerule=0mm, colframe=quarto-callout-note-color-frame, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, bottomrule=.15mm, left=2mm, breakable, rightrule=.15mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, left=2mm, toptitle=1mm, colback=white, leftrule=.75mm, rightrule=.15mm, bottomrule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, colbacktitle=quarto-callout-note-color!10!white, colframe=quarto-callout-note-color-frame, coltitle=black, toprule=.15mm, arc=.35mm, bottomtitle=1mm, opacitybacktitle=0.6, titlerule=0mm, opacityback=0, breakable]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -3223,6 +3226,92 @@ peak-force differences are 34--46\%. This is an adverse model
 counterexample under approximate work matching, not a load-matched
 causal estimate or a human optimum.
 
+\subsection{Joint Work- and Load-Matched Forward
+Screen}\label{joint-work--and-load-matched-forward-screen}
+
+The load confound is testable rather than merely acknowledged. A
+follow-on finite factorial fixes both proximal-drive cut and
+wrist-release time at 0.14 s, then crosses six early proximal torques,
+four post-cut proximal torques, three opposing wrist torques, and three
+post-release wrist torques. All 216 attempts remain in the record; 148
+satisfy the same club-vertical impact definition. Candidate pairs must
+differ by at least 1.5 rad/s in proximal rate at release while matching
+net actuator work and positive actuator work within 5\% and peak modeled
+interface force within 10\%.
+
+The primary screen contains 109 admissible candidate pairs. To prevent
+one trajectory from being counted repeatedly, a frozen greedy rule
+selects 46 disjoint pairs, ordered first by the sum of the three
+relative mismatches and then by larger rate separation. The higher-rate
+member is faster in 20 pairs and slower in 26. Its speed difference
+ranges from -3.85 to +1.45 m/s, with a mean of -0.13 m/s. Thus, load
+matching removes the uniformly adverse result of the earlier eight
+reused work-only pairs, but it does not reveal a monotonic benefit. It
+exposes a mixed response: rate is one state coordinate within a coupled
+control and geometry history.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{data/joint_matched_proximal_rate/figures/fig_joint_matched_proximal_rate.pdf}
+
+}
+
+\caption{\label{fig-joint-matched-proximal-rate}Independent primary
+matches retain favorable and adverse higher-rate outcomes. The
+sensitivity panel reports the mean higher-minus-lower rate speed
+difference and the number of favorable pairs over all independent pairs
+in each tolerance cell.}
+
+\end{figure}%
+
+\begin{longtable}[]{@{}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedleft
+Work Tolerance
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Load Tolerance
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Independent Pairs
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Higher Rate Faster
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Higher Rate Slower
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Mean Speed Difference (m/s)
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+2.5\% & 5\% & 16 & 5 & 11 & -0.216 \\
+2.5\% & 10\% & 27 & 11 & 16 & -0.105 \\
+2.5\% & 15\% & 32 & 11 & 21 & -0.493 \\
+5\% & 5\% & 30 & 11 & 19 & -0.274 \\
+5\% & 10\% & 46 & 20 & 26 & -0.127 \\
+5\% & 15\% & 49 & 22 & 27 & -0.115 \\
+7.5\% & 5\% & 33 & 13 & 20 & -0.235 \\
+7.5\% & 10\% & 49 & 23 & 26 & -0.060 \\
+7.5\% & 15\% & 53 & 25 & 28 & -0.029 \\
+\end{longtable}
+
+Every tolerance cell retains both signs, and every cell has more slower
+than faster higher-rate members. This sign mixture is the important
+result; the small negative means are not estimates of a human effect.
+Programs can differ in several actuator commands, greedy matching is not
+a globally optimal assignment, and valid-impact conditioning remains a
+selection. A decisive next test must independently intervene on the
+achieved rate or acceleration, match the full delivery state and
+work/load ledgers, and repeat the contrast in spatial, subject-scaled,
+and held-out human tiers.
+
 \begin{figure}
 
 \centering{
@@ -3585,16 +3674,17 @@ Boundary}\label{reproducibility-and-claim-boundary}
 The committed evidence contains 126 velocity cases (90 across five phase
 labels and two rate-matching rules, plus 36 energy-matched states across
 four nonzero-energy phases), 45 identical-state proximal-acceleration
-cases, and all 60 attempted trajectory programs. The machine-readable
-JSON files record every row, phase summary, closure test, invalid-impact
-attempt, Pareto membership, model-tier statement, falsifier, limitation,
-and dependency hash; paired NPZ files preserve the numerical arrays.
-Repeated generation is byte-identical for both JSON and NPZ artifacts.
-The pointwise generating scripts are
+cases, all 60 timing-grid programs, and all 216 joint-matching programs.
+The machine-readable JSON files record every row, phase summary, closure
+test, invalid-impact attempt, Pareto membership, model-tier statement,
+falsifier, limitation, and dependency hash; paired NPZ files preserve
+the numerical arrays. Repeated generation is byte-identical for both
+JSON and NPZ artifacts. The pointwise generating scripts are
 \texttt{shoulder\_velocity\_transfer.py},
 \texttt{run\_shoulder\_velocity\_transfer\_study.py}, and
 \texttt{make\_shoulder\_velocity\_transfer\_figures.py}. The trajectory
 scripts are \texttt{shoulder\_velocity\_strategy\_search.py},
+\texttt{run\_joint\_matched\_proximal\_rate\_study.py},
 \texttt{run\_shoulder\_velocity\_strategy\_study.py}, and
 \texttt{make\_shoulder\_velocity\_strategy\_figures.py}.
 
@@ -10696,13 +10786,13 @@ decisively. & Larger attraction-region sweeps, adverse external loads,
 independently identified observers, and human perturbations without
 hidden load-cost increase. \\
 Should proximal velocity be maximized? & No general rule is supported.
-Exact equal-energy rate sweeps are nonmonotonic, the large pre-impact
-slope nearly vanishes, and eight approximately work-matched forward
-pairs favor lower rate. An identical-state acceleration sweep reverses
-the club-acceleration response before impact. & Jointly
-work/load/state-matched forward rate and acceleration trajectories,
-extended across spatial and subject-scaled models and held-out
-participants. \\
+Exact equal-energy rate sweeps are nonmonotonic. A 216-program
+common-time screen yields 46 disjoint work/load-matched pairs with 20
+favorable and 26 adverse higher-rate outcomes. An identical-state
+acceleration sweep also reverses the club-acceleration response before
+impact. & Full-delivery-state-matched forward rate and acceleration
+interventions, extended across spatial and subject-scaled models and
+held-out participants. \\
 Is slack beneficial or necessary? & Unanswered until the mechanism is
 named. Contact loss, backlash, elastic preload, muscle-tendon series
 compliance, and control deadband are not interchangeable. & One slack
@@ -10813,15 +10903,19 @@ than forcing a monotonic fit. The exact energy-matched state sweep
 retains 36 later-phase cases with maximum energy residual
 \(5.7\times10^{-14}\) J; no phase is monotonic, and the pre-impact
 fitted slope falls from 283.74 to 5.70 W/(rad/s) relative to the
-co-varying-energy rule. Eight approximate work-matched forward pairs all
-favor the lower-rate member by 4.31--9.28 m/s, but the absence of any
-simultaneously load-matched pair leaves the joint causal comparison
-open. The separate 45-case acceleration intervention holds the entire
-state and distal torque fixed. Before impact, increasing proximal
-acceleration raises interface power yet reduces club angular
-acceleration; the required proximal torque spans -69 to +189 N m.
-Acceleration is therefore neither a free input nor a monotonic
-substitute for proximal rate.
+co-varying-energy rule. The initial eight reused work-only pairs favor
+the lower-rate member by 4.31--9.28 m/s. The follow-on 216-program
+common-time factorial resolves that load confound: its primary
+thresholds produce 109 candidate and 46 disjoint work/load-matched
+pairs, of which 20 higher-rate members are faster and 26 are slower. All
+nine tolerance cells retain both signs. This mixed result rejects a
+monotonic rate rule but does not isolate a causal rate effect because
+actuator commands and full delivery state differ. The separate 45-case
+acceleration intervention holds the entire state and distal torque
+fixed. Before impact, increasing proximal acceleration raises interface
+power yet reduces club angular acceleration; the required proximal
+torque spans -69 to +189 N m. Acceleration is therefore neither a free
+input nor a monotonic substitute for proximal rate.
 
 \section{Five Distinct Slack
 Hypotheses}\label{five-distinct-slack-hypotheses}

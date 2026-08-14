@@ -2,14 +2,14 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "886ce8314ea15568e8a46c53b72cf69c315b76518e88e54fb59e8964f2e451fb",
+    "source_digest": "2a9d7eabf6d3c5c1a70792f15dd24dc81af8aba6439e965fbb24f28f2da6e737",
     "baseline_commit": "13ea6a69585a42dc1db4b3959440ed95787c9779"
   },
   "audit_scope": {
     "completion_status": "complete",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "The complete 945-candidate paper inventory is adjudicated. The critical-question chapter maps fifteen candidates to seven bounded claims and retains all human-data gates."
+    "current_scope": "The complete 951-candidate paper inventory is adjudicated. The critical-question chapter maps fifteen candidates to seven bounded claims and retains all human-data gates."
   },
   "dependencies": [
     {
@@ -8010,7 +8010,7 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-52fe40f02705ce0f",
+      "candidate_id": "PD-CAND-1dc21a34f8948a6c",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-007",
@@ -9183,6 +9183,66 @@
       "last_verified_on": "2026-08-13"
     },
     {
+      "candidate_id": "PD-CAND-7ef9fd0350f12ed6",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-250"
+      ],
+      "rationale": "This passage states or bounds a registered proximal rate or acceleration result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-8e92bd6af92dbae4",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-250"
+      ],
+      "rationale": "This passage states or bounds a registered proximal rate or acceleration result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-7af97637fd53ac41",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-250"
+      ],
+      "rationale": "This passage states or bounds a registered proximal rate or acceleration result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-b2316fcea3ebf810",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-250"
+      ],
+      "rationale": "This passage states or bounds a registered proximal rate or acceleration result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-a484636d860faeed",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-250"
+      ],
+      "rationale": "This passage states or bounds a registered proximal rate or acceleration result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-75e89b0e289f4402",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-250"
+      ],
+      "rationale": "This passage states or bounds a registered proximal rate or acceleration result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
       "candidate_id": "PD-CAND-54f75367bf9c0ac8",
       "disposition": "material_claims_mapped",
       "claim_ids": [
@@ -9256,7 +9316,7 @@
       "candidate_id": "PD-CAND-91a57be070bd4382",
       "disposition": "material_claims_mapped",
       "claim_ids": [
-        "PD-CLAIM-235"
+        "PD-CLAIM-236"
       ],
       "rationale": "This passage states or bounds a registered proximal rate or acceleration result.",
       "reviewer": "Codex technical audit",
@@ -9443,7 +9503,7 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-d349c382ce3046d0",
+      "candidate_id": "PD-CAND-60bdc4b3f88805d5",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-092"
@@ -9493,7 +9553,7 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-d7b8099ed0f0a0d8",
+      "candidate_id": "PD-CAND-2de87995dfa0e8c9",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-243"
@@ -9573,7 +9633,7 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-25b5691f2031a8ea",
+      "candidate_id": "PD-CAND-f68d06799fe605bf",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-247"
@@ -9804,7 +9864,7 @@
         "PD-CAND-3c12b7e2054e4237",
         "PD-CAND-eca9e7374e7231c3",
         "PD-CAND-61e9db608ffdbb62",
-        "PD-CAND-52fe40f02705ce0f",
+        "PD-CAND-1dc21a34f8948a6c",
         "PD-CAND-26221cfd905990fb"
       ],
       "statement": "Under commonly used segment and angular-velocity definitions, proximal-to-distal peak ordering is common in sampled skilled golfers but is not universal or measurement-definition invariant.",
@@ -9847,7 +9907,7 @@
       "candidate_ids": [
         "PD-CAND-96f95833c562cb11",
         "PD-CAND-efa294cfd5f1828d",
-        "PD-CAND-52fe40f02705ce0f",
+        "PD-CAND-1dc21a34f8948a6c",
         "PD-CAND-26221cfd905990fb"
       ],
       "statement": "The temporal order of segment angular-velocity peaks is not, by itself, a measurement of mechanical energy transfer.",
@@ -18274,7 +18334,7 @@
       "claim_id": "PD-CLAIM-214",
       "candidate_ids": [
         "PD-CAND-c10fdeb10b48eb9b",
-        "PD-CAND-52fe40f02705ce0f",
+        "PD-CAND-1dc21a34f8948a6c",
         "PD-CAND-f405c095d850ac4f",
         "PD-CAND-82b5634777708c30",
         "PD-CAND-52a2c44f84a0278d",
@@ -19599,7 +19659,9 @@
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.json",
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.npz",
         "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.json",
-        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz"
+        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate/figures/fig_joint_matched_proximal_rate.pdf"
       ],
       "model_domain": "Declared planar pointwise and forward mechanism tiers, with a separate rotating-base bilateral tier.",
       "uncertainty_boundary": "No anatomical, subject-scaled, causal human, or universal coaching inference is supported.",
@@ -19643,7 +19705,9 @@
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.json",
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.npz",
         "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.json",
-        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz"
+        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate/figures/fig_joint_matched_proximal_rate.pdf"
       ],
       "model_domain": "Declared planar pointwise and forward mechanism tiers, with a separate rotating-base bilateral tier.",
       "uncertainty_boundary": "No anatomical, subject-scaled, causal human, or universal coaching inference is supported.",
@@ -19689,7 +19753,9 @@
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.json",
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.npz",
         "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.json",
-        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz"
+        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate/figures/fig_joint_matched_proximal_rate.pdf"
       ],
       "model_domain": "Declared planar pointwise and forward mechanism tiers, with a separate rotating-base bilateral tier.",
       "uncertainty_boundary": "No anatomical, subject-scaled, causal human, or universal coaching inference is supported.",
@@ -19741,7 +19807,9 @@
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.json",
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.npz",
         "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.json",
-        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz"
+        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate/figures/fig_joint_matched_proximal_rate.pdf"
       ],
       "model_domain": "Declared planar pointwise and forward mechanism tiers, with a separate rotating-base bilateral tier.",
       "uncertainty_boundary": "No anatomical, subject-scaled, causal human, or universal coaching inference is supported.",
@@ -19787,7 +19855,9 @@
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.json",
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.npz",
         "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.json",
-        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz"
+        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate/figures/fig_joint_matched_proximal_rate.pdf"
       ],
       "model_domain": "Declared planar pointwise and forward mechanism tiers, with a separate rotating-base bilateral tier.",
       "uncertainty_boundary": "No anatomical, subject-scaled, causal human, or universal coaching inference is supported.",
@@ -19831,7 +19901,9 @@
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.json",
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.npz",
         "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.json",
-        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz"
+        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate/figures/fig_joint_matched_proximal_rate.pdf"
       ],
       "model_domain": "Declared planar pointwise and forward mechanism tiers, with a separate rotating-base bilateral tier.",
       "uncertainty_boundary": "No anatomical, subject-scaled, causal human, or universal coaching inference is supported.",
@@ -19873,7 +19945,9 @@
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.json",
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.npz",
         "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.json",
-        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz"
+        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate/figures/fig_joint_matched_proximal_rate.pdf"
       ],
       "model_domain": "Declared planar pointwise and forward mechanism tiers, with a separate rotating-base bilateral tier.",
       "uncertainty_boundary": "No anatomical, subject-scaled, causal human, or universal coaching inference is supported.",
@@ -19899,14 +19973,26 @@
     {
       "claim_id": "PD-CLAIM-250",
       "candidate_ids": [
-        "PD-CAND-c241d67eb2d74542"
+        "PD-CAND-c241d67eb2d74542",
+        "PD-CAND-7ef9fd0350f12ed6",
+        "PD-CAND-8e92bd6af92dbae4",
+        "PD-CAND-7af97637fd53ac41",
+        "PD-CAND-b2316fcea3ebf810",
+        "PD-CAND-a484636d860faeed",
+        "PD-CAND-75e89b0e289f4402"
       ],
-      "statement": "Eight approximate net- and positive-actuator-work-matched pairs all favor the lower-rate member, but reused pairs and the absence of a simultaneously load-matched pair prevent a joint causal estimate.",
+      "statement": "The initial reused work-only pairs are adverse, while the 216-program common-time screen yields 46 disjoint work/load-matched pairs with mixed higher-rate outcomes across all nine tolerance cells; neither screen identifies a causal human effect.",
       "classification": "mechanistic_model_evidence_and_boundary",
       "published_status": "supported_at_declared_synthetic_tiers",
       "audit_status": "evidence_boundary_and_falsification_contract_checked",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:201"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:201",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:212",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:221",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:231",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:236",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:238",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:248"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd",
@@ -19915,7 +20001,9 @@
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.json",
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.npz",
         "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.json",
-        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz"
+        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate/figures/fig_joint_matched_proximal_rate.pdf"
       ],
       "model_domain": "Declared planar pointwise and forward mechanism tiers, with a separate rotating-base bilateral tier.",
       "uncertainty_boundary": "No anatomical, subject-scaled, causal human, or universal coaching inference is supported.",
@@ -19949,8 +20037,8 @@
       "published_status": "supported_at_declared_synthetic_tiers",
       "audit_status": "evidence_boundary_and_falsification_contract_checked",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:210",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:214"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:257",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:261"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd",
@@ -19959,7 +20047,9 @@
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.json",
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.npz",
         "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.json",
-        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz"
+        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate/figures/fig_joint_matched_proximal_rate.pdf"
       ],
       "model_domain": "Declared planar pointwise and forward mechanism tiers, with a separate rotating-base bilateral tier.",
       "uncertainty_boundary": "No anatomical, subject-scaled, causal human, or universal coaching inference is supported.",
@@ -19993,8 +20083,8 @@
       "published_status": "supported_at_declared_synthetic_tiers",
       "audit_status": "evidence_boundary_and_falsification_contract_checked",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:225",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:229"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:272",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:276"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd",
@@ -20003,7 +20093,9 @@
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.json",
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.npz",
         "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.json",
-        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz"
+        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate/figures/fig_joint_matched_proximal_rate.pdf"
       ],
       "model_domain": "Declared planar pointwise and forward mechanism tiers, with a separate rotating-base bilateral tier.",
       "uncertainty_boundary": "No anatomical, subject-scaled, causal human, or universal coaching inference is supported.",
@@ -20031,18 +20123,16 @@
       "candidate_ids": [
         "PD-CAND-3f24b7bec1a13566",
         "PD-CAND-3c07c3b67ea18ea3",
-        "PD-CAND-22fff2ffb5e930ab",
-        "PD-CAND-91a57be070bd4382"
+        "PD-CAND-22fff2ffb5e930ab"
       ],
       "statement": "The rotating-base tier is a finite-inertia, constrained bilateral planar mechanism with explicit contact-power and energy checks.",
       "classification": "mechanistic_model_evidence_and_boundary",
       "published_status": "supported_at_declared_synthetic_tiers",
       "audit_status": "evidence_boundary_and_falsification_contract_checked",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:240",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:256",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:264",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:275"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:287",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:303",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:311"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd",
@@ -20051,7 +20141,9 @@
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.json",
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.npz",
         "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.json",
-        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz"
+        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate/figures/fig_joint_matched_proximal_rate.pdf"
       ],
       "model_domain": "Declared planar pointwise and forward mechanism tiers, with a separate rotating-base bilateral tier.",
       "uncertainty_boundary": "No anatomical, subject-scaled, causal human, or universal coaching inference is supported.",
@@ -20077,6 +20169,7 @@
     {
       "claim_id": "PD-CLAIM-236",
       "candidate_ids": [
+        "PD-CAND-91a57be070bd4382",
         "PD-CAND-ce7dfe2f88c50b9e",
         "PD-CAND-6a547198e8748c41",
         "PD-CAND-37da957d8de007e5",
@@ -20088,11 +20181,12 @@
       "published_status": "supported_at_declared_synthetic_tiers",
       "audit_status": "evidence_boundary_and_falsification_contract_checked",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:285",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:289",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:301",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:310",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:315"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:322",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:332",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:336",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:348",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:357",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:362"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd",
@@ -20101,7 +20195,9 @@
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.json",
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.npz",
         "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.json",
-        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz"
+        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate/figures/fig_joint_matched_proximal_rate.pdf"
       ],
       "model_domain": "Declared planar pointwise and forward mechanism tiers, with a separate rotating-base bilateral tier.",
       "uncertainty_boundary": "No anatomical, subject-scaled, causal human, or universal coaching inference is supported.",
@@ -20135,8 +20231,8 @@
       "published_status": "supported_at_declared_synthetic_tiers",
       "audit_status": "evidence_boundary_and_falsification_contract_checked",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:327",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:338"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:374",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:385"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd",
@@ -20145,7 +20241,9 @@
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.json",
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.npz",
         "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.json",
-        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz"
+        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate/figures/fig_joint_matched_proximal_rate.pdf"
       ],
       "model_domain": "Declared planar pointwise and forward mechanism tiers, with a separate rotating-base bilateral tier.",
       "uncertainty_boundary": "No anatomical, subject-scaled, causal human, or universal coaching inference is supported.",
@@ -20179,8 +20277,8 @@
       "published_status": "supported_at_declared_synthetic_tiers",
       "audit_status": "evidence_boundary_and_falsification_contract_checked",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:342",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:354"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:389",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:401"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd",
@@ -20189,7 +20287,9 @@
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.json",
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.npz",
         "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.json",
-        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz"
+        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate/figures/fig_joint_matched_proximal_rate.pdf"
       ],
       "model_domain": "Declared planar pointwise and forward mechanism tiers, with a separate rotating-base bilateral tier.",
       "uncertainty_boundary": "No anatomical, subject-scaled, causal human, or universal coaching inference is supported.",
@@ -20224,9 +20324,9 @@
       "published_status": "supported_at_declared_synthetic_tiers",
       "audit_status": "evidence_boundary_and_falsification_contract_checked",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:364",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:367",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:391"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:411",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:414",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:438"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd",
@@ -20235,7 +20335,9 @@
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.json",
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.npz",
         "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.json",
-        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz"
+        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate/figures/fig_joint_matched_proximal_rate.pdf"
       ],
       "model_domain": "Declared planar pointwise and forward mechanism tiers, with a separate rotating-base bilateral tier.",
       "uncertainty_boundary": "No anatomical, subject-scaled, causal human, or universal coaching inference is supported.",
@@ -20270,9 +20372,9 @@
       "published_status": "supported_at_declared_synthetic_tiers",
       "audit_status": "evidence_boundary_and_falsification_contract_checked",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:401",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:405",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:416"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:448",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:452",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:463"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd",
@@ -20281,7 +20383,9 @@
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.json",
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.npz",
         "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.json",
-        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz"
+        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate/figures/fig_joint_matched_proximal_rate.pdf"
       ],
       "model_domain": "Declared planar pointwise and forward mechanism tiers, with a separate rotating-base bilateral tier.",
       "uncertainty_boundary": "No anatomical, subject-scaled, causal human, or universal coaching inference is supported.",
@@ -20316,9 +20420,9 @@
       "published_status": "supported_at_declared_synthetic_tiers",
       "audit_status": "evidence_boundary_and_falsification_contract_checked",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:429",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:432",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:445"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:476",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:479",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:492"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd",
@@ -20327,7 +20431,9 @@
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.json",
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.npz",
         "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.json",
-        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz"
+        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate/figures/fig_joint_matched_proximal_rate.pdf"
       ],
       "model_domain": "Declared planar pointwise and forward mechanism tiers, with a separate rotating-base bilateral tier.",
       "uncertainty_boundary": "No anatomical, subject-scaled, causal human, or universal coaching inference is supported.",
@@ -20353,16 +20459,16 @@
     {
       "claim_id": "PD-CLAIM-092",
       "candidate_ids": [
-        "PD-CAND-d349c382ce3046d0",
+        "PD-CAND-60bdc4b3f88805d5",
         "PD-CAND-0a76a779d27a6ea0"
       ],
-      "statement": "The expanded deterministic evidence contains 126 rate cases, 45 acceleration cases, and 60 forward programs and supports only model-bounded counterexamples to a standalone proximal-rate rule.",
+      "statement": "The expanded deterministic evidence contains 126 rate cases, 45 acceleration cases, 60 timing-grid programs, and 216 joint-matching programs and supports only model-bounded counterexamples to a standalone proximal-rate rule.",
       "classification": "mechanistic_model_evidence_and_boundary",
       "published_status": "supported_at_declared_synthetic_tiers",
       "audit_status": "evidence_boundary_and_falsification_contract_checked",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:459",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:474"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:506",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:522"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd",
@@ -20371,7 +20477,9 @@
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.json",
         "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.npz",
         "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.json",
-        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz"
+        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate/figures/fig_joint_matched_proximal_rate.pdf"
       ],
       "model_domain": "Declared planar pointwise and forward mechanism tiers, with a separate rotating-base bilateral tier.",
       "uncertainty_boundary": "No anatomical, subject-scaled, causal human, or universal coaching inference is supported.",
@@ -20438,7 +20546,7 @@
     {
       "claim_id": "PD-CLAIM-243",
       "candidate_ids": [
-        "PD-CAND-d7b8099ed0f0a0d8"
+        "PD-CAND-2de87995dfa0e8c9"
       ],
       "statement": "The seven-question table retains observable-specific drift attribution and bounded current answers after adding the geometry and recovery studies.",
       "classification": "critical_question_answer_map",
@@ -20594,18 +20702,18 @@
     {
       "claim_id": "PD-CLAIM-247",
       "candidate_ids": [
-        "PD-CAND-25b5691f2031a8ea",
+        "PD-CAND-f68d06799fe605bf",
         "PD-CAND-db74be00a06f8889",
         "PD-CAND-ce5ed5ff62ef6edd"
       ],
-      "statement": "Energy- and approximate-work-controlled planar evidence rejects maximizing proximal velocity as a general rule at those tiers, while five distinct slack classes require separate state, energy, and measurement tests.",
+      "statement": "Energy-, work-, and load-controlled planar evidence rejects maximizing proximal velocity as a general rule at those tiers, while five distinct slack classes require separate state, energy, and measurement tests.",
       "classification": "nonmonotonic_velocity_and_typed_slack_boundary",
       "published_status": "proximal_rule_rejected_at_planar_tiers_slack_mostly_open",
       "audit_status": "evidence_boundary_and_falsification_contract_checked",
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:88",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:108",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:115"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:112",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:119"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
@@ -20614,7 +20722,7 @@
         "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_experiment_registry.json"
       ],
       "model_domain": "Cross-tier synthesis and prospective experiment governance.",
-      "uncertainty_boundary": "The acceleration intervention is pointwise, no work-matched pair is also load matched, and only a phenomenological transmission dead zone has been directly exercised; no human optimum is identified.",
+      "uncertainty_boundary": "The acceleration intervention is pointwise, forward pairs do not match the full delivery state, and only a phenomenological transmission dead zone has been directly exercised; no human optimum is identified.",
       "competing_explanations": [
         "model-tier dependence",
         "estimand choice",
@@ -20642,7 +20750,7 @@
       "published_status": "human_validation_blocked",
       "audit_status": "evidence_boundary_and_falsification_contract_checked",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:123"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:127"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
