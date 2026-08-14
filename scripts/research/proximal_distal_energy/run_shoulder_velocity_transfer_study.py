@@ -23,20 +23,21 @@ from scripts.research.proximal_distal_energy.swing_model import (
 from scripts.research.proximal_distal_energy.torque_programs import (
     restrain_then_drive_program,
 )
-from src.shared.python.simulation_backends import GolfModelParams
+from src.shared.python.simulation_backends import GolfModelParams, make_backend
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DATA_DIR = REPO_ROOT / "docs/research/proximal_distal_energy_transfer/data"
 FIGURE_DIR = DATA_DIR / "shoulder_velocity_transfer/figures"
 JSON_PATH = DATA_DIR / "shoulder_velocity_transfer_study.json"
 NPZ_PATH = DATA_DIR / "shoulder_velocity_transfer_study.npz"
-SCHEMA_VERSION = "shoulder-velocity-transfer-evidence-v2"
+SCHEMA_VERSION = "shoulder-velocity-transfer-evidence-v3"
 PHASE_FRACTIONS = (0.0, 0.15, 0.40, 0.70, 0.95)
 MINIMUM_VELOCITY_SCALE_RAD_S = 4.0
 VELOCITY_OFFSET_FRACTION = 0.75
 VELOCITY_CONSTRAINTS = (
     "preserve_relative_club_rate",
     "preserve_absolute_club_rate",
+    "preserve_total_kinetic_energy",
 )
 
 
@@ -72,6 +73,39 @@ def _velocity_grid(reference_rate: float) -> np.ndarray:
     return reference_rate + direction * offsets * scale
 
 
+def _energy_matched_velocity_grid(
+    q: np.ndarray, reference_velocity: np.ndarray, params: GolfModelParams
+) -> np.ndarray:
+    """Return nine feasible rates centered on the reference at fixed kinetic energy."""
+    backend = make_backend("ode", params)
+    mass = np.asarray(backend.mass_matrix(q), dtype=float)
+    energy = 0.5 * float(reference_velocity @ mass @ reference_velocity)
+    schur = float(mass[0, 0] - mass[0, 1] ** 2 / mass[1, 1])
+    maximum_rate = np.sqrt(2.0 * energy / schur)
+    reference_rate = float(reference_velocity[0])
+    safety_limit = (1.0 - 1e-8) * maximum_rate
+    lower_limit = -safety_limit
+    upper_limit = safety_limit
+    if reference_rate <= lower_limit:
+        lower_limit = 0.5 * (-maximum_rate + reference_rate)
+    if reference_rate >= upper_limit:
+        upper_limit = 0.5 * (maximum_rate + reference_rate)
+    nominal_span = VELOCITY_OFFSET_FRACTION * _velocity_scale(reference_rate)
+    lower = max(lower_limit, reference_rate - nominal_span)
+    upper = min(upper_limit, reference_rate + nominal_span)
+    if (
+        not np.isfinite(lower + upper)
+        or min(reference_rate - lower, upper - reference_rate) <= 1e-10
+    ):
+        raise RuntimeError("reference state has no usable energy-matched rate interval")
+    return np.concatenate(
+        (
+            np.linspace(lower, reference_rate, 5),
+            np.linspace(reference_rate, upper, 5)[1:],
+        )
+    )
+
+
 def _reference_trace() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, float]:
     params = GolfModelParams.default()
     program = restrain_then_drive_program(60.0, 15.0, 10.0, 0.10)
@@ -92,11 +126,20 @@ def _rows() -> list[dict[str, Any]]:
         reference_rate = float(velocity[index, 0])
         sweep_scale = _velocity_scale(reference_rate)
         for constraint in VELOCITY_CONSTRAINTS:
+            if constraint == "preserve_total_kinetic_energy" and np.allclose(
+                velocity[index], 0.0, atol=1e-12
+            ):
+                continue
+            proximal_grid = (
+                _energy_matched_velocity_grid(q[index], velocity[index], params)
+                if constraint == "preserve_total_kinetic_energy"
+                else _velocity_grid(reference_rate)
+            )
             request = VelocitySweepRequest(
                 q_rad=q[index],
                 reference_velocity_rad_s=velocity[index],
                 control_nm=control[index],
-                proximal_velocity_rad_s=_velocity_grid(reference_rate),
+                proximal_velocity_rad_s=proximal_grid,
                 velocity_constraint=constraint,
             )
             for sample in evaluate_velocity_sweep(request, params):
@@ -129,6 +172,8 @@ def _phase_summaries(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 for row in rows
                 if row["phase"] == phase and row["velocity_constraint"] == constraint
             ]
+            if not selected:
+                continue
             velocity = _array(selected, "proximal_velocity_rad_s")
             drift_power = _array(selected, "drift_grip_power_w")
             braking = _array(selected, "braking_grip_power_w")
@@ -188,6 +233,9 @@ def run_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
         "club_angular_velocity_rad_s",
         "clubhead_speed_m_s",
         "distal_kinetic_energy_j",
+        "total_kinetic_energy_j",
+        "reference_total_kinetic_energy_j",
+        "kinetic_energy_residual_j",
         "total_club_angular_acceleration_rad_s2",
         "drift_club_angular_acceleration_rad_s2",
         "control_club_angular_acceleration_rad_s2",
@@ -213,7 +261,7 @@ def run_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
     phases = list(dict.fromkeys(row["phase"] for row in rows))
     record: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
-        "study_id": "phase-resolved-proximal-link-velocity-atlas-v2",
+        "study_id": "phase-resolved-proximal-link-velocity-atlas-v3",
         "model_tier": "exact_planar_double_pendulum",
         "counterfactual_kind": "pointwise_state_matched_zero_applied_control",
         "proximal_coordinate_meaning": (
@@ -229,7 +277,17 @@ def run_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
             "minimum_scale_rad_s": MINIMUM_VELOCITY_SCALE_RAD_S,
             "scale_definition": "max(abs(reference proximal rate), minimum scale)",
             "zero_rate_direction": "positive model coordinate",
-            "stored_energy_is_not_matched": True,
+            "energy_matched_rule": (
+                "solve the mass-matrix kinetic-energy quadratic for the relative "
+                "club rate and choose the branch continuous with the reference"
+            ),
+            "energy_matched_grid_safety_fraction_of_feasible_limit": 0.98,
+            "stored_energy_is_matched_only_for": "preserve_total_kinetic_energy",
+            "zero_kinetic_energy_phase_excluded": "Transition",
+            "zero_energy_reason": (
+                "the only velocity state at zero kinetic energy is the zero vector, "
+                "so a nondegenerate proximal-rate dose is not identifiable"
+            ),
         },
         "rows": rows,
         "phase_summaries": _phase_summaries(rows),
@@ -250,7 +308,8 @@ def run_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
             "Test an independently actuated torso and measured bilateral grip wrenches.",
         ],
         "limitations": [
-            "Changing velocity changes stored kinetic energy; the atlas is not a free-energy comparison.",
+            "Relative-rate and absolute-rate families change stored kinetic energy; only the explicitly named energy-matched family controls it.",
+            "Equal instantaneous kinetic energy does not match the prior actuator work used to reach a state.",
             "The fixed pivot has no torso, pelvis, moving shoulder center, or three-dimensional motion.",
             "The local force field does not identify how a player creates or regulates the state.",
             "Pointwise power does not establish accumulated work or impact speed.",

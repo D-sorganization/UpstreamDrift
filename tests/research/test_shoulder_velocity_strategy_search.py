@@ -59,6 +59,13 @@ def test_small_trajectory_search_reports_closed_transfer_metrics() -> None:
         assert outcome.transfer_work_closure_residual_j == pytest.approx(0.0, abs=1e-8)
         assert outcome.braking_grip_work_j >= 0.0
         assert outcome.peak_grip_force_n >= 0.0
+        assert np.isfinite(outcome.total_actuator_work_j)
+        assert outcome.total_actuator_work_j == pytest.approx(
+            outcome.proximal_actuator_work_j + outcome.distal_actuator_work_j,
+            abs=1e-10,
+        )
+        assert outcome.positive_actuator_work_j >= 0.0
+        assert outcome.negative_actuator_work_j >= 0.0
 
 
 def test_fixed_program_supports_timestep_refinement() -> None:

@@ -127,7 +127,9 @@
       ],
       "required_controls": [
         "matched initial state",
+        "matched total kinetic energy",
         "matched work",
+        "matched peak interface load",
         "torso killswitch",
         "arm killswitch",
         "wrist killswitch",

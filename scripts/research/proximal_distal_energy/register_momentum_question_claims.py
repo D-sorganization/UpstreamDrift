@@ -31,8 +31,8 @@ def main() -> None:
         "PD-CLAIM-244": [by_line[line]["candidate_id"] for line in (28, 38, 41)],
         "PD-CLAIM-245": [by_line[line]["candidate_id"] for line in (53, 63)],
         "PD-CLAIM-246": [by_line[line]["candidate_id"] for line in (71, 82)],
-        "PD-CLAIM-247": [by_line[line]["candidate_id"] for line in (88, 97, 104)],
-        "PD-CLAIM-248": [by_line[112]["candidate_id"]],
+        "PD-CLAIM-247": [by_line[line]["candidate_id"] for line in (88, 108, 115)],
+        "PD-CLAIM-248": [by_line[123]["candidate_id"]],
     }
     definitions = {
         "PD-CLAIM-242": (
@@ -71,10 +71,10 @@ def main() -> None:
             "A policy advantage emerges under expanded preregistered attraction-region, external-load, or participant-held-out tests.",
         ),
         "PD-CLAIM-247": (
-            "The planar evidence rejects maximizing proximal velocity as a general rule at those tiers, while five distinct slack classes require separate state, energy, and measurement tests.",
+            "Energy- and approximate-work-controlled planar evidence rejects maximizing proximal velocity as a general rule at those tiers, while five distinct slack classes require separate state, energy, and measurement tests.",
             "nonmonotonic_velocity_and_typed_slack_boundary",
             "proximal_rule_rejected_at_planar_tiers_slack_mostly_open",
-            "Only a phenomenological transmission dead zone has been directly exercised; no human optimum is identified.",
+            "The acceleration intervention is pointwise, no work-matched pair is also load matched, and only a phenomenological transmission dead zone has been directly exercised; no human optimum is identified.",
             "A planar reversal is promoted to a human optimum or one slack class is inferred from another.",
         ),
         "PD-CLAIM-248": (
@@ -145,7 +145,7 @@ def main() -> None:
     registry["paper"]["source_digest"] = inventory["source_digest"]
     registry["audit_scope"]["completion_status"] = "complete"
     registry["audit_scope"]["current_scope"] = (
-        "The complete 940-candidate paper inventory is adjudicated. The critical-question chapter maps fifteen candidates to seven bounded claims and retains all human-data gates."
+        "The complete 945-candidate paper inventory is adjudicated. The critical-question chapter maps fifteen candidates to seven bounded claims and retains all human-data gates."
     )
     REGISTRY.write_text(json.dumps(registry, indent=2) + "\n", encoding="utf-8")
 
