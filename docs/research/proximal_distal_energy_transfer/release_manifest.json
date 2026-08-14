@@ -131,8 +131,8 @@
       "bytes": 2789
     },
     "docs/research/proximal_distal_energy_transfer/DATA_DICTIONARY.md": {
-      "sha256": "4a267ecb4f17a4255d7fb878ce333613d0cf5859d8b1b931b2a5b46ef6c13a6f",
-      "bytes": 6440
+      "sha256": "ea0073efdbf6f32eed23c26d94111400a3c0d289a801452101f6c114110e1ce1",
+      "bytes": 6743
     },
     "docs/research/proximal_distal_energy_transfer/EVIDENCE_SCHEMA_V2.md": {
       "sha256": "43e5e9728e63f6c22bed3874c5149976df7b50ffbf20d1e28104033b8a3adc7e",
@@ -151,16 +151,16 @@
       "bytes": 24027
     },
     "docs/research/proximal_distal_energy_transfer/MOMENTUM_TRANSFER_QUESTION_PROGRAM.md": {
-      "sha256": "d78bda287174d1266e4ebd842ec60774d7bd792484b6d12f049fce3e4f716b83",
-      "bytes": 14490
+      "sha256": "a281fe27fd549998b24779fab4e6cb4ad7363df0a5a2e6907e1730aa7b71504b",
+      "bytes": 14905
     },
     "docs/research/proximal_distal_energy_transfer/OPEN_RELEASE_QUALIFICATION.md": {
       "sha256": "0e079557b208e57898f281eb9117c6ba6fa1c728d0d5ebfb904c87fbbc8f5435",
       "bytes": 4139
     },
     "docs/research/proximal_distal_energy_transfer/README.md": {
-      "sha256": "2e6067e65295b01312260a36ec675cf790e9b32ce680488e5b9c24205aa3aee1",
-      "bytes": 24690
+      "sha256": "ad5f60ffb1ccd51adf39a3a8166b9fe5f865d68b5c5ca5cde7587a413a2d597b",
+      "bytes": 25215
     },
     "docs/research/proximal_distal_energy_transfer/REVIEWER_WORKBENCH.md": {
       "sha256": "b864b26ec27a87759d2f977224942b9c3e312f13f9a8882342126de379be706e",
@@ -437,6 +437,10 @@
     "docs/research/proximal_distal_energy_transfer/data/model_completion_predictions.json": {
       "sha256": "dee0996036587ffbc6d8c175dcc1ad69b69f95eafcdcc007d79816e400052783",
       "bytes": 7472
+    },
+    "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_experiment_registry.json": {
+      "sha256": "a9e2d314cc5a95374ce50f88949aae7ba6b8d0bb4690f8c31966613d528d5489",
+      "bytes": 10196
     },
     "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_question_registry.json": {
       "sha256": "70b4048584fd7c7594a6c7e04ce2c31fbe9ab2538fff8df60455e6f5a4b790f9",

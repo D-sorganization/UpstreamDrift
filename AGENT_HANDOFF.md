@@ -4,6 +4,15 @@ Last updated: 2026-08-13
 
 Update this file with every PR and every push to main.
 
+## Momentum Transfer Experiment Registration
+
+- Branch `research/8595-experiment-registry` continues #8595 after #8596 and
+  #8597 merged. It adds an implementation-level registry for Q1--Q7 and the
+  governed participant-held-out stage. Every record declares model tiers,
+  interventions, controls, outcomes, uncertainty, a falsifier, required data,
+  and honest execution status. Qualifying bilateral-wrench human data remain
+  unavailable; synthetic work cannot close that evidence boundary.
+
 ## Momentum Transfer Critical-Question Program
 
 - Branch `research/8595-momentum-agenda` implements issue #8595 under research

@@ -1,0 +1,336 @@
+{
+  "schema_version": "momentum-transfer-experiment-registry/v1",
+  "program_issue": 8595,
+  "registration_status": "frozen_before_new_preferred_results",
+  "evidence_rule": "Synthetic experiments can falsify a declared model mechanism or verify software, but cannot establish a human strategy.",
+  "experiments": [
+    {
+      "id": "MT-E01",
+      "questions": ["Q1"],
+      "title": "Observable-Specific Drift Attribution Ledger",
+      "model_tiers": [
+        "fixed_hub_planar",
+        "moving_base_planar",
+        "two_hand_compliant_club"
+      ],
+      "interventions": [
+        "same_state_all_driver_killswitch",
+        "one_driver_at_a_time_killswitch",
+        "forward_zero_driver_continuation"
+      ],
+      "controls": [
+        "identical_state",
+        "identical_frame",
+        "identical_event_window",
+        "alternative_coordinate_convention"
+      ],
+      "outcomes": [
+        "drift_acceleration",
+        "drift_force",
+        "drift_impulse",
+        "drift_power",
+        "drift_work",
+        "forward_persistence"
+      ],
+      "uncertainty": [
+        "time_step_refinement",
+        "event_window_shift",
+        "decomposition_convention"
+      ],
+      "falsifier": "A registered drift contribution or forward persistence vanishes, reverses, or is smaller than declared numerical uncertainty.",
+      "required_data": [
+        "state_history",
+        "mass_matrix",
+        "bias_terms",
+        "applied_inputs",
+        "interface_force_and_velocity"
+      ],
+      "execution_status": "partly_available_requires_common_estimand_table"
+    },
+    {
+      "id": "MT-E02",
+      "questions": ["Q2"],
+      "title": "Geometry Sign and Null Atlas",
+      "model_tiers": [
+        "analytical",
+        "fixed_hub_planar",
+        "moving_base_planar",
+        "two_hand_compliant_club",
+        "spatial_articulated"
+      ],
+      "interventions": [
+        "relative_link_angle_sweep",
+        "force_direction_sweep",
+        "grip_separation_sweep",
+        "swing_plane_orientation_sweep",
+        "moment_arm_reversal"
+      ],
+      "controls": [
+        "zero_moment_arm",
+        "coincident_grips",
+        "reversed_moment_arm",
+        "orthogonal_force_velocity",
+        "proper_frame_transform"
+      ],
+      "outcomes": [
+        "force_velocity_projection",
+        "contact_couple",
+        "interface_work",
+        "distal_energy_gain",
+        "delivery_speed_and_orientation"
+      ],
+      "uncertainty": [
+        "geometry_measurement_error",
+        "contact_reference_point",
+        "engine_implementation"
+      ],
+      "falsifier": "A null or sign-reversing geometry fails to null or reverse the proposed pathway beyond uncertainty, or the result fails independent-engine reproduction.",
+      "required_data": [
+        "segment_geometry",
+        "hand_contact_locations",
+        "three_dimensional_kinematics",
+        "bilateral_wrenches",
+        "club_deflection"
+      ],
+      "execution_status": "planar_controls_available_spatial_atlas_open"
+    },
+    {
+      "id": "MT-E03",
+      "questions": ["Q3"],
+      "title": "Casting, Early Proximal Acceleration, and Release Timing Interventions",
+      "model_tiers": [
+        "double_pendulum",
+        "moving_base_planar",
+        "two_hand_compliant_club",
+        "spatial_articulated"
+      ],
+      "interventions": [
+        "proximal_acceleration_onset",
+        "distal_release_onset",
+        "proximal_braking_onset",
+        "release_rate_threshold"
+      ],
+      "controls": [
+        "matched_initial_state",
+        "matched_input_work",
+        "matched_delivery_state",
+        "alternative_casting_definitions",
+        "adverse_load"
+      ],
+      "outcomes": [
+        "casting_event",
+        "viable_release_window",
+        "distal_energy_gain",
+        "braking_work",
+        "grip_load",
+        "impact_state"
+      ],
+      "uncertainty": [
+        "event_definition",
+        "phase_registration",
+        "control_capacity"
+      ],
+      "falsifier": "The apparent timing benefit disappears under matched work or state, reverses under a plausible casting definition, or is dominated by orientation or load cost.",
+      "required_data": [
+        "segment_and_club_kinematics",
+        "joint_or_actuator_work",
+        "bilateral_wrenches",
+        "impact_outcomes"
+      ],
+      "execution_status": "release_programs_available_factorial_interventions_open"
+    },
+    {
+      "id": "MT-E04",
+      "questions": ["Q4", "Q5"],
+      "title": "Timing Demand and Closed-Loop Recovery",
+      "model_tiers": [
+        "two_hand_compliant_club",
+        "spatial_articulated",
+        "subject_scaled"
+      ],
+      "interventions": [
+        "clock_policy",
+        "state_policy",
+        "impedance_policy",
+        "delayed_observer_policy",
+        "matched_state_perturbation"
+      ],
+      "controls": [
+        "common_random_numbers",
+        "matched_effort",
+        "matched_peak_force",
+        "held_out_disturbances",
+        "adverse_external_load"
+      ],
+      "outcomes": [
+        "viable_timing_volume",
+        "event_time_sensitivity",
+        "error_decay_rate",
+        "recovery_time",
+        "viable_set_return_probability",
+        "attraction_region",
+        "lower_tail_outcome"
+      ],
+      "uncertainty": [
+        "observer_delay",
+        "sensor_noise",
+        "actuator_saturation",
+        "model_parameter_shift"
+      ],
+      "falsifier": "A drift-mediated or feedback policy has no larger viable region, no faster recovery, or obtains benefit only through an undeclared effort or force increase.",
+      "required_data": [
+        "perturbed_trials",
+        "state_estimates",
+        "control_inputs",
+        "force_and_effort_costs",
+        "impact_outcomes"
+      ],
+      "execution_status": "engineering_perturbations_available_observer_and_recovery_tests_open"
+    },
+    {
+      "id": "MT-E05",
+      "questions": ["Q6"],
+      "title": "Proximal Velocity and Acceleration Dose Response",
+      "model_tiers": [
+        "moving_base_planar",
+        "two_hand_compliant_club",
+        "spatial_articulated",
+        "subject_scaled"
+      ],
+      "interventions": [
+        "proximal_rate_grid",
+        "proximal_acceleration_grid",
+        "torso_killswitch",
+        "arm_killswitch",
+        "wrist_killswitch"
+      ],
+      "controls": [
+        "matched_initial_state",
+        "matched_relative_rate",
+        "matched_absolute_rate",
+        "matched_work",
+        "matched_impact_definition"
+      ],
+      "outcomes": [
+        "delivery_speed",
+        "distal_energy_gain",
+        "braking_work",
+        "grip_load",
+        "orientation",
+        "interior_optimum"
+      ],
+      "uncertainty": [
+        "matching_rule",
+        "anatomical_capacity",
+        "subject_parameters",
+        "impact_model"
+      ],
+      "falsifier": "The claimed monotonic benefit contains a plateau, interior optimum, reversal, adverse load, or matching-rule dependence.",
+      "required_data": [
+        "proximal_kinematics",
+        "full_state",
+        "work_ledger",
+        "bilateral_wrenches",
+        "impact_outcomes"
+      ],
+      "execution_status": "reduced_model_nonmonotonicity_demonstrated_human_test_open"
+    },
+    {
+      "id": "MT-E06",
+      "questions": ["Q7"],
+      "title": "Typed Slack Perturbation Suite",
+      "model_tiers": [
+        "analytical",
+        "two_hand_compliant_club",
+        "spatial_articulated",
+        "neuromusculoskeletal"
+      ],
+      "interventions": [
+        "contact_disengagement",
+        "transmission_backlash",
+        "structural_preload",
+        "series_compliance",
+        "control_deadband"
+      ],
+      "controls": [
+        "one_slack_class_at_a_time",
+        "zero_slack",
+        "matched_initial_energy",
+        "passivity_check",
+        "hysteresis_direction_reversal"
+      ],
+      "outcomes": [
+        "transmitted_torque",
+        "contact_state",
+        "stored_and_released_energy",
+        "closure_residual",
+        "delivery_outcome",
+        "peak_load",
+        "recovery"
+      ],
+      "uncertainty": [
+        "onset",
+        "magnitude",
+        "hysteresis",
+        "stiffness",
+        "damping",
+        "delay"
+      ],
+      "falsifier": "A proposed slack benefit fails energy closure, depends on conflating slack classes, or vanishes under matched energy and load.",
+      "required_data": [
+        "grip_pressure_or_contact_state",
+        "shaft_and_tissue_compliance",
+        "bilateral_wrenches",
+        "activation_and_delay_proxies"
+      ],
+      "execution_status": "transmission_dead_zone_available_other_classes_open"
+    },
+    {
+      "id": "MT-H01",
+      "questions": ["Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7"],
+      "title": "Participant-Held-Out Human Falsification",
+      "model_tiers": ["governed_human"],
+      "interventions": [
+        "registered_natural_contrasts",
+        "timing_shuffle_null",
+        "geometry_null",
+        "adverse_load",
+        "participant_holdout"
+      ],
+      "controls": [
+        "frozen_event_definitions",
+        "frozen_split",
+        "alternative_frames",
+        "filter_sensitivity",
+        "synchronization_sensitivity",
+        "negative_controls"
+      ],
+      "outcomes": [
+        "held_out_prediction",
+        "conditional_contrasts",
+        "drift_attribution_uncertainty",
+        "impact_outcomes",
+        "bilateral_load",
+        "slack_state"
+      ],
+      "uncertainty": [
+        "measurement",
+        "synchronization",
+        "inverse_dynamics",
+        "model_structure",
+        "participant_variability"
+      ],
+      "falsifier": "The registered effect fails participant-held-out testing, reverses under a declared sensitivity, overlaps the negligible region, or incurs an adverse load margin.",
+      "required_data": [
+        "full_body_kinematics",
+        "force_plates",
+        "bilateral_six_axis_grip_wrenches",
+        "grip_pressure_contact_state",
+        "club_kinematics_and_deflection",
+        "emg_if_governed",
+        "launch_and_impact_outcomes"
+      ],
+      "execution_status": "blocked_qualifying_dataset_not_acquired"
+    }
+  ]
+}
