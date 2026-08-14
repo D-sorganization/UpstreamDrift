@@ -1,9 +1,9 @@
 {
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper_source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-  "source_digest": "626f603db48b9bceb8179cc143eef17b07739a723406b15ec54195eb543e8ebb",
+  "source_digest": "f540a94c5d50d486c558ab4be6727ffcae30121b9d0ed8ca25ce5ec69596ac34",
   "source_count": 33,
-  "candidate_count": 937,
+  "candidate_count": 940,
   "candidates": [
     {
       "candidate_id": "PD-CAND-384556ac26fc8724",
@@ -14742,12 +14742,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-c1ecd66f8c4e9cb7",
+      "candidate_id": "PD-CAND-e2a8ee08b1ab7d8c",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
       "line_start": 14,
       "line_end": 20,
-      "text": "| How much transfer is drift-mediated? | Conditional on the observable, coordinate and frame, event window, model, and decomposition. Signed drift shares may exceed 100% when control opposes the pathway; pointwise attribution is not forward persistence. | A common acceleration/force/impulse/power/work ledger across tiers, same-state killswitches, uncertainty propagation, and participant-held-out bilateral-wrench evaluation. | | Which geometry matters? | Relative link angle, force direction, velocity direction, reference point, grip separation, swing-plane orientation, and contact moment arm can gate magnitude and sign. | A subject-scaled spatial atlas with zero, orthogonal, coincident-grip, and reversed-moment-arm controls reproduced in an independent engine. | | Which timing patterns matter? | Early distal release changes the available geometry; proximal rate, acceleration, braking, and release timing interact nonmonotonically. \u201cCasting\u201d is not one universal event. | Factorial interventions on proximal acceleration, distal release, and braking under matched state and work, with multiple preregistered casting definitions and adverse-load tests. | | Does a drift-mediated strategy require less timing precision? | Unresolved for people. In a 15-case paired planar screen, neither perfect nor delayed/noisy state triggering established a recovery advantage over the clock policy; this is not evidence about neural timing demand. | Viable timing-region and phase-error studies under matched work, force, and effort, then participant-held-out perturbation trials. | | Is a strategy self-correcting? | Not established. Requiring error to remain below half its initial value through delivery produced recovery in only 13\u201320% of the engineering cases, with no policy separating decisively. | Larger attraction-region sweeps, adverse external loads, independently identified observers, and human perturbations without hidden load-cost increase. | | Should proximal velocity be maximized? | No general rule is supported. The reduced studies contain phase dependence, matching-rule dependence, nonmonotonic killswitch effects, and adverse braking associations. | Dose-response surfaces for rate and acceleration with matched state, work, load, and impact definitions, extended across spatial and subject-scaled models and held-out participants. | | Is slack beneficial or necessary? | Unanswered until the mechanism is named. Contact loss, backlash, elastic preload, muscle-tendon series compliance, and control deadband are not interchangeable. | One slack class at a time, with a state and constitutive law, matched initial energy, passivity and closure checks, hysteresis sweeps, and a measurement strategy. |",
-      "text_sha256": "c7b6c78eaf68cd50241d2cb09db25f976a5c0c29cb7961b8bda23bd497763e9a",
+      "text": "| How much transfer is drift-mediated? | Conditional on the observable, coordinate and frame, event window, model, and decomposition. Signed drift shares may exceed 100% when control opposes the pathway; pointwise attribution is not forward persistence. | A common acceleration/force/impulse/power/work ledger across tiers, same-state killswitches, uncertainty propagation, and participant-held-out bilateral-wrench evaluation. | | Which geometry matters? | Relative-link and force\u2013velocity angles create exact sine/cosine gates; bilateral couple varies with signed grip separation and transverse differential force. Existing moving-base and two-engine spatial controls reproduce coincident-grip zeros and moment-arm reversals. | Subject-scaled scapular/arm/grip geometry, calibrated contact compliance, and equipment geometry evaluated with held-out digital twins and human bilateral wrenches. | | Which timing patterns matter? | Early distal release changes the available geometry; proximal rate, acceleration, braking, and release timing interact nonmonotonically. \u201cCasting\u201d is not one universal event. | Factorial interventions on proximal acceleration, distal release, and braking under matched state and work, with multiple preregistered casting definitions and adverse-load tests. | | Does a drift-mediated strategy require less timing precision? | Unresolved for people. In a 15-case paired planar screen, neither perfect nor delayed/noisy state triggering established a recovery advantage over the clock policy; this is not evidence about neural timing demand. | Viable timing-region and phase-error studies under matched work, force, and effort, then participant-held-out perturbation trials. | | Is a strategy self-correcting? | Not established. Requiring error to remain below half its initial value through delivery produced recovery in only 13\u201320% of the engineering cases, with no policy separating decisively. | Larger attraction-region sweeps, adverse external loads, independently identified observers, and human perturbations without hidden load-cost increase. | | Should proximal velocity be maximized? | No general rule is supported. The reduced studies contain phase dependence, matching-rule dependence, nonmonotonic killswitch effects, and adverse braking associations. | Dose-response surfaces for rate and acceleration with matched state, work, load, and impact definitions, extended across spatial and subject-scaled models and held-out participants. | | Is slack beneficial or necessary? | Unanswered until the mechanism is named. Contact loss, backlash, elastic preload, muscle-tendon series compliance, and control deadband are not interchangeable. | One slack class at a time, with a state and constitutive law, matched initial energy, passivity and closure checks, hysteresis sweeps, and a measurement strategy. |",
+      "text_sha256": "8f0df4bd3513b25617c327c6a2ff4b8382798926908b28776b45c26b6da2bfe1",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": true,
@@ -14777,10 +14777,58 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-12fabdf06bcc96aa",
+      "candidate_id": "PD-CAND-67fd82fb5c07f83b",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
       "line_start": 28,
-      "line_end": 34,
+      "line_end": 36,
+      "text": "The geometry atlas in @fig-momentum-geometry-atlas makes three independent gates explicit. First, force power is $Fv\\cos\\phi$: the same force magnitude is positive, zero, or negative as the force\u2013velocity angle crosses 0, 90, or 180 degrees. Second, the distal tangential and centripetal projections have distinct $\\cos\\theta$ and $-\\sin\\theta$ gates, so one can vanish while the other is maximal. Third, an ideal bilateral differential-force couple is the signed grip-separation vector crossed with differential force. It vanishes for coincident contacts and axial differential force and reverses with the moment arm or transverse force.",
+      "text_sha256": "00c3d82b6a8f95bee231d95d479788074c885ac6781739b9cf31dd76948bb6fd",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": false,
+      "priority_score": 2,
+      "triage_flags": [
+        "numeric"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-4e8a8c5ae12baa0e",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
+      "line_start": 38,
+      "line_end": 39,
+      "text": "![Geometry Atlas for Force Power, Relative-Link Projection, and Bilateral Force-Couple Sign.](figures/fig_momentum_geometry_atlas.pdf){#fig-momentum-geometry-atlas width=100%}",
+      "text_sha256": "cfb08a728753bfd3a57ae420f540ceb913cdcb0300e319a938613820d043ca48",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": false,
+      "priority_score": 2,
+      "triage_flags": [
+        "numeric"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-e19d3f8f56db3b52",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
+      "line_start": 41,
+      "line_end": 49,
+      "text": "These are not merely symbolic checks. The existing moving-base planar control gives exactly zero couple for coincident grips; the rotating-base tier changes +1.351 to -1.351 N m under signed arm reversal; and the independently authored MuJoCo and Pinocchio spatial-contact tier retains a maximum reversal residual below $9.2\\times10^{-16}$ N m. Proper 3-D rotations preserve total wrench power to the registered numerical tolerance. The remaining anatomical question is therefore not whether these geometric identities hold, but which subject-scaled configurations, forces, velocities, and compliant contacts are feasible and used by people.",
+      "text_sha256": "15e7b19d30f179edfdedaae4c6d6c845118b96793f0be3b016f32d559e6aea73",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": false,
+      "priority_score": 2,
+      "triage_flags": [
+        "numeric"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-12fabdf06bcc96aa",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
+      "line_start": 53,
+      "line_end": 59,
       "text": "The terms *casting*, *weak early body acceleration*, and *late release* are useful only after translation into observables. The registered timing study therefore treats at least four quantities independently: proximal-acceleration onset, distal-angle or distal-rate threshold crossing, proximal-braking onset, and the impact or delivery event. A result is not robust if it depends on one arbitrary casting threshold. Work-matched and delivery-state-matched controls are both required because either matching rule can alter the apparent benefit.",
       "text_sha256": "db39d9f130de4e5d128c14c57af8183a70b1152b3971688dac4feb9c242b2804",
       "citation_keys": [],
@@ -14795,8 +14843,8 @@
     {
       "candidate_id": "PD-CAND-b49f0e860e9eab2b",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
-      "line_start": 38,
-      "line_end": 44,
+      "line_start": 63,
+      "line_end": 69,
       "text": "A mechanism can be mechanically passive at an instant while its preparation or regulation remains demanding. Timing demand is therefore reported as the width or volume of a viable event-time region, outcome sensitivity to phase error, lower-tail performance, and degradation under observer delay and noise. Self-correction has the stronger requirement that a declared physical or feedback mechanism return a perturbed state toward a viable set. Repeatable open-loop behavior does not meet that definition.",
       "text_sha256": "8ce9e7c0e011d3fdf6197ead4c2e1e2104f18cd5a2fda4d6b367879cce996c25",
       "citation_keys": [],
@@ -14812,8 +14860,8 @@
     {
       "candidate_id": "PD-CAND-10eb3da872358d30",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
-      "line_start": 46,
-      "line_end": 55,
+      "line_start": 71,
+      "line_end": 80,
       "text": "The delayed-observer experiment makes that distinction executable. Each policy received the same nuisance parameters and deterministic sensor-noise realization in an unperturbed reference and a matched initial-state perturbation. All policies briefly crossed the half-error threshold in most cases, but most later left it. Requiring sustained recovery through delivery reduced return fractions to 0.20 for the clock and delayed/noisy policies and 0.13 for perfect-state and higher-impedance policies. Median terminal error remained 0.79--0.84 of the initial perturbation. @fig-observer-recovery thus rejects the shortcut from transient error reduction or low outcome variance to self-correction; it does not rank human strategies.",
       "text_sha256": "420ff1c537c454c3498ffafed98e91f57e0b1e1462b306022aab70b4e77fd10f",
       "citation_keys": [],
@@ -14829,8 +14877,8 @@
     {
       "candidate_id": "PD-CAND-05fb768fef0fe143",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
-      "line_start": 57,
-      "line_end": 59,
+      "line_start": 82,
+      "line_end": 84,
       "text": "![Trajectory-Level Recovery Under Matched Initial-State Perturbations. Bands show the held-out engineering envelope; labels above the recovery bars give 90th-percentile individual-hand force.](figures/fig_observer_recovery.pdf){#fig-observer-recovery width=100%}",
       "text_sha256": "f89a20c78d56567d088c3d51d5e3bcf5cbf16364f5dfa6825e6c1808280f4ea2",
       "citation_keys": [],
@@ -14846,8 +14894,8 @@
     {
       "candidate_id": "PD-CAND-17632d2f70c8422d",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
-      "line_start": 63,
-      "line_end": 68,
+      "line_start": 88,
+      "line_end": 93,
       "text": "The existing planar evidence is sufficient to reject the rule \u201cmaximize proximal velocity\u201d at those declared tiers, but not to specify a human optimum. An apparent speed benefit must be considered together with relative motion, control work, interface power, braking work, bilateral load, club orientation, and the matching rule. The registered analysis searches explicitly for plateaus, interior optima, and reversals rather than forcing a monotonic fit.",
       "text_sha256": "67549c9005130604c2479943d9a4fb2844cc05523684bf25943ecc99dcb8f613",
       "citation_keys": [],
@@ -14863,8 +14911,8 @@
     {
       "candidate_id": "PD-CAND-db74be00a06f8889",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
-      "line_start": 72,
-      "line_end": 77,
+      "line_start": 97,
+      "line_end": 102,
       "text": "1. **Contact slack** is temporary loss or weakening of a hand-grip constraint. 2. **Transmission slack** is backlash or a dead zone before torque transmission. 3. **Structural slack** is compliant preload and elastic deformation. 4. **Biological series compliance** is a muscle-tendon state with stored and released energy. 5. **Control slack** is an activation deadband, delay, or co-contraction reserve.",
       "text_sha256": "1f09000d7a638e22f8b9b8048674d2932c6317e8a69ea8af3b0629e7ae98eed7",
       "citation_keys": [],
@@ -14879,8 +14927,8 @@
     {
       "candidate_id": "PD-CAND-ce5ed5ff62ef6edd",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
-      "line_start": 79,
-      "line_end": 83,
+      "line_start": 104,
+      "line_end": 108,
       "text": "Only the declared phenomenological transmission dead zone has been exercised directly in the present allocation study. The other classes remain separate experiments. Any proposed benefit must survive matched-energy, zero-slack, direction-reversal, passivity, and work-energy closure controls before it can be interpreted as a transfer mechanism.",
       "text_sha256": "1359d7ac0e731cd72db5e1206f00efb955324718c00a0feb3514544f4bf5915a",
       "citation_keys": [],
@@ -14896,8 +14944,8 @@
     {
       "candidate_id": "PD-CAND-49c472fa030a2018",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
-      "line_start": 87,
-      "line_end": 94,
+      "line_start": 112,
+      "line_end": 119,
       "text": "These experiments are designed to make the framework easier to disprove. Synthetic studies can reject a mechanism within a declared model and can qualify software, but they cannot establish a coaching instruction or human control strategy. The participant-held-out stage remains blocked until a governed dataset contains synchronized full-body and club kinematics, force plates, bilateral six-axis grip wrenches, grip/contact state, and impact outcomes. Substituting synthetic traces would erase the question the human stage is intended to answer.",
       "text_sha256": "4ccf1e49bbec9741ca71479ff1bcd5c917d918321efc621f105c4dfaa88a832d",
       "citation_keys": [],
