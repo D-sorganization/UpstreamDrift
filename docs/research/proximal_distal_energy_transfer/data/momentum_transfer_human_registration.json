@@ -1,0 +1,142 @@
+{
+  "schema_version": "momentum-transfer-human-registration/v1",
+  "parent_protocol_id": "proximal-distal-human-falsification-v1",
+  "program_issue": 8595,
+  "registration_status": "frozen_before_governed_human_outcomes",
+  "dataset_status": "not_acquired",
+  "split_unit": "participant",
+  "held_out_fraction": 0.25,
+  "minimum_valid_swings_per_participant": 8,
+  "required_modalities": [
+    "full_body_kinematics",
+    "force_plates",
+    "bilateral_six_axis_grip_wrenches",
+    "grip_pressure_or_contact_state",
+    "club_kinematics_and_deflection",
+    "launch_and_impact_outcomes"
+  ],
+  "optional_governed_modalities": [
+    "surface_emg",
+    "ultrasound_or_tendon_state_proxy"
+  ],
+  "registered_events": [
+    "downswing_start",
+    "peak_proximal_acceleration",
+    "casting_angle_threshold",
+    "casting_rate_threshold",
+    "proximal_braking_onset",
+    "drift_power_sign_crossing",
+    "maximum_grip_load",
+    "impact"
+  ],
+  "tests": [
+    {
+      "test_id": "MT-H-Q1",
+      "questions": ["Q1"],
+      "estimand": "Participant-held-out drift shares for acceleration, force, impulse, power, and work in frozen event windows, reported signed and magnitude-normalized with cancellation.",
+      "null": "The registered drift contribution is negligible after propagated measurement, synchronization, inverse-dynamics, and convention uncertainty.",
+      "falsifier": "The interval overlaps the negligible region, changes sign under a registered frame or convention, or forward killswitch persistence is absent.",
+      "sensitivities": [
+        "event_window_shift",
+        "reference_frame",
+        "coordinate_convention",
+        "filter_cutoff",
+        "inverse_dynamics_residual"
+      ]
+    },
+    {
+      "test_id": "MT-H-Q2",
+      "questions": ["Q2"],
+      "estimand": "Held-out change in pathway sign and magnitude across measured moment arm, relative angle, force-velocity projection, grip separation, and swing-plane orientation.",
+      "null": "Geometry variables add no held-out predictive or sign-gating value after full-state conditioning.",
+      "falsifier": "Registered null/reversal contrasts do not change the proposed pathway or fail across participant holdouts.",
+      "sensitivities": [
+        "hand_contact_reference",
+        "club_frame",
+        "functional_joint_centers",
+        "subject_scaling",
+        "shaft_state"
+      ]
+    },
+    {
+      "test_id": "MT-H-Q3",
+      "questions": ["Q3"],
+      "estimand": "Conditional effect of early proximal acceleration, distal release, and braking timing on delivery outcomes at matched measured work and state.",
+      "null": "Timing variables add no held-out outcome value and registered casting definitions disagree without a stable effect.",
+      "falsifier": "The effect vanishes under matched work/state, reverses across plausible casting definitions, or incurs the adverse load margin.",
+      "sensitivities": [
+        "casting_angle_threshold",
+        "casting_rate_threshold",
+        "phase_alignment",
+        "matching_rule",
+        "impact_definition"
+      ]
+    },
+    {
+      "test_id": "MT-H-Q4-Q5",
+      "questions": ["Q4", "Q5"],
+      "estimand": "Participant-held-out timing-region width and perturbation recovery, including error decay, recovery time, and viable-set return probability.",
+      "null": "The proposed strategy has no larger timing region or recovery probability after effort and load matching.",
+      "falsifier": "Any apparent robustness disappears under observer-delay/noise sensitivity or depends on an adverse force, effort, or orientation increase.",
+      "sensitivities": [
+        "observer_delay",
+        "phase_error",
+        "sensor_noise",
+        "effort_matching",
+        "load_matching"
+      ]
+    },
+    {
+      "test_id": "MT-H-Q6",
+      "questions": ["Q6"],
+      "estimand": "Participant-held-out proximal-rate and acceleration dose-response for speed, distal energy, braking, grip load, and orientation under matched work and state.",
+      "null": "No stable nonmonotonic surface or benefit remains after conditioning and uncertainty propagation.",
+      "falsifier": "A claimed monotonic benefit contains a plateau, reversal, interior optimum, matching-rule dependence, or adverse load margin.",
+      "sensitivities": [
+        "relative_rate_matching",
+        "absolute_rate_matching",
+        "work_matching",
+        "participant_capacity",
+        "impact_model"
+      ]
+    },
+    {
+      "test_id": "MT-H-Q7",
+      "questions": ["Q7"],
+      "estimand": "Class-specific association of contact disengagement, transmission dead zone, structural preload, biological series compliance, or control deadband with transfer and load outcomes.",
+      "null": "No separately identified slack class improves the registered outcome after matched energy and load.",
+      "falsifier": "The result depends on conflating classes, fails passivity or energy accounting, or vanishes under the zero-slack/matched-energy comparator.",
+      "sensitivities": [
+        "slack_class",
+        "onset",
+        "magnitude",
+        "hysteresis",
+        "stiffness",
+        "damping",
+        "activation_delay"
+      ]
+    }
+  ],
+  "negative_controls": [
+    "participant_label_permutation",
+    "timing_shuffle",
+    "geometry_null_or_reversal",
+    "noncausal_future_window",
+    "alternative_reference_frame",
+    "adverse_load_test"
+  ],
+  "adverse_margins": {
+    "peak_bilateral_grip_wrench": "frozen_before_outcome_access",
+    "negative_grip_work": "frozen_before_outcome_access",
+    "club_orientation_error": "frozen_before_outcome_access",
+    "inverse_dynamics_residual": "use_parent_protocol_threshold"
+  },
+  "missing_data_contract": {
+    "primary_window_imputation": "prohibited",
+    "participant_exclusion": "before_outcome_unblinding",
+    "missing_bilateral_wrench": "primary_analysis_exclusion"
+  },
+  "identity_policy": "pseudonym_only_no_identity_inference",
+  "completion_gate": "Requires governed synchronized participant-level data and frozen participant-held-out results; synthetic dry runs and published group summaries do not satisfy this registration.",
+  "inference_boundary": "Observed association or prediction does not establish a causal coaching strategy."
+}

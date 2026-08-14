@@ -49,7 +49,7 @@ reviewed.
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.515 |
+| **Spec Version** | 1.0.516 |
 | **Last Spec Update** | 2026-08-13 |
 
 ## 2. Purpose & Mission
@@ -3005,3 +3005,7 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - The article shall expose the current answer, unresolved boundary, and
   decisive falsification path for every registered momentum-transfer question;
   project-management labels shall not appear as scientific conclusions.
+- The Q1--Q7 human registration shall use participant holdout, synchronized
+  bilateral six-axis grip wrenches, frozen nulls and adverse margins,
+  alternative-frame/filter/synchronization sensitivities, and identity-safe
+  handling. Missing primary-window wrench data shall not be imputed.
