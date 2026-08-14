@@ -1,6 +1,6 @@
 # BunkerShot3D pro-grade upgrade — state ledger
 
-**Read this first on resumption.** Updated 2026-08-14 (13:05 UTC).
+**Read this first on resumption.** Updated 2026-08-14 (13:32 UTC).
 
 Epic: https://github.com/D-sorganization/UpstreamDrift/issues/8607
 
@@ -86,9 +86,9 @@ Follow-ups the merges created:
 | Issue | Workstream                                      | Status                      |
 | ----- | ----------------------------------------------- | --------------------------- |
 | #8611 | W4 **DRFT solver** — the default F0 tier        | **merged** (`1c857759c`)    |
-| #8613 | W6 the ball + `SwingBallFlightPipeline` handoff | **PR #8636** (CI running)   |
-| #8614 | W7 designer metrics                             | not started (needs #8611)   |
-| #8616 | W9 V&V suite + credibility statement            | not started (needs #8611)   |
+| #8613 | W6 the ball + `SwingBallFlightPipeline` handoff | **merged** (`577673cf8`)    |
+| #8614 | W7 designer metrics                             | not started                 |
+| #8616 | W9 V&V suite + credibility statement            | not started                 |
 | #8618 | W11 designer workbench GUI                      | not started                 |
 | #8608 | W1 foundations (value objects, units)           | re-scope before starting    |
 
