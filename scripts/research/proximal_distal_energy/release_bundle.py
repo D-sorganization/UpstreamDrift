@@ -6,7 +6,6 @@ import hashlib
 from pathlib import Path
 from typing import Any
 
-
 ARTICLE_REL = Path("docs/research/proximal_distal_energy_transfer")
 _EXCLUDED = frozenset({"release_manifest.json", "CHECKSUMS.sha256"})
 
@@ -114,6 +113,10 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
             "shoulder_velocity_strategy": {
                 "command": "python -m scripts.research.proximal_distal_energy.run_shoulder_velocity_strategy_study",
                 "tier": "planar_fixed_hub_control_program_search",
+            },
+            "joint_matched_proximal_rate": {
+                "command": "python -m scripts.research.proximal_distal_energy.run_joint_matched_proximal_rate_study",
+                "tier": "planar_fixed_hub_joint_work_load_matching_screen",
             },
             "rotating_base_torso_velocity": {
                 "command": "python -m scripts.research.proximal_distal_energy.run_rotating_base_torso_velocity_study",

@@ -18,6 +18,8 @@ ARTIFACTS = [
     "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.npz",
     "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.json",
     "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.npz",
+    "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate_study.json",
+    "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate/figures/fig_joint_matched_proximal_rate.pdf",
 ]
 
 
@@ -31,14 +33,17 @@ def main() -> None:
         == "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd"
         and item["line_start"] == 10
     )
-    superseded_abstract_candidate = "PD-CAND-384556ac26fc8724"
+    superseded_abstract_candidates = {
+        "PD-CAND-384556ac26fc8724",
+        "PD-CAND-52fe40f02705ce0f",
+    }
     for claim in registry["claims"]:
         claim["candidate_ids"] = [
-            abstract_candidate if item == superseded_abstract_candidate else item
+            abstract_candidate if item in superseded_abstract_candidates else item
             for item in claim["candidate_ids"]
         ]
     for review in registry["candidate_reviews"]:
-        if review["candidate_id"] == superseded_abstract_candidate:
+        if review["candidate_id"] in superseded_abstract_candidates:
             review["candidate_id"] = abstract_candidate
     candidates = [
         item for item in inventory["candidates"] if item["source_path"] == CHAPTER
@@ -52,17 +57,17 @@ def main() -> None:
         "PD-CLAIM-249": (144, 153, 157),
         "PD-CLAIM-085": (173, 182),
         "PD-CLAIM-086": (187,),
-        "PD-CLAIM-250": (201,),
-        "PD-CLAIM-087": (210, 214),
-        "PD-CLAIM-088": (225, 229),
-        "PD-CLAIM-235": (240, 256, 264, 275),
-        "PD-CLAIM-236": (285, 289, 301, 310, 315),
-        "PD-CLAIM-237": (327, 338),
-        "PD-CLAIM-238": (342, 354),
-        "PD-CLAIM-089": (364, 367, 391),
-        "PD-CLAIM-090": (401, 405, 416),
-        "PD-CLAIM-091": (429, 432, 445),
-        "PD-CLAIM-092": (459, 474),
+        "PD-CLAIM-250": (201, 212, 221, 231, 236, 238, 248),
+        "PD-CLAIM-087": (257, 261),
+        "PD-CLAIM-088": (272, 276),
+        "PD-CLAIM-235": (287, 303, 311),
+        "PD-CLAIM-236": (322, 332, 336, 348, 357, 362),
+        "PD-CLAIM-237": (374, 385),
+        "PD-CLAIM-238": (389, 401),
+        "PD-CLAIM-089": (411, 414, 438),
+        "PD-CLAIM-090": (448, 452, 463),
+        "PD-CLAIM-091": (476, 479, 492),
+        "PD-CLAIM-092": (506, 522),
     }
     groups = {
         claim_id: [by_line[line]["candidate_id"] for line in lines]
@@ -76,7 +81,7 @@ def main() -> None:
         "PD-CLAIM-249": "The 45-case identical-state acceleration intervention closes exactly and shows that interface-power response and club-angular-acceleration response can have opposite signs before impact while required proximal torque and power vary materially.",
         "PD-CLAIM-085": "The forward experiment retains all 60 timing and proximal-drive programs, including 34 that miss the registered impact event.",
         "PD-CLAIM-086": "Among 26 valid programs, release-state proximal rate has adverse descriptive speed and braking associations after a declared regression, without causal or human identification.",
-        "PD-CLAIM-250": "Eight approximate net- and positive-actuator-work-matched pairs all favor the lower-rate member, but reused pairs and the absence of a simultaneously load-matched pair prevent a joint causal estimate.",
+        "PD-CLAIM-250": "The initial reused work-only pairs are adverse, while the 216-program common-time screen yields 46 disjoint work/load-matched pairs with mixed higher-rate outcomes across all nine tolerance cells; neither screen identifies a causal human effect.",
         "PD-CLAIM-087": "The highest-speed sampled program and fixed-step refinement retain exact interface-work closure while exposing a large modeled net interface load.",
         "PD-CLAIM-088": "The sampled speed, braking, and peak-force Pareto screen is weakly discriminating and does not identify unique human strategies.",
         "PD-CLAIM-235": "The rotating-base tier is a finite-inertia, constrained bilateral planar mechanism with explicit contact-power and energy checks.",
@@ -86,7 +91,7 @@ def main() -> None:
         "PD-CLAIM-089": "The chapter states testable design hypotheses rather than instructions and requires actuator, interface, club-energy, and external-work accounting.",
         "PD-CLAIM-090": "Reduced models cannot identify bilateral hand or anatomical torso strategy, and sampled optima require explicit load and robustness costs.",
         "PD-CLAIM-091": "A human test requires synchronized declared-frame kinematics, bilateral identified wrenches, impact outcomes, participant holdout, and preregistered falsifiers.",
-        "PD-CLAIM-092": "The expanded deterministic evidence contains 126 rate cases, 45 acceleration cases, and 60 forward programs and supports only model-bounded counterexamples to a standalone proximal-rate rule.",
+        "PD-CLAIM-092": "The expanded deterministic evidence contains 126 rate cases, 45 acceleration cases, 60 timing-grid programs, and 216 joint-matching programs and supports only model-bounded counterexamples to a standalone proximal-rate rule.",
     }
     old_ids = set(groups)
     mapped = {candidate for members in groups.values() for candidate in members}
@@ -151,7 +156,7 @@ def main() -> None:
     registry["paper"]["source_digest"] = inventory["source_digest"]
     registry["audit_scope"]["completion_status"] = "complete"
     registry["audit_scope"]["current_scope"] = (
-        "The complete 945-candidate paper inventory is adjudicated, including exact energy matching, actuator-work accounting, and identical-state acceleration interventions."
+        "The complete paper inventory is adjudicated, including exact energy matching, actuator-work and load matching, and identical-state acceleration interventions."
     )
     REGISTRY.write_text(json.dumps(registry, indent=2) + "\n", encoding="utf-8")
 

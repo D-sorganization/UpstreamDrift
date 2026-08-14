@@ -22,26 +22,29 @@ in git and GitHub.
 
 ## Current Branch
 
-- `research/8595-proximal-dose` executes Q6 rate and acceleration controls.
+- `research/8595-forward-match` executes the remaining planar Q6 forward
+  work/load matching control.
   The velocity atlas now has 126 pointwise cases: 90 relative/absolute-rate
   cases plus 36 exact total-kinetic-energy matches. The zero-energy transition
   dose is correctly non-identifiable rather than energy injected.
 - No energy-matched phase is monotonic. The pre-impact drift-power slope falls
   from 283.74 to 5.70 W/(rad/s) when total kinetic energy is held fixed; maximum
   energy residual is `5.7e-14 J`.
-- The 60-program forward ledger now includes proximal/distal, positive/negative,
-  and net actuator work. Eight reused pairs match net and positive work within
-  5%; every higher-rate member is 4.31–9.28 m/s slower, but no pair also matches
-  peak interface force within 10%, so the joint causal comparison remains open.
+- A second 216-program common-release-time factorial has 148 valid impacts and
+  109 primary candidate pairs matching net work, positive work, and peak force.
+  The frozen non-reuse matcher retains 46 independent pairs: 20 higher-rate
+  members are faster and 26 are slower, with differences from -3.85 to +1.45
+  m/s. The model response is mixed and nonmonotonic; this is not a causal or
+  human strategy estimate.
 - A separate 45-case identical-state acceleration intervention holds state,
   energy, and distal torque fixed. Before impact, interface-power response is
   positive while club-angular-acceleration response reverses; required proximal
   torque spans -69 to +189 N m. This is pointwise model evidence, not a human
   acceleration strategy.
-- The rebuilt paper is 208 pages and 1,489,234 bytes with 186 URI links and
-  243 outline entries. Figures and paper pages 53–57 and 185–186 were visually
-  checked. The claim audit is complete at 945/945 candidates and 249 claims;
-  the qualified open release contains 412 checksum-verified artifacts.
+- The rebuilt paper is 209 pages and 1,500,740 bytes with 186 retained URI
+  annotations and 243 outline entries. The new figure and paper pages 56–58
+  were visually checked. The claim audit is complete at 951/951 candidates and
+  249 claims; the open release validates 416 checksum-verified artifacts.
 
 ## Recently Merged #8595 Slices
 
@@ -59,8 +62,8 @@ in git and GitHub.
 
 ## Remaining Scientific Work
 
-1. Add jointly work-, load-, and delivery-state-matched forward rate and
-   acceleration controls; the current work screen is deliberately not load matched.
+1. Add full-delivery-state-matched forward rate and acceleration controls; work,
+   positive work, common release time, and peak load are now jointly screened.
 2. Add matched-work and matched-delivery controls to the timing factorial.
 3. Expand observer recovery into a phase-volume and attraction-region study,
    including adverse external loads and identified observer alternatives.
@@ -79,6 +82,7 @@ python -m pytest tests/research/test_shoulder_velocity_transfer.py `
   tests/research/test_shoulder_velocity_strategy_study.py `
   tests/research/test_proximal_acceleration_transfer.py `
   tests/research/test_proximal_acceleration_transfer_study.py `
+  tests/research/test_joint_matched_proximal_rate_study.py `
   tests/research/test_momentum_transfer_experiment_registry.py -q
 python -m ruff check scripts/research/proximal_distal_energy/proximal_acceleration_transfer.py `
   scripts/research/proximal_distal_energy/run_proximal_acceleration_transfer_study.py

@@ -162,10 +162,13 @@ abstract: |
   acceleration raises interface power while reducing club angular acceleration
   before impact. A separate 60-program grid is more adversarial: among 26 valid
   impacts, release-state proximal velocity correlates negatively with impact
-  speed and positively with negative grip work. Eight approximate actuator-
-  work matches all favor the lower-rate member, although none also matches
-  interface load. The combined result rejects proximal speed as a standalone
-  release rule while retaining the joint work/load test as open. The resulting rotating-base,
+  speed and positively with negative grip work. Eight reused approximate
+  actuator-work matches initially favor the lower-rate member but retain a load
+  confound. A follow-on 216-program common-time screen resolves that confound:
+  46 independent work/load-matched pairs contain 20 favorable and 26 adverse
+  higher-rate outcomes, with both signs retained in all nine tolerance cells.
+  The combined result rejects proximal speed as a standalone release rule while
+  retaining full-delivery-state and human tests as open. The resulting rotating-base,
   two-hand tier uses finite torso inertia, two closed arm--grip constraints,
   separated reactions, and a compliant distal club. Its 18-program matched-
   state grid finds that higher initial torso rate can accompany greater delivery

@@ -16,7 +16,7 @@ and their broader rationale is documented in the open
 | Which timing patterns matter? | Early distal release changes the available geometry; proximal rate, acceleration, braking, and release timing interact nonmonotonically. “Casting” is not one universal event. | Factorial interventions on proximal acceleration, distal release, and braking under matched state and work, with multiple preregistered casting definitions and adverse-load tests. |
 | Does a drift-mediated strategy require less timing precision? | Unresolved for people. In a 15-case paired planar screen, neither perfect nor delayed/noisy state triggering established a recovery advantage over the clock policy; this is not evidence about neural timing demand. | Viable timing-region and phase-error studies under matched work, force, and effort, then participant-held-out perturbation trials. |
 | Is a strategy self-correcting? | Not established. Requiring error to remain below half its initial value through delivery produced recovery in only 13–20% of the engineering cases, with no policy separating decisively. | Larger attraction-region sweeps, adverse external loads, independently identified observers, and human perturbations without hidden load-cost increase. |
-| Should proximal velocity be maximized? | No general rule is supported. Exact equal-energy rate sweeps are nonmonotonic, the large pre-impact slope nearly vanishes, and eight approximately work-matched forward pairs favor lower rate. An identical-state acceleration sweep reverses the club-acceleration response before impact. | Jointly work/load/state-matched forward rate and acceleration trajectories, extended across spatial and subject-scaled models and held-out participants. |
+| Should proximal velocity be maximized? | No general rule is supported. Exact equal-energy rate sweeps are nonmonotonic. A 216-program common-time screen yields 46 disjoint work/load-matched pairs with 20 favorable and 26 adverse higher-rate outcomes. An identical-state acceleration sweep also reverses the club-acceleration response before impact. | Full-delivery-state-matched forward rate and acceleration interventions, extended across spatial and subject-scaled models and held-out participants. |
 | Is slack beneficial or necessary? | Unanswered until the mechanism is named. Contact loss, backlash, elastic preload, muscle-tendon series compliance, and control deadband are not interchangeable. | One slack class at a time, with a state and constitutive law, matched initial energy, passivity and closure checks, hysteresis sweeps, and a measurement strategy. |
 
 : Current answer and falsification map for the critical momentum-transfer
@@ -94,9 +94,13 @@ plateaus, interior optima, and reversals rather than forcing a monotonic fit.
 The exact energy-matched state sweep retains 36 later-phase cases with maximum
 energy residual $5.7\times10^{-14}$ J; no phase is monotonic, and the
 pre-impact fitted slope falls from 283.74 to 5.70 W/(rad/s) relative to the
-co-varying-energy rule. Eight approximate work-matched forward pairs all favor
-the lower-rate member by 4.31--9.28 m/s, but the absence of any simultaneously
-load-matched pair leaves the joint causal comparison open.
+co-varying-energy rule. The initial eight reused work-only pairs favor the
+lower-rate member by 4.31--9.28 m/s. The follow-on 216-program common-time
+factorial resolves that load confound: its primary thresholds produce 109
+candidate and 46 disjoint work/load-matched pairs, of which 20 higher-rate
+members are faster and 26 are slower. All nine tolerance cells retain both
+signs. This mixed result rejects a monotonic rate rule but does not isolate a
+causal rate effect because actuator commands and full delivery state differ.
 The separate 45-case acceleration intervention holds the entire state and
 distal torque fixed. Before impact, increasing proximal acceleration raises
 interface power yet reduces club angular acceleration; the required proximal
