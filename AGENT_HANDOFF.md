@@ -14,8 +14,9 @@ in git and GitHub.
 - PR [#8651](https://github.com/D-sorganization/UpstreamDrift/pull/8651) is the
   protected slice that reconciles the nine-point readiness assessment, adds
   inspectable evidence links, and separates candidate-census completion from
-  the then-open release reviews. Branch `research/8557-release-claim-review`
-  adds the deterministic 31-claim review authority and is awaiting protected
+  the then-open release reviews. PR
+  [#8652](https://github.com/D-sorganization/UpstreamDrift/pull/8652) adds the
+  deterministic 31-claim review authority and is awaiting protected
   publication.
 - Canonical question, experiment, and readiness registries live under
   `docs/research/proximal_distal_energy_transfer/data/`. MT-E01 through MT-E09
