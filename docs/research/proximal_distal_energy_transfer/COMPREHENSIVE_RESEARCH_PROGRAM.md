@@ -160,7 +160,7 @@ scientific contract.
 
 ## Completed Paper-Wide Claim Audit
 
-The 2026-08-13 audit adjudicated all 925 narrative candidates against 240
+The 2026-08-13 audit adjudicated all 935 narrative candidates against 244
 atomic claim contracts; no candidate remains unreviewed. Repeated methods,
 summary, limitation, and release passages point back to their primary claim
 instead of acquiring stronger authority through repetition. The final pass

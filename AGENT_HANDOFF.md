@@ -4,6 +4,17 @@ Last updated: 2026-08-13
 
 Update this file with every PR and every push to main.
 
+## Momentum Transfer Paper Integration
+
+- Branch `docs/8595-paper-agenda` integrates the Q1--Q7 assessment into the
+  rendered article as a scientific question/falsification chapter. It avoids
+  universal transfer fractions and coaching prescriptions, operationalizes
+  timing demand and self-correction, rejects proximal velocity as a presumed
+  maximum, separates five slack mechanisms, and retains the governed-human
+  data blocker. The rebuilt 206-page PDF was visually checked across the new
+  chapter; the claim audit is complete at 935/935 candidates and 244 atomic
+  claims.
+
 ## Momentum Transfer Experiment Registration
 
 - Branch `research/8595-experiment-registry` continues #8595 after #8596 and
