@@ -40,6 +40,11 @@ def test_key_failure_controls_are_explicit() -> None:
     assert "one_slack_class_at_a_time" in experiments["MT-E06"]["controls"]
     assert "manufactured_axial_null_mode" in experiments["MT-E07"]["controls"]
     assert "bilateral_six_axis_grip_wrenches" in experiments["MT-E07"]["required_data"]
+    assert "bilateral_contact_closure" in experiments["MT-E08"]["controls"]
+    assert "joint_limit_and_collision_screen" in experiments["MT-E08"]["controls"]
+    assert experiments["MT-E08"]["execution_status"].startswith(
+        "prescribed_subject_scaled_closure"
+    )
 
 
 def test_human_stage_is_participant_held_out_and_fail_closed() -> None:

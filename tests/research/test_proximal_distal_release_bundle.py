@@ -26,6 +26,7 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         "shaft_beam_reference",
         "torque_allocation_preload",
         "spatial_common_state",
+        "subject_scaled_spatial_geometry",
         "spatial_forward_contact",
         "uncertainty_control",
         "experimental_readiness",
