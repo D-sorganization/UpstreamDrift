@@ -2,14 +2,14 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "48fad135b6590a1b915582aa5959e79a5e4035ebaca583db9adc38f95d73961f",
-    "baseline_commit": "13ea6a69585a42dc1db4b3959440ed95787c9779"
+    "source_digest": "4ccf0e0839ac5a694f7a6652a0a307e12e9e8dcb83473dd324f664583f60945d",
+    "baseline_commit": "a4b53e39b"
   },
   "audit_scope": {
     "completion_status": "complete",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "The complete 962-candidate paper inventory is adjudicated. The critical-question chapter maps twenty-four candidates to ten bounded claims and retains all human-data gates."
+    "current_scope": "The complete 970-candidate paper inventory is adjudicated. The bilateral-wrench extension adds three bounded structural-identifiability claims while retaining practical-sensor and human-data gates."
   },
   "dependencies": [
     {
@@ -25,7 +25,7 @@
       "provider": "NotebookLM",
       "review_status": "blocked_on_reauthentication",
       "authority_status": "research_index_only",
-      "last_check": "2026-08-12",
+      "last_check": "2026-08-14",
       "verification": "Original sources must be independently checked before use."
     },
     {
@@ -33,7 +33,7 @@
       "provider": "NotebookLM",
       "review_status": "blocked_on_reauthentication",
       "authority_status": "research_index_only",
-      "last_check": "2026-08-12",
+      "last_check": "2026-08-14",
       "verification": "Original sources must be independently checked before use."
     }
   ],
@@ -157,6 +157,16 @@
       "release_claim_key": "single_channel_slack_class_identification",
       "published_status": "not_established",
       "audit_state": "reviewed_as_unsupported_or_untested"
+    },
+    {
+      "release_claim_key": "individual_hand_allocation_from_net_wrench",
+      "published_status": "structurally_unidentifiable",
+      "audit_state": "reviewed_as_structurally_unidentifiable"
+    },
+    {
+      "release_claim_key": "bilateral_human_wrench_validation",
+      "published_status": "untested",
+      "audit_state": "reviewed_as_untested"
     }
   ],
   "candidate_reviews": [
@@ -8995,14 +9005,6 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-8d94385a32854a1c",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "This heading, equation fragment, figure/table anchor, command block, navigation statement, or repository pointer asserts no standalone scientific result.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13"
-    },
-    {
       "candidate_id": "PD-CAND-159f08a2959d68a7",
       "disposition": "material_claims_mapped",
       "claim_ids": [
@@ -9799,6 +9801,94 @@
         "PD-CLAIM-251"
       ],
       "rationale": "This passage states or bounds a registered critical-question conclusion.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-01824e3a259855c8",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This artifact inventory points to evidence but asserts no standalone scientific result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-259d909ca75d4513",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-254"
+      ],
+      "rationale": "This passage states or bounds the bilateral-wrench identifiability result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-0dc9872097b60500",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-254"
+      ],
+      "rationale": "This passage states or bounds the bilateral-wrench identifiability result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-d6c32adf3a68e0b2",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-254"
+      ],
+      "rationale": "This passage states or bounds the bilateral-wrench identifiability result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-2c722521196e0beb",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-254"
+      ],
+      "rationale": "This passage states or bounds the bilateral-wrench identifiability result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-0e99c083a643b55a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-255"
+      ],
+      "rationale": "This passage states or bounds the bilateral-wrench identifiability result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-956e6e3bbfb2d78a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-255"
+      ],
+      "rationale": "This passage states or bounds the bilateral-wrench identifiability result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-631623baa5516883",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-256"
+      ],
+      "rationale": "This passage states or bounds the bilateral-wrench identifiability result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-67a91d28e6ff207c",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-256"
+      ],
+      "rationale": "This passage states or bounds the bilateral-wrench identifiability result.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-14"
     }
@@ -21141,6 +21231,139 @@
       ],
       "falsifier": "Any source point is omitted, lacks a falsifier or decisive test, is linked to an experiment that does not cover it, or is presented as a completed human conclusion.",
       "adjudication": "Reconciled to the existing claim audit, machine-readable question registry, and prospective experiment contract without promoting model evidence to human evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "claim_id": "PD-CLAIM-254",
+      "candidate_ids": [
+        "PD-CAND-259d909ca75d4513",
+        "PD-CAND-0dc9872097b60500",
+        "PD-CAND-d6c32adf3a68e0b2",
+        "PD-CAND-2c722521196e0beb"
+      ],
+      "statement": "Two separated three-axis point forces map to a net club wrench with rank five and one invisible equal-and-opposite axial force mode; point forces alone cannot create a midpoint free moment along the separation axis.",
+      "classification": "bilateral_point_force_structural_identifiability",
+      "published_status": "supported_analytically_and_numerically",
+      "audit_status": "analytic_rank_manufactured_null_rotation_and_span_controls_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:197",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:214",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:226",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:234"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/bilateral_wrench_identifiability_study.json",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_bilateral_wrench_identifiability.pdf",
+        "scripts/research/proximal_distal_energy/bilateral_wrench_identifiability.py",
+        "scripts/research/proximal_distal_energy/run_bilateral_wrench_identifiability_study.py",
+        "tests/research/test_bilateral_wrench_identifiability.py",
+        "tests/research/test_bilateral_wrench_identifiability_evidence.py"
+      ],
+      "model_domain": "Instantaneous linear map from two separated three-dimensional hand contacts to one net club wrench.",
+      "uncertainty_boundary": "Structural rank is exact for declared point contacts; it does not establish that the null-mode force exists in a golfer.",
+      "competing_explanations": [
+        "free hand moments",
+        "distributed contact pressure",
+        "contact-center migration",
+        "sensor cross-talk and synchronization error",
+        "constitutive assumptions used to select one allocation"
+      ],
+      "negative_controls": [
+        "manufactured equal-and-opposite axial null vector",
+        "one-scalar axial measurement augmentation",
+        "three proper spatial rotations",
+        "forty-nine grip-span geometries",
+        "explicit force and moment measurement scaling"
+      ],
+      "falsifier": "The manufactured axial vector produces a nonzero net wrench, or the distinct-contact map does not have rank five.",
+      "adjudication": "The analytic map, numerical SVD, manufactured null mode, augmentation, spatial rotations, and neutral human boundary reconcile with the committed JSON and tests.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "claim_id": "PD-CLAIM-255",
+      "candidate_ids": [
+        "PD-CAND-0e99c083a643b55a",
+        "PD-CAND-956e6e3bbfb2d78a"
+      ],
+      "statement": "The full bilateral six-axis hand-wrench map has rank six and nullity six; one axial scalar closes only the point-force rank gap, so net club wrench cannot uniquely recover individual full hand-wrench allocation.",
+      "classification": "bilateral_full_wrench_measurement_boundary",
+      "published_status": "structurally_unidentifiable_from_net_wrench",
+      "audit_status": "analytic_rank_manufactured_null_rotation_and_span_controls_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:240",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:252"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/bilateral_wrench_identifiability_study.json",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_bilateral_wrench_identifiability.pdf",
+        "scripts/research/proximal_distal_energy/bilateral_wrench_identifiability.py",
+        "scripts/research/proximal_distal_energy/run_bilateral_wrench_identifiability_study.py",
+        "tests/research/test_bilateral_wrench_identifiability.py",
+        "tests/research/test_bilateral_wrench_identifiability_evidence.py"
+      ],
+      "model_domain": "Instantaneous linear map from two separated three-dimensional hand contacts to one net club wrench.",
+      "uncertainty_boundary": "Additional constitutive assumptions may select an allocation but do not create measurement information; practical sensor qualification remains open.",
+      "competing_explanations": [
+        "free hand moments",
+        "distributed contact pressure",
+        "contact-center migration",
+        "sensor cross-talk and synchronization error",
+        "constitutive assumptions used to select one allocation"
+      ],
+      "negative_controls": [
+        "manufactured equal-and-opposite axial null vector",
+        "one-scalar axial measurement augmentation",
+        "three proper spatial rotations",
+        "forty-nine grip-span geometries",
+        "explicit force and moment measurement scaling"
+      ],
+      "falsifier": "Net wrench uniquely recovers all twelve bilateral components without additional measurements or assumptions.",
+      "adjudication": "The analytic map, numerical SVD, manufactured null mode, augmentation, spatial rotations, and neutral human boundary reconcile with the committed JSON and tests.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "claim_id": "PD-CLAIM-256",
+      "candidate_ids": [
+        "PD-CAND-631623baa5516883",
+        "PD-CAND-67a91d28e6ff207c"
+      ],
+      "statement": "Grip span changes the normalized nonzero conditioning while proper rotation preserves structural rank and singular values; no muscle, scapular, intentional, or human strategy is identified.",
+      "classification": "geometry_conditioning_and_scope_boundary",
+      "published_status": "supported_for_declared_scaling_with_human_validation_open",
+      "audit_status": "analytic_rank_manufactured_null_rotation_and_span_controls_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:254",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05_two_hand_wrench.qmd:265"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/bilateral_wrench_identifiability_study.json",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_bilateral_wrench_identifiability.pdf",
+        "scripts/research/proximal_distal_energy/bilateral_wrench_identifiability.py",
+        "scripts/research/proximal_distal_energy/run_bilateral_wrench_identifiability_study.py",
+        "tests/research/test_bilateral_wrench_identifiability.py",
+        "tests/research/test_bilateral_wrench_identifiability_evidence.py"
+      ],
+      "model_domain": "Instantaneous linear map from two separated three-dimensional hand contacts to one net club wrench.",
+      "uncertainty_boundary": "Condition values depend on declared force/moment scaling and exclude noise, cross-talk, contact migration, tissue dynamics, and subject variability.",
+      "competing_explanations": [
+        "free hand moments",
+        "distributed contact pressure",
+        "contact-center migration",
+        "sensor cross-talk and synchronization error",
+        "constitutive assumptions used to select one allocation"
+      ],
+      "negative_controls": [
+        "manufactured equal-and-opposite axial null vector",
+        "one-scalar axial measurement augmentation",
+        "three proper spatial rotations",
+        "forty-nine grip-span geometries",
+        "explicit force and moment measurement scaling"
+      ],
+      "falsifier": "Rank changes under a consistent proper rotation, the span trend fails under the declared scaling, or the result is promoted to a biological strategy.",
+      "adjudication": "The analytic map, numerical SVD, manufactured null mode, augmentation, spatial rotations, and neutral human boundary reconcile with the committed JSON and tests.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-14"
     }

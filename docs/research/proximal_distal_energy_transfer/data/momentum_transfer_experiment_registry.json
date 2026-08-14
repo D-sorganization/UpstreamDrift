@@ -288,6 +288,58 @@
       "execution_status": "dynamic_constitutive_passivity_and_local_identifiability_screen_complete_delivery_spatial_subject_and_human_tests_open"
     },
     {
+      "id": "MT-E07",
+      "questions": ["Q2"],
+      "title": "Bilateral Wrench Identifiability and Sensor Qualification",
+      "model_tiers": [
+        "instantaneous_linear_measurement_map",
+        "spatial_articulated",
+        "subject_scaled",
+        "governed_human"
+      ],
+      "interventions": [
+        "grip_span_sweep",
+        "proper_rotation",
+        "reference_transport",
+        "point_force_only",
+        "point_force_plus_internal_axial_scalar",
+        "bilateral_six_axis_wrenches"
+      ],
+      "controls": [
+        "manufactured_axial_null_mode",
+        "coincident_contact_limit",
+        "rank_and_nullity",
+        "declared_force_and_moment_scaling",
+        "sensor_noise_and_cross_talk",
+        "contact_migration"
+      ],
+      "outcomes": [
+        "structural_rank",
+        "allocation_nullity",
+        "singular_values",
+        "nonzero_condition_ratio",
+        "allocation_recovery_error",
+        "held_out_wrench_closure"
+      ],
+      "uncertainty": [
+        "grip_geometry",
+        "reference_point",
+        "sensor_calibration",
+        "cross_talk",
+        "contact_center_migration",
+        "measurement_noise"
+      ],
+      "falsifier": "A proposed allocation is not unique under the declared measurement map, changes materially within calibrated sensor uncertainty, or fails held-out bilateral wrench closure.",
+      "required_data": [
+        "bilateral_six_axis_grip_wrenches",
+        "time_resolved_contact_centers",
+        "club_kinematics",
+        "sensor_calibration_and_cross_talk_matrix",
+        "synchronization_record"
+      ],
+      "execution_status": "instantaneous_point_force_and_full_wrench_structural_rank_complete_noise_contact_migration_subject_and_human_qualification_open"
+    },
+    {
       "id": "MT-H01",
       "questions": ["Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7"],
       "title": "Participant-Held-Out Human Falsification",

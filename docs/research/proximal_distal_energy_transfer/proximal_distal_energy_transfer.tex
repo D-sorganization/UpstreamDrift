@@ -462,7 +462,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, colframe=quarto-callout-note-color-frame, breakable, leftrule=.75mm, opacitybacktitle=0.6, rightrule=.15mm, bottomrule=.15mm, colback=white, bottomtitle=1mm, titlerule=0mm, toprule=.15mm, arc=.35mm, opacityback=0, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, left=2mm, coltitle=black]
+\begin{tcolorbox}[enhanced jigsaw, breakable, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, bottomtitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, left=2mm, toprule=.15mm, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, colback=white, opacityback=0, coltitle=black, toptitle=1mm, titlerule=0mm, arc=.35mm, rightrule=.15mm, opacitybacktitle=0.6]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -4239,6 +4239,102 @@ greatly exceeds the resultant over much of the early and middle trace.
 BASE and ZTCF resultants are nearly coincident, while their opposed
 modes differ more visibly. This is why a net-force plot alone cannot
 diagnose the rotational action of a two-hand grip.
+
+\section{Which Bilateral Forces Are
+Identifiable?}\label{sec-bilateral-wrench-identifiability}
+
+The common/differential decomposition also exposes a measurement
+limitation. Let the stacked point-force vector be
+\(\mathbf f=[\mathbf F_L^T,\mathbf F_T^T]^T\). About a declared
+reference \(O\), the measured net club wrench is the linear map
+
+\begin{equation}\phantomsection\label{eq-point-force-wrench-map}{
+\begin{bmatrix}\mathbf R\\\mathbf M_O\end{bmatrix}
+=
+\underbrace{
+\begin{bmatrix}
+\mathbf I & \mathbf I\\
+[\mathbf r_L-\mathbf r_O]_\times &
+[\mathbf r_T-\mathbf r_O]_\times
+\end{bmatrix}}_{\mathbf A_F}
+\begin{bmatrix}\mathbf F_L\\\mathbf F_T\end{bmatrix},
+}\end{equation}
+
+where \([\mathbf r]_\times\mathbf F=\mathbf r\times\mathbf F\). For two
+distinct point contacts, \(\mathbf A_F\) has rank five rather than six.
+Its one-dimensional right null space is
+
+\begin{equation}\phantomsection\label{eq-axial-internal-null-mode}{
+\mathbf n_F=\frac{1}{\sqrt{2}}
+\begin{bmatrix}\widehat{\mathbf d}\\-\widehat{\mathbf d}\end{bmatrix},
+\qquad
+\widehat{\mathbf d}=\frac{\mathbf r_T-\mathbf r_L}
+{\lVert\mathbf r_T-\mathbf r_L\rVert}.
+}\end{equation}
+
+Thus equal and opposite forces directed along the contact-separation
+axis produce neither a net force nor a net moment. They can preload the
+grip, change contact pressure, and alter tissue or shaft states while
+remaining exactly invisible in the net club wrench. This is a structural
+result, not a statement that such loading is beneficial, intentional, or
+present in a golfer. It also shows why club motion, inverse dynamics, or
+a single net-wrench sensor cannot by itself distinguish a lead-arm push
+from an opposing trail-arm pull.
+
+The left-null counterpart is equally useful: point forces alone cannot
+create a free moment parallel to \(\mathbf d\) about the grip midpoint.
+Such a measured long-axis moment requires a free hand torque, a
+non-point contact distribution, or model discrepancy. Perpendicular
+differential forces remain observable through their couple, with
+force-to-moment gain proportional to grip span.
+
+If each hand is instead allowed an independent six-axis wrench, the
+input has twelve components and the net-wrench map has rank six and
+nullity six. A net club wrench therefore identifies even less of the
+\emph{allocation}: infinitely many bilateral force/free-moment
+combinations produce the same resultant wrench. One independent internal
+axial-force scalar raises the point-force map to full column rank six,
+but it does not resolve the full six-axis bilateral problem. Direct
+allocation requires bilateral measurements or additional assumptions
+that must themselves be calibrated and tested. Instrumented-grip studies
+show feasible measurement precedents (\citeproc{ref-koike2016}{Koike
+2016}; \citeproc{ref-koike2020}{Choi and Park 2020}), but the available
+public reports are not a governed participant-level data deposit for the
+frozen human protocol.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_bilateral_wrench_identifiability.pdf}
+
+}
+
+\caption{\label{fig-bilateral-wrench-identifiability}Bilateral Wrench
+Identifiability Is Geometry and Sensor Dependent}
+
+\end{figure}%
+
+Figure~\ref{fig-bilateral-wrench-identifiability} reports the executable
+audit. The point- force map is rank five with nullity one; adding the
+axial scalar gives rank six; and the full bilateral-wrench map is rank
+six with nullity six. A 0.06--0.30 m declared grip-span sweep preserves
+rank while increasing the smallest nonzero singular value and reducing
+the nonzero condition ratio. Because force and moment have different
+units, the plotted audit uses explicit SI numerical scaling (1 N for
+force and 1 N m for moment); its condition ratio is therefore
+measurement-scale dependent, while rank and nullity are not. Three
+consistent proper rotations preserve the singular values to within
+\(2.3\times10^{-16}\).
+
+This closes only an instantaneous linear structural-identifiability
+question. It does not establish practical identifiability under noise,
+identify wrist, arm, scapular, or muscle commands, or validate a human
+strategy. Those stronger questions require synchronized bilateral
+six-axis grip wrenches, contact-state or pressure measurements,
+kinematics, and participant-held-out evaluation. The machine-readable
+result and figure are regenerated by
+\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/scripts/research/proximal_distal_energy/run_bilateral_wrench_identifiability_study.py}{\texttt{run\_bilateral\_wrench\_identifiability\_study.py}}.
 
 \section{Reconstruction and Verification
 Methods}\label{sec-two-hand-methods}
@@ -11533,6 +11629,11 @@ Recorded outputs:
   \texttt{data/two\_hand\_wscg\_analysis.npz} --- local force modes,
   moment and power decompositions, poses, and geometry-counterfactual
   arrays.
+\item
+  \texttt{data/bilateral\_wrench\_identifiability\_study.json} ---
+  three-dimensional point-force and full bilateral-wrench ranks, null
+  spaces, grip-span sweep, proper-rotation audit, sensing boundary, and
+  explicit nonhuman claims.
 \item
   \texttt{data/shaft\_contribution\_study.json} --- matched
   rigid/flexible results, termwise acceleration and power summaries,

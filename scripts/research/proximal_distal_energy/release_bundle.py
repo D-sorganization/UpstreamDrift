@@ -130,6 +130,10 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
                 "command": "python -m scripts.research.proximal_distal_energy.run_rotating_base_torso_velocity_study",
                 "tier": "planar_rotating_base_two_hand_compliant_club",
             },
+            "bilateral_wrench_identifiability": {
+                "command": "python -m scripts.research.proximal_distal_energy.run_bilateral_wrench_identifiability_study",
+                "tier": "instantaneous_linear_structural_identifiability",
+            },
         },
         "claims": {
             "interaction_dynamics_planar": "supported_at_declared_model_tier",
@@ -174,6 +178,10 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
             "human_torso_velocity_strategy": "untested",
             "global_slack_benefit": "unsupported",
             "single_channel_slack_class_identification": "not_established",
+            "individual_hand_allocation_from_net_wrench": (
+                "structurally_unidentifiable"
+            ),
+            "bilateral_human_wrench_validation": "untested",
         },
         "known_open_gates": [
             "subject-scaled articulated spatial contact with calibrated grip and distributed shaft",

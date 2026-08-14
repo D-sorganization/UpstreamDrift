@@ -38,6 +38,8 @@ def test_key_failure_controls_are_explicit() -> None:
     assert "delayed_observer_policy" in experiments["MT-E04"]["interventions"]
     assert "interior_optimum" in experiments["MT-E05"]["outcomes"]
     assert "one_slack_class_at_a_time" in experiments["MT-E06"]["controls"]
+    assert "manufactured_axial_null_mode" in experiments["MT-E07"]["controls"]
+    assert "bilateral_six_axis_grip_wrenches" in experiments["MT-E07"]["required_data"]
 
 
 def test_human_stage_is_participant_held_out_and_fail_closed() -> None:
