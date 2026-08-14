@@ -49,7 +49,7 @@ reviewed.
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.513 |
+| **Spec Version** | 1.0.514 |
 | **Last Spec Update** | 2026-08-13 |
 
 ## 2. Purpose & Mission
@@ -2997,3 +2997,8 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - The machine-readable registry shall provide required estimands, controls,
   falsifiers, and governing issues for all seven questions. Synthetic evidence
   may design human tests but shall not close human claims.
+- The implementation registry shall freeze model tiers, interventions,
+  controls, outcomes, uncertainty axes, required data, falsifiers, and honest
+  execution status before new preferred results are selected. The governed
+  human stage shall remain blocked until a qualifying participant-level
+  dataset exists; synthetic traces shall not satisfy that stage.

@@ -14,6 +14,13 @@ Every question has a current evidence boundary, a next model experiment, a
 measurement requirement, and a result that would contradict the proposed
 mechanism.
 
+The implementation-level registration is
+[`data/momentum_transfer_experiment_registry.json`](data/momentum_transfer_experiment_registry.json).
+It freezes seven model experiments and one participant-held-out human stage,
+including interventions, controls, outcomes, uncertainty axes, falsifiers,
+required data, and present execution status. A status describes what is
+available; it is not a favorable-result label.
+
 ## Current Answer Map
 
 | ID  | Critical Question                                                                                                      | Present Answer                                                                                                                                                                                                                 | Evidence Already Available                                                                                                                                             | Material Boundary                                                                                                                                                | Decisive Path Forward                                                                                                                                                                                                                                  |

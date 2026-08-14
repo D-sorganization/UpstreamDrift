@@ -160,30 +160,31 @@ the finding-by-finding record in
 
 ## Layout
 
-| Path                                                                                   | What it is                                                                        |
-| -------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| [`proximal_distal_energy_transfer.qmd`](proximal_distal_energy_transfer.qmd)           | Master Quarto document (front matter + chapter includes)                          |
-| [`chapters/`](chapters/)                                                               | Chapter source files (`_ch01`–`_ch09`, `_appendices`)                             |
-| [`HAND_PATH_ATTRIBUTION_CONTRACT.md`](HAND_PATH_ATTRIBUTION_CONTRACT.md)               | Canonical source, terminology, and estimand contract for hand-path attribution    |
-| [`TERMINOLOGY_AND_CONVENTIONS.md`](TERMINOLOGY_AND_CONVENTIONS.md)                     | Normative scientific vocabulary, frame, wrench, power, and evidence-status rules  |
-| [`ADVANCED_EXPANSION_REVIEW.md`](ADVANCED_EXPANSION_REVIEW.md)                         | Completed review, implemented expansion, and falsifiable next-model roadmap       |
-| [`EVIDENCE_SCHEMA_V2.md`](EVIDENCE_SCHEMA_V2.md)                                       | Falsifiable prediction and named spatial-interface evidence contract              |
-| [`CLAIM_AUDIT_SCHEMA.md`](CLAIM_AUDIT_SCHEMA.md)                                       | Atomic claim, candidate-inventory, source, alternative, and adjudication contract |
-| [`COMPREHENSIVE_RESEARCH_PROGRAM.md`](COMPREHENSIVE_RESEARCH_PROGRAM.md)               | Biomechanics, nonlinear-control, model-ladder, data, and validation roadmap       |
-| [`MOMENTUM_TRANSFER_QUESTION_PROGRAM.md`](MOMENTUM_TRANSFER_QUESTION_PROGRAM.md)       | Drift, geometry, timing, robustness, proximal-velocity, and typed-slack questions |
-| [`MODEL_COMPLETION_FALSIFICATION_MATRIX.md`](MODEL_COMPLETION_FALSIFICATION_MATRIX.md) | Claim, alternative-explanation, model-discrepancy, and falsifier register         |
-| [`EXPERIMENTAL_FALSIFICATION_PROTOCOL.md`](EXPERIMENTAL_FALSIFICATION_PROTOCOL.md)     | Frozen human-data acquisition, split, analysis, and inference-boundary protocol   |
-| [`REVIEWER_WORKBENCH.md`](REVIEWER_WORKBENCH.md)                                       | Claim-first figure, evidence, and download index by model tier                    |
-| [`COMPANION_WORKBENCH.md`](COMPANION_WORKBENCH.md)                                     | Interactive PyQt6 and React/Tauri model guide, experiments, and evidence boundary |
-| [`ADVERSARIAL_REVIEW_ADJUDICATION.md`](ADVERSARIAL_REVIEW_ADJUDICATION.md)             | Verified disposition and remediation record for the independent technical review  |
-| [`DATA_DICTIONARY.md`](DATA_DICTIONARY.md)                                             | Artifact and recurring-field definitions with interpretation boundaries           |
-| [`release_manifest.json`](release_manifest.json)                                       | Hash-pinned presets, claim status, artifacts, and open release gates              |
-| [`references.bib`](references.bib)                                                     | Linked bibliography plus a clearly labeled project-originated presentation source |
-| [`figures/`](figures/)                                                                 | Figures generated from the recorded analyses (PDF and SVG)                        |
-| [`data/`](data/)                                                                       | Recorded experiment outputs with provenance (JSON + NPZ)                          |
-| [`proximal_distal_energy_transfer.tex`](proximal_distal_energy_transfer.tex)           | LaTeX generated from the Quarto source (`keep-tex: true`)                         |
-| [`sources/wscg_2024/`](sources/wscg_2024/)                                             | Hash-registered WSCG presentation sources and interpretation boundaries           |
-| [`proximal_distal_energy_transfer.pdf`](proximal_distal_energy_transfer.pdf)           | Rendered scientific PDF                                                           |
+| Path                                                                                                 | What it is                                                                        |
+| ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| [`proximal_distal_energy_transfer.qmd`](proximal_distal_energy_transfer.qmd)                         | Master Quarto document (front matter + chapter includes)                          |
+| [`chapters/`](chapters/)                                                                             | Chapter source files (`_ch01`–`_ch09`, `_appendices`)                             |
+| [`HAND_PATH_ATTRIBUTION_CONTRACT.md`](HAND_PATH_ATTRIBUTION_CONTRACT.md)                             | Canonical source, terminology, and estimand contract for hand-path attribution    |
+| [`TERMINOLOGY_AND_CONVENTIONS.md`](TERMINOLOGY_AND_CONVENTIONS.md)                                   | Normative scientific vocabulary, frame, wrench, power, and evidence-status rules  |
+| [`ADVANCED_EXPANSION_REVIEW.md`](ADVANCED_EXPANSION_REVIEW.md)                                       | Completed review, implemented expansion, and falsifiable next-model roadmap       |
+| [`EVIDENCE_SCHEMA_V2.md`](EVIDENCE_SCHEMA_V2.md)                                                     | Falsifiable prediction and named spatial-interface evidence contract              |
+| [`CLAIM_AUDIT_SCHEMA.md`](CLAIM_AUDIT_SCHEMA.md)                                                     | Atomic claim, candidate-inventory, source, alternative, and adjudication contract |
+| [`COMPREHENSIVE_RESEARCH_PROGRAM.md`](COMPREHENSIVE_RESEARCH_PROGRAM.md)                             | Biomechanics, nonlinear-control, model-ladder, data, and validation roadmap       |
+| [`MOMENTUM_TRANSFER_QUESTION_PROGRAM.md`](MOMENTUM_TRANSFER_QUESTION_PROGRAM.md)                     | Drift, geometry, timing, robustness, proximal-velocity, and typed-slack questions |
+| [`data/momentum_transfer_experiment_registry.json`](data/momentum_transfer_experiment_registry.json) | Frozen interventions, controls, outcomes, uncertainty, falsifiers, and data needs |
+| [`MODEL_COMPLETION_FALSIFICATION_MATRIX.md`](MODEL_COMPLETION_FALSIFICATION_MATRIX.md)               | Claim, alternative-explanation, model-discrepancy, and falsifier register         |
+| [`EXPERIMENTAL_FALSIFICATION_PROTOCOL.md`](EXPERIMENTAL_FALSIFICATION_PROTOCOL.md)                   | Frozen human-data acquisition, split, analysis, and inference-boundary protocol   |
+| [`REVIEWER_WORKBENCH.md`](REVIEWER_WORKBENCH.md)                                                     | Claim-first figure, evidence, and download index by model tier                    |
+| [`COMPANION_WORKBENCH.md`](COMPANION_WORKBENCH.md)                                                   | Interactive PyQt6 and React/Tauri model guide, experiments, and evidence boundary |
+| [`ADVERSARIAL_REVIEW_ADJUDICATION.md`](ADVERSARIAL_REVIEW_ADJUDICATION.md)                           | Verified disposition and remediation record for the independent technical review  |
+| [`DATA_DICTIONARY.md`](DATA_DICTIONARY.md)                                                           | Artifact and recurring-field definitions with interpretation boundaries           |
+| [`release_manifest.json`](release_manifest.json)                                                     | Hash-pinned presets, claim status, artifacts, and open release gates              |
+| [`references.bib`](references.bib)                                                                   | Linked bibliography plus a clearly labeled project-originated presentation source |
+| [`figures/`](figures/)                                                                               | Figures generated from the recorded analyses (PDF and SVG)                        |
+| [`data/`](data/)                                                                                     | Recorded experiment outputs with provenance (JSON + NPZ)                          |
+| [`proximal_distal_energy_transfer.tex`](proximal_distal_energy_transfer.tex)                         | LaTeX generated from the Quarto source (`keep-tex: true`)                         |
+| [`sources/wscg_2024/`](sources/wscg_2024/)                                                           | Hash-registered WSCG presentation sources and interpretation boundaries           |
+| [`proximal_distal_energy_transfer.pdf`](proximal_distal_energy_transfer.pdf)                         | Rendered scientific PDF                                                           |
 
 ## Reproducing Everything
 
