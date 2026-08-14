@@ -351,15 +351,12 @@ def _embedded_fixed_seed(fixed_solution: _SolveResult) -> FloatArray:
     return np.concatenate((np.zeros(4), values[:4], np.zeros(4), values[4:]))
 
 
-def run_scapulothoracic_contact_screen(
-    *,
-    profiles: Sequence[SyntheticSubjectProfile] | None = None,
-    grip_spans_m: FloatArray | None = None,
-    time_s: FloatArray | None = None,
-    adverse_grip_span_m: float = 2.0,
-    config: ScapulothoracicConfig = ScapulothoracicConfig(),
-) -> tuple[dict[str, Any], dict[str, FloatArray]]:
-    """Run paired arm-only closure with fixed and mobile scapular geometry."""
+def _validated_design(
+    profiles: Sequence[SyntheticSubjectProfile] | None,
+    grip_spans_m: FloatArray | None,
+    time_s: FloatArray | None,
+    adverse_grip_span_m: float,
+) -> tuple[tuple[SyntheticSubjectProfile, ...], FloatArray, FloatArray]:
     selected = tuple(default_synthetic_profiles() if profiles is None else profiles)
     spans = np.asarray([0.12, 0.18, 0.24] if grip_spans_m is None else grip_spans_m)
     times = np.asarray(np.array([0.0, 0.12, 0.24]) if time_s is None else time_s)
@@ -385,9 +382,11 @@ def run_scapulothoracic_contact_screen(
         np.max(spans)
     ):
         raise ValueError("adverse_grip_span_m must exceed every registered grip span")
+    return selected, spans, times
 
-    shape = (len(selected) * spans.size, times.size)
-    arrays = {
+
+def _empty_result_arrays(shape: tuple[int, int]) -> dict[str, FloatArray]:
+    return {
         "fixed_max_contact_error_m": np.empty(shape),
         "scapular_max_contact_error_m": np.empty(shape),
         "fixed_contact_jacobian_rank": np.empty(shape, dtype=np.int64),
@@ -401,6 +400,48 @@ def run_scapulothoracic_contact_screen(
         "scapular_shoulder_excursion_m": np.empty((*shape, 2)),
         "scapular_coordinates_rad": np.empty((*shape, 2, 4)),
     }
+
+
+def _store_pair(
+    arrays: dict[str, FloatArray],
+    case: int,
+    time_index: int,
+    fixed: _SolveResult,
+    scapular: _SolveResult,
+    neutral_shoulders: FloatArray,
+) -> None:
+    prefix_to_result = {"fixed": fixed, "scapular": scapular}
+    for prefix, result in prefix_to_result.items():
+        arrays[f"{prefix}_max_contact_error_m"][case, time_index] = (
+            result.max_contact_error_m
+        )
+        arrays[f"{prefix}_contact_jacobian_rank"][case, time_index] = (
+            result.contact_jacobian_rank
+        )
+        arrays[f"{prefix}_contact_jacobian_nullity"][case, time_index] = (
+            result.contact_jacobian_nullity
+        )
+        arrays[f"{prefix}_solver_termination_success"][case, time_index] = (
+            result.solver_termination_success
+        )
+        arrays[f"{prefix}_minimum_bound_margin_rad"][case, time_index] = (
+            result.minimum_coordinate_bound_margin_rad
+        )
+    arrays["scapular_shoulder_excursion_m"][case, time_index] = np.linalg.norm(
+        scapular.shoulder_points_m - neutral_shoulders, axis=1
+    )
+    arrays["scapular_coordinates_rad"][case, time_index] = np.asarray(
+        (scapular.coordinates[:4], scapular.coordinates[8:12])
+    )
+
+
+def _run_registered_cases(
+    selected: tuple[SyntheticSubjectProfile, ...],
+    spans: FloatArray,
+    times: FloatArray,
+    config: ScapulothoracicConfig,
+) -> tuple[list[dict[str, Any]], dict[str, FloatArray]]:
+    arrays = _empty_result_arrays((len(selected) * spans.size, times.size))
     profile_records: list[dict[str, Any]] = []
     case = 0
     for profile in selected:
@@ -434,50 +475,28 @@ def run_scapulothoracic_contact_screen(
                     fallback=embedded,
                 )
                 scapular_previous = scapular.coordinates
-                arrays["fixed_max_contact_error_m"][case, time_index] = (
-                    fixed.max_contact_error_m
-                )
-                arrays["scapular_max_contact_error_m"][case, time_index] = (
-                    scapular.max_contact_error_m
-                )
-                arrays["fixed_contact_jacobian_rank"][case, time_index] = (
-                    fixed.contact_jacobian_rank
-                )
-                arrays["scapular_contact_jacobian_rank"][case, time_index] = (
-                    scapular.contact_jacobian_rank
-                )
-                arrays["fixed_contact_jacobian_nullity"][case, time_index] = (
-                    fixed.contact_jacobian_nullity
-                )
-                arrays["scapular_contact_jacobian_nullity"][case, time_index] = (
-                    scapular.contact_jacobian_nullity
-                )
-                arrays["fixed_solver_termination_success"][case, time_index] = (
-                    fixed.solver_termination_success
-                )
-                arrays["scapular_solver_termination_success"][case, time_index] = (
-                    scapular.solver_termination_success
-                )
-                arrays["fixed_minimum_bound_margin_rad"][case, time_index] = (
-                    fixed.minimum_coordinate_bound_margin_rad
-                )
-                arrays["scapular_minimum_bound_margin_rad"][case, time_index] = (
-                    scapular.minimum_coordinate_bound_margin_rad
-                )
                 neutral_shoulders = _positions(
                     scap_reference, context, config, include_scapula=True
                 )[1]
-                arrays["scapular_shoulder_excursion_m"][case, time_index] = (
-                    np.linalg.norm(
-                        scapular.shoulder_points_m - neutral_shoulders, axis=1
-                    )
-                )
-                arrays["scapular_coordinates_rad"][case, time_index] = np.asarray(
-                    (scapular.coordinates[:4], scapular.coordinates[8:12])
+                _store_pair(
+                    arrays,
+                    case,
+                    time_index,
+                    fixed,
+                    scapular,
+                    neutral_shoulders,
                 )
             case += 1
+    return profile_records, arrays
 
-    adverse_model, adverse_metadata = build_subject_scaled_model(selected[0])
+
+def _run_adverse_control(
+    profile: SyntheticSubjectProfile,
+    times: FloatArray,
+    adverse_grip_span_m: float,
+    config: ScapulothoracicConfig,
+) -> dict[str, Any]:
+    adverse_model, adverse_metadata = build_subject_scaled_model(profile)
     adverse_q, _, _ = prescribed_state(adverse_model, float(times[len(times) // 2]))
     adverse_context = _context(
         adverse_model, adverse_q, adverse_metadata, adverse_grip_span_m
@@ -495,7 +514,25 @@ def run_scapulothoracic_contact_screen(
         include_scapula=True,
         seed=_embedded_fixed_seed(adverse_fixed),
     )
-    record = {
+    return {
+        "grip_span_m": adverse_grip_span_m,
+        "fixed_contact_closed": adverse_fixed.contact_closed,
+        "scapular_contact_closed": adverse_scapular.contact_closed,
+        "scapular_max_contact_error_m": adverse_scapular.max_contact_error_m,
+    }
+
+
+def _result_record(
+    selected: tuple[SyntheticSubjectProfile, ...],
+    spans: FloatArray,
+    times: FloatArray,
+    profile_records: list[dict[str, Any]],
+    arrays: dict[str, FloatArray],
+    adverse_control: dict[str, Any],
+    config: ScapulothoracicConfig,
+) -> dict[str, Any]:
+    shape = arrays["fixed_max_contact_error_m"].shape
+    return {
         "schema_version": "scapulothoracic-contact-screen/v1",
         "study_id": "paired-fixed-and-scapula-on-ellipsoid-arm-only-contact-screen",
         "model": {
@@ -553,12 +590,7 @@ def run_scapulothoracic_contact_screen(
                 np.count_nonzero(arrays["scapular_minimum_bound_margin_rad"] <= 1.0e-6)
             ),
         },
-        "adverse_control": {
-            "grip_span_m": adverse_grip_span_m,
-            "fixed_contact_closed": adverse_fixed.contact_closed,
-            "scapular_contact_closed": adverse_scapular.contact_closed,
-            "scapular_max_contact_error_m": adverse_scapular.max_contact_error_m,
-        },
+        "adverse_control": adverse_control,
         "boundaries": {
             "model_identity": "ellipsoid_surface_kinematic_surrogate_not_exact_seth_opensim_model",
             "scapular_or_glenohumeral_allocation": "structurally_nonunique_from_contact_geometry",
@@ -569,6 +601,33 @@ def run_scapulothoracic_contact_screen(
         },
         "array_artifact": "scapulothoracic_contact_screen.npz",
     }
+
+
+def run_scapulothoracic_contact_screen(
+    *,
+    profiles: Sequence[SyntheticSubjectProfile] | None = None,
+    grip_spans_m: FloatArray | None = None,
+    time_s: FloatArray | None = None,
+    adverse_grip_span_m: float = 2.0,
+    config: ScapulothoracicConfig = ScapulothoracicConfig(),
+) -> tuple[dict[str, Any], dict[str, FloatArray]]:
+    """Run paired arm-only closure with fixed and mobile scapular geometry."""
+    selected, spans, times = _validated_design(
+        profiles, grip_spans_m, time_s, adverse_grip_span_m
+    )
+    profile_records, arrays = _run_registered_cases(selected, spans, times, config)
+    adverse_control = _run_adverse_control(
+        selected[0], times, adverse_grip_span_m, config
+    )
+    record = _result_record(
+        selected,
+        spans,
+        times,
+        profile_records,
+        arrays,
+        adverse_control,
+        config,
+    )
     return record, arrays
 
 
