@@ -455,7 +455,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm, opacitybacktitle=0.6, left=2mm, opacityback=0, arc=.35mm, bottomtitle=1mm, breakable, rightrule=.15mm, titlerule=0mm, leftrule=.75mm, toptitle=1mm, colback=white, coltitle=black, toprule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}]
+\begin{tcolorbox}[enhanced jigsaw, bottomtitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, colback=white, bottomrule=.15mm, opacityback=0, leftrule=.75mm, arc=.35mm, coltitle=black, opacitybacktitle=0.6, left=2mm, toprule=.15mm, breakable, rightrule=.15mm, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, titlerule=0mm]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -10597,16 +10597,18 @@ event. & Factorial interventions on proximal acceleration, distal
 release, and braking under matched state and work, with multiple
 preregistered casting definitions and adverse-load tests. \\
 Does a drift-mediated strategy require less timing precision? &
-Unresolved for people. State triggering improves selected synthetic
-outcomes but assumes state access and does not prove reduced neural
-timing demand. & Clock, state, impedance, and delayed-observer policies
-compared by viable timing-region volume, lower-tail outcome, phase
-error, delay, saturation, force, and effort. \\
-Is a strategy self-correcting? & Not established. Low perturbation
-sensitivity is not self-correction without a recovery mechanism. &
-Matched perturbations demonstrating error decay, recovery time,
-viable-set return probability, attraction-region size, and no hidden
-load-cost increase. \\
+Unresolved for people. In a 15-case paired planar screen, neither
+perfect nor delayed/noisy state triggering established a recovery
+advantage over the clock policy; this is not evidence about neural
+timing demand. & Viable timing-region and phase-error studies under
+matched work, force, and effort, then participant-held-out perturbation
+trials. \\
+Is a strategy self-correcting? & Not established. Requiring error to
+remain below half its initial value through delivery produced recovery
+in only 13--20\% of the engineering cases, with no policy separating
+decisively. & Larger attraction-region sweeps, adverse external loads,
+independently identified observers, and human perturbations without
+hidden load-cost increase. \\
 Should proximal velocity be maximized? & No general rule is supported.
 The reduced studies contain phase dependence, matching-rule dependence,
 nonmonotonic killswitch effects, and adverse braking associations. &
@@ -10644,6 +10646,33 @@ under observer delay and noise. Self-correction has the stronger
 requirement that a declared physical or feedback mechanism return a
 perturbed state toward a viable set. Repeatable open-loop behavior does
 not meet that definition.
+
+The delayed-observer experiment makes that distinction executable. Each
+policy received the same nuisance parameters and deterministic
+sensor-noise realization in an unperturbed reference and a matched
+initial-state perturbation. All policies briefly crossed the half-error
+threshold in most cases, but most later left it. Requiring sustained
+recovery through delivery reduced return fractions to 0.20 for the clock
+and delayed/noisy policies and 0.13 for perfect-state and
+higher-impedance policies. Median terminal error remained 0.79--0.84 of
+the initial perturbation. Figure~\ref{fig-observer-recovery} thus
+rejects the shortcut from transient error reduction or low outcome
+variance to self-correction; it does not rank human strategies.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_observer_recovery.pdf}
+
+}
+
+\caption{\label{fig-observer-recovery}Trajectory-Level Recovery Under
+Matched Initial-State Perturbations. Bands show the held-out engineering
+envelope; labels above the recovery bars give 90th-percentile
+individual-hand force.}
+
+\end{figure}%
 
 \section{Proximal Velocity as a Dose, Not a
 Maxim}\label{proximal-velocity-as-a-dose-not-a-maxim}
