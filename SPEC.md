@@ -4,8 +4,9 @@
 
 Epic #8557 has completed the current narrative-candidate adjudication contract:
 994/994 candidates, 266 atomic claims, and zero unadjudicated entries. This
-status is not release-level scientific closure: 10 of 31 public release claims
-remain pending or in progress and must be reported by the validator. The
+status is not scientific closure: all 31 public release claims now have a
+traceable review disposition, but all 31 retain an explicit model, equipment,
+anatomy, archival, or governed-human scientific gate. The
 trajectory-level bilateral point-force sensor qualification and subject-scaled
 spatial contact-closure audit retain their synthetic and prescribed-state
 scopes. Issue #8556 remains blocked on governed human bilateral six-axis
@@ -51,7 +52,7 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.529 |
+| **Spec Version** | 1.0.530 |
 | **Last Spec Update** | 2026-08-14 |
 
 ## 2. Purpose & Mission
@@ -82,6 +83,13 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ## 4. Architecture Overview
 
 ### Recent Spec Updates
+
+- **2026-08-14** - Completed the release-level claim-review authority for epic
+  #8557. All 31 release claims now link to supporting atomic claims, evidence,
+  negative controls, falsifiers, uncertainty boundaries, a scientific
+  disposition, and a remaining gate. Open review bookkeeping is zero while
+  human self-stabilization, physical bilateral sensing, and other scientific
+  gates remain explicitly untested or conditional.
 
 - `src/shared/python/club_data/loader.py`: Replaced `.iterrows()` with `df.to_dict('records')` (spec-exempt: micro-optimization)
 
@@ -3179,3 +3187,21 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - The next gate shall use an independently validated articulated shoulder,
   governed subject geometry where available, calibrated distributed grip
   contact, and paired forward dynamics with conservation and null controls.
+
+### F-8557.24: Release-Level Claim-Review Authority
+
+- Every release claim shall map to one or more registered atomic claims with
+  non-empty evidence artifacts, source locations, negative controls,
+  falsifiers, and uncertainty boundaries.
+- The release-level authority shall record the public status, review state,
+  scientific disposition, supporting claim identifiers, and next decisive
+  scientific gate for every release claim.
+- Release-review completion shall mean that no release claim is waiting for
+  adjudication. It shall not imply that a conditional, adverse, unsupported,
+  unexecuted, or untested scientific claim has become validated.
+- Open-resource qualification shall fail closed when the release inventory,
+  atomic evidence contract, registry review states, or generated release-level
+  authority drifts.
+- Human self-stabilization, physical bilateral six-axis device validation,
+  and human torso/strategy claims shall remain untested until governed data and
+  their registered participant-held-out protocols exist.
