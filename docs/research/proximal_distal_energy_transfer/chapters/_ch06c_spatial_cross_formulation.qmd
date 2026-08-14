@@ -258,6 +258,51 @@ lever arm. Consequently, the sign response is attributable to
 to a change in force norm, event timing, solver state, or reference-frame
 rotation.
 
+## Subject-Scaled Contact-Closure Audit {#sec-subject-scaled-contact-closure}
+
+The common-state result still leaves a more basic geometric question: do the
+anatomical hand points occupy the declared club-contact points? A constraint
+Jacobian can have full row rank even when the points it would constrain are
+far apart. Treating rank as proof of feasible two-hand contact would therefore
+hide a model-structure failure.
+
+A deterministic atlas scales the same 20-coordinate tree with the repository's
+canonical de Leva anthropometric estimator. It uses female and male regression
+tables at statures of 1.55, 1.75, and 1.95 m, with mass fixed by a declared
+24 kg/m$^2$ design rule. These six profiles are engineering design points, not
+participants or a population sample. Each is evaluated at 61 prescribed
+states and grip spans of 0.12, 0.18, and 0.24 m. The audit records the two
+anatomical hand-to-grip distances, the $6\times20$ bilateral point-constraint
+Jacobian and its singular values, the two-point force-to-wrench rank, and the
+regional generalized loads.
+
+![Subject-Scaled Spatial Contact-Geometry Audit](figures/fig_subject_scaled_spatial_geometry.pdf){#fig-subject-scaled-spatial-geometry width=100%}
+
+The adverse result is unambiguous. Anatomical hand points miss the declared
+grip points by 0.171--0.616 m across the atlas, with a median miss of 0.405 m;
+none is within the preregistered 5 mm closure tolerance. At the same open
+states, however, every local bilateral constraint Jacobian has rank six and
+condition number 5.35--6.40. Thus the rank calculation answers whether six
+local closure directions are independently available, not whether the
+prescribed configuration already satisfies those closures.
+
+The point-force measurement map retains rank five and one invisible axial
+push--pull mode at every grip span. Adding the independently measured internal
+axial scalar raises the augmented map to rank six. The prescribed
+force-generated couple scales exactly with grip span to stored precision.
+These positive algebraic controls do not rescue anatomical feasibility; they
+show that measurement rank, local kinematic rank, contact closure, and forward
+contact dynamics are four distinct gates.
+
+This result narrows the next spatial experiment. A subject-scaled model must
+first solve bilateral closed-contact inverse kinematics with joint-limit and
+collision checks. It must then integrate calibrated compliant contact from the
+same closed initial state, expose contact loss or tissue/shaft compliance as
+typed states, and repeat the coincident, reversal, killswitch, power, and
+work--energy controls in two independent engines. Only trajectories passing
+those gates may be used to test whether drift-mediated transfer reduces timing
+demand, creates recovery, benefits from slack, or supports a human strategy.
+
 ## Falsifiability Gained and Claims Still Open {#sec-spatial-claim-boundary}
 
 The executed experiment advances the evidence boundary in three ways.
@@ -289,7 +334,9 @@ Four stronger statements remain open:
   addresses that separate estimand without promoting this prescribed-load
   result.
 - **Anatomical Magnitude Is Unsupported.** The reduced tree and spherical
-  inertias are not subject-specific anatomy, muscle, or tissue mechanics.
+  inertias are not subject-specific anatomy, muscle, or tissue mechanics. The
+  subject-scaled audit further shows that its prescribed states do not close
+  the anatomical hands on the declared grip points.
 - **Human Strategy Is Unsupported.** No measured trajectory or force record is
   held out for validation, and no coaching prescription follows from this
   mechanism experiment.

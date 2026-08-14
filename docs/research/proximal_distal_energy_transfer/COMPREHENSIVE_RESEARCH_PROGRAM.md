@@ -111,7 +111,8 @@ inform acquisition design but are not participant-level deposits satisfying
 the frozen contract. Synthetic traces and paper-level summary curves are
 prohibited substitutes. The companion GUI is tracked by Tools
 [#4430](https://github.com/D-sorganization/Tools/issues/4430), stacked after
-runner-pending PR [#4411](https://github.com/D-sorganization/Tools/pull/4411);
+consolidated PR [#4450](https://github.com/D-sorganization/Tools/pull/4450).
+PR #4411 was intentionally closed as superseded;
 unchanged CI must not be redundantly rerun.
 
 ## Research Collection Review
@@ -145,7 +146,11 @@ remain subject to the model and human-evidence boundaries below.
 4. **Reusable Uncertainty Authority:** Tools #4142 merged, pinned, and parity
    verified.
 5. **Articulated Spatial Model:** calibrated grip and club, whole-body contact,
-   independent-engine comparison, and discrepancy report.
+   closed-contact inverse kinematics, joint-limit and collision checks,
+   independent-engine comparison, and discrepancy report. The first
+   subject-scaled atlas is complete and rejects the current prescribed common
+   states as anatomical contact configurations: hand-to-grip error is
+   0.171--0.616 m despite full local constraint rank.
 6. **Neuromuscular and Control Models:** activation, redundancy,
    identifiability, robust control, and held-out simulation evidence.
 7. **Human Falsification:** acquire governed synchronized bilateral six-axis
@@ -163,7 +168,7 @@ scientific contract.
 
 ## Completed Paper-Wide Claim Audit
 
-The current audit adjudicates all 975 narrative candidates against 258
+The current audit adjudicates all 982 narrative candidates against 261
 atomic claim contracts; no candidate remains unreviewed. Repeated methods,
 summary, limitation, and release passages point back to their primary claim
 instead of acquiring stronger authority through repetition. The final pass
