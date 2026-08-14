@@ -89,7 +89,7 @@ class CredibilityFactor(StrEnum):
     PEOPLE_QUALIFICATIONS = "people_qualifications"
 
     @property
-    def title(self) -> str:
+    def label(self) -> str:
         """Human-readable factor name, as NASA-STD-7009B writes it."""
         if self is CredibilityFactor.MS_MANAGEMENT:
             return "M&S Management"
@@ -426,7 +426,7 @@ def credibility_table_markdown() -> str:
         "| ------ | -------- | --------- | --- |",
     ]
     lines.extend(
-        f"| {item.factor.title} | {item.level_text()} | "
+        f"| {item.factor.label} | {item.level_text()} | "
         f"{item.threshold_level} / {MAX_CREDIBILITY_LEVEL} | {item.gap_text()} |"
         for item in CREDIBILITY_ASSESSMENT
     )

@@ -160,6 +160,6 @@ def to_post_impact_state(
         clubhead_velocity=club_velocity,
         clubhead_angular_velocity=clubhead_angular_velocity,
         contact_duration=contact_duration,
-        energy_transfer=energy_transfer,
+        energy_transfer=float(energy_transfer),
         impact_location=impact_location,
     )

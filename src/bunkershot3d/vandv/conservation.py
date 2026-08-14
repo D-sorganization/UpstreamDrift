@@ -247,7 +247,7 @@ def linear_impulse_residual(
         name="linear momentum (impulse identity)",
         conservation_class=ConservationClass.ROUND_OFF,
         residual=float(residual),
-        scale=max(scale, np.finfo(np.float64).tiny),
+        scale=max(float(scale), float(np.finfo(np.float64).tiny)),
     )
 
 
@@ -453,7 +453,9 @@ def energy_work_residual(
         name="energy (work-energy theorem)",
         conservation_class=ConservationClass.TRUNCATION,
         residual=abs(kinetic - work),
-        scale=max(abs(kinetic), magnitude, np.finfo(np.float64).tiny),
+        scale=max(
+            float(abs(kinetic)), float(magnitude), float(np.finfo(np.float64).tiny)
+        ),
         step_size_s=step,
     )
 

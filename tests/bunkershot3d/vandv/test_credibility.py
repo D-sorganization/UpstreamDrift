@@ -215,7 +215,7 @@ class TestTheDocumentIsFresh:
     def test_the_document_names_every_credibility_factor(self) -> None:
         text = CREDIBILITY_DOC.read_text(encoding="utf-8")
         for factor in CredibilityFactor:
-            assert factor.title in text, factor
+            assert factor.label in text, factor
 
     def test_the_document_states_that_nothing_is_validated(self) -> None:
         text = CREDIBILITY_DOC.read_text(encoding="utf-8")
