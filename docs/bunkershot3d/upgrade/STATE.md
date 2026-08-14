@@ -1,6 +1,6 @@
 # BunkerShot3D pro-grade upgrade — state ledger
 
-**Read this first on resumption.** Updated 2026-08-14 (18:58 UTC).
+**Read this first on resumption.** Updated 2026-08-14 (19:02 UTC).
 
 Epic: https://github.com/D-sorganization/UpstreamDrift/issues/8607
 
@@ -87,7 +87,7 @@ Follow-ups the merges created:
 | ----- | ----------------------------------------------- | --------------------------- |
 | #8611 | W4 **DRFT solver** — the default F0 tier        | **merged** (`1c857759c`)    |
 | #8613 | W6 the ball + `SwingBallFlightPipeline` handoff | **merged** (`577673cf8`)    |
-| #8614 | W7 designer metrics                             | **PR #8645** (CI running)   |
+| #8614 | W7 designer metrics                             | **merged** (`a86efa222`)    |
 | #8616 | W9 V&V suite + credibility statement            | not started                 |
 | #8618 | W11 designer workbench GUI                      | not started                 |
 | #8608 | W1 foundations (value objects, units)           | re-scope before starting    |
@@ -112,6 +112,12 @@ Follow-ups the merges created:
   finite-difference sensitivity analysis, forgiveness index
 - 42 new tests covering all metric categories
 - Computed from HDF5 result artifacts for fidelity-tier-agnostic (F0–F3) analysis
+
+**Post-merge review comments (Codex bot) — consider addressing in follow-up:**
+- `trajectory.py:129` — Use both x,y for horizontal distance (currently x-only)
+- `energy.py:113` — Allow negative e_unaccounted to expose energy overdraw
+- `twist.py:80` — Document that shaft_axis must be in world coordinates
+- `forgiveness.py:186` — Actually use reference_scales for gradient normalization
 
 ## How to resume
 
