@@ -1,6 +1,41 @@
-"""Energy metrics: KE loss, energy to sand, energy to ball (issue #8614).
+"""Energy partition through the strike (issue #8614, W7).
 
-Energy partition analysis for understanding where club energy goes.
+**The partition is two-level, and that is not a detail.** In a splash shot the
+club never touches the ball: it does work on the sand, and the sand throws the
+ball out. So the energy leaving the club divides as
+
+```
+club KE loss  =  work on sand  +  direct ball work  +  residual
+work on sand  =  energy retained by the sand  +  energy delivered to the ball
+```
+
+Adding "energy to sand" and "energy to ball" as if they were siblings would
+double-count the ball's energy for every splash shot. The reported fractions are
+therefore *sand-retained*, *ball* and *residual*, and they sum to exactly one by
+construction because the residual is defined as what is left over.
+
+============================== ===========================================================
+Quantity                       Definition
+============================== ===========================================================
+Club KE loss                   ``KE(t_start) - KE(t_end)`` of the head; translational
+                               ``0.5 m |v_cg|^2`` plus, when an inertia tensor is
+                               supplied, rotational ``0.5 w.I.w`` [J].
+Work on sand                   ``-integral of (F.v_cg + M_cg.w) dt`` -- minus the work the
+                               sand does on the head is the work the head does on the
+                               sand [J].
+Energy to ball                 Ball kinetic energy at launch, supplied by the caller
+                               (result artifacts carry no ball state) [J].
+Sand-retained energy           Work on sand minus the ball's share, for a sand-driven
+                               ball; the whole of it for a directly struck ball [J].
+Residual                       Club KE loss minus everything attributed. Gravity over the
+                               window, work done by the shaft and hands, and any model
+                               error all land here [J].
+============================== ===========================================================
+
+The residual is reported, never quietly absorbed: a large residual means the
+window is too wide, the grip is doing work, or the wrench is wrong. That is
+information a designer needs, and hiding it inside "energy to sand" is exactly
+the failure mode this package has been burnt by before (#7999).
 """
 
 from __future__ import annotations
@@ -9,147 +44,238 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from src.shared.python.core.contracts import require
+from src.shared.python.core.contracts import ensure
+
+from .trace import (
+    HeadModel,
+    StrikeTrace,
+    centre_of_mass_moment_Nm,
+    rotate_world_to_body,
+)
 
 __all__ = [
+    "BallLaunch",
     "EnergyPartition",
-    "compute_energy_partition",
+    "energy_partition",
+    "head_kinetic_energy_J",
 ]
 
+#: Default closure tolerance on the fraction sum, in fractions of the KE loss.
+DEFAULT_CLOSURE_ATOL = 1e-9
 
-@dataclass(frozen=True, slots=True)
-class EnergyPartition:
-    """Energy accounting for a bunker shot.
+
+@dataclass(frozen=True)
+class BallLaunch:
+    """Ball state at launch, as far as the energy budget is concerned.
+
+    The result artifact carries no ball state -- there is no ball anywhere in
+    the schema -- so this is supplied by the caller, normally from the W6 ball
+    handoff (#8613) or from a launch monitor.
 
     Attributes:
-        club_ke_in_j: Club kinetic energy at start [J].
-        club_ke_out_j: Club kinetic energy at end [J].
-        club_ke_lost_j: Club KE lost during shot [J].
-        energy_to_sand_j: Energy dissipated to sand [J].
-        energy_to_ball_j: Energy transferred to ball [J].
-        energy_unaccounted_j: Unaccounted energy (numerical, sound, etc.) [J].
-        fraction_to_sand: Fraction of lost KE going to sand.
-        fraction_to_ball: Fraction of lost KE going to ball.
-        fraction_unaccounted: Fraction unaccounted for.
+        mass_kg: Ball mass [kg]. A conforming ball is at most 0.04593 kg.
+        speed_mps: Launch speed of the centre of mass [m/s].
+        spin_radps: Launch spin rate [rad/s].
+        inertia_kg_m2: Moment of inertia about the spin axis [kg.m^2]. Required
+            once ``spin_radps`` is non-zero rather than defaulted, so spin
+            energy is never silently dropped or silently invented.
+        driven_by_sand: True for a splash shot, where the ball's energy comes
+            through the sand and is therefore part of the work on sand. False
+            for a directly struck ball, where it is a separate branch off the
+            club's kinetic energy.
     """
 
-    club_ke_in_j: float
-    club_ke_out_j: float
-    club_ke_lost_j: float
-    energy_to_sand_j: float
-    energy_to_ball_j: float
-    energy_unaccounted_j: float
-    fraction_to_sand: float
-    fraction_to_ball: float
-    fraction_unaccounted: float
+    mass_kg: float
+    speed_mps: float
+    spin_radps: float = 0.0
+    inertia_kg_m2: float | None = None
+    driven_by_sand: bool = True
+
+    def __post_init__(self) -> None:
+        """Validate the launch state.
+
+        Raises:
+            ValueError: If the mass is not positive, a value is not finite or
+                negative where it cannot be, or spin is reported without the
+                inertia needed to price it.
+        """
+        for name in ("mass_kg", "speed_mps", "spin_radps"):
+            value = float(getattr(self, name))
+            if not np.isfinite(value):
+                raise ValueError(f"{name} must be finite, got {value}")
+        if self.mass_kg <= 0.0:
+            raise ValueError(f"mass_kg must be positive, got {self.mass_kg}")
+        if self.speed_mps < 0.0:
+            raise ValueError(f"speed_mps must be non-negative, got {self.speed_mps}")
+        if self.spin_radps != 0.0 and self.inertia_kg_m2 is None:
+            raise ValueError(
+                "spin_radps is non-zero but inertia_kg_m2 was not supplied, so the "
+                "spin energy cannot be computed; supply it or report zero spin"
+            )
+        if self.inertia_kg_m2 is not None and self.inertia_kg_m2 <= 0.0:
+            raise ValueError(
+                f"inertia_kg_m2 must be positive, got {self.inertia_kg_m2}"
+            )
+
+    @property
+    def kinetic_energy_J(self) -> float:
+        """Launch kinetic energy, translational plus rotational [J]."""
+        energy = 0.5 * self.mass_kg * self.speed_mps**2
+        if self.inertia_kg_m2 is not None:
+            energy += 0.5 * self.inertia_kg_m2 * self.spin_radps**2
+        return float(energy)
 
 
-def compute_energy_partition(
-    t: np.ndarray,
-    positions: np.ndarray,
-    velocities: np.ndarray,
-    head_mass_kg: float,
-    *,
-    forces: np.ndarray | None = None,
-    ball_mass_kg: float = 0.0,
-    ball_moi_kg_m2: float = 0.0,
-    ball_speed_m_s: float = 0.0,
-    ball_spin_rad_s: float = 0.0,
-) -> EnergyPartition:
-    """Compute energy partition from trajectory data.
+def head_kinetic_energy_J(trace: StrikeTrace, head: HeadModel) -> np.ndarray:
+    """Return the head's kinetic energy at every sample [J].
+
+    Rotational energy is included only when the head carries an inertia tensor.
+    Omitting it is reported by :attr:`EnergyPartition.rotation_included` rather
+    than papered over with a guessed inertia.
 
     Args:
-        t: Time array (T,) [s].
-        positions: Clubhead positions (T, 3) [m].
-        velocities: Clubhead velocities (T, 3) [m/s].
-        head_mass_kg: Clubhead mass [kg].
-        forces: Contact forces (T, 3) [N], optional for work calculation.
-        ball_mass_kg: Ball mass [kg].
-        ball_moi_kg_m2: Ball moment of inertia [kg.m^2].
-        ball_speed_m_s: Ball launch speed [m/s].
-        ball_spin_rad_s: Ball spin rate [rad/s].
+        trace: Strike trace.
+        head: Head the trace was recorded for.
 
     Returns:
-        EnergyPartition with full energy accounting.
+        ``(T,)`` kinetic energy [J].
     """
-    require(len(t) == len(positions), "t and positions must have same length")
-    require(len(t) == len(velocities), "t and velocities must have same length")
-    require(head_mass_kg > 0, "head mass must be positive")
+    velocity = trace.point_velocity_mps(head.centre_of_mass_body_m)
+    energy = 0.5 * head.mass_kg * np.sum(velocity**2, axis=1)
+    if head.inertia_body_kg_m2 is None:
+        return energy
+    omega_body = rotate_world_to_body(
+        trace.head_orientation_quat, trace.angular_velocity_radps()
+    )
+    rotational = 0.5 * np.einsum(
+        "ti,ij,tj->t", omega_body, head.inertia_body_kg_m2, omega_body
+    )
+    return energy + rotational
 
-    velocities = np.asarray(velocities)
-    positions = np.asarray(positions)
 
-    if len(t) < 2:
-        return EnergyPartition(
-            club_ke_in_j=0.0,
-            club_ke_out_j=0.0,
-            club_ke_lost_j=0.0,
-            energy_to_sand_j=0.0,
-            energy_to_ball_j=0.0,
-            energy_unaccounted_j=0.0,
-            fraction_to_sand=0.0,
-            fraction_to_ball=0.0,
-            fraction_unaccounted=1.0,
+@dataclass(frozen=True)
+class EnergyPartition:
+    """Where the club's kinetic energy went.
+
+    Attributes:
+        club_kinetic_energy_loss_J: KE at the start of the window minus KE at
+            the end. Must be positive for a partition to mean anything.
+        work_on_sand_J: Work the head did on the sand over the window.
+        ball_energy_J: Ball kinetic energy at launch.
+        sand_retained_J: Work on sand that did not end up in the ball -- ejecta
+            kinetic energy plus everything dissipated in the bed.
+        residual_J: Club KE loss not attributed to sand or ball.
+        sand_fraction: ``sand_retained_J / club_kinetic_energy_loss_J``.
+        ball_fraction: ``ball_energy_J / club_kinetic_energy_loss_J``.
+        residual_fraction: ``residual_J / club_kinetic_energy_loss_J``.
+        rotation_included: Whether rotational terms are in the KE loss.
+        ball_driven_by_sand: Whether the ball's energy was taken out of the work
+            on sand (splash) or off the club directly (struck).
+    """
+
+    club_kinetic_energy_loss_J: float
+    work_on_sand_J: float
+    ball_energy_J: float
+    sand_retained_J: float
+    residual_J: float
+    sand_fraction: float
+    ball_fraction: float
+    residual_fraction: float
+    rotation_included: bool
+    ball_driven_by_sand: bool
+
+    @property
+    def fraction_sum(self) -> float:
+        """Sum of the three reported fractions; one by construction."""
+        return self.sand_fraction + self.ball_fraction + self.residual_fraction
+
+    def closes(self, atol: float = DEFAULT_CLOSURE_ATOL) -> bool:
+        """Return whether the fractions sum to one within ``atol``.
+
+        Args:
+            atol: Absolute tolerance on the fraction sum.
+
+        Returns:
+            True when the partition closes.
+        """
+        return bool(abs(self.fraction_sum - 1.0) <= atol)
+
+
+def energy_partition(
+    trace: StrikeTrace,
+    head: HeadModel,
+    *,
+    ball: BallLaunch | None = None,
+    window: slice | None = None,
+) -> EnergyPartition:
+    """Partition the club's kinetic-energy loss across the strike.
+
+    The wrench is zero outside contact, so widening the window does not change
+    the work on sand -- but it does change the kinetic-energy loss, because
+    gravity and the grip keep acting. Trim the window to the strike when the
+    residual matters.
+
+    Args:
+        trace: Strike trace.
+        head: Head the trace was recorded for.
+        ball: Ball state at launch, or ``None`` to report a club/sand-only
+            partition with a zero ball share.
+        window: Optional sample window; defaults to the whole trace.
+
+    Returns:
+        The partition. The three fractions sum to one exactly.
+
+    Raises:
+        ValueError: If the head gains kinetic energy over the window, so there
+            is no loss to partition, or if the ball is credited with more energy
+            than the head delivered to the sand.
+    """
+    selection = slice(None) if window is None else window
+    times = trace.time_s[selection]
+    if times.size < 3:
+        raise ValueError(
+            f"the energy window needs at least 3 samples, got {times.size}"
         )
-
-    v_in = velocities[0]
-    v_out = velocities[-1]
-
-    ke_in = 0.5 * head_mass_kg * float(np.dot(v_in, v_in))
-    ke_out = 0.5 * head_mass_kg * float(np.dot(v_out, v_out))
-    ke_lost = max(0.0, ke_in - ke_out)
-
-    e_ball_trans = 0.5 * ball_mass_kg * ball_speed_m_s**2 if ball_mass_kg > 0 else 0.0
-    e_ball_rot = (
-        0.5 * ball_moi_kg_m2 * ball_spin_rad_s**2 if ball_moi_kg_m2 > 0 else 0.0
+    energy = head_kinetic_energy_J(trace, head)[selection]
+    loss_J = float(energy[0] - energy[-1])
+    if loss_J <= 0.0:
+        raise ValueError(
+            "the head does not lose kinetic energy over this window "
+            f"(change is {-loss_J:+.6g} J), so there is nothing to partition"
+        )
+    velocity = trace.point_velocity_mps(head.centre_of_mass_body_m)[selection]
+    omega = trace.angular_velocity_radps()[selection]
+    moment = centre_of_mass_moment_Nm(trace, head)[selection]
+    power_on_head = np.sum(trace.sand_force_N[selection] * velocity, axis=1) + np.sum(
+        moment * omega, axis=1
     )
-    e_ball = e_ball_trans + e_ball_rot
-
-    if forces is not None:
-        e_sand = _compute_work_against_force(positions, forces)
-    else:
-        e_sand = max(0.0, ke_lost - e_ball)
-
-    e_unaccounted = max(0.0, ke_lost - e_sand - e_ball)
-
-    if ke_lost > 0:
-        f_sand = e_sand / ke_lost
-        f_ball = e_ball / ke_lost
-        f_unaccounted = e_unaccounted / ke_lost
-    else:
-        f_sand = 0.0
-        f_ball = 0.0
-        f_unaccounted = 1.0 if (e_sand + e_ball + e_unaccounted) == 0 else 0.0
-
-    total = f_sand + f_ball + f_unaccounted
-    if total > 0:
-        f_sand /= total
-        f_ball /= total
-        f_unaccounted /= total
-
-    return EnergyPartition(
-        club_ke_in_j=ke_in,
-        club_ke_out_j=ke_out,
-        club_ke_lost_j=ke_lost,
-        energy_to_sand_j=e_sand,
-        energy_to_ball_j=e_ball,
-        energy_unaccounted_j=e_unaccounted,
-        fraction_to_sand=f_sand,
-        fraction_to_ball=f_ball,
-        fraction_unaccounted=f_unaccounted,
+    work_on_sand_J = -float(np.trapezoid(power_on_head, times))
+    ball_energy_J = 0.0 if ball is None else ball.kinetic_energy_J
+    driven_by_sand = True if ball is None else ball.driven_by_sand
+    ball_share_of_sand_J = ball_energy_J if driven_by_sand else 0.0
+    sand_retained_J = work_on_sand_J - ball_share_of_sand_J
+    ensure(
+        sand_retained_J >= 0.0,
+        "the ball cannot carry more energy than the head delivered to the sand; "
+        "check the ball state, the wrench sign, or ball.driven_by_sand",
+        value=(work_on_sand_J, ball_energy_J),
     )
-
-
-def _compute_work_against_force(positions: np.ndarray, forces: np.ndarray) -> float:
-    """Compute work done against resistance force: W = -integral(F . ds).
-
-    Negative sign because sand force opposes motion.
-    """
-    if len(positions) < 2:
-        return 0.0
-
-    ds = np.diff(positions, axis=0)
-    f_avg = (forces[:-1] + forces[1:]) / 2.0
-
-    work = -np.sum(f_avg * ds)
-    return max(0.0, float(work))
+    residual_J = loss_J - work_on_sand_J - (ball_energy_J - ball_share_of_sand_J)
+    partition = EnergyPartition(
+        club_kinetic_energy_loss_J=loss_J,
+        work_on_sand_J=work_on_sand_J,
+        ball_energy_J=ball_energy_J,
+        sand_retained_J=sand_retained_J,
+        residual_J=residual_J,
+        sand_fraction=sand_retained_J / loss_J,
+        ball_fraction=ball_energy_J / loss_J,
+        residual_fraction=residual_J / loss_J,
+        rotation_included=head.inertia_body_kg_m2 is not None,
+        ball_driven_by_sand=driven_by_sand,
+    )
+    ensure(
+        partition.closes(1e-9),
+        "the energy fractions must sum to one",
+        value=partition.fraction_sum,
+    )
+    return partition

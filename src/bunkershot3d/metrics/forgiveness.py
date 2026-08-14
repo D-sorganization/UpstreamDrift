@@ -1,188 +1,436 @@
-"""Forgiveness metrics: sensitivity of ball launch to input errors (issue #8614).
+"""Forgiveness sensitivities over the measured delivery ranges (issue #8614).
 
-Quantifies how tolerant a wedge design is to golfer errors.
+A wedge is forgiving when carry does *not* track the thing the player fails to
+control. Wivou et al. (2016) measured how strongly it does track, on real
+bunker shots:
+
+* carry vs entry distance behind the ball: **r = -0.98**
+* carry vs divot depth: **r = -0.91**
+
+Those are the numbers to beat, and lower magnitude is better. They are
+**measurements from published work, not outputs of this model** -- the
+distinction matters, and this package has been burnt once already by presenting
+a borrowed constant as a measurement (#7999).
+
+Reported per factor:
+
+============================ =============================================================
+Quantity                     Definition
+============================ =============================================================
+``correlation_r``            Pearson correlation of carry against the factor. Directly
+                             comparable with the published baselines.
+``slope_m_per_unit``         Least-squares slope, carry [m] per factor unit.
+``carry_change_over_span_m`` ``slope * (sampled span)`` -- how much carry moves across the
+                             swept range.
+``fractional_carry_change``  That change divided by the target carry; dimensionless, and
+                             the number a designer compares across factors of different
+                             units. Smaller is more forgiving.
+============================ =============================================================
+
+Pearson ``r`` is scale-free, which makes it comparable with the literature but
+blind to *how much* carry actually moved: a factor can correlate at -0.99 and
+shift carry by one metre. That is why the fractional change is reported
+alongside, and why the ranking uses it. Variance-based sensitivity over a
+multi-factor design lives in :mod:`bunkershot3d.study.sensitivity`; this module
+is deliberately the one-factor linear form the baselines are stated in.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from collections.abc import Callable
+from dataclasses import dataclass
+from types import MappingProxyType
 
 import numpy as np
 
 __all__ = [
-    "ForgivenessMetrics",
-    "SensitivityGradient",
-    "compute_forgiveness_metrics",
+    "SWEEP_RANGES",
+    "WIVOU_2016_CARRY_CORRELATION",
+    "FactorSensitivity",
+    "ForgivenessReport",
+    "SweepRange",
+    "forgiveness_report",
+    "forgiveness_sensitivity",
 ]
 
-
-@dataclass(frozen=True, slots=True)
-class SensitivityGradient:
-    """Gradient of an output with respect to an input.
-
-    Attributes:
-        value: The sensitivity value (d_output / d_input).
-        units: Units string (e.g. "m/s per m").
-        input_name: Name of the input parameter.
-        output_name: Name of the output parameter.
-    """
-
-    value: float
-    units: str
-    input_name: str = ""
-    output_name: str = ""
-
-    @classmethod
-    def from_finite_diff(
-        cls,
-        func: Callable[[float], float],
-        nominal_value: float,
-        perturbation: float,
-        *,
-        input_units: str = "m",
-        output_units: str = "m/s",
-    ) -> SensitivityGradient:
-        """Compute gradient using central finite differences.
-
-        Args:
-            func: Function to differentiate (input -> output).
-            nominal_value: Nominal input value.
-            perturbation: Perturbation size for finite diff.
-            input_units: Units of the input.
-            output_units: Units of the output.
-
-        Returns:
-            SensitivityGradient with computed value.
-        """
-        f_plus = func(nominal_value + perturbation)
-        f_minus = func(nominal_value - perturbation)
-        gradient = (f_plus - f_minus) / (2 * perturbation)
-
-        return cls(
-            value=gradient,
-            units=f"{output_units} per {input_units}",
-        )
+#: Penetrometer readings are quoted in kg/cm^2 in the turf literature; this is
+#: the conversion to the SI unit the model works in.
+_KGF_PER_CM2_TO_KPA = 98.0665
 
 
-@dataclass
-class ForgivenessMetrics:
-    """Complete forgiveness analysis.
+@dataclass(frozen=True)
+class SweepRange:
+    """A factor's sweep range, in SI, with the source it came from.
 
     Attributes:
-        gradients: Nested dict of sensitivities [input][output].
-        forgiveness_index: Normalized score (0-1, higher = more forgiving).
-        error_budgets: Allowable input errors for given output variance.
+        name: Factor name, matching the keyword used across this package.
+        low: Lower bound, SI.
+        high: Upper bound, SI.
+        unit: SI unit symbol.
+        source: Where the range comes from. Recorded so a borrowed range is
+            never mistaken for a measured one.
     """
 
-    gradients: dict[str, dict[str, SensitivityGradient]] = field(default_factory=dict)
-    forgiveness_index: float = 0.5
-    _reference_scale: dict[str, float] = field(default_factory=dict)
+    name: str
+    low: float
+    high: float
+    unit: str
+    source: str
 
-    def compute_error_budget(
-        self,
-        output_name: str,
-        max_variance: float,
-    ) -> dict[str, float]:
-        """Compute allowable input error for given output variance.
+    def __post_init__(self) -> None:
+        """Validate the range.
 
-        Args:
-            output_name: Name of the output to bound.
-            max_variance: Maximum acceptable output variance.
-
-        Returns:
-            Dict of input_name -> max_error.
+        Raises:
+            ValueError: If the bounds are not finite or not ordered.
         """
-        budget: dict[str, float] = {}
+        if not (np.isfinite(self.low) and np.isfinite(self.high)):
+            raise ValueError(f"range {self.name!r} must have finite bounds")
+        if self.high <= self.low:
+            raise ValueError(
+                f"range {self.name!r} must have high > low, got {self.low} to {self.high}"
+            )
 
-        for input_name, output_grads in self.gradients.items():
-            if output_name in output_grads:
-                grad = output_grads[output_name]
-                if abs(grad.value) > 1e-10:
-                    budget[input_name] = max_variance / abs(grad.value)
-                else:
-                    budget[input_name] = float("inf")
+    @property
+    def span(self) -> float:
+        """Width of the range in its own unit."""
+        return self.high - self.low
 
-        return budget
+    def contains(self, value: float) -> bool:
+        """Return whether ``value`` lies inside the closed range."""
+        return bool(self.low <= value <= self.high)
 
 
-def compute_forgiveness_metrics(
-    outcome_model: Callable[..., dict],
-    nominal_inputs: dict[str, float],
-    perturbations: dict[str, float],
-    *,
-    reference_scales: dict[str, float] | None = None,
-) -> ForgivenessMetrics:
-    """Compute forgiveness metrics via sensitivity analysis.
-
-    Args:
-        outcome_model: Function(input_params) -> dict of outputs.
-        nominal_inputs: Nominal input values.
-        perturbations: Perturbation size for each input.
-        reference_scales: Reference scales for normalization (optional).
+def _sweep_ranges() -> dict[str, SweepRange]:
+    """Build the sweep-range registry.
 
     Returns:
-        ForgivenessMetrics with gradients and forgiveness index.
+        Mapping of factor name to its range. Angles are radians, lengths metres,
+        pressures kilopascals.
     """
-    gradients: dict[str, dict[str, SensitivityGradient]] = {}
+    entries = (
+        SweepRange(
+            "entry_distance_behind_ball_m",
+            0.025,
+            0.150,
+            "m",
+            "Wivou et al. 2016 delivery data (measured 0.080-0.280 m)",
+        ),
+        SweepRange(
+            "divot_depth_m",
+            0.020,
+            0.060,
+            "m",
+            "Wivou et al. 2016 delivery data (measured 0.025-0.052 m)",
+        ),
+        SweepRange(
+            "attack_angle_rad",
+            float(np.radians(-12.0)),
+            float(np.radians(-2.0)),
+            "rad",
+            "tour delivery; the largest single term in presentation to velocity",
+        ),
+        SweepRange(
+            "face_open_angle_rad",
+            0.0,
+            float(np.radians(30.0)),
+            "rad",
+            "propagates as delta_loft = delta_bounce = Omega cos(lie)",
+        ),
+        SweepRange(
+            "shaft_lean_rad",
+            float(np.radians(4.0)),
+            float(np.radians(14.0)),
+            "rad",
+            "tour delivery; subtracts from loft and bounce degree for degree",
+        ),
+        SweepRange(
+            "strike_location_heel_toe_m",
+            -0.015,
+            0.015,
+            "m",
+            "changes the sand load distribution without face contact",
+        ),
+        SweepRange(
+            "lie_deviation_rad",
+            float(np.radians(-5.0)),
+            float(np.radians(5.0)),
+            "rad",
+            "modulated by the sole rocker radius",
+        ),
+        SweepRange(
+            "sand_firmness_kPa",
+            1.6 * _KGF_PER_CM2_TO_KPA,
+            2.8 * _KGF_PER_CM2_TO_KPA,
+            "kPa",
+            "golf-ball penetrometer 1.6/2.0/2.4/2.8 kg/cm^2 (USGA firmness bands)",
+        ),
+        SweepRange(
+            "sand_depth_m",
+            0.025,
+            0.150,
+            "m",
+            "USGA 100-150 mm floors, 50-75 mm faces",
+        ),
+    )
+    return {entry.name: entry for entry in entries}
 
-    nominal_outputs = outcome_model(**nominal_inputs)
 
-    for input_name, perturbation in perturbations.items():
-        if input_name not in nominal_inputs:
-            continue
+#: Sweep ranges for the forgiveness study, SI, each carrying its source.
+SWEEP_RANGES: MappingProxyType[str, SweepRange] = MappingProxyType(_sweep_ranges())
 
-        inputs_plus = dict(nominal_inputs)
-        inputs_plus[input_name] = nominal_inputs[input_name] + perturbation
+#: Published carry correlations to beat (Wivou et al. 2016). **Measured values
+#: from the literature, not outputs of this model.** Lower magnitude = more
+#: forgiving.
+WIVOU_2016_CARRY_CORRELATION: MappingProxyType[str, float] = MappingProxyType(
+    {"entry_distance_behind_ball_m": -0.98, "divot_depth_m": -0.91}
+)
 
-        inputs_minus = dict(nominal_inputs)
-        inputs_minus[input_name] = nominal_inputs[input_name] - perturbation
 
-        outputs_plus = outcome_model(**inputs_plus)
-        outputs_minus = outcome_model(**inputs_minus)
+@dataclass(frozen=True)
+class FactorSensitivity:
+    """How strongly carry tracks one delivery factor.
 
-        gradients[input_name] = {}
+    Attributes:
+        factor: Factor name.
+        unit: SI unit of the factor.
+        n_samples: Number of paired samples.
+        correlation_r: Pearson correlation of carry against the factor.
+        slope_m_per_unit: Least-squares slope [m per factor unit].
+        intercept_m: Least-squares intercept [m].
+        sampled_low: Smallest factor value sampled.
+        sampled_high: Largest factor value sampled.
+        carry_change_over_span_m: ``slope * (sampled_high - sampled_low)``.
+        fractional_carry_change: That change divided by the target carry.
+        target_carry_m: Target carry the fraction is taken against.
+        baseline_r: Published correlation to beat, or ``None``.
+        covers_declared_range: Whether the samples span the registered sweep
+            range, or ``None`` when the factor is not in :data:`SWEEP_RANGES`.
+    """
 
-        for output_name in nominal_outputs:
-            if output_name in outputs_plus and output_name in outputs_minus:
-                delta_output = outputs_plus[output_name] - outputs_minus[output_name]
-                delta_input = 2 * perturbation
-                grad_value = delta_output / delta_input
+    factor: str
+    unit: str
+    n_samples: int
+    correlation_r: float
+    slope_m_per_unit: float
+    intercept_m: float
+    sampled_low: float
+    sampled_high: float
+    carry_change_over_span_m: float
+    fractional_carry_change: float
+    target_carry_m: float
+    baseline_r: float | None
+    covers_declared_range: bool | None
 
-                gradients[input_name][output_name] = SensitivityGradient(
-                    value=grad_value,
-                    units="per unit",
-                    input_name=input_name,
-                    output_name=output_name,
-                )
+    @property
+    def more_forgiving_than_baseline(self) -> bool | None:
+        """Whether ``|r|`` is below the published baseline, or ``None``.
 
-    forgiveness_index = _compute_forgiveness_index(gradients, reference_scales)
+        Returns:
+            True when this design tracks the factor less strongly than the
+            published measurement, i.e. is more forgiving; ``None`` when no
+            baseline exists for the factor.
+        """
+        if self.baseline_r is None:
+            return None
+        return bool(abs(self.correlation_r) < abs(self.baseline_r))
 
-    return ForgivenessMetrics(
-        gradients=gradients,
-        forgiveness_index=forgiveness_index,
+
+def _linear_fit(factor: np.ndarray, carry_m: np.ndarray) -> tuple[float, float, float]:
+    """Return ``(slope, intercept, pearson_r)`` for carry against a factor.
+
+    Args:
+        factor: ``(n,)`` factor samples.
+        carry_m: ``(n,)`` carry samples [m].
+
+    Returns:
+        Slope [m per factor unit], intercept [m], and Pearson ``r``.
+
+    Raises:
+        ValueError: If either series has zero variance, which leaves both the
+            slope and the correlation undefined.
+    """
+    factor_centred = factor - factor.mean()
+    carry_centred = carry_m - carry_m.mean()
+    factor_ss = float(factor_centred @ factor_centred)
+    carry_ss = float(carry_centred @ carry_centred)
+    if factor_ss <= 0.0:
+        raise ValueError(
+            "the factor samples are all equal, so no sensitivity can be measured"
+        )
+    if carry_ss <= 0.0:
+        raise ValueError(
+            "the carry samples are all equal, so the correlation is undefined; "
+            "report a zero slope explicitly rather than inferring one"
+        )
+    covariance = float(factor_centred @ carry_centred)
+    slope = covariance / factor_ss
+    intercept = float(carry_m.mean() - slope * factor.mean())
+    return slope, intercept, covariance / np.sqrt(factor_ss * carry_ss)
+
+
+def _paired_samples(
+    factor_values: np.ndarray, carry_m: np.ndarray
+) -> tuple[np.ndarray, np.ndarray]:
+    """Validate and return the paired sample arrays.
+
+    Args:
+        factor_values: Factor samples.
+        carry_m: Carry samples [m].
+
+    Returns:
+        The two arrays as 1-D float64.
+
+    Raises:
+        ValueError: If the lengths disagree, fewer than three pairs are given,
+            or a value is not finite. Three is the minimum at which a
+            correlation says anything at all: two points always give |r| = 1.
+    """
+    factor = np.asarray(factor_values, dtype=float).reshape(-1)
+    carry = np.asarray(carry_m, dtype=float).reshape(-1)
+    if factor.shape != carry.shape:
+        raise ValueError(
+            f"factor and carry must be paired; got {factor.shape} and {carry.shape}"
+        )
+    if factor.size < 3:
+        raise ValueError(
+            "a forgiveness sensitivity needs at least 3 samples; two points are "
+            f"always perfectly correlated, got {factor.size}"
+        )
+    if not (np.all(np.isfinite(factor)) and np.all(np.isfinite(carry))):
+        raise ValueError("factor and carry samples must be finite; found NaN or inf")
+    return factor, carry
+
+
+def forgiveness_sensitivity(
+    factor_values: np.ndarray,
+    carry_m: np.ndarray,
+    *,
+    factor: str,
+    target_carry_m: float,
+    unit: str | None = None,
+    baseline_r: float | None = None,
+    coverage_rtol: float = 1e-9,
+) -> FactorSensitivity:
+    """Measure how strongly carry tracks one factor over its swept range.
+
+    Args:
+        factor_values: ``(n,)`` factor samples, SI.
+        carry_m: ``(n,)`` carry distances [m], paired with ``factor_values``.
+        factor: Factor name. When it is a key of :data:`SWEEP_RANGES`, the unit,
+            the published baseline and the range-coverage check are filled in
+            from the registry.
+        target_carry_m: Target carry the fractional change is taken against [m].
+        unit: SI unit, overriding the registry.
+        baseline_r: Published correlation to beat, overriding the registry.
+        coverage_rtol: Relative slack when checking that the samples span the
+            registered range.
+
+    Returns:
+        The sensitivity.
+
+    Raises:
+        ValueError: If the samples are unusable, or the target carry is not
+            positive.
+    """
+    values, carry = _paired_samples(factor_values, carry_m)
+    if not np.isfinite(target_carry_m) or target_carry_m <= 0.0:
+        raise ValueError(
+            f"target_carry_m must be positive and finite, got {target_carry_m}"
+        )
+    declared = SWEEP_RANGES.get(factor)
+    slope, intercept, correlation = _linear_fit(values, carry)
+    low, high = float(values.min()), float(values.max())
+    change_m = slope * (high - low)
+    covers: bool | None = None
+    if declared is not None:
+        slack = coverage_rtol * declared.span
+        covers = bool(low <= declared.low + slack and high >= declared.high - slack)
+    return FactorSensitivity(
+        factor=factor,
+        unit=unit if unit is not None else (declared.unit if declared else ""),
+        n_samples=int(values.size),
+        correlation_r=float(correlation),
+        slope_m_per_unit=float(slope),
+        intercept_m=float(intercept),
+        sampled_low=low,
+        sampled_high=high,
+        carry_change_over_span_m=float(change_m),
+        fractional_carry_change=float(change_m / target_carry_m),
+        target_carry_m=float(target_carry_m),
+        baseline_r=(
+            baseline_r
+            if baseline_r is not None
+            else WIVOU_2016_CARRY_CORRELATION.get(factor)
+        ),
+        covers_declared_range=covers,
     )
 
 
-def _compute_forgiveness_index(
-    gradients: dict[str, dict[str, SensitivityGradient]],
-    reference_scales: dict[str, float] | None,
-) -> float:
-    """Compute normalized forgiveness index (0-1, higher = more forgiving).
+@dataclass(frozen=True)
+class ForgivenessReport:
+    """Sensitivities for several factors, ranked.
 
-    Uses inverse of total gradient magnitude, normalized to [0, 1].
+    Attributes:
+        sensitivities: One entry per factor, in the order supplied.
     """
-    all_grads = []
 
-    for input_grads in gradients.values():
-        for grad in input_grads.values():
-            all_grads.append(abs(grad.value))
+    sensitivities: tuple[FactorSensitivity, ...]
 
-    if not all_grads:
-        return 0.5
+    def ranked(self) -> tuple[FactorSensitivity, ...]:
+        """Return the sensitivities worst-first by fractional carry change.
 
-    total_sensitivity = sum(all_grads)
+        Returns:
+            The entries sorted by ``|fractional_carry_change|``, descending. Ties
+            keep their input order, so the ranking is deterministic.
+        """
+        return tuple(
+            sorted(
+                self.sensitivities,
+                key=lambda entry: abs(entry.fractional_carry_change),
+                reverse=True,
+            )
+        )
 
-    forgiveness = 1.0 / (1.0 + total_sensitivity / 100.0)
+    def worse_than_baseline(self) -> tuple[FactorSensitivity, ...]:
+        """Return the factors this design tracks at least as strongly as published.
 
-    return float(np.clip(forgiveness, 0.0, 1.0))
+        Returns:
+            Entries with a baseline whose ``|r|`` is not below it.
+        """
+        return tuple(
+            entry
+            for entry in self.sensitivities
+            if entry.more_forgiving_than_baseline is False
+        )
+
+
+def forgiveness_report(
+    samples: dict[str, tuple[np.ndarray, np.ndarray]],
+    *,
+    target_carry_m: float,
+) -> ForgivenessReport:
+    """Measure several factors at once.
+
+    Args:
+        samples: Mapping of factor name to ``(factor_values, carry_m)``.
+        target_carry_m: Target carry [m].
+
+    Returns:
+        The report, entries in the order the mapping supplies them.
+
+    Raises:
+        ValueError: If no factors were supplied, or any factor's samples are
+            unusable.
+    """
+    if not samples:
+        raise ValueError("a forgiveness report needs at least one factor")
+    return ForgivenessReport(
+        sensitivities=tuple(
+            forgiveness_sensitivity(
+                values,
+                carry,
+                factor=name,
+                target_carry_m=target_carry_m,
+            )
+            for name, (values, carry) in samples.items()
+        )
+    )

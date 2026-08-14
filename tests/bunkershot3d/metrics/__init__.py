@@ -1,1 +1,1 @@
-"""Tests for bunkershot3d metrics (issue #8614)."""
+"""Tests for the BunkerShot3D designer metrics (issue #8614, W7)."""
