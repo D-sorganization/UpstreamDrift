@@ -471,7 +471,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, opacityback=0, left=2mm, colback=white, opacitybacktitle=0.6, colbacktitle=quarto-callout-note-color!10!white, toprule=.15mm, bottomtitle=1mm, toptitle=1mm, titlerule=0mm, coltitle=black, breakable, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, arc=.35mm, leftrule=.75mm, rightrule=.15mm, colframe=quarto-callout-note-color-frame, bottomrule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, bottomtitle=1mm, bottomrule=.15mm, toprule=.15mm, colframe=quarto-callout-note-color-frame, left=2mm, opacitybacktitle=0.6, colbacktitle=quarto-callout-note-color!10!white, coltitle=black, titlerule=0mm, colback=white, leftrule=.75mm, opacityback=0, breakable, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, toptitle=1mm, arc=.35mm, rightrule=.15mm]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -7357,6 +7357,68 @@ tissue contact. Inverse kinematics supplies neither force nor work and
 cannot test passivity, timing demand, self-correction, proximal-speed
 benefit, or any class of slack.
 
+\subsection{Paired Scapula-on-Ellipsoid Geometry
+Screen}\label{paired-scapula-on-ellipsoid-geometry-screen}
+
+The fixed shoulder centers are the next explicit structural
+intervention. A paired arm-only screen holds the prescribed trunk and
+club pose fixed and compares the existing fixed centers with four
+bounded scapular coordinates per side: protraction, elevation, upward
+rotation, and winging. Protraction and elevation move the shoulder
+center on a declared thoracic ellipsoid; upward rotation and winging
+precede the three glenohumeral rotations. The construction is informed
+by the ellipsoid-constrained OpenSim shoulder complex of Seth et al.
+(\citeproc{ref-seth2016}{2016}), but it is a reduced kinematic surrogate
+rather than a reproduction of that model.
+
+The screen uses the same six deterministic profiles and three grip spans
+at 0.00, 0.12, and 0.24 s, yielding 54 paired states. Only the two arms
+move; the trunk and all six club coordinates remain fixed. The
+fixed-shoulder problem has eight arm coordinates, whereas the scapular
+problem has sixteen. The fixed solution is embedded exactly at zero
+scapular coordinates, so a larger residual in the mobile branch would be
+a numerical failure rather than a geometric finding.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_scapulothoracic_contact_screen.pdf}
+
+}
+
+\caption{\label{fig-scapulothoracic-contact-screen}Scapular Mobility and
+Bilateral Contact Geometry}
+
+\end{figure}%
+
+No fixed-shoulder arm-only state reaches the 0.5 mm bilateral tolerance.
+The mobile-scapula branch reaches that residual in 31 of 54 states, but
+only 16 of 54 also receive a successful optimizer termination.
+Twenty-eight states place at least one coordinate on its declared
+screening bound, and the largest shoulder-center excursion is 0.101 m.
+The retained 2.0 m adverse grip span still fails, with 0.480 m maximum
+bilateral error. These counts expose a model-structure effect and a
+numerical/range boundary; they do not establish that the remaining
+states are anatomically infeasible.
+
+Both paired contact Jacobians have rank six at every registered state.
+The fixed branch therefore has a two-dimensional local coordinate null
+space and the scapular branch has a ten-dimensional null space.
+Bilateral contact position alone cannot allocate motion uniquely among
+scapular and glenohumeral coordinates. Adding scapular mobility
+materially changes the geometric screen while simultaneously increasing
+allocation non-identifiability.
+
+This result advances the model ladder without identifying a human
+mechanism. The ellipsoid radii and angular bounds are engineering
+values, the screen has no subject-specific bone or muscle geometry, and
+no contact force, power, work, passivity, tissue load, or club-delivery
+outcome is solved. The decisive next test replaces this surrogate with
+the independently validated articulated shoulder model, subject-specific
+anatomy where governed, calibrated grip contact, and paired forward
+dynamics.
+
 The next spatial experiment must now integrate calibrated compliant
 contact from these closed states, expose contact loss and tissue/shaft
 compliance as typed states, and repeat the coincident, reversal,
@@ -11487,6 +11549,15 @@ results, not measured anatomical ranges or mesh-level clearance; they
 advance the next test to calibrated compliant forward contact from the
 closed states.
 
+A paired arm-only intervention now isolates one omitted structure. With
+trunk and club pose fixed, the fixed-shoulder branch closes none of 54
+registered states, whereas a bounded scapula-on-ellipsoid surrogate
+reaches the contact residual in 31 states and satisfies both residual
+and solver-termination gates in 16. Full rank persists while coordinate
+nullity rises from two to ten, so the result supports the importance of
+scapular geometry but also strengthens the non-identifiability boundary.
+It is not an anatomical, muscular, or human strategy result.
+
 The reduced spatial forward-contact extension resolves that narrower
 mechanism gate. Native MuJoCo and Pinocchio independently integrate two
 finite-mass hand carriages, paired compliant interfaces, and a free
@@ -12376,6 +12447,13 @@ Rugy, Aymar de, Gerald E. Loeb, and Timothy J. Carroll. 2018. {``Muscle
 Patterns Underlying Voluntary Modulation of Co-Contraction.''}
 \emph{PLoS ONE} 13 (10): e0205538.
 \url{https://doi.org/10.1371/journal.pone.0205538}.
+
+\bibitem[\citeproctext]{ref-seth2016}
+Seth, Ajay, Ricardo Matias, Antonio P. Veloso, and Scott L. Delp. 2016.
+{``A Biomechanical Model of the Scapulothoracic Joint to Accurately
+Capture Scapular Kinematics During Shoulder Movements.''} \emph{PLOS
+ONE} 11 (1): e0141028.
+\url{https://doi.org/10.1371/journal.pone.0141028}.
 
 \bibitem[\citeproctext]{ref-sharp2009}
 Sharp, Robin S. 2009. {``On the Mechanics of the Golf Swing.''}

@@ -51,7 +51,7 @@ reviewed.
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.526 |
+| **Spec Version** | 1.0.528 |
 | **Last Spec Update** | 2026-08-14 |
 
 ## 2. Purpose & Mission
@@ -2234,6 +2234,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 2026-08-14 | 1.0.527 | Added fail-closed scientific-support integrity for the proximal-to-distal program: all claim source locators must resolve to an in-range repository line; every registered local evidence artifact is SHA-256/size pinned; every external support URL is inventoried without being promoted to scientific validation; omission and tamper controls are executable; and the critical-question roadmap now maps each handwritten question to its bounded current answer, decisive model/measurement gate, and independently checked scapulothoracic, EMG, and distributed-grip acquisition leads. |
+| 2026-08-14 | 1.0.528 | Added MT-E09 paired scapulothoracic contact geometry: a fixed-trunk and fixed-club nested comparison separates residual closure, solver termination, bound activity, rank, coordinate nullity, and an adverse grip-span control, while prohibiting anatomical, muscular, transfer, and strategy inference until validated articulated forward contact. |
 | 2026-08-14 | 1.0.525 | Added the MT-E08 subject-scaled spatial contact-closure audit: six deterministic de Leva engineering profiles, three grip spans, and 61 states per case fail the 5 mm bilateral closure tolerance despite full local contact-Jacobian rank. The governed evidence, release claims, and scientific boundary now distinguish measurement rank, local kinematic rank, geometric closure, and forward contact dynamics, and require closed-contact inverse kinematics with joint-limit/collision checks before anatomical or human-strategy inference. |
 | 2026-08-14 | 1.0.526 | Added the MT-E08 subject-scaled closed-contact inverse-kinematics screen: all 234 profile, grip-span, and phase configurations close with the club pose fixed, full achieved constraint rank, positive broad engineering-limit margins, positive coarse bounding-sphere clearances, and continuous solved paths. The contract preserves these as reduced-tree necessary conditions and advances the next gate to subject-specific anatomy and calibrated compliant forward contact. |
 | 2026-08-14 | 1.0.524 | Added trajectory-level synthetic qualification for the MT-E07 bilateral point-force estimator: 301 samples and 32 seeded trials exercise normalized noise, cross-talk, calibration residual, and contact-center migration controls; a manufactured net-wrench-only failure demonstrates that resultant closure does not identify allocation; and the paper, registries, claim audit, figure, evidence, tests, and handoff retain explicit full-device, distributed-contact, anatomical, and governed-human gates. |
@@ -3145,3 +3146,23 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   shall not identify grip wrench, activation onset shall retain baseline and
   threshold sensitivity, and proceedings-level grip studies shall not satisfy
   the governed human-data gate.
+
+### F-8557.23: Paired Scapulothoracic Contact-Geometry Screen
+
+- A fixed-shoulder branch shall be nested exactly within the mobile-scapula
+  branch, with identical trunk pose, club pose, grip targets, profiles, spans,
+  phases, residual tolerance, and numerical reporting.
+- Scapular protraction, elevation, upward rotation, and winging shall be
+  declared reduced screening coordinates. The ellipsoid, coordinate ranges,
+  and regularization shall be recorded and shall not be called subject-specific
+  anatomy or a reproduction of an external articulated model.
+- Residual closure, optimizer termination, coordinate-bound activity,
+  shoulder-center excursion, local contact-Jacobian rank, and coordinate
+  nullity shall be reported separately. Full row rank shall not identify the
+  scapular/glenohumeral allocation.
+- An unreachable grip span shall remain as an adverse control. Favorable
+  reachability shall not establish contact force, power, work, passivity,
+  tissue load, club delivery, muscle action, or human strategy.
+- The next gate shall use an independently validated articulated shoulder,
+  governed subject geometry where available, calibrated distributed grip
+  contact, and paired forward dynamics with conservation and null controls.

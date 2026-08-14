@@ -209,7 +209,7 @@ scientific contract.
 
 ## Completed Paper-Wide Claim Audit
 
-The current audit adjudicates all 987 narrative candidates against 263
+The pre-scapulothoracic audit adjudicated all 987 narrative candidates against 263
 atomic claim contracts; no candidate remains unreviewed. Repeated methods,
 summary, limitation, and release passages point back to their primary claim
 instead of acquiring stronger authority through repetition. The final pass
@@ -230,6 +230,17 @@ and contact tracking are part of the measurement contract. Traceable bilateral
 six-axis device calibration, distributed contact, subject scaling, and held-out
 human qualification remain open.
 
+The first paired scapulothoracic intervention is now executed as MT-E09. With
+trunk and club pose fixed, fixed shoulder centers close none of 54 states; the
+bounded scapula-on-ellipsoid surrogate reaches residual tolerance in 31 and
+passes the separate optimizer-termination gate in 16. Twenty-eight states
+activate a screening bound, the maximum shoulder-center excursion is 0.101 m,
+and the retained 2.0 m adverse span fails. Both contact Jacobians remain full
+row rank while local coordinate nullity increases from two to ten. This is a
+structural result and an identifiability warning, not an anatomical or coaching
+result. The next milestone replaces the surrogate with a validated articulated
+shoulder and calibrated forward grip contact.
+
 Completion of the paper audit is not completion of the research program. In
 particular, the audit rejected quantitative small-deflection shaft inference
 for the current coupled baseline, retained only bounded synthetic structural
@@ -238,8 +249,8 @@ map, and preserves #8556 as an external human-data acquisition gate. Future
 milestones must create new claim records and falsifiers before new conclusions
 enter summaries or conclusions.
 
-The separate claim-evidence integrity manifest covers all 1,541 evidence
-references. It hash-pins 193 distinct repository artifacts and inventories 85
+The separate claim-evidence integrity manifest covers all 1,639 evidence
+references. It hash-pins 200 distinct repository artifacts and inventories 85
 external URLs. Hash agreement establishes content identity, not independence
 or correctness; URL inventory establishes traceability, not availability or
 scientific validity.
