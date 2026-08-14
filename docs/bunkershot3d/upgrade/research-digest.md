@@ -76,6 +76,16 @@ All measured in a vertical plane perpendicular to the leading edge.
 Heel–toe rocker: toe radius <40 mm, heel <30 mm, centre >70 mm. That asymmetry **is**
 heel/toe relief.
 
+> **CORRECTION (found while implementing #8609, verified independently).** These are
+> **local curvature measurements at a point, not radii spanning the blade**, and they
+> cannot be applied across one. A 75 mm centre radius integrated across a 78 mm blade
+> lifts the heel and toe by **10.9 mm** — no wedge does that. Blade-scale radii are
+> roughly 250 / 90 / 130 mm (centre / heel / toe), giving ~3.1 mm of lift. Treat the
+> patent numbers as a curvature _field_ to be integrated, never as a blade-spanning arc.
+> `rocker_offsets_m` integrates the field and states this in its docstring.
+> **Open decision:** the blade-scale radii above are inferred, not published — do not
+> quote them as patent-conformant without an OEM source or a measured head.
+
 **Two bounce conventions — never mix.** Patent `theta` is geometric (to the true trailing
 contact point, >20 deg); marketed bounce is to the ground-contact plane (4–14 deg). Make
 the convention part of the type.
@@ -90,9 +100,13 @@ delta_loft ~ delta_bounce ~ Om * cos(lam)
 delta_aim                 ~ Om * sin(lam)
 ```
 
-**Test case:** 56 deg loft, 64 deg lie, Omega = 20 deg -> `L_eff = 64.5 deg`. You gain
-**8.5 deg**, not 20. First-order 20*cos(64) = 8.8. Aim opens 20*sin(64) = 18 deg.
+**Test case:** 56 deg loft, 64 deg lie, Omega = 20 deg -> **`L_eff = 64.591 deg`**, a gain
+of **8.591 deg**, not 20. First-order 20\*cos(64) = 8.767. Aim opens 20\*sin(64) = 18 deg.
 Limiting checks: Om=0 -> L; lam=90 -> L; lam=0 -> L+Om.
+
+> **CORRECTION:** earlier revisions of this digest quoted `64.5` / gain `8.5`. That was a
+> rounded restatement, not the value the formula gives. Verified independently: the exact
+> closed form evaluates to **64.591 deg**. Pin tests to 64.591, not 64.5.
 
 Shaft lean S: `L_eff = L - S`, `B_eff = B - S`, degree for degree (tour 4–14 deg).
 Presentation to velocity: `beta_eff ~ B_static - S + Om cos(lam) + AoA`, AoA -2 to -12 deg,

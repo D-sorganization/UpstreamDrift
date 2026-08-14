@@ -45,30 +45,37 @@ Do not create new worktrees on C:. See "Blockers" below.
 - Epic #8607 filed with 11 child issues #8608-#8618, all linked, with research findings
   attached as comments on #8609, #8610, #8611, #8613, #8614, #8616.
 
-### Wave 1 — merged into `feat/bunkershot-pro-epic` (pushed)
+### Wave 1 — ALL FIVE MERGED into `feat/bunkershot-pro-epic` (pushed)
 
-| Issue | Workstream                        | Status                                                           |
-| ----- | --------------------------------- | ---------------------------------------------------------------- |
-| #8617 | W10 result schema v2 + provenance | **merged** — commit `b445a128c`                                  |
-| #8610 | W3 sand state model               | **merged** — commit `5b1783e49`                                  |
-| #8609 | W2 parametric wedge geometry      | running (`feat/bunker-geometry`, `D:/bunker-worktrees/geometry`) |
-| #8612 | W5 backend correctness            | running (`feat/bunker-backends`, `D:/bunker-worktrees/backends`) |
-| #8615 | W8 study layer (DOE/Sobol/GP)     | running (`feat/bunker-study`, `D:/bunker-worktrees/study`)       |
+| Issue | Workstream                        | Commit      |
+| ----- | --------------------------------- | ----------- |
+| #8617 | W10 result schema v2 + provenance | `b445a128c` |
+| #8610 | W3 sand state model               | `5b1783e49` |
+| #8615 | W8 study layer (DOE/Sobol/GP)     | `8e4115f25` |
+| #8612 | W5 backend correctness            | `1aa1e84ac` |
+| #8609 | W2 parametric wedge geometry      | `b60c21519` |
 
-Suite after the two merges: **729 passed, 5 skipped**.
-Merge order for the rest: geometry, backends, study.
+Integrated suite: **1309 passed, 4 skipped** (baseline was 157). No merge conflicts —
+the disjoint file ownership held.
 
-Two follow-ups the merges created:
+Follow-ups the merges created:
 
 - **Drivers do not yet pass a run manifest.** `BunkerShotResultWriter` takes `manifest=` /
-  `set_manifest()`; wiring is one line per driver once #8612 lands. Until then result files
-  carry `schema_version` but no provenance.
-- **`src/bunkershot3d/__init__.py` does not re-export the sand package** — consumers must
-  `from bunkershot3d.sand import ...`. One-line follow-up.
-- **SPEC.md**: the `spec-check` workflow blocks PRs that touch `src/**` without updating
-  SPEC.md. It fires on pull_request only, so merging workstreams into the epic branch is
-  unaffected. Do **one** coordinated SPEC.md update when the epic PRs to `main`, not five
-  conflicting ones.
+  `set_manifest()`; one line per driver. Result files carry `schema_version` but no provenance.
+- **`src/bunkershot3d/__init__.py` does not re-export `sand`, `study` or the new geometry
+  API** — consumers must import the subpackage directly. One-line follow-up.
+- **SPEC.md**: `spec-check` blocks PRs touching `src/**` without a SPEC.md update. It fires on
+  pull_request only, so epic-branch merges are unaffected. Do **one** coordinated update when
+  the epic PRs to `main`.
+- **`reference_swing.csv` still does not exist** (B33). It is now a loud
+  `TrajectoryUnavailableError` rather than a silent 5 m/s substitution, but the F0 solver
+  work (#8611) will want a real reference trajectory.
+- **Rocker radii need a decision** — see the CORRECTION box in `research-digest.md` §2. The
+  patent's heel/toe/centre radii are local curvature, not blade-spanning arcs; the
+  blade-scale values used by the reference geometry are inferred, not published.
+- **Lofted head CG sits ~5 mm above the leading edge** vs the patent's 9.65–17.02 mm band.
+  The parametric blade has no hosel or toe taper yet; the test asserts a plausibility band
+  and says so rather than pretending a match.
 
 ### Wave 2 — not started (depends on wave 1)
 
