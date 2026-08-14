@@ -21,8 +21,15 @@ import numpy as np
 from ...config import BunkerShotConfig
 from ...io.schema import BunkerShotResultWriter
 from ...kinematics.trajectory import SwingTrajectory
+from ...provenance import RunManifest, Validity
 from ..packing import lattice_positions
 from ..prescribed_motion import load_trajectory
+from ..run_provenance import (
+    GRAIN_POSITION_SEED,
+    GRAIN_RADII_SEED,
+    dem_run_manifest,
+    fixed_seed_record,
+)
 from ..stability import (
     DEFAULT_MAX_STEPS,
     StepPlan,
@@ -47,6 +54,14 @@ from ...exceptions import BackendNotImplementedError
 #: they are not a physical consolidation time.
 SETTLE_STEPS = 500
 
+#: Why a Chrono result is never labelled valid (ADR-0032).
+_F3_VERDICT = (
+    "Chrono is an F3 grain-scale DEM tier. A USGA bunker base at true scale "
+    "needs 2.1e8 grains and days per shot, so any tractable run here is a "
+    "coarse-grained proxy, not the bunker. Use it for grain-scale studies "
+    "only, never as a design answer."
+)
+
 
 class ChronoDriver:
     """Driver for running the bunker shot simulation using Project Chrono."""
@@ -63,14 +78,14 @@ class ChronoDriver:
         Single source of truth for SMC material configuration (issue #6936):
         walls, grains, and the clubhead all call this so a new contact
         property is wired once rather than in three drifting copies. Reads
-        the flat ``config.contact_params()`` accessor (issue #6937) rather
-        than reaching into ``config.contact_model.*``.
+        the assembled ``config.to_contact_material()`` value object
+        (issue #8608) rather than reaching into ``config.contact_model.*``.
         """
-        params = self.config.contact_params()
+        params = self.config.to_contact_material()
         material = chrono.ChContactMaterialSMC()
         material.SetFriction(params.friction)
         material.SetRestitution(params.restitution)
-        material.SetYoungModulus(params.youngs_modulus)
+        material.SetYoungModulus(params.youngs_modulus_pa)
         material.SetPoissonRatio(params.poisson_ratio)
         return material
 
@@ -80,9 +95,10 @@ class ChronoDriver:
         The bound is what makes the lattice packing guarantee hold: the
         placement uses the largest admissible diameter as its pitch.
         """
-        rng = np.random.default_rng(seed=42)
-        r_mean = self.config.grain_diameter_mean / 2.0
-        sigma = self.config.grain_diameter_sigma_log
+        rng = np.random.default_rng(seed=GRAIN_RADII_SEED)
+        grains = self.config.to_grain_population()
+        r_mean = grains.radius_mean_m
+        sigma = grains.diameter_sigma_log
         radii = rng.lognormal(mean=np.log(r_mean), sigma=sigma, size=count)
         return np.clip(
             radii,
@@ -95,7 +111,7 @@ class ChronoDriver:
         system = chrono.ChSystemSMC()
         system.SetGravitationalAcceleration(chrono.ChVector3d(0, 0, -9.80665))
 
-        lx, ly, lz = self.config.domain_extents()
+        lx, ly, lz = self.config.to_domain_box().extents_m
 
         wall_material = self._make_contact_material()
 
@@ -133,19 +149,17 @@ class ChronoDriver:
         # Grain contact material
         grain_mat = self._make_contact_material()
 
-        count = self.config.grain_count
-        density = self.config.grain_density
-        cgf = self.config.grain_coarse_graining_factor
-
-        # Effective particle count after coarse-graining
-        effective_count = max(1, int(count / cgf))
+        grains = self.config.to_grain_population()
+        density = grains.density_kg_m3
+        cgf = grains.coarse_graining_factor
+        effective_count = grains.effective_count
 
         radii = self._grain_radii(effective_count)
         positions = lattice_positions(
             count=effective_count,
             extents=(lx, ly, lz),
             diameter=2.0 * largest_grain_radius(self.config),
-            rng=np.random.default_rng(seed=43),
+            rng=np.random.default_rng(seed=GRAIN_POSITION_SEED),
         )
 
         for i in range(effective_count):
@@ -160,9 +174,10 @@ class ChronoDriver:
             system.Add(grain)
 
         # Clubhead body
-        ch_w = self.config.clubhead_width
-        ch_h = self.config.clubhead_height
-        ch_mass = self.config.clubhead_mass
+        clubhead = self.config.clubhead
+        ch_w = clubhead.width
+        ch_h = clubhead.height
+        ch_mass = clubhead.mass
 
         clubhead_mat = self._make_contact_material()
 
@@ -233,6 +248,24 @@ class ChronoDriver:
             np.array([torque.x, torque.y, torque.z], dtype=float),
         )
 
+    def run_manifest(self) -> RunManifest:
+        """Provenance for a run of this driver (issue #8608, finding B18).
+
+        Returns:
+            A manifest naming the configuration hashes, both fixed grain seeds
+            and the F3 verdict, ready to attach to the result file.
+        """
+        return dem_run_manifest(
+            self.config,
+            solver="chrono",
+            seeds=(
+                fixed_seed_record("grain-radii", GRAIN_RADII_SEED),
+                fixed_seed_record("grain-positions", GRAIN_POSITION_SEED),
+            ),
+            validity=Validity.OUT_OF_ENVELOPE,
+            validity_reason=_F3_VERDICT,
+        )
+
     def _plan(self, trajectory: SwingTrajectory, max_steps: int) -> StepPlan:
         """Resolve a Rayleigh- and Courant-stable integration schedule."""
         return plan_from_config(
@@ -271,7 +304,7 @@ class ChronoDriver:
         plan = self._plan(trajectory, max_steps)
         start_time = float(trajectory.time[0])
 
-        writer = BunkerShotResultWriter(output_path)
+        writer = BunkerShotResultWriter(output_path, manifest=self.run_manifest())
         try:
             # Settle phase: relax the packing with the clubhead parked.
             self._prescribe_clubhead(trajectory, start_time, moving=False)

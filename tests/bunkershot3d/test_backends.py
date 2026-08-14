@@ -119,9 +119,10 @@ def test_mpm_step_count_from_trajectory_duration(
     trajectory = load_trajectory(driver.config_path, driver.config)
     plan = driver._plan(trajectory, 200_000)
 
-    expected_dt = 0.1 * driver.config.grain_diameter_mean / _SPEED
+    expected_dt = 0.1 * driver.config.to_grain_population().diameter_mean_m / _SPEED
     assert plan.dt <= expected_dt * 1.001
-    assert plan.n_steps == int(round(driver.config.trajectory_duration / plan.dt))
+    duration_s = driver.config.to_trajectory_source().duration_s
+    assert plan.n_steps == int(round(duration_s / plan.dt))
 
 
 def test_mpm_contact_wrench_shape(dummy_config: Path, tmp_path: Path) -> None:

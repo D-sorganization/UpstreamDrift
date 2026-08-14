@@ -33,6 +33,12 @@ import numpy as np
 from ...config import BunkerShotConfig
 from ...exceptions import BackendNotImplementedError
 from ...io.schema import BunkerShotResultWriter
+from ...provenance import RunManifest, Validity
+from ..run_provenance import (
+    LIGGGHTS_GENERATOR,
+    dem_run_manifest,
+    fixed_seed_record,
+)
 from ..stability import (
     rayleigh_timestep,
     smallest_grain_radius,
@@ -43,6 +49,17 @@ from ..stability import (
 #: size distribution. LIGGGHTS' ``particletemplate/sphere`` has no log-normal
 #: primitive, so the distribution is represented exactly at its quantiles.
 SIZE_BINS = 5
+
+#: Seed LIGGGHTS' ``insert/pack`` uses to place particles, as written into the
+#: generated deck. Recorded in the run manifest so the packing is replayable.
+INSERTION_SEED = 5330
+
+#: Seed of the ``particledistribution/discrete`` fix in the generated deck.
+DISTRIBUTION_SEED = 32452843
+
+#: Base seed of the per-bin ``particletemplate/sphere`` fixes; bin ``i`` uses
+#: ``TEMPLATE_SEED_BASE + 2 i``.
+TEMPLATE_SEED_BASE = 15485863
 
 #: Significant digits used when writing the timestep into the deck. The value
 #: is floored, never rounded, so the written deck cannot exceed the limit.
@@ -125,6 +142,35 @@ class LiggghtsDriver:
         """
         raise BackendNotImplementedError("liggghts", feature=_NON_VIABLE)
 
+    def run_manifest(self) -> RunManifest:
+        """Provenance for a result parsed out of a LIGGGHTS dump (#8608, B18).
+
+        The seeds recorded are the deck's own: LIGGGHTS drives LAMMPS' Park/
+        Miller generator from integer literals in the input script, not numpy,
+        and the manifest says so rather than implying the PCG64DXSM discipline
+        of :mod:`bunkershot3d.provenance.rng`.
+
+        Returns:
+            A manifest carrying the configuration hashes, the deck seeds and an
+            ``INVALID`` verdict.
+        """
+        return dem_run_manifest(
+            self.config,
+            solver="liggghts",
+            seeds=(
+                fixed_seed_record(
+                    "liggghts-insertion", INSERTION_SEED, LIGGGHTS_GENERATOR
+                ),
+                fixed_seed_record(
+                    "liggghts-size-distribution",
+                    DISTRIBUTION_SEED,
+                    LIGGGHTS_GENERATOR,
+                ),
+            ),
+            validity=Validity.INVALID,
+            validity_reason=_NON_VIABLE,
+        )
+
     # ------------------------------------------------------------------
     # Timestep
     # ------------------------------------------------------------------
@@ -136,13 +182,13 @@ class LiggghtsDriver:
         previously carried two independent hard-coded copies of ``1.0e-5``
         (#8612, B12). The *smallest* grain in the population governs.
         """
-        params = self.config.contact_params()
+        material = self.config.to_contact_material()
         return _floor_to_significant(
             rayleigh_timestep(
                 radius=smallest_grain_radius(self.config),
-                density=self.config.grain_density,
-                youngs_modulus=params.youngs_modulus,
-                poisson_ratio=params.poisson_ratio,
+                density=self.config.to_grain_population().density_kg_m3,
+                youngs_modulus=material.youngs_modulus_pa,
+                poisson_ratio=material.poisson_ratio,
             )
         )
 
@@ -152,15 +198,16 @@ class LiggghtsDriver:
 
     def _size_distribution_block(self) -> str:
         """LIGGGHTS templates encoding the log-normal size distribution."""
+        grains = self.config.to_grain_population()
         bins = lognormal_size_bins(
-            self.config.grain_diameter_mean / 2.0,
-            self.config.grain_diameter_sigma_log,
+            grains.radius_mean_m,
+            grains.diameter_sigma_log,
         )
-        density = self.config.grain_density
+        density = grains.density_kg_m3
 
         templates = "\n".join(
             f"fix             pts{index + 1} all particletemplate/sphere "
-            f"{15485863 + 2 * index} atom_type 1 \\\n"
+            f"{TEMPLATE_SEED_BASE + 2 * index} atom_type 1 \\\n"
             f"                    density constant {density:.6g} \\\n"
             f"                    radius constant {radius:.10g}"
             for index, (radius, _fraction) in enumerate(bins)
@@ -171,7 +218,7 @@ class LiggghtsDriver:
         )
         distribution = (
             f"fix             pdd1 all particledistribution/discrete "
-            f"32452843 {len(bins)} {pairs}"
+            f"{DISTRIBUTION_SEED} {len(bins)} {pairs}"
         )
         return f"{templates}\n\n{distribution}"
 
@@ -198,7 +245,7 @@ class LiggghtsDriver:
 
         dt = self.integration_timestep()
         dump_every = max(1, round(1.0 / (out.rate_hz * dt)))
-        total_steps = max(1, round(cfg.trajectory_duration / dt))
+        total_steps = max(1, round(cfg.to_trajectory_source().duration_s / dt))
 
         input_deck_path = work_dir / "in.bunkershot"
         with open(input_deck_path, "w", encoding="utf-8") as f:
@@ -243,7 +290,7 @@ fix             wall_yhi all wall/gran model hertz tangential history primitive 
 # -- Particle insertion: log-normal diameters, discretised at its quantiles --
 {self._size_distribution_block()}
 
-fix             ins all insert/pack seed 5330 distributiontemplate pdd1 \\
+fix             ins all insert/pack seed {INSERTION_SEED} distributiontemplate pdd1 \\
                     insert_every once overlapcheck yes all_in yes \\
                     vel constant 0.0 0.0 -0.1 \\
                     region domain ntry_mc 10000 \\
@@ -299,7 +346,7 @@ run             {total_steps}
 
         dump_file = work_dir / "dump.bunkershot"
 
-        writer = BunkerShotResultWriter(output_path)
+        writer = BunkerShotResultWriter(output_path, manifest=self.run_manifest())
         try:
             for timestep, positions, velocities in _iter_dump_frames(dump_file):
                 time = timestep * dt

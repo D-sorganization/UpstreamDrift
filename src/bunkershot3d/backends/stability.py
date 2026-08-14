@@ -38,6 +38,8 @@ from typing import TYPE_CHECKING, NamedTuple
 
 from src.shared.python.core.contracts import ensure, require
 
+from ..exceptions import BunkerShot3DStateError, BunkerShot3DValueError
+
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from ..config import BunkerShotConfig
 
@@ -60,15 +62,15 @@ DEFAULT_MAX_STEPS = 200_000
 SIGMA_SPAN = 3.0
 
 
-class TimestepStabilityError(ValueError):
+class TimestepStabilityError(BunkerShot3DValueError):
     """Raised when an integration timestep exceeds a stability limit."""
 
 
-class ContactStiffnessError(ValueError):
+class ContactStiffnessError(BunkerShot3DValueError):
     """Raised when a contact stiffness cannot resolve the configured impact."""
 
 
-class StepBudgetExceededError(RuntimeError):
+class StepBudgetExceededError(BunkerShot3DStateError):
     """Raised when a stable run would need more steps than the caller allows."""
 
 
@@ -317,7 +319,9 @@ def plan_steps(
     require(dt > 0.0, "dt must be positive", dt)
     require(output_rate_hz > 0.0, "output_rate_hz must be positive", output_rate_hz)
     if duration <= 0.0 or dt <= 0.0 or output_rate_hz <= 0.0:
-        raise ValueError("duration, dt and output_rate_hz must all be positive")
+        raise BunkerShot3DValueError(
+            "duration, dt and output_rate_hz must all be positive"
+        )
 
     n_steps = max(1, int(round(duration / dt)))
     output_every = max(1, int(round(1.0 / (output_rate_hz * dt))))
@@ -347,16 +351,14 @@ def smallest_grain_radius(config: BunkerShotConfig) -> float:
     population at +/- ``SIGMA_SPAN`` sigma in log-space, and the *smallest*
     grain sets the Rayleigh limit.
     """
-    return (config.grain_diameter_mean / 2.0) * math.exp(
-        -SIGMA_SPAN * config.grain_diameter_sigma_log
-    )
+    grains = config.to_grain_population()
+    return grains.radius_mean_m * math.exp(-SIGMA_SPAN * grains.diameter_sigma_log)
 
 
 def largest_grain_radius(config: BunkerShotConfig) -> float:
     """Largest grain radius the configured population will produce (m)."""
-    return (config.grain_diameter_mean / 2.0) * math.exp(
-        SIGMA_SPAN * config.grain_diameter_sigma_log
-    )
+    grains = config.to_grain_population()
+    return grains.radius_mean_m * math.exp(SIGMA_SPAN * grains.diameter_sigma_log)
 
 
 def validate_contact_model(
@@ -365,12 +367,12 @@ def validate_contact_model(
     impact_speed: float = REFERENCE_IMPACT_SPEED_MPS,
 ) -> float:
     """Refuse a config whose contact stiffness cannot resolve the impact."""
-    params = config.contact_params()
+    material = config.to_contact_material()
     return require_resolvable_contacts(
         impact_speed=impact_speed,
-        density=config.grain_density,
-        youngs_modulus=params.youngs_modulus,
-        poisson_ratio=params.poisson_ratio,
+        density=config.to_grain_population().density_kg_m3,
+        youngs_modulus=material.youngs_modulus_pa,
+        poisson_ratio=material.poisson_ratio,
     )
 
 
@@ -392,12 +394,13 @@ def plan_from_config(
         ContactStiffnessError: The stiffness cannot resolve ``max_speed``.
         StepBudgetExceededError: The stable schedule is intractable.
     """
-    params = config.contact_params()
+    material = config.to_contact_material()
+    grains = config.to_grain_population()
     require_resolvable_contacts(
         impact_speed=max_speed,
-        density=config.grain_density,
-        youngs_modulus=params.youngs_modulus,
-        poisson_ratio=params.poisson_ratio,
+        density=grains.density_kg_m3,
+        youngs_modulus=material.youngs_modulus_pa,
+        poisson_ratio=material.poisson_ratio,
     )
 
     radius = smallest_grain_radius(config)
@@ -405,9 +408,9 @@ def plan_from_config(
     if enforce_rayleigh:
         rayleigh_limit = rayleigh_timestep(
             radius=radius,
-            density=config.grain_density,
-            youngs_modulus=params.youngs_modulus,
-            poisson_ratio=params.poisson_ratio,
+            density=grains.density_kg_m3,
+            youngs_modulus=material.youngs_modulus_pa,
+            poisson_ratio=material.poisson_ratio,
         )
     else:
         rayleigh_limit = math.inf
@@ -423,17 +426,18 @@ def plan_from_config(
     require_stable_timestep(
         dt,
         radius=radius,
-        density=config.grain_density,
-        youngs_modulus=params.youngs_modulus,
-        poisson_ratio=params.poisson_ratio,
+        density=grains.density_kg_m3,
+        youngs_modulus=material.youngs_modulus_pa,
+        poisson_ratio=material.poisson_ratio,
         max_speed=max_speed,
         enforce_rayleigh=enforce_rayleigh,
     )
 
+    settings = config.to_solver_settings()
     plan = plan_steps(
-        duration=config.trajectory_duration,
+        duration=config.to_trajectory_source().duration_s,
         dt=dt,
-        output_rate_hz=config.output_rate_hz,
+        output_rate_hz=settings.output_rate_hz,
         max_steps=max_steps,
         extra_steps=extra_steps,
     )

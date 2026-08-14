@@ -113,7 +113,7 @@ class TestIntegrationTimestep:
         driver.setup()
         driver.run(tmp_path / "out.h5")
 
-        sampling_interval = 1.0 / driver.config.output_rate_hz
+        sampling_interval = driver.config.to_solver_settings().output_period_s
         steps = [
             call.args[0]
             for call in driver._system.DoStepDynamics.call_args_list  # type: ignore[union-attr]
@@ -156,7 +156,7 @@ class TestTrajectoryDrivenKinematics:
         calls = driver._clubhead_body.SetPos.call_args_list  # type: ignore[union-attr]
         xs = [call.args[0].x for call in calls]
         travel = xs[-1] - xs[1]
-        expected = _SPEED * driver.config.trajectory_duration
+        expected = _SPEED * driver.config.to_trajectory_source().duration_s
         assert travel == pytest.approx(expected, rel=0.05), (
             "the clubhead is not following the prescribed trajectory"
         )
