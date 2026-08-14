@@ -4,6 +4,14 @@ Last updated: 2026-08-13
 
 Update this file with every PR and every push to main.
 
+## Momentum Transfer Human Registration
+
+- Branch `research/8595-human-registration` freezes participant-held-out human
+  tests for Q1--Q7, including required bilateral six-axis grip wrenches,
+  measurable events, nulls, falsifiers, sensitivities, negative controls,
+  adverse margins, missing-data rules, and identity safety. The dataset remains
+  not acquired, and synthetic traces cannot satisfy the registration.
+
 ## Momentum Transfer Paper Integration
 
 - Branch `docs/8595-paper-agenda` integrates the Q1--Q7 assessment into the

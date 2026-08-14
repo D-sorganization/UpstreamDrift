@@ -30,6 +30,7 @@ not be promoted to a human or physiological result.
 | `transmission_robustness_study.{json,npz}`   | Paired clock/state-trigger perturbations, robust objectives, pathway metrics, local outcome Jacobian, and adversarial gap register | Conditional planar robustness; no human stability       |
 | `momentum_transfer_question_registry.json`   | Seven critical questions with current status, estimands, controls, falsifiers, and governing issues                                | Research-program contract; not experimental evidence    |
 | `momentum_transfer_experiment_registry.json` | Registered model tiers, interventions, controls, outcomes, uncertainty, falsifiers, required data, and execution status            | Prospective experiment contract; not a favorable result |
+| `momentum_transfer_human_registration.json`  | Participant-held-out Q1--Q7 estimands, nulls, falsifiers, sensitivities, negative controls, adverse margins, and data requirements | Frozen protocol; no governed human outcome acquired     |
 
 ## Recurring Field Families
 
