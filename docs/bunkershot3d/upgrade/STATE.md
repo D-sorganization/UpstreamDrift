@@ -1,6 +1,6 @@
 # BunkerShot3D pro-grade upgrade — state ledger
 
-**Read this first on resumption.** Updated 2026-08-13.
+**Read this first on resumption.** Updated 2026-08-14 (07:02 UTC).
 
 Epic: https://github.com/D-sorganization/UpstreamDrift/issues/8607
 
@@ -81,19 +81,23 @@ Follow-ups the merges created:
   The parametric blade has no hosel or toe taper yet; the test asserts a plausibility band
   and says so rather than pretending a match.
 
-### Wave 2 — not started (depends on wave 1)
+### Wave 2 — IN PROGRESS
 
-| Issue | Workstream                                      | Depends on                                          |
-| ----- | ----------------------------------------------- | --------------------------------------------------- |
-| #8611 | W4 **DRFT solver** — the default F0 tier        | #8609 geometry, #8610 sand                          |
-| #8613 | W6 the ball + `SwingBallFlightPipeline` handoff | #8611                                               |
-| #8614 | W7 designer metrics                             | #8611, #8617                                        |
-| #8616 | W9 V&V suite + credibility statement            | #8611                                               |
-| #8618 | W11 designer workbench GUI                      | most of the above                                   |
-| #8608 | W1 foundations (value objects, units)           | partly absorbed by W2/W3 — re-scope before starting |
+| Issue | Workstream                                      | Status                      |
+| ----- | ----------------------------------------------- | --------------------------- |
+| #8611 | W4 **DRFT solver** — the default F0 tier        | **merged** (`1c857759c`)    |
+| #8613 | W6 the ball + `SwingBallFlightPipeline` handoff | not started (needs #8611)   |
+| #8614 | W7 designer metrics                             | not started (needs #8611)   |
+| #8616 | W9 V&V suite + credibility statement            | not started (needs #8611)   |
+| #8618 | W11 designer workbench GUI                      | not started                 |
+| #8608 | W1 foundations (value objects, units)           | re-scope before starting    |
 
-**#8611 is the critical path.** Its implementation data (the 20-term 3D-RFT polynomial table,
-the material-scaling cubic, the two DRFT corrections) is in the research addendum §3.
+**#8611 (DRFT solver) implemented.** PR #8624 adds:
+- `src/bunkershot3d/solver/coefficients.py` — 20-term polynomial table from PNAS 120 (2023)
+- `src/bunkershot3d/solver/material.py` — material scaling via xi_n = rho_c * g * f_hat(mu)
+- `src/bunkershot3d/solver/envelope.py` — validity envelope (Fr, I, d/L) enforcement
+- `src/bunkershot3d/solver/drft.py` — complete F0 solver with flat_plate_intrusion
+- 50 new tests, smoke test passes (~1550 N for 20×80 mm sole at 25 m/s)
 
 ## How to resume
 
