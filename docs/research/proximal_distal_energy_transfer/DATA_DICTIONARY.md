@@ -32,6 +32,7 @@ not be promoted to a human or physiological result.
 | `momentum_transfer_experiment_registry.json` | Registered model tiers, interventions, controls, outcomes, uncertainty, falsifiers, required data, and execution status            | Prospective experiment contract; not a favorable result |
 | `momentum_transfer_human_registration.json`  | Participant-held-out Q1--Q7 estimands, nulls, falsifiers, sensitivities, negative controls, adverse margins, and data requirements | Frozen protocol; no governed human outcome acquired     |
 | `typed_slack_study.json`                     | One-class-at-a-time engagement, transmission, stored energy, work, and closure for five slack definitions                          | Synthetic constitutive screen; no performance result    |
+| `timing_failure_mode_study.json`             | Twenty-seven proximal-acceleration, braking, and release timing cases with two casting-event definitions and delivery status       | Unmatched-work fixed-hub screen; no coaching conclusion |
 
 ## Recurring Field Families
 

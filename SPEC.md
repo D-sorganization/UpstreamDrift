@@ -49,7 +49,7 @@ reviewed.
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.517 |
+| **Spec Version** | 1.0.518 |
 | **Last Spec Update** | 2026-08-13 |
 
 ## 2. Purpose & Mission
@@ -3009,6 +3009,10 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   distinct engagement, transmission, elastic-storage, and dissipation states.
   The scalar constitutive screen shall not be represented as delivery,
   physiological, or human-strategy evidence.
+- Timing/failure studies shall vary proximal acceleration, proximal braking,
+  and distal release independently and retain disagreement between declared
+  casting-event definitions. Unmatched-work screens shall not be promoted to
+  causal timing optima or coaching conclusions.
 - The Q1--Q7 human registration shall use participant holdout, synchronized
   bilateral six-axis grip wrenches, frozen nulls and adverse margins,
   alternative-frame/filter/synchronization sensitivities, and identity-safe

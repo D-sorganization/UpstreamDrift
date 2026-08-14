@@ -4,6 +4,13 @@ Last updated: 2026-08-13
 
 Update this file with every PR and every push to main.
 
+## Timing and Failure-Mode Factorial
+
+- `research/8595-timing-factorial`: 27 fixed-hub cases independently vary
+  proximal acceleration, braking, and distal release. Angle/rate casting
+  events disagree in every case. Work is unmatched, so the fastest case is
+  descriptive, not a causal optimum or human strategy.
+
 ## Typed Slack Constitutive Suite
 
 - Branch `research/8595-typed-slack` implements separate scalar contracts for
