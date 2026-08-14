@@ -10,8 +10,8 @@
   "program_issue": 8595,
   "summary": {
     "critical_point_count": 9,
-    "answered_or_partly_answered": 7,
-    "unresolved_or_definition_gated": 2,
+    "answered_or_partly_answered": 8,
+    "unresolved_or_definition_gated": 1,
     "model_plan_registered_for_all": true,
     "human_plan_registered_for_all": true,
     "human_execution_blocked": true,
@@ -135,14 +135,14 @@
       "id": "MTQ-09",
       "question_id": "Q7",
       "topic": "Slack Benefit, Harm, and Intentionality",
-      "answer_state": "unresolved_until_typed",
+      "answer_state": "partly_answered",
       "model_plan_state": "partly_executed",
       "human_plan_state": "blocked",
       "experiment_ids": ["MT-E06", "MT-H01"],
-      "present_answer": "Contact loss, backlash, structural preload, biological series compliance, and activation deadband are different states; only a phenomenological transmission dead zone has been directly exercised, so slack is neither generally good nor required.",
-      "decisive_next_test": "Introduce one slack class at a time, sweep onset/magnitude/hysteresis, enforce passivity and energy closure, compare zero-slack and direction-reversal controls, and estimate only identifiable parameters.",
+      "present_answer": "Five declared slack classes have now been exercised separately under two synthetic excitations with class-specific engagement, mechanical passivity where applicable, energy closure, delayed-control boundaries, and local sensitivity audits. No global benefit, necessity, intentionality, or delivery advantage is supported; one scalar output nearly confounds contact disengagement with the biological-compliance surrogate.",
+      "decisive_next_test": "Embed one mechanical class at a time in moving-base, two-hand, and spatial delivery models under matched work, load, and state; add a stateful play operator and subject-specific tissue models; then use independent contact, shaft, tendon, activation, and bilateral-wrench measurements to test class identification.",
       "falsifier": "A proposed benefit disappears when slack classes are separated, violates passivity or energy closure, or is non-identifiable from the available measurements.",
-      "data_gate": "Transmission dead-zone evidence exists; calibrated contact, shaft, muscle-tendon, activation, and human grip-state measurements remain open."
+      "data_gate": "Synthetic constitutive, passivity, and local-sensitivity evidence exists; calibrated contact, shaft, muscle-tendon, activation, and human grip-state measurements remain open."
     }
   ]
 }

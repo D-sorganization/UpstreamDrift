@@ -17,7 +17,7 @@ and their broader rationale is documented in the open
 | Does a drift-mediated strategy require less timing precision? | Not supported in the registered moving-base planar comparison. On a common nominal phase grid, the clock policy retained four of five robust task-viable points and 45 ms of contiguous width; the delayed/noisy state trigger retained one point and no multi-point span. This does not measure neural timing demand. | Continuous phase-volume studies with independently identified observers, spatial impact outcomes, subject scaling, and participant-held-out perturbations. |
 | Is a strategy self-correcting? | Not established. The earlier screen produced 13–20% sustained recovery, whereas the expanded phase/load screen produced none in 60 cases. No tested policy has a recovery-qualified viable region. | Continuous attraction-region studies with independently identified observers, stronger feedback families, external-contact disturbances, and human perturbations without hidden load-cost increase. |
 | Should proximal velocity be maximized? | No general rule is supported. Exact equal-energy rate sweeps are nonmonotonic. A 216-program common-time screen yields 46 disjoint work/load-matched pairs with 20 favorable and 26 adverse higher-rate outcomes. An identical-state acceleration sweep also reverses the club-acceleration response before impact. | Full-delivery-state-matched forward rate and acceleration interventions, extended across spatial and subject-scaled models and held-out participants. |
-| Is slack beneficial or necessary? | Unanswered until the mechanism is named. Contact loss, backlash, elastic preload, muscle-tendon series compliance, and control deadband are not interchangeable. | One slack class at a time, with a state and constitutive law, matched initial energy, passivity and closure checks, hysteresis sweeps, and a measurement strategy. |
+| Is slack beneficial or necessary? | Partly answered at a synthetic constitutive tier. Five declared classes have been exercised separately, but no global benefit, necessity, intentionality, or delivery advantage is supported. One scalar output nearly confounds contact disengagement with the biological-compliance surrogate. | Embed one class at a time in moving-base, two-hand, and spatial delivery models under matched state, work, and load; add stateful backlash and subject-specific tissue models; acquire independent contact, shaft, tendon, activation, and bilateral-wrench measurements. |
 
 : Current answer and falsification map for the critical momentum-transfer
 questions. “Conditional” denotes model- and estimand-bounded evidence rather
@@ -144,11 +144,34 @@ nor a monotonic substitute for proximal rate.
    released energy.
 5. **Control slack** is an activation deadband, delay, or co-contraction reserve.
 
-Only the declared phenomenological transmission dead zone has been exercised
-directly in the present allocation study. The other classes remain separate
-experiments. Any proposed benefit must survive matched-energy, zero-slack,
-direction-reversal, passivity, and work-energy closure controls before it can
-be interpreted as a transfer mechanism.
+The dynamic constitutive audit now exercises all five classes separately under
+a slow closed-cycle sine and a richer multisine with repeated reversals. The
+four mechanical surrogates satisfy the registered passivity and work-energy
+closure checks; the largest absolute closure residual is
+$5.13\times10^{-10}$ J. The control deadband is deliberately treated as a
+delayed command-transmission map, so mechanical passivity and stored energy
+are not assigned to it.
+
+The richer excitation improves the local scaled-sensitivity conditioning of
+every mechanical surrogate. Each three-parameter local Jacobian is full rank,
+but that result does not identify the generating class. Under the registered
+multisine, contact disengagement and the biological-compliance surrogate differ
+by only 1.96% normalized transmitted-output RMSE. Independent contact, tissue,
+shaft, activation, and bilateral-wrench measurements are therefore necessary
+to distinguish mechanisms rather than fitting one output channel. The
+transmission element remains a memoryless dead-zone-plus-damping surrogate,
+not a stateful rate-independent play operator, and the biological element is a
+unilateral Kelvin-Voigt surrogate rather than a subject-specific tendon model.
+
+![Typed Slack Dynamic Audit. Mechanical force-displacement loops, the delayed
+control boundary, local scaled-sensitivity ranks, and normalized outputs are
+shown for the registered synthetic excitations.](figures/fig_typed_slack_dynamic_audit.pdf){#fig-typed-slack-dynamic-audit width=100%}
+
+This evidence supports only a typed experimental program. It does not show
+that slack is good, bad, intentional, required, or beneficial for delivery.
+Any such proposal must still survive matched-energy, zero-slack,
+direction-reversal, passivity, work-energy closure, and independent-measurement
+controls in a forward delivery model.
 
 ## Evidential Boundary
 
@@ -168,8 +191,8 @@ examples are separated: drift contribution; geometry; casting; early-downswing
 proximal acceleration; segment release; timing precision; self-correction and
 noise robustness; proximal-velocity maximization; and slack. The executable
 readiness audit preserves all nine rather than allowing a broad question to
-hide an unplanned subquestion. Seven presently have a model-bounded answer or
-a negative general-rule result. Two remain unresolved or definition-gated.
+hide an unplanned subquestion. Eight presently have a model-bounded answer or
+a negative general-rule result. One remains unresolved as a single construct.
 All nine have a registered model experiment and a participant-held-out human
 stage, but the latter remains blocked by the bilateral-wrench data boundary.
 
@@ -183,7 +206,7 @@ stage, but the latter remains blocked by the bilateral-wrench data boundary.
 | Timing precision | Partly answered; a state-trigger volume advantage is not supported in the registered planar tier | Continuous common-phase spatial and subject-scaled comparison |
 | Self-correction and noise robustness | Partly answered negatively at the registered planar tier; no sustained recovery in 60 cases | Continuous attraction regions with identified observers and external-contact loads |
 | Proximal-velocity maximization | Not supported as a general planar rule | Causal full-delivery-state-matched spatial dose response |
-| Slack | Unresolved until typed | One-class-at-a-time passivity, hysteresis, and identifiability suite |
+| Slack | Partly answered at a synthetic constitutive tier; no global benefit and one-channel class identification is not established | One-class-at-a-time moving-base and spatial delivery tests with stateful backlash, subject-specific tissue, and independent measurements |
 
 : Readiness assessment for every point transcribed from the source agenda.
 “Partly answered” never denotes a human or coaching conclusion.

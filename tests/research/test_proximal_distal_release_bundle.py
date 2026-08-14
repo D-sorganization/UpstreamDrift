@@ -32,6 +32,7 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         "advanced_biological_bridge",
         "transmission_robustness",
         "timing_viability_adverse_load",
+        "typed_slack_dynamic_audit",
         "shoulder_velocity_pointwise",
         "shoulder_velocity_strategy",
         "joint_matched_proximal_rate",
@@ -46,6 +47,10 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
     )
     assert manifest["claims"]["registered_model_sustained_recovery"] == (
         "not_observed_in_60_cases"
+    )
+    assert manifest["claims"]["global_slack_benefit"] == "unsupported"
+    assert manifest["claims"]["single_channel_slack_class_identification"] == (
+        "not_established"
     )
     assert (
         manifest["claims"]["distributed_shaft_modal_reduction"]

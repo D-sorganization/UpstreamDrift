@@ -2,14 +2,14 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "6b6aba3f7a4776c5e102b6a1349ec62a98011071e77e3d1d14df6dbde154ade8",
+    "source_digest": "48fad135b6590a1b915582aa5959e79a5e4035ebaca583db9adc38f95d73961f",
     "baseline_commit": "13ea6a69585a42dc1db4b3959440ed95787c9779"
   },
   "audit_scope": {
     "completion_status": "complete",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "The complete 959-candidate paper inventory is adjudicated. The critical-question chapter maps twenty candidates to nine bounded claims and retains all human-data gates."
+    "current_scope": "The complete 962-candidate paper inventory is adjudicated. The critical-question chapter maps twenty-four candidates to ten bounded claims and retains all human-data gates."
   },
   "dependencies": [
     {
@@ -146,6 +146,16 @@
     {
       "release_claim_key": "human_torso_velocity_strategy",
       "published_status": "untested",
+      "audit_state": "reviewed_as_unsupported_or_untested"
+    },
+    {
+      "release_claim_key": "global_slack_benefit",
+      "published_status": "unsupported",
+      "audit_state": "reviewed_as_unsupported_or_untested"
+    },
+    {
+      "release_claim_key": "single_channel_slack_class_identification",
+      "published_status": "not_established",
       "audit_state": "reviewed_as_unsupported_or_untested"
     }
   ],
@@ -9563,7 +9573,7 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-3b1d505352ff6b17",
+      "candidate_id": "PD-CAND-8530e00f5a9092c1",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-243"
@@ -9693,10 +9703,40 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-ce5ed5ff62ef6edd",
+      "candidate_id": "PD-CAND-c4c001fab108c8b8",
       "disposition": "material_claims_mapped",
       "claim_ids": [
-        "PD-CLAIM-247"
+        "PD-CLAIM-253"
+      ],
+      "rationale": "This passage states or bounds a registered critical-question conclusion.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-5bb964996c957e8b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-253"
+      ],
+      "rationale": "This passage states or bounds a registered critical-question conclusion.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-c6f3dffde5c055ae",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-253"
+      ],
+      "rationale": "This passage states or bounds a registered critical-question conclusion.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-ac373f7ecba4fa8d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-253"
       ],
       "rationale": "This passage states or bounds a registered critical-question conclusion.",
       "reviewer": "Codex technical audit",
@@ -9713,7 +9753,7 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-4cffabfef4e2bc33",
+      "candidate_id": "PD-CAND-2705100c55ffd22a",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-251"
@@ -9733,7 +9773,7 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-9518683d2551b8e7",
+      "candidate_id": "PD-CAND-73b7fe82d5d81fd7",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-251"
@@ -20618,7 +20658,12 @@
         "docs/research/proximal_distal_energy_transfer/data/timing_viability_study.npz",
         "docs/research/proximal_distal_energy_transfer/figures/fig_timing_viability_adverse_load.pdf",
         "scripts/research/proximal_distal_energy/timing_viability.py",
-        "scripts/research/proximal_distal_energy/run_timing_viability_study.py"
+        "scripts/research/proximal_distal_energy/run_timing_viability_study.py",
+        "docs/research/proximal_distal_energy_transfer/data/typed_slack_dynamic_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/typed_slack_dynamic_study.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_typed_slack_dynamic_audit.pdf",
+        "scripts/research/proximal_distal_energy/typed_slack_dynamic.py",
+        "scripts/research/proximal_distal_energy/run_typed_slack_dynamic_study.py"
       ],
       "model_domain": "Cross-tier synthesis and prospective experiment governance.",
       "uncertainty_boundary": "The map summarizes existing adjudicated evidence and prospective tests; it is not new experimental evidence.",
@@ -20642,7 +20687,7 @@
     {
       "claim_id": "PD-CLAIM-243",
       "candidate_ids": [
-        "PD-CAND-3b1d505352ff6b17"
+        "PD-CAND-8530e00f5a9092c1"
       ],
       "statement": "The seven-question table retains observable-specific drift attribution and bounded current answers after adding the geometry and recovery studies.",
       "classification": "critical_question_answer_map",
@@ -20661,7 +20706,12 @@
         "docs/research/proximal_distal_energy_transfer/data/timing_viability_study.npz",
         "docs/research/proximal_distal_energy_transfer/figures/fig_timing_viability_adverse_load.pdf",
         "scripts/research/proximal_distal_energy/timing_viability.py",
-        "scripts/research/proximal_distal_energy/run_timing_viability_study.py"
+        "scripts/research/proximal_distal_energy/run_timing_viability_study.py",
+        "docs/research/proximal_distal_energy_transfer/data/typed_slack_dynamic_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/typed_slack_dynamic_study.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_typed_slack_dynamic_audit.pdf",
+        "scripts/research/proximal_distal_energy/typed_slack_dynamic.py",
+        "scripts/research/proximal_distal_energy/run_typed_slack_dynamic_study.py"
       ],
       "model_domain": "Cross-tier synthesis and prospective experiment governance.",
       "uncertainty_boundary": "A table entry is a synthesis of registered evidence rather than an independent experiment.",
@@ -20708,7 +20758,12 @@
         "docs/research/proximal_distal_energy_transfer/data/timing_viability_study.npz",
         "docs/research/proximal_distal_energy_transfer/figures/fig_timing_viability_adverse_load.pdf",
         "scripts/research/proximal_distal_energy/timing_viability.py",
-        "scripts/research/proximal_distal_energy/run_timing_viability_study.py"
+        "scripts/research/proximal_distal_energy/run_timing_viability_study.py",
+        "docs/research/proximal_distal_energy_transfer/data/typed_slack_dynamic_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/typed_slack_dynamic_study.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_typed_slack_dynamic_audit.pdf",
+        "scripts/research/proximal_distal_energy/typed_slack_dynamic.py",
+        "scripts/research/proximal_distal_energy/run_typed_slack_dynamic_study.py"
       ],
       "model_domain": "Cross-tier synthesis and prospective experiment governance.",
       "uncertainty_boundary": "The identities and model controls do not establish feasible or preferred subject-scaled human geometry.",
@@ -20753,7 +20808,12 @@
         "docs/research/proximal_distal_energy_transfer/data/timing_viability_study.npz",
         "docs/research/proximal_distal_energy_transfer/figures/fig_timing_viability_adverse_load.pdf",
         "scripts/research/proximal_distal_energy/timing_viability.py",
-        "scripts/research/proximal_distal_energy/run_timing_viability_study.py"
+        "scripts/research/proximal_distal_energy/run_timing_viability_study.py",
+        "docs/research/proximal_distal_energy_transfer/data/typed_slack_dynamic_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/typed_slack_dynamic_study.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_typed_slack_dynamic_audit.pdf",
+        "scripts/research/proximal_distal_energy/typed_slack_dynamic.py",
+        "scripts/research/proximal_distal_energy/run_typed_slack_dynamic_study.py"
       ],
       "model_domain": "Cross-tier synthesis and prospective experiment governance.",
       "uncertainty_boundary": "Observer, recovery, and participant experiments have not been completed.",
@@ -20798,7 +20858,12 @@
         "docs/research/proximal_distal_energy_transfer/data/timing_viability_study.npz",
         "docs/research/proximal_distal_energy_transfer/figures/fig_timing_viability_adverse_load.pdf",
         "scripts/research/proximal_distal_energy/timing_viability.py",
-        "scripts/research/proximal_distal_energy/run_timing_viability_study.py"
+        "scripts/research/proximal_distal_energy/run_timing_viability_study.py",
+        "docs/research/proximal_distal_energy_transfer/data/typed_slack_dynamic_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/typed_slack_dynamic_study.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_typed_slack_dynamic_audit.pdf",
+        "scripts/research/proximal_distal_energy/typed_slack_dynamic.py",
+        "scripts/research/proximal_distal_energy/run_typed_slack_dynamic_study.py"
       ],
       "model_domain": "Cross-tier synthesis and prospective experiment governance.",
       "uncertainty_boundary": "The result is limited to a small engineering envelope and a simple delayed observer; it does not estimate human correction.",
@@ -20845,7 +20910,12 @@
         "docs/research/proximal_distal_energy_transfer/data/timing_viability_study.npz",
         "docs/research/proximal_distal_energy_transfer/figures/fig_timing_viability_adverse_load.pdf",
         "scripts/research/proximal_distal_energy/timing_viability.py",
-        "scripts/research/proximal_distal_energy/run_timing_viability_study.py"
+        "scripts/research/proximal_distal_energy/run_timing_viability_study.py",
+        "docs/research/proximal_distal_energy_transfer/data/typed_slack_dynamic_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/typed_slack_dynamic_study.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_typed_slack_dynamic_audit.pdf",
+        "scripts/research/proximal_distal_energy/typed_slack_dynamic.py",
+        "scripts/research/proximal_distal_energy/run_typed_slack_dynamic_study.py"
       ],
       "model_domain": "Cross-tier synthesis and prospective experiment governance.",
       "uncertainty_boundary": "The result is limited to five sampled phase offsets, six engineering load cohorts, declared task guards, and a reduced planar controller; it does not identify human timing demand, self-correction, or coaching strategy.",
@@ -20870,17 +20940,15 @@
       "claim_id": "PD-CLAIM-247",
       "candidate_ids": [
         "PD-CAND-f68d06799fe605bf",
-        "PD-CAND-db74be00a06f8889",
-        "PD-CAND-ce5ed5ff62ef6edd"
+        "PD-CAND-db74be00a06f8889"
       ],
       "statement": "Energy-, work-, and load-controlled planar evidence rejects maximizing proximal velocity as a general rule at those tiers, while five distinct slack classes require separate state, energy, and measurement tests.",
       "classification": "nonmonotonic_velocity_and_typed_slack_boundary",
-      "published_status": "proximal_rule_rejected_at_planar_tiers_slack_mostly_open",
+      "published_status": "proximal_rule_rejected_at_planar_tiers_slack_typed",
       "audit_status": "evidence_boundary_and_falsification_contract_checked",
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:116",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:140",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:147"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:140"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
@@ -20892,10 +20960,15 @@
         "docs/research/proximal_distal_energy_transfer/data/timing_viability_study.npz",
         "docs/research/proximal_distal_energy_transfer/figures/fig_timing_viability_adverse_load.pdf",
         "scripts/research/proximal_distal_energy/timing_viability.py",
-        "scripts/research/proximal_distal_energy/run_timing_viability_study.py"
+        "scripts/research/proximal_distal_energy/run_timing_viability_study.py",
+        "docs/research/proximal_distal_energy_transfer/data/typed_slack_dynamic_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/typed_slack_dynamic_study.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_typed_slack_dynamic_audit.pdf",
+        "scripts/research/proximal_distal_energy/typed_slack_dynamic.py",
+        "scripts/research/proximal_distal_energy/run_typed_slack_dynamic_study.py"
       ],
       "model_domain": "Cross-tier synthesis and prospective experiment governance.",
-      "uncertainty_boundary": "The acceleration intervention is pointwise, forward pairs do not match the full delivery state, and only a phenomenological transmission dead zone has been directly exercised; no human optimum is identified.",
+      "uncertainty_boundary": "The acceleration intervention is pointwise, forward pairs do not match the full delivery state, and the typed slack suite remains a synthetic scalar constitutive audit; no human optimum is identified.",
       "competing_explanations": [
         "model-tier dependence",
         "estimand choice",
@@ -20914,16 +20987,22 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "claim_id": "PD-CLAIM-248",
+      "claim_id": "PD-CLAIM-253",
       "candidate_ids": [
-        "PD-CAND-49c472fa030a2018"
+        "PD-CAND-c4c001fab108c8b8",
+        "PD-CAND-5bb964996c957e8b",
+        "PD-CAND-c6f3dffde5c055ae",
+        "PD-CAND-ac373f7ecba4fa8d"
       ],
-      "statement": "Synthetic studies can falsify declared model mechanisms and qualify software but cannot establish coaching or human-control strategies; governed participant-held-out bilateral-wrench data remain required.",
-      "classification": "human_evidence_boundary",
-      "published_status": "human_validation_blocked",
+      "statement": "A two-excitation synthetic constitutive audit separates five slack classes, closes the four mechanical work-energy ledgers, and obtains full local scaled-sensitivity rank, but one transmitted-output channel does not identify the generating class or establish a delivery benefit.",
+      "classification": "typed_slack_dynamic_passivity_and_identifiability_audit",
+      "published_status": "constitutive_mechanical_closure_supported_class_identification_not_established",
       "audit_status": "evidence_boundary_and_falsification_contract_checked",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:155"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:147",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:155",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:166",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:170"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
@@ -20935,7 +21014,60 @@
         "docs/research/proximal_distal_energy_transfer/data/timing_viability_study.npz",
         "docs/research/proximal_distal_energy_transfer/figures/fig_timing_viability_adverse_load.pdf",
         "scripts/research/proximal_distal_energy/timing_viability.py",
-        "scripts/research/proximal_distal_energy/run_timing_viability_study.py"
+        "scripts/research/proximal_distal_energy/run_timing_viability_study.py",
+        "docs/research/proximal_distal_energy_transfer/data/typed_slack_dynamic_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/typed_slack_dynamic_study.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_typed_slack_dynamic_audit.pdf",
+        "scripts/research/proximal_distal_energy/typed_slack_dynamic.py",
+        "scripts/research/proximal_distal_energy/run_typed_slack_dynamic_study.py"
+      ],
+      "model_domain": "Cross-tier synthesis and prospective experiment governance.",
+      "uncertainty_boundary": "The registered backlash is memoryless dead-zone plus damping, biological compliance is a unilateral Kelvin-Voigt surrogate, and the suite contains no forward delivery, subject-specific anatomy, intentionality, injury, or human outcome.",
+      "competing_explanations": [
+        "model-tier dependence",
+        "estimand choice",
+        "matching rule",
+        "measurement uncertainty"
+      ],
+      "negative_controls": [
+        "same-state killswitch",
+        "geometry null and reversal",
+        "matched work and state",
+        "participant holdout"
+      ],
+      "falsifier": "A mechanical class violates passivity or closure, the result depends on mixing classes, or independent measurements and held-out data contradict the registered near-confounding and non-identification boundary.",
+      "adjudication": "Reconciled to the existing claim audit, machine-readable question registry, and prospective experiment contract without promoting model evidence to human evidence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "claim_id": "PD-CLAIM-248",
+      "candidate_ids": [
+        "PD-CAND-49c472fa030a2018"
+      ],
+      "statement": "Synthetic studies can falsify declared model mechanisms and qualify software but cannot establish coaching or human-control strategies; governed participant-held-out bilateral-wrench data remain required.",
+      "classification": "human_evidence_boundary",
+      "published_status": "human_validation_blocked",
+      "audit_status": "evidence_boundary_and_falsification_contract_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:178"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
+        "docs/research/proximal_distal_energy_transfer/MOMENTUM_TRANSFER_QUESTION_PROGRAM.md",
+        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_question_registry.json",
+        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_experiment_registry.json",
+        "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_readiness_audit.json",
+        "docs/research/proximal_distal_energy_transfer/data/timing_viability_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/timing_viability_study.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_timing_viability_adverse_load.pdf",
+        "scripts/research/proximal_distal_energy/timing_viability.py",
+        "scripts/research/proximal_distal_energy/run_timing_viability_study.py",
+        "docs/research/proximal_distal_energy_transfer/data/typed_slack_dynamic_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/typed_slack_dynamic_study.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_typed_slack_dynamic_audit.pdf",
+        "scripts/research/proximal_distal_energy/typed_slack_dynamic.py",
+        "scripts/research/proximal_distal_energy/run_typed_slack_dynamic_study.py"
       ],
       "model_domain": "Cross-tier synthesis and prospective experiment governance.",
       "uncertainty_boundary": "No qualifying governed participant-level dataset is available.",
@@ -20959,9 +21091,9 @@
     {
       "claim_id": "PD-CLAIM-251",
       "candidate_ids": [
-        "PD-CAND-4cffabfef4e2bc33",
+        "PD-CAND-2705100c55ffd22a",
         "PD-CAND-51f73ab4ac4d57de",
-        "PD-CAND-9518683d2551b8e7",
+        "PD-CAND-73b7fe82d5d81fd7",
         "PD-CAND-640befe2d6c188d2",
         "PD-CAND-1746f6ac68698fb0"
       ],
@@ -20970,11 +21102,11 @@
       "published_status": "planning_coverage_complete_scientific_questions_partly_open",
       "audit_status": "evidence_boundary_and_falsification_contract_checked",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:166",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:176",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:178",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:188",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:192"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:189",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:199",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:201",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:211",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:215"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
@@ -20986,7 +21118,12 @@
         "docs/research/proximal_distal_energy_transfer/data/timing_viability_study.npz",
         "docs/research/proximal_distal_energy_transfer/figures/fig_timing_viability_adverse_load.pdf",
         "scripts/research/proximal_distal_energy/timing_viability.py",
-        "scripts/research/proximal_distal_energy/run_timing_viability_study.py"
+        "scripts/research/proximal_distal_energy/run_timing_viability_study.py",
+        "docs/research/proximal_distal_energy_transfer/data/typed_slack_dynamic_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/typed_slack_dynamic_study.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_typed_slack_dynamic_audit.pdf",
+        "scripts/research/proximal_distal_energy/typed_slack_dynamic.py",
+        "scripts/research/proximal_distal_energy/run_typed_slack_dynamic_study.py"
       ],
       "model_domain": "Cross-tier synthesis and prospective experiment governance.",
       "uncertainty_boundary": "This is a completeness and evidence-readiness result, not new mechanical or human evidence; the human stage remains blocked by the bilateral-wrench data boundary.",

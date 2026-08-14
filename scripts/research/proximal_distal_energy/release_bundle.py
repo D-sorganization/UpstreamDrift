@@ -110,6 +110,10 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
                 "command": "python -m scripts.research.proximal_distal_energy.run_timing_viability_study",
                 "tier": "common_phase_paired_adverse_load_recovery",
             },
+            "typed_slack_dynamic_audit": {
+                "command": "python -m scripts.research.proximal_distal_energy.run_typed_slack_dynamic_study",
+                "tier": "synthetic_scalar_dynamic_constitutive_screen",
+            },
             "shoulder_velocity_pointwise": {
                 "command": "python -m scripts.research.proximal_distal_energy.run_shoulder_velocity_transfer_study",
                 "tier": "planar_fixed_hub_pointwise_phase_sensitivity",
@@ -168,6 +172,8 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
                 "supported_conditionally_at_declared_reduced_model_tier"
             ),
             "human_torso_velocity_strategy": "untested",
+            "global_slack_benefit": "unsupported",
+            "single_channel_slack_class_identification": "not_established",
         },
         "known_open_gates": [
             "subject-scaled articulated spatial contact with calibrated grip and distributed shaft",

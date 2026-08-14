@@ -49,7 +49,7 @@ reviewed.
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.521 |
+| **Spec Version** | 1.0.522 |
 | **Last Spec Update** | 2026-08-14 |
 
 ## 2. Purpose & Mission
@@ -2201,6 +2201,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-14 | 1.0.522 | Added a two-excitation typed-slack dynamic audit that separates contact disengagement, transmission dead zone, structural preload, biological series compliance, and control deadband; enforces mechanical passivity and closure where applicable; reports scaled local sensitivity and pairwise output separation; and retains delivery, anatomical, class-identification, intentionality, and human conclusions as open. |
 | 2026-08-14 | 1.0.521 | Added a common-phase timing-viability and adverse-load-recovery experiment for the critical-question program: 60 paired cases and 120 trajectories compare clock and state-triggered release under five phase offsets and six load/perturbation cohorts, retain strict/primary/lenient task-viability definitions, test sustained half-error recovery, and register timestep sensitivity. The model screen found a larger clock-policy task-viability region and no sustained recovery in either policy; it explicitly does not identify human timing demand, self-correction, or coaching strategy. |
 | 2026-08-14 | 1.0.520 | Registered all nine points from the handwritten momentum-transfer agenda with answer state, decisive next test, falsifier, data gate, model plan, and participant-held-out human stage; added a generated fail-closed readiness audit; expanded the paper claim audit to 956 candidates and 250 claims; and retained #8556 as the governed bilateral-wrench human-data blocker. |
 | 2026-08-14 | 1.0.519 | Removed eleven orphaned `.codex-worktrees/` gitlinks that PR #8583 introduced without matching `.gitmodules` stanzas, which made `git submodule update --init --recursive` and `git submodule status` exit non-zero on a fresh clone even though that command is the documented setup step and is emitted in runtime error messages from the engine loaders, pendulum engine, and model explorer. Added `.codex-worktrees/` to `.gitignore` beside the existing Claude agent-worktree entry, and added `tests/unit/repo_hygiene/test_no_orphaned_gitlinks.py` asserting that every tracked gitlink is declared in `.gitmodules`. Path-scoped submodule commands were unaffected, so vendor-freshness CI never regressed, and PR #8575's code changes remain intact on main. |
@@ -3039,3 +3040,11 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   perturbation recovery is required before describing model self-correction,
   and neither outcome shall be promoted to human timing demand or coaching
   strategy without the governed participant-held-out stage.
+- Typed-slack dynamics shall retain separate constitutive channels, two or more
+  registered excitations, class-specific engagement, mechanical passivity and
+  closure where applicable, a nonmechanical control boundary, scaled local
+  sensitivity, and cross-class output-separation diagnostics.
+- Full local sensitivity rank shall not be represented as class identification.
+  Memoryless backlash and reduced biological-compliance surrogates shall be
+  named as such, and no scalar constitutive screen shall establish delivery,
+  intentionality, anatomical, injury, coaching, or human benefit.

@@ -462,7 +462,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, coltitle=black, colback=white, arc=.35mm, rightrule=.15mm, toprule=.15mm, toptitle=1mm, titlerule=0mm, bottomtitle=1mm, opacityback=0, breakable, left=2mm, bottomrule=.15mm, opacitybacktitle=0.6, colframe=quarto-callout-note-color-frame]
+\begin{tcolorbox}[enhanced jigsaw, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, colframe=quarto-callout-note-color-frame, breakable, leftrule=.75mm, opacitybacktitle=0.6, rightrule=.15mm, bottomrule=.15mm, colback=white, bottomtitle=1mm, titlerule=0mm, toprule=.15mm, arc=.35mm, opacityback=0, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, left=2mm, coltitle=black]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -10795,12 +10795,15 @@ acceleration sweep also reverses the club-acceleration response before
 impact. & Full-delivery-state-matched forward rate and acceleration
 interventions, extended across spatial and subject-scaled models and
 held-out participants. \\
-Is slack beneficial or necessary? & Unanswered until the mechanism is
-named. Contact loss, backlash, elastic preload, muscle-tendon series
-compliance, and control deadband are not interchangeable. & One slack
-class at a time, with a state and constitutive law, matched initial
-energy, passivity and closure checks, hysteresis sweeps, and a
-measurement strategy. \\
+Is slack beneficial or necessary? & Partly answered at a synthetic
+constitutive tier. Five declared classes have been exercised separately,
+but no global benefit, necessity, intentionality, or delivery advantage
+is supported. One scalar output nearly confounds contact disengagement
+with the biological-compliance surrogate. & Embed one class at a time in
+moving-base, two-hand, and spatial delivery models under matched state,
+work, and load; add stateful backlash and subject-specific tissue
+models; acquire independent contact, shaft, tendon, activation, and
+bilateral-wrench measurements. \\
 \end{longtable}
 
 \section{Geometry Gates and Null
@@ -10984,12 +10987,47 @@ Hypotheses}\label{five-distinct-slack-hypotheses}
   co-contraction reserve.
 \end{enumerate}
 
-Only the declared phenomenological transmission dead zone has been
-exercised directly in the present allocation study. The other classes
-remain separate experiments. Any proposed benefit must survive
-matched-energy, zero-slack, direction-reversal, passivity, and
-work-energy closure controls before it can be interpreted as a transfer
-mechanism.
+The dynamic constitutive audit now exercises all five classes separately
+under a slow closed-cycle sine and a richer multisine with repeated
+reversals. The four mechanical surrogates satisfy the registered
+passivity and work-energy closure checks; the largest absolute closure
+residual is \(5.13\times10^{-10}\) J. The control deadband is
+deliberately treated as a delayed command-transmission map, so
+mechanical passivity and stored energy are not assigned to it.
+
+The richer excitation improves the local scaled-sensitivity conditioning
+of every mechanical surrogate. Each three-parameter local Jacobian is
+full rank, but that result does not identify the generating class. Under
+the registered multisine, contact disengagement and the
+biological-compliance surrogate differ by only 1.96\% normalized
+transmitted-output RMSE. Independent contact, tissue, shaft, activation,
+and bilateral-wrench measurements are therefore necessary to distinguish
+mechanisms rather than fitting one output channel. The transmission
+element remains a memoryless dead-zone-plus-damping surrogate, not a
+stateful rate-independent play operator, and the biological element is a
+unilateral Kelvin-Voigt surrogate rather than a subject-specific tendon
+model.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_typed_slack_dynamic_audit.pdf}
+
+}
+
+\caption{\label{fig-typed-slack-dynamic-audit}Typed Slack Dynamic Audit.
+Mechanical force-displacement loops, the delayed control boundary, local
+scaled-sensitivity ranks, and normalized outputs are shown for the
+registered synthetic excitations.}
+
+\end{figure}%
+
+This evidence supports only a typed experimental program. It does not
+show that slack is good, bad, intentional, required, or beneficial for
+delivery. Any such proposal must still survive matched-energy,
+zero-slack, direction-reversal, passivity, work-energy closure, and
+independent-measurement controls in a forward delivery model.
 
 \section{Evidential Boundary}\label{evidential-boundary}
 
@@ -11011,9 +11049,9 @@ early-downswing proximal acceleration; segment release; timing
 precision; self-correction and noise robustness; proximal-velocity
 maximization; and slack. The executable readiness audit preserves all
 nine rather than allowing a broad question to hide an unplanned
-subquestion. Seven presently have a model-bounded answer or a negative
-general-rule result. Two remain unresolved or definition-gated. All nine
-have a registered model experiment and a participant-held-out human
+subquestion. Eight presently have a model-bounded answer or a negative
+general-rule result. One remains unresolved as a single construct. All
+nine have a registered model experiment and a participant-held-out human
 stage, but the latter remains blocked by the bilateral-wrench data
 boundary.
 
@@ -11065,8 +11103,10 @@ attraction regions with identified observers and external-contact
 loads \\
 Proximal-velocity maximization & Not supported as a general planar rule
 & Causal full-delivery-state-matched spatial dose response \\
-Slack & Unresolved until typed & One-class-at-a-time passivity,
-hysteresis, and identifiability suite \\
+Slack & Partly answered at a synthetic constitutive tier; no global
+benefit and one-channel class identification is not established &
+One-class-at-a-time moving-base and spatial delivery tests with stateful
+backlash, subject-specific tissue, and independent measurements \\
 \end{longtable}
 
 The machine-readable authority is
