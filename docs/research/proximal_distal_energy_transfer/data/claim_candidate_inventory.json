@@ -1,9 +1,9 @@
 {
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper_source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-  "source_digest": "0acb5e28428ca76a25650ab1c982a51af80c8ad4d1e69fef599191ab1b9470eb",
+  "source_digest": "267de8bda7b0d9052ecd6d1555342b54fa9e9aa4fe41357d477db695995b30ec",
   "source_count": 33,
-  "candidate_count": 987,
+  "candidate_count": 994,
   "candidates": [
     {
       "candidate_id": "PD-CAND-2595bd0677ce26f9",
@@ -10153,10 +10153,110 @@
       "review_state": "unadjudicated"
     },
     {
+      "candidate_id": "PD-CAND-d6d5f4bbd42571e4",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd",
+      "line_start": 329,
+      "line_end": 337,
+      "text": "The fixed shoulder centers are the next explicit structural intervention. A paired arm-only screen holds the prescribed trunk and club pose fixed and compares the existing fixed centers with four bounded scapular coordinates per side: protraction, elevation, upward rotation, and winging. Protraction and elevation move the shoulder center on a declared thoracic ellipsoid; upward rotation and winging precede the three glenohumeral rotations. The construction is informed by the ellipsoid-constrained OpenSim shoulder complex of @seth2016, but it is a reduced kinematic surrogate rather than a reproduction of that model.",
+      "text_sha256": "acfda1338ab8b8b8db362b55a42cd485545022198859bf6f3d40c6799f1b9c49",
+      "citation_keys": [
+        "seth2016"
+      ],
+      "has_numeric_content": true,
+      "has_assertive_language": false,
+      "priority_score": 3,
+      "triage_flags": [
+        "numeric",
+        "external_citation"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-c3105f94a0a046da",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd",
+      "line_start": 339,
+      "line_end": 345,
+      "text": "The screen uses the same six deterministic profiles and three grip spans at 0.00, 0.12, and 0.24 s, yielding 54 paired states. Only the two arms move; the trunk and all six club coordinates remain fixed. The fixed-shoulder problem has eight arm coordinates, whereas the scapular problem has sixteen. The fixed solution is embedded exactly at zero scapular coordinates, so a larger residual in the mobile branch would be a numerical failure rather than a geometric finding.",
+      "text_sha256": "5e481ac11eeaadc53f7fbf7e8ced3c7255785168ecdfbc6b71721eae02d0942e",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": true,
+      "priority_score": 4,
+      "triage_flags": [
+        "numeric",
+        "assertive_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-60b8207530657651",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd",
+      "line_start": 347,
+      "line_end": 347,
+      "text": "![Scapular Mobility and Bilateral Contact Geometry](figures/fig_scapulothoracic_contact_screen.pdf){#fig-scapulothoracic-contact-screen width=100%}",
+      "text_sha256": "b3d1e6bc3519177c54e69db332ea20deedd56d35ab8643674fb907ecc7d44a00",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": false,
+      "priority_score": 2,
+      "triage_flags": [
+        "numeric"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-6c02100a0f5c73eb",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd",
+      "line_start": 349,
+      "line_end": 356,
+      "text": "No fixed-shoulder arm-only state reaches the 0.5 mm bilateral tolerance. The mobile-scapula branch reaches that residual in 31 of 54 states, but only 16 of 54 also receive a successful optimizer termination. Twenty-eight states place at least one coordinate on its declared screening bound, and the largest shoulder-center excursion is 0.101 m. The retained 2.0 m adverse grip span still fails, with 0.480 m maximum bilateral error. These counts expose a model-structure effect and a numerical/range boundary; they do not establish that the remaining states are anatomically infeasible.",
+      "text_sha256": "80646a3fbb1e76ebfb26a638bd62d2e3c320d300d4f2ea2a35a4bb4c7bd4d0be",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": true,
+      "priority_score": 4,
+      "triage_flags": [
+        "numeric",
+        "assertive_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-2b73f9c6cbe6873a",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd",
+      "line_start": 358,
+      "line_end": 364,
+      "text": "Both paired contact Jacobians have rank six at every registered state. The fixed branch therefore has a two-dimensional local coordinate null space and the scapular branch has a ten-dimensional null space. Bilateral contact position alone cannot allocate motion uniquely among scapular and glenohumeral coordinates. Adding scapular mobility materially changes the geometric screen while simultaneously increasing allocation non-identifiability.",
+      "text_sha256": "d3260fe52782999ba5fb604d25b29010c825f5ce921a058a5ae4ec676e8a129e",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": false,
+      "priority_score": 0,
+      "triage_flags": [],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-e7dde156e2ab6cec",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd",
+      "line_start": 366,
+      "line_end": 372,
+      "text": "This result advances the model ladder without identifying a human mechanism. The ellipsoid radii and angular bounds are engineering values, the screen has no subject-specific bone or muscle geometry, and no contact force, power, work, passivity, tissue load, or club-delivery outcome is solved. The decisive next test replaces this surrogate with the independently validated articulated shoulder model, subject-specific anatomy where governed, calibrated grip contact, and paired forward dynamics.",
+      "text_sha256": "a54e6a7abc55979877f1b7211ba8451a1e83c10f5cd45db89306e6d1c6d1890a",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": true,
+      "priority_score": 5,
+      "triage_flags": [
+        "assertive_language",
+        "causal_or_generalizing_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
       "candidate_id": "PD-CAND-f35adbe08b937d77",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd",
-      "line_start": 327,
-      "line_end": 332,
+      "line_start": 374,
+      "line_end": 379,
       "text": "The next spatial experiment must now integrate calibrated compliant contact from these closed states, expose contact loss and tissue/shaft compliance as typed states, and repeat the coincident, reversal, killswitch, power, and work--energy controls in two independent engines. Only trajectories passing those gates may be used to test whether drift-mediated transfer reduces timing demand, creates recovery, benefits from slack, or supports a human strategy.",
       "text_sha256": "64211a37abd2b5977f617b3d4293053eb2e0ae3eae3de77ea22926c1909fdf77",
       "citation_keys": [],
@@ -10171,8 +10271,8 @@
     {
       "candidate_id": "PD-CAND-e6a141c32e670db8",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd",
-      "line_start": 336,
-      "line_end": 336,
+      "line_start": 383,
+      "line_end": 383,
       "text": "The executed experiment advances the evidence boundary in three ways.",
       "text_sha256": "d519c0695598af53d65928f58457c97b36e6db072a0a253d6c393a568c561daf",
       "citation_keys": [],
@@ -10187,8 +10287,8 @@
     {
       "candidate_id": "PD-CAND-ee0adfd0063a4727",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd",
-      "line_start": 338,
-      "line_end": 342,
+      "line_start": 385,
+      "line_end": 389,
       "text": "First, the common spatial wrench is now coupled to a nonplanar reduced full-body inverse-dynamics calculation. The earlier three-dimensional result was only a frame-transformation audit. Here the mass matrix, bias forces, gravity, external generalized loads, and body Jacobians change with a genuine spatial state.",
       "text_sha256": "505d42a22b90d0aa317c5d8d943a52c3695e55cf1b11ed7da2a8202691db3330",
       "citation_keys": [],
@@ -10203,8 +10303,8 @@
     {
       "candidate_id": "PD-CAND-2c2258c05cf1f8fc",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd",
-      "line_start": 344,
-      "line_end": 348,
+      "line_start": 391,
+      "line_end": 395,
       "text": "Second, the same model is evaluated through independent algorithms. Agreement therefore tests implementation transport rather than coordinate relabeling. The discovered external-load convention error demonstrates why that test has scientific value: two individually plausible calculations disagreed until the reported estimand was made identical.",
       "text_sha256": "2b2e01edf4550692457d533746b609f76c065b1c3a3ae99d21deec02bb71751f",
       "citation_keys": [],
@@ -10219,8 +10319,8 @@
     {
       "candidate_id": "PD-CAND-6eb9b67c82f012a7",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd",
-      "line_start": 350,
-      "line_end": 352,
+      "line_start": 397,
+      "line_end": 399,
       "text": "Third, the geometry intervention remains exact in the spatial tier. It supports the statement that separated force application points can set club-couple sign independently of total force magnitude.",
       "text_sha256": "00255806a98f9f3d9162dacd9ce75defec6c907b9aebbbdf8ebcafaabf596f8c",
       "citation_keys": [],
@@ -10235,8 +10335,8 @@
     {
       "candidate_id": "PD-CAND-3ab6317faf735919",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd",
-      "line_start": 354,
-      "line_end": 354,
+      "line_start": 401,
+      "line_end": 401,
       "text": "Four stronger statements remain open:",
       "text_sha256": "8340f28519d1c1427b05bf32139a3a721681f1a8235c97b54ecb34aced177ccd",
       "citation_keys": [],
@@ -10251,8 +10351,8 @@
     {
       "candidate_id": "PD-CAND-36a661af65c9ae1d",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd",
-      "line_start": 356,
-      "line_end": 371,
+      "line_start": 403,
+      "line_end": 418,
       "text": "- **Passive Contact Origin Is Inconclusive.** The hand forces are inputs. A forward compliant two-hand solve must determine whether equivalent loads emerge after a distal command killswitch. - **Forward Cross-Engine Contact Is Untested at This Tier.** Same-state inverse dynamics removes trajectory divergence by design. The independently integrated reduced contact experiment in @sec-spatial-forward-contact addresses that separate estimand without promoting this prescribed-load result. - **Anatomical Magnitude Is Unsupported.** The reduced tree and spherical inertias are not subject-specific anatomy, muscle, or tissue mechanics. The subject-scaled audit shows that its prescribed states do not close the anatomical hands on the declared grip points; the bounded follow-up closes only a reduced tree under engineering-limit and coarse collision screens. - **Human Strategy Is Unsupported.** No measured trajectory or force record is held out for validation, and no coaching prescription follows from this mechanism experiment.",
       "text_sha256": "e630e60a9cf82102025616c535a259ca66e37873f742fdbdd5cc192a90ca0050",
       "citation_keys": [],
@@ -10268,8 +10368,8 @@
     {
       "candidate_id": "PD-CAND-bbac8d9885489dc6",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd",
-      "line_start": 373,
-      "line_end": 377,
+      "line_start": 420,
+      "line_end": 424,
       "text": "The next chapter tests the reduced contact mechanism under independent forward integration. Identifiability and uncertainty are then treated before control claims. Parameter compensation can otherwise make a structurally inadequate model reproduce one output while assigning the wrong contribution to contact, base motion, passive tissue, or actuation.",
       "text_sha256": "96ece61b32182541bbc014f6766d98e56220b2a962fd8991b52aef3831778381",
       "citation_keys": [],
@@ -15853,10 +15953,27 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-3a28f92e6b8aa6a3",
+      "candidate_id": "PD-CAND-1caf11fb82f2f6aa",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd",
       "line_start": 79,
-      "line_end": 88,
+      "line_end": 86,
+      "text": "A paired arm-only intervention now isolates one omitted structure. With trunk and club pose fixed, the fixed-shoulder branch closes none of 54 registered states, whereas a bounded scapula-on-ellipsoid surrogate reaches the contact residual in 31 states and satisfies both residual and solver-termination gates in 16. Full rank persists while coordinate nullity rises from two to ten, so the result supports the importance of scapular geometry but also strengthens the non-identifiability boundary. It is not an anatomical, muscular, or human strategy result.",
+      "text_sha256": "d9b7474fa3c74d314a1b16001e756204b16d8f7a20e1b14c6f72c569c7b006cd",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": true,
+      "priority_score": 4,
+      "triage_flags": [
+        "numeric",
+        "assertive_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-3a28f92e6b8aa6a3",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd",
+      "line_start": 88,
+      "line_end": 97,
       "text": "The reduced spatial forward-contact extension resolves that narrower mechanism gate. Native MuJoCo and Pinocchio independently integrate two finite-mass hand carriages, paired compliant interfaces, and a free rigid club without direct club actuation. Their baseline and same-state killswitch trajectories satisfy the declared position, orientation, wrench, and energy regions. Removing the complete grounded driver leaves a negative force-generated swing-normal couple for 37.5 ms in both engines; coincident and reversed-moment-arm controls close exactly, and the work--energy residual decreases under timestep refinement. This supports reduced spatial contact persistence, not anatomical arms, muscles, calibrated grip tissue, equipment, or human strategy.",
       "text_sha256": "307686ae1479e821ad1a155503102b6fdff191ca8df65f0e8d29bb25655b3972",
       "citation_keys": [],
@@ -15873,8 +15990,8 @@
     {
       "candidate_id": "PD-CAND-58e2fdab32244d00",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd",
-      "line_start": 90,
-      "line_end": 97,
+      "line_start": 99,
+      "line_end": 106,
       "text": "The coupled uncertainty/control phase rejects two additional shortcuts. A net planar wrench cannot uniquely identify both hand forces, and six summary observables cannot identify the complete 12-parameter vector. Separate training and held-out ensembles leave objective-dependent tradeoffs among all eight command programs. Early restraint improves held-out lower-tail speed relative to late drive but increases the planar face/path error, so the result supports a conditional model mechanism rather than a universal or physiological strategy.",
       "text_sha256": "0623392842a8b8d93bfdb1b8298273ba9bc0680f274d5974db7cbee5890a18f5",
       "citation_keys": [],
@@ -15891,8 +16008,8 @@
     {
       "candidate_id": "PD-CAND-8fadc01cf2fdc629",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd",
-      "line_start": 99,
-      "line_end": 104,
+      "line_start": 108,
+      "line_end": 113,
       "text": "The experimental phase is preregistered but not empirically executed. Its machine-readable protocol fixes six synchronized modalities, participant-level holdout, identity-safe provenance, filtering and residual sensitivities, and four prediction-specific falsifiers. The synthetic dry run passes all intake and fail-closed controls, but it cannot advance H1--H4. Governed human data are still required.",
       "text_sha256": "652ee026810a3536d63d37736f4a84dab0a9a2dec0e3f173594aee27b53dcc9c",
       "citation_keys": [],
@@ -15905,8 +16022,8 @@
     {
       "candidate_id": "PD-CAND-2641f160380c0508",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd",
-      "line_start": 106,
-      "line_end": 112,
+      "line_start": 115,
+      "line_end": 121,
       "text": "The open-resource layer now supplies model-tier presets, a hash-pinned release manifest, standard checksums, a data dictionary, citation metadata, and a claim-first reviewer workbench. Validation fails closed on artifact drift. The bundle remains a qualified local release candidate rather than a persistent archive: articulated subject-scaled contact, equipment-calibrated beam coupling, governed human evaluation, and external identifier deposit remain open.",
       "text_sha256": "1d38f12efaa9def90247911f3f580a98a9003a821c63d51a9fbb790add907e49",
       "citation_keys": [],
@@ -15922,8 +16039,8 @@
     {
       "candidate_id": "PD-CAND-efee29754ee09df2",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd",
-      "line_start": 116,
-      "line_end": 117,
+      "line_start": 125,
+      "line_end": 126,
       "text": "The next work should reduce the largest inferential risks in dependency order:",
       "text_sha256": "07513d405d6a2dec80de362e100344a58900b15d92e7c1b05bd76a35d1357608",
       "citation_keys": [],
@@ -15936,8 +16053,8 @@
     {
       "candidate_id": "PD-CAND-c063936829317748",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd",
-      "line_start": 119,
-      "line_end": 147,
+      "line_start": 128,
+      "line_end": 156,
       "text": "1. **Articulated Spatial Forward-Contact Counterfactual.** Replace the executed hand-carriage reference with subject-scaled articulated arms and calibrated grip interfaces. Start from the executed bilateral closed-contact, engineering-limit, and coarse collision-qualified configurations, replace those screens with subject-specific anatomy where available, then preserve the two-engine same-state killswitch, force, couple, power, work, pathway, and closure observables. 2. **Calibrated Uncertainty and Constrained Control.** Extend the executed multivariable screen with population-informed distributions, measurement error, profile-likelihood or Bayesian calibration, larger held-out ensembles, and a constrained optimal-control comparator. 3. **Spatial Model-Fidelity Ladder.** Add base rotation, a three-dimensional club, ground pathways, and couple the executed distributed/modal shaft reference into the forward constrained solve without changing the registered interface observables. Each rung should carry conservation checks and cross-engine tolerance gates. 4. **Execute the Frozen Human-Data Protocol.** Acquire governed synchronized measurements that pass the fixed inclusion, residual, missingness, participant-holdout, and provenance gates. Sequence order alone must not be treated as evidence of energy transfer. 5. **Arm--Wrist Allocation and Preload Falsification.** Execute the bilateral grip-wrench, pressure, activation, stiffness, and participant-holdout tests registered in @sec-torque-allocation-preload. Treat the dead-zone mechanism as rejected if its predicted gap is absent under documented low tangent stiffness or if any performance difference disappears on holdout. 6. **Open-Resource Release.** Maintain deterministic commands, machine-readable results, data dictionaries, checksums, citation metadata, and explicit license boundaries. Archive validated releases with a persistent identifier.",
       "text_sha256": "5886e1a97376b1adc873cea0fdfe36bd742c2b8a8e3a9defdc68e6d05cb67961",
       "citation_keys": [],
@@ -15954,8 +16071,8 @@
     {
       "candidate_id": "PD-CAND-5f49580176ce4034",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd",
-      "line_start": 149,
-      "line_end": 152,
+      "line_start": 158,
+      "line_end": 161,
       "text": "The implementation roadmap and acceptance criteria are tracked in [the open research epic](https://github.com/D-sorganization/UpstreamDrift/issues/8426). The matched-task allocation and transmission program is tracked separately in [its falsification epic](https://github.com/D-sorganization/UpstreamDrift/issues/8497).",
       "text_sha256": "69f0dfa6c4a5d553181cbe3053fb91cc0ed7d41646ffbcfb44478310936488af",
       "citation_keys": [],
@@ -15970,8 +16087,8 @@
     {
       "candidate_id": "PD-CAND-fa5f064559bb1c98",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd",
-      "line_start": 156,
-      "line_end": 180,
+      "line_start": 165,
+      "line_end": 189,
       "text": "Analysis code, tests, figures, machine-readable outputs, and parameter records are available in the [open-source repository](https://github.com/D-sorganization/UpstreamDrift/tree/main/docs/research/proximal_distal_energy_transfer). The repository name identifies provenance only; none of the scientific claims depend on adoption of the broader software project. The principal summary is recorded in [`data/results_summary.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/results_summary.json), and the parameter-sensitivity results are recorded in [`data/e1d_parameter_sensitivity.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/e1d_parameter_sensitivity.json). The spatial common-state evidence is recorded in [`data/spatial_full_body_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json). The two-engine spatial forward-contact evidence is recorded in [`data/spatial_forward_contact_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json). The uncertainty, identifiability, and control evidence is recorded in [`data/uncertainty_control_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.json). The distributed-shaft structural evidence is recorded in [`data/shaft_beam_reference.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json). The forward distributed-modal shaft and arm--wrist allocation evidence are recorded in [`data/moving_base_modal_shaft_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/moving_base_modal_shaft_study.json) and [`data/torque_allocation_preload_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/torque_allocation_preload_study.json). The frozen experimental protocol and synthetic readiness classification are recorded in [`data/experimental_protocol_v1.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/experimental_protocol_v1.json) and [`data/experimental_protocol_readiness.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/experimental_protocol_readiness.json).",
       "text_sha256": "5421d6e329218a861111c943a7b77eb04a87bdd121f8ecae635dcd661abba888",
       "citation_keys": [],

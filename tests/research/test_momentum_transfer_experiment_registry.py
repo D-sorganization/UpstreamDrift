@@ -45,6 +45,8 @@ def test_key_failure_controls_are_explicit() -> None:
     assert experiments["MT-E08"]["execution_status"].startswith(
         "prescribed_state_rejection_and_234_sample_reduced_tree_closed_contact"
     )
+    assert "nested_zero_scapular_coordinates" in experiments["MT-E09"]["controls"]
+    assert "coordinate_allocation_nullity" in experiments["MT-E09"]["outcomes"]
 
 
 def test_human_stage_is_participant_held_out_and_fail_closed() -> None:

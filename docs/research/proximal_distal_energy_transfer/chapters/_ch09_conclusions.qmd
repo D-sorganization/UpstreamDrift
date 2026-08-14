@@ -76,6 +76,15 @@ screening results, not measured anatomical ranges or mesh-level clearance;
 they advance the next test to calibrated compliant forward contact from the
 closed states.
 
+A paired arm-only intervention now isolates one omitted structure. With trunk
+and club pose fixed, the fixed-shoulder branch closes none of 54 registered
+states, whereas a bounded scapula-on-ellipsoid surrogate reaches the contact
+residual in 31 states and satisfies both residual and solver-termination gates
+in 16. Full rank persists while coordinate nullity rises from two to ten, so
+the result supports the importance of scapular geometry but also strengthens
+the non-identifiability boundary. It is not an anatomical, muscular, or human
+strategy result.
+
 The reduced spatial forward-contact extension resolves that narrower mechanism
 gate. Native MuJoCo and Pinocchio independently integrate two finite-mass hand
 carriages, paired compliant interfaces, and a free rigid club without direct

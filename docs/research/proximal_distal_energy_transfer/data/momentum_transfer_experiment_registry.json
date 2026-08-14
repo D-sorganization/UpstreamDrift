@@ -396,6 +396,44 @@
       "execution_status": "prescribed_state_rejection_and_234_sample_reduced_tree_closed_contact_limit_collision_screen_complete_compliant_forward_anatomical_and_human_tests_open"
     },
     {
+      "id": "MT-E09",
+      "questions": ["Q2", "Q3", "Q5", "Q7"],
+      "title": "Paired Scapulothoracic Contact-Geometry Screen",
+      "model_tiers": ["subject_scaled_reduced_kinematics"],
+      "interventions": [
+        "fixed_versus_mobile_scapular_geometry",
+        "protraction_elevation_upward_rotation_and_winging",
+        "grip_span_and_phase_sweep"
+      ],
+      "controls": [
+        "nested_zero_scapular_coordinates",
+        "fixed_trunk_and_club_pose",
+        "residual_and_solver_termination_separation",
+        "coordinate_bound_activity",
+        "contact_jacobian_rank_and_nullity",
+        "two_meter_adverse_grip_span"
+      ],
+      "outcomes": [
+        "bilateral_contact_residual",
+        "qualified_closure_count",
+        "shoulder_center_excursion",
+        "coordinate_allocation_nullity"
+      ],
+      "uncertainty": [
+        "engineering_ellipsoid_geometry",
+        "coordinate_bounds",
+        "optimizer_termination",
+        "omitted_subject_specific_anatomy_and_contact"
+      ],
+      "falsifier": "The nested mobile model does not reproduce the paired reachability improvement, the adverse span closes, or anatomical and strategy claims are made without articulated anatomy and forward contact.",
+      "required_data": [
+        "subject_specific_scapular_and_glenohumeral_kinematics",
+        "calibrated_bilateral_grip_contact",
+        "full_body_and_club_kinematics"
+      ],
+      "execution_status": "54_state_reduced_geometry_screen_complete_partial_reachability_and_high_allocation_nullity_articulated_forward_test_open"
+    },
+    {
       "id": "MT-H01",
       "questions": ["Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7"],
       "title": "Participant-Held-Out Human Falsification",
