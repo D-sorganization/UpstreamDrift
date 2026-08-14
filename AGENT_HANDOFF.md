@@ -11,6 +11,10 @@ in git and GitHub.
   governs the proximal-to-distal research program. Issue
   [#8595](https://github.com/D-sorganization/UpstreamDrift/issues/8595) retains
   the photographed nine-point momentum-transfer agenda.
+- PR [#8651](https://github.com/D-sorganization/UpstreamDrift/pull/8651) is the
+  protected slice that reconciles the nine-point readiness assessment, adds
+  inspectable evidence links, and separates candidate-census completion from
+  the 10 open release reviews.
 - Canonical question, experiment, and readiness registries live under
   `docs/research/proximal_distal_energy_transfer/data/`. MT-E01 through MT-E09
   are model studies; MT-H01 is the governed participant-held-out stage.
