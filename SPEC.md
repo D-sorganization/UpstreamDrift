@@ -1,9 +1,9 @@
 # SPEC.md — Repository Specification Document
 
-## Current Scientific Audit State (2026-08-13)
+## Current Scientific Audit State (2026-08-14)
 
 Epic #8557 has completed the paper-wide candidate adjudication contract:
-956/956 candidates, 250 atomic claims, and zero unadjudicated entries. The
+970/970 candidates, 255 atomic claims, and zero unadjudicated entries. The
 registry is `complete` for the present paper state. This status does not waive
 open empirical or model-fidelity gates; #8556 remains blocked on governed human
 bilateral six-axis grip-wrench acquisition, and all new scientific content must
@@ -49,7 +49,7 @@ reviewed.
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.522 |
+| **Spec Version** | 1.0.523 |
 | **Last Spec Update** | 2026-08-14 |
 
 ## 2. Purpose & Mission
@@ -80,6 +80,16 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ## 4. Architecture Overview
 
 ### Recent Spec Updates
+
+- **2026-08-14** - Added MT-E07 bilateral-wrench structural identifiability.
+  Two separated three-axis point forces map to one net club wrench with rank 5
+  and one equal-and-opposite axial null mode; adding one independent axial
+  scalar closes that point-force rank gap. Two full six-axis hand wrenches map
+  to net wrench with rank 6 and nullity 6, so net club wrench cannot recover
+  individual bilateral allocation. Grip-span and proper-rotation controls,
+  publication evidence, tests, claim adjudication, and the sensor-qualification
+  plan are release artifacts. Practical noise/cross-talk, contact migration,
+  muscle or scapular action, and governed human validation remain open.
 
 - **2026-08-14** - Added the #8557 handwritten momentum-transfer agenda
   readiness contract. Nine independently testable points now retain their
