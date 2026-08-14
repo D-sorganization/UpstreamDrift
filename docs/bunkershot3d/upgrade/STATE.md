@@ -1,6 +1,6 @@
 # BunkerShot3D pro-grade upgrade — state ledger
 
-**Read this first on resumption.** Updated 2026-08-13.
+**Read this first on resumption.** Updated 2026-08-14 (19:02 UTC).
 
 Epic: https://github.com/D-sorganization/UpstreamDrift/issues/8607
 
@@ -81,19 +81,43 @@ Follow-ups the merges created:
   The parametric blade has no hosel or toe taper yet; the test asserts a plausibility band
   and says so rather than pretending a match.
 
-### Wave 2 — not started (depends on wave 1)
+### Wave 2 — IN PROGRESS
 
-| Issue | Workstream                                      | Depends on                                          |
-| ----- | ----------------------------------------------- | --------------------------------------------------- |
-| #8611 | W4 **DRFT solver** — the default F0 tier        | #8609 geometry, #8610 sand                          |
-| #8613 | W6 the ball + `SwingBallFlightPipeline` handoff | #8611                                               |
-| #8614 | W7 designer metrics                             | #8611, #8617                                        |
-| #8616 | W9 V&V suite + credibility statement            | #8611                                               |
-| #8618 | W11 designer workbench GUI                      | most of the above                                   |
-| #8608 | W1 foundations (value objects, units)           | partly absorbed by W2/W3 — re-scope before starting |
+| Issue | Workstream                                      | Status                      |
+| ----- | ----------------------------------------------- | --------------------------- |
+| #8611 | W4 **DRFT solver** — the default F0 tier        | **merged** (`1c857759c`)    |
+| #8613 | W6 the ball + `SwingBallFlightPipeline` handoff | **merged** (`577673cf8`)    |
+| #8614 | W7 designer metrics                             | **merged** (`a86efa222`)    |
+| #8616 | W9 V&V suite + credibility statement            | not started                 |
+| #8618 | W11 designer workbench GUI                      | not started                 |
+| #8608 | W1 foundations (value objects, units)           | re-scope before starting    |
 
-**#8611 is the critical path.** Its implementation data (the 20-term 3D-RFT polynomial table,
-the material-scaling cubic, the two DRFT corrections) is in the research addendum §3.
+**#8611 (DRFT solver) implemented.** PR #8624 adds:
+- `src/bunkershot3d/solver/coefficients.py` — 20-term polynomial table from PNAS 120 (2023)
+- `src/bunkershot3d/solver/material.py` — material scaling via xi_n = rho_c * g * f_hat(mu)
+- `src/bunkershot3d/solver/envelope.py` — validity envelope (Fr, I, d/L) enforcement
+- `src/bunkershot3d/solver/drft.py` — complete F0 solver with flat_plate_intrusion
+- 50 new tests, smoke test passes (~1550 N for 20×80 mm sole at 25 m/s)
+
+**#8614 (designer metrics) implemented.** PR #8645 adds:
+- `src/bunkershot3d/metrics/trajectory.py` — TrajectoryMetrics, DivotProfile, dig/skid index,
+  depth trace, entry/max/exit points
+- `src/bunkershot3d/metrics/energy.py` — EnergyPartition, club KE in/out/lost, energy-to-sand,
+  energy-to-ball, fraction accounting
+- `src/bunkershot3d/metrics/force.py` — ForceMetrics, peak/mean force, peak moment,
+  peak/mean deceleration, contact duration
+- `src/bunkershot3d/metrics/twist.py` — TwistMetrics, shaft-axis moment, CG moment, impulse,
+  net twist direction (opening/closing)
+- `src/bunkershot3d/metrics/forgiveness.py` — ForgivenessMetrics, SensitivityGradient,
+  finite-difference sensitivity analysis, forgiveness index
+- 42 new tests covering all metric categories
+- Computed from HDF5 result artifacts for fidelity-tier-agnostic (F0–F3) analysis
+
+**Post-merge review comments (Codex bot) — consider addressing in follow-up:**
+- `trajectory.py:129` — Use both x,y for horizontal distance (currently x-only)
+- `energy.py:113` — Allow negative e_unaccounted to expose energy overdraw
+- `twist.py:80` — Document that shaft_axis must be in world coordinates
+- `forgiveness.py:186` — Actually use reference_scales for gradient normalization
 
 ## How to resume
 

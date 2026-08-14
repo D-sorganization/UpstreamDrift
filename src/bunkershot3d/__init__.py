@@ -47,6 +47,7 @@ __version__ = "0.1.0"
 # Subpackages: the primary API surface.
 from . import (
     backends,
+    ball,
     calibration,
     config,
     domain,
@@ -54,10 +55,23 @@ from . import (
     geometry,
     io,
     kinematics,
+    metrics,
     postproc,
     provenance,
     sand,
+    solver,
     units,
+)
+
+# Ball model: promoted to the flat surface because a bunker shot's whole point
+# is the ball, and callers should not have to reach into a subpackage for it.
+from .ball import (
+    BallLie,
+    BallLieType,
+    BallProperties,
+    BunkerShotState,
+    compute_bunker_launch,
+    to_post_impact_state,
 )
 
 # Backend drivers
@@ -170,6 +184,9 @@ def __dir__() -> list[str]:
 __all__: list[str] = [
     "AngleOfReposeExperiment",
     "BackendNotImplementedError",
+    "BallLie",
+    "BallLieType",
+    "BallProperties",
     "BoundaryCondition",
     "BunkerShot3DError",
     "BunkerShot3DStateError",
@@ -177,6 +194,7 @@ __all__: list[str] = [
     "BunkerShotConfig",
     "BunkerShotResultReader",
     "BunkerShotResultWriter",
+    "BunkerShotState",
     "CalibrationOptimizer",
     "ChronoDriver",
     "ClubheadGenerator",
@@ -206,7 +224,9 @@ __all__: list[str] = [
     "WrenchTrace",
     "__version__",
     "backends",
+    "ball",
     "calibration",
+    "compute_bunker_launch",
     "config",
     "config_hash",
     "deliver_wedge",
@@ -217,12 +237,15 @@ __all__: list[str] = [
     "get_preset",
     "io",
     "kinematics",
+    "metrics",
     "physics_hash",
     "postproc",
     "preset_names",
     "provenance",
     "sand",
+    "solver",
     "study",
+    "to_post_impact_state",
     "units",
     "usga_reference_sand",
 ]
