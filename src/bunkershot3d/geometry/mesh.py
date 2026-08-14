@@ -19,6 +19,8 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
+from ..exceptions import BunkerShot3DValueError
+
 __all__ = [
     "MeshValidationError",
     "MeshValidity",
@@ -30,7 +32,7 @@ __all__ = [
 _DEGENERATE_AREA_M2 = 1e-20
 
 
-class MeshValidationError(ValueError):
+class MeshValidationError(BunkerShot3DValueError):
     """Raised when a mesh fails a validity precondition."""
 
 

@@ -1,14 +1,19 @@
 """Exceptions for the BunkerShot3D sand state model (issue #8610).
 
-All of these derive from :class:`ValueError` so that callers who only care
-that a configuration was rejected can catch the standard type, while callers
-who need to distinguish *why* can catch the specific subclass.
+All of these derive from
+:class:`~bunkershot3d.exceptions.BunkerShot3DValueError` (issue #8608), and so
+from both the package root :class:`~bunkershot3d.exceptions.BunkerShot3DError`
+and the standard :class:`ValueError`. A caller who only cares that a
+configuration was rejected can catch either of those; a caller who needs to
+distinguish *why* catches the specific subclass.
 
 These are raised, never asserted: ``python -O`` strips ``assert`` statements,
 and a feasibility guard that disappears under optimisation is not a guard.
 """
 
 from __future__ import annotations
+
+from ..exceptions import BunkerShot3DValueError
 
 __all__ = [
     "BedGeometryError",
@@ -21,7 +26,7 @@ __all__ = [
 ]
 
 
-class SandModelError(ValueError):
+class SandModelError(BunkerShot3DValueError):
     """Base class for every sand-model rejection."""
 
 

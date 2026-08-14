@@ -28,10 +28,13 @@ except (ImportError, OSError):
 import numpy as np
 
 from ...config import BunkerShotConfig
+from ...exceptions import BunkerShot3DStateError
 from ...io.schema import BunkerShotResultWriter
 from ...kinematics.trajectory import SwingTrajectory
+from ...provenance import RunManifest, Validity
 from ..packing import lattice_positions
 from ..prescribed_motion import load_trajectory
+from ..run_provenance import GRAIN_POSITION_SEED, dem_run_manifest, fixed_seed_record
 from ..stability import (
     DEFAULT_MAX_STEPS,
     StepPlan,
@@ -49,6 +52,15 @@ SETTLE_STEPS = 500
 #: Draft cap on the number of MuJoCo spheres. The configured grain count is
 #: routinely 50 000, which MuJoCo cannot carry at interactive cost.
 MAX_SPHERES = 1000
+
+#: Why a MuJoCo-proxy result is never labelled valid (ADR-0032).
+_F3_VERDICT = (
+    "MuJoCo discrete spheres are an F3 grain-scale DEM *proxy*: the sphere "
+    f"count is capped at {MAX_SPHERES} against a true-scale requirement of "
+    "2.1e8 grains, and contacts are resolved by a soft constraint solver "
+    "rather than a Hertzian contact law. Use it for grain-scale studies only, "
+    "never as a design answer."
+)
 
 
 class MPMDriver:
@@ -71,23 +83,23 @@ class MPMDriver:
         Replaces the previous ``rng.uniform`` draw over the whole domain, which
         initialised grains interpenetrating (#8612, B16).
         """
-        extents = self.config.domain_extents()
-        count = min(MAX_SPHERES, self.config.grain_count)
+        grains = self.config.to_grain_population()
         return lattice_positions(
-            count=count,
-            extents=extents,
-            diameter=self.config.grain_diameter_mean,
-            rng=np.random.default_rng(seed=42),
+            count=min(MAX_SPHERES, grains.count),
+            extents=self.config.to_domain_box().extents_m,
+            diameter=grains.diameter_mean_m,
+            rng=np.random.default_rng(seed=GRAIN_POSITION_SEED),
         )
 
     def _generate_xml(self) -> str:
         """Generate the MJCF XML string for the bunker and clubhead."""
-        lx, ly, lz = self.config.domain_extents()
-        radius = self.config.grain_diameter_mean / 2.0
+        lx, ly, lz = self.config.to_domain_box().extents_m
+        radius = self.config.to_grain_population().radius_mean_m
         positions = self._grain_positions()
 
-        ch_w = self.config.clubhead_width
-        ch_h = self.config.clubhead_height
+        clubhead = self.config.clubhead
+        ch_w = clubhead.width
+        ch_h = clubhead.height
 
         # The authored timestep is a placeholder: run() overwrites
         # ``model.opt.timestep`` with the Courant-stable value for the actual
@@ -146,7 +158,9 @@ class MPMDriver:
         A plain ``raise``: ``assert`` is stripped by ``python -O``.
         """
         if self.model is None or self.data is None:
-            raise RuntimeError("MPMDriver.setup() must be called before run()")
+            raise BunkerShot3DStateError(
+                "MPMDriver.setup() must be called before run()"
+            )
         return self.model, self.data
 
     # ------------------------------------------------------------------
@@ -159,7 +173,7 @@ class MPMDriver:
         for joint_id in range(model.njnt):
             if model.jnt_bodyid[joint_id] == clubhead_id:
                 return int(model.jnt_qposadr[joint_id]), int(model.jnt_dofadr[joint_id])
-        raise RuntimeError("the clubhead body has no joint to prescribe")
+        raise BunkerShot3DStateError("the clubhead body has no joint to prescribe")
 
     def _prescribe_clubhead(
         self,
@@ -226,6 +240,21 @@ class MPMDriver:
     # Run
     # ------------------------------------------------------------------
 
+    def run_manifest(self) -> RunManifest:
+        """Provenance for a run of this driver (issue #8608, finding B18).
+
+        Returns:
+            A manifest naming the configuration hashes, the fixed placement
+            seed and the F3 verdict, ready to attach to the result file.
+        """
+        return dem_run_manifest(
+            self.config,
+            solver="mujoco",
+            seeds=(fixed_seed_record("grain-positions", GRAIN_POSITION_SEED),),
+            validity=Validity.OUT_OF_ENVELOPE,
+            validity_reason=_F3_VERDICT,
+        )
+
     def _plan(self, trajectory: SwingTrajectory, max_steps: int) -> StepPlan:
         """Resolve the integration schedule for this swing.
 
@@ -271,7 +300,7 @@ class MPMDriver:
         qpos_adr, dof_adr = self._clubhead_addresses(clubhead_id)
         start_time = float(trajectory.time[0])
 
-        writer = BunkerShotResultWriter(output_path)
+        writer = BunkerShotResultWriter(output_path, manifest=self.run_manifest())
         try:
             # Relax the lattice with the clubhead parked at its start pose.
             for _ in range(SETTLE_STEPS):

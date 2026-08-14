@@ -286,9 +286,10 @@ class TestCanonicalConfigStiffness:
 
     def test_canonical_config_passes_the_runtime_precondition(self) -> None:
         config = BunkerShotConfig.from_yaml(_CANONICAL)
+        material = config.to_contact_material()
         require_resolvable_contacts(
             impact_speed=IMPACT_SPEED_MPS,
-            density=config.grain_density,
-            youngs_modulus=config.contact_params().youngs_modulus,
-            poisson_ratio=config.contact_params().poisson_ratio,
+            density=config.to_grain_population().density_kg_m3,
+            youngs_modulus=material.youngs_modulus_pa,
+            poisson_ratio=material.poisson_ratio,
         )

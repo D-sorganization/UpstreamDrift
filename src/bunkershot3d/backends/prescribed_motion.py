@@ -15,13 +15,14 @@ from __future__ import annotations
 from pathlib import Path
 
 from ..config import BunkerShotConfig
+from ..exceptions import BunkerShot3DFileNotFoundError
 from ..kinematics.trajectory import SwingTrajectory
 
 #: Marker files identifying the repository root when walking upwards.
 _ROOT_MARKERS = ("pyproject.toml", ".git")
 
 
-class TrajectoryUnavailableError(FileNotFoundError):
+class TrajectoryUnavailableError(BunkerShot3DFileNotFoundError):
     """Raised when the configured swing trajectory cannot be located."""
 
 
@@ -76,5 +77,5 @@ def load_trajectory(config_path: Path, config: BunkerShotConfig) -> SwingTraject
         TrajectoryUnavailableError: The file does not exist.
     """
     return SwingTrajectory.from_csv(
-        resolve_trajectory_path(Path(config_path), config.trajectory_file)
+        resolve_trajectory_path(Path(config_path), config.to_trajectory_source().file)
     )
