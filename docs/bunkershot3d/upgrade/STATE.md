@@ -1,8 +1,61 @@
 # BunkerShot3D pro-grade upgrade — state ledger
 
-**Read this first on resumption.** Updated 2026-08-14 (19:02 UTC).
+**Read this first on resumption.** Updated 2026-08-14 (22:40 UTC).
 
 Epic: https://github.com/D-sorganization/UpstreamDrift/issues/8607
+
+---
+
+## CURRENT STATE — authoritative, supersedes anything below that disagrees
+
+**Integrated suite: 1976 passed, 4 skipped** on `feat/bunkershot-pro-epic` @ `d89f5aa13`.
+
+**DONE — do NOT re-implement any of these:**
+
+| Issue | Workstream                        | Note                                 |
+| ----- | --------------------------------- | ------------------------------------ |
+| #8617 | W10 result schema v2 + provenance |                                      |
+| #8610 | W3 sand state model               |                                      |
+| #8615 | W8 study layer                    |                                      |
+| #8612 | W5 backend correctness            |                                      |
+| #8609 | W2 parametric wedge geometry      |                                      |
+| #8608 | W1 foundations                    | rescoped; config is now an assembler |
+| #8613 | W6 ball model + flight handoff    |                                      |
+| #8611 | W4 **F0 DRFT solver**             | **superseded** — see below           |
+| #8614 | W7 designer metrics               | **superseded** — see below           |
+
+**IN FLIGHT right now (do not start these):** #8616 V&V on `feat/bunker-vandv`,
+#8618 designer workbench on `feat/bunker-workbench`, and an architecture-budget
+cleanup on `feat/bunker-gates2`.
+
+**After those three land, the epic is functionally complete.** Do not invent new scope.
+Finish by: greening the gates, one coordinated SPEC.md update, and opening the epic PR
+to `main`.
+
+### Two supersessions — read before touching solver or metrics
+
+#8611 and #8614 were each implemented twice concurrently. The versions now on the branch
+are the ones that were kept, and the reasons matter:
+
+- **Solver.** The superseded version mentioned `delta_h` only in a module docstring and
+  never computed it. That is exactly the failure the source paper reports: applying
+  `lambda*rho*v_n^2` without the structural correction gave the **wrong sign of sinkage**
+  at every lambda from 1 to 100. The kept version implements both corrections, lives at
+  `src/bunkershot3d/solvers/` (**plural** — `solver/` singular is gone), and measures
+  14.2 ms/shot against a 50 ms budget.
+- **Metrics.** The superseded version lacked both headline outputs — `playability_window_area`
+  (the primary scalar objective) and the bounce utilisation map (which tells a designer
+  _where to grind_). It also split energy three ways, which double-counts: in a splash shot
+  the ball is driven **through** the sand, so sand-energy and ball-energy are not siblings.
+
+### Coordination
+
+A scheduled cloud routine (`trig_01XXJ3NrMKYA1oZARXKPPoTn`, every 6 h) and interactive
+sessions both work this branch. **Check `git branch -r --list 'origin/feat/bunker-*'` and
+this table before starting anything**, or you will duplicate a workstream as happened with
+#8611 and #8614.
+
+---
 
 ## Where everything lives
 
@@ -83,23 +136,25 @@ Follow-ups the merges created:
 
 ### Wave 2 — IN PROGRESS
 
-| Issue | Workstream                                      | Status                      |
-| ----- | ----------------------------------------------- | --------------------------- |
-| #8611 | W4 **DRFT solver** — the default F0 tier        | **merged** (`1c857759c`)    |
-| #8613 | W6 the ball + `SwingBallFlightPipeline` handoff | **merged** (`577673cf8`)    |
-| #8614 | W7 designer metrics                             | **merged** (`a86efa222`)    |
-| #8616 | W9 V&V suite + credibility statement            | not started                 |
-| #8618 | W11 designer workbench GUI                      | not started                 |
-| #8608 | W1 foundations (value objects, units)           | re-scope before starting    |
+| Issue | Workstream                                      | Status                   |
+| ----- | ----------------------------------------------- | ------------------------ |
+| #8611 | W4 **DRFT solver** — the default F0 tier        | **merged** (`1c857759c`) |
+| #8613 | W6 the ball + `SwingBallFlightPipeline` handoff | **merged** (`577673cf8`) |
+| #8614 | W7 designer metrics                             | **merged** (`a86efa222`) |
+| #8616 | W9 V&V suite + credibility statement            | not started              |
+| #8618 | W11 designer workbench GUI                      | not started              |
+| #8608 | W1 foundations (value objects, units)           | re-scope before starting |
 
 **#8611 (DRFT solver) implemented.** PR #8624 adds:
+
 - `src/bunkershot3d/solver/coefficients.py` — 20-term polynomial table from PNAS 120 (2023)
-- `src/bunkershot3d/solver/material.py` — material scaling via xi_n = rho_c * g * f_hat(mu)
+- `src/bunkershot3d/solver/material.py` — material scaling via xi*n = rho_c * g \_ f_hat(mu)
 - `src/bunkershot3d/solver/envelope.py` — validity envelope (Fr, I, d/L) enforcement
 - `src/bunkershot3d/solver/drft.py` — complete F0 solver with flat_plate_intrusion
 - 50 new tests, smoke test passes (~1550 N for 20×80 mm sole at 25 m/s)
 
 **#8614 (designer metrics) implemented.** PR #8645 adds:
+
 - `src/bunkershot3d/metrics/trajectory.py` — TrajectoryMetrics, DivotProfile, dig/skid index,
   depth trace, entry/max/exit points
 - `src/bunkershot3d/metrics/energy.py` — EnergyPartition, club KE in/out/lost, energy-to-sand,
@@ -114,6 +169,7 @@ Follow-ups the merges created:
 - Computed from HDF5 result artifacts for fidelity-tier-agnostic (F0–F3) analysis
 
 **Post-merge review comments (Codex bot) — consider addressing in follow-up:**
+
 - `trajectory.py:129` — Use both x,y for horizontal distance (currently x-only)
 - `energy.py:113` — Allow negative e_unaccounted to expose energy overdraw
 - `twist.py:80` — Document that shaft_axis must be in world coordinates
