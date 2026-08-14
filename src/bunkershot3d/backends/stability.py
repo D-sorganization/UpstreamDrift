@@ -34,6 +34,7 @@ is exactly the failure this module exists to prevent.
 from __future__ import annotations
 
 import math
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, NamedTuple
 
 from src.shared.python.core.contracts import ensure, require
@@ -72,6 +73,57 @@ class ContactStiffnessError(BunkerShot3DValueError):
 
 class StepBudgetExceededError(BunkerShot3DStateError):
     """Raised when a stable run would need more steps than the caller allows."""
+
+
+@dataclass(frozen=True, slots=True)
+class GrainContact:
+    """The elastic description of one grain, as the stability limits see it.
+
+    These four numbers always travel together: the Rayleigh limit needs all
+    four, the Courant limit needs the radius, and the Hertzian overlap needs
+    the other three. Passing them as one narrow value object (ADR-0032
+    structural decision 1: narrow value objects, not a god config) is what
+    stops a caller pairing one backend's grain radius with another backend's
+    contact modulus, and gives the pairing a single place to be validated.
+
+    Attributes:
+        radius: Grain radius (m). The *smallest* grain in the population
+            governs the Rayleigh limit; see :func:`smallest_grain_radius`.
+        density: Grain material density (kg/m^3).
+        youngs_modulus: Contact Young's modulus (Pa).
+        poisson_ratio: Contact Poisson's ratio, strictly inside ``(-1, 0.5)``.
+    """
+
+    radius: float
+    density: float
+    youngs_modulus: float
+    poisson_ratio: float
+
+    def __post_init__(self) -> None:
+        """Validate the pairing.
+
+        Raises:
+            ValueError: A field is outside its admissible range. The same
+                exception the individual criteria raise, so callers that
+                already handle a bad radius keep working.
+        """
+        if self.radius <= 0.0:
+            raise ValueError(f"radius must be positive, got {self.radius}")
+        if self.density <= 0.0:
+            raise ValueError(f"density must be positive, got {self.density}")
+        if self.youngs_modulus <= 0.0:
+            raise ValueError(
+                f"youngs_modulus must be positive, got {self.youngs_modulus}"
+            )
+        if not -1.0 < self.poisson_ratio < 0.5:
+            raise ValueError(
+                f"poisson_ratio must be in (-1, 0.5), got {self.poisson_ratio}"
+            )
+
+    @property
+    def diameter(self) -> float:
+        """Grain diameter (m), the length scale the Courant limit uses."""
+        return 2.0 * self.radius
 
 
 class StepPlan(NamedTuple):
@@ -239,11 +291,8 @@ def require_resolvable_contacts(
 
 def require_stable_timestep(
     dt: float,
+    grain: GrainContact,
     *,
-    radius: float,
-    density: float,
-    youngs_modulus: float,
-    poisson_ratio: float,
     max_speed: float,
     rayleigh_safety: float = RAYLEIGH_SAFETY_FACTOR,
     courant: float = COURANT_NUMBER,
@@ -253,6 +302,11 @@ def require_stable_timestep(
 
     Args:
         dt: Proposed integration timestep (s).
+        grain: The grain whose elastic properties set the limits.
+        max_speed: Fastest body in the problem (m/s); ``0`` leaves only the
+            Rayleigh criterion active.
+        rayleigh_safety: Fraction of ``t_R`` treated as the limit.
+        courant: Grain diameters a body may traverse in one step.
         enforce_rayleigh: Set ``False`` for solvers whose contacts are not
             soft-sphere Hertzian (MuJoCo resolves contacts implicitly at the
             velocity level, so the Rayleigh wave-speed limit does not govern;
@@ -265,13 +319,13 @@ def require_stable_timestep(
         raise ValueError(f"dt must be positive, got {dt}")
 
     courant_limit = cfl_timestep(
-        diameter=2.0 * radius, max_speed=max_speed, courant=courant
+        diameter=grain.diameter, max_speed=max_speed, courant=courant
     )
     if dt > courant_limit:
         raise TimestepStabilityError(
             f"timestep {dt:.3e} s violates the CFL/Courant limit "
             f"{courant_limit:.3e} s: at {max_speed:.3g} m/s the body traverses "
-            f"{dt * max_speed / (2.0 * radius):.1f} grain diameters per step, "
+            f"{dt * max_speed / grain.diameter:.1f} grain diameters per step, "
             "so contacts are never detected."
         )
 
@@ -279,18 +333,19 @@ def require_stable_timestep(
         return
 
     limit = rayleigh_timestep(
-        radius=radius,
-        density=density,
-        youngs_modulus=youngs_modulus,
-        poisson_ratio=poisson_ratio,
+        radius=grain.radius,
+        density=grain.density,
+        youngs_modulus=grain.youngs_modulus,
+        poisson_ratio=grain.poisson_ratio,
         safety_factor=rayleigh_safety,
     )
     if dt > limit:
         raise TimestepStabilityError(
             f"timestep {dt:.3e} s is {dt / limit:.0f}x the Rayleigh stability "
             f"limit {limit:.3e} s ({rayleigh_safety:g} t_R for a "
-            f"{radius * 1e3:.3g} mm-radius grain). Refusing to integrate: the "
-            "output sampling rate is not the integration timestep."
+            f"{grain.radius * 1e3:.3g} mm-radius grain). Refusing to "
+            "integrate: the output sampling rate is not the integration "
+            "timestep."
         )
 
 
@@ -403,14 +458,19 @@ def plan_from_config(
         poisson_ratio=material.poisson_ratio,
     )
 
-    radius = smallest_grain_radius(config)
-    cfl_limit = cfl_timestep(diameter=2.0 * radius, max_speed=max_speed)
+    grain = GrainContact(
+        radius=smallest_grain_radius(config),
+        density=grains.density_kg_m3,
+        youngs_modulus=material.youngs_modulus_pa,
+        poisson_ratio=material.poisson_ratio,
+    )
+    cfl_limit = cfl_timestep(diameter=grain.diameter, max_speed=max_speed)
     if enforce_rayleigh:
         rayleigh_limit = rayleigh_timestep(
-            radius=radius,
-            density=grains.density_kg_m3,
-            youngs_modulus=material.youngs_modulus_pa,
-            poisson_ratio=material.poisson_ratio,
+            radius=grain.radius,
+            density=grain.density,
+            youngs_modulus=grain.youngs_modulus,
+            poisson_ratio=grain.poisson_ratio,
         )
     else:
         rayleigh_limit = math.inf
@@ -425,10 +485,7 @@ def plan_from_config(
     # derivation above cannot quietly reintroduce B30.
     require_stable_timestep(
         dt,
-        radius=radius,
-        density=grains.density_kg_m3,
-        youngs_modulus=material.youngs_modulus_pa,
-        poisson_ratio=material.poisson_ratio,
+        grain,
         max_speed=max_speed,
         enforce_rayleigh=enforce_rayleigh,
     )

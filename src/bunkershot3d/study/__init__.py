@@ -56,6 +56,7 @@ from .morris import (
     morris_statistics,
 )
 from .optimisation import (
+    AcquisitionSettings,
     BayesOptResult,
     bayesian_optimisation,
     expected_improvement,
@@ -72,6 +73,7 @@ from .sensitivity import (
 from .surrogate import GaussianProcess, GPHyperparameters
 
 __all__ = [
+    "AcquisitionSettings",
     "AnalyticIndices",
     "BayesOptResult",
     "DesignComparison",

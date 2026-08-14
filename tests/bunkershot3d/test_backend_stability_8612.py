@@ -28,6 +28,7 @@ from _bunker_fixtures_8612 import (
 )
 from bunkershot3d.backends.stability import (
     ContactStiffnessError,
+    GrainContact,
     StepBudgetExceededError,
     StepPlan,
     TimestepStabilityError,
@@ -128,13 +129,58 @@ class TestCflCriterion:
         with pytest.raises(TimestepStabilityError, match="CFL|Courant|courant"):
             require_stable_timestep(
                 1.0e-3,
-                radius=2.0e-4,
-                density=QUARTZ_DENSITY,
-                youngs_modulus=7.0e10,
-                poisson_ratio=0.17,
+                GrainContact(
+                    radius=2.0e-4,
+                    density=QUARTZ_DENSITY,
+                    youngs_modulus=7.0e10,
+                    poisson_ratio=0.17,
+                ),
                 max_speed=IMPACT_SPEED_MPS,
                 enforce_rayleigh=False,
             )
+
+
+class TestGrainContactValueObject:
+    """The four elastic properties travel together and are checked together."""
+
+    def test_diameter_is_twice_the_radius(self) -> None:
+        grain = GrainContact(
+            radius=2.0e-4,
+            density=QUARTZ_DENSITY,
+            youngs_modulus=7.0e10,
+            poisson_ratio=0.17,
+        )
+        assert grain.diameter == pytest.approx(4.0e-4)
+
+    @pytest.mark.parametrize(
+        ("field", "bad"),
+        [
+            ("radius", 0.0),
+            ("density", -1.0),
+            ("youngs_modulus", 0.0),
+            ("poisson_ratio", 0.5),
+        ],
+    )
+    def test_rejects_an_inadmissible_field(self, field: str, bad: float) -> None:
+        fields = {
+            "radius": 2.0e-4,
+            "density": QUARTZ_DENSITY,
+            "youngs_modulus": 7.0e10,
+            "poisson_ratio": 0.17,
+        }
+        fields[field] = bad
+        with pytest.raises(ValueError, match=field):
+            GrainContact(**fields)  # type: ignore[arg-type]
+
+    def test_is_immutable(self) -> None:
+        grain = GrainContact(
+            radius=2.0e-4,
+            density=QUARTZ_DENSITY,
+            youngs_modulus=7.0e10,
+            poisson_ratio=0.17,
+        )
+        with pytest.raises((AttributeError, TypeError)):
+            grain.radius = 1.0  # type: ignore[misc]
 
 
 class TestStabilityRefusal:
@@ -149,10 +195,12 @@ class TestStabilityRefusal:
         with pytest.raises(TimestepStabilityError) as excinfo:
             require_stable_timestep(
                 1.0 / 2000.0,
-                radius=2.0e-4,
-                density=QUARTZ_DENSITY,
-                youngs_modulus=7.0e10,
-                poisson_ratio=0.17,
+                GrainContact(
+                    radius=2.0e-4,
+                    density=QUARTZ_DENSITY,
+                    youngs_modulus=7.0e10,
+                    poisson_ratio=0.17,
+                ),
                 max_speed=0.0,
             )
         message = str(excinfo.value)
@@ -163,10 +211,12 @@ class TestStabilityRefusal:
     def test_a_stable_step_is_accepted(self) -> None:
         require_stable_timestep(
             1.0e-9,
-            radius=2.0e-4,
-            density=QUARTZ_DENSITY,
-            youngs_modulus=7.0e10,
-            poisson_ratio=0.17,
+            GrainContact(
+                radius=2.0e-4,
+                density=QUARTZ_DENSITY,
+                youngs_modulus=7.0e10,
+                poisson_ratio=0.17,
+            ),
             max_speed=IMPACT_SPEED_MPS,
         )
 
