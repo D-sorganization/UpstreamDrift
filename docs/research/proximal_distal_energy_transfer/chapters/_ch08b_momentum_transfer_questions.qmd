@@ -12,7 +12,7 @@ and their broader rationale is documented in the open
 | Question | Present Assessment | What Would Change the Assessment? |
 |---|---|---|
 | How much transfer is drift-mediated? | Conditional on the observable, coordinate and frame, event window, model, and decomposition. Signed drift shares may exceed 100% when control opposes the pathway; pointwise attribution is not forward persistence. | A common acceleration/force/impulse/power/work ledger across tiers, same-state killswitches, uncertainty propagation, and participant-held-out bilateral-wrench evaluation. |
-| Which geometry matters? | Relative-link and force–velocity angles create exact sine/cosine gates; bilateral couple varies with signed grip separation and transverse differential force. Existing moving-base and two-engine spatial controls reproduce coincident-grip zeros and moment-arm reversals. | Subject-scaled scapular/arm/grip geometry, calibrated contact compliance, and equipment geometry evaluated with held-out digital twins and human bilateral wrenches. |
+| Which geometry matters? | Relative-link and force–velocity angles create exact sine/cosine gates; bilateral couple varies with signed grip separation and transverse differential force. Existing moving-base and two-engine spatial controls reproduce coincident-grip zeros and moment-arm reversals. A six-profile subject-scaled audit finds that the prescribed spatial states miss bilateral grip closure by 0.171–0.616 m despite a full-rank local constraint Jacobian. | Closed-contact inverse kinematics with joint-limit and collision checks, calibrated contact compliance, equipment geometry, and held-out digital twins and human bilateral wrenches. |
 | Which timing patterns matter? | Early distal release changes the available geometry; proximal rate, acceleration, braking, and release timing interact nonmonotonically. “Casting” is not one universal event. | Factorial interventions on proximal acceleration, distal release, and braking under matched state and work, with multiple preregistered casting definitions and adverse-load tests. |
 | Does a drift-mediated strategy require less timing precision? | Not supported in the registered moving-base planar comparison. On a common nominal phase grid, the clock policy retained four of five robust task-viable points and 45 ms of contiguous width; the delayed/noisy state trigger retained one point and no multi-point span. This does not measure neural timing demand. | Continuous phase-volume studies with independently identified observers, spatial impact outcomes, subject scaling, and participant-held-out perturbations. |
 | Is a strategy self-correcting? | Not established. The earlier screen produced 13–20% sustained recovery, whereas the expanded phase/load screen produced none in 60 cases. No tested policy has a recovery-qualified viable region. | Continuous attraction-region studies with independently identified observers, stronger feedback families, external-contact disturbances, and human perturbations without hidden load-cost increase. |
@@ -46,7 +46,11 @@ below $9.2\times10^{-16}$ N m. Proper 3-D rotations preserve total wrench
 power to the registered numerical tolerance. The remaining anatomical question
 is therefore not whether these geometric identities hold, but which
 subject-scaled configurations, forces, velocities, and compliant contacts are
-feasible and used by people.
+feasible and used by people. The subject-scaled audit in
+@sec-subject-scaled-contact-closure makes that distinction quantitative: all
+local constraint Jacobians retain rank six, yet the prescribed anatomical hand
+points remain 0.171--0.616 m from the grips. Full local rank is not contact
+closure.
 
 ## Timing and Common Failure Descriptions
 
@@ -199,7 +203,7 @@ stage, but the latter remains blocked by the bilateral-wrench data boundary.
 | Source Point | Present Scientific State | Next Decisive Model Test |
 |---|---|---|
 | Drift contribution | Partly answered; observable- and window-specific only | Common cross-tier estimand table with uncertainty |
-| Geometry dependencies | Partly answered through reduced spatial controls | Subject-scaled articulated geometry and calibrated contact |
+| Geometry dependencies | Partly answered through reduced spatial controls; the first subject-scaled audit rejects contact feasibility of the prescribed common states | Closed-contact inverse kinematics, calibrated contact, and independent forward integration |
 | Casting | Unresolved as a single construct | Multiple preregistered event definitions under matched controls |
 | Early proximal acceleration | Partly answered pointwise; nonmonotonic | Forward factorial intervention with full-state/work/load matching |
 | Segment release | Partly answered; objective- and constraint-dependent | Viable-region mapping across proximal and distal control families |

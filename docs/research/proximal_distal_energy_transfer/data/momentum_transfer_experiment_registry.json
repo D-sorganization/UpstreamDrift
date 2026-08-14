@@ -345,6 +345,57 @@
       "execution_status": "instantaneous_structural_and_synthetic_point_force_trajectory_sensor_qualification_complete_full_wrench_device_subject_and_human_qualification_open"
     },
     {
+      "id": "MT-E08",
+      "questions": ["Q2", "Q4", "Q5", "Q7"],
+      "title": "Subject-Scaled Spatial Contact Feasibility",
+      "model_tiers": [
+        "prescribed_subject_scaled_common_state",
+        "closed_contact_inverse_kinematics",
+        "articulated_spatial_forward_contact",
+        "governed_human"
+      ],
+      "interventions": [
+        "stature_and_sex_table_design",
+        "grip_span_sweep",
+        "closed_contact_inverse_kinematics",
+        "same_state_driver_killswitch",
+        "typed_contact_or_tissue_slack"
+      ],
+      "controls": [
+        "bilateral_contact_closure",
+        "joint_limit_and_collision_screen",
+        "constraint_rank_and_conditioning",
+        "coincident_and_reversed_moment_arm",
+        "independent_forward_engine"
+      ],
+      "outcomes": [
+        "hand_to_grip_distance",
+        "contact_constraint_singular_values",
+        "contact_force_couple",
+        "timing_viability_volume",
+        "perturbation_recovery",
+        "delivery_and_load"
+      ],
+      "uncertainty": [
+        "anthropometric_regression",
+        "joint_center_and_axis",
+        "scapular_kinematics",
+        "contact_center",
+        "contact_and_tissue_compliance",
+        "initial_state"
+      ],
+      "falsifier": "A prescribed or solved configuration fails bilateral closure, joint limits, collision, conservation, independent-engine agreement, or the proposed timing, recovery, or slack benefit disappears after those feasibility gates are enforced.",
+      "required_data": [
+        "subject_specific_segment_and_joint_geometry",
+        "scapular_and_wrist_kinematics",
+        "bilateral_six_axis_grip_wrenches",
+        "time_resolved_contact_centers",
+        "contact_tissue_and_shaft_compliance",
+        "club_kinematics_and_impact_outcomes"
+      ],
+      "execution_status": "prescribed_subject_scaled_closure_rank_and_grip_span_atlas_complete_closed_contact_forward_spatial_and_human_tests_open"
+    },
+    {
       "id": "MT-H01",
       "questions": ["Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7"],
       "title": "Participant-Held-Out Human Falsification",

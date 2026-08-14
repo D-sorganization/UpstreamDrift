@@ -61,6 +61,15 @@ Because the forces are prescribed and the state is shared, this supports
 spatial inverse-dynamics and geometry transport but leaves passive forward
 contact inconclusive at that tier.
 
+The subject-scaled contact-closure audit rejects a tempting shortcut at that
+same tier. Six deterministic de Leva profiles retain a full-row-rank local
+contact Jacobian, yet the prescribed anatomical hand points remain
+0.171--0.616 m from the declared grips. Rank and conditioning therefore cannot
+substitute for closed feasible anatomy. The next articulated spatial tier must
+solve bilateral closed-contact inverse kinematics with joint-limit and
+collision checks before its forward contact, timing, recovery, or slack
+results can be interpreted.
+
 The reduced spatial forward-contact extension resolves that narrower mechanism
 gate. Native MuJoCo and Pinocchio independently integrate two finite-mass hand
 carriages, paired compliant interfaces, and a free rigid club without direct
@@ -103,8 +112,10 @@ order:
 
 1. **Articulated Spatial Forward-Contact Counterfactual.** Replace the executed
    hand-carriage reference with subject-scaled articulated arms and calibrated
-   grip interfaces while preserving the two-engine same-state killswitch,
-   force, couple, power, work, pathway, and closure observables.
+   grip interfaces. First require bilateral closed-contact inverse kinematics,
+   joint-limit and collision qualification, then preserve the two-engine
+   same-state killswitch, force, couple, power, work, pathway, and closure
+   observables.
 2. **Calibrated Uncertainty and Constrained Control.** Extend the executed
    multivariable screen with population-informed distributions, measurement
    error, profile-likelihood or Bayesian calibration, larger held-out

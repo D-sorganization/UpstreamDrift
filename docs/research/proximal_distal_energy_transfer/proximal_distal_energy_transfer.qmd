@@ -91,7 +91,10 @@ abstract: |
   $2.14\times10^{-11}$; reversing the hand moment arm reverses a $-4.32$ N m
   force-generated couple, and coincident hands remove it exactly. Because
   contact loads are prescribed, passive spatial contact remains inconclusive
-  at that tier. A subsequent reduced forward-contact experiment independently
+  at that tier. A six-profile subject-scaled audit then shows why local rank is
+  insufficient: its prescribed anatomical hand points miss the declared grips
+  by 0.171--0.616 m even though every local contact Jacobian has rank six. A
+  subsequent reduced forward-contact experiment independently
   integrates MuJoCo and Pinocchio with two finite-mass hand carriages, paired
   compliant interfaces, and no direct club actuation. Its exact same-state
   driver-killswitch branch retains a negative swing-normal contact couple for

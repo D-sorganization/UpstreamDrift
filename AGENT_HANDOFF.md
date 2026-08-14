@@ -21,39 +21,32 @@ in git and GitHub.
   manual Google reauthentication. The 2026-08-14 token check failed closed;
   credentials and authentication dialogs were not automated.
 
-## Active Bilateral-Wrench Sensor-Qualification Slice
+## Active Subject-Scaled Spatial-Geometry Slice
 
-- Branch `research/8557-nonlinear-biomechanics-gap` adds MT-E07 and advances Q2
-  without claiming a human result.
+- Branch `research/8557-spatial-geometry` adds MT-E08 and advances Q2, Q4, Q5,
+  and Q7 without claiming an anatomically feasible or human result.
+- Six deterministic de Leva engineering profiles (female and male at 1.55,
+  1.75, and 1.95 m) are evaluated at three grip spans and 61 states per case.
+- Anatomical hand points miss the prescribed grip contacts by 0.171--0.616 m
+  (median 0.405 m); none meets the preregistered 5 mm closure tolerance.
+- Every local 6 x 20 bilateral contact Jacobian nevertheless has rank six and
+  condition number 5.35--6.40. Local rank is therefore not proof that an open
+  prescribed configuration satisfies its declared contact constraints.
 - Two separated three-axis point forces map to one net club wrench with rank 5
   and nullity 1. The exact invisible mode is equal and opposite axial force
   along the hand-separation direction.
 - One independently measured internal axial scalar gives point-force rank 6.
   It does not solve the full problem: two six-axis hand wrenches map to net
   wrench with rank 6 and nullity 6.
-- A 49-case 0.06–0.30 m grip-span sweep preserves rank while changing
-  normalized nonzero conditioning. Three proper rotations preserve singular
-  values to `2.22e-16` under declared 1 N / 1 N m scaling.
-- The trajectory-level synthetic qualification exercises 301 samples across 32
-  deterministic trials. Net-wrench-only inversion retains 11.86 N allocation
-  RMSE and 29.05 N axial-mode RMSE despite numerical resultant-wrench closure.
-- In the registered combined synthetic case, the augmented point-force
-  estimator has 1.02 N allocation RMSE, 3.87 N 95th-percentile error, 0.0142
-  normalized net-wrench RMSE, and 0.351 N axial-mode RMSE.
-- Exact cross-talk calibration reduces the declared 1% normalized cross-talk
-  case from 0.942 N to 0.153 N allocation RMSE. Exact contact tracking reduces
-  the declared 8 mm migration case from 2.025 N to numerical closure.
-- These are synthetic point-force estimator results, not device calibration or
-  human evidence. Full bilateral moments, distributed contact, compliance,
-  muscle/scapular action, intentionality, and strategy remain unestablished.
-- Evidence is in `data/bilateral_wrench_sensor_qualification.json`; both
-  identifiability and sensor-qualification backends, runners, tests, and figures
-  are release artifacts.
+- The prescribed force-generated couple scales linearly with grip span, but
+  this algebraic control does not rescue contact closure or anatomical validity.
+- Evidence is in `data/subject_scaled_spatial_geometry.json` and `.npz`; its
+  backend, runner, tests, claim registration, and figure are release artifacts.
 
 ## Current Program State
 
-- The claim inventory is adjudicated at 975/975 candidates and 258 atomic
-  claims, including structural and synthetic bilateral-wrench qualification.
+- The claim inventory is adjudicated at 982/982 candidates and 261 atomic
+  claims, including the adverse subject-scaled contact-closure result.
 - The handwritten agenda retains bounded model answers for eight points and a
   construct-level unresolved boundary for human intentional slack.
 - Typed slack remains separated into five classes; no global benefit,
@@ -65,35 +58,37 @@ in git and GitHub.
 
 ## Remaining Scientific Work
 
-1. Qualify MT-E07 with a traceably calibrated bilateral six-axis device,
+1. Solve subject-scaled bilateral closed-contact inverse kinematics with joint
+   limits and collision checks; reject trajectories that do not close.
+2. Integrate calibrated compliant contact from those closed states, then repeat
+   coincident, reversal, killswitch, power, and work--energy controls in two
+   independent forward engines.
+3. Qualify MT-E07 with a traceably calibrated bilateral six-axis device,
    distributed time-varying contact, compliance, drift, and synchronization.
-2. Add full-delivery-state-matched forward rate/acceleration and timing controls
+4. Add full-delivery-state-matched forward rate/acceleration and timing controls
    across spatial and subject-scaled tiers.
-3. Estimate continuous attraction regions with identified observers, external
+5. Estimate continuous attraction regions with identified observers, external
    contact loads, spatial impact, saturation, and subject scaling.
-4. Embed each typed-slack class separately in higher-order delivery models.
-5. Couple calibrated grip, distributed shaft, articulated arms/scapula, ground,
+6. Embed each typed-slack class separately in higher-order delivery models.
+7. Couple calibrated grip, distributed shaft, articulated arms/scapula, ground,
    impact, and an independent dynamics engine.
-6. Execute MT-H01 only after governed bilateral-wrench acquisition and the
+8. Execute MT-H01 only after governed bilateral-wrench acquisition and the
    frozen participant split.
 
 ## Required Gates
 
 ```powershell
-python -m scripts.research.proximal_distal_energy.run_bilateral_wrench_identifiability_study
-python -m scripts.research.proximal_distal_energy.run_bilateral_wrench_sensor_qualification
-python -m pytest tests/research/test_bilateral_wrench_identifiability.py `
-  tests/research/test_bilateral_wrench_identifiability_evidence.py `
-  tests/research/test_bilateral_wrench_sensor_qualification.py `
-  tests/research/test_bilateral_wrench_sensor_qualification_evidence.py `
+python -m scripts.research.proximal_distal_energy.run_subject_scaled_spatial_geometry
+python -m scripts.research.proximal_distal_energy.make_subject_scaled_spatial_geometry_figures
+python -m pytest tests/research/test_subject_scaled_spatial_geometry.py `
   tests/research/test_momentum_transfer_experiment_registry.py `
   tests/unit/research/test_momentum_question_readiness.py `
   tests/research/test_proximal_distal_release_bundle.py -q
-python -m ruff check scripts/research/proximal_distal_energy/bilateral_wrench_identifiability.py `
-  scripts/research/proximal_distal_energy/run_bilateral_wrench_identifiability_study.py `
-  scripts/research/proximal_distal_energy/register_bilateral_wrench_identifiability_claims.py `
-  tests/research/test_bilateral_wrench_identifiability.py `
-  tests/research/test_bilateral_wrench_identifiability_evidence.py
+python -m ruff check scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py `
+  scripts/research/proximal_distal_energy/run_subject_scaled_spatial_geometry.py `
+  scripts/research/proximal_distal_energy/make_subject_scaled_spatial_geometry_figures.py `
+  scripts/research/proximal_distal_energy/register_subject_scaled_spatial_geometry_claims.py `
+  tests/research/test_subject_scaled_spatial_geometry.py
 python -m scripts.research.proximal_distal_energy.claim_audit validate
 python -m scripts.research.proximal_distal_energy.momentum_question_readiness validate
 python -m scripts.research.proximal_distal_energy.qualify_open_release validate

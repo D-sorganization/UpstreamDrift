@@ -29,8 +29,13 @@ dynamics with finite-mass hand carriages, paired compliant interfaces, an
 exact same-state grounded-driver killswitch, long-axis rotation, swing-plane
 evolution, and ground-pathway bookkeeping. It supports reduced forward-contact
 transport while keeping anatomical, muscle, equipment, human, and coaching
-claims explicitly open. A three-tier
-hand-path attribution study now separates stitched pointwise ZTCF drift,
+claims explicitly open. A separate
+subject-scaled geometry audit now tests six deterministic de Leva design
+profiles and three grip spans. It finds 0.171--0.616 m anatomical
+hand-to-grip error despite a full-rank local constraint Jacobian, thereby
+requiring closed-contact inverse kinematics, joint-limit and collision checks,
+and calibrated forward contact before anatomical strategy claims. A three-tier
+hand-path attribution study separates stitched pointwise ZTCF drift,
 same-state control, and separately defined ZVCF reactions for force vectors,
 impulse, power, work, every modeled joint, and four neutral time windows. A
 bounded first-order residual-couple preview study records the late two-hand
@@ -110,6 +115,9 @@ rank audit and a trajectory-level synthetic point-force qualification under
 noise, normalized cross-talk, calibration residual, and contact-center
 migration. It demonstrates that net-wrench closure does not establish force
 allocation and retains physical-device and human validation as open gates.
+MT-E08 now registers the dependency-ordered anatomical test: prescribed-state
+closure audit, closed-contact inverse kinematics, independently integrated
+articulated contact, and participant-held-out falsification.
 The first external-evidence audit slice narrows the introduction and empirical
 evidence synthesis, records reciprocal candidate dispositions, and separates
 sample-specific associations from causal mechanisms. In particular, it corrects
