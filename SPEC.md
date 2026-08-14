@@ -81,6 +81,7 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ## 4. Architecture Overview
 
 ### Recent Spec Updates
+- `src/shared/python/club_data/loader.py`: Replaced `.iterrows()` with `df.to_dict('records')` (spec-exempt: micro-optimization)
 
 - **2026-08-14** - Qualified the MT-E07 bilateral point-force estimator over
   deterministic synthetic trajectories with normalized noise and cross-talk,
