@@ -756,20 +756,8 @@ CI entry points: `.github/workflows/ci-standard.yml` (full matrix: `code-quality
 - **Do not batch a day's work into one commit** — commit small, frequent, conventional
   commits.
 
-## Short-Term Roadmap (Ordered)
+## Current Roadmap Authority
 
-1. Land this handoff-policy PR (Repository_Management#1390 rollout for UpstreamDrift).
-2. Confirm `vendor/ud-tools` submodule pin from #8339 points at the Tools `main`
-   squash-merge commit (not the old branch-head SHA).
-3. Clear the small independent queue: `bolt-*` perf PRs, #8344 physics fix, dependabot
-   bumps.
-4. Review and merge PR **#8352** (`feat/putting-dynamics`) for #8345 P2/P3/P4.
-   Important audit
-   corrections include the 1.64 m/s full-chord capture bound, signed overspin settling,
-   down-grain friction semantics, immutable field ownership, and consistent tangential
-   impulse/backspin vector recomposition.
-5. Review full PR **#8354** for #8345 P1; it consumes the
-   curated `putting_dynamics` façade without duplicating physics in React. Then
-   complete P5 public sharing and parity registration.
-6. After Tools ground merges, repin its exact commit and finish #4276 UI/release
-   gates. Closed draft #8369 is not a parent; replacement #8432 already merged.
+Use open GitHub issues and dependency-ordered PRs as the current roadmap. The
+older numbered list formerly here described already-merged 2026-08 work and
+was removed to keep this handoff within its governed size budget.
