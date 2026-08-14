@@ -152,6 +152,9 @@ Recorded outputs:
   residuals, reversal times, sensitivity results, and interpretation boundary.
 - `data/two_hand_wscg_analysis.npz` — local force modes, moment and power
   decompositions, poses, and geometry-counterfactual arrays.
+- `data/bilateral_wrench_identifiability_study.json` — three-dimensional
+  point-force and full bilateral-wrench ranks, null spaces, grip-span sweep,
+  proper-rotation audit, sensing boundary, and explicit nonhuman claims.
 - `data/shaft_contribution_study.json` — matched rigid/flexible results,
   termwise acceleration and power summaries, ablations, 120 robustness cases,
   endpoint windows, timestep convergence, and interpretation boundaries.

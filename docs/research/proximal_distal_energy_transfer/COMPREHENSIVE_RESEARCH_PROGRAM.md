@@ -122,7 +122,10 @@ limitations, model classes, and decisive experiments. Each collection receives
 a source manifest and coverage note. Notebook output remains a lead; every
 change to the paper or bibliography is supported by an independently checked
 original source. The initial 2026-08-12 live review is explicitly pending
-because the local profile failed network token validation.
+because the local profile failed network token validation. The 2026-08-14
+retry again redirected to manual Google authentication; no credentials or
+authentication dialogs were automated. Repository evidence and independently
+checked original sources therefore remain the current authority.
 
 ## Delivery Milestones
 
@@ -160,13 +163,22 @@ scientific contract.
 
 ## Completed Paper-Wide Claim Audit
 
-The 2026-08-13 audit adjudicated all 935 narrative candidates against 244
+The current audit adjudicates all 970 narrative candidates against 255
 atomic claim contracts; no candidate remains unreviewed. Repeated methods,
 summary, limitation, and release passages point back to their primary claim
 instead of acquiring stronger authority through repetition. The final pass
 added missing primary records for the rotating-base torso experiment, the
 isolated synthetic beam experiment, and the exploratory-interface/open-release
 boundary.
+
+The bilateral-wrench extension adds a sensor-level falsifiability result. Two
+separated three-axis point forces map to net club wrench with rank five and one
+invisible equal-and-opposite axial mode. Full bilateral six-axis hand wrenches
+map to the same six-component net wrench with nullity six. One independently
+measured axial scalar closes only the point-force rank gap; direct full
+allocation still requires bilateral sensing. MT-E07 now carries the remaining
+noise, cross-talk, contact-migration, subject-scaling, and held-out human
+qualification plan.
 
 Completion of the paper audit is not completion of the research program. In
 particular, the audit rejected quantitative small-deflection shaft inference

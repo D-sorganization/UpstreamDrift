@@ -238,6 +238,7 @@ python3 -m scripts.research.proximal_distal_energy.make_torque_allocation_preloa
 python3 -m scripts.research.proximal_distal_energy.make_spatial_full_body_figures
 python3 -m scripts.research.proximal_distal_energy.make_spatial_forward_contact_figures
 python3 -m scripts.research.proximal_distal_energy.make_uncertainty_control_figures
+python3 -m scripts.research.proximal_distal_energy.run_bilateral_wrench_identifiability_study
 # document
 cd docs/research/proximal_distal_energy_transfer
 quarto render proximal_distal_energy_transfer.qmd --to pdf

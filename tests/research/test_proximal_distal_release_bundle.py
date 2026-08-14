@@ -37,6 +37,7 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         "shoulder_velocity_strategy",
         "joint_matched_proximal_rate",
         "rotating_base_torso_velocity",
+        "bilateral_wrench_identifiability",
     ]
     assert manifest["claims"]["human_experimental"] == "untested"
     assert manifest["claims"]["high_proximal_velocity_universally_beneficial"] == (
