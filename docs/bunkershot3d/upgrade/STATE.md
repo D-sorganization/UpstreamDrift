@@ -97,15 +97,20 @@ the material-scaling cubic, the two DRFT corrections) is in the research addendu
 
 ## How to resume
 
-1. `cd C:\Users\diete\Repositories\UpstreamDrift-worktrees\bunker-pro && git fetch origin`
-2. Check which wave-1 branches have commits: `git log --oneline feat/bunker-<name> ^feat/bunkershot-pro-epic`
-3. For each finished branch: review the diff, run
-   `python -m pytest tests/bunkershot3d -p no:randomly --timeout=180`, then merge into
-   `feat/bunkershot-pro-epic`. Merge in dependency order: schema, sand, geometry, backends, study.
-4. Re-run the full bunker suite on the integrated branch before starting wave 2.
-5. Launch wave 2 agents the same way — isolated worktree on D:, disjoint file ownership,
-   TDD, no push/PR from the agent.
-6. Tick the epic checklist as each workstream lands.
+Wave 1 is done and pushed, so resumption starts at wave 2.
+
+1. `cd D:/bunker-worktrees/integration && git fetch origin && git checkout feat/bunkershot-pro-epic && git pull`
+2. Confirm the baseline still holds:
+   `python -m pytest tests/bunkershot3d tests/unit/simulation_backends -p no:randomly --timeout=300`
+   → expect **1309 passed, 4 skipped**.
+3. Start **#8611 (W4, the DRFT solver)** — it is the critical path and everything else in
+   wave 2 depends on it. Its implementation data is in `research-digest-addendum.md` §3:
+   the 20-term polynomial table, the material-scaling cubic, and **both** DRFT corrections
+   (the inertial term alone gives the wrong sign of sinkage).
+4. Launch each wave-2 workstream in its own worktree **on D:**, with disjoint file ownership,
+   TDD, and no push/PR from the agent — the same pattern that gave wave 1 zero conflicts.
+5. Merge into `feat/bunkershot-pro-epic`, re-run the suite, push, comment on the issue, tick
+   the epic checklist, and update this ledger.
 
 ## Non-negotiables carried from the ADR
 
@@ -119,8 +124,13 @@ the material-scaling cubic, the two DRFT corrections) is in the research addendu
 
 ## Blockers needing the user
 
-1. **C: drive is full** — 600 MB free of 953 GB, with 74 UpstreamDrift worktrees on it. Agent
-   worktrees were relocated to D: as a workaround, but this will keep causing failures
+1. **C: worktree churn.** C: hit 100% mid-run (604 MB free of 953 GB) with 74 UpstreamDrift
+   worktrees on it, which broke worktree creation. Something then reaped stale worktrees and
+   freed ~100 GB — including this epic's integration worktree, while work was in flight. No
+   data was lost, but the pattern is hostile to long-running work. Worth deciding
+   deliberately: either exclude in-flight worktrees from the reaper, or standardise this kind
+   of work on D:. Agent worktrees were relocated to D: as a workaround, but this will keep
+   causing failures
    fleet-wide. Cleaning up stale worktrees is destructive and was not done unilaterally.
 2. **BSD-4-Clause advertising clause** on Kratos MPM (the best CPU-capable higher-fidelity
    tier) — fine internally, but a commercial product must reproduce the acknowledgement.
