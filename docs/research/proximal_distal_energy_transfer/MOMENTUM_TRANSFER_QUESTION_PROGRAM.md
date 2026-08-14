@@ -64,6 +64,32 @@ linked to an experiment that does not cover its parent question, or if an
 answer, decisive test, falsifier, inspectable evidence artifact, data gate, or
 human stage is absent.
 
+## Release-Claim Review Authority
+
+The handwritten agenda is also reconciled against every claim exposed by the
+open-resource release, not only the nine-point question transcription. The
+machine-readable
+[`data/release_claim_review.json`](data/release_claim_review.json) links all 31
+release claims to the supporting atomic claims, evidence artifacts, negative
+controls, falsifiers, uncertainty boundaries, and next scientific gate.
+
+The distinction is deliberate: the release review is complete when each claim
+has a traceable disposition, but scientific work remains open wherever the
+registered gate requires a higher-fidelity model, measured equipment,
+subject-specific anatomy, or governed human data. In particular, review
+completion does not convert the untested human self-stabilization or physical
+bilateral six-axis device claims into positive findings.
+
+Regenerate and validate this authority with:
+
+```text
+python -m scripts.research.proximal_distal_energy.release_claim_review write
+python -m scripts.research.proximal_distal_energy.release_claim_review validate
+```
+
+Open-resource qualification invokes the read-only validator and therefore
+fails closed if the claim registry or release-review report drifts.
+
 ## Required Definitions
 
 ### Drift Attribution

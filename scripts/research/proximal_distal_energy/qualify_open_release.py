@@ -17,6 +17,7 @@ from .release_bundle import (
     checksum_lines,
     validate_release_manifest,
 )
+from .release_claim_review import validate_review
 
 ROOT = Path(__file__).resolve().parents[3]
 
@@ -32,6 +33,7 @@ def main() -> None:
     action = _parser().parse_args().action
     manifest_path = ROOT / ARTICLE_REL / "release_manifest.json"
     if action == "write":
+        validate_review()
         manifest = build_release_manifest(ROOT)
         manifest_path.write_text(
             json.dumps(manifest, indent=2) + "\n", encoding="utf-8"
@@ -51,6 +53,7 @@ def main() -> None:
         return
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     if action == "validate":
+        validate_review()
         result = validate_release_manifest(ROOT, manifest)
         claim_manifest_path = ROOT / CLAIM_EVIDENCE_MANIFEST_REL
         claim_manifest = json.loads(claim_manifest_path.read_text(encoding="utf-8"))

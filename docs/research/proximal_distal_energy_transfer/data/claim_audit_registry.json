@@ -8,7 +8,7 @@
   "audit_scope": {
     "completion_status": "complete",
     "completion_layer": "narrative_candidate_census",
-    "release_review_completion_status": "in_progress",
+    "release_review_completion_status": "complete",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
     "current_scope": "The complete 994-candidate paper inventory is adjudicated. The subject-scaled spatial audit retains its adverse prescribed-state contact-closure result and favorable algebraic controls. The bounded closed-contact follow-up passes the declared reduced-tree screen. The paired scapulothoracic surrogate improves reachability but retains termination, active-bound, and allocation-nullity boundaries while calibrated articulated forward contact remains unexecuted."
@@ -43,22 +43,22 @@
     {
       "release_claim_key": "interaction_dynamics_planar",
       "published_status": "supported_at_declared_model_tier",
-      "audit_state": "in_progress"
+      "audit_state": "reviewed_at_declared_model_tier"
     },
     {
       "release_claim_key": "geometry_transfer_spatial_common_state",
       "published_status": "supported_at_declared_model_tier",
-      "audit_state": "in_progress"
+      "audit_state": "reviewed_at_declared_model_tier"
     },
     {
       "release_claim_key": "distributed_shaft_modal_reduction",
       "published_status": "supported_on_synthetic_structural_case",
-      "audit_state": "pending"
+      "audit_state": "reviewed_as_synthetic_structural_case"
     },
     {
       "release_claim_key": "distributed_modal_shaft_coupled_forward",
       "published_status": "supported_at_declared_planar_mechanism_tier",
-      "audit_state": "pending"
+      "audit_state": "reviewed_as_model_conditional_with_failed_small_deflection_screen"
     },
     {
       "release_claim_key": "arm_wrist_allocation_equivalence",
@@ -68,7 +68,7 @@
     {
       "release_claim_key": "preload_continuity_advantage",
       "published_status": "conditional_on_the_declared_dead_zone_transmission_family",
-      "audit_state": "reviewed"
+      "audit_state": "reviewed_as_model_conditional"
     },
     {
       "release_claim_key": "scapular_or_muscle_strategy_identification",
@@ -78,7 +78,7 @@
     {
       "release_claim_key": "passive_negative_couple_spatial_forward",
       "published_status": "supported_at_declared_reduced_contact_tier",
-      "audit_state": "in_progress"
+      "audit_state": "reviewed_at_declared_reduced_contact_tier"
     },
     {
       "release_claim_key": "universal_control_strategy",
@@ -88,7 +88,7 @@
     {
       "release_claim_key": "human_experimental",
       "published_status": "untested",
-      "audit_state": "reviewed_as_unsupported_or_untested"
+      "audit_state": "reviewed_as_untested"
     },
     {
       "release_claim_key": "reference_frame_power_invariance",
@@ -98,22 +98,22 @@
     {
       "release_claim_key": "muscle_redundancy_same_moment",
       "published_status": "supported_at_reduced_hill_type_tier",
-      "audit_state": "reviewed"
+      "audit_state": "reviewed_at_reduced_model_tier"
     },
     {
       "release_claim_key": "canonical_pose_adapter_round_trip",
       "published_status": "supported_for_coordinate_representation_only",
-      "audit_state": "reviewed"
+      "audit_state": "reviewed_as_representation_only"
     },
     {
       "release_claim_key": "drake_opensim_myosuite_human_validation",
       "published_status": "unexecuted",
-      "audit_state": "reviewed_as_unsupported_or_untested"
+      "audit_state": "reviewed_as_unexecuted"
     },
     {
       "release_claim_key": "state_triggered_model_robustness",
       "published_status": "conditional_with_force_tradeoff",
-      "audit_state": "pending"
+      "audit_state": "reviewed_as_model_conditional_with_load_tradeoff"
     },
     {
       "release_claim_key": "state_triggered_larger_timing_region",
@@ -128,37 +128,37 @@
     {
       "release_claim_key": "human_self_stabilization",
       "published_status": "untested",
-      "audit_state": "pending"
+      "audit_state": "reviewed_as_untested"
     },
     {
       "release_claim_key": "high_proximal_velocity_universally_beneficial",
       "published_status": "falsified_at_declared_planar_tiers",
-      "audit_state": "pending"
+      "audit_state": "reviewed_as_falsified_at_declared_model_tiers"
     },
     {
       "release_claim_key": "shoulder_velocity_control_strategy",
       "published_status": "conditional_on_phase_geometry_wrist_state_and_objective",
-      "audit_state": "pending"
+      "audit_state": "reviewed_as_model_conditional"
     },
     {
       "release_claim_key": "rotating_base_torso_velocity_transfer",
       "published_status": "supported_conditionally_at_declared_reduced_model_tier",
-      "audit_state": "pending"
+      "audit_state": "reviewed_as_model_conditional"
     },
     {
       "release_claim_key": "human_torso_velocity_strategy",
       "published_status": "untested",
-      "audit_state": "reviewed_as_unsupported_or_untested"
+      "audit_state": "reviewed_as_untested"
     },
     {
       "release_claim_key": "global_slack_benefit",
       "published_status": "unsupported",
-      "audit_state": "reviewed_as_unsupported_or_untested"
+      "audit_state": "reviewed_as_unsupported"
     },
     {
       "release_claim_key": "single_channel_slack_class_identification",
       "published_status": "not_established",
-      "audit_state": "reviewed_as_unsupported_or_untested"
+      "audit_state": "reviewed_as_not_identified"
     },
     {
       "release_claim_key": "individual_hand_allocation_from_net_wrench",
