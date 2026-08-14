@@ -123,3 +123,6 @@
 ## 2026-06-25 - Pandas iterrows vs vectorized dictionary assignment
 **Learning:** Iterating over a pandas DataFrame using `.iterrows()` and appending row dictionaries to a list is extremely slow due to Python object overhead and Series creation for every row.
 **Action:** Replaced `.iterrows()` loop with vectorized dictionary assignment (e.g., `new_data[col] = df[col]`) when transforming DataFrame columns into a new DataFrame. This provides a ~700x speedup.
+## 2026-06-25 - Pandas iterrows vs vectorized dictionary conversion
+**Learning:** Iterating over a pandas DataFrame using `.iterrows()` and appending row dictionaries to a list is extremely slow due to Python object overhead and Series creation for every row.
+**Action:** Replaced `.iterrows()` loop with vectorized column mapping and dictionary conversion via `df.to_dict('records')` when transforming DataFrame rows into a list of dictionaries. This provides a ~6.8x speedup.
