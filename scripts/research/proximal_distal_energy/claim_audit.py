@@ -402,6 +402,28 @@ def validate_registry(
             raise ValueError(
                 f"Release claim inventory mismatch; missing={missing}, extra={extra}"
             )
+    open_release_states = {"pending", "in_progress"}
+    for item in release_inventory:
+        release_key = item.get("release_claim_key", "<missing release_claim_key>")
+        for field in ("published_status", "audit_state"):
+            if not isinstance(item.get(field), str) or not item[field].strip():
+                raise ValueError(f"{release_key}: {field} must be a non-empty string")
+    open_release_keys = sorted(
+        item["release_claim_key"]
+        for item in release_inventory
+        if item["audit_state"] in open_release_states
+    )
+    release_review_completion = "complete" if not open_release_keys else "in_progress"
+    declared_release_completion = registry.get("audit_scope", {}).get(
+        "release_review_completion_status"
+    )
+    if (
+        declared_release_completion is not None
+        and declared_release_completion != release_review_completion
+    ):
+        raise ValueError(
+            "Declared release review completion does not match release claim states"
+        )
 
     completion = registry.get("audit_scope", {}).get("completion_status")
     candidate_ids = {item["candidate_id"] for item in inventory["candidates"]}
@@ -474,6 +496,9 @@ def validate_registry(
         "registered_claim_count": len(claims),
         "reviewed_candidate_count": len(review_ids),
         "release_claim_count": len(release_keys),
+        "release_review_completion_status": release_review_completion,
+        "open_release_claim_count": len(open_release_keys),
+        "open_release_claim_keys": open_release_keys,
         "source_digest": inventory["source_digest"],
     }
 

@@ -204,18 +204,31 @@ proximal acceleration; segment release; timing precision; self-correction and
 noise robustness; proximal-velocity maximization; and slack. The executable
 readiness audit preserves all nine rather than allowing a broad question to
 hide an unplanned subquestion. Eight presently have a model-bounded answer or
-a negative general-rule result. One remains unresolved as a single construct.
+a negative general-rule result. The unresolved point is the broader
+timing-precision claim: the registered planar comparison is adverse to a
+state-trigger advantage, but spatial and human timing demand remain untested.
 All nine have a registered model experiment and a participant-held-out human
 stage, but the latter remains blocked by the bilateral-wrench data boundary.
+
+The machine-readable authority is
+[`momentum_transfer_readiness_audit.json`](../data/momentum_transfer_readiness_audit.json).
+It is regenerated from the question and experiment registries and validated in
+CI. A missing source point, missing falsifier, invalid evidence status, absent
+human stage, or experiment linked to the wrong question is a hard failure.
+
+```{=latex}
+\begingroup
+\small
+```
 
 | Source Point | Present Scientific State | Next Decisive Model Test |
 |---|---|---|
 | Drift contribution | Partly answered; observable- and window-specific only | Common cross-tier estimand table with uncertainty |
 | Geometry dependencies | Partly answered through reduced spatial controls; the first subject-scaled audit rejects contact feasibility of the prescribed common states | Closed-contact inverse kinematics, calibrated contact, and independent forward integration |
-| Casting | Unresolved as a single construct | Multiple preregistered event definitions under matched controls |
+| Casting | Partly answered: no single event definition is defensible; human causal interpretation remains open | Multiple preregistered event definitions under matched controls |
 | Early proximal acceleration | Partly answered pointwise; nonmonotonic | Forward factorial intervention with full-state/work/load matching |
 | Segment release | Partly answered; objective- and constraint-dependent | Viable-region mapping across proximal and distal control families |
-| Timing precision | Partly answered; a state-trigger volume advantage is not supported in the registered planar tier | Continuous common-phase spatial and subject-scaled comparison |
+| Timing precision | Unresolved beyond an adverse planar result; a state-trigger volume advantage is not supported in the registered planar tier | Continuous common-phase spatial and subject-scaled comparison |
 | Self-correction and noise robustness | Partly answered negatively at the registered planar tier; no sustained recovery in 60 cases | Continuous attraction regions with identified observers and external-contact loads |
 | Proximal-velocity maximization | Not supported as a general planar rule | Causal full-delivery-state-matched spatial dose response |
 | Slack | Partly answered at a synthetic constitutive tier; no global benefit and one-channel class identification is not established | One-class-at-a-time moving-base and spatial delivery tests with stateful backlash, subject-specific tissue, and independent measurements |
@@ -224,8 +237,6 @@ stage, but the latter remains blocked by the bilateral-wrench data boundary.
 “Partly answered” never denotes a human or coaching conclusion.
 {#tbl-momentum-source-readiness tbl-colwidths="24,36,40"}
 
-The machine-readable authority is
-[`momentum_transfer_readiness_audit.json`](../data/momentum_transfer_readiness_audit.json).
-It is regenerated from the question and experiment registries and validated in
-CI. A missing source point, missing falsifier, invalid evidence status, absent
-human stage, or experiment linked to the wrong question is a hard failure.
+```{=latex}
+\endgroup
+```

@@ -69,14 +69,19 @@ in git and GitHub.
   The next spatial gate is calibrated compliant forward contact initialized
   from the closed configurations.
 - The claim inventory is adjudicated at 994/994 candidates and 266 atomic
-  claims, including the adverse subject-scaled contact-closure result.
+  claims, including the adverse subject-scaled contact-closure result. This is
+  candidate-census completion, not release-level scientific closure: 10 of 31
+  release claims remain pending or in progress and are reported by the gate.
 - Every one of 1,064 claim source locators now resolves to an existing
   repository file and in-range line. The claim-evidence integrity authority
   covers all 1,639 support references, hash-pins 200 distinct local artifacts,
   and inventories 85 external URLs without treating link presence as
   independent scientific validation.
-- The handwritten agenda retains bounded model answers for eight points and a
-  construct-level unresolved boundary for human intentional slack.
+- The handwritten agenda retains bounded model answers, partial answers, or a
+  negative general-rule result for eight points. MTQ-06, whether passive or
+  drift-mediated transfer reduces timing precision beyond the adverse planar
+  comparison and in people, remains unresolved. Every point now links directly
+  to inspectable evidence artifacts as well as its decisive next test.
 - Typed slack remains separated into five classes; no global benefit,
   necessity, intentionality, or delivery advantage is established.
 - The common-phase timing screen has no sustained half-error recovery in 60
