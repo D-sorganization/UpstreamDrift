@@ -40,8 +40,8 @@
       "id": "MTQ-03",
       "question_id": "Q3",
       "topic": "Casting",
-      "answer_state": "unresolved",
-      "model_plan_state": "registered",
+      "answer_state": "partly_answered",
+      "model_plan_state": "partly_executed",
       "human_plan_state": "blocked",
       "experiment_ids": ["MT-E03", "MT-H01"],
       "present_answer": "Casting is not one mechanism or event; distal-angle, distal-rate, wrist-angle, and event-window definitions can disagree, so no universal causal diagnosis is supported.",
@@ -83,23 +83,23 @@
       "model_plan_state": "registered",
       "human_plan_state": "blocked",
       "experiment_ids": ["MT-E04", "MT-H01"],
-      "present_answer": "Mechanical passivity at an instant does not imply low preparation or neural timing demand; the current delayed-observer screen establishes no recovery advantage.",
-      "decisive_next_test": "Measure viable timing-region volume and phase-error sensitivity for clock, state, impedance, and observer policies after matching work, force, and effort.",
+      "present_answer": "Mechanical passivity at an instant does not imply low preparation or neural timing demand. In the registered common-phase planar screen, the clock policy retained 4/5 robust task-viable phase points and 45 ms of contiguous width, versus 1/5 and no multi-point span for the delayed/noisy state trigger; this falsifies a state-trigger timing-volume advantage in that model, not in people.",
+      "decisive_next_test": "Repeat the common-phase viable-volume comparison with independently identified observers, continuous phase sampling, spatial impact outcomes, subject scaling, and participant-held-out perturbations.",
       "falsifier": "The drift-mediated policy has an equal or smaller viable region, worse lower-tail result, or greater delay/phase sensitivity than its comparator.",
-      "data_gate": "The policy comparison is executable in models; identified human delays and perturbation trials are unavailable."
+      "data_gate": "The moving-base two-hand planar comparison is executed under common speed, face/path, force, effort, and numerical guards; identified human delays, spatial impact, and participant perturbation trials remain unavailable."
     },
     {
       "id": "MTQ-07",
       "question_id": "Q5",
       "topic": "Self-Correction and Noise Robustness",
-      "answer_state": "unresolved",
+      "answer_state": "partly_answered",
       "model_plan_state": "partly_executed",
       "human_plan_state": "blocked",
       "experiment_ids": ["MT-E04", "MT-H01"],
-      "present_answer": "No tested policy has established a decisive attraction-region or sustained-recovery advantage; transient threshold crossing and low variance are insufficient.",
-      "decisive_next_test": "Expand attraction-region, adverse-load, delay, noise, and saturation sweeps with held-out disturbances and require recovery without hidden force or effort cost.",
+      "present_answer": "No tested policy has established self-correction. The expanded common-phase screen observed no sustained half-error recovery in any of 60 policy/load/phase cases, so neither clock nor state triggering has a recovery-qualified viable region in this model.",
+      "decisive_next_test": "Estimate continuous attraction regions with independently identified observers, stronger feedback families, saturation and external-contact disturbances, then test held-out spatial and human recovery without hidden force or effort cost.",
       "falsifier": "Perturbations do not decay, viable-set return is not more probable, or any benefit requires an undeclared load increase.",
-      "data_gate": "A small planar recovery screen exists; spatial and governed human perturbation data remain open."
+      "data_gate": "Small and expanded planar recovery screens exist; independently identified spatial observers and governed human perturbation data remain open."
     },
     {
       "id": "MTQ-08",
@@ -198,7 +198,7 @@
       "id": "Q4",
       "slug": "timing-demand",
       "question": "Does passive or drift-mediated transfer reduce required timing precision?",
-      "status": "unresolved",
+      "status": "model_state_trigger_advantage_not_supported_human_unresolved",
       "required_estimands": [
         "viable timing-window volume",
         "event-time sensitivity",
@@ -214,13 +214,13 @@
         "held-out perturbations"
       ],
       "falsifier": "The drift-mediated policy has an equal or smaller viable region, worse lower-tail outcome, or greater delay/phase sensitivity after force and effort costs are matched.",
-      "issues": [8449, 8556, 8592, 8595]
+      "issues": [8449, 8556, 8592, 8595, 8623]
     },
     {
       "id": "Q5",
       "slug": "self-correction-and-robustness",
       "question": "Are any strategies self-correcting, noise-rejecting, or more robust?",
-      "status": "unresolved",
+      "status": "no_registered_model_recovery_human_unresolved",
       "required_estimands": [
         "error decay",
         "recovery time",
@@ -236,7 +236,7 @@
         "adverse external load"
       ],
       "falsifier": "Perturbations do not decay, recovery is not more probable than the comparator, or any benefit requires an unregistered force/load increase.",
-      "issues": [8449, 8551, 8595]
+      "issues": [8449, 8551, 8595, 8623]
     },
     {
       "id": "Q6",

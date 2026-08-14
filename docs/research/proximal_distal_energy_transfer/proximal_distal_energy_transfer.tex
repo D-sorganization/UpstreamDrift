@@ -462,7 +462,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, left=2mm, titlerule=0mm, toprule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, opacitybacktitle=0.6, colframe=quarto-callout-note-color-frame, arc=.35mm, breakable, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm, coltitle=black, opacityback=0, bottomtitle=1mm, rightrule=.15mm, toptitle=1mm, leftrule=.75mm, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, coltitle=black, colback=white, arc=.35mm, rightrule=.15mm, toprule=.15mm, toptitle=1mm, titlerule=0mm, bottomtitle=1mm, opacityback=0, breakable, left=2mm, bottomrule=.15mm, opacitybacktitle=0.6, colframe=quarto-callout-note-color-frame]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -10772,19 +10772,21 @@ timing interact nonmonotonically. ``Casting'' is not one universal
 event. & Factorial interventions on proximal acceleration, distal
 release, and braking under matched state and work, with multiple
 preregistered casting definitions and adverse-load tests. \\
-Does a drift-mediated strategy require less timing precision? &
-Unresolved for people. In a 15-case paired planar screen, neither
-perfect nor delayed/noisy state triggering established a recovery
-advantage over the clock policy; this is not evidence about neural
-timing demand. & Viable timing-region and phase-error studies under
-matched work, force, and effort, then participant-held-out perturbation
-trials. \\
-Is a strategy self-correcting? & Not established. Requiring error to
-remain below half its initial value through delivery produced recovery
-in only 13--20\% of the engineering cases, with no policy separating
-decisively. & Larger attraction-region sweeps, adverse external loads,
-independently identified observers, and human perturbations without
-hidden load-cost increase. \\
+Does a drift-mediated strategy require less timing precision? & Not
+supported in the registered moving-base planar comparison. On a common
+nominal phase grid, the clock policy retained four of five robust
+task-viable points and 45 ms of contiguous width; the delayed/noisy
+state trigger retained one point and no multi-point span. This does not
+measure neural timing demand. & Continuous phase-volume studies with
+independently identified observers, spatial impact outcomes, subject
+scaling, and participant-held-out perturbations. \\
+Is a strategy self-correcting? & Not established. The earlier screen
+produced 13--20\% sustained recovery, whereas the expanded phase/load
+screen produced none in 60 cases. No tested policy has a
+recovery-qualified viable region. & Continuous attraction-region studies
+with independently identified observers, stronger feedback families,
+external-contact disturbances, and human perturbations without hidden
+load-cost increase. \\
 Should proximal velocity be maximized? & No general rule is supported.
 Exact equal-energy rate sweeps are nonmonotonic. A 216-program
 common-time screen yields 46 disjoint work/load-matched pairs with 20
@@ -10890,6 +10892,48 @@ individual-hand force.}
 
 \end{figure}%
 
+The common-phase extension maps both policies onto the same nominal
+release coordinate. Clock commands use offsets from 0.140 s; state
+thresholds are the right-shoulder angles reached at those same target
+times on one common nominal trajectory. The comparison therefore does
+not confuse seconds with arbitrary angle thresholds. Six named cohorts
+preserve nominal dynamics, a 15\% heavier distal club, 20\% lower shaft
+stiffness, 12 ms additional actuator delay, a 50\% larger initial
+perturbation, and a combined adverse case. Every policy, load, and phase
+has paired reference and perturbed trajectories.
+
+Under the primary task guards---at least 95\% of the load-matched clock
+baseline speed, no more than 2 degrees additional face/path error, no
+more than 10\% additional peak individual-hand force or squared-torque
+effort, and a 5\% normalized numerical-residual ceiling---the clock
+policy is viable at four of five phase points across the intersection of
+all loads. Its largest contiguous sampled span is 45 ms. The
+delayed/noisy state trigger is robustly viable only at the latest point
+and therefore has no multi-point span. Strict, primary, and lenient
+guards retain the same ordering. Requiring sustained half-error recovery
+makes both regions empty: none of the 60 perturbed cases recovers
+through delivery. This is evidence against a state-trigger timing or
+self-correction advantage in this declared model, not evidence that
+people should use clock timing. Half-step checks change delivery speed
+by 0.029--0.034 m/s and reduce the normalized residual from 0.014--0.022
+to 0.008--0.012.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_timing_viability_adverse_load.pdf}
+
+}
+
+\caption{\label{fig-timing-viability-adverse-load}Task Viability and
+Realized Trigger Timing Across the Common Phase Grid and Declared
+Adverse Loads. Green cells satisfy common speed, face/path, force,
+effort, and numerical guards; recovery is reported separately and is
+absent in all registered cases.}
+
+\end{figure}%
+
 \section{Proximal Velocity as a Dose, Not a
 Maxim}\label{proximal-velocity-as-a-dose-not-a-maxim}
 
@@ -10967,9 +11011,9 @@ early-downswing proximal acceleration; segment release; timing
 precision; self-correction and noise robustness; proximal-velocity
 maximization; and slack. The executable readiness audit preserves all
 nine rather than allowing a broad question to hide an unplanned
-subquestion. Five presently have a model-bounded answer or a negative
-general-rule result. Four remain unresolved or definition-gated. All
-nine have a registered model experiment and a participant-held-out human
+subquestion. Seven presently have a model-bounded answer or a negative
+general-rule result. Two remain unresolved or definition-gated. All nine
+have a registered model experiment and a participant-held-out human
 stage, but the latter remains blocked by the bilateral-wrench data
 boundary.
 
@@ -11012,10 +11056,13 @@ Early proximal acceleration & Partly answered pointwise; nonmonotonic &
 Forward factorial intervention with full-state/work/load matching \\
 Segment release & Partly answered; objective- and constraint-dependent &
 Viable-region mapping across proximal and distal control families \\
-Timing precision & Unresolved & Matched viable-volume and phase-error
-comparison \\
-Self-correction and noise robustness & Unresolved & Attraction-region
-and adverse-load recovery study \\
+Timing precision & Partly answered; a state-trigger volume advantage is
+not supported in the registered planar tier & Continuous common-phase
+spatial and subject-scaled comparison \\
+Self-correction and noise robustness & Partly answered negatively at the
+registered planar tier; no sustained recovery in 60 cases & Continuous
+attraction regions with identified observers and external-contact
+loads \\
 Proximal-velocity maximization & Not supported as a general planar rule
 & Causal full-delivery-state-matched spatial dose response \\
 Slack & Unresolved until typed & One-class-at-a-time passivity,

@@ -31,13 +31,21 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         "experimental_readiness",
         "advanced_biological_bridge",
         "transmission_robustness",
+        "timing_viability_adverse_load",
         "shoulder_velocity_pointwise",
         "shoulder_velocity_strategy",
+        "joint_matched_proximal_rate",
         "rotating_base_torso_velocity",
     ]
     assert manifest["claims"]["human_experimental"] == "untested"
     assert manifest["claims"]["high_proximal_velocity_universally_beneficial"] == (
         "falsified_at_declared_planar_tiers"
+    )
+    assert manifest["claims"]["state_triggered_larger_timing_region"] == (
+        "falsified_in_registered_moving_base_planar_screen"
+    )
+    assert manifest["claims"]["registered_model_sustained_recovery"] == (
+        "not_observed_in_60_cases"
     )
     assert (
         manifest["claims"]["distributed_shaft_modal_reduction"]

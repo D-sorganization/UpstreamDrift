@@ -106,6 +106,10 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
                 "command": "python -m scripts.research.proximal_distal_energy.run_transmission_robustness_study",
                 "tier": "paired_state_trigger_and_task_robustness",
             },
+            "timing_viability_adverse_load": {
+                "command": "python -m scripts.research.proximal_distal_energy.run_timing_viability_study",
+                "tier": "common_phase_paired_adverse_load_recovery",
+            },
             "shoulder_velocity_pointwise": {
                 "command": "python -m scripts.research.proximal_distal_energy.run_shoulder_velocity_transfer_study",
                 "tier": "planar_fixed_hub_pointwise_phase_sensitivity",
@@ -149,6 +153,10 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
             ),
             "drake_opensim_myosuite_human_validation": "unexecuted",
             "state_triggered_model_robustness": "conditional_with_force_tradeoff",
+            "state_triggered_larger_timing_region": (
+                "falsified_in_registered_moving_base_planar_screen"
+            ),
+            "registered_model_sustained_recovery": "not_observed_in_60_cases",
             "human_self_stabilization": "untested",
             "high_proximal_velocity_universally_beneficial": (
                 "falsified_at_declared_planar_tiers"
