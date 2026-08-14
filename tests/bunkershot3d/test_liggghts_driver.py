@@ -16,6 +16,8 @@ from _bunker_fixtures_8612 import write_config
 from bunkershot3d.backends.liggghts.driver import LiggghtsDriver, _iter_dump_frames
 from bunkershot3d.exceptions import BackendNotImplementedError
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # Shared fixture
 # ---------------------------------------------------------------------------

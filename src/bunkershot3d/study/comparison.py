@@ -143,12 +143,55 @@ def _rank_from_draws(
     return probability_best, better
 
 
+@dataclass(frozen=True, eq=False)
+class _IntervalEstimate:
+    """One design's central estimate with the uncertainty band around it.
+
+    The four arrays are meaningless apart -- a mean without its interval is
+    exactly the point estimate this module exists to refuse -- so they are
+    passed as one narrow value object (ADR-0032 structural decision 1) rather
+    than as four positional arrays a caller could transpose silently. Both
+    entry points build one: :func:`compare_designs` from bootstrap
+    percentiles, :func:`compare_predicted_designs` from a Gaussian band.
+
+    Attributes:
+        mean: ``(n,)`` central estimate of each design's objective.
+        std_error: ``(n,)`` standard error of that estimate.
+        ci_low: ``(n,)`` lower confidence bound.
+        ci_high: ``(n,)`` upper confidence bound.
+    """
+
+    mean: np.ndarray
+    std_error: np.ndarray
+    ci_low: np.ndarray
+    ci_high: np.ndarray
+
+    def __post_init__(self) -> None:
+        """Check the four arrays describe the same set of designs.
+
+        Raises:
+            ValueError: The arrays disagree in length, or a bound is inverted.
+        """
+        sizes = {
+            "mean": self.mean.size,
+            "std_error": self.std_error.size,
+            "ci_low": self.ci_low.size,
+            "ci_high": self.ci_high.size,
+        }
+        if len(set(sizes.values())) != 1:
+            raise ValueError(f"estimate arrays must agree in length, got {sizes}")
+        if np.any(self.ci_high < self.ci_low):
+            raise ValueError("ci_high must be at least ci_low for every design")
+
+    @property
+    def size(self) -> int:
+        """Number of designs described."""
+        return int(self.mean.size)
+
+
 def _build_comparison(
     names: tuple[str, ...],
-    mean: np.ndarray,
-    std_error: np.ndarray,
-    ci_low: np.ndarray,
-    ci_high: np.ndarray,
+    estimate: _IntervalEstimate,
     draws: np.ndarray,
     lower_is_better: bool,
     confidence_level: float,
@@ -158,10 +201,7 @@ def _build_comparison(
 
     Args:
         names: Design names.
-        mean: ``(n,)`` central estimates.
-        std_error: ``(n,)`` standard errors.
-        ci_low: ``(n,)`` lower bounds.
-        ci_high: ``(n,)`` upper bounds.
+        estimate: Central estimates with their confidence band.
         draws: ``(n_draws, n)`` Monte-Carlo draws.
         lower_is_better: Objective direction.
         confidence_level: Nominal coverage.
@@ -171,10 +211,11 @@ def _build_comparison(
         The assembled comparison.
     """
     probability_best, probability_better = _rank_from_draws(draws, lower_is_better)
+    mean = estimate.mean
     oriented_mean = mean if lower_is_better else -mean
     order = np.argsort(oriented_mean, kind="stable")
-    rank = np.empty(mean.size, dtype=int)
-    rank[order] = np.arange(mean.size)
+    rank = np.empty(estimate.size, dtype=int)
+    rank[order] = np.arange(estimate.size)
 
     require(
         abs(float(probability_best.sum()) - 1.0) < 1e-9,
@@ -184,9 +225,9 @@ def _build_comparison(
     return DesignComparison(
         names=names,
         mean=mean,
-        std_error=std_error,
-        ci_low=ci_low,
-        ci_high=ci_high,
+        std_error=estimate.std_error,
+        ci_low=estimate.ci_low,
+        ci_high=estimate.ci_high,
         rank=rank,
         probability_best=probability_best,
         probability_better=probability_better,
@@ -291,10 +332,12 @@ def compare_designs(
     )
     return _build_comparison(
         names=tidy_names,
-        mean=data.mean(axis=1),
-        std_error=data.std(axis=1, ddof=1) / np.sqrt(n_replicates),
-        ci_low=ci_low,
-        ci_high=ci_high,
+        estimate=_IntervalEstimate(
+            mean=data.mean(axis=1),
+            std_error=data.std(axis=1, ddof=1) / np.sqrt(n_replicates),
+            ci_low=ci_low,
+            ci_high=ci_high,
+        ),
         draws=draws,
         lower_is_better=lower_is_better,
         confidence_level=confidence_level,
@@ -361,10 +404,12 @@ def compare_predicted_designs(
     )
     return _build_comparison(
         names=tidy_names,
-        mean=centre,
-        std_error=spread,
-        ci_low=centre - z * spread,
-        ci_high=centre + z * spread,
+        estimate=_IntervalEstimate(
+            mean=centre,
+            std_error=spread,
+            ci_low=centre - z * spread,
+            ci_high=centre + z * spread,
+        ),
         draws=draws,
         lower_is_better=lower_is_better,
         confidence_level=confidence_level,

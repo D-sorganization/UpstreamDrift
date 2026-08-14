@@ -5,6 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 from bunkershot3d.study import compare_designs, compare_predicted_designs
+from bunkershot3d.study.comparison import _IntervalEstimate
 from bunkershot3d.study.rng import new_seed_record
 
 pytestmark = pytest.mark.unit
@@ -152,6 +153,28 @@ class TestSurrogateComparison:
         result = compare_predicted_designs(GRIND_NAMES, mean, std, seed=4)
         np.testing.assert_allclose(result.ci_low, mean - 1.959964 * std, atol=1e-5)
         np.testing.assert_allclose(result.ci_high, mean + 1.959964 * std, atol=1e-5)
+
+
+class TestIntervalEstimateInvariants:
+    """The estimate and its band are checked as one object, not four arrays."""
+
+    def test_rejects_arrays_of_different_lengths(self) -> None:
+        with pytest.raises(ValueError, match="agree in length"):
+            _IntervalEstimate(
+                mean=np.array([1.0, 2.0]),
+                std_error=np.array([0.1, 0.1]),
+                ci_low=np.array([0.9]),
+                ci_high=np.array([1.1, 2.1]),
+            )
+
+    def test_rejects_an_inverted_interval(self) -> None:
+        with pytest.raises(ValueError, match="ci_high"):
+            _IntervalEstimate(
+                mean=np.array([1.0]),
+                std_error=np.array([0.1]),
+                ci_low=np.array([1.5]),
+                ci_high=np.array([0.5]),
+            )
 
 
 class TestFailureModes:

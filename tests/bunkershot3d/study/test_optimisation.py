@@ -10,6 +10,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 from bunkershot3d.study import (
+    AcquisitionSettings,
     DesignSpace,
     GaussianProcess,
     GPHyperparameters,
@@ -165,6 +166,31 @@ class TestProposeLocation:
             propose_location(gp, SEARCH_SPACE, n_candidates=0)
 
 
+class TestAcquisitionSettings:
+    """The acquisition is one decision, validated once."""
+
+    def test_defaults_match_the_documented_loop(self) -> None:
+        settings = AcquisitionSettings()
+        assert settings.xi == pytest.approx(0.01)
+        assert settings.minimise is True
+        assert settings.n_candidates > 0
+
+    @pytest.mark.parametrize(
+        ("kwargs", "message"),
+        [({"xi": -1e-9}, "xi"), ({"n_candidates": 0}, "n_candidates")],
+    )
+    def test_rejects_inadmissible_settings(
+        self, kwargs: dict[str, float], message: str
+    ) -> None:
+        with pytest.raises(ValueError, match=message):
+            AcquisitionSettings(**kwargs)  # type: ignore[arg-type]
+
+    def test_is_immutable(self) -> None:
+        settings = AcquisitionSettings()
+        with pytest.raises((AttributeError, TypeError)):
+            settings.xi = 0.5  # type: ignore[misc]
+
+
 class TestBayesianOptimisation:
     """The loop as a whole."""
 
@@ -217,7 +243,7 @@ class TestBayesianOptimisation:
             n_initial=8,
             n_iterations=12,
             seed=3,
-            minimise=False,
+            acquisition=AcquisitionSettings(minimise=False),
             noise_variance=1e-8,
         )
         assert result.best_y == np.max(result.y)

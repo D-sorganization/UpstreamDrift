@@ -36,6 +36,8 @@ from bunkershot3d.kinematics.trajectory import (
 )
 from bunkershot3d.postproc.wrench_trace import WrenchTrace
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # WrenchTrace
 # ---------------------------------------------------------------------------

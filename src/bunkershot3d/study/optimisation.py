@@ -39,6 +39,7 @@ from .rng import SeedRecord, as_generator, new_seed_record
 from .surrogate import GaussianProcess, GPHyperparameters
 
 __all__ = [
+    "AcquisitionSettings",
     "BayesOptResult",
     "bayesian_optimisation",
     "expected_improvement",
@@ -49,6 +50,44 @@ ModelFunction = Callable[[np.ndarray], np.ndarray]
 
 #: Sobol' candidate-set size for the acquisition maximiser.
 _DEFAULT_CANDIDATES = 1024
+
+
+@dataclass(frozen=True, slots=True)
+class AcquisitionSettings:
+    """How the expected-improvement acquisition is posed and searched.
+
+    These three settings are one decision, not three: ``minimise`` orients the
+    improvement, ``xi`` sets how much improvement is demanded before a point
+    looks attractive, and ``n_candidates`` sets how hard the surface is
+    searched for it. Every iteration of the loop passes all three together, so
+    they travel as one narrow value object (ADR-0032 structural decision 1)
+    that can be validated once instead of on every call.
+
+    Attributes:
+        xi: Exploration margin; larger values demand a bigger improvement.
+        minimise: Treat lower objective values as better.
+        n_candidates: Size of the Sobol' candidate set; rounded up to a power
+            of two by the engine's requirements.
+    """
+
+    xi: float = 0.01
+    minimise: bool = True
+    n_candidates: int = _DEFAULT_CANDIDATES
+
+    def __post_init__(self) -> None:
+        """Validate.
+
+        Raises:
+            ValueError: ``xi`` is negative or ``n_candidates`` is not positive.
+        """
+        if self.xi < 0.0:
+            raise ValueError(f"xi must be non-negative, got {self.xi}")
+        if self.n_candidates <= 0:
+            raise ValueError(f"n_candidates must be positive, got {self.n_candidates}")
+
+
+#: The acquisition every caller gets unless it says otherwise.
+_DEFAULT_ACQUISITION = AcquisitionSettings()
 
 
 @dataclass(frozen=True, eq=False)
@@ -211,9 +250,7 @@ def bayesian_optimisation(
     n_initial: int = 8,
     n_iterations: int = 20,
     seed: int | SeedRecord | None = None,
-    xi: float = 0.01,
-    minimise: bool = True,
-    n_candidates: int = _DEFAULT_CANDIDATES,
+    acquisition: AcquisitionSettings = _DEFAULT_ACQUISITION,
     noise_variance: float | None = None,
 ) -> BayesOptResult:
     """Run expected-improvement Bayesian optimisation.
@@ -227,9 +264,8 @@ def bayesian_optimisation(
             two.
         n_iterations: Number of surrogate-guided evaluations.
         seed: Explicit entropy or seed record; ``None`` draws fresh entropy.
-        xi: Exploration margin for the acquisition.
-        minimise: Treat lower objective values as better.
-        n_candidates: Size of the acquisition candidate set.
+        acquisition: Exploration margin, objective direction and candidate-set
+            size for the acquisition; see :class:`AcquisitionSettings`.
         noise_variance: Fix the GP noise variance instead of fitting it. Use
             a tiny value (or ``0.0``) for a deterministic simulator.
 
@@ -263,9 +299,9 @@ def bayesian_optimisation(
             surrogate,
             space,
             seed=acquisition_rng,
-            xi=xi,
-            minimise=minimise,
-            n_candidates=n_candidates,
+            xi=acquisition.xi,
+            minimise=acquisition.minimise,
+            n_candidates=acquisition.n_candidates,
         )
         observed = np.asarray(model(candidate.reshape(1, -1)), dtype=float).ravel()
         if observed.size != 1:
@@ -276,7 +312,7 @@ def bayesian_optimisation(
         values = np.concatenate([values, observed])
         surrogate = _fit_surrogate(space, points, values, noise_variance, fit_rng)
 
-    best_index = int(np.argmin(values) if minimise else np.argmax(values))
+    best_index = int(np.argmin(values) if acquisition.minimise else np.argmax(values))
     require(
         points.shape[0] == values.size,
         "design and objective histories must stay aligned",
@@ -290,8 +326,8 @@ def bayesian_optimisation(
         extra={
             "n_initial": initial_size,
             "n_iterations": n_iterations,
-            "xi": xi,
-            "minimise": minimise,
+            "xi": acquisition.xi,
+            "minimise": acquisition.minimise,
         },
     )
     return BayesOptResult(
