@@ -22,7 +22,7 @@ pytestmark = pytest.mark.unit
 def test_momentum_transfer_registry_is_complete_and_falsifiable() -> None:
     payload = json.loads(REGISTRY.read_text(encoding="utf-8"))
 
-    assert payload["schema_version"] == "momentum-transfer-question-registry/v1"
+    assert payload["schema_version"] == "momentum-transfer-question-registry/v2"
     assert payload["parent_epic"] == 8557
     assert payload["program_issue"] == 8595
 
@@ -58,3 +58,4 @@ def test_registry_preserves_critical_scientific_distinctions() -> None:
     assert "attraction-region size" in by_id["Q5"]["required_estimands"]
     assert "interior-optimum search" in by_id["Q6"]["required_controls"]
     assert "one slack class at a time" in by_id["Q7"]["required_controls"]
+    assert by_id["Q7"]["status"] == "partly_answered"

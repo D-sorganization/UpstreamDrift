@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- A two-excitation typed-slack dynamic audit for the momentum-transfer program,
+  with separate mechanical and control boundaries, work-energy closure,
+  passivity checks, local scaled-sensitivity ranks, cross-class output
+  separation, and explicit non-identification and human-evidence limits.
 - New `simulation_backends` package: the golf double-pendulum model is described
   once (`GolfModelParams`) and run through interchangeable `ode` (CPU analytical
   reference), `mujoco` (CPU), and `mjwarp` (MuJoCo Warp GPU) backends behind one

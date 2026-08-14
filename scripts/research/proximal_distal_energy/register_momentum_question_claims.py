@@ -21,6 +21,11 @@ ARTIFACTS = [
     "docs/research/proximal_distal_energy_transfer/figures/fig_timing_viability_adverse_load.pdf",
     "scripts/research/proximal_distal_energy/timing_viability.py",
     "scripts/research/proximal_distal_energy/run_timing_viability_study.py",
+    "docs/research/proximal_distal_energy_transfer/data/typed_slack_dynamic_study.json",
+    "docs/research/proximal_distal_energy_transfer/data/typed_slack_dynamic_study.npz",
+    "docs/research/proximal_distal_energy_transfer/figures/fig_typed_slack_dynamic_audit.pdf",
+    "scripts/research/proximal_distal_energy/typed_slack_dynamic.py",
+    "scripts/research/proximal_distal_energy/run_typed_slack_dynamic_study.py",
 ]
 
 
@@ -38,10 +43,13 @@ def main() -> None:
         "PD-CLAIM-245": [by_line[line]["candidate_id"] for line in (53, 63)],
         "PD-CLAIM-246": [by_line[line]["candidate_id"] for line in (71, 82)],
         "PD-CLAIM-252": [by_line[line]["candidate_id"] for line in (86, 95, 109)],
-        "PD-CLAIM-247": [by_line[line]["candidate_id"] for line in (116, 140, 147)],
-        "PD-CLAIM-248": [by_line[155]["candidate_id"]],
+        "PD-CLAIM-247": [by_line[line]["candidate_id"] for line in (116, 140)],
+        "PD-CLAIM-253": [
+            by_line[line]["candidate_id"] for line in (147, 155, 166, 170)
+        ],
+        "PD-CLAIM-248": [by_line[178]["candidate_id"]],
         "PD-CLAIM-251": [
-            by_line[line]["candidate_id"] for line in (166, 176, 178, 188, 192)
+            by_line[line]["candidate_id"] for line in (189, 199, 201, 211, 215)
         ],
     }
     definitions = {
@@ -90,9 +98,16 @@ def main() -> None:
         "PD-CLAIM-247": (
             "Energy-, work-, and load-controlled planar evidence rejects maximizing proximal velocity as a general rule at those tiers, while five distinct slack classes require separate state, energy, and measurement tests.",
             "nonmonotonic_velocity_and_typed_slack_boundary",
-            "proximal_rule_rejected_at_planar_tiers_slack_mostly_open",
-            "The acceleration intervention is pointwise, forward pairs do not match the full delivery state, and only a phenomenological transmission dead zone has been directly exercised; no human optimum is identified.",
+            "proximal_rule_rejected_at_planar_tiers_slack_typed",
+            "The acceleration intervention is pointwise, forward pairs do not match the full delivery state, and the typed slack suite remains a synthetic scalar constitutive audit; no human optimum is identified.",
             "A planar reversal is promoted to a human optimum or one slack class is inferred from another.",
+        ),
+        "PD-CLAIM-253": (
+            "A two-excitation synthetic constitutive audit separates five slack classes, closes the four mechanical work-energy ledgers, and obtains full local scaled-sensitivity rank, but one transmitted-output channel does not identify the generating class or establish a delivery benefit.",
+            "typed_slack_dynamic_passivity_and_identifiability_audit",
+            "constitutive_mechanical_closure_supported_class_identification_not_established",
+            "The registered backlash is memoryless dead-zone plus damping, biological compliance is a unilateral Kelvin-Voigt surrogate, and the suite contains no forward delivery, subject-specific anatomy, intentionality, injury, or human outcome.",
+            "A mechanical class violates passivity or closure, the result depends on mixing classes, or independent measurements and held-out data contradict the registered near-confounding and non-identification boundary.",
         ),
         "PD-CLAIM-248": (
             "Synthetic studies can falsify declared model mechanisms and qualify software but cannot establish coaching or human-control strategies; governed participant-held-out bilateral-wrench data remain required.",
@@ -169,7 +184,7 @@ def main() -> None:
     registry["paper"]["source_digest"] = inventory["source_digest"]
     registry["audit_scope"]["completion_status"] = "complete"
     registry["audit_scope"]["current_scope"] = (
-        "The complete 959-candidate paper inventory is adjudicated. The critical-question chapter maps twenty candidates to nine bounded claims and retains all human-data gates."
+        "The complete 962-candidate paper inventory is adjudicated. The critical-question chapter maps twenty-four candidates to ten bounded claims and retains all human-data gates."
     )
     REGISTRY.write_text(json.dumps(registry, indent=2) + "\n", encoding="utf-8")
 

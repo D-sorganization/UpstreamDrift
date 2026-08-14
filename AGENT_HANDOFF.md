@@ -1,6 +1,6 @@
 # Agent Handoff — UpstreamDrift
 
-Last updated: 2026-08-13
+Last updated: 2026-08-14
 
 Update this current-state file with every PR and push to `main`; history belongs
 in git and GitHub.
@@ -9,10 +9,10 @@ in git and GitHub.
 
 - Epic [#8557](https://github.com/D-sorganization/UpstreamDrift/issues/8557)
   governs the proximal-to-distal research program. Critical-question issue
-  [#8595](https://github.com/D-sorganization/UpstreamDrift/issues/8595) is
-  closed as the completed planning/initial-model slice; unresolved spatial,
-  subject-scaled, and human work remains governed by #8557 and its child
-  issues.
+  [#8595](https://github.com/D-sorganization/UpstreamDrift/issues/8595) is open
+  and retains the handwritten question agenda as the acceptance checklist;
+  unresolved spatial, subject-scaled, and human work remains governed by #8557
+  and its child issues.
 - Canonical question sources are
   `docs/research/proximal_distal_energy_transfer/MOMENTUM_TRANSFER_QUESTION_PROGRAM.md`,
   `data/momentum_transfer_question_registry.json`, and
@@ -23,7 +23,24 @@ in git and GitHub.
   synchronized bilateral six-axis grip wrenches has been acquired. Synthetic
   traces must not substitute for the registered human test.
 
-## Current #8623 Timing-Viability Slice
+## Current Typed-Slack Dynamic Slice
+
+- Branch `research/8595-slack-dynamic-identifiability` advances Q7/MT-E06 from
+  definition-gated to partly answered at a synthetic scalar constitutive tier.
+- Contact disengagement, transmission dead zone, structural preload,
+  biological series compliance, and control deadband are exercised separately
+  under a slow sine and a multisine with reversals. The four mechanical
+  surrogates pass the registered closure check with maximum absolute residual
+  `5.13e-10 J`; the control channel is not relabelled mechanical storage.
+- All three local scaled parameters are full rank for each registered case,
+  but class identification is not established. Contact and biological
+  surrogate outputs differ by only 1.96% normalized RMSE under the multisine.
+- The backlash model remains memoryless dead-zone plus damping and the
+  biological element remains a unilateral Kelvin-Voigt surrogate. Forward
+  delivery, stateful play, subject-specific tissue, independent measurements,
+  and the governed human stage remain open.
+
+## Recently Merged #8623 Timing-Viability Slice
 
 - Child issue [#8623](https://github.com/D-sorganization/UpstreamDrift/issues/8623)
   maps clock and delayed/noisy state-trigger policies onto one five-point
@@ -42,7 +59,7 @@ in git and GitHub.
 - Representative half-step checks change delivery speed by 0.029--0.034 m/s,
   keep peak-force differences below 2.7%, and reduce normalized residuals.
 
-## Current Branch
+## Previous Claim-Audit Expansion
 
 - `research/8557-claim-audit-expansion` adds the source-agenda readiness gate
   and paper/epic integration on top of the merged Q6 forward matching control.
@@ -63,13 +80,14 @@ in git and GitHub.
   positive while club-angular-acceleration response reverses; required proximal
   torque spans -69 to +189 N m. This is pointwise model evidence, not a human
   acceleration strategy.
-- The rebuilt paper is 210 pages and 1,504,200 bytes with 186 retained URI
+- The rebuilt paper is 212 pages and 1,529,780 bytes with 186 retained URI
   annotations and 244 outline entries. The source agenda now has nine
-  registered points: five bounded/partial/negative-rule answers and four
-  unresolved or definition-gated questions. The claim inventory is complete
-  at 956/956 candidates and 250 claims. Paper pages 187--191 (PDF pages
-  191--195), including the split readiness table and chapter transition, were
-  visually inspected without clipping, overlap, or unreadable content.
+  registered points: eight bounded/partial/negative-rule answers and one
+  unresolved as a single construct after the current typed-slack slice. The
+  claim inventory is complete at 962/962 candidates and 252 claims. PDF pages
+  193--196, including the typed-slack figure, evidential boundary, and readiness
+  table, were visually inspected without clipping, overlap, missing glyphs, or
+  unreadable content.
 
 ## Recently Merged #8595 Slices
 
