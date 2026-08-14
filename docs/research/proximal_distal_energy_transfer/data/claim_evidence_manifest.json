@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-evidence-integrity-v1",
   "registry": {
     "path": "docs/research/proximal_distal_energy_transfer/data/claim_audit_registry.json",
-    "sha256": "6b3035344b2008e5225ead1ff13e417b435d9f8407cfa40267c3e9d0d3235085"
+    "sha256": "fff27bf90efa6d18c0f48ee9b37796aad73313064665f97fa17dcd6dbf52ea4d"
   },
   "scope": {
     "local_artifact_semantics": "content_integrity_not_independent_validation",
@@ -2998,8 +2998,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/MOMENTUM_TRANSFER_QUESTION_PROGRAM.md": {
-      "sha256": "2eeb75c494a19a487aab6ca4733c23549f41dd481819a26079dbf46e232ce0ff",
-      "bytes": 20096,
+      "sha256": "03f3256418c86af207ecddb8f9dc60c68a90823f4ad80a1bd76587a024088080",
+      "bytes": 21320,
       "referenced_by": [
         "PD-CLAIM-242",
         "PD-CLAIM-243",
@@ -3068,8 +3068,8 @@
       "referenced_by": ["PD-CLAIM-073"]
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd": {
-      "sha256": "ec2a3e6bcf90dfa46cc6a137325743c9f06b1c52cfe4ef431de630aa5cadb33c",
-      "bytes": 18894,
+      "sha256": "0b52f59e1c8f9509683c1aac874b955052ba2c9eaa61f7c535760d25aaf9721e",
+      "bytes": 18921,
       "referenced_by": [
         "PD-CLAIM-242",
         "PD-CLAIM-243",
@@ -4218,13 +4218,13 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/references.bib": {
-      "sha256": "f51baf141866a57473f4ac6df73535b54e0fc81965d577760093a41dec949a9f",
-      "bytes": 44098,
+      "sha256": "2303dcbcdbe8eac270fa3c07461a6639d448a58455d5789f9a8c57f49f684adc",
+      "bytes": 44112,
       "referenced_by": ["PD-CLAIM-035", "PD-CLAIM-036", "PD-CLAIM-037"]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "351991e13bf8b2cdc00230f640967f0b7241b7a1f0d444367fbc1e79a9752282",
-      "bytes": 104827,
+      "sha256": "3b730c6eda82ba2a6a72f7af83a0da99530fbaa02835e5ebad4697f1eaa440a6",
+      "bytes": 105219,
       "referenced_by": ["PD-CLAIM-241"]
     },
     "docs/research/proximal_distal_energy_transfer/sources/wscg_2024/SOURCE_REGISTER.md": {

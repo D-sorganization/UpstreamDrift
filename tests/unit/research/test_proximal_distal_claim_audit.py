@@ -361,5 +361,6 @@ def test_repository_registry_matches_release_claims_and_is_complete() -> None:
     assert result["reviewed_candidate_count"] >= 5
     assert result["completion_status"] == "complete"
     assert result["unadjudicated_candidate_count"] == 0
-    assert result["release_review_completion_status"] == "in_progress"
-    assert result["open_release_claim_count"] == 10
+    assert result["release_review_completion_status"] == "complete"
+    assert result["open_release_claim_count"] == 0
+    assert result["open_release_claim_keys"] == []

@@ -14,7 +14,9 @@ in git and GitHub.
 - PR [#8651](https://github.com/D-sorganization/UpstreamDrift/pull/8651) is the
   protected slice that reconciles the nine-point readiness assessment, adds
   inspectable evidence links, and separates candidate-census completion from
-  the 10 open release reviews.
+  the then-open release reviews. Branch `research/8557-release-claim-review`
+  adds the deterministic 31-claim review authority and is awaiting protected
+  publication.
 - Canonical question, experiment, and readiness registries live under
   `docs/research/proximal_distal_energy_transfer/data/`. MT-E01 through MT-E09
   are model studies; MT-H01 is the governed participant-held-out stage.
@@ -73,9 +75,11 @@ in git and GitHub.
   The next spatial gate is calibrated compliant forward contact initialized
   from the closed configurations.
 - The claim inventory is adjudicated at 994/994 candidates and 266 atomic
-  claims, including the adverse subject-scaled contact-closure result. This is
-  candidate-census completion, not release-level scientific closure: 10 of 31
-  release claims remain pending or in progress and are reported by the gate.
+  claims, including the adverse subject-scaled contact-closure result. All 31
+  release claims now have a deterministic review disposition, supporting
+  atomic claims, evidence, controls, falsifiers, uncertainty boundaries, and a
+  remaining scientific gate. This closes review bookkeeping, not science: all
+  31 retain a model, equipment, anatomy, archival, or governed-human gate.
 - Every one of 1,064 claim source locators now resolves to an existing
   repository file and in-range line. The claim-evidence integrity authority
   covers all 1,639 support references, hash-pins 200 distinct local artifacts,

@@ -12,6 +12,14 @@ The machine-readable prediction definitions are stored in
 `data/model_completion_predictions.json`. Status changes require a reviewed
 evidence bundle generated after its tolerance and intervention were registered.
 
+The complementary
+[`data/release_claim_review.json`](data/release_claim_review.json) covers all 31
+claims exposed by the qualified release. It records the supporting atomic
+claims, controls, falsifiers, uncertainty boundaries, and the next scientific
+gate for each one. Its completed review state means that no release claim is
+awaiting adjudication; it does not mean that model, equipment, anatomical,
+archival, or human-validation gates have been completed.
+
 ## Claim–Evidence–Falsifier Register
 
 | Hypothesis                                         | Current Evidence                                                                                                                                                                                                                                   | Current Boundary                                                                                                                                                                  | Strongest Competing Explanations                                                                                                 | Decisive Next Test                                                                                                                                                                      | Current Status                                                                                                                                           |
