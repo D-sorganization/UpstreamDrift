@@ -9,7 +9,12 @@ import typing
 
 try:
     import mujoco
-except ImportError:
+except (ImportError, OSError):
+    # OSError covers a *present but unloadable* native library: on Windows a
+    # MuJoCo built against a newer MSVC runtime than the host raises
+    # ``OSError(1114, "DLL initialization routine failed")`` rather than
+    # ImportError. Catching only ImportError let that escape and take the
+    # whole launcher down at import time (#8084).
     mujoco = None
 
 import numpy as np
