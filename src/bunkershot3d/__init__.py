@@ -59,7 +59,7 @@ from . import (
     postproc,
     provenance,
     sand,
-    solver,
+    solvers,
     units,
 )
 
@@ -243,7 +243,7 @@ __all__: list[str] = [
     "preset_names",
     "provenance",
     "sand",
-    "solver",
+    "solvers",
     "study",
     "to_post_impact_state",
     "units",
