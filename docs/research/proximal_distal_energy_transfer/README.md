@@ -105,6 +105,11 @@ comprehensive open modeling program are tracked in
 [#8557](https://github.com/D-sorganization/UpstreamDrift/issues/8557), with the
 durable execution contract in
 [`COMPREHENSIVE_RESEARCH_PROGRAM.md`](COMPREHENSIVE_RESEARCH_PROGRAM.md).
+The MT-E07 measurement program now includes both the exact bilateral-wrench
+rank audit and a trajectory-level synthetic point-force qualification under
+noise, normalized cross-talk, calibration residual, and contact-center
+migration. It demonstrates that net-wrench closure does not establish force
+allocation and retains physical-device and human validation as open gates.
 The first external-evidence audit slice narrows the introduction and empirical
 evidence synthesis, records reciprocal candidate dispositions, and separates
 sample-specific associations from causal mechanisms. In particular, it corrects
@@ -239,6 +244,7 @@ python3 -m scripts.research.proximal_distal_energy.make_spatial_full_body_figure
 python3 -m scripts.research.proximal_distal_energy.make_spatial_forward_contact_figures
 python3 -m scripts.research.proximal_distal_energy.make_uncertainty_control_figures
 python3 -m scripts.research.proximal_distal_energy.run_bilateral_wrench_identifiability_study
+python3 -m scripts.research.proximal_distal_energy.run_bilateral_wrench_sensor_qualification
 # document
 cd docs/research/proximal_distal_energy_transfer
 quarto render proximal_distal_energy_transfer.qmd --to pdf

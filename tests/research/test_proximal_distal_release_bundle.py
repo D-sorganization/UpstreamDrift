@@ -38,6 +38,7 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         "joint_matched_proximal_rate",
         "rotating_base_torso_velocity",
         "bilateral_wrench_identifiability",
+        "bilateral_wrench_sensor_qualification",
     ]
     assert manifest["claims"]["human_experimental"] == "untested"
     assert manifest["claims"]["high_proximal_velocity_universally_beneficial"] == (
@@ -52,6 +53,14 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
     assert manifest["claims"]["global_slack_benefit"] == "unsupported"
     assert manifest["claims"]["single_channel_slack_class_identification"] == (
         "not_established"
+    )
+    assert (
+        manifest["claims"]["synthetic_bilateral_point_force_sensor_qualification"]
+        == "qualified_for_declared_synthetic_cases"
+    )
+    assert (
+        manifest["claims"]["physical_bilateral_six_axis_device_validation"]
+        == "untested"
     )
     assert (
         manifest["claims"]["distributed_shaft_modal_reduction"]

@@ -163,7 +163,7 @@ scientific contract.
 
 ## Completed Paper-Wide Claim Audit
 
-The current audit adjudicates all 970 narrative candidates against 255
+The current audit adjudicates all 975 narrative candidates against 258
 atomic claim contracts; no candidate remains unreviewed. Repeated methods,
 summary, limitation, and release passages point back to their primary claim
 instead of acquiring stronger authority through repetition. The final pass
@@ -176,9 +176,13 @@ separated three-axis point forces map to net club wrench with rank five and one
 invisible equal-and-opposite axial mode. Full bilateral six-axis hand wrenches
 map to the same six-component net wrench with nullity six. One independently
 measured axial scalar closes only the point-force rank gap; direct full
-allocation still requires bilateral sensing. MT-E07 now carries the remaining
-noise, cross-talk, contact-migration, subject-scaling, and held-out human
-qualification plan.
+allocation still requires bilateral sensing. MT-E07 now adds a deterministic
+trajectory-level synthetic point-force qualification under normalized noise,
+cross-talk calibration error, and contact-center migration. It demonstrates
+that net-wrench closure can hide large allocation error and that calibration
+and contact tracking are part of the measurement contract. Traceable bilateral
+six-axis device calibration, distributed contact, subject scaling, and held-out
+human qualification remain open.
 
 Completion of the paper audit is not completion of the research program. In
 particular, the audit rejected quantitative small-deflection shaft inference

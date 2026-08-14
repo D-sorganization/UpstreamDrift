@@ -134,6 +134,10 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
                 "command": "python -m scripts.research.proximal_distal_energy.run_bilateral_wrench_identifiability_study",
                 "tier": "instantaneous_linear_structural_identifiability",
             },
+            "bilateral_wrench_sensor_qualification": {
+                "command": "python -m scripts.research.proximal_distal_energy.run_bilateral_wrench_sensor_qualification",
+                "tier": "synthetic_trajectory_point_force_sensor_qualification",
+            },
         },
         "claims": {
             "interaction_dynamics_planar": "supported_at_declared_model_tier",
@@ -182,6 +186,10 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
                 "structurally_unidentifiable"
             ),
             "bilateral_human_wrench_validation": "untested",
+            "synthetic_bilateral_point_force_sensor_qualification": (
+                "qualified_for_declared_synthetic_cases"
+            ),
+            "physical_bilateral_six_axis_device_validation": "untested",
         },
         "known_open_gates": [
             "subject-scaled articulated spatial contact with calibrated grip and distributed shaft",
