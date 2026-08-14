@@ -455,7 +455,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, bottomtitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, colback=white, bottomrule=.15mm, opacityback=0, leftrule=.75mm, arc=.35mm, coltitle=black, opacitybacktitle=0.6, left=2mm, toprule=.15mm, breakable, rightrule=.15mm, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, titlerule=0mm]
+\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-note-color-frame, arc=.35mm, rightrule=.15mm, leftrule=.75mm, opacitybacktitle=0.6, titlerule=0mm, toptitle=1mm, bottomtitle=1mm, bottomrule=.15mm, toprule=.15mm, left=2mm, opacityback=0, breakable, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, colback=white, coltitle=black, colbacktitle=quarto-callout-note-color!10!white]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -10585,11 +10585,13 @@ pointwise attribution is not forward persistence. & A common
 acceleration/force/impulse/power/work ledger across tiers, same-state
 killswitches, uncertainty propagation, and participant-held-out
 bilateral-wrench evaluation. \\
-Which geometry matters? & Relative link angle, force direction, velocity
-direction, reference point, grip separation, swing-plane orientation,
-and contact moment arm can gate magnitude and sign. & A subject-scaled
-spatial atlas with zero, orthogonal, coincident-grip, and
-reversed-moment-arm controls reproduced in an independent engine. \\
+Which geometry matters? & Relative-link and force--velocity angles
+create exact sine/cosine gates; bilateral couple varies with signed grip
+separation and transverse differential force. Existing moving-base and
+two-engine spatial controls reproduce coincident-grip zeros and
+moment-arm reversals. & Subject-scaled scapular/arm/grip geometry,
+calibrated contact compliance, and equipment geometry evaluated with
+held-out digital twins and human bilateral wrenches. \\
 Which timing patterns matter? & Early distal release changes the
 available geometry; proximal rate, acceleration, braking, and release
 timing interact nonmonotonically. ``Casting'' is not one universal
@@ -10622,6 +10624,44 @@ class at a time, with a state and constitutive law, matched initial
 energy, passivity and closure checks, hysteresis sweeps, and a
 measurement strategy. \\
 \end{longtable}
+
+\section{Geometry Gates and Null
+Controls}\label{geometry-gates-and-null-controls}
+
+The geometry atlas in Figure~\ref{fig-momentum-geometry-atlas} makes
+three independent gates explicit. First, force power is \(Fv\cos\phi\):
+the same force magnitude is positive, zero, or negative as the
+force--velocity angle crosses 0, 90, or 180 degrees. Second, the distal
+tangential and centripetal projections have distinct \(\cos\theta\) and
+\(-\sin\theta\) gates, so one can vanish while the other is maximal.
+Third, an ideal bilateral differential-force couple is the signed
+grip-separation vector crossed with differential force. It vanishes for
+coincident contacts and axial differential force and reverses with the
+moment arm or transverse force.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_momentum_geometry_atlas.pdf}
+
+}
+
+\caption{\label{fig-momentum-geometry-atlas}Geometry Atlas for Force
+Power, Relative-Link Projection, and Bilateral Force-Couple Sign.}
+
+\end{figure}%
+
+These are not merely symbolic checks. The existing moving-base planar
+control gives exactly zero couple for coincident grips; the
+rotating-base tier changes +1.351 to -1.351 N m under signed arm
+reversal; and the independently authored MuJoCo and Pinocchio
+spatial-contact tier retains a maximum reversal residual below
+\(9.2\times10^{-16}\) N m. Proper 3-D rotations preserve total wrench
+power to the registered numerical tolerance. The remaining anatomical
+question is therefore not whether these geometric identities hold, but
+which subject-scaled configurations, forces, velocities, and compliant
+contacts are feasible and used by people.
 
 \section{Timing and Common Failure
 Descriptions}\label{timing-and-common-failure-descriptions}

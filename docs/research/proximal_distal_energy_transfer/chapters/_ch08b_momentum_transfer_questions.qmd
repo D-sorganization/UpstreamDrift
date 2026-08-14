@@ -12,7 +12,7 @@ and their broader rationale is documented in the open
 | Question | Present Assessment | What Would Change the Assessment? |
 |---|---|---|
 | How much transfer is drift-mediated? | Conditional on the observable, coordinate and frame, event window, model, and decomposition. Signed drift shares may exceed 100% when control opposes the pathway; pointwise attribution is not forward persistence. | A common acceleration/force/impulse/power/work ledger across tiers, same-state killswitches, uncertainty propagation, and participant-held-out bilateral-wrench evaluation. |
-| Which geometry matters? | Relative link angle, force direction, velocity direction, reference point, grip separation, swing-plane orientation, and contact moment arm can gate magnitude and sign. | A subject-scaled spatial atlas with zero, orthogonal, coincident-grip, and reversed-moment-arm controls reproduced in an independent engine. |
+| Which geometry matters? | Relative-link and force–velocity angles create exact sine/cosine gates; bilateral couple varies with signed grip separation and transverse differential force. Existing moving-base and two-engine spatial controls reproduce coincident-grip zeros and moment-arm reversals. | Subject-scaled scapular/arm/grip geometry, calibrated contact compliance, and equipment geometry evaluated with held-out digital twins and human bilateral wrenches. |
 | Which timing patterns matter? | Early distal release changes the available geometry; proximal rate, acceleration, braking, and release timing interact nonmonotonically. “Casting” is not one universal event. | Factorial interventions on proximal acceleration, distal release, and braking under matched state and work, with multiple preregistered casting definitions and adverse-load tests. |
 | Does a drift-mediated strategy require less timing precision? | Unresolved for people. In a 15-case paired planar screen, neither perfect nor delayed/noisy state triggering established a recovery advantage over the clock policy; this is not evidence about neural timing demand. | Viable timing-region and phase-error studies under matched work, force, and effort, then participant-held-out perturbation trials. |
 | Is a strategy self-correcting? | Not established. Requiring error to remain below half its initial value through delivery produced recovery in only 13–20% of the engineering cases, with no policy separating decisively. | Larger attraction-region sweeps, adverse external loads, independently identified observers, and human perturbations without hidden load-cost increase. |
@@ -22,6 +22,31 @@ and their broader rationale is documented in the open
 : Current answer and falsification map for the critical momentum-transfer
 questions. “Conditional” denotes model- and estimand-bounded evidence rather
 than a human strategy. {#tbl-momentum-question-status tbl-colwidths="20,38,42"}
+
+## Geometry Gates and Null Controls
+
+The geometry atlas in @fig-momentum-geometry-atlas makes three independent
+gates explicit. First, force power is $Fv\cos\phi$: the same force magnitude
+is positive, zero, or negative as the force–velocity angle crosses 0, 90, or
+180 degrees. Second, the distal tangential and centripetal projections have
+distinct $\cos\theta$ and $-\sin\theta$ gates, so one can vanish while the
+other is maximal. Third, an ideal bilateral differential-force couple is the
+signed grip-separation vector crossed with differential force. It vanishes for
+coincident contacts and axial differential force and reverses with the moment
+arm or transverse force.
+
+![Geometry Atlas for Force Power, Relative-Link Projection, and Bilateral
+Force-Couple Sign.](figures/fig_momentum_geometry_atlas.pdf){#fig-momentum-geometry-atlas width=100%}
+
+These are not merely symbolic checks. The existing moving-base planar control
+gives exactly zero couple for coincident grips; the rotating-base tier changes
++1.351 to -1.351 N m under signed arm reversal; and the independently authored
+MuJoCo and Pinocchio spatial-contact tier retains a maximum reversal residual
+below $9.2\times10^{-16}$ N m. Proper 3-D rotations preserve total wrench
+power to the registered numerical tolerance. The remaining anatomical question
+is therefore not whether these geometric identities hold, but which
+subject-scaled configurations, forces, velocities, and compliant contacts are
+feasible and used by people.
 
 ## Timing and Common Failure Descriptions
 

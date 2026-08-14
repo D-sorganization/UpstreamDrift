@@ -22,22 +22,20 @@ in git and GitHub.
 
 ## Current Branch
 
-- `research/8595-observer-recovery` adds a paired 15-case delayed-observer and
-  trajectory-recovery screen for Q4/Q5. Clock, perfect-state, delayed/noisy,
-  and higher-impedance policies receive common nuisance parameters and sensor
-  realizations.
-- Recovery requires normalized state error to fall below half its initial
-  value and remain there through delivery. Fractions are 0.20 for clock and
-  delayed/noisy policies and 0.13 for perfect-state and higher-impedance
-  policies; median terminal error remains 0.79–0.84. No policy or human
-  self-correction advantage is established.
-- The study reports recovery trajectories, times, viable-set return, terminal
-  delivery, individual-hand force, and effort. The paper includes the result
-  and a visually checked figure. The claim audit is complete at 937/937
-  candidates and 245 atomic claims.
-- The rebuilt, losslessly optimized paper is 206 pages and 1,423,668 bytes,
-  with 186 URI links and 241 outline entries. Pages 185–186 were visually
-  checked for clipping, legibility, captioning, and figure layout.
+- `research/8595-geometry-atlas` adds exact force–velocity, relative-link, and
+  bilateral force-couple geometry maps for Q2. Null controls cover orthogonal
+  force/velocity, coincident contacts, axial differential force, and distinct
+  sine/cosine zeros; force and moment-arm reversals test sign.
+- The atlas collects achieved-state controls from the moving-base planar,
+  rotating-base two-hand, and independently authored MuJoCo/Pinocchio spatial
+  tiers without relabeling them as one model. Proper 3-D rotations preserve
+  wrench power at numerical tolerance.
+- The paper and question registry report the geometry result while retaining
+  subject-scaled scapular/arm/contact/equipment geometry and governed bilateral
+  human wrenches as open evidence boundaries. No human technique is inferred.
+- The rebuilt paper is 207 pages and 1,474,162 bytes with 186 URI links and
+  242 outline entries. The source atlas and paper pages 185–187 were visually
+  checked. The claim audit is complete at 940/940 candidates and 247 claims.
 
 ## Recently Merged #8595 Slices
 

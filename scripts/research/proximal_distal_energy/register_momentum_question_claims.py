@@ -27,10 +27,12 @@ def main() -> None:
     by_line = {item["line_start"]: item for item in candidates}
     groups = {
         "PD-CLAIM-242": [by_line[line]["candidate_id"] for line in (3, 12, 22)],
-        "PD-CLAIM-243": [by_line[line]["candidate_id"] for line in (14, 28, 38)],
-        "PD-CLAIM-244": [by_line[line]["candidate_id"] for line in (46, 57)],
-        "PD-CLAIM-245": [by_line[line]["candidate_id"] for line in (63, 72, 79)],
-        "PD-CLAIM-246": [by_line[87]["candidate_id"]],
+        "PD-CLAIM-243": [by_line[14]["candidate_id"]],
+        "PD-CLAIM-244": [by_line[line]["candidate_id"] for line in (28, 38, 41)],
+        "PD-CLAIM-245": [by_line[line]["candidate_id"] for line in (53, 63)],
+        "PD-CLAIM-246": [by_line[line]["candidate_id"] for line in (71, 82)],
+        "PD-CLAIM-247": [by_line[line]["candidate_id"] for line in (88, 97, 104)],
+        "PD-CLAIM-248": [by_line[112]["candidate_id"]],
     }
     definitions = {
         "PD-CLAIM-242": (
@@ -41,27 +43,41 @@ def main() -> None:
             "A conditional entry is presented as a universal or human conclusion.",
         ),
         "PD-CLAIM-243": (
+            "The seven-question table retains observable-specific drift attribution and bounded current answers after adding the geometry and recovery studies.",
+            "critical_question_answer_map",
+            "model_and_estimand_bounded",
+            "A table entry is a synthesis of registered evidence rather than an independent experiment.",
+            "A conditional model entry is presented as a universal or human conclusion.",
+        ),
+        "PD-CLAIM-244": (
+            "Force--velocity and relative-link angles provide exact power/projection gates, while signed grip separation and transverse differential force determine bilateral couple sign and zeros across declared planar and spatial controls.",
+            "geometry_gate_atlas",
+            "supported_through_declared_spatial_mechanism_controls",
+            "The identities and model controls do not establish feasible or preferred subject-scaled human geometry.",
+            "An orthogonal, coincident, axial, reversed, or proper-frame control fails beyond registered tolerance.",
+        ),
+        "PD-CLAIM-245": (
             "Casting, timing demand, and self-correction require measurable event, sensitivity, and perturbation-recovery definitions; state-triggered synthetic performance does not establish reduced human timing demand.",
             "operational_timing_and_recovery_contract",
             "registered_and_human_unresolved",
             "Observer, recovery, and participant experiments have not been completed.",
             "Repeatability or open-loop sensitivity is relabeled self-correction or human timing economy.",
         ),
-        "PD-CLAIM-244": (
+        "PD-CLAIM-246": (
             "A paired 15-case planar screen found sustained half-error recovery in 13--20 percent of cases, with no decisive policy separation; transient threshold crossing is not self-correction.",
             "trajectory_recovery_screen",
             "no_policy_recovery_advantage_established",
             "The result is limited to a small engineering envelope and a simple delayed observer; it does not estimate human correction.",
             "A policy advantage emerges under expanded preregistered attraction-region, external-load, or participant-held-out tests.",
         ),
-        "PD-CLAIM-245": (
+        "PD-CLAIM-247": (
             "The planar evidence rejects maximizing proximal velocity as a general rule at those tiers, while five distinct slack classes require separate state, energy, and measurement tests.",
             "nonmonotonic_velocity_and_typed_slack_boundary",
             "proximal_rule_rejected_at_planar_tiers_slack_mostly_open",
             "Only a phenomenological transmission dead zone has been directly exercised; no human optimum is identified.",
             "A planar reversal is promoted to a human optimum or one slack class is inferred from another.",
         ),
-        "PD-CLAIM-246": (
+        "PD-CLAIM-248": (
             "Synthetic studies can falsify declared model mechanisms and qualify software but cannot establish coaching or human-control strategies; governed participant-held-out bilateral-wrench data remain required.",
             "human_evidence_boundary",
             "human_validation_blocked",
@@ -129,7 +145,7 @@ def main() -> None:
     registry["paper"]["source_digest"] = inventory["source_digest"]
     registry["audit_scope"]["completion_status"] = "complete"
     registry["audit_scope"]["current_scope"] = (
-        "The complete 937-candidate paper inventory is adjudicated. The critical-question chapter maps twelve candidates to five bounded claims and retains all human-data gates."
+        "The complete 940-candidate paper inventory is adjudicated. The critical-question chapter maps fifteen candidates to seven bounded claims and retains all human-data gates."
     )
     REGISTRY.write_text(json.dumps(registry, indent=2) + "\n", encoding="utf-8")
 

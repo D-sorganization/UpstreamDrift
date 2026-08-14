@@ -92,7 +92,7 @@
         "bilateral_wrenches",
         "club_deflection"
       ],
-      "execution_status": "planar_controls_available_spatial_atlas_open"
+      "execution_status": "analytical_planar_moving_base_and_two_engine_spatial_controls_complete_subject_scaled_and_human_open"
     },
     {
       "id": "MT-E03",
