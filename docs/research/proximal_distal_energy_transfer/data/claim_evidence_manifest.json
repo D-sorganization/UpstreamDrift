@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-evidence-integrity-v1",
   "registry": {
     "path": "docs/research/proximal_distal_energy_transfer/data/claim_audit_registry.json",
-    "sha256": "f64213ff497676d5832cddbc4e8df5e12ddd866dcd23422c29c2104e5ada984f"
+    "sha256": "6b3035344b2008e5225ead1ff13e417b435d9f8407cfa40267c3e9d0d3235085"
   },
   "scope": {
     "local_artifact_semantics": "content_integrity_not_independent_validation",
@@ -2998,8 +2998,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/MOMENTUM_TRANSFER_QUESTION_PROGRAM.md": {
-      "sha256": "c71dfd1aedd9e0ad544af3d11dc708da1531e1cab6e86b8c3e09bbc3c022cfe2",
-      "bytes": 19985,
+      "sha256": "2eeb75c494a19a487aab6ca4733c23549f41dd481819a26079dbf46e232ce0ff",
+      "bytes": 20096,
       "referenced_by": [
         "PD-CLAIM-242",
         "PD-CLAIM-243",
@@ -3068,8 +3068,8 @@
       "referenced_by": ["PD-CLAIM-073"]
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd": {
-      "sha256": "dff54a4eb7cf3e02dbcae73586d14ba72aece85db7d4a62b9547bcc34098eebb",
-      "bytes": 18612,
+      "sha256": "ec2a3e6bcf90dfa46cc6a137325743c9f06b1c52cfe4ef431de630aa5cadb33c",
+      "bytes": 18894,
       "referenced_by": [
         "PD-CLAIM-242",
         "PD-CLAIM-243",
@@ -3407,8 +3407,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_question_registry.json": {
-      "sha256": "2f62bdca22a19de0b3090da114b86f38fd267a2d05790517bcaa731f9456fdc1",
-      "bytes": 17715,
+      "sha256": "07f24e8187d7b98604d9117f7f82bc17531fd7fe1c02d2f7eb85dae31a06d0a5",
+      "bytes": 20252,
       "referenced_by": [
         "PD-CLAIM-242",
         "PD-CLAIM-243",
@@ -3423,8 +3423,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_readiness_audit.json": {
-      "sha256": "e72cdc6454f070dfab6fae39b23ae9d5f320f59c7d81883259c4a01c70818836",
-      "bytes": 12439,
+      "sha256": "0495fcbeff71b4181baddeae9588d61bffd2f0a0e3c619f8bac509e53c9b4db2",
+      "bytes": 15016,
       "referenced_by": [
         "PD-CLAIM-242",
         "PD-CLAIM-243",
@@ -4223,7 +4223,7 @@
       "referenced_by": ["PD-CLAIM-035", "PD-CLAIM-036", "PD-CLAIM-037"]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "4fd28dd8685a7127315110f8df36a280655febd54c880d1643dc6c62dab2cc18",
+      "sha256": "351991e13bf8b2cdc00230f640967f0b7241b7a1f0d444367fbc1e79a9752282",
       "bytes": 104827,
       "referenced_by": ["PD-CLAIM-241"]
     },
@@ -4758,8 +4758,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/scapulothoracic_contact_screen.py": {
-      "sha256": "ef3fdd788ceab026dd6b6fb886ee1adccdd944e839ac351a20f9701afa10d5fb",
-      "bytes": 22533,
+      "sha256": "99af09c105fd5f7eaa4394c32efc1aa7d7e0758988f520936e4bd9d9b99261d6",
+      "bytes": 23709,
       "referenced_by": [
         "PD-CLAIM-260",
         "PD-CLAIM-261",

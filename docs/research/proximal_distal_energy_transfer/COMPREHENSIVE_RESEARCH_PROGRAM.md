@@ -207,15 +207,15 @@ schema, release qualification, and AffineDrift's pinned review surface. The
 GitHub epic is the scheduling authority; this document defines the durable
 scientific contract.
 
-## Completed Paper-Wide Claim Audit
+## Completed Candidate Census and Ongoing Release Review
 
-The pre-scapulothoracic audit adjudicated all 987 narrative candidates against 263
-atomic claim contracts; no candidate remains unreviewed. Repeated methods,
+The narrative census adjudicates all 994 paper candidates against 266 atomic
+claim contracts; no candidate remains unreviewed. That completion status
+applies to candidate coverage, not to scientific closure of every release
+claim. Ten of the 31 public release claims remain pending or in progress, and
+the validator now reports that open count explicitly. Repeated methods,
 summary, limitation, and release passages point back to their primary claim
-instead of acquiring stronger authority through repetition. The final pass
-added missing primary records for the rotating-base torso experiment, the
-isolated synthetic beam experiment, and the exploratory-interface/open-release
-boundary.
+instead of acquiring stronger authority through repetition.
 
 The bilateral-wrench extension adds a sensor-level falsifiability result. Two
 separated three-axis point forces map to net club wrench with rank five and one
@@ -241,7 +241,8 @@ structural result and an identifiability warning, not an anatomical or coaching
 result. The next milestone replaces the surrogate with a validated articulated
 shoulder and calibrated forward grip contact.
 
-Completion of the paper audit is not completion of the research program. In
+Completion of the candidate census is not completion of release review or the
+research program. In
 particular, the audit rejected quantitative small-deflection shaft inference
 for the current coupled baseline, retained only bounded synthetic structural
 results, found scale-dependent practical rank in the allocation/transmission

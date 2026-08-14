@@ -1,7 +1,7 @@
 {
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper_source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-  "source_digest": "267de8bda7b0d9052ecd6d1555342b54fa9e9aa4fe41357d477db695995b30ec",
+  "source_digest": "f56f43cb73f586dea3ddfb7255678fc8dab0550c8bff6d93e1df5167ca49f09d",
   "source_count": 33,
   "candidate_count": 994,
   "candidates": [
@@ -15736,12 +15736,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-2705100c55ffd22a",
+      "candidate_id": "PD-CAND-cfaa95a682ee0f72",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
       "line_start": 201,
-      "line_end": 209,
-      "text": "The handwritten agenda contains nine testable points after its nested timing examples are separated: drift contribution; geometry; casting; early-downswing proximal acceleration; segment release; timing precision; self-correction and noise robustness; proximal-velocity maximization; and slack. The executable readiness audit preserves all nine rather than allowing a broad question to hide an unplanned subquestion. Eight presently have a model-bounded answer or a negative general-rule result. One remains unresolved as a single construct. All nine have a registered model experiment and a participant-held-out human stage, but the latter remains blocked by the bilateral-wrench data boundary.",
-      "text_sha256": "3ec49510d8a4906a38cc43c24485179a220c2fed69ce18fa8c481aa2e1bc1f27",
+      "line_end": 211,
+      "text": "The handwritten agenda contains nine testable points after its nested timing examples are separated: drift contribution; geometry; casting; early-downswing proximal acceleration; segment release; timing precision; self-correction and noise robustness; proximal-velocity maximization; and slack. The executable readiness audit preserves all nine rather than allowing a broad question to hide an unplanned subquestion. Eight presently have a model-bounded answer or a negative general-rule result. The unresolved point is the broader timing-precision claim: the registered planar comparison is adverse to a state-trigger advantage, but spatial and human timing demand remain untested. All nine have a registered model experiment and a participant-held-out human stage, but the latter remains blocked by the bilateral-wrench data boundary.",
+      "text_sha256": "a1d1f38b384b153a88cc42cbdd948acb70b9e2bc763b767b0bb6831e7742b636",
       "citation_keys": [],
       "has_numeric_content": false,
       "has_assertive_language": true,
@@ -15752,10 +15752,27 @@
       "review_state": "unadjudicated"
     },
     {
+      "candidate_id": "PD-CAND-1746f6ac68698fb0",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
+      "line_start": 213,
+      "line_end": 217,
+      "text": "The machine-readable authority is [`momentum_transfer_readiness_audit.json`](../data/momentum_transfer_readiness_audit.json). It is regenerated from the question and experiment registries and validated in CI. A missing source point, missing falsifier, invalid evidence status, absent human stage, or experiment linked to the wrong question is a hard failure.",
+      "text_sha256": "47282d21f66788a8eb13fde3b779c6e33d714b467a56eb7e348df34df1781855",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": true,
+      "priority_score": 5,
+      "triage_flags": [
+        "assertive_language",
+        "causal_or_generalizing_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
       "candidate_id": "PD-CAND-51f73ab4ac4d57de",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
-      "line_start": 211,
-      "line_end": 211,
+      "line_start": 224,
+      "line_end": 224,
       "text": "| Source Point | Present Scientific State | Next Decisive Model Test |",
       "text_sha256": "75e8a48a9cf1821ef7298bb2ce42a528654e8b70dda3bacdcba079514ff71ca8",
       "citation_keys": [],
@@ -15766,12 +15783,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-39c5fecfbbf8a50a",
+      "candidate_id": "PD-CAND-da26b9373cd3a5a5",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
-      "line_start": 213,
-      "line_end": 221,
-      "text": "| Drift contribution | Partly answered; observable- and window-specific only | Common cross-tier estimand table with uncertainty | | Geometry dependencies | Partly answered through reduced spatial controls; the first subject-scaled audit rejects contact feasibility of the prescribed common states | Closed-contact inverse kinematics, calibrated contact, and independent forward integration | | Casting | Unresolved as a single construct | Multiple preregistered event definitions under matched controls | | Early proximal acceleration | Partly answered pointwise; nonmonotonic | Forward factorial intervention with full-state/work/load matching | | Segment release | Partly answered; objective- and constraint-dependent | Viable-region mapping across proximal and distal control families | | Timing precision | Partly answered; a state-trigger volume advantage is not supported in the registered planar tier | Continuous common-phase spatial and subject-scaled comparison | | Self-correction and noise robustness | Partly answered negatively at the registered planar tier; no sustained recovery in 60 cases | Continuous attraction regions with identified observers and external-contact loads | | Proximal-velocity maximization | Not supported as a general planar rule | Causal full-delivery-state-matched spatial dose response | | Slack | Partly answered at a synthetic constitutive tier; no global benefit and one-channel class identification is not established | One-class-at-a-time moving-base and spatial delivery tests with stateful backlash, subject-specific tissue, and independent measurements |",
-      "text_sha256": "7b485429cc495dd1ac5bb1cbd77ff5eda1b5a0f684e017f5b6690c3cc342bbcd",
+      "line_start": 226,
+      "line_end": 234,
+      "text": "| Drift contribution | Partly answered; observable- and window-specific only | Common cross-tier estimand table with uncertainty | | Geometry dependencies | Partly answered through reduced spatial controls; the first subject-scaled audit rejects contact feasibility of the prescribed common states | Closed-contact inverse kinematics, calibrated contact, and independent forward integration | | Casting | Partly answered: no single event definition is defensible; human causal interpretation remains open | Multiple preregistered event definitions under matched controls | | Early proximal acceleration | Partly answered pointwise; nonmonotonic | Forward factorial intervention with full-state/work/load matching | | Segment release | Partly answered; objective- and constraint-dependent | Viable-region mapping across proximal and distal control families | | Timing precision | Unresolved beyond an adverse planar result; a state-trigger volume advantage is not supported in the registered planar tier | Continuous common-phase spatial and subject-scaled comparison | | Self-correction and noise robustness | Partly answered negatively at the registered planar tier; no sustained recovery in 60 cases | Continuous attraction regions with identified observers and external-contact loads | | Proximal-velocity maximization | Not supported as a general planar rule | Causal full-delivery-state-matched spatial dose response | | Slack | Partly answered at a synthetic constitutive tier; no global benefit and one-channel class identification is not established | One-class-at-a-time moving-base and spatial delivery tests with stateful backlash, subject-specific tissue, and independent measurements |",
+      "text_sha256": "d72373dd5b4e4ce819a6283590691a1b4763e0fba08421ff09dcfda28444d75f",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": true,
@@ -15786,8 +15803,8 @@
     {
       "candidate_id": "PD-CAND-640befe2d6c188d2",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
-      "line_start": 223,
-      "line_end": 225,
+      "line_start": 236,
+      "line_end": 238,
       "text": ": Readiness assessment for every point transcribed from the source agenda. \u201cPartly answered\u201d never denotes a human or coaching conclusion. {#tbl-momentum-source-readiness tbl-colwidths=\"24,36,40\"}",
       "text_sha256": "eb7b6114050db4ccd1d425eae391cb3807022d9d29a003141d5bed0b55ab6f9b",
       "citation_keys": [],
@@ -15796,23 +15813,6 @@
       "priority_score": 2,
       "triage_flags": [
         "numeric"
-      ],
-      "review_state": "unadjudicated"
-    },
-    {
-      "candidate_id": "PD-CAND-1746f6ac68698fb0",
-      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
-      "line_start": 227,
-      "line_end": 231,
-      "text": "The machine-readable authority is [`momentum_transfer_readiness_audit.json`](../data/momentum_transfer_readiness_audit.json). It is regenerated from the question and experiment registries and validated in CI. A missing source point, missing falsifier, invalid evidence status, absent human stage, or experiment linked to the wrong question is a hard failure.",
-      "text_sha256": "47282d21f66788a8eb13fde3b779c6e33d714b467a56eb7e348df34df1781855",
-      "citation_keys": [],
-      "has_numeric_content": false,
-      "has_assertive_language": true,
-      "priority_score": 5,
-      "triage_flags": [
-        "assertive_language",
-        "causal_or_generalizing_language"
       ],
       "review_state": "unadjudicated"
     },

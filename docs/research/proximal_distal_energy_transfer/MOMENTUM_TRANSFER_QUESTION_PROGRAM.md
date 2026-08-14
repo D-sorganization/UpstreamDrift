@@ -42,10 +42,11 @@ is the completion authority for this transcription and planning layer.
 
 - Eight points have a bounded model answer, partial answer, or a supported
   rejection of a general maximization rule.
-- One point remains unresolved as a single construct: casting. Human timing
-  demand, self-correction, delivery effects, and mechanism identification
-  remain open at higher evidence tiers even where reduced models provide
-  bounded negative or partial answers.
+- One point remains unresolved at the registered evidence scope: whether a
+  passive or drift-mediated strategy reduces timing precision beyond the
+  adverse planar comparison and in people. Casting is partly answered only in
+  the narrower sense that no single event definition is defensible; its human
+  causal interpretation remains open.
 - Every point maps to at least one model experiment, a decisive falsifier, and
   the participant-held-out human stage.
 - Human execution remains blocked because no qualifying governed dataset with
@@ -60,7 +61,8 @@ python -m scripts.research.proximal_distal_energy.momentum_question_readiness va
 
 The validator fails if any of the nine source points is omitted, if a point is
 linked to an experiment that does not cover its parent question, or if an
-answer, decisive test, falsifier, data gate, or human stage is absent.
+answer, decisive test, falsifier, inspectable evidence artifact, data gate, or
+human stage is absent.
 
 ## Required Definitions
 

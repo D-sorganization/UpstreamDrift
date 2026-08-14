@@ -2,15 +2,15 @@
 
 ## Current Scientific Audit State (2026-08-14)
 
-Epic #8557 has completed the current paper-wide candidate adjudication contract:
-982/982 candidates, 261 atomic claims, and zero unadjudicated entries. The
+Epic #8557 has completed the current narrative-candidate adjudication contract:
+994/994 candidates, 266 atomic claims, and zero unadjudicated entries. This
+status is not release-level scientific closure: 10 of 31 public release claims
+remain pending or in progress and must be reported by the validator. The
 trajectory-level bilateral point-force sensor qualification and subject-scaled
-spatial contact-closure audit are included while retaining their synthetic and
-prescribed-state scopes. This status does not waive
-open empirical or model-fidelity gates; #8556 remains blocked on governed human
-bilateral six-axis grip-wrench acquisition, and all new scientific content must
-regenerate the inventory and reopen adjudication until every new candidate is
-reviewed.
+spatial contact-closure audit retain their synthetic and prescribed-state
+scopes. Issue #8556 remains blocked on governed human bilateral six-axis
+grip-wrench acquisition, and all new scientific content must regenerate the
+inventory and reopen adjudication until every new candidate is reviewed.
 
 <!--
   TEMPLATE VERSION: 1.0.0
@@ -51,7 +51,7 @@ reviewed.
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.528 |
+| **Spec Version** | 1.0.529 |
 | **Last Spec Update** | 2026-08-14 |
 
 ## 2. Purpose & Mission
@@ -85,6 +85,14 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 - `src/shared/python/club_data/loader.py`: Replaced `.iterrows()` with `df.to_dict('records')` (spec-exempt: micro-optimization)
 
+- **2026-08-14** - Reconciled all nine photographed momentum-transfer source
+  points with inspectable evidence artifacts and a generated readiness audit.
+  Eight retain bounded model answers, partial answers, or a negative
+  general-rule result. MTQ-06, whether passive or drift-mediated transfer
+  reduces timing precision beyond the adverse planar comparison and in people,
+  remains unresolved. Candidate-census completion is now reported separately
+  from 10 pending or in-progress release reviews.
+
 - **2026-08-14** - Added MT-E08 subject-scaled spatial contact-closure audit.
   Six deterministic de Leva engineering profiles, three grip spans, and 61
   prescribed states per case expose hand-to-grip miss distances of
@@ -114,14 +122,12 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   muscle or scapular action, and governed human validation remain open.
 
 - **2026-08-14** - Added the #8557 handwritten momentum-transfer agenda
-  readiness contract. Nine independently testable points now retain their
-  present answer state, decisive next test, falsifier, data gate, model plan,
-  and participant-held-out human stage in a generated fail-closed audit. Five
-  have bounded model answers, partial answers, or a supported rejection of a
-  general rule; casting as one construct, timing precision, self-correction,
-  and typed slack remain unresolved or definition-gated. The paper audit now
-  covers 956 candidates and 250 claims, while #8556 remains the human-data
-  blocker.
+  readiness contract. Nine independently testable points retain their present
+  answer state, decisive next test, falsifier, data gate, model plan, and
+  participant-held-out human stage in a generated fail-closed audit. Casting
+  is definition-dependent and partly answered; broader timing precision remains
+  unresolved beyond the adverse planar comparison. Issue #8556 remains the
+  human-data blocker.
 
 - **2026-08-13** - Adjudicated the transmission robustness chapter for #8557.
   All four registered programs remain nondominated in every held-out
@@ -2233,6 +2239,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-14 | 1.0.529 | Reconciled the photographed nine-point momentum-transfer agenda with direct evidence-artifact links and an explicit unresolved-point identity; corrected the paper so MTQ-06 timing precision, rather than casting, is the one globally unresolved source point; and separated complete 994-candidate coverage from the 10 of 31 release reviews that remain pending or in progress. |
 | 2026-08-14 | 1.0.527 | Added fail-closed scientific-support integrity for the proximal-to-distal program: all claim source locators must resolve to an in-range repository line; every registered local evidence artifact is SHA-256/size pinned; every external support URL is inventoried without being promoted to scientific validation; omission and tamper controls are executable; and the critical-question roadmap now maps each handwritten question to its bounded current answer, decisive model/measurement gate, and independently checked scapulothoracic, EMG, and distributed-grip acquisition leads. |
 | 2026-08-14 | 1.0.528 | Added MT-E09 paired scapulothoracic contact geometry: a fixed-trunk and fixed-club nested comparison separates residual closure, solver termination, bound activity, rank, coordinate nullity, and an adverse grip-span control, while prohibiting anatomical, muscular, transfer, and strategy inference until validated articulated forward contact. |
 | 2026-08-14 | 1.0.525 | Added the MT-E08 subject-scaled spatial contact-closure audit: six deterministic de Leva engineering profiles, three grip spans, and 61 states per case fail the 5 mm bilateral closure tolerance despite full local contact-Jacobian rank. The governed evidence, release claims, and scientific boundary now distinguish measurement rank, local kinematic rank, geometric closure, and forward contact dynamics, and require closed-contact inverse kinematics with joint-limit/collision checks before anatomical or human-strategy inference. |
@@ -2783,6 +2790,10 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   incomplete required fields, non-reciprocal candidate-to-claim mappings,
   drift from the public release-claim manifest, or a completed audit status
   while any candidate is unadjudicated or still requires splitting.
+- **F-8557.1e:** Candidate-census completion and release-review completion
+  shall be reported separately. Every public release entry shall retain a
+  non-empty published status and audit state, and the validator shall enumerate
+  all pending or in-progress release keys.
 - **F-8557.1a:** Deterministic numeric, assertive, citation, and
   causal/generalizing triage flags may prioritize review but shall never assign
   scientific materiality or support automatically; Quarto cross-references
@@ -3048,8 +3059,10 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   zone, structural preload, biological series compliance, or control deadband;
   one class shall not be inferred from another.
 - The machine-readable registry shall provide required estimands, controls,
-  falsifiers, and governing issues for all seven questions. Synthetic evidence
-  may design human tests but shall not close human claims.
+  falsifiers, inspectable evidence artifacts, and governing issues for all
+  seven questions and all nine source points. The generated summary shall name
+  every unresolved source-point identifier. Synthetic evidence may design
+  human tests but shall not close human claims.
 - The implementation registry shall freeze model tiers, interventions,
   controls, outcomes, uncertainty axes, required data, falsifiers, and honest
   execution status before new preferred results are selected. The governed
