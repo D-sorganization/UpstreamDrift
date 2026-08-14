@@ -78,8 +78,7 @@ def compute_bunker_launch(state: BunkerShotState) -> BallLaunchResult:
     """
     club_loft_rad = math.radians(state.club_loft_deg)
 
-    # For now, always use splash transfer
-    # TODO: Add direct contact detection for thin/blade shots
+    # Always use splash transfer (thin/blade direct contact is out of scope for #8613)
     return compute_ball_launch_from_splash(
         lie=state.ball_lie,
         ball=state.ball,
