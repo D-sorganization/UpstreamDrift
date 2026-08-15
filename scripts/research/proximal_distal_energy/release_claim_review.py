@@ -224,9 +224,45 @@ REVIEW_SPECS: dict[str, dict[str, Any]] = {
     ),
     "subject_scaled_closed_contact_feasibility": _spec(
         "reviewed_as_necessary_condition_result",
-        "necessary_condition_supported_not_sufficient",
+        "necessary_condition_and_short_forward_initialization_supported_not_sufficient",
         ("PD-CLAIM-262", "PD-CLAIM-263", "PD-CLAIM-264"),
-        "Independent forward-dynamics closure with forces, passivity, loads, and delivery outcomes.",
+        "Full-horizon articulated forward dynamics with calibrated contact, loads, and delivery outcomes.",
+    ),
+    "closed_state_forward_initialization": _spec(
+        "reviewed_as_short_horizon_reduced_model_result",
+        "supported_for_declared_mapping_and_spanning_subset",
+        ("PD-CLAIM-268", "PD-CLAIM-269", "PD-CLAIM-270"),
+        "Replace hand carriages with articulated arms and run full-horizon calibrated contact controls.",
+    ),
+    "closed_state_forward_validity_horizon": _spec(
+        "reviewed_as_right_censored_reduced_model_result",
+        "no_failure_observed_through_registered_50_ms_interval",
+        ("PD-CLAIM-271", "PD-CLAIM-272", "PD-CLAIM-273"),
+        "Replace hand carriages with articulated subject-scaled arms and repeat the horizon, adverse-load, contact-loss, and energy controls with calibrated grip and shaft properties.",
+    ),
+    "subject_scaled_articulated_inertia": _spec(
+        "reviewed_as_common_state_articulated_dynamics_result",
+        "native_articulated_inertia_operators_agree_at_declared_closed_states",
+        ("PD-CLAIM-274", "PD-CLAIM-275", "PD-CLAIM-276"),
+        "Apply bilateral compliant contact to the qualified articulated tree and repeat horizon, adverse-load, contact-loss, refinement, power, and energy controls.",
+    ),
+    "subject_scaled_articulated_contact_projection": _spec(
+        "reviewed_as_same_state_articulated_contact_projection_result",
+        "bilateral_contact_projection_and_native_initial_acceleration_qualified",
+        ("PD-CLAIM-277", "PD-CLAIM-278", "PD-CLAIM-279"),
+        "Integrate a bounded articulated bilateral-contact horizon and repeat contact-loss, adverse-load, refinement, power, and work-energy controls.",
+    ),
+    "bounded_articulated_forward_contact": _spec(
+        "reviewed_as_right_censored_synthetic_forward_result",
+        "five_millisecond_bilateral_attachment_forward_gate_qualified",
+        ("PD-CLAIM-280", "PD-CLAIM-281", "PD-CLAIM-282"),
+        "Extend the right-censored horizon with typed unilateral slack, calibrated distributed grip and shaft compliance, ground coupling, and governed bilateral human wrenches.",
+    ),
+    "typed_articulated_slack": _spec(
+        "reviewed_as_right_censored_synthetic_contact_result",
+        "five_millisecond_typed_attachment_event_gate_qualified",
+        ("PD-CLAIM-283", "PD-CLAIM-284", "PD-CLAIM-285"),
+        "Extend the right-censored typed laws through calibrated distributed grip and shaft contact, longer matched-work/load delivery, ground coupling, and governed bilateral human wrenches.",
     ),
     "scapulothoracic_contact_geometry": _spec(
         "reviewed_as_paired_geometry_screen_with_explicit_boundaries",

@@ -20,6 +20,9 @@ NEW_CLAIM_IDS = {
     "PD-CLAIM-265",
     "PD-CLAIM-266",
     "PD-CLAIM-267",
+    "PD-CLAIM-268",
+    "PD-CLAIM-269",
+    "PD-CLAIM-270",
 }
 ARTIFACTS = [
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
@@ -36,6 +39,13 @@ ARTIFACTS = [
     "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
     "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
     "tests/research/test_subject_scaled_closed_contact.py",
+    "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.json",
+    "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.npz",
+    "docs/research/proximal_distal_energy_transfer/figures/fig_closed_state_forward_bridge.pdf",
+    "scripts/research/proximal_distal_energy/closed_state_forward_bridge.py",
+    "scripts/research/proximal_distal_energy/run_closed_state_forward_bridge.py",
+    "scripts/research/proximal_distal_energy/make_closed_state_forward_bridge_figure.py",
+    "tests/research/test_closed_state_forward_bridge.py",
     "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
     "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz",
     "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf",
@@ -219,7 +229,7 @@ def main() -> None:
     next_gate = _find(
         candidates,
         "_ch06c_spatial_cross_formulation.qmd",
-        "The next spatial experiment must now integrate",
+        "The bounded forward experiment now retains",
     )
     closed_design = _find(
         candidates,
@@ -240,6 +250,26 @@ def main() -> None:
         candidates,
         "_ch08b_momentum_transfer_questions.qmd",
         "The bounded inverse-kinematics follow-up separates",
+    )
+    bridge_design = _find(
+        candidates,
+        "_ch06c_spatial_cross_formulation.qmd",
+        "The closed configurations now enter",
+    )
+    bridge_mapping = _find(
+        candidates,
+        "_ch06c_spatial_cross_formulation.qmd",
+        "All 234 position mappings retain",
+    )
+    bridge_forward = _find(
+        candidates,
+        "_ch06c_spatial_cross_formulation.qmd",
+        "A spanning subset advances",
+    )
+    bridge_boundary = _find(
+        candidates,
+        "_ch06c_spatial_cross_formulation.qmd",
+        "This is an initialization and short-horizon",
     )
     conclusion = _find(
         candidates,
@@ -293,10 +323,10 @@ def main() -> None:
         _claim(
             "PD-CLAIM-262",
             [next_gate],
-            statement="Articulated spatial timing, recovery, and slack claims require calibrated compliant forward contact from closed states plus independent-engine controls before interpretation; reduced-tree inverse-kinematics screening alone is insufficient.",
+            statement="The bounded articulated attachment screen advances closed states through 5 ms with independent-engine controls, but timing, recovery, and slack claims still require longer calibrated forward contact with typed unilateral loss and distributed structure.",
             classification="articulated_spatial_completion_gate",
-            status="closed_contact_screen_complete_forward_contact_not_executed",
-            boundary="This is a dependency-ordered falsification contract, not evidence that compliant articulated dynamics will support the proposed mechanism.",
+            status="bounded_articulated_attachment_forward_gate_complete_longer_calibrated_contact_open",
+            boundary="This remains a dependency-ordered falsification contract; a 5 ms bilateral spring screen is not evidence for unilateral slack, late-downswing persistence, or human strategy.",
             falsifier="A broader anatomical or transfer claim is published without calibrated contact, conservation, and independent-engine checks.",
         ),
         _claim(
@@ -349,6 +379,36 @@ def main() -> None:
             falsifier="Any anatomical, muscular, transfer, or strategy conclusion is attributed to this reduced geometry screen alone.",
             model_domain="Reduced scapula-on-ellipsoid kinematic surrogate only.",
         ),
+        _claim(
+            "PD-CLAIM-268",
+            [bridge_design, bridge_mapping],
+            statement="All 234 subject-scaled closed states map into the engine-neutral forward-contact coordinates with maximum position and velocity closure errors of 1.16e-10 m and 1.29 mm/s, respectively, and exact closure creates zero contact preload.",
+            classification="closed_state_forward_initialization_mapping",
+            status="supported_for_declared_reduced_mapping",
+            boundary="Velocities are finite differences along reduced-tree inverse-kinematics paths; the mapping does not add anatomical dynamics or equipment calibration.",
+            falsifier="Any mapped state exceeds the registered position or velocity closure tolerance or develops nonzero force at exact closure.",
+            model_domain="All 234 reduced-tree closed configurations mapped by one constant initial rigid transformation.",
+        ),
+        _claim(
+            "PD-CLAIM-269",
+            [bridge_forward],
+            statement="MuJoCo and Pinocchio receive identical digested initial states and pass the existing trajectory, contact-wrench, and normalized-energy gates for all 54 profile-span-phase cases in the 4 ms spanning initialization audit.",
+            classification="closed_state_short_horizon_cross_engine_forward_audit",
+            status="supported_for_declared_reduced_short_horizon_subset",
+            boundary="The forward solvers use finite-mass hand carriages after initialization and the 4 ms window is not a downswing or delivery simulation.",
+            falsifier="An engine pair receives a different initial-state digest or fails any registered trajectory, wrench, or energy comparison gate.",
+            model_domain="Six synthetic profiles, three grip spans, and early, middle, and late phases in two reduced native forward solvers.",
+        ),
+        _claim(
+            "PD-CLAIM-270",
+            [bridge_boundary, next_gate],
+            statement="The closed-state bridge removes an initialization gap but does not establish calibrated equipment, articulated anatomical dynamics, tissue loading, passive transfer, delivery benefit, slack benefit, or human strategy.",
+            classification="closed_state_forward_bridge_inference_boundary",
+            status="explicitly_bounded",
+            boundary="Full-horizon articulated contact, calibrated grip and shaft properties, typed contact loss, adverse-load controls, and governed human validation remain open.",
+            falsifier="A mechanism, delivery, anatomy, or coaching conclusion is attributed to the initialization audit alone.",
+            model_domain="Coordinate mapping, constitutive controls, and 4 ms reduced forward initialization only.",
+        ),
     ]
     registry["claims"].extend(claims)
     for claim in claims:
@@ -360,6 +420,7 @@ def main() -> None:
     for figure_prefix in (
         "![Subject-Scaled Spatial Contact-Geometry Audit]",
         "![Subject-Scaled Bilateral Closed-Contact Feasibility]",
+        "![Closed Subject States Enter Independent Forward Solvers Without Preload]",
         "![Scapular Mobility and Bilateral Contact Geometry]",
     ):
         figure = _find(
@@ -431,8 +492,13 @@ def main() -> None:
     }
     release_entries["subject_scaled_closed_contact_feasibility"] = {
         "release_claim_key": "subject_scaled_closed_contact_feasibility",
-        "published_status": "reduced_tree_closed_contact_screen_passed_compliant_forward_test_open",
+        "published_status": "reduced_tree_closed_contact_screen_and_short_forward_initialization_passed",
         "audit_state": "reviewed_as_necessary_condition_result",
+    }
+    release_entries["closed_state_forward_initialization"] = {
+        "release_claim_key": "closed_state_forward_initialization",
+        "published_status": "supported_for_234_mappings_and_54_short_cross_engine_cases",
+        "audit_state": "reviewed_as_short_horizon_reduced_model_result",
     }
     release_entries["scapulothoracic_contact_geometry"] = {
         "release_claim_key": "scapulothoracic_contact_geometry",
@@ -447,7 +513,8 @@ def main() -> None:
         "adjudicated. The subject-scaled spatial audit retains its adverse "
         "prescribed-state contact-closure result and favorable algebraic controls. "
         "The bounded closed-contact follow-up passes the declared reduced-tree "
-        "screen. The paired scapulothoracic surrogate improves reachability but "
+        "screen, and all 234 states map into a 54-case short-horizon two-engine "
+        "initialization audit. The paired scapulothoracic surrogate improves reachability but "
         "retains termination, active-bound, and allocation-nullity boundaries while "
         "calibrated articulated forward contact remains unexecuted."
     )

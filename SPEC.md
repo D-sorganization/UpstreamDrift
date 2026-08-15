@@ -1,15 +1,46 @@
 # SPEC.md — Repository Specification Document
 
-## Current Scientific Audit State (2026-08-14)
+## Current Scientific Audit State (2026-08-15)
 
 Epic #8557 has completed the current narrative-candidate adjudication contract:
-994/994 candidates, 266 atomic claims, and zero unadjudicated entries. This
-status is not scientific closure: all 31 public release claims now have a
-traceable review disposition, but all 31 retain an explicit model, equipment,
+1,022/1,022 candidates, 281 atomic claims, and zero unadjudicated entries. This
+status is not scientific closure: all 36 public release claims now have a
+traceable review disposition, and all 35 retain an explicit model, equipment,
 anatomy, archival, or governed-human scientific gate. The
 trajectory-level bilateral point-force sensor qualification and subject-scaled
 spatial contact-closure audit retain their synthetic and prescribed-state
-scopes. Issue #8556 remains blocked on governed human bilateral six-axis
+scopes. The closed-state forward bridge maps all 234 solved states and advances
+54 profile--span--phase cases for 4 ms in native MuJoCo and Pinocchio. This is
+a reduced initialization audit: articulated arms, calibrated contact and shaft
+properties, full-horizon delivery, and human inference remain prohibited.
+Issue #8666 extends that reference through 4, 10, 25, and 50 ms under nominal
+conditions and nine one-factor adverse or null branches. All 2,160 registered
+horizon cases pass the existing cross-engine discrepancy and work--energy
+closure gates. No failure is observed through 50 ms, making the result
+right-censored at that reduced-model horizon rather than a full-delivery or
+anatomical claim.
+Child issue #8676 under issue #8668 records the first articulated prerequisite:
+all 234 closed states are assembled independently in native MuJoCo and robotics
+Pinocchio, and every
+registered mass-matrix, bias-force, inverse-dynamics, symmetry, and
+positive-definiteness gate passes. This common-state result qualifies the
+20-coordinate articulated rigid-body transport only. Forward bilateral
+contact, scapulothoracic anatomy, distributed grip and shaft properties,
+muscles, delivery, and human inference remain prohibited.
+Child issue #8678 applies finite bilateral Kelvin--Voigt forces to those same
+234 states and verifies action--reaction, virtual power, passivity, geometry
+controls, and native MuJoCo/Pinocchio initial-acceleration parity. It advances
+no trajectory; contact loss, accumulated work, calibrated anatomy/equipment,
+delivery, and human inference remain prohibited.
+Child issue #8680 advances 18 selected cross-profile/span/phase states through
+seven nominal/adverse branches, three time steps, and two native engines for a
+total of 756 five-millisecond trajectories. All registered bilateral-
+attachment retention, virtual-power, dissipativity, work--energy, refinement,
+and parity gates pass. This is a right-censored synthetic attachment result;
+unilateral slack, distributed grip and shaft structure, ground coupling, late
+downswing, impact, anatomy, muscle action, and human strategy remain
+prohibited inferences.
+Issue #8556 remains blocked on governed human bilateral six-axis
 grip-wrench acquisition, and all new scientific content must regenerate the
 inventory and reopen adjudication until every new candidate is reviewed.
 
@@ -52,8 +83,8 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.530 |
-| **Last Spec Update** | 2026-08-14 |
+| **Spec Version** | 1.0.537 |
+| **Last Spec Update** | 2026-08-15 |
 
 ## 2. Purpose & Mission
 
@@ -119,7 +150,7 @@ study,vandv,provenance,units}`, with subpackages re-exported by name and a
   rewritten after seven of its eight claims were found to contradict the code.
 
 - **2026-08-14** - Completed the release-level claim-review authority for epic
-  #8557. All 31 release claims now link to supporting atomic claims, evidence,
+  #8557. All 36 release claims now link to supporting atomic claims, evidence,
   negative controls, falsifiers, uncertainty boundaries, a scientific
   disposition, and a remaining gate. Open review bookkeeping is zero while
   human self-stabilization, physical bilateral sensing, and other scientific
@@ -2282,6 +2313,12 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-15 | 1.0.537 | Added the typed unilateral articulated-attachment falsification gate: bilateral, tension-only, and dead-zone tension laws are evaluated across common-displacement and matched-extension comparisons, velocity-sign branches, isolated opening/reattachment probes, three time steps, and native MuJoCo/Pinocchio dynamics. The passive-law, virtual-power, work--energy, refinement, trajectory-parity, force-parity, and active-set-parity contracts pass. Natural five-millisecond branches do not produce opening or reattachment transitions, so event-probe results qualify the implementation only and do not establish a human or coaching strategy. |
+| 2026-08-15 | 1.0.536 | Added the bounded articulated bilateral-attachment forward gate: 18 selected closed states, seven nominal/adverse branches, three time steps, and native MuJoCo/Pinocchio dynamics produce 756 five-millisecond trajectories. Attachment-retention, power, work--energy, refinement, and parity gates pass; the result is explicitly right-censored and does not model unilateral slack, calibrated distributed grip/shaft, ground coupling, late downswing, impact, muscle action, human transfer, or coaching strategy. |
+| 2026-08-15 | 1.0.535 | Added the subject-scaled articulated contact-projection gate: finite bilateral Kelvin--Voigt forces arise from a declared club perturbation at all 234 closed states, project through the hand and club Jacobians with exact action--reaction and virtual-power controls, and yield matching native MuJoCo/Pinocchio initial accelerations. This is a same-state prerequisite, not a forward contact or human-strategy result. |
+| 2026-08-15 | 1.0.534 | Added the subject-scaled articulated-inertia cross-engine gate: all 234 closed configurations are rebuilt independently in native MuJoCo and robotics Pinocchio, with mass-matrix, bias-force, inverse-dynamics, symmetry, and positive-definiteness equivalence registered before forward bilateral contact. The result qualifies common-state rigid-body transport only and explicitly leaves contact, anatomy, equipment, muscle, delivery, and human claims open. |
+| 2026-08-14 | 1.0.533 | Added the closed-state cross-engine validity-horizon contract: all 54 profile--span--phase states are evaluated at 4, 10, 25, and 50 ms under nominal and nine one-factor adverse/null branches in native MuJoCo and Pinocchio. All 2,160 horizon cases pass trajectory, wrench, energy-discrepancy, and work--energy closure gates; the no-failure result is right-censored at 50 ms and cannot establish articulated anatomy, calibrated equipment, full delivery, or human strategy. |
+| 2026-08-14 | 1.0.532 | Added the closed-state forward-contact bridge: all 234 subject-scaled closed configurations map through a declared rigid coordinate transform with position and velocity closure gates, zero-preload and passivity controls, and unique initial-state digests; 54 early/middle/late profile-span cases enter native MuJoCo and Pinocchio for a short-horizon trajectory, wrench, and energy parity audit. The contract explicitly prohibits promotion to articulated anatomy, calibrated equipment, full-downswing delivery, passive-transfer benefit, or human strategy. |
 | 2026-08-15 | 1.0.531 | Added BunkerShot3D designer metrics module for issue #8614. Implements `bunkershot3d.metrics.trajectory` (TrajectoryMetrics, DivotProfile, dig/skid classification, depth trace, entry/max/exit points), `bunkershot3d.metrics.energy` (EnergyPartition, club KE tracking, energy-to-sand/ball accounting), `bunkershot3d.metrics.force` (ForceMetrics, peak/mean force and moment, deceleration, contact duration), `bunkershot3d.metrics.twist` (TwistMetrics, shaft-axis and CG moments, impulse, twist direction), and `bunkershot3d.metrics.forgiveness` (ForgivenessMetrics, SensitivityGradient, finite-difference sensitivity analysis, forgiveness index). 42 new tests covering all metric categories. Computed from HDF5 result artifacts for fidelity-tier-agnostic (F0–F3) analysis. |
 | 2026-08-15 | 1.0.530 | Added the BunkerShot3D ball model and SwingBallFlightPipeline handoff for issue #8613. Implements `bunkershot3d.ball.lie` (BallLie, BallLieType, BallProperties with USGA specs, submersion/exposed-area geometry), `bunkershot3d.ball.splash` (sand-mediated splash momentum transfer: ejecta velocity, splash impulse, and ball launch from splash), and `bunkershot3d.ball.pipeline` (BunkerShotState, compute_bunker_launch, to_post_impact_state for PostImpactState handoff). 47 new tests covering lie geometry, splash physics, pipeline integration, energy accounting, and tour bunker shot sanity checks. |
 | 2026-08-14 | 1.0.529 | Reconciled the photographed nine-point momentum-transfer agenda with direct evidence-artifact links and an explicit unresolved-point identity; corrected the paper so MTQ-06 timing precision, rather than casting, is the one globally unresolved source point; and separated complete 994-candidate coverage from the 10 of 31 release reviews that remain pending or in progress. |
@@ -3242,3 +3279,27 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Human self-stabilization, physical bilateral six-axis device validation,
   and human torso/strategy claims shall remain untested until governed data and
   their registered participant-held-out protocols exist.
+
+### F-8557.25: External-Source Qualification Authority
+
+- Every external claim-support URL shall be assigned exactly once to a
+  canonical underlying work. DOI, PubMed, publisher, repository, and
+  author-hosted mirrors shall not be counted as independent replication.
+- Every work shall declare its bibliographic identity, source type, evidence
+  role, project independence, scholarly-record status and check method,
+  scientific disposition, scope, and material limitations.
+- Every work-to-claim link shall state how the source is used and shall retain
+  the atomic claim's uncertainty boundary. Eligible support shall never exceed
+  the claims linked by the claim-evidence inventory.
+- A committed availability snapshot shall cover every external URL. Broken,
+  transient, omitted, duplicated, or unchecked URLs shall fail qualification;
+  automated-access restriction shall remain distinct from a broken link.
+- Open-resource qualification shall invoke the offline validator and fail when
+  the claim evidence, canonical-work grouping, claim assessments,
+  scholarly-record fields, availability coverage, or summary counts drift.
+- Passing source qualification shall establish traceability and bounded claim
+  fit only. It shall not close model, equipment, anatomy, archive, or governed
+  participant-held-out human gates.
+- Use `np.vdot` instead of `np.sum(x**2)` and `np.sqrt(np.einsum("ij,ij->i", x, x))` instead of `np.linalg.norm(x, axis=1)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
+- Use `np.einsum('ij,ij->j', x, x)` instead of `np.sum(x * x, axis=0)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
+- (spec-exempt: micro-optimization) Replaced `.iterrows()` with `.to_dict('records')` in `data_processor_widget.py`, `kaggle_validation.py`, and `launch_monitor_analytics/widgets.py` to optimize UI and validation performance.

@@ -12,6 +12,8 @@ from scripts.research.proximal_distal_energy.run_two_hand_wscg_analysis import (
     write_outputs,
 )
 
+pytestmark = pytest.mark.scientific
+
 
 def test_publication_style_uses_portable_minus_glyph() -> None:
     """Core PDF fonts must not render negative ticks as missing-glyph question marks."""

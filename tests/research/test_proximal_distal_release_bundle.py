@@ -27,6 +27,12 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         "spatial_common_state",
         "subject_scaled_spatial_geometry",
         "subject_scaled_closed_contact",
+        "closed_state_forward_bridge",
+        "forward_contact_validity_horizon",
+        "articulated_inertia_cross_engine",
+        "articulated_contact_projection",
+        "articulated_forward_contact",
+        "articulated_slack_atlas",
         "scapulothoracic_contact_screen",
         "spatial_forward_contact",
         "uncertainty_control",
@@ -55,6 +61,9 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
     assert manifest["claims"]["global_slack_benefit"] == "unsupported"
     assert manifest["claims"]["single_channel_slack_class_identification"] == (
         "not_established"
+    )
+    assert manifest["claims"]["typed_articulated_slack"] == (
+        "five_millisecond_typed_attachment_event_gate_qualified"
     )
     assert (
         manifest["claims"]["synthetic_bilateral_point_force_sensor_qualification"]
@@ -106,8 +115,14 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
     assert manifest["integrity_authorities"]["claim_evidence_manifest"].startswith(
         "deterministic_self_excluded"
     )
+    assert manifest["integrity_authorities"]["external_source_review"].startswith(
+        "offline_url_complete"
+    )
     assert not any(
         path.endswith("claim_evidence_manifest.json") for path in manifest["artifacts"]
+    )
+    assert any(
+        path.endswith("external_source_review.json") for path in manifest["artifacts"]
     )
     assert any(
         path.endswith("fig_shoulder_velocity_strategy_pareto.pdf")

@@ -9,6 +9,8 @@ import pytest
 
 from src.shared.python.config import tools_vendor_authority as authority
 
+pytestmark = pytest.mark.unit
+
 GitResponseKey = tuple[Path, tuple[str, ...]]
 
 

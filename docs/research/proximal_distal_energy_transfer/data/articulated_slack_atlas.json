@@ -1,0 +1,332 @@
+{
+  "schema_version": "articulated-slack-atlas/v1",
+  "study_id": "typed-unilateral-slack-articulated-contact",
+  "design": {
+    "engine_versions": {
+      "mujoco": "3.8.0",
+      "pinocchio": "3.8.0"
+    },
+    "state_count": 18,
+    "condition_count": 18,
+    "time_step_count": 3,
+    "trajectory_count": 1944,
+    "horizon_s": 0.005,
+    "active_driver_or_joint_torque": "none; motion is an initial condition"
+  },
+  "configuration": {
+    "forward": {
+      "duration_s": 0.005,
+      "time_steps_s": [
+        0.001,
+        0.0005,
+        0.00025
+      ],
+      "virtual_power_tolerance_w": 1e-10,
+      "normalized_energy_residual_tolerance": 0.03,
+      "trajectory_relative_tolerance": 1e-07,
+      "refinement_ratio_limit": 0.8
+    },
+    "case_indices": [
+      0,
+      4,
+      8,
+      9,
+      13,
+      17
+    ],
+    "sample_indices": [
+      0,
+      6,
+      12
+    ],
+    "stiffness_n_m": 1800.0,
+    "damping_n_s_m": 18.0,
+    "base_extension_m": 0.001,
+    "initial_velocity_m_s": 0.05,
+    "slack_distances_m": [
+      0.0005,
+      0.0015
+    ]
+  },
+  "conditions": [
+    {
+      "name": "bilateral__common_displacement__forward",
+      "law": {
+        "kind": "bilateral",
+        "stiffness": 1800.0,
+        "damping": 18.0,
+        "slack_distance_m": 0.0
+      },
+      "preload_mode": "common_displacement",
+      "state_velocity_factor": 1.0,
+      "club_velocity_m_s": 0.05,
+      "initial_displacement_m": 0.001
+    },
+    {
+      "name": "bilateral__common_displacement__reversed",
+      "law": {
+        "kind": "bilateral",
+        "stiffness": 1800.0,
+        "damping": 18.0,
+        "slack_distance_m": 0.0
+      },
+      "preload_mode": "common_displacement",
+      "state_velocity_factor": 1.0,
+      "club_velocity_m_s": -0.05,
+      "initial_displacement_m": 0.001
+    },
+    {
+      "name": "bilateral__matched_extension__forward",
+      "law": {
+        "kind": "bilateral",
+        "stiffness": 1800.0,
+        "damping": 18.0,
+        "slack_distance_m": 0.0
+      },
+      "preload_mode": "matched_extension",
+      "state_velocity_factor": 1.0,
+      "club_velocity_m_s": 0.05,
+      "initial_displacement_m": 0.001
+    },
+    {
+      "name": "bilateral__matched_extension__reversed",
+      "law": {
+        "kind": "bilateral",
+        "stiffness": 1800.0,
+        "damping": 18.0,
+        "slack_distance_m": 0.0
+      },
+      "preload_mode": "matched_extension",
+      "state_velocity_factor": 1.0,
+      "club_velocity_m_s": -0.05,
+      "initial_displacement_m": 0.001
+    },
+    {
+      "name": "tension_only__common_displacement__forward",
+      "law": {
+        "kind": "tension_only",
+        "stiffness": 1800.0,
+        "damping": 18.0,
+        "slack_distance_m": 0.0
+      },
+      "preload_mode": "common_displacement",
+      "state_velocity_factor": 1.0,
+      "club_velocity_m_s": 0.05,
+      "initial_displacement_m": 0.001
+    },
+    {
+      "name": "tension_only__common_displacement__reversed",
+      "law": {
+        "kind": "tension_only",
+        "stiffness": 1800.0,
+        "damping": 18.0,
+        "slack_distance_m": 0.0
+      },
+      "preload_mode": "common_displacement",
+      "state_velocity_factor": 1.0,
+      "club_velocity_m_s": -0.05,
+      "initial_displacement_m": 0.001
+    },
+    {
+      "name": "tension_only__matched_extension__forward",
+      "law": {
+        "kind": "tension_only",
+        "stiffness": 1800.0,
+        "damping": 18.0,
+        "slack_distance_m": 0.0
+      },
+      "preload_mode": "matched_extension",
+      "state_velocity_factor": 1.0,
+      "club_velocity_m_s": 0.05,
+      "initial_displacement_m": 0.001
+    },
+    {
+      "name": "tension_only__matched_extension__reversed",
+      "law": {
+        "kind": "tension_only",
+        "stiffness": 1800.0,
+        "damping": 18.0,
+        "slack_distance_m": 0.0
+      },
+      "preload_mode": "matched_extension",
+      "state_velocity_factor": 1.0,
+      "club_velocity_m_s": -0.05,
+      "initial_displacement_m": 0.001
+    },
+    {
+      "name": "dead_zone_0.5mm__common_displacement__forward",
+      "law": {
+        "kind": "dead_zone_tension",
+        "stiffness": 1800.0,
+        "damping": 18.0,
+        "slack_distance_m": 0.0005
+      },
+      "preload_mode": "common_displacement",
+      "state_velocity_factor": 1.0,
+      "club_velocity_m_s": 0.05,
+      "initial_displacement_m": 0.001
+    },
+    {
+      "name": "dead_zone_0.5mm__common_displacement__reversed",
+      "law": {
+        "kind": "dead_zone_tension",
+        "stiffness": 1800.0,
+        "damping": 18.0,
+        "slack_distance_m": 0.0005
+      },
+      "preload_mode": "common_displacement",
+      "state_velocity_factor": 1.0,
+      "club_velocity_m_s": -0.05,
+      "initial_displacement_m": 0.001
+    },
+    {
+      "name": "dead_zone_0.5mm__matched_extension__forward",
+      "law": {
+        "kind": "dead_zone_tension",
+        "stiffness": 1800.0,
+        "damping": 18.0,
+        "slack_distance_m": 0.0005
+      },
+      "preload_mode": "matched_extension",
+      "state_velocity_factor": 1.0,
+      "club_velocity_m_s": 0.05,
+      "initial_displacement_m": 0.0015
+    },
+    {
+      "name": "dead_zone_0.5mm__matched_extension__reversed",
+      "law": {
+        "kind": "dead_zone_tension",
+        "stiffness": 1800.0,
+        "damping": 18.0,
+        "slack_distance_m": 0.0005
+      },
+      "preload_mode": "matched_extension",
+      "state_velocity_factor": 1.0,
+      "club_velocity_m_s": -0.05,
+      "initial_displacement_m": 0.0015
+    },
+    {
+      "name": "dead_zone_1.5mm__common_displacement__forward",
+      "law": {
+        "kind": "dead_zone_tension",
+        "stiffness": 1800.0,
+        "damping": 18.0,
+        "slack_distance_m": 0.0015
+      },
+      "preload_mode": "common_displacement",
+      "state_velocity_factor": 1.0,
+      "club_velocity_m_s": 0.05,
+      "initial_displacement_m": 0.001
+    },
+    {
+      "name": "dead_zone_1.5mm__common_displacement__reversed",
+      "law": {
+        "kind": "dead_zone_tension",
+        "stiffness": 1800.0,
+        "damping": 18.0,
+        "slack_distance_m": 0.0015
+      },
+      "preload_mode": "common_displacement",
+      "state_velocity_factor": 1.0,
+      "club_velocity_m_s": -0.05,
+      "initial_displacement_m": 0.001
+    },
+    {
+      "name": "dead_zone_1.5mm__matched_extension__forward",
+      "law": {
+        "kind": "dead_zone_tension",
+        "stiffness": 1800.0,
+        "damping": 18.0,
+        "slack_distance_m": 0.0015
+      },
+      "preload_mode": "matched_extension",
+      "state_velocity_factor": 1.0,
+      "club_velocity_m_s": 0.05,
+      "initial_displacement_m": 0.0025
+    },
+    {
+      "name": "dead_zone_1.5mm__matched_extension__reversed",
+      "law": {
+        "kind": "dead_zone_tension",
+        "stiffness": 1800.0,
+        "damping": 18.0,
+        "slack_distance_m": 0.0015
+      },
+      "preload_mode": "matched_extension",
+      "state_velocity_factor": 1.0,
+      "club_velocity_m_s": -0.05,
+      "initial_displacement_m": 0.0025
+    },
+    {
+      "name": "dead_zone_event_probe__open_to_taut",
+      "law": {
+        "kind": "dead_zone_tension",
+        "stiffness": 1800.0,
+        "damping": 18.0,
+        "slack_distance_m": 0.0015
+      },
+      "preload_mode": "event_probe_open",
+      "state_velocity_factor": 0.0,
+      "club_velocity_m_s": 1.0,
+      "initial_displacement_m": 0.001
+    },
+    {
+      "name": "dead_zone_event_probe__taut_to_open",
+      "law": {
+        "kind": "dead_zone_tension",
+        "stiffness": 1800.0,
+        "damping": 18.0,
+        "slack_distance_m": 0.0015
+      },
+      "preload_mode": "event_probe_taut",
+      "state_velocity_factor": 0.0,
+      "club_velocity_m_s": -1.0,
+      "initial_displacement_m": 0.0025
+    }
+  ],
+  "results": {
+    "opening_cell_count": 108,
+    "reattachment_cell_count": 216,
+    "maximum_open_fraction": 1.0,
+    "maximum_transition_count": 2,
+    "maximum_peak_contact_force_n": 23.643256091397284,
+    "maximum_virtual_power_residual_w": 2.1316282072803006e-14,
+    "maximum_positive_dissipation_power_w": 0.0,
+    "maximum_normalized_work_energy_residual": 0.019229556335426067,
+    "maximum_trajectory_relative_error": 1.3189347020963522e-15,
+    "maximum_force_relative_error": 1.8246515409714448e-12,
+    "active_set_parity_failures": 0,
+    "failed_numerical_cell_count": 0,
+    "failed_parity_cell_count": 0,
+    "refinement_worst_normalized_residual": [
+      0.019229556335426067,
+      0.01096725255444169,
+      0.004802668344012334
+    ],
+    "refinement_direction_passed": true,
+    "all_registered_gates_passed": true
+  },
+  "interpretation": {
+    "matched_controls": "common-displacement and approximately matched radial-extension branches separate dead-zone opening from preload-energy changes",
+    "events": "opening and reattachment are active-set events in a synthetic tension law, not measured biological slack",
+    "right_censoring": "absence of an event before five milliseconds is right-censored at the registered horizon"
+  },
+  "claim_boundary": {
+    "supported": "typed bilateral, tension-only, and dead-zone laws can be compared under matched articulated initial states and registered numerical controls",
+    "timing_economy_or_self_correction": "not_identified",
+    "biological_slack_or_intent": "not_identified",
+    "delivery_or_clubhead_speed_strategy": "not_established",
+    "human_transfer": "untested"
+  },
+  "next_gate": "extend event-qualified laws to distributed grip and shaft compliance, longer horizons, ground coupling, and governed bilateral human wrenches",
+  "source_sha256": {
+    "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "8eed52fe4ebbc55fcf753f4703330dd6d768281b0babfbb2adca074b862fc36d",
+    "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
+    "scripts/research/proximal_distal_energy/articulated_slack_contact.py": "2301d3ddbdb1387df952d18c1f37d6b81e892ca87f1cab037879cc38ed204844",
+    "scripts/research/proximal_distal_energy/articulated_slack_forward.py": "1a2190ad0616b50a32c1427e66401760beff789ef128bf2eba2bb7a6eba5ea54",
+    "scripts/research/proximal_distal_energy/articulated_slack_atlas.py": "c5a49913785d35d85a1830b01d0a71d4819a999ea98497cd99d9d4fe4d5c8ca1",
+    "scripts/research/proximal_distal_energy/run_articulated_slack_atlas.py": "db5f0e9f2fd04cf305e44b90c7df718df126c0362a2caac6bb94647faccd889b",
+    "tests/research/test_articulated_slack_contact.py": "4491c65a0b3e464450abfb51239c36d73f9d392e7ab1e2430916dbacbe202205",
+    "tests/research/test_articulated_slack_forward.py": "7d67a24d299dbab8073634dc19ae5323c5fabb90a99e09d01f4452bf0b253676"
+  }
+}
