@@ -25,6 +25,7 @@ from src.tools.bunker_shot_gui.design import (
 )
 from src.tools.bunker_shot_gui.model import (
     ATTACK_ANGLE_SWEEP_DEG,
+    PlayabilityOutcome,
     ShotOutcome,
     WorkbenchModel,
 )
@@ -168,6 +169,38 @@ class TestDesignerMetrics:
 
     def test_no_metric_was_silently_dropped(self, nominal_shot) -> None:
         assert nominal_shot.unavailable == ()
+
+
+class TestCarryNeverTravelsWithoutItsVerdict:
+    """Issue #8657: carry is uncalibrated, so it is never shown bare."""
+
+    def test_the_carry_carries_its_verdict(self, nominal_shot) -> None:
+        assert nominal_shot.carry_verdict is not None
+        assert nominal_shot.carry_verdict.status is not EnvelopeStatus.WITHIN
+
+    def test_the_carry_verdict_says_it_is_uncalibrated(self, nominal_shot) -> None:
+        reasons = " ".join(nominal_shot.carry_verdict.reasons)
+        assert "uncalibrated" in reasons
+
+    def test_a_carry_without_a_verdict_cannot_be_constructed(
+        self, nominal_shot
+    ) -> None:
+        """A type invariant, not a convention the display layer follows."""
+        with pytest.raises(ValueError, match="travel together"):
+            ShotOutcome(
+                verdict=nominal_shot.verdict,
+                fidelity_tier=FidelityTier.F0,
+                refused=False,
+                delivered=nominal_shot.delivered,
+                carry_m=9.0,
+            )
+
+    def test_a_carry_grid_without_a_verdict_cannot_be_constructed(self) -> None:
+        with pytest.raises(ValueError, match="travel together"):
+            PlayabilityOutcome(window=None, carry_m=np.array([[7.5]], dtype=np.float64))
+
+    def test_the_playability_grid_carries_its_verdict(self, nominal_evaluation) -> None:
+        assert nominal_evaluation.playability.carry_verdict is not None
 
 
 class TestRefusalIsNotANumber:

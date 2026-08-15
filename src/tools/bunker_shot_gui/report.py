@@ -24,6 +24,7 @@ from .model import (
 )
 
 __all__ = [
+    "CARRY_CAVEAT",
     "MAX_REPORTED_REASONS",
     "SHADE_RAMP",
     "STATUS_COLOUR",
@@ -207,24 +208,41 @@ def _dig_skid_lines(outcome: ShotOutcome) -> tuple[str, ...]:
     if outcome.dig_skid is None:
         return ()
     skid = outcome.dig_skid
+    dig_skid_verdict = skid.verdict
     return (
         "Dig versus skid",
         _THIN,
-        _line("Verdict", skid.verdict.value.upper()),
+        _line("Verdict", dig_skid_verdict.value.upper()),
         _line("Slope ratio", f"{skid.slope_ratio:.3f}"),
         _line("Vertical sand impulse", f"{skid.vertical_sand_impulse_Ns:.4g} N.s"),
         "",
     )
 
 
+CARRY_CAVEAT = (
+    "carry is derived from the delivered sand impulse and the measured divot "
+    "mass through an uncalibrated transfer efficiency; no published "
+    "measurement of ball speed or launch angle out of sand exists (#8616)"
+)
+"""The sentence a carry number is never shown without (issue #8657)."""
+
+
 def _ball_lines(outcome: ShotOutcome) -> tuple[str, ...]:
-    """Ball section, or nothing when no carry was computed."""
-    if outcome.carry_m is None:
+    """Ball section, or nothing when no carry was computed.
+
+    The carry never appears without its own validity line: the model type
+    already refuses to hold one without the other, and this is where that
+    guarantee reaches the reader.
+    """
+    verdict = outcome.carry_verdict
+    if outcome.carry_m is None or verdict is None:
         return ()
     return (
         "Ball",
         _THIN,
         _line("Carry", f"{outcome.carry_m:.4g} m"),
+        _line("Carry validity", status_headline(verdict.status)),
+        f"  {CARRY_CAVEAT}",
         "",
     )
 
@@ -406,9 +424,15 @@ def playability_text(playability: PlayabilityOutcome) -> str:
             )
         )
     low, high = window.carry_band_m
+    grid_verdict = playability.carry_verdict
     lines = [
         "Playability window (attack angle x sand firmness)",
         _THIN,
+        _line(
+            "Carry validity",
+            status_headline(grid_verdict.status) if grid_verdict else "not measured",
+        ),
+        f"  {CARRY_CAVEAT}",
         _line("Target carry", f"{window.target_carry_m:.4g} m"),
         _line("Acceptance band", f"{low:.4g} to {high:.4g} m"),
         _line("Window area", f"{window.area:.4g} {window.area_unit}"),
