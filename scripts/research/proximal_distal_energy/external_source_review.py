@@ -52,6 +52,129 @@ def _require_text(record: dict[str, Any], field: str, work_id: str) -> None:
         raise ValueError(f"{work_id}: {field} must be non-empty text")
 
 
+def _validate_assessments(
+    work: dict[str, Any], work_id: str, linked_claims: set[str]
+) -> tuple[set[str], set[str]]:
+    assessments = work.get("claim_assessments")
+    if not isinstance(assessments, dict) or set(assessments) != linked_claims:
+        raise ValueError(f"{work_id}: claim_assessments must cover linked_claims")
+    supported: set[str] = set()
+    contextual: set[str] = set()
+    for claim_id, assessment in assessments.items():
+        disposition = assessment.get("disposition")
+        if disposition not in {
+            "contextual_only",
+            "excluded",
+            "supports_with_declared_boundary",
+        }:
+            raise ValueError(f"{work_id}: invalid claim assessment disposition")
+        _require_text(assessment, "use", f"{work_id}/{claim_id}")
+        _require_text(assessment, "boundary", f"{work_id}/{claim_id}")
+        if disposition == "supports_with_declared_boundary":
+            supported.add(claim_id)
+        elif disposition == "contextual_only":
+            contextual.add(claim_id)
+    return supported, contextual
+
+
+def _validate_work(
+    work: dict[str, Any],
+    evidence_manifest: dict[str, Any],
+    expected_claims: set[str],
+    seen_urls: dict[str, str],
+    seen_ids: set[str],
+) -> tuple[str, set[str], set[str], set[str]]:
+    work_id = work.get("work_id", "<missing-work-id>")
+    _require_text(work, "work_id", work_id)
+    if work_id in seen_ids:
+        raise ValueError(f"duplicate external work id: {work_id}")
+    seen_ids.add(work_id)
+    for field in (
+        "title",
+        "canonical_metadata_url",
+        "scope_assessment",
+        "correction_check_method",
+    ):
+        _require_text(work, field, work_id)
+    if not isinstance(work.get("year"), int):
+        raise ValueError(f"{work_id}: year must be an integer")
+    if work.get("source_type") not in SOURCE_TYPES:
+        raise ValueError(f"{work_id}: invalid source_type")
+    if work.get("evidence_role") not in EVIDENCE_ROLES:
+        raise ValueError(f"{work_id}: invalid evidence_role")
+    if work.get("independence") not in INDEPENDENCE_STATES:
+        raise ValueError(f"{work_id}: invalid independence")
+    if work.get("correction_status") not in CORRECTION_STATES:
+        raise ValueError(f"{work_id}: invalid correction_status")
+    disposition = work.get("evidence_disposition")
+    if disposition not in DISPOSITIONS:
+        raise ValueError(f"{work_id}: invalid evidence_disposition")
+    if (
+        work["correction_status"] in {"retracted", "expression_of_concern"}
+        and disposition == "eligible"
+    ):
+        raise ValueError(f"{work_id}: affected work cannot remain evidence-eligible")
+    urls = work.get("urls")
+    if not isinstance(urls, list) or not urls:
+        raise ValueError(f"{work_id}: urls must be a non-empty list")
+    for url in urls:
+        if url in seen_urls:
+            raise ValueError(
+                f"external URL assigned to both {seen_urls[url]} and {work_id}: {url}"
+            )
+        seen_urls[url] = work_id
+    linked_claims = set(work.get("linked_claims", []))
+    if not linked_claims or not linked_claims <= expected_claims:
+        raise ValueError(f"{work_id}: linked_claims are missing or invalid")
+    expected_linked = {
+        claim_id
+        for url in urls
+        for claim_id in evidence_manifest["external_urls"]
+        .get(url, {})
+        .get("referenced_by", [])
+    }
+    if linked_claims != expected_linked:
+        raise ValueError(f"{work_id}: linked_claims do not match URL inventory")
+    declared_supported = set(work.get("supports_claims", []))
+    if not declared_supported <= linked_claims:
+        raise ValueError(f"{work_id}: supports_claims exceed linked_claims")
+    supported, contextual = _validate_assessments(work, work_id, linked_claims)
+    if supported != declared_supported:
+        raise ValueError(f"{work_id}: supports_claims disagree with assessments")
+    if disposition == "eligible" and not supported:
+        raise ValueError(f"{work_id}: eligible work supports no linked claim")
+    limitations = work.get("limitations")
+    if (
+        not isinstance(limitations, list)
+        or not limitations
+        or not all(isinstance(item, str) and item.strip() for item in limitations)
+    ):
+        raise ValueError(f"{work_id}: limitations must be explicit")
+    return disposition, linked_claims, supported, contextual
+
+
+def _validate_availability(
+    availability: dict[str, Any], expected_urls: set[str]
+) -> dict[str, int]:
+    _require_text(availability, "checked_on", "availability_snapshot")
+    _require_text(availability, "method", "availability_snapshot")
+    url_checks = availability.get("url_checks")
+    if not isinstance(url_checks, dict) or set(url_checks) != expected_urls:
+        raise ValueError("availability snapshot URL coverage is stale")
+    counts = {"resolves": 0, "automated_access_restricted": 0}
+    for url, check in url_checks.items():
+        status = check.get("status")
+        if status not in counts:
+            raise ValueError(f"unacceptable availability status for {url}: {status}")
+        if not isinstance(check.get("http_status"), int):
+            raise ValueError(f"availability HTTP status missing for {url}")
+        _require_text(check, "final_url", url)
+        counts[status] += 1
+    if availability.get("summary") != counts:
+        raise ValueError("availability snapshot summary is stale")
+    return counts
+
+
 def validate_external_source_review(
     root: str | Path,
     review: dict[str, Any],
@@ -69,12 +192,6 @@ def validate_external_source_review(
     availability = review.get("availability_snapshot")
     if not isinstance(availability, dict):
         raise ValueError("external source review requires an availability snapshot")
-    _require_text(availability, "checked_on", "availability_snapshot")
-    _require_text(availability, "method", "availability_snapshot")
-    url_checks = availability.get("url_checks")
-    if not isinstance(url_checks, dict):
-        raise ValueError("availability snapshot requires per-URL checks")
-
     works = review.get("works")
     if not isinstance(works, list) or not works:
         raise ValueError("external source review must contain works")
@@ -90,93 +207,12 @@ def validate_external_source_review(
     contextual_claims: set[str] = set()
 
     for work in works:
-        work_id = work.get("work_id", "<missing-work-id>")
-        _require_text(work, "work_id", work_id)
-        if work_id in seen_ids:
-            raise ValueError(f"duplicate external work id: {work_id}")
-        seen_ids.add(work_id)
-        for field in (
-            "title",
-            "canonical_metadata_url",
-            "scope_assessment",
-            "correction_check_method",
-        ):
-            _require_text(work, field, work_id)
-        if not isinstance(work.get("year"), int):
-            raise ValueError(f"{work_id}: year must be an integer")
-        if work.get("source_type") not in SOURCE_TYPES:
-            raise ValueError(f"{work_id}: invalid source_type")
-        if work.get("evidence_role") not in EVIDENCE_ROLES:
-            raise ValueError(f"{work_id}: invalid evidence_role")
-        if work.get("independence") not in INDEPENDENCE_STATES:
-            raise ValueError(f"{work_id}: invalid independence")
-        if work.get("correction_status") not in CORRECTION_STATES:
-            raise ValueError(f"{work_id}: invalid correction_status")
-        disposition = work.get("evidence_disposition")
-        if disposition not in DISPOSITIONS:
-            raise ValueError(f"{work_id}: invalid evidence_disposition")
-        if (
-            work["correction_status"] in {"retracted", "expression_of_concern"}
-            and disposition == "eligible"
-        ):
-            raise ValueError(
-                f"{work_id}: affected work cannot remain evidence-eligible"
-            )
-        urls = work.get("urls")
-        if not isinstance(urls, list) or not urls:
-            raise ValueError(f"{work_id}: urls must be a non-empty list")
-        for url in urls:
-            if url in seen_urls:
-                raise ValueError(
-                    f"external URL assigned to both {seen_urls[url]} and {work_id}: {url}"
-                )
-            seen_urls[url] = work_id
-        linked_claims = set(work.get("linked_claims", []))
-        if not linked_claims or not linked_claims <= expected_claims:
-            raise ValueError(f"{work_id}: linked_claims are missing or invalid")
-        expected_linked = {
-            claim_id
-            for url in urls
-            for claim_id in evidence_manifest["external_urls"]
-            .get(url, {})
-            .get("referenced_by", [])
-        }
-        if linked_claims != expected_linked:
-            raise ValueError(f"{work_id}: linked_claims do not match URL inventory")
-        supported = set(work.get("supports_claims", []))
-        if not supported <= linked_claims:
-            raise ValueError(f"{work_id}: supports_claims exceed linked_claims")
-        if disposition == "eligible" and not supported:
-            raise ValueError(f"{work_id}: eligible work supports no linked claim")
-        assessments = work.get("claim_assessments")
-        if not isinstance(assessments, dict) or set(assessments) != linked_claims:
-            raise ValueError(f"{work_id}: claim_assessments must cover linked_claims")
-        assessment_supported: set[str] = set()
-        for claim_id, assessment in assessments.items():
-            assessment_disposition = assessment.get("disposition")
-            if assessment_disposition not in {
-                "contextual_only",
-                "excluded",
-                "supports_with_declared_boundary",
-            }:
-                raise ValueError(f"{work_id}: invalid claim assessment disposition")
-            _require_text(assessment, "use", f"{work_id}/{claim_id}")
-            _require_text(assessment, "boundary", f"{work_id}/{claim_id}")
-            if assessment_disposition == "supports_with_declared_boundary":
-                assessment_supported.add(claim_id)
-            elif assessment_disposition == "contextual_only":
-                contextual_claims.add(claim_id)
-        if assessment_supported != supported:
-            raise ValueError(f"{work_id}: supports_claims disagree with assessments")
+        disposition, linked_claims, supported, contextual_for_work = _validate_work(
+            work, evidence_manifest, expected_claims, seen_urls, seen_ids
+        )
         externally_linked_claims.update(linked_claims)
         supported_claims.update(supported)
-        limitations = work.get("limitations")
-        if (
-            not isinstance(limitations, list)
-            or not limitations
-            or not all(isinstance(item, str) and item.strip() for item in limitations)
-        ):
-            raise ValueError(f"{work_id}: limitations must be explicit")
+        contextual_claims.update(contextual_for_work)
         if disposition == "eligible":
             eligible += 1
         elif disposition == "contextual_only":
@@ -191,19 +227,7 @@ def validate_external_source_review(
         raise ValueError(
             f"external URL coverage mismatch: missing={missing}, extra={extra}"
         )
-    if set(url_checks) != expected_urls:
-        raise ValueError("availability snapshot URL coverage is stale")
-    availability_counts = {"resolves": 0, "automated_access_restricted": 0}
-    for url, check in url_checks.items():
-        status = check.get("status")
-        if status not in availability_counts:
-            raise ValueError(f"unacceptable availability status for {url}: {status}")
-        if not isinstance(check.get("http_status"), int):
-            raise ValueError(f"availability HTTP status missing for {url}")
-        _require_text(check, "final_url", url)
-        availability_counts[status] += 1
-    if availability.get("summary") != availability_counts:
-        raise ValueError("availability snapshot summary is stale")
+    availability_counts = _validate_availability(availability, expected_urls)
     summary = review.get("summary")
     expected_summary = {
         "external_url_count": len(expected_urls),

@@ -23,6 +23,13 @@ in git and GitHub.
   [#8654](https://github.com/D-sorganization/UpstreamDrift/pull/8654) merged as
   `bc081457f33d47837b0d0f6ad1a642e574a1561a`, the starting remote `main`
   for the external-source qualification slice.
+- PR [#8658](https://github.com/D-sorganization/UpstreamDrift/pull/8658) is the
+  active protected external-source qualification slice. It is based on current
+  remote `main` after merging `337991108e8578a1bf4e820f25f7cc11510f4480`.
+  Its initial repository-structure failure was actionable: the new validator
+  and the touched release-manifest builder exceeded the changed-function
+  architecture budget. Both are now decomposed without an exception; the
+  focused 36-test release suite and architecture gate pass locally.
 - Canonical question, experiment, and readiness registries live under
   `docs/research/proximal_distal_energy_transfer/data/`. MT-E01 through MT-E09
   are model studies; MT-H01 is the governed participant-held-out stage.

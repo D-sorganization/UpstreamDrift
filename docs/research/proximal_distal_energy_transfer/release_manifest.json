@@ -1570,8 +1570,8 @@
       "bytes": 9484
     },
     "scripts/research/proximal_distal_energy/external_source_review.py": {
-      "sha256": "66084ae62bc5ed0d630415bbe079e5b21d5c1a1bc08fe5c2d2311a2d9ca8946f",
-      "bytes": 9823
+      "sha256": "397336f83c47a9d77c6e2759d654f0118a4e863a80a62fb92c1e4c806587dde7",
+      "bytes": 10252
     },
     "scripts/research/proximal_distal_energy/extract_wscg_charts.py": {
       "sha256": "1b8d6fe6222cd228564f9b0f7bca539fd799465d78ae81785153f17d0ceda054",
@@ -1774,8 +1774,8 @@
       "bytes": 9575
     },
     "scripts/research/proximal_distal_energy/release_bundle.py": {
-      "sha256": "21b4261152cdfd110b0a1a5499232db106a290f27d21806284b29df5f7bdd57a",
-      "bytes": 13387
+      "sha256": "6c68daaa65d07bc0cc55c5a24b8f49f36c9fab62923d4a3b6e2f236524d0c474",
+      "bytes": 12705
     },
     "scripts/research/proximal_distal_energy/release_claim_review.py": {
       "sha256": "014567ddd6f37b1e6def2eadff26ff0cfe7d4d8b6f601edd3a38d8f842c64f9e",
