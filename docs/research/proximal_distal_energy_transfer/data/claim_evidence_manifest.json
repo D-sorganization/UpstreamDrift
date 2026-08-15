@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-evidence-integrity-v1",
   "registry": {
     "path": "docs/research/proximal_distal_energy_transfer/data/claim_audit_registry.json",
-    "sha256": "75f3cd5bb6d91ab265a75e91efcb052fa610f3ae020a35b42b0792330c280a55"
+    "sha256": "93bbc20bb5911de889a0aa0aed8fdf6c700e94c872098a9b55b46a8cf54eec46"
   },
   "scope": {
     "local_artifact_semantics": "content_integrity_not_independent_validation",
@@ -10,9 +10,9 @@
     "network_access_required": false
   },
   "summary": {
-    "claim_count": 266,
-    "evidence_reference_count": 1639,
-    "local_artifact_count": 200,
+    "claim_count": 269,
+    "evidence_reference_count": 1779,
+    "local_artifact_count": 207,
     "external_url_count": 78
   },
   "claims": {
@@ -2803,6 +2803,13 @@
         "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
         "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
         "tests/research/test_subject_scaled_closed_contact.py",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.json",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_closed_state_forward_bridge.pdf",
+        "scripts/research/proximal_distal_energy/closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/run_closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/make_closed_state_forward_bridge_figure.py",
+        "tests/research/test_closed_state_forward_bridge.py",
         "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
         "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz",
         "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf",
@@ -2829,6 +2836,13 @@
         "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
         "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
         "tests/research/test_subject_scaled_closed_contact.py",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.json",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_closed_state_forward_bridge.pdf",
+        "scripts/research/proximal_distal_energy/closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/run_closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/make_closed_state_forward_bridge_figure.py",
+        "tests/research/test_closed_state_forward_bridge.py",
         "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
         "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz",
         "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf",
@@ -2855,6 +2869,13 @@
         "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
         "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
         "tests/research/test_subject_scaled_closed_contact.py",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.json",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_closed_state_forward_bridge.pdf",
+        "scripts/research/proximal_distal_energy/closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/run_closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/make_closed_state_forward_bridge_figure.py",
+        "tests/research/test_closed_state_forward_bridge.py",
         "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
         "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz",
         "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf",
@@ -2881,6 +2902,13 @@
         "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
         "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
         "tests/research/test_subject_scaled_closed_contact.py",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.json",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_closed_state_forward_bridge.pdf",
+        "scripts/research/proximal_distal_energy/closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/run_closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/make_closed_state_forward_bridge_figure.py",
+        "tests/research/test_closed_state_forward_bridge.py",
         "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
         "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz",
         "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf",
@@ -2907,6 +2935,13 @@
         "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
         "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
         "tests/research/test_subject_scaled_closed_contact.py",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.json",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_closed_state_forward_bridge.pdf",
+        "scripts/research/proximal_distal_energy/closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/run_closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/make_closed_state_forward_bridge_figure.py",
+        "tests/research/test_closed_state_forward_bridge.py",
         "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
         "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz",
         "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf",
@@ -2933,6 +2968,13 @@
         "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
         "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
         "tests/research/test_subject_scaled_closed_contact.py",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.json",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_closed_state_forward_bridge.pdf",
+        "scripts/research/proximal_distal_energy/closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/run_closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/make_closed_state_forward_bridge_figure.py",
+        "tests/research/test_closed_state_forward_bridge.py",
         "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
         "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz",
         "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf",
@@ -2959,6 +3001,13 @@
         "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
         "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
         "tests/research/test_subject_scaled_closed_contact.py",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.json",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_closed_state_forward_bridge.pdf",
+        "scripts/research/proximal_distal_energy/closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/run_closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/make_closed_state_forward_bridge_figure.py",
+        "tests/research/test_closed_state_forward_bridge.py",
         "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
         "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz",
         "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf",
@@ -2985,6 +3034,112 @@
         "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
         "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
         "tests/research/test_subject_scaled_closed_contact.py",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.json",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_closed_state_forward_bridge.pdf",
+        "scripts/research/proximal_distal_energy/closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/run_closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/make_closed_state_forward_bridge_figure.py",
+        "tests/research/test_closed_state_forward_bridge.py",
+        "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
+        "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf",
+        "scripts/research/proximal_distal_energy/scapulothoracic_contact_screen.py",
+        "scripts/research/proximal_distal_energy/run_scapulothoracic_contact_screen.py",
+        "scripts/research/proximal_distal_energy/make_scapulothoracic_contact_figures.py",
+        "tests/research/test_scapulothoracic_contact_screen.py"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-268": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_subject_scaled_spatial_geometry.pdf",
+        "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
+        "scripts/research/proximal_distal_energy/run_subject_scaled_spatial_geometry.py",
+        "scripts/research/proximal_distal_energy/make_subject_scaled_spatial_geometry_figures.py",
+        "tests/research/test_subject_scaled_spatial_geometry.py",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_subject_scaled_closed_contact.pdf",
+        "scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py",
+        "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
+        "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
+        "tests/research/test_subject_scaled_closed_contact.py",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.json",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_closed_state_forward_bridge.pdf",
+        "scripts/research/proximal_distal_energy/closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/run_closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/make_closed_state_forward_bridge_figure.py",
+        "tests/research/test_closed_state_forward_bridge.py",
+        "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
+        "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf",
+        "scripts/research/proximal_distal_energy/scapulothoracic_contact_screen.py",
+        "scripts/research/proximal_distal_energy/run_scapulothoracic_contact_screen.py",
+        "scripts/research/proximal_distal_energy/make_scapulothoracic_contact_figures.py",
+        "tests/research/test_scapulothoracic_contact_screen.py"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-269": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_subject_scaled_spatial_geometry.pdf",
+        "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
+        "scripts/research/proximal_distal_energy/run_subject_scaled_spatial_geometry.py",
+        "scripts/research/proximal_distal_energy/make_subject_scaled_spatial_geometry_figures.py",
+        "tests/research/test_subject_scaled_spatial_geometry.py",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_subject_scaled_closed_contact.pdf",
+        "scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py",
+        "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
+        "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
+        "tests/research/test_subject_scaled_closed_contact.py",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.json",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_closed_state_forward_bridge.pdf",
+        "scripts/research/proximal_distal_energy/closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/run_closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/make_closed_state_forward_bridge_figure.py",
+        "tests/research/test_closed_state_forward_bridge.py",
+        "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
+        "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf",
+        "scripts/research/proximal_distal_energy/scapulothoracic_contact_screen.py",
+        "scripts/research/proximal_distal_energy/run_scapulothoracic_contact_screen.py",
+        "scripts/research/proximal_distal_energy/make_scapulothoracic_contact_figures.py",
+        "tests/research/test_scapulothoracic_contact_screen.py"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-270": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_subject_scaled_spatial_geometry.pdf",
+        "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
+        "scripts/research/proximal_distal_energy/run_subject_scaled_spatial_geometry.py",
+        "scripts/research/proximal_distal_energy/make_subject_scaled_spatial_geometry_figures.py",
+        "tests/research/test_subject_scaled_spatial_geometry.py",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_subject_scaled_closed_contact.pdf",
+        "scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py",
+        "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
+        "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
+        "tests/research/test_subject_scaled_closed_contact.py",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.json",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_closed_state_forward_bridge.pdf",
+        "scripts/research/proximal_distal_energy/closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/run_closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/make_closed_state_forward_bridge_figure.py",
+        "tests/research/test_closed_state_forward_bridge.py",
         "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
         "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz",
         "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf",
@@ -3018,8 +3173,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/MOMENTUM_TRANSFER_QUESTION_PROGRAM.md": {
-      "sha256": "5ded11d126fc15730792a263b99a0b90a9223047590a7246edc1dc71cc1a00ff",
-      "bytes": 22901,
+      "sha256": "bb8c565802df9cec8c5dcaab0bbdc3b44c1e837c9d3fc8187693d0a005d88c2a",
+      "bytes": 23693,
       "referenced_by": [
         "PD-CLAIM-242",
         "PD-CLAIM-243",
@@ -3155,6 +3310,40 @@
         "PD-CLAIM-257",
         "PD-CLAIM-258",
         "PD-CLAIM-259"
+      ]
+    },
+    "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.json": {
+      "sha256": "2be5e80f939b3a781bdab520e3f2d81584b4d53f35434f5baa014dcb1faa9e39",
+      "bytes": 70183,
+      "referenced_by": [
+        "PD-CLAIM-260",
+        "PD-CLAIM-261",
+        "PD-CLAIM-262",
+        "PD-CLAIM-263",
+        "PD-CLAIM-264",
+        "PD-CLAIM-265",
+        "PD-CLAIM-266",
+        "PD-CLAIM-267",
+        "PD-CLAIM-268",
+        "PD-CLAIM-269",
+        "PD-CLAIM-270"
+      ]
+    },
+    "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.npz": {
+      "sha256": "2042656080670605d7f9b3bbbe008edc579d5650750e739cf16ca750afea9ca0",
+      "bytes": 140072,
+      "referenced_by": [
+        "PD-CLAIM-260",
+        "PD-CLAIM-261",
+        "PD-CLAIM-262",
+        "PD-CLAIM-263",
+        "PD-CLAIM-264",
+        "PD-CLAIM-265",
+        "PD-CLAIM-266",
+        "PD-CLAIM-267",
+        "PD-CLAIM-268",
+        "PD-CLAIM-269",
+        "PD-CLAIM-270"
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/counterfactual_ensemble.json": {
@@ -3669,7 +3858,10 @@
         "PD-CLAIM-264",
         "PD-CLAIM-265",
         "PD-CLAIM-266",
-        "PD-CLAIM-267"
+        "PD-CLAIM-267",
+        "PD-CLAIM-268",
+        "PD-CLAIM-269",
+        "PD-CLAIM-270"
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz": {
@@ -3683,7 +3875,10 @@
         "PD-CLAIM-264",
         "PD-CLAIM-265",
         "PD-CLAIM-266",
-        "PD-CLAIM-267"
+        "PD-CLAIM-267",
+        "PD-CLAIM-268",
+        "PD-CLAIM-269",
+        "PD-CLAIM-270"
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json": {
@@ -3831,8 +4026,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json": {
-      "sha256": "255c59c67a18f19d639ce9991862a85222cda9f7f24717cadb7d9d2e188dc025",
-      "bytes": 11343,
+      "sha256": "88eb01a46e06b55b7a36d57fb033cf85cc53cf8671ecfe297cbe2e251f333848",
+      "bytes": 11347,
       "referenced_by": [
         "PD-CLAIM-005",
         "PD-CLAIM-127",
@@ -3849,8 +4044,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.npz": {
-      "sha256": "29b955b16aaba2e348060248d50fe954dd54a351e143055c8e29e2b7af51694a",
-      "bytes": 1688376,
+      "sha256": "0abc856f275678d04009d1950e4779d7e98ef5d8c98398a8d6f1653d6a1fc61d",
+      "bytes": 1688288,
       "referenced_by": [
         "PD-CLAIM-005",
         "PD-CLAIM-127",
@@ -3910,7 +4105,10 @@
         "PD-CLAIM-264",
         "PD-CLAIM-265",
         "PD-CLAIM-266",
-        "PD-CLAIM-267"
+        "PD-CLAIM-267",
+        "PD-CLAIM-268",
+        "PD-CLAIM-269",
+        "PD-CLAIM-270"
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": {
@@ -3924,7 +4122,10 @@
         "PD-CLAIM-264",
         "PD-CLAIM-265",
         "PD-CLAIM-266",
-        "PD-CLAIM-267"
+        "PD-CLAIM-267",
+        "PD-CLAIM-268",
+        "PD-CLAIM-269",
+        "PD-CLAIM-270"
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json": {
@@ -3938,7 +4139,10 @@
         "PD-CLAIM-264",
         "PD-CLAIM-265",
         "PD-CLAIM-266",
-        "PD-CLAIM-267"
+        "PD-CLAIM-267",
+        "PD-CLAIM-268",
+        "PD-CLAIM-269",
+        "PD-CLAIM-270"
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.npz": {
@@ -3952,7 +4156,10 @@
         "PD-CLAIM-264",
         "PD-CLAIM-265",
         "PD-CLAIM-266",
-        "PD-CLAIM-267"
+        "PD-CLAIM-267",
+        "PD-CLAIM-268",
+        "PD-CLAIM-269",
+        "PD-CLAIM-270"
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/timing_viability_study.json": {
@@ -4203,6 +4410,23 @@
         "PD-CLAIM-259"
       ]
     },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_closed_state_forward_bridge.pdf": {
+      "sha256": "37e2af72d9e2549d1e21b0754cc2e485e62196a7cbf73d0d951ac01a53b1cf9f",
+      "bytes": 30143,
+      "referenced_by": [
+        "PD-CLAIM-260",
+        "PD-CLAIM-261",
+        "PD-CLAIM-262",
+        "PD-CLAIM-263",
+        "PD-CLAIM-264",
+        "PD-CLAIM-265",
+        "PD-CLAIM-266",
+        "PD-CLAIM-267",
+        "PD-CLAIM-268",
+        "PD-CLAIM-269",
+        "PD-CLAIM-270"
+      ]
+    },
     "docs/research/proximal_distal_energy_transfer/figures/fig_counterfactual_divergence_maps.pdf": {
       "sha256": "a154fd67d439a7968691cf3b5da4452aa2268e0f1a0f9b4c9a314722f6564e5d",
       "bytes": 24215,
@@ -4242,7 +4466,10 @@
         "PD-CLAIM-264",
         "PD-CLAIM-265",
         "PD-CLAIM-266",
-        "PD-CLAIM-267"
+        "PD-CLAIM-267",
+        "PD-CLAIM-268",
+        "PD-CLAIM-269",
+        "PD-CLAIM-270"
       ]
     },
     "docs/research/proximal_distal_energy_transfer/figures/fig_subject_scaled_closed_contact.pdf": {
@@ -4256,7 +4483,10 @@
         "PD-CLAIM-264",
         "PD-CLAIM-265",
         "PD-CLAIM-266",
-        "PD-CLAIM-267"
+        "PD-CLAIM-267",
+        "PD-CLAIM-268",
+        "PD-CLAIM-269",
+        "PD-CLAIM-270"
       ]
     },
     "docs/research/proximal_distal_energy_transfer/figures/fig_subject_scaled_spatial_geometry.pdf": {
@@ -4270,7 +4500,10 @@
         "PD-CLAIM-264",
         "PD-CLAIM-265",
         "PD-CLAIM-266",
-        "PD-CLAIM-267"
+        "PD-CLAIM-267",
+        "PD-CLAIM-268",
+        "PD-CLAIM-269",
+        "PD-CLAIM-270"
       ]
     },
     "docs/research/proximal_distal_energy_transfer/figures/fig_timing_viability_adverse_load.pdf": {
@@ -4315,8 +4548,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "70ff2f3afbc25568a7737c5f52df01361300236a3ff0c8b98158bdad97b0c4b6",
-      "bytes": 105721,
+      "sha256": "20a2afa7cd2f48bf669939828b58761db8994a3d9decf3bec32cdc7b067a2255",
+      "bytes": 107521,
       "referenced_by": [
         "PD-CLAIM-241"
       ]
@@ -4396,6 +4629,23 @@
         "PD-CLAIM-259"
       ]
     },
+    "scripts/research/proximal_distal_energy/closed_state_forward_bridge.py": {
+      "sha256": "8d5dab05cdfc4da82f8ced6853819b5e88a3c1792addc89d7fadb84abfff5812",
+      "bytes": 14163,
+      "referenced_by": [
+        "PD-CLAIM-260",
+        "PD-CLAIM-261",
+        "PD-CLAIM-262",
+        "PD-CLAIM-263",
+        "PD-CLAIM-264",
+        "PD-CLAIM-265",
+        "PD-CLAIM-266",
+        "PD-CLAIM-267",
+        "PD-CLAIM-268",
+        "PD-CLAIM-269",
+        "PD-CLAIM-270"
+      ]
+    },
     "scripts/research/proximal_distal_energy/counterfactual_ensemble.py": {
       "sha256": "08944916666d8f6553a7982dba31bf726423235fd1fa6ee31577cf0aec980ca3",
       "bytes": 9338,
@@ -4469,6 +4719,23 @@
         "PD-CLAIM-055"
       ]
     },
+    "scripts/research/proximal_distal_energy/make_closed_state_forward_bridge_figure.py": {
+      "sha256": "e63b44668320303e1c88475bc9fc7cbf4fee490b7fc95041fa052ebd668ebede",
+      "bytes": 2704,
+      "referenced_by": [
+        "PD-CLAIM-260",
+        "PD-CLAIM-261",
+        "PD-CLAIM-262",
+        "PD-CLAIM-263",
+        "PD-CLAIM-264",
+        "PD-CLAIM-265",
+        "PD-CLAIM-266",
+        "PD-CLAIM-267",
+        "PD-CLAIM-268",
+        "PD-CLAIM-269",
+        "PD-CLAIM-270"
+      ]
+    },
     "scripts/research/proximal_distal_energy/make_counterfactual_figures.py": {
       "sha256": "7fb7850252e61803d355883594d2f7b12da6fe86f644db58185fe6654e7adf3c",
       "bytes": 8129,
@@ -4487,7 +4754,10 @@
         "PD-CLAIM-264",
         "PD-CLAIM-265",
         "PD-CLAIM-266",
-        "PD-CLAIM-267"
+        "PD-CLAIM-267",
+        "PD-CLAIM-268",
+        "PD-CLAIM-269",
+        "PD-CLAIM-270"
       ]
     },
     "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py": {
@@ -4501,7 +4771,10 @@
         "PD-CLAIM-264",
         "PD-CLAIM-265",
         "PD-CLAIM-266",
-        "PD-CLAIM-267"
+        "PD-CLAIM-267",
+        "PD-CLAIM-268",
+        "PD-CLAIM-269",
+        "PD-CLAIM-270"
       ]
     },
     "scripts/research/proximal_distal_energy/make_subject_scaled_spatial_geometry_figures.py": {
@@ -4515,7 +4788,10 @@
         "PD-CLAIM-264",
         "PD-CLAIM-265",
         "PD-CLAIM-266",
-        "PD-CLAIM-267"
+        "PD-CLAIM-267",
+        "PD-CLAIM-268",
+        "PD-CLAIM-269",
+        "PD-CLAIM-270"
       ]
     },
     "scripts/research/proximal_distal_energy/mechanism_ladder.py": {
@@ -4598,6 +4874,23 @@
         "PD-CLAIM-257",
         "PD-CLAIM-258",
         "PD-CLAIM-259"
+      ]
+    },
+    "scripts/research/proximal_distal_energy/run_closed_state_forward_bridge.py": {
+      "sha256": "e6fae22babbd6d6774f0e653834baadf8315b0799e6dec53ed1bd7074828ac0a",
+      "bytes": 2376,
+      "referenced_by": [
+        "PD-CLAIM-260",
+        "PD-CLAIM-261",
+        "PD-CLAIM-262",
+        "PD-CLAIM-263",
+        "PD-CLAIM-264",
+        "PD-CLAIM-265",
+        "PD-CLAIM-266",
+        "PD-CLAIM-267",
+        "PD-CLAIM-268",
+        "PD-CLAIM-269",
+        "PD-CLAIM-270"
       ]
     },
     "scripts/research/proximal_distal_energy/run_counterfactual_ensemble.py": {
@@ -4715,7 +5008,10 @@
         "PD-CLAIM-264",
         "PD-CLAIM-265",
         "PD-CLAIM-266",
-        "PD-CLAIM-267"
+        "PD-CLAIM-267",
+        "PD-CLAIM-268",
+        "PD-CLAIM-269",
+        "PD-CLAIM-270"
       ]
     },
     "scripts/research/proximal_distal_energy/run_shaft_contribution_study.py": {
@@ -4781,7 +5077,10 @@
         "PD-CLAIM-264",
         "PD-CLAIM-265",
         "PD-CLAIM-266",
-        "PD-CLAIM-267"
+        "PD-CLAIM-267",
+        "PD-CLAIM-268",
+        "PD-CLAIM-269",
+        "PD-CLAIM-270"
       ]
     },
     "scripts/research/proximal_distal_energy/run_subject_scaled_spatial_geometry.py": {
@@ -4795,7 +5094,10 @@
         "PD-CLAIM-264",
         "PD-CLAIM-265",
         "PD-CLAIM-266",
-        "PD-CLAIM-267"
+        "PD-CLAIM-267",
+        "PD-CLAIM-268",
+        "PD-CLAIM-269",
+        "PD-CLAIM-270"
       ]
     },
     "scripts/research/proximal_distal_energy/run_timing_viability_study.py": {
@@ -4900,12 +5202,15 @@
         "PD-CLAIM-264",
         "PD-CLAIM-265",
         "PD-CLAIM-266",
-        "PD-CLAIM-267"
+        "PD-CLAIM-267",
+        "PD-CLAIM-268",
+        "PD-CLAIM-269",
+        "PD-CLAIM-270"
       ]
     },
     "scripts/research/proximal_distal_energy/spatial_forward_contract.py": {
-      "sha256": "8803ff4922223870953999489f4e133a89b024a18c253b1764cfa218a4980ef7",
-      "bytes": 10403,
+      "sha256": "04bb646557de3516d106806e50d7ace90f2ac9243a5a1a57b83a4d6381af071c",
+      "bytes": 12009,
       "referenced_by": [
         "PD-CLAIM-005",
         "PD-CLAIM-184",
@@ -4921,8 +5226,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/spatial_forward_engines.py": {
-      "sha256": "dd5c9b29c2fbc8df8003068446190e3cb50cf34adf6e8627caf08d06ccb47456",
-      "bytes": 15180,
+      "sha256": "4c85f6868cfcbaa43d6a4a3dd6e0a19738bbeb72b8b48b93684d58997c0471da",
+      "bytes": 16553,
       "referenced_by": [
         "PD-CLAIM-005",
         "PD-CLAIM-184",
@@ -4938,8 +5243,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/spatial_forward_study.py": {
-      "sha256": "8b9588d28c7a532a79e2177135e8fd27fe49c9be512937aad562e4e4c07c1825",
-      "bytes": 16668,
+      "sha256": "768e220729e15eb3e0bb00c37670a38faeab0fbebea0b54e8a5ff55c0e46a76d",
+      "bytes": 17127,
       "referenced_by": [
         "PD-CLAIM-005",
         "PD-CLAIM-184",
@@ -4981,7 +5286,10 @@
         "PD-CLAIM-264",
         "PD-CLAIM-265",
         "PD-CLAIM-266",
-        "PD-CLAIM-267"
+        "PD-CLAIM-267",
+        "PD-CLAIM-268",
+        "PD-CLAIM-269",
+        "PD-CLAIM-270"
       ]
     },
     "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py": {
@@ -4995,7 +5303,10 @@
         "PD-CLAIM-264",
         "PD-CLAIM-265",
         "PD-CLAIM-266",
-        "PD-CLAIM-267"
+        "PD-CLAIM-267",
+        "PD-CLAIM-268",
+        "PD-CLAIM-269",
+        "PD-CLAIM-270"
       ]
     },
     "scripts/research/proximal_distal_energy/timing_viability.py": {
@@ -5204,6 +5515,23 @@
         "PD-CLAIM-257",
         "PD-CLAIM-258",
         "PD-CLAIM-259"
+      ]
+    },
+    "tests/research/test_closed_state_forward_bridge.py": {
+      "sha256": "0d76832d155b36a88307026f1785a10dea62f311094e943ae79cc3cef0a4a2c1",
+      "bytes": 2854,
+      "referenced_by": [
+        "PD-CLAIM-260",
+        "PD-CLAIM-261",
+        "PD-CLAIM-262",
+        "PD-CLAIM-263",
+        "PD-CLAIM-264",
+        "PD-CLAIM-265",
+        "PD-CLAIM-266",
+        "PD-CLAIM-267",
+        "PD-CLAIM-268",
+        "PD-CLAIM-269",
+        "PD-CLAIM-270"
       ]
     },
     "tests/research/test_experimental_falsification_protocol.py": {
@@ -5427,7 +5755,10 @@
         "PD-CLAIM-264",
         "PD-CLAIM-265",
         "PD-CLAIM-266",
-        "PD-CLAIM-267"
+        "PD-CLAIM-267",
+        "PD-CLAIM-268",
+        "PD-CLAIM-269",
+        "PD-CLAIM-270"
       ]
     },
     "tests/research/test_shaft_contribution_evidence.py": {
@@ -5451,8 +5782,8 @@
       ]
     },
     "tests/research/test_spatial_forward_contact.py": {
-      "sha256": "530072cd0628948b4744bf047221fca8d0357c144df2315bd28342a850907774",
-      "bytes": 6810,
+      "sha256": "a233df27e7d8f8f0abd51e6d27af4e8f8a21da08d2f423d352ae2219be12827f",
+      "bytes": 8832,
       "referenced_by": [
         "PD-CLAIM-005",
         "PD-CLAIM-127",
@@ -5495,7 +5826,10 @@
         "PD-CLAIM-264",
         "PD-CLAIM-265",
         "PD-CLAIM-266",
-        "PD-CLAIM-267"
+        "PD-CLAIM-267",
+        "PD-CLAIM-268",
+        "PD-CLAIM-269",
+        "PD-CLAIM-270"
       ]
     },
     "tests/research/test_subject_scaled_spatial_geometry.py": {
@@ -5509,7 +5843,10 @@
         "PD-CLAIM-264",
         "PD-CLAIM-265",
         "PD-CLAIM-266",
-        "PD-CLAIM-267"
+        "PD-CLAIM-267",
+        "PD-CLAIM-268",
+        "PD-CLAIM-269",
+        "PD-CLAIM-270"
       ]
     },
     "tests/research/test_torque_allocation_preload.py": {

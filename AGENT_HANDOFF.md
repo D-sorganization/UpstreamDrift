@@ -67,6 +67,25 @@ in git and GitHub.
 
 ## Current Program State
 
+- Issue [#8663](https://github.com/D-sorganization/UpstreamDrift/issues/8663)
+  is the protected next slice under epic #8557. It maps all 234 closed
+  subject-scaled states into the engine-neutral compliant-contact state and
+  audits a 54-case profile--span--phase subset in native MuJoCo and Pinocchio.
+- The constant initial rigid-frame map preserves inertial velocities. Maximum
+  position closure is `1.15817e-10 m`; maximum finite-difference velocity
+  closure is `0.00128431 m/s`; all 234 initial-state digests are unique, and
+  exact closure produces zero Kelvin--Voigt preload.
+- All 54 MuJoCo/Pinocchio pairs receive identical state digests and pass the
+  existing short-horizon trajectory, wrench, and normalized-energy gates.
+  Maximum club-position difference is `8.286e-08 m`, maximum relative wrench
+  RMS is `1.4423e-04`, and maximum normalized-energy difference is
+  `2.18793e-07`.
+- This is not a subject-scaled forward golfer: finite-mass hand carriages
+  replace articulated arms after initialization, the audit lasts 4 ms, and
+  equipment, tissue, full-delivery, and human-strategy claims remain open.
+  The next gate is full-horizon articulated contact with calibrated grip and
+  shaft properties plus null, reversal, adverse-load, and refinement controls.
+
 - MT-E09 holds trunk and club pose fixed across 54 paired arm-only states.
   Fixed shoulder centers close 0 states; the scapula-on-ellipsoid surrogate
   reaches the 0.5 mm residual in 31 and also passes optimizer termination in 16. Twenty-eight states activate a bound, maximum shoulder-center excursion

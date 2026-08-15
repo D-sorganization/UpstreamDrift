@@ -98,6 +98,10 @@ _RELEASE_METADATA: dict[str, Any] = {
             "command": "python -m scripts.research.proximal_distal_energy.run_subject_scaled_closed_contact",
             "tier": "subject_scaled_bounded_closed_contact_inverse_kinematics",
         },
+        "closed_state_forward_bridge": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_closed_state_forward_bridge",
+            "tier": "subject_scaled_closed_state_reduced_forward_initialization",
+        },
         "scapulothoracic_contact_screen": {
             "command": "python -m scripts.research.proximal_distal_energy.run_scapulothoracic_contact_screen",
             "tier": "paired_arm_only_scapula_on_ellipsoid_geometry_screen",
@@ -208,14 +212,17 @@ _RELEASE_METADATA: dict[str, Any] = {
             "prescribed_states_rejected_closed_contact_forward_test_open"
         ),
         "subject_scaled_closed_contact_feasibility": (
-            "reduced_tree_closed_contact_screen_passed_compliant_forward_test_open"
+            "reduced_tree_closed_contact_screen_and_short_forward_initialization_passed"
+        ),
+        "closed_state_forward_initialization": (
+            "supported_for_234_mappings_and_54_short_cross_engine_cases"
         ),
         "scapulothoracic_contact_geometry": (
             "partial_reachability_with_high_allocation_nullity_forward_test_open"
         ),
     },
     "known_open_gates": [
-        "subject-scaled articulated spatial contact with calibrated grip and distributed shaft",
+        "full-horizon subject-scaled articulated spatial contact with calibrated grip and distributed shaft",
         "equipment-calibrated distributed beam and grip coupled into a subject-scaled forward solve",
         "measured tissue-level preload and slack identification",
         "governed held-out human experimental evaluation",

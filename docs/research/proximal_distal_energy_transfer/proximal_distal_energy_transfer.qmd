@@ -99,7 +99,12 @@ abstract: |
   sample retains rank six, stays inside broad reduced-model engineering
   limits, and passes a coarse nonadjacent-body bounding-sphere screen. This
   establishes reduced-tree geometric feasibility, not anatomical validity,
-  contact force, passivity, timing benefit, or human strategy. A subsequent
+  contact force, passivity, timing benefit, or human strategy. All 234 closed
+  states now enter one canonical forward-state contract with preserved
+  position and velocity closure and zero interface preload. Native MuJoCo and
+  Pinocchio then pass trajectory, wrench, and energy comparisons for a
+  54-case, 4 ms spanning initialization audit. This closes a coordinate and
+  numerical-transport gap, not the full-horizon articulated-contact gate. A subsequent
   reduced forward-contact experiment independently
   integrates MuJoCo and Pinocchio with two finite-mass hand carriages, paired
   compliant interfaces, and no direct club actuation. Its exact same-state

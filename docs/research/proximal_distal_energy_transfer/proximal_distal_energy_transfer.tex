@@ -368,74 +368,80 @@ subject-scaled configurations while holding the club pose fixed; every
 sample retains rank six, stays inside broad reduced-model engineering
 limits, and passes a coarse nonadjacent-body bounding-sphere screen.
 This establishes reduced-tree geometric feasibility, not anatomical
-validity, contact force, passivity, timing benefit, or human strategy. A
-subsequent reduced forward-contact experiment independently integrates
-MuJoCo and Pinocchio with two finite-mass hand carriages, paired
-compliant interfaces, and no direct club actuation. Its exact same-state
-driver-killswitch branch retains a negative swing-normal contact couple
-for 37.5 ms; coincident and reversed-moment-arm controls close exactly,
-trajectory and wrench gates pass, and work--energy residual decreases
-under timestep refinement. This supports a reduced spatial mechanism,
-not anatomical arms, muscle coordination, human strategy, or equipment
-calibration. A coupled uncertainty and control experiment then varies 12
-inputs simultaneously, audits structural and practical identifiability,
-and compares eight preselected delayed-command programs on separate
-training and held-out ensembles. The net planar wrench leaves one
-individual-hand-force mode unidentified, the six summary observables
-cannot identify the full 12-parameter vector, and all eight programs are
-nondominated on held-out samples. An early opposing command improves
-lower-tail speed relative to late drive but worsens the planar face/path
-proxy, rejecting a universal optimum and any direct physiological
-interpretation. A preregistered experimental protocol then fixes
-synchronized motion, bilateral hand-wrench, club, ground-reaction,
-launch, and activation measurements; participant-level holdout;
-filtering; calibration; residuals; identity protection; and four outcome
-falsifiers. Its synthetic dry run qualifies only the fail-closed
-pipeline. No human outcome is analyzed, and every experimental
-prediction remains untested. A separate hand-path attribution study
-evaluates the MacKenzie force-work-per-path-length estimand in an
-impact-truncated double pendulum, a forward-simulated one-arm model, and
-a mechanically closed two-arm local sweep. Drift supplies 101.2\% and
-103.5\% of signed hand-path force work in the two forward cases because
-the contemporaneous control contribution is slightly opposing; in the
-two-arm sweep, drift and control instead cancel with an index of 0.962.
-Joint- and time-resolved impulse, power, work, force-vector, and
-common/differential-mode results show why a large net hand-path force is
-a mechanical transfer observable rather than a direct measure of
-biological effort. A final matched-task allocation experiment separates
-direct wrist moments from the moment of bilateral hand forces at
-identical club states. Internal demands vary even when club-moment
-closure is exact. A separate dead-zone transmission model predicts that
-preserving each channel's loaded direction avoids a reversal gap,
-whereas reversing both modeled channels crosses zero transmission. These
-conditional predictions do not identify scapular action or establish a
-preferred human technique. A constrained-contact extension then defines
-frame-explicit configuration, velocity, control, and external-load
-contributions to reaction force and fails closed when contact allocation
-is nonunique. In the fixed-support double-pendulum benchmark, pointwise
-ZTCF predicts the modeled support-reaction waveform with componentwise
-R-squared values of 0.871 and 0.814 but retains large amplitude error;
-opposing control also makes the vertical ZTCF impulse exceed the total.
-This benchmark is not a bilateral human force-plate validation, and the
-required synchronized force-plate and whole-body kinematic experiment is
-specified as a falsification protocol. An advanced bridge then proves
-wrench--twist power invariance under proper rotations and paired
-reference-point transport, verifies Jacobian virtual work, and
-round-trips one canonical pose through the MuJoCo, Pinocchio, Drake,
-OpenSim, and MyoSuite coordinate adapters. The pose result is a
-representation check, not five-engine dynamics parity. A reduced
-Hill-type study demonstrates that 41 agonist--antagonist allocations can
-produce the same net moment while changing internal stiffness and
-series-energy proxies; continuous activation and series-force states
-make preparation history observable but do not identify anatomy or a
-preferred technique. A final adversarial transmission study compares
-clock- and state-triggered handoff under paired training and held-out
-perturbations. State triggering improves lower-tail delivery speed and a
-planar face/path proxy relative to clock timing but raises peak hand
-force; higher impedance changes the tradeoff, and all four registered
-programs remain Pareto-nondominated. A local task-Jacobian partition
-exposes five task-null input directions, but this is a model property
-rather than evidence of a neural synergy or human self-stabilization. A
+validity, contact force, passivity, timing benefit, or human strategy.
+All 234 closed states now enter one canonical forward-state contract
+with preserved position and velocity closure and zero interface preload.
+Native MuJoCo and Pinocchio then pass trajectory, wrench, and energy
+comparisons for a 54-case, 4 ms spanning initialization audit. This
+closes a coordinate and numerical-transport gap, not the full-horizon
+articulated-contact gate. A subsequent reduced forward-contact
+experiment independently integrates MuJoCo and Pinocchio with two
+finite-mass hand carriages, paired compliant interfaces, and no direct
+club actuation. Its exact same-state driver-killswitch branch retains a
+negative swing-normal contact couple for 37.5 ms; coincident and
+reversed-moment-arm controls close exactly, trajectory and wrench gates
+pass, and work--energy residual decreases under timestep refinement.
+This supports a reduced spatial mechanism, not anatomical arms, muscle
+coordination, human strategy, or equipment calibration. A coupled
+uncertainty and control experiment then varies 12 inputs simultaneously,
+audits structural and practical identifiability, and compares eight
+preselected delayed-command programs on separate training and held-out
+ensembles. The net planar wrench leaves one individual-hand-force mode
+unidentified, the six summary observables cannot identify the full
+12-parameter vector, and all eight programs are nondominated on held-out
+samples. An early opposing command improves lower-tail speed relative to
+late drive but worsens the planar face/path proxy, rejecting a universal
+optimum and any direct physiological interpretation. A preregistered
+experimental protocol then fixes synchronized motion, bilateral
+hand-wrench, club, ground-reaction, launch, and activation measurements;
+participant-level holdout; filtering; calibration; residuals; identity
+protection; and four outcome falsifiers. Its synthetic dry run qualifies
+only the fail-closed pipeline. No human outcome is analyzed, and every
+experimental prediction remains untested. A separate hand-path
+attribution study evaluates the MacKenzie force-work-per-path-length
+estimand in an impact-truncated double pendulum, a forward-simulated
+one-arm model, and a mechanically closed two-arm local sweep. Drift
+supplies 101.2\% and 103.5\% of signed hand-path force work in the two
+forward cases because the contemporaneous control contribution is
+slightly opposing; in the two-arm sweep, drift and control instead
+cancel with an index of 0.962. Joint- and time-resolved impulse, power,
+work, force-vector, and common/differential-mode results show why a
+large net hand-path force is a mechanical transfer observable rather
+than a direct measure of biological effort. A final matched-task
+allocation experiment separates direct wrist moments from the moment of
+bilateral hand forces at identical club states. Internal demands vary
+even when club-moment closure is exact. A separate dead-zone
+transmission model predicts that preserving each channel's loaded
+direction avoids a reversal gap, whereas reversing both modeled channels
+crosses zero transmission. These conditional predictions do not identify
+scapular action or establish a preferred human technique. A
+constrained-contact extension then defines frame-explicit configuration,
+velocity, control, and external-load contributions to reaction force and
+fails closed when contact allocation is nonunique. In the fixed-support
+double-pendulum benchmark, pointwise ZTCF predicts the modeled
+support-reaction waveform with componentwise R-squared values of 0.871
+and 0.814 but retains large amplitude error; opposing control also makes
+the vertical ZTCF impulse exceed the total. This benchmark is not a
+bilateral human force-plate validation, and the required synchronized
+force-plate and whole-body kinematic experiment is specified as a
+falsification protocol. An advanced bridge then proves wrench--twist
+power invariance under proper rotations and paired reference-point
+transport, verifies Jacobian virtual work, and round-trips one canonical
+pose through the MuJoCo, Pinocchio, Drake, OpenSim, and MyoSuite
+coordinate adapters. The pose result is a representation check, not
+five-engine dynamics parity. A reduced Hill-type study demonstrates that
+41 agonist--antagonist allocations can produce the same net moment while
+changing internal stiffness and series-energy proxies; continuous
+activation and series-force states make preparation history observable
+but do not identify anatomy or a preferred technique. A final
+adversarial transmission study compares clock- and state-triggered
+handoff under paired training and held-out perturbations. State
+triggering improves lower-tail delivery speed and a planar face/path
+proxy relative to clock timing but raises peak hand force; higher
+impedance changes the tradeoff, and all four registered programs remain
+Pareto-nondominated. A local task-Jacobian partition exposes five
+task-null input directions, but this is a model property rather than
+evidence of a neural synergy or human self-stabilization. A
 phase-resolved proximal-motion study evaluates 126 rate cases under
 relative-rate, absolute-rate, and exact total-kinetic-energy matching,
 plus 45 identical-state acceleration interventions. The large pre-impact
@@ -471,7 +477,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, colback=white, rightrule=.15mm, left=2mm, bottomtitle=1mm, colframe=quarto-callout-note-color-frame, toptitle=1mm, toprule=.15mm, opacityback=0, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, opacitybacktitle=0.6, arc=.35mm, breakable, titlerule=0mm, coltitle=black, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, toprule=.15mm, left=2mm, opacityback=0, colbacktitle=quarto-callout-note-color!10!white, colframe=quarto-callout-note-color-frame, coltitle=black, arc=.35mm, breakable, titlerule=0mm, rightrule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, bottomtitle=1mm, leftrule=.75mm, toptitle=1mm, bottomrule=.15mm, opacitybacktitle=0.6]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -7357,6 +7363,62 @@ tissue contact. Inverse kinematics supplies neither force nor work and
 cannot test passivity, timing demand, self-correction, proximal-speed
 benefit, or any class of slack.
 
+\subsection{Closed-State Forward-Contact Initialization
+Gate}\label{closed-state-forward-contact-initialization-gate}
+
+The closed configurations now enter the independently authored MuJoCo
+and Pinocchio contact solvers through one engine-neutral state contract.
+For each of the 234 profile--span--phase states, a constant rigid
+transformation places the club reference at the canonical center and
+aligns its initial orientation with the canonical axes. Positions are
+rotated and translated; linear and angular velocities are rotated
+without subtracting the club velocity, so the map changes coordinates
+rather than changing inertial motion. The two local grip offsets remain
+\((0,\pm s/2,-0.03)\) m.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_closed_state_forward_bridge.pdf}
+
+}
+
+\caption{\label{fig-closed-state-forward-bridge}Closed Subject States
+Enter Independent Forward Solvers Without Preload}
+
+\end{figure}%
+
+All 234 position mappings retain the source closure, with a maximum
+error of \(1.16\times10^{-10}\) m. Velocities estimated by second-order
+finite differences along each closed inverse-kinematics path close to
+1.29 mm/s at worst, below the preregistered 5 mm/s mapping tolerance.
+Every mapped state has a distinct SHA-256 digest. Exact closure produces
+zero Kelvin--Voigt preload; the 1 mm constitutive perturbation preserves
+action--reaction and produces nonpositive damping power.
+
+A spanning subset advances all six profiles, all three grip spans, and
+early, middle, and late phases through both native forward solvers: 54
+shared initial states and 108 trajectories. Every engine pair reports
+the same initial-state digest and passes the existing trajectory,
+wrench, and normalized-energy comparison gates over the preregistered 4
+ms initialization audit. The largest cross-engine club-position
+difference is 0.083 \(\mu\)m, the largest relative contact-wrench RMS
+difference is 0.0145\%, and the largest normalized-energy difference is
+\(2.19\times10^{-7}\).
+
+This is an initialization and short-horizon numerical-transport result,
+not a subject-scaled forward golfer. The forward tier still replaces the
+articulated arms with finite-mass hand carriages after initialization;
+its hand mass is profile-scaled, but its club, contact stiffness,
+damping, and driver remain declared engineering values. The result
+therefore removes an executable gap between closed geometry and
+compliant contact without establishing calibrated equipment, anatomical
+dynamics, tissue loading, passive late-downswing transfer, delivery
+benefit, or a human strategy. The next falsifier is a full-horizon
+articulated solve with typed contact loss, calibrated grip and shaft
+compliance, refinement, adverse-load, null, and reversal controls.
+
 \subsection{Paired Scapula-on-Ellipsoid Geometry
 Screen}\label{paired-scapula-on-ellipsoid-geometry-screen}
 
@@ -7419,13 +7481,14 @@ the independently validated articulated shoulder model, subject-specific
 anatomy where governed, calibrated grip contact, and paired forward
 dynamics.
 
-The next spatial experiment must now integrate calibrated compliant
-contact from these closed states, expose contact loss and tissue/shaft
-compliance as typed states, and repeat the coincident, reversal,
-killswitch, power, and work--energy controls in two independent engines.
-Only trajectories passing those gates may be used to test whether
-drift-mediated transfer reduces timing demand, creates recovery,
-benefits from slack, or supports a human strategy.
+The next spatial experiment must retain the verified closed-state
+initialization while replacing the hand carriages with articulated
+forward dynamics, expose contact loss and tissue/shaft compliance as
+typed states, and repeat the coincident, reversal, killswitch, power,
+and work--energy controls in two independent engines. Only trajectories
+passing those gates may be used to test whether drift-mediated transfer
+reduces timing demand, creates recovery, benefits from slack, or
+supports a human strategy.
 
 \section{Falsifiability Gained and Claims Still
 Open}\label{sec-spatial-claim-boundary}

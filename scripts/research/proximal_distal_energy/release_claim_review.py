@@ -224,9 +224,15 @@ REVIEW_SPECS: dict[str, dict[str, Any]] = {
     ),
     "subject_scaled_closed_contact_feasibility": _spec(
         "reviewed_as_necessary_condition_result",
-        "necessary_condition_supported_not_sufficient",
+        "necessary_condition_and_short_forward_initialization_supported_not_sufficient",
         ("PD-CLAIM-262", "PD-CLAIM-263", "PD-CLAIM-264"),
-        "Independent forward-dynamics closure with forces, passivity, loads, and delivery outcomes.",
+        "Full-horizon articulated forward dynamics with calibrated contact, loads, and delivery outcomes.",
+    ),
+    "closed_state_forward_initialization": _spec(
+        "reviewed_as_short_horizon_reduced_model_result",
+        "supported_for_declared_mapping_and_spanning_subset",
+        ("PD-CLAIM-268", "PD-CLAIM-269", "PD-CLAIM-270"),
+        "Replace hand carriages with articulated arms and run full-horizon calibrated contact controls.",
     ),
     "scapulothoracic_contact_geometry": _spec(
         "reviewed_as_paired_geometry_screen_with_explicit_boundaries",
