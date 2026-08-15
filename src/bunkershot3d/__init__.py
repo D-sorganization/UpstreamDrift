@@ -67,10 +67,13 @@ from . import (
 # Ball model: promoted to the flat surface because a bunker shot's whole point
 # is the ball, and callers should not have to reach into a subpackage for it.
 from .ball import (
+    BallLaunchResult,
     BallLie,
     BallLieType,
     BallProperties,
     BunkerShotState,
+    MomentumTransfer,
+    SandDelivery,
     compute_bunker_launch,
     to_post_impact_state,
 )
@@ -185,6 +188,7 @@ def __dir__() -> list[str]:
 __all__: list[str] = [
     "AngleOfReposeExperiment",
     "BackendNotImplementedError",
+    "BallLaunchResult",
     "BallLie",
     "BallLieType",
     "BallProperties",
@@ -213,7 +217,9 @@ __all__: list[str] = [
     "LiggghtsDriver",
     "MPMDriver",
     "MassProperties",
+    "MomentumTransfer",
     "RunManifest",
+    "SandDelivery",
     "SandState",
     "SolverSettings",
     "SwingCondition",

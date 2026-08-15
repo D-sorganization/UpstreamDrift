@@ -46,7 +46,12 @@ from typing import TypeVar
 import numpy as np
 from numpy.typing import NDArray
 
-from bunkershot3d.ball import BallLie, BunkerShotState, compute_bunker_launch
+from bunkershot3d.ball import (
+    BallLie,
+    BunkerShotState,
+    SandDelivery,
+    compute_bunker_launch,
+)
 from bunkershot3d.geometry import (
     DeliveredGeometry,
     WedgeGeometry,
@@ -56,9 +61,11 @@ from bunkershot3d.metrics import (
     DigSkidResult,
     DivotMetrics,
     HeadLoadMetrics,
+    HeadModel,
     PlayabilityAxis,
     PlayabilityWindow,
     StrikeScene,
+    StrikeTrace,
     bounce_utilisation,
     dig_vs_skid,
     divot_metrics,
@@ -103,6 +110,7 @@ from .design import (
 __all__ = [
     "ATTACK_ANGLE_SWEEP_DEG",
     "COMPARISON_SEED",
+    "CarryEstimate",
     "DesignEvaluation",
     "HeadBuild",
     "PlayabilityOutcome",
@@ -123,6 +131,87 @@ COMPARISON_SEED = 20260814
 """Fixed entropy for the A/B bootstrap, so a comparison is reproducible."""
 
 _MAX_FLIGHT_TIME_S = 10.0
+
+
+@dataclass(frozen=True, slots=True)
+class CarryEstimate:
+    """A carry number and the verdict it may only ever be quoted with.
+
+    Issue #8657: carry is derived from the impulse the solver delivered and
+    the divot mass the metrics layer measured, through an **uncalibrated**
+    transfer efficiency, and there is no published measurement of ball speed
+    or launch angle out of sand to calibrate it against (issue #8616). Pairing
+    the number with its verdict in one value object is what stops the two
+    being separated on the way to a display.
+
+    Attributes:
+        carry_m: Carry distance [m].
+        verdict: The shot's verdict combined with the launch model's own,
+            never better than ``BEYOND_VALIDATION``.
+    """
+
+    carry_m: float
+    verdict: ValidityVerdict
+
+
+def _strike_scene(ball_depth_m: float) -> StrikeScene:
+    """Return the flat-surface scene the W7 metrics are measured against.
+
+    Args:
+        ball_depth_m: How far the ball centre sits below the sand surface.
+
+    Returns:
+        The scene.
+    """
+    return StrikeScene(
+        sand_surface_height_m=0.0,
+        ball_position_m=np.array(
+            [0.0, 0.0, BallLie(depth_m=ball_depth_m).center_z_m()], dtype=np.float64
+        ),
+        travel_axis=np.array([1.0, 0.0, 0.0], dtype=np.float64),
+    )
+
+
+def _sand_delivery(result: ShotResult, divot: DivotMetrics) -> SandDelivery:
+    """Bundle what the solver and the metrics layer measured about one strike.
+
+    Args:
+        result: The F0 shot.
+        divot: The divot the same shot cut.
+
+    Returns:
+        The delivery the ball model derives launch from.
+    """
+    return SandDelivery(
+        impulse_n_s=float(np.linalg.norm(result.impulse_n_s)),
+        displaced_mass_kg=divot.mass_kg,
+        contact_duration_s=result.contact_duration_s,
+        entry_speed_m_s=result.entry_speed_m_s,
+        exit_speed_m_s=result.exit_speed_m_s,
+        verdict=result.verdict,
+    )
+
+
+def _measured_divot(divot: DivotMetrics | None) -> DivotMetrics:
+    """Return the divot, refusing to carry on without one.
+
+    Args:
+        divot: The measured divot, or ``None``.
+
+    Returns:
+        The divot.
+
+    Raises:
+        ValueError: If the divot was not measured. Without it the mass the
+            sand carried is unknown, and #8657 removed the box-volume estimate
+            that used to stand in for it.
+    """
+    if divot is None:
+        raise ValueError(
+            "the divot was not measured, so the mass of sand the strike moved "
+            "is unknown and no carry can be derived from the delivered impulse"
+        )
+    return divot
 
 
 @dataclass(frozen=True)
@@ -149,6 +238,8 @@ class ShotOutcome:
         dig_skid: The dig-versus-skid discriminator.
         sole_load: The bounce-utilisation map.
         carry_m: Carry from the splash and flight models.
+        carry_verdict: The validity statement the carry may be quoted under.
+            Present whenever ``carry_m`` is, and absent whenever it is not.
         unavailable: One line per metric that could not be computed, with
             the reason. Empty when everything was.
     """
@@ -170,17 +261,28 @@ class ShotOutcome:
     dig_skid: DigSkidResult | None = None
     sole_load: SoleLoadMap | None = None
     carry_m: float | None = None
+    carry_verdict: ValidityVerdict | None = None
     unavailable: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
-        """Enforce the refusal rule.
+        """Enforce the refusal rule and the carry-verdict rule.
 
         Raises:
-            ValueError: If a refused outcome carries any number. ADR-0032
-                makes this the single most important behaviour of the tier,
-                so it is a ``raise`` rather than a contract decorator --
-                ``DBC_LEVEL=off`` must not switch the envelope off.
+            ValueError: If a refused outcome carries any number, or if a carry
+                number arrives without the verdict it may be quoted under.
+                ADR-0032 makes the first the single most important behaviour
+                of the tier and issue #8657 makes the second the condition on
+                displaying carry at all, so both are a ``raise`` rather than a
+                contract decorator -- ``DBC_LEVEL=off`` must not switch either
+                off.
         """
+        if (self.carry_m is None) != (self.carry_verdict is None):
+            raise ValueError(
+                "a carry number and its validity verdict travel together. No "
+                "published measurement of ball speed or launch angle out of "
+                "sand exists (issue #8616), so a carry shown on its own would "
+                "read as though it had been measured"
+            )
         if not self.refused:
             return
         numbers = (
@@ -218,6 +320,9 @@ class PlayabilityOutcome:
         carry_m: ``(na, nb)`` carry grid [m]; NaN where the solver refused.
         attack_angle_deg: ``(na,)`` swept attack angles, for display.
         firmness_kg_per_cm2: ``(nb,)`` swept penetrometer readings.
+        carry_verdict: The worst verdict over the answered grid points, which
+            the whole grid must be read under. Present whenever any cell of
+            ``carry_m`` is finite.
     """
 
     window: PlayabilityWindow | None
@@ -231,6 +336,21 @@ class PlayabilityOutcome:
     firmness_kg_per_cm2: NDArray[np.float64] = field(
         default_factory=lambda: np.zeros(0, dtype=np.float64)
     )
+    carry_verdict: ValidityVerdict | None = None
+
+    def __post_init__(self) -> None:
+        """Enforce the carry-verdict rule on the grid as well as the shot.
+
+        Raises:
+            ValueError: If any grid point holds a carry number and no verdict
+                accompanies the grid (issue #8657).
+        """
+        if bool(np.isfinite(self.carry_m).any()) and self.carry_verdict is None:
+            raise ValueError(
+                "a carry grid and its validity verdict travel together; "
+                f"{int(np.isfinite(self.carry_m).sum())} point(s) carry a "
+                "number with no verdict to read them under"
+            )
 
     @property
     def available(self) -> bool:
@@ -459,14 +579,7 @@ class WorkbenchModel:
                 "trace metrics: the shot recorded fewer than 3 samples, which is "
                 "too few to differentiate a velocity"
             )
-        scene = StrikeScene(
-            sand_surface_height_m=0.0,
-            ball_position_m=np.array(
-                [0.0, 0.0, BallLie(depth_m=swing.ball_depth_m).center_z_m()],
-                dtype=np.float64,
-            ),
-            travel_axis=np.array([1.0, 0.0, 0.0], dtype=np.float64),
-        )
+        scene = _strike_scene(swing.ball_depth_m)
         head = build.head_model
         loads = _try(
             lambda: head_load_metrics(trace, head) if trace else None,
@@ -474,17 +587,7 @@ class WorkbenchModel:
             missing,
         )
         divot = _try(
-            lambda: (
-                divot_metrics(
-                    trace,
-                    head,
-                    scene,
-                    width_m=geometry.sole_width_m,
-                    bulk_density_kg_m3=sand.bulk_density_kg_m3,
-                )
-                if trace
-                else None
-            ),
+            lambda: self._divot(trace, head, scene, geometry, sand),
             "divot geometry",
             missing,
         )
@@ -499,7 +602,9 @@ class WorkbenchModel:
             missing,
         )
         carry = _try(
-            lambda: self.carry_m(geometry, swing, result.max_depth_m),
+            lambda: self.carry_estimate(
+                geometry, swing, _sand_delivery(result, _measured_divot(divot))
+            ),
             "carry",
             missing,
         )
@@ -524,8 +629,39 @@ class WorkbenchModel:
             divot=divot,
             dig_skid=skid,
             sole_load=sole_load,
-            carry_m=carry,
+            carry_m=None if carry is None else carry.carry_m,
+            carry_verdict=None if carry is None else carry.verdict,
             unavailable=tuple(missing),
+        )
+
+    def _divot(
+        self,
+        trace: StrikeTrace | None,
+        head: HeadModel,
+        scene: StrikeScene,
+        geometry: WedgeGeometry,
+        sand: SandState,
+    ) -> DivotMetrics | None:
+        """Measure the divot one shot cut, when the trace supports it.
+
+        Args:
+            trace: The strike trace, or ``None`` when it was too short.
+            head: The head the trace was recorded for.
+            scene: The sand surface, ball and travel axis.
+            geometry: The design vector, supplying the cutting width.
+            sand: The sand state, supplying the bulk density.
+
+        Returns:
+            The divot, or ``None`` when there is no trace to measure it on.
+        """
+        if trace is None:
+            return None
+        return divot_metrics(
+            trace,
+            head,
+            scene,
+            width_m=geometry.sole_width_m,
+            bulk_density_kg_m3=sand.bulk_density_kg_m3,
         )
 
     def _sole_map(
@@ -543,18 +679,24 @@ class WorkbenchModel:
 
     # ------------------------------------------------------------ ball flight
 
-    def carry_m(
-        self, geometry: WedgeGeometry, swing: SwingSetup, entry_depth_m: float
-    ) -> float:
-        """Carry the splash and flight models predict for one shot.
+    def carry_estimate(
+        self, geometry: WedgeGeometry, swing: SwingSetup, delivery: SandDelivery
+    ) -> CarryEstimate:
+        """Carry the splash and flight models predict, with its verdict.
+
+        The splash model is driven by the momentum the solver delivered and
+        the divot mass the metrics layer measured, both of which arrive in
+        ``delivery``. Since issue #8657 nothing here estimates displaced sand
+        from a sole length and an entry depth.
 
         Args:
-            geometry: The design vector, supplying loft, sole and mass.
+            geometry: The design vector, supplying loft and head mass.
             swing: The delivery.
-            entry_depth_m: How deep the sole went, from the F0 shot.
+            delivery: What the solver and metrics layer measured about the
+                strike.
 
         Returns:
-            Carry distance [m].
+            The carry and the verdict it may be quoted under.
 
         Raises:
             RuntimeError: If the ball-flight kernel is unavailable. Reported
@@ -566,12 +708,9 @@ class WorkbenchModel:
         delivered = deliver_wedge(geometry, swing.delivery())
         launch = compute_bunker_launch(
             BunkerShotState(
-                club_velocity_m_s=float(swing.clubhead_speed_mps),
                 club_loft_deg=float(delivered.effective_loft_deg),
                 ball_lie=BallLie(depth_m=float(swing.ball_depth_m)),
-                entry_depth_m=max(float(entry_depth_m), 0.0),
-                sole_width_m=geometry.sole_width_m,
-                sole_length_m=geometry.blade_length_m,
+                delivery=delivery,
                 club_mass_kg=geometry.head_mass_kg,
             )
         )
@@ -586,7 +725,10 @@ class WorkbenchModel:
             max_time=_MAX_FLIGHT_TIME_S,
             dt=self._settings.flight_time_step_s,
         )
-        return float(simulator.analyze_trajectory(trajectory)["carry_distance"])
+        return CarryEstimate(
+            carry_m=float(simulator.analyze_trajectory(trajectory)["carry_distance"]),
+            verdict=launch.verdict,
+        )
 
     # ---------------------------------------------------------- playability
 
@@ -615,12 +757,17 @@ class WorkbenchModel:
         firmness = np.linspace(*FIRMNESS_RANGE_KG_PER_CM2, points, dtype=np.float64)
         carry = np.full((points, points), np.nan, dtype=np.float64)
         reasons: list[str] = []
+        verdicts: list[ValidityVerdict] = []
         for column, reading in enumerate(firmness):
             state = sand.with_firmness(float(reading)).sand_state()
             for row, angle in enumerate(attack_deg):
-                carry[row, column] = self._grid_carry(
+                estimate = self._grid_carry(
                     geometry, state, swing.with_attack_angle(float(angle)), reasons
                 )
+                if estimate is None:
+                    continue
+                carry[row, column] = estimate.carry_m
+                verdicts.append(estimate.verdict)
         if not np.isfinite(carry).any():
             return PlayabilityOutcome(
                 window=None,
@@ -649,6 +796,7 @@ class WorkbenchModel:
             carry_m=carry,
             attack_angle_deg=attack_deg,
             firmness_kg_per_cm2=firmness,
+            carry_verdict=worst_of(verdicts),
         )
 
     def _grid_carry(
@@ -657,16 +805,27 @@ class WorkbenchModel:
         sand: SandState,
         swing: SwingSetup,
         reasons: list[str],
-    ) -> float:
-        """Carry at one grid point, or NaN when the point is unanswerable."""
+    ) -> CarryEstimate | None:
+        """Carry at one grid point, or ``None`` when it is unanswerable.
+
+        Args:
+            geometry: The design vector.
+            sand: The sand state at this grid point.
+            swing: The delivery at this grid point.
+            reasons: Accumulator for why a point could not be answered.
+
+        Returns:
+            The carry and its verdict, or ``None``.
+        """
         build = self.head_build(geometry)
         solver = self.solver(sand, swing)
+        kinematics = entry_kinematics(build, swing, self._settings)
         try:
             result = simulate_shot(
                 solver,
                 build.elements_body,
                 head_mass_kg=geometry.head_mass_kg,
-                kinematics=entry_kinematics(build, swing, self._settings),
+                kinematics=kinematics,
                 settings=ShotSettings(
                     time_step_s=self._settings.time_step_s,
                     max_time_s=self._settings.max_time_s,
@@ -675,12 +834,26 @@ class WorkbenchModel:
             )
         except OutOfEnvelopeError:
             reasons.append("the solver refused every point in the delivery sweep")
-            return math.nan
+            return None
         try:
-            return self.carry_m(geometry, swing, result.max_depth_m)
+            trace = strike_trace(
+                result,
+                kinematics.orientation,
+                kinematics.orientation @ build.sole_reference_body_m,
+            )
+            divot = self._divot(
+                trace,
+                build.head_model,
+                _strike_scene(swing.ball_depth_m),
+                geometry,
+                sand,
+            )
+            return self.carry_estimate(
+                geometry, swing, _sand_delivery(result, _measured_divot(divot))
+            )
         except (RuntimeError, ImportError, ValueError) as error:
             reasons.append(f"carry is unavailable: {error}")
-            return math.nan
+            return None
 
     # -------------------------------------------------------------- top level
 
