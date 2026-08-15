@@ -23,6 +23,8 @@ from src.shared.python.humanoid_character_builder.generators._smplx_generator im
     SMPLXMeshGenerator,
 )
 
+pytestmark = pytest.mark.unit
+
 _MEASURED_BETAS = [0.5, -1.2, 0.0, 0.3, -0.7, 1.1, 0.05, -0.4, 0.9, 0.2]
 
 

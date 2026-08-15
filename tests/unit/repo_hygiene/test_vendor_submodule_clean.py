@@ -5,6 +5,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 ROOT = Path(__file__).resolve().parent.parent.parent.parent
 VENDOR_DIR = ROOT / "vendor" / "ud-tools"
 
