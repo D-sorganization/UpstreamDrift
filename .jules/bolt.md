@@ -133,3 +133,6 @@
 ## 2024-06-25 - [Replacing np.sum(x * x, axis=0) with np.einsum for performance]
 **Learning:** For calculating the sum of squares along an axis (like `axis=0`) on a 2D array, `np.einsum('ij,ij->j', x, x)` avoids temporary intermediate array allocations and provides ~3x faster execution than `np.sum(x * x, axis=0)`.
 **Action:** Replace `np.sum(x * x, axis=0)` with `np.einsum('ij,ij->j', x, x)` when optimizing numeric array code on paths like mathematical modeling or geometry calculation.
+## 2026-06-25 - Pandas iterrows vs vectorized dictionary conversion
+**Learning:** Iterating over a pandas DataFrame using `.iterrows()` and unpacking the resulting Series into a tuple is extremely slow due to Python object overhead and Series creation for every row.
+**Action:** Replaced `.iterrows()` loop with dictionary conversion via `df.to_dict('records')` and iterating over `row.values()` when unpacking DataFrame rows for UI widgets and validation loops. This provides a significant speedup for iteration.
