@@ -168,6 +168,67 @@ def _optional(value: float | None, unit: str, scale: float = 1.0) -> str:
     return f"{value * scale:.4g} {unit}"
 
 
+def _head_load_lines(outcome: ShotOutcome) -> tuple[str, ...]:
+    """Head-load section, or nothing when the metrics were not computed."""
+    if outcome.loads is None:
+        return ()
+    loads = outcome.loads
+    return (
+        "Head loads",
+        _THIN,
+        _line("Peak deceleration", f"{loads.peak_deceleration_g:.4g} g"),
+        _line("Peak moment about the CG", f"{loads.peak_resultant_moment_Nm:.4g} N.m"),
+        _line("Mean resultant force", f"{loads.mean_resultant_force_N:.4g} N"),
+        "",
+    )
+
+
+def _divot_lines(outcome: ShotOutcome) -> tuple[str, ...]:
+    """Divot section, or nothing when no divot profile was produced."""
+    if outcome.divot is None:
+        return ()
+    divot = outcome.divot
+    return (
+        "Divot",
+        _THIN,
+        _line(
+            "Entry behind ball",
+            f"{divot.entry_distance_behind_ball_m * 1e3:.4g} mm",
+        ),
+        _line("Maximum depth", f"{divot.max_depth_m * 1e3:.4g} mm"),
+        _line("Length", f"{divot.length_m * 1e3:.4g} mm"),
+        _line("Sand moved", f"{divot.mass_kg:.4g} kg"),
+        "",
+    )
+
+
+def _dig_skid_lines(outcome: ShotOutcome) -> tuple[str, ...]:
+    """Dig-versus-skid section, or nothing when it was not evaluated."""
+    if outcome.dig_skid is None:
+        return ()
+    skid = outcome.dig_skid
+    return (
+        "Dig versus skid",
+        _THIN,
+        _line("Verdict", skid.verdict.value.upper()),
+        _line("Slope ratio", f"{skid.slope_ratio:.3f}"),
+        _line("Vertical sand impulse", f"{skid.vertical_sand_impulse_Ns:.4g} N.s"),
+        "",
+    )
+
+
+def _ball_lines(outcome: ShotOutcome) -> tuple[str, ...]:
+    """Ball section, or nothing when no carry was computed."""
+    if outcome.carry_m is None:
+        return ()
+    return (
+        "Ball",
+        _THIN,
+        _line("Carry", f"{outcome.carry_m:.4g} m"),
+        "",
+    )
+
+
 def shot_report(outcome: ShotOutcome) -> str:
     """Render one shot: verdict first, then whatever numbers exist.
 
@@ -230,67 +291,10 @@ def shot_report(outcome: ShotOutcome) -> str:
             "",
         )
     )
-    if outcome.loads is not None:
-        lines.extend(
-            (
-                "Head loads",
-                _THIN,
-                _line(
-                    "Peak deceleration",
-                    f"{outcome.loads.peak_deceleration_g:.4g} g",
-                ),
-                _line(
-                    "Peak moment about the CG",
-                    f"{outcome.loads.peak_resultant_moment_Nm:.4g} N.m",
-                ),
-                _line(
-                    "Mean resultant force",
-                    f"{outcome.loads.mean_resultant_force_N:.4g} N",
-                ),
-                "",
-            )
-        )
-    if outcome.divot is not None:
-        divot = outcome.divot
-        lines.extend(
-            (
-                "Divot",
-                _THIN,
-                _line(
-                    "Entry behind ball",
-                    f"{divot.entry_distance_behind_ball_m * 1e3:.4g} mm",
-                ),
-                _line("Maximum depth", f"{divot.max_depth_m * 1e3:.4g} mm"),
-                _line("Length", f"{divot.length_m * 1e3:.4g} mm"),
-                _line("Sand moved", f"{divot.mass_kg:.4g} kg"),
-                "",
-            )
-        )
-    if outcome.dig_skid is not None:
-        skid = outcome.dig_skid
-        verdict = skid.verdict
-        lines.extend(
-            (
-                "Dig versus skid",
-                _THIN,
-                _line("Verdict", verdict.value.upper()),
-                _line("Slope ratio", f"{skid.slope_ratio:.3f}"),
-                _line(
-                    "Vertical sand impulse",
-                    f"{skid.vertical_sand_impulse_Ns:.4g} N.s",
-                ),
-                "",
-            )
-        )
-    if outcome.carry_m is not None:
-        lines.extend(
-            (
-                "Ball",
-                _THIN,
-                _line("Carry", f"{outcome.carry_m:.4g} m"),
-                "",
-            )
-        )
+    lines.extend(_head_load_lines(outcome))
+    lines.extend(_divot_lines(outcome))
+    lines.extend(_dig_skid_lines(outcome))
+    lines.extend(_ball_lines(outcome))
     if outcome.unavailable:
         lines.append("Not computed")
         lines.append(_THIN)
