@@ -39,8 +39,8 @@ class DataFrameTable(QtWidgets.QTableWidget):
         self.setRowCount(len(preview))
         self.setColumnCount(len(preview.columns))
         self.setHorizontalHeaderLabels([str(column) for column in preview.columns])
-        for row_position, (_, row) in enumerate(preview.iterrows()):
-            for column_position, value in enumerate(row):
+        for row_position, row in enumerate(preview.to_dict("records")):
+            for column_position, value in enumerate(row.values()):
                 text = "" if pd.isna(value) else str(value)
                 self.setItem(
                     row_position, column_position, QtWidgets.QTableWidgetItem(text)
