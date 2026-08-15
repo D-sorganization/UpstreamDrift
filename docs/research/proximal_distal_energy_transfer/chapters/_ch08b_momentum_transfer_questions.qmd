@@ -181,9 +181,16 @@ shown for the registered synthetic excitations.](figures/fig_typed_slack_dynamic
 
 This evidence supports only a typed experimental program. It does not show
 that slack is good, bad, intentional, required, or beneficial for delivery.
-Any such proposal must still survive matched-energy, zero-slack,
-direction-reversal, passivity, work-energy closure, and independent-measurement
-controls in a forward delivery model.
+The articulated forward atlas now performs the first of those transport tests:
+bilateral, tension-only, and two dead-zone laws are compared under common
+displacement and approximately matched radial extension across 1,944 bounded
+trajectories. The 1.5 mm law remains open under the common 1 mm displacement
+but taut under matched extension; natural branches show no transition before
+5 ms, while isolated boundary probes qualify opening and reattachment. This
+shows why preload matching changes the answer, not that either condition is
+beneficial. Any benefit proposal must still survive longer matched-work/load
+delivery, stateful hysteresis, calibrated distributed contact, and independent
+human measurement.
 
 ## Evidential Boundary
 

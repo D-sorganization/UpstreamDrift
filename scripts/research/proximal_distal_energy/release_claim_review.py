@@ -258,6 +258,12 @@ REVIEW_SPECS: dict[str, dict[str, Any]] = {
         ("PD-CLAIM-280", "PD-CLAIM-281", "PD-CLAIM-282"),
         "Extend the right-censored horizon with typed unilateral slack, calibrated distributed grip and shaft compliance, ground coupling, and governed bilateral human wrenches.",
     ),
+    "typed_articulated_slack": _spec(
+        "reviewed_as_right_censored_synthetic_contact_result",
+        "five_millisecond_typed_attachment_event_gate_qualified",
+        ("PD-CLAIM-283", "PD-CLAIM-284", "PD-CLAIM-285"),
+        "Extend the right-censored typed laws through calibrated distributed grip and shaft contact, longer matched-work/load delivery, ground coupling, and governed bilateral human wrenches.",
+    ),
     "scapulothoracic_contact_geometry": _spec(
         "reviewed_as_paired_geometry_screen_with_explicit_boundaries",
         "paired_geometry_screen_partial_with_explicit_boundaries",

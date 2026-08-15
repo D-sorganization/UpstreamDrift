@@ -136,8 +136,9 @@ noise, normalized cross-talk, calibration residual, and contact-center
 migration. It demonstrates that net-wrench closure does not establish force
 allocation and retains physical-device and human validation as open gates.
 MT-E08 now executes the prescribed-state rejection and reduced-tree
-closed-contact screen, then retains independently integrated calibrated
-articulated contact and participant-held-out falsification as open gates.
+closed-contact screen, bounded bilateral forward dynamics, and a typed
+unilateral slack/contact atlas. Calibrated distributed contact, longer
+delivery, and participant-held-out falsification remain open gates.
 The first external-evidence audit slice narrows the introduction and empirical
 evidence synthesis, records reciprocal candidate dispositions, and separates
 sample-specific associations from causal mechanisms. In particular, it corrects
@@ -265,6 +266,9 @@ python3 scripts/research/proximal_distal_energy/register_articulated_contact_pro
 python3 -m scripts.research.proximal_distal_energy.run_articulated_forward_contact
 python3 -m scripts.research.proximal_distal_energy.make_articulated_forward_contact_figure
 python3 scripts/research/proximal_distal_energy/register_articulated_forward_contact_claims.py
+python3 -m scripts.research.proximal_distal_energy.run_articulated_slack_atlas
+python3 -m scripts.research.proximal_distal_energy.make_articulated_slack_figure
+python3 scripts/research/proximal_distal_energy/register_articulated_slack_claims.py
 python3 -m scripts.research.proximal_distal_energy.run_spatial_forward_contact_study
 python3 -m scripts.research.proximal_distal_energy.run_uncertainty_control_study
 python3 -m scripts.research.proximal_distal_energy.run_timing_viability_study
