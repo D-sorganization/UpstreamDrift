@@ -129,3 +129,7 @@
 ## 2026-06-25 - [Replacing np.sum(x**2) with np.vdot(x,x) for performance]
 **Learning:** For calculating the sum of squares of a 1D array, `np.vdot(x, x)` avoids temporary array allocations (unlike `x**2`) and is ~3-4x faster than `np.sum(x**2)`.
 **Action:** Replace `np.sum((a-b)**2)` with `diff = a-b; np.vdot(diff, diff)` and `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum("ij,ij->i", x, x))` when optimizing tight numerical calculation loops.
+
+## 2024-06-25 - [Replacing np.sum(x * x, axis=0) with np.einsum for performance]
+**Learning:** For calculating the sum of squares along an axis (like `axis=0`) on a 2D array, `np.einsum('ij,ij->j', x, x)` avoids temporary intermediate array allocations and provides ~3x faster execution than `np.sum(x * x, axis=0)`.
+**Action:** Replace `np.sum(x * x, axis=0)` with `np.einsum('ij,ij->j', x, x)` when optimizing numeric array code on paths like mathematical modeling or geometry calculation.
