@@ -81,6 +81,40 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-08-14** - Rebuilt BunkerShot3D as a multi-fidelity wedge-design tool
+  under epic #8607 (ADR-0032). The package is now organised around the design
+  question — given two sole geometries, which performs better, in what
+  conditions, and how confident are we — rather than around granular backends.
+  Resolved DEM was demoted from the primary path on arithmetic, not preference:
+  the previous canonical configuration held 50,000 grains at 0.4 mm in a
+  0.4x0.3x0.1 m domain, a solid fraction of 1.4e-4 and a settled bed 0.023 mm
+  deep, while a real 100 mm USGA base needs 2.1e8 grains, and the Chrono driver
+  integrated at ~11,900x the Rayleigh stability limit by using the output
+  sampling rate as its timestep. The default tier (F0) is now an analytic
+  dynamic Resistive Force Theory solver at ~14 ms/shot, with DEM retained and
+  explicitly labelled non-viable at true grain scale.
+
+  New public surface: `bunkershot3d.{geometry,sand,domain,solvers,ball,metrics,
+study,vandv,provenance,units}`, with subpackages re-exported by name and a
+  curated flat set; `study` is lazily imported so `postproc` does not require
+  the optimisation extras. The result schema is versioned (contiguous arrays
+  replacing one HDF5 group per timestep, reader accepting v1 and v2) and every
+  run carries a manifest with config and physics hashes, seeds, and a validity
+  verdict.
+
+  **Credibility, stated plainly: verification is real, validation is zero.**
+  Observed orders are 1.004 (energy) and 2.001 (surface quadrature) against a
+  closed-form integral, and an angular-momentum check catches axis swaps that
+  leave the resultant force bit-identical. But no published data exists for ball
+  launch, spin, head deceleration in sand, energy split or ejecta mass, so
+  `ValidationComparison` refuses to construct such a comparison at all. The
+  solver is used ~60x outside RFT's stated Fr < 0.4 envelope and ~20x beyond any
+  published validation; `delta_h` and `lambda` are uncalibrated for a wedge, and
+  every F0 coefficient is borrowed rather than measured. Out-of-envelope queries
+  refuse rather than return a plausible number. See
+  `docs/bunkershot3d/credibility.md`; `docs/bunkershot3d/comparison.md` was
+  rewritten after seven of its eight claims were found to contradict the code.
+
 - **2026-08-13** - Adjudicated the transmission robustness chapter for #8557.
   All four registered programs remain nondominated in every held-out
   leave-one-case-out recomputation. The task map retains algebraic rank three
