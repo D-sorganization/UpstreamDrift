@@ -151,15 +151,15 @@ controls.
 
 ## Critical-Question Completion Map
 
-| Handwritten Question                                     | Current Answer                                                                                                                                        | Decisive Completion Path                                                                                                                                      |
-| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| How much is drift?                                       | Exactly defined and computed at declared planar states and windows; no model-independent or human fraction exists.                                    | Repeat the work/impulse attribution in articulated spatial forward dynamics and held-out participants with uncertainty intervals and cancellation reporting.  |
-| What are the geometry dependencies?                      | Moment arm, force--velocity projection, reference point, grip span, and constraint conditioning can change magnitude or sign in current tiers.        | Subject-specific scapula/arms, calibrated grip/contact, distributed shaft, null and sign-reversal controls in two engines.                                    |
-| What is the timing of momentum flow?                     | Phase-resolved model windows exist; clock versus state-trigger results are conditional and no sustained recovery was observed in 60 registered cases. | Independent proximal acceleration, braking, and distal-release interventions with common-phase event definitions, observer delay, and held-out perturbations. |
-| What constitutes casting or early body deceleration?     | Definition-dependent model events are registered; no unique physiological event has been established.                                                 | Preregister competing event definitions and require agreement or report disagreement against motion, wrench, shaft, and impact measurements.                  |
-| Does passive drift reduce timing demand or self-correct? | Not established; the registered screen did not show sustained half-error recovery.                                                                    | Estimate attraction/recovery regions under delay, saturation, contact loads, and subject scaling, then test the frozen human endpoint.                        |
-| Does maximizing proximal velocity maximize transfer?     | No universal rule is supported; rate effects are nonmonotonic and matching-rule dependent.                                                            | Full-delivery-state matching with speed, braking work, load, face/path, strike, and robustness Pareto outcomes.                                               |
-| Is slack useful or necessary?                            | There is no global answer; five distinct slack classes are separated and intentional slack remains unidentifiable.                                    | Embed each class separately in higher-order models, measure the corresponding state, and test benefit, harm, and null regions without cross-class inference.  |
+| Handwritten Question                                     | Current Answer                                                                                                                                                                                                 | Decisive Completion Path                                                                                                                                                   |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| How much is drift?                                       | Exactly defined and computed at declared planar states and windows; no model-independent or human fraction exists.                                                                                             | Repeat the work/impulse attribution in articulated spatial forward dynamics and held-out participants with uncertainty intervals and cancellation reporting.               |
+| What are the geometry dependencies?                      | Moment arm, force--velocity projection, reference point, grip span, and constraint conditioning can change magnitude or sign in current tiers.                                                                 | Subject-specific scapula/arms, calibrated grip/contact, distributed shaft, null and sign-reversal controls in two engines.                                                 |
+| What is the timing of momentum flow?                     | Phase-resolved model windows exist; clock versus state-trigger results are conditional and no sustained recovery was observed in 60 registered cases.                                                          | Independent proximal acceleration, braking, and distal-release interventions with common-phase event definitions, observer delay, and held-out perturbations.              |
+| What constitutes casting or early body deceleration?     | Definition-dependent model events are registered; no unique physiological event has been established.                                                                                                          | Preregister competing event definitions and require agreement or report disagreement against motion, wrench, shaft, and impact measurements.                               |
+| Does passive drift reduce timing demand or self-correct? | Not established; the registered screen did not show sustained half-error recovery.                                                                                                                             | Estimate attraction/recovery regions under delay, saturation, contact loads, and subject scaling, then test the frozen human endpoint.                                     |
+| Does maximizing proximal velocity maximize transfer?     | No universal rule is supported; rate effects are nonmonotonic and matching-rule dependent.                                                                                                                     | Full-delivery-state matching with speed, braking work, load, face/path, strike, and robustness Pareto outcomes.                                                            |
+| Is slack useful or necessary?                            | There is no global answer. Five classes are separated; a 1,944-trajectory articulated atlas shows that preload matching reverses open/taut classification, while natural events remain right-censored at 5 ms. | Extend typed laws through distributed matched-work/load delivery, measure the corresponding state, and test benefit, harm, and null regions without cross-class inference. |
 
 This map distinguishes a bounded model answer from project completion. A row is
 complete only when its registered model, measurement, uncertainty, negative
@@ -191,7 +191,10 @@ remain subject to the model and human-evidence boundaries below.
    independent-engine comparison, and discrepancy report. The first
    subject-scaled atlas is complete and rejects the current prescribed common
    states as anatomical contact configurations: hand-to-grip error is
-   0.171--0.616 m despite full local constraint rank.
+   0.171--0.616 m despite full local constraint rank. The bounded follow-up
+   closes the reduced tree, passes bilateral forward dynamics, and qualifies
+   typed unilateral opening/reattachment under common-displacement and
+   matched-extension controls. Calibrated distributed contact remains open.
 6. **Neuromuscular and Control Models:** activation, redundancy,
    identifiability, robust control, and held-out simulation evidence.
 7. **Human Falsification:** acquire governed synchronized bilateral six-axis
@@ -278,6 +281,17 @@ The worst normalized energy residual decreases from 0.00738 to 0.000854 under
 refinement. This is a right-censored bilateral-attachment result, not a model of
 unilateral slack, calibrated grip or shaft structure, ground coupling, late
 downswing, impact, human transfer, or coaching strategy.
+
+Child issue #8682 adds a distinct typed unilateral-contact gate. Bilateral,
+tension-only, and two radial dead-zone laws are compared under common 1 mm
+displacement and approximately matched extension across 1,944 trajectories.
+The 1.5 mm common-displacement cases remain open while their matched-extension
+counterparts remain taut; no natural branch crosses state before 5 ms.
+Isolated open-to-taut and taut-to-open probes qualify event handling in both
+native engines. All power, passivity, work--energy, refinement, trajectory,
+force, and active-set parity gates pass. This demonstrates preload/law
+confounding and software event fidelity, not a benefit of slack or a human
+strategy.
 
 Completion of the candidate census is not completion of release review or the
 research program. In

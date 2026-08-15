@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "d8ea929fabc0790f4c00f1dba1f27f70f844a08f03f26402555806015566b4a4",
+    "source_digest": "a60b0e7a24997d74bdcd88aa59dcdb7cc19265a5a10464f91257f8ce91ed9172",
     "baseline_commit": "a4b53e39b"
   },
   "audit_scope": {
@@ -11,7 +11,7 @@
     "release_review_completion_status": "complete",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "The complete paper inventory is adjudicated, including exact energy matching, actuator-work and load matching, and identical-state acceleration interventions."
+    "current_scope": "The complete paper inventory is adjudicated. The articulated bilateral and typed unilateral attachment tiers pass their registered five-millisecond gates. Distributed calibrated contact and governed human validation remain open."
   },
   "dependencies": [
     {
@@ -219,6 +219,11 @@
       "release_claim_key": "bounded_articulated_forward_contact",
       "published_status": "five_millisecond_bilateral_attachment_forward_gate_qualified",
       "audit_state": "reviewed_as_right_censored_synthetic_forward_result"
+    },
+    {
+      "release_claim_key": "typed_articulated_slack",
+      "published_status": "five_millisecond_typed_attachment_event_gate_qualified",
+      "audit_state": "reviewed_as_right_censored_synthetic_contact_result"
     }
   ],
   "candidate_reviews": [
@@ -3845,26 +3850,6 @@
     },
     {
       "candidate_id": "PD-CAND-8be30b67be37e89f",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-128"
-      ],
-      "rationale": "Adjudicated within PD-CLAIM-128; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13"
-    },
-    {
-      "candidate_id": "PD-CAND-c452c1575879a613",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-128"
-      ],
-      "rationale": "Adjudicated within PD-CLAIM-128; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13"
-    },
-    {
-      "candidate_id": "PD-CAND-d200cb0a538c6e52",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-128"
@@ -8252,16 +8237,6 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-ac373f7ecba4fa8d",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-253"
-      ],
-      "rationale": "This passage states or bounds a registered critical-question conclusion.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-14"
-    },
-    {
       "candidate_id": "PD-CAND-49c472fa030a2018",
       "disposition": "material_claims_mapped",
       "claim_ids": [
@@ -8921,18 +8896,6 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-b98d9a890ea75aff",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-262",
-        "PD-CLAIM-264",
-        "PD-CLAIM-270"
-      ],
-      "rationale": "This passage states or bounds the subject-scaled contact-geometry audit.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-14"
-    },
-    {
       "candidate_id": "PD-CAND-d062d3a7b7e089ee",
       "disposition": "material_claims_mapped",
       "claim_ids": [
@@ -8944,26 +8907,6 @@
     },
     {
       "candidate_id": "PD-CAND-d477dd45e2f2542c",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-262"
-      ],
-      "rationale": "This revised synthesis passage carries the registered contact-feasibility boundary or its next-test consequence.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-14"
-    },
-    {
-      "candidate_id": "PD-CAND-7f3f4f4c40fd141d",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-262"
-      ],
-      "rationale": "This revised synthesis passage carries the registered contact-feasibility boundary or its next-test consequence.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-14"
-    },
-    {
-      "candidate_id": "PD-CAND-96739b1a09c6ff95",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-262"
@@ -10454,6 +10397,147 @@
       "rationale": "This passage states or bounds a registered proximal rate or acceleration result.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-5d3b0ab4a7bb6634",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-283"
+      ],
+      "rationale": "This passage states or bounds the typed articulated slack gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "candidate_id": "PD-CAND-9df3c7b592db9af9",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-283"
+      ],
+      "rationale": "This passage states or bounds the typed articulated slack gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "candidate_id": "PD-CAND-297e909147a30490",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "The figure include points to registered evidence without a standalone claim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "candidate_id": "PD-CAND-1d879a0cbb70495a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-284"
+      ],
+      "rationale": "This passage states or bounds the typed articulated slack gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "candidate_id": "PD-CAND-c21acd8fffa5704e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-284"
+      ],
+      "rationale": "This passage states or bounds the typed articulated slack gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "candidate_id": "PD-CAND-f6e7da9a2c420424",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-285"
+      ],
+      "rationale": "This passage states or bounds the typed articulated slack gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "candidate_id": "PD-CAND-506f6479feda769d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-283"
+      ],
+      "rationale": "This repeated boundary or model-ladder passage inherits the mapped primary claim limits.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "candidate_id": "PD-CAND-c81672ca0e4c2320",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-128",
+        "PD-CLAIM-262",
+        "PD-CLAIM-264",
+        "PD-CLAIM-270",
+        "PD-CLAIM-285"
+      ],
+      "rationale": "This repeated boundary or model-ladder passage inherits the mapped primary claim limits.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "candidate_id": "PD-CAND-498e02bc8b231886",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-128",
+        "PD-CLAIM-262",
+        "PD-CLAIM-285"
+      ],
+      "rationale": "This repeated boundary or model-ladder passage inherits the mapped primary claim limits.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "candidate_id": "PD-CAND-2cd9b9cc528f3acb",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-128",
+        "PD-CLAIM-262",
+        "PD-CLAIM-285"
+      ],
+      "rationale": "This repeated boundary or model-ladder passage inherits the mapped primary claim limits.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "candidate_id": "PD-CAND-c357588db18f5c6c",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-128",
+        "PD-CLAIM-284",
+        "PD-CLAIM-285"
+      ],
+      "rationale": "This repeated boundary or model-ladder passage inherits the mapped primary claim limits.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "candidate_id": "PD-CAND-beaf8f5cead4ff2a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-128",
+        "PD-CLAIM-284",
+        "PD-CLAIM-285"
+      ],
+      "rationale": "This repeated boundary or model-ladder passage inherits the mapped primary claim limits.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "candidate_id": "PD-CAND-0e5d5314a405698d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-253",
+        "PD-CLAIM-285"
+      ],
+      "rationale": "This repeated boundary or model-ladder passage inherits the mapped primary claim limits.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
     }
   ],
   "claims": [
@@ -15027,14 +15111,17 @@
       "claim_id": "PD-CLAIM-128",
       "candidate_ids": [
         "PD-CAND-8be30b67be37e89f",
-        "PD-CAND-c452c1575879a613",
-        "PD-CAND-d200cb0a538c6e52",
         "PD-CAND-d2bfd72f6462a516",
         "PD-CAND-7667c0e512dd9e84",
         "PD-CAND-fc0fb848d84d02cb",
-        "PD-CAND-4a557d919aeb6342"
+        "PD-CAND-4a557d919aeb6342",
+        "PD-CAND-c81672ca0e4c2320",
+        "PD-CAND-498e02bc8b231886",
+        "PD-CAND-2cd9b9cc528f3acb",
+        "PD-CAND-c357588db18f5c6c",
+        "PD-CAND-beaf8f5cead4ff2a"
       ],
-      "statement": "The discrepancy matrix records explicit branch capabilities rather than cumulative triangular inheritance; nine bounded findings are supported somewhere in executed tiers, while anatomical-arm, distributed-shaft-magnitude, and independently authored humanoid force-history transport remain untested.",
+      "statement": "The discrepancy matrix records explicit branch capabilities rather than cumulative triangular inheritance; ten bounded findings are supported somewhere in executed tiers, while calibrated anatomical, distributed, and independently measured human transport remain untested.",
       "classification": "model_discrepancy_and_survival_boundary",
       "published_status": "machine_readable_branched_boundary",
       "audit_status": "capability_cells_findings_and_open_nonclaims_checked",
@@ -15045,7 +15132,12 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:319",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:56",
         "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:12",
-        "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:14"
+        "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:14",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:651",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:685",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:286",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:299",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:305"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
@@ -20630,9 +20722,9 @@
         "PD-CAND-c4c001fab108c8b8",
         "PD-CAND-5bb964996c957e8b",
         "PD-CAND-c6f3dffde5c055ae",
-        "PD-CAND-ac373f7ecba4fa8d"
+        "PD-CAND-0e5d5314a405698d"
       ],
-      "statement": "A two-excitation synthetic constitutive audit separates five slack classes, closes the four mechanical work-energy ledgers, and obtains full local scaled-sensitivity rank, but one transmitted-output channel does not identify the generating class or establish a delivery benefit.",
+      "statement": "A two-excitation constitutive audit separates five slack classes, and a 1,944-trajectory articulated atlas transports three attachment classes under preload and event controls; neither establishes class identity or benefit.",
       "classification": "typed_slack_dynamic_passivity_and_identifiability_audit",
       "published_status": "constitutive_mechanical_closure_supported_class_identification_not_established",
       "audit_status": "evidence_boundary_and_falsification_contract_checked",
@@ -20640,7 +20732,8 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:147",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:155",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:166",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:170"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:170",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:182"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
@@ -21562,15 +21655,15 @@
     {
       "claim_id": "PD-CLAIM-262",
       "candidate_ids": [
-        "PD-CAND-b98d9a890ea75aff",
         "PD-CAND-c063936829317748",
         "PD-CAND-c3105f94a0a046da",
         "PD-CAND-d062d3a7b7e089ee",
         "PD-CAND-d477dd45e2f2542c",
-        "PD-CAND-7f3f4f4c40fd141d",
-        "PD-CAND-96739b1a09c6ff95"
+        "PD-CAND-c81672ca0e4c2320",
+        "PD-CAND-498e02bc8b231886",
+        "PD-CAND-2cd9b9cc528f3acb"
       ],
-      "statement": "The bounded articulated attachment screen advances closed states through 5 ms with independent-engine controls, but timing, recovery, and slack claims still require longer calibrated forward contact with typed unilateral loss and distributed structure.",
+      "statement": "The bounded articulated bilateral and typed unilateral screens advance closed states through 5 ms with independent-engine controls, but timing, recovery, and benefit claims require longer calibrated distributed contact.",
       "classification": "articulated_spatial_completion_gate",
       "published_status": "bounded_articulated_attachment_forward_gate_complete_longer_calibrated_contact_open",
       "audit_status": "deterministic_subject_scaling_closure_rank_and_geometry_controls_checked",
@@ -21581,7 +21674,9 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:506",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:515",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:621",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:286"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:286",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:651",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:685"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
@@ -21705,9 +21800,9 @@
       "claim_id": "PD-CLAIM-264",
       "candidate_ids": [
         "PD-CAND-684ed6cb396eac0e",
-        "PD-CAND-b98d9a890ea75aff",
         "PD-CAND-9dd9306ab117189e",
-        "PD-CAND-9bdb0446f034d972"
+        "PD-CAND-9bdb0446f034d972",
+        "PD-CAND-c81672ca0e4c2320"
       ],
       "statement": "Closed-contact inverse kinematics is a necessary geometric gate and does not establish anatomy, contact force, work, passivity, timing demand, self-correction, slack benefit, or human strategy.",
       "classification": "closed_contact_inference_boundary",
@@ -21717,7 +21812,8 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:318",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:589",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:55",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:64"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:64",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:651"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
@@ -22089,7 +22185,7 @@
       "claim_id": "PD-CLAIM-270",
       "candidate_ids": [
         "PD-CAND-f885f0bb4a96dc0b",
-        "PD-CAND-b98d9a890ea75aff"
+        "PD-CAND-c81672ca0e4c2320"
       ],
       "statement": "The closed-state bridge removes an initialization gap but does not establish calibrated equipment, articulated anatomical dynamics, tissue loading, passive transfer, delivery benefit, slack benefit, or human strategy.",
       "classification": "closed_state_forward_bridge_inference_boundary",
@@ -22097,7 +22193,8 @@
       "audit_status": "deterministic_subject_scaling_closure_rank_and_geometry_controls_checked",
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:357",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:589"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:589",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:651"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
@@ -23292,6 +23389,163 @@
       "adjudication": "Reconciled to executable artifacts without promoting pointwise or synthetic evidence to a human strategy.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-283",
+      "candidate_ids": [
+        "PD-CAND-5d3b0ab4a7bb6634",
+        "PD-CAND-9df3c7b592db9af9",
+        "PD-CAND-506f6479feda769d"
+      ],
+      "statement": "A registered articulated atlas distinguishes bilateral, tension-only, and dead-zone attachment laws under common-displacement, matched-extension, reversal, and isolated event controls.",
+      "classification": "typed_articulated_slack_design",
+      "published_status": "complete_for_declared_bounded_matrix",
+      "audit_status": "typed_articulated_slack_events_and_matched_controls_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:544",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:566",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:559"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_slack_atlas.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_slack_atlas.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_slack_atlas.pdf",
+        "scripts/research/proximal_distal_energy/articulated_slack_contact.py",
+        "scripts/research/proximal_distal_energy/articulated_slack_forward.py",
+        "scripts/research/proximal_distal_energy/articulated_slack_atlas.py",
+        "scripts/research/proximal_distal_energy/run_articulated_slack_atlas.py",
+        "scripts/research/proximal_distal_energy/make_articulated_slack_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_slack_claims.py",
+        "tests/research/test_articulated_slack_contact.py",
+        "tests/research/test_articulated_slack_forward.py"
+      ],
+      "model_domain": "Eighteen synthetic articulated states, sixteen natural law/preload/velocity conditions, two isolated event probes, three time steps, two native engines, and a five-millisecond horizon.",
+      "uncertainty_boundary": "The passive laws and parameters are synthetic point-attachment comparators, not tissue or intent.",
+      "competing_explanations": [
+        "preload-energy mismatch rather than slack",
+        "short right-censored horizon",
+        "memoryless radial law rather than distributed contact or tissue",
+        "shared analytical contact law and semi-implicit integrator"
+      ],
+      "negative_controls": [
+        "bilateral and zero-slack tension comparators",
+        "common-displacement versus matched-extension preload",
+        "initial-velocity reversal",
+        "open-to-taut and taut-to-open event probes",
+        "three-step refinement and two native dynamics operators"
+      ],
+      "falsifier": "An open interface transmits force, a law creates compression contrary to its contract, or a preload control is omitted.",
+      "adjudication": "The registered event and natural-state results are reported separately with explicit right-censoring and no human or coaching inference.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "claim_id": "PD-CLAIM-284",
+      "candidate_ids": [
+        "PD-CAND-1d879a0cbb70495a",
+        "PD-CAND-c21acd8fffa5704e",
+        "PD-CAND-c357588db18f5c6c",
+        "PD-CAND-beaf8f5cead4ff2a"
+      ],
+      "statement": "The 1,944-trajectory atlas passes power, passivity, work-energy, refinement, native-engine trajectory/force, and active-set parity gates; natural states show no transition before five milliseconds while isolated probes reproduce opening and reattachment.",
+      "classification": "typed_articulated_slack_result",
+      "published_status": "supported_at_declared_five_millisecond_synthetic_tier",
+      "audit_status": "typed_articulated_slack_events_and_matched_controls_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:580",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:588",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:299",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:305"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_slack_atlas.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_slack_atlas.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_slack_atlas.pdf",
+        "scripts/research/proximal_distal_energy/articulated_slack_contact.py",
+        "scripts/research/proximal_distal_energy/articulated_slack_forward.py",
+        "scripts/research/proximal_distal_energy/articulated_slack_atlas.py",
+        "scripts/research/proximal_distal_energy/run_articulated_slack_atlas.py",
+        "scripts/research/proximal_distal_energy/make_articulated_slack_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_slack_claims.py",
+        "tests/research/test_articulated_slack_contact.py",
+        "tests/research/test_articulated_slack_forward.py"
+      ],
+      "model_domain": "Eighteen synthetic articulated states, sixteen natural law/preload/velocity conditions, two isolated event probes, three time steps, two native engines, and a five-millisecond horizon.",
+      "uncertainty_boundary": "Natural event absence is right-censored; probe events qualify implementation and are not natural-state predictions.",
+      "competing_explanations": [
+        "preload-energy mismatch rather than slack",
+        "short right-censored horizon",
+        "memoryless radial law rather than distributed contact or tissue",
+        "shared analytical contact law and semi-implicit integrator"
+      ],
+      "negative_controls": [
+        "bilateral and zero-slack tension comparators",
+        "common-displacement versus matched-extension preload",
+        "initial-velocity reversal",
+        "open-to-taut and taut-to-open event probes",
+        "three-step refinement and two native dynamics operators"
+      ],
+      "falsifier": "Any reproduced cell exceeds a registered numerical/parity gate or an event probe fails to cross the declared boundary.",
+      "adjudication": "The registered event and natural-state results are reported separately with explicit right-censoring and no human or coaching inference.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "claim_id": "PD-CLAIM-285",
+      "candidate_ids": [
+        "PD-CAND-f6e7da9a2c420424",
+        "PD-CAND-c81672ca0e4c2320",
+        "PD-CAND-498e02bc8b231886",
+        "PD-CAND-2cd9b9cc528f3acb",
+        "PD-CAND-c357588db18f5c6c",
+        "PD-CAND-beaf8f5cead4ff2a",
+        "PD-CAND-0e5d5314a405698d"
+      ],
+      "statement": "Changing the law and preload match can reverse open/taut classification, but the atlas does not establish slack benefit, necessity, intentionality, self-correction, timing economy, delivery advantage, or human strategy.",
+      "classification": "typed_articulated_slack_inference_boundary",
+      "published_status": "explicitly_bounded",
+      "audit_status": "typed_articulated_slack_events_and_matched_controls_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:596",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:651",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:685",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:286",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:299",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:305",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:182"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_slack_atlas.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_slack_atlas.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_slack_atlas.pdf",
+        "scripts/research/proximal_distal_energy/articulated_slack_contact.py",
+        "scripts/research/proximal_distal_energy/articulated_slack_forward.py",
+        "scripts/research/proximal_distal_energy/articulated_slack_atlas.py",
+        "scripts/research/proximal_distal_energy/run_articulated_slack_atlas.py",
+        "scripts/research/proximal_distal_energy/make_articulated_slack_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_slack_claims.py",
+        "tests/research/test_articulated_slack_contact.py",
+        "tests/research/test_articulated_slack_forward.py"
+      ],
+      "model_domain": "Eighteen synthetic articulated states, sixteen natural law/preload/velocity conditions, two isolated event probes, three time steps, two native engines, and a five-millisecond horizon.",
+      "uncertainty_boundary": "Longer distributed grip/shaft contact, calibrated tissue/friction/ground, matched delivery, and governed human measurements remain open.",
+      "competing_explanations": [
+        "preload-energy mismatch rather than slack",
+        "short right-censored horizon",
+        "memoryless radial law rather than distributed contact or tissue",
+        "shared analytical contact law and semi-implicit integrator"
+      ],
+      "negative_controls": [
+        "bilateral and zero-slack tension comparators",
+        "common-displacement versus matched-extension preload",
+        "initial-velocity reversal",
+        "open-to-taut and taut-to-open event probes",
+        "three-step refinement and two native dynamics operators"
+      ],
+      "falsifier": "A biological, benefit, timing, delivery, or coaching claim is attributed to this bounded synthetic atlas alone.",
+      "adjudication": "The registered event and natural-state results are reported separately with explicit right-censoring and no human or coaching inference.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
     }
   ]
 }

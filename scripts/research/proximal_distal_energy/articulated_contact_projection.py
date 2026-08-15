@@ -105,7 +105,7 @@ class ContactProjectionSnapshot:
     reversed_couple_sign_residual_nm: float
 
 
-def _contact_kinematics(
+def contact_kinematics(
     model: SpatialModel,
     q: FloatArray,
     qd: FloatArray,
@@ -165,7 +165,7 @@ def evaluate_contact_projection(
         q[14] += config.club_translation_perturbation_m
         qd[14] += config.club_velocity_perturbation_m_s
 
-    hand_points, hand_jacobians, grip_points, grip_jacobians = _contact_kinematics(
+    hand_points, hand_jacobians, grip_points, grip_jacobians = contact_kinematics(
         model,
         q,
         qd,
@@ -242,6 +242,243 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+@dataclass(frozen=True, slots=True)
+class _ProjectionAuthority:
+    time_s: FloatArray
+    profile_index: NDArray[np.int_]
+    grip_span_m: FloatArray
+    solution_q: FloatArray
+
+
+@dataclass(slots=True)
+class _ProjectionBuffers:
+    acceleration: FloatArray
+    acceleration_absolute_error: FloatArray
+    acceleration_relative_error: FloatArray
+    maximum_force: FloatArray
+    couple: FloatArray
+    zero_preload_force: FloatArray
+    action_reaction: FloatArray
+    virtual_power: FloatArray
+    dissipation_power: FloatArray
+    coincident_couple: FloatArray
+    reversal_residual: FloatArray
+
+
+def _load_projection_authority() -> _ProjectionAuthority:
+    with np.load(DATA_DIR / "subject_scaled_closed_contact.npz") as source:
+        authority = _ProjectionAuthority(
+            time_s=np.asarray(source["time_s"], dtype=float),
+            profile_index=np.asarray(source["case_profile_index"], dtype=int),
+            grip_span_m=np.asarray(source["case_grip_span_m"], dtype=float),
+            solution_q=np.asarray(source["solution_q"], dtype=float),
+        )
+        feasible = np.asarray(source["feasible"], dtype=bool)
+    if authority.solution_q.shape != (18, 13, 20) or not np.all(feasible):
+        raise RuntimeError("the closed-state authority is incomplete or infeasible")
+    return authority
+
+
+def _projection_buffers(shape: tuple[int, int], nq: int) -> _ProjectionBuffers:
+    return _ProjectionBuffers(
+        acceleration=np.empty((*shape, 2, nq)),
+        acceleration_absolute_error=np.empty(shape),
+        acceleration_relative_error=np.empty(shape),
+        maximum_force=np.empty(shape),
+        couple=np.empty((*shape, 3)),
+        zero_preload_force=np.empty(shape),
+        action_reaction=np.empty(shape),
+        virtual_power=np.empty(shape),
+        dissipation_power=np.empty(shape),
+        coincident_couple=np.empty(shape),
+        reversal_residual=np.empty(shape),
+    )
+
+
+def _evaluate_projection_case(
+    authority: _ProjectionAuthority,
+    buffers: _ProjectionBuffers,
+    config: ArticulatedContactProjectionConfig,
+    case: int,
+    profiles: tuple[Any, ...],
+    pin: Any,
+) -> None:
+    model, metadata = build_subject_scaled_model(
+        profiles[authority.profile_index[case]]
+    )
+    native = build_pinocchio_articulated_model(pin, model)
+    native_data = native.createData()
+    velocity, _ = finite_difference_kinematics(
+        authority.solution_q[case], authority.time_s
+    )
+    for sample, (q, qd) in enumerate(
+        zip(authority.solution_q[case], velocity, strict=True)
+    ):
+        grip_span_m = float(authority.grip_span_m[case])
+        hand_contact_local_x_m = float(metadata["hand_contact_local_x_m"])
+        zero = evaluate_contact_projection(
+            model,
+            q,
+            np.zeros_like(qd),
+            grip_span_m=grip_span_m,
+            hand_contact_local_x_m=hand_contact_local_x_m,
+            perturb_contact=False,
+            config=config,
+        )
+        perturbed = evaluate_contact_projection(
+            model,
+            q,
+            qd,
+            grip_span_m=grip_span_m,
+            hand_contact_local_x_m=hand_contact_local_x_m,
+            perturb_contact=True,
+            config=config,
+        )
+        q_perturbed, qd_perturbed = q.copy(), qd.copy()
+        q_perturbed[14] += config.club_translation_perturbation_m
+        qd_perturbed[14] += config.club_velocity_perturbation_m_s
+        matrix_m, bias_m = mujoco_mass_matrix_and_bias(model, q_perturbed, qd_perturbed)
+        matrix_p = np.asarray(pin.crba(native, native_data, q_perturbed)).copy()
+        bias_p = np.asarray(
+            pin.nonLinearEffects(  # type: ignore[attr-defined]
+                native, native_data, q_perturbed, qd_perturbed
+            )
+        ).copy()
+        buffers.acceleration[case, sample, 0] = np.linalg.solve(
+            matrix_m, perturbed.generalized_contact_force - bias_m
+        )
+        buffers.acceleration[case, sample, 1] = np.linalg.solve(
+            matrix_p, perturbed.generalized_contact_force - bias_p
+        )
+        errors = _relative_error(
+            buffers.acceleration[case, sample, 0],
+            buffers.acceleration[case, sample, 1],
+        )
+        buffers.acceleration_absolute_error[case, sample] = errors[0]
+        buffers.acceleration_relative_error[case, sample] = errors[1]
+        buffers.maximum_force[case, sample] = perturbed.maximum_contact_force_n
+        buffers.couple[case, sample] = perturbed.force_couple_vector_nm
+        buffers.zero_preload_force[case, sample] = zero.maximum_contact_force_n
+        buffers.action_reaction[case, sample] = perturbed.action_reaction_residual_n
+        buffers.virtual_power[case, sample] = perturbed.virtual_power_residual_w
+        buffers.dissipation_power[case, sample] = perturbed.contact_dissipation_power_w
+        buffers.coincident_couple[case, sample] = perturbed.coincident_force_couple_nm
+        buffers.reversal_residual[case, sample] = (
+            perturbed.reversed_couple_sign_residual_nm
+        )
+
+
+def _projection_gates(
+    buffers: _ProjectionBuffers, config: ArticulatedContactProjectionConfig
+) -> NDArray[np.bool_]:
+    return (
+        (buffers.zero_preload_force <= config.zero_preload_force_tolerance_n)
+        & (buffers.action_reaction <= config.action_reaction_tolerance_n)
+        & (buffers.virtual_power <= config.virtual_power_tolerance_w)
+        & (buffers.dissipation_power <= 0.0)
+        & (buffers.coincident_couple <= config.geometry_control_tolerance_nm)
+        & (buffers.reversal_residual <= config.geometry_control_tolerance_nm)
+        & (
+            buffers.acceleration_relative_error
+            <= config.acceleration_relative_tolerance
+        )
+    )
+
+
+def _projection_arrays(
+    authority: _ProjectionAuthority,
+    buffers: _ProjectionBuffers,
+    gates: NDArray[np.bool_],
+) -> dict[str, NDArray[Any]]:
+    return {
+        "time_s": authority.time_s,
+        "case_profile_index": authority.profile_index,
+        "case_grip_span_m": authority.grip_span_m,
+        "initial_acceleration": buffers.acceleration,
+        "acceleration_absolute_error": buffers.acceleration_absolute_error,
+        "acceleration_relative_error": buffers.acceleration_relative_error,
+        "maximum_contact_force_n": buffers.maximum_force,
+        "force_couple_vector_nm": buffers.couple,
+        "zero_preload_force_n": buffers.zero_preload_force,
+        "action_reaction_residual_n": buffers.action_reaction,
+        "virtual_power_residual_w": buffers.virtual_power,
+        "contact_dissipation_power_w": buffers.dissipation_power,
+        "coincident_force_couple_nm": buffers.coincident_couple,
+        "reversed_couple_sign_residual_nm": buffers.reversal_residual,
+        "all_gates_passed": gates,
+        "engine_names": np.asarray(["mujoco", "pinocchio"]),
+    }
+
+
+def _projection_record(
+    authority: _ProjectionAuthority,
+    buffers: _ProjectionBuffers,
+    gates: NDArray[np.bool_],
+    config: ArticulatedContactProjectionConfig,
+    engine_versions: dict[str, str],
+) -> dict[str, Any]:
+    shape = authority.solution_q.shape[:2]
+    return {
+        "schema_version": "articulated-contact-projection/v1",
+        "study_id": "subject-scaled-articulated-contact-initial-acceleration",
+        "model_tier": "same_state_articulated_bilateral_contact_projection",
+        "design": {
+            "profile_count": len(default_synthetic_profiles()),
+            "grip_span_count": int(np.unique(authority.grip_span_m).size),
+            "case_count": int(shape[0]),
+            "samples_per_case": int(shape[1]),
+            "state_count": int(np.prod(shape)),
+            "coordinate_count": int(authority.solution_q.shape[2]),
+            "forward_steps": 0,
+        },
+        "engines": engine_versions,
+        "contact_contract": {
+            "kind": "paired Kelvin-Voigt point interfaces",
+            "force_origin": "achieved hand-grip displacement and relative velocity",
+            "projection": "J_grip.T force_on_club + J_hand.T force_on_hand",
+            "direct_club_actuation": "none",
+        },
+        "tolerances": asdict(config),
+        "results": {
+            "maximum_contact_force_n": float(np.max(buffers.maximum_force)),
+            "maximum_zero_preload_force_n": float(np.max(buffers.zero_preload_force)),
+            "maximum_action_reaction_residual_n": float(
+                np.max(buffers.action_reaction)
+            ),
+            "maximum_virtual_power_residual_w": float(np.max(buffers.virtual_power)),
+            "maximum_contact_dissipation_power_w": float(
+                np.max(buffers.dissipation_power)
+            ),
+            "minimum_contact_dissipation_power_w": float(
+                np.min(buffers.dissipation_power)
+            ),
+            "maximum_coincident_force_couple_nm": float(
+                np.max(buffers.coincident_couple)
+            ),
+            "maximum_reversal_sign_residual_nm": float(
+                np.max(buffers.reversal_residual)
+            ),
+            "maximum_generalized_acceleration_absolute_error": float(
+                np.max(buffers.acceleration_absolute_error)
+            ),
+            "maximum_acceleration_relative_error": float(
+                np.max(buffers.acceleration_relative_error)
+            ),
+            "failed_state_count": int(np.count_nonzero(~gates)),
+            "all_registered_gates_passed": bool(np.all(gates)),
+        },
+        "claim_boundary": {
+            "supported": "bilateral compliant point forces project consistently into the qualified articulated tree and yield matching native initial acceleration",
+            "forward_trajectory": "not_executed",
+            "contact_loss_or_recovery": "not_tested",
+            "anatomy_and_equipment": "not_calibrated",
+            "human_transfer_or_strategy": "untested",
+        },
+        "next_gate": "integrate the articulated bilateral contact state through a bounded horizon with contact-loss, convergence, energy, and adverse-load controls",
+        "source_sha256": {path: _sha256(REPO_ROOT / path) for path in SOURCE_PATHS},
+    }
+
+
 def run_articulated_contact_projection_atlas(
     config: ArticulatedContactProjectionConfig = ArticulatedContactProjectionConfig(),
 ) -> tuple[dict[str, Any], dict[str, NDArray[Any]]]:
@@ -253,178 +490,25 @@ def run_articulated_contact_projection_atlas(
     except ImportError as error:  # pragma: no cover - native runtime gate
         raise RuntimeError("MuJoCo and robotics Pinocchio are required") from error
 
-    with np.load(DATA_DIR / "subject_scaled_closed_contact.npz") as source:
-        time_s = np.asarray(source["time_s"], dtype=float)
-        profile_index = np.asarray(source["case_profile_index"], dtype=int)
-        grip_span_m = np.asarray(source["case_grip_span_m"], dtype=float)
-        solution_q = np.asarray(source["solution_q"], dtype=float)
-        feasible = np.asarray(source["feasible"], dtype=bool)
-    if solution_q.shape != (18, 13, 20) or not np.all(feasible):
-        raise RuntimeError("the closed-state authority is incomplete or infeasible")
-
-    shape = solution_q.shape[:2]
-    acceleration = np.empty((*shape, 2, solution_q.shape[2]))
-    acceleration_absolute_error = np.empty(shape)
-    acceleration_relative_error = np.empty(shape)
-    maximum_force = np.empty(shape)
-    couple = np.empty((*shape, 3))
-    zero_preload_force = np.empty(shape)
-    action_reaction = np.empty(shape)
-    virtual_power = np.empty(shape)
-    dissipation_power = np.empty(shape)
-    coincident_couple = np.empty(shape)
-    reversal_residual = np.empty(shape)
+    authority = _load_projection_authority()
+    shape = (authority.solution_q.shape[0], authority.solution_q.shape[1])
+    buffers = _projection_buffers(shape, authority.solution_q.shape[2])
     profiles = default_synthetic_profiles()
-
-    for case in range(shape[0]):
-        model, metadata = build_subject_scaled_model(profiles[profile_index[case]])
-        native = build_pinocchio_articulated_model(pin, model)
-        native_data = native.createData()
-        velocity, _ = finite_difference_kinematics(solution_q[case], time_s)
-        for sample in range(shape[1]):
-            q = solution_q[case, sample]
-            qd = velocity[sample]
-            zero = evaluate_contact_projection(
-                model,
-                q,
-                np.zeros_like(qd),
-                grip_span_m=float(grip_span_m[case]),
-                hand_contact_local_x_m=float(metadata["hand_contact_local_x_m"]),
-                perturb_contact=False,
-                config=config,
-            )
-            perturbed = evaluate_contact_projection(
-                model,
-                q,
-                qd,
-                grip_span_m=float(grip_span_m[case]),
-                hand_contact_local_x_m=float(metadata["hand_contact_local_x_m"]),
-                perturb_contact=True,
-                config=config,
-            )
-            q_perturbed = q.copy()
-            q_perturbed[14] += config.club_translation_perturbation_m
-            qd_perturbed = qd.copy()
-            qd_perturbed[14] += config.club_velocity_perturbation_m_s
-            matrix_m, bias_m = mujoco_mass_matrix_and_bias(
-                model, q_perturbed, qd_perturbed
-            )
-            matrix_p = np.asarray(pin.crba(native, native_data, q_perturbed)).copy()
-            bias_p = np.asarray(
-                pin.nonLinearEffects(native, native_data, q_perturbed, qd_perturbed)
-            ).copy()
-            acceleration[case, sample, 0] = np.linalg.solve(
-                matrix_m, perturbed.generalized_contact_force - bias_m
-            )
-            acceleration[case, sample, 1] = np.linalg.solve(
-                matrix_p, perturbed.generalized_contact_force - bias_p
-            )
-            (
-                acceleration_absolute_error[case, sample],
-                acceleration_relative_error[case, sample],
-            ) = _relative_error(
-                acceleration[case, sample, 0], acceleration[case, sample, 1]
-            )
-            maximum_force[case, sample] = perturbed.maximum_contact_force_n
-            couple[case, sample] = perturbed.force_couple_vector_nm
-            zero_preload_force[case, sample] = zero.maximum_contact_force_n
-            action_reaction[case, sample] = perturbed.action_reaction_residual_n
-            virtual_power[case, sample] = perturbed.virtual_power_residual_w
-            dissipation_power[case, sample] = perturbed.contact_dissipation_power_w
-            coincident_couple[case, sample] = perturbed.coincident_force_couple_nm
-            reversal_residual[case, sample] = perturbed.reversed_couple_sign_residual_nm
-
-    gates = (
-        (zero_preload_force <= config.zero_preload_force_tolerance_n)
-        & (action_reaction <= config.action_reaction_tolerance_n)
-        & (virtual_power <= config.virtual_power_tolerance_w)
-        & (dissipation_power <= 0.0)
-        & (coincident_couple <= config.geometry_control_tolerance_nm)
-        & (reversal_residual <= config.geometry_control_tolerance_nm)
-        & (acceleration_relative_error <= config.acceleration_relative_tolerance)
-    )
-    arrays: dict[str, NDArray[Any]] = {
-        "time_s": time_s,
-        "case_profile_index": profile_index,
-        "case_grip_span_m": grip_span_m,
-        "initial_acceleration": acceleration,
-        "acceleration_absolute_error": acceleration_absolute_error,
-        "acceleration_relative_error": acceleration_relative_error,
-        "maximum_contact_force_n": maximum_force,
-        "force_couple_vector_nm": couple,
-        "zero_preload_force_n": zero_preload_force,
-        "action_reaction_residual_n": action_reaction,
-        "virtual_power_residual_w": virtual_power,
-        "contact_dissipation_power_w": dissipation_power,
-        "coincident_force_couple_nm": coincident_couple,
-        "reversed_couple_sign_residual_nm": reversal_residual,
-        "all_gates_passed": gates,
-        "engine_names": np.asarray(["mujoco", "pinocchio"]),
+    for case in range(authority.solution_q.shape[0]):
+        _evaluate_projection_case(authority, buffers, config, case, profiles, pin)
+    gates = _projection_gates(buffers, config)
+    arrays = _projection_arrays(authority, buffers, gates)
+    versions = {
+        "mujoco": str(mujoco.__version__),
+        "pinocchio": str(pin.__version__),  # type: ignore[attr-defined]
     }
-    record: dict[str, Any] = {
-        "schema_version": "articulated-contact-projection/v1",
-        "study_id": "subject-scaled-articulated-contact-initial-acceleration",
-        "model_tier": "same_state_articulated_bilateral_contact_projection",
-        "design": {
-            "profile_count": len(profiles),
-            "grip_span_count": int(np.unique(grip_span_m).size),
-            "case_count": int(shape[0]),
-            "samples_per_case": int(shape[1]),
-            "state_count": int(np.prod(shape)),
-            "coordinate_count": int(solution_q.shape[2]),
-            "forward_steps": 0,
-        },
-        "engines": {
-            "mujoco": str(mujoco.__version__),
-            "pinocchio": str(pin.__version__),
-        },
-        "contact_contract": {
-            "kind": "paired Kelvin-Voigt point interfaces",
-            "force_origin": "achieved hand-grip displacement and relative velocity",
-            "projection": "J_grip.T force_on_club + J_hand.T force_on_hand",
-            "direct_club_actuation": "none",
-        },
-        "tolerances": asdict(config),
-        "results": {
-            "maximum_contact_force_n": float(np.max(maximum_force)),
-            "maximum_zero_preload_force_n": float(np.max(zero_preload_force)),
-            "maximum_action_reaction_residual_n": float(np.max(action_reaction)),
-            "maximum_virtual_power_residual_w": float(np.max(virtual_power)),
-            "maximum_contact_dissipation_power_w": float(np.max(dissipation_power)),
-            "minimum_contact_dissipation_power_w": float(np.min(dissipation_power)),
-            "maximum_coincident_force_couple_nm": float(np.max(coincident_couple)),
-            "maximum_reversal_sign_residual_nm": float(np.max(reversal_residual)),
-            "maximum_generalized_acceleration_absolute_error": float(
-                np.max(acceleration_absolute_error)
-            ),
-            "maximum_acceleration_relative_error": float(
-                np.max(acceleration_relative_error)
-            ),
-            "failed_state_count": int(np.count_nonzero(~gates)),
-            "all_registered_gates_passed": bool(np.all(gates)),
-        },
-        "claim_boundary": {
-            "supported": (
-                "bilateral compliant point forces project consistently into the "
-                "qualified articulated tree and yield matching native initial acceleration"
-            ),
-            "forward_trajectory": "not_executed",
-            "contact_loss_or_recovery": "not_tested",
-            "anatomy_and_equipment": "not_calibrated",
-            "human_transfer_or_strategy": "untested",
-        },
-        "next_gate": (
-            "integrate the articulated bilateral contact state through a bounded "
-            "horizon with contact-loss, convergence, energy, and adverse-load controls"
-        ),
-        "source_sha256": {path: _sha256(REPO_ROOT / path) for path in SOURCE_PATHS},
-    }
-    return record, arrays
+    return _projection_record(authority, buffers, gates, config, versions), arrays
 
 
 __all__ = [
     "ArticulatedContactProjectionConfig",
     "ContactProjectionSnapshot",
+    "contact_kinematics",
     "evaluate_contact_projection",
     "run_articulated_contact_projection_atlas",
 ]

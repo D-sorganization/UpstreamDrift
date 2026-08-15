@@ -8,6 +8,7 @@ import pytest
 
 from scripts.research.proximal_distal_energy.articulated_forward_contact import (
     ArticulatedForwardContactConfig,
+    ForwardIntegrationCase,
     integrate_articulated_contact,
     mechanical_energy,
 )
@@ -42,33 +43,25 @@ def test_zero_preload_trace_converges_under_refinement() -> None:
         time_steps_s=(0.001, 0.0005),
     )
 
+    def integration_case(time_step_s: float) -> ForwardIntegrationCase:
+        return ForwardIntegrationCase(
+            q=q,
+            qd=qd,
+            grip_span_m=grip_span_m,
+            hand_contact_local_x_m=float(metadata["hand_contact_local_x_m"]),
+            time_step_s=time_step_s,
+            contact_stiffness=1800.0,
+            contact_damping=0.0,
+            initial_club_displacement_m=0.0,
+            initial_club_velocity_m_s=0.0,
+            engine="mujoco",
+        )
+
     coarse = integrate_articulated_contact(
-        model,
-        q,
-        qd,
-        grip_span_m=grip_span_m,
-        hand_contact_local_x_m=float(metadata["hand_contact_local_x_m"]),
-        time_step_s=config.time_steps_s[0],
-        contact_stiffness=1800.0,
-        contact_damping=0.0,
-        initial_club_displacement_m=0.0,
-        initial_club_velocity_m_s=0.0,
-        engine="mujoco",
-        config=config,
+        model, integration_case(config.time_steps_s[0]), config
     )
     fine = integrate_articulated_contact(
-        model,
-        q,
-        qd,
-        grip_span_m=grip_span_m,
-        hand_contact_local_x_m=float(metadata["hand_contact_local_x_m"]),
-        time_step_s=config.time_steps_s[1],
-        contact_stiffness=1800.0,
-        contact_damping=0.0,
-        initial_club_displacement_m=0.0,
-        initial_club_velocity_m_s=0.0,
-        engine="mujoco",
-        config=config,
+        model, integration_case(config.time_steps_s[1]), config
     )
 
     assert np.all(np.isfinite(coarse["mechanical_energy_j"]))

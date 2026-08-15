@@ -142,15 +142,18 @@
   "source_sha256": {
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "8eed52fe4ebbc55fcf753f4703330dd6d768281b0babfbb2adca074b862fc36d",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
-    "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.json": "d640ca9567d95fa79528e20e5fd808d32cffbbb99043bd93ac9330bc8d028bfd",
-    "scripts/research/proximal_distal_energy/articulated_forward_contact.py": "5234d7526eecec6691622a2ac17e1c45092fc9def6df6f288c077de64534cfad",
+    "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.json": "85a60f36279eac71d1ce253c121582e6857397cc3233d94a5fbc780e5dac35c1",
+    "scripts/research/proximal_distal_energy/articulated_forward_contact.py": "0a208418991bb272bd6ce72ba56161c227367ab1efe8d8e46fcabb61f7066605",
+    "scripts/research/proximal_distal_energy/articulated_forward_contract.py": "c2f2a89bbb90da5e41488e4763327afe126f6be6be70da73c41c74adca52349a",
+    "scripts/research/proximal_distal_energy/articulated_forward_integration.py": "c42de070289a1a2f2fc2b7351effa28d2e2f1b2c36c2e4b9ff0ea0b20f5098b0",
+    "scripts/research/proximal_distal_energy/articulated_forward_atlas.py": "7a5cf9167dfb17ddf66a7d034b55dd4ac0a333fc99d08a47dcfd869e1d4fd4c2",
     "scripts/research/proximal_distal_energy/run_articulated_forward_contact.py": "45eda14a775dba2af99979679a36bb551f36a4a770edd3c31e50ea20a368144a",
     "scripts/research/proximal_distal_energy/make_articulated_forward_contact_figure.py": "58553b916fdf641d3c78e383c179b33cc1e6512b1245516fc4a9561cd7236585",
     "scripts/research/proximal_distal_energy/register_articulated_forward_contact_claims.py": "3da0ad192f042fcebc16b631ba28163322a2455f7b5839975de2c91fd78f0950",
-    "scripts/research/proximal_distal_energy/articulated_contact_projection.py": "2cc183a3a0ae4ba012defb4fc0e35f305656f4eb54437b22d45f128134f7c42d",
+    "scripts/research/proximal_distal_energy/articulated_contact_projection.py": "a5914695739fd3f2137c3be0905f707b8de11f4dea3edc1d0c04897853149fd3",
     "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py": "37f051cae4dd3ebd9c5f3d3305d50083a6a7743e4f8689883e70eff93ee2b5cd",
     "scripts/research/proximal_distal_energy/spatial_full_body.py": "8e0c3efb06747742cca30f6bc1b9e18a28779a1c187e4b98ba6cde5293d96cfc",
     "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py": "c2b01f1d8de0b25daa39c03ae97d3ef51512264f3a2978766a7360aed5d9cda8",
-    "tests/research/test_articulated_forward_contact.py": "a185c5ce8ab485c39e43b11ac82c8689e0d61c731f3c0dfa0eb1a2692d773544"
+    "tests/research/test_articulated_forward_contact.py": "2f5ab64e653cf71940231aaf0ef6f5d102f4251afdb7ed83dbf2ca1983d6ce54"
   }
 }
