@@ -24,6 +24,8 @@ from src.shared.python.visualization.rerun_renderer import (
 )
 from src.shared.python.visualization.viewport import ViewportOverlayPayload
 
+pytestmark = pytest.mark.unit
+
 
 def _payload(*, with_markers: bool = False, with_wrench: bool = False):
     n = 4

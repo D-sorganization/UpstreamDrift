@@ -9,6 +9,8 @@ from scripts.research.proximal_distal_energy.momentum_question_readiness import 
     build_readiness_audit,
 )
 
+pytestmark = pytest.mark.unit
+
 ROOT = Path(__file__).resolve().parents[3]
 ARTICLE = ROOT / "docs/research/proximal_distal_energy_transfer"
 

@@ -5,6 +5,8 @@ from pathlib import Path
 import pytest
 import yaml
 
+pytestmark = pytest.mark.unit
+
 ROOT = Path(__file__).resolve().parent.parent.parent.parent
 VENDOR_SRC = ROOT / "vendor" / "ud-tools" / "src" / "shared" / "python"
 LOCAL_SRC = ROOT / "src" / "shared" / "python"

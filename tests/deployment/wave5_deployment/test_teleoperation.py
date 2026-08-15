@@ -21,6 +21,8 @@ from src.deployment.teleoperation.interface import (
     WorkspaceMapping,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class FakeDevice:
     def __init__(self):

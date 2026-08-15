@@ -4,9 +4,13 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from src.launchers.launcher_shared_tools_diagnostics import (
     inspect_shared_tools_freshness,
 )
+
+pytestmark = pytest.mark.unit
 
 
 def test_probe_reports_missing_submodule_without_mutating_inputs(
