@@ -374,7 +374,12 @@ with preserved position and velocity closure and zero interface preload.
 Native MuJoCo and Pinocchio then pass trajectory, wrench, and energy
 comparisons for a 54-case, 4 ms spanning initialization audit. This
 closes a coordinate and numerical-transport gap, not the full-horizon
-articulated-contact gate. A subsequent reduced forward-contact
+articulated-contact gate. A preregistered extension then advances the
+same 54 states through 4, 10, 25, and 50 ms under nominal conditions and
+nine one-factor adverse or null branches. All 2,160 horizon cases pass
+the declared cross-engine and work--energy gates; no failure is observed
+through 50 ms. The result is right-censored at that horizon and remains
+a reduced hand-carriage result. A subsequent reduced forward-contact
 experiment independently integrates MuJoCo and Pinocchio with two
 finite-mass hand carriages, paired compliant interfaces, and no direct
 club actuation. Its exact same-state driver-killswitch branch retains a
@@ -477,7 +482,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, colback=white, toprule=.15mm, left=2mm, opacityback=0, colbacktitle=quarto-callout-note-color!10!white, colframe=quarto-callout-note-color-frame, coltitle=black, arc=.35mm, breakable, titlerule=0mm, rightrule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, bottomtitle=1mm, leftrule=.75mm, toptitle=1mm, bottomrule=.15mm, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, opacitybacktitle=0.6, colback=white, colframe=quarto-callout-note-color-frame, left=2mm, bottomtitle=1mm, breakable, leftrule=.75mm, bottomrule=.15mm, rightrule=.15mm, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, toprule=.15mm, titlerule=0mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, arc=.35mm, opacityback=0, coltitle=black]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -7419,6 +7424,55 @@ benefit, or a human strategy. The next falsifier is a full-horizon
 articulated solve with typed contact loss, calibrated grip and shaft
 compliance, refinement, adverse-load, null, and reversal controls.
 
+\subsubsection{Cross-Engine Validity Horizon and Adverse-Load
+Map}\label{cross-engine-validity-horizon-and-adverse-load-map}
+
+The 4 ms result establishes initialization transport but leaves its
+persistence unmeasured. A preregistered extension therefore advances the
+same six profiles, three grip spans, and early, middle, and late closed
+states to 4, 10, 25, and 50 ms. Ten branches retain the nominal model;
+halve or double contact stiffness, contact damping, represented hand
+mass, or timestep one factor at a time; or remove the grounded driver
+from the first integration step. Both native engines receive identical
+state and parameter records. Failed, unstable, and non-finite cases
+would remain typed outcomes rather than being removed.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_forward_contact_validity_horizon.pdf}
+
+}
+
+\caption{\label{fig-forward-contact-validity-horizon}Cross-Engine
+Forward-Contact Validity Horizon and Adverse-Load Map}
+
+\end{figure}%
+
+All 2,160 profile--span--phase--variant--horizon cases pass the existing
+trajectory, contact-wrench, and normalized-energy discrepancy gates
+together with an 8\% work--energy closure gate. At 50 ms, the worst
+nominal club-position difference is 0.503 \(\mu\)m, the worst nominal
+relative contact-wrench RMS difference is 0.0252\%, and the worst
+nominal normalized-energy difference is \(3.20\times10^{-6}\). Across
+every adverse and null branch, the largest club-position difference is
+1.02 \(\mu\)m, the largest relative wrench RMS is 0.0506\%, and the
+largest normalized work--energy closure residual is 0.327\%. Halving the
+timestep reduces the worst closure residual from 0.164\% to 0.0818\%,
+whereas doubling it raises the value to 0.327\%, supplying the expected
+first-order refinement direction without retuning a threshold.
+
+No first-failure horizon is observed inside the registered 50 ms
+interval. That is a right-censored engineering result, not permission to
+extrapolate to the remaining downswing or impact. The carriages, rigid
+club, engineering contact law, and prescribed driver still omit
+articulated arms and scapulae, distributed grip and shaft properties,
+contact loss, ground coupling, and calibrated equipment. The study
+strengthens the reduced cross-engine reference that the articulated tier
+must reproduce; it does not establish anatomy, passive human transfer,
+timing economy, slack benefit, or coaching strategy.
+
 \subsection{Paired Scapula-on-Ellipsoid Geometry
 Screen}\label{paired-scapula-on-ellipsoid-geometry-screen}
 
@@ -11158,11 +11212,13 @@ separation and transverse differential force. Existing moving-base and
 two-engine spatial controls reproduce coincident-grip zeros and
 moment-arm reversals. A six-profile audit rejects prescribed states that
 miss closure by 0.171--0.616 m; a bounded follow-up closes all 234
-registered reduced-tree configurations while retaining rank,
-engineering-limit, and coarse collision gates. & Calibrated compliant
-forward contact from the closed states, equipment geometry,
-subject-specific anatomy, and held-out digital twins and human bilateral
-wrenches. \\
+registered reduced-tree configurations. The resulting hand-carriage
+reference retains all registered cross-engine and energy gates through
+50 ms under nine one-factor adverse or null branches. & Replace the
+carriages with articulated subject-scaled arms, calibrated distributed
+grip and shaft properties, contact loss, and ground coupling; then
+repeat the horizon, geometry, killswitch, and held-out human
+bilateral-wrench tests. \\
 Which timing patterns matter? & Early distal release changes the
 available geometry; proximal rate, acceleration, braking, and release
 timing interact nonmonotonically. ``Casting'' is not one universal
@@ -11640,6 +11696,17 @@ engines; coincident and reversed-moment-arm controls close exactly, and
 the work--energy residual decreases under timestep refinement. This
 supports reduced spatial contact persistence, not anatomical arms,
 muscles, calibrated grip tissue, equipment, or human strategy.
+
+The closed-state validity-horizon extension further shows that the same
+two engines remain inside the declared trajectory, wrench,
+energy-discrepancy, and work--energy closure gates for all 2,160
+registered cases through 50 ms. The matrix spans all
+profile--span--phase states plus one-factor stiffness, damping,
+hand-mass, timestep, and immediate-driver-off branches. No failure is
+observed inside the registered interval, so the result is right-censored
+at 50 ms. It strengthens the reduced numerical reference but does not
+turn the hand-carriage model into articulated anatomy or a full delivery
+simulation.
 
 The coupled uncertainty/control phase rejects two additional shortcuts.
 A net planar wrench cannot uniquely identify both hand forces, and six

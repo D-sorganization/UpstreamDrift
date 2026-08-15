@@ -104,7 +104,13 @@ abstract: |
   position and velocity closure and zero interface preload. Native MuJoCo and
   Pinocchio then pass trajectory, wrench, and energy comparisons for a
   54-case, 4 ms spanning initialization audit. This closes a coordinate and
-  numerical-transport gap, not the full-horizon articulated-contact gate. A subsequent
+  numerical-transport gap, not the full-horizon articulated-contact gate. A
+  preregistered extension then advances the same 54 states through 4, 10, 25,
+  and 50 ms under nominal conditions and nine one-factor adverse or null
+  branches. All 2,160 horizon cases pass the declared cross-engine and
+  work--energy gates; no failure is observed through 50 ms. The result is
+  right-censored at that horizon and remains a reduced hand-carriage result.
+  A subsequent
   reduced forward-contact experiment independently
   integrates MuJoCo and Pinocchio with two finite-mass hand carriages, paired
   compliant interfaces, and no direct club actuation. Its exact same-state

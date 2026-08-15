@@ -183,43 +183,65 @@ def canonical_state_from_vector(values: FloatArray) -> CanonicalSpatialState:
     )
 
 
-def _short_forward_trace(
+def _bridge_forces(
+    state: CanonicalSpatialState,
+    params: SpatialContactParameters,
+) -> tuple[FloatArray, FloatArray, FloatArray, float, float]:
+    rotation = rotation_matrix_from_quaternion(state.club_quaternion_wxyz)
+    offsets = np.asarray([params.lead_grip_offset, params.trail_grip_offset])
+    rotated = (rotation @ offsets.T).T
+    club_points = state.club_position + rotated
+    club_velocities = state.club_linear_velocity + np.cross(
+        np.broadcast_to(state.club_angular_velocity, (2, 3)), rotated
+    )
+    forces = np.zeros((2, 3))
+    storage = 0.0
+    dissipation = 0.0
+    for hand in range(2):
+        force, _, _, dissipated = contact_pair(
+            hand_position=state.hand_positions[hand],
+            hand_velocity=state.hand_velocities[hand],
+            club_point_position=club_points[hand],
+            club_point_velocity=club_velocities[hand],
+            stiffness=params.contact_stiffness,
+            damping=params.contact_damping,
+        )
+        displacement = state.hand_positions[hand] - club_points[hand]
+        forces[hand] = force
+        storage += 0.5 * params.contact_stiffness * float(displacement @ displacement)
+        dissipation += dissipated
+    return club_points, club_velocities, forces, storage, dissipation
+
+
+def run_bridge_trace(
     engine: str,
     params: SpatialContactParameters,
     initial_state: CanonicalSpatialState,
+    *,
+    duration_s: float = 0.004,
+    driver_enabled: bool = True,
 ) -> dict[str, Any]:
+    """Advance one closed state with common forces and named energy ledgers."""
+
+    if not np.isfinite(duration_s) or not 0.0 < duration_s <= params.duration:
+        raise ValueError("duration_s must be finite and in (0, params.duration]")
     adapter = make_spatial_forward_adapter(engine, params, initial_state)
-    steps = int(round(0.004 / params.time_step))
-    positions, quaternions, wrenches, energies = [], [], [], []
+    steps = int(round(duration_s / params.time_step))
+    positions, quaternions, wrenches = [], [], []
+    energies, driver_powers, dissipated_powers = [], [], []
     for index in range(steps + 1):
         state = adapter.canonical_state()
-        rotation = rotation_matrix_from_quaternion(state.club_quaternion_wxyz)
-        offsets = np.asarray([params.lead_grip_offset, params.trail_grip_offset])
-        rotated = (rotation @ offsets.T).T
-        club_points = state.club_position + rotated
-        club_velocities = state.club_linear_velocity + np.cross(
-            np.broadcast_to(state.club_angular_velocity, (2, 3)), rotated
-        )
-        contact_forces = np.asarray(
-            [
-                contact_pair(
-                    hand_position=state.hand_positions[hand],
-                    hand_velocity=state.hand_velocities[hand],
-                    club_point_position=club_points[hand],
-                    club_point_velocity=club_velocities[hand],
-                    stiffness=params.contact_stiffness,
-                    damping=params.contact_damping,
-                )[0]
-                for hand in range(2)
-            ]
+        club_points, _, contact_forces, storage, dissipation = _bridge_forces(
+            state, params
         )
         sample_time = index * params.time_step
-        driver_forces = params.driver_stiffness * (
-            driver_targets(sample_time, params) - state.hand_positions
-        ) + params.driver_damping * (
-            driver_target_velocities(sample_time, params) - state.hand_velocities
-        )
-        displacement = state.hand_positions - club_points
+        driver_forces = np.zeros((2, 3))
+        if driver_enabled:
+            driver_forces = params.driver_stiffness * (
+                driver_targets(sample_time, params) - state.hand_positions
+            ) + params.driver_damping * (
+                driver_target_velocities(sample_time, params) - state.hand_velocities
+            )
         positions.append(state.club_position)
         quaternions.append(state.club_quaternion_wxyz)
         wrenches.append(
@@ -229,10 +251,9 @@ def _short_forward_trace(
                 forces=contact_forces,
             )
         )
-        energies.append(
-            adapter.native_mechanical_energy()
-            + 0.5 * params.contact_stiffness * float(np.sum(displacement**2))
-        )
+        energies.append(adapter.native_mechanical_energy() + storage)
+        driver_powers.append(float(np.sum(driver_forces * state.hand_velocities)))
+        dissipated_powers.append(dissipation)
         if index < steps:
             adapter.step(
                 AppliedSpatialForces(
@@ -242,16 +263,25 @@ def _short_forward_trace(
                 ),
                 params.time_step,
             )
+    total_energy = np.asarray(energies)
+    input_power = np.asarray(driver_powers) + np.asarray(dissipated_powers)
+    cumulative_input = np.zeros_like(input_power)
+    cumulative_input[1:] = np.cumsum(
+        0.5 * (input_power[1:] + input_power[:-1]) * params.time_step
+    )
     return {
         "initial_state_digest": adapter.initial_state_digest,
         "club_position": np.asarray(positions),
         "club_quaternion_wxyz": np.asarray(quaternions),
         "contact_wrench": np.asarray(wrenches),
-        "total_energy": np.asarray(energies),
+        "total_energy": total_energy,
+        "driver_power": np.asarray(driver_powers),
+        "contact_dissipation_power": np.asarray(dissipated_powers),
+        "energy_balance_residual": total_energy - total_energy[0] - cumulative_input,
     }
 
 
-def _compare_short_traces(
+def compare_bridge_traces(
     left: dict[str, Any], right: dict[str, Any]
 ) -> dict[str, Any]:
     position_delta = left["club_position"] - right["club_position"]
@@ -316,10 +346,10 @@ def evaluate_spanning_forward_subset(
                 club_initial_position=tuple(state.club_position),
             )
             traces = {
-                engine: _short_forward_trace(engine, params, state)
+                engine: run_bridge_trace(engine, params, state)
                 for engine in ("mujoco", "pinocchio")
             }
-            comparison = _compare_short_traces(traces["mujoco"], traces["pinocchio"])
+            comparison = compare_bridge_traces(traces["mujoco"], traces["pinocchio"])
             rows.append(
                 {
                     "case_index": case,
@@ -469,6 +499,8 @@ def map_closed_contact_atlas(
 __all__ = [
     "ClosedStateBridgeConfig",
     "canonical_state_from_vector",
+    "compare_bridge_traces",
     "evaluate_spanning_forward_subset",
     "map_closed_contact_atlas",
+    "run_bridge_trace",
 ]

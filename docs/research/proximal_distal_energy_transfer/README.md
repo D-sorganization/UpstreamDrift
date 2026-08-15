@@ -43,7 +43,12 @@ subset passes short-horizon MuJoCo/Pinocchio trajectory, wrench, and energy
 comparisons from identical digested initial states. This removes an
 initialization gap but does not establish articulated forward anatomy,
 calibrated equipment, passive transfer, delivery benefit, slack benefit, or
-human strategy. A three-tier
+human strategy. A preregistered validity-horizon extension now advances all 54
+profile/span/phase states through 4, 10, 25, and 50 ms under nominal conditions
+and nine one-factor adverse or null branches. All 2,160 horizon cases pass the
+declared cross-engine and work--energy gates; no failure is observed through 50
+ms. This is a right-censored reduced-model result, not a full delivery or
+anatomical validation. A three-tier
 hand-path attribution study separates stitched pointwise ZTCF drift,
 same-state control, and separately defined ZVCF reactions for force vectors,
 impulse, power, work, every modeled joint, and four neutral time windows. A
@@ -243,6 +248,8 @@ python3 -m scripts.research.proximal_distal_energy.run_spatial_full_body_study
 python3 -m scripts.research.proximal_distal_energy.run_subject_scaled_closed_contact
 python3 -m scripts.research.proximal_distal_energy.run_closed_state_forward_bridge
 python3 -m scripts.research.proximal_distal_energy.make_closed_state_forward_bridge_figure
+python3 -m scripts.research.proximal_distal_energy.run_forward_contact_validity_horizon
+python3 -m scripts.research.proximal_distal_energy.make_forward_contact_validity_horizon_figure
 python3 -m scripts.research.proximal_distal_energy.run_spatial_forward_contact_study
 python3 -m scripts.research.proximal_distal_energy.run_uncertainty_control_study
 python3 -m scripts.research.proximal_distal_energy.run_timing_viability_study
@@ -251,6 +258,7 @@ python3 -m scripts.research.proximal_distal_energy.run_experimental_protocol_dry
 python3 -m scripts.research.proximal_distal_energy.run_advanced_biological_bridge
 python3 -m scripts.research.proximal_distal_energy.claim_audit inventory
 python3 -m scripts.research.proximal_distal_energy.register_closed_state_forward_bridge_claims
+python3 -m scripts.research.proximal_distal_energy.register_forward_contact_validity_horizon_claims
 python3 -m scripts.research.proximal_distal_energy.claim_audit validate
 python3 -m scripts.research.proximal_distal_energy.claim_evidence_integrity validate
 python3 -m scripts.research.proximal_distal_energy.external_source_review validate
