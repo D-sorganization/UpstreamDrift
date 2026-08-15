@@ -256,6 +256,35 @@ def _require_list(record: dict[str, Any], field: str, claim_id: str) -> None:
         raise ValueError(f"{claim_id}: {field} must be a non-empty list")
 
 
+def _validate_source_location(location: str, claim_id: str, root: Path) -> None:
+    """Resolve a repository-relative ``path:line`` locator or fail closed."""
+    if not isinstance(location, str) or not location.strip():
+        raise ValueError(f"{claim_id}: source_locations entries must be non-empty")
+    path_text, separator, line_text = location.rpartition(":")
+    if not separator or not path_text or not line_text.isdigit():
+        raise ValueError(
+            f"{claim_id}: source location must use path:line: {location!r}"
+        )
+    source_path = Path(path_text)
+    if source_path.is_absolute():
+        raise ValueError(
+            f"{claim_id}: source location must be repository-relative: {location!r}"
+        )
+    resolved = (root / source_path).resolve()
+    if not resolved.is_relative_to(root):
+        raise ValueError(
+            f"{claim_id}: source location escapes repository root: {location!r}"
+        )
+    if not resolved.is_file():
+        raise ValueError(f"{claim_id}: missing source location file: {location!r}")
+    line_number = int(line_text)
+    line_count = len(resolved.read_text(encoding="utf-8").splitlines())
+    if line_number < 1 or line_number > line_count:
+        raise ValueError(
+            f"{claim_id}: source location line is out of range: {location!r}"
+        )
+
+
 def validate_registry(
     registry_path: Path,
     *,
@@ -302,6 +331,8 @@ def validate_registry(
                 raise ValueError(f"{claim_id}: {field} must be a non-empty string")
         for field in required_lists:
             _require_list(record, field, claim_id)
+        for location in record["source_locations"]:
+            _validate_source_location(location, claim_id, root)
         for artifact in record["evidence_artifacts"]:
             if not isinstance(artifact, str) or not artifact.strip():
                 raise ValueError(
@@ -371,6 +402,28 @@ def validate_registry(
             raise ValueError(
                 f"Release claim inventory mismatch; missing={missing}, extra={extra}"
             )
+    open_release_states = {"pending", "in_progress"}
+    for item in release_inventory:
+        release_key = item.get("release_claim_key", "<missing release_claim_key>")
+        for field in ("published_status", "audit_state"):
+            if not isinstance(item.get(field), str) or not item[field].strip():
+                raise ValueError(f"{release_key}: {field} must be a non-empty string")
+    open_release_keys = sorted(
+        item["release_claim_key"]
+        for item in release_inventory
+        if item["audit_state"] in open_release_states
+    )
+    release_review_completion = "complete" if not open_release_keys else "in_progress"
+    declared_release_completion = registry.get("audit_scope", {}).get(
+        "release_review_completion_status"
+    )
+    if (
+        declared_release_completion is not None
+        and declared_release_completion != release_review_completion
+    ):
+        raise ValueError(
+            "Declared release review completion does not match release claim states"
+        )
 
     completion = registry.get("audit_scope", {}).get("completion_status")
     candidate_ids = {item["candidate_id"] for item in inventory["candidates"]}
@@ -443,6 +496,9 @@ def validate_registry(
         "registered_claim_count": len(claims),
         "reviewed_candidate_count": len(review_ids),
         "release_claim_count": len(release_keys),
+        "release_review_completion_status": release_review_completion,
+        "open_release_claim_count": len(open_release_keys),
+        "open_release_claim_keys": open_release_keys,
         "source_digest": inventory["source_digest"],
     }
 

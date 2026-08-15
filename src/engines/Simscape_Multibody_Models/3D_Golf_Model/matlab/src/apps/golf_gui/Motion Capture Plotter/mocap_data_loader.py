@@ -197,14 +197,11 @@ def parse_simscape_csv(filename: str) -> pd.DataFrame:
     if not available_joints:
         raise ValueError("No valid joint position data found in the CSV file")
 
-    data = []
-    for _i, row in df.iterrows():
-        frame_data: dict[str, float] = {"time": row["time"]}
-        for joint_name, columns in available_joints.items():
-            if all(col in df.columns for col in columns):
-                frame_data[f"{joint_name}_X"] = row[columns[0]]
-                frame_data[f"{joint_name}_Y"] = row[columns[1]]
-                frame_data[f"{joint_name}_Z"] = row[columns[2]]
-        data.append(frame_data)
+    new_data: dict[str, pd.Series] = {"time": df["time"]}
+    for joint_name, columns in available_joints.items():
+        if all(col in df.columns for col in columns):
+            new_data[f"{joint_name}_X"] = df[columns[0]]
+            new_data[f"{joint_name}_Y"] = df[columns[1]]
+            new_data[f"{joint_name}_Z"] = df[columns[2]]
 
-    return pd.DataFrame(data)
+    return pd.DataFrame(new_data)

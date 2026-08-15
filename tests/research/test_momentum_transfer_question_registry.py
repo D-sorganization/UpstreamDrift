@@ -5,7 +5,6 @@ from pathlib import Path
 
 import pytest
 
-
 ROOT = Path(__file__).resolve().parents[2]
 REGISTRY = (
     ROOT
@@ -22,7 +21,7 @@ pytestmark = pytest.mark.unit
 def test_momentum_transfer_registry_is_complete_and_falsifiable() -> None:
     payload = json.loads(REGISTRY.read_text(encoding="utf-8"))
 
-    assert payload["schema_version"] == "momentum-transfer-question-registry/v1"
+    assert payload["schema_version"] == "momentum-transfer-question-registry/v2"
     assert payload["parent_epic"] == 8557
     assert payload["program_issue"] == 8595
 
@@ -58,3 +57,14 @@ def test_registry_preserves_critical_scientific_distinctions() -> None:
     assert "attraction-region size" in by_id["Q5"]["required_estimands"]
     assert "interior-optimum search" in by_id["Q6"]["required_controls"]
     assert "one slack class at a time" in by_id["Q7"]["required_controls"]
+    assert by_id["Q7"]["status"] == "partly_answered"
+
+
+def test_every_source_point_links_to_inspectable_evidence() -> None:
+    payload = json.loads(REGISTRY.read_text(encoding="utf-8"))
+    root = Path(__file__).resolve().parents[2]
+
+    for point in payload["critical_points"]:
+        assert point["evidence_artifacts"]
+        for artifact in point["evidence_artifacts"]:
+            assert (root / artifact).is_file(), f"{point['id']}: {artifact}"

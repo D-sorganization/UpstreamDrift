@@ -258,6 +258,126 @@ lever arm. Consequently, the sign response is attributable to
 to a change in force norm, event timing, solver state, or reference-frame
 rotation.
 
+## Subject-Scaled Contact-Closure Audit {#sec-subject-scaled-contact-closure}
+
+The common-state result still leaves a more basic geometric question: do the
+anatomical hand points occupy the declared club-contact points? A constraint
+Jacobian can have full row rank even when the points it would constrain are
+far apart. Treating rank as proof of feasible two-hand contact would therefore
+hide a model-structure failure.
+
+A deterministic atlas scales the same 20-coordinate tree with the repository's
+canonical de Leva anthropometric estimator. It uses female and male regression
+tables at statures of 1.55, 1.75, and 1.95 m, with mass fixed by a declared
+24 kg/m$^2$ design rule. These six profiles are engineering design points, not
+participants or a population sample. Each is evaluated at 61 prescribed
+states and grip spans of 0.12, 0.18, and 0.24 m. The audit records the two
+anatomical hand-to-grip distances, the $6\times20$ bilateral point-constraint
+Jacobian and its singular values, the two-point force-to-wrench rank, and the
+regional generalized loads.
+
+![Subject-Scaled Spatial Contact-Geometry Audit](figures/fig_subject_scaled_spatial_geometry.pdf){#fig-subject-scaled-spatial-geometry width=100%}
+
+The adverse result is unambiguous. Anatomical hand points miss the declared
+grip points by 0.171--0.616 m across the atlas, with a median miss of 0.405 m;
+none is within the preregistered 5 mm closure tolerance. At the same open
+states, however, every local bilateral constraint Jacobian has rank six and
+condition number 5.35--6.40. Thus the rank calculation answers whether six
+local closure directions are independently available, not whether the
+prescribed configuration already satisfies those closures.
+
+The point-force measurement map retains rank five and one invisible axial
+push--pull mode at every grip span. Adding the independently measured internal
+axial scalar raises the augmented map to rank six. The prescribed
+force-generated couple scales exactly with grip span to stored precision.
+These positive algebraic controls do not rescue anatomical feasibility; they
+show that measurement rank, local kinematic rank, contact closure, and forward
+contact dynamics are four distinct gates.
+
+### Closed-Contact Inverse-Kinematics Gate
+
+The next registered rung solves rather than prescribes the body and arm
+coordinates. For each of the six profiles, three grip spans, and 13 samples
+from 0.00 through 0.24 s, a bounded least-squares solve holds all six club
+coordinates at their prescribed values and adjusts the 14 pelvis, torso,
+shoulder, elbow, and wrist coordinates. Bilateral point errors are the primary
+residual; a weak reference-posture term selects one solution from the
+underdetermined family. An unreachable 2.0 m grip span is retained as an
+adverse control and correctly fails the closure gate.
+
+![Subject-Scaled Bilateral Closed-Contact Feasibility](figures/fig_subject_scaled_closed_contact.pdf){#fig-subject-scaled-closed-contact width=100%}
+
+All 234 registered samples close both contacts. The largest bilateral error is
+$1.16\times10^{-10}$ m, every achieved constraint Jacobian retains rank six,
+and the maximum adjacent-sample change across the 20 ms continuation grid is
+0.0256 rad. The smallest margin to the declared reduced-model joint bounds is
+0.103 rad, and the smallest nonexempt bounding-sphere clearance is 30.9 mm.
+The result therefore rejects the earlier prescribed trajectories without
+showing that the grip geometry itself is unreachable in this reduced tree.
+
+Those favorable checks remain a necessary-condition result. The broad bounds
+are engineering guards, not measured clinical ranges. Bounding spheres omit
+mesh-level anatomy; connected segments and intended hand--grip contacts are
+exempt. The tree has no explicit scapular glide, forearm
+pronation--supination, multi-axis wrist, fingers, or distributed tissue
+contact. Inverse kinematics supplies neither force nor work and cannot test
+passivity, timing demand, self-correction, proximal-speed benefit, or any
+class of slack.
+
+### Paired Scapula-on-Ellipsoid Geometry Screen
+
+The fixed shoulder centers are the next explicit structural intervention. A
+paired arm-only screen holds the prescribed trunk and club pose fixed and
+compares the existing fixed centers with four bounded scapular coordinates per
+side: protraction, elevation, upward rotation, and winging. Protraction and
+elevation move the shoulder center on a declared thoracic ellipsoid; upward
+rotation and winging precede the three glenohumeral rotations. The construction
+is informed by the ellipsoid-constrained OpenSim shoulder complex of
+@seth2016, but it is a reduced kinematic surrogate rather than a reproduction
+of that model.
+
+The screen uses the same six deterministic profiles and three grip spans at
+0.00, 0.12, and 0.24 s, yielding 54 paired states. Only the two arms move; the
+trunk and all six club coordinates remain fixed. The fixed-shoulder problem has
+eight arm coordinates, whereas the scapular problem has sixteen. The fixed
+solution is embedded exactly at zero scapular coordinates, so a larger residual
+in the mobile branch would be a numerical failure rather than a geometric
+finding.
+
+![Scapular Mobility and Bilateral Contact Geometry](figures/fig_scapulothoracic_contact_screen.pdf){#fig-scapulothoracic-contact-screen width=100%}
+
+No fixed-shoulder arm-only state reaches the 0.5 mm bilateral tolerance. The
+mobile-scapula branch reaches that residual in 31 of 54 states, but only 16 of
+54 also receive a successful optimizer termination. Twenty-eight states place
+at least one coordinate on its declared screening bound, and the largest
+shoulder-center excursion is 0.101 m. The retained 2.0 m adverse grip span
+still fails, with 0.480 m maximum bilateral error. These counts expose a
+model-structure effect and a numerical/range boundary; they do not establish
+that the remaining states are anatomically infeasible.
+
+Both paired contact Jacobians have rank six at every registered state. The
+fixed branch therefore has a two-dimensional local coordinate null space and
+the scapular branch has a ten-dimensional null space. Bilateral contact
+position alone cannot allocate motion uniquely among scapular and
+glenohumeral coordinates. Adding scapular mobility materially changes the
+geometric screen while simultaneously increasing allocation
+non-identifiability.
+
+This result advances the model ladder without identifying a human mechanism.
+The ellipsoid radii and angular bounds are engineering values, the screen has
+no subject-specific bone or muscle geometry, and no contact force, power,
+work, passivity, tissue load, or club-delivery outcome is solved. The decisive
+next test replaces this surrogate with the independently validated articulated
+shoulder model, subject-specific anatomy where governed, calibrated grip
+contact, and paired forward dynamics.
+
+The next spatial experiment must now integrate calibrated compliant contact
+from these closed states, expose contact loss and tissue/shaft compliance as
+typed states, and repeat the coincident, reversal, killswitch, power, and
+work--energy controls in two independent engines. Only trajectories passing
+those gates may be used to test whether drift-mediated transfer reduces timing
+demand, creates recovery, benefits from slack, or supports a human strategy.
+
 ## Falsifiability Gained and Claims Still Open {#sec-spatial-claim-boundary}
 
 The executed experiment advances the evidence boundary in three ways.
@@ -289,7 +409,10 @@ Four stronger statements remain open:
   addresses that separate estimand without promoting this prescribed-load
   result.
 - **Anatomical Magnitude Is Unsupported.** The reduced tree and spherical
-  inertias are not subject-specific anatomy, muscle, or tissue mechanics.
+  inertias are not subject-specific anatomy, muscle, or tissue mechanics. The
+  subject-scaled audit shows that its prescribed states do not close the
+  anatomical hands on the declared grip points; the bounded follow-up closes
+  only a reduced tree under engineering-limit and coarse collision screens.
 - **Human Strategy Is Unsupported.** No measured trajectory or force record is
   held out for validation, and no coaching prescription follows from this
   mechanism experiment.

@@ -29,6 +29,7 @@ FloatArray = npt.NDArray[np.float64]
 _VELOCITY_CONSTRAINTS = {
     "preserve_relative_club_rate",
     "preserve_absolute_club_rate",
+    "preserve_total_kinetic_energy",
 }
 _PHASES = (
     (0.10, "Transition"),
@@ -66,7 +67,8 @@ class VelocitySweepRequest:
             raise ValueError("proximal_velocity_rad_s values must be unique")
         if self.velocity_constraint not in _VELOCITY_CONSTRAINTS:
             raise ValueError(
-                "velocity_constraint must preserve relative or absolute club rate"
+                "velocity_constraint must preserve relative club rate, absolute "
+                "club rate, or total kinetic energy"
             )
         object.__setattr__(self, "proximal_velocity_rad_s", proximal)
 
@@ -80,6 +82,9 @@ class VelocitySweepRow:
     club_angular_velocity_rad_s: float
     clubhead_speed_m_s: float
     distal_kinetic_energy_j: float
+    total_kinetic_energy_j: float
+    reference_total_kinetic_energy_j: float
+    kinetic_energy_residual_j: float
     total_club_angular_acceleration_rad_s2: float
     drift_club_angular_acceleration_rad_s2: float
     control_club_angular_acceleration_rad_s2: float
@@ -107,11 +112,39 @@ def classify_transfer_phase(normalized_downswing_time: float) -> str:
     return next(name for upper, name in _PHASES if value <= upper)
 
 
-def _velocity_for(request: VelocitySweepRequest, proximal_rate: float) -> FloatArray:
+def _total_kinetic_energy(mass: FloatArray, velocity: FloatArray) -> float:
+    return 0.5 * float(velocity @ mass @ velocity)
+
+
+def _velocity_for(
+    request: VelocitySweepRequest, proximal_rate: float, mass: FloatArray
+) -> FloatArray:
     if request.velocity_constraint == "preserve_relative_club_rate":
         return np.array([proximal_rate, request.reference_velocity_rad_s[1]])
-    absolute_rate = float(np.sum(request.reference_velocity_rad_s))
-    return np.array([proximal_rate, absolute_rate - proximal_rate])
+    if request.velocity_constraint == "preserve_absolute_club_rate":
+        absolute_rate = float(np.sum(request.reference_velocity_rad_s))
+        return np.array([proximal_rate, absolute_rate - proximal_rate])
+
+    target_energy = _total_kinetic_energy(mass, request.reference_velocity_rad_s)
+    quadratic_a = 0.5 * float(mass[1, 1])
+    quadratic_b = float(mass[0, 1]) * proximal_rate
+    quadratic_c = 0.5 * float(mass[0, 0]) * proximal_rate**2 - target_energy
+    discriminant = quadratic_b**2 - 4.0 * quadratic_a * quadratic_c
+    tolerance = 1e-12 * max(1.0, quadratic_b**2, abs(4.0 * quadratic_a * quadratic_c))
+    if discriminant < -tolerance:
+        raise ValueError(
+            "proximal rate is infeasible under the total-kinetic-energy constraint"
+        )
+    root_term = np.sqrt(max(discriminant, 0.0))
+    roots = np.array(
+        [
+            (-quadratic_b - root_term) / (2.0 * quadratic_a),
+            (-quadratic_b + root_term) / (2.0 * quadratic_a),
+        ]
+    )
+    reference_relative_rate = float(request.reference_velocity_rad_s[1])
+    relative_rate = float(roots[np.argmin(np.abs(roots - reference_relative_rate))])
+    return np.array([proximal_rate, relative_rate])
 
 
 def _row(
@@ -121,7 +154,10 @@ def _row(
 ) -> VelocitySweepRow:
     backend = make_backend("ode", params)
     q = request.q_rad
-    velocity = _velocity_for(request, proximal_rate)
+    mass = np.asarray(backend.mass_matrix(q), dtype=float)
+    velocity = _velocity_for(request, proximal_rate, mass)
+    reference_energy = _total_kinetic_energy(mass, request.reference_velocity_rad_s)
+    total_energy = _total_kinetic_energy(mass, velocity)
     total_qdd = backend.forward_dynamics(q, velocity, request.control_nm)
     drift_qdd = backend.forward_dynamics(q, velocity, np.zeros(2))
     control_qdd = total_qdd - drift_qdd
@@ -152,6 +188,9 @@ def _row(
         club_angular_velocity_rad_s=float(np.sum(velocity)),
         clubhead_speed_m_s=float(clubhead_speed(inertials, q_row, velocity_row)[0]),
         distal_kinetic_energy_j=float(distal_energy[0]),
+        total_kinetic_energy_j=total_energy,
+        reference_total_kinetic_energy_j=reference_energy,
+        kinetic_energy_residual_j=total_energy - reference_energy,
         total_club_angular_acceleration_rad_s2=float(club_acceleration[0]),
         drift_club_angular_acceleration_rad_s2=float(club_acceleration[1]),
         control_club_angular_acceleration_rad_s2=float(club_acceleration[2]),

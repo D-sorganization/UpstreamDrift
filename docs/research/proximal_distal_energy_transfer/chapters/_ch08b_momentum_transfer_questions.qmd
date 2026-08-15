@@ -12,16 +12,53 @@ and their broader rationale is documented in the open
 | Question | Present Assessment | What Would Change the Assessment? |
 |---|---|---|
 | How much transfer is drift-mediated? | Conditional on the observable, coordinate and frame, event window, model, and decomposition. Signed drift shares may exceed 100% when control opposes the pathway; pointwise attribution is not forward persistence. | A common acceleration/force/impulse/power/work ledger across tiers, same-state killswitches, uncertainty propagation, and participant-held-out bilateral-wrench evaluation. |
-| Which geometry matters? | Relative link angle, force direction, velocity direction, reference point, grip separation, swing-plane orientation, and contact moment arm can gate magnitude and sign. | A subject-scaled spatial atlas with zero, orthogonal, coincident-grip, and reversed-moment-arm controls reproduced in an independent engine. |
+| Which geometry matters? | Relative-link and force–velocity angles create exact sine/cosine gates; bilateral couple varies with signed grip separation and transverse differential force. Existing moving-base and two-engine spatial controls reproduce coincident-grip zeros and moment-arm reversals. A six-profile audit rejects prescribed states that miss closure by 0.171–0.616 m; a bounded follow-up closes all 234 registered reduced-tree configurations while retaining rank, engineering-limit, and coarse collision gates. | Calibrated compliant forward contact from the closed states, equipment geometry, subject-specific anatomy, and held-out digital twins and human bilateral wrenches. |
 | Which timing patterns matter? | Early distal release changes the available geometry; proximal rate, acceleration, braking, and release timing interact nonmonotonically. “Casting” is not one universal event. | Factorial interventions on proximal acceleration, distal release, and braking under matched state and work, with multiple preregistered casting definitions and adverse-load tests. |
-| Does a drift-mediated strategy require less timing precision? | Unresolved for people. In a 15-case paired planar screen, neither perfect nor delayed/noisy state triggering established a recovery advantage over the clock policy; this is not evidence about neural timing demand. | Viable timing-region and phase-error studies under matched work, force, and effort, then participant-held-out perturbation trials. |
-| Is a strategy self-correcting? | Not established. Requiring error to remain below half its initial value through delivery produced recovery in only 13–20% of the engineering cases, with no policy separating decisively. | Larger attraction-region sweeps, adverse external loads, independently identified observers, and human perturbations without hidden load-cost increase. |
-| Should proximal velocity be maximized? | No general rule is supported. The reduced studies contain phase dependence, matching-rule dependence, nonmonotonic killswitch effects, and adverse braking associations. | Dose-response surfaces for rate and acceleration with matched state, work, load, and impact definitions, extended across spatial and subject-scaled models and held-out participants. |
-| Is slack beneficial or necessary? | Unanswered until the mechanism is named. Contact loss, backlash, elastic preload, muscle-tendon series compliance, and control deadband are not interchangeable. | One slack class at a time, with a state and constitutive law, matched initial energy, passivity and closure checks, hysteresis sweeps, and a measurement strategy. |
+| Does a drift-mediated strategy require less timing precision? | Not supported in the registered moving-base planar comparison. On a common nominal phase grid, the clock policy retained four of five robust task-viable points and 45 ms of contiguous width; the delayed/noisy state trigger retained one point and no multi-point span. This does not measure neural timing demand. | Continuous phase-volume studies with independently identified observers, spatial impact outcomes, subject scaling, and participant-held-out perturbations. |
+| Is a strategy self-correcting? | Not established. The earlier screen produced 13–20% sustained recovery, whereas the expanded phase/load screen produced none in 60 cases. No tested policy has a recovery-qualified viable region. | Continuous attraction-region studies with independently identified observers, stronger feedback families, external-contact disturbances, and human perturbations without hidden load-cost increase. |
+| Should proximal velocity be maximized? | No general rule is supported. Exact equal-energy rate sweeps are nonmonotonic. A 216-program common-time screen yields 46 disjoint work/load-matched pairs with 20 favorable and 26 adverse higher-rate outcomes. An identical-state acceleration sweep also reverses the club-acceleration response before impact. | Full-delivery-state-matched forward rate and acceleration interventions, extended across spatial and subject-scaled models and held-out participants. |
+| Is slack beneficial or necessary? | Partly answered at a synthetic constitutive tier. Five declared classes have been exercised separately, but no global benefit, necessity, intentionality, or delivery advantage is supported. One scalar output nearly confounds contact disengagement with the biological-compliance surrogate. | Embed one class at a time in moving-base, two-hand, and spatial delivery models under matched state, work, and load; add stateful backlash and subject-specific tissue models; acquire independent contact, shaft, tendon, activation, and bilateral-wrench measurements. |
 
 : Current answer and falsification map for the critical momentum-transfer
 questions. “Conditional” denotes model- and estimand-bounded evidence rather
 than a human strategy. {#tbl-momentum-question-status tbl-colwidths="20,38,42"}
+
+## Geometry Gates and Null Controls
+
+The geometry atlas in @fig-momentum-geometry-atlas makes three independent
+gates explicit. First, force power is $Fv\cos\phi$: the same force magnitude
+is positive, zero, or negative as the force–velocity angle crosses 0, 90, or
+180 degrees. Second, the distal tangential and centripetal projections have
+distinct $\cos\theta$ and $-\sin\theta$ gates, so one can vanish while the
+other is maximal. Third, an ideal bilateral differential-force couple is the
+signed grip-separation vector crossed with differential force. It vanishes for
+coincident contacts and axial differential force and reverses with the moment
+arm or transverse force.
+
+![Geometry Atlas for Force Power, Relative-Link Projection, and Bilateral
+Force-Couple Sign.](figures/fig_momentum_geometry_atlas.pdf){#fig-momentum-geometry-atlas width=100%}
+
+These are not merely symbolic checks. The existing moving-base planar control
+gives exactly zero couple for coincident grips; the rotating-base tier changes
++1.351 to -1.351 N m under signed arm reversal; and the independently authored
+MuJoCo and Pinocchio spatial-contact tier retains a maximum reversal residual
+below $9.2\times10^{-16}$ N m. Proper 3-D rotations preserve total wrench
+power to the registered numerical tolerance. The remaining anatomical question
+is therefore not whether these geometric identities hold, but which
+subject-scaled configurations, forces, velocities, and compliant contacts are
+feasible and used by people. The subject-scaled audit in
+@sec-subject-scaled-contact-closure makes that distinction quantitative: all
+local constraint Jacobians retain rank six, yet the prescribed anatomical hand
+points remain 0.171--0.616 m from the grips. Full local rank is not contact
+closure.
+
+The bounded inverse-kinematics follow-up separates unclosed prescription from
+reduced-tree reachability. All 234 profile/span/phase configurations close
+both point contacts with fixed club coordinates, rank-six achieved constraint
+Jacobians, positive engineering-limit margins, and positive coarse
+bounding-sphere clearances. That result clears only the next geometric gate:
+the bounds are not clinical ranges, the collision screen is not anatomy, and
+no contact forces or delivery outcomes are solved.
 
 ## Timing and Common Failure Descriptions
 
@@ -58,6 +95,34 @@ to self-correction; it does not rank human strategies.
 show the held-out engineering envelope; labels above the recovery bars give
 90th-percentile individual-hand force.](figures/fig_observer_recovery.pdf){#fig-observer-recovery width=100%}
 
+The common-phase extension maps both policies onto the same nominal release
+coordinate. Clock commands use offsets from 0.140 s; state thresholds are the
+right-shoulder angles reached at those same target times on one common nominal
+trajectory. The comparison therefore does not confuse seconds with arbitrary
+angle thresholds. Six named cohorts preserve nominal dynamics, a 15% heavier
+distal club, 20% lower shaft stiffness, 12 ms additional actuator delay, a 50%
+larger initial perturbation, and a combined adverse case. Every policy, load,
+and phase has paired reference and perturbed trajectories.
+
+Under the primary task guards---at least 95% of the load-matched clock
+baseline speed, no more than 2 degrees additional face/path error, no more
+than 10% additional peak individual-hand force or squared-torque effort, and
+a 5% normalized numerical-residual ceiling---the clock policy is viable at
+four of five phase points across the intersection of all loads. Its largest
+contiguous sampled span is 45 ms. The delayed/noisy state trigger is robustly
+viable only at the latest point and therefore has no multi-point span. Strict,
+primary, and lenient guards retain the same ordering. Requiring sustained
+half-error recovery makes both regions empty: none of the 60 perturbed cases
+recovers through delivery. This is evidence against a state-trigger timing or
+self-correction advantage in this declared model, not evidence that people
+should use clock timing. Half-step checks change delivery speed by 0.029--0.034
+m/s and reduce the normalized residual from 0.014--0.022 to 0.008--0.012.
+
+![Task Viability and Realized Trigger Timing Across the Common Phase Grid and
+Declared Adverse Loads. Green cells satisfy common speed, face/path, force,
+effort, and numerical guards; recovery is reported separately and is absent
+in all registered cases.](figures/fig_timing_viability_adverse_load.pdf){#fig-timing-viability-adverse-load width=100%}
+
 ## Proximal Velocity as a Dose, Not a Maxim
 
 The existing planar evidence is sufficient to reject the rule “maximize
@@ -66,6 +131,21 @@ An apparent speed benefit must be considered together with relative motion,
 control work, interface power, braking work, bilateral load, club orientation,
 and the matching rule. The registered analysis searches explicitly for
 plateaus, interior optima, and reversals rather than forcing a monotonic fit.
+The exact energy-matched state sweep retains 36 later-phase cases with maximum
+energy residual $5.7\times10^{-14}$ J; no phase is monotonic, and the
+pre-impact fitted slope falls from 283.74 to 5.70 W/(rad/s) relative to the
+co-varying-energy rule. The initial eight reused work-only pairs favor the
+lower-rate member by 4.31--9.28 m/s. The follow-on 216-program common-time
+factorial resolves that load confound: its primary thresholds produce 109
+candidate and 46 disjoint work/load-matched pairs, of which 20 higher-rate
+members are faster and 26 are slower. All nine tolerance cells retain both
+signs. This mixed result rejects a monotonic rate rule but does not isolate a
+causal rate effect because actuator commands and full delivery state differ.
+The separate 45-case acceleration intervention holds the entire state and
+distal torque fixed. Before impact, increasing proximal acceleration raises
+interface power yet reduces club angular acceleration; the required proximal
+torque spans -69 to +189 N m. Acceleration is therefore neither a free input
+nor a monotonic substitute for proximal rate.
 
 ## Five Distinct Slack Hypotheses
 
@@ -76,11 +156,34 @@ plateaus, interior optima, and reversals rather than forcing a monotonic fit.
    released energy.
 5. **Control slack** is an activation deadband, delay, or co-contraction reserve.
 
-Only the declared phenomenological transmission dead zone has been exercised
-directly in the present allocation study. The other classes remain separate
-experiments. Any proposed benefit must survive matched-energy, zero-slack,
-direction-reversal, passivity, and work-energy closure controls before it can
-be interpreted as a transfer mechanism.
+The dynamic constitutive audit now exercises all five classes separately under
+a slow closed-cycle sine and a richer multisine with repeated reversals. The
+four mechanical surrogates satisfy the registered passivity and work-energy
+closure checks; the largest absolute closure residual is
+$5.13\times10^{-10}$ J. The control deadband is deliberately treated as a
+delayed command-transmission map, so mechanical passivity and stored energy
+are not assigned to it.
+
+The richer excitation improves the local scaled-sensitivity conditioning of
+every mechanical surrogate. Each three-parameter local Jacobian is full rank,
+but that result does not identify the generating class. Under the registered
+multisine, contact disengagement and the biological-compliance surrogate differ
+by only 1.96% normalized transmitted-output RMSE. Independent contact, tissue,
+shaft, activation, and bilateral-wrench measurements are therefore necessary
+to distinguish mechanisms rather than fitting one output channel. The
+transmission element remains a memoryless dead-zone-plus-damping surrogate,
+not a stateful rate-independent play operator, and the biological element is a
+unilateral Kelvin-Voigt surrogate rather than a subject-specific tendon model.
+
+![Typed Slack Dynamic Audit. Mechanical force-displacement loops, the delayed
+control boundary, local scaled-sensitivity ranks, and normalized outputs are
+shown for the registered synthetic excitations.](figures/fig_typed_slack_dynamic_audit.pdf){#fig-typed-slack-dynamic-audit width=100%}
+
+This evidence supports only a typed experimental program. It does not show
+that slack is good, bad, intentional, required, or beneficial for delivery.
+Any such proposal must still survive matched-energy, zero-slack,
+direction-reversal, passivity, work-energy closure, and independent-measurement
+controls in a forward delivery model.
 
 ## Evidential Boundary
 
@@ -92,3 +195,48 @@ governed dataset contains synchronized full-body and club kinematics, force
 plates, bilateral six-axis grip wrenches, grip/contact state, and impact
 outcomes. Substituting synthetic traces would erase the question the human
 stage is intended to answer.
+
+## Point-by-Point Readiness Audit
+
+The handwritten agenda contains nine testable points after its nested timing
+examples are separated: drift contribution; geometry; casting; early-downswing
+proximal acceleration; segment release; timing precision; self-correction and
+noise robustness; proximal-velocity maximization; and slack. The executable
+readiness audit preserves all nine rather than allowing a broad question to
+hide an unplanned subquestion. Eight presently have a model-bounded answer or
+a negative general-rule result. The unresolved point is the broader
+timing-precision claim: the registered planar comparison is adverse to a
+state-trigger advantage, but spatial and human timing demand remain untested.
+All nine have a registered model experiment and a participant-held-out human
+stage, but the latter remains blocked by the bilateral-wrench data boundary.
+
+The machine-readable authority is
+[`momentum_transfer_readiness_audit.json`](../data/momentum_transfer_readiness_audit.json).
+It is regenerated from the question and experiment registries and validated in
+CI. A missing source point, missing falsifier, invalid evidence status, absent
+human stage, or experiment linked to the wrong question is a hard failure.
+
+```{=latex}
+\begingroup
+\small
+```
+
+| Source Point | Present Scientific State | Next Decisive Model Test |
+|---|---|---|
+| Drift contribution | Partly answered; observable- and window-specific only | Common cross-tier estimand table with uncertainty |
+| Geometry dependencies | Partly answered through reduced spatial controls; the first subject-scaled audit rejects contact feasibility of the prescribed common states | Closed-contact inverse kinematics, calibrated contact, and independent forward integration |
+| Casting | Partly answered: no single event definition is defensible; human causal interpretation remains open | Multiple preregistered event definitions under matched controls |
+| Early proximal acceleration | Partly answered pointwise; nonmonotonic | Forward factorial intervention with full-state/work/load matching |
+| Segment release | Partly answered; objective- and constraint-dependent | Viable-region mapping across proximal and distal control families |
+| Timing precision | Unresolved beyond an adverse planar result; a state-trigger volume advantage is not supported in the registered planar tier | Continuous common-phase spatial and subject-scaled comparison |
+| Self-correction and noise robustness | Partly answered negatively at the registered planar tier; no sustained recovery in 60 cases | Continuous attraction regions with identified observers and external-contact loads |
+| Proximal-velocity maximization | Not supported as a general planar rule | Causal full-delivery-state-matched spatial dose response |
+| Slack | Partly answered at a synthetic constitutive tier; no global benefit and one-channel class identification is not established | One-class-at-a-time moving-base and spatial delivery tests with stateful backlash, subject-specific tissue, and independent measurements |
+
+: Readiness assessment for every point transcribed from the source agenda.
+“Partly answered” never denotes a human or coaching conclusion.
+{#tbl-momentum-source-readiness tbl-colwidths="24,36,40"}
+
+```{=latex}
+\endgroup
+```

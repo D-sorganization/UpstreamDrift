@@ -359,19 +359,28 @@ Across 20 generalized coordinates and 61 states, the maximum relative
 discrepancy is \(2.14\times10^{-11}\); reversing the hand moment arm
 reverses a \(-4.32\) N m force-generated couple, and coincident hands
 remove it exactly. Because contact loads are prescribed, passive spatial
-contact remains inconclusive at that tier. A subsequent reduced
-forward-contact experiment independently integrates MuJoCo and Pinocchio
-with two finite-mass hand carriages, paired compliant interfaces, and no
-direct club actuation. Its exact same-state driver-killswitch branch
-retains a negative swing-normal contact couple for 37.5 ms; coincident
-and reversed-moment-arm controls close exactly, trajectory and wrench
-gates pass, and work--energy residual decreases under timestep
-refinement. This supports a reduced spatial mechanism, not anatomical
-arms, muscle coordination, human strategy, or equipment calibration. A
-coupled uncertainty and control experiment then varies 12 inputs
-simultaneously, audits structural and practical identifiability, and
-compares eight preselected delayed-command programs on separate training
-and held-out ensembles. The net planar wrench leaves one
+contact remains inconclusive at that tier. A six-profile subject-scaled
+audit then shows why local rank is insufficient: its prescribed
+anatomical hand points miss the declared grips by 0.171--0.616 m even
+though every local contact Jacobian has rank six. A bounded
+inverse-kinematics continuation then closes all 234 registered
+subject-scaled configurations while holding the club pose fixed; every
+sample retains rank six, stays inside broad reduced-model engineering
+limits, and passes a coarse nonadjacent-body bounding-sphere screen.
+This establishes reduced-tree geometric feasibility, not anatomical
+validity, contact force, passivity, timing benefit, or human strategy. A
+subsequent reduced forward-contact experiment independently integrates
+MuJoCo and Pinocchio with two finite-mass hand carriages, paired
+compliant interfaces, and no direct club actuation. Its exact same-state
+driver-killswitch branch retains a negative swing-normal contact couple
+for 37.5 ms; coincident and reversed-moment-arm controls close exactly,
+trajectory and wrench gates pass, and work--energy residual decreases
+under timestep refinement. This supports a reduced spatial mechanism,
+not anatomical arms, muscle coordination, human strategy, or equipment
+calibration. A coupled uncertainty and control experiment then varies 12
+inputs simultaneously, audits structural and practical identifiability,
+and compares eight preselected delayed-command programs on separate
+training and held-out ensembles. The net planar wrench leaves one
 individual-hand-force mode unidentified, the six summary observables
 cannot identify the full 12-parameter vector, and all eight programs are
 nondominated on held-out samples. An early opposing command improves
@@ -427,21 +436,28 @@ force; higher impedance changes the tradeoff, and all four registered
 programs remain Pareto-nondominated. A local task-Jacobian partition
 exposes five task-null input directions, but this is a model property
 rather than evidence of a neural synergy or human self-stabilization. A
-phase-resolved proximal-velocity study then evaluates 90 exact
-same-state cases under relative- and absolute-club-rate matching. High
-proximal-link speed strongly increases late drift power in some states,
-but the sign reverses earlier and in the delivery state under
-absolute-rate matching. A separate 60-program trajectory grid is more
+phase-resolved proximal-motion study evaluates 126 rate cases under
+relative-rate, absolute-rate, and exact total-kinetic-energy matching,
+plus 45 identical-state acceleration interventions. The large pre-impact
+rate trend nearly vanishes under energy matching, and increasing
+proximal acceleration raises interface power while reducing club angular
+acceleration before impact. A separate 60-program grid is more
 adversarial: among 26 valid impacts, release-state proximal velocity
 correlates negatively with impact speed and positively with negative
-grip work. The combined result rejects proximal speed as a standalone
-release rule. The resulting rotating-base, two-hand tier uses finite
-torso inertia, two closed arm--grip constraints, separated reactions,
-and a compliant distal club. Its 18-program matched- state grid finds
-that higher initial torso rate can accompany greater delivery speed but
-does not uniformly reduce braking work; exact torso, arm, and wrist
-killswitches are nonmonotonic. This remains a planar mechanism result. A
-frozen participant-held-out bilateral-wrench protocol defines the human
+grip work. Eight reused approximate actuator-work matches initially
+favor the lower-rate member but retain a load confound. A follow-on
+216-program common-time screen resolves that confound: 46 independent
+work/load-matched pairs contain 20 favorable and 26 adverse higher-rate
+outcomes, with both signs retained in all nine tolerance cells. The
+combined result rejects proximal speed as a standalone release rule
+while retaining full-delivery-state and human tests as open. The
+resulting rotating-base, two-hand tier uses finite torso inertia, two
+closed arm--grip constraints, separated reactions, and a compliant
+distal club. Its 18-program matched- state grid finds that higher
+initial torso rate can accompany greater delivery speed but does not
+uniformly reduce braking work; exact torso, arm, and wrist killswitches
+are nonmonotonic. This remains a planar mechanism result. A frozen
+participant-held-out bilateral-wrench protocol defines the human
 falsifier, but no governed human outcome is available. References,
 analysis code, machine-readable results, and provenance are available
 with the document for independent inspection and reuse.
@@ -455,7 +471,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, bottomtitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, colback=white, bottomrule=.15mm, opacityback=0, leftrule=.75mm, arc=.35mm, coltitle=black, opacitybacktitle=0.6, left=2mm, toprule=.15mm, breakable, rightrule=.15mm, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, titlerule=0mm]
+\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-note-color-frame, opacitybacktitle=0.6, leftrule=.75mm, bottomrule=.15mm, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, breakable, arc=.35mm, colback=white, titlerule=0mm, left=2mm, opacityback=0, rightrule=.15mm, bottomtitle=1mm, coltitle=black, toprule=.15mm]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -2986,11 +3002,12 @@ from the same pointwise acceleration split; dotting each force with the
 wrist-point velocity gives its interface power. Acceleration, force, and
 power must close componentwise before a sample is admitted.
 
-\section{Two Velocity-Matching Rules}\label{two-velocity-matching-rules}
+\section{Three Velocity-Matching
+Rules}\label{three-velocity-matching-rules}
 
 Changing \(\dot q_1\) alone is not a unique intervention because the
 distal angular rate may be expressed either relative to the proximal
-link or in the laboratory frame. We therefore evaluate two declared
+link or in the laboratory frame. We therefore evaluate three declared
 counterfactual families:
 
 \begin{enumerate}
@@ -3006,11 +3023,18 @@ counterfactual families:
   while changing \(\dot q_1\). This changes the relative rate and asks
   whether proximal speed alone improves the transfer when distal
   laboratory-frame angular rate is matched.
+\item
+  \textbf{Preserve Total Kinetic Energy:} hold
+  \(T=\tfrac12\dot q^\mathsf{T}M(q)\dot q\) fixed. For each feasible
+  proximal rate, solve the mass-matrix quadratic for the relative club
+  rate and select the branch continuous with the reference state. This
+  removes instantaneous stored kinetic energy as an explanation, but not
+  the prior work used to create the state.
 \end{enumerate}
 
 At five samples from one registered reference trajectory, nine proximal
-rates are evaluated. The grid is centered on the achieved proximal rate
-and adds offsets from -75\% through +75\% of
+rates are evaluated for each rate-matching rule. The grid is centered on
+the achieved proximal rate and adds offsets from -75\% through +75\% of
 \(\max(|\dot q_{1,\mathrm{ref}}|,4\ \mathrm{rad\,s^{-1}})\), so every
 family contains its reference state and the zero-rate transition sample
 remains testable. The labels Transition, Early Downswing, Mid-Downswing,
@@ -3018,9 +3042,12 @@ Delivery and Release, and Pre-Impact refer to 0\%, 15\%, 40\%, 70\%, and
 95\% of this model's time to club-vertical crossing; except for the
 endpoint definitions, they are not human event detections.
 Configuration, torque command, model parameters, and gravity are held
-fixed within a family. Changing velocity necessarily changes kinetic
-energy. This is therefore a local state-field sensitivity sweep, not an
-equal-energy comparison or realizable trajectory optimization.
+fixed within a family. The energy-matched family spans the feasible
+reference branch at each nonzero-energy phase. Transition begins at zero
+velocity, for which the only zero-kinetic-energy velocity state is the
+zero vector; its energy-matched dose is therefore non-identifiable and
+explicitly omitted. The first two rules change kinetic energy. All three
+are local state-field sensitivity sweeps, not trajectory optimizations.
 
 \section{Phase-Resolved Results}\label{phase-resolved-results}
 
@@ -3055,6 +3082,17 @@ separately; the delivery absolute-rate value is -0.92 W/(rad/s), versus
 change survives both matching rules only in the pre-impact state.
 Delivery remains strongly positive when relative club rate is preserved
 but has a negative endpoint change when absolute club rate is preserved.
+
+The energy-matched result is more adverse to a monotonic rule. Its
+drift-power slope is -1.77 W/(rad/s) in early downswing, -22.98 in
+mid-downswing, -56.71 in delivery, and +5.70 before impact. None of the
+four energy-matched curves is monotonic. Before impact, the fitted
+\(R^2\) is only 0.005 and the endpoint change is +15.72 W, compared with
++3807.53 W when relative club rate---and thus stored energy---is allowed
+to co-vary. The maximum kinetic-energy residual across 36 energy-matched
+states is \(5.7\times10^{-14}\) J. This does not prove that proximal
+speed is harmful; it shows that the largest apparent benefit is not
+invariant to stored-energy control.
 
 \begin{figure}
 
@@ -3098,6 +3136,49 @@ drift-mediated interface power within the declared local sweep.}
 
 \end{figure}%
 
+\section{Proximal Acceleration as a Separate
+Intervention}\label{proximal-acceleration-as-a-separate-intervention}
+
+Velocity and acceleration are not interchangeable. A third pointwise
+study holds configuration, velocity, model parameters, gravity, and
+distal actuator torque fixed, then solves the proximal actuator torque
+required to impose each of nine proximal accelerations at each of the
+five phases. Every row therefore has the same state and instantaneous
+kinetic energy within its phase, but not the same actuator torque,
+instantaneous power, accumulated work, or prior reachability.
+Target-acceleration residual is below \(5.7\times10^{-14}\) rad/s² and
+force closure is exact at stored precision.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{data/proximal_acceleration_transfer/figures/fig_proximal_acceleration_transfer.pdf}
+
+}
+
+\caption{\label{fig-proximal-acceleration-transfer}Identical-state
+proximal-acceleration interventions. The left panel reports
+interface-force power; the right exposes the proximal torque needed to
+impose the acceleration.}
+
+\end{figure}%
+
+At transition, grip velocity is zero, so every acceleration target has
+zero instantaneous interface power; this is a geometric null, not an
+absence of required torque. Across early, mid, delivery, and pre-impact
+phases, interface- power slopes are +0.62, +0.98, +1.40, and +1.57 W per
+rad/s². That result does not imply that continued proximal acceleration
+always accelerates the club. The club-angular-acceleration response
+slope is +0.116, +0.573, and +0.619 in the first three nonzero phases
+but reverses to -0.287 before impact. In that pre-impact state, the
+proximal torque required across the dose ranges from -69 to +189 N m and
+proximal actuator power from -612 to +1677 W. Increasing proximal
+acceleration can therefore raise interface power while reducing the
+club's instantaneous angular acceleration and changing actuator/load
+cost. Only a forward, work- and load-matched intervention can determine
+whether that pointwise response improves delivery.
+
 \section{Trajectory-Level Strategy
 Search}\label{trajectory-level-strategy-search}
 
@@ -3120,9 +3201,11 @@ window.
 }
 
 \caption{\label{fig-shoulder-velocity-strategy-associations}Release-state
-proximal velocity against impact speed and negative interface work for
-every valid-impact trajectory. Color denotes release time, exposing the
-timing confound.}
+proximal velocity against impact speed and negative interface work,
+followed by impact speed against net actuator work, for every valid-
+impact trajectory. Color denotes release time in the first two panels;
+gray connectors identify the approximate work-matched pairs in the
+third.}
 
 \end{figure}%
 
@@ -3141,6 +3224,102 @@ and conditioning on valid impact creates selection. It nevertheless
 supplies a model counterexample to the claim that waiting for the
 modeled proximal link to attain a larger angular velocity is sufficient
 to improve transfer.
+
+The forward ledger now integrates proximal and distal actuator power
+from the start of motion through impact. Eight sampled program pairs
+differ by 2.56 rad/s in release-state proximal rate while matching both
+net and positive actuator work within 5\%. In all eight, the higher-rate
+member is slower by 4.31--9.28 m/s. These pairs are reused, not
+independent, and no pair also matches peak interface force within 10\%;
+peak-force differences are 34--46\%. This is an adverse model
+counterexample under approximate work matching, not a load-matched
+causal estimate or a human optimum.
+
+\subsection{Joint Work- and Load-Matched Forward
+Screen}\label{joint-work--and-load-matched-forward-screen}
+
+The load confound is testable rather than merely acknowledged. A
+follow-on finite factorial fixes both proximal-drive cut and
+wrist-release time at 0.14 s, then crosses six early proximal torques,
+four post-cut proximal torques, three opposing wrist torques, and three
+post-release wrist torques. All 216 attempts remain in the record; 148
+satisfy the same club-vertical impact definition. Candidate pairs must
+differ by at least 1.5 rad/s in proximal rate at release while matching
+net actuator work and positive actuator work within 5\% and peak modeled
+interface force within 10\%.
+
+The primary screen contains 109 admissible candidate pairs. To prevent
+one trajectory from being counted repeatedly, a frozen greedy rule
+selects 46 disjoint pairs, ordered first by the sum of the three
+relative mismatches and then by larger rate separation. The higher-rate
+member is faster in 20 pairs and slower in 26. Its speed difference
+ranges from -3.85 to +1.45 m/s, with a mean of -0.13 m/s. Thus, load
+matching removes the uniformly adverse result of the earlier eight
+reused work-only pairs, but it does not reveal a monotonic benefit. It
+exposes a mixed response: rate is one state coordinate within a coupled
+control and geometry history.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{data/joint_matched_proximal_rate/figures/fig_joint_matched_proximal_rate.pdf}
+
+}
+
+\caption{\label{fig-joint-matched-proximal-rate}Independent primary
+matches retain favorable and adverse higher-rate outcomes. The
+sensitivity panel reports the mean higher-minus-lower rate speed
+difference and the number of favorable pairs over all independent pairs
+in each tolerance cell.}
+
+\end{figure}%
+
+\begin{longtable}[]{@{}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedleft
+Work Tolerance
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Load Tolerance
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Independent Pairs
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Higher Rate Faster
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Higher Rate Slower
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Mean Speed Difference (m/s)
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+2.5\% & 5\% & 16 & 5 & 11 & -0.216 \\
+2.5\% & 10\% & 27 & 11 & 16 & -0.105 \\
+2.5\% & 15\% & 32 & 11 & 21 & -0.493 \\
+5\% & 5\% & 30 & 11 & 19 & -0.274 \\
+5\% & 10\% & 46 & 20 & 26 & -0.127 \\
+5\% & 15\% & 49 & 22 & 27 & -0.115 \\
+7.5\% & 5\% & 33 & 13 & 20 & -0.235 \\
+7.5\% & 10\% & 49 & 23 & 26 & -0.060 \\
+7.5\% & 15\% & 53 & 25 & 28 & -0.029 \\
+\end{longtable}
+
+Every tolerance cell retains both signs, and every cell has more slower
+than faster higher-rate members. This sign mixture is the important
+result; the small negative means are not estimates of a human effect.
+Programs can differ in several actuator commands, greedy matching is not
+a globally optimal assignment, and valid-impact conditioning remains a
+selection. A decisive next test must independently intervene on the
+achieved rate or acceleration, match the full delivery state and
+work/load ledgers, and repeat the contrast in spatial, subject-scaled,
+and held-out human tiers.
 
 \begin{figure}
 
@@ -3501,30 +3680,34 @@ be declared before examining outcomes.
 \section{Reproducibility and Claim
 Boundary}\label{reproducibility-and-claim-boundary}
 
-The committed evidence contains 90 pointwise cases (five phase labels,
-two velocity-matching rules, and nine proximal rates) and all 60
-attempted trajectory programs. The machine-readable JSON files record
-every row, phase summary, closure test, invalid-impact attempt, Pareto
-membership, model-tier statement, falsifier, limitation, and dependency
-hash; paired NPZ files preserve the numerical arrays. Repeated
-generation is byte-identical for both JSON and NPZ artifacts. The
-pointwise generating scripts are
+The committed evidence contains 126 velocity cases (90 across five phase
+labels and two rate-matching rules, plus 36 energy-matched states across
+four nonzero-energy phases), 45 identical-state proximal-acceleration
+cases, all 60 timing-grid programs, and all 216 joint-matching programs.
+The machine-readable JSON files record every row, phase summary, closure
+test, invalid-impact attempt, Pareto membership, model-tier statement,
+falsifier, limitation, and dependency hash; paired NPZ files preserve
+the numerical arrays. Repeated generation is byte-identical for both
+JSON and NPZ artifacts. The pointwise generating scripts are
 \texttt{shoulder\_velocity\_transfer.py},
 \texttt{run\_shoulder\_velocity\_transfer\_study.py}, and
 \texttt{make\_shoulder\_velocity\_transfer\_figures.py}. The trajectory
 scripts are \texttt{shoulder\_velocity\_strategy\_search.py},
+\texttt{run\_joint\_matched\_proximal\_rate\_study.py},
 \texttt{run\_shoulder\_velocity\_strategy\_study.py}, and
 \texttt{make\_shoulder\_velocity\_strategy\_figures.py}.
 
 The supported conclusion is narrow: in the reference fixed-hub planar
 model, increasing proximal-link angular velocity can markedly increase
-late drift- mediated interface power over a declared local range, but
-the effect is phase-, range-, and state-definition-dependent and can
-reverse earlier in the downswing. A separate finite control grid
-supplies a counterexample to using release-state proximal rate as a
-standalone rule. The study does not establish an optimal human thorax
-velocity, a causal shoulder strategy, a bilateral hand allocation, or a
-universal instruction to release while rotating rapidly.
+late drift- mediated interface power when stored energy co-varies, but
+the effect is phase-, range-, and state-definition-dependent, can
+reverse earlier, and nearly disappears in the energy-matched pre-impact
+screen. A separate finite control grid, including approximate
+actuator-work matches, supplies a counterexample to using release-state
+proximal rate as a standalone rule. The study does not establish an
+optimal human thorax velocity, a causal shoulder strategy, a bilateral
+hand allocation, or a universal instruction to release while rotating
+rapidly.
 
 \chapter{Matched-State Counterfactual
 Persistence}\label{sec-killswitch-ensemble}
@@ -4065,6 +4248,159 @@ greatly exceeds the resultant over much of the early and middle trace.
 BASE and ZTCF resultants are nearly coincident, while their opposed
 modes differ more visibly. This is why a net-force plot alone cannot
 diagnose the rotational action of a two-hand grip.
+
+\section{Which Bilateral Forces Are
+Identifiable?}\label{sec-bilateral-wrench-identifiability}
+
+The common/differential decomposition also exposes a measurement
+limitation. Let the stacked point-force vector be
+\(\mathbf f=[\mathbf F_L^T,\mathbf F_T^T]^T\). About a declared
+reference \(O\), the measured net club wrench is the linear map
+
+\begin{equation}\phantomsection\label{eq-point-force-wrench-map}{
+\begin{bmatrix}\mathbf R\\\mathbf M_O\end{bmatrix}
+=
+\underbrace{
+\begin{bmatrix}
+\mathbf I & \mathbf I\\
+[\mathbf r_L-\mathbf r_O]_\times &
+[\mathbf r_T-\mathbf r_O]_\times
+\end{bmatrix}}_{\mathbf A_F}
+\begin{bmatrix}\mathbf F_L\\\mathbf F_T\end{bmatrix},
+}\end{equation}
+
+where \([\mathbf r]_\times\mathbf F=\mathbf r\times\mathbf F\). For two
+distinct point contacts, \(\mathbf A_F\) has rank five rather than six.
+Its one-dimensional right null space is
+
+\begin{equation}\phantomsection\label{eq-axial-internal-null-mode}{
+\mathbf n_F=\frac{1}{\sqrt{2}}
+\begin{bmatrix}\widehat{\mathbf d}\\-\widehat{\mathbf d}\end{bmatrix},
+\qquad
+\widehat{\mathbf d}=\frac{\mathbf r_T-\mathbf r_L}
+{\lVert\mathbf r_T-\mathbf r_L\rVert}.
+}\end{equation}
+
+Thus equal and opposite forces directed along the contact-separation
+axis produce neither a net force nor a net moment. They can preload the
+grip, change contact pressure, and alter tissue or shaft states while
+remaining exactly invisible in the net club wrench. This is a structural
+result, not a statement that such loading is beneficial, intentional, or
+present in a golfer. It also shows why club motion, inverse dynamics, or
+a single net-wrench sensor cannot by itself distinguish a lead-arm push
+from an opposing trail-arm pull.
+
+The left-null counterpart is equally useful: point forces alone cannot
+create a free moment parallel to \(\mathbf d\) about the grip midpoint.
+Such a measured long-axis moment requires a free hand torque, a
+non-point contact distribution, or model discrepancy. Perpendicular
+differential forces remain observable through their couple, with
+force-to-moment gain proportional to grip span.
+
+If each hand is instead allowed an independent six-axis wrench, the
+input has twelve components and the net-wrench map has rank six and
+nullity six. A net club wrench therefore identifies even less of the
+\emph{allocation}: infinitely many bilateral force/free-moment
+combinations produce the same resultant wrench. One independent internal
+axial-force scalar raises the point-force map to full column rank six,
+but it does not resolve the full six-axis bilateral problem. Direct
+allocation requires bilateral measurements or additional assumptions
+that must themselves be calibrated and tested. Instrumented-grip studies
+show feasible measurement precedents (\citeproc{ref-koike2016}{Koike
+2016}; \citeproc{ref-koike2020}{Choi and Park 2020}), but the available
+public reports are not a governed participant-level data deposit for the
+frozen human protocol.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_bilateral_wrench_identifiability.pdf}
+
+}
+
+\caption{\label{fig-bilateral-wrench-identifiability}Bilateral Wrench
+Identifiability Is Geometry and Sensor Dependent}
+
+\end{figure}%
+
+Figure~\ref{fig-bilateral-wrench-identifiability} reports the executable
+audit. The point- force map is rank five with nullity one; adding the
+axial scalar gives rank six; and the full bilateral-wrench map is rank
+six with nullity six. A 0.06--0.30 m declared grip-span sweep preserves
+rank while increasing the smallest nonzero singular value and reducing
+the nonzero condition ratio. Because force and moment have different
+units, the plotted audit uses explicit SI numerical scaling (1 N for
+force and 1 N m for moment); its condition ratio is therefore
+measurement-scale dependent, while rank and nullity are not. Three
+consistent proper rotations preserve the singular values to within
+\(2.3\times10^{-16}\).
+
+This closes only an instantaneous linear structural-identifiability
+question. It does not establish practical identifiability under noise,
+identify wrist, arm, scapular, or muscle commands, or validate a human
+strategy. Those stronger questions require synchronized bilateral
+six-axis grip wrenches, contact-state or pressure measurements,
+kinematics, and participant-held-out evaluation. The machine-readable
+result and figure are regenerated by
+\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/scripts/research/proximal_distal_energy/run_bilateral_wrench_identifiability_study.py}{\texttt{run\_bilateral\_wrench\_identifiability\_study.py}}.
+
+\subsection{Trajectory-Level Synthetic Sensor
+Qualification}\label{sec-bilateral-sensor-qualification}
+
+The structural result supplies a necessary measurement contract, but not
+a device specification. A deterministic 301-sample, 32-trial synthetic
+qualification therefore propagates time-varying bilateral point forces
+through the same map under declared channel noise, normalized
+cross-talk, calibration error, and contact-center migration. Force
+channels use a 100 N normalization, moment channels use 10 N m, and the
+added internal-axial channel uses 100 N. These scales and perturbation
+levels are study inputs, not measurements from a particular instrument.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_bilateral_wrench_sensor_qualification.pdf}
+
+}
+
+\caption{\label{fig-bilateral-wrench-sensor-qualification}Synthetic
+Bilateral Point-Force Sensor Qualification}
+
+\end{figure}%
+
+Figure~\ref{fig-bilateral-wrench-sensor-qualification} demonstrates why
+net-wrench closure is an insufficient acceptance test. The
+net-wrench-only estimator reproduces the resultant wrench to numerical
+precision while retaining 11.86 N bilateral allocation RMSE, 45.01 N
+allocation 95th-percentile error, and 29.05 N error in the invisible
+axial mode. Adding an independently measured axial scalar reduces the
+ideal allocation error to numerical precision. Under the registered
+combined synthetic condition, allocation RMSE is 1.02 N, its 95th
+percentile is 3.87 N, normalized net-wrench RMSE is 0.0142, and
+axial-mode RMSE is 0.351 N.
+
+The separated controls localize two practical failure paths. One percent
+normalized cross-talk produces 0.942 N allocation RMSE when uncorrected
+and 0.153 N when its matrix is exactly calibrated; a ten-percent
+residual error in that cross-talk calibration raises the result to 0.179
+N. Eight millimetres of declared contact-center migration produces 2.025
+N allocation RMSE when the estimator holds nominal contacts fixed,
+whereas exact contact tracking restores numerical closure. These values
+qualify the executable synthetic estimator only. They do not constitute
+sensor calibration, uncertainty bounds for a future device, or evidence
+about a golfer.
+
+The qualification remains restricted to bilateral point forces. It
+excludes free hand moments, distributed contact, grip compliance, shaft
+deformation, skin and tissue dynamics, anatomical source attribution,
+and human performance. A full bilateral six-axis system still requires
+traceable load calibration, cross-talk and drift characterization,
+time-varying contact registration, synchronization, and
+participant-held-out validation. The machine-readable cases and figure
+are regenerated by
+\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/scripts/research/proximal_distal_energy/run_bilateral_wrench_sensor_qualification.py}{\texttt{run\_bilateral\_wrench\_sensor\_qualification.py}}.
 
 \section{Reconstruction and Verification
 Methods}\label{sec-two-hand-methods}
@@ -6926,6 +7262,171 @@ is attributable to Equation~\ref{eq-spatial-two-hand-wrench} within the
 declared model. It is not attributable to a change in force norm, event
 timing, solver state, or reference-frame rotation.
 
+\section{Subject-Scaled Contact-Closure
+Audit}\label{sec-subject-scaled-contact-closure}
+
+The common-state result still leaves a more basic geometric question: do
+the anatomical hand points occupy the declared club-contact points? A
+constraint Jacobian can have full row rank even when the points it would
+constrain are far apart. Treating rank as proof of feasible two-hand
+contact would therefore hide a model-structure failure.
+
+A deterministic atlas scales the same 20-coordinate tree with the
+repository's canonical de Leva anthropometric estimator. It uses female
+and male regression tables at statures of 1.55, 1.75, and 1.95 m, with
+mass fixed by a declared 24 kg/m\(^2\) design rule. These six profiles
+are engineering design points, not participants or a population sample.
+Each is evaluated at 61 prescribed states and grip spans of 0.12, 0.18,
+and 0.24 m. The audit records the two anatomical hand-to-grip distances,
+the \(6\times20\) bilateral point-constraint Jacobian and its singular
+values, the two-point force-to-wrench rank, and the regional generalized
+loads.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_subject_scaled_spatial_geometry.pdf}
+
+}
+
+\caption{\label{fig-subject-scaled-spatial-geometry}Subject-Scaled
+Spatial Contact-Geometry Audit}
+
+\end{figure}%
+
+The adverse result is unambiguous. Anatomical hand points miss the
+declared grip points by 0.171--0.616 m across the atlas, with a median
+miss of 0.405 m; none is within the preregistered 5 mm closure
+tolerance. At the same open states, however, every local bilateral
+constraint Jacobian has rank six and condition number 5.35--6.40. Thus
+the rank calculation answers whether six local closure directions are
+independently available, not whether the prescribed configuration
+already satisfies those closures.
+
+The point-force measurement map retains rank five and one invisible
+axial push--pull mode at every grip span. Adding the independently
+measured internal axial scalar raises the augmented map to rank six. The
+prescribed force-generated couple scales exactly with grip span to
+stored precision. These positive algebraic controls do not rescue
+anatomical feasibility; they show that measurement rank, local kinematic
+rank, contact closure, and forward contact dynamics are four distinct
+gates.
+
+\subsection{Closed-Contact Inverse-Kinematics
+Gate}\label{closed-contact-inverse-kinematics-gate}
+
+The next registered rung solves rather than prescribes the body and arm
+coordinates. For each of the six profiles, three grip spans, and 13
+samples from 0.00 through 0.24 s, a bounded least-squares solve holds
+all six club coordinates at their prescribed values and adjusts the 14
+pelvis, torso, shoulder, elbow, and wrist coordinates. Bilateral point
+errors are the primary residual; a weak reference-posture term selects
+one solution from the underdetermined family. An unreachable 2.0 m grip
+span is retained as an adverse control and correctly fails the closure
+gate.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_subject_scaled_closed_contact.pdf}
+
+}
+
+\caption{\label{fig-subject-scaled-closed-contact}Subject-Scaled
+Bilateral Closed-Contact Feasibility}
+
+\end{figure}%
+
+All 234 registered samples close both contacts. The largest bilateral
+error is \(1.16\times10^{-10}\) m, every achieved constraint Jacobian
+retains rank six, and the maximum adjacent-sample change across the 20
+ms continuation grid is 0.0256 rad. The smallest margin to the declared
+reduced-model joint bounds is 0.103 rad, and the smallest nonexempt
+bounding-sphere clearance is 30.9 mm. The result therefore rejects the
+earlier prescribed trajectories without showing that the grip geometry
+itself is unreachable in this reduced tree.
+
+Those favorable checks remain a necessary-condition result. The broad
+bounds are engineering guards, not measured clinical ranges. Bounding
+spheres omit mesh-level anatomy; connected segments and intended
+hand--grip contacts are exempt. The tree has no explicit scapular glide,
+forearm pronation--supination, multi-axis wrist, fingers, or distributed
+tissue contact. Inverse kinematics supplies neither force nor work and
+cannot test passivity, timing demand, self-correction, proximal-speed
+benefit, or any class of slack.
+
+\subsection{Paired Scapula-on-Ellipsoid Geometry
+Screen}\label{paired-scapula-on-ellipsoid-geometry-screen}
+
+The fixed shoulder centers are the next explicit structural
+intervention. A paired arm-only screen holds the prescribed trunk and
+club pose fixed and compares the existing fixed centers with four
+bounded scapular coordinates per side: protraction, elevation, upward
+rotation, and winging. Protraction and elevation move the shoulder
+center on a declared thoracic ellipsoid; upward rotation and winging
+precede the three glenohumeral rotations. The construction is informed
+by the ellipsoid-constrained OpenSim shoulder complex of Seth et al.
+(\citeproc{ref-seth2016}{2016}), but it is a reduced kinematic surrogate
+rather than a reproduction of that model.
+
+The screen uses the same six deterministic profiles and three grip spans
+at 0.00, 0.12, and 0.24 s, yielding 54 paired states. Only the two arms
+move; the trunk and all six club coordinates remain fixed. The
+fixed-shoulder problem has eight arm coordinates, whereas the scapular
+problem has sixteen. The fixed solution is embedded exactly at zero
+scapular coordinates, so a larger residual in the mobile branch would be
+a numerical failure rather than a geometric finding.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_scapulothoracic_contact_screen.pdf}
+
+}
+
+\caption{\label{fig-scapulothoracic-contact-screen}Scapular Mobility and
+Bilateral Contact Geometry}
+
+\end{figure}%
+
+No fixed-shoulder arm-only state reaches the 0.5 mm bilateral tolerance.
+The mobile-scapula branch reaches that residual in 31 of 54 states, but
+only 16 of 54 also receive a successful optimizer termination.
+Twenty-eight states place at least one coordinate on its declared
+screening bound, and the largest shoulder-center excursion is 0.101 m.
+The retained 2.0 m adverse grip span still fails, with 0.480 m maximum
+bilateral error. These counts expose a model-structure effect and a
+numerical/range boundary; they do not establish that the remaining
+states are anatomically infeasible.
+
+Both paired contact Jacobians have rank six at every registered state.
+The fixed branch therefore has a two-dimensional local coordinate null
+space and the scapular branch has a ten-dimensional null space.
+Bilateral contact position alone cannot allocate motion uniquely among
+scapular and glenohumeral coordinates. Adding scapular mobility
+materially changes the geometric screen while simultaneously increasing
+allocation non-identifiability.
+
+This result advances the model ladder without identifying a human
+mechanism. The ellipsoid radii and angular bounds are engineering
+values, the screen has no subject-specific bone or muscle geometry, and
+no contact force, power, work, passivity, tissue load, or club-delivery
+outcome is solved. The decisive next test replaces this surrogate with
+the independently validated articulated shoulder model, subject-specific
+anatomy where governed, calibrated grip contact, and paired forward
+dynamics.
+
+The next spatial experiment must now integrate calibrated compliant
+contact from these closed states, expose contact loss and tissue/shaft
+compliance as typed states, and repeat the coincident, reversal,
+killswitch, power, and work--energy controls in two independent engines.
+Only trajectories passing those gates may be used to test whether
+drift-mediated transfer reduces timing demand, creates recovery,
+benefits from slack, or supports a human strategy.
+
 \section{Falsifiability Gained and Claims Still
 Open}\label{sec-spatial-claim-boundary}
 
@@ -6965,7 +7466,10 @@ Four stronger statements remain open:
 \item
   \textbf{Anatomical Magnitude Is Unsupported.} The reduced tree and
   spherical inertias are not subject-specific anatomy, muscle, or tissue
-  mechanics.
+  mechanics. The subject-scaled audit shows that its prescribed states
+  do not close the anatomical hands on the declared grip points; the
+  bounded follow-up closes only a reduced tree under engineering-limit
+  and coarse collision screens.
 \item
   \textbf{Human Strategy Is Unsupported.} No measured trajectory or
   force record is held out for validation, and no coaching prescription
@@ -10585,43 +11089,107 @@ pointwise attribution is not forward persistence. & A common
 acceleration/force/impulse/power/work ledger across tiers, same-state
 killswitches, uncertainty propagation, and participant-held-out
 bilateral-wrench evaluation. \\
-Which geometry matters? & Relative link angle, force direction, velocity
-direction, reference point, grip separation, swing-plane orientation,
-and contact moment arm can gate magnitude and sign. & A subject-scaled
-spatial atlas with zero, orthogonal, coincident-grip, and
-reversed-moment-arm controls reproduced in an independent engine. \\
+Which geometry matters? & Relative-link and force--velocity angles
+create exact sine/cosine gates; bilateral couple varies with signed grip
+separation and transverse differential force. Existing moving-base and
+two-engine spatial controls reproduce coincident-grip zeros and
+moment-arm reversals. A six-profile audit rejects prescribed states that
+miss closure by 0.171--0.616 m; a bounded follow-up closes all 234
+registered reduced-tree configurations while retaining rank,
+engineering-limit, and coarse collision gates. & Calibrated compliant
+forward contact from the closed states, equipment geometry,
+subject-specific anatomy, and held-out digital twins and human bilateral
+wrenches. \\
 Which timing patterns matter? & Early distal release changes the
 available geometry; proximal rate, acceleration, braking, and release
 timing interact nonmonotonically. ``Casting'' is not one universal
 event. & Factorial interventions on proximal acceleration, distal
 release, and braking under matched state and work, with multiple
 preregistered casting definitions and adverse-load tests. \\
-Does a drift-mediated strategy require less timing precision? &
-Unresolved for people. In a 15-case paired planar screen, neither
-perfect nor delayed/noisy state triggering established a recovery
-advantage over the clock policy; this is not evidence about neural
-timing demand. & Viable timing-region and phase-error studies under
-matched work, force, and effort, then participant-held-out perturbation
-trials. \\
-Is a strategy self-correcting? & Not established. Requiring error to
-remain below half its initial value through delivery produced recovery
-in only 13--20\% of the engineering cases, with no policy separating
-decisively. & Larger attraction-region sweeps, adverse external loads,
-independently identified observers, and human perturbations without
-hidden load-cost increase. \\
+Does a drift-mediated strategy require less timing precision? & Not
+supported in the registered moving-base planar comparison. On a common
+nominal phase grid, the clock policy retained four of five robust
+task-viable points and 45 ms of contiguous width; the delayed/noisy
+state trigger retained one point and no multi-point span. This does not
+measure neural timing demand. & Continuous phase-volume studies with
+independently identified observers, spatial impact outcomes, subject
+scaling, and participant-held-out perturbations. \\
+Is a strategy self-correcting? & Not established. The earlier screen
+produced 13--20\% sustained recovery, whereas the expanded phase/load
+screen produced none in 60 cases. No tested policy has a
+recovery-qualified viable region. & Continuous attraction-region studies
+with independently identified observers, stronger feedback families,
+external-contact disturbances, and human perturbations without hidden
+load-cost increase. \\
 Should proximal velocity be maximized? & No general rule is supported.
-The reduced studies contain phase dependence, matching-rule dependence,
-nonmonotonic killswitch effects, and adverse braking associations. &
-Dose-response surfaces for rate and acceleration with matched state,
-work, load, and impact definitions, extended across spatial and
-subject-scaled models and held-out participants. \\
-Is slack beneficial or necessary? & Unanswered until the mechanism is
-named. Contact loss, backlash, elastic preload, muscle-tendon series
-compliance, and control deadband are not interchangeable. & One slack
-class at a time, with a state and constitutive law, matched initial
-energy, passivity and closure checks, hysteresis sweeps, and a
-measurement strategy. \\
+Exact equal-energy rate sweeps are nonmonotonic. A 216-program
+common-time screen yields 46 disjoint work/load-matched pairs with 20
+favorable and 26 adverse higher-rate outcomes. An identical-state
+acceleration sweep also reverses the club-acceleration response before
+impact. & Full-delivery-state-matched forward rate and acceleration
+interventions, extended across spatial and subject-scaled models and
+held-out participants. \\
+Is slack beneficial or necessary? & Partly answered at a synthetic
+constitutive tier. Five declared classes have been exercised separately,
+but no global benefit, necessity, intentionality, or delivery advantage
+is supported. One scalar output nearly confounds contact disengagement
+with the biological-compliance surrogate. & Embed one class at a time in
+moving-base, two-hand, and spatial delivery models under matched state,
+work, and load; add stateful backlash and subject-specific tissue
+models; acquire independent contact, shaft, tendon, activation, and
+bilateral-wrench measurements. \\
 \end{longtable}
+
+\section{Geometry Gates and Null
+Controls}\label{geometry-gates-and-null-controls}
+
+The geometry atlas in Figure~\ref{fig-momentum-geometry-atlas} makes
+three independent gates explicit. First, force power is \(Fv\cos\phi\):
+the same force magnitude is positive, zero, or negative as the
+force--velocity angle crosses 0, 90, or 180 degrees. Second, the distal
+tangential and centripetal projections have distinct \(\cos\theta\) and
+\(-\sin\theta\) gates, so one can vanish while the other is maximal.
+Third, an ideal bilateral differential-force couple is the signed
+grip-separation vector crossed with differential force. It vanishes for
+coincident contacts and axial differential force and reverses with the
+moment arm or transverse force.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_momentum_geometry_atlas.pdf}
+
+}
+
+\caption{\label{fig-momentum-geometry-atlas}Geometry Atlas for Force
+Power, Relative-Link Projection, and Bilateral Force-Couple Sign.}
+
+\end{figure}%
+
+These are not merely symbolic checks. The existing moving-base planar
+control gives exactly zero couple for coincident grips; the
+rotating-base tier changes +1.351 to -1.351 N m under signed arm
+reversal; and the independently authored MuJoCo and Pinocchio
+spatial-contact tier retains a maximum reversal residual below
+\(9.2\times10^{-16}\) N m. Proper 3-D rotations preserve total wrench
+power to the registered numerical tolerance. The remaining anatomical
+question is therefore not whether these geometric identities hold, but
+which subject-scaled configurations, forces, velocities, and compliant
+contacts are feasible and used by people. The subject-scaled audit in
+Section~\ref{sec-subject-scaled-contact-closure} makes that distinction
+quantitative: all local constraint Jacobians retain rank six, yet the
+prescribed anatomical hand points remain 0.171--0.616 m from the grips.
+Full local rank is not contact closure.
+
+The bounded inverse-kinematics follow-up separates unclosed prescription
+from reduced-tree reachability. All 234 profile/span/phase
+configurations close both point contacts with fixed club coordinates,
+rank-six achieved constraint Jacobians, positive engineering-limit
+margins, and positive coarse bounding-sphere clearances. That result
+clears only the next geometric gate: the bounds are not clinical ranges,
+the collision screen is not anatomy, and no contact forces or delivery
+outcomes are solved.
 
 \section{Timing and Common Failure
 Descriptions}\label{timing-and-common-failure-descriptions}
@@ -10674,6 +11242,48 @@ individual-hand force.}
 
 \end{figure}%
 
+The common-phase extension maps both policies onto the same nominal
+release coordinate. Clock commands use offsets from 0.140 s; state
+thresholds are the right-shoulder angles reached at those same target
+times on one common nominal trajectory. The comparison therefore does
+not confuse seconds with arbitrary angle thresholds. Six named cohorts
+preserve nominal dynamics, a 15\% heavier distal club, 20\% lower shaft
+stiffness, 12 ms additional actuator delay, a 50\% larger initial
+perturbation, and a combined adverse case. Every policy, load, and phase
+has paired reference and perturbed trajectories.
+
+Under the primary task guards---at least 95\% of the load-matched clock
+baseline speed, no more than 2 degrees additional face/path error, no
+more than 10\% additional peak individual-hand force or squared-torque
+effort, and a 5\% normalized numerical-residual ceiling---the clock
+policy is viable at four of five phase points across the intersection of
+all loads. Its largest contiguous sampled span is 45 ms. The
+delayed/noisy state trigger is robustly viable only at the latest point
+and therefore has no multi-point span. Strict, primary, and lenient
+guards retain the same ordering. Requiring sustained half-error recovery
+makes both regions empty: none of the 60 perturbed cases recovers
+through delivery. This is evidence against a state-trigger timing or
+self-correction advantage in this declared model, not evidence that
+people should use clock timing. Half-step checks change delivery speed
+by 0.029--0.034 m/s and reduce the normalized residual from 0.014--0.022
+to 0.008--0.012.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_timing_viability_adverse_load.pdf}
+
+}
+
+\caption{\label{fig-timing-viability-adverse-load}Task Viability and
+Realized Trigger Timing Across the Common Phase Grid and Declared
+Adverse Loads. Green cells satisfy common speed, face/path, force,
+effort, and numerical guards; recovery is reported separately and is
+absent in all registered cases.}
+
+\end{figure}%
+
 \section{Proximal Velocity as a Dose, Not a
 Maxim}\label{proximal-velocity-as-a-dose-not-a-maxim}
 
@@ -10683,7 +11293,23 @@ optimum. An apparent speed benefit must be considered together with
 relative motion, control work, interface power, braking work, bilateral
 load, club orientation, and the matching rule. The registered analysis
 searches explicitly for plateaus, interior optima, and reversals rather
-than forcing a monotonic fit.
+than forcing a monotonic fit. The exact energy-matched state sweep
+retains 36 later-phase cases with maximum energy residual
+\(5.7\times10^{-14}\) J; no phase is monotonic, and the pre-impact
+fitted slope falls from 283.74 to 5.70 W/(rad/s) relative to the
+co-varying-energy rule. The initial eight reused work-only pairs favor
+the lower-rate member by 4.31--9.28 m/s. The follow-on 216-program
+common-time factorial resolves that load confound: its primary
+thresholds produce 109 candidate and 46 disjoint work/load-matched
+pairs, of which 20 higher-rate members are faster and 26 are slower. All
+nine tolerance cells retain both signs. This mixed result rejects a
+monotonic rate rule but does not isolate a causal rate effect because
+actuator commands and full delivery state differ. The separate 45-case
+acceleration intervention holds the entire state and distal torque
+fixed. Before impact, increasing proximal acceleration raises interface
+power yet reduces club angular acceleration; the required proximal
+torque spans -69 to +189 N m. Acceleration is therefore neither a free
+input nor a monotonic substitute for proximal rate.
 
 \section{Five Distinct Slack
 Hypotheses}\label{five-distinct-slack-hypotheses}
@@ -10708,12 +11334,47 @@ Hypotheses}\label{five-distinct-slack-hypotheses}
   co-contraction reserve.
 \end{enumerate}
 
-Only the declared phenomenological transmission dead zone has been
-exercised directly in the present allocation study. The other classes
-remain separate experiments. Any proposed benefit must survive
-matched-energy, zero-slack, direction-reversal, passivity, and
-work-energy closure controls before it can be interpreted as a transfer
-mechanism.
+The dynamic constitutive audit now exercises all five classes separately
+under a slow closed-cycle sine and a richer multisine with repeated
+reversals. The four mechanical surrogates satisfy the registered
+passivity and work-energy closure checks; the largest absolute closure
+residual is \(5.13\times10^{-10}\) J. The control deadband is
+deliberately treated as a delayed command-transmission map, so
+mechanical passivity and stored energy are not assigned to it.
+
+The richer excitation improves the local scaled-sensitivity conditioning
+of every mechanical surrogate. Each three-parameter local Jacobian is
+full rank, but that result does not identify the generating class. Under
+the registered multisine, contact disengagement and the
+biological-compliance surrogate differ by only 1.96\% normalized
+transmitted-output RMSE. Independent contact, tissue, shaft, activation,
+and bilateral-wrench measurements are therefore necessary to distinguish
+mechanisms rather than fitting one output channel. The transmission
+element remains a memoryless dead-zone-plus-damping surrogate, not a
+stateful rate-independent play operator, and the biological element is a
+unilateral Kelvin-Voigt surrogate rather than a subject-specific tendon
+model.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_typed_slack_dynamic_audit.pdf}
+
+}
+
+\caption{\label{fig-typed-slack-dynamic-audit}Typed Slack Dynamic Audit.
+Mechanical force-displacement loops, the delayed control boundary, local
+scaled-sensitivity ranks, and normalized outputs are shown for the
+registered synthetic excitations.}
+
+\end{figure}%
+
+This evidence supports only a typed experimental program. It does not
+show that slack is good, bad, intentional, required, or beneficial for
+delivery. Any such proposal must still survive matched-energy,
+zero-slack, direction-reversal, passivity, work-energy closure, and
+independent-measurement controls in a forward delivery model.
 
 \section{Evidential Boundary}\label{evidential-boundary}
 
@@ -10725,6 +11386,92 @@ until a governed dataset contains synchronized full-body and club
 kinematics, force plates, bilateral six-axis grip wrenches, grip/contact
 state, and impact outcomes. Substituting synthetic traces would erase
 the question the human stage is intended to answer.
+
+\section{Point-by-Point Readiness
+Audit}\label{point-by-point-readiness-audit}
+
+The handwritten agenda contains nine testable points after its nested
+timing examples are separated: drift contribution; geometry; casting;
+early-downswing proximal acceleration; segment release; timing
+precision; self-correction and noise robustness; proximal-velocity
+maximization; and slack. The executable readiness audit preserves all
+nine rather than allowing a broad question to hide an unplanned
+subquestion. Eight presently have a model-bounded answer or a negative
+general-rule result. The unresolved point is the broader
+timing-precision claim: the registered planar comparison is adverse to a
+state-trigger advantage, but spatial and human timing demand remain
+untested. All nine have a registered model experiment and a
+participant-held-out human stage, but the latter remains blocked by the
+bilateral-wrench data boundary.
+
+The machine-readable authority is
+\href{../data/momentum_transfer_readiness_audit.json}{\texttt{momentum\_transfer\_readiness\_audit.json}}.
+It is regenerated from the question and experiment registries and
+validated in CI. A missing source point, missing falsifier, invalid
+evidence status, absent human stage, or experiment linked to the wrong
+question is a hard failure.
+
+\begingroup
+\small
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2400}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3600}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4000}}@{}}
+\caption{Readiness assessment for every point transcribed from the
+source agenda. ``Partly answered'' never denotes a human or coaching
+conclusion. }\label{tbl-momentum-source-readiness}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Source Point
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Present Scientific State
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Next Decisive Model Test
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Source Point
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Present Scientific State
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Next Decisive Model Test
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Drift contribution & Partly answered; observable- and window-specific
+only & Common cross-tier estimand table with uncertainty \\
+Geometry dependencies & Partly answered through reduced spatial
+controls; the first subject-scaled audit rejects contact feasibility of
+the prescribed common states & Closed-contact inverse kinematics,
+calibrated contact, and independent forward integration \\
+Casting & Partly answered: no single event definition is defensible;
+human causal interpretation remains open & Multiple preregistered event
+definitions under matched controls \\
+Early proximal acceleration & Partly answered pointwise; nonmonotonic &
+Forward factorial intervention with full-state/work/load matching \\
+Segment release & Partly answered; objective- and constraint-dependent &
+Viable-region mapping across proximal and distal control families \\
+Timing precision & Unresolved beyond an adverse planar result; a
+state-trigger volume advantage is not supported in the registered planar
+tier & Continuous common-phase spatial and subject-scaled comparison \\
+Self-correction and noise robustness & Partly answered negatively at the
+registered planar tier; no sustained recovery in 60 cases & Continuous
+attraction regions with identified observers and external-contact
+loads \\
+Proximal-velocity maximization & Not supported as a general planar rule
+& Causal full-delivery-state-matched spatial dose response \\
+Slack & Partly answered at a synthetic constitutive tier; no global
+benefit and one-channel class identification is not established &
+One-class-at-a-time moving-base and spatial delivery tests with stateful
+backlash, subject-specific tissue, and independent measurements \\
+\end{longtable}
+
+\endgroup
 
 \chapter{Conclusions and Research Priorities}\label{sec-conclusions}
 
@@ -10794,6 +11541,31 @@ points remove it exactly. Because the forces are prescribed and the
 state is shared, this supports spatial inverse-dynamics and geometry
 transport but leaves passive forward contact inconclusive at that tier.
 
+The subject-scaled contact-closure audit rejects a tempting shortcut at
+that same tier. Six deterministic de Leva profiles retain a
+full-row-rank local contact Jacobian, yet the prescribed anatomical hand
+points remain 0.171--0.616 m from the declared grips. Rank and
+conditioning therefore cannot substitute for closed feasible anatomy.
+The next articulated spatial tier must solve bilateral closed-contact
+inverse kinematics with joint-limit and collision checks before its
+forward contact, timing, recovery, or slack results can be interpreted.
+The registered inverse-kinematics follow-up now clears that reduced-tree
+gate in all 234 profile/span/phase samples while holding the club pose
+fixed. Its minimum engineering-limit margin is 0.103 rad and its minimum
+coarse bounding-sphere clearance is 30.9 mm. These are screening
+results, not measured anatomical ranges or mesh-level clearance; they
+advance the next test to calibrated compliant forward contact from the
+closed states.
+
+A paired arm-only intervention now isolates one omitted structure. With
+trunk and club pose fixed, the fixed-shoulder branch closes none of 54
+registered states, whereas a bounded scapula-on-ellipsoid surrogate
+reaches the contact residual in 31 states and satisfies both residual
+and solver-termination gates in 16. Full rank persists while coordinate
+nullity rises from two to ten, so the result supports the importance of
+scapular geometry but also strengthens the non-identifiability boundary.
+It is not an anatomical, muscular, or human strategy result.
+
 The reduced spatial forward-contact extension resolves that narrower
 mechanism gate. Native MuJoCo and Pinocchio independently integrate two
 finite-mass hand carriages, paired compliant interfaces, and a free
@@ -10841,9 +11613,11 @@ order:
 \item
   \textbf{Articulated Spatial Forward-Contact Counterfactual.} Replace
   the executed hand-carriage reference with subject-scaled articulated
-  arms and calibrated grip interfaces while preserving the two-engine
-  same-state killswitch, force, couple, power, work, pathway, and
-  closure observables.
+  arms and calibrated grip interfaces. Start from the executed bilateral
+  closed-contact, engineering-limit, and coarse collision-qualified
+  configurations, replace those screens with subject-specific anatomy
+  where available, then preserve the two-engine same-state killswitch,
+  force, couple, power, work, pathway, and closure observables.
 \item
   \textbf{Calibrated Uncertainty and Constrained Control.} Extend the
   executed multivariable screen with population-informed distributions,
@@ -11143,6 +11917,11 @@ Recorded outputs:
   \texttt{data/two\_hand\_wscg\_analysis.npz} --- local force modes,
   moment and power decompositions, poses, and geometry-counterfactual
   arrays.
+\item
+  \texttt{data/bilateral\_wrench\_identifiability\_study.json} ---
+  three-dimensional point-force and full bilateral-wrench ranks, null
+  spaces, grip-span sweep, proper-rotation audit, sensing boundary, and
+  explicit nonhuman claims.
 \item
   \texttt{data/shaft\_contribution\_study.json} --- matched
   rigid/flexible results, termwise acceleration and power summaries,
@@ -11676,6 +12455,13 @@ Rugy, Aymar de, Gerald E. Loeb, and Timothy J. Carroll. 2018. {``Muscle
 Patterns Underlying Voluntary Modulation of Co-Contraction.''}
 \emph{PLoS ONE} 13 (10): e0205538.
 \url{https://doi.org/10.1371/journal.pone.0205538}.
+
+\bibitem[\citeproctext]{ref-seth2016}
+Seth, Ajay, Ricardo Matias, Antonio P. Veloso, and Scott L. Delp. 2016.
+{``A Biomechanical Model of the Scapulothoracic Joint to Accurately
+Capture Scapular Kinematics During Shoulder Movements.''} \emph{PLOS
+ONE} 11 (1): e0141028.
+\url{https://doi.org/10.1371/journal.pone.0141028}.
 
 \bibitem[\citeproctext]{ref-sharp2009}
 Sharp, Robin S. 2009. {``On the Mechanics of the Golf Swing.''}

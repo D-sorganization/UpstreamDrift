@@ -83,6 +83,11 @@ class ShoulderVelocityOutcome:
     transfer_work_closure_residual_j: float
     braking_grip_work_j: float
     peak_grip_force_n: float
+    total_actuator_work_j: float
+    proximal_actuator_work_j: float
+    distal_actuator_work_j: float
+    positive_actuator_work_j: float
+    negative_actuator_work_j: float
     model_tier: str = "exact_planar_double_pendulum_fixed_hub"
 
 
@@ -164,6 +169,18 @@ def _evaluate_program(
         )
     )
     grip_force = trajectory.force_total[release_index : impact_index + 1, 1]
+    actuator_power = applied * velocity
+    actuator_window = actuator_power[: impact_index + 1]
+    actuator_time = time[: impact_index + 1]
+    joint_work = np.trapezoid(actuator_window, x=actuator_time, axis=0)
+    total_actuator_power = np.sum(actuator_window, axis=1)
+    total_actuator_work = float(np.trapezoid(total_actuator_power, x=actuator_time))
+    positive_actuator_work = float(
+        np.trapezoid(np.maximum(total_actuator_power, 0.0), x=actuator_time)
+    )
+    negative_actuator_work = -float(
+        np.trapezoid(np.minimum(total_actuator_power, 0.0), x=actuator_time)
+    )
     speed = clubhead_speed(inertials, q, velocity)
     return ShoulderVelocityOutcome(
         program=program,
@@ -178,6 +195,11 @@ def _evaluate_program(
         transfer_work_closure_residual_j=total - drift - control,
         braking_grip_work_j=braking,
         peak_grip_force_n=float(np.max(np.linalg.norm(grip_force, axis=1))),
+        total_actuator_work_j=total_actuator_work,
+        proximal_actuator_work_j=float(joint_work[0]),
+        distal_actuator_work_j=float(joint_work[1]),
+        positive_actuator_work_j=positive_actuator_work,
+        negative_actuator_work_j=negative_actuator_work,
     )
 
 
