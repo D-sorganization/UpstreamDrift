@@ -124,6 +124,6 @@
 **Learning:** Iterating over a pandas DataFrame using `.iterrows()` and appending row dictionaries to a list is extremely slow due to Python object overhead and Series creation for every row.
 **Action:** Replaced `.iterrows()` loop with vectorized dictionary assignment (e.g., `new_data[col] = df[col]`) when transforming DataFrame columns into a new DataFrame. This provides a ~700x speedup.
 
-## 2026-07-15 - Replace np.sum(x**2) with np.vdot
-**Learning:** `np.vdot(x, x)` is significantly faster (~3-4x) than `np.sum(x**2)` for 1D arrays since it avoids creating temporary intermediate arrays for the squared differences.
-**Action:** Replace `np.sum(x**2)` with `np.vdot(x, x)` for calculating sums of squares on 1D arrays to prevent unnecessary memory allocations and improve performance in critical loops.
+## 2026-08-15 - Pandas iterrows vs itertuples in data tables
+**Learning:** Iterating over a pandas DataFrame using `.iterrows()` is incredibly slow due to Python object overhead and Series creation for every row, blocking the UI thread on large pages. Using `.itertuples(index=False)` provides roughly an 8x speedup by returning namedtuples without creating intermediate Series objects.
+**Action:** Replace `for i, (_, row) in enumerate(df.iterrows()):` with `for i, row in enumerate(df.itertuples(index=False)):` for read-only iteration over pandas DataFrames in UI loops.

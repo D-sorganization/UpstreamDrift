@@ -535,10 +535,8 @@ class DataProcessorEngine(BaseCalculationEngine):
                 f"Fit type '{fit_type.value}' not yet implemented"
             )
 
-        res = y - f
-        ss_res: float = float(np.vdot(res, res))
-        tot = y - np.mean(y)
-        ss_tot: float = float(np.vdot(tot, tot))
+        ss_res: float = float(np.sum((y - f) ** 2))
+        ss_tot: float = float(np.sum((y - np.mean(y)) ** 2))
         r2 = 1 - ss_res / ss_tot if ss_tot != 0 else 0.0
         return FitResult(fit_type.value, list(c), float(r2), eq, f, y - f)
 
