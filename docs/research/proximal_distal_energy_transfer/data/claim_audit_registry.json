@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "fd9d1db3633bb616eb0ea8b1c539ebac8fa1e904c07e846c64f0dda5fc2844c6",
+    "source_digest": "08124a330b94ed930a6773dd644c8bef076aace5acad78bacaab4c192e4700a4",
     "baseline_commit": "a4b53e39b"
   },
   "audit_scope": {
@@ -11,7 +11,7 @@
     "release_review_completion_status": "complete",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "The complete paper inventory is adjudicated. Closed subject-scaled states pass a 2,160-case reduced cross-engine horizon and adverse-load map through 50 ms. The no-failure result is right-censored; articulated contact, calibrated equipment, full delivery, and governed human validation remain open."
+    "current_scope": "The complete paper inventory is adjudicated. Native MuJoCo and Pinocchio articulated mass, bias, and inverse dynamics agree at all 234 closed states. Forward articulated contact, calibrated equipment, full delivery, and governed human validation remain open."
   },
   "dependencies": [
     {
@@ -204,6 +204,11 @@
       "release_claim_key": "closed_state_forward_validity_horizon",
       "published_status": "no_failure_observed_through_registered_50_ms_reduced_interval",
       "audit_state": "reviewed_as_right_censored_reduced_model_result"
+    },
+    {
+      "release_claim_key": "subject_scaled_articulated_inertia",
+      "published_status": "native_common_state_mass_bias_and_inverse_dynamics_qualified",
+      "audit_state": "reviewed_as_common_state_articulated_dynamics_result"
     }
   ],
   "candidate_reviews": [
@@ -10266,6 +10271,54 @@
       "rationale": "This passage states or bounds the registered forward-contact validity-horizon result.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-7e070a6970d80cd1",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-274"
+      ],
+      "rationale": "This passage states or bounds the native articulated-inertia gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "candidate_id": "PD-CAND-0aa4b71d948b8837",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-274"
+      ],
+      "rationale": "This passage states or bounds the native articulated-inertia gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "candidate_id": "PD-CAND-87e213384de0e497",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-275"
+      ],
+      "rationale": "This passage states or bounds the native articulated-inertia gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "candidate_id": "PD-CAND-1f4f302cb0b2f89e",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "The figure include points to registered evidence but asserts no standalone result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "candidate_id": "PD-CAND-9655875f1ecca182",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-276"
+      ],
+      "rationale": "This passage states or bounds the native articulated-inertia gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
     }
   ],
   "claims": [
@@ -22645,6 +22698,134 @@
       "adjudication": "All registered outcomes were retained. No failure was observed through 50 ms, so persistence is reported as right-censored rather than extrapolated.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-14"
+    },
+    {
+      "claim_id": "PD-CLAIM-274",
+      "candidate_ids": [
+        "PD-CAND-7e070a6970d80cd1",
+        "PD-CAND-0aa4b71d948b8837"
+      ],
+      "statement": "The articulated common-state gate independently assembles the same subject-scaled 20-coordinate tree in native MuJoCo and robotics Pinocchio at all 234 closed states.",
+      "classification": "subject_scaled_articulated_inertia_design",
+      "published_status": "complete_for_declared_common_state_matrix",
+      "audit_status": "native_articulated_mass_bias_inverse_dynamics_and_positive_definiteness_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:405",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:415"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_inertia_cross_engine.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_inertia_cross_engine.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_inertia_cross_engine.pdf",
+        "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py",
+        "scripts/research/proximal_distal_energy/run_articulated_inertia_cross_engine.py",
+        "scripts/research/proximal_distal_energy/make_articulated_inertia_cross_engine_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_inertia_claims.py",
+        "tests/research/test_articulated_inertia_cross_engine.py"
+      ],
+      "model_domain": "Six synthetic profiles, three grip spans, 13 closed states per case, 20 scalar coordinates, and two native rigid-body engines.",
+      "uncertainty_boundary": "Segment geometry and spherical inertias are engineering design values rather than participant-specific anatomy.",
+      "competing_explanations": [
+        "shared idealized spherical-body inertia specification",
+        "common-state comparison rather than trajectory integration",
+        "broad reduced-tree geometry and engineering joint bounds",
+        "finite-difference velocity and acceleration estimates"
+      ],
+      "negative_controls": [
+        "independent engine model assembly",
+        "mass-matrix symmetry gate",
+        "positive-definiteness eigenvalue gate",
+        "mass, bias, and inverse-dynamics operators checked separately",
+        "all 234 closed states retained"
+      ],
+      "falsifier": "Any closed state is omitted, model dimensions or joint order differ, or an engine does not use its named native operators.",
+      "adjudication": "All registered states pass the common-state native dynamics gates. The result is restricted to articulated rigid-body operator transport.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "claim_id": "PD-CLAIM-275",
+      "candidate_ids": [
+        "PD-CAND-87e213384de0e497"
+      ],
+      "statement": "All 234 states pass native mass-matrix, bias-force, inverse-dynamics, symmetry, and positive-definiteness gates.",
+      "classification": "subject_scaled_articulated_inertia_result",
+      "published_status": "supported_at_declared_common_state_rigid_body_tier",
+      "audit_status": "native_articulated_mass_bias_inverse_dynamics_and_positive_definiteness_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:426"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_inertia_cross_engine.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_inertia_cross_engine.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_inertia_cross_engine.pdf",
+        "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py",
+        "scripts/research/proximal_distal_energy/run_articulated_inertia_cross_engine.py",
+        "scripts/research/proximal_distal_energy/make_articulated_inertia_cross_engine_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_inertia_claims.py",
+        "tests/research/test_articulated_inertia_cross_engine.py"
+      ],
+      "model_domain": "Six synthetic profiles, three grip spans, 13 closed states per case, 20 scalar coordinates, and two native rigid-body engines.",
+      "uncertainty_boundary": "The result tests rigid-body operator agreement and does not advance contact or a delivery trajectory.",
+      "competing_explanations": [
+        "shared idealized spherical-body inertia specification",
+        "common-state comparison rather than trajectory integration",
+        "broad reduced-tree geometry and engineering joint bounds",
+        "finite-difference velocity and acceleration estimates"
+      ],
+      "negative_controls": [
+        "independent engine model assembly",
+        "mass-matrix symmetry gate",
+        "positive-definiteness eigenvalue gate",
+        "mass, bias, and inverse-dynamics operators checked separately",
+        "all 234 closed states retained"
+      ],
+      "falsifier": "Any reproduced state exceeds a registered relative tolerance, loses symmetry, or has a nonpositive mass-matrix eigenvalue.",
+      "adjudication": "All registered states pass the common-state native dynamics gates. The result is restricted to articulated rigid-body operator transport.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "claim_id": "PD-CLAIM-276",
+      "candidate_ids": [
+        "PD-CAND-9655875f1ecca182"
+      ],
+      "statement": "Native articulated inertia parity does not establish forward contact, anatomy, grip or shaft behavior, muscles, human transfer, timing economy, slack benefit, or coaching strategy.",
+      "classification": "subject_scaled_articulated_inertia_inference_boundary",
+      "published_status": "explicitly_bounded",
+      "audit_status": "native_articulated_mass_bias_inverse_dynamics_and_positive_definiteness_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:434"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_inertia_cross_engine.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_inertia_cross_engine.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_inertia_cross_engine.pdf",
+        "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py",
+        "scripts/research/proximal_distal_energy/run_articulated_inertia_cross_engine.py",
+        "scripts/research/proximal_distal_energy/make_articulated_inertia_cross_engine_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_inertia_claims.py",
+        "tests/research/test_articulated_inertia_cross_engine.py"
+      ],
+      "model_domain": "Six synthetic profiles, three grip spans, 13 closed states per case, 20 scalar coordinates, and two native rigid-body engines.",
+      "uncertainty_boundary": "Compliant bilateral contact, detailed anatomy, equipment, ground, delivery, and governed human evidence remain open.",
+      "competing_explanations": [
+        "shared idealized spherical-body inertia specification",
+        "common-state comparison rather than trajectory integration",
+        "broad reduced-tree geometry and engineering joint bounds",
+        "finite-difference velocity and acceleration estimates"
+      ],
+      "negative_controls": [
+        "independent engine model assembly",
+        "mass-matrix symmetry gate",
+        "positive-definiteness eigenvalue gate",
+        "mass, bias, and inverse-dynamics operators checked separately",
+        "all 234 closed states retained"
+      ],
+      "falsifier": "A contact, anatomy, equipment, muscle, delivery, or human claim is attributed to common-state inertia parity alone.",
+      "adjudication": "All registered states pass the common-state native dynamics gates. The result is restricted to articulated rigid-body operator transport.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
     }
   ]
 }

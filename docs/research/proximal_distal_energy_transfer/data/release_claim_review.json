@@ -3,11 +3,11 @@
   "authority": "D-sorganization/UpstreamDrift#8557",
   "interpretation": "Review completion means every release claim has traceable atomic support, controls, falsifiers, boundaries, and a remaining gate. It does not mean every scientific claim is validated.",
   "summary": {
-    "release_claim_count": 33,
-    "reviewed_release_claim_count": 33,
+    "release_claim_count": 34,
+    "reviewed_release_claim_count": 34,
     "open_release_review_count": 0,
-    "scientifically_open_gate_count": 33,
-    "atomic_claim_count": 272
+    "scientifically_open_gate_count": 34,
+    "atomic_claim_count": 275
   },
   "release_claim_reviews": [
     {
@@ -1925,6 +1925,51 @@
         "Articulated subject-scaled contact, distributed grip and shaft calibration, ground coupling, contact loss, delivery, impact, and governed human evidence remain open."
       ],
       "remaining_scientific_gate": "Replace hand carriages with articulated subject-scaled arms and repeat the horizon, adverse-load, contact-loss, and energy controls with calibrated grip and shaft properties."
+    },
+    {
+      "release_claim_key": "subject_scaled_articulated_inertia",
+      "published_status": "native_common_state_mass_bias_and_inverse_dynamics_qualified",
+      "audit_state": "reviewed_as_common_state_articulated_dynamics_result",
+      "scientific_disposition": "native_articulated_inertia_operators_agree_at_declared_closed_states",
+      "supporting_claim_ids": [
+        "PD-CLAIM-274",
+        "PD-CLAIM-275",
+        "PD-CLAIM-276"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_inertia_cross_engine.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_inertia_cross_engine.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_inertia_cross_engine.pdf",
+        "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py",
+        "scripts/research/proximal_distal_energy/run_articulated_inertia_cross_engine.py",
+        "scripts/research/proximal_distal_energy/make_articulated_inertia_cross_engine_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_inertia_claims.py",
+        "tests/research/test_articulated_inertia_cross_engine.py"
+      ],
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:405",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:415",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:426",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:434"
+      ],
+      "negative_controls": [
+        "independent engine model assembly",
+        "mass-matrix symmetry gate",
+        "positive-definiteness eigenvalue gate",
+        "mass, bias, and inverse-dynamics operators checked separately",
+        "all 234 closed states retained"
+      ],
+      "falsifiers": [
+        "Any closed state is omitted, model dimensions or joint order differ, or an engine does not use its named native operators.",
+        "Any reproduced state exceeds a registered relative tolerance, loses symmetry, or has a nonpositive mass-matrix eigenvalue.",
+        "A contact, anatomy, equipment, muscle, delivery, or human claim is attributed to common-state inertia parity alone."
+      ],
+      "uncertainty_boundaries": [
+        "Segment geometry and spherical inertias are engineering design values rather than participant-specific anatomy.",
+        "The result tests rigid-body operator agreement and does not advance contact or a delivery trajectory.",
+        "Compliant bilateral contact, detailed anatomy, equipment, ground, delivery, and governed human evidence remain open."
+      ],
+      "remaining_scientific_gate": "Apply bilateral compliant contact to the qualified articulated tree and repeat horizon, adverse-load, contact-loss, refinement, power, and energy controls."
     }
   ]
 }

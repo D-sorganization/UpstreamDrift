@@ -24,6 +24,8 @@ This is a current-state handoff. Historical detail belongs in git and GitHub.
   is the next registered tier: subject-scaled articulated bilateral contact
   with distributed grip, shaft, ground, contact-loss, refinement, and
   adverse-load controls.
+- Child issue [#8676](https://github.com/D-sorganization/UpstreamDrift/issues/8676)
+  records the completed common-state articulated-inertia prerequisite.
 - Issue [#8556](https://github.com/D-sorganization/UpstreamDrift/issues/8556)
   remains open. No qualifying participant dataset with synchronized bilateral
   six-axis grip wrenches is available; synthetic traces cannot replace it.
@@ -84,10 +86,21 @@ This is a current-state handoff. Historical detail belongs in git and GitHub.
   arms. It does not establish anatomy, equipment behavior, full delivery,
   passive human transfer, timing benefit, or coaching strategy.
 
+## Articulated Inertia Result
+
+- Native MuJoCo and robotics Pinocchio independently assemble the same
+  subject-scaled 20-coordinate tree at all 234 closed states.
+- Every mass-matrix, bias-force, inverse-dynamics, symmetry, and
+  positive-definiteness gate passes. Worst relative errors are `8.62e-13`,
+  `1.41e-12`, and `1.79e-12`; the minimum eigenvalue is `1.386e-04`.
+- This qualifies common-state rigid-body transport only. Forward contact,
+  scapular anatomy, distributed grip/shaft, muscles, and people remain open.
+
 ## Next Scientific Gates
 
-1. Add subject-scaled articulated arms and scapulae with independently
-   qualified joint geometry, clinical limits where governed, and mesh contact.
+1. Apply bilateral compliant contact to the qualified articulated tree, with
+   independently qualified scapular geometry, clinical limits where governed,
+   and mesh contact.
 2. Calibrate distributed grip and shaft compliance, damping, friction, contact
    loss, ground coupling, and equipment uncertainty.
 3. Repeat the registered horizon, reversal, killswitch, adverse-load,
@@ -106,6 +119,8 @@ This is a current-state handoff. Historical detail belongs in git and GitHub.
 ```powershell
 python -m scripts.research.proximal_distal_energy.run_forward_contact_validity_horizon
 python -m scripts.research.proximal_distal_energy.make_forward_contact_validity_horizon_figure
+python -m scripts.research.proximal_distal_energy.run_articulated_inertia_cross_engine
+python -m scripts.research.proximal_distal_energy.make_articulated_inertia_cross_engine_figure
 python -m pytest tests/research/test_forward_contact_validity_horizon.py `
   tests/research/test_closed_state_forward_bridge.py `
   tests/research/test_proximal_distal_release_bundle.py -q

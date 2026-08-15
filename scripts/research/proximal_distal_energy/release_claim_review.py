@@ -240,6 +240,12 @@ REVIEW_SPECS: dict[str, dict[str, Any]] = {
         ("PD-CLAIM-271", "PD-CLAIM-272", "PD-CLAIM-273"),
         "Replace hand carriages with articulated subject-scaled arms and repeat the horizon, adverse-load, contact-loss, and energy controls with calibrated grip and shaft properties.",
     ),
+    "subject_scaled_articulated_inertia": _spec(
+        "reviewed_as_common_state_articulated_dynamics_result",
+        "native_articulated_inertia_operators_agree_at_declared_closed_states",
+        ("PD-CLAIM-274", "PD-CLAIM-275", "PD-CLAIM-276"),
+        "Apply bilateral compliant contact to the qualified articulated tree and repeat horizon, adverse-load, contact-loss, refinement, power, and energy controls.",
+    ),
     "scapulothoracic_contact_geometry": _spec(
         "reviewed_as_paired_geometry_screen_with_explicit_boundaries",
         "paired_geometry_screen_partial_with_explicit_boundaries",
