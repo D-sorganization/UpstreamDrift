@@ -19,7 +19,10 @@ in git and GitHub.
   deterministic 31-claim review authority; it merged as
   `001e2d56bdd7fcfa79d591acdd9768c03276b563`. SPEC follow-up
   [#8653](https://github.com/D-sorganization/UpstreamDrift/pull/8653) merged as
-  `f797b33924d8a36ee91979f5353ffd201597d98c`, the current remote `main`.
+  `f797b33924d8a36ee91979f5353ffd201597d98c`. Handoff follow-up
+  [#8654](https://github.com/D-sorganization/UpstreamDrift/pull/8654) merged as
+  `bc081457f33d47837b0d0f6ad1a642e574a1561a`, the starting remote `main`
+  for the external-source qualification slice.
 - Canonical question, experiment, and readiness registries live under
   `docs/research/proximal_distal_energy_transfer/data/`. MT-E01 through MT-E09
   are model studies; MT-H01 is the governed participant-held-out stage.
@@ -86,8 +89,18 @@ in git and GitHub.
 - Every one of 1,064 claim source locators now resolves to an existing
   repository file and in-range line. The claim-evidence integrity authority
   covers all 1,639 support references, hash-pins 200 distinct local artifacts,
-  and inventories 85 external URLs without treating link presence as
+  and inventories 78 external URLs without treating link presence as
   independent scientific validation.
+- The external-source authority consolidates those 78 links into 56 underlying
+  works and supplies bounded assessments for all 54 externally supported
+  atomic claims. Its 2026-08-14 availability snapshot contains 36 resolving
+  links, 42 automated-access-restricted publisher/index links, and no broken,
+  transient, omitted, or unchecked link.
+- PD-CLAIM-093 now cites the actual Pickering, Sprigings, Neal, and Cheetham
+  records; PD-CLAIM-035 now cites the actual Feltner interaction-chain papers.
+  One broken DOI destination was replaced with its stable PubMed record and
+  two redundant TLS-failing author mirrors were removed without removing the
+  underlying works.
 - The handwritten agenda retains bounded model answers, partial answers, or a
   negative general-rule result for eight points. MTQ-06, whether passive or
   drift-mediated transfer reduces timing precision beyond the adverse planar

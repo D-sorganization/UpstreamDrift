@@ -11,6 +11,10 @@ from .claim_evidence_integrity import (
     build_claim_evidence_manifest,
     validate_claim_evidence_manifest,
 )
+from .external_source_review import (
+    REVIEW_REL as EXTERNAL_SOURCE_REVIEW_REL,
+    validate_external_source_review,
+)
 from .release_bundle import (
     ARTICLE_REL,
     build_release_manifest,
@@ -34,6 +38,12 @@ def main() -> None:
     manifest_path = ROOT / ARTICLE_REL / "release_manifest.json"
     if action == "write":
         validate_review()
+        claim_manifest_path = ROOT / CLAIM_EVIDENCE_MANIFEST_REL
+        claim_manifest = build_claim_evidence_manifest(ROOT)
+        external_review = json.loads(
+            (ROOT / EXTERNAL_SOURCE_REVIEW_REL).read_text(encoding="utf-8")
+        )
+        validate_external_source_review(ROOT, external_review, claim_manifest)
         manifest = build_release_manifest(ROOT)
         manifest_path.write_text(
             json.dumps(manifest, indent=2) + "\n", encoding="utf-8"
@@ -42,9 +52,9 @@ def main() -> None:
         checksum_path.write_text(
             "\n".join(checksum_lines(manifest)) + "\n", encoding="utf-8"
         )
-        claim_manifest_path = ROOT / CLAIM_EVIDENCE_MANIFEST_REL
+        claim_manifest = build_claim_evidence_manifest(ROOT)
         claim_manifest_path.write_text(
-            json.dumps(build_claim_evidence_manifest(ROOT), indent=2) + "\n",
+            json.dumps(claim_manifest, indent=2) + "\n",
             encoding="utf-8",
         )
         print(manifest_path)
@@ -59,6 +69,12 @@ def main() -> None:
         claim_manifest = json.loads(claim_manifest_path.read_text(encoding="utf-8"))
         result["claim_evidence"] = validate_claim_evidence_manifest(
             ROOT, claim_manifest
+        )
+        external_review = json.loads(
+            (ROOT / EXTERNAL_SOURCE_REVIEW_REL).read_text(encoding="utf-8")
+        )
+        result["external_sources"] = validate_external_source_review(
+            ROOT, external_review, claim_manifest
         )
         print(json.dumps(result, indent=2))
         return

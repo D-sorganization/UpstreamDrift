@@ -10367,7 +10367,7 @@
       "evidence_artifacts": [
         "https://doi.org/10.1080/14763141.2010.535842",
         "https://doi.org/10.1177/17479541261429479",
-        "https://doi.org/10.5277/ABB-01318-2019-02"
+        "https://pubmed.ncbi.nlm.nih.gov/31741482/"
       ],
       "model_domain": "Published optical-motion studies of selected skilled, elite, professional, and amateur samples using study-specific segment frames, angular-velocity components, filtering, and peak events.",
       "uncertainty_boundary": "Prevalence across all golfers and invariance across coordinate definitions, clubs, shot intents, and processing pipelines remain unestablished.",
@@ -10820,7 +10820,7 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd:118"
       ],
       "evidence_artifacts": [
-        "https://doi.org/10.5277/ABB-01318-2019-02"
+        "https://pubmed.ncbi.nlm.nih.gov/31741482/"
       ],
       "model_domain": "Driver swings from 13 golfers reprocessed using seven angular-velocity component definitions.",
       "uncertainty_boundary": "One sample and a finite method set; does not quantify all preprocessing, filtering, coordinate, or population sources of variability.",
@@ -10973,8 +10973,7 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactuals.qmd:22"
       ],
       "evidence_artifacts": [
-        "https://doi.org/10.1046/j.1460-2687.2002.00094.x",
-        "https://sashomackenzie.com/publications/delayedrelease.pdf"
+        "https://doi.org/10.1046/j.1460-2687.2002.00094.x"
       ],
       "model_domain": "Planar torso-arm-club model with activation-rate and force-velocity-constrained torque generators, Powell optimization, a vertical-shaft impact constraint, and three declared simulation conditions.",
       "uncertainty_boundary": "The forced-delay benefit is 1.6 percent in this model and is distinct from the much larger post-release torque ablation; the model omitted legs, torso translation, right-arm extension, and forearm long-axis rotation.",
@@ -11220,8 +11219,7 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:267"
       ],
       "evidence_artifacts": [
-        "https://doi.org/10.1007/s12283-009-0020-9",
-        "https://www.sashomackenzie.com/publications/MacKenzie%202009%20A%20three%20dimensional%20forward%20dynamics%20model%20of%20the%20golf%20swing.pdf"
+        "https://doi.org/10.1007/s12283-009-0020-9"
       ],
       "model_domain": "Four human degrees of freedom with parametric muscle-torque generators and a flexible segmented shaft, fitted and compared with one participant before a separate impact-speed optimization.",
       "uncertainty_boundary": "Validation used six accepted drives from one 3-handicap male and one 2-D camera; the model omitted lower-body energy and a trail arm, and the optimized speed was approximately 7 m/s below the professional comparison cited in the paper.",
@@ -11363,7 +11361,8 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:350"
       ],
       "evidence_artifacts": [
-        "https://doi.org/10.1249/00005768-198901000-00006",
+        "https://doi.org/10.1123/ijsb.5.4.403",
+        "https://doi.org/10.1123/ijsb.5.4.420",
         "docs/research/proximal_distal_energy_transfer/references.bib#featherstone2008"
       ],
       "model_domain": "Finite-dimensional articulated rigid-body coordinates with a nonsingular inertia matrix; cross-coordinate response is read from the relevant entries of M inverse.",
@@ -11379,9 +11378,9 @@
         "Matched state with the selected torque removed"
       ],
       "falsifier": "The declared equations have a zero inverse-inertia pathway while the manuscript attributes nonzero cross-coordinate acceleration to that torque, or independent symbolic evaluation contradicts the stated response.",
-      "adjudication": "The former manuscript said every torque accelerates every joint. The corrected statement preserves induced-acceleration mechanics while making the nonzero-coupling condition and model dependence explicit.",
+      "adjudication": "The former manuscript said every torque accelerates every joint. The corrected statement preserves induced-acceleration mechanics while making the nonzero-coupling condition and model dependence explicit. External-source qualification replaced an unresolvable DOI-like identifier with the actual Feltner two-segment interaction records.",
       "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13"
+      "last_verified_on": "2026-08-14"
     },
     {
       "claim_id": "PD-CLAIM-036",
@@ -11817,7 +11816,6 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:367"
       ],
       "evidence_artifacts": [
-        "https://doi.org/10.5277/ABB-01318-2019-02",
         "https://pubmed.ncbi.nlm.nih.gov/31741482/"
       ],
       "model_domain": "Method comparison for pelvis, upper-trunk, arm, and club angular-velocity sequences in driver swings from 13 golfers.",
@@ -11896,7 +11894,7 @@
       ],
       "evidence_artifacts": [
         "https://doi.org/10.1016/S0966-6362(02)00068-1",
-        "https://doi.org/10.5277/ABB-01318-2019-02",
+        "https://pubmed.ncbi.nlm.nih.gov/31741482/",
         "https://doi.org/10.1080/02640410410001730179",
         "https://doi.org/10.1080/14763141.2012.660799"
       ],
@@ -13190,9 +13188,11 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactuals.qmd:55"
       ],
       "evidence_artifacts": [
-        "https://doi.org/10.1080/14763140701683264",
-        "https://doi.org/10.1080/14763149908573820",
-        "https://doi.org/10.1080/14763140008522704"
+        "https://doi.org/10.1046/j.1460-2687.1999.00028.x",
+        "https://doi.org/10.1123/jab.16.4.356",
+        "https://doi.org/10.1046/j.1460-2687.2002.00094.x",
+        "https://doi.org/10.1260/174795407789705497",
+        "https://www.researchgate.net/publication/252236426"
       ],
       "model_domain": "Timing hypotheses for linked-segment golf models and bounded observational timing evidence.",
       "uncertainty_boundary": "The evidence does not identify a universal performance plateau, motor strategy, or causal human optimum.",
@@ -13208,9 +13208,9 @@
         "no technique prescription"
       ],
       "falsifier": "Registered model or human tests show early positive interface power or another timing program dominates under matched states and declared constraints.",
-      "adjudication": "The chapter now distinguishes primary observations, model results, and the open S2 hypothesis.",
+      "adjudication": "The chapter distinguishes primary observations, model results, and the open S2 hypothesis. The evidence registry now points to the actual Pickering, Sprigings, Neal, and Cheetham records after three unresolvable DOI-like identifiers were removed during external-source qualification.",
       "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13"
+      "last_verified_on": "2026-08-14"
     },
     {
       "claim_id": "PD-CLAIM-094",

@@ -28,7 +28,7 @@ def test_builder_hash_pins_all_local_support_and_inventories_external_links() ->
     assert manifest["summary"]["claim_count"] == len(registry["claims"])
     assert manifest["summary"]["evidence_reference_count"] == expected_references
     assert manifest["summary"]["local_artifact_count"] >= 190
-    assert manifest["summary"]["external_url_count"] >= 80
+    assert manifest["summary"]["external_url_count"] >= 75
     assert manifest["scope"]["external_url_semantics"] == (
         "inventory_only_not_scientific_validation"
     )

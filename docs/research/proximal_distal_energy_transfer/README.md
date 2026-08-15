@@ -161,6 +161,15 @@ pitch-load analysis from the 1989 angular-acceleration decomposition, and
 labels the golf extension of racquet-task long-axis rotation as a hypothesis.
 The expanded paper now has 889 candidates; 44 are reviewed, 43 atomic claims
 are registered, and 845 remain unadjudicated.
+The release-level external-source qualification consolidates 78 exact links
+into 56 underlying works and records a bounded assessment for all 54 atomic
+claims that use external support. It removes three unresolvable DOI-like
+identifiers, replaces a broken DOI destination with its stable PubMed record,
+and removes two redundant author-hosted mirrors with TLS failures. The
+committed availability snapshot contains 36 directly resolving links and 42
+publisher or index pages that restrict automated access; it contains no broken,
+transient, omitted, or unchecked link. Multiple mirrors never count as
+independent replication, and all prospective human gates remain open.
 The hand-path attribution, two-hand redundancy, and preactivation validation
 program is tracked in
 [#8458](https://github.com/D-sorganization/UpstreamDrift/issues/8458).
@@ -187,6 +196,7 @@ the finding-by-finding record in
 | [`EVIDENCE_SCHEMA_V2.md`](EVIDENCE_SCHEMA_V2.md)                                                     | Falsifiable prediction and named spatial-interface evidence contract              |
 | [`CLAIM_AUDIT_SCHEMA.md`](CLAIM_AUDIT_SCHEMA.md)                                                     | Atomic claim, candidate-inventory, source, alternative, and adjudication contract |
 | [`data/claim_evidence_manifest.json`](data/claim_evidence_manifest.json)                             | Claim-complete local hashes and external-support URL inventory                    |
+| [`data/external_source_review.json`](data/external_source_review.json)                               | Work-deduplicated source, correction, claim-fit, and link-availability review     |
 | [`COMPREHENSIVE_RESEARCH_PROGRAM.md`](COMPREHENSIVE_RESEARCH_PROGRAM.md)                             | Biomechanics, nonlinear-control, model-ladder, data, and validation roadmap       |
 | [`MOMENTUM_TRANSFER_QUESTION_PROGRAM.md`](MOMENTUM_TRANSFER_QUESTION_PROGRAM.md)                     | Drift, geometry, timing, robustness, proximal-velocity, and typed-slack questions |
 | [`data/momentum_transfer_experiment_registry.json`](data/momentum_transfer_experiment_registry.json) | Frozen interventions, controls, outcomes, uncertainty, falsifiers, and data needs |
@@ -234,6 +244,7 @@ python3 -m scripts.research.proximal_distal_energy.run_advanced_biological_bridg
 python3 -m scripts.research.proximal_distal_energy.claim_audit inventory
 python3 -m scripts.research.proximal_distal_energy.claim_audit validate
 python3 -m scripts.research.proximal_distal_energy.claim_evidence_integrity validate
+python3 -m scripts.research.proximal_distal_energy.external_source_review validate
 python3 -m scripts.research.proximal_distal_energy.momentum_question_readiness validate
 python3 -m scripts.research.proximal_distal_energy.qualify_open_release validate
 # robustness analyses

@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-evidence-integrity-v1",
   "registry": {
     "path": "docs/research/proximal_distal_energy_transfer/data/claim_audit_registry.json",
-    "sha256": "fff27bf90efa6d18c0f48ee9b37796aad73313064665f97fa17dcd6dbf52ea4d"
+    "sha256": "75f3cd5bb6d91ab265a75e91efcb052fa610f3ae020a35b42b0792330c280a55"
   },
   "scope": {
     "local_artifact_semantics": "content_integrity_not_independent_validation",
@@ -13,7 +13,7 @@
     "claim_count": 266,
     "evidence_reference_count": 1639,
     "local_artifact_count": 200,
-    "external_url_count": 85
+    "external_url_count": 78
   },
   "claims": {
     "PD-CLAIM-002": {
@@ -62,7 +62,7 @@
       "external_references": [
         "https://doi.org/10.1080/14763141.2010.535842",
         "https://doi.org/10.1177/17479541261429479",
-        "https://doi.org/10.5277/ABB-01318-2019-02"
+        "https://pubmed.ncbi.nlm.nih.gov/31741482/"
       ]
     },
     "PD-CLAIM-008": {
@@ -70,7 +70,9 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd"
       ],
-      "external_references": ["https://pubmed.ncbi.nlm.nih.gov/8505347/"]
+      "external_references": [
+        "https://pubmed.ncbi.nlm.nih.gov/8505347/"
+      ]
     },
     "PD-CLAIM-009": {
       "local_references": [],
@@ -153,7 +155,9 @@
     },
     "PD-CLAIM-020": {
       "local_references": [],
-      "external_references": ["https://doi.org/10.5277/ABB-01318-2019-02"]
+      "external_references": [
+        "https://pubmed.ncbi.nlm.nih.gov/31741482/"
+      ]
     },
     "PD-CLAIM-021": {
       "local_references": [
@@ -180,8 +184,7 @@
     "PD-CLAIM-024": {
       "local_references": [],
       "external_references": [
-        "https://doi.org/10.1046/j.1460-2687.2002.00094.x",
-        "https://sashomackenzie.com/publications/delayedrelease.pdf"
+        "https://doi.org/10.1046/j.1460-2687.2002.00094.x"
       ]
     },
     "PD-CLAIM-025": {
@@ -229,8 +232,7 @@
     "PD-CLAIM-031": {
       "local_references": [],
       "external_references": [
-        "https://doi.org/10.1007/s12283-009-0020-9",
-        "https://www.sashomackenzie.com/publications/MacKenzie%202009%20A%20three%20dimensional%20forward%20dynamics%20model%20of%20the%20golf%20swing.pdf"
+        "https://doi.org/10.1007/s12283-009-0020-9"
       ]
     },
     "PD-CLAIM-032": {
@@ -262,7 +264,8 @@
         "docs/research/proximal_distal_energy_transfer/references.bib#featherstone2008"
       ],
       "external_references": [
-        "https://doi.org/10.1249/00005768-198901000-00006"
+        "https://doi.org/10.1123/ijsb.5.4.403",
+        "https://doi.org/10.1123/ijsb.5.4.420"
       ]
     },
     "PD-CLAIM-036": {
@@ -327,15 +330,21 @@
     },
     "PD-CLAIM-044": {
       "local_references": [],
-      "external_references": ["https://doi.org/10.1016/S0966-6362(02)00068-1"]
+      "external_references": [
+        "https://doi.org/10.1016/S0966-6362(02)00068-1"
+      ]
     },
     "PD-CLAIM-045": {
       "local_references": [],
-      "external_references": ["https://doi.org/10.1016/0021-9290(80)90172-4"]
+      "external_references": [
+        "https://doi.org/10.1016/0021-9290(80)90172-4"
+      ]
     },
     "PD-CLAIM-046": {
       "local_references": [],
-      "external_references": ["https://doi.org/10.1016/0021-9290(80)90172-4"]
+      "external_references": [
+        "https://doi.org/10.1016/0021-9290(80)90172-4"
+      ]
     },
     "PD-CLAIM-047": {
       "local_references": [],
@@ -347,7 +356,6 @@
     "PD-CLAIM-048": {
       "local_references": [],
       "external_references": [
-        "https://doi.org/10.5277/ABB-01318-2019-02",
         "https://pubmed.ncbi.nlm.nih.gov/31741482/"
       ]
     },
@@ -362,7 +370,7 @@
       "local_references": [],
       "external_references": [
         "https://doi.org/10.1016/S0966-6362(02)00068-1",
-        "https://doi.org/10.5277/ABB-01318-2019-02",
+        "https://pubmed.ncbi.nlm.nih.gov/31741482/",
         "https://doi.org/10.1080/02640410410001730179",
         "https://doi.org/10.1080/14763141.2012.660799"
       ]
@@ -510,14 +518,18 @@
       "local_references": [
         "docs/research/proximal_distal_energy_transfer/data/hand_path_attribution/hand_path_attribution_study.json"
       ],
-      "external_references": ["https://doi.org/10.1038/srep38845"]
+      "external_references": [
+        "https://doi.org/10.1038/srep38845"
+      ]
     },
     "PD-CLAIM-070": {
       "local_references": [
         "docs/research/proximal_distal_energy_transfer/data/two_hand_preactivation_hypothesis.json",
         "docs/research/proximal_distal_energy_transfer/EXPERIMENTAL_FALSIFICATION_PROTOCOL.md"
       ],
-      "external_references": ["https://doi.org/10.1038/srep38845"]
+      "external_references": [
+        "https://doi.org/10.1038/srep38845"
+      ]
     },
     "PD-CLAIM-071": {
       "local_references": [
@@ -585,14 +597,18 @@
         "docs/research/proximal_distal_energy_transfer/data/grf_drift/grf_drift_study.json",
         "docs/research/proximal_distal_energy_transfer/EXPERIMENTAL_FALSIFICATION_PROTOCOL.md"
       ],
-      "external_references": ["https://pubmed.ncbi.nlm.nih.gov/17454544/"]
+      "external_references": [
+        "https://pubmed.ncbi.nlm.nih.gov/17454544/"
+      ]
     },
     "PD-CLAIM-079": {
       "local_references": [
         "docs/research/proximal_distal_energy_transfer/EXPERIMENTAL_FALSIFICATION_PROTOCOL.md",
         "docs/research/proximal_distal_energy_transfer/data/grf_drift/figures/fig_grf_falsification_ladder.pdf"
       ],
-      "external_references": ["https://pubmed.ncbi.nlm.nih.gov/41653371/"]
+      "external_references": [
+        "https://pubmed.ncbi.nlm.nih.gov/41653371/"
+      ]
     },
     "PD-CLAIM-080": {
       "local_references": [
@@ -605,9 +621,11 @@
     "PD-CLAIM-093": {
       "local_references": [],
       "external_references": [
-        "https://doi.org/10.1080/14763140701683264",
-        "https://doi.org/10.1080/14763149908573820",
-        "https://doi.org/10.1080/14763140008522704"
+        "https://doi.org/10.1046/j.1460-2687.1999.00028.x",
+        "https://doi.org/10.1123/jab.16.4.356",
+        "https://doi.org/10.1046/j.1460-2687.2002.00094.x",
+        "https://doi.org/10.1260/174795407789705497",
+        "https://www.researchgate.net/publication/252236426"
       ]
     },
     "PD-CLAIM-094": {
@@ -2982,7 +3000,9 @@
     "docs/research/proximal_distal_energy_transfer/COMPANION_WORKBENCH.md": {
       "sha256": "dea7cfb13f1c7b732a5a92cffedb2ff65ca5fa404793a42acb69d3b2981ab100",
       "bytes": 6630,
-      "referenced_by": ["PD-CLAIM-241"]
+      "referenced_by": [
+        "PD-CLAIM-241"
+      ]
     },
     "docs/research/proximal_distal_energy_transfer/EXPERIMENTAL_FALSIFICATION_PROTOCOL.md": {
       "sha256": "2e3a82bc17686ae4aa5e2e092cc1943ef525b14826f7d6d1e95fbc2222598cac",
@@ -2998,8 +3018,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/MOMENTUM_TRANSFER_QUESTION_PROGRAM.md": {
-      "sha256": "03f3256418c86af207ecddb8f9dc60c68a90823f4ad80a1bd76587a024088080",
-      "bytes": 21320,
+      "sha256": "5ded11d126fc15730792a263b99a0b90a9223047590a7246edc1dc71cc1a00ff",
+      "bytes": 22901,
       "referenced_by": [
         "PD-CLAIM-242",
         "PD-CLAIM-243",
@@ -3016,22 +3036,32 @@
     "docs/research/proximal_distal_energy_transfer/WSCG_2024_LEGACY_EVIDENCE_AUDIT.md": {
       "sha256": "c29c51d55e8edb984a4c5bf8875d728fc4561860a4897e26b6e0bb3f5bf62f11",
       "bytes": 15020,
-      "referenced_by": ["PD-CLAIM-002"]
+      "referenced_by": [
+        "PD-CLAIM-002"
+      ]
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd": {
       "sha256": "506a3b42771e6ad3d0f617d15959fba6d0aa6ad0ee77ec79d6116c4773198073",
       "bytes": 26674,
-      "referenced_by": ["PD-CLAIM-008", "PD-CLAIM-021", "PD-CLAIM-036"]
+      "referenced_by": [
+        "PD-CLAIM-008",
+        "PD-CLAIM-021",
+        "PD-CLAIM-036"
+      ]
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd": {
       "sha256": "738df6d2f5a4f618d1d39923b9162198838a8534e44dc5cf3af20b07325d8c0d",
       "bytes": 10072,
-      "referenced_by": ["PD-CLAIM-021"]
+      "referenced_by": [
+        "PD-CLAIM-021"
+      ]
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd": {
       "sha256": "4b33992960a78300d04a3067c484f297f20d4ea68cda0cb3700b2fc261b1ea98",
       "bytes": 22351,
-      "referenced_by": ["PD-CLAIM-008"]
+      "referenced_by": [
+        "PD-CLAIM-008"
+      ]
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd": {
       "sha256": "1ad16235fe0faf9d23ceb9c3a03252e2243d37369bc0cc1ecb994e64b50a3eb0",
@@ -3060,12 +3090,16 @@
     "docs/research/proximal_distal_energy_transfer/chapters/_ch06e_experimental_protocol.qmd": {
       "sha256": "e6a029ef9e6cd81d5488adfd9f899a26de3e5b01099d84f7eb490ff57a95c06b",
       "bytes": 8332,
-      "referenced_by": ["PD-CLAIM-061"]
+      "referenced_by": [
+        "PD-CLAIM-061"
+      ]
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch07b_frames_biology_engines.qmd": {
       "sha256": "af08b875e93cf93aed071872381a6ad7ed01a2c903a4707240736fe876cd61a4",
       "bytes": 15681,
-      "referenced_by": ["PD-CLAIM-073"]
+      "referenced_by": [
+        "PD-CLAIM-073"
+      ]
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd": {
       "sha256": "0b52f59e1c8f9509683c1aac874b955052ba2c9eaa61f7c535760d25aaf9721e",
@@ -3108,12 +3142,20 @@
     "docs/research/proximal_distal_energy_transfer/data/bilateral_wrench_identifiability_study.json": {
       "sha256": "0ee8c67cead5b958e452a12ccfe82f5138253fec309fae55059ed82d7828ef3c",
       "bytes": 5392,
-      "referenced_by": ["PD-CLAIM-254", "PD-CLAIM-255", "PD-CLAIM-256"]
+      "referenced_by": [
+        "PD-CLAIM-254",
+        "PD-CLAIM-255",
+        "PD-CLAIM-256"
+      ]
     },
     "docs/research/proximal_distal_energy_transfer/data/bilateral_wrench_sensor_qualification.json": {
       "sha256": "61e68eb05146a29b85de1c196710d0492ad6fdb105f9d98ede4e60ae7c4193da",
       "bytes": 3647,
-      "referenced_by": ["PD-CLAIM-257", "PD-CLAIM-258", "PD-CLAIM-259"]
+      "referenced_by": [
+        "PD-CLAIM-257",
+        "PD-CLAIM-258",
+        "PD-CLAIM-259"
+      ]
     },
     "docs/research/proximal_distal_energy_transfer/data/counterfactual_ensemble.json": {
       "sha256": "fe3157680189c1e0486085e104f77dbd79db056d44c63ed2aa3dd891003c41f5",
@@ -3132,7 +3174,11 @@
     "docs/research/proximal_distal_energy_transfer/data/counterfactual_selected_traces.npz": {
       "sha256": "9c413384e46995269d8d395ddfd9d8623c6fe37e38f39d69ef3f45d188fbb65e",
       "bytes": 34289,
-      "referenced_by": ["PD-CLAIM-098", "PD-CLAIM-099", "PD-CLAIM-103"]
+      "referenced_by": [
+        "PD-CLAIM-098",
+        "PD-CLAIM-099",
+        "PD-CLAIM-103"
+      ]
     },
     "docs/research/proximal_distal_energy_transfer/data/e1_sweep.json": {
       "sha256": "43437834fafb3315473f38d47497ddf30f2b5fd26222ec225372743f651c9e34",
@@ -3207,12 +3253,16 @@
     "docs/research/proximal_distal_energy_transfer/data/experimental_protocol_dry_run.json": {
       "sha256": "6b193ae754d54150e158fc559a045eee5dd497a64e0a393e58e30e1165f12c93",
       "bytes": 1602,
-      "referenced_by": ["PD-CLAIM-199"]
+      "referenced_by": [
+        "PD-CLAIM-199"
+      ]
     },
     "docs/research/proximal_distal_energy_transfer/data/experimental_protocol_v1.json": {
       "sha256": "c3af53b966083702eab7ca99a39e5e99d35dfbf7e7a8ae3ff8261a1945bc0834",
       "bytes": 6164,
-      "referenced_by": ["PD-CLAIM-199"]
+      "referenced_by": [
+        "PD-CLAIM-199"
+      ]
     },
     "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.json": {
       "sha256": "f2e88ad80e3c1edb71421339bf47833df055eefc79e97750c901f4bc18f91281",
@@ -3258,17 +3308,25 @@
     "docs/research/proximal_distal_energy_transfer/data/grf_drift/figures/fig_grf_falsification_ladder.pdf": {
       "sha256": "a310b84f6c791837d29e4a39734d91af44ced2cd33fa9693e65aafab543dce0d",
       "bytes": 15693,
-      "referenced_by": ["PD-CLAIM-079"]
+      "referenced_by": [
+        "PD-CLAIM-079"
+      ]
     },
     "docs/research/proximal_distal_energy_transfer/data/grf_drift/grf_drift_study.json": {
       "sha256": "6ff450a0b679db34235b11c34ec802168fd706342b597a1859509a27d8910b04",
       "bytes": 3902,
-      "referenced_by": ["PD-CLAIM-077", "PD-CLAIM-078", "PD-CLAIM-080"]
+      "referenced_by": [
+        "PD-CLAIM-077",
+        "PD-CLAIM-078",
+        "PD-CLAIM-080"
+      ]
     },
     "docs/research/proximal_distal_energy_transfer/data/grf_drift/grf_drift_traces.npz": {
       "sha256": "9445be948afe251611237b78da3b41e14b2132403657f99d76b9057e1ea901fe",
       "bytes": 25645,
-      "referenced_by": ["PD-CLAIM-077"]
+      "referenced_by": [
+        "PD-CLAIM-077"
+      ]
     },
     "docs/research/proximal_distal_energy_transfer/data/hand_path_attribution/hand_path_attribution_study.json": {
       "sha256": "2a337a0aecdd26df4951eeebe4f00c71dd267489ec16aad0f9c3715c1d028e18",
@@ -3284,12 +3342,16 @@
     "docs/research/proximal_distal_energy_transfer/data/hand_path_attribution/hand_path_attribution_traces.npz": {
       "sha256": "8ea2d6e1db806878ce69404757157d7f58211445d6fe394b0c94e80a5bd351b6",
       "bytes": 453773,
-      "referenced_by": ["PD-CLAIM-066"]
+      "referenced_by": [
+        "PD-CLAIM-066"
+      ]
     },
     "docs/research/proximal_distal_energy_transfer/data/interaction_force_mechanisms.npz": {
       "sha256": "69f641abdb55f6388a5a92e818aa1b415e9c4fdb35d065f39e3382ebd381b20a",
       "bytes": 209135,
-      "referenced_by": ["PD-CLAIM-057"]
+      "referenced_by": [
+        "PD-CLAIM-057"
+      ]
     },
     "docs/research/proximal_distal_energy_transfer/data/interaction_force_summary.json": {
       "sha256": "e2c063e8751d216c59c8118e61d17611198d7a723170b3efc5c1117ab720b80e",
@@ -3627,7 +3689,10 @@
     "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json": {
       "sha256": "f07fc33cc76fb80f395cd10b01a30169b6440cec3854be3894024d435bc0f722",
       "bytes": 2591,
-      "referenced_by": ["PD-CLAIM-239", "PD-CLAIM-240"]
+      "referenced_by": [
+        "PD-CLAIM-239",
+        "PD-CLAIM-240"
+      ]
     },
     "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json": {
       "sha256": "8707130cb56dfe535ff15a605d71aa9a33dfb6dc42a14073537cb3a45c52f488",
@@ -3984,7 +4049,10 @@
     "docs/research/proximal_distal_energy_transfer/data/two_hand_preactivation_hypothesis.json": {
       "sha256": "45d3283f6f054fafc913c3f765a747822b045f90ed1c19c1fb2c0148fcc7d0ee",
       "bytes": 3936,
-      "referenced_by": ["PD-CLAIM-070", "PD-CLAIM-071"]
+      "referenced_by": [
+        "PD-CLAIM-070",
+        "PD-CLAIM-071"
+      ]
     },
     "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json": {
       "sha256": "56fcea4c627191291ec4f20f5da398e9705ec71542835a36e461c3d711942ba9",
@@ -4106,42 +4174,62 @@
     "docs/research/proximal_distal_energy_transfer/data/wscg_2024_source_provenance.json": {
       "sha256": "74476c8a0d2bcc097b01454be63e2d91c6f963154f0a49bf82d791849c41da94",
       "bytes": 850,
-      "referenced_by": ["PD-CLAIM-060"]
+      "referenced_by": [
+        "PD-CLAIM-060"
+      ]
     },
     "docs/research/proximal_distal_energy_transfer/data/wscg_two_hand_raw/ztcf.csv": {
       "sha256": "47445e57db5246f695177b4644bcd67237593ed1fb40ddb38e286cab19a1e12a",
       "bytes": 3628977,
-      "referenced_by": ["PD-CLAIM-002"]
+      "referenced_by": [
+        "PD-CLAIM-002"
+      ]
     },
     "docs/research/proximal_distal_energy_transfer/figures/fig_bilateral_wrench_identifiability.pdf": {
       "sha256": "ccbb12f537a033ce63b084ab3d36f197d2b413a6c8bf3972df6df295a150a847",
       "bytes": 22061,
-      "referenced_by": ["PD-CLAIM-254", "PD-CLAIM-255", "PD-CLAIM-256"]
+      "referenced_by": [
+        "PD-CLAIM-254",
+        "PD-CLAIM-255",
+        "PD-CLAIM-256"
+      ]
     },
     "docs/research/proximal_distal_energy_transfer/figures/fig_bilateral_wrench_sensor_qualification.pdf": {
       "sha256": "c699d9a347123d74a6bc82ce6e02f13cd7cea7006450bcc358d816534506a634",
       "bytes": 21081,
-      "referenced_by": ["PD-CLAIM-257", "PD-CLAIM-258", "PD-CLAIM-259"]
+      "referenced_by": [
+        "PD-CLAIM-257",
+        "PD-CLAIM-258",
+        "PD-CLAIM-259"
+      ]
     },
     "docs/research/proximal_distal_energy_transfer/figures/fig_counterfactual_divergence_maps.pdf": {
       "sha256": "a154fd67d439a7968691cf3b5da4452aa2268e0f1a0f9b4c9a314722f6564e5d",
       "bytes": 24215,
-      "referenced_by": ["PD-CLAIM-099"]
+      "referenced_by": [
+        "PD-CLAIM-099"
+      ]
     },
     "docs/research/proximal_distal_energy_transfer/figures/fig_counterfactual_physics_variants.pdf": {
       "sha256": "8d6d1bd5ba479efa8cf0cfed7e83411580260cee04049a3854c37295328a6067",
       "bytes": 19401,
-      "referenced_by": ["PD-CLAIM-101"]
+      "referenced_by": [
+        "PD-CLAIM-101"
+      ]
     },
     "docs/research/proximal_distal_energy_transfer/figures/fig_counterfactual_selected_futures.pdf": {
       "sha256": "deb7a10dd82917bd48798470b07ab20c334cab2f1101ade316540d2ae65a3576",
       "bytes": 34015,
-      "referenced_by": ["PD-CLAIM-099"]
+      "referenced_by": [
+        "PD-CLAIM-099"
+      ]
     },
     "docs/research/proximal_distal_energy_transfer/figures/fig_counterfactual_timestep_sensitivity.pdf": {
       "sha256": "3ab55084573f7929f792893aae0753a7ec516ae2f055add7061089c5223f64dc",
       "bytes": 19903,
-      "referenced_by": ["PD-CLAIM-100"]
+      "referenced_by": [
+        "PD-CLAIM-100"
+      ]
     },
     "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf": {
       "sha256": "c812deb805ee74d51b356dc8e2125bf53d0ca5a33a9a3f9409ff05d0b6033433",
@@ -4218,19 +4306,27 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/references.bib": {
-      "sha256": "2303dcbcdbe8eac270fa3c07461a6639d448a58455d5789f9a8c57f49f684adc",
-      "bytes": 44112,
-      "referenced_by": ["PD-CLAIM-035", "PD-CLAIM-036", "PD-CLAIM-037"]
+      "sha256": "89c87718a7c58209f223bf136875f7e305bd45646549bd02957f2512aff77f59",
+      "bytes": 44111,
+      "referenced_by": [
+        "PD-CLAIM-035",
+        "PD-CLAIM-036",
+        "PD-CLAIM-037"
+      ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "3b730c6eda82ba2a6a72f7af83a0da99530fbaa02835e5ebad4697f1eaa440a6",
-      "bytes": 105219,
-      "referenced_by": ["PD-CLAIM-241"]
+      "sha256": "3acee8469e520febdbc5ad8b6c0f5cef964bf37ce1911dab1e379275044cb129",
+      "bytes": 105720,
+      "referenced_by": [
+        "PD-CLAIM-241"
+      ]
     },
     "docs/research/proximal_distal_energy_transfer/sources/wscg_2024/SOURCE_REGISTER.md": {
       "sha256": "289853f0f30dd8f2eae1fff11be0043180a8477d823500363e7f53db723fbacb",
       "bytes": 4590,
-      "referenced_by": ["PD-CLAIM-060"]
+      "referenced_by": [
+        "PD-CLAIM-060"
+      ]
     },
     "scripts/research/proximal_distal_energy/advanced_biological_bridge.py": {
       "sha256": "eea8eb4f7b5bcf3af9dfd55fe3b34cc407e40511ca02710269d1feeaa666a736",
@@ -4285,27 +4381,42 @@
     "scripts/research/proximal_distal_energy/bilateral_wrench_identifiability.py": {
       "sha256": "bf9e965ba04f0dcfacd611588e7ce377ba5b8688c66c140b3f083ec671690cd1",
       "bytes": 4657,
-      "referenced_by": ["PD-CLAIM-254", "PD-CLAIM-255", "PD-CLAIM-256"]
+      "referenced_by": [
+        "PD-CLAIM-254",
+        "PD-CLAIM-255",
+        "PD-CLAIM-256"
+      ]
     },
     "scripts/research/proximal_distal_energy/bilateral_wrench_sensor_qualification.py": {
       "sha256": "e879b7bf349df9217105873d2ddd24d81f33b1da87f03de55adc1729efb59383",
       "bytes": 8858,
-      "referenced_by": ["PD-CLAIM-257", "PD-CLAIM-258", "PD-CLAIM-259"]
+      "referenced_by": [
+        "PD-CLAIM-257",
+        "PD-CLAIM-258",
+        "PD-CLAIM-259"
+      ]
     },
     "scripts/research/proximal_distal_energy/counterfactual_ensemble.py": {
       "sha256": "08944916666d8f6553a7982dba31bf726423235fd1fa6ee31577cf0aec980ca3",
       "bytes": 9338,
-      "referenced_by": ["PD-CLAIM-058", "PD-CLAIM-098"]
+      "referenced_by": [
+        "PD-CLAIM-058",
+        "PD-CLAIM-098"
+      ]
     },
     "scripts/research/proximal_distal_energy/experimental_protocol.py": {
       "sha256": "7e824f4cf7e48437138546294c8542299d1636324305d66bc472cf7e59958d03",
       "bytes": 9484,
-      "referenced_by": ["PD-CLAIM-199"]
+      "referenced_by": [
+        "PD-CLAIM-199"
+      ]
     },
     "scripts/research/proximal_distal_energy/extract_wscg_charts.py": {
       "sha256": "1b8d6fe6222cd228564f9b0f7bca539fd799465d78ae81785153f17d0ceda054",
       "bytes": 4899,
-      "referenced_by": ["PD-CLAIM-060"]
+      "referenced_by": [
+        "PD-CLAIM-060"
+      ]
     },
     "scripts/research/proximal_distal_energy/flexible_shaft_study.py": {
       "sha256": "6f1d895f086cd3a74d18f001640eb90e39791dacb7750816f0dd1214c6bd27fc",
@@ -4361,7 +4472,9 @@
     "scripts/research/proximal_distal_energy/make_counterfactual_figures.py": {
       "sha256": "7fb7850252e61803d355883594d2f7b12da6fe86f644db58185fe6654e7adf3c",
       "bytes": 8129,
-      "referenced_by": ["PD-CLAIM-103"]
+      "referenced_by": [
+        "PD-CLAIM-103"
+      ]
     },
     "scripts/research/proximal_distal_energy/make_scapulothoracic_contact_figures.py": {
       "sha256": "589fd37b6c0439070d313120329ef3f3ce15e4a528c4c62da787e21359911e7c",
@@ -4472,17 +4585,27 @@
     "scripts/research/proximal_distal_energy/run_bilateral_wrench_identifiability_study.py": {
       "sha256": "6dd6c1c8739ab1422acbefac43fad300a825675d073426722010916113247462",
       "bytes": 7946,
-      "referenced_by": ["PD-CLAIM-254", "PD-CLAIM-255", "PD-CLAIM-256"]
+      "referenced_by": [
+        "PD-CLAIM-254",
+        "PD-CLAIM-255",
+        "PD-CLAIM-256"
+      ]
     },
     "scripts/research/proximal_distal_energy/run_bilateral_wrench_sensor_qualification.py": {
       "sha256": "c1334c30dcb89aab050eda22178ea2d21d98965eaf324337366a7b310c248a22",
       "bytes": 6726,
-      "referenced_by": ["PD-CLAIM-257", "PD-CLAIM-258", "PD-CLAIM-259"]
+      "referenced_by": [
+        "PD-CLAIM-257",
+        "PD-CLAIM-258",
+        "PD-CLAIM-259"
+      ]
     },
     "scripts/research/proximal_distal_energy/run_counterfactual_ensemble.py": {
       "sha256": "306bac233c355e9ac9bf88729a639f98305033ef09771420d8a6c5e00e08ee0d",
       "bytes": 10784,
-      "referenced_by": ["PD-CLAIM-103"]
+      "referenced_by": [
+        "PD-CLAIM-103"
+      ]
     },
     "scripts/research/proximal_distal_energy/run_forward_two_arm_study.py": {
       "sha256": "a00675428cd6e85ba6b2a800212424895f3437ac5f62b579f547ff9b60280081",
@@ -4507,17 +4630,26 @@
     "scripts/research/proximal_distal_energy/run_grf_drift_study.py": {
       "sha256": "54e027b804967367c606d30f87d625e90ae8c0fe00b5c53acbc5400f8964da1f",
       "bytes": 14201,
-      "referenced_by": ["PD-CLAIM-076", "PD-CLAIM-077", "PD-CLAIM-080"]
+      "referenced_by": [
+        "PD-CLAIM-076",
+        "PD-CLAIM-077",
+        "PD-CLAIM-080"
+      ]
     },
     "scripts/research/proximal_distal_energy/run_hand_path_attribution_study.py": {
       "sha256": "b22b42bd6d515b2e866c1391acbd9967b93be633332cb42b637e0fb4b240208c",
       "bytes": 40305,
-      "referenced_by": ["PD-CLAIM-063", "PD-CLAIM-064"]
+      "referenced_by": [
+        "PD-CLAIM-063",
+        "PD-CLAIM-064"
+      ]
     },
     "scripts/research/proximal_distal_energy/run_interaction_force_study.py": {
       "sha256": "bacbc849db85a3849d3f5dbf12e88291e22df51f7c7cbfb559c8b922c8ca2425",
       "bytes": 7304,
-      "referenced_by": ["PD-CLAIM-056"]
+      "referenced_by": [
+        "PD-CLAIM-056"
+      ]
     },
     "scripts/research/proximal_distal_energy/run_mechanism_ladder_study.py": {
       "sha256": "00d97228a34d439b79c9653952260f3bb9b0a241572671d1fe1c130dccf56457",
@@ -4929,7 +5061,9 @@
     "scripts/research/proximal_distal_energy/two_hand_preactivation_hypothesis.py": {
       "sha256": "ab4adee1d0bc20637e0aede6515e814ab2cccbc7485a5d971cf1859c36425922",
       "bytes": 14637,
-      "referenced_by": ["PD-CLAIM-071"]
+      "referenced_by": [
+        "PD-CLAIM-071"
+      ]
     },
     "scripts/research/proximal_distal_energy/two_hand_wrench.py": {
       "sha256": "67b49e4fff99e9615ec9985372b1d34e81b483dee1ffa58dcdf3c6f9c3b2ebf8",
@@ -4985,32 +5119,45 @@
     "src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/core/processing/calculate_work_impulse.m": {
       "sha256": "0bca8f376b1af178bce9d418e6020a2b168190ba23892b5201a86041b5f855b4",
       "bytes": 12314,
-      "referenced_by": ["PD-CLAIM-096"]
+      "referenced_by": [
+        "PD-CLAIM-096"
+      ]
     },
     "src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/core/processing/process_data_tables.m": {
       "sha256": "2ade479df0cba455967bca061885479ee586029467a93c90c61927c1148ee41f",
       "bytes": 5317,
-      "referenced_by": ["PD-CLAIM-096"]
+      "referenced_by": [
+        "PD-CLAIM-096"
+      ]
     },
     "src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/core/simulation/run_single_ztcf_point.m": {
       "sha256": "d2d243f2986c80aa987af19207e33181a23109d3c5344ae68a3341247de55089",
       "bytes": 1801,
-      "referenced_by": ["PD-CLAIM-096"]
+      "referenced_by": [
+        "PD-CLAIM-096"
+      ]
     },
     "src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/core/simulation/run_ztcf_simulation.m": {
       "sha256": "a81c2856efdcd9385a04d018926efa1ce33de9fe4b653502339af99f9544eaec",
       "bytes": 9414,
-      "referenced_by": ["PD-CLAIM-096"]
+      "referenced_by": [
+        "PD-CLAIM-096"
+      ]
     },
     "src/shared/python/physics/contact_reaction_decomposition.py": {
       "sha256": "9f2abd71d3619edf1f693aee8f47417964066b6a77e8c57a15708a5f25574309",
       "bytes": 10667,
-      "referenced_by": ["PD-CLAIM-075", "PD-CLAIM-076"]
+      "referenced_by": [
+        "PD-CLAIM-075",
+        "PD-CLAIM-076"
+      ]
     },
     "src/shared/python/simulation_backends/ztcf_zvcf.py": {
       "sha256": "6488076bf95b10bab775c4599ec257704b37c0bc77a060584e834710778bccb2",
       "bytes": 23743,
-      "referenced_by": ["PD-CLAIM-095"]
+      "referenced_by": [
+        "PD-CLAIM-095"
+      ]
     },
     "tests/research/test_advanced_biological_bridge.py": {
       "sha256": "d4122291586619e92fda26ce3b1e7654978ffebf8ffa9750bd7a155330915a24",
@@ -5026,27 +5173,45 @@
     "tests/research/test_bilateral_wrench_identifiability.py": {
       "sha256": "30123cf2d2fd92fe9ce13ddfe237f0c8deb5ec7ef28586d1a0fbebde1198b338",
       "bytes": 3092,
-      "referenced_by": ["PD-CLAIM-254", "PD-CLAIM-255", "PD-CLAIM-256"]
+      "referenced_by": [
+        "PD-CLAIM-254",
+        "PD-CLAIM-255",
+        "PD-CLAIM-256"
+      ]
     },
     "tests/research/test_bilateral_wrench_identifiability_evidence.py": {
       "sha256": "c2ffb44b302980cd5b4d3db64fa137f22235f71085936b174c337674fe4ca5c6",
       "bytes": 1218,
-      "referenced_by": ["PD-CLAIM-254", "PD-CLAIM-255", "PD-CLAIM-256"]
+      "referenced_by": [
+        "PD-CLAIM-254",
+        "PD-CLAIM-255",
+        "PD-CLAIM-256"
+      ]
     },
     "tests/research/test_bilateral_wrench_sensor_qualification.py": {
       "sha256": "12566387bb87a870706a0f1e6a5b34484cea99ab146a823a0033d289daad0f8a",
       "bytes": 3788,
-      "referenced_by": ["PD-CLAIM-257", "PD-CLAIM-258", "PD-CLAIM-259"]
+      "referenced_by": [
+        "PD-CLAIM-257",
+        "PD-CLAIM-258",
+        "PD-CLAIM-259"
+      ]
     },
     "tests/research/test_bilateral_wrench_sensor_qualification_evidence.py": {
       "sha256": "2bf5cdd7505cee9e3c23ea034ee9685c1a6a36e1ca0eeeb02851c940f8864498",
       "bytes": 1724,
-      "referenced_by": ["PD-CLAIM-257", "PD-CLAIM-258", "PD-CLAIM-259"]
+      "referenced_by": [
+        "PD-CLAIM-257",
+        "PD-CLAIM-258",
+        "PD-CLAIM-259"
+      ]
     },
     "tests/research/test_experimental_falsification_protocol.py": {
       "sha256": "a4f1e50611221431576e4b3f2bdb41d31cfae72d3ed5b2eb24b0ba67bda7b2e3",
       "bytes": 3529,
-      "referenced_by": ["PD-CLAIM-199"]
+      "referenced_by": [
+        "PD-CLAIM-199"
+      ]
     },
     "tests/research/test_flexible_shaft_study.py": {
       "sha256": "9015c5e865c69b5edb665c6aa7a6dc09cac21bbd732a47f0a385fc91ba809fc1",
@@ -5111,7 +5276,11 @@
     "tests/research/test_grf_drift_study.py": {
       "sha256": "da032dbcfc71662717c4b88e392f8a79f6b0dac9c90e86381c8fc46413da514b",
       "bytes": 2856,
-      "referenced_by": ["PD-CLAIM-076", "PD-CLAIM-077", "PD-CLAIM-080"]
+      "referenced_by": [
+        "PD-CLAIM-076",
+        "PD-CLAIM-077",
+        "PD-CLAIM-080"
+      ]
     },
     "tests/research/test_hand_path_attribution_study.py": {
       "sha256": "131b4cd3357c105c03bc970b0af5d966dec73256546e051621fcc9b24c751061",
@@ -5425,7 +5594,9 @@
     "tests/research/test_two_hand_preactivation_hypothesis.py": {
       "sha256": "e90d02a9ec18044687bbc67e0266c9005533dffb8b9ce1c7c82e71151efa1186",
       "bytes": 3005,
-      "referenced_by": ["PD-CLAIM-071"]
+      "referenced_by": [
+        "PD-CLAIM-071"
+      ]
     },
     "tests/research/test_two_hand_wrench.py": {
       "sha256": "5735b7f72f661a45f357b2bd7be88a83ea1dbb823dd65dcf86675569c4842d58",
@@ -5514,7 +5685,9 @@
     "tests/unit/biomechanics/test_interaction_evidence.py": {
       "sha256": "266205c1d08d2161092d42350f6feb901ae0ec743271aacdb24b7345bdfcab6d",
       "bytes": 10743,
-      "referenced_by": ["PD-CLAIM-073"]
+      "referenced_by": [
+        "PD-CLAIM-073"
+      ]
     },
     "tests/unit/research/test_interaction_force_mechanisms.py": {
       "sha256": "287ebb28e8bccecb42dcf1f8a0c23bd3f1a0896070c42cc623b781675b83ba63",
@@ -5538,253 +5711,491 @@
     "tests/unit/research/test_proximal_distal_energy.py": {
       "sha256": "0823d73ea8a9a9c5470db5511b9f6f4cd6b73592d036ee71b70cce1461e85568",
       "bytes": 9693,
-      "referenced_by": ["PD-CLAIM-036"]
+      "referenced_by": [
+        "PD-CLAIM-036"
+      ]
     },
     "tests/unit/test_contact_reaction_decomposition.py": {
       "sha256": "728a4f589e3d8ce12ca8cf09d7e80afb061971c981e060bad7104a35cfe883fb",
       "bytes": 5009,
-      "referenced_by": ["PD-CLAIM-075", "PD-CLAIM-076"]
+      "referenced_by": [
+        "PD-CLAIM-075",
+        "PD-CLAIM-076"
+      ]
     }
   },
   "external_urls": {
     "https://api.crossref.org/works/10.1115/1.3426951": {
       "scheme": "https",
       "host": "api.crossref.org",
-      "referenced_by": ["PD-CLAIM-030"]
+      "referenced_by": [
+        "PD-CLAIM-030"
+      ]
     },
     "https://doi.org/10.1007/978-0-387-46050-5_30": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-013"]
+      "referenced_by": [
+        "PD-CLAIM-013"
+      ]
     },
     "https://doi.org/10.1007/BF00198762": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-068"]
+      "referenced_by": [
+        "PD-CLAIM-068"
+      ]
     },
     "https://doi.org/10.1007/s12283-008-0005-0": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-014"]
+      "referenced_by": [
+        "PD-CLAIM-014"
+      ]
     },
     "https://doi.org/10.1007/s12283-009-0020-9": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-031", "PD-CLAIM-034"]
+      "referenced_by": [
+        "PD-CLAIM-031",
+        "PD-CLAIM-034"
+      ]
     },
     "https://doi.org/10.1007/s12283-016-0197-7": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-032", "PD-CLAIM-034"]
+      "referenced_by": [
+        "PD-CLAIM-032",
+        "PD-CLAIM-034"
+      ]
     },
     "https://doi.org/10.1016/0021-9290(80)90172-4": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-045", "PD-CLAIM-046"]
+      "referenced_by": [
+        "PD-CLAIM-045",
+        "PD-CLAIM-046"
+      ]
     },
     "https://doi.org/10.1016/0021-9290(92)90073-A": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-041"]
+      "referenced_by": [
+        "PD-CLAIM-041"
+      ]
     },
     "https://doi.org/10.1016/0021-9290(93)90084-R": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-039"]
+      "referenced_by": [
+        "PD-CLAIM-039"
+      ]
     },
     "https://doi.org/10.1016/S0966-6362(02)00068-1": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-044", "PD-CLAIM-047", "PD-CLAIM-050"]
+      "referenced_by": [
+        "PD-CLAIM-044",
+        "PD-CLAIM-047",
+        "PD-CLAIM-050"
+      ]
     },
     "https://doi.org/10.1016/S1440-2440(04)80265-2": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-006"]
+      "referenced_by": [
+        "PD-CLAIM-006"
+      ]
     },
     "https://doi.org/10.1016/j.jbiomech.2013.01.020": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-062"]
+      "referenced_by": [
+        "PD-CLAIM-062"
+      ]
     },
     "https://doi.org/10.1016/j.jbiomech.2022.111087": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-075"]
+      "referenced_by": [
+        "PD-CLAIM-075"
+      ]
     },
     "https://doi.org/10.1038/srep38845": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-069", "PD-CLAIM-070"]
+      "referenced_by": [
+        "PD-CLAIM-069",
+        "PD-CLAIM-070"
+      ]
     },
     "https://doi.org/10.1046/j.1460-2687.1999.00028.x": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-022", "PD-CLAIM-059"]
+      "referenced_by": [
+        "PD-CLAIM-022",
+        "PD-CLAIM-059",
+        "PD-CLAIM-093"
+      ]
     },
     "https://doi.org/10.1046/j.1460-2687.2001.00071.x": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-026"]
+      "referenced_by": [
+        "PD-CLAIM-026"
+      ]
     },
     "https://doi.org/10.1046/j.1460-2687.2002.00094.x": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-024"]
+      "referenced_by": [
+        "PD-CLAIM-024",
+        "PD-CLAIM-093"
+      ]
     },
     "https://doi.org/10.1055/s-2008-1038732": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-012"]
+      "referenced_by": [
+        "PD-CLAIM-012"
+      ]
     },
     "https://doi.org/10.1080/026404100364983": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-042", "PD-CLAIM-043"]
+      "referenced_by": [
+        "PD-CLAIM-042",
+        "PD-CLAIM-043"
+      ]
     },
     "https://doi.org/10.1080/02640410410001730179": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-049", "PD-CLAIM-050"]
+      "referenced_by": [
+        "PD-CLAIM-049",
+        "PD-CLAIM-050"
+      ]
     },
     "https://doi.org/10.1080/02640410701373543": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-015"]
+      "referenced_by": [
+        "PD-CLAIM-015"
+      ]
     },
     "https://doi.org/10.1080/02640414.2010.507249": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-016"]
-    },
-    "https://doi.org/10.1080/14763140008522704": {
-      "scheme": "https",
-      "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-093"]
-    },
-    "https://doi.org/10.1080/14763140701683264": {
-      "scheme": "https",
-      "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-093"]
+      "referenced_by": [
+        "PD-CLAIM-016"
+      ]
     },
     "https://doi.org/10.1080/14763141.2010.535842": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-007"]
+      "referenced_by": [
+        "PD-CLAIM-007"
+      ]
     },
     "https://doi.org/10.1080/14763141.2012.660799": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-049", "PD-CLAIM-050"]
+      "referenced_by": [
+        "PD-CLAIM-049",
+        "PD-CLAIM-050"
+      ]
     },
     "https://doi.org/10.1080/14763141.2012.728244": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-017"]
+      "referenced_by": [
+        "PD-CLAIM-017"
+      ]
     },
     "https://doi.org/10.1080/14763141.2013.771896": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-018"]
+      "referenced_by": [
+        "PD-CLAIM-018"
+      ]
     },
     "https://doi.org/10.1080/14763141.2019.1586983": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-011"]
-    },
-    "https://doi.org/10.1080/14763149908573820": {
-      "scheme": "https",
-      "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-093"]
+      "referenced_by": [
+        "PD-CLAIM-011"
+      ]
     },
     "https://doi.org/10.1088/0034-4885/66/2/202": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-051"]
+      "referenced_by": [
+        "PD-CLAIM-051"
+      ]
     },
     "https://doi.org/10.1098/rspa.2008.0304": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-029", "PD-CLAIM-030", "PD-CLAIM-034"]
+      "referenced_by": [
+        "PD-CLAIM-029",
+        "PD-CLAIM-030",
+        "PD-CLAIM-034"
+      ]
     },
     "https://doi.org/10.1115/1.3426951": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-030", "PD-CLAIM-034"]
+      "referenced_by": [
+        "PD-CLAIM-030",
+        "PD-CLAIM-034"
+      ]
     },
     "https://doi.org/10.1119/1.1976419": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-051"]
+      "referenced_by": [
+        "PD-CLAIM-051"
+      ]
     },
     "https://doi.org/10.1119/1.2346688": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-025"]
+      "referenced_by": [
+        "PD-CLAIM-025"
+      ]
     },
     "https://doi.org/10.1123/ijsb.2.4.235": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-040"]
+      "referenced_by": [
+        "PD-CLAIM-040"
+      ]
     },
     "https://doi.org/10.1123/ijsb.5.4.403": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-040"]
+      "referenced_by": [
+        "PD-CLAIM-035",
+        "PD-CLAIM-040"
+      ]
     },
     "https://doi.org/10.1123/ijsb.5.4.420": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-040", "PD-CLAIM-043"]
+      "referenced_by": [
+        "PD-CLAIM-035",
+        "PD-CLAIM-040",
+        "PD-CLAIM-043"
+      ]
     },
     "https://doi.org/10.1123/jab.16.4.356": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-023", "PD-CLAIM-059"]
+      "referenced_by": [
+        "PD-CLAIM-023",
+        "PD-CLAIM-059",
+        "PD-CLAIM-093"
+      ]
     },
     "https://doi.org/10.1177/17479541261429479": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-007", "PD-CLAIM-012"]
+      "referenced_by": [
+        "PD-CLAIM-007",
+        "PD-CLAIM-012"
+      ]
     },
     "https://doi.org/10.1249/00005768-198201000-00012": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-038"]
-    },
-    "https://doi.org/10.1249/00005768-198901000-00006": {
-      "scheme": "https",
-      "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-035"]
+      "referenced_by": [
+        "PD-CLAIM-038"
+      ]
     },
     "https://doi.org/10.1260/174795407789705497": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-019"]
+      "referenced_by": [
+        "PD-CLAIM-019",
+        "PD-CLAIM-093"
+      ]
     },
     "https://doi.org/10.1371/journal.pone.0295152": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-075"]
+      "referenced_by": [
+        "PD-CLAIM-075"
+      ]
     },
     "https://doi.org/10.3200/JMBR.40.5.446-476": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-068"]
+      "referenced_by": [
+        "PD-CLAIM-068"
+      ]
     },
     "https://doi.org/10.3389/fspor.2026.1790645": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-010"]
+      "referenced_by": [
+        "PD-CLAIM-010"
+      ]
     },
     "https://doi.org/10.3390/proceedings2060243": {
       "scheme": "https",
       "host": "doi.org",
-      "referenced_by": ["PD-CLAIM-033", "PD-CLAIM-034"]
+      "referenced_by": [
+        "PD-CLAIM-033",
+        "PD-CLAIM-034"
+      ]
     },
-    "https://doi.org/10.5277/ABB-01318-2019-02": {
+    "https://journals.humankinetics.com/view/journals/jab/16/4/article-p356.xml": {
       "scheme": "https",
-      "host": "doi.org",
+      "host": "journals.humankinetics.com",
+      "referenced_by": [
+        "PD-CLAIM-023"
+      ]
+    },
+    "https://journals.sagepub.com/doi/10.1260/174795407789705497": {
+      "scheme": "https",
+      "host": "journals.sagepub.com",
+      "referenced_by": [
+        "PD-CLAIM-019"
+      ]
+    },
+    "https://onlinelibrary.wiley.com/doi/abs/10.1046/j.1460-2687.1999.00028.x": {
+      "scheme": "https",
+      "host": "onlinelibrary.wiley.com",
+      "referenced_by": [
+        "PD-CLAIM-022"
+      ]
+    },
+    "https://people.stfx.ca/smackenz/Courses/DirectedStudy/Articles/Kenny%202008%20Segmental%20sequencing%20of%20kinetic%20energy%20in%20a%20computer-simulated.pdf": {
+      "scheme": "https",
+      "host": "people.stfx.ca",
+      "referenced_by": [
+        "PD-CLAIM-014"
+      ]
+    },
+    "https://people.stfx.ca/smackenz/Courses/DirectedStudy/Articles/Miura%202001%20Parametric%20acceleration%20effect%20of%20inward%20pull.pdf": {
+      "scheme": "https",
+      "host": "people.stfx.ca",
+      "referenced_by": [
+        "PD-CLAIM-026"
+      ]
+    },
+    "https://people.stfx.ca/smackenz/Courses/DirectedStudy/Articles/Neal%202007%20Body%20Segment%20Sequencing%20and%20Timing%20in%20Golf.pdf": {
+      "scheme": "https",
+      "host": "people.stfx.ca",
+      "referenced_by": [
+        "PD-CLAIM-019"
+      ]
+    },
+    "https://people.stfx.ca/smackenz/courses/DirectedStudy/Articles/Sharp%202008%20Mechanics%20of%20golf.pdf": {
+      "scheme": "https",
+      "host": "people.stfx.ca",
+      "referenced_by": [
+        "PD-CLAIM-029"
+      ]
+    },
+    "https://people.stfx.ca/smackenz/courses/hk396/handouts/Chu%202010%20The%20relationship%20between%20biomechanical%20variables%20and%20driving%20performance.pdf": {
+      "scheme": "https",
+      "host": "people.stfx.ca",
+      "referenced_by": [
+        "PD-CLAIM-016"
+      ]
+    },
+    "https://pmc.ncbi.nlm.nih.gov/articles/PMC3899667/": {
+      "scheme": "https",
+      "host": "pmc.ncbi.nlm.nih.gov",
+      "referenced_by": [
+        "PD-CLAIM-009"
+      ]
+    },
+    "https://pubmed.ncbi.nlm.nih.gov/10824641/": {
+      "scheme": "https",
+      "host": "pubmed.ncbi.nlm.nih.gov",
+      "referenced_by": [
+        "PD-CLAIM-042"
+      ]
+    },
+    "https://pubmed.ncbi.nlm.nih.gov/1400517/": {
+      "scheme": "https",
+      "host": "pubmed.ncbi.nlm.nih.gov",
+      "referenced_by": [
+        "PD-CLAIM-041",
+        "PD-CLAIM-043"
+      ]
+    },
+    "https://pubmed.ncbi.nlm.nih.gov/15712503/": {
+      "scheme": "https",
+      "host": "pubmed.ncbi.nlm.nih.gov",
+      "referenced_by": [
+        "PD-CLAIM-006"
+      ]
+    },
+    "https://pubmed.ncbi.nlm.nih.gov/17454544/": {
+      "scheme": "https",
+      "host": "pubmed.ncbi.nlm.nih.gov",
+      "referenced_by": [
+        "PD-CLAIM-074",
+        "PD-CLAIM-078"
+      ]
+    },
+    "https://pubmed.ncbi.nlm.nih.gov/17852693/": {
+      "scheme": "https",
+      "host": "pubmed.ncbi.nlm.nih.gov",
+      "referenced_by": [
+        "PD-CLAIM-015"
+      ]
+    },
+    "https://pubmed.ncbi.nlm.nih.gov/1997807/": {
+      "scheme": "https",
+      "host": "pubmed.ncbi.nlm.nih.gov",
+      "referenced_by": [
+        "PD-CLAIM-039",
+        "PD-CLAIM-043"
+      ]
+    },
+    "https://pubmed.ncbi.nlm.nih.gov/24149910/": {
+      "scheme": "https",
+      "host": "pubmed.ncbi.nlm.nih.gov",
+      "referenced_by": [
+        "PD-CLAIM-074"
+      ]
+    },
+    "https://pubmed.ncbi.nlm.nih.gov/25435779/": {
+      "scheme": "https",
+      "host": "pubmed.ncbi.nlm.nih.gov",
+      "referenced_by": [
+        "PD-CLAIM-028"
+      ]
+    },
+    "https://pubmed.ncbi.nlm.nih.gov/2676547/": {
+      "scheme": "https",
+      "host": "pubmed.ncbi.nlm.nih.gov",
+      "referenced_by": [
+        "PD-CLAIM-047"
+      ]
+    },
+    "https://pubmed.ncbi.nlm.nih.gov/27515436/": {
+      "scheme": "https",
+      "host": "pubmed.ncbi.nlm.nih.gov",
+      "referenced_by": [
+        "PD-CLAIM-074"
+      ]
+    },
+    "https://pubmed.ncbi.nlm.nih.gov/31042142/": {
+      "scheme": "https",
+      "host": "pubmed.ncbi.nlm.nih.gov",
+      "referenced_by": [
+        "PD-CLAIM-011",
+        "PD-CLAIM-074"
+      ]
+    },
+    "https://pubmed.ncbi.nlm.nih.gov/31741482/": {
+      "scheme": "https",
+      "host": "pubmed.ncbi.nlm.nih.gov",
       "referenced_by": [
         "PD-CLAIM-007",
         "PD-CLAIM-020",
@@ -5792,190 +6203,108 @@
         "PD-CLAIM-050"
       ]
     },
-    "https://journals.humankinetics.com/view/journals/jab/16/4/article-p356.xml": {
-      "scheme": "https",
-      "host": "journals.humankinetics.com",
-      "referenced_by": ["PD-CLAIM-023"]
-    },
-    "https://journals.sagepub.com/doi/10.1260/174795407789705497": {
-      "scheme": "https",
-      "host": "journals.sagepub.com",
-      "referenced_by": ["PD-CLAIM-019"]
-    },
-    "https://onlinelibrary.wiley.com/doi/abs/10.1046/j.1460-2687.1999.00028.x": {
-      "scheme": "https",
-      "host": "onlinelibrary.wiley.com",
-      "referenced_by": ["PD-CLAIM-022"]
-    },
-    "https://people.stfx.ca/smackenz/Courses/DirectedStudy/Articles/Kenny%202008%20Segmental%20sequencing%20of%20kinetic%20energy%20in%20a%20computer-simulated.pdf": {
-      "scheme": "https",
-      "host": "people.stfx.ca",
-      "referenced_by": ["PD-CLAIM-014"]
-    },
-    "https://people.stfx.ca/smackenz/Courses/DirectedStudy/Articles/Miura%202001%20Parametric%20acceleration%20effect%20of%20inward%20pull.pdf": {
-      "scheme": "https",
-      "host": "people.stfx.ca",
-      "referenced_by": ["PD-CLAIM-026"]
-    },
-    "https://people.stfx.ca/smackenz/Courses/DirectedStudy/Articles/Neal%202007%20Body%20Segment%20Sequencing%20and%20Timing%20in%20Golf.pdf": {
-      "scheme": "https",
-      "host": "people.stfx.ca",
-      "referenced_by": ["PD-CLAIM-019"]
-    },
-    "https://people.stfx.ca/smackenz/courses/DirectedStudy/Articles/Sharp%202008%20Mechanics%20of%20golf.pdf": {
-      "scheme": "https",
-      "host": "people.stfx.ca",
-      "referenced_by": ["PD-CLAIM-029"]
-    },
-    "https://people.stfx.ca/smackenz/courses/hk396/handouts/Chu%202010%20The%20relationship%20between%20biomechanical%20variables%20and%20driving%20performance.pdf": {
-      "scheme": "https",
-      "host": "people.stfx.ca",
-      "referenced_by": ["PD-CLAIM-016"]
-    },
-    "https://pmc.ncbi.nlm.nih.gov/articles/PMC3899667/": {
-      "scheme": "https",
-      "host": "pmc.ncbi.nlm.nih.gov",
-      "referenced_by": ["PD-CLAIM-009"]
-    },
-    "https://pubmed.ncbi.nlm.nih.gov/10824641/": {
-      "scheme": "https",
-      "host": "pubmed.ncbi.nlm.nih.gov",
-      "referenced_by": ["PD-CLAIM-042"]
-    },
-    "https://pubmed.ncbi.nlm.nih.gov/1400517/": {
-      "scheme": "https",
-      "host": "pubmed.ncbi.nlm.nih.gov",
-      "referenced_by": ["PD-CLAIM-041", "PD-CLAIM-043"]
-    },
-    "https://pubmed.ncbi.nlm.nih.gov/15712503/": {
-      "scheme": "https",
-      "host": "pubmed.ncbi.nlm.nih.gov",
-      "referenced_by": ["PD-CLAIM-006"]
-    },
-    "https://pubmed.ncbi.nlm.nih.gov/17454544/": {
-      "scheme": "https",
-      "host": "pubmed.ncbi.nlm.nih.gov",
-      "referenced_by": ["PD-CLAIM-074", "PD-CLAIM-078"]
-    },
-    "https://pubmed.ncbi.nlm.nih.gov/17852693/": {
-      "scheme": "https",
-      "host": "pubmed.ncbi.nlm.nih.gov",
-      "referenced_by": ["PD-CLAIM-015"]
-    },
-    "https://pubmed.ncbi.nlm.nih.gov/1997807/": {
-      "scheme": "https",
-      "host": "pubmed.ncbi.nlm.nih.gov",
-      "referenced_by": ["PD-CLAIM-039", "PD-CLAIM-043"]
-    },
-    "https://pubmed.ncbi.nlm.nih.gov/24149910/": {
-      "scheme": "https",
-      "host": "pubmed.ncbi.nlm.nih.gov",
-      "referenced_by": ["PD-CLAIM-074"]
-    },
-    "https://pubmed.ncbi.nlm.nih.gov/25435779/": {
-      "scheme": "https",
-      "host": "pubmed.ncbi.nlm.nih.gov",
-      "referenced_by": ["PD-CLAIM-028"]
-    },
-    "https://pubmed.ncbi.nlm.nih.gov/2676547/": {
-      "scheme": "https",
-      "host": "pubmed.ncbi.nlm.nih.gov",
-      "referenced_by": ["PD-CLAIM-047"]
-    },
-    "https://pubmed.ncbi.nlm.nih.gov/27515436/": {
-      "scheme": "https",
-      "host": "pubmed.ncbi.nlm.nih.gov",
-      "referenced_by": ["PD-CLAIM-074"]
-    },
-    "https://pubmed.ncbi.nlm.nih.gov/31042142/": {
-      "scheme": "https",
-      "host": "pubmed.ncbi.nlm.nih.gov",
-      "referenced_by": ["PD-CLAIM-011", "PD-CLAIM-074"]
-    },
-    "https://pubmed.ncbi.nlm.nih.gov/31741482/": {
-      "scheme": "https",
-      "host": "pubmed.ncbi.nlm.nih.gov",
-      "referenced_by": ["PD-CLAIM-048"]
-    },
     "https://pubmed.ncbi.nlm.nih.gov/41653371/": {
       "scheme": "https",
       "host": "pubmed.ncbi.nlm.nih.gov",
-      "referenced_by": ["PD-CLAIM-074", "PD-CLAIM-079"]
+      "referenced_by": [
+        "PD-CLAIM-074",
+        "PD-CLAIM-079"
+      ]
     },
     "https://pubmed.ncbi.nlm.nih.gov/8505347/": {
       "scheme": "https",
       "host": "pubmed.ncbi.nlm.nih.gov",
-      "referenced_by": ["PD-CLAIM-008", "PD-CLAIM-039", "PD-CLAIM-043"]
-    },
-    "https://sashomackenzie.com/publications/delayedrelease.pdf": {
-      "scheme": "https",
-      "host": "sashomackenzie.com",
-      "referenced_by": ["PD-CLAIM-024"]
+      "referenced_by": [
+        "PD-CLAIM-008",
+        "PD-CLAIM-039",
+        "PD-CLAIM-043"
+      ]
     },
     "https://uwspace.uwaterloo.ca/items/812277fb-2d1b-47b9-ba6d-8b25392c120f": {
       "scheme": "https",
       "host": "uwspace.uwaterloo.ca",
-      "referenced_by": ["PD-CLAIM-032"]
+      "referenced_by": [
+        "PD-CLAIM-032"
+      ]
     },
     "https://waddengolfacademy.com/biomechanics/White%202006%20On%20the%20efficiency%20of%20the%20golf%20swing.pdf": {
       "scheme": "https",
       "host": "waddengolfacademy.com",
-      "referenced_by": ["PD-CLAIM-025"]
+      "referenced_by": [
+        "PD-CLAIM-025"
+      ]
     },
     "https://www.frontiersin.org/journals/sports-and-active-living/articles/10.3389/fspor.2026.1790645/full": {
       "scheme": "https",
       "host": "www.frontiersin.org",
-      "referenced_by": ["PD-CLAIM-010"]
+      "referenced_by": [
+        "PD-CLAIM-010"
+      ]
     },
     "https://www.golfsciencejournal.org/article/12640-how-amateur-golfers-deliver-energy-to-the-driver": {
       "scheme": "https",
       "host": "www.golfsciencejournal.org",
-      "referenced_by": ["PD-CLAIM-062"]
+      "referenced_by": [
+        "PD-CLAIM-062"
+      ]
     },
     "https://www.jssm.org/volume04/iss4/cap/jssm-04-520.pdf": {
       "scheme": "https",
       "host": "www.jssm.org",
-      "referenced_by": ["PD-CLAIM-009"]
+      "referenced_by": [
+        "PD-CLAIM-009"
+      ]
     },
     "https://www.jssm.org/volume08/iss2/cap/jssm-08-235.pdf": {
       "scheme": "https",
       "host": "www.jssm.org",
-      "referenced_by": ["PD-CLAIM-027", "PD-CLAIM-055"]
+      "referenced_by": [
+        "PD-CLAIM-027",
+        "PD-CLAIM-055"
+      ]
     },
     "https://www.jssm.org/volume13/iss4/cap/jssm-13-859.pdf": {
       "scheme": "https",
       "host": "www.jssm.org",
-      "referenced_by": ["PD-CLAIM-028"]
+      "referenced_by": [
+        "PD-CLAIM-028"
+      ]
     },
     "https://www.mdpi.com/2504-3900/2/6/243": {
       "scheme": "https",
       "host": "www.mdpi.com",
-      "referenced_by": ["PD-CLAIM-033"]
+      "referenced_by": [
+        "PD-CLAIM-033"
+      ]
     },
     "https://www.researchgate.net/publication/226339824_Segmental_Sequencing_of_Kinetic_Energy_in_the_Golf_Swing": {
       "scheme": "https",
       "host": "www.researchgate.net",
-      "referenced_by": ["PD-CLAIM-013"]
+      "referenced_by": [
+        "PD-CLAIM-013"
+      ]
     },
     "https://www.researchgate.net/publication/252236426": {
       "scheme": "https",
       "host": "www.researchgate.net",
-      "referenced_by": ["PD-CLAIM-012"]
-    },
-    "https://www.sashomackenzie.com/publications/MacKenzie%202009%20A%20three%20dimensional%20forward%20dynamics%20model%20of%20the%20golf%20swing.pdf": {
-      "scheme": "https",
-      "host": "www.sashomackenzie.com",
-      "referenced_by": ["PD-CLAIM-031"]
+      "referenced_by": [
+        "PD-CLAIM-012",
+        "PD-CLAIM-093"
+      ]
     },
     "https://www.tandfonline.com/doi/abs/10.1080/14763141.2012.728244": {
       "scheme": "https",
       "host": "www.tandfonline.com",
-      "referenced_by": ["PD-CLAIM-017"]
+      "referenced_by": [
+        "PD-CLAIM-017"
+      ]
     },
     "https://www.tandfonline.com/doi/abs/10.1080/14763141.2013.771896": {
       "scheme": "https",
       "host": "www.tandfonline.com",
-      "referenced_by": ["PD-CLAIM-018"]
+      "referenced_by": [
+        "PD-CLAIM-018"
+      ]
     }
   }
 }

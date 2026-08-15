@@ -90,6 +90,38 @@ python -m scripts.research.proximal_distal_energy.release_claim_review validate
 Open-resource qualification invokes the read-only validator and therefore
 fails closed if the claim registry or release-review report drifts.
 
+## External Source Qualification
+
+The release review is backed by
+[`data/external_source_review.json`](data/external_source_review.json), which
+assigns all 78 external URLs to 56 underlying works and then adjudicates their
+use for 54 atomic claims. Each claim assessment records the evidence role and
+reuses the claim's declared uncertainty boundary. DOI, PubMed, publisher,
+repository, and author-hosted mirrors of one publication remain one work and
+do not increase the independent-source count.
+
+The 2026-08-14 review removed three DOI-like identifiers that did not resolve
+and were not the sources cited in the timing discussion. PD-CLAIM-093 now
+points to the actual Pickering, Sprigings, Neal, and Cheetham records.
+PD-CLAIM-035 now points to the actual Feltner interaction-chain papers instead
+of an unresolvable identifier. A separate DOI whose publisher destination
+returned 404 was replaced in claim links and the bibliography by its stable
+PubMed record. Two redundant author-hosted mirrors with TLS failures were
+removed while their DOI records were retained.
+
+The committed availability snapshot reports 36 resolving links and 42 links
+whose publisher or indexing page restricts automated access. It contains no
+broken, transient, unchecked, or unassigned link. This is a recovery and
+metadata gate, not a favorable scientific result: all model, anatomy,
+equipment, and participant-held-out falsification requirements remain in
+force.
+
+Run the offline qualification with:
+
+```text
+python -m scripts.research.proximal_distal_energy.external_source_review validate
+```
+
 ## Required Definitions
 
 ### Drift Attribution

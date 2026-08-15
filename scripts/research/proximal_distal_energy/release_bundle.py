@@ -66,7 +66,10 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
         "integrity_authorities": {
             "claim_evidence_manifest": (
                 "deterministic_self_excluded_authority_to_avoid_recursive_hashing"
-            )
+            ),
+            "external_source_review": (
+                "offline_url_complete_work_and_claim_adjudication_embedded_in_artifacts"
+            ),
         },
         "presets": {
             "double_pendulum": {
