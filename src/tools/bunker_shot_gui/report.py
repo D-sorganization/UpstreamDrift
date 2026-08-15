@@ -207,10 +207,11 @@ def _dig_skid_lines(outcome: ShotOutcome) -> tuple[str, ...]:
     if outcome.dig_skid is None:
         return ()
     skid = outcome.dig_skid
+    verdict = skid.verdict
     return (
         "Dig versus skid",
         _THIN,
-        _line("Verdict", skid.verdict.value.upper()),
+        _line("Verdict", verdict.value.upper()),
         _line("Slope ratio", f"{skid.slope_ratio:.3f}"),
         _line("Vertical sand impulse", f"{skid.vertical_sand_impulse_Ns:.4g} N.s"),
         "",
