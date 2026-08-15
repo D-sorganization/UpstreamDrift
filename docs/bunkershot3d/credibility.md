@@ -192,7 +192,7 @@ dangerous. `bunkershot3d.vandv.require_measurable` raises `NoReferenceDataError`
 so a `ValidationComparison` against them **cannot be constructed** — the refusal is in the
 constructor, not in a review comment.
 
-### The Carry Chain (issue #8657)
+### The Carry Chain (Issue #8657)
 
 Carry is the headline number and it drives `playability_window_area`, the tool's primary
 scalar objective, so what it rests on matters more than anything else on this page.

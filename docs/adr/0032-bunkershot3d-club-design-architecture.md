@@ -1,4 +1,4 @@
-# ADR-0032: BunkerShot3D as a multi-fidelity club-design tool
+# ADR-0032: BunkerShot3D as a Multi-Fidelity Club-Design Tool
 
 - **Status:** Accepted
 - **Date:** 2026-08-13
@@ -51,7 +51,7 @@ Two further constraints are binding:
 CPU-native solver as the default**, and treat high-fidelity granular solvers
 as optional reference backends used to calibrate and validate it.
 
-### Fidelity tiers
+### Fidelity Tiers
 
 | Tier   | Solver                                                 | Cost/shot                 | Role                                                             |
 | ------ | ------------------------------------------------------ | ------------------------- | ---------------------------------------------------------------- |
@@ -99,7 +99,7 @@ sits below the crossover, in a regime with the wrong dominant physics.
 carries its fidelity tier plus a validity verdict. A solver used outside its
 calibrated envelope must say so rather than return a plausible number.
 
-### Structural decisions
+### Structural Decisions
 
 1. **Domain objects, not a god config.** `BunkerShotConfig`'s 15 flat
    delegating accessors are replaced by narrow value objects (`SandState`,
@@ -145,7 +145,7 @@ calibrated envelope must say so rather than return a plausible number.
    built on numpy/scipy (`scipy.stats.qmc` provides Sobol/LHS/Halton).
    `mujoco`, `newton`, `warp`, `trimesh`, `pychrono` are all optional.
 
-### Physics decisions
+### Physics Decisions
 
 - **Wet sand is two distinct regimes, not one.** Damp/capillary
   (apparent cohesion ~1–10 kPa) and saturated/cavitating are ~20× apart in
@@ -187,7 +187,7 @@ explicitly labelled non-viable at true grain scale and are not part of the
 supported path. Neither `pychrono` nor a LIGGGHTS binary is a declared
 dependency; both are only ever exercised against mocks.
 
-## Alternatives considered
+## Alternatives Considered
 
 - **Fix the DEM backends and keep them primary** — rejected: 2.1 × 10⁸ grains
   and days-per-shot make sweeps impossible regardless of code quality.
