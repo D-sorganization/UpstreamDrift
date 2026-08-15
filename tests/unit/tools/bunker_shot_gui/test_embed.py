@@ -1,103 +1,105 @@
-"""Smoke tests for the bunker_shot_gui EmbeddableTool adapter.
+"""The single embed adapter for the BunkerShot3D workbench (issue #8618).
 
-These tests are strictly headless — PyQt6 is checked via
-``pytest.importorskip`` so the suite runs in headless CI without a
-display or Qt installation.
+``bunker_shot_gui`` used to define **two** adapters for one ``tool_id`` -- one
+in ``_embed_adapter`` and one inside ``gui`` -- and the registry rejects a
+duplicate id, so whichever registered second was silently dropped and the
+launcher's view of the tool depended on import order. There is now exactly
+one, and these tests pin that.
+
+Importing the adapter must not import Qt; only ``create_main_widget`` may,
+which is why the widget-building test is the one guarded by ``importorskip``.
 """
 
 from __future__ import annotations
 
 import pytest
 
-pytest.importorskip("PyQt6", reason="PyQt6 is required for bunker_shot_gui")
-
-from src.shared.python.launcher_embed import (  # noqa: E402
+from src.shared.python.launcher_embed import (
+    EMBEDDABLE_TOOL_REGISTRY,
     EmbedCapabilities,
     EmbeddableTool,
 )
+from src.tools.bunker_shot_gui import BunkerShotGuiAdapter
+
+pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
 
 
 @pytest.fixture()
-def adapter():
-    """Return a fresh _EmbedAdapter instance."""
-    from src.tools.bunker_shot_gui.gui import _EmbedAdapter
-
-    return _EmbedAdapter()
+def adapter() -> BunkerShotGuiAdapter:
+    """Return a fresh adapter."""
+    return BunkerShotGuiAdapter()
 
 
-# ---------------------------------------------------------------------------
-# Protocol conformance
-# ---------------------------------------------------------------------------
+def test_tool_id_is_stable(adapter: BunkerShotGuiAdapter) -> None:
+    assert BunkerShotGuiAdapter.tool_id == "bunker_shot_gui"
+    assert adapter.tool_id == "bunker_shot_gui"
 
 
-@pytest.mark.unit
-def test_tool_id_is_stable() -> None:
-    from src.tools.bunker_shot_gui.gui import _EmbedAdapter
-
-    assert _EmbedAdapter.tool_id == "bunker_shot_gui"
-    assert _EmbedAdapter().tool_id == "bunker_shot_gui"
-
-
-@pytest.mark.unit
-def test_adapter_satisfies_embeddable_protocol(adapter) -> None:
+def test_adapter_satisfies_the_embeddable_protocol(
+    adapter: BunkerShotGuiAdapter,
+) -> None:
     assert isinstance(adapter, EmbeddableTool)
 
 
-# ---------------------------------------------------------------------------
-# embed_capabilities
-# ---------------------------------------------------------------------------
+def test_importing_the_package_registers_exactly_one_adapter() -> None:
+    registered = EMBEDDABLE_TOOL_REGISTRY.get("bunker_shot_gui")
+    assert isinstance(registered, BunkerShotGuiAdapter)
 
 
-@pytest.mark.unit
-def test_embed_capabilities_returns_expected_shape(adapter) -> None:
-    caps = adapter.embed_capabilities()
-
-    assert isinstance(caps, EmbedCapabilities)
-    assert caps.supports_embedded is True
-    assert caps.requires_separate_qapplication is False
-    assert caps.min_size[0] > 0
-    assert caps.min_size[1] > 0
+def test_workbench_declares_itself_embeddable(adapter: BunkerShotGuiAdapter) -> None:
+    capabilities = adapter.embed_capabilities()
+    assert isinstance(capabilities, EmbedCapabilities)
+    assert capabilities.supports_embedded is True
+    assert capabilities.requires_separate_qapplication is False
 
 
-@pytest.mark.unit
-def test_embed_capabilities_stable_across_calls(adapter) -> None:
+def test_minimum_size_fits_two_design_columns(
+    adapter: BunkerShotGuiAdapter,
+) -> None:
+    width, height = adapter.embed_capabilities().min_size
+    assert width >= 1000
+    assert height >= 700
+
+
+def test_capabilities_are_stable_across_calls(
+    adapter: BunkerShotGuiAdapter,
+) -> None:
     assert adapter.embed_capabilities() == adapter.embed_capabilities()
 
 
-# ---------------------------------------------------------------------------
-# cleanup / is_dirty
-# ---------------------------------------------------------------------------
-
-
-@pytest.mark.unit
-def test_cleanup_before_widget_is_safe(adapter) -> None:
+def test_cleanup_before_a_widget_exists_is_safe(
+    adapter: BunkerShotGuiAdapter,
+) -> None:
     adapter.cleanup()
     assert adapter._widget is None
 
 
-@pytest.mark.unit
-def test_cleanup_is_idempotent(adapter) -> None:
+def test_cleanup_is_idempotent(adapter: BunkerShotGuiAdapter) -> None:
     adapter.cleanup()
     adapter.cleanup()
+    assert adapter._widget is None
 
 
-@pytest.mark.unit
-def test_is_dirty_always_false(adapter) -> None:
+def test_the_workbench_holds_no_unsaved_state(
+    adapter: BunkerShotGuiAdapter,
+) -> None:
     assert adapter.is_dirty() is False
 
 
-# ---------------------------------------------------------------------------
-# Registration side-effect
-# ---------------------------------------------------------------------------
+def test_the_adapter_defers_its_gui_import() -> None:
+    """Only ``create_main_widget`` may reach for Qt.
 
+    The widget-building half of the contract is exercised in
+    ``tests/tools/bunker_shot_gui``, which owns the session QApplication.
+    This directory stays Qt-free on purpose.
+    """
+    import inspect
 
-@pytest.mark.unit
-def test_gui_module_registers_adapter_on_import() -> None:
-    from src.shared.python.launcher_embed import get_embeddable_tool
+    from src.tools.bunker_shot_gui import _embed_adapter
 
-    import src.tools.bunker_shot_gui.gui  # noqa: F401
-
-    registered = get_embeddable_tool("bunker_shot_gui")
-    assert registered is not None
-    assert registered.tool_id == "bunker_shot_gui"
-    assert isinstance(registered, EmbeddableTool)
+    module_source = inspect.getsource(_embed_adapter)
+    assert "import PyQt" not in module_source
+    assert "from PyQt" not in module_source
+    assert "from .gui import" in inspect.getsource(
+        BunkerShotGuiAdapter.create_main_widget
+    )
