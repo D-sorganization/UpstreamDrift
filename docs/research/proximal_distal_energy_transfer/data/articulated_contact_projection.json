@@ -1,0 +1,71 @@
+{
+  "schema_version": "articulated-contact-projection/v1",
+  "study_id": "subject-scaled-articulated-contact-initial-acceleration",
+  "model_tier": "same_state_articulated_bilateral_contact_projection",
+  "design": {
+    "profile_count": 6,
+    "grip_span_count": 3,
+    "case_count": 18,
+    "samples_per_case": 13,
+    "state_count": 234,
+    "coordinate_count": 20,
+    "forward_steps": 0
+  },
+  "engines": {
+    "mujoco": "3.8.0",
+    "pinocchio": "3.8.0"
+  },
+  "contact_contract": {
+    "kind": "paired Kelvin-Voigt point interfaces",
+    "force_origin": "achieved hand-grip displacement and relative velocity",
+    "projection": "J_grip.T force_on_club + J_hand.T force_on_hand",
+    "direct_club_actuation": "none"
+  },
+  "tolerances": {
+    "contact_stiffness": 1800.0,
+    "contact_damping": 18.0,
+    "club_translation_perturbation_m": 0.001,
+    "club_velocity_perturbation_m_s": 0.05,
+    "zero_preload_force_tolerance_n": 1e-06,
+    "action_reaction_tolerance_n": 1e-12,
+    "virtual_power_tolerance_w": 1e-10,
+    "geometry_control_tolerance_nm": 1e-12,
+    "acceleration_relative_tolerance": 1e-08
+  },
+  "results": {
+    "maximum_contact_force_n": 2.708068977627232,
+    "maximum_zero_preload_force_n": 2.0847027717205781e-07,
+    "maximum_action_reaction_residual_n": 0.0,
+    "maximum_virtual_power_residual_w": 3.885780586188048e-16,
+    "maximum_contact_dissipation_power_w": -0.08924139573390398,
+    "minimum_contact_dissipation_power_w": -0.09064618588732645,
+    "maximum_coincident_force_couple_nm": 0.0,
+    "maximum_reversal_sign_residual_nm": 0.0,
+    "maximum_generalized_acceleration_absolute_error": 3.872457909892546e-11,
+    "maximum_acceleration_relative_error": 4.853676965632414e-13,
+    "failed_state_count": 0,
+    "all_registered_gates_passed": true
+  },
+  "claim_boundary": {
+    "supported": "bilateral compliant point forces project consistently into the qualified articulated tree and yield matching native initial acceleration",
+    "forward_trajectory": "not_executed",
+    "contact_loss_or_recovery": "not_tested",
+    "anatomy_and_equipment": "not_calibrated",
+    "human_transfer_or_strategy": "untested"
+  },
+  "next_gate": "integrate the articulated bilateral contact state through a bounded horizon with contact-loss, convergence, energy, and adverse-load controls",
+  "source_sha256": {
+    "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "8eed52fe4ebbc55fcf753f4703330dd6d768281b0babfbb2adca074b862fc36d",
+    "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
+    "docs/research/proximal_distal_energy_transfer/data/articulated_inertia_cross_engine.json": "852e24997f90f9ecee4b395bfc3f22f65c821d84dce3d297159a1f5a10987b6f",
+    "scripts/research/proximal_distal_energy/articulated_contact_projection.py": "682ef327ff84b313f5d47957b7f7fe9e086c58d75d333ce103a38df6029521eb",
+    "scripts/research/proximal_distal_energy/run_articulated_contact_projection.py": "44545d6a622de738281462fe799a6fee26ee0d7c798b26f61b865294b976d0f1",
+    "scripts/research/proximal_distal_energy/make_articulated_contact_projection_figure.py": "3d9e57994c65d7e2852cbab3afb2aabe5b913c7a9831d4944d7540a82aea7f1a",
+    "scripts/research/proximal_distal_energy/register_articulated_contact_projection_claims.py": "ef9439dd1efc3e5b917c1b341593640fae894362b60fe61a5965de19eb7e4b8c",
+    "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py": "37f051cae4dd3ebd9c5f3d3305d50083a6a7743e4f8689883e70eff93ee2b5cd",
+    "scripts/research/proximal_distal_energy/spatial_forward_contract.py": "04bb646557de3516d106806e50d7ace90f2ac9243a5a1a57b83a4d6381af071c",
+    "scripts/research/proximal_distal_energy/spatial_full_body.py": "8e0c3efb06747742cca30f6bc1b9e18a28779a1c187e4b98ba6cde5293d96cfc",
+    "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py": "c2b01f1d8de0b25daa39c03ae97d3ef51512264f3a2978766a7360aed5d9cda8",
+    "tests/research/test_articulated_contact_projection.py": "9f4e84a6293cce4406478defdb44ad049bbd4be18d2a042c06b508cb45272995"
+  }
+}

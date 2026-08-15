@@ -261,6 +261,14 @@ removes an engine-assembly confound. It does not execute forward contact or
 establish scapular anatomy, distributed grip or shaft behavior, muscles,
 delivery, or human strategy.
 
+The second #8668 prerequisite now adds finite bilateral Kelvin--Voigt forces at
+all 234 closed states. The point forces arise from a declared club displacement
+and velocity perturbation, project through the articulated hand and grip
+Jacobians, and satisfy action--reaction, virtual-power, passivity, coincident,
+and reversal controls. Native MuJoCo and Pinocchio initial accelerations agree
+to $4.86\times10^{-13}$ relative. Because no forward step is taken, the result
+does not test contact loss, accumulated work, delivery, or a human strategy.
+
 Completion of the candidate census is not completion of release review or the
 research program. In
 particular, the audit rejected quantitative small-deflection shaft inference
@@ -270,8 +278,8 @@ map, and preserves #8556 as an external human-data acquisition gate. Future
 milestones must create new claim records and falsifiers before new conclusions
 enter summaries or conclusions.
 
-The separate claim-evidence integrity manifest covers all 1,743 evidence
-references. It hash-pins 216 distinct repository artifacts and inventories 78
+The separate claim-evidence integrity manifest covers all 1,791 evidence
+references. It hash-pins 232 distinct repository artifacts and inventories 78
 external URLs. Hash agreement establishes content identity, not independence
 or correctness; URL inventory establishes traceability, not availability or
 scientific validity.

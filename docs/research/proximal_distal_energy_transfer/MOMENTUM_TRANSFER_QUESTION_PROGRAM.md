@@ -201,6 +201,9 @@ claims.
   pass MuJoCo/Pinocchio mass, bias, inverse-dynamics, symmetry, and
   positive-definiteness checks. Do not treat common-state parity as forward
   contact, anatomy, or human-mechanism evidence.
+- Preserve the executed contact-projection gate: finite bilateral forces must
+  close action--reaction, virtual power, geometry, and native initial
+  acceleration before forward integration.
 - Repeat the geometry and killswitch registry in independently authored
   engines with articulated arms, calibrated two-hand contact, and a
   distributed bending/torsion club.

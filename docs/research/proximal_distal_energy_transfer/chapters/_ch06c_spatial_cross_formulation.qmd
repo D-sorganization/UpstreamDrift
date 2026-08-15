@@ -440,6 +440,47 @@ human transfer, timing demand, slack benefit, or a coaching strategy. It
 provides a qualified inertial foundation for the next forward-contact
 falsifier.
 
+#### Articulated Contact Projection and Initial Acceleration
+
+The next gate adds finite bilateral interaction forces without yet advancing a
+trajectory. At each of the 234 closed states, the club is displaced 1 mm and
+given 0.05 m/s additional velocity along its world $x$ coordinate. Paired
+Kelvin--Voigt interfaces with the previously declared 1,800 N/m stiffness and
+18 N s/m damping then generate forces from achieved hand--grip displacement and
+relative velocity. No wrench or direct club actuator is prescribed.
+
+For each hand $i$, the generalized contact load is
+
+$$
+Q_c = \sum_i\left(J_{g,i}^{\mathsf T}f_i
+      + J_{h,i}^{\mathsf T}(-f_i)\right),
+$$ {#eq-articulated-contact-projection}
+
+where $J_g$ and $J_h$ are the club-grip and hand-point Jacobians. This form
+exposes the action--reaction and virtual-power identities directly. MuJoCo and
+robotics Pinocchio then independently evaluate their native mass and bias
+operators at the perturbed state and solve
+$\ddot q=M^{-1}(Q_c-h)$. The comparison is therefore an initial-acceleration
+test of force projection into the qualified articulated tree, not a forward
+contact simulation.
+
+![Articulated Contact Projection and Initial Acceleration Across All Closed States](figures/fig_articulated_contact_projection.pdf){#fig-articulated-contact-projection width=87%}
+
+All 234 states pass. The largest contact force is 2.708 N, the largest
+zero-preload leakage is $2.08\times10^{-7}$ N, and the largest virtual-power
+residual is $3.89\times10^{-16}$ W. Damping power is non-positive at every
+state. Coincident moment arms remove the force couple exactly, reversing both
+moment arms reverses it exactly, and the largest MuJoCo--Pinocchio generalized
+initial-acceleration discrepancy is $4.85\times10^{-13}$ relative.
+
+This closes the same-state contact-projection question only. No trajectory is
+integrated, so contact loss, recovery, numerical stability over time, delivered
+speed, accumulated work, and late-downswing torque duration remain untested.
+The interfaces, anatomy, club, and ground pathway remain uncalibrated. It
+therefore cannot establish passive human transfer, slack benefit, timing
+economy, or coaching strategy. The next falsifier is bounded integration with
+contact-loss, adverse-load, refinement, power, and work--energy controls.
+
 ### Paired Scapula-on-Ellipsoid Geometry Screen
 
 The fixed shoulder centers are the next explicit structural intervention. A

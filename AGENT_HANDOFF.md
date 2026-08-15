@@ -26,6 +26,8 @@ This is a current-state handoff. Historical detail belongs in git and GitHub.
   adverse-load controls.
 - Child issue [#8676](https://github.com/D-sorganization/UpstreamDrift/issues/8676)
   records the completed common-state articulated-inertia prerequisite.
+- Child issue [#8678](https://github.com/D-sorganization/UpstreamDrift/issues/8678)
+  tracks the articulated contact-projection and initial-acceleration gate.
 - Issue [#8556](https://github.com/D-sorganization/UpstreamDrift/issues/8556)
   remains open. No qualifying participant dataset with synchronized bilateral
   six-axis grip wrenches is available; synthetic traces cannot replace it.
@@ -96,6 +98,14 @@ This is a current-state handoff. Historical detail belongs in git and GitHub.
 - This qualifies common-state rigid-body transport only. Forward contact,
   scapular anatomy, distributed grip/shaft, muscles, and people remain open.
 
+## Articulated Contact-Projection Result
+
+- Finite bilateral Kelvin--Voigt forces are projected through the hand and
+  club Jacobians at all 234 closed states; no direct club actuation is used.
+- Action--reaction, virtual power, passivity, coincident/reversed geometry, and
+  native MuJoCo/Pinocchio initial-acceleration gates all pass.
+- This is a same-state acceleration result, not a forward contact trajectory.
+
 ## Next Scientific Gates
 
 1. Apply bilateral compliant contact to the qualified articulated tree, with
@@ -121,6 +131,8 @@ python -m scripts.research.proximal_distal_energy.run_forward_contact_validity_h
 python -m scripts.research.proximal_distal_energy.make_forward_contact_validity_horizon_figure
 python -m scripts.research.proximal_distal_energy.run_articulated_inertia_cross_engine
 python -m scripts.research.proximal_distal_energy.make_articulated_inertia_cross_engine_figure
+python -m scripts.research.proximal_distal_energy.run_articulated_contact_projection
+python -m scripts.research.proximal_distal_energy.make_articulated_contact_projection_figure
 python -m pytest tests/research/test_forward_contact_validity_horizon.py `
   tests/research/test_closed_state_forward_bridge.py `
   tests/research/test_proximal_distal_release_bundle.py -q
