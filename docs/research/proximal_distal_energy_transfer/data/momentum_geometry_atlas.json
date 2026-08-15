@@ -1,0 +1,74 @@
+{
+  "schema_version": "momentum-transfer-geometry-atlas/v1",
+  "study_id": "reference-explicit-momentum-transfer-geometry-atlas-v1",
+  "registered_before_preferred_result": true,
+  "geometry_gates": {
+    "force_velocity_projection": "F v cos(phi)",
+    "distal_tangential_projection": "cos(relative_link_angle)",
+    "distal_centripetal_projection": "-sin(relative_link_angle)",
+    "bilateral_differential_couple": "signed separation cross differential force",
+    "closed_loop_conditioning": "constraint Jacobian singular values; magnitude requires dynamics"
+  },
+  "negative_controls": {
+    "orthogonal_force_velocity": "zero force power",
+    "relative_angle_gate_zeros": "distinct tangential and centripetal nulls",
+    "coincident_grips": "zero bilateral couple",
+    "axial_differential_force": "zero bilateral couple",
+    "reversed_force_or_moment_arm": "sign reversal",
+    "maximum_null_residual": 6.123233995736766e-17,
+    "maximum_reversal_residual": 1.1102230246251565e-16
+  },
+  "frame_audit": {
+    "rotation_count": 12,
+    "maximum_power_residual_w": 1.4210854715202004e-14
+  },
+  "cross_tier_controls": {
+    "moving_base_planar": {
+      "baseline_minimum_couple_nm": -2.173091553546857,
+      "coincident_couple_nm": 0.0,
+      "provenance": "moving_base_flexible_study.json"
+    },
+    "rotating_base_two_hand": {
+      "baseline_couple_nm": 1.3512786186871217,
+      "coincident_couple_nm": 0.0,
+      "reversed_couple_nm": -1.3512786186871217,
+      "provenance": "rotating_base_torso_velocity_study.json"
+    },
+    "spatial_two_engine": {
+      "minimum_killswitch_couple_nm": -0.4092851000343657,
+      "coincident_couple_nm": 0.0,
+      "reversal_residual_nm": 9.159339953157541e-16,
+      "provenance": "spatial_forward_contact_study.json"
+    },
+    "closed_loop_conditioning": {
+      "minimum_condition_number": 9.052293552169415,
+      "maximum_condition_number": 9.464777995504267,
+      "provenance": "mechanism_ladder_study.json"
+    }
+  },
+  "tier_coverage": {
+    "analytical": "executed_exact_geometry",
+    "fixed_hub_planar": "executed_relative_link_gates",
+    "moving_base_two_hand": "linked_existing_evidence",
+    "spatial_forward_contact": "linked_existing_evidence_and_frame_audit",
+    "subject_scaled": "open_requires_anthropometry_and_contact_calibration"
+  },
+  "claim_status": {
+    "force_magnitude_alone_determines_transfer": "rejected",
+    "geometry_can_gate_sign_and_zero": "supported_analytically_and_in_declared_model_controls",
+    "coordinate_rotation_changes_physical_power": "rejected_for_proper_rotations",
+    "universal_human_geometry": "untested",
+    "coaching_prescription": "unsupported"
+  },
+  "limitations": [
+    "The atlas normalizes force and speed and therefore maps geometry rather than attainable human magnitude.",
+    "The bilateral couple surface assumes an ideal opposed differential force mode at a declared midpoint.",
+    "Closed-loop conditioning does not determine reaction-force magnitude without dynamics and control.",
+    "Subject-scaled scapular, wrist, grip-compliance, and distributed-club geometry remain open."
+  ],
+  "source_sha256": {
+    "momentum_geometry_atlas.py": "ff67f0fd9ede922bb152734d5717fe6457043873a033b7ebc28a533274c85fdb",
+    "run_momentum_geometry_atlas.py": "a09b1f693682f0e229a94feb410adc367c7212ba90a10f00106f117bde6c1622"
+  },
+  "array_artifact": "momentum_geometry_atlas.npz"
+}

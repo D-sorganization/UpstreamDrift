@@ -53,6 +53,39 @@ def test_velocity_constraint_can_preserve_absolute_club_rate() -> None:
     assert rows[1].club_angular_velocity_rad_s == pytest.approx(12.0)
 
 
+def test_velocity_constraint_can_preserve_total_kinetic_energy() -> None:
+    request = VelocitySweepRequest(
+        q_rad=_request().q_rad,
+        reference_velocity_rad_s=np.array([7.0, 5.0]),
+        control_nm=_request().control_nm,
+        proximal_velocity_rad_s=np.array([5.0, 7.0, 9.0]),
+        velocity_constraint="preserve_total_kinetic_energy",
+    )
+
+    rows = evaluate_velocity_sweep(request, GolfModelParams.default())
+
+    assert max(abs(row.kinetic_energy_residual_j) for row in rows) < 1e-10
+    assert len({round(row.relative_club_velocity_rad_s, 6) for row in rows}) == 3
+    reference = rows[1]
+    assert reference.relative_club_velocity_rad_s == pytest.approx(5.0)
+    assert reference.total_kinetic_energy_j == pytest.approx(
+        reference.reference_total_kinetic_energy_j
+    )
+
+
+def test_energy_matched_constraint_rejects_infeasible_proximal_rate() -> None:
+    request = VelocitySweepRequest(
+        q_rad=_request().q_rad,
+        reference_velocity_rad_s=np.array([7.0, 5.0]),
+        control_nm=_request().control_nm,
+        proximal_velocity_rad_s=np.array([7.0, 1_000.0]),
+        velocity_constraint="preserve_total_kinetic_energy",
+    )
+
+    with pytest.raises(ValueError, match="infeasible"):
+        evaluate_velocity_sweep(request, GolfModelParams.default())
+
+
 def test_request_rejects_duplicate_or_ambiguous_velocity_contract() -> None:
     with pytest.raises(ValueError, match="unique"):
         VelocitySweepRequest(

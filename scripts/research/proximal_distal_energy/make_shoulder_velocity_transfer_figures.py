@@ -9,7 +9,7 @@ import matplotlib
 import numpy as np
 
 matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "proximal-distal-shoulder-velocity-v2"
+matplotlib.rcParams["svg.hashsalt"] = "proximal-distal-shoulder-velocity-v3"
 import matplotlib.pyplot as plt  # noqa: E402
 
 from scripts.research.proximal_distal_energy.run_shoulder_velocity_transfer_study import (
@@ -48,10 +48,15 @@ def _save(figure: plt.Figure, stem: str) -> tuple[Path, Path]:
 
 
 def _power_by_phase(rows: list[dict]) -> tuple[Path, Path]:
-    figure, axes = plt.subplots(1, 2, figsize=(11.0, 4.5), sharey=True)
+    constraints = (
+        "preserve_relative_club_rate",
+        "preserve_absolute_club_rate",
+        "preserve_total_kinetic_energy",
+    )
+    figure, axes = plt.subplots(1, 3, figsize=(14.8, 4.5), sharey=True)
     for axis, constraint in zip(
         axes,
-        ("preserve_relative_club_rate", "preserve_absolute_club_rate"),
+        constraints,
         strict=True,
     ):
         for phase, color in _COLORS.items():
@@ -60,6 +65,8 @@ def _power_by_phase(rows: list[dict]) -> tuple[Path, Path]:
                 for row in rows
                 if row["phase"] == phase and row["velocity_constraint"] == constraint
             ]
+            if not selected:
+                continue
             axis.plot(
                 [row["proximal_velocity_rad_s"] for row in selected],
                 [row["drift_grip_power_w"] for row in selected],
@@ -69,16 +76,16 @@ def _power_by_phase(rows: list[dict]) -> tuple[Path, Path]:
                 label=phase,
             )
         axis.axhline(0.0, color="#555555", linewidth=0.8)
-        title = (
-            "Relative Club Rate Preserved"
-            if constraint == "preserve_relative_club_rate"
-            else "Absolute Club Rate Preserved"
-        )
+        title = {
+            "preserve_relative_club_rate": "Relative Club Rate Preserved",
+            "preserve_absolute_club_rate": "Absolute Club Rate Preserved",
+            "preserve_total_kinetic_energy": "Total Kinetic Energy Preserved",
+        }[constraint]
         axis.set_title(title)
         axis.set_xlabel("Proximal-Link Angular Velocity (rad/s)")
         axis.grid(alpha=0.25)
     axes[0].set_ylabel("Pointwise Drift Interface Power (W)")
-    axes[1].legend(loc="upper left", fontsize=8)
+    axes[2].legend(loc="upper left", fontsize=8)
     figure.suptitle(
         "Drift Interface Power Depends on Phase and the Matched-Velocity Contract"
     )
@@ -125,6 +132,7 @@ def _slope_summary(rows: list[dict]) -> tuple[Path, Path]:
     constraints = (
         "preserve_relative_club_rate",
         "preserve_absolute_club_rate",
+        "preserve_total_kinetic_energy",
     )
     slopes = np.zeros((len(phases), len(constraints)))
     for row_index, phase in enumerate(phases):
@@ -134,19 +142,26 @@ def _slope_summary(rows: list[dict]) -> tuple[Path, Path]:
                 for row in rows
                 if row["phase"] == phase and row["velocity_constraint"] == constraint
             ]
-            x = np.asarray([row["proximal_velocity_rad_s"] for row in selected])
-            y = np.asarray([row["drift_grip_power_w"] for row in selected])
-            slopes[row_index, column] = np.polyfit(x, y, 1)[0]
-    limit = float(np.max(np.abs(slopes)))
+            if selected:
+                x = np.asarray([row["proximal_velocity_rad_s"] for row in selected])
+                y = np.asarray([row["drift_grip_power_w"] for row in selected])
+                slopes[row_index, column] = np.polyfit(x, y, 1)[0]
+            else:
+                slopes[row_index, column] = np.nan
+    limit = float(np.nanmax(np.abs(slopes)))
     figure, axis = plt.subplots(figsize=(7.5, 5.0))
     image = axis.imshow(slopes, cmap="coolwarm", vmin=-limit, vmax=limit, aspect="auto")
-    axis.set_xticks((0, 1), ("Relative Rate Held", "Absolute Rate Held"))
+    axis.set_xticks(
+        (0, 1, 2),
+        ("Relative Rate Held", "Absolute Rate Held", "Kinetic Energy Held"),
+    )
     axis.set_yticks(np.arange(len(phases)), phases)
     for row in range(slopes.shape[0]):
         for column in range(slopes.shape[1]):
-            axis.text(
-                column, row, f"{slopes[row, column]:.1f}", ha="center", va="center"
+            label = (
+                "N/A" if np.isnan(slopes[row, column]) else f"{slopes[row, column]:.1f}"
             )
+            axis.text(column, row, label, ha="center", va="center")
     axis.set_title("Finite-Range Drift-Power Slope Changes Sign Across Swing Phases")
     colorbar = figure.colorbar(image, ax=axis)
     colorbar.set_label("Slope (W per rad/s)")

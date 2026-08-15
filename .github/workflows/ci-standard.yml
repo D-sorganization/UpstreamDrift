@@ -33,7 +33,9 @@ permissions:
 jobs:
   local-only-workflows:
     name: Reject hosted runner routing
-    runs-on: ${{ vars.CI_RUNNER_MODE == 'hosted' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
+    runs-on:
+      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
+      'd-sorg-fleet-docker' }}
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -48,7 +50,9 @@ jobs:
 
   pinned-actions:
     name: Enforce action SHA pinning
-    runs-on: ${{ vars.CI_RUNNER_MODE == 'hosted' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
+    runs-on:
+      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
+      'd-sorg-fleet-docker' }}
     timeout-minutes: 15
     steps:
       - name: Clean corrupt git objects
@@ -70,7 +74,9 @@ jobs:
 
   workflow-inventory:
     name: Enforce workflow inventory
-    runs-on: ${{ vars.CI_RUNNER_MODE == 'hosted' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
+    runs-on:
+      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
+      'd-sorg-fleet-docker' }}
     timeout-minutes: 15
     steps:
       - name: Clean corrupt git objects
@@ -92,7 +98,9 @@ jobs:
 
   urdf-layering:
     name: Enforce URDF subsystem layering (ADR 0007)
-    runs-on: ${{ vars.CI_RUNNER_MODE == 'hosted' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
+    runs-on:
+      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
+      'd-sorg-fleet-docker' }}
     timeout-minutes: 15
     steps:
       - name: Clean corrupt git objects
@@ -112,19 +120,50 @@ jobs:
         shell: bash
         run: python3 scripts/ci/check_urdf_layering.py
 
-  # -- Dispatcher: route to self-hosted if available --------------------------
+  # -- Dispatcher: route to hosted runners on public repos ---------------------
+  # This repo is public, so standard GitHub-hosted runners are free and
+  # unmetered. Keeping the dispatcher itself pinned to the fleet meant every
+  # downstream job had to wait for a self-hosted slot before it could even
+  # learn where to run. Private repos still fall through to the fleet, so no
+  # Actions minutes are ever billed.
+  #
+  # Reverting: set the repo variable CI_RUNNER_MODE=local.
   pick-runner:
-    runs-on: d-sorg-fleet-docker
-    timeout-minutes: 2
+    runs-on:
+      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
+      'd-sorg-fleet-docker' }}
+    timeout-minutes: 3
     outputs:
       runner: ${{ steps.check.outputs.runner }}
+      mode: ${{ steps.check.outputs.mode }}
     steps:
-      - name: Set runner
+      - name: Select runner target without API polling
         id: check
+        shell: bash
+        env:
+          CI_RUNNER_MODE: ${{ vars.CI_RUNNER_MODE }}
+          REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
+          RUNNER_LABEL: d-sorg-fleet-docker
         run: |
+          mode="${CI_RUNNER_MODE:-auto}"
+          if [ "$REPOSITORY_PRIVATE" != "true" ] && [ "$mode" != "local" ]; then
+            mode="hosted"
+            runner="ubuntu-latest"
+          else
+            mode="local"
+            runner="$RUNNER_LABEL"
+          fi
           mkdir -p "$(dirname "$GITHUB_OUTPUT")"
-          echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
-          echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
+          {
+            echo "runner=$runner"
+            echo "mode=$mode"
+          } >> "$GITHUB_OUTPUT"
+          {
+            echo "## Runner Selection"
+            echo "- requested mode: \`${CI_RUNNER_MODE:-unset}\`"
+            echo "- selected target: \`$runner\` (\`$mode\`)"
+            echo "- GitHub API calls: \`0\`"
+          } >> "$GITHUB_STEP_SUMMARY"
   # ---------------------------------------------------------------------------
   # Quality gates are split into independent, parallel jobs (issue #7064) so a
   # single flaky step no longer masks unrelated failures. The required branch-

@@ -9,7 +9,7 @@ import matplotlib
 import numpy as np
 
 matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "proximal-distal-shoulder-strategy-v2"
+matplotlib.rcParams["svg.hashsalt"] = "proximal-distal-shoulder-strategy-v3"
 import matplotlib.pyplot as plt  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -44,7 +44,9 @@ def make_association_figure(record: dict) -> None:
     speed = np.asarray([row["impact_speed_m_s"] for row in rows])
     braking = np.asarray([row["braking_grip_work_j"] for row in rows])
     release = np.asarray([row["wrist_release_s"] for row in rows])
-    figure, axes = plt.subplots(1, 2, figsize=(10.2, 4.1), constrained_layout=True)
+    actuator_work = np.asarray([row["total_actuator_work_j"] for row in rows])
+    index_to_row = {row["program_index"]: row for row in rows}
+    figure, axes = plt.subplots(1, 3, figsize=(15.0, 4.1), constrained_layout=True)
     scatter = axes[0].scatter(velocity, speed, c=release, cmap="viridis", s=48)
     axes[0].set_xlabel("Proximal-Link Velocity at Release (rad/s)")
     axes[0].set_ylabel("Impact Speed (m/s)")
@@ -54,6 +56,20 @@ def make_association_figure(record: dict) -> None:
     axes[1].set_xlabel("Proximal-Link Velocity at Release (rad/s)")
     axes[1].set_ylabel("Negative Interface Work After Release (J)")
     axes[1].set_title("Later High-Velocity Releases Increase Braking Exposure")
+    axes[2].scatter(actuator_work, speed, c=velocity, cmap="plasma", s=48)
+    for pair in record["matched_work_screen"]["pairs"]:
+        low = index_to_row[pair["lower_velocity_program_index"]]
+        high = index_to_row[pair["higher_velocity_program_index"]]
+        axes[2].plot(
+            [low["total_actuator_work_j"], high["total_actuator_work_j"]],
+            [low["impact_speed_m_s"], high["impact_speed_m_s"]],
+            color="#6b7280",
+            linewidth=0.8,
+            alpha=0.55,
+        )
+    axes[2].set_xlabel("Net Actuator Work to Impact (J)")
+    axes[2].set_ylabel("Impact Speed (m/s)")
+    axes[2].set_title("Work-Matched Pairs Retain a Load Confound")
     for axis in axes:
         axis.grid(alpha=0.25)
     _save(figure, "fig_shoulder_velocity_strategy_associations")

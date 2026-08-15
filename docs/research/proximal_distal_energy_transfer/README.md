@@ -29,8 +29,17 @@ dynamics with finite-mass hand carriages, paired compliant interfaces, an
 exact same-state grounded-driver killswitch, long-axis rotation, swing-plane
 evolution, and ground-pathway bookkeeping. It supports reduced forward-contact
 transport while keeping anatomical, muscle, equipment, human, and coaching
-claims explicitly open. A three-tier
-hand-path attribution study now separates stitched pointwise ZTCF drift,
+claims explicitly open. A separate
+subject-scaled geometry audit now tests six deterministic de Leva design
+profiles and three grip spans. It finds 0.171--0.616 m anatomical
+hand-to-grip error despite a full-rank local constraint Jacobian, thereby
+rejecting the prescribed states. A bounded follow-up closes all 234 registered
+profile/span/phase configurations while preserving the club pose, achieved
+rank, broad engineering-limit margins, and coarse collision clearance. This
+clears a reduced-tree necessary condition and advances the open gate to
+subject-specific anatomy and calibrated forward contact; it does not establish
+forces, passivity, timing benefit, slack benefit, or human strategy. A three-tier
+hand-path attribution study separates stitched pointwise ZTCF drift,
 same-state control, and separately defined ZVCF reactions for force vectors,
 impulse, power, work, every modeled joint, and four neutral time windows. A
 bounded first-order residual-couple preview study records the late two-hand
@@ -105,6 +114,14 @@ comprehensive open modeling program are tracked in
 [#8557](https://github.com/D-sorganization/UpstreamDrift/issues/8557), with the
 durable execution contract in
 [`COMPREHENSIVE_RESEARCH_PROGRAM.md`](COMPREHENSIVE_RESEARCH_PROGRAM.md).
+The MT-E07 measurement program now includes both the exact bilateral-wrench
+rank audit and a trajectory-level synthetic point-force qualification under
+noise, normalized cross-talk, calibration residual, and contact-center
+migration. It demonstrates that net-wrench closure does not establish force
+allocation and retains physical-device and human validation as open gates.
+MT-E08 now executes the prescribed-state rejection and reduced-tree
+closed-contact screen, then retains independently integrated calibrated
+articulated contact and participant-held-out falsification as open gates.
 The first external-evidence audit slice narrows the introduction and empirical
 evidence synthesis, records reciprocal candidate dispositions, and separates
 sample-specific associations from causal mechanisms. In particular, it corrects
@@ -169,6 +186,7 @@ the finding-by-finding record in
 | [`ADVANCED_EXPANSION_REVIEW.md`](ADVANCED_EXPANSION_REVIEW.md)                                       | Completed review, implemented expansion, and falsifiable next-model roadmap       |
 | [`EVIDENCE_SCHEMA_V2.md`](EVIDENCE_SCHEMA_V2.md)                                                     | Falsifiable prediction and named spatial-interface evidence contract              |
 | [`CLAIM_AUDIT_SCHEMA.md`](CLAIM_AUDIT_SCHEMA.md)                                                     | Atomic claim, candidate-inventory, source, alternative, and adjudication contract |
+| [`data/claim_evidence_manifest.json`](data/claim_evidence_manifest.json)                             | Claim-complete local hashes and external-support URL inventory                    |
 | [`COMPREHENSIVE_RESEARCH_PROGRAM.md`](COMPREHENSIVE_RESEARCH_PROGRAM.md)                             | Biomechanics, nonlinear-control, model-ladder, data, and validation roadmap       |
 | [`MOMENTUM_TRANSFER_QUESTION_PROGRAM.md`](MOMENTUM_TRANSFER_QUESTION_PROGRAM.md)                     | Drift, geometry, timing, robustness, proximal-velocity, and typed-slack questions |
 | [`data/momentum_transfer_experiment_registry.json`](data/momentum_transfer_experiment_registry.json) | Frozen interventions, controls, outcomes, uncertainty, falsifiers, and data needs |
@@ -209,10 +227,14 @@ python3 -m scripts.research.proximal_distal_energy.run_torque_allocation_preload
 python3 -m scripts.research.proximal_distal_energy.run_spatial_full_body_study
 python3 -m scripts.research.proximal_distal_energy.run_spatial_forward_contact_study
 python3 -m scripts.research.proximal_distal_energy.run_uncertainty_control_study
+python3 -m scripts.research.proximal_distal_energy.run_timing_viability_study
+python3 -m scripts.research.proximal_distal_energy.run_typed_slack_dynamic_study
 python3 -m scripts.research.proximal_distal_energy.run_experimental_protocol_dry_run
 python3 -m scripts.research.proximal_distal_energy.run_advanced_biological_bridge
 python3 -m scripts.research.proximal_distal_energy.claim_audit inventory
 python3 -m scripts.research.proximal_distal_energy.claim_audit validate
+python3 -m scripts.research.proximal_distal_energy.claim_evidence_integrity validate
+python3 -m scripts.research.proximal_distal_energy.momentum_question_readiness validate
 python3 -m scripts.research.proximal_distal_energy.qualify_open_release validate
 # robustness analyses
 python3 -m scripts.research.proximal_distal_energy.e1b_bounded_torque
@@ -235,6 +257,8 @@ python3 -m scripts.research.proximal_distal_energy.make_torque_allocation_preloa
 python3 -m scripts.research.proximal_distal_energy.make_spatial_full_body_figures
 python3 -m scripts.research.proximal_distal_energy.make_spatial_forward_contact_figures
 python3 -m scripts.research.proximal_distal_energy.make_uncertainty_control_figures
+python3 -m scripts.research.proximal_distal_energy.run_bilateral_wrench_identifiability_study
+python3 -m scripts.research.proximal_distal_energy.run_bilateral_wrench_sensor_qualification
 # document
 cd docs/research/proximal_distal_energy_transfer
 quarto render proximal_distal_energy_transfer.qmd --to pdf

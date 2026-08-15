@@ -10,7 +10,6 @@ from scripts.research.proximal_distal_energy.release_bundle import (
     validate_release_manifest,
 )
 
-
 ROOT = Path(__file__).resolve().parents[2]
 ARTICLE = ROOT / "docs/research/proximal_distal_energy_transfer"
 pytestmark = pytest.mark.unit
@@ -26,18 +25,44 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         "shaft_beam_reference",
         "torque_allocation_preload",
         "spatial_common_state",
+        "subject_scaled_spatial_geometry",
+        "subject_scaled_closed_contact",
+        "scapulothoracic_contact_screen",
         "spatial_forward_contact",
         "uncertainty_control",
         "experimental_readiness",
         "advanced_biological_bridge",
         "transmission_robustness",
+        "timing_viability_adverse_load",
+        "typed_slack_dynamic_audit",
         "shoulder_velocity_pointwise",
         "shoulder_velocity_strategy",
+        "joint_matched_proximal_rate",
         "rotating_base_torso_velocity",
+        "bilateral_wrench_identifiability",
+        "bilateral_wrench_sensor_qualification",
     ]
     assert manifest["claims"]["human_experimental"] == "untested"
     assert manifest["claims"]["high_proximal_velocity_universally_beneficial"] == (
         "falsified_at_declared_planar_tiers"
+    )
+    assert manifest["claims"]["state_triggered_larger_timing_region"] == (
+        "falsified_in_registered_moving_base_planar_screen"
+    )
+    assert manifest["claims"]["registered_model_sustained_recovery"] == (
+        "not_observed_in_60_cases"
+    )
+    assert manifest["claims"]["global_slack_benefit"] == "unsupported"
+    assert manifest["claims"]["single_channel_slack_class_identification"] == (
+        "not_established"
+    )
+    assert (
+        manifest["claims"]["synthetic_bilateral_point_force_sensor_qualification"]
+        == "qualified_for_declared_synthetic_cases"
+    )
+    assert (
+        manifest["claims"]["physical_bilateral_six_axis_device_validation"]
+        == "untested"
     )
     assert (
         manifest["claims"]["distributed_shaft_modal_reduction"]
@@ -58,6 +83,9 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
     assert manifest["claims"]["scapular_or_muscle_strategy_identification"] == (
         "unsupported"
     )
+    assert manifest["claims"]["scapulothoracic_contact_geometry"] == (
+        "partial_reachability_with_high_allocation_nullity_forward_test_open"
+    )
     assert manifest["claims"]["canonical_pose_adapter_round_trip"] == (
         "supported_for_coordinate_representation_only"
     )
@@ -75,6 +103,12 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         == "pending_external_archive"
     )
     assert manifest["resource_framing"] == "neutral_open_research_resource"
+    assert manifest["integrity_authorities"]["claim_evidence_manifest"].startswith(
+        "deterministic_self_excluded"
+    )
+    assert not any(
+        path.endswith("claim_evidence_manifest.json") for path in manifest["artifacts"]
+    )
     assert any(
         path.endswith("fig_shoulder_velocity_strategy_pareto.pdf")
         for path in manifest["artifacts"]

@@ -6,9 +6,14 @@ import hashlib
 from pathlib import Path
 from typing import Any
 
-
 ARTICLE_REL = Path("docs/research/proximal_distal_energy_transfer")
-_EXCLUDED = frozenset({"release_manifest.json", "CHECKSUMS.sha256"})
+_EXCLUDED = frozenset(
+    {
+        "release_manifest.json",
+        "claim_evidence_manifest.json",
+        "CHECKSUMS.sha256",
+    }
+)
 
 
 def _sha256(path: Path) -> str:
@@ -58,6 +63,11 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
         "schema_version": "proximal-distal-open-release-v1",
         "release_id": "proximal-distal-model-ladder-2026-08",
         "resource_framing": "neutral_open_research_resource",
+        "integrity_authorities": {
+            "claim_evidence_manifest": (
+                "deterministic_self_excluded_authority_to_avoid_recursive_hashing"
+            )
+        },
         "presets": {
             "double_pendulum": {
                 "command": "python -m scripts.research.proximal_distal_energy.run_experiments",
@@ -87,6 +97,18 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
                 "command": "python -m scripts.research.proximal_distal_energy.run_spatial_full_body_study",
                 "tier": "reduced_full_body_common_state",
             },
+            "subject_scaled_spatial_geometry": {
+                "command": "python -m scripts.research.proximal_distal_energy.run_subject_scaled_spatial_geometry",
+                "tier": "prescribed_subject_scaled_contact_closure_audit",
+            },
+            "subject_scaled_closed_contact": {
+                "command": "python -m scripts.research.proximal_distal_energy.run_subject_scaled_closed_contact",
+                "tier": "subject_scaled_bounded_closed_contact_inverse_kinematics",
+            },
+            "scapulothoracic_contact_screen": {
+                "command": "python -m scripts.research.proximal_distal_energy.run_scapulothoracic_contact_screen",
+                "tier": "paired_arm_only_scapula_on_ellipsoid_geometry_screen",
+            },
             "spatial_forward_contact": {
                 "command": "python -m scripts.research.proximal_distal_energy.run_spatial_forward_contact_study",
                 "tier": "reduced_two_engine_forward_contact",
@@ -107,6 +129,14 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
                 "command": "python -m scripts.research.proximal_distal_energy.run_transmission_robustness_study",
                 "tier": "paired_state_trigger_and_task_robustness",
             },
+            "timing_viability_adverse_load": {
+                "command": "python -m scripts.research.proximal_distal_energy.run_timing_viability_study",
+                "tier": "common_phase_paired_adverse_load_recovery",
+            },
+            "typed_slack_dynamic_audit": {
+                "command": "python -m scripts.research.proximal_distal_energy.run_typed_slack_dynamic_study",
+                "tier": "synthetic_scalar_dynamic_constitutive_screen",
+            },
             "shoulder_velocity_pointwise": {
                 "command": "python -m scripts.research.proximal_distal_energy.run_shoulder_velocity_transfer_study",
                 "tier": "planar_fixed_hub_pointwise_phase_sensitivity",
@@ -115,9 +145,21 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
                 "command": "python -m scripts.research.proximal_distal_energy.run_shoulder_velocity_strategy_study",
                 "tier": "planar_fixed_hub_control_program_search",
             },
+            "joint_matched_proximal_rate": {
+                "command": "python -m scripts.research.proximal_distal_energy.run_joint_matched_proximal_rate_study",
+                "tier": "planar_fixed_hub_joint_work_load_matching_screen",
+            },
             "rotating_base_torso_velocity": {
                 "command": "python -m scripts.research.proximal_distal_energy.run_rotating_base_torso_velocity_study",
                 "tier": "planar_rotating_base_two_hand_compliant_club",
+            },
+            "bilateral_wrench_identifiability": {
+                "command": "python -m scripts.research.proximal_distal_energy.run_bilateral_wrench_identifiability_study",
+                "tier": "instantaneous_linear_structural_identifiability",
+            },
+            "bilateral_wrench_sensor_qualification": {
+                "command": "python -m scripts.research.proximal_distal_energy.run_bilateral_wrench_sensor_qualification",
+                "tier": "synthetic_trajectory_point_force_sensor_qualification",
             },
         },
         "claims": {
@@ -146,6 +188,10 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
             ),
             "drake_opensim_myosuite_human_validation": "unexecuted",
             "state_triggered_model_robustness": "conditional_with_force_tradeoff",
+            "state_triggered_larger_timing_region": (
+                "falsified_in_registered_moving_base_planar_screen"
+            ),
+            "registered_model_sustained_recovery": "not_observed_in_60_cases",
             "human_self_stabilization": "untested",
             "high_proximal_velocity_universally_beneficial": (
                 "falsified_at_declared_planar_tiers"
@@ -157,6 +203,25 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
                 "supported_conditionally_at_declared_reduced_model_tier"
             ),
             "human_torso_velocity_strategy": "untested",
+            "global_slack_benefit": "unsupported",
+            "single_channel_slack_class_identification": "not_established",
+            "individual_hand_allocation_from_net_wrench": (
+                "structurally_unidentifiable"
+            ),
+            "bilateral_human_wrench_validation": "untested",
+            "synthetic_bilateral_point_force_sensor_qualification": (
+                "qualified_for_declared_synthetic_cases"
+            ),
+            "physical_bilateral_six_axis_device_validation": "untested",
+            "subject_scaled_spatial_contact_feasibility": (
+                "prescribed_states_rejected_closed_contact_forward_test_open"
+            ),
+            "subject_scaled_closed_contact_feasibility": (
+                "reduced_tree_closed_contact_screen_passed_compliant_forward_test_open"
+            ),
+            "scapulothoracic_contact_geometry": (
+                "partial_reachability_with_high_allocation_nullity_forward_test_open"
+            ),
         },
         "known_open_gates": [
             "subject-scaled articulated spatial contact with calibrated grip and distributed shaft",
