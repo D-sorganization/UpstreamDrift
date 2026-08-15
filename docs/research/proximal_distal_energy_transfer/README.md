@@ -48,7 +48,13 @@ profile/span/phase states through 4, 10, 25, and 50 ms under nominal conditions
 and nine one-factor adverse or null branches. All 2,160 horizon cases pass the
 declared cross-engine and work--energy gates; no failure is observed through 50
 ms. This is a right-censored reduced-model result, not a full delivery or
-anatomical validation. A three-tier
+anatomical validation. A native articulated-inertia gate now rebuilds the
+subject-scaled 20-coordinate tree independently in MuJoCo and robotics
+Pinocchio at all 234 closed states. Mass-matrix, bias-force, inverse-dynamics,
+symmetry, and positive-definiteness gates all pass at near machine precision.
+This qualifies common-state articulated rigid-body transport while leaving
+forward contact, scapulothoracic anatomy, distributed grip and shaft,
+muscles, and human strategy open. A three-tier
 hand-path attribution study separates stitched pointwise ZTCF drift,
 same-state control, and separately defined ZVCF reactions for force vectors,
 impulse, power, work, every modeled joint, and four neutral time windows. A
@@ -250,6 +256,9 @@ python3 -m scripts.research.proximal_distal_energy.run_closed_state_forward_brid
 python3 -m scripts.research.proximal_distal_energy.make_closed_state_forward_bridge_figure
 python3 -m scripts.research.proximal_distal_energy.run_forward_contact_validity_horizon
 python3 -m scripts.research.proximal_distal_energy.make_forward_contact_validity_horizon_figure
+python3 -m scripts.research.proximal_distal_energy.run_articulated_inertia_cross_engine
+python3 -m scripts.research.proximal_distal_energy.make_articulated_inertia_cross_engine_figure
+python3 scripts/research/proximal_distal_energy/register_articulated_inertia_claims.py
 python3 -m scripts.research.proximal_distal_energy.run_spatial_forward_contact_study
 python3 -m scripts.research.proximal_distal_energy.run_uncertainty_control_study
 python3 -m scripts.research.proximal_distal_energy.run_timing_viability_study

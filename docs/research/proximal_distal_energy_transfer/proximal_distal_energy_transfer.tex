@@ -482,7 +482,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, opacitybacktitle=0.6, colback=white, colframe=quarto-callout-note-color-frame, left=2mm, bottomtitle=1mm, breakable, leftrule=.75mm, bottomrule=.15mm, rightrule=.15mm, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, toprule=.15mm, titlerule=0mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, arc=.35mm, opacityback=0, coltitle=black]
+\begin{tcolorbox}[enhanced jigsaw, opacitybacktitle=0.6, left=2mm, toprule=.15mm, toptitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, opacityback=0, colframe=quarto-callout-note-color-frame, breakable, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, titlerule=0mm, arc=.35mm, colback=white, rightrule=.15mm, bottomrule=.15mm, leftrule=.75mm, coltitle=black]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -7472,6 +7472,61 @@ contact loss, ground coupling, and calibrated equipment. The study
 strengthens the reduced cross-engine reference that the articulated tier
 must reproduce; it does not establish anatomy, passive human transfer,
 timing economy, slack benefit, or coaching strategy.
+
+\subsubsection{Native Articulated Inertia
+Qualification}\label{native-articulated-inertia-qualification}
+
+The reduced forward-contact result cannot be promoted merely by
+replacing the hand carriages with a more detailed drawing. Before adding
+compliant contact, the two native engines must first agree on the
+inertia and gravity operators of the subject-scaled articulated tree
+itself. The next common-state gate therefore uses all 234 closed
+configurations: six engineering profiles, three grip spans, and 13
+continuation samples. Each model retains the 20-coordinate pelvis,
+torso, bilateral three-axis shoulder, elbow, wrist, and six-coordinate
+rigid-club tree. Segment lengths and masses remain de Leva-derived
+engineering design points; each spherical body inertia is declared as
+\(2mr^2/5\).
+
+MuJoCo independently evaluates its full mass matrix, bias force, and
+inverse dynamics with \texttt{mj\_fullM}, \texttt{qfrc\_bias}, and
+\texttt{mj\_inverse}. Robotics Pinocchio builds the same scalar-joint
+tree and evaluates \texttt{crba}, \texttt{nonLinearEffects}, and
+\texttt{rnea}. Velocities and accelerations are second-order finite
+differences of the closed 13-sample paths. Because both engines receive
+the same achieved state rather than advancing a trajectory, this
+isolates model assembly and native dynamics conventions from contact-law
+and integrator divergence.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=0.96\linewidth,height=\textheight,keepaspectratio]{figures/fig_articulated_inertia_cross_engine.pdf}
+
+}
+
+\caption{\label{fig-articulated-inertia-cross-engine}Native Articulated
+Dynamics Across All Closed States}
+
+\end{figure}%
+
+All 234 states pass the preregistered mass-matrix, bias-force,
+inverse-dynamics, symmetry, and positive-definiteness gates. The largest
+relative mass-matrix error is \(8.62\times10^{-13}\), the largest
+relative bias error is \(1.41\times10^{-12}\), and the largest relative
+inverse-dynamics error is \(1.79\times10^{-12}\). The largest symmetry
+residual is zero at stored precision, and the smallest native
+mass-matrix eigenvalue is \(1.386\times10^{-4}\).
+
+This closes an engine-transport question, not the articulated-contact
+question. The common-state comparison applies no bilateral contact,
+advances no forward trajectory, and adds no scapulothoracic glide,
+forearm pronation--supination, multi-axis wrist, fingers, distributed
+grip, flexible shaft, ground contact, or muscle model. Consequently it
+cannot establish anatomical validity, passive human transfer, timing
+demand, slack benefit, or a coaching strategy. It provides a qualified
+inertial foundation for the next forward-contact falsifier.
 
 \subsection{Paired Scapula-on-Ellipsoid Geometry
 Screen}\label{paired-scapula-on-ellipsoid-geometry-screen}

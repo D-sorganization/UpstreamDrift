@@ -106,6 +106,10 @@ _RELEASE_METADATA: dict[str, Any] = {
             "command": "python -m scripts.research.proximal_distal_energy.run_forward_contact_validity_horizon",
             "tier": "subject_scaled_closed_state_reduced_forward_horizon_map",
         },
+        "articulated_inertia_cross_engine": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_articulated_inertia_cross_engine",
+            "tier": "subject_scaled_closed_state_articulated_common_state_dynamics",
+        },
         "scapulothoracic_contact_screen": {
             "command": "python -m scripts.research.proximal_distal_energy.run_scapulothoracic_contact_screen",
             "tier": "paired_arm_only_scapula_on_ellipsoid_geometry_screen",
@@ -223,6 +227,9 @@ _RELEASE_METADATA: dict[str, Any] = {
         ),
         "closed_state_forward_validity_horizon": (
             "no_failure_observed_through_registered_50_ms_reduced_model_interval"
+        ),
+        "subject_scaled_articulated_inertia": (
+            "native_common_state_mass_bias_and_inverse_dynamics_qualified"
         ),
         "scapulothoracic_contact_geometry": (
             "partial_reachability_with_high_allocation_nullity_forward_test_open"

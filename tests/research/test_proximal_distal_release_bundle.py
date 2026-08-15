@@ -29,6 +29,7 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         "subject_scaled_closed_contact",
         "closed_state_forward_bridge",
         "forward_contact_validity_horizon",
+        "articulated_inertia_cross_engine",
         "scapulothoracic_contact_screen",
         "spatial_forward_contact",
         "uncertainty_control",

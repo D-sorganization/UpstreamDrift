@@ -251,6 +251,16 @@ the result is explicitly right-censored there. This strengthens the reduced
 hand-carriage reference that the articulated tier must reproduce; it does not
 establish anatomy, calibrated equipment, full delivery, or human strategy.
 
+The first #8668 prerequisite is now executed before adding those contact
+forces. Native MuJoCo and robotics Pinocchio independently assemble the same
+subject-scaled 20-coordinate articulated tree at all 234 closed states. Every
+registered mass-matrix, bias-force, inverse-dynamics, symmetry, and
+positive-definiteness gate passes, with worst relative discrepancies below
+$1.8\times10^{-12}$. This qualifies common-state rigid-body transport and
+removes an engine-assembly confound. It does not execute forward contact or
+establish scapular anatomy, distributed grip or shaft behavior, muscles,
+delivery, or human strategy.
+
 Completion of the candidate census is not completion of release review or the
 research program. In
 particular, the audit rejected quantitative small-deflection shaft inference
