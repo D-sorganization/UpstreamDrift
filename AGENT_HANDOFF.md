@@ -10,16 +10,6 @@ This is a current-state handoff. Historical detail belongs in git and GitHub.
   governs the proximal-to-distal research program. Issue
   [#8595](https://github.com/D-sorganization/UpstreamDrift/issues/8595) retains
   the photographed nine-point momentum-transfer agenda.
-- PR [#8664](https://github.com/D-sorganization/UpstreamDrift/pull/8664)
-  merged the closed-state forward bridge as
-  `eff94297743d0612075f11648f60419044e2067c`. PR
-  [#8665](https://github.com/D-sorganization/UpstreamDrift/pull/8665) merged its
-  architecture isolation as `9f0c18a4d50b8c30ce3bafbb36a2e45197ffe1d3`,
-  verified as exact remote `main` before the present slice.
-- PR [#8667](https://github.com/D-sorganization/UpstreamDrift/pull/8667)
-  merged the cross-engine validity-horizon study as
-  `f7135940891d229b4895ba3c00dc90e0ba4d0f3c`, verified as exact remote
-  `main`; issue #8666 is closed.
 - Issue [#8668](https://github.com/D-sorganization/UpstreamDrift/issues/8668)
   is the next registered tier: subject-scaled articulated bilateral contact
   with distributed grip, shaft, ground, contact-loss, refinement, and
@@ -28,6 +18,8 @@ This is a current-state handoff. Historical detail belongs in git and GitHub.
   records the completed common-state articulated-inertia prerequisite.
 - Child issue [#8678](https://github.com/D-sorganization/UpstreamDrift/issues/8678)
   tracks the articulated contact-projection and initial-acceleration gate.
+- Child issue [#8680](https://github.com/D-sorganization/UpstreamDrift/issues/8680)
+  tracks the bounded articulated bilateral-attachment forward gate.
 - Issue [#8556](https://github.com/D-sorganization/UpstreamDrift/issues/8556)
   remains open. No qualifying participant dataset with synchronized bilateral
   six-axis grip wrenches is available; synthetic traces cannot replace it.
@@ -38,9 +30,9 @@ This is a current-state handoff. Historical detail belongs in git and GitHub.
 
 - The question, experiment, claim, evidence, and readiness registries live in
   `docs/research/proximal_distal_energy_transfer/data/`. The claim inventory is
-  fully adjudicated at 1,004 candidates and 272 atomic claims; all 33 release
+  fully adjudicated at 1,022 candidates and 281 atomic claims; all 36 release
   claims have deterministic dispositions.
-- Evidence integrity covers 1,743 support references, 216 hash-pinned local
+- Evidence integrity covers 1,875 support references, 239 hash-pinned local
   artifacts, and 78 external URLs representing 56 works. Link availability is
   not treated as independent validation.
 - The photographed agenda has bounded model answers or partial answers for
@@ -106,11 +98,22 @@ This is a current-state handoff. Historical detail belongs in git and GitHub.
   native MuJoCo/Pinocchio initial-acceleration gates all pass.
 - This is a same-state acceleration result, not a forward contact trajectory.
 
+## Bounded Articulated Forward Result
+
+- Eighteen profile--span--phase states, seven branches, three time steps, and
+  two native engines produce 756 five-millisecond trajectories.
+- All attachment-retention, virtual-power, dissipativity, work--energy,
+  refinement, and parity gates pass. The worst normalized energy residual falls
+  from `0.00738` to `0.000854`; worst cross-engine trajectory error is
+  `1.54e-14` relative.
+- This is a right-censored bilateral-attachment result, not unilateral slack,
+  late-downswing, anatomy, equipment, human-transfer, or coaching evidence.
+
 ## Next Scientific Gates
 
-1. Apply bilateral compliant contact to the qualified articulated tree, with
-   independently qualified scapular geometry, clinical limits where governed,
-   and mesh contact.
+1. Extend the 5 ms articulated horizon with independently qualified scapular
+   geometry, clinical limits where governed, mesh contact, and typed unilateral
+   slack.
 2. Calibrate distributed grip and shaft compliance, damping, friction, contact
    loss, ground coupling, and equipment uncertainty.
 3. Repeat the registered horizon, reversal, killswitch, adverse-load,
@@ -133,6 +136,8 @@ python -m scripts.research.proximal_distal_energy.run_articulated_inertia_cross_
 python -m scripts.research.proximal_distal_energy.make_articulated_inertia_cross_engine_figure
 python -m scripts.research.proximal_distal_energy.run_articulated_contact_projection
 python -m scripts.research.proximal_distal_energy.make_articulated_contact_projection_figure
+python -m scripts.research.proximal_distal_energy.run_articulated_forward_contact
+python -m scripts.research.proximal_distal_energy.make_articulated_forward_contact_figure
 python -m pytest tests/research/test_forward_contact_validity_horizon.py `
   tests/research/test_closed_state_forward_bridge.py `
   tests/research/test_proximal_distal_release_bundle.py -q

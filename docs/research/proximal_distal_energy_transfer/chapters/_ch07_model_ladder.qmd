@@ -287,7 +287,9 @@ This executes independent forward spatial contact at a reduced mechanism tier.
 It does not add anatomical arms, subject-specific inertias, muscles, measured
 grip compliance, a distributed shaft, or human observations. The evidence
 boundary therefore moves from “forward contact unexecuted” to “reduced forward
-contact supported; articulated human transport untested.”
+contact supported.” The later articulated tier adds a right-censored 5 ms
+bilateral-attachment result; calibrated articulated and human transport remain
+untested.
 
 ## What Survives, What Changes, and What Remains Open {#sec-ladder-discrepancy}
 

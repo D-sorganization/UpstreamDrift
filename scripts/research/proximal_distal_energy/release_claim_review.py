@@ -252,6 +252,12 @@ REVIEW_SPECS: dict[str, dict[str, Any]] = {
         ("PD-CLAIM-277", "PD-CLAIM-278", "PD-CLAIM-279"),
         "Integrate a bounded articulated bilateral-contact horizon and repeat contact-loss, adverse-load, refinement, power, and work-energy controls.",
     ),
+    "bounded_articulated_forward_contact": _spec(
+        "reviewed_as_right_censored_synthetic_forward_result",
+        "five_millisecond_bilateral_attachment_forward_gate_qualified",
+        ("PD-CLAIM-280", "PD-CLAIM-281", "PD-CLAIM-282"),
+        "Extend the right-censored horizon with typed unilateral slack, calibrated distributed grip and shaft compliance, ground coupling, and governed bilateral human wrenches.",
+    ),
     "scapulothoracic_contact_geometry": _spec(
         "reviewed_as_paired_geometry_screen_with_explicit_boundaries",
         "paired_geometry_screen_partial_with_explicit_boundaries",

@@ -3,8 +3,8 @@
 ## Current Scientific Audit State (2026-08-15)
 
 Epic #8557 has completed the current narrative-candidate adjudication contract:
-1,015/1,015 candidates, 278 atomic claims, and zero unadjudicated entries. This
-status is not scientific closure: all 35 public release claims now have a
+1,022/1,022 candidates, 281 atomic claims, and zero unadjudicated entries. This
+status is not scientific closure: all 36 public release claims now have a
 traceable review disposition, and all 35 retain an explicit model, equipment,
 anatomy, archival, or governed-human scientific gate. The
 trajectory-level bilateral point-force sensor qualification and subject-scaled
@@ -32,6 +32,14 @@ Child issue #8678 applies finite bilateral Kelvin--Voigt forces to those same
 controls, and native MuJoCo/Pinocchio initial-acceleration parity. It advances
 no trajectory; contact loss, accumulated work, calibrated anatomy/equipment,
 delivery, and human inference remain prohibited.
+Child issue #8680 advances 18 selected cross-profile/span/phase states through
+seven nominal/adverse branches, three time steps, and two native engines for a
+total of 756 five-millisecond trajectories. All registered bilateral-
+attachment retention, virtual-power, dissipativity, work--energy, refinement,
+and parity gates pass. This is a right-censored synthetic attachment result;
+unilateral slack, distributed grip and shaft structure, ground coupling, late
+downswing, impact, anatomy, muscle action, and human strategy remain
+prohibited inferences.
 Issue #8556 remains blocked on governed human bilateral six-axis
 grip-wrench acquisition, and all new scientific content must regenerate the
 inventory and reopen adjudication until every new candidate is reviewed.
@@ -142,7 +150,7 @@ study,vandv,provenance,units}`, with subpackages re-exported by name and a
   rewritten after seven of its eight claims were found to contradict the code.
 
 - **2026-08-14** - Completed the release-level claim-review authority for epic
-  #8557. All 33 release claims now link to supporting atomic claims, evidence,
+  #8557. All 36 release claims now link to supporting atomic claims, evidence,
   negative controls, falsifiers, uncertainty boundaries, a scientific
   disposition, and a remaining gate. Open review bookkeeping is zero while
   human self-stabilization, physical bilateral sensing, and other scientific
@@ -2305,6 +2313,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-15 | 1.0.536 | Added the bounded articulated bilateral-attachment forward gate: 18 selected closed states, seven nominal/adverse branches, three time steps, and native MuJoCo/Pinocchio dynamics produce 756 five-millisecond trajectories. Attachment-retention, power, work--energy, refinement, and parity gates pass; the result is explicitly right-censored and does not model unilateral slack, calibrated distributed grip/shaft, ground coupling, late downswing, impact, muscle action, human transfer, or coaching strategy. |
 | 2026-08-15 | 1.0.535 | Added the subject-scaled articulated contact-projection gate: finite bilateral Kelvin--Voigt forces arise from a declared club perturbation at all 234 closed states, project through the hand and club Jacobians with exact action--reaction and virtual-power controls, and yield matching native MuJoCo/Pinocchio initial accelerations. This is a same-state prerequisite, not a forward contact or human-strategy result. |
 | 2026-08-15 | 1.0.534 | Added the subject-scaled articulated-inertia cross-engine gate: all 234 closed configurations are rebuilt independently in native MuJoCo and robotics Pinocchio, with mass-matrix, bias-force, inverse-dynamics, symmetry, and positive-definiteness equivalence registered before forward bilateral contact. The result qualifies common-state rigid-body transport only and explicitly leaves contact, anatomy, equipment, muscle, delivery, and human claims open. |
 | 2026-08-14 | 1.0.533 | Added the closed-state cross-engine validity-horizon contract: all 54 profile--span--phase states are evaluated at 4, 10, 25, and 50 ms under nominal and nine one-factor adverse/null branches in native MuJoCo and Pinocchio. All 2,160 horizon cases pass trajectory, wrench, energy-discrepancy, and work--energy closure gates; the no-failure result is right-censored at 50 ms and cannot establish articulated anatomy, calibrated equipment, full delivery, or human strategy. |

@@ -58,7 +58,7 @@
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "8eed52fe4ebbc55fcf753f4703330dd6d768281b0babfbb2adca074b862fc36d",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
     "docs/research/proximal_distal_energy_transfer/data/articulated_inertia_cross_engine.json": "852e24997f90f9ecee4b395bfc3f22f65c821d84dce3d297159a1f5a10987b6f",
-    "scripts/research/proximal_distal_energy/articulated_contact_projection.py": "682ef327ff84b313f5d47957b7f7fe9e086c58d75d333ce103a38df6029521eb",
+    "scripts/research/proximal_distal_energy/articulated_contact_projection.py": "2cc183a3a0ae4ba012defb4fc0e35f305656f4eb54437b22d45f128134f7c42d",
     "scripts/research/proximal_distal_energy/run_articulated_contact_projection.py": "44545d6a622de738281462fe799a6fee26ee0d7c798b26f61b865294b976d0f1",
     "scripts/research/proximal_distal_energy/make_articulated_contact_projection_figure.py": "3d9e57994c65d7e2852cbab3afb2aabe5b913c7a9831d4944d7540a82aea7f1a",
     "scripts/research/proximal_distal_energy/register_articulated_contact_projection_claims.py": "ef9439dd1efc3e5b917c1b341593640fae894362b60fe61a5965de19eb7e4b8c",
