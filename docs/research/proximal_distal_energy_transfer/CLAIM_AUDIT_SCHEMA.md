@@ -14,7 +14,10 @@ The machine-readable authorities are:
 - `data/claim_audit_registry.json`, the adjudicated claim records, release-claim
   reconciliation, research-collection status, and external dependencies; and
 - `data/claim_evidence_manifest.json`, the deterministic coverage and content-
-  integrity record for every local and external evidence reference.
+  integrity record for every local and external evidence reference; and
+- `data/external_source_review.json`, the URL-complete, work-deduplicated,
+  claim-specific scientific qualification and availability snapshot for every
+  external reference.
 
 ## Candidate Inventory
 
@@ -134,6 +137,30 @@ Completion additionally requires recomputation of every quantitative claim,
 figure-data verification, original-source and live-link review, and an
 independent finding-by-finding adjudication. Passing the validator proves
 contract integrity; it does not by itself prove scientific correctness.
+
+## External Source Qualification
+
+Run
+`python -m scripts.research.proximal_distal_energy.external_source_review validate`
+to require that every external URL belongs to exactly one canonical work and
+that every work records its source type, evidence role, project independence,
+scholarly-record check, disposition, limitations, and claim-specific use and
+boundary. DOI, PubMed, publisher, repository, and author-hosted URLs for one
+work remain one source; mirrors are never counted as replication.
+
+The committed availability snapshot is an explicit review observation, not a
+network-dependent CI test. It records successful resolution separately from
+automated-access restriction. Broken, transient, omitted, or unchecked links
+cannot pass the validator. Scholarly-record review uses Crossref update and
+relationship metadata, PubMed relational publication types, and the original
+publisher or repository record as available. A clean metadata check means only
+that no correction, expression of concern, or retraction was found in the
+reviewed records on the stated date; it is not proof that none exists.
+
+An eligible source supports only its registered claim assessment and declared
+boundary. It does not close a prospective model, equipment, anatomical, or
+human-validation gate, and it does not become independent confirmation merely
+because the project reproduces or cites it.
 
 ## NotebookLM Boundary
 

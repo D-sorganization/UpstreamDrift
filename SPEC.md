@@ -52,7 +52,7 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.530 |
+| **Spec Version** | 1.0.531 |
 | **Last Spec Update** | 2026-08-14 |
 
 ## 2. Purpose & Mission
@@ -3242,3 +3242,24 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Human self-stabilization, physical bilateral six-axis device validation,
   and human torso/strategy claims shall remain untested until governed data and
   their registered participant-held-out protocols exist.
+
+### F-8557.25: External-Source Qualification Authority
+
+- Every external claim-support URL shall be assigned exactly once to a
+  canonical underlying work. DOI, PubMed, publisher, repository, and
+  author-hosted mirrors shall not be counted as independent replication.
+- Every work shall declare its bibliographic identity, source type, evidence
+  role, project independence, scholarly-record status and check method,
+  scientific disposition, scope, and material limitations.
+- Every work-to-claim link shall state how the source is used and shall retain
+  the atomic claim's uncertainty boundary. Eligible support shall never exceed
+  the claims linked by the claim-evidence inventory.
+- A committed availability snapshot shall cover every external URL. Broken,
+  transient, omitted, duplicated, or unchecked URLs shall fail qualification;
+  automated-access restriction shall remain distinct from a broken link.
+- Open-resource qualification shall invoke the offline validator and fail when
+  the claim evidence, canonical-work grouping, claim assessments,
+  scholarly-record fields, availability coverage, or summary counts drift.
+- Passing source qualification shall establish traceability and bounded claim
+  fit only. It shall not close model, equipment, anatomy, archive, or governed
+  participant-held-out human gates.

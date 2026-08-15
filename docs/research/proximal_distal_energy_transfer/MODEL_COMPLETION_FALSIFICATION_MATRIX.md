@@ -20,6 +20,15 @@ gate for each one. Its completed review state means that no release claim is
 awaiting adjudication; it does not mean that model, equipment, anatomical,
 archival, or human-validation gates have been completed.
 
+The complementary
+[`data/external_source_review.json`](data/external_source_review.json)
+prevents URL count from being mistaken for independent-source count. It
+consolidates mirrors into underlying works, assigns a claim-specific evidence
+role and uncertainty boundary, records scholarly-update checks, and rejects
+broken or unchecked links. Its passing state qualifies source traceability and
+scope only; it does not promote an observational association, review,
+simulation, or method paper into causal human validation.
+
 ## Claim–Evidence–Falsifier Register
 
 | Hypothesis                                         | Current Evidence                                                                                                                                                                                                                                   | Current Boundary                                                                                                                                                                  | Strongest Competing Explanations                                                                                                 | Decisive Next Test                                                                                                                                                                      | Current Status                                                                                                                                           |
