@@ -37,8 +37,13 @@ rejecting the prescribed states. A bounded follow-up closes all 234 registered
 profile/span/phase configurations while preserving the club pose, achieved
 rank, broad engineering-limit margins, and coarse collision clearance. This
 clears a reduced-tree necessary condition and advances the open gate to
-subject-specific anatomy and calibrated forward contact; it does not establish
-forces, passivity, timing benefit, slack benefit, or human strategy. A three-tier
+subject-specific anatomy and calibrated forward contact. All 234 closed states
+now map into the canonical compliant-contact contract; a 54-case spanning
+subset passes short-horizon MuJoCo/Pinocchio trajectory, wrench, and energy
+comparisons from identical digested initial states. This removes an
+initialization gap but does not establish articulated forward anatomy,
+calibrated equipment, passive transfer, delivery benefit, slack benefit, or
+human strategy. A three-tier
 hand-path attribution study separates stitched pointwise ZTCF drift,
 same-state control, and separately defined ZVCF reactions for force vectors,
 impulse, power, work, every modeled joint, and four neutral time windows. A
@@ -235,6 +240,9 @@ python3 -m scripts.research.proximal_distal_energy.run_moving_base_modal_shaft_s
 python3 -m scripts.research.proximal_distal_energy.run_shaft_beam_reference
 python3 -m scripts.research.proximal_distal_energy.run_torque_allocation_preload_study
 python3 -m scripts.research.proximal_distal_energy.run_spatial_full_body_study
+python3 -m scripts.research.proximal_distal_energy.run_subject_scaled_closed_contact
+python3 -m scripts.research.proximal_distal_energy.run_closed_state_forward_bridge
+python3 -m scripts.research.proximal_distal_energy.make_closed_state_forward_bridge_figure
 python3 -m scripts.research.proximal_distal_energy.run_spatial_forward_contact_study
 python3 -m scripts.research.proximal_distal_energy.run_uncertainty_control_study
 python3 -m scripts.research.proximal_distal_energy.run_timing_viability_study

@@ -27,6 +27,7 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         "spatial_common_state",
         "subject_scaled_spatial_geometry",
         "subject_scaled_closed_contact",
+        "closed_state_forward_bridge",
         "scapulothoracic_contact_screen",
         "spatial_forward_contact",
         "uncertainty_control",

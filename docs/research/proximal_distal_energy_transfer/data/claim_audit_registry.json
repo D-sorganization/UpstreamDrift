@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "f56f43cb73f586dea3ddfb7255678fc8dab0550c8bff6d93e1df5167ca49f09d",
+    "source_digest": "1204a1247e534736f99f7238eb7c89c9b1ff1ed3015e2b7fb0927193837120c9",
     "baseline_commit": "a4b53e39b"
   },
   "audit_scope": {
@@ -11,7 +11,7 @@
     "release_review_completion_status": "complete",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "The complete 994-candidate paper inventory is adjudicated. The subject-scaled spatial audit retains its adverse prescribed-state contact-closure result and favorable algebraic controls. The bounded closed-contact follow-up passes the declared reduced-tree screen. The paired scapulothoracic surrogate improves reachability but retains termination, active-bound, and allocation-nullity boundaries while calibrated articulated forward contact remains unexecuted."
+    "current_scope": "The complete 999-candidate paper inventory is adjudicated. The subject-scaled spatial audit retains its adverse prescribed-state contact-closure result and favorable algebraic controls. The bounded closed-contact follow-up passes the declared reduced-tree screen, and all 234 states map into a 54-case short-horizon two-engine initialization audit. The paired scapulothoracic surrogate improves reachability but retains termination, active-bound, and allocation-nullity boundaries while calibrated articulated forward contact remains unexecuted."
   },
   "dependencies": [
     {
@@ -187,13 +187,18 @@
     },
     {
       "release_claim_key": "subject_scaled_closed_contact_feasibility",
-      "published_status": "reduced_tree_closed_contact_screen_passed_compliant_forward_test_open",
+      "published_status": "reduced_tree_closed_contact_screen_and_short_forward_initialization_passed",
       "audit_state": "reviewed_as_necessary_condition_result"
     },
     {
       "release_claim_key": "scapulothoracic_contact_geometry",
       "published_status": "partial_reachability_with_high_allocation_nullity_forward_test_open",
       "audit_state": "reviewed_as_paired_geometry_screen_with_explicit_boundaries"
+    },
+    {
+      "release_claim_key": "closed_state_forward_initialization",
+      "published_status": "supported_for_234_mappings_and_54_short_cross_engine_cases",
+      "audit_state": "reviewed_as_short_horizon_reduced_model_result"
     }
   ],
   "candidate_reviews": [
@@ -9974,33 +9979,11 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-2595bd0677ce26f9",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-260",
-        "PD-CLAIM-263"
-      ],
-      "rationale": "This passage states or bounds the subject-scaled contact-geometry audit.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-14"
-    },
-    {
       "candidate_id": "PD-CAND-9bdb0446f034d972",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-260",
         "PD-CLAIM-263",
-        "PD-CLAIM-264"
-      ],
-      "rationale": "This passage states or bounds the subject-scaled contact-geometry audit.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-14"
-    },
-    {
-      "candidate_id": "PD-CAND-f35adbe08b937d77",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-262",
         "PD-CLAIM-264"
       ],
       "rationale": "This passage states or bounds the subject-scaled contact-geometry audit.",
@@ -10154,6 +10137,77 @@
         "PD-CLAIM-262"
       ],
       "rationale": "This revised synthesis passage carries the registered contact-feasibility boundary or its next-test consequence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-59dd7b95647eda3f",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-262",
+        "PD-CLAIM-264",
+        "PD-CLAIM-270"
+      ],
+      "rationale": "This passage states or bounds the subject-scaled contact-geometry audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-e0ad5489b710c46d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-268"
+      ],
+      "rationale": "This passage states or bounds the subject-scaled contact-geometry audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-89c1d22cda081ec4",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-268"
+      ],
+      "rationale": "This passage states or bounds the subject-scaled contact-geometry audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-9cc89a4c7f80780b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-269"
+      ],
+      "rationale": "This passage states or bounds the subject-scaled contact-geometry audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-f885f0bb4a96dc0b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-270"
+      ],
+      "rationale": "This passage states or bounds the subject-scaled contact-geometry audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-971dc64c394ef77b",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "The figure include points to registered evidence but asserts no standalone scientific result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-595f13f49a6683a9",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-260",
+        "PD-CLAIM-263"
+      ],
+      "rationale": "This passage states or bounds the subject-scaled contact-geometry audit.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-14"
     }
@@ -21750,7 +21804,7 @@
     {
       "claim_id": "PD-CLAIM-260",
       "candidate_ids": [
-        "PD-CAND-2595bd0677ce26f9",
+        "PD-CAND-595f13f49a6683a9",
         "PD-CAND-bc0368729ddb9738",
         "PD-CAND-7b6cd5358472b395",
         "PD-CAND-80616653a4fc60a7",
@@ -21782,6 +21836,13 @@
         "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
         "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
         "tests/research/test_subject_scaled_closed_contact.py",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.json",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_closed_state_forward_bridge.pdf",
+        "scripts/research/proximal_distal_energy/closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/run_closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/make_closed_state_forward_bridge_figure.py",
+        "tests/research/test_closed_state_forward_bridge.py",
         "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
         "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz",
         "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf",
@@ -21836,6 +21897,13 @@
         "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
         "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
         "tests/research/test_subject_scaled_closed_contact.py",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.json",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_closed_state_forward_bridge.pdf",
+        "scripts/research/proximal_distal_energy/closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/run_closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/make_closed_state_forward_bridge_figure.py",
+        "tests/research/test_closed_state_forward_bridge.py",
         "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
         "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz",
         "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf",
@@ -21866,7 +21934,7 @@
     {
       "claim_id": "PD-CLAIM-262",
       "candidate_ids": [
-        "PD-CAND-f35adbe08b937d77",
+        "PD-CAND-59dd7b95647eda3f",
         "PD-CAND-54446a28f977e4fa",
         "PD-CAND-c063936829317748",
         "PD-CAND-36a661af65c9ae1d",
@@ -21877,11 +21945,11 @@
       "published_status": "closed_contact_screen_complete_forward_contact_not_executed",
       "audit_status": "deterministic_subject_scaling_closure_rank_and_geometry_controls_checked",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:374",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:415",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:128",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:403",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:339"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:445",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:380"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
@@ -21898,6 +21966,13 @@
         "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
         "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
         "tests/research/test_subject_scaled_closed_contact.py",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.json",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_closed_state_forward_bridge.pdf",
+        "scripts/research/proximal_distal_energy/closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/run_closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/make_closed_state_forward_bridge_figure.py",
+        "tests/research/test_closed_state_forward_bridge.py",
         "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
         "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz",
         "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf",
@@ -21928,7 +22003,7 @@
     {
       "claim_id": "PD-CLAIM-263",
       "candidate_ids": [
-        "PD-CAND-2595bd0677ce26f9",
+        "PD-CAND-595f13f49a6683a9",
         "PD-CAND-9c65c424209437d6",
         "PD-CAND-c39cc01504847772",
         "PD-CAND-9dd9306ab117189e",
@@ -21960,6 +22035,13 @@
         "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
         "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
         "tests/research/test_subject_scaled_closed_contact.py",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.json",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_closed_state_forward_bridge.pdf",
+        "scripts/research/proximal_distal_energy/closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/run_closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/make_closed_state_forward_bridge_figure.py",
+        "tests/research/test_closed_state_forward_bridge.py",
         "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
         "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz",
         "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf",
@@ -21991,7 +22073,7 @@
       "claim_id": "PD-CLAIM-264",
       "candidate_ids": [
         "PD-CAND-684ed6cb396eac0e",
-        "PD-CAND-f35adbe08b937d77",
+        "PD-CAND-59dd7b95647eda3f",
         "PD-CAND-9dd9306ab117189e",
         "PD-CAND-9bdb0446f034d972"
       ],
@@ -22001,7 +22083,7 @@
       "audit_status": "deterministic_subject_scaling_closure_rank_and_geometry_controls_checked",
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:318",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:374",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:415",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:55",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:64"
       ],
@@ -22020,6 +22102,13 @@
         "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
         "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
         "tests/research/test_subject_scaled_closed_contact.py",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.json",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_closed_state_forward_bridge.pdf",
+        "scripts/research/proximal_distal_energy/closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/run_closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/make_closed_state_forward_bridge_figure.py",
+        "tests/research/test_closed_state_forward_bridge.py",
         "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
         "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz",
         "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf",
@@ -22059,8 +22148,8 @@
       "published_status": "partial_closure_with_numerical_and_range_boundaries",
       "audit_status": "deterministic_subject_scaling_closure_rank_and_geometry_controls_checked",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:329",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:349",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:370",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:390",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:79"
       ],
       "evidence_artifacts": [
@@ -22078,6 +22167,13 @@
         "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
         "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
         "tests/research/test_subject_scaled_closed_contact.py",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.json",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_closed_state_forward_bridge.pdf",
+        "scripts/research/proximal_distal_energy/closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/run_closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/make_closed_state_forward_bridge_figure.py",
+        "tests/research/test_closed_state_forward_bridge.py",
         "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
         "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz",
         "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf",
@@ -22116,7 +22212,7 @@
       "published_status": "supported_in_declared_local_linearization",
       "audit_status": "deterministic_subject_scaling_closure_rank_and_geometry_controls_checked",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:358",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:399",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:79"
       ],
       "evidence_artifacts": [
@@ -22134,6 +22230,13 @@
         "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
         "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
         "tests/research/test_subject_scaled_closed_contact.py",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.json",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_closed_state_forward_bridge.pdf",
+        "scripts/research/proximal_distal_energy/closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/run_closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/make_closed_state_forward_bridge_figure.py",
+        "tests/research/test_closed_state_forward_bridge.py",
         "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
         "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz",
         "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf",
@@ -22173,8 +22276,8 @@
       "published_status": "explicitly_bounded",
       "audit_status": "deterministic_subject_scaling_closure_rank_and_geometry_controls_checked",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:329",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:366",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:370",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:407",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:79"
       ],
       "evidence_artifacts": [
@@ -22192,6 +22295,13 @@
         "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
         "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
         "tests/research/test_subject_scaled_closed_contact.py",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.json",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_closed_state_forward_bridge.pdf",
+        "scripts/research/proximal_distal_energy/closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/run_closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/make_closed_state_forward_bridge_figure.py",
+        "tests/research/test_closed_state_forward_bridge.py",
         "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
         "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz",
         "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf",
@@ -22215,6 +22325,193 @@
         "point-force wrench-map rank and axial augmentation"
       ],
       "falsifier": "Any anatomical, muscular, transfer, or strategy conclusion is attributed to this reduced geometry screen alone.",
+      "adjudication": "The executable atlas was regenerated from canonical anthropometrics and the shared spatial model; favorable rank and couple-scaling controls are retained alongside the adverse contact-closure result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "claim_id": "PD-CLAIM-268",
+      "candidate_ids": [
+        "PD-CAND-e0ad5489b710c46d",
+        "PD-CAND-89c1d22cda081ec4"
+      ],
+      "statement": "All 234 subject-scaled closed states map into the engine-neutral forward-contact coordinates with maximum position and velocity closure errors of 1.16e-10 m and 1.29 mm/s, respectively, and exact closure creates zero contact preload.",
+      "classification": "closed_state_forward_initialization_mapping",
+      "published_status": "supported_for_declared_reduced_mapping",
+      "audit_status": "deterministic_subject_scaling_closure_rank_and_geometry_controls_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:329",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:340"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_subject_scaled_spatial_geometry.pdf",
+        "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
+        "scripts/research/proximal_distal_energy/run_subject_scaled_spatial_geometry.py",
+        "scripts/research/proximal_distal_energy/make_subject_scaled_spatial_geometry_figures.py",
+        "tests/research/test_subject_scaled_spatial_geometry.py",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_subject_scaled_closed_contact.pdf",
+        "scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py",
+        "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
+        "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
+        "tests/research/test_subject_scaled_closed_contact.py",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.json",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_closed_state_forward_bridge.pdf",
+        "scripts/research/proximal_distal_energy/closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/run_closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/make_closed_state_forward_bridge_figure.py",
+        "tests/research/test_closed_state_forward_bridge.py",
+        "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
+        "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf",
+        "scripts/research/proximal_distal_energy/scapulothoracic_contact_screen.py",
+        "scripts/research/proximal_distal_energy/run_scapulothoracic_contact_screen.py",
+        "scripts/research/proximal_distal_energy/make_scapulothoracic_contact_figures.py",
+        "tests/research/test_scapulothoracic_contact_screen.py"
+      ],
+      "model_domain": "All 234 reduced-tree closed configurations mapped by one constant initial rigid transformation.",
+      "uncertainty_boundary": "Velocities are finite differences along reduced-tree inverse-kinematics paths; the mapping does not add anatomical dynamics or equipment calibration.",
+      "competing_explanations": [
+        "prescribed state is not a closed-contact inverse-kinematics solution",
+        "reduced scapular, shoulder, wrist, and hand geometry",
+        "anthropometric regression rather than subject measurement",
+        "unmodeled contact, tissue, and shaft compliance"
+      ],
+      "negative_controls": [
+        "bilateral distance-to-contact closure",
+        "constraint Jacobian rank and singular values",
+        "grip-span sweep",
+        "point-force wrench-map rank and axial augmentation"
+      ],
+      "falsifier": "Any mapped state exceeds the registered position or velocity closure tolerance or develops nonzero force at exact closure.",
+      "adjudication": "The executable atlas was regenerated from canonical anthropometrics and the shared spatial model; favorable rank and couple-scaling controls are retained alongside the adverse contact-closure result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "claim_id": "PD-CLAIM-269",
+      "candidate_ids": [
+        "PD-CAND-9cc89a4c7f80780b"
+      ],
+      "statement": "MuJoCo and Pinocchio receive identical digested initial states and pass the existing trajectory, contact-wrench, and normalized-energy gates for all 54 profile-span-phase cases in the 4 ms spanning initialization audit.",
+      "classification": "closed_state_short_horizon_cross_engine_forward_audit",
+      "published_status": "supported_for_declared_reduced_short_horizon_subset",
+      "audit_status": "deterministic_subject_scaling_closure_rank_and_geometry_controls_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:348"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_subject_scaled_spatial_geometry.pdf",
+        "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
+        "scripts/research/proximal_distal_energy/run_subject_scaled_spatial_geometry.py",
+        "scripts/research/proximal_distal_energy/make_subject_scaled_spatial_geometry_figures.py",
+        "tests/research/test_subject_scaled_spatial_geometry.py",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_subject_scaled_closed_contact.pdf",
+        "scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py",
+        "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
+        "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
+        "tests/research/test_subject_scaled_closed_contact.py",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.json",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_closed_state_forward_bridge.pdf",
+        "scripts/research/proximal_distal_energy/closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/run_closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/make_closed_state_forward_bridge_figure.py",
+        "tests/research/test_closed_state_forward_bridge.py",
+        "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
+        "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf",
+        "scripts/research/proximal_distal_energy/scapulothoracic_contact_screen.py",
+        "scripts/research/proximal_distal_energy/run_scapulothoracic_contact_screen.py",
+        "scripts/research/proximal_distal_energy/make_scapulothoracic_contact_figures.py",
+        "tests/research/test_scapulothoracic_contact_screen.py"
+      ],
+      "model_domain": "Six synthetic profiles, three grip spans, and early, middle, and late phases in two reduced native forward solvers.",
+      "uncertainty_boundary": "The forward solvers use finite-mass hand carriages after initialization and the 4 ms window is not a downswing or delivery simulation.",
+      "competing_explanations": [
+        "prescribed state is not a closed-contact inverse-kinematics solution",
+        "reduced scapular, shoulder, wrist, and hand geometry",
+        "anthropometric regression rather than subject measurement",
+        "unmodeled contact, tissue, and shaft compliance"
+      ],
+      "negative_controls": [
+        "bilateral distance-to-contact closure",
+        "constraint Jacobian rank and singular values",
+        "grip-span sweep",
+        "point-force wrench-map rank and axial augmentation"
+      ],
+      "falsifier": "An engine pair receives a different initial-state digest or fails any registered trajectory, wrench, or energy comparison gate.",
+      "adjudication": "The executable atlas was regenerated from canonical anthropometrics and the shared spatial model; favorable rank and couple-scaling controls are retained alongside the adverse contact-closure result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "claim_id": "PD-CLAIM-270",
+      "candidate_ids": [
+        "PD-CAND-f885f0bb4a96dc0b",
+        "PD-CAND-59dd7b95647eda3f"
+      ],
+      "statement": "The closed-state bridge removes an initialization gap but does not establish calibrated equipment, articulated anatomical dynamics, tissue loading, passive transfer, delivery benefit, slack benefit, or human strategy.",
+      "classification": "closed_state_forward_bridge_inference_boundary",
+      "published_status": "explicitly_bounded",
+      "audit_status": "deterministic_subject_scaling_closure_rank_and_geometry_controls_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:357",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:415"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_subject_scaled_spatial_geometry.pdf",
+        "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
+        "scripts/research/proximal_distal_energy/run_subject_scaled_spatial_geometry.py",
+        "scripts/research/proximal_distal_energy/make_subject_scaled_spatial_geometry_figures.py",
+        "tests/research/test_subject_scaled_spatial_geometry.py",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_subject_scaled_closed_contact.pdf",
+        "scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py",
+        "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
+        "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
+        "tests/research/test_subject_scaled_closed_contact.py",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.json",
+        "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_closed_state_forward_bridge.pdf",
+        "scripts/research/proximal_distal_energy/closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/run_closed_state_forward_bridge.py",
+        "scripts/research/proximal_distal_energy/make_closed_state_forward_bridge_figure.py",
+        "tests/research/test_closed_state_forward_bridge.py",
+        "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
+        "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf",
+        "scripts/research/proximal_distal_energy/scapulothoracic_contact_screen.py",
+        "scripts/research/proximal_distal_energy/run_scapulothoracic_contact_screen.py",
+        "scripts/research/proximal_distal_energy/make_scapulothoracic_contact_figures.py",
+        "tests/research/test_scapulothoracic_contact_screen.py"
+      ],
+      "model_domain": "Coordinate mapping, constitutive controls, and 4 ms reduced forward initialization only.",
+      "uncertainty_boundary": "Full-horizon articulated contact, calibrated grip and shaft properties, typed contact loss, adverse-load controls, and governed human validation remain open.",
+      "competing_explanations": [
+        "prescribed state is not a closed-contact inverse-kinematics solution",
+        "reduced scapular, shoulder, wrist, and hand geometry",
+        "anthropometric regression rather than subject measurement",
+        "unmodeled contact, tissue, and shaft compliance"
+      ],
+      "negative_controls": [
+        "bilateral distance-to-contact closure",
+        "constraint Jacobian rank and singular values",
+        "grip-span sweep",
+        "point-force wrench-map rank and axial augmentation"
+      ],
+      "falsifier": "A mechanism, delivery, anatomy, or coaching conclusion is attributed to the initialization audit alone.",
       "adjudication": "The executable atlas was regenerated from canonical anthropometrics and the shared spatial model; favorable rank and couple-scaling controls are retained alongside the adverse contact-closure result.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-14"

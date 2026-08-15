@@ -324,6 +324,47 @@ contact. Inverse kinematics supplies neither force nor work and cannot test
 passivity, timing demand, self-correction, proximal-speed benefit, or any
 class of slack.
 
+### Closed-State Forward-Contact Initialization Gate
+
+The closed configurations now enter the independently authored MuJoCo and
+Pinocchio contact solvers through one engine-neutral state contract. For each
+of the 234 profile--span--phase states, a constant rigid transformation places
+the club reference at the canonical center and aligns its initial orientation
+with the canonical axes. Positions are rotated and translated; linear and
+angular velocities are rotated without subtracting the club velocity, so the
+map changes coordinates rather than changing inertial motion. The two local
+grip offsets remain $(0,\pm s/2,-0.03)$ m.
+
+![Closed Subject States Enter Independent Forward Solvers Without Preload](figures/fig_closed_state_forward_bridge.pdf){#fig-closed-state-forward-bridge width=100%}
+
+All 234 position mappings retain the source closure, with a maximum error of
+$1.16\times10^{-10}$ m. Velocities estimated by second-order finite
+differences along each closed inverse-kinematics path close to 1.29 mm/s at
+worst, below the preregistered 5 mm/s mapping tolerance. Every mapped state has
+a distinct SHA-256 digest. Exact closure produces zero Kelvin--Voigt preload;
+the 1 mm constitutive perturbation preserves action--reaction and produces
+nonpositive damping power.
+
+A spanning subset advances all six profiles, all three grip spans, and early,
+middle, and late phases through both native forward solvers: 54 shared initial
+states and 108 trajectories. Every engine pair reports the same initial-state
+digest and passes the existing trajectory, wrench, and normalized-energy
+comparison gates over the preregistered 4 ms initialization audit. The largest
+cross-engine club-position difference is 0.083 $\mu$m, the largest relative
+contact-wrench RMS difference is 0.0145%, and the largest normalized-energy
+difference is $2.19\times10^{-7}$.
+
+This is an initialization and short-horizon numerical-transport result, not a
+subject-scaled forward golfer. The forward tier still replaces the articulated
+arms with finite-mass hand carriages after initialization; its hand mass is
+profile-scaled, but its club, contact stiffness, damping, and driver remain
+declared engineering values. The result therefore removes an executable gap
+between closed geometry and compliant contact without establishing calibrated
+equipment, anatomical dynamics, tissue loading, passive late-downswing
+transfer, delivery benefit, or a human strategy. The next falsifier is a
+full-horizon articulated solve with typed contact loss, calibrated grip and
+shaft compliance, refinement, adverse-load, null, and reversal controls.
+
 ### Paired Scapula-on-Ellipsoid Geometry Screen
 
 The fixed shoulder centers are the next explicit structural intervention. A
@@ -371,10 +412,11 @@ next test replaces this surrogate with the independently validated articulated
 shoulder model, subject-specific anatomy where governed, calibrated grip
 contact, and paired forward dynamics.
 
-The next spatial experiment must now integrate calibrated compliant contact
-from these closed states, expose contact loss and tissue/shaft compliance as
-typed states, and repeat the coincident, reversal, killswitch, power, and
-work--energy controls in two independent engines. Only trajectories passing
+The next spatial experiment must retain the verified closed-state initialization
+while replacing the hand carriages with articulated forward dynamics, expose
+contact loss and tissue/shaft compliance as typed states, and repeat the
+coincident, reversal, killswitch, power, and work--energy controls in two
+independent engines. Only trajectories passing
 those gates may be used to test whether drift-mediated transfer reduces timing
 demand, creates recovery, benefits from slack, or supports a human strategy.
 
