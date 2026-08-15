@@ -26,6 +26,7 @@ __all__ = [
     "BallLieType",
     "BallProperties",
     "compute_exposed_cap_area",
+    "compute_exposed_cap_fraction",
     "compute_submersion_depth",
 ]
 
@@ -221,3 +222,27 @@ def compute_exposed_cap_area(lie: BallLie, ball: BallProperties) -> float:
         ``lie.depth_m``.
     """
     return _upper_hemisphere_area_m2(ball) * _exposed_fraction(lie, ball)
+
+
+def compute_exposed_cap_fraction(lie: BallLie, ball: BallProperties) -> float:
+    """Compute the exposed share of the ball's upper hemisphere.
+
+    :func:`compute_exposed_cap_area` normalised by the reference area of a
+    ball resting on an undisturbed surface, so the result is the dimensionless
+    taper itself: ``1`` at or above the surface, ``0`` once the ball has sunk a
+    full diameter.
+
+    :mod:`bunkershot3d.ball.splash` uses it as the share of the moving sand
+    taken to be on a path that meets the ball. That reading is a **modelling
+    convention**, stated as such in the launch provenance record: it is the
+    same linear taper documented on :func:`compute_exposed_cap_area`, not a
+    measured interception ratio.
+
+    Args:
+        lie: Ball lie specification.
+        ball: Ball physical properties.
+
+    Returns:
+        A fraction in ``[0, 1]``, decreasing in ``lie.depth_m``.
+    """
+    return _exposed_fraction(lie, ball)
