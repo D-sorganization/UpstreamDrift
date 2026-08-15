@@ -16,9 +16,14 @@ This is a current-state handoff. Historical detail belongs in git and GitHub.
   [#8665](https://github.com/D-sorganization/UpstreamDrift/pull/8665) merged its
   architecture isolation as `9f0c18a4d50b8c30ce3bafbb36a2e45197ffe1d3`,
   verified as exact remote `main` before the present slice.
-- Issue [#8666](https://github.com/D-sorganization/UpstreamDrift/issues/8666)
-  is the current protected slice: the cross-engine forward-contact validity
-  horizon and adverse-load map.
+- PR [#8667](https://github.com/D-sorganization/UpstreamDrift/pull/8667)
+  merged the cross-engine validity-horizon study as
+  `f7135940891d229b4895ba3c00dc90e0ba4d0f3c`, verified as exact remote
+  `main`; issue #8666 is closed.
+- Issue [#8668](https://github.com/D-sorganization/UpstreamDrift/issues/8668)
+  is the next registered tier: subject-scaled articulated bilateral contact
+  with distributed grip, shaft, ground, contact-loss, refinement, and
+  adverse-load controls.
 - Issue [#8556](https://github.com/D-sorganization/UpstreamDrift/issues/8556)
   remains open. No qualifying participant dataset with synchronized bilateral
   six-axis grip wrenches is available; synthetic traces cannot replace it.
