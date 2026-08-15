@@ -6,56 +6,36 @@ Epic: https://github.com/D-sorganization/UpstreamDrift/issues/8607
 
 ---
 
-## CURRENT STATE — authoritative, supersedes anything below that disagrees
+## CURRENT STATE — epic COMPLETE
 
-**Integrated suite: 1976 passed, 4 skipped** on `feat/bunkershot-pro-epic` @ `d89f5aa13`.
+**All eleven workstreams merged. PR to `main`: #8655.**
+Suite **2374 passed, 4 skipped** (baseline 157). Gates green except the
+suite-marker ratchet, which is red on `main` itself (365 net-new unmarked tests there);
+zero remaining offenders are under `tests/bunkershot3d`.
 
-**DONE — do NOT re-implement any of these:**
+#8608 #8609 #8610 #8611 #8612 #8613 #8614 #8615 #8616 #8617 #8618 — all done.
+SPEC.md has one coordinated entry. Do not re-implement any of them.
 
-| Issue | Workstream                        | Note                                 |
-| ----- | --------------------------------- | ------------------------------------ |
-| #8617 | W10 result schema v2 + provenance |                                      |
-| #8610 | W3 sand state model               |                                      |
-| #8615 | W8 study layer                    |                                      |
-| #8612 | W5 backend correctness            |                                      |
-| #8609 | W2 parametric wedge geometry      |                                      |
-| #8608 | W1 foundations                    | rescoped; config is now an assembler |
-| #8613 | W6 ball model + flight handoff    |                                      |
-| #8611 | W4 **F0 DRFT solver**             | **superseded** — see below           |
-| #8614 | W7 designer metrics               | **superseded** — see below           |
+**If you are a scheduled run picking this up: the epic is finished.** Do not invent new
+scope. Useful follow-ups only, in rough priority order:
 
-**IN FLIGHT right now (do not start these):** #8616 V&V on `feat/bunker-vandv`,
-#8618 designer workbench on `feat/bunker-workbench`, and an architecture-budget
-cleanup on `feat/bunker-gates2`.
+1. **Carry is the weakest number in the tool.** `ball.splash` makes ball speed linear in
+   entry depth with hard-coded coefficients, and it drives the playability window.
+2. **Entry distance does not propagate** into the F0→splash chain, which is why the
+   playability axes are attack angle x firmness. Making it propagate would let the window
+   use the axis the fitting literature actually measures.
+3. **Calibrate `delta_h` and `lambda` for a wedge.** Both are borrowed; `lambda` carries
+   ~90% of the load and its published spread across motion types is 1.0–2.8.
+4. **Blade-scale rocker radii are inferred, not published** — needs an OEM source or a
+   measured head before being quoted as patent-conformant.
+5. Lofted head CG sits ~5 mm above the leading edge vs the patent's 9.65–17.02 mm band;
+   the parametric blade has no hosel or toe taper.
+6. `reference_swing.csv` still does not exist (B33) — now a loud error, not a silent
+   5 m/s substitution, but the solver would like a real reference trajectory.
 
-**After those three land, the epic is functionally complete.** Do not invent new scope.
-Finish by: greening the gates, one coordinated SPEC.md update, and opening the epic PR
-to `main`.
-
-### Two supersessions — read before touching solver or metrics
-
-#8611 and #8614 were each implemented twice concurrently. The versions now on the branch
-are the ones that were kept, and the reasons matter:
-
-- **Solver.** The superseded version mentioned `delta_h` only in a module docstring and
-  never computed it. That is exactly the failure the source paper reports: applying
-  `lambda*rho*v_n^2` without the structural correction gave the **wrong sign of sinkage**
-  at every lambda from 1 to 100. The kept version implements both corrections, lives at
-  `src/bunkershot3d/solvers/` (**plural** — `solver/` singular is gone), and measures
-  14.2 ms/shot against a 50 ms budget.
-- **Metrics.** The superseded version lacked both headline outputs — `playability_window_area`
-  (the primary scalar objective) and the bounce utilisation map (which tells a designer
-  _where to grind_). It also split energy three ways, which double-counts: in a splash shot
-  the ball is driven **through** the sand, so sand-energy and ball-energy are not siblings.
-
-### Coordination
-
-A scheduled cloud routine (`trig_01XXJ3NrMKYA1oZARXKPPoTn`, every 6 h) and interactive
-sessions both work this branch. **Check `git branch -r --list 'origin/feat/bunker-*'` and
-this table before starting anything**, or you will duplicate a workstream as happened with
-#8611 and #8614.
-
----
+Anything beyond that needs experimental data, which is the honest bottleneck: no
+published values exist for ball launch, spin, head deceleration in sand, energy split or
+ejecta mass, and `ValidationComparison` refuses to fabricate a comparison against them.
 
 ## Where everything lives
 
