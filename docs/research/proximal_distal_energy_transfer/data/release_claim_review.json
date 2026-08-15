@@ -3,11 +3,11 @@
   "authority": "D-sorganization/UpstreamDrift#8557",
   "interpretation": "Review completion means every release claim has traceable atomic support, controls, falsifiers, boundaries, and a remaining gate. It does not mean every scientific claim is validated.",
   "summary": {
-    "release_claim_count": 34,
-    "reviewed_release_claim_count": 34,
+    "release_claim_count": 35,
+    "reviewed_release_claim_count": 35,
     "open_release_review_count": 0,
-    "scientifically_open_gate_count": 34,
-    "atomic_claim_count": 275
+    "scientifically_open_gate_count": 35,
+    "atomic_claim_count": 278
   },
   "release_claim_reviews": [
     {
@@ -1970,6 +1970,52 @@
         "Compliant bilateral contact, detailed anatomy, equipment, ground, delivery, and governed human evidence remain open."
       ],
       "remaining_scientific_gate": "Apply bilateral compliant contact to the qualified articulated tree and repeat horizon, adverse-load, contact-loss, refinement, power, and energy controls."
+    },
+    {
+      "release_claim_key": "subject_scaled_articulated_contact_projection",
+      "published_status": "same_state_bilateral_contact_projection_and_initial_acceleration_qualified",
+      "audit_state": "reviewed_as_same_state_articulated_contact_projection_result",
+      "scientific_disposition": "bilateral_contact_projection_and_native_initial_acceleration_qualified",
+      "supporting_claim_ids": [
+        "PD-CLAIM-277",
+        "PD-CLAIM-278",
+        "PD-CLAIM-279"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_contact_projection.pdf",
+        "scripts/research/proximal_distal_energy/articulated_contact_projection.py",
+        "scripts/research/proximal_distal_energy/run_articulated_contact_projection.py",
+        "scripts/research/proximal_distal_energy/make_articulated_contact_projection_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_contact_projection_claims.py",
+        "tests/research/test_articulated_contact_projection.py"
+      ],
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:445",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:452",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:459",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:469",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:476"
+      ],
+      "negative_controls": [
+        "zero-preload closed-state control",
+        "exact action-reaction and virtual-power identities",
+        "non-positive damping power",
+        "coincident and reversed moment-arm controls",
+        "all 234 closed states retained"
+      ],
+      "falsifiers": [
+        "Any force is prescribed independently of achieved contact state, action-reaction or virtual power fails, or a closed state is omitted.",
+        "Any reproduced state exceeds a registered residual or native acceleration tolerance.",
+        "A trajectory, human, equipment, or strategy claim is attributed to this initial-acceleration gate alone."
+      ],
+      "uncertainty_boundaries": [
+        "The contact law, geometry, and perturbation are engineering values rather than participant or equipment calibration.",
+        "The result is one same-state acceleration evaluation and contains no forward trajectory or accumulated work.",
+        "Forward integration, calibrated structure/contact, ground, and governed human evidence remain open."
+      ],
+      "remaining_scientific_gate": "Integrate a bounded articulated bilateral-contact horizon and repeat contact-loss, adverse-load, refinement, power, and work-energy controls."
     }
   ]
 }

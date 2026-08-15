@@ -3,9 +3,9 @@
 ## Current Scientific Audit State (2026-08-15)
 
 Epic #8557 has completed the current narrative-candidate adjudication contract:
-1,009/1,009 candidates, 275 atomic claims, and zero unadjudicated entries. This
-status is not scientific closure: all 34 public release claims now have a
-traceable review disposition, and all 34 retain an explicit model, equipment,
+1,015/1,015 candidates, 278 atomic claims, and zero unadjudicated entries. This
+status is not scientific closure: all 35 public release claims now have a
+traceable review disposition, and all 35 retain an explicit model, equipment,
 anatomy, archival, or governed-human scientific gate. The
 trajectory-level bilateral point-force sensor qualification and subject-scaled
 spatial contact-closure audit retain their synthetic and prescribed-state
@@ -27,6 +27,11 @@ positive-definiteness gate passes. This common-state result qualifies the
 20-coordinate articulated rigid-body transport only. Forward bilateral
 contact, scapulothoracic anatomy, distributed grip and shaft properties,
 muscles, delivery, and human inference remain prohibited.
+Child issue #8678 applies finite bilateral Kelvin--Voigt forces to those same
+234 states and verifies action--reaction, virtual power, passivity, geometry
+controls, and native MuJoCo/Pinocchio initial-acceleration parity. It advances
+no trajectory; contact loss, accumulated work, calibrated anatomy/equipment,
+delivery, and human inference remain prohibited.
 Issue #8556 remains blocked on governed human bilateral six-axis
 grip-wrench acquisition, and all new scientific content must regenerate the
 inventory and reopen adjudication until every new candidate is reviewed.
@@ -2300,6 +2305,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-15 | 1.0.535 | Added the subject-scaled articulated contact-projection gate: finite bilateral Kelvin--Voigt forces arise from a declared club perturbation at all 234 closed states, project through the hand and club Jacobians with exact action--reaction and virtual-power controls, and yield matching native MuJoCo/Pinocchio initial accelerations. This is a same-state prerequisite, not a forward contact or human-strategy result. |
 | 2026-08-15 | 1.0.534 | Added the subject-scaled articulated-inertia cross-engine gate: all 234 closed configurations are rebuilt independently in native MuJoCo and robotics Pinocchio, with mass-matrix, bias-force, inverse-dynamics, symmetry, and positive-definiteness equivalence registered before forward bilateral contact. The result qualifies common-state rigid-body transport only and explicitly leaves contact, anatomy, equipment, muscle, delivery, and human claims open. |
 | 2026-08-14 | 1.0.533 | Added the closed-state cross-engine validity-horizon contract: all 54 profile--span--phase states are evaluated at 4, 10, 25, and 50 ms under nominal and nine one-factor adverse/null branches in native MuJoCo and Pinocchio. All 2,160 horizon cases pass trajectory, wrench, energy-discrepancy, and work--energy closure gates; the no-failure result is right-censored at 50 ms and cannot establish articulated anatomy, calibrated equipment, full delivery, or human strategy. |
 | 2026-08-14 | 1.0.532 | Added the closed-state forward-contact bridge: all 234 subject-scaled closed configurations map through a declared rigid coordinate transform with position and velocity closure gates, zero-preload and passivity controls, and unique initial-state digests; 54 early/middle/late profile-span cases enter native MuJoCo and Pinocchio for a short-horizon trajectory, wrench, and energy parity audit. The contract explicitly prohibits promotion to articulated anatomy, calibrated equipment, full-downswing delivery, passive-transfer benefit, or human strategy. |

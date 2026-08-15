@@ -246,6 +246,12 @@ REVIEW_SPECS: dict[str, dict[str, Any]] = {
         ("PD-CLAIM-274", "PD-CLAIM-275", "PD-CLAIM-276"),
         "Apply bilateral compliant contact to the qualified articulated tree and repeat horizon, adverse-load, contact-loss, refinement, power, and energy controls.",
     ),
+    "subject_scaled_articulated_contact_projection": _spec(
+        "reviewed_as_same_state_articulated_contact_projection_result",
+        "bilateral_contact_projection_and_native_initial_acceleration_qualified",
+        ("PD-CLAIM-277", "PD-CLAIM-278", "PD-CLAIM-279"),
+        "Integrate a bounded articulated bilateral-contact horizon and repeat contact-loss, adverse-load, refinement, power, and work-energy controls.",
+    ),
     "scapulothoracic_contact_geometry": _spec(
         "reviewed_as_paired_geometry_screen_with_explicit_boundaries",
         "paired_geometry_screen_partial_with_explicit_boundaries",

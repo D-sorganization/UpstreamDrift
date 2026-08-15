@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-evidence-integrity-v1",
   "registry": {
     "path": "docs/research/proximal_distal_energy_transfer/data/claim_audit_registry.json",
-    "sha256": "987a7f794dff5c6901814f170da684afa897bc92d3d5afb6054698983f659b28"
+    "sha256": "dbe3d41ad2990026b55addb999333765c5281936cceae56ca35d3484534c92d1"
   },
   "scope": {
     "local_artifact_semantics": "content_integrity_not_independent_validation",
@@ -10,9 +10,9 @@
     "network_access_required": false
   },
   "summary": {
-    "claim_count": 275,
-    "evidence_reference_count": 1767,
-    "local_artifact_count": 224,
+    "claim_count": 278,
+    "evidence_reference_count": 1791,
+    "local_artifact_count": 232,
     "external_url_count": 78
   },
   "claims": {
@@ -3167,6 +3167,45 @@
         "tests/research/test_articulated_inertia_cross_engine.py"
       ],
       "external_references": []
+    },
+    "PD-CLAIM-277": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_contact_projection.pdf",
+        "scripts/research/proximal_distal_energy/articulated_contact_projection.py",
+        "scripts/research/proximal_distal_energy/run_articulated_contact_projection.py",
+        "scripts/research/proximal_distal_energy/make_articulated_contact_projection_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_contact_projection_claims.py",
+        "tests/research/test_articulated_contact_projection.py"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-278": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_contact_projection.pdf",
+        "scripts/research/proximal_distal_energy/articulated_contact_projection.py",
+        "scripts/research/proximal_distal_energy/run_articulated_contact_projection.py",
+        "scripts/research/proximal_distal_energy/make_articulated_contact_projection_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_contact_projection_claims.py",
+        "tests/research/test_articulated_contact_projection.py"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-279": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_contact_projection.pdf",
+        "scripts/research/proximal_distal_energy/articulated_contact_projection.py",
+        "scripts/research/proximal_distal_energy/run_articulated_contact_projection.py",
+        "scripts/research/proximal_distal_energy/make_articulated_contact_projection_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_contact_projection_claims.py",
+        "tests/research/test_articulated_contact_projection.py"
+      ],
+      "external_references": []
     }
   },
   "local_artifacts": {
@@ -3191,8 +3230,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/MOMENTUM_TRANSFER_QUESTION_PROGRAM.md": {
-      "sha256": "b79319905072d52ef43bfa3d4e8138e0120e926a1197f8befaee6e5f225a4f93",
-      "bytes": 26467,
+      "sha256": "74a6005ba08a885f7a53d94d841d002a360f75142908a7228734660f7104a8e1",
+      "bytes": 26658,
       "referenced_by": [
         "PD-CLAIM-242",
         "PD-CLAIM-243",
@@ -3310,6 +3349,24 @@
         "PD-CLAIM-196",
         "PD-CLAIM-197",
         "PD-CLAIM-198"
+      ]
+    },
+    "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.json": {
+      "sha256": "2bc288153fa1b4e3abd7907abf78ee1b37f094d5626dfedcbe6af3f82e965a74",
+      "bytes": 4167,
+      "referenced_by": [
+        "PD-CLAIM-277",
+        "PD-CLAIM-278",
+        "PD-CLAIM-279"
+      ]
+    },
+    "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.npz": {
+      "sha256": "080d10a5087d3dd83d1fb778017ffbca01e0b49f61deedf2d2bc796985094c43",
+      "bytes": 69621,
+      "referenced_by": [
+        "PD-CLAIM-277",
+        "PD-CLAIM-278",
+        "PD-CLAIM-279"
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_inertia_cross_engine.json": {
@@ -4428,6 +4485,15 @@
         "PD-CLAIM-002"
       ]
     },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_contact_projection.pdf": {
+      "sha256": "020c45de08b742ef3b3b21c32807cb8b12977f73f3e5943e395b4ed8df4faf03",
+      "bytes": 36062,
+      "referenced_by": [
+        "PD-CLAIM-277",
+        "PD-CLAIM-278",
+        "PD-CLAIM-279"
+      ]
+    },
     "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_inertia_cross_engine.pdf": {
       "sha256": "26c2c88192c434707beaffbdbe5d3c43a1b55b0f0fd3f5d26404e3cd434bd5e2",
       "bytes": 33478,
@@ -4593,8 +4659,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "86df45c1889b21f6f0414f443816b72773cd18bf8177a5073c04a53c8daab785",
-      "bytes": 111817,
+      "sha256": "5ecc7c142cfe61f5c39dbdf72dc5c938751ee9ce84ee3381da49375b7203669f",
+      "bytes": 113860,
       "referenced_by": [
         "PD-CLAIM-241"
       ]
@@ -4615,6 +4681,15 @@
         "PD-CLAIM-196",
         "PD-CLAIM-197",
         "PD-CLAIM-198"
+      ]
+    },
+    "scripts/research/proximal_distal_energy/articulated_contact_projection.py": {
+      "sha256": "682ef327ff84b313f5d47957b7f7fe9e086c58d75d333ce103a38df6029521eb",
+      "bytes": 18071,
+      "referenced_by": [
+        "PD-CLAIM-277",
+        "PD-CLAIM-278",
+        "PD-CLAIM-279"
       ]
     },
     "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py": {
@@ -4782,6 +4857,15 @@
         "PD-CLAIM-055"
       ]
     },
+    "scripts/research/proximal_distal_energy/make_articulated_contact_projection_figure.py": {
+      "sha256": "3d9e57994c65d7e2852cbab3afb2aabe5b913c7a9831d4944d7540a82aea7f1a",
+      "bytes": 2598,
+      "referenced_by": [
+        "PD-CLAIM-277",
+        "PD-CLAIM-278",
+        "PD-CLAIM-279"
+      ]
+    },
     "scripts/research/proximal_distal_energy/make_articulated_inertia_cross_engine_figure.py": {
       "sha256": "969a3c94645164cabc48e2dec3f5d39bbe2b819c89333a991c210c5a7936d5ad",
       "bytes": 3043,
@@ -4919,6 +5003,15 @@
         "PD-CLAIM-229"
       ]
     },
+    "scripts/research/proximal_distal_energy/register_articulated_contact_projection_claims.py": {
+      "sha256": "ef9439dd1efc3e5b917c1b341593640fae894362b60fe61a5965de19eb7e4b8c",
+      "bytes": 8373,
+      "referenced_by": [
+        "PD-CLAIM-277",
+        "PD-CLAIM-278",
+        "PD-CLAIM-279"
+      ]
+    },
     "scripts/research/proximal_distal_energy/register_articulated_inertia_claims.py": {
       "sha256": "de3ea35acedd2cc106c87ef33a0fa4e64b41580e69ca3fc553d2e51b543ebb7a",
       "bytes": 9960,
@@ -4955,6 +5048,15 @@
         "PD-CLAIM-196",
         "PD-CLAIM-197",
         "PD-CLAIM-198"
+      ]
+    },
+    "scripts/research/proximal_distal_energy/run_articulated_contact_projection.py": {
+      "sha256": "44545d6a622de738281462fe799a6fee26ee0d7c798b26f61b865294b976d0f1",
+      "bytes": 863,
+      "referenced_by": [
+        "PD-CLAIM-277",
+        "PD-CLAIM-278",
+        "PD-CLAIM-279"
       ]
     },
     "scripts/research/proximal_distal_energy/run_articulated_inertia_cross_engine.py": {
@@ -5578,6 +5680,15 @@
         "PD-CLAIM-196",
         "PD-CLAIM-197",
         "PD-CLAIM-198"
+      ]
+    },
+    "tests/research/test_articulated_contact_projection.py": {
+      "sha256": "9f4e84a6293cce4406478defdb44ad049bbd4be18d2a042c06b508cb45272995",
+      "bytes": 3575,
+      "referenced_by": [
+        "PD-CLAIM-277",
+        "PD-CLAIM-278",
+        "PD-CLAIM-279"
       ]
     },
     "tests/research/test_articulated_inertia_cross_engine.py": {
