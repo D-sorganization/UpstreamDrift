@@ -98,6 +98,8 @@ class ContactProjectionSnapshot:
     virtual_power_residual_w: float
     contact_storage_power_w: float
     contact_dissipation_power_w: float
+    attachment_strain_energy_j: float
+    maximum_attachment_separation_m: float
     force_couple_vector_nm: FloatArray
     coincident_force_couple_nm: float
     reversed_couple_sign_residual_nm: float
@@ -174,6 +176,7 @@ def evaluate_contact_projection(
     generalized = np.zeros(model.nq)
     storage_power = 0.0
     dissipation_power = 0.0
+    strain_energy = 0.0
     action_residual = 0.0
     physical_power = 0.0
     for index in range(2):
@@ -188,6 +191,10 @@ def evaluate_contact_projection(
             damping=config.contact_damping,
         )
         forces[index] = force_on_club
+        displacement = hand_points[index] - grip_points[index]
+        strain_energy += (
+            0.5 * config.contact_stiffness * float(displacement @ displacement)
+        )
         generalized += grip_jacobians[index].T @ force_on_club
         generalized += hand_jacobians[index].T @ force_on_hand
         action_residual = max(
@@ -213,6 +220,10 @@ def evaluate_contact_projection(
         virtual_power_residual_w=float(abs(generalized @ qd - physical_power)),
         contact_storage_power_w=float(storage_power),
         contact_dissipation_power_w=float(dissipation_power),
+        attachment_strain_energy_j=float(strain_energy),
+        maximum_attachment_separation_m=float(
+            np.max(np.linalg.norm(hand_points - grip_points, axis=1))
+        ),
         force_couple_vector_nm=couple,
         coincident_force_couple_nm=float(np.linalg.norm(coincident)),
         reversed_couple_sign_residual_nm=float(

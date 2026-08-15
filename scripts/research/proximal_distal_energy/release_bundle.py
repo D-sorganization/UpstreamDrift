@@ -114,6 +114,10 @@ _RELEASE_METADATA: dict[str, Any] = {
             "command": "python -m scripts.research.proximal_distal_energy.run_articulated_contact_projection",
             "tier": "subject_scaled_articulated_contact_initial_acceleration",
         },
+        "articulated_forward_contact": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_articulated_forward_contact",
+            "tier": "bounded_subject_scaled_articulated_bilateral_attachment_forward_dynamics",
+        },
         "scapulothoracic_contact_screen": {
             "command": "python -m scripts.research.proximal_distal_energy.run_scapulothoracic_contact_screen",
             "tier": "paired_arm_only_scapula_on_ellipsoid_geometry_screen",
@@ -238,12 +242,15 @@ _RELEASE_METADATA: dict[str, Any] = {
         "subject_scaled_articulated_contact_projection": (
             "same_state_bilateral_contact_projection_and_initial_acceleration_qualified"
         ),
+        "bounded_articulated_forward_contact": (
+            "five_millisecond_bilateral_attachment_forward_gate_qualified"
+        ),
         "scapulothoracic_contact_geometry": (
             "partial_reachability_with_high_allocation_nullity_forward_test_open"
         ),
     },
     "known_open_gates": [
-        "full-horizon subject-scaled articulated spatial contact with calibrated grip and distributed shaft",
+        "longer-horizon subject-scaled articulated spatial contact with typed unilateral slack, calibrated grip, distributed shaft, and ground coupling",
         "equipment-calibrated distributed beam and grip coupled into a subject-scaled forward solve",
         "measured tissue-level preload and slack identification",
         "governed held-out human experimental evaluation",

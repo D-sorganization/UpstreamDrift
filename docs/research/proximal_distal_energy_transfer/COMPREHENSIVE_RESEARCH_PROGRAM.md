@@ -209,7 +209,7 @@ scientific contract.
 
 ## Completed Candidate Census and Ongoing Release Review
 
-The narrative census adjudicates all 1,004 paper candidates against 272 atomic
+The narrative census adjudicates all 1,022 paper candidates against 281 atomic
 claim contracts; no candidate remains unreviewed. That completion status
 applies to candidate coverage, not to scientific closure of every release
 claim. All 33 public release claims now have deterministic review dispositions
@@ -269,6 +269,16 @@ and reversal controls. Native MuJoCo and Pinocchio initial accelerations agree
 to $4.86\times10^{-13}$ relative. Because no forward step is taken, the result
 does not test contact loss, accumulated work, delivery, or a human strategy.
 
+Child issue #8680 advances the articulated tree through a deliberately bounded
+5 ms forward interval. Eighteen profile--span--phase states, seven
+nominal/adverse branches, three time steps, and two native engines produce 756
+trajectories. All registered attachment-retention, virtual-power,
+dissipativity, work--energy, refinement, and cross-engine parity gates pass.
+The worst normalized energy residual decreases from 0.00738 to 0.000854 under
+refinement. This is a right-censored bilateral-attachment result, not a model of
+unilateral slack, calibrated grip or shaft structure, ground coupling, late
+downswing, impact, human transfer, or coaching strategy.
+
 Completion of the candidate census is not completion of release review or the
 research program. In
 particular, the audit rejected quantitative small-deflection shaft inference
@@ -278,8 +288,8 @@ map, and preserves #8556 as an external human-data acquisition gate. Future
 milestones must create new claim records and falsifiers before new conclusions
 enter summaries or conclusions.
 
-The separate claim-evidence integrity manifest covers all 1,791 evidence
-references. It hash-pins 232 distinct repository artifacts and inventories 78
+The separate claim-evidence integrity manifest covers all 1,875 evidence
+references. It hash-pins 239 distinct repository artifacts and inventories 78
 external URLs. Hash agreement establishes content identity, not independence
 or correctness; URL inventory establishes traceability, not availability or
 scientific validity.

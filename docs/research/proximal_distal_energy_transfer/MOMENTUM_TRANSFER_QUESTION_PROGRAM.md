@@ -204,6 +204,10 @@ claims.
 - Preserve the executed contact-projection gate: finite bilateral forces must
   close action--reaction, virtual power, geometry, and native initial
   acceleration before forward integration.
+- Preserve the executed bounded forward gate: 756 five-millisecond bilateral-
+  attachment trajectories pass retention, adverse-control, refinement,
+  work--energy, and native-engine parity checks. Treat the result as
+  right-censored and do not relabel the bilateral springs as unilateral slack.
 - Repeat the geometry and killswitch registry in independently authored
   engines with articulated arms, calibrated two-hand contact, and a
   distributed bending/torsion club.

@@ -482,7 +482,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, bottomrule=.15mm, colback=white, breakable, opacitybacktitle=0.6, toprule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, colframe=quarto-callout-note-color-frame, left=2mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, coltitle=black, bottomtitle=1mm, arc=.35mm, titlerule=0mm, rightrule=.15mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, left=2mm, opacitybacktitle=0.6, arc=.35mm, opacityback=0, colback=white, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, toprule=.15mm, breakable, titlerule=0mm, coltitle=black, bottomrule=.15mm, leftrule=.75mm, rightrule=.15mm]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -7469,9 +7469,11 @@ extrapolate to the remaining downswing or impact. The carriages, rigid
 club, engineering contact law, and prescribed driver still omit
 articulated arms and scapulae, distributed grip and shaft properties,
 contact loss, ground coupling, and calibrated equipment. The study
-strengthens the reduced cross-engine reference that the articulated tier
-must reproduce; it does not establish anatomy, passive human transfer,
-timing economy, slack benefit, or coaching strategy.
+strengthens the reduced cross-engine reference. The articulated tier
+reproduces its power, energy, refinement, and engine- parity logic only
+through 5 ms, not the full 50 ms interval. Neither result establishes
+anatomy, passive human transfer, timing economy, slack benefit, or
+coaching strategy.
 
 \subsubsection{Native Articulated Inertia
 Qualification}\label{native-articulated-inertia-qualification}
@@ -7584,6 +7586,78 @@ transfer, slack benefit, timing economy, or coaching strategy. The next
 falsifier is bounded integration with contact-loss, adverse-load,
 refinement, power, and work--energy controls.
 
+\subsubsection{Bounded Articulated Bilateral-Attachment Forward
+Dynamics}\label{bounded-articulated-bilateral-attachment-forward-dynamics}
+
+The forward gate advances eighteen selected closed states spanning all
+six synthetic profiles, all three grip spans, and three phase samples.
+Seven registered branches cover nominal parameters, half and double
+stiffness, half and double damping, reversed initial club velocity, and
+zero preload. Each branch is advanced for 5 ms at 1.0, 0.5, and 0.25 ms
+time steps with native MuJoCo and robotics Pinocchio mass and bias
+operators, producing 756 bounded trajectories. No active joint torque,
+hand driver, or direct club actuator is applied during the interval.
+
+Each trajectory begins from an achieved closed configuration. The
+nominal and one-factor branches add the declared 1 mm club displacement
+and 0.05 m/s club velocity perturbations before evaluating the same two
+bilateral Kelvin--Voigt attachments. These are tensile-and-compressive
+attachment springs, not unilateral collision contacts. ``Retention''
+therefore means that attachment separation stays below a predeclared 10
+mm numerical screening threshold; it does not mean that anatomical grip
+contact, tissue preload, or slack has been identified.
+
+The mechanical ledger adds native rigid-body kinetic and gravitational
+potential energy to the two attachment strain energies,
+
+\begin{equation}\phantomsection\label{eq-articulated-forward-energy}{
+E = T + V_g + \sum_i \frac{1}{2}k\lVert d_i\rVert^2,
+\qquad
+R_E(t)=E(t)-E(0)-\int_0^t P_d\,\mathrm{d}t,
+}\end{equation}
+
+where \(P_d\leq 0\) is the declared damping power. Semi-implicit Euler
+advances the common coordinates, while each engine independently
+evaluates its mass and bias operators at every step. The registered
+gates cover the 10 mm attachment threshold, action--reaction virtual
+power, non-positive damping, normalized work--energy residual below
+0.02, monotone refinement with a fine-to-coarse ratio below 0.8, and
+cross-engine trajectory and force-history differences below \(10^{-7}\)
+relative.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=0.9\linewidth,height=\textheight,keepaspectratio]{figures/fig_articulated_forward_contact.pdf}
+
+}
+
+\caption{\label{fig-articulated-forward-contact}Bounded Articulated
+Bilateral-Attachment Forward Dynamics Across Registered States and
+Controls}
+
+\end{figure}%
+
+All registered five-millisecond trajectories pass. The largest
+attachment separation is 1.229 mm and the largest contact force is
+17.761 N. The worst normalized work--energy residual decreases from
+0.00738 to 0.00170 and then 0.000854 as the step is halved. The largest
+virtual-power residual is \(3.55\times10^{-15}\) W; damping power
+remains negative; and the largest MuJoCo--Pinocchio trajectory and
+force-history discrepancies are \(1.54\times10^{-14}\) and
+\(1.06\times10^{-11}\) relative, respectively.
+
+This is a right-censored synthetic result: no registered failure occurs
+before 5 ms, but persistence later in the downswing or through impact is
+not tested. The result does not model unilateral slack, distributed grip
+pressure, shaft bending or torsion, ground coupling, calibrated anatomy,
+muscle action, or participant-specific control. It therefore cannot
+establish passive human transfer, timing economy, a benefit of avoiding
+slack, or a coaching strategy. Those questions require longer
+typed-slack trajectories and the governed bilateral six-axis grip-wrench
+data identified in the human protocol.
+
 \subsection{Paired Scapula-on-Ellipsoid Geometry
 Screen}\label{paired-scapula-on-ellipsoid-geometry-screen}
 
@@ -7646,11 +7720,13 @@ the independently validated articulated shoulder model, subject-specific
 anatomy where governed, calibrated grip contact, and paired forward
 dynamics.
 
-The next spatial experiment must retain the verified closed-state
+The bounded forward experiment now retains the verified closed-state
 initialization while replacing the hand carriages with articulated
-forward dynamics, expose contact loss and tissue/shaft compliance as
-typed states, and repeat the coincident, reversal, killswitch, power,
-and work--energy controls in two independent engines. Only trajectories
+forward dynamics for 5 ms. It repeats power, work--energy, refinement,
+adverse-load, and engine-parity controls, but its bilateral springs do
+not expose unilateral contact loss or tissue/shaft compliance. The next
+experiment must add those typed states, extend the horizon, and repeat
+the coincident, reversal, and killswitch controls. Only trajectories
 passing those gates may be used to test whether drift-mediated transfer
 reduces timing demand, creates recovery, benefits from slack, or
 supports a human strategy.
@@ -7686,11 +7762,11 @@ Four stronger statements remain open:
   inputs. A forward compliant two-hand solve must determine whether
   equivalent loads emerge after a distal command killswitch.
 \item
-  \textbf{Forward Cross-Engine Contact Is Untested at This Tier.}
-  Same-state inverse dynamics removes trajectory divergence by design.
-  The independently integrated reduced contact experiment in
-  Section~\ref{sec-spatial-forward-contact} addresses that separate
-  estimand without promoting this prescribed-load result.
+  \textbf{Bounded Cross-Engine Attachment Dynamics Do Not Establish Full
+  Contact.} The 5 ms articulated trajectories test divergence,
+  attachment separation, power, and energy in two engines. They do not
+  test unilateral contact loss, calibrated distributed grip or shaft
+  mechanics, late downswing, or impact.
 \item
   \textbf{Anatomical Magnitude Is Unsupported.} The reduced tree and
   spherical inertias are not subject-specific anatomy, muscle, or tissue
@@ -9074,8 +9150,9 @@ This executes independent forward spatial contact at a reduced mechanism
 tier. It does not add anatomical arms, subject-specific inertias,
 muscles, measured grip compliance, a distributed shaft, or human
 observations. The evidence boundary therefore moves from ``forward
-contact unexecuted'' to ``reduced forward contact supported; articulated
-human transport untested.''
+contact unexecuted'' to ``reduced forward contact supported.'' The later
+articulated tier adds a right-censored 5 ms bilateral-attachment result;
+calibrated articulated and human transport remain untested.
 
 \section{What Survives, What Changes, and What Remains
 Open}\label{sec-ladder-discrepancy}
