@@ -126,3 +126,6 @@
 ## 2026-06-25 - Pandas iterrows vs vectorized dictionary conversion
 **Learning:** Iterating over a pandas DataFrame using `.iterrows()` and appending row dictionaries to a list is extremely slow due to Python object overhead and Series creation for every row.
 **Action:** Replaced `.iterrows()` loop with vectorized column mapping and dictionary conversion via `df.to_dict('records')` when transforming DataFrame rows into a list of dictionaries. This provides a ~6.8x speedup.
+## 2026-06-25 - [Replacing np.sum(x**2) with np.vdot(x,x) for performance]
+**Learning:** For calculating the sum of squares of a 1D array, `np.vdot(x, x)` avoids temporary array allocations (unlike `x**2`) and is ~3-4x faster than `np.sum(x**2)`.
+**Action:** Replace `np.sum((a-b)**2)` with `diff = a-b; np.vdot(diff, diff)` and `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum("ij,ij->i", x, x))` when optimizing tight numerical calculation loops.

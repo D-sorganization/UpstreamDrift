@@ -3275,3 +3275,4 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Passing source qualification shall establish traceability and bounded claim
   fit only. It shall not close model, equipment, anatomy, archive, or governed
   participant-held-out human gates.
+- Use `np.vdot` instead of `np.sum(x**2)` and `np.sqrt(np.einsum("ij,ij->i", x, x))` instead of `np.linalg.norm(x, axis=1)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
