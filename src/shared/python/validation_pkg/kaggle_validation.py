@@ -237,7 +237,7 @@ def validate_model_against_dataset(
     predictions_list: list[float] = []
     actuals_list: list[float] = []
 
-    for _, row in sample.iterrows():
+    for row in sample.to_dict("records"):
         try:
             pred = model_func(
                 row["ball_speed_mph"],
