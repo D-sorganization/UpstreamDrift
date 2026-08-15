@@ -1845,34 +1845,14 @@
         "PD-CLAIM-270"
       ],
       "evidence_artifacts": [
-        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
-        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.npz",
-        "docs/research/proximal_distal_energy_transfer/figures/fig_subject_scaled_spatial_geometry.pdf",
-        "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
-        "scripts/research/proximal_distal_energy/run_subject_scaled_spatial_geometry.py",
-        "scripts/research/proximal_distal_energy/make_subject_scaled_spatial_geometry_figures.py",
-        "tests/research/test_subject_scaled_spatial_geometry.py",
-        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
-        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
-        "docs/research/proximal_distal_energy_transfer/figures/fig_subject_scaled_closed_contact.pdf",
-        "scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py",
-        "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
-        "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
-        "tests/research/test_subject_scaled_closed_contact.py",
         "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.json",
         "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.npz",
         "docs/research/proximal_distal_energy_transfer/figures/fig_closed_state_forward_bridge.pdf",
         "scripts/research/proximal_distal_energy/closed_state_forward_bridge.py",
         "scripts/research/proximal_distal_energy/run_closed_state_forward_bridge.py",
         "scripts/research/proximal_distal_energy/make_closed_state_forward_bridge_figure.py",
-        "tests/research/test_closed_state_forward_bridge.py",
-        "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
-        "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz",
-        "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf",
-        "scripts/research/proximal_distal_energy/scapulothoracic_contact_screen.py",
-        "scripts/research/proximal_distal_energy/run_scapulothoracic_contact_screen.py",
-        "scripts/research/proximal_distal_energy/make_scapulothoracic_contact_figures.py",
-        "tests/research/test_scapulothoracic_contact_screen.py"
+        "scripts/research/proximal_distal_energy/register_closed_state_forward_bridge_claims.py",
+        "tests/research/test_closed_state_forward_bridge.py"
       ],
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:329",
@@ -1882,20 +1862,20 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:415"
       ],
       "negative_controls": [
-        "bilateral distance-to-contact closure",
-        "constraint Jacobian rank and singular values",
-        "grip-span sweep",
-        "point-force wrench-map rank and axial augmentation"
+        "position and velocity closure",
+        "exact zero-preload contact",
+        "action-reaction and damping passivity",
+        "independent-engine state-digest and trajectory comparison"
       ],
       "falsifiers": [
-        "Any mapped state exceeds the registered position or velocity closure tolerance or develops nonzero force at exact closure.",
-        "An engine pair receives a different initial-state digest or fails any registered trajectory, wrench, or energy comparison gate.",
-        "A mechanism, delivery, anatomy, or coaching conclusion is attributed to the initialization audit alone."
+        "Any mapped state exceeds a registered closure tolerance or develops nonzero force at exact closure.",
+        "An engine pair receives a different digest or fails any registered comparison gate.",
+        "A mechanism, delivery, anatomy, or coaching conclusion is attributed to this initialization audit alone."
       ],
       "uncertainty_boundaries": [
-        "Velocities are finite differences along reduced-tree inverse-kinematics paths; the mapping does not add anatomical dynamics or equipment calibration.",
-        "The forward solvers use finite-mass hand carriages after initialization and the 4 ms window is not a downswing or delivery simulation.",
-        "Full-horizon articulated contact, calibrated grip and shaft properties, typed contact loss, adverse-load controls, and governed human validation remain open."
+        "Velocities are finite differences along reduced-tree inverse-kinematics paths; the mapping adds neither anatomical dynamics nor equipment calibration.",
+        "Finite-mass hand carriages replace articulated arms after initialization, and 4 ms is not a downswing or delivery simulation.",
+        "Full-horizon articulated contact, calibrated grip and shaft properties, adverse-load controls, and governed human validation remain open."
       ],
       "remaining_scientific_gate": "Replace hand carriages with articulated arms and run full-horizon calibrated contact controls."
     }

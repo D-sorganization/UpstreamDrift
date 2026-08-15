@@ -250,6 +250,7 @@ python3 -m scripts.research.proximal_distal_energy.run_typed_slack_dynamic_study
 python3 -m scripts.research.proximal_distal_energy.run_experimental_protocol_dry_run
 python3 -m scripts.research.proximal_distal_energy.run_advanced_biological_bridge
 python3 -m scripts.research.proximal_distal_energy.claim_audit inventory
+python3 -m scripts.research.proximal_distal_energy.register_closed_state_forward_bridge_claims
 python3 -m scripts.research.proximal_distal_energy.claim_audit validate
 python3 -m scripts.research.proximal_distal_energy.claim_evidence_integrity validate
 python3 -m scripts.research.proximal_distal_energy.external_source_review validate

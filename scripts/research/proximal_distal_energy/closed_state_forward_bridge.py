@@ -15,6 +15,14 @@ from scripts.research.proximal_distal_energy.spatial_forward_contract import (
     SpatialContactParameters,
     canonical_spatial_state_digest,
     contact_pair,
+    driver_target_velocities,
+    driver_targets,
+    rotation_matrix_from_quaternion,
+    transport_wrench,
+)
+from scripts.research.proximal_distal_energy.spatial_forward_engines import (
+    AppliedSpatialForces,
+    make_spatial_forward_adapter,
 )
 from scripts.research.proximal_distal_energy.spatial_full_body import (
     SpatialModel,
@@ -175,15 +183,119 @@ def canonical_state_from_vector(values: FloatArray) -> CanonicalSpatialState:
     )
 
 
+def _short_forward_trace(
+    engine: str,
+    params: SpatialContactParameters,
+    initial_state: CanonicalSpatialState,
+) -> dict[str, Any]:
+    adapter = make_spatial_forward_adapter(engine, params, initial_state)
+    steps = int(round(0.004 / params.time_step))
+    positions, quaternions, wrenches, energies = [], [], [], []
+    for index in range(steps + 1):
+        state = adapter.canonical_state()
+        rotation = rotation_matrix_from_quaternion(state.club_quaternion_wxyz)
+        offsets = np.asarray([params.lead_grip_offset, params.trail_grip_offset])
+        rotated = (rotation @ offsets.T).T
+        club_points = state.club_position + rotated
+        club_velocities = state.club_linear_velocity + np.cross(
+            np.broadcast_to(state.club_angular_velocity, (2, 3)), rotated
+        )
+        contact_forces = np.asarray(
+            [
+                contact_pair(
+                    hand_position=state.hand_positions[hand],
+                    hand_velocity=state.hand_velocities[hand],
+                    club_point_position=club_points[hand],
+                    club_point_velocity=club_velocities[hand],
+                    stiffness=params.contact_stiffness,
+                    damping=params.contact_damping,
+                )[0]
+                for hand in range(2)
+            ]
+        )
+        sample_time = index * params.time_step
+        driver_forces = params.driver_stiffness * (
+            driver_targets(sample_time, params) - state.hand_positions
+        ) + params.driver_damping * (
+            driver_target_velocities(sample_time, params) - state.hand_velocities
+        )
+        displacement = state.hand_positions - club_points
+        positions.append(state.club_position)
+        quaternions.append(state.club_quaternion_wxyz)
+        wrenches.append(
+            transport_wrench(
+                reference=state.club_position,
+                points=club_points,
+                forces=contact_forces,
+            )
+        )
+        energies.append(
+            adapter.native_mechanical_energy()
+            + 0.5 * params.contact_stiffness * float(np.sum(displacement**2))
+        )
+        if index < steps:
+            adapter.step(
+                AppliedSpatialForces(
+                    hand_forces=driver_forces - contact_forces,
+                    club_points=club_points,
+                    club_forces=contact_forces,
+                ),
+                params.time_step,
+            )
+    return {
+        "initial_state_digest": adapter.initial_state_digest,
+        "club_position": np.asarray(positions),
+        "club_quaternion_wxyz": np.asarray(quaternions),
+        "contact_wrench": np.asarray(wrenches),
+        "total_energy": np.asarray(energies),
+    }
+
+
+def _compare_short_traces(
+    left: dict[str, Any], right: dict[str, Any]
+) -> dict[str, Any]:
+    position_delta = left["club_position"] - right["club_position"]
+    quaternion_dot = np.abs(
+        np.sum(left["club_quaternion_wxyz"] * right["club_quaternion_wxyz"], axis=1)
+    )
+    wrench_delta = left["contact_wrench"] - right["contact_wrench"]
+    wrench_scale = max(
+        1.0,
+        float(np.sqrt(np.mean(left["contact_wrench"] ** 2))),
+        float(np.sqrt(np.mean(right["contact_wrench"] ** 2))),
+    )
+    energy_scale = max(
+        1.0,
+        float(np.ptp(left["total_energy"])),
+        float(np.ptp(right["total_energy"])),
+    )
+    metrics = {
+        "club_position_rms_m": float(np.sqrt(np.mean(position_delta**2))),
+        "club_position_max_m": float(np.max(np.linalg.norm(position_delta, axis=1))),
+        "club_orientation_max_rad": float(
+            np.max(2.0 * np.arccos(np.clip(quaternion_dot, 0.0, 1.0)))
+        ),
+        "contact_wrench_relative_rms": float(
+            np.sqrt(np.mean(wrench_delta**2)) / wrench_scale
+        ),
+        "normalized_energy_discrepancy": float(
+            np.max(np.abs(left["total_energy"] - right["total_energy"])) / energy_scale
+        ),
+    }
+    return {
+        "observed_metrics": metrics,
+        "trajectory_gate_passed": metrics["club_position_rms_m"] <= 0.003
+        and metrics["club_position_max_m"] <= 0.009
+        and metrics["club_orientation_max_rad"] <= 0.035,
+        "wrench_gate_passed": metrics["contact_wrench_relative_rms"] <= 0.10,
+        "energy_gate_passed": metrics["normalized_energy_discrepancy"] <= 0.08,
+    }
+
+
 def evaluate_spanning_forward_subset(
     arrays: dict[str, NDArray[Any]],
 ) -> tuple[dict[str, Any], dict[str, NDArray[Any]]]:
     """Run both native engines for all profiles/spans at early/mid/late phases."""
-
-    from scripts.research.proximal_distal_energy.spatial_forward_study import (
-        compare_engine_traces,
-        run_engine_trace,
-    )
 
     profiles = default_synthetic_profiles()
     phase_indices = (0, arrays["time_s"].size // 2, arrays["time_s"].size - 1)
@@ -204,18 +316,10 @@ def evaluate_spanning_forward_subset(
                 club_initial_position=tuple(state.club_position),
             )
             traces = {
-                engine: run_engine_trace(
-                    engine,
-                    params,
-                    disable_driver_after_killswitch=False,
-                    initial_state=state,
-                    trace_duration=0.004,
-                )
+                engine: _short_forward_trace(engine, params, state)
                 for engine in ("mujoco", "pinocchio")
             }
-            comparison = compare_engine_traces(
-                traces["mujoco"], traces["pinocchio"], params
-            )
+            comparison = _compare_short_traces(traces["mujoco"], traces["pinocchio"])
             rows.append(
                 {
                     "case_index": case,
@@ -223,21 +327,24 @@ def evaluate_spanning_forward_subset(
                     "profile_id": profiles[profile_index].profile_id,
                     "grip_span_m": span,
                     "initial_state_digest_match": (
-                        traces["mujoco"].initial_state_digest
-                        == traces["pinocchio"].initial_state_digest
+                        traces["mujoco"]["initial_state_digest"]
+                        == traces["pinocchio"]["initial_state_digest"]
                     ),
                     **comparison,
                 }
             )
             positions.append(
                 np.stack(
-                    [traces[engine].club_position for engine in ("mujoco", "pinocchio")]
+                    [
+                        traces[engine]["club_position"]
+                        for engine in ("mujoco", "pinocchio")
+                    ]
                 )
             )
             wrenches.append(
                 np.stack(
                     [
-                        traces[engine].contact_wrench
+                        traces[engine]["contact_wrench"]
                         for engine in ("mujoco", "pinocchio")
                     ]
                 )
@@ -246,6 +353,18 @@ def evaluate_spanning_forward_subset(
     summary = {
         "subset_case_count": len(rows),
         "phase_indices": list(phase_indices),
+        "declared_tolerances": {
+            "club_position_rms_limit_m": 0.003,
+            "club_position_max_limit_m": 0.009,
+            "club_orientation_max_limit_rad": 0.035,
+            "contact_wrench_relative_rms_limit": 0.10,
+            "normalized_energy_discrepancy_limit": 0.08,
+        },
+        "tolerance_calibration": (
+            "Existing reduced-forward engineering acceptance regions, applied "
+            "unchanged to the 4 ms closed-state initialization audit; they are "
+            "not empirical confidence intervals."
+        ),
         "all_initial_state_digests_match": all(
             row["initial_state_digest_match"] for row in rows
         ),

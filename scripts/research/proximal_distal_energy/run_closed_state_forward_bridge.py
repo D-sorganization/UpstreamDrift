@@ -21,7 +21,6 @@ NPZ_PATH = DATA_DIR / "closed_state_forward_bridge.npz"
 SOURCES = (
     "scripts/research/proximal_distal_energy/spatial_forward_contract.py",
     "scripts/research/proximal_distal_energy/spatial_forward_engines.py",
-    "scripts/research/proximal_distal_energy/spatial_forward_study.py",
     "scripts/research/proximal_distal_energy/closed_state_forward_bridge.py",
     "scripts/research/proximal_distal_energy/run_closed_state_forward_bridge.py",
 )
