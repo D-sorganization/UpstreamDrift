@@ -3,8 +3,8 @@
 ## Current Scientific Audit State (2026-08-14)
 
 Epic #8557 has completed the current narrative-candidate adjudication contract:
-994/994 candidates, 266 atomic claims, and zero unadjudicated entries. This
-status is not scientific closure: all 31 public release claims now have a
+1,004/1,004 candidates, 272 atomic claims, and zero unadjudicated entries. This
+status is not scientific closure: all 33 public release claims now have a
 traceable review disposition, but all 31 retain an explicit model, equipment,
 anatomy, archival, or governed-human scientific gate. The
 trajectory-level bilateral point-force sensor qualification and subject-scaled
@@ -13,6 +13,12 @@ scopes. The closed-state forward bridge maps all 234 solved states and advances
 54 profile--span--phase cases for 4 ms in native MuJoCo and Pinocchio. This is
 a reduced initialization audit: articulated arms, calibrated contact and shaft
 properties, full-horizon delivery, and human inference remain prohibited.
+Issue #8666 extends that reference through 4, 10, 25, and 50 ms under nominal
+conditions and nine one-factor adverse or null branches. All 2,160 registered
+horizon cases pass the existing cross-engine discrepancy and work--energy
+closure gates. No failure is observed through 50 ms, making the result
+right-censored at that reduced-model horizon rather than a full-delivery or
+anatomical claim.
 Issue #8556 remains blocked on governed human bilateral six-axis
 grip-wrench acquisition, and all new scientific content must regenerate the
 inventory and reopen adjudication until every new candidate is reviewed.
@@ -123,7 +129,7 @@ study,vandv,provenance,units}`, with subpackages re-exported by name and a
   rewritten after seven of its eight claims were found to contradict the code.
 
 - **2026-08-14** - Completed the release-level claim-review authority for epic
-  #8557. All 31 release claims now link to supporting atomic claims, evidence,
+  #8557. All 33 release claims now link to supporting atomic claims, evidence,
   negative controls, falsifiers, uncertainty boundaries, a scientific
   disposition, and a remaining gate. Open review bookkeeping is zero while
   human self-stabilization, physical bilateral sensing, and other scientific
@@ -2286,6 +2292,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-14 | 1.0.533 | Added the closed-state cross-engine validity-horizon contract: all 54 profile--span--phase states are evaluated at 4, 10, 25, and 50 ms under nominal and nine one-factor adverse/null branches in native MuJoCo and Pinocchio. All 2,160 horizon cases pass trajectory, wrench, energy-discrepancy, and work--energy closure gates; the no-failure result is right-censored at 50 ms and cannot establish articulated anatomy, calibrated equipment, full delivery, or human strategy. |
 | 2026-08-14 | 1.0.532 | Added the closed-state forward-contact bridge: all 234 subject-scaled closed configurations map through a declared rigid coordinate transform with position and velocity closure gates, zero-preload and passivity controls, and unique initial-state digests; 54 early/middle/late profile-span cases enter native MuJoCo and Pinocchio for a short-horizon trajectory, wrench, and energy parity audit. The contract explicitly prohibits promotion to articulated anatomy, calibrated equipment, full-downswing delivery, passive-transfer benefit, or human strategy. |
 | 2026-08-15 | 1.0.531 | Added BunkerShot3D designer metrics module for issue #8614. Implements `bunkershot3d.metrics.trajectory` (TrajectoryMetrics, DivotProfile, dig/skid classification, depth trace, entry/max/exit points), `bunkershot3d.metrics.energy` (EnergyPartition, club KE tracking, energy-to-sand/ball accounting), `bunkershot3d.metrics.force` (ForceMetrics, peak/mean force and moment, deceleration, contact duration), `bunkershot3d.metrics.twist` (TwistMetrics, shaft-axis and CG moments, impulse, twist direction), and `bunkershot3d.metrics.forgiveness` (ForgivenessMetrics, SensitivityGradient, finite-difference sensitivity analysis, forgiveness index). 42 new tests covering all metric categories. Computed from HDF5 result artifacts for fidelity-tier-agnostic (F0–F3) analysis. |
 | 2026-08-15 | 1.0.530 | Added the BunkerShot3D ball model and SwingBallFlightPipeline handoff for issue #8613. Implements `bunkershot3d.ball.lie` (BallLie, BallLieType, BallProperties with USGA specs, submersion/exposed-area geometry), `bunkershot3d.ball.splash` (sand-mediated splash momentum transfer: ejecta velocity, splash impulse, and ball launch from splash), and `bunkershot3d.ball.pipeline` (BunkerShotState, compute_bunker_launch, to_post_impact_state for PostImpactState handoff). 47 new tests covering lie geometry, splash physics, pipeline integration, energy accounting, and tour bunker shot sanity checks. |

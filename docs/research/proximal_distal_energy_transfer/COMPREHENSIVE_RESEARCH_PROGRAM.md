@@ -209,11 +209,11 @@ scientific contract.
 
 ## Completed Candidate Census and Ongoing Release Review
 
-The narrative census adjudicates all 994 paper candidates against 266 atomic
+The narrative census adjudicates all 1,004 paper candidates against 272 atomic
 claim contracts; no candidate remains unreviewed. That completion status
 applies to candidate coverage, not to scientific closure of every release
-claim. Ten of the 31 public release claims remain pending or in progress, and
-the validator now reports that open count explicitly. Repeated methods,
+claim. All 33 public release claims now have deterministic review dispositions
+and explicit remaining scientific gates. Repeated methods,
 summary, limitation, and release passages point back to their primary claim
 instead of acquiring stronger authority through repetition.
 
@@ -241,6 +241,16 @@ structural result and an identifiability warning, not an anatomical or coaching
 result. The next milestone replaces the surrogate with a validated articulated
 shoulder and calibrated forward grip contact.
 
+The closed-state forward reference now also has a registered validity-horizon
+map. Native MuJoCo and Pinocchio advance all 54 profile--span--phase states
+through 4, 10, 25, and 50 ms under nominal conditions and nine one-factor
+stiffness, damping, hand-mass, timestep, or immediate-driver-off branches. All
+2,160 horizon cases pass the declared trajectory, wrench, normalized-energy,
+and work--energy closure gates. No first failure is observed through 50 ms, so
+the result is explicitly right-censored there. This strengthens the reduced
+hand-carriage reference that the articulated tier must reproduce; it does not
+establish anatomy, calibrated equipment, full delivery, or human strategy.
+
 Completion of the candidate census is not completion of release review or the
 research program. In
 particular, the audit rejected quantitative small-deflection shaft inference
@@ -250,8 +260,8 @@ map, and preserves #8556 as an external human-data acquisition gate. Future
 milestones must create new claim records and falsifiers before new conclusions
 enter summaries or conclusions.
 
-The separate claim-evidence integrity manifest covers all 1,639 evidence
-references. It hash-pins 200 distinct repository artifacts and inventories 85
+The separate claim-evidence integrity manifest covers all 1,743 evidence
+references. It hash-pins 216 distinct repository artifacts and inventories 78
 external URLs. Hash agreement establishes content identity, not independence
 or correctness; URL inventory establishes traceability, not availability or
 scientific validity.

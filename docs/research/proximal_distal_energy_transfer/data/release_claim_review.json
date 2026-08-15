@@ -3,11 +3,11 @@
   "authority": "D-sorganization/UpstreamDrift#8557",
   "interpretation": "Review completion means every release claim has traceable atomic support, controls, falsifiers, boundaries, and a remaining gate. It does not mean every scientific claim is validated.",
   "summary": {
-    "release_claim_count": 32,
-    "reviewed_release_claim_count": 32,
+    "release_claim_count": 33,
+    "reviewed_release_claim_count": 33,
     "open_release_review_count": 0,
-    "scientifically_open_gate_count": 32,
-    "atomic_claim_count": 269
+    "scientifically_open_gate_count": 33,
+    "atomic_claim_count": 272
   },
   "release_claim_reviews": [
     {
@@ -1878,6 +1878,53 @@
         "Full-horizon articulated contact, calibrated grip and shaft properties, adverse-load controls, and governed human validation remain open."
       ],
       "remaining_scientific_gate": "Replace hand carriages with articulated arms and run full-horizon calibrated contact controls."
+    },
+    {
+      "release_claim_key": "closed_state_forward_validity_horizon",
+      "published_status": "no_failure_observed_through_registered_50_ms_reduced_interval",
+      "audit_state": "reviewed_as_right_censored_reduced_model_result",
+      "scientific_disposition": "no_failure_observed_through_registered_50_ms_interval",
+      "supporting_claim_ids": [
+        "PD-CLAIM-271",
+        "PD-CLAIM-272",
+        "PD-CLAIM-273"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/forward_contact_validity_horizon.json",
+        "docs/research/proximal_distal_energy_transfer/data/forward_contact_validity_horizon.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_forward_contact_validity_horizon.pdf",
+        "scripts/research/proximal_distal_energy/forward_contact_validity_horizon.py",
+        "scripts/research/proximal_distal_energy/run_forward_contact_validity_horizon.py",
+        "scripts/research/proximal_distal_energy/make_forward_contact_validity_horizon_figure.py",
+        "scripts/research/proximal_distal_energy/register_forward_contact_validity_horizon_claims.py",
+        "tests/research/test_forward_contact_validity_horizon.py"
+      ],
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:370",
+        "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd:10",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:382",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:99",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:394",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14"
+      ],
+      "negative_controls": [
+        "zero driver from the first integration step",
+        "contact stiffness and damping extremes",
+        "represented hand-mass extremes",
+        "timestep halving and doubling",
+        "work--energy closure without threshold retuning"
+      ],
+      "falsifiers": [
+        "Any registered case is omitted, silently dropped, receives unequal engine inputs, or lacks a typed outcome.",
+        "Any committed case fails a gate, loses finite closure, or a reproduced result finds an earlier incomplete-pass horizon.",
+        "A model, anatomy, equipment, delivery, or human conclusion is attributed to the reduced 50 ms agreement alone."
+      ],
+      "uncertainty_boundaries": [
+        "The design varies engineering factors one at a time and does not sample a calibrated joint parameter distribution.",
+        "Passing through 50 ms supplies no evidence beyond 50 ms and does not constitute a full delivery or impact simulation.",
+        "Articulated subject-scaled contact, distributed grip and shaft calibration, ground coupling, contact loss, delivery, impact, and governed human evidence remain open."
+      ],
+      "remaining_scientific_gate": "Replace hand carriages with articulated subject-scaled arms and repeat the horizon, adverse-load, contact-loss, and energy controls with calibrated grip and shaft properties."
     }
   ]
 }

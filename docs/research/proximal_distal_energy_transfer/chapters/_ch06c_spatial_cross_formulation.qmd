@@ -365,6 +365,41 @@ transfer, delivery benefit, or a human strategy. The next falsifier is a
 full-horizon articulated solve with typed contact loss, calibrated grip and
 shaft compliance, refinement, adverse-load, null, and reversal controls.
 
+#### Cross-Engine Validity Horizon and Adverse-Load Map
+
+The 4 ms result establishes initialization transport but leaves its persistence
+unmeasured. A preregistered extension therefore advances the same six profiles,
+three grip spans, and early, middle, and late closed states to 4, 10, 25, and
+50 ms. Ten branches retain the nominal model; halve or double contact
+stiffness, contact damping, represented hand mass, or timestep one factor at a
+time; or remove the grounded driver from the first integration step. Both
+native engines receive identical state and parameter records. Failed,
+unstable, and non-finite cases would remain typed outcomes rather than being
+removed.
+
+![Cross-Engine Forward-Contact Validity Horizon and Adverse-Load Map](figures/fig_forward_contact_validity_horizon.pdf){#fig-forward-contact-validity-horizon width=100%}
+
+All 2,160 profile--span--phase--variant--horizon cases pass the existing
+trajectory, contact-wrench, and normalized-energy discrepancy gates together
+with an 8% work--energy closure gate. At 50 ms, the worst nominal club-position
+difference is 0.503 $\mu$m, the worst nominal relative contact-wrench RMS
+difference is 0.0252%, and the worst nominal normalized-energy difference is
+$3.20\times10^{-6}$. Across every adverse and null branch, the largest
+club-position difference is 1.02 $\mu$m, the largest relative wrench RMS is
+0.0506%, and the largest normalized work--energy closure residual is 0.327%.
+Halving the timestep reduces the worst closure residual from 0.164% to 0.0818%,
+whereas doubling it raises the value to 0.327%, supplying the expected
+first-order refinement direction without retuning a threshold.
+
+No first-failure horizon is observed inside the registered 50 ms interval.
+That is a right-censored engineering result, not permission to extrapolate to
+the remaining downswing or impact. The carriages, rigid club, engineering
+contact law, and prescribed driver still omit articulated arms and scapulae,
+distributed grip and shaft properties, contact loss, ground coupling, and
+calibrated equipment. The study strengthens the reduced cross-engine reference
+that the articulated tier must reproduce; it does not establish anatomy,
+passive human transfer, timing economy, slack benefit, or coaching strategy.
+
 ### Paired Scapula-on-Ellipsoid Geometry Screen
 
 The fixed shoulder centers are the next explicit structural intervention. A

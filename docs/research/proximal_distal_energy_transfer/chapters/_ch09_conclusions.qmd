@@ -96,6 +96,15 @@ exactly, and the work--energy residual decreases under timestep refinement.
 This supports reduced spatial contact persistence, not anatomical arms,
 muscles, calibrated grip tissue, equipment, or human strategy.
 
+The closed-state validity-horizon extension further shows that the same two
+engines remain inside the declared trajectory, wrench, energy-discrepancy, and
+work--energy closure gates for all 2,160 registered cases through 50 ms. The
+matrix spans all profile--span--phase states plus one-factor stiffness,
+damping, hand-mass, timestep, and immediate-driver-off branches. No failure is
+observed inside the registered interval, so the result is right-censored at 50
+ms. It strengthens the reduced numerical reference but does not turn the
+hand-carriage model into articulated anatomy or a full delivery simulation.
+
 The coupled uncertainty/control phase rejects two additional shortcuts. A net
 planar wrench cannot uniquely identify both hand forces, and six summary
 observables cannot identify the complete 12-parameter vector. Separate

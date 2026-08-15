@@ -234,6 +234,12 @@ REVIEW_SPECS: dict[str, dict[str, Any]] = {
         ("PD-CLAIM-268", "PD-CLAIM-269", "PD-CLAIM-270"),
         "Replace hand carriages with articulated arms and run full-horizon calibrated contact controls.",
     ),
+    "closed_state_forward_validity_horizon": _spec(
+        "reviewed_as_right_censored_reduced_model_result",
+        "no_failure_observed_through_registered_50_ms_interval",
+        ("PD-CLAIM-271", "PD-CLAIM-272", "PD-CLAIM-273"),
+        "Replace hand carriages with articulated subject-scaled arms and repeat the horizon, adverse-load, contact-loss, and energy controls with calibrated grip and shaft properties.",
+    ),
     "scapulothoracic_contact_geometry": _spec(
         "reviewed_as_paired_geometry_screen_with_explicit_boundaries",
         "paired_geometry_screen_partial_with_explicit_boundaries",

@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "1204a1247e534736f99f7238eb7c89c9b1ff1ed3015e2b7fb0927193837120c9",
+    "source_digest": "fd9d1db3633bb616eb0ea8b1c539ebac8fa1e904c07e846c64f0dda5fc2844c6",
     "baseline_commit": "a4b53e39b"
   },
   "audit_scope": {
@@ -11,7 +11,7 @@
     "release_review_completion_status": "complete",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "The complete paper inventory is adjudicated. Subject-scaled closed contact passes its reduced-tree screen, and all 234 states map into a 54-case short-horizon two-engine initialization audit. Calibrated articulated forward contact and governed human validation remain unexecuted."
+    "current_scope": "The complete paper inventory is adjudicated. Closed subject-scaled states pass a 2,160-case reduced cross-engine horizon and adverse-load map through 50 ms. The no-failure result is right-censored; articulated contact, calibrated equipment, full delivery, and governed human validation remain open."
   },
   "dependencies": [
     {
@@ -199,6 +199,11 @@
       "release_claim_key": "closed_state_forward_initialization",
       "published_status": "supported_for_234_mappings_and_54_short_cross_engine_cases",
       "audit_state": "reviewed_as_short_horizon_reduced_model_result"
+    },
+    {
+      "release_claim_key": "closed_state_forward_validity_horizon",
+      "published_status": "no_failure_observed_through_registered_50_ms_reduced_interval",
+      "audit_state": "reviewed_as_right_censored_reduced_model_result"
     }
   ],
   "candidate_reviews": [
@@ -10040,16 +10045,6 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-54446a28f977e4fa",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-262"
-      ],
-      "rationale": "This revised synthesis passage carries the registered contact-feasibility boundary or its next-test consequence.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-14"
-    },
-    {
       "candidate_id": "PD-CAND-c063936829317748",
       "disposition": "material_claims_mapped",
       "claim_ids": [
@@ -10201,13 +10196,74 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-595f13f49a6683a9",
+      "candidate_id": "PD-CAND-cac57b75d18764b2",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-260",
-        "PD-CLAIM-263"
+        "PD-CLAIM-263",
+        "PD-CLAIM-272"
       ],
       "rationale": "This passage states or bounds the subject-scaled contact-geometry audit.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-6b69d424ec75e68f",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-262",
+        "PD-CLAIM-273"
+      ],
+      "rationale": "This revised synthesis passage carries the registered contact-feasibility boundary or its next-test consequence.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-89eca8d0cabc3372",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-271"
+      ],
+      "rationale": "This passage states or bounds the registered forward-contact validity-horizon result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-afe3ac81a69a2746",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "The figure include points to registered evidence but asserts no standalone result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-b33f294ebe6557dd",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-272"
+      ],
+      "rationale": "This passage states or bounds the registered forward-contact validity-horizon result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-8d7dcc67a221fe3f",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-273"
+      ],
+      "rationale": "This passage states or bounds the registered forward-contact validity-horizon result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "candidate_id": "PD-CAND-b30af9f570f239dc",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-272",
+        "PD-CLAIM-273"
+      ],
+      "rationale": "This passage states or bounds the registered forward-contact validity-horizon result.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-14"
     }
@@ -21804,7 +21860,7 @@
     {
       "claim_id": "PD-CLAIM-260",
       "candidate_ids": [
-        "PD-CAND-595f13f49a6683a9",
+        "PD-CAND-cac57b75d18764b2",
         "PD-CAND-bc0368729ddb9738",
         "PD-CAND-7b6cd5358472b395",
         "PD-CAND-80616653a4fc60a7",
@@ -21935,7 +21991,7 @@
       "claim_id": "PD-CLAIM-262",
       "candidate_ids": [
         "PD-CAND-59dd7b95647eda3f",
-        "PD-CAND-54446a28f977e4fa",
+        "PD-CAND-6b69d424ec75e68f",
         "PD-CAND-c063936829317748",
         "PD-CAND-36a661af65c9ae1d",
         "PD-CAND-c3105f94a0a046da"
@@ -22003,7 +22059,7 @@
     {
       "claim_id": "PD-CLAIM-263",
       "candidate_ids": [
-        "PD-CAND-595f13f49a6683a9",
+        "PD-CAND-cac57b75d18764b2",
         "PD-CAND-9c65c424209437d6",
         "PD-CAND-c39cc01504847772",
         "PD-CAND-9dd9306ab117189e",
@@ -22453,6 +22509,140 @@
       ],
       "falsifier": "A mechanism, delivery, anatomy, or coaching conclusion is attributed to this initialization audit alone.",
       "adjudication": "The deterministic artifacts were regenerated in native MuJoCo and Pinocchio and retain the short-horizon reduced-model boundary.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "claim_id": "PD-CLAIM-271",
+      "candidate_ids": [
+        "PD-CAND-89eca8d0cabc3372"
+      ],
+      "statement": "The registered horizon matrix advances every profile--span--phase state through four horizons under nominal conditions and nine one-factor adverse or null branches in paired MuJoCo and Pinocchio runs.",
+      "classification": "closed_state_forward_horizon_design",
+      "published_status": "complete_for_declared_reduced_matrix",
+      "audit_status": "paired_cross_engine_horizon_adverse_load_and_energy_controls_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:370"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/forward_contact_validity_horizon.json",
+        "docs/research/proximal_distal_energy_transfer/data/forward_contact_validity_horizon.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_forward_contact_validity_horizon.pdf",
+        "scripts/research/proximal_distal_energy/forward_contact_validity_horizon.py",
+        "scripts/research/proximal_distal_energy/run_forward_contact_validity_horizon.py",
+        "scripts/research/proximal_distal_energy/make_forward_contact_validity_horizon_figure.py",
+        "scripts/research/proximal_distal_energy/register_forward_contact_validity_horizon_claims.py",
+        "tests/research/test_forward_contact_validity_horizon.py"
+      ],
+      "model_domain": "Six synthetic profiles, three grip spans, three phase states, ten one-factor branches, four horizons, and two native engines.",
+      "uncertainty_boundary": "The design varies engineering factors one at a time and does not sample a calibrated joint parameter distribution.",
+      "competing_explanations": [
+        "shared reduced model structure",
+        "engineering contact and driver parameters",
+        "rigid club and hand-carriage substitution",
+        "finite 50 ms observation interval"
+      ],
+      "negative_controls": [
+        "zero driver from the first integration step",
+        "contact stiffness and damping extremes",
+        "represented hand-mass extremes",
+        "timestep halving and doubling",
+        "work--energy closure without threshold retuning"
+      ],
+      "falsifier": "Any registered case is omitted, silently dropped, receives unequal engine inputs, or lacks a typed outcome.",
+      "adjudication": "All registered outcomes were retained. No failure was observed through 50 ms, so persistence is reported as right-censored rather than extrapolated.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "claim_id": "PD-CLAIM-272",
+      "candidate_ids": [
+        "PD-CAND-cac57b75d18764b2",
+        "PD-CAND-b33f294ebe6557dd",
+        "PD-CAND-b30af9f570f239dc"
+      ],
+      "statement": "All 2,160 registered horizon cases pass the declared trajectory, wrench, normalized-energy, and work--energy closure gates; no first failure is observed through 50 ms.",
+      "classification": "closed_state_cross_engine_validity_horizon_result",
+      "published_status": "supported_and_right_censored_at_50_ms",
+      "audit_status": "paired_cross_engine_horizon_adverse_load_and_energy_controls_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd:10",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:382",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:99"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/forward_contact_validity_horizon.json",
+        "docs/research/proximal_distal_energy_transfer/data/forward_contact_validity_horizon.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_forward_contact_validity_horizon.pdf",
+        "scripts/research/proximal_distal_energy/forward_contact_validity_horizon.py",
+        "scripts/research/proximal_distal_energy/run_forward_contact_validity_horizon.py",
+        "scripts/research/proximal_distal_energy/make_forward_contact_validity_horizon_figure.py",
+        "scripts/research/proximal_distal_energy/register_forward_contact_validity_horizon_claims.py",
+        "tests/research/test_forward_contact_validity_horizon.py"
+      ],
+      "model_domain": "Six synthetic profiles, three grip spans, three phase states, ten one-factor branches, four horizons, and two native engines.",
+      "uncertainty_boundary": "Passing through 50 ms supplies no evidence beyond 50 ms and does not constitute a full delivery or impact simulation.",
+      "competing_explanations": [
+        "shared reduced model structure",
+        "engineering contact and driver parameters",
+        "rigid club and hand-carriage substitution",
+        "finite 50 ms observation interval"
+      ],
+      "negative_controls": [
+        "zero driver from the first integration step",
+        "contact stiffness and damping extremes",
+        "represented hand-mass extremes",
+        "timestep halving and doubling",
+        "work--energy closure without threshold retuning"
+      ],
+      "falsifier": "Any committed case fails a gate, loses finite closure, or a reproduced result finds an earlier incomplete-pass horizon.",
+      "adjudication": "All registered outcomes were retained. No failure was observed through 50 ms, so persistence is reported as right-censored rather than extrapolated.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-14"
+    },
+    {
+      "claim_id": "PD-CLAIM-273",
+      "candidate_ids": [
+        "PD-CAND-8d7dcc67a221fe3f",
+        "PD-CAND-6b69d424ec75e68f",
+        "PD-CAND-b30af9f570f239dc"
+      ],
+      "statement": "The validity-horizon result strengthens only the reduced hand-carriage reference and does not establish articulated anatomy, calibrated equipment, passive human transfer, timing economy, slack benefit, or coaching strategy.",
+      "classification": "closed_state_forward_horizon_inference_boundary",
+      "published_status": "explicitly_bounded",
+      "audit_status": "paired_cross_engine_horizon_adverse_load_and_energy_controls_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:394",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:99"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/forward_contact_validity_horizon.json",
+        "docs/research/proximal_distal_energy_transfer/data/forward_contact_validity_horizon.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_forward_contact_validity_horizon.pdf",
+        "scripts/research/proximal_distal_energy/forward_contact_validity_horizon.py",
+        "scripts/research/proximal_distal_energy/run_forward_contact_validity_horizon.py",
+        "scripts/research/proximal_distal_energy/make_forward_contact_validity_horizon_figure.py",
+        "scripts/research/proximal_distal_energy/register_forward_contact_validity_horizon_claims.py",
+        "tests/research/test_forward_contact_validity_horizon.py"
+      ],
+      "model_domain": "Six synthetic profiles, three grip spans, three phase states, ten one-factor branches, four horizons, and two native engines.",
+      "uncertainty_boundary": "Articulated subject-scaled contact, distributed grip and shaft calibration, ground coupling, contact loss, delivery, impact, and governed human evidence remain open.",
+      "competing_explanations": [
+        "shared reduced model structure",
+        "engineering contact and driver parameters",
+        "rigid club and hand-carriage substitution",
+        "finite 50 ms observation interval"
+      ],
+      "negative_controls": [
+        "zero driver from the first integration step",
+        "contact stiffness and damping extremes",
+        "represented hand-mass extremes",
+        "timestep halving and doubling",
+        "work--energy closure without threshold retuning"
+      ],
+      "falsifier": "A model, anatomy, equipment, delivery, or human conclusion is attributed to the reduced 50 ms agreement alone.",
+      "adjudication": "All registered outcomes were retained. No failure was observed through 50 ms, so persistence is reported as right-censored rather than extrapolated.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-14"
     }

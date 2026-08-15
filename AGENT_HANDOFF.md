@@ -1,9 +1,8 @@
 # Agent Handoff — UpstreamDrift
 
-Last updated: 2026-08-14
+Last updated: 2026-08-15
 
-Update this current-state file with every PR and push to `main`; history belongs
-in git and GitHub.
+This is a current-state handoff. Historical detail belongs in git and GitHub.
 
 ## Program Authority
 
@@ -11,206 +10,119 @@ in git and GitHub.
   governs the proximal-to-distal research program. Issue
   [#8595](https://github.com/D-sorganization/UpstreamDrift/issues/8595) retains
   the photographed nine-point momentum-transfer agenda.
-- PR [#8651](https://github.com/D-sorganization/UpstreamDrift/pull/8651) is the
-  protected slice that reconciles the nine-point readiness assessment, adds
-  inspectable evidence links, and separates candidate-census completion from
-  the then-open release reviews. PR
-  [#8652](https://github.com/D-sorganization/UpstreamDrift/pull/8652) adds the
-  deterministic 31-claim review authority; it merged as
-  `001e2d56bdd7fcfa79d591acdd9768c03276b563`. SPEC follow-up
-  [#8653](https://github.com/D-sorganization/UpstreamDrift/pull/8653) merged as
-  `f797b33924d8a36ee91979f5353ffd201597d98c`. Handoff follow-up
-  [#8654](https://github.com/D-sorganization/UpstreamDrift/pull/8654) merged as
-  `bc081457f33d47837b0d0f6ad1a642e574a1561a`, the starting remote `main`
-  for the external-source qualification slice.
-- PR [#8658](https://github.com/D-sorganization/UpstreamDrift/pull/8658) merged
-  the protected external-source qualification slice as
-  `1717549c5f64fe1e1d75e966f3f60f44ad5f7292`, verified as remote `main` on
-  2026-08-14. Its actionable architecture-budget failure was fixed by
-  decomposing the validator and release-manifest builder without an exception;
-  protected document, PDF, SPEC, architecture, quality, and release gates
-  passed before auto-merge.
-- Canonical question, experiment, and readiness registries live under
-  `docs/research/proximal_distal_energy_transfer/data/`. MT-E01 through MT-E09
-  are model studies; MT-H01 is the governed participant-held-out stage.
-- [#8556](https://github.com/D-sorganization/UpstreamDrift/issues/8556) remains
-  open. No qualifying participant dataset with synchronized bilateral six-axis
-  grip wrenches is available; synthetic traces cannot substitute.
-- NotebookLM Biomechanics and Nonlinear Control review remains blocked on
-  manual Google reauthentication. The 2026-08-14 token check failed closed;
-  credentials and authentication dialogs were not automated.
+- PR [#8664](https://github.com/D-sorganization/UpstreamDrift/pull/8664)
+  merged the closed-state forward bridge as
+  `eff94297743d0612075f11648f60419044e2067c`. PR
+  [#8665](https://github.com/D-sorganization/UpstreamDrift/pull/8665) merged its
+  architecture isolation as `9f0c18a4d50b8c30ce3bafbb36a2e45197ffe1d3`,
+  verified as exact remote `main` before the present slice.
+- Issue [#8666](https://github.com/D-sorganization/UpstreamDrift/issues/8666)
+  is the current protected slice: the cross-engine forward-contact validity
+  horizon and adverse-load map.
+- Issue [#8556](https://github.com/D-sorganization/UpstreamDrift/issues/8556)
+  remains open. No qualifying participant dataset with synchronized bilateral
+  six-axis grip wrenches is available; synthetic traces cannot replace it.
+- NotebookLM review remains blocked on manual Google reauthentication. Do not
+  automate credentials, authentication dialogs, CAPTCHA, or two-factor steps.
 
-## Subject-Scaled Spatial-Geometry Slice
+## Current Scientific State
 
-- PR #8637 merged MT-E08 as
-  `04e03b9248dc483737f7e96b7dc0523e63860284` and advances Q2, Q4, Q5, and Q7
-  without claiming an anatomically feasible or human result. Branch
-  `docs/8557-spatial-spec` records the corresponding SPEC contract required by
-  the separate freshness gate.
-- Six deterministic de Leva engineering profiles (female and male at 1.55,
-  1.75, and 1.95 m) are evaluated at three grip spans and 61 states per case.
-- Anatomical hand points miss the prescribed grip contacts by 0.171--0.616 m
-  (median 0.405 m); none meets the preregistered 5 mm closure tolerance.
-- Every local 6 x 20 bilateral contact Jacobian nevertheless has rank six and
-  condition number 5.35--6.40. Local rank is therefore not proof that an open
-  prescribed configuration satisfies its declared contact constraints.
-- Two separated three-axis point forces map to one net club wrench with rank 5
-  and nullity 1. The exact invisible mode is equal and opposite axial force
-  along the hand-separation direction.
-- One independently measured internal axial scalar gives point-force rank 6.
-  It does not solve the full problem: two six-axis hand wrenches map to net
-  wrench with rank 6 and nullity 6.
-- The prescribed force-generated couple scales linearly with grip span, but
-  this algebraic control does not rescue contact closure or anatomical validity.
-- Evidence is in `data/subject_scaled_spatial_geometry.json` and `.npz`; its
-  backend, runner, tests, claim registration, and figure are release artifacts.
-
-## Current Program State
-
-- Issue [#8663](https://github.com/D-sorganization/UpstreamDrift/issues/8663)
-  is the protected next slice under epic #8557. It maps all 234 closed
-  subject-scaled states into the engine-neutral compliant-contact state and
-  audits a 54-case profile--span--phase subset in native MuJoCo and Pinocchio.
-- The constant initial rigid-frame map preserves inertial velocities. Maximum
-  position closure is `1.15817e-10 m`; maximum finite-difference velocity
-  closure is `0.00128431 m/s`; all 234 initial-state digests are unique, and
-  exact closure produces zero Kelvin--Voigt preload.
-- All 54 MuJoCo/Pinocchio pairs receive identical state digests and pass the
-  existing short-horizon trajectory, wrench, and normalized-energy gates.
-  Maximum club-position difference is `8.286e-08 m`, maximum relative wrench
-  RMS is `1.4423e-04`, and maximum normalized-energy difference is
-  `2.18793e-07`.
-- This is not a subject-scaled forward golfer: finite-mass hand carriages
-  replace articulated arms after initialization, the audit lasts 4 ms, and
-  equipment, tissue, full-delivery, and human-strategy claims remain open.
-  The next gate is full-horizon articulated contact with calibrated grip and
-  shaft properties plus null, reversal, adverse-load, and refinement controls.
-
-- MT-E09 holds trunk and club pose fixed across 54 paired arm-only states.
-  Fixed shoulder centers close 0 states; the scapula-on-ellipsoid surrogate
-  reaches the 0.5 mm residual in 31 and also passes optimizer termination in 16. Twenty-eight states activate a bound, maximum shoulder-center excursion
-  is `0.1011905 m`, and the 2.0 m adverse span fails at `0.4801423 m`.
-- Both paired contact Jacobians have rank six, while coordinate nullity rises
-  from two to ten. The result exposes geometry sensitivity and allocation
-  non-identifiability; it does not establish anatomy, muscle action, passive
-  transfer, delivery benefit, or human strategy.
-
-- The MT-E08 closed-contact follow-up solves all 234 combinations of six
-  synthetic profiles, three grip spans, and 13 phase samples while fixing the
-  six club coordinates. Worst bilateral closure error is
-  `1.15817e-10 m`; every achieved constraint Jacobian has rank six.
-- The minimum broad engineering-limit margin is `0.103452 rad`, the minimum
-  coarse nonadjacent-body bounding-sphere clearance is `0.0308571 m`, and the
-  maximum adjacent-sample configuration change is `0.0255737 rad`.
-- Those screens do not establish clinical range of motion, mesh-level anatomy,
-  grip force, passive transfer, timing benefit, slack benefit, or human use.
-  The next spatial gate is calibrated compliant forward contact initialized
-  from the closed configurations.
-- The claim inventory is adjudicated at 994/994 candidates and 266 atomic
-  claims, including the adverse subject-scaled contact-closure result. All 31
-  release claims now have a deterministic review disposition, supporting
-  atomic claims, evidence, controls, falsifiers, uncertainty boundaries, and a
-  remaining scientific gate. This closes review bookkeeping, not science: all
-  31 retain a model, equipment, anatomy, archival, or governed-human gate.
-- Every one of 1,064 claim source locators now resolves to an existing
-  repository file and in-range line. The claim-evidence integrity authority
-  covers all 1,639 support references, hash-pins 200 distinct local artifacts,
-  and inventories 78 external URLs without treating link presence as
-  independent scientific validation.
-- The external-source authority consolidates those 78 links into 56 underlying
-  works and supplies bounded assessments for all 54 externally supported
-  atomic claims. Its 2026-08-14 availability snapshot contains 36 resolving
-  links, 42 automated-access-restricted publisher/index links, and no broken,
-  transient, omitted, or unchecked link.
-- PD-CLAIM-093 now cites the actual Pickering, Sprigings, Neal, and Cheetham
-  records; PD-CLAIM-035 now cites the actual Feltner interaction-chain papers.
-  One broken DOI destination was replaced with its stable PubMed record and
-  two redundant TLS-failing author mirrors were removed without removing the
-  underlying works.
-- The handwritten agenda retains bounded model answers, partial answers, or a
-  negative general-rule result for eight points. MTQ-06, whether passive or
-  drift-mediated transfer reduces timing precision beyond the adverse planar
-  comparison and in people, remains unresolved. Every point now links directly
-  to inspectable evidence artifacts as well as its decisive next test.
-- Typed slack remains separated into five classes; no global benefit,
-  necessity, intentionality, or delivery advantage is established.
-- The common-phase timing screen has no sustained half-error recovery in 60
-  cases and does not support a state-trigger timing-volume advantage.
+- The question, experiment, claim, evidence, and readiness registries live in
+  `docs/research/proximal_distal_energy_transfer/data/`. The claim inventory is
+  fully adjudicated at 1,004 candidates and 272 atomic claims; all 33 release
+  claims have deterministic dispositions.
+- Evidence integrity covers 1,743 support references, 216 hash-pinned local
+  artifacts, and 78 external URLs representing 56 works. Link availability is
+  not treated as independent validation.
+- The photographed agenda has bounded model answers or partial answers for
+  eight of nine points. MTQ-06—whether passive or drift-mediated transfer
+  reduces timing precision beyond the adverse planar comparison and in
+  people—remains unresolved.
+- Typed slack remains separated into five classes. No global slack benefit,
+  necessity, intentionality, delivery advantage, or coaching rule is claimed.
 - Higher proximal rate is not a universal release rule. Matching choice and
-  exact torso/arm/wrist killswitches retain favorable and adverse outcomes.
+  torso, arm, and wrist killswitches retain favorable and adverse outcomes.
 
-## Remaining Scientific Work
+## Subject-Scaled Geometry and Closed-State Bridge
 
-1. Replace the executed broad engineering bounds and bounding-sphere collision
-   screen with subject-specific joint geometry, clinical ranges where governed,
-   and mesh-level collision/contact qualification.
-2. Integrate calibrated compliant contact from the closed states, then repeat
-   coincident, reversal, killswitch, power, and work--energy controls in two
-   independent forward engines.
-3. Qualify MT-E07 with a traceably calibrated bilateral six-axis device,
-   distributed time-varying contact, compliance, drift, and synchronization.
-4. Add full-delivery-state-matched forward rate/acceleration and timing controls
-   across spatial and subject-scaled tiers.
-5. Estimate continuous attraction regions with identified observers, external
-   contact loads, spatial impact, saturation, and subject scaling.
-6. Embed each typed-slack class separately in higher-order delivery models.
-7. Couple calibrated grip, distributed shaft, articulated arms/scapula, ground,
-   impact, and an independent dynamics engine.
-8. Execute MT-H01 only after governed bilateral-wrench acquisition and the
-   frozen participant split.
-9. Replace the executed Seth-informed reduced scapulothoracic surrogate with an
-   independently validated articulated implementation; execute EMG onset-
-   definition sensitivity and distributed-grip contact measurements described
-   in the biomechanics plan; retain each as a model or acquisition design until
-   its prospective gates pass.
+- Six deterministic engineering profiles, three grip spans, and 13 phase
+  samples form 234 prescribed states. Anatomical hand points miss prescribed
+  contacts by 0.171–0.616 m (median 0.405 m); none meets 5 mm closure.
+- Both contact Jacobians can still be rank six. Local rank therefore does not
+  prove that an open prescribed configuration satisfies its contacts.
+- The closed-contact solve reaches `1.15817e-10 m` worst closure with rank-six
+  achieved constraints, but broad joint bounds and bounding spheres are not
+  clinical range-of-motion or mesh-level anatomy evidence.
+- A scapula-on-ellipsoid surrogate closes 31 of 54 paired states to 0.5 mm and
+  passes optimizer termination in 16. This exposes geometry sensitivity and
+  allocation non-identifiability; it does not establish anatomy or muscle use.
+- The engine-neutral closed-state bridge preserves inertial velocities, creates
+  zero Kelvin–Voigt preload at exact closure, and gives every state a unique
+  digest. Native MuJoCo and robotics Pinocchio receive identical digests.
 
-## Required Gates
+## Validity-Horizon Result
+
+- The #8666 study evaluates 4, 10, 25, and 50 ms for all 54 selected
+  profile–span–phase states under nominal conditions and nine one-factor/null
+  variants. Ten variants, two engines, and four horizons produce 1,080 engine
+  traces and 2,160 paired horizon cases.
+- All cases pass the registered trajectory, wrench, normalized-energy, and
+  work–energy gates through 50 ms. No first failure is observed, so the result
+  is right-censored at 50 ms rather than evidence for a full downswing.
+- At 50 ms, worst nominal club-position difference is 0.503 micrometres,
+  relative wrench RMS is 0.0252%, and normalized-energy difference is
+  `3.20e-06`.
+- Across all variants, worst position difference is 1.02 micrometres, wrench
+  RMS is 0.0506%, and energy-closure residual is 0.327%. Timestep halving
+  improves worst closure to 0.0818%, the expected refinement direction.
+- The reduced model uses finite-mass hand carriages rather than articulated
+  arms. It does not establish anatomy, equipment behavior, full delivery,
+  passive human transfer, timing benefit, or coaching strategy.
+
+## Next Scientific Gates
+
+1. Add subject-scaled articulated arms and scapulae with independently
+   qualified joint geometry, clinical limits where governed, and mesh contact.
+2. Calibrate distributed grip and shaft compliance, damping, friction, contact
+   loss, ground coupling, and equipment uncertainty.
+3. Repeat the registered horizon, reversal, killswitch, adverse-load,
+   refinement, power, and energy-ledger controls in two independent engines.
+4. Add full-delivery state-matched rate, acceleration, and timing controls;
+   estimate continuous attraction regions with identified observers.
+5. Embed each typed-slack class separately rather than treating slack as one
+   binary state.
+6. Qualify MT-E07 using a traceable bilateral six-axis measurement device with
+   synchronization, drift, distributed contact, and uncertainty controls.
+7. Execute MT-H01 only after governed participant acquisition and the frozen
+   participant-held-out split.
+
+## Reproduction and Release Gates
 
 ```powershell
-python -m scripts.research.proximal_distal_energy.run_subject_scaled_spatial_geometry
-python -m scripts.research.proximal_distal_energy.make_subject_scaled_spatial_geometry_figures
-python -m scripts.research.proximal_distal_energy.run_subject_scaled_closed_contact
-python -m scripts.research.proximal_distal_energy.make_subject_scaled_closed_contact_figures
-python -m scripts.research.proximal_distal_energy.run_scapulothoracic_contact_screen
-python -m scripts.research.proximal_distal_energy.make_scapulothoracic_contact_figures
-python -m pytest tests/research/test_subject_scaled_spatial_geometry.py `
-  tests/research/test_subject_scaled_closed_contact.py `
-  tests/research/test_scapulothoracic_contact_screen.py `
-  tests/research/test_momentum_transfer_experiment_registry.py `
-  tests/unit/research/test_momentum_question_readiness.py `
+python -m scripts.research.proximal_distal_energy.run_forward_contact_validity_horizon
+python -m scripts.research.proximal_distal_energy.make_forward_contact_validity_horizon_figure
+python -m pytest tests/research/test_forward_contact_validity_horizon.py `
+  tests/research/test_closed_state_forward_bridge.py `
   tests/research/test_proximal_distal_release_bundle.py -q
-python -m ruff check scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py `
-  scripts/research/proximal_distal_energy/run_subject_scaled_spatial_geometry.py `
-  scripts/research/proximal_distal_energy/make_subject_scaled_spatial_geometry_figures.py `
-  scripts/research/proximal_distal_energy/register_subject_scaled_spatial_geometry_claims.py `
-  tests/research/test_subject_scaled_spatial_geometry.py `
-  scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py `
-  scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py `
-  scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py `
-  tests/research/test_subject_scaled_closed_contact.py
-python -m ruff check scripts/research/proximal_distal_energy/scapulothoracic_contact_screen.py `
-  scripts/research/proximal_distal_energy/run_scapulothoracic_contact_screen.py `
-  scripts/research/proximal_distal_energy/make_scapulothoracic_contact_figures.py `
-  tests/research/test_scapulothoracic_contact_screen.py
 python -m scripts.research.proximal_distal_energy.claim_audit validate
 python -m scripts.research.proximal_distal_energy.claim_evidence_integrity validate
 python -m scripts.research.proximal_distal_energy.momentum_question_readiness validate
 python -m scripts.research.proximal_distal_energy.qualify_open_release validate
 python scripts/check_document_title_case.py --changed-from origin/main
 python scripts/check_doc_size_budget.py
+pre-commit run --hook-stage pre-push --all-files
 ```
 
-Render the Quarto PDF, optimize it, inspect affected and boundary pages, write
-and validate the release manifest, then verify the protected squash merge on
-remote `main`.
+Render the Quarto PDF, optimize it, inspect affected and boundary pages, and
+validate the release manifest before the protected squash merge.
 
 ## Do Not
 
-- Do not infer human technique, muscle action, injury benefit, or neural timing
-  demand from synthetic or structural-identifiability studies.
+- Do not infer human technique, muscle action, injury benefit, neural timing
+  demand, or coaching advice from synthetic or identifiability studies.
 - Do not treat one net club wrench as a substitute for bilateral sensing.
 - Do not collapse pointwise drift, forward persistence, and statistical
   mediation into one estimand.
 - Do not close #8556 or #8557 without their declared evidence.
-- Do not bypass reviews/checks, force-push, admin-merge, or rerun unchanged
+- Do not bypass reviews or checks, force-push, admin-merge, or rerun unchanged
   runner-capacity failures.
