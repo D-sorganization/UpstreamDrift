@@ -117,9 +117,11 @@ def _tension_snapshot(
     displacement: FloatArray,
     relative_velocity: FloatArray,
     config: AttachmentLawConfig,
+    reference_length_m: float,
 ) -> AttachmentLawSnapshot:
     distance = float(np.linalg.norm(displacement))
-    extension = max(0.0, distance - config.slack_distance_m)
+    free_length = reference_length_m + config.slack_distance_m
+    extension = max(0.0, distance - free_length)
     if extension == 0.0 or distance <= np.finfo(float).eps:
         zero = np.zeros(3)
         return AttachmentLawSnapshot(zero, zero, 0.0, 0.0, 0.0, 0.0, 0.0, False)
@@ -147,6 +149,7 @@ def evaluate_attachment_law(
     displacement_m: FloatArray,
     relative_velocity_m_s: FloatArray,
     config: AttachmentLawConfig,
+    reference_length_m: float = 0.0,
 ) -> AttachmentLawSnapshot:
     """Evaluate one declared passive law without hidden force while open."""
 
@@ -154,9 +157,13 @@ def evaluate_attachment_law(
         raise TypeError("config must be an AttachmentLawConfig")
     displacement = _finite_vector(displacement_m, "displacement_m")
     relative_velocity = _finite_vector(relative_velocity_m_s, "relative_velocity_m_s")
+    if not np.isfinite(reference_length_m) or reference_length_m < 0.0:
+        raise ValueError("reference_length_m must be finite and nonnegative")
     if config.kind is AttachmentLawKind.BILATERAL:
         return _bilateral_snapshot(displacement, relative_velocity, config)
-    return _tension_snapshot(displacement, relative_velocity, config)
+    return _tension_snapshot(
+        displacement, relative_velocity, config, reference_length_m
+    )
 
 
 def evaluate_slack_projection(

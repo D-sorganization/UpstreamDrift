@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "a60b0e7a24997d74bdcd88aa59dcdb7cc19265a5a10464f91257f8ce91ed9172",
+    "source_digest": "6afb9618a40ee8e4fb0933a7a154774c8c73e448d4ab293b9dd6595fd309c297",
     "baseline_commit": "a4b53e39b"
   },
   "audit_scope": {
@@ -11,7 +11,7 @@
     "release_review_completion_status": "complete",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "The complete paper inventory is adjudicated. The articulated bilateral and typed unilateral attachment tiers pass their registered five-millisecond gates. Distributed calibrated contact and governed human validation remain open."
+    "current_scope": "The complete paper inventory is adjudicated. Articulated point-attachment and distributed-fiber tiers pass their registered gates through 5 and 50 ms. Calibrated shaft, ground, tissue, and governed human validation remain open."
   },
   "dependencies": [
     {
@@ -224,6 +224,11 @@
       "release_claim_key": "typed_articulated_slack",
       "published_status": "five_millisecond_typed_attachment_event_gate_qualified",
       "audit_state": "reviewed_as_right_censored_synthetic_contact_result"
+    },
+    {
+      "release_claim_key": "distributed_grip_discretization",
+      "published_status": "fifty_millisecond_distributed_fiber_gate_qualified",
+      "audit_state": "reviewed_as_right_censored_synthetic_discretization_result"
     }
   ],
   "candidate_reviews": [
@@ -3970,26 +3975,6 @@
     },
     {
       "candidate_id": "PD-CAND-b9431c1dd8029d1e",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-132"
-      ],
-      "rationale": "Adjudicated within PD-CLAIM-132; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13"
-    },
-    {
-      "candidate_id": "PD-CAND-c154a0643c3bc5a2",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-132"
-      ],
-      "rationale": "Adjudicated within PD-CLAIM-132; the candidate is bounded to its declared model branch, transform contract, quantitative evidence, or explicit nonclaim.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13"
-    },
-    {
-      "candidate_id": "PD-CAND-23d01986b4ac7dc1",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-132"
@@ -10467,20 +10452,6 @@
       "last_verified_on": "2026-08-15"
     },
     {
-      "candidate_id": "PD-CAND-c81672ca0e4c2320",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-128",
-        "PD-CLAIM-262",
-        "PD-CLAIM-264",
-        "PD-CLAIM-270",
-        "PD-CLAIM-285"
-      ],
-      "rationale": "This repeated boundary or model-ladder passage inherits the mapped primary claim limits.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-15"
-    },
-    {
       "candidate_id": "PD-CAND-498e02bc8b231886",
       "disposition": "material_claims_mapped",
       "claim_ids": [
@@ -10536,6 +10507,120 @@
         "PD-CLAIM-285"
       ],
       "rationale": "This repeated boundary or model-ladder passage inherits the mapped primary claim limits.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "candidate_id": "PD-CAND-76ea04ded2d830ea",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-286"
+      ],
+      "rationale": "This passage states or bounds the distributed-grip gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "candidate_id": "PD-CAND-0a0a52b22a81c843",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-286"
+      ],
+      "rationale": "This passage states or bounds the distributed-grip gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "candidate_id": "PD-CAND-ba742bf9c01f716e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-286"
+      ],
+      "rationale": "This passage states or bounds the distributed-grip gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "candidate_id": "PD-CAND-9ee6e09e54f876be",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-287"
+      ],
+      "rationale": "This passage states or bounds the distributed-grip gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "candidate_id": "PD-CAND-0a5e2304b59129dd",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-287"
+      ],
+      "rationale": "This passage states or bounds the distributed-grip gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "candidate_id": "PD-CAND-20fbda78e3de59ef",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-288"
+      ],
+      "rationale": "This passage states or bounds the distributed-grip gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "candidate_id": "PD-CAND-edbbdf59e8d58a29",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "The figure include points to governed evidence without a standalone claim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "candidate_id": "PD-CAND-68d0bbee37063137",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-128",
+        "PD-CLAIM-288"
+      ],
+      "rationale": "This repeated ladder or boundary passage inherits the primary claim limits.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "candidate_id": "PD-CAND-62b3a36f1be3774a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-128",
+        "PD-CLAIM-288"
+      ],
+      "rationale": "This repeated ladder or boundary passage inherits the primary claim limits.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "candidate_id": "PD-CAND-8de255425ce45d75",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-253",
+        "PD-CLAIM-287",
+        "PD-CLAIM-288"
+      ],
+      "rationale": "This repeated ladder or boundary passage inherits the primary claim limits.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "candidate_id": "PD-CAND-4456e812d05b90b1",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-128",
+        "PD-CLAIM-262",
+        "PD-CLAIM-288"
+      ],
+      "rationale": "This repeated ladder or boundary passage inherits the primary claim limits.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-15"
     }
@@ -15115,13 +15200,15 @@
         "PD-CAND-7667c0e512dd9e84",
         "PD-CAND-fc0fb848d84d02cb",
         "PD-CAND-4a557d919aeb6342",
-        "PD-CAND-c81672ca0e4c2320",
         "PD-CAND-498e02bc8b231886",
         "PD-CAND-2cd9b9cc528f3acb",
         "PD-CAND-c357588db18f5c6c",
-        "PD-CAND-beaf8f5cead4ff2a"
+        "PD-CAND-beaf8f5cead4ff2a",
+        "PD-CAND-68d0bbee37063137",
+        "PD-CAND-62b3a36f1be3774a",
+        "PD-CAND-4456e812d05b90b1"
       ],
-      "statement": "The discrepancy matrix records explicit branch capabilities rather than cumulative triangular inheritance; ten bounded findings are supported somewhere in executed tiers, while calibrated anatomical, distributed, and independently measured human transport remain untested.",
+      "statement": "The discrepancy matrix records explicit branch capabilities rather than cumulative triangular inheritance; eleven bounded findings are supported somewhere in executed tiers, while calibrated anatomical, shaft, ground, and independently measured human transport remain untested.",
       "classification": "model_discrepancy_and_survival_boundary",
       "published_status": "machine_readable_branched_boundary",
       "audit_status": "capability_cells_findings_and_open_nonclaims_checked",
@@ -15137,7 +15224,10 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:685",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:286",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:299",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:305"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:305",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:440",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:458",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:710"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
@@ -15300,8 +15390,6 @@
       "claim_id": "PD-CLAIM-132",
       "candidate_ids": [
         "PD-CAND-b9431c1dd8029d1e",
-        "PD-CAND-c154a0643c3bc5a2",
-        "PD-CAND-23d01986b4ac7dc1",
         "PD-CAND-7c1423dce490ab9b",
         "PD-CAND-afbc50ff19058ed3",
         "PD-CAND-fc0fb848d84d02cb",
@@ -20722,9 +20810,10 @@
         "PD-CAND-c4c001fab108c8b8",
         "PD-CAND-5bb964996c957e8b",
         "PD-CAND-c6f3dffde5c055ae",
-        "PD-CAND-0e5d5314a405698d"
+        "PD-CAND-0e5d5314a405698d",
+        "PD-CAND-8de255425ce45d75"
       ],
-      "statement": "A two-excitation constitutive audit separates five slack classes, and a 1,944-trajectory articulated atlas transports three attachment classes under preload and event controls; neither establishes class identity or benefit.",
+      "statement": "Typed scalar and articulated point-contact audits separate slack classes, and a 288-trajectory distributed-fiber atlas exposes station-count and active-set sensitivity; none establishes physical class identity or benefit.",
       "classification": "typed_slack_dynamic_passivity_and_identifiability_audit",
       "published_status": "constitutive_mechanical_closure_supported_class_identification_not_established",
       "audit_status": "evidence_boundary_and_falsification_contract_checked",
@@ -20733,7 +20822,8 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:155",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:166",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:170",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:182"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:182",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:195"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
@@ -21659,11 +21749,11 @@
         "PD-CAND-c3105f94a0a046da",
         "PD-CAND-d062d3a7b7e089ee",
         "PD-CAND-d477dd45e2f2542c",
-        "PD-CAND-c81672ca0e4c2320",
         "PD-CAND-498e02bc8b231886",
-        "PD-CAND-2cd9b9cc528f3acb"
+        "PD-CAND-2cd9b9cc528f3acb",
+        "PD-CAND-4456e812d05b90b1"
       ],
-      "statement": "The bounded articulated bilateral and typed unilateral screens advance closed states through 5 ms with independent-engine controls, but timing, recovery, and benefit claims require longer calibrated distributed contact.",
+      "statement": "Articulated point-attachment screens pass through 5 ms and the distributed fiber discretization passes through 50 ms, but timing, recovery, equipment, and benefit claims require calibrated shaft, ground, tissue, and human data.",
       "classification": "articulated_spatial_completion_gate",
       "published_status": "bounded_articulated_attachment_forward_gate_complete_longer_calibrated_contact_open",
       "audit_status": "deterministic_subject_scaling_closure_rank_and_geometry_controls_checked",
@@ -21676,7 +21766,8 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:621",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:286",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:651",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:685"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:685",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:710"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
@@ -21801,8 +21892,7 @@
       "candidate_ids": [
         "PD-CAND-684ed6cb396eac0e",
         "PD-CAND-9dd9306ab117189e",
-        "PD-CAND-9bdb0446f034d972",
-        "PD-CAND-c81672ca0e4c2320"
+        "PD-CAND-9bdb0446f034d972"
       ],
       "statement": "Closed-contact inverse kinematics is a necessary geometric gate and does not establish anatomy, contact force, work, passivity, timing demand, self-correction, slack benefit, or human strategy.",
       "classification": "closed_contact_inference_boundary",
@@ -22184,8 +22274,7 @@
     {
       "claim_id": "PD-CLAIM-270",
       "candidate_ids": [
-        "PD-CAND-f885f0bb4a96dc0b",
-        "PD-CAND-c81672ca0e4c2320"
+        "PD-CAND-f885f0bb4a96dc0b"
       ],
       "statement": "The closed-state bridge removes an initialization gap but does not establish calibrated equipment, articulated anatomical dynamics, tissue loading, passive transfer, delivery benefit, slack benefit, or human strategy.",
       "classification": "closed_state_forward_bridge_inference_boundary",
@@ -23494,7 +23583,6 @@
       "claim_id": "PD-CLAIM-285",
       "candidate_ids": [
         "PD-CAND-f6e7da9a2c420424",
-        "PD-CAND-c81672ca0e4c2320",
         "PD-CAND-498e02bc8b231886",
         "PD-CAND-2cd9b9cc528f3acb",
         "PD-CAND-c357588db18f5c6c",
@@ -23544,6 +23632,160 @@
       ],
       "falsifier": "A biological, benefit, timing, delivery, or coaching claim is attributed to this bounded synthetic atlas alone.",
       "adjudication": "The registered event and natural-state results are reported separately with explicit right-censoring and no human or coaching inference.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "claim_id": "PD-CLAIM-286",
+      "candidate_ids": [
+        "PD-CAND-76ea04ded2d830ea",
+        "PD-CAND-0a0a52b22a81c843",
+        "PD-CAND-ba742bf9c01f716e"
+      ],
+      "statement": "A registered articulated atlas compares one-, three-, and five-fiber tension grips with equal total stiffness/damping, state-registered free lengths, and nested 4--50 ms horizons.",
+      "classification": "distributed_grip_discretization_design",
+      "published_status": "complete_for_declared_synthetic_matrix",
+      "audit_status": "distributed_grip_horizon_and_discretization_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:606",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:617",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:626"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_grip_atlas.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_grip_atlas.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_distributed_grip_atlas.pdf",
+        "scripts/research/proximal_distal_energy/articulated_distributed_grip.py",
+        "scripts/research/proximal_distal_energy/articulated_distributed_forward.py",
+        "scripts/research/proximal_distal_energy/articulated_distributed_atlas.py",
+        "scripts/research/proximal_distal_energy/run_distributed_grip_atlas.py",
+        "scripts/research/proximal_distal_energy/make_distributed_grip_figure.py",
+        "scripts/research/proximal_distal_energy/register_distributed_grip_claims.py",
+        "tests/research/test_articulated_distributed_grip.py",
+        "tests/research/test_articulated_distributed_forward.py",
+        "tests/research/test_articulated_distributed_atlas.py"
+      ],
+      "model_domain": "Twelve synthetic articulated states, one/three/five fibers per hand, two initial velocity signs, two time steps, two native engines, and nested 4/10/25/50 millisecond observations from 288 trajectories.",
+      "uncertainty_boundary": "The fibers are frictionless engineering lines, not measured pressure, fingers, or tissue.",
+      "competing_explanations": [
+        "fiber geometry rather than physical pressure distribution",
+        "state-registered free lengths rather than tissue preload",
+        "rigid-club or unchanged-support dynamics",
+        "unmatched load and delivery state"
+      ],
+      "negative_controls": [
+        "one-fiber point-law reduction",
+        "equal total stiffness and damping across station counts",
+        "coincident and reversed moment arms",
+        "initial-velocity reversal",
+        "time-step, station-count, and native-engine comparisons"
+      ],
+      "falsifier": "Station count changes total stiffness, horizons are reinitialized, or the one-fiber reduction fails.",
+      "adjudication": "Discretization and active-set results are reported without assigning measured pressure, benefit, human intent, or coaching meaning.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "claim_id": "PD-CLAIM-287",
+      "candidate_ids": [
+        "PD-CAND-9ee6e09e54f876be",
+        "PD-CAND-0a5e2304b59129dd",
+        "PD-CAND-8de255425ce45d75"
+      ],
+      "statement": "All 288 trajectories pass registered power, passivity, work-energy, geometry, refinement, and MuJoCo--Pinocchio gates through 50 ms; multi-fiber active sets are partly open but do not transition.",
+      "classification": "distributed_grip_discretization_result",
+      "published_status": "supported_through_declared_fifty_millisecond_synthetic_horizon",
+      "audit_status": "distributed_grip_horizon_and_discretization_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:636",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:646",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:195"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_grip_atlas.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_grip_atlas.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_distributed_grip_atlas.pdf",
+        "scripts/research/proximal_distal_energy/articulated_distributed_grip.py",
+        "scripts/research/proximal_distal_energy/articulated_distributed_forward.py",
+        "scripts/research/proximal_distal_energy/articulated_distributed_atlas.py",
+        "scripts/research/proximal_distal_energy/run_distributed_grip_atlas.py",
+        "scripts/research/proximal_distal_energy/make_distributed_grip_figure.py",
+        "scripts/research/proximal_distal_energy/register_distributed_grip_claims.py",
+        "tests/research/test_articulated_distributed_grip.py",
+        "tests/research/test_articulated_distributed_forward.py",
+        "tests/research/test_articulated_distributed_atlas.py"
+      ],
+      "model_domain": "Twelve synthetic articulated states, one/three/five fibers per hand, two initial velocity signs, two time steps, two native engines, and nested 4/10/25/50 millisecond observations from 288 trajectories.",
+      "uncertainty_boundary": "No-transition observations are right-censored, and delivery states are not matched for load or work.",
+      "competing_explanations": [
+        "fiber geometry rather than physical pressure distribution",
+        "state-registered free lengths rather than tissue preload",
+        "rigid-club or unchanged-support dynamics",
+        "unmatched load and delivery state"
+      ],
+      "negative_controls": [
+        "one-fiber point-law reduction",
+        "equal total stiffness and damping across station counts",
+        "coincident and reversed moment arms",
+        "initial-velocity reversal",
+        "time-step, station-count, and native-engine comparisons"
+      ],
+      "falsifier": "Any reproduced cell exceeds a gate, a geometric control fails, or a reported active transition is absent from committed evidence.",
+      "adjudication": "Discretization and active-set results are reported without assigning measured pressure, benefit, human intent, or coaching meaning.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "claim_id": "PD-CLAIM-288",
+      "candidate_ids": [
+        "PD-CAND-20fbda78e3de59ef",
+        "PD-CAND-4456e812d05b90b1",
+        "PD-CAND-68d0bbee37063137",
+        "PD-CAND-62b3a36f1be3774a",
+        "PD-CAND-8de255425ce45d75"
+      ],
+      "statement": "The distributed-fiber atlas establishes discretization sensitivity, not physical grip-pressure benefit, slack benefit, equipment response, timing economy, human transfer, or strategy.",
+      "classification": "distributed_grip_inference_boundary",
+      "published_status": "explicitly_bounded",
+      "audit_status": "distributed_grip_horizon_and_discretization_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:656",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:710",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:440",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:458",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:195"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_grip_atlas.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_grip_atlas.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_distributed_grip_atlas.pdf",
+        "scripts/research/proximal_distal_energy/articulated_distributed_grip.py",
+        "scripts/research/proximal_distal_energy/articulated_distributed_forward.py",
+        "scripts/research/proximal_distal_energy/articulated_distributed_atlas.py",
+        "scripts/research/proximal_distal_energy/run_distributed_grip_atlas.py",
+        "scripts/research/proximal_distal_energy/make_distributed_grip_figure.py",
+        "scripts/research/proximal_distal_energy/register_distributed_grip_claims.py",
+        "tests/research/test_articulated_distributed_grip.py",
+        "tests/research/test_articulated_distributed_forward.py",
+        "tests/research/test_articulated_distributed_atlas.py"
+      ],
+      "model_domain": "Twelve synthetic articulated states, one/three/five fibers per hand, two initial velocity signs, two time steps, two native engines, and nested 4/10/25/50 millisecond observations from 288 trajectories.",
+      "uncertainty_boundary": "Shaft bending/torsion, ground/free-moment work, friction, tissue, matched delivery, and governed human measurements remain open.",
+      "competing_explanations": [
+        "fiber geometry rather than physical pressure distribution",
+        "state-registered free lengths rather than tissue preload",
+        "rigid-club or unchanged-support dynamics",
+        "unmatched load and delivery state"
+      ],
+      "negative_controls": [
+        "one-fiber point-law reduction",
+        "equal total stiffness and damping across station counts",
+        "coincident and reversed moment arms",
+        "initial-velocity reversal",
+        "time-step, station-count, and native-engine comparisons"
+      ],
+      "falsifier": "A physical, biological, equipment, timing, or coaching claim is attributed to this synthetic atlas alone.",
+      "adjudication": "Discretization and active-set results are reported without assigning measured pressure, benefit, human intent, or coaching meaning.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-15"
     }

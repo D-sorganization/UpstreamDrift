@@ -269,6 +269,9 @@ python3 scripts/research/proximal_distal_energy/register_articulated_forward_con
 python3 -m scripts.research.proximal_distal_energy.run_articulated_slack_atlas
 python3 -m scripts.research.proximal_distal_energy.make_articulated_slack_figure
 python3 scripts/research/proximal_distal_energy/register_articulated_slack_claims.py
+python3 -m scripts.research.proximal_distal_energy.run_distributed_grip_atlas
+python3 -m scripts.research.proximal_distal_energy.make_distributed_grip_figure
+python3 scripts/research/proximal_distal_energy/register_distributed_grip_claims.py
 python3 -m scripts.research.proximal_distal_energy.run_spatial_forward_contact_study
 python3 -m scripts.research.proximal_distal_energy.run_uncertainty_control_study
 python3 -m scripts.research.proximal_distal_energy.run_timing_viability_study

@@ -40,6 +40,16 @@ and parity gates pass. This is a right-censored synthetic attachment result;
 unilateral slack, distributed grip and shaft structure, ground coupling, late
 downswing, impact, anatomy, muscle action, and human strategy remain
 prohibited inferences.
+Child issue #8682 then qualifies typed bilateral, tension-only, and radial
+dead-zone point attachments across 1,944 five-millisecond trajectories and
+isolated opening/reattachment probes. Child issue #8685 replaces each hand's
+point attachment with one, three, or five tension fibers while preserving total
+stiffness and damping. Its 288 trajectories are observed at nested 4, 10, 25,
+and 50 ms horizons in MuJoCo and Pinocchio. All registered geometry, power,
+passivity, work--energy, time-refinement, station-refinement, and engine-parity
+gates pass; no natural active-set transition occurs. This qualifies a synthetic
+contact discretization, not measured grip pressure, shaft response, delivery
+benefit, timing economy, human transfer, or technique.
 Issue #8556 remains blocked on governed human bilateral six-axis
 grip-wrench acquisition, and all new scientific content must regenerate the
 inventory and reopen adjudication until every new candidate is reviewed.
@@ -83,7 +93,7 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.537 |
+| **Spec Version** | 1.0.538 |
 | **Last Spec Update** | 2026-08-15 |
 
 ## 2. Purpose & Mission
@@ -2348,6 +2358,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-15 | 1.0.538 | Added the distributed-grip contact-discretization gate: one, three, and five tension fibers per hand preserve total stiffness and damping across 12 articulated states, two initial velocity signs, two time steps, two native engines, and nested 4/10/25/50 ms observations from 288 trajectories. Geometry null/reversal, virtual-power, passivity, work--energy, time-refinement, station-refinement, active-set, and cross-engine gates pass. The result is synthetic and right-censored; it does not establish physical grip pressure, shaft response, timing economy, delivery benefit, human transfer, or technique. |
 | 2026-08-15 | 1.0.537 | Added the typed unilateral articulated-attachment falsification gate: bilateral, tension-only, and dead-zone tension laws are evaluated across common-displacement and matched-extension comparisons, velocity-sign branches, isolated opening/reattachment probes, three time steps, and native MuJoCo/Pinocchio dynamics. The passive-law, virtual-power, work--energy, refinement, trajectory-parity, force-parity, and active-set-parity contracts pass. Natural five-millisecond branches do not produce opening or reattachment transitions, so event-probe results qualify the implementation only and do not establish a human or coaching strategy. |
 | 2026-08-15 | 1.0.536 | Added the bounded articulated bilateral-attachment forward gate: 18 selected closed states, seven nominal/adverse branches, three time steps, and native MuJoCo/Pinocchio dynamics produce 756 five-millisecond trajectories. Attachment-retention, power, work--energy, refinement, and parity gates pass; the result is explicitly right-censored and does not model unilateral slack, calibrated distributed grip/shaft, ground coupling, late downswing, impact, muscle action, human transfer, or coaching strategy. |
 | 2026-08-15 | 1.0.535 | Added the subject-scaled articulated contact-projection gate: finite bilateral Kelvin--Voigt forces arise from a declared club perturbation at all 234 closed states, project through the hand and club Jacobians with exact action--reaction and virtual-power controls, and yield matching native MuJoCo/Pinocchio initial accelerations. This is a same-state prerequisite, not a forward contact or human-strategy result. |
