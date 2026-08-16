@@ -7,127 +7,100 @@ This is a current-state handoff. Historical detail belongs in git and GitHub.
 ## Program Authority
 
 - Epic [#8557](https://github.com/D-sorganization/UpstreamDrift/issues/8557)
-  governs the proximal-to-distal research program. Issue
-  [#8595](https://github.com/D-sorganization/UpstreamDrift/issues/8595) retains
-  the photographed nine-point momentum-transfer agenda.
-- PR [#8664](https://github.com/D-sorganization/UpstreamDrift/pull/8664)
-  merged the closed-state forward bridge as
-  `eff94297743d0612075f11648f60419044e2067c`. PR
-  [#8665](https://github.com/D-sorganization/UpstreamDrift/pull/8665) merged its
-  architecture isolation as `9f0c18a4d50b8c30ce3bafbb36a2e45197ffe1d3`,
-  verified as exact remote `main` before the present slice.
-- PR [#8667](https://github.com/D-sorganization/UpstreamDrift/pull/8667)
-  merged the cross-engine validity-horizon study as
-  `f7135940891d229b4895ba3c00dc90e0ba4d0f3c`, verified as exact remote
-  `main`; issue #8666 is closed.
-- Issue [#8668](https://github.com/D-sorganization/UpstreamDrift/issues/8668)
-  is the next registered tier: subject-scaled articulated bilateral contact
-  with distributed grip, shaft, ground, contact-loss, refinement, and
-  adverse-load controls.
-- Issue [#8556](https://github.com/D-sorganization/UpstreamDrift/issues/8556)
-  remains open. No qualifying participant dataset with synchronized bilateral
-  six-axis grip wrenches is available; synthetic traces cannot replace it.
-- NotebookLM review remains blocked on manual Google reauthentication. Do not
+  governs the proximal-to-distal program; [#8595](https://github.com/D-sorganization/UpstreamDrift/issues/8595)
+  retains the photographed nine-point agenda.
+- [#8668](https://github.com/D-sorganization/UpstreamDrift/issues/8668) is the
+  subject-scaled articulated-contact tier. Children #8676, #8678, and #8680
+  completed inertia, contact projection, and bounded bilateral forwarding.
+- [#8682](https://github.com/D-sorganization/UpstreamDrift/issues/8682) adds
+  architecture-budget remediation and typed unilateral slack/contact.
+- [#8556](https://github.com/D-sorganization/UpstreamDrift/issues/8556)
+  remains open: no governed participant dataset contains synchronized bilateral
+  six-axis grip wrenches. Synthetic traces cannot replace it.
+- NotebookLM review is blocked on manual Google reauthentication. Never
   automate credentials, authentication dialogs, CAPTCHA, or two-factor steps.
 
-## Current Scientific State
+## Governed Evidence State
 
-- The question, experiment, claim, evidence, and readiness registries live in
-  `docs/research/proximal_distal_energy_transfer/data/`. The claim inventory is
-  fully adjudicated at 1,004 candidates and 272 atomic claims; all 33 release
-  claims have deterministic dispositions.
-- Evidence integrity covers 1,743 support references, 216 hash-pinned local
-  artifacts, and 78 external URLs representing 56 works. Link availability is
-  not treated as independent validation.
-- The photographed agenda has bounded model answers or partial answers for
-  eight of nine points. MTQ-06—whether passive or drift-mediated transfer
-  reduces timing precision beyond the adverse planar comparison and in
-  people—remains unresolved.
-- Typed slack remains separated into five classes. No global slack benefit,
-  necessity, intentionality, delivery advantage, or coaching rule is claimed.
-- Higher proximal rate is not a universal release rule. Matching choice and
+- The inventory contains 1,029 adjudicated candidates, 284 atomic claims, and
+  37 release claims; no candidate or release review is open.
+- Evidence integrity covers 1,908 references, 250 hash-pinned local artifacts,
+  and 78 URLs representing 56 works. Link availability is not validation.
+- Eight of nine photographed-agenda points have bounded/partial model answers.
+  MTQ-06—whether passive transfer reduces timing precision beyond the adverse
+  planar comparison and in people—remains unresolved.
+- Higher proximal rate is not universally beneficial. Matching choice and
   torso, arm, and wrist killswitches retain favorable and adverse outcomes.
 
-## Subject-Scaled Geometry and Closed-State Bridge
+## Articulated Geometry and Dynamics
 
-- Six deterministic engineering profiles, three grip spans, and 13 phase
-  samples form 234 prescribed states. Anatomical hand points miss prescribed
-  contacts by 0.171–0.616 m (median 0.405 m); none meets 5 mm closure.
-- Both contact Jacobians can still be rank six. Local rank therefore does not
-  prove that an open prescribed configuration satisfies its contacts.
-- The closed-contact solve reaches `1.15817e-10 m` worst closure with rank-six
-  achieved constraints, but broad joint bounds and bounding spheres are not
-  clinical range-of-motion or mesh-level anatomy evidence.
-- A scapula-on-ellipsoid surrogate closes 31 of 54 paired states to 0.5 mm and
-  passes optimizer termination in 16. This exposes geometry sensitivity and
-  allocation non-identifiability; it does not establish anatomy or muscle use.
-- The engine-neutral closed-state bridge preserves inertial velocities, creates
-  zero Kelvin–Voigt preload at exact closure, and gives every state a unique
-  digest. Native MuJoCo and robotics Pinocchio receive identical digests.
+- Six engineering profiles, three grip spans, and 13 phases define 234 states.
+  Prescribed anatomical hand points miss grip contacts by 0.171–0.616 m even
+  though both contact Jacobians can have rank six.
+- The reduced-tree closed solve reaches `1.15817e-10 m` worst closure. Broad
+  joint bounds and spheres are not clinical ranges or mesh anatomy.
+- Native MuJoCo and robotics Pinocchio independently assemble the same
+  20-coordinate tree at all 234 closed states. Mass, bias, inverse-dynamics,
+  symmetry, and positive-definiteness gates pass below `1.8e-12` relative.
+- Bilateral Kelvin–Voigt forces project through hand/grip Jacobians at all 234
+  states. Action–reaction, virtual power, passivity, geometry reversal, and
+  native initial-acceleration gates pass.
+- The reduced hand-carriage reference passes 2,160 paired cases through 4, 10,
+  25, and 50 ms; absence of a first failure is right-censored at 50 ms.
 
-## Validity-Horizon Result
+## Bounded Bilateral and Typed-Slack Results
 
-- The #8666 study evaluates 4, 10, 25, and 50 ms for all 54 selected
-  profile–span–phase states under nominal conditions and nine one-factor/null
-  variants. Ten variants, two engines, and four horizons produce 1,080 engine
-  traces and 2,160 paired horizon cases.
-- All cases pass the registered trajectory, wrench, normalized-energy, and
-  work–energy gates through 50 ms. No first failure is observed, so the result
-  is right-censored at 50 ms rather than evidence for a full downswing.
-- At 50 ms, worst nominal club-position difference is 0.503 micrometres,
-  relative wrench RMS is 0.0252%, and normalized-energy difference is
-  `3.20e-06`.
-- Across all variants, worst position difference is 1.02 micrometres, wrench
-  RMS is 0.0506%, and energy-closure residual is 0.327%. Timestep halving
-  improves worst closure to 0.0818%, the expected refinement direction.
-- The reduced model uses finite-mass hand carriages rather than articulated
-  arms. It does not establish anatomy, equipment behavior, full delivery,
-  passive human transfer, timing benefit, or coaching strategy.
+- The bilateral articulated gate covers 18 states, seven branches, three time
+  steps, and two engines: 756 five-millisecond trajectories. All retention,
+  power, energy, refinement, and parity gates pass; the worst normalized energy
+  residual falls from `0.00738` to `0.000854`.
+- The typed atlas covers bilateral, tension-only, 0.5 mm and 1.5 mm dead-zone
+  laws; common-displacement and matched-extension preload; velocity reversal;
+  two event probes; three steps; and two engines: 1,944 trajectories.
+- All typed-law numerical and parity gates pass. Worst force is `23.643 N`,
+  normalized energy residual refines `0.01923 → 0.01097 → 0.00480`, trajectory
+  parity is `1.32e-15`, and active-set parity failures are zero.
+- Natural branches show no transition before 5 ms. The 1.5 mm common 1 mm
+  displacement stays open; matched extension stays taut. Isolated probes yield
+  108 opening and 216 reattachment cells, qualifying event logic only.
+- No slack benefit, necessity, intent, timing economy, self-correction,
+  delivery advantage, human transfer, or coaching rule is supported.
 
 ## Next Scientific Gates
 
-1. Add subject-scaled articulated arms and scapulae with independently
-   qualified joint geometry, clinical limits where governed, and mesh contact.
-2. Calibrate distributed grip and shaft compliance, damping, friction, contact
-   loss, ground coupling, and equipment uncertainty.
-3. Repeat the registered horizon, reversal, killswitch, adverse-load,
-   refinement, power, and energy-ledger controls in two independent engines.
-4. Add full-delivery state-matched rate, acceleration, and timing controls;
-   estimate continuous attraction regions with identified observers.
-5. Embed each typed-slack class separately rather than treating slack as one
-   binary state.
-6. Qualify MT-E07 using a traceable bilateral six-axis measurement device with
-   synchronization, drift, distributed contact, and uncertainty controls.
-7. Execute MT-H01 only after governed participant acquisition and the frozen
-   participant-held-out split.
+1. Extend typed laws beyond 5 ms with distributed grip pressure, calibrated
+   friction, shaft bending/torsion, tissue, ground coupling, and uncertainty.
+2. Repeat geometry, reversal, killswitch, matched-work/load, refinement,
+   virtual-power, work–energy, and two-engine event controls.
+3. Add full-delivery state-matched rate, acceleration, and timing interventions
+   plus continuous attraction regions with identified observers.
+4. Qualify MT-E07 using a traceable bilateral six-axis device and execute
+   MT-H01 only after governed acquisition and a frozen participant holdout.
 
 ## Reproduction and Release Gates
 
 ```powershell
-python -m scripts.research.proximal_distal_energy.run_forward_contact_validity_horizon
-python -m scripts.research.proximal_distal_energy.make_forward_contact_validity_horizon_figure
-python -m pytest tests/research/test_forward_contact_validity_horizon.py `
-  tests/research/test_closed_state_forward_bridge.py `
+python -m scripts.research.proximal_distal_energy.run_articulated_contact_projection
+python -m scripts.research.proximal_distal_energy.run_articulated_forward_contact
+python -m scripts.research.proximal_distal_energy.run_articulated_slack_atlas
+python -m scripts.research.proximal_distal_energy.make_articulated_slack_figure
+python scripts/research/proximal_distal_energy/register_articulated_slack_claims.py
+python -m pytest tests/research/test_articulated_contact_projection.py `
+  tests/research/test_articulated_forward_contact.py `
+  tests/research/test_articulated_slack_contact.py `
+  tests/research/test_articulated_slack_forward.py `
   tests/research/test_proximal_distal_release_bundle.py -q
 python -m scripts.research.proximal_distal_energy.claim_audit validate
 python -m scripts.research.proximal_distal_energy.claim_evidence_integrity validate
 python -m scripts.research.proximal_distal_energy.momentum_question_readiness validate
 python -m scripts.research.proximal_distal_energy.qualify_open_release validate
+python scripts/ci/check_architecture_budget.py
 python scripts/check_document_title_case.py --changed-from origin/main
 python scripts/check_doc_size_budget.py
 pre-commit run --hook-stage pre-push --all-files
 ```
 
-Render the Quarto PDF, optimize it, inspect affected and boundary pages, and
-validate the release manifest before the protected squash merge.
-
-## Do Not
-
-- Do not infer human technique, muscle action, injury benefit, neural timing
-  demand, or coaching advice from synthetic or identifiability studies.
-- Do not treat one net club wrench as a substitute for bilateral sensing.
-- Do not collapse pointwise drift, forward persistence, and statistical
-  mediation into one estimand.
-- Do not close #8556 or #8557 without their declared evidence.
-- Do not bypass reviews or checks, force-push, admin-merge, or rerun unchanged
-  runner-capacity failures.
+Render and inspect the Quarto PDF before protected squash merge. Do not infer
+human technique, physiology, injury, timing demand, or coaching advice; treat a
+net wrench as bilateral allocation; close #8556/#8557; bypass protection;
+force-push; admin-merge; or rerun unchanged capacity failures.

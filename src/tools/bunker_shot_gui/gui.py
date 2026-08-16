@@ -321,16 +321,22 @@ class BunkerShotWidget(QWidget):
                     f"load; {utilisation.removable_area_m2 * 1e4:.1f} cm^2 removable"
                 ),
             )
-        window = evaluation.playability.window
-        if window is None:
+        playability = evaluation.playability
+        window = playability.window
+        if window is None or playability.carry_verdict is None:
             window_map.clear()
         else:
+            # A carry number never appears without the statement it may be
+            # read under (issue #8657): the grid and its verdict travel
+            # together on the outcome, and the caption is where that reaches
+            # the designer.
+            status = playability.carry_verdict.status
             window_map.set_grid(
-                evaluation.playability.carry_m,
+                playability.carry_m,
                 mask=window.in_window,
                 caption=(
-                    f"carry vs attack angle x firmness; window "
-                    f"{window.fraction:.0%} of the domain"
+                    f"carry [{status.value.replace('_', ' ').upper()}] vs attack "
+                    f"angle x firmness; window {window.fraction:.0%} of the domain"
                 ),
             )
 

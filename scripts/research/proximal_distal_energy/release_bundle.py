@@ -106,6 +106,22 @@ _RELEASE_METADATA: dict[str, Any] = {
             "command": "python -m scripts.research.proximal_distal_energy.run_forward_contact_validity_horizon",
             "tier": "subject_scaled_closed_state_reduced_forward_horizon_map",
         },
+        "articulated_inertia_cross_engine": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_articulated_inertia_cross_engine",
+            "tier": "subject_scaled_closed_state_articulated_common_state_dynamics",
+        },
+        "articulated_contact_projection": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_articulated_contact_projection",
+            "tier": "subject_scaled_articulated_contact_initial_acceleration",
+        },
+        "articulated_forward_contact": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_articulated_forward_contact",
+            "tier": "bounded_subject_scaled_articulated_bilateral_attachment_forward_dynamics",
+        },
+        "articulated_slack_atlas": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_articulated_slack_atlas",
+            "tier": "bounded_subject_scaled_typed_unilateral_attachment_forward_dynamics",
+        },
         "scapulothoracic_contact_screen": {
             "command": "python -m scripts.research.proximal_distal_energy.run_scapulothoracic_contact_screen",
             "tier": "paired_arm_only_scapula_on_ellipsoid_geometry_screen",
@@ -224,12 +240,24 @@ _RELEASE_METADATA: dict[str, Any] = {
         "closed_state_forward_validity_horizon": (
             "no_failure_observed_through_registered_50_ms_reduced_model_interval"
         ),
+        "subject_scaled_articulated_inertia": (
+            "native_common_state_mass_bias_and_inverse_dynamics_qualified"
+        ),
+        "subject_scaled_articulated_contact_projection": (
+            "same_state_bilateral_contact_projection_and_initial_acceleration_qualified"
+        ),
+        "bounded_articulated_forward_contact": (
+            "five_millisecond_bilateral_attachment_forward_gate_qualified"
+        ),
+        "typed_articulated_slack": (
+            "five_millisecond_typed_attachment_event_gate_qualified"
+        ),
         "scapulothoracic_contact_geometry": (
             "partial_reachability_with_high_allocation_nullity_forward_test_open"
         ),
     },
     "known_open_gates": [
-        "full-horizon subject-scaled articulated spatial contact with calibrated grip and distributed shaft",
+        "longer-horizon subject-scaled articulated spatial contact with calibrated distributed grip, friction, shaft, tissue, and ground coupling",
         "equipment-calibrated distributed beam and grip coupled into a subject-scaled forward solve",
         "measured tissue-level preload and slack identification",
         "governed held-out human experimental evaluation",

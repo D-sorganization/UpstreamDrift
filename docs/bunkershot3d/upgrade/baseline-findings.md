@@ -1,4 +1,4 @@
-# BunkerShot3D — baseline defect audit (2026-08-13)
+# BunkerShot3D — Baseline Defect Audit (2026-08-13)
 
 Base: `origin/main` @ `973c9342c`. Worktree: `UpstreamDrift-worktrees/bunker-pro`,
 branch `feat/bunkershot-pro-epic`.
@@ -7,7 +7,7 @@ Baseline test result: **2 failed, 138 passed, 3 skipped** (`pytest tests/bunkers
 
 Source size: ~1,530 LOC in `src/bunkershot3d/`, ~280 in `src/tools/bunker_shot_gui/`.
 
-## P0 — the model does not model the thing
+## P0 — The Model Does Not Model the Thing
 
 | #   | Finding                                                                                                                                                                                                                                                                                                                                                                                                                             | Evidence                                                                        |
 | --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
@@ -20,7 +20,7 @@ Source size: ~1,530 LOC in `src/bunkershot3d/`, ~280 in `src/tools/bunker_shot_g
 | B6  | **`CoSimulator.step` returns a hard-coded wrench** `[10,0,5]` / `[0,1,0]` and the backend push/step lines are commented out. It is a stub presenting as a co-simulator.                                                                                                                                                                                                                                                             | `kinematics/coupling.py:116-141`                                                |
 | B7  | **Dual-module identity split.** `calibration/calibrate_all.py` does `sys.path.insert(0, ...)` at import and imports `src.bunkershot3d.*`, so `src.bunkershot3d.exceptions.BackendNotImplementedError` and `bunkershot3d.exceptions.BackendNotImplementedError` are different classes. `except`/`pytest.raises` across the boundary fails. **This is one of the 2 baseline test failures.**                                          | `calibration/calibrate_all.py:27-34`                                            |
 
-## P0 — the configured simulation is arithmetically impossible
+## P0 — The Configured Simulation Is Arithmetically Impossible
 
 | #   | Finding                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Evidence                                                               |
 | --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
@@ -32,7 +32,7 @@ constraint to design around — it forces the multi-fidelity architecture (fast 
 
 - optional high-fidelity reference), rather than "make the DEM backends work".
 
-## Corrections to this audit
+## Corrections to This Audit
 
 **B5 was real but LATENT, not active** — my original characterisation was wrong about when it
 fires. MuJoCo orders a contact pair by **collider type, not geom id**. Verified directly: a box
@@ -53,7 +53,7 @@ pydantic. Rewritten as `7.0e+10` / `4.0e-4`, with a test pinning `isinstance(...
 Previously this fell through to the silent 5 m/s substitution (B10). It is now a loud
 `TrajectoryUnavailableError` naming every candidate path tried.
 
-## P1 — physics / numerics wrong
+## P1 — Physics / Numerics Wrong
 
 | #   | Finding                                                                                                                                                                                                                                                                                   | Evidence                                       |
 | --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
@@ -67,7 +67,7 @@ Previously this fell through to the silent 5 m/s substitution (B10). It is now a
 | B15 | **Sphere-only DEM with no rolling friction.** Spherical grains without a rolling-resistance model cannot reach the shear strength of angular silica sand; friction identified this way is not transferable.                                                                               | all three backends                             |
 | B16 | **MuJoCo grain init uses `rng.uniform` over the whole domain** — grains are initialised interpenetrating and explode on the first step; only the 500-step "settle" masks it. Chrono uses `np.linspace` z-layers, which stacks all grains in a single vertical line for large counts.      | `mpm/driver.py:68-71`, `chrono/driver.py:108`  |
 
-## P2 — architecture / engineering quality
+## P2 — Architecture / Engineering Quality
 
 | #   | Finding                                                                                                                                                                                                                                                                                                                                           |
 | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -84,7 +84,7 @@ Previously this fell through to the silent 5 m/s substitution (B10). It is now a
 | B27 | Both `notebooks/bunkershot3d/phase1_mvp.py` and `src/tools/bunker_shot_gui/gui.py` are separate entry points to the same thing; two launcher tiles (`bunkershot3d`, `bunker_shot`) point at different files.                                                                                                                                      |
 | B28 | **The GUI never imports `bunkershot3d`.** `_run_simulation` draws `np.random.normal` particles and reports `0.5 * 0.3 * v**2` as "Est. Force". It is labelled a preview, which is honest, but it means the only user-facing surface is disconnected from the model. `src/tools/bunker_shot_gui/gui.py:141-205`                                    |
 
-## Baseline test failures
+## Baseline Test Failures
 
 1. `test_calibration_honesty_7999.py::TestCalibrateAllProvenance::test_non_mock_run_fails_instead_of_fabricating` — B7 (dual-module identity split).
 2. `test_mpm_optional_dependency.py::test_mpm_driver_import_survives_mujoco_dll_initialization_failure` — import-guard test; `mujoco` 3.9.0 imports fine here, the test simulates `OSError(1114)` and the guard only catches `ImportError`.

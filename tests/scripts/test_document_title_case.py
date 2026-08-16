@@ -6,6 +6,7 @@ import pytest
 
 from scripts.check_document_title_case import (
     _added_lines_from_diff,
+    changed_paths,
     changed_lines_for_path,
     expected_title,
     findings_for_text,
@@ -59,3 +60,21 @@ def test_git_diff_is_decoded_as_utf8(monkeypatch: pytest.MonkeyPatch) -> None:
     assert changed == {1}
     assert observed["encoding"] == "utf-8"
     assert observed["errors"] == "replace"
+
+
+def test_staged_path_selection_does_not_scan_untouched_documents(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    staged_pdf = tmp_path / "paper.pdf"
+    staged_pdf.write_bytes(b"%PDF-")
+    (tmp_path / "notes.txt").write_text("not a governed document", encoding="utf-8")
+    observed: dict[str, object] = {}
+
+    def fake_run(*args: object, **kwargs: object) -> object:
+        observed["command"] = args[0]
+        return type("Result", (), {"stdout": "paper.pdf\nnotes.txt\n"})()
+
+    monkeypatch.setattr("scripts.check_document_title_case.subprocess.run", fake_run)
+
+    assert changed_paths(tmp_path, staged=True) == [staged_pdf]
+    assert "--cached" in observed["command"]
