@@ -433,11 +433,13 @@ def sole_field_text(field: SoleLoadField, patch: ContactPatch | None = None) -> 
             f"{field.peak_resultant_force_N(depth):.4g} N at "
             f"{field.peak_time_s(depth) * 1e3:.2f} ms",
         ),
+        f"  {depth.description}",
         _line(
             f"Peak {inertial.label.lower()}",
             f"{field.peak_resultant_force_N(inertial):.4g} N at "
             f"{field.peak_time_s(inertial) * 1e3:.2f} ms",
         ),
+        f"  {inertial.description}",
         _line(
             "Inertial share at peak load",
             f"{field.peak_inertial_share:.1%} of the sole's own resultant",

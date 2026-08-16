@@ -54,6 +54,13 @@ class TestTheTwoTermsAreReportedApart:
     def test_the_inertial_share_is_stated(self, text: str) -> None:
         assert "inertial share" in text.lower()
 
+    def test_each_term_says_what_it_physically_is(self, text: str) -> None:
+        """A designer reading "depth-dependent" should not have to guess."""
+        from src.tools.bunker_shot_gui.field import LoadComponent
+
+        for component in (LoadComponent.DEPTH, LoadComponent.INERTIAL):
+            assert component.description in text
+
     def test_the_resolution_is_stated_so_the_bin_count_is_not_confused(
         self, text: str, nominal_shot
     ) -> None:  # type: ignore[no-untyped-def]
