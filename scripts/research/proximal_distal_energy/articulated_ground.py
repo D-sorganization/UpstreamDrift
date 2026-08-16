@@ -14,6 +14,12 @@ from typing import Literal
 import numpy as np
 from numpy.typing import NDArray
 
+from scripts.research.proximal_distal_energy.articulated_distributed_grip import (
+    DistributedGripConfig,
+    DistributedGripSnapshot,
+    distributed_contact_kinematics,
+    evaluate_distributed_grip_kinematics,
+)
 from scripts.research.proximal_distal_energy.articulated_shaft import (
     ArticulatedShaftProperties,
     ShaftEnergy,
@@ -362,6 +368,59 @@ def evaluate_ground_wrench(
     )
 
 
+def evaluate_ground_coupled_grip(
+    model: SpatialModel,
+    q: FloatArray,
+    qd: FloatArray,
+    eta_dot: FloatArray,
+    base: FloatArray,
+    base_velocity: FloatArray,
+    shaft: ArticulatedShaftProperties,
+    ground: ArticulatedGroundProperties,
+    *,
+    grip_span_m: float,
+    hand_contact_local_x_m: float,
+    reference_lengths_m: FloatArray,
+    config: DistributedGripConfig,
+) -> DistributedGripSnapshot:
+    """Evaluate grip contact after moving only the articulated human tree."""
+
+    full = _full_base_state(base, ground)
+    _full_base_state(base_velocity, ground)
+    hand, hand_q_jac, grip, grip_q_jac = distributed_contact_kinematics(
+        model,
+        q,
+        grip_span_m=grip_span_m,
+        hand_contact_local_x_m=hand_contact_local_x_m,
+        config=config,
+    )
+    c, s = np.cos(full[2]), np.sin(full[2])
+    rotation = np.array([[c, 0.0, s], [0.0, 1.0, 0.0], [-s, 0.0, c]])
+    translation = np.array([full[0], 0.0, full[1]])
+    moved_hand = np.einsum("ij,abj->abi", rotation, hand) + translation
+    total = model.nq + shaft.coordinate_count + ground.coordinate_count
+    hand_jac = np.zeros((*hand.shape, total))
+    grip_jac = np.zeros((*grip.shape, total))
+    hand_jac[..., : model.nq] = np.einsum("ij,abjk->abik", rotation, hand_q_jac)
+    grip_jac[..., : model.nq] = grip_q_jac
+    selector = np.asarray(ground.active_full_indices, dtype=int)
+    base_offset = model.nq + shaft.coordinate_count
+    for hand_index in range(2):
+        for station_index in range(config.station_count_per_hand):
+            linear, _ = _base_jacobians(moved_hand[hand_index, station_index])
+            hand_jac[hand_index, station_index, :, base_offset:] = linear[:, selector]
+    velocity = np.concatenate((qd, eta_dot, base_velocity))
+    return evaluate_distributed_grip_kinematics(
+        moved_hand,
+        hand_jac,
+        grip,
+        grip_jac,
+        velocity,
+        reference_lengths_m=reference_lengths_m,
+        config=config,
+    )
+
+
 def ground_state_energy(
     model: SpatialModel,
     q: FloatArray,
@@ -402,6 +461,7 @@ __all__ = [
     "augmented_ground_mass_matrix",
     "build_articulated_ground",
     "evaluate_ground_wrench",
+    "evaluate_ground_coupled_grip",
     "ground_extra_gravitational_energy",
     "ground_extra_potential_gradient",
     "ground_mass_increment",

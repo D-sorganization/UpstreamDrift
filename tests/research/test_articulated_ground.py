@@ -9,6 +9,7 @@ from scripts.research.proximal_distal_energy.articulated_ground import (
     ArticulatedGroundConfig,
     augmented_ground_mass_matrix,
     build_articulated_ground,
+    evaluate_ground_coupled_grip,
     evaluate_ground_wrench,
     ground_extra_potential_gradient,
     ground_mass_increment_coriolis,
@@ -18,6 +19,11 @@ from scripts.research.proximal_distal_energy.articulated_shaft import (
     ArticulatedShaftConfig,
     augmented_mass_matrix,
     build_articulated_shaft,
+)
+from scripts.research.proximal_distal_energy.articulated_distributed_grip import (
+    DistributedGripConfig,
+    distributed_reference_lengths,
+    evaluate_distributed_grip,
 )
 from scripts.research.proximal_distal_energy.spatial_full_body import mass_matrix
 from scripts.research.proximal_distal_energy.subject_scaled_spatial_geometry import (
@@ -160,3 +166,67 @@ def test_ground_bias_and_gravity_gradient_are_finite_and_pathway_separated() -> 
         ground_extra_potential_gradient(model, q, np.zeros(0), shaft, fixed),
         np.zeros(model.nq + shaft.coordinate_count),
     )
+
+
+def test_ground_coupled_grip_reduces_at_fixed_base_and_responds_to_translation() -> (
+    None
+):
+    model, q, shaft, _ = _authority()
+    grip = DistributedGripConfig(station_count_per_hand=3)
+    references = distributed_reference_lengths(
+        model,
+        q,
+        grip_span_m=0.18,
+        hand_contact_local_x_m=0.055,
+        config=grip,
+    )
+    qd = np.linspace(-0.02, 0.02, model.nq)
+    fixed = build_articulated_ground(ArticulatedGroundConfig(activation="fixed"))
+    baseline = evaluate_distributed_grip(
+        model,
+        q,
+        qd,
+        grip_span_m=0.18,
+        hand_contact_local_x_m=0.055,
+        reference_lengths_m=references,
+        config=grip,
+    )
+    reduced = evaluate_ground_coupled_grip(
+        model,
+        q,
+        qd,
+        np.zeros(shaft.coordinate_count),
+        np.zeros(0),
+        np.zeros(0),
+        shaft,
+        fixed,
+        grip_span_m=0.18,
+        hand_contact_local_x_m=0.055,
+        reference_lengths_m=references,
+        config=grip,
+    )
+    np.testing.assert_allclose(
+        reduced.generalized_contact_force[: model.nq],
+        baseline.generalized_contact_force,
+        atol=1.0e-12,
+    )
+    assert reduced.virtual_power_residual_w < 1.0e-12
+
+    moving = build_articulated_ground(ArticulatedGroundConfig(activation="translation"))
+    translated = evaluate_ground_coupled_grip(
+        model,
+        q,
+        qd,
+        np.zeros(shaft.coordinate_count),
+        np.array([-0.001, 0.001]),
+        np.array([-0.02, 0.01]),
+        shaft,
+        moving,
+        grip_span_m=0.18,
+        hand_contact_local_x_m=0.055,
+        reference_lengths_m=references,
+        config=grip,
+    )
+    assert translated.maximum_extension_m > reduced.maximum_extension_m
+    assert np.linalg.norm(translated.generalized_contact_force[-2:]) > 0.0
+    assert translated.virtual_power_residual_w < 1.0e-10
