@@ -40,6 +40,33 @@ means a slower slug and *less* ball speed, never more. And ``p_ball`` cannot
 exceed ``J``, because ``eta <= 1`` and ``m_b / (m_int + m_b) <= 1``; the
 partition is checked against that bound with a plain ``raise``.
 
+``eta`` depends on the lie (issue #8704)
+----------------------------------------
+
+It did not, and the model was backwards because of it: holding geometry and
+delivery fixed and sweeping the bed gave firm 12.13 m/s, fluffy 12.55 m/s and
+plugged 12.60 m/s -- a plugged lie launching the ball *fastest*.
+
+The sand model was not at fault. The delivered impulse barely moves across the
+four conditions (2.848-2.855 N.s, 0.2 %), because the head gives up almost the
+same momentum whatever it decelerates against: head speed loss moved 1.1 %
+while peak sand force moved 22 %. What did move was the divot **mass**, which
+scales with bulk density -- 65.4 g in firm sand against 61.2 g in plugged -- so
+the added-mass term ``m_b / (m_int + m_b)`` *penalised* the firm bed, and a
+lie-independent ``eta`` left nothing to pay it back.
+
+A transfer model whose efficiency does not depend on the lie cannot represent a
+lie-dependent splash, so ``eta`` is now a function of the bed's packing state::
+
+    eta(D_r) = efficiency * (1 - packing_sensitivity * (1 - D_r))
+
+increasing in relative density, equal to the stated dense-bed value at
+``D_r = 1`` and never above it, so the bound above still holds. The direction
+comes from critical-state soil mechanics -- loose sand contracts under shear
+and spends momentum rearranging grains, dense sand carries it out through force
+chains -- and the **magnitude is assumed, not measured**. See
+:data:`BED_PACKING_TRANSFER_SENSITIVITY`.
+
 What is still not grounded
 --------------------------
 
@@ -71,6 +98,8 @@ __all__ = [
     "BALL_LAUNCH_MEASUREMENT_GAP",
     "BALL_LAUNCH_UNCALIBRATED_REASON",
     "BALL_MOMENTUM_TRANSFER_EFFICIENCY",
+    "BED_PACKING_DEPENDENCE_REASON",
+    "BED_PACKING_TRANSFER_SENSITIVITY",
     "DEFAULT_MOMENTUM_TRANSFER",
     "SAND_BALL_FRICTION",
     "SPIN_LEVER_ARM_FRACTION",
@@ -87,13 +116,39 @@ __all__ = [
 ]
 
 BALL_MOMENTUM_TRANSFER_EFFICIENCY: float = 0.5
-"""Share of the intercepted sand momentum the ball ends up with.
+"""Share of the intercepted sand momentum a ball struck out of a **fully dense**
+bed ends up with.
 
 **Uncalibrated.** A partially inelastic collision through a granular stream
 loses momentum to grains that glance off, to grains that arrive after the ball
 has left, and to the sand-on-sand contacts inside the slug. None of that has
 been measured for a bunker shot, so this is a stated placeholder that scales
-the answer linearly and must be reported as such."""
+the answer linearly and must be reported as such.
+
+Since issue #8704 this is the value at relative density 1 rather than a flat
+constant; see :data:`BED_PACKING_TRANSFER_SENSITIVITY`."""
+
+BED_PACKING_TRANSFER_SENSITIVITY: float = 0.5
+"""Share of the transfer efficiency a **fully loose** bed costs, so that
+
+    eta(D_r) = efficiency * (1 - sensitivity * (1 - D_r))
+
+**The sign is physical; the size is assumed.** Critical-state soil mechanics
+has it that a dense sand *dilates* under shear while a loose one *contracts*:
+in a loose bed the grains still have voids to rearrange into, so a larger share
+of the delivered momentum is spent on compaction and on grain-on-grain
+collisions and never leaves as a directed stream. A dense bed is already near
+jamming and carries momentum out through force chains. That is the mechanism
+by which a fluffy or plugged lie plays dead, and it is the direction issue
+#8704 found the model getting backwards.
+
+The **magnitude** -- a fully loose bed delivering half the share a fully dense
+one does -- is a stated placeholder, not a calibration. Per issue #8616 no
+published measurement of ball speed out of sand exists to fit it to, and the
+provenance record says so.
+
+Bounding it at or below 1 is what keeps ``eta <= efficiency <= 1``, and so
+keeps the momentum-budget proof of issue #8657 intact."""
 
 SAND_BALL_FRICTION: float = 0.5
 """Tangential share of the ball impulse available to spin it up. Uncalibrated."""
@@ -110,6 +165,17 @@ BALL_LAUNCH_MEASUREMENT_GAP = (
     "(issue #8616), so this parameter is uncalibrated and cannot be calibrated "
     "by reading harder."
 )
+
+BED_PACKING_DEPENDENCE_REASON = (
+    "the share of the intercepted sand momentum the ball keeps is taken to "
+    "fall with the bed's relative density, because a loose bed contracts under "
+    "shear and spends momentum rearranging grains that a dense one carries out "
+    "through force chains. The direction is the one issue #8704 found the "
+    "model getting backwards -- softer lies were launching the ball faster -- "
+    "and it is physically motivated, but its magnitude is assumed and not "
+    "measured (issue #8616)"
+)
+"""Why the lie-dependence exists, and what about it is still an assumption."""
 
 BALL_LAUNCH_UNCALIBRATED_REASON = (
     "ball launch is partitioned out of the delivered sand impulse through an "
@@ -169,30 +235,77 @@ class MomentumTransfer:
     answer rests on numbers nobody has measured, and a caller can sweep them.
 
     Attributes:
-        efficiency: ``eta``, the share of intercepted sand momentum the ball
-            keeps. Scales ball speed linearly.
+        efficiency: ``eta`` at relative density 1, the share of intercepted
+            sand momentum a ball struck out of a fully dense bed keeps. Scales
+            ball speed linearly.
         sand_ball_friction: Tangential share of the ball impulse that spins it.
         spin_lever_arm_fraction: Height below the ball centre at which the sand
             stream is taken to act, as a fraction of the radius.
+        packing_sensitivity: Share of :attr:`efficiency` a fully loose bed
+            costs. Zero recovers the lie-independent model issue #8704 was
+            filed against.
     """
 
     efficiency: float = BALL_MOMENTUM_TRANSFER_EFFICIENCY
     sand_ball_friction: float = SAND_BALL_FRICTION
     spin_lever_arm_fraction: float = SPIN_LEVER_ARM_FRACTION
+    packing_sensitivity: float = BED_PACKING_TRANSFER_SENSITIVITY
 
     def __post_init__(self) -> None:
         """Bound every parameter to ``[0, 1]``.
 
-        The bound on :attr:`efficiency` is what makes the momentum budget
-        provable, so it is a ``raise`` and not a contract.
+        The bounds on :attr:`efficiency` and :attr:`packing_sensitivity` are
+        what make the momentum budget provable -- together they cap the
+        effective efficiency at :attr:`efficiency` -- so they are a ``raise``
+        and not a contract.
 
         Raises:
             ValueError: If any parameter falls outside ``[0, 1]``.
         """
-        for name in ("efficiency", "sand_ball_friction", "spin_lever_arm_fraction"):
+        for name in (
+            "efficiency",
+            "sand_ball_friction",
+            "spin_lever_arm_fraction",
+            "packing_sensitivity",
+        ):
             value = float(getattr(self, name))
             if not math.isfinite(value) or not 0.0 <= value <= 1.0:
                 _refuse(name, value, "a finite fraction in [0, 1]")
+
+    def efficiency_for(self, bed_relative_density: float) -> float:
+        """Return the share of intercepted momentum the ball keeps in one bed.
+
+        ``eta(D_r) = efficiency * (1 - packing_sensitivity * (1 - D_r))``:
+        increasing in relative density, equal to :attr:`efficiency` in a fully
+        dense bed and never above it. See
+        :data:`BED_PACKING_TRANSFER_SENSITIVITY` for the mechanism assumed and
+        for what about it is not measured.
+
+        Args:
+            bed_relative_density: ``D_r`` of the bed the strike was made in,
+                0 at the loosest packing and 1 at the densest.
+
+        Returns:
+            The effective transfer efficiency, in ``[0, efficiency]``.
+
+        Raises:
+            ValueError: If ``bed_relative_density`` is not a finite fraction.
+                A plain ``raise``: the momentum budget rests on the bound and
+                must survive ``python -O``.
+        """
+        density = float(bed_relative_density)
+        if not math.isfinite(density) or not 0.0 <= density <= 1.0:
+            _refuse("bed relative density", density, "a finite fraction in [0, 1]")
+        efficiency = self.efficiency * (
+            1.0 - self.packing_sensitivity * (1.0 - density)
+        )
+        if efficiency > self.efficiency:
+            raise ValueError(
+                f"the bed-dependent efficiency {efficiency:.6g} exceeds the "
+                f"dense-bed value {self.efficiency:.6g}; the momentum budget "
+                "of issue #8657 rests on it not doing so"
+            )
+        return efficiency
 
 
 DEFAULT_MOMENTUM_TRANSFER = MomentumTransfer()
@@ -209,13 +322,30 @@ def momentum_transfer_provenance(transfer: MomentumTransfer) -> SandProvenance:
         A record naming the basis of every parameter, in the shape the sand
         presets and the RFT coefficients already use.
     """
-    placeholder = f"chosen placeholder, {transfer.efficiency:.3g}; not a calibration"
+    placeholder = (
+        f"chosen placeholder, {transfer.efficiency:.3g} in a fully dense bed; "
+        "not a calibration"
+    )
     return SandProvenance(
         entries={
             "transfer_efficiency": PropertyProvenance(
                 basis=ProvenanceBasis.ESTIMATED,
                 source=placeholder,
                 note="uncalibrated. " + BALL_LAUNCH_MEASUREMENT_GAP,
+            ),
+            "bed_packing_dependence": PropertyProvenance(
+                basis=ProvenanceBasis.ESTIMATED,
+                source=(
+                    f"a fully loose bed costs "
+                    f"{transfer.packing_sensitivity:.3g} of the dense-bed "
+                    "transfer efficiency, linear in relative density"
+                ),
+                note=(
+                    "the direction is physically motivated -- a loose bed "
+                    "contracts under shear and spends momentum rearranging "
+                    "grains, which is why a plugged lie plays dead -- but the "
+                    "magnitude is assumed, not measured. " + BALL_LAUNCH_MEASUREMENT_GAP
+                ),
             ),
             "sand_ball_friction": PropertyProvenance(
                 basis=ProvenanceBasis.ESTIMATED,
@@ -274,6 +404,11 @@ class SandDelivery:
         contact_duration_s: Time the sole spent engaged with the bed [s].
         entry_speed_m_s: Head speed at the first sample [m/s].
         exit_speed_m_s: Head speed at the last sample [m/s].
+        bed_relative_density: ``D_r`` of the bed the strike was made in, from
+            :attr:`bunkershot3d.sand.SandState.relative_density`. Required
+            rather than defaulted: with a lie-independent efficiency the model
+            launches the ball *faster* out of a plugged lie than a firm one
+            (issue #8704), so there is no safe default to fall back on.
         verdict: The solver's validity statement for the strike, which the
             launch verdict is combined with so carry can never read better
             than the shot behind it.
@@ -284,6 +419,7 @@ class SandDelivery:
     contact_duration_s: float
     entry_speed_m_s: float
     exit_speed_m_s: float
+    bed_relative_density: float
     verdict: ValidityVerdict
 
     def __post_init__(self) -> None:
@@ -312,6 +448,16 @@ class SandDelivery:
                 self.displaced_mass_kg,
                 "finite and positive -- a strike that moved no sand has no ejecta",
             )
+        if (
+            not math.isfinite(self.bed_relative_density)
+            or not 0.0 <= self.bed_relative_density <= 1.0
+        ):
+            _refuse(
+                "bed_relative_density",
+                self.bed_relative_density,
+                "a finite fraction in [0, 1] -- the lie sets how much of the "
+                "delivered momentum reaches the ball (issue #8704)",
+            )
 
     @property
     def mean_ejecta_speed_m_s(self) -> float:
@@ -339,6 +485,8 @@ class SplashTransferResult:
         intercepted_mass_kg: ``intercepted_fraction * divot mass`` [kg].
         ejecta_speed_m_s: Mean speed of the moving sand [m/s], derived.
         contact_duration_s: Measured engagement time [s].
+        transfer_efficiency: The bed-dependent ``eta`` the partition actually
+            used, so the number is visible rather than implied (issue #8704).
     """
 
     impulse_x_ns: float
@@ -353,6 +501,7 @@ class SplashTransferResult:
     intercepted_mass_kg: float
     ejecta_speed_m_s: float
     contact_duration_s: float
+    transfer_efficiency: float
 
 
 @dataclass(frozen=True, slots=True)
@@ -369,6 +518,8 @@ class BallLaunchResult:
         ball_angular_velocity: Ball angular velocity [rad/s].
         contact_type: Type of contact.
         energy_transfer_fraction: Share of head kinetic energy the ball holds.
+        transfer_efficiency: The bed-dependent ``eta`` the partition used, so a
+            caller can see how much of the answer the lie decided (#8704).
         delivered_impulse_n_s: Momentum the head put into the bed [N.s].
         ball_impulse_n_s: Momentum the ball received [N.s].
         verdict: The solver's verdict combined with the launch model's own,
@@ -385,6 +536,7 @@ class BallLaunchResult:
     ball_angular_velocity: tuple[float, float, float]
     contact_type: ContactType
     energy_transfer_fraction: float
+    transfer_efficiency: float
     delivered_impulse_n_s: float
     ball_impulse_n_s: float
     verdict: ValidityVerdict
@@ -447,8 +599,9 @@ def compute_splash_impulse(
     )
     intercepted = compute_exposed_cap_fraction(lie, ball)
     intercepted_mass_kg = intercepted * delivery.displaced_mass_kg
+    efficiency = transfer.efficiency_for(delivery.bed_relative_density)
     ball_impulse = (
-        transfer.efficiency
+        efficiency
         * (ball.mass_kg / (intercepted_mass_kg + ball.mass_kg))
         * (intercepted * delivery.impulse_n_s)
     )
@@ -472,6 +625,7 @@ def compute_splash_impulse(
         intercepted_mass_kg=intercepted_mass_kg,
         ejecta_speed_m_s=delivery.mean_ejecta_speed_m_s,
         contact_duration_s=delivery.contact_duration_s,
+        transfer_efficiency=efficiency,
     )
 
 
@@ -490,9 +644,10 @@ def _launch_reasons(delivery: SandDelivery) -> tuple[str, ...]:
     if entry > 0.0 and ejecta > entry:
         return (
             BALL_LAUNCH_UNCALIBRATED_REASON,
+            BED_PACKING_DEPENDENCE_REASON,
             SUPERSONIC_EJECTA_REASON.format(ejecta=ejecta, entry=entry),
         )
-    return (BALL_LAUNCH_UNCALIBRATED_REASON,)
+    return (BALL_LAUNCH_UNCALIBRATED_REASON, BED_PACKING_DEPENDENCE_REASON)
 
 
 def launch_verdict(delivery: SandDelivery) -> ValidityVerdict:
@@ -625,6 +780,7 @@ def compute_ball_launch_from_splash(
         energy_transfer_fraction=(
             (ball_ke + ball_rot_ke) / head_ke if head_ke > 0.0 else 0.0
         ),
+        transfer_efficiency=splash.transfer_efficiency,
         delivered_impulse_n_s=splash.delivered_impulse_n_s,
         ball_impulse_n_s=splash.ball_impulse_n_s,
         verdict=launch_verdict(delivery),

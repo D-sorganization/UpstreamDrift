@@ -264,6 +264,24 @@ REVIEW_SPECS: dict[str, dict[str, Any]] = {
         ("PD-CLAIM-283", "PD-CLAIM-284", "PD-CLAIM-285"),
         "Extend the right-censored typed laws through calibrated distributed grip and shaft contact, longer matched-work/load delivery, ground coupling, and governed bilateral human wrenches.",
     ),
+    "distributed_grip_discretization": _spec(
+        "reviewed_as_right_censored_synthetic_discretization_result",
+        "fifty_millisecond_distributed_fiber_gate_qualified",
+        ("PD-CLAIM-286", "PD-CLAIM-287", "PD-CLAIM-288"),
+        "Calibrate grip friction and pressure, couple the qualified fibers to shaft bending and torsion, add ground pathways, and test longer matched-work/load delivery against governed bilateral human wrenches.",
+    ),
+    "articulated_shaft_bending_torsion": _spec(
+        "reviewed_as_synthetic_first_mode_articulated_result",
+        "passive_shaft_pathway_qualified_with_mixed_matched_outcomes",
+        ("PD-CLAIM-289", "PD-CLAIM-290", "PD-CLAIM-291", "PD-CLAIM-292"),
+        "Calibrate distributed grip and shaft properties, add higher-mode fast-load and finite-ground pathways, then test governed delivery, impact, and human outcomes.",
+    ),
+    "articulated_ground_free_moment": _spec(
+        "reviewed_as_synthetic_finite_base_result_with_adverse_primary_match",
+        "fifty_millisecond_finite_ground_gate_qualified_primary_match_empty",
+        ("PD-CLAIM-293", "PD-CLAIM-294", "PD-CLAIM-295", "PD-CLAIM-296"),
+        "Replace bilateral linear support with calibrated unilateral three-dimensional foot contact and force-plate observations, then repeat matched delivery and governed human tests.",
+    ),
     "scapulothoracic_contact_geometry": _spec(
         "reviewed_as_paired_geometry_screen_with_explicit_boundaries",
         "paired_geometry_screen_partial_with_explicit_boundaries",

@@ -1,12 +1,12 @@
 # SPEC.md — Repository Specification Document
 
-## Current Scientific Audit State (2026-08-15)
+## Current Scientific Audit State (2026-08-16)
 
 Epic #8557 has completed the current narrative-candidate adjudication contract:
-1,022/1,022 candidates, 281 atomic claims, and zero unadjudicated entries. This
-status is not scientific closure: all 36 public release claims now have a
-traceable review disposition, and all 35 retain an explicit model, equipment,
-anatomy, archival, or governed-human scientific gate. The
+1,047/1,047 candidates, 291 atomic claims, and zero unadjudicated entries. This
+status is not scientific closure: all 39 public release claims now have a
+traceable review disposition and zero remain open; each retains its applicable
+model, equipment, anatomy, archival, or governed-human scientific boundary. The
 trajectory-level bilateral point-force sensor qualification and subject-scaled
 spatial contact-closure audit retain their synthetic and prescribed-state
 scopes. The closed-state forward bridge maps all 234 solved states and advances
@@ -40,6 +40,51 @@ and parity gates pass. This is a right-censored synthetic attachment result;
 unilateral slack, distributed grip and shaft structure, ground coupling, late
 downswing, impact, anatomy, muscle action, and human strategy remain
 prohibited inferences.
+Child issue #8682 then qualifies typed bilateral, tension-only, and radial
+dead-zone point attachments across 1,944 five-millisecond trajectories and
+isolated opening/reattachment probes. Child issue #8685 replaces each hand's
+point attachment with one, three, or five tension fibers while preserving total
+stiffness and damping. Its 288 trajectories are observed at nested 4, 10, 25,
+and 50 ms horizons in MuJoCo and Pinocchio. All registered geometry, power,
+passivity, work--energy, time-refinement, station-refinement, and engine-parity
+gates pass; no natural active-set transition occurs. This qualifies a synthetic
+contact discretization, not measured grip pressure, shaft response, delivery
+benefit, timing economy, human transfer, or technique.
+Issues #8703 and #8704 (epic #8699) withdraw two BunkerShot3D outputs from
+quotable status. The `dig_vs_skid` verdict returned `MARGINAL` at all 77 demo
+design points with slope ratios spanning 0.9987--1.0000: the shipped 10 mm
+entry window is about 0.4 ms at a 25 m/s delivery, over which a 0.3 kg head
+under an order-5 N.s impulse cannot deflect measurably. Resizing the window was
+measured over 48 design points before being rejected -- the ratio span grows
+from 0.0015 at 10 mm to 0.28 at half the divot length, but its correlation with
+maximum sole depth is negative at every informative window (-0.50 to -0.68), so
+a resized window inverts the verdict rather than calibrating it. The ratio is
+pinned at 1 for a vanishing window and at 0 for a window spanning the divot,
+for every design, so no window size is a free parameter. Every `DigSkidResult`
+therefore carries a `DigSkidCalibration` reporting `calibrated=False`, and both
+degenerate window ends are refused rather than clipped. A separating verdict
+requires a quantity that varies with the design -- sole depth does -- and an
+absolute threshold that is not published. Issue #8704 makes the sand-to-ball
+transfer efficiency a function of the bed's relative density,
+`eta(D_r) = efficiency * (1 - packing_sensitivity * (1 - D_r))`, which restores
+the physical ordering of ball speed with lie firmness (firm 11.37 m/s, wet
+8.12, fluffy 7.84, plugged 7.09, against a previous inverted firm 12.13 /
+fluffy 12.55 / plugged 12.60). The direction follows critical-state dilatancy;
+the magnitude is an assumed placeholder recorded in the launch provenance under
+`bed_packing_dependence`, and ball speed remains `BEYOND_VALIDATION` because
+issue #8616 found no published measurement of ball speed, launch angle or spin
+out of sand.
+
+Child issue #8697 then couples two first bending modes and one torsional mode
+to that distributed-grip authority. Its registered 0.25/0.125 ms atlas covers
+384 trajectories and 1,536 nested-horizon summaries. Domain, activation,
+power, work--energy, refinement, and MuJoCo/Pinocchio parity gates pass. Among
+126 coupled-versus-rigid cells matched within 5% for peak contact load and
+dissipated work, delivery-speed differences span -0.0285 to +0.0212 m/s, with
+82 negative and 44 positive outcomes. The result therefore rejects a universal
+passive-shaft speed benefit. It is a planar structural reference, not physical
+shaft calibration, human validation, physiological inference, or technique.
+
 Issue #8556 remains blocked on governed human bilateral six-axis
 grip-wrench acquisition, and all new scientific content must regenerate the
 inventory and reopen adjudication until every new candidate is reviewed.
@@ -83,8 +128,8 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.537 |
-| **Last Spec Update** | 2026-08-15 |
+| **Spec Version** | 1.0.539 |
+| **Last Spec Update** | 2026-08-16 |
 
 ## 2. Purpose & Mission
 
@@ -114,6 +159,130 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ## 4. Architecture Overview
 
 ### Recent Spec Updates
+
+- **2026-08-16** - Made BunkerShot3D's sole-camber substitution observable
+  (`src/bunkershot3d/geometry/`, issue #8698, epic #8699). A wedge sole can
+  only realise camber areas inside a band set by its width and bounce, so
+  `build_wedge_mesh` fitted a declared `sole_camber_area_m2` that fell outside
+  it to the nearest constructible value. That fit is physically correct and is
+  retained — a narrow sole geometrically cannot host an arbitrarily large
+  camber, and emitting an inconstructible section would be worse — but it was
+  **unobservable**: `constructible_camber_range_m2` was not re-exported from
+  `bunkershot3d.geometry` or the top level, and no result object carried the
+  effective value back, so a caller who declared 48 mm² received a different
+  sole and had no way to find out. Measured on a 77-point demo sweep, the
+  clamp fired on 40 points and moved the effective camber over 24.5–61.6 mm²
+  against a constant declared 48.0 mm².
+
+  This matters most in `bunkershot3d.study`: a `MorrisDesign`,
+  `SaltelliDesign` or `SobolIndices` run over sole width or bounce would
+  attribute variance to a camber the user believes is pinned, and no
+  diagnostic in the artifact would say so.
+
+  Three complementary changes. (1) `loft_wedge()` returns a new `LoftedWedge`
+  carrying `effective_camber_area_m2`, `constructible_camber_range_m2`,
+  `camber_was_clamped`, `camber_substitution_m2` and a per-station
+  `StationCamber` account; `build_wedge_mesh()` is now a thin wrapper that
+  returns only its mesh. (2) `constructible_camber_range_m2` is re-exported
+  from `bunkershot3d.geometry` and the top-level package, and
+  `DesignSpace.check_wedge_camber(geometry)` screens the corners of a design
+  box against the band before a sweep spends solver time inside it — the wedge
+  knowledge lives in `geometry/design_bounds.py` and is imported on call, so
+  the study layer keeps its independence from the geometry package. (3)
+  `CamberFit` makes silence opt-in: the default `CamberFit.STRICT` raises
+  `InconstructibleCamberError` when a **declared** camber is outside the band,
+  and `CamberFit.NEAREST` is the explicit opt-in to nearest-constructible
+  behaviour. Relief-scaled stations are always fitted rather than refused,
+  because that request is derived by the lofter rather than declared by the
+  caller — but every substitution, declared or derived, is recorded.
+
+  `STRICT` is the default because it is what the rest of the package already
+  does: `build_sole_profile` raises for exactly this condition one layer down,
+  `DesignSpace.sample` raises rather than silently lose Sobol' balance, and
+  `WedgeGeometry.__post_init__` rejects inadmissible combinations. The lofter
+  was the single place that downgraded a loud failure to a silent one.
+  `InconstructibleCamberError` subclasses `BunkerShot3DValueError`, so
+  existing `except ValueError` sites keep working. Per CLAUDE.md every guard
+  `raise`s and none `assert`s, because `python -O` strips assertions.
+
+  Two consequences fell out of making the check loud. Three shipped grind
+  presets (`acushnet_example_2`, `acushnet_example_3`, `tour_shaved_heel_lob`)
+  declared a camber area their own sole cannot carry, so their meshes had
+  never matched their declarations; their `sole_camber_area_m2` — an
+  `ESTIMATED` field in every preset — is corrected to a constructible value,
+  and the patent-example helper now takes it per example because the band
+  climbs steeply with bounce. And the workbench GUI
+  (`src/tools/bunker_shot_gui/`) opts into `CamberFit.NEAREST` explicitly,
+  because a designer dragging a bounce slider must keep getting a head to look
+  at; having opted in, its evaluation report now states the camber area the
+  head actually carries alongside the declared one.
+
+- **2026-08-15** - Restored the two repository-hygiene guards
+  (`tests/unit/repo_hygiene/test_vendor_submodule_clean.py` and
+  `test_no_shadow_of_tools_shared.py`) to actually enforce. Both were
+  introduced 2026-05-16 (#5623 / PR #5625) and reduced to stubs on 2026-08-01
+  by consolidation commit 0575fb4b8 (#8322), which also emptied the shadow
+  ledger and added four new shadows in the same commit. Three independent
+  mechanisms kept them vacuous: neither file carried a suite marker, so
+  `unit-test-gate`'s `-m "unit and ..."` selector never collected them; both
+  called `pytest.skip` when `vendor/ud-tools` was absent, so they passed
+  vacuously even when collected; and push-to-main runs are cancelled by
+  `cancel-in-progress` concurrency (83 of the last 85), so the only lane that
+  would collect them effectively never completed.
+
+  A missing vendor tree now raises `AssertionError` when `$CI` is set and only
+  skips on a developer machine, matching `test_tools_child_copy_contract.py`.
+  The shadow ledger in `scripts/config/shadow_modules.yaml` is re-established
+  as a no-growth ratchet: 32 grandfathered entries (28 from the original #5623
+  baseline plus the 4 that #8322 added while the guard was off), each carrying
+  a `tracking_issue` and a `sunset_date`. Bare name lists are rejected, expired
+  sunset dates fail, and stale entries must be pruned, so the ledger can only
+  shrink.
+
+  The vendor-clean guard also carried a latent detection bug: it filtered
+  `git status` lines for the prefix `vendor/ud-tools/` (trailing slash), but
+  git collapses all submodule-internal state onto the gitlink entry whose path
+  is exactly `vendor/ud-tools`, with flags `S<c><m><u>`. The predicate could
+  never match. Detection now parses the sub-status field, so modified (`S.M.`)
+  and untracked (`S..U`) content fail while a deliberate pointer bump (`SC..`)
+  passes. A new `test_hygiene_guards_run_in_ci.py` asserts that every workflow
+  job running this package materialises `vendor/ud-tools`, and that
+  `unit-test-gate` does so before invoking pytest.
+
+- **2026-08-15** - Restored input validation on the symbolic solver router
+  (`src/shared/python/calc_backend/routers/symbolic_solver.py`, issue #8675).
+  This file is a shadow copy of a module owned by the Tools repository. Tools
+  hardened its copy on 2026-07-22 by guarding every `parse_expr` call with
+  `validate_expression`; the shadow was forked on 2026-05-20 and never received
+  that change, so it carried six fewer guards than upstream while keeping all
+  four parse sites. The removal was not deliberate — `validate_expression` has
+  no history in this file at all — it is drift by omission.
+
+  The exposure was not theoretical. `sympy.parse_expr` is an _evaluating_
+  parser, and all three affected endpoints (`/api/calc/symbolic/solve`,
+  `/derivative`, `/simplify`) take their expression from the request body, so
+  the input is remote by construction. Against the unguarded module,
+  `__import__("os").getcwd()` executed and returned the server's working
+  directory in the response error string, and `9**9**9**9` hung the worker
+  in an uninterruptible bignum computation that the thread-based pytest
+  timeout could not kill.
+
+  The fix re-adds `from src.shared.python.safe_eval import validate_expression`
+  (UD's own `src.`-prefixed convention, matching the sibling `ode_solver`
+  router) and the four upstream call sites: both sides of an `lhs = rhs`
+  equation, the bare-expression branch of `/solve`, and the single expression
+  on `/derivative` and `/simplify`. Note that a `vendor/ud-tools` submodule
+  bump cannot fix this: the submodule is unpopulated, and
+  `src/shared/python` precedes it in resolution, so the shadow is what is
+  actually imported.
+
+  Regression coverage pins the guard to behaviour rather than to its presence:
+  each endpoint must reject attribute-based calls, attribute access, and
+  exponentiation bombs; legitimate work (`x**2 - 4 = 0`, `x^2` via
+  `convert_xor`, `sin(x)**2 + cos(x)**2`) must still solve; the payload's
+  observable side effect must never appear in a response; and an
+  instrumented-ordering test asserts `parse_expr` never runs ahead of
+  `validate_expression` on any path.
 
 - **2026-08-14** - Rebuilt BunkerShot3D as a multi-fidelity wedge-design tool
   under epic #8607 (ADR-0032). The package is now organised around the design
@@ -2081,6 +2250,7 @@ overlapping fixture names in nested conftests.
 
 | Tool       | Version | Purpose                                                                            | Blocking? |
 | ---------- | ------- | ---------------------------------------------------------------------------------- | --------- |
+| 2026-08-16 | 1.0.539 | Made BunkerShot3D's F0 solver and W7 metrics compose without hand-padding (issues #8702, #8700, #8701 under epic #8699). `bunkershot3d.solvers.shot.simulate_shot` now records the whole strike rather than the contact: a free-flight lead-in (`ShotSettings.free_flight_lead_steps`, 3.5 steps) brackets the entry crossing, and the march integrates through the disengaged tail until the sole reference is back above the free surface, so both `depth = 0` crossings the divot metrics interpolate are inside the record. `StrikeTrace.from_shot` is the metrics-layer view of an in-memory shot, one sample per recorded sample with nothing synthesised. `ShotSettings.max_time_s` moves from 10 ms to 200 ms because a nominal bunker shot does not clear the sand until ~10.8 ms, and a window that ends first now raises `ShotTruncatedError` from the solver -- naming `max_time_s` and the time reached, and carrying the partial trace -- instead of surfacing as `divot_metrics` refusing to locate an exit; `require_exit=False` keeps deliberate fixed-window marches legal. `ShotResult.depths_m` was engaged-element depth documented as sole depth (non-monotone, and reading zero while the sole was millimetres under), and is split into `engaged_depths_m` and a geometric `sole_depths_m`. `src/tools/bunker_shot_gui/bridge.py` drops its private free-flight placement and ballistic zero-wrench coast-out and consumes the library composition instead. 19 new tests; no new dependencies. |
 | 2026-04-27 | 1.0.83  | Fixed Bandit B604 false positive alerts in test files by adding nosec annotations. |
 | ruff       | latest  | Linting and formatting                                                             | Yes       |
 | mypy       | 1.7+    | Static type checking                                                               | Yes       |
@@ -2313,6 +2483,8 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-16 | 1.0.539 | Added the passive articulated-shaft qualification: a frozen 24-element bending basis and declared tapered-section torsion extend the distributed-grip authority through rigid, bending, torsion, and coupled activations. The registered 384-trajectory, two-engine, two-step atlas passes domain, activation, power, work--energy, refinement, and parity gates; retained coarse steps fail the linear-domain screen. Among 126 load/work-matched coupled-versus-rigid cells, delivery-speed differences have both signs (-0.0285 to +0.0212 m/s), rejecting a universal passive-shaft speed benefit. The result remains a planar structural reference, not equipment calibration, human validation, physiology, or coaching guidance. |
+| 2026-08-15 | 1.0.538 | Added the distributed-grip contact-discretization gate: one, three, and five tension fibers per hand preserve total stiffness and damping across 12 articulated states, two initial velocity signs, two time steps, two native engines, and nested 4/10/25/50 ms observations from 288 trajectories. Geometry null/reversal, virtual-power, passivity, work--energy, time-refinement, station-refinement, active-set, and cross-engine gates pass. The result is synthetic and right-censored; it does not establish physical grip pressure, shaft response, timing economy, delivery benefit, human transfer, or technique. |
 | 2026-08-15 | 1.0.537 | Added the typed unilateral articulated-attachment falsification gate: bilateral, tension-only, and dead-zone tension laws are evaluated across common-displacement and matched-extension comparisons, velocity-sign branches, isolated opening/reattachment probes, three time steps, and native MuJoCo/Pinocchio dynamics. The passive-law, virtual-power, work--energy, refinement, trajectory-parity, force-parity, and active-set-parity contracts pass. Natural five-millisecond branches do not produce opening or reattachment transitions, so event-probe results qualify the implementation only and do not establish a human or coaching strategy. |
 | 2026-08-15 | 1.0.536 | Added the bounded articulated bilateral-attachment forward gate: 18 selected closed states, seven nominal/adverse branches, three time steps, and native MuJoCo/Pinocchio dynamics produce 756 five-millisecond trajectories. Attachment-retention, power, work--energy, refinement, and parity gates pass; the result is explicitly right-censored and does not model unilateral slack, calibrated distributed grip/shaft, ground coupling, late downswing, impact, muscle action, human transfer, or coaching strategy. |
 | 2026-08-15 | 1.0.535 | Added the subject-scaled articulated contact-projection gate: finite bilateral Kelvin--Voigt forces arise from a declared club perturbation at all 234 closed states, project through the hand and club Jacobians with exact action--reaction and virtual-power controls, and yield matching native MuJoCo/Pinocchio initial accelerations. This is a same-state prerequisite, not a forward contact or human-strategy result. |
@@ -3300,6 +3472,34 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Passing source qualification shall establish traceability and bounded claim
   fit only. It shall not close model, equipment, anatomy, archive, or governed
   participant-held-out human gates.
+
+### F-8557.26: Finite Ground and Intrinsic Free-Moment Pathway
+
+- The finite-base model shall transform only the articulated human body tree;
+  the independently rooted club shall remain coupled through the qualified
+  distributed grip and passive shaft pathways.
+- Base translation and pitch shall enter inertia, posture-varying Christoffel
+  bias, gravity, hand-contact geometry, generalized grip reaction, ground
+  storage/damping, and the closed work--energy ledger. Fixed base shall reduce
+  exactly to the qualified shaft solver.
+- Ground force, intrinsic free moment, and reference-transported moment shall
+  remain distinct. Reversing the center-of-pressure reference shall change
+  only the transported moment, never generalized force or trajectory.
+- Fixed, translation-only, free-moment-only, and coupled pathways shall use
+  common rigid and natural-zero elastic/base initial states. Rigid-shaft and
+  horizontal-restraint-removed controls, velocity reversal, two native
+  engines, time refinement, matched-load/work screening, and domain gates
+  shall be retained.
+- Natural-zero, gravity-only, and conditional base balance shall be reported as
+  separate initialization sensitivities. A base-force balance shall not be
+  called whole-mechanism equilibrium.
+- Zero horizontal stiffness/damping shall be labeled removal of modeled
+  horizontal restraint, not complete Coulomb friction, unilateral contact, or
+  foot mechanics. Synthetic parameters shall not be called force-plate,
+  equipment, participant, human-transfer, timing, or coaching validation.
 - Use `np.vdot` instead of `np.sum(x**2)` and `np.sqrt(np.einsum("ij,ij->i", x, x))` instead of `np.linalg.norm(x, axis=1)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
 - Use `np.einsum('ij,ij->j', x, x)` instead of `np.sum(x * x, axis=0)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
 - (spec-exempt: micro-optimization) Replaced `.iterrows()` with `.to_dict('records')` in `data_processor_widget.py`, `kaggle_validation.py`, and `launch_monitor_analytics/widgets.py` to optimize UI and validation performance.
+- Use `np.einsum('ij,ij->i', x, x)` instead of `np.sum(x**2, axis=1)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
+- Use `np.einsum('ij,ij->i', A, B)` instead of `np.sum(A * B, axis=1)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
+- Use `np.sqrt(np.einsum('...i,...i->...', x, x))` instead of `np.linalg.norm(x, axis=-1)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
