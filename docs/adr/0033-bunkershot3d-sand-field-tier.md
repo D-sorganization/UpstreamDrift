@@ -33,6 +33,29 @@ Issue #8709 and epic #8699 both describe the MuJoCo proxy as _available now_
 and _producing genuine per-grain velocities today_. **That description is
 false, and the rest of this ADR rests on measurements that establish it.**
 
+### The Epic's Premise Does Not Hold
+
+This ADR does not merely choose between two options — it removes the premise
+epic #8699 was built on, so that premise is stated and withdrawn explicitly
+rather than quietly worked around.
+
+The epic inferred that a grain-resolved run was "reachable now" from two
+observations: that `backends/mpm/driver.py` is 327 lines with **zero
+`NotImplementedError`**, and that `mujoco 3.9.0` is installed. Neither
+observation is evidence of capability, and both were wrong about this file.
+Measured below: the model does not build at all; the shipped grain population
+places **0 of 1000 grains** anywhere near the clubhead, forming a
+single-grain-thick line **150 mm off the club's path**; and the implied bed is
+**0.00116 grain diameters** deep. The club swings through empty space.
+
+**Line count and the absence of `NotImplementedError` were used as a proxy for
+"works", and they are not one.** A backend that raises is honest about being
+unfinished; this one would have run to completion and written a result file
+full of zeros with an `OUT_OF_ENVELOPE` verdict that reads as a fidelity
+caveat rather than as "nothing happened". That failure mode is the reason this
+decision had to be made against a running probe rather than against a reading
+of the source.
+
 ## Measured Evidence
 
 All measurements were taken on the primary development machine (Windows 11,
