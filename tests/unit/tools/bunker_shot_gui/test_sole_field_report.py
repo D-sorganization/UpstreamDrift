@@ -87,7 +87,7 @@ class TestTheConfoundIsCarried:
     def test_a_design_whose_camber_is_substituted_says_so_by_the_patch(
         self, model: WorkbenchModel, firm_sand: SandCondition, tour_swing: SwingSetup
     ) -> None:
-        wide = WedgeDesign(name="clamped", camber_area_mm2=70.0, sole_width_mm=9.0)
+        wide = WedgeDesign(name="clamped", camber_area_mm2=70.0)
         evaluation = model.evaluate(
             wide, firm_sand, tour_swing, include_playability=False
         )

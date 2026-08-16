@@ -15,6 +15,7 @@ import numpy as np
 
 from bunkershot3d.solvers import EnvelopeStatus, ValidityVerdict
 
+from .field import ContactPatch, LoadComponent, SoleLoadField
 from .model import (
     DesignEvaluation,
     PlayabilityOutcome,
@@ -26,6 +27,7 @@ from .model import (
 __all__ = [
     "CARRY_CAVEAT",
     "MAX_REPORTED_REASONS",
+    "PATCH_CONFOUND_CAVEAT",
     "SHADE_RAMP",
     "STATUS_COLOUR",
     "STATUS_HEADLINE",
@@ -34,6 +36,7 @@ __all__ = [
     "playability_text",
     "shade_grid",
     "shot_report",
+    "sole_field_text",
     "sole_map_text",
     "status_colour",
     "status_headline",
@@ -327,6 +330,10 @@ def shot_report(outcome: ShotOutcome) -> str:
             "",
         )
     )
+    if outcome.sole_field is not None:
+        lines.extend(
+            sole_field_text(outcome.sole_field, outcome.contact_patch).splitlines()
+        )
     lines.extend(_head_load_lines(outcome))
     lines.extend(_divot_lines(outcome))
     lines.extend(_dig_skid_lines(outcome))
@@ -378,6 +385,90 @@ def shade_grid(values: np.ndarray, *, peak: float | None = None) -> tuple[str, .
         )
         for row, mask in zip(scaled, finite, strict=True)
     )
+
+
+PATCH_CONFOUND_CAVEAT = (
+    "the contact patch on this design is a bounce-AND-camber result, not a "
+    "bounce result: the declared camber area was not constructible at this "
+    "sole width and bounce, so the lofter substituted the nearest one (#8698) "
+    "and any patch trend read across a bounce sweep moves both terms at once"
+)
+"""What a patch series may not be read as, when the camber was substituted.
+
+Issue #8707 asks for this explicitly. The patch shrinking across a bounce
+sweep is the mechanism behind more bounce producing *more* depth and force,
+but on the demo sweep the effective camber moved over 24.5-61.6 mm^2 against
+a declared constant 48 mm^2 on 40 of 77 points -- so on any design where the
+substitution fired, "bounce" is not the only thing that changed.
+"""
+
+
+def sole_field_text(field: SoleLoadField, patch: ContactPatch | None = None) -> str:
+    """Render the per-element load field and the contact patch as numbers.
+
+    The animated view answers the same questions by eye. This is what can be
+    pasted into an issue, diffed between two runs, or read where no display
+    exists.
+
+    Args:
+        field: The per-element load field.
+        patch: The contact-patch series, when there is one.
+
+    Returns:
+        A multi-line report, opening with the validity statement the whole
+        section must be read under.
+    """
+    depth, inertial = LoadComponent.DEPTH, LoadComponent.INERTIAL
+    lines = [
+        "Per-element sole load and contact patch",
+        _THIN,
+        _line("Validity", status_headline(field.status)),
+        _line(
+            "Resolution",
+            f"{field.n_elements} sole elements x {field.n_frames} samples "
+            f"(the 12x12 map above is this, binned and summed)",
+        ),
+        _line(
+            f"Peak {depth.label.lower()}",
+            f"{field.peak_resultant_force_N(depth):.4g} N at "
+            f"{field.peak_time_s(depth) * 1e3:.2f} ms",
+        ),
+        _line(
+            f"Peak {inertial.label.lower()}",
+            f"{field.peak_resultant_force_N(inertial):.4g} N at "
+            f"{field.peak_time_s(inertial) * 1e3:.2f} ms",
+        ),
+        _line(
+            "Inertial share at peak load",
+            f"{field.peak_inertial_share:.1%} of the sole's own resultant",
+        ),
+    ]
+    if patch is not None:
+        lines.extend(
+            (
+                _line(
+                    "Patch at first contact",
+                    f"{patch.initial_area_m2 * 1e4:.4g} cm^2 at "
+                    f"{patch.initial_time_s * 1e3:.2f} ms",
+                ),
+                _line(
+                    "Largest patch",
+                    f"{patch.peak_area_m2 * 1e4:.4g} cm^2 at "
+                    f"{patch.peak_area_time_s * 1e3:.2f} ms",
+                ),
+                _line(
+                    "Closest approach to leading edge",
+                    f"{patch.closest_approach_m * 1e3:.2f} mm at "
+                    f"{patch.time_of_closest_approach_s * 1e3:.2f} ms",
+                ),
+                _line(
+                    "Sole span, leading to trailing",
+                    f"{(patch.trailing_edge_m - patch.leading_edge_m) * 1e3:.2f} mm",
+                ),
+            )
+        )
+    lines.append("")
+    return "\n".join(lines)
 
 
 def sole_map_text(sole_load: SoleLoadMap) -> str:
@@ -542,6 +633,11 @@ def evaluation_report(evaluation: DesignEvaluation) -> str:
     parts = ["\n".join(header), shot_report(evaluation.shot)]
     if evaluation.shot.sole_load is not None:
         parts.append(sole_map_text(evaluation.shot.sole_load))
+    if evaluation.camber_was_clamped and evaluation.shot.contact_patch is not None:
+        # The caveat belongs beside the patch numbers, not only beside the
+        # geometry: a designer reading a patch trend across a bounce sweep is
+        # exactly the reader who must be told the camber moved with it.
+        parts.append(f"  {PATCH_CONFOUND_CAVEAT}\n")
     parts.append(playability_text(evaluation.playability))
     return "\n".join(parts)
 
