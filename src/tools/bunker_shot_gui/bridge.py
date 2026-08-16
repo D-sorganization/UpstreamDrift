@@ -12,12 +12,19 @@ headline APIs, and everything it does is stated rather than assumed:
 
 * the lofted head is **cached**, because solving the camber segment per station
   costs about a second and a design sweep re-uses one geometry many times;
-* the head is started in **free flight**, so the trace contains the approach
-  the dig-versus-skid discriminator needs;
-* the recorded path is **coasted out** at zero wrench when the solver stops
-  while the sole is still geometrically in the divot;
+* the head is **placed** so its sole reference enters where the designer asked;
 * the per-element sole load is **replayed**, because a shot records the
   resultant and the bounce-utilisation map needs the distribution.
+
+Two things this module used to do have moved into the library, because they
+were never workbench concerns: it started the head in free flight itself, and
+it coasted the recorded path out ballistically at zero wrench when the solver
+stopped with the sole still geometrically in the divot. Both were the
+undocumented ritual of issue #8702 -- necessary to get a trace the metrics
+would accept, and invisible to anyone outside this application.
+:func:`~bunkershot3d.solvers.shot.simulate_shot` now records the whole strike,
+and :meth:`~bunkershot3d.metrics.trace.StrikeTrace.from_shot` converts it, so
+the workbench composes the two packages the same way any other caller does.
 
 No Qt, no arithmetic that is not either the solver's or the metric's.
 """
@@ -33,10 +40,12 @@ from numpy.typing import NDArray
 from scipy.spatial.transform import Rotation
 
 from bunkershot3d.geometry import (
+    CamberFit,
+    LoftedWedge,
     MassProperties,
     WedgeGeometry,
-    build_wedge_mesh,
     compute_mass_properties,
+    loft_wedge,
     shaft_axis,
 )
 from bunkershot3d.metrics import (
@@ -44,7 +53,6 @@ from bunkershot3d.metrics import (
     HeadModel,
     SoleLoadTrace,
     StrikeTrace,
-    WrenchReference,
 )
 from bunkershot3d.solvers import (
     DRFTSolver,
@@ -55,7 +63,7 @@ from bunkershot3d.solvers import (
 )
 from src.shared.python.core.contracts import require
 
-from .design import SolverSetup, SwingSetup
+from .design import SwingSetup
 
 __all__ = [
     "MAP_BINS",
@@ -71,19 +79,6 @@ __all__ = [
 
 MAP_BINS = 12
 """Bins per axis of the sole map. Twelve resolves a 20 mm sole to ~1.7 mm."""
-
-_FREE_FLIGHT_STEPS = 3.5
-"""Steps of approach recorded before entry.
-
-``dig_vs_skid`` measures the delivered path slope across the two samples
-*before* entry, so at least two free-flight samples must be recorded. The
-half step keeps the crossing off a sample, where a depth of exactly zero
-would not register as submerged."""
-
-_MAX_COAST_STEPS = 400
-"""Cap on the ballistic continuation. A head that needs more than this to
-clear the surface is not exiting, and the divot metrics say so rather than
-extrapolating a trace of unbounded length."""
 
 _SOLE_NORMAL_CEILING = 0.0
 """An element belongs to the sole when its outward normal points downward."""
@@ -101,6 +96,12 @@ class HeadBuild:
         sole_reference_body_m: ``(3,)`` lowest sole element at address -- the
             point whose depth defines the divot.
         shaft_axis_body: ``(3,)`` unit shaft axis, head toward grip.
+        loft: The lofting record, carrying the camber area the head was
+            actually built with. The workbench lofts with
+            :attr:`~bunkershot3d.geometry.CamberFit.NEAREST` because a
+            designer dragging a bounce slider must keep getting a head to
+            look at -- but the substitution is then *reported*, never
+            assumed away (issue #8698).
     """
 
     geometry: WedgeGeometry
@@ -109,6 +110,17 @@ class HeadBuild:
     sole_mask: NDArray[np.bool_]
     sole_reference_body_m: NDArray[np.float64]
     shaft_axis_body: NDArray[np.float64]
+    loft: LoftedWedge
+
+    @property
+    def effective_camber_area_m2(self) -> float:
+        """The camber area the lofted head actually carries."""
+        return self.loft.effective_camber_area_m2
+
+    @property
+    def camber_was_clamped(self) -> bool:
+        """Whether the declared camber area had to be substituted."""
+        return self.loft.camber_was_clamped
 
     @property
     def head_model(self) -> HeadModel:
@@ -168,9 +180,13 @@ def build_head(
     Raises:
         ValueError: If the sole cannot be lofted at this resolution.
     """
-    mesh = build_wedge_mesh(
-        geometry, n_profile_points=n_profile_points, n_stations=n_stations
+    lofted = loft_wedge(
+        geometry,
+        n_profile_points=n_profile_points,
+        n_stations=n_stations,
+        camber_fit=CamberFit.NEAREST,
     )
+    mesh = lofted.mesh
     elements = SurfaceElements.from_mesh(mesh)
     sole_mask = elements.normals[:, 2] < _SOLE_NORMAL_CEILING
     sole_centroids = elements.centroids_m[sole_mask]
@@ -183,6 +199,7 @@ def build_head(
         sole_mask=sole_mask,
         sole_reference_body_m=np.asarray(reference, dtype=np.float64),
         shaft_axis_body=np.asarray(axis, dtype=np.float64),
+        loft=lofted,
     )
 
 
@@ -210,21 +227,20 @@ def delivery_rotation(
     return np.asarray((lean * opening).as_matrix(), dtype=np.float64)
 
 
-def entry_kinematics(
-    build: HeadBuild, swing: SwingSetup, settings: SolverSetup
-) -> HeadKinematics:
+def entry_kinematics(build: HeadBuild, swing: SwingSetup) -> HeadKinematics:
     """Place the head so its sole reference enters where the designer asked.
 
-    The head starts in free flight above the sand, so the recorded trace
-    contains the approach the dig-versus-skid discriminator measures the
-    delivered path slope across. Gravity is off during contact, so free flight
-    is exactly linear and the crossing point is placed analytically rather
-    than searched for.
+    Only the along-track station is set here. The height is the solver's:
+    ``ShotSettings.start_at_first_contact`` drops the head so the sole
+    reference reaches the free surface after the recorded free-flight lead-in,
+    which is the approach the dig-versus-skid discriminator measures the
+    delivered path slope across. This module used to compute that clearance
+    itself; doing it once, in the solver, is what makes the workbench's trace
+    the same trace any other caller gets.
 
     Args:
         build: The lofted head.
         swing: The delivery.
-        settings: Integration settings, supplying the time step.
 
     Returns:
         The entry pose and velocity.
@@ -235,22 +251,17 @@ def entry_kinematics(
     velocity = speed * np.array(
         [math.cos(attack_rad), 0.0, math.sin(attack_rad)], dtype=np.float64
     )
-    descent_mps = -float(velocity[2])
     require(
-        descent_mps > 0.0,
+        -float(velocity[2]) > 0.0,
         "the head must be descending to enter the sand",
-        value=descent_mps,
+        value=-float(velocity[2]),
     )
     reference_world = orientation @ build.sole_reference_body_m
-    clearance_m = _FREE_FLIGHT_STEPS * descent_mps * settings.time_step_s
-    time_to_entry_s = clearance_m / descent_mps
     position = np.array(
         [
-            -swing.entry_distance_behind_ball_m
-            - float(reference_world[0])
-            - float(velocity[0]) * time_to_entry_s,
+            -swing.entry_distance_behind_ball_m - float(reference_world[0]),
             0.0,
-            clearance_m - float(reference_world[2]),
+            0.0,
         ],
         dtype=np.float64,
     )
@@ -259,81 +270,24 @@ def entry_kinematics(
     )
 
 
-def _coast_out(
-    result: ShotResult, reference_offset_world_m: NDArray[np.float64]
-) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
-    """Continue the recorded path ballistically until the sole clears the sand.
-
-    ``simulate_shot`` stops the moment no element is both submerged and
-    leading-edge, which happens while the sole is still geometrically inside
-    the divot: a sole moving *away* from the sand carries no RFT traction, so
-    the solver correctly reports zero. The divot and dig-versus-skid metrics
-    need the exit crossing, so the recorded path is continued at the last
-    velocity with a **zero** wrench -- which is not an assumption but the
-    force the solver already returned -- until the sole reference rises above
-    the undisturbed surface.
-
-    Args:
-        result: The completed shot.
-        reference_offset_world_m: ``(3,)`` sole reference offset from the body
-            origin, in world axes.
-
-    Returns:
-        ``(times_s, positions_m)`` for the appended samples; both empty when
-        no continuation is needed or possible.
-    """
-    empty = (np.zeros(0, dtype=np.float64), np.zeros((0, 3), dtype=np.float64))
-    if result.n_steps < 2:
-        return empty
-    position = result.positions_m[-1]
-    velocity = result.velocities_m_s[-1]
-    if float(position[2] + reference_offset_world_m[2]) > 0.0:
-        return empty
-    if float(velocity[2]) <= 0.0:
-        return empty
-    step_s = float(np.diff(result.times_s).mean())
-    rise_m = -float(position[2] + reference_offset_world_m[2])
-    extra = int(math.ceil(rise_m / (float(velocity[2]) * step_s))) + 1
-    if extra > _MAX_COAST_STEPS:
-        return empty
-    offsets = np.arange(1, extra + 1, dtype=np.float64)
-    return (
-        result.times_s[-1] + offsets * step_s,
-        position + offsets[:, None] * (velocity * step_s),
-    )
-
-
-def strike_trace(
-    result: ShotResult,
-    orientation: NDArray[np.float64],
-    reference_offset_world_m: NDArray[np.float64],
-) -> StrikeTrace | None:
+def strike_trace(result: ShotResult) -> StrikeTrace | None:
     """Convert a shot trace into the metrics package's input contract.
+
+    A thin wrapper on
+    :meth:`~bunkershot3d.metrics.trace.StrikeTrace.from_shot`, kept only so
+    that a shot too short to differentiate reads as "no trace" here rather
+    than as an exception in the middle of assembling an outcome. It adds no
+    samples and no arithmetic of its own.
 
     Args:
         result: The shot.
-        orientation: The prescribed, constant body-to-world rotation.
-        reference_offset_world_m: ``(3,)`` sole reference offset from the body
-            origin, in world axes.
 
     Returns:
         The trace, or ``None`` when it is too short to differentiate.
     """
     if result.n_steps < 3:
         return None
-    coast_times, coast_positions = _coast_out(result, reference_offset_world_m)
-    times = np.concatenate([result.times_s, coast_times])
-    positions = np.vstack([result.positions_m, coast_positions])
-    pad = np.zeros((coast_times.size, 3), dtype=np.float64)
-    quaternion = Rotation.from_matrix(orientation).as_quat(scalar_first=True)
-    return StrikeTrace(
-        time_s=times,
-        head_position_m=positions,
-        head_orientation_quat=np.tile(quaternion, (times.size, 1)),
-        sand_force_N=np.vstack([result.forces_n, pad]),
-        sand_moment_Nm=np.vstack([result.torques_n_m, pad]),
-        moment_reference=WrenchReference.HEAD_ORIGIN,
-    )
+    return StrikeTrace.from_shot(result)
 
 
 def sole_load_trace(

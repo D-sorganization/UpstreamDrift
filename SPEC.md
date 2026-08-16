@@ -134,6 +134,63 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-08-16** - Made BunkerShot3D's sole-camber substitution observable
+  (`src/bunkershot3d/geometry/`, issue #8698, epic #8699). A wedge sole can
+  only realise camber areas inside a band set by its width and bounce, so
+  `build_wedge_mesh` fitted a declared `sole_camber_area_m2` that fell outside
+  it to the nearest constructible value. That fit is physically correct and is
+  retained — a narrow sole geometrically cannot host an arbitrarily large
+  camber, and emitting an inconstructible section would be worse — but it was
+  **unobservable**: `constructible_camber_range_m2` was not re-exported from
+  `bunkershot3d.geometry` or the top level, and no result object carried the
+  effective value back, so a caller who declared 48 mm² received a different
+  sole and had no way to find out. Measured on a 77-point demo sweep, the
+  clamp fired on 40 points and moved the effective camber over 24.5–61.6 mm²
+  against a constant declared 48.0 mm².
+
+  This matters most in `bunkershot3d.study`: a `MorrisDesign`,
+  `SaltelliDesign` or `SobolIndices` run over sole width or bounce would
+  attribute variance to a camber the user believes is pinned, and no
+  diagnostic in the artifact would say so.
+
+  Three complementary changes. (1) `loft_wedge()` returns a new `LoftedWedge`
+  carrying `effective_camber_area_m2`, `constructible_camber_range_m2`,
+  `camber_was_clamped`, `camber_substitution_m2` and a per-station
+  `StationCamber` account; `build_wedge_mesh()` is now a thin wrapper that
+  returns only its mesh. (2) `constructible_camber_range_m2` is re-exported
+  from `bunkershot3d.geometry` and the top-level package, and
+  `DesignSpace.check_wedge_camber(geometry)` screens the corners of a design
+  box against the band before a sweep spends solver time inside it — the wedge
+  knowledge lives in `geometry/design_bounds.py` and is imported on call, so
+  the study layer keeps its independence from the geometry package. (3)
+  `CamberFit` makes silence opt-in: the default `CamberFit.STRICT` raises
+  `InconstructibleCamberError` when a **declared** camber is outside the band,
+  and `CamberFit.NEAREST` is the explicit opt-in to nearest-constructible
+  behaviour. Relief-scaled stations are always fitted rather than refused,
+  because that request is derived by the lofter rather than declared by the
+  caller — but every substitution, declared or derived, is recorded.
+
+  `STRICT` is the default because it is what the rest of the package already
+  does: `build_sole_profile` raises for exactly this condition one layer down,
+  `DesignSpace.sample` raises rather than silently lose Sobol' balance, and
+  `WedgeGeometry.__post_init__` rejects inadmissible combinations. The lofter
+  was the single place that downgraded a loud failure to a silent one.
+  `InconstructibleCamberError` subclasses `BunkerShot3DValueError`, so
+  existing `except ValueError` sites keep working. Per CLAUDE.md every guard
+  `raise`s and none `assert`s, because `python -O` strips assertions.
+
+  Two consequences fell out of making the check loud. Three shipped grind
+  presets (`acushnet_example_2`, `acushnet_example_3`, `tour_shaved_heel_lob`)
+  declared a camber area their own sole cannot carry, so their meshes had
+  never matched their declarations; their `sole_camber_area_m2` — an
+  `ESTIMATED` field in every preset — is corrected to a constructible value,
+  and the patent-example helper now takes it per example because the band
+  climbs steeply with bounce. And the workbench GUI
+  (`src/tools/bunker_shot_gui/`) opts into `CamberFit.NEAREST` explicitly,
+  because a designer dragging a bounce slider must keep getting a head to look
+  at; having opted in, its evaluation report now states the camber area the
+  head actually carries alongside the declared one.
+
 - **2026-08-15** - Restored the two repository-hygiene guards
   (`tests/unit/repo_hygiene/test_vendor_submodule_clean.py` and
   `test_no_shadow_of_tools_shared.py`) to actually enforce. Both were
@@ -2167,6 +2224,7 @@ overlapping fixture names in nested conftests.
 
 | Tool       | Version | Purpose                                                                            | Blocking? |
 | ---------- | ------- | ---------------------------------------------------------------------------------- | --------- |
+| 2026-08-16 | 1.0.539 | Made BunkerShot3D's F0 solver and W7 metrics compose without hand-padding (issues #8702, #8700, #8701 under epic #8699). `bunkershot3d.solvers.shot.simulate_shot` now records the whole strike rather than the contact: a free-flight lead-in (`ShotSettings.free_flight_lead_steps`, 3.5 steps) brackets the entry crossing, and the march integrates through the disengaged tail until the sole reference is back above the free surface, so both `depth = 0` crossings the divot metrics interpolate are inside the record. `StrikeTrace.from_shot` is the metrics-layer view of an in-memory shot, one sample per recorded sample with nothing synthesised. `ShotSettings.max_time_s` moves from 10 ms to 200 ms because a nominal bunker shot does not clear the sand until ~10.8 ms, and a window that ends first now raises `ShotTruncatedError` from the solver -- naming `max_time_s` and the time reached, and carrying the partial trace -- instead of surfacing as `divot_metrics` refusing to locate an exit; `require_exit=False` keeps deliberate fixed-window marches legal. `ShotResult.depths_m` was engaged-element depth documented as sole depth (non-monotone, and reading zero while the sole was millimetres under), and is split into `engaged_depths_m` and a geometric `sole_depths_m`. `src/tools/bunker_shot_gui/bridge.py` drops its private free-flight placement and ballistic zero-wrench coast-out and consumes the library composition instead. 19 new tests; no new dependencies. |
 | 2026-04-27 | 1.0.83  | Fixed Bandit B604 false positive alerts in test files by adding nosec annotations. |
 | ruff       | latest  | Linting and formatting                                                             | Yes       |
 | mypy       | 1.7+    | Static type checking                                                               | Yes       |
@@ -3416,3 +3474,6 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Use `np.vdot` instead of `np.sum(x**2)` and `np.sqrt(np.einsum("ij,ij->i", x, x))` instead of `np.linalg.norm(x, axis=1)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
 - Use `np.einsum('ij,ij->j', x, x)` instead of `np.sum(x * x, axis=0)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
 - (spec-exempt: micro-optimization) Replaced `.iterrows()` with `.to_dict('records')` in `data_processor_widget.py`, `kaggle_validation.py`, and `launch_monitor_analytics/widgets.py` to optimize UI and validation performance.
+- Use `np.einsum('ij,ij->i', x, x)` instead of `np.sum(x**2, axis=1)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
+- Use `np.einsum('ij,ij->i', A, B)` instead of `np.sum(A * B, axis=1)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
+- Use `np.sqrt(np.einsum('...i,...i->...', x, x))` instead of `np.linalg.norm(x, axis=-1)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)

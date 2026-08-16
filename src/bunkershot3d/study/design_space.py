@@ -11,16 +11,26 @@ has its balance property at sizes that are a power of two, and SciPy merely
 *warns* when asked for another size. Silently losing low discrepancy is
 exactly the kind of failure a design study cannot detect downstream, so we
 raise instead.
+
+The same reasoning gives :meth:`DesignSpace.check_wedge_camber` its one
+domain-aware duty (issue #8698): a box that sweeps sole width or bounce can
+leave the band of camber areas a sole can physically realise, and the sweep
+would then answer a different question than the one asked. The wedge
+knowledge itself lives in :mod:`bunkershot3d.geometry.design_bounds` and is
+imported on call, so this module stays independent of it.
 """
 
 from __future__ import annotations
 
 import inspect
 from dataclasses import dataclass
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 from scipy.stats import qmc
+
+if TYPE_CHECKING:  # pragma: no cover - typing only
+    from bunkershot3d.geometry.wedge import WedgeGeometry
 
 from src.shared.python.core.contracts import require
 
@@ -336,6 +346,42 @@ class DesignSpace:
             ``upper - lower`` per parameter.
         """
         return self.upper - self.lower
+
+    def check_wedge_camber(
+        self, geometry: WedgeGeometry, *, n_points: int = 48
+    ) -> tuple[str, ...]:
+        """Screen this space against the constructible sole-camber band.
+
+        A sweep over sole width or bounce moves the camber areas a sole can
+        physically realise, so corners of the box can fall outside the band
+        and be lofted as the nearest constructible section instead. The sweep
+        still completes, but a sensitivity estimator then attributes variance
+        to a camber the user believes is pinned (issue #8698). This is the
+        cheap up-front check that catches it; it costs a handful of profile
+        solves rather than a full design of experiments.
+
+        The wedge knowledge lives in
+        :func:`bunkershot3d.geometry.design_bounds.check_camber_design_space`
+        and is imported here on call, so this module keeps working - and
+        keeps being testable against analytic functions - without it.
+
+        Args:
+            geometry: The :class:`~bunkershot3d.geometry.wedge.WedgeGeometry`
+                the study pins everything outside this space from.
+            n_points: Sole samples used to evaluate the band; pass the value
+                the sweep will loft at.
+
+        Returns:
+            One finding per offending corner, empty when the space is clean.
+            A space with no camber, sole-width or bounce parameter is not
+            screened and returns an empty tuple.
+
+        Raises:
+            TypeError: If ``geometry`` is not a ``WedgeGeometry``.
+        """
+        from bunkershot3d.geometry.design_bounds import check_camber_design_space
+
+        return check_camber_design_space(self, geometry, n_points=n_points)
 
     def index_of(self, name: str) -> int:
         """Return the column index of a named parameter.

@@ -463,6 +463,31 @@ def playability_text(playability: PlayabilityOutcome) -> str:
     return "\n".join(lines)
 
 
+def _camber_area_text(evaluation: DesignEvaluation) -> str:
+    """State the camber area, and the declared one when they differ.
+
+    A sole of a given width and bounce can only realise camber areas inside a
+    band, so a declared value outside it is built as the nearest one that is
+    constructible. Reporting only the declared number would tell the designer
+    about a sole that was never built (issue #8698).
+
+    Args:
+        evaluation: The evaluated design.
+
+    Returns:
+        The rendered value.
+    """
+    effective_mm2 = evaluation.effective_camber_area_m2 * 1e6
+    if not evaluation.camber_was_clamped:
+        return f"{effective_mm2:.1f} mm^2"
+    declared_mm2 = evaluation.geometry.sole_camber_area_m2 * 1e6
+    return (
+        f"{effective_mm2:.1f} mm^2  "
+        f"(declared {declared_mm2:.1f} mm^2; not constructible at this "
+        "sole width and bounce)"
+    )
+
+
 def evaluation_report(evaluation: DesignEvaluation) -> str:
     """Render one design end to end.
 
@@ -492,7 +517,7 @@ def evaluation_report(evaluation: DesignEvaluation) -> str:
         _line("Sole entry angle", f"{geometry.sole_entry_angle_deg:.2f} deg"),
         _line("Leading-edge radius", f"{geometry.leading_edge_radius_m * 1e3:.2f} mm"),
         _line("Sole contour ratio", f"{geometry.sole_contour_ratio:.3f}"),
-        _line("Camber area", f"{geometry.sole_camber_area_m2 * 1e6:.1f} mm^2"),
+        _line("Camber area", _camber_area_text(evaluation)),
         _line("Head mass", f"{geometry.head_mass_kg * 1e3:.0f} g"),
         "",
     ]

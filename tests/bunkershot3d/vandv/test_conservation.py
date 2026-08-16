@@ -74,7 +74,13 @@ def _torque_state(elements: SurfaceElements) -> IntrusionState:
 
 
 def _run_shot(solver: DRFTSolver, *, n_steps: int) -> tuple[ShotResult, float]:
-    """March the lopsided body through the bed for a fixed window."""
+    """March the lopsided body through the bed for a fixed window.
+
+    ``require_exit=False`` says what this shot is: a stated number of steps of
+    a body that starts 100 mm down and is not meant to come out. The identity
+    under test belongs to the update rule, not to a strike, so the march must
+    not be required to reach an exit crossing.
+    """
     step = SHOT_WINDOW_S / n_steps
     trace = simulate_shot(
         solver,
@@ -88,6 +94,7 @@ def _run_shot(solver: DRFTSolver, *, n_steps: int) -> tuple[ShotResult, float]:
             max_time_s=SHOT_WINDOW_S,
             include_gravity=False,
             start_at_first_contact=False,
+            require_exit=False,
         ),
     )
     return (trace, step)

@@ -90,12 +90,19 @@ class TestGeometryIsActuallyRepresented:
 
     def test_bounce_changes_the_sole(self) -> None:
         from bunkershot3d.geometry.bounce import GeometricBounce
+        from bunkershot3d.geometry.lofting import CamberFit
 
+        # The band of realisable camber areas climbs with bounce, so the
+        # reference wedge's 55 mm^2 is not constructible at 16 deg. That is
+        # the point of #8698: ask for the nearest constructible sole
+        # explicitly rather than have one substituted behind your back.
         low = build_wedge_mesh(
-            build_reference_wedge(geometric_bounce=GeometricBounce(16.0))
+            build_reference_wedge(geometric_bounce=GeometricBounce(16.0)),
+            camber_fit=CamberFit.NEAREST,
         )
         high = build_wedge_mesh(
-            build_reference_wedge(geometric_bounce=GeometricBounce(24.0))
+            build_reference_wedge(geometric_bounce=GeometricBounce(24.0)),
+            camber_fit=CamberFit.NEAREST,
         )
         assert float(low.vertices[:, 2].min()) > float(high.vertices[:, 2].min())
 
