@@ -482,7 +482,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, opacityback=0, bottomtitle=1mm, opacitybacktitle=0.6, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, rightrule=.15mm, breakable, bottomrule=.15mm, toprule=.15mm, colframe=quarto-callout-note-color-frame, leftrule=.75mm, titlerule=0mm, arc=.35mm, coltitle=black, colback=white, left=2mm, colbacktitle=quarto-callout-note-color!10!white]
+\begin{tcolorbox}[enhanced jigsaw, opacitybacktitle=0.6, rightrule=.15mm, colback=white, left=2mm, breakable, toptitle=1mm, arc=.35mm, toprule=.15mm, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, titlerule=0mm, bottomtitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, bottomrule=.15mm, opacityback=0, colframe=quarto-callout-note-color-frame, coltitle=black]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -7737,6 +7737,83 @@ shaft compliance, ground coupling, or human wrench data. Longer
 distributed-contact trajectories and the governed participant protocol
 remain necessary before a delivery or coaching inference.
 
+\subsubsection{Distributed Grip Contact Discretization Across Nested
+Horizons}\label{distributed-grip-contact-discretization-across-nested-horizons}
+
+The next gate isolates contact discretization before admitting shaft or
+ground degrees of freedom. Each hand receives \(N\in\{1,3,5\}\) tension
+fibers across a declared 30 mm grip-axis width. Fiber \(j\) has free
+length \(\ell_{0j}=\|d_j(q_0)\|\) at the unperturbed closed state and
+
+\begin{equation}\phantomsection\label{eq-distributed-grip-fibers}{
+e_j=\max(\|d_j\|-\ell_{0j},0),\qquad
+k_j=\frac{k_{\mathrm{grip}}}{N},\qquad
+c_j=\frac{c_{\mathrm{grip}}}{N}.
+}\end{equation}
+
+Thus station count does not silently multiply total grip stiffness or
+damping, and finite off-axis reference length does not become hidden
+preload. Closure residuals below \(10^{-8}\) m are treated as zero; the
+one-fiber configuration then reproduces the point tension law and its
+forward trajectory. Every fiber retains equal-and-opposite force,
+loading-only damping, strain energy, active state, and virtual-power
+accounting. Replacing all realized application points by their midpoint
+removes the force couple exactly, while reversing all moment arms
+reverses it exactly without changing the realized forces.
+
+The atlas selects twelve states spanning four profile--grip cases and
+three phase samples. Forward and reversed initial club-velocity
+perturbations, one-, three-, and five-fiber grips, 1.0 and 0.5 ms steps,
+and native MuJoCo and Pinocchio produce 288 trajectories. Each
+trajectory is advanced once to 50 ms and summarized at nested 4, 10, 25,
+and 50 ms horizons, yielding 1,152 engine--horizon summaries without
+resetting the state at each horizon. No active joint torque, hand
+driver, or direct club actuation is applied.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=0.96\linewidth,height=\textheight,keepaspectratio]{figures/fig_articulated_distributed_grip_atlas.pdf}
+
+}
+
+\caption{\label{fig-articulated-distributed-grip-atlas}Distributed Grip
+Discretization Across Nested Articulated Horizons}
+
+\end{figure}%
+
+All registered numerical and native-engine gates pass. The largest
+station force is 4.030 N and the largest force couple is 0.375 N m.
+Coincident and reversed-moment-arm residuals are exactly zero; the
+largest virtual-power residual is \(1.14\times10^{-15}\) W and positive
+damping power is zero. The worst normalized work--energy residual
+decreases from 0.03119 to 0.01560 when the step is halved. Maximum
+trajectory and station-force discrepancies between engines are
+\(7.97\times10^{-14}\) and \(2.85\times10^{-12}\) relative, with no
+active-set parity failure. At the fine step, the largest
+three-to-five-fiber state discrepancy is 0.00355 relative; the
+one-to-three discrepancy is 0.0419.
+
+The active-set result is structural rather than a benefit result. The
+one-fiber comparator remains fully taut, whereas the off-axis
+multi-fiber grips retain at least one open fiber over 66.7--100\% of
+samples in the registered cells. No active-set transition occurs, so
+opening or reattachment is right-censored through 50 ms. At 50 ms, the
+engine-averaged ensemble mean club translation speeds are 0.2444,
+0.2379, and 0.2314 m/s for one, three, and five fibers. These
+unmatched-load values show discretization dependence; they do not rank
+physical grips or establish that partial opening helps or harms
+delivery.
+
+The fibers remain memoryless, frictionless engineering lines rather than
+calibrated pressure, fingers, tissue, or measured grip mechanics. The
+club is rigid and the support pathway is unchanged. Consequently this
+gate establishes contact-discretization sensitivity and a 50 ms
+numerical horizon only. Shaft bending/torsion, ground/free-moment work,
+matched delivery, and governed human measurements remain required before
+equipment, timing, or strategy inference.
+
 \subsection{Paired Scapula-on-Ellipsoid Geometry
 Screen}\label{paired-scapula-on-ellipsoid-geometry-screen}
 
@@ -7799,18 +7876,19 @@ the independently validated articulated shoulder model, subject-specific
 anatomy where governed, calibrated grip contact, and paired forward
 dynamics.
 
-The bounded forward experiments now retain the verified closed-state
-initialization while replacing the hand carriages with articulated
-dynamics for 5 ms. The bilateral and typed unilateral tiers repeat
-power, work--energy, refinement, adverse-load, and engine-parity
-controls. The unilateral tier distinguishes open, taut, opening, and
-reattachment states, but it still lacks calibrated tissue, friction,
-distributed grip and shaft compliance, and ground coupling. The next
-experiment must extend those typed states and repeat the geometry,
-reversal, and killswitch controls. Only trajectories passing those gates
-may be used to test whether drift-mediated transfer reduces timing
-demand, creates recovery, benefits from slack, or supports a human
-strategy.
+The bounded articulated experiments retain the verified closed-state
+initialization. Bilateral and typed point-attachment tiers repeat power,
+work--energy, refinement, adverse-load, event, and engine-parity
+controls through 5 ms. The distributed extension then preserves total
+stiffness and damping while advancing one-, three-, and five-fiber
+tension grips through 50 ms with geometry and station-refinement
+controls. It still lacks calibrated tissue, pressure, friction, shaft
+compliance, and ground coupling. The next tests must add shaft and
+ground pathways separately before combining them and repeating
+matched-state, work, load, reversal, and killswitch controls. Only
+trajectories passing those gates may test whether drift-mediated
+transfer reduces timing demand, creates recovery, benefits from slack,
+or supports a human strategy.
 
 \section{Falsifiability Gained and Claims Still
 Open}\label{sec-spatial-claim-boundary}
@@ -9453,17 +9531,24 @@ The ladder remains deliberately incomplete:
   inertia elements rather than solved contact and subject-specific
   anatomy; and
 \item
-  the forward spatial tier uses two translational hand carriages,
-  declared Kelvin--Voigt contacts, and a rigid club rather than
-  anatomical arms, measured tissue, or the distributed shaft.
+  the reduced forward spatial tier uses two translational hand
+  carriages; the subject-scaled articulated tier now advances one-,
+  three-, and five-fiber tension grips through 50 ms, but those fibers
+  remain frictionless engineering lines with state-registered free
+  lengths rather than measured pressure, fingers, or tissue; and
+\item
+  every articulated forward branch still uses a rigid club and unchanged
+  support pathway rather than the distributed shaft and
+  ground/free-moment system.
 \end{itemize}
 
-The next decisive model test replaces the carriages with subject-scaled
-articulated arms and couples the distributed shaft while emitting the
-same common schema and preserving the exact same-state command-removal
-branch. Failure of force/moment balance, power invariance, contact-rank
-agreement, or matched-event parity at that tier would falsify transport
-of the reduced passive-persistence claim.
+The next decisive model tests add shaft bending/torsion and a finite
+ground/free-moment pathway separately before combining them with the
+distributed articulated grip. Each must emit the same common schema and
+retain the exact same-state command-removal branch. Failure of
+force/moment balance, power invariance, contact-rank agreement,
+refinement, or matched-event parity at those tiers would falsify
+transport of the reduced passive-persistence claim.
 
 \chapter{Reference Frames, Biological Mechanisms, and the Multi-Engine
 Ladder}\label{sec-frames-biology-engines}
@@ -11778,6 +11863,17 @@ changes the answer, not that either condition is beneficial. Any benefit
 proposal must still survive longer matched-work/load delivery, stateful
 hysteresis, calibrated distributed contact, and independent human
 measurement.
+
+The next articulated atlas extends a frictionless tension-fiber
+comparator to one, three, and five stations per hand while holding total
+stiffness and damping fixed. Its 288 trajectories pass nested 4, 10, 25,
+and 50 ms power, energy, refinement, geometry-null, and
+MuJoCo--Pinocchio gates. The one-fiber branch stays taut; multi-fiber
+branches retain partially open active sets but show no transition
+through 50 ms. Their delivery-state differences therefore demonstrate
+discretization sensitivity, not a physical benefit of slack or
+distributed pressure. Measured contact pressure, friction, shaft/ground
+work, matched tasks, and governed human outcomes remain necessary.
 
 \section{Evidential Boundary}\label{evidential-boundary}
 

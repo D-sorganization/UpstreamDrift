@@ -264,6 +264,12 @@ REVIEW_SPECS: dict[str, dict[str, Any]] = {
         ("PD-CLAIM-283", "PD-CLAIM-284", "PD-CLAIM-285"),
         "Extend the right-censored typed laws through calibrated distributed grip and shaft contact, longer matched-work/load delivery, ground coupling, and governed bilateral human wrenches.",
     ),
+    "distributed_grip_discretization": _spec(
+        "reviewed_as_right_censored_synthetic_discretization_result",
+        "fifty_millisecond_distributed_fiber_gate_qualified",
+        ("PD-CLAIM-286", "PD-CLAIM-287", "PD-CLAIM-288"),
+        "Calibrate grip friction and pressure, couple the qualified fibers to shaft bending and torsion, add ground pathways, and test longer matched-work/load delivery against governed bilateral human wrenches.",
+    ),
     "scapulothoracic_contact_geometry": _spec(
         "reviewed_as_paired_geometry_screen_with_explicit_boundaries",
         "paired_geometry_screen_partial_with_explicit_boundaries",
