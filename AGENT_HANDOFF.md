@@ -89,27 +89,32 @@ This is current operational state. Historical detail belongs in git/GitHub.
   shaft power and energy, contact transitions, reaction/free moment, and both
   shaft and base domain screens. Thirty combined regression tests pass.
 - The nonlinear base Christoffel evaluation is substantially costlier than the
-  shaft tier; do not freeze it silently. Run bounded 4 ms step/preload probes
-  before registering the 50 ms two-engine atlas.
+  shaft tier; do not freeze it silently.
 - A dependency-free Newton/line-search solver balances ground, grip, and
   gravity at fixed posture. Retain natural-zero, gravity-only, and full
   conditional-equilibrium initializations: gravity-only balance moved the
   registered probe about 18.8 mm vertically and 0.038 rad in pitch, preloaded
   the grip, and materially changed club speed.
-- The first 4 ms MuJoCo probe refines by about 2x from 0.25 to 0.125 ms in all
-  activations; maximum residuals were 0.000154–0.00156 J at 0.125 ms.
-- Domain diagnostics, two-engine atlas, paper/release integration, and the
-  publication figure remain.
+- The governed 42-trace, two-engine 4 ms diagnostic is generated at
+  `data/articulated_ground_diagnostic.json`: all 14 step series monotonically
+  halve their energy residual, engine trajectory errors are below `2.5e-12`,
+  force errors below `1.1e-10`, and every active set matches. Eight focused
+  forward/diagnostic tests pass.
+- Initialization is not innocuous. At 0.125 ms, natural-zero versus gravity-
+  only versus conditional-base starts produced peak ground forces of 32.8,
+  565.5, and 510.3 N and 4 ms club speeds of 0.264, 1.908, and 0.946 m/s.
+  The conditional solve balances only base generalized forces, not the full
+  mechanism; retain this limitation and use natural-zero for exact-state atlas
+  killswitch comparisons.
+- The production atlas, paper/release integration, and publication figure remain.
 
 ## Immediate Next Steps
 
-1. Implement the #8719 forward integrator with ground mass Christoffel and
-   gravity gradients, domain screens, and exact fixed-base reduction.
-2. Add deterministic diagnostics and a refined two-engine atlas with reversal,
+1. Register and generate the refined two-engine atlas with reversal,
    frictionless, rigid-shaft, matched-load/work, and domain-failure controls.
-3. Integrate the paper, claims, release, SPEC, and publication figure; visually
+2. Integrate the paper, claims, release, SPEC, and publication figure; visually
    inspect the PDF and shepherd a protected merge.
-4. Continue to full-delivery matching/uncertainty and governed human holdout;
+3. Continue to full-delivery matching/uncertainty and governed human holdout;
    do not close #8556 without qualifying participant data.
 
 ## Reproduction and Release Gates
@@ -121,6 +126,7 @@ The full shaft atlas takes about 34 minutes with four ordered workers.
 python -m scripts.research.proximal_distal_energy.generate_articulated_shaft_structural_basis
 wsl.exe bash -lc "cd /mnt/c/Users/diete/Repositories/UpstreamDrift-worktrees/articulated-shaft-8697 && python3 -m scripts.research.proximal_distal_energy.run_articulated_shaft_time_step_diagnostic"
 wsl.exe bash -lc "cd /mnt/c/Users/diete/Repositories/UpstreamDrift-worktrees/articulated-shaft-8697 && python3 -m scripts.research.proximal_distal_energy.run_articulated_shaft_atlas"
+wsl.exe bash -lc "cd /mnt/c/Users/diete/Repositories/UpstreamDrift-worktrees/ground-free-moment-8719 && python3 -m scripts.research.proximal_distal_energy.run_articulated_ground_diagnostic"
 python -m scripts.research.proximal_distal_energy.make_articulated_shaft_figure
 python -m scripts.research.proximal_distal_energy.claim_audit inventory
 python scripts/research/proximal_distal_energy/register_articulated_shaft_claims.py
