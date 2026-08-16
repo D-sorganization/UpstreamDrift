@@ -36,7 +36,7 @@ This directory tracks architecture-impacting decisions for UpstreamDrift.
 | [0028](0028-react-tauri-launcher-parity.md)           | React/Tauri launcher parity model                                                 | Accepted | 2026-06-10 |
 | [0030](0030-c3d-viewer-renderer-backend.md)           | C3D Viewer Renderer Backend                                                       | Accepted | 2026-06-10 |
 | [0031](0031-launch-monitor-canonical-shot-schema.md)  | Canonical Launch Monitor Shot Schema                                              | Accepted | 2026-08-04 |
-| [0032](0032-bunkershot3d-club-design-architecture.md) | BunkerShot3D as a multi-fidelity club-design tool                                 | Accepted | 2026-08-13 |
+| [0032](0032-bunkershot3d-club-design-architecture.md) | BunkerShot3D as a Multi-Fidelity Club-Design Tool                                 | Accepted | 2026-08-13 |
 
 Note: ADR 0013 was amended on 2026-05-31 to document the CC-32
 canonical-core app-shell registry reuse of the embeddable-tool contract.
