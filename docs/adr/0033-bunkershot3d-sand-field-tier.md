@@ -3,7 +3,8 @@
 - Status: Proposed
 - Date: 2026-08-16
 - Decision Makers: UpstreamDrift maintainers
-- Related Issues/PRs: #8709 (B1), epic #8699, amends ADR-0032, blocks #8710
+- Related Issues/PRs: #8709 (B1), epic #8699, #8726 (MuJoCo driver defects
+  measured here), amends ADR-0032, blocks #8710
   (B2), #8711 (B3), #8712 (B4), #8713 (B5)
 - Amends: [ADR-0032](0032-bunkershot3d-club-design-architecture.md) — fidelity
   tier table and the F3 tier's scope
@@ -472,14 +473,21 @@ the sand is not the tier that reports the load.
 **non-functional**, not merely low-fidelity. It must either be repaired behind
 a test that actually builds a model and puts grains under the club, or removed;
 leaving 327 lines that raise on first use, described in two issues as working,
-is worse than either. This is filed as a follow-up rather than fixed here,
-because this ADR is a decision and the repair is a change to
-`backends/mpm/`.
+is worse than either. **A backend that silently simulates vacuum is worse than
+one that raises `NotImplementedError`** — the raising backend is honest about
+being unfinished, whereas this one would write a well-formed result file full
+of zeros carrying an `OUT_OF_ENVELOPE` verdict that reads as a fidelity caveat
+rather than as "the club never touched anything". The defects are filed as
+**#8726** rather than fixed here, because this ADR is a decision and the repair
+is a change to `backends/mpm/`.
 
 **Follow-ups.**
 
-- Repair or remove `backends/mpm/driver.py`; at minimum add a test that
-  `setup()` builds, since none currently does.
+- **#8726** — repair or remove `backends/mpm/driver.py`. Covers the five
+  defects measured above (inertia below `mjMINVAL`; water-density grains; the
+  1000-sphere cap destroying rather than thinning the bed; 114,382 steps/shot
+  dominated by travel outside the domain; grain state never written) plus the
+  absence of any test that builds a real model.
 - Amend the epic #8699 child list: B2/B3/B4 are gated on an F1 implementation
   issue that does not yet exist.
 - Record the effective-width assumption in the result manifest schema before
