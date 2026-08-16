@@ -37,7 +37,10 @@ from dataclasses import dataclass
 
 import numpy as np
 from matplotlib.axes import Axes
+from matplotlib.collections import PathCollection
 from matplotlib.figure import Figure
+from matplotlib.lines import Line2D
+from matplotlib.text import Text
 from numpy.typing import NDArray
 
 from src.shared.python.visualization.viewport import select_viewport_provider
@@ -47,6 +50,7 @@ from .report import status_colour
 
 __all__ = [
     "RENDERER",
+    "ShotFrameArtists",
     "ViewportFallback",
     "draw_shot_frame",
     "field_scales",
@@ -236,21 +240,19 @@ def _marker_sizes(field: SoleLoadField) -> NDArray[np.float64]:
     return np.clip(field.element_area_m2 * _MARKER_AREA_PT2, 4.0, 400.0)
 
 
-def _draw_component(
+def _build_component(
     axes: Axes,
     figure: Figure,
     field: SoleLoadField,
     component: LoadComponent,
     scale: LoadScale,
-    frame: int,
-) -> None:
-    """Paint one component's per-element pressure at one sample."""
-    pressure = field.component_pressure_pa(component)[frame]
+) -> PathCollection:
+    """Build one component's panel, everything about it that never changes."""
     low, high = scale.limits_pa
     scatter = axes.scatter(
         field.element_centroid_body_m[:, 1] * 1e3,
         field.element_centroid_body_m[:, 0] * 1e3,
-        c=pressure,
+        c=np.zeros(field.n_elements, dtype=np.float64),
         s=_marker_sizes(field),
         cmap=scale.colormap_name,
         vmin=low,
@@ -261,8 +263,6 @@ def _draw_component(
     bar = figure.colorbar(scatter, ax=axes)
     bar.ax.set_ylabel(f"{component.label} [{scale.unit}]", fontsize=7)
     bar.ax.tick_params(labelsize=6)
-    resultant = field.resultant_force_N(component)[frame]
-    axes.set_title(f"{component.label}: {resultant:.4g} N", fontsize=8)
     _label_sole_axes(axes)
     _stamp(axes, field)
     _note(
@@ -270,11 +270,21 @@ def _draw_component(
         f"scale peak {scale.peak_pa:.3g} {scale.unit}\n"
         f"term peaks at {field.peak_time_s(component) * 1e3:.2f} ms",
     )
+    return scatter
 
 
-def _note(axes: Axes, text: str) -> None:
-    """Draw a small qualifier under the stamp, inside the axes."""
-    axes.text(
+def _note(axes: Axes, text: str) -> Text:
+    """Draw a small qualifier under the stamp, inside the axes.
+
+    Args:
+        axes: The panel to draw on.
+        text: The qualifier.
+
+    Returns:
+        The text artist, so a caller that has to rewrite it per frame can hold
+        it rather than search the axes for it.
+    """
+    return axes.text(
         0.02,
         0.02,
         text,
@@ -304,27 +314,22 @@ def _label_sole_axes(axes: Axes) -> None:
         axes.invert_yaxis()
 
 
-def _draw_patch(
-    axes: Axes, field: SoleLoadField, patch: ContactPatch, frame: int
-) -> None:
-    """Paint the engaged element set at one sample, against the leading edge."""
+def _build_patch(
+    axes: Axes, field: SoleLoadField, patch: ContactPatch
+) -> tuple[PathCollection, Text]:
+    """Build the patch panel; only the element colours change per frame.
+
+    One scatter over *every* element, recoloured per frame, rather than a
+    static pale layer plus a per-frame engaged layer: the engaged set changes
+    size every sample, so a second scatter would have to be rebuilt each time,
+    which is what made the animation cost a quarter of a second per frame.
+    """
     stations = patch.element_centroid_body_m[:, 0] * 1e3
     across = patch.element_centroid_body_m[:, 1] * 1e3
-    engaged = patch.engaged[frame]
     sizes = np.clip(patch.element_area_m2 * _MARKER_AREA_PT2, 4.0, 400.0)
-    axes.scatter(
+    scatter = axes.scatter(
         across, stations, s=sizes, c=_PALE, marker="s", linewidths=0.0, zorder=1
     )
-    if engaged.any():
-        axes.scatter(
-            across[engaged],
-            stations[engaged],
-            s=sizes[engaged],
-            c=status_colour(field.status),
-            marker="s",
-            linewidths=0.0,
-            zorder=2,
-        )
     axes.axhline(
         patch.leading_edge_m * 1e3,
         color=_EDGE,
@@ -333,23 +338,14 @@ def _draw_patch(
         label="leading edge",
         zorder=3,
     )
-    reach_mm = patch.reach_m[frame] * 1e3
-    reach_text = "no contact" if not np.isfinite(reach_mm) else f"{reach_mm:.2f} mm"
-    axes.set_title(f"Contact patch: {patch.area_m2[frame] * 1e4:.2f} cm^2", fontsize=8)
     _label_sole_axes(axes)
     axes.legend(loc="lower right", fontsize=6, framealpha=0.6)
     _stamp(axes, field)
-    _note(
-        axes,
-        f"{patch.time_s[frame] * 1e3:.2f} ms\n"
-        f"nearest load {reach_text} behind the leading edge",
-    )
+    return scatter, _note(axes, "")
 
 
-def _draw_time_series(
-    axes: Axes, field: SoleLoadField, patch: ContactPatch, frame: int
-) -> None:
-    """Plot patch area and each term's resultant against time."""
+def _build_time_series(axes: Axes, field: SoleLoadField, patch: ContactPatch) -> Line2D:
+    """Build the time-series panel; only the frame cursor moves."""
     time_ms = patch.time_s * 1e3
     axes.plot(
         time_ms,
@@ -361,7 +357,7 @@ def _draw_time_series(
     axes.set_xlabel("time from the start of the record [ms]", fontsize=7)
     axes.set_ylabel("contact patch area [cm^2]", fontsize=7)
     axes.tick_params(labelsize=6)
-    axes.axvline(time_ms[frame], color=_EDGE, linewidth=1.0, linestyle=":")
+    cursor = axes.axvline(time_ms[0], color=_EDGE, linewidth=1.0, linestyle=":")
 
     # The two terms differ by three orders of magnitude at greenside speed, so
     # plotting both in newtons on one axis hides the depth term entirely.
@@ -404,6 +400,101 @@ def _draw_time_series(
         f"peak {patch.peak_area_m2 * 1e4:.2f} cm^2 at "
         f"{patch.peak_area_time_s * 1e3:.2f} ms",
     )
+    return cursor
+
+
+class ShotFrameArtists:
+    """Axes built once for one shot, and the artists a frame change touches.
+
+    Rebuilding the whole figure per frame costs about 250 ms at the shipped
+    discretization -- the colour bars and the layout pass, not the 500-point
+    scatters -- which is slower than the transport interval and makes playback
+    queue rather than animate. Everything that does not depend on the sample is
+    therefore built once and only the frame-varying artists are mutated:
+    two colour arrays, one set of face colours, one cursor line and four
+    titles.
+
+    The colour limits live on the scatters, set at build time from the fixed
+    :class:`~.field.LoadScale`, so no update path can reintroduce per-frame
+    autoscaling.
+    """
+
+    def __init__(
+        self,
+        figure: Figure,
+        field: SoleLoadField,
+        patch: ContactPatch | None,
+        scales: dict[LoadComponent, LoadScale],
+    ) -> None:
+        """Build the axes for one shot.
+
+        Args:
+            figure: The figure to build into; cleared first.
+            field: The per-element load field.
+            patch: The contact-patch series, when there is one.
+            scales: The fixed colour scales to pin the panels to.
+        """
+        self._field = field
+        self._patch = patch
+        figure.clear()
+        rows = 2 if patch is not None else 1
+        axes = figure.subplots(rows, 2, squeeze=False)
+        self._component_axes = {
+            LoadComponent.DEPTH: axes[0][0],
+            LoadComponent.INERTIAL: axes[0][1],
+        }
+        self._component_art = {
+            component: _build_component(
+                panel, figure, field, component, scales[component]
+            )
+            for component, panel in self._component_axes.items()
+        }
+        self._patch_axes: Axes | None = None
+        self._patch_art: PathCollection | None = None
+        self._patch_note: Text | None = None
+        self._cursor: Line2D | None = None
+        if patch is not None:
+            self._patch_axes = axes[1][0]
+            self._patch_art, self._patch_note = _build_patch(axes[1][0], field, patch)
+            self._cursor = _build_time_series(axes[1][1], field, patch)
+        figure.tight_layout()
+
+    def update(self, frame: int) -> None:
+        """Show one sample.
+
+        Args:
+            frame: The sample index.
+
+        Raises:
+            ValueError: If the index is outside the recorded shot.
+        """
+        index = _check_frame(self._field, frame)
+        field = self._field
+        for component, art in self._component_art.items():
+            art.set_array(field.component_pressure_pa(component)[index])
+            resultant = field.resultant_force_N(component)[index]
+            self._component_axes[component].set_title(
+                f"{component.label}: {resultant:.4g} N", fontsize=8
+            )
+        patch = self._patch
+        if patch is None or self._patch_art is None or self._patch_axes is None:
+            return
+        engaged = patch.engaged[index]
+        loaded = status_colour(field.status)
+        self._patch_art.set_facecolor([loaded if flag else _PALE for flag in engaged])
+        self._patch_axes.set_title(
+            f"Contact patch: {patch.area_m2[index] * 1e4:.2f} cm^2", fontsize=8
+        )
+        reach_mm = patch.reach_m[index] * 1e3
+        reach = "no contact" if not np.isfinite(reach_mm) else f"{reach_mm:.2f} mm"
+        if self._patch_note is not None:
+            self._patch_note.set_text(
+                f"{patch.time_s[index] * 1e3:.2f} ms\n"
+                f"nearest load {reach} behind the leading edge"
+            )
+        if self._cursor is not None:
+            moment = patch.time_s[index] * 1e3
+            self._cursor.set_xdata([moment, moment])
 
 
 def draw_shot_frame(
@@ -413,11 +504,13 @@ def draw_shot_frame(
     *,
     frame: int = 0,
     scales: dict[LoadComponent, LoadScale] | None = None,
-) -> None:
+) -> ShotFrameArtists:
     """Draw one sample of one shot into an existing figure.
 
-    The figure is cleared first, so an animation can call this once per frame
-    without accumulating axes.
+    The figure is cleared and rebuilt, so this is the right call for a still
+    and the wrong one for an animation: hold the returned
+    :class:`ShotFrameArtists` and call :meth:`~ShotFrameArtists.update`
+    instead, which is what the workbench view does.
 
     Args:
         figure: The figure to draw into.
@@ -429,36 +522,19 @@ def draw_shot_frame(
             this field's own, which is correct for a single design and
             **wrong** for a comparison -- pass the merged scales there.
 
+    Returns:
+        The built artists, ready to be updated to another frame.
+
     Raises:
         ValueError: If the frame is outside the shot, or the patch does not
             describe the same shot as the field.
     """
-    index = _check_frame(field, frame)
+    _check_frame(field, frame)
     _check_patch(field, patch)
     limits = field_scales((field,)) if scales is None else scales
-    figure.clear()
-    rows = 2 if patch is not None else 1
-    axes = figure.subplots(rows, 2, squeeze=False)
-    _draw_component(
-        axes[0][0],
-        figure,
-        field,
-        LoadComponent.DEPTH,
-        limits[LoadComponent.DEPTH],
-        index,
-    )
-    _draw_component(
-        axes[0][1],
-        figure,
-        field,
-        LoadComponent.INERTIAL,
-        limits[LoadComponent.INERTIAL],
-        index,
-    )
-    if patch is not None:
-        _draw_patch(axes[1][0], field, patch, index)
-        _draw_time_series(axes[1][1], field, patch, index)
-    figure.tight_layout()
+    artists = ShotFrameArtists(figure, field, patch, limits)
+    artists.update(frame)
+    return artists
 
 
 def sole_load_still(

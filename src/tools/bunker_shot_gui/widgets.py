@@ -41,7 +41,7 @@ from .design import (
     playing_condition_names,
 )
 from .field import ContactPatch, LoadComponent, LoadScale, SoleLoadField
-from .render import draw_shot_frame, field_scales, viewport_fallback
+from .render import ShotFrameArtists, field_scales, viewport_fallback
 from .report import status_colour, status_headline
 
 __all__ = [
@@ -56,7 +56,11 @@ _EMPTY_CELL = QColor(238, 234, 226)
 _WINDOW_EDGE = QColor(20, 90, 40)
 _MIN_MAP_HEIGHT_PX = 150
 _CELL_GAP_PX = 1
-_FRAME_INTERVAL_MS = 90
+_FRAME_INTERVAL_MS = 120
+"""Transport period. Measured: mutating the artists costs 0.75 ms, and the
+canvas render they sit in costs about 98 ms at the shipped discretization, so
+the interval is set above the renderer's own cost rather than below it. A
+faster timer would not produce a faster animation, only dropped ticks."""
 _MIN_FIELD_HEIGHT_PX = 380
 
 
@@ -307,6 +311,7 @@ class SoleLoadFieldWidget(QWidget):
         self._field: SoleLoadField | None = None
         self._patch: ContactPatch | None = None
         self._scales: dict[LoadComponent, LoadScale] | None = None
+        self._artists: ShotFrameArtists | None = None
         self._frame = 0
         self._fallback = viewport_fallback()
 
@@ -407,6 +412,10 @@ class SoleLoadFieldWidget(QWidget):
         self._field = field
         self._patch = patch
         self._scales = field_scales((field,)) if scales is None else scales
+        # The axes are built once here, not once per frame: rebuilding the
+        # colour bars and re-running the layout pass costs about 250 ms at the
+        # shipped discretization, which is slower than the transport interval.
+        self._artists = ShotFrameArtists(self._canvas.fig, field, patch, self._scales)
         self._frame = int(field.resultant_force_N(LoadComponent.TOTAL).argmax())
         self._slider.blockSignals(True)
         self._slider.setRange(0, field.n_frames - 1)
@@ -420,6 +429,7 @@ class SoleLoadFieldWidget(QWidget):
         self._field = None
         self._patch = None
         self._scales = None
+        self._artists = None
         self._frame = 0
         self._slider.blockSignals(True)
         self._slider.setRange(0, 0)
@@ -489,15 +499,9 @@ class SoleLoadFieldWidget(QWidget):
 
     def _redraw(self) -> None:
         """Repaint the canvas at the current frame."""
-        if self._field is None:
+        if self._field is None or self._artists is None:
             return
-        draw_shot_frame(
-            self._canvas.fig,
-            self._field,
-            self._patch,
-            frame=self._frame,
-            scales=self._scales,
-        )
+        self._artists.update(self._frame)
         self._canvas.draw_idle()
         self._readout.setText(
             f"sample {self._frame + 1} of {self._field.n_frames}  "
