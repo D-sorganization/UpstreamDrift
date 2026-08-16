@@ -172,12 +172,16 @@ def _strike_scene(ball_depth_m: float) -> StrikeScene:
     )
 
 
-def _sand_delivery(result: ShotResult, divot: DivotMetrics) -> SandDelivery:
+def _sand_delivery(
+    result: ShotResult, divot: DivotMetrics, sand: SandState
+) -> SandDelivery:
     """Bundle what the solver and the metrics layer measured about one strike.
 
     Args:
         result: The F0 shot.
         divot: The divot the same shot cut.
+        sand: The bed it was struck in, supplying the relative density the
+            sand-to-ball transfer efficiency depends on (issue #8704).
 
     Returns:
         The delivery the ball model derives launch from.
@@ -188,6 +192,7 @@ def _sand_delivery(result: ShotResult, divot: DivotMetrics) -> SandDelivery:
         contact_duration_s=result.contact_duration_s,
         entry_speed_m_s=result.entry_speed_m_s,
         exit_speed_m_s=result.exit_speed_m_s,
+        bed_relative_density=sand.relative_density,
         verdict=result.verdict,
     )
 
@@ -610,7 +615,7 @@ class WorkbenchModel:
         )
         carry = _try(
             lambda: self.carry_estimate(
-                geometry, swing, _sand_delivery(result, _measured_divot(divot))
+                geometry, swing, _sand_delivery(result, _measured_divot(divot), sand)
             ),
             "carry",
             missing,
@@ -852,7 +857,7 @@ class WorkbenchModel:
                 sand,
             )
             return self.carry_estimate(
-                geometry, swing, _sand_delivery(result, _measured_divot(divot))
+                geometry, swing, _sand_delivery(result, _measured_divot(divot), sand)
             )
         except (RuntimeError, ImportError, ValueError) as error:
             reasons.append(f"carry is unavailable: {error}")

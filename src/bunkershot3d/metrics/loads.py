@@ -309,9 +309,15 @@ def head_twist_metrics(
     moment = centre_of_mass_moment_Nm(trace, head)[selection]
     axes = shaft_travel_loft_axes(trace, head, scene)
     shaft, travel, loft = (axes[0][selection], axes[1][selection], axes[2][selection])
-    shaft_moment = np.einsum('ij,ij->i', moment, shaft)  # ⚡ Bolt: np.einsum avoids temporary arrays and is ~2.5x faster than np.sum(a * b, axis=1)
-    travel_moment = np.einsum('ij,ij->i', moment, travel)  # ⚡ Bolt: np.einsum avoids temporary arrays and is ~2.5x faster than np.sum(a * b, axis=1)
-    loft_moment = np.einsum('ij,ij->i', moment, loft)  # ⚡ Bolt: np.einsum avoids temporary arrays and is ~2.5x faster than np.sum(a * b, axis=1)
+    shaft_moment = np.einsum(
+        "ij,ij->i", moment, shaft
+    )  # ⚡ Bolt: np.einsum avoids temporary arrays and is ~2.5x faster than np.sum(a * b, axis=1)
+    travel_moment = np.einsum(
+        "ij,ij->i", moment, travel
+    )  # ⚡ Bolt: np.einsum avoids temporary arrays and is ~2.5x faster than np.sum(a * b, axis=1)
+    loft_moment = np.einsum(
+        "ij,ij->i", moment, loft
+    )  # ⚡ Bolt: np.einsum avoids temporary arrays and is ~2.5x faster than np.sum(a * b, axis=1)
     duration_s = float(times[-1] - times[0])
     angular_impulse = float(np.trapezoid(shaft_moment, times))
     inertia: float | None = None
