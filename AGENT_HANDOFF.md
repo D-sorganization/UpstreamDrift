@@ -14,10 +14,14 @@ This is current operational state. Historical detail belongs in git/GitHub.
 - [#8684](https://github.com/D-sorganization/UpstreamDrift/issues/8684)
   governs distributed grip, shaft, and ground pathways. #8685 completed grip
   discretization. [#8697](https://github.com/D-sorganization/UpstreamDrift/issues/8697)
-  is the active shaft child on branch `research/8684-articulated-shaft-8697`.
+  completed the shaft child.
   Protected PR [#8715](https://github.com/D-sorganization/UpstreamDrift/pull/8715)
-  merged as `0c988f05a`. A narrow follow-up records the qualification in
-  `SPEC.md` without applying the freshness-bypass label.
+  merged as `0c988f05a`; SPEC/handoff follow-up
+  [#8717](https://github.com/D-sorganization/UpstreamDrift/pull/8717) merged as
+  `051f8dccc`. Both are verified ancestors of remote main.
+- [#8719](https://github.com/D-sorganization/UpstreamDrift/issues/8719) is the
+  active finite-ground/free-moment child on branch
+  `research/8684-ground-free-moment-8719` from main `051f8dccc`.
 - #8556 remains open: no governed participant dataset contains synchronized
   bilateral six-axis grip wrenches. Synthetic traces cannot replace it.
 - NotebookLM review remains blocked on manual Google reauthentication. Never
@@ -35,7 +39,7 @@ This is current operational state. Historical detail belongs in git/GitHub.
   signs, two steps, two engines, and nested 4/10/25/50 ms observations. It
   establishes discretization sensitivity, not measured pressure or benefit.
 
-## Active Shaft Slice — Complete Locally
+## Qualified Shaft Slice
 
 - Added passive bending/torsion constitutive, forward, atlas, frozen-basis,
   limiting-step diagnostic, figure, registration, release, and test layers.
@@ -62,15 +66,29 @@ This is current operational state. Historical detail belongs in git/GitHub.
   entries. New body pages 138–140 and the mechanism figure were visually
   inspected. Inventory/claim/release totals are 1,047/291/39; all are reviewed.
 
+## Active Ground Slice — Contract Checkpoint
+
+- `articulated_ground.py` adds active sets `fixed`, `translation`,
+  `free_moment`, and `coupled` for human-tree base `x/z` translation and world-
+  `y` rotation; the independently rooted club remains grip-coupled only.
+- The passive law exposes ground-on-body force, intrinsic free moment,
+  transported moment, strain/storage/damping power, and a closure residual.
+  Center-of-pressure reversal changes only reference transport, not force or
+  intrinsic free moment.
+- The mass extension includes every non-club inertia and its rigid/base cross
+  block after the shaft coordinates. Eight contract tests pass, including exact
+  fixed-base and zero-energy reduction plus positive-definite coupled inertia.
+- Forward integration, Christoffel/gravity gradients, domain diagnostics,
+  two-engine atlas, paper/release integration, and publication figure remain.
+
 ## Immediate Next Steps
 
-1. Shepherd the #8715 SPEC/handoff follow-up without bypassing protection and
-   verify its squash commit on remote main.
-2. Close #8697 only after merge. Update #8684 with mixed matched outcomes and
-   retained calibration/higher-mode boundaries.
-3. Create the finite ground/free-moment child under #8684. Qualify it separately
-   with the same state, energy, load/work, reversal, killswitch, refinement,
-   and two-engine controls before combining ground, grip, and shaft pathways.
+1. Implement the #8719 forward integrator with ground mass Christoffel and
+   gravity gradients, domain screens, and exact fixed-base reduction.
+2. Add deterministic diagnostics and a refined two-engine atlas with reversal,
+   frictionless, rigid-shaft, matched-load/work, and domain-failure controls.
+3. Integrate the paper, claims, release, SPEC, and publication figure; visually
+   inspect the PDF and shepherd a protected merge.
 4. Continue to full-delivery matching/uncertainty and governed human holdout;
    do not close #8556 without qualifying participant data.
 
