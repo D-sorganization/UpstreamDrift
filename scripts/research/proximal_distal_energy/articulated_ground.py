@@ -41,6 +41,7 @@ class ArticulatedGroundConfig:
     center_of_pressure_xz_m: tuple[float, float] = (0.08, -0.95)
     translation_limit_m: float = 0.05
     rotation_limit_rad: float = np.deg2rad(10.0)
+    derivative_step: float = 1.0e-6
 
     def __post_init__(self) -> None:
         if self.activation not in {"fixed", "translation", "free_moment", "coupled"}:
@@ -62,6 +63,7 @@ class ArticulatedGroundConfig:
             "free_moment_damping_nm_s_rad",
             "translation_limit_m",
             "rotation_limit_rad",
+            "derivative_step",
         ):
             value = float(getattr(self, name))
             if not np.isfinite(value) or value <= 0.0:
@@ -234,6 +236,96 @@ def augmented_ground_mass_matrix(
     return matrix
 
 
+def ground_mass_increment_coriolis(
+    model: SpatialModel,
+    q: FloatArray,
+    qd: FloatArray,
+    eta_dot: FloatArray,
+    base_velocity: FloatArray,
+    shaft: ArticulatedShaftProperties,
+    ground: ArticulatedGroundProperties,
+) -> FloatArray:
+    """Return the Christoffel bias of the posture-varying base mass blocks."""
+
+    total = model.nq + shaft.coordinate_count + ground.coordinate_count
+    if ground.coordinate_count == 0:
+        return np.zeros(total)
+    derivatives = np.zeros((total, total, total))
+    step = ground.config.derivative_step
+    for index, joint in enumerate(model.joints):
+        if joint.region == "club":
+            continue
+        delta = np.zeros(model.nq)
+        delta[index] = step
+        derivatives[index] = (
+            ground_mass_increment(model, q + delta, shaft, ground)
+            - ground_mass_increment(model, q - delta, shaft, ground)
+        ) / (2.0 * step)
+    velocity = np.concatenate((qd, eta_dot, base_velocity))
+    first = np.einsum("kij,j,k->i", derivatives, velocity, velocity)
+    third = np.einsum("ijk,j,k->i", derivatives, velocity, velocity)
+    return first - 0.5 * third
+
+
+def ground_extra_gravitational_energy(
+    model: SpatialModel,
+    q: FloatArray,
+    base: FloatArray,
+    ground: ArticulatedGroundProperties,
+) -> float:
+    """Return gravity change caused only by finite human-base motion."""
+
+    full = _full_base_state(base, ground)
+    if ground.coordinate_count == 0:
+        return 0.0
+    kin = forward_kinematics(model, np.asarray(q, dtype=float))
+    c, s = np.cos(full[2]), np.sin(full[2])
+    rotation = np.array([[c, 0.0, s], [0.0, 1.0, 0.0], [-s, 0.0, c]])
+    translation = np.array([full[0], 0.0, full[1]])
+    value = 0.0
+    for body_index, body in enumerate(model.bodies):
+        if body.region == "club":
+            continue
+        original = kin.body_position_m[body_index]
+        transformed = rotation @ original + translation
+        value += body.mass_kg * 9.80665 * (transformed[2] - original[2])
+    return float(value)
+
+
+def ground_extra_potential_gradient(
+    model: SpatialModel,
+    q: FloatArray,
+    base: FloatArray,
+    shaft: ArticulatedShaftProperties,
+    ground: ArticulatedGroundProperties,
+) -> FloatArray:
+    """Return the augmented gradient of finite-base gravitational energy."""
+
+    total = model.nq + shaft.coordinate_count + ground.coordinate_count
+    gradient = np.zeros(total)
+    if ground.coordinate_count == 0:
+        return gradient
+    step = ground.config.derivative_step
+    for index, joint in enumerate(model.joints):
+        if joint.region == "club":
+            continue
+        delta = np.zeros(model.nq)
+        delta[index] = step
+        gradient[index] = (
+            ground_extra_gravitational_energy(model, q + delta, base, ground)
+            - ground_extra_gravitational_energy(model, q - delta, base, ground)
+        ) / (2.0 * step)
+    offset = model.nq + shaft.coordinate_count
+    for index in range(ground.coordinate_count):
+        delta = np.zeros(ground.coordinate_count)
+        delta[index] = step
+        gradient[offset + index] = (
+            ground_extra_gravitational_energy(model, q, base + delta, ground)
+            - ground_extra_gravitational_energy(model, q, base - delta, ground)
+        ) / (2.0 * step)
+    return gradient
+
+
 def evaluate_ground_wrench(
     base: FloatArray,
     base_velocity: FloatArray,
@@ -291,18 +383,7 @@ def ground_state_energy(
         velocity @ ground_mass_increment(model, q, shaft, ground) @ velocity
     )
     strain = 0.5 * float(base @ ground.stiffness @ base)
-    full = _full_base_state(base, ground)
-    kin = forward_kinematics(model, np.asarray(q, dtype=float))
-    c, s = np.cos(full[2]), np.sin(full[2])
-    rotation = np.array([[c, 0.0, s], [0.0, 1.0, 0.0], [-s, 0.0, c]])
-    translation = np.array([full[0], 0.0, full[1]])
-    gravity = 0.0
-    for body_index, body in enumerate(model.bodies):
-        if body.region == "club":
-            continue
-        original = kin.body_position_m[body_index]
-        transformed = rotation @ original + translation
-        gravity += body.mass_kg * 9.80665 * (transformed[2] - original[2])
+    gravity = ground_extra_gravitational_energy(model, q, base, ground)
     total = shaft_energy.total_mechanical_j + kinetic + strain + gravity
     return GroundEnergy(
         shaft_energy=shaft_energy,
@@ -321,6 +402,9 @@ __all__ = [
     "augmented_ground_mass_matrix",
     "build_articulated_ground",
     "evaluate_ground_wrench",
+    "ground_extra_gravitational_energy",
+    "ground_extra_potential_gradient",
     "ground_mass_increment",
+    "ground_mass_increment_coriolis",
     "ground_state_energy",
 ]

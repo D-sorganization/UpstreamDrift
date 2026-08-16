@@ -10,6 +10,8 @@ from scripts.research.proximal_distal_energy.articulated_ground import (
     augmented_ground_mass_matrix,
     build_articulated_ground,
     evaluate_ground_wrench,
+    ground_extra_potential_gradient,
+    ground_mass_increment_coriolis,
     ground_state_energy,
 )
 from scripts.research.proximal_distal_energy.articulated_shaft import (
@@ -127,4 +129,34 @@ def test_zero_base_state_reduces_energy_to_shaft_authority() -> None:
     assert energy.extra_gravitational_j == pytest.approx(0.0, abs=1.0e-15)
     assert energy.total_mechanical_j == pytest.approx(
         energy.shaft_energy.total_mechanical_j, abs=1.0e-15
+    )
+
+
+def test_ground_bias_and_gravity_gradient_are_finite_and_pathway_separated() -> None:
+    model, q, shaft, _ = _authority()
+    ground = build_articulated_ground()
+    qd = np.linspace(-0.03, 0.03, model.nq)
+    eta_dot = np.linspace(-0.01, 0.01, shaft.coordinate_count)
+    base_velocity = np.array([0.01, -0.02, 0.03])
+    base = np.array([0.001, -0.002, 0.003])
+
+    coriolis = ground_mass_increment_coriolis(
+        model, q, qd, eta_dot, base_velocity, shaft, ground
+    )
+    gradient = ground_extra_potential_gradient(model, q, base, shaft, ground)
+    assert coriolis.shape == gradient.shape == (model.nq + shaft.coordinate_count + 3,)
+    assert np.all(np.isfinite(coriolis))
+    assert np.all(np.isfinite(gradient))
+    assert gradient[model.nq + shaft.coordinate_count + 1] > 0.0
+
+    fixed = build_articulated_ground(ArticulatedGroundConfig(activation="fixed"))
+    np.testing.assert_array_equal(
+        ground_mass_increment_coriolis(
+            model, q, qd, eta_dot, np.zeros(0), shaft, fixed
+        ),
+        np.zeros(model.nq + shaft.coordinate_count),
+    )
+    np.testing.assert_array_equal(
+        ground_extra_potential_gradient(model, q, np.zeros(0), shaft, fixed),
+        np.zeros(model.nq + shaft.coordinate_count),
     )

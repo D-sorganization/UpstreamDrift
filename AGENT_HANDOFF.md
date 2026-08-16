@@ -76,10 +76,12 @@ This is current operational state. Historical detail belongs in git/GitHub.
   Center-of-pressure reversal changes only reference transport, not force or
   intrinsic free moment.
 - The mass extension includes every non-club inertia and its rigid/base cross
-  block after the shaft coordinates. Eight contract tests pass, including exact
+  block after the shaft coordinates. Nine contract tests pass, including exact
   fixed-base and zero-energy reduction plus positive-definite coupled inertia.
-- Forward integration, Christoffel/gravity gradients, domain diagnostics,
-  two-engine atlas, paper/release integration, and publication figure remain.
+- Posture-varying base-mass Christoffel bias and finite-base gravity energy/
+  gradient are implemented and finite; their fixed-base outputs reduce exactly.
+- Forward integration, domain diagnostics, two-engine atlas, paper/release
+  integration, and publication figure remain.
 
 ## Immediate Next Steps
 
