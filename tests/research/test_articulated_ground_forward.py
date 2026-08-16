@@ -15,6 +15,7 @@ from scripts.research.proximal_distal_energy.articulated_ground_forward import (
     GroundForwardConfig,
     GroundIntegrationCase,
     integrate_articulated_ground,
+    solve_conditional_base_equilibrium,
 )
 from scripts.research.proximal_distal_energy.articulated_shaft import (
     ArticulatedShaftConfig,
@@ -131,3 +132,23 @@ def test_translation_and_free_moment_killswitches_are_distinct() -> None:
     assert np.all(translation_trace["ground_intrinsic_free_moment_nm"] == 0.0)
     assert np.all(moment_trace["ground_force_n"] == 0.0)
     assert np.max(np.abs(moment_trace["ground_intrinsic_free_moment_nm"])) > 0.0
+
+
+def test_conditional_base_equilibrium_closes_ground_grip_and_gravity() -> None:
+    model, case, _ = _case("coupled")
+    equilibrium = solve_conditional_base_equilibrium(
+        model,
+        case.q,
+        grip_span_m=case.grip_span_m,
+        hand_contact_local_x_m=case.hand_contact_local_x_m,
+        grip_config=case.grip,
+        shaft_config=case.shaft,
+        ground_config=case.ground,
+    )
+    assert equilibrium.residual_norm < 1.0e-6
+    assert equilibrium.iteration_count <= 40
+    assert (equilibrium.active_station_count == 0) == (
+        equilibrium.maximum_station_force_n == 0.0
+    )
+    assert np.linalg.norm(equilibrium.base_coordinates[:2]) < 0.05
+    assert abs(equilibrium.base_coordinates[2]) < np.deg2rad(10.0)

@@ -95,6 +95,18 @@ class GroundIntegrationCase:
     ground: ArticulatedGroundConfig
 
 
+@dataclass(frozen=True, slots=True)
+class BaseEquilibrium:
+    """Conditional fixed-posture balance of ground, grip, and gravity."""
+
+    base_coordinates: tuple[float, float, float]
+    residual_generalized_force: tuple[float, float, float]
+    residual_norm: float
+    iteration_count: int
+    active_station_count: int
+    maximum_station_force_n: float
+
+
 def _validate(
     model: SpatialModel, case: GroundIntegrationCase, config: GroundForwardConfig
 ) -> int:
@@ -142,6 +154,114 @@ def _full_elastic(
     full = np.zeros(3)
     full[np.asarray(properties.active_full_indices, dtype=int)] = eta
     return full
+
+
+def solve_conditional_base_equilibrium(
+    model: SpatialModel,
+    q: FloatArray,
+    *,
+    grip_span_m: float,
+    hand_contact_local_x_m: float,
+    grip_config: DistributedGripConfig,
+    shaft_config: ArticulatedShaftConfig = ArticulatedShaftConfig(),
+    ground_config: ArticulatedGroundConfig = ArticulatedGroundConfig(),
+    tolerance_n: float = 1.0e-6,
+    maximum_iterations: int = 40,
+) -> BaseEquilibrium:
+    """Solve the base balance with posture and club held at the authority state."""
+
+    if ground_config.activation != "coupled":
+        raise ValueError("conditional equilibrium requires coupled ground activation")
+    if not np.isfinite(tolerance_n) or tolerance_n <= 0.0:
+        raise ValueError("tolerance_n must be finite and positive")
+    if not isinstance(maximum_iterations, int) or maximum_iterations < 1:
+        raise ValueError("maximum_iterations must be a positive integer")
+    q = np.asarray(q, dtype=float)
+    shaft = build_articulated_shaft(model, shaft_config)
+    ground = build_articulated_ground(ground_config)
+    reference = distributed_reference_lengths(
+        model,
+        q,
+        grip_span_m=grip_span_m,
+        hand_contact_local_x_m=hand_contact_local_x_m,
+        config=grip_config,
+    )
+    offset = model.nq + shaft.coordinate_count
+
+    def residual(base: FloatArray) -> tuple[FloatArray, Any]:
+        contact = evaluate_ground_coupled_grip(
+            model,
+            q,
+            np.zeros(model.nq),
+            np.zeros(shaft.coordinate_count),
+            base,
+            np.zeros(ground.coordinate_count),
+            shaft,
+            ground,
+            grip_span_m=grip_span_m,
+            hand_contact_local_x_m=hand_contact_local_x_m,
+            reference_lengths_m=reference,
+            config=grip_config,
+        )
+        wrench = evaluate_ground_wrench(base, np.zeros(ground.coordinate_count), ground)
+        gravity = ground_extra_potential_gradient(model, q, base, shaft, ground)[
+            offset:
+        ]
+        value = (
+            wrench.generalized_force
+            + contact.generalized_contact_force[-ground.coordinate_count :]
+            - gravity
+        )
+        return value, contact
+
+    gravity_at_zero = ground_extra_potential_gradient(
+        model, q, np.zeros(ground.coordinate_count), shaft, ground
+    )[offset:]
+    base = -np.linalg.solve(ground.stiffness, gravity_at_zero)
+    lower = np.array(
+        [
+            -ground_config.translation_limit_m,
+            -ground_config.translation_limit_m,
+            -ground_config.rotation_limit_rad,
+        ]
+    )
+    upper = -lower
+    base = np.clip(base, lower, upper)
+    contact: Any = None
+    for iteration in range(1, maximum_iterations + 1):
+        value, contact = residual(base)
+        norm = float(np.linalg.norm(value))
+        if norm <= tolerance_n:
+            return BaseEquilibrium(
+                base_coordinates=tuple(float(item) for item in base),  # type: ignore[arg-type]
+                residual_generalized_force=tuple(float(item) for item in value),  # type: ignore[arg-type]
+                residual_norm=norm,
+                iteration_count=iteration,
+                active_station_count=int(contact.active_station_count),
+                maximum_station_force_n=float(contact.maximum_station_force_n),
+            )
+        jacobian = np.empty((ground.coordinate_count, ground.coordinate_count))
+        step = ground_config.derivative_step
+        for index in range(ground.coordinate_count):
+            delta = np.zeros(ground.coordinate_count)
+            delta[index] = step
+            jacobian[:, index] = (
+                residual(np.clip(base + delta, lower, upper))[0]
+                - residual(np.clip(base - delta, lower, upper))[0]
+            ) / (2.0 * step)
+        update = np.linalg.solve(jacobian, -value)
+        scale = 1.0
+        accepted = False
+        while scale >= 1.0 / 1024.0:
+            candidate = np.clip(base + scale * update, lower, upper)
+            if np.linalg.norm(residual(candidate)[0]) < norm:
+                base = candidate
+                accepted = True
+                break
+            scale *= 0.5
+        if not accepted:
+            raise RuntimeError("conditional base equilibrium line search stalled")
+    raise RuntimeError("conditional base equilibrium did not converge")
 
 
 def _fixed_trace(
@@ -379,7 +499,9 @@ def integrate_articulated_ground(
 
 
 __all__ = [
+    "BaseEquilibrium",
     "GroundForwardConfig",
     "GroundIntegrationCase",
     "integrate_articulated_ground",
+    "solve_conditional_base_equilibrium",
 ]

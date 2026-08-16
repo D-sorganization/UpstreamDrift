@@ -91,6 +91,13 @@ This is current operational state. Historical detail belongs in git/GitHub.
 - The nonlinear base Christoffel evaluation is substantially costlier than the
   shaft tier; do not freeze it silently. Run bounded 4 ms step/preload probes
   before registering the 50 ms two-engine atlas.
+- A dependency-free Newton/line-search solver balances ground, grip, and
+  gravity at fixed posture. Retain natural-zero, gravity-only, and full
+  conditional-equilibrium initializations: gravity-only balance moved the
+  registered probe about 18.8 mm vertically and 0.038 rad in pitch, preloaded
+  the grip, and materially changed club speed.
+- The first 4 ms MuJoCo probe refines by about 2x from 0.25 to 0.125 ms in all
+  activations; maximum residuals were 0.000154–0.00156 J at 0.125 ms.
 - Domain diagnostics, two-engine atlas, paper/release integration, and the
   publication figure remain.
 
