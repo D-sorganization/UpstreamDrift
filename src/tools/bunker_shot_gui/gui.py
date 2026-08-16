@@ -130,11 +130,12 @@ def _density_limits(
         maps are empty -- in which case the widget falls back to its own
         stretch, which for a single empty map is harmless.
     """
-    peaks = [
-        evaluation.shot.sole_load.peak_density_pa_s
+    maps = [
+        evaluation.shot.sole_load
         for evaluation in evaluations
         if evaluation.shot.sole_load is not None
     ]
+    peaks = [sole_load.peak_density_pa_s for sole_load in maps]
     top = max(peaks, default=0.0)
     return (0.0, top) if top > 0.0 else None
 

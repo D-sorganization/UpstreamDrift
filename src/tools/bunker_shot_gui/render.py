@@ -110,10 +110,9 @@ def viewport_fallback() -> ViewportFallback:
         import-discoverable.
     """
     selection = select_viewport_provider()
-    if selection.selected is not None:
-        return ViewportFallback(
-            provider=selection.selected.metadata.display_name, reason=""
-        )
+    selected = selection.selected
+    if selected is not None:
+        return ViewportFallback(provider=selected.metadata.display_name, reason="")
     # Name every provider that was tried and what it wanted, rather than the
     # layer's one-line "no provider is available": the point of stating the
     # fallback is that a reader can undo it.
@@ -138,9 +137,10 @@ def frame_stamp(field: SoleLoadField) -> str:
         is a measurement. Kept short enough to sit inside an axes without
         covering the data it qualifies.
     """
-    status = field.status.value.replace("_", " ").upper()
+    status, tier = field.status, field.fidelity_tier
     return (
-        f"{status} - {field.fidelity_tier.value.upper()} dynamic 3D-RFT\n"
+        f"{status.value.replace('_', ' ').upper()} - "
+        f"{tier.value.upper()} dynamic 3D-RFT\n"
         "not calibrated for bunker sand"
     )
 
