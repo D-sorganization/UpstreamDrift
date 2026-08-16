@@ -85,15 +85,18 @@ its centroid and its gap to the leading edge. The terms are summed and then
 clamped, never clamped and then summed, so the array
 `bounce_utilisation` consumes is bit-for-bit what it consumed before: one
 traction can point outward on a steeply raked element while the resultant is
-still compressive. On the nominal 58 deg design at 25 m/s the sole resolves to
-104 elements over 52 samples; the depth-term resultant peaks at 1.654 N and the
-inertial term at 806.7 N, both at 3.75 ms, giving a 99.8 % inertial share of the
-sole's own resultant against the roughly 0.9 whole-body share ADR-0032 predicts.
-The two terms do not separate in time on this delivery but do separate in
-space, the depth term loading 15--22 mm behind the leading edge and the
-inertial term 22--28 mm behind it. The contact patch opens at 1.72 cm^2, peaks
-at 16.97 cm^2 and closes from 13.7 mm to 5.63 mm behind the leading edge before
-retreating. Every frame is drawn with its `EnvelopeStatus` and fidelity tier
+still compressive. On the nominal 58 deg design at 25 m/s and the shipped
+discretization the sole resolves to 500 elements over 53 samples; the
+depth-term resultant peaks at 1.991 N at 4.00 ms and the inertial term at
+725.3 N at 4.25 ms, a 99.7 % inertial share of the sole's own resultant against
+the roughly 0.9 whole-body share ADR-0032 predicts. The two terms separate in
+space as well as in time, the depth term loading 5--18 mm behind the leading
+edge and the inertial term 20--28 mm behind it. The contact patch opens at
+1.309 cm^2, peaks at 16.21 cm^2 and closes from 13.09 mm to 3.39 mm behind the
+leading edge before retreating. The separation in time is one sample wide and
+does not survive coarsening: at a 5-station mesh both terms peak in the same
+4 ms bin, so the moment is reported per term rather than a difference being
+asserted. Every frame is drawn with its `EnvelopeStatus` and fidelity tier
 stamped inside the axes rather than in a caption, on colour limits fixed across
 frames and merged across an A/B pair; no 3-D viewport provider (MeshCat, Rerun,
 VTK) is installed, so the ADR-0027 selection degrades to a stated matplotlib
