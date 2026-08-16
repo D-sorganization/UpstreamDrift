@@ -14,8 +14,9 @@ This is current operational state. Historical detail belongs in git/GitHub.
 - [#8684](https://github.com/D-sorganization/UpstreamDrift/issues/8684)
   governs distributed grip, shaft, and ground pathways. #8685 completed grip
   discretization. [#8697](https://github.com/D-sorganization/UpstreamDrift/issues/8697)
-  is the active shaft child on branch `research/8684-articulated-shaft-8697`
-  from main `055363b97`.
+  is the active shaft child on branch `research/8684-articulated-shaft-8697`.
+  Protected PR [#8715](https://github.com/D-sorganization/UpstreamDrift/pull/8715)
+  was opened from rebased head `7cb5f8b78` onto main `7298dd811`.
 - #8556 remains open: no governed participant dataset contains synchronized
   bilateral six-axis grip wrenches. Synthetic traces cannot replace it.
 - NotebookLM review remains blocked on manual Google reauthentication. Never
@@ -62,9 +63,8 @@ This is current operational state. Historical detail belongs in git/GitHub.
 
 ## Immediate Next Steps
 
-1. Rebuild final release authorities after any edit, run full pre-push gates,
-   commit/push #8697, open a protected PR, preserve auto-merge, and verify the
-   squash commit on remote main.
+1. Shepherd #8715 without bypassing protection, preserve squash auto-merge,
+   and verify its merge commit on remote main.
 2. Close #8697 only after merge. Update #8684 with mixed matched outcomes and
    retained calibration/higher-mode boundaries.
 3. Create the finite ground/free-moment child under #8684. Qualify it separately
