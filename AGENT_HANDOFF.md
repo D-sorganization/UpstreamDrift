@@ -21,7 +21,7 @@ This is current operational state. Historical detail belongs in git/GitHub.
   `051f8dccc`. Both are verified ancestors of remote main.
 - [#8719](https://github.com/D-sorganization/UpstreamDrift/issues/8719) is active
   on branch `research/8684-ground-free-moment-8719` from main `051f8dccc`;
-  executed atlas, paper, and release checkpoint `3fbf17432` is pushed.
+  atlas/paper checkpoint `3fbf17432` and handoff checkpoint `dcc78d7f2` are pushed.
 - #8556 remains open: no governed participant dataset contains synchronized
   bilateral six-axis grip wrenches. Synthetic traces cannot replace it.
 - NotebookLM review remains blocked on manual Google reauthentication. Never
