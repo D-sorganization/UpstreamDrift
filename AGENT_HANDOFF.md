@@ -92,9 +92,7 @@ This is current operational state. Historical detail belongs in git/GitHub.
   shaft tier; do not freeze it silently.
 - A dependency-free Newton/line-search solver balances ground, grip, and
   gravity at fixed posture. Retain natural-zero, gravity-only, and full
-  conditional-equilibrium initializations: gravity-only balance moved the
-  registered probe about 18.8 mm vertically and 0.038 rad in pitch, preloaded
-  the grip, and materially changed club speed.
+  conditional-equilibrium initializations as separate sensitivity branches.
 - The governed 42-trace, two-engine 4 ms diagnostic is generated at
   `data/articulated_ground_diagnostic.json`: all 14 step series monotonically
   halve their energy residual, engine trajectory errors are below `2.5e-12`,
@@ -106,12 +104,17 @@ This is current operational state. Historical detail belongs in git/GitHub.
   The conditional solve balances only base generalized forces, not the full
   mechanism; retain this limitation and use natural-zero for exact-state atlas
   killswitch comparisons.
-- The production atlas, paper/release integration, and publication figure remain.
+- `articulated_ground_atlas.py` registers 384 primary traces (12 states, four
+  pathways, velocity reversal, two steps/engines) plus 192 rigid-shaft and
+  horizontal-restraint-removed controls at 4/10/25/50 ms. A 48-trace 4 ms
+  native smoke run passed every numerical/parity/refinement gate. The full
+  atlas, paper/release integration, and publication figure remain.
 
 ## Immediate Next Steps
 
-1. Register and generate the refined two-engine atlas with reversal,
-   frictionless, rigid-shaft, matched-load/work, and domain-failure controls.
+1. Generate the registered two-engine atlas and retain any declared-domain
+   failures without widening limits or relabeling horizontal restraint as a
+   complete Coulomb-friction model.
 2. Integrate the paper, claims, release, SPEC, and publication figure; visually
    inspect the PDF and shepherd a protected merge.
 3. Continue to full-delivery matching/uncertainty and governed human holdout;

@@ -44,10 +44,26 @@ def _authority():
 def test_ground_contract_fails_closed() -> None:
     with pytest.raises(ValueError, match="activation"):
         ArticulatedGroundConfig(activation="rolling")  # type: ignore[arg-type]
-    with pytest.raises(ValueError, match="positive pairs"):
-        ArticulatedGroundConfig(translation_stiffness_n_m=(0.0, 1.0))
+    with pytest.raises(ValueError, match="positive vertical"):
+        ArticulatedGroundConfig(translation_stiffness_n_m=(1.0, 0.0))
     with pytest.raises(ValueError, match="finite pair"):
         ArticulatedGroundConfig(center_of_pressure_xz_m=(np.nan, 0.0))
+
+
+def test_horizontal_restraint_can_be_removed_as_a_frictionless_control() -> None:
+    properties = build_articulated_ground(
+        ArticulatedGroundConfig(
+            translation_stiffness_n_m=(0.0, 30_000.0),
+            translation_damping_n_s_m=(0.0, 800.0),
+        )
+    )
+    wrench = evaluate_ground_wrench(
+        np.array([0.01, -0.001, 0.0]),
+        np.array([0.1, -0.02, 0.0]),
+        properties,
+    )
+    assert wrench.force_n[0] == 0.0
+    assert wrench.force_n[2] != 0.0
 
 
 @pytest.mark.parametrize(

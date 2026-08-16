@@ -54,16 +54,20 @@ class ArticulatedGroundConfig:
             raise ValueError(
                 "activation must be fixed, translation, free_moment, or coupled"
             )
-        positive_groups = (
+        nonnegative_groups = (
             self.translation_stiffness_n_m,
             self.translation_damping_n_s_m,
         )
         if any(
             len(values) != 2
-            or any(not np.isfinite(value) or value <= 0.0 for value in values)
-            for values in positive_groups
+            or any(not np.isfinite(value) or value < 0.0 for value in values)
+            or values[1] <= 0.0
+            for values in nonnegative_groups
         ):
-            raise ValueError("translation stiffness and damping must be positive pairs")
+            raise ValueError(
+                "translation stiffness and damping must be nonnegative pairs "
+                "with positive vertical terms"
+            )
         for name in (
             "free_moment_stiffness_nm_rad",
             "free_moment_damping_nm_s_rad",
