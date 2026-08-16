@@ -213,9 +213,48 @@ def evaluate_distributed_grip(
         hand_contact_local_x_m=hand_contact_local_x_m,
         config=config,
     )
+    return evaluate_distributed_grip_kinematics(
+        hand,
+        hand_jac,
+        grip,
+        grip_jac,
+        velocity,
+        reference_lengths_m=references,
+        config=config,
+    )
+
+
+def evaluate_distributed_grip_kinematics(
+    hand: FloatArray,
+    hand_jac: FloatArray,
+    grip: FloatArray,
+    grip_jac: FloatArray,
+    generalized_velocity: FloatArray,
+    *,
+    reference_lengths_m: FloatArray,
+    config: DistributedGripConfig,
+) -> DistributedGripSnapshot:
+    """Evaluate the fiber law from declared points and common-coordinate Jacobians."""
+
+    hand = np.asarray(hand, dtype=float)
+    grip = np.asarray(grip, dtype=float)
+    hand_jac = np.asarray(hand_jac, dtype=float)
+    grip_jac = np.asarray(grip_jac, dtype=float)
+    velocity = np.asarray(generalized_velocity, dtype=float)
+    references = _validate_reference_lengths(reference_lengths_m, config)
+    point_shape = (2, config.station_count_per_hand, 3)
+    if hand.shape != point_shape or grip.shape != point_shape:
+        raise ValueError(f"hand and grip points must have shape {point_shape}")
+    jacobian_shape = (*point_shape, velocity.size)
+    if hand_jac.shape != jacobian_shape or grip_jac.shape != jacobian_shape:
+        raise ValueError(f"contact Jacobians must have shape {jacobian_shape}")
+    arrays = (hand, grip, hand_jac, grip_jac, velocity)
+    if any(np.any(~np.isfinite(value)) for value in arrays):
+        raise ValueError("contact kinematics and velocity must be finite")
+
     forces = np.zeros_like(hand)
     active = np.zeros(references.shape, dtype=bool)
-    generalized = np.zeros(model.nq)
+    generalized = np.zeros(velocity.size)
     physical_power = storage = dissipation = strain = 0.0
     extensions = np.zeros(references.shape)
     action_residual = 0.0
@@ -280,4 +319,5 @@ __all__ = [
     "distributed_contact_kinematics",
     "distributed_reference_lengths",
     "evaluate_distributed_grip",
+    "evaluate_distributed_grip_kinematics",
 ]

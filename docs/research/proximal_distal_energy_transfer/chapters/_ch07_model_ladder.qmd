@@ -299,7 +299,7 @@ remain untested.
 The discrepancy matrix in @fig-ladder-discrepancy-matrix summarizes the
 branched evidence boundary. Its cells are explicit capability memberships,
 not a triangular claim that every later model contains every earlier
-mechanism. Ten bounded findings are supported somewhere in the executed
+mechanism. Eleven bounded findings are supported somewhere in the executed
 ladder:
 
 1. interaction force may remain nonzero under zero instantaneous distal
@@ -320,13 +320,17 @@ ladder:
    regions; and
 10. typed dead-zone and preload choices can reverse whether the same
     articulated state is classified as open or taut, while explicit boundary
-    probes reproduce opening and reattachment in both native engines.
+    probes reproduce opening and reattachment in both native engines; and
+11. finite base translation and intrinsic free moment are mechanically active
+    under the declared passive law, although the preregistered fixed--coupled
+    total-work match admits no cell and therefore identifies no delivery
+    effect.
 
 Other claims do not yet survive because they have not been tested. The present
 analysis does not show that the reduced result survives anatomical arms, that
-its magnitude is invariant to a distributed shaft, or that independently
-authored native humanoid models produce matched force histories. Those are
-separate structural and empirical questions.
+the synthetic shaft/support values are calibrated, or that independently
+authored native humanoid models produce matched human force histories. Those
+are separate structural and empirical questions.
 
 ### Tier-by-Tier Interpretation {#sec-ladder-tier-interpretation}
 
@@ -382,6 +386,15 @@ long-axis rotation, swing-plane evolution, and reduced ground-pathway
 bookkeeping. It transports the declared mechanism through two native engines.
 Its hand carriages and declared contact law prevent anatomical, tissue, muscle,
 or human inference.
+
+**Articulated Finite Ground and Free Moment.** This tier adds planar base
+translation and pitch to the closed-state articulated body, distributed grip,
+and passive first-mode shaft. The support force, intrinsic free moment,
+reference-transported moment, storage, damping, and augmented inertia/gravity
+ledger are explicit. All 576 trajectories pass their declared numerical and
+native-engine gates, but the primary fixed--coupled total-work match admits no
+cell. The tier therefore qualifies the finite-base mechanism and exposes an
+adverse identifiability result; it does not establish a ground-use benefit.
 
 **Articulated Full-Body Forward Contact.** This tier remains open because it
 must replace the carriages with subject-scaled articulated arms, retain
@@ -452,14 +465,13 @@ The ladder remains deliberately incomplete:
   engineering lines with state-registered free lengths rather than measured
   pressure, fingers, or tissue; and
 - the newest articulated branch adds separately qualified first-mode bending
-  and torsion to the distributed grip, but all shaft parameters remain
-  synthetic and the support pathway remains unchanged rather than a finite
-  ground/free-moment system.
+  and torsion to the distributed grip; the subsequent finite-base branch adds
+  planar ground force and intrinsic free moment, but all shaft/support
+  parameters remain synthetic and the ground law is linear and bilateral.
 
-The next decisive model test adds a finite ground/free-moment pathway before
-combining it with the qualified distributed grip and passive shaft. It must
-emit the same common schema and retain
-the exact same-state command-removal branch. Failure of force/moment balance,
-power invariance, contact-rank agreement, refinement, or matched-event parity
-at those tiers would falsify transport of the reduced passive-persistence
-claim.
+The next decisive model test replaces the synthetic bilateral support with
+calibrated unilateral foot contact and force-plate observations while retaining
+the common wrench, power, initialization, killswitch, refinement, and
+independent-engine schema. Failure of force/moment balance, power invariance,
+contact-rank agreement, refinement, or participant-held-out prediction would
+falsify transport of the reduced mechanism.

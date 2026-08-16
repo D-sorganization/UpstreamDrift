@@ -19,13 +19,13 @@
     "human_blocker": "No qualifying governed participant dataset with synchronized bilateral six-axis grip wrenches is available."
   },
   "question_coverage": {
-    "Q1": ["MT-E01", "MT-H01"],
-    "Q2": ["MT-E02", "MT-E07", "MT-E08", "MT-E09", "MT-H01"],
+    "Q1": ["MT-E01", "MT-E10", "MT-H01"],
+    "Q2": ["MT-E02", "MT-E07", "MT-E08", "MT-E09", "MT-E10", "MT-H01"],
     "Q3": ["MT-E03", "MT-E09", "MT-H01"],
     "Q4": ["MT-E04", "MT-E08", "MT-H01"],
     "Q5": ["MT-E04", "MT-E08", "MT-E09", "MT-H01"],
-    "Q6": ["MT-E05", "MT-H01"],
-    "Q7": ["MT-E06", "MT-E08", "MT-E09", "MT-H01"]
+    "Q6": ["MT-E05", "MT-E10", "MT-H01"],
+    "Q7": ["MT-E06", "MT-E08", "MT-E09", "MT-E10", "MT-H01"]
   },
   "critical_points": [
     {
