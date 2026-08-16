@@ -12,8 +12,10 @@ This is a current-state handoff. Historical detail belongs in git and GitHub.
 - [#8668](https://github.com/D-sorganization/UpstreamDrift/issues/8668) is the
   subject-scaled articulated-contact tier. Children #8676, #8678, and #8680
   completed inertia, contact projection, and bounded bilateral forwarding.
-- [#8682](https://github.com/D-sorganization/UpstreamDrift/issues/8682) adds
-  architecture-budget remediation and typed unilateral slack/contact.
+- [#8682](https://github.com/D-sorganization/UpstreamDrift/issues/8682) completed
+  typed unilateral slack/contact. [#8684](https://github.com/D-sorganization/UpstreamDrift/issues/8684)
+  governs distributed grip, shaft, and ground pathways; #8685 is its first
+  contact-discretization child.
 - [#8556](https://github.com/D-sorganization/UpstreamDrift/issues/8556)
   remains open: no governed participant dataset contains synchronized bilateral
   six-axis grip wrenches. Synthetic traces cannot replace it.
@@ -22,8 +24,9 @@ This is a current-state handoff. Historical detail belongs in git and GitHub.
 
 ## Governed Evidence State
 
-- The inventory contains 1,029 adjudicated candidates, 284 atomic claims, and
-  37 release claims; no candidate or release review is open.
+- Regenerate the inventory and release review after every scientific edit;
+  candidate, atomic-claim, and release-claim totals are asserted by the
+  committed generated authorities.
 - Evidence integrity covers 1,908 references, 250 hash-pinned local artifacts,
   and 78 URLs representing 56 works. Link availability is not validation.
 - Eight of nine photographed-agenda points have bounded/partial model answers.
@@ -66,10 +69,22 @@ This is a current-state handoff. Historical detail belongs in git and GitHub.
 - No slack benefit, necessity, intent, timing economy, self-correction,
   delivery advantage, human transfer, or coaching rule is supported.
 
+## Distributed-Grip Discretization
+
+- Twelve closed articulated states, one/three/five fibers per hand, two initial
+  velocity signs, two time steps, and two engines produce 288 trajectories with
+  nested 4/10/25/50 ms observations.
+- All registered gates pass. Worst force is `4.030 N`, worst couple is
+  `0.375 N m`, trajectory parity is `7.97e-14`, force parity is `2.86e-12`, and
+  fine-step three-to-five-station error is `0.00355`.
+- Multi-fiber cases can be partly open, but no natural active-set transition is
+  observed through 50 ms. This is a right-censored, frictionless engineering-
+  fiber result—not measured pressure, fingers, shaft behavior, or benefit.
+
 ## Next Scientific Gates
 
-1. Extend typed laws beyond 5 ms with distributed grip pressure, calibrated
-   friction, shaft bending/torsion, tissue, ground coupling, and uncertainty.
+1. Calibrate grip pressure/friction and couple the qualified fibers to shaft
+   bending/torsion, tissue, ground/free-moment pathways, and uncertainty.
 2. Repeat geometry, reversal, killswitch, matched-work/load, refinement,
    virtual-power, work–energy, and two-engine event controls.
 3. Add full-delivery state-matched rate, acceleration, and timing interventions
@@ -79,12 +94,20 @@ This is a current-state handoff. Historical detail belongs in git and GitHub.
 
 ## Reproduction and Release Gates
 
+Use WSL `python3` for native articulated atlas generation. That environment
+contains robotics Pinocchio 3.8.0 and MuJoCo 3.8.0; Windows Python currently
+resolves an unrelated `pinocchio` test plug-in and must fail the native gate.
+The distributed atlas takes about four minutes on this workstation.
+
 ```powershell
 python -m scripts.research.proximal_distal_energy.run_articulated_contact_projection
 python -m scripts.research.proximal_distal_energy.run_articulated_forward_contact
 python -m scripts.research.proximal_distal_energy.run_articulated_slack_atlas
 python -m scripts.research.proximal_distal_energy.make_articulated_slack_figure
 python scripts/research/proximal_distal_energy/register_articulated_slack_claims.py
+wsl.exe bash -lc "cd /mnt/c/Users/diete/Repositories/UpstreamDrift && python3 -m scripts.research.proximal_distal_energy.run_distributed_grip_atlas"
+python -m scripts.research.proximal_distal_energy.make_distributed_grip_figure
+python scripts/research/proximal_distal_energy/register_distributed_grip_claims.py
 python -m pytest tests/research/test_articulated_contact_projection.py `
   tests/research/test_articulated_forward_contact.py `
   tests/research/test_articulated_slack_contact.py `

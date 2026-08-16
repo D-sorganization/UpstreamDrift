@@ -446,13 +446,19 @@ The ladder remains deliberately incomplete:
   spatial beam;
 - the reduced full-body tier uses prescribed hand loads and spherical inertia
   elements rather than solved contact and subject-specific anatomy; and
-- the forward spatial tier uses two translational hand carriages, declared
-  Kelvin--Voigt contacts, and a rigid club rather than anatomical arms,
-  measured tissue, or the distributed shaft.
+- the reduced forward spatial tier uses two translational hand carriages;
+  the subject-scaled articulated tier now advances one-, three-, and
+  five-fiber tension grips through 50 ms, but those fibers remain frictionless
+  engineering lines with state-registered free lengths rather than measured
+  pressure, fingers, or tissue; and
+- every articulated forward branch still uses a rigid club and unchanged
+  support pathway rather than the distributed shaft and ground/free-moment
+  system.
 
-The next decisive model test replaces the carriages with subject-scaled
-articulated arms and couples the distributed shaft while emitting the same
-common schema and preserving the exact same-state command-removal branch.
-Failure of force/moment balance, power invariance, contact-rank agreement, or
-matched-event parity at that tier would falsify transport of the reduced
-passive-persistence claim.
+The next decisive model tests add shaft bending/torsion and a finite
+ground/free-moment pathway separately before combining them with the
+distributed articulated grip. Each must emit the same common schema and retain
+the exact same-state command-removal branch. Failure of force/moment balance,
+power invariance, contact-rank agreement, refinement, or matched-event parity
+at those tiers would falsify transport of the reduced passive-persistence
+claim.
