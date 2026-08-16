@@ -16,7 +16,9 @@ This is current operational state. Historical detail belongs in git/GitHub.
   discretization. [#8697](https://github.com/D-sorganization/UpstreamDrift/issues/8697)
   is the active shaft child on branch `research/8684-articulated-shaft-8697`.
   Protected PR [#8715](https://github.com/D-sorganization/UpstreamDrift/pull/8715)
-  was opened from rebased head `7cb5f8b78` onto main `7298dd811`.
+  is open from a branch rebased onto main `7298dd811`; squash auto-merge is
+  enabled. Its initial SPEC-freshness failure was addressed in `SPEC.md`
+  without applying the bypass label.
 - #8556 remains open: no governed participant dataset contains synchronized
   bilateral six-axis grip wrenches. Synthetic traces cannot replace it.
 - NotebookLM review remains blocked on manual Google reauthentication. Never

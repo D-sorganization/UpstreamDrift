@@ -1,12 +1,12 @@
 # SPEC.md — Repository Specification Document
 
-## Current Scientific Audit State (2026-08-15)
+## Current Scientific Audit State (2026-08-16)
 
 Epic #8557 has completed the current narrative-candidate adjudication contract:
-1,022/1,022 candidates, 281 atomic claims, and zero unadjudicated entries. This
-status is not scientific closure: all 36 public release claims now have a
-traceable review disposition, and all 35 retain an explicit model, equipment,
-anatomy, archival, or governed-human scientific gate. The
+1,047/1,047 candidates, 291 atomic claims, and zero unadjudicated entries. This
+status is not scientific closure: all 39 public release claims now have a
+traceable review disposition and zero remain open; each retains its applicable
+model, equipment, anatomy, archival, or governed-human scientific boundary. The
 trajectory-level bilateral point-force sensor qualification and subject-scaled
 spatial contact-closure audit retain their synthetic and prescribed-state
 scopes. The closed-state forward bridge maps all 234 solved states and advances
@@ -50,6 +50,15 @@ passivity, work--energy, time-refinement, station-refinement, and engine-parity
 gates pass; no natural active-set transition occurs. This qualifies a synthetic
 contact discretization, not measured grip pressure, shaft response, delivery
 benefit, timing economy, human transfer, or technique.
+Child issue #8697 then couples two first bending modes and one torsional mode
+to that distributed-grip authority. Its registered 0.25/0.125 ms atlas covers
+384 trajectories and 1,536 nested-horizon summaries. Domain, activation,
+power, work--energy, refinement, and MuJoCo/Pinocchio parity gates pass. Among
+126 coupled-versus-rigid cells matched within 5% for peak contact load and
+dissipated work, delivery-speed differences span -0.0285 to +0.0212 m/s, with
+82 negative and 44 positive outcomes. The result therefore rejects a universal
+passive-shaft speed benefit. It is a planar structural reference, not physical
+shaft calibration, human validation, physiological inference, or technique.
 Issue #8556 remains blocked on governed human bilateral six-axis
 grip-wrench acquisition, and all new scientific content must regenerate the
 inventory and reopen adjudication until every new candidate is reviewed.
@@ -93,8 +102,8 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.538 |
-| **Last Spec Update** | 2026-08-15 |
+| **Spec Version** | 1.0.539 |
+| **Last Spec Update** | 2026-08-16 |
 
 ## 2. Purpose & Mission
 
@@ -2390,6 +2399,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-16 | 1.0.539 | Added the passive articulated-shaft qualification: a frozen 24-element bending basis and declared tapered-section torsion extend the distributed-grip authority through rigid, bending, torsion, and coupled activations. The registered 384-trajectory, two-engine, two-step atlas passes domain, activation, power, work--energy, refinement, and parity gates; retained coarse steps fail the linear-domain screen. Among 126 load/work-matched coupled-versus-rigid cells, delivery-speed differences have both signs (-0.0285 to +0.0212 m/s), rejecting a universal passive-shaft speed benefit. The result remains a planar structural reference, not equipment calibration, human validation, physiology, or coaching guidance. |
 | 2026-08-15 | 1.0.538 | Added the distributed-grip contact-discretization gate: one, three, and five tension fibers per hand preserve total stiffness and damping across 12 articulated states, two initial velocity signs, two time steps, two native engines, and nested 4/10/25/50 ms observations from 288 trajectories. Geometry null/reversal, virtual-power, passivity, work--energy, time-refinement, station-refinement, active-set, and cross-engine gates pass. The result is synthetic and right-censored; it does not establish physical grip pressure, shaft response, timing economy, delivery benefit, human transfer, or technique. |
 | 2026-08-15 | 1.0.537 | Added the typed unilateral articulated-attachment falsification gate: bilateral, tension-only, and dead-zone tension laws are evaluated across common-displacement and matched-extension comparisons, velocity-sign branches, isolated opening/reattachment probes, three time steps, and native MuJoCo/Pinocchio dynamics. The passive-law, virtual-power, work--energy, refinement, trajectory-parity, force-parity, and active-set-parity contracts pass. Natural five-millisecond branches do not produce opening or reattachment transitions, so event-probe results qualify the implementation only and do not establish a human or coaching strategy. |
 | 2026-08-15 | 1.0.536 | Added the bounded articulated bilateral-attachment forward gate: 18 selected closed states, seven nominal/adverse branches, three time steps, and native MuJoCo/Pinocchio dynamics produce 756 five-millisecond trajectories. Attachment-retention, power, work--energy, refinement, and parity gates pass; the result is explicitly right-censored and does not model unilateral slack, calibrated distributed grip/shaft, ground coupling, late downswing, impact, muscle action, human transfer, or coaching strategy. |
