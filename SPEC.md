@@ -74,6 +74,33 @@ the magnitude is an assumed placeholder recorded in the launch provenance under
 `bed_packing_dependence`, and ball speed remains `BEYOND_VALIDATION` because
 issue #8616 found no published measurement of ball speed, launch angle or spin
 out of sand.
+Issues #8705 and #8707 (epic #8699) raise the BunkerShot3D sole-load view from
+a summed 12x12 bin to the field the F0 solver actually produces. `simulate_shot`
+builds the club wrench as an integral of a per-element traction and then keeps
+only the resultant; the workbench recovered a 12x12 impulse-density map summed
+over the strike and discarded the rest. `SoleLoadField` now carries the load
+per surface element and per sample with the depth-linear and inertial 3D-RFT
+terms separated, and `ContactPatch` follows the engaged element set, its area,
+its centroid and its gap to the leading edge. The terms are summed and then
+clamped, never clamped and then summed, so the array
+`bounce_utilisation` consumes is bit-for-bit what it consumed before: one
+traction can point outward on a steeply raked element while the resultant is
+still compressive. On the nominal 58 deg design at 25 m/s the sole resolves to
+104 elements over 52 samples; the depth-term resultant peaks at 1.654 N and the
+inertial term at 806.7 N, both at 3.75 ms, giving a 99.8 % inertial share of the
+sole's own resultant against the roughly 0.9 whole-body share ADR-0032 predicts.
+The two terms do not separate in time on this delivery but do separate in
+space, the depth term loading 15--22 mm behind the leading edge and the
+inertial term 22--28 mm behind it. The contact patch opens at 1.72 cm^2, peaks
+at 16.97 cm^2 and closes from 13.7 mm to 5.63 mm behind the leading edge before
+retreating. Every frame is drawn with its `EnvelopeStatus` and fidelity tier
+stamped inside the axes rather than in a caption, on colour limits fixed across
+frames and merged across an A/B pair; no 3-D viewport provider (MeshCat, Rerun,
+VTK) is installed, so the ADR-0027 selection degrades to a stated matplotlib
+plan view. This is a rendering of existing F0 output at higher fidelity, not
+new physics and not calibration: the field inherits `BEYOND_VALIDATION`, and a
+patch trend read across a bounce sweep is reported as a bounce-and-camber
+trend wherever the declared camber was substituted (#8698).
 
 Child issue #8697 then couples two first bending modes and one torsional mode
 to that distributed-grip authority. Its registered 0.25/0.125 ms atlas covers
