@@ -368,6 +368,11 @@ class DesignEvaluation:
         sand: The sand state the shot was run in.
         shot: The nominal shot.
         playability: The playability window over the delivery sweep.
+        effective_camber_area_m2: The camber area the lofted head actually
+            carries. A sole cannot host an arbitrarily large camber for its
+            width and bounce, so the declared area in :attr:`geometry` is
+            fitted to what the sole admits; carrying the realised value here
+            is what lets the report state both (issue #8698).
     """
 
     design: WedgeDesign
@@ -375,6 +380,12 @@ class DesignEvaluation:
     sand: SandState
     shot: ShotOutcome
     playability: PlayabilityOutcome
+    effective_camber_area_m2: float
+
+    @property
+    def camber_was_clamped(self) -> bool:
+        """Whether the declared camber area had to be substituted."""
+        return self.effective_camber_area_m2 != self.geometry.sole_camber_area_m2
 
     @property
     def verdict(self) -> ValidityVerdict:
@@ -896,6 +907,8 @@ class WorkbenchModel:
             sand=state,
             shot=shot,
             playability=window,
+            # Free: the build is cached, and run_shot has already made it.
+            effective_camber_area_m2=self.head_build(geometry).effective_camber_area_m2,
         )
 
     def compare(

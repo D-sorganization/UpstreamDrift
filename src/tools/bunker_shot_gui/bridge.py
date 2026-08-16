@@ -33,10 +33,12 @@ from numpy.typing import NDArray
 from scipy.spatial.transform import Rotation
 
 from bunkershot3d.geometry import (
+    CamberFit,
+    LoftedWedge,
     MassProperties,
     WedgeGeometry,
-    build_wedge_mesh,
     compute_mass_properties,
+    loft_wedge,
     shaft_axis,
 )
 from bunkershot3d.metrics import (
@@ -101,6 +103,12 @@ class HeadBuild:
         sole_reference_body_m: ``(3,)`` lowest sole element at address -- the
             point whose depth defines the divot.
         shaft_axis_body: ``(3,)`` unit shaft axis, head toward grip.
+        loft: The lofting record, carrying the camber area the head was
+            actually built with. The workbench lofts with
+            :attr:`~bunkershot3d.geometry.CamberFit.NEAREST` because a
+            designer dragging a bounce slider must keep getting a head to
+            look at -- but the substitution is then *reported*, never
+            assumed away (issue #8698).
     """
 
     geometry: WedgeGeometry
@@ -109,6 +117,17 @@ class HeadBuild:
     sole_mask: NDArray[np.bool_]
     sole_reference_body_m: NDArray[np.float64]
     shaft_axis_body: NDArray[np.float64]
+    loft: LoftedWedge
+
+    @property
+    def effective_camber_area_m2(self) -> float:
+        """The camber area the lofted head actually carries."""
+        return self.loft.effective_camber_area_m2
+
+    @property
+    def camber_was_clamped(self) -> bool:
+        """Whether the declared camber area had to be substituted."""
+        return self.loft.camber_was_clamped
 
     @property
     def head_model(self) -> HeadModel:
@@ -168,9 +187,13 @@ def build_head(
     Raises:
         ValueError: If the sole cannot be lofted at this resolution.
     """
-    mesh = build_wedge_mesh(
-        geometry, n_profile_points=n_profile_points, n_stations=n_stations
+    lofted = loft_wedge(
+        geometry,
+        n_profile_points=n_profile_points,
+        n_stations=n_stations,
+        camber_fit=CamberFit.NEAREST,
     )
+    mesh = lofted.mesh
     elements = SurfaceElements.from_mesh(mesh)
     sole_mask = elements.normals[:, 2] < _SOLE_NORMAL_CEILING
     sole_centroids = elements.centroids_m[sole_mask]
@@ -183,6 +206,7 @@ def build_head(
         sole_mask=sole_mask,
         sole_reference_body_m=np.asarray(reference, dtype=np.float64),
         shaft_axis_body=np.asarray(axis, dtype=np.float64),
+        loft=lofted,
     )
 
 
