@@ -84,8 +84,15 @@ This is current operational state. Historical detail belongs in git/GitHub.
   Jacobians. The ground tier rotates/translates hand points and augments their
   Jacobians while leaving the independently rooted club grip unchanged; its
   fixed-base contact force and power reduce to the prior evaluator exactly.
-- Forward integration, domain diagnostics, two-engine atlas, paper/release
-  integration, and publication figure remain.
+- `articulated_ground_forward.py` now integrates rigid, shaft, and base states;
+  fixed base delegates bit-for-bit to the shaft solver. It records ground/grip/
+  shaft power and energy, contact transitions, reaction/free moment, and both
+  shaft and base domain screens. Thirty combined regression tests pass.
+- The nonlinear base Christoffel evaluation is substantially costlier than the
+  shaft tier; do not freeze it silently. Run bounded 4 ms step/preload probes
+  before registering the 50 ms two-engine atlas.
+- Domain diagnostics, two-engine atlas, paper/release integration, and the
+  publication figure remain.
 
 ## Immediate Next Steps
 
