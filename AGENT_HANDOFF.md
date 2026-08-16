@@ -1,129 +1,102 @@
 # Agent Handoff — UpstreamDrift
 
-Last updated: 2026-08-15
+Last updated: 2026-08-16
 
-This is a current-state handoff. Historical detail belongs in git and GitHub.
+This is current operational state. Historical detail belongs in git/GitHub.
 
 ## Program Authority
 
 - Epic [#8557](https://github.com/D-sorganization/UpstreamDrift/issues/8557)
-  governs the proximal-to-distal program; [#8595](https://github.com/D-sorganization/UpstreamDrift/issues/8595)
-  retains the photographed nine-point agenda.
-- [#8668](https://github.com/D-sorganization/UpstreamDrift/issues/8668) is the
-  subject-scaled articulated-contact tier. Children #8676, #8678, and #8680
-  completed inertia, contact projection, and bounded bilateral forwarding.
-- [#8682](https://github.com/D-sorganization/UpstreamDrift/issues/8682) completed
-  typed unilateral slack/contact. [#8684](https://github.com/D-sorganization/UpstreamDrift/issues/8684)
-  governs distributed grip, shaft, and ground pathways; #8685 is its first
-  contact-discretization child.
-- [#8556](https://github.com/D-sorganization/UpstreamDrift/issues/8556)
-  remains open: no governed participant dataset contains synchronized bilateral
-  six-axis grip wrenches. Synthetic traces cannot replace it.
-- NotebookLM review is blocked on manual Google reauthentication. Never
+  governs the proximal-to-distal program; #8595 retains the photographed agenda.
+- #8668 governs subject-scaled articulated contact. Children #8676, #8678,
+  #8680, and #8682 completed inertia, contact projection, bounded bilateral
+  forwarding, and typed slack/contact.
+- [#8684](https://github.com/D-sorganization/UpstreamDrift/issues/8684)
+  governs distributed grip, shaft, and ground pathways. #8685 completed grip
+  discretization. [#8697](https://github.com/D-sorganization/UpstreamDrift/issues/8697)
+  is the active shaft child on branch `research/8684-articulated-shaft-8697`
+  from main `055363b97`.
+- #8556 remains open: no governed participant dataset contains synchronized
+  bilateral six-axis grip wrenches. Synthetic traces cannot replace it.
+- NotebookLM review remains blocked on manual Google reauthentication. Never
   automate credentials, authentication dialogs, CAPTCHA, or two-factor steps.
 
-## Governed Evidence State
+## Qualified Articulated Baseline
 
-- Regenerate the inventory and release review after every scientific edit;
-  candidate, atomic-claim, and release-claim totals are asserted by the
-  committed generated authorities.
-- Evidence integrity covers 1,908 references, 250 hash-pinned local artifacts,
-  and 78 URLs representing 56 works. Link availability is not validation.
-- Eight of nine photographed-agenda points have bounded/partial model answers.
-  MTQ-06—whether passive transfer reduces timing precision beyond the adverse
-  planar comparison and in people—remains unresolved.
-- Higher proximal rate is not universally beneficial. Matching choice and
-  torso, arm, and wrist killswitches retain favorable and adverse outcomes.
+- Six profiles, three grip spans, and 13 phases define 234 closed states.
+  Prescribed hands miss grips by 0.171–0.616 m; the reduced-tree solve closes
+  to `1.16e-10 m`. Broad bounds/spheres are not clinical ranges or anatomy.
+- Native MuJoCo and robotics Pinocchio independently qualify the 20-coordinate
+  rigid tree. Bilateral point, typed-slack, and distributed-fiber tiers retain
+  power, passivity, energy, refinement, geometry, and engine-parity controls.
+- The distributed atlas covers 12 states, one/three/five fibers, two velocity
+  signs, two steps, two engines, and nested 4/10/25/50 ms observations. It
+  establishes discretization sensitivity, not measured pressure or benefit.
 
-## Articulated Geometry and Dynamics
+## Active Shaft Slice — Complete Locally
 
-- Six engineering profiles, three grip spans, and 13 phases define 234 states.
-  Prescribed anatomical hand points miss grip contacts by 0.171–0.616 m even
-  though both contact Jacobians can have rank six.
-- The reduced-tree closed solve reaches `1.15817e-10 m` worst closure. Broad
-  joint bounds and spheres are not clinical ranges or mesh anatomy.
-- Native MuJoCo and robotics Pinocchio independently assemble the same
-  20-coordinate tree at all 234 closed states. Mass, bias, inverse-dynamics,
-  symmetry, and positive-definiteness gates pass below `1.8e-12` relative.
-- Bilateral Kelvin–Voigt forces project through hand/grip Jacobians at all 234
-  states. Action–reaction, virtual power, passivity, geometry reversal, and
-  native initial-acceleration gates pass.
-- The reduced hand-carriage reference passes 2,160 paired cases through 4, 10,
-  25, and 50 ms; absence of a first failure is right-censored at 50 ms.
+- Added passive bending/torsion constitutive, forward, atlas, frozen-basis,
+  limiting-step diagnostic, figure, registration, release, and test layers.
+- Coordinates are two tip-normalized first bending modes plus tip twist.
+  Bending inherits the 24-element FE authority at `5.2399 Hz`; declared tapered
+  hollow-section torsion is `70.1260 Hz`. Damping ratio is 0.018. These are
+  synthetic structural references, not equipment calibration.
+- Native WSL cannot solve the FE eigenproblem with its lean SciPy/NumPy stack.
+  Regenerate `articulated_shaft_structural_basis.{json,npz}` under Windows;
+  native runs hash-check that frozen basis without importing SciPy.
+- Coarse-step falsification is retained: 1.0 ms leaves the linear domain for
+  state `(0,0)`/negative velocity; 0.50 ms does so for `(8,0)`/positive
+  velocity. The limiting 0.25/0.125/0.0625 ms residuals refine
+  `0.00776 → 0.00390 → 0.00195 J` while remaining bounded through 50 ms.
+- The registered 0.25/0.125 ms atlas covers 384 trajectories and 1,536 nested
+  summaries. Every domain, power, energy, activation, and parity gate passes.
+  Maximum bend is `1.696 mm`, twist `0.001855 rad`, energy residual
+  `0.007798 → 0.003900`, trajectory parity `3.84e-13`, and force parity
+  `2.15e-10`.
+- Of 384 coupled-versus-rigid cells, 126 match within 5% for peak load and
+  dissipated work. Speed differences span `-0.0285` to `+0.0212 m/s`
+  (82 negative, 44 positive), rejecting a universal passive-shaft speed benefit.
+- The paper is 229 pages and 1,733,358 bytes with 189 URI links and 246 outline
+  entries. New body pages 138–140 and the mechanism figure were visually
+  inspected. Inventory/claim/release totals are 1,047/291/39; all are reviewed.
 
-## Bounded Bilateral and Typed-Slack Results
+## Immediate Next Steps
 
-- The bilateral articulated gate covers 18 states, seven branches, three time
-  steps, and two engines: 756 five-millisecond trajectories. All retention,
-  power, energy, refinement, and parity gates pass; the worst normalized energy
-  residual falls from `0.00738` to `0.000854`.
-- The typed atlas covers bilateral, tension-only, 0.5 mm and 1.5 mm dead-zone
-  laws; common-displacement and matched-extension preload; velocity reversal;
-  two event probes; three steps; and two engines: 1,944 trajectories.
-- All typed-law numerical and parity gates pass. Worst force is `23.643 N`,
-  normalized energy residual refines `0.01923 → 0.01097 → 0.00480`, trajectory
-  parity is `1.32e-15`, and active-set parity failures are zero.
-- Natural branches show no transition before 5 ms. The 1.5 mm common 1 mm
-  displacement stays open; matched extension stays taut. Isolated probes yield
-  108 opening and 216 reattachment cells, qualifying event logic only.
-- No slack benefit, necessity, intent, timing economy, self-correction,
-  delivery advantage, human transfer, or coaching rule is supported.
-
-## Distributed-Grip Discretization
-
-- Twelve closed articulated states, one/three/five fibers per hand, two initial
-  velocity signs, two time steps, and two engines produce 288 trajectories with
-  nested 4/10/25/50 ms observations.
-- All registered gates pass. Worst force is `4.030 N`, worst couple is
-  `0.375 N m`, trajectory parity is `7.97e-14`, force parity is `2.86e-12`, and
-  fine-step three-to-five-station error is `0.00355`.
-- Multi-fiber cases can be partly open, but no natural active-set transition is
-  observed through 50 ms. This is a right-censored, frictionless engineering-
-  fiber result—not measured pressure, fingers, shaft behavior, or benefit.
-
-## Next Scientific Gates
-
-1. Calibrate grip pressure/friction and couple the qualified fibers to shaft
-   bending/torsion, tissue, ground/free-moment pathways, and uncertainty.
-2. Repeat geometry, reversal, killswitch, matched-work/load, refinement,
-   virtual-power, work–energy, and two-engine event controls.
-3. Add full-delivery state-matched rate, acceleration, and timing interventions
-   plus continuous attraction regions with identified observers.
-4. Qualify MT-E07 using a traceable bilateral six-axis device and execute
-   MT-H01 only after governed acquisition and a frozen participant holdout.
+1. Rebuild final release authorities after any edit, run full pre-push gates,
+   commit/push #8697, open a protected PR, preserve auto-merge, and verify the
+   squash commit on remote main.
+2. Close #8697 only after merge. Update #8684 with mixed matched outcomes and
+   retained calibration/higher-mode boundaries.
+3. Create the finite ground/free-moment child under #8684. Qualify it separately
+   with the same state, energy, load/work, reversal, killswitch, refinement,
+   and two-engine controls before combining ground, grip, and shaft pathways.
+4. Continue to full-delivery matching/uncertainty and governed human holdout;
+   do not close #8556 without qualifying participant data.
 
 ## Reproduction and Release Gates
 
-Use WSL `python3` for native articulated atlas generation. That environment
-contains robotics Pinocchio 3.8.0 and MuJoCo 3.8.0; Windows Python currently
-resolves an unrelated `pinocchio` test plug-in and must fail the native gate.
-The distributed atlas takes about four minutes on this workstation.
+Use Windows Python for the FE basis and WSL `python3` for native atlas runs.
+The full shaft atlas takes about 34 minutes with four ordered workers.
 
 ```powershell
-python -m scripts.research.proximal_distal_energy.run_articulated_contact_projection
-python -m scripts.research.proximal_distal_energy.run_articulated_forward_contact
-python -m scripts.research.proximal_distal_energy.run_articulated_slack_atlas
-python -m scripts.research.proximal_distal_energy.make_articulated_slack_figure
-python scripts/research/proximal_distal_energy/register_articulated_slack_claims.py
-wsl.exe bash -lc "cd /mnt/c/Users/diete/Repositories/UpstreamDrift && python3 -m scripts.research.proximal_distal_energy.run_distributed_grip_atlas"
-python -m scripts.research.proximal_distal_energy.make_distributed_grip_figure
-python scripts/research/proximal_distal_energy/register_distributed_grip_claims.py
-python -m pytest tests/research/test_articulated_contact_projection.py `
-  tests/research/test_articulated_forward_contact.py `
-  tests/research/test_articulated_slack_contact.py `
-  tests/research/test_articulated_slack_forward.py `
-  tests/research/test_proximal_distal_release_bundle.py -q
+python -m scripts.research.proximal_distal_energy.generate_articulated_shaft_structural_basis
+wsl.exe bash -lc "cd /mnt/c/Users/diete/Repositories/UpstreamDrift-worktrees/articulated-shaft-8697 && python3 -m scripts.research.proximal_distal_energy.run_articulated_shaft_time_step_diagnostic"
+wsl.exe bash -lc "cd /mnt/c/Users/diete/Repositories/UpstreamDrift-worktrees/articulated-shaft-8697 && python3 -m scripts.research.proximal_distal_energy.run_articulated_shaft_atlas"
+python -m scripts.research.proximal_distal_energy.make_articulated_shaft_figure
+python -m scripts.research.proximal_distal_energy.claim_audit inventory
+python scripts/research/proximal_distal_energy/register_articulated_shaft_claims.py
+python -m scripts.research.proximal_distal_energy.release_claim_review write
+python -m scripts.research.proximal_distal_energy.qualify_open_release write
+python -m pytest tests/research/test_articulated_shaft.py tests/research/test_articulated_shaft_forward.py tests/research/test_articulated_shaft_atlas.py tests/research/test_proximal_distal_release_bundle.py -q
 python -m scripts.research.proximal_distal_energy.claim_audit validate
 python -m scripts.research.proximal_distal_energy.claim_evidence_integrity validate
 python -m scripts.research.proximal_distal_energy.momentum_question_readiness validate
 python -m scripts.research.proximal_distal_energy.qualify_open_release validate
-python scripts/ci/check_architecture_budget.py
 python scripts/check_document_title_case.py --changed-from origin/main
 python scripts/check_doc_size_budget.py
 pre-commit run --hook-stage pre-push --all-files
 ```
 
-Render and inspect the Quarto PDF before protected squash merge. Do not infer
-human technique, physiology, injury, timing demand, or coaching advice; treat a
-net wrench as bilateral allocation; close #8556/#8557; bypass protection;
-force-push; admin-merge; or rerun unchanged capacity failures.
+Do not infer human technique, physiology, injury, timing demand, or coaching
+advice; close #8556/#8557; bypass protection; force-push; admin-merge; or rerun
+unchanged runner-capacity failures.
