@@ -108,7 +108,7 @@ This is current operational state. Historical detail belongs in git/GitHub.
   pathways, velocity reversal, two steps/engines) plus 192 rigid-shaft and
   horizontal-restraint-removed controls at 4/10/25/50 ms. A 48-trace 4 ms
   native smoke run passed every numerical/parity/refinement gate. The full
-  atlas, paper/release integration, and publication figure remain.
+  four-worker WSL atlas run is active; paper/release results and figure remain.
 
 ## Immediate Next Steps
 
