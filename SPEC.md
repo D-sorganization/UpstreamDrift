@@ -94,6 +94,38 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-08-15** - Restored the two repository-hygiene guards
+  (`tests/unit/repo_hygiene/test_vendor_submodule_clean.py` and
+  `test_no_shadow_of_tools_shared.py`) to actually enforce. Both were
+  introduced 2026-05-16 (#5623 / PR #5625) and reduced to stubs on 2026-08-01
+  by consolidation commit 0575fb4b8 (#8322), which also emptied the shadow
+  ledger and added four new shadows in the same commit. Three independent
+  mechanisms kept them vacuous: neither file carried a suite marker, so
+  `unit-test-gate`'s `-m "unit and ..."` selector never collected them; both
+  called `pytest.skip` when `vendor/ud-tools` was absent, so they passed
+  vacuously even when collected; and push-to-main runs are cancelled by
+  `cancel-in-progress` concurrency (83 of the last 85), so the only lane that
+  would collect them effectively never completed.
+
+  A missing vendor tree now raises `AssertionError` when `$CI` is set and only
+  skips on a developer machine, matching `test_tools_child_copy_contract.py`.
+  The shadow ledger in `scripts/config/shadow_modules.yaml` is re-established
+  as a no-growth ratchet: 32 grandfathered entries (28 from the original #5623
+  baseline plus the 4 that #8322 added while the guard was off), each carrying
+  a `tracking_issue` and a `sunset_date`. Bare name lists are rejected, expired
+  sunset dates fail, and stale entries must be pruned, so the ledger can only
+  shrink.
+
+  The vendor-clean guard also carried a latent detection bug: it filtered
+  `git status` lines for the prefix `vendor/ud-tools/` (trailing slash), but
+  git collapses all submodule-internal state onto the gitlink entry whose path
+  is exactly `vendor/ud-tools`, with flags `S<c><m><u>`. The predicate could
+  never match. Detection now parses the sub-status field, so modified (`S.M.`)
+  and untracked (`S..U`) content fail while a deliberate pointer bump (`SC..`)
+  passes. A new `test_hygiene_guards_run_in_ci.py` asserts that every workflow
+  job running this package materialises `vendor/ud-tools`, and that
+  `unit-test-gate` does so before invoking pytest.
+
 - **2026-08-14** - Rebuilt BunkerShot3D as a multi-fidelity wedge-design tool
   under epic #8607 (ADR-0032). The package is now organised around the design
   question — given two sole geometries, which performs better, in what
