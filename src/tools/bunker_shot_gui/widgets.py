@@ -330,8 +330,15 @@ class SoleLoadFieldWidget(QWidget):
         transport.addWidget(self._readout)
         layout.addLayout(transport)
 
-        self._note = QLabel(self._fallback.describe())
-        self._note.setWordWrap(True)
+        # The full degradation reason names three optional packages and their
+        # install hints, which is four lines of text beside a figure. The
+        # label states the renderer actually in use; the reason is a hover
+        # away rather than a paragraph the designer reads once and never again.
+        self._note = QLabel(
+            f"Renderer: {self._fallback.renderer}"
+            + (" (no 3-D viewport installed)" if self._fallback.degraded else "")
+        )
+        self._note.setToolTip(self._fallback.describe())
         layout.addWidget(self._note)
 
         self._timer = QTimer(self)

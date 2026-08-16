@@ -139,7 +139,10 @@ def frame_stamp(field: SoleLoadField) -> str:
         covering the data it qualifies.
     """
     status = field.status.value.replace("_", " ").upper()
-    return f"{status} | {field.fidelity_tier.value.upper()} dynamic 3D-RFT | not calibrated for bunker sand"
+    return (
+        f"{status} - {field.fidelity_tier.value.upper()} dynamic 3D-RFT\n"
+        "not calibrated for bunker sand"
+    )
 
 
 def field_scales(
@@ -245,8 +248,8 @@ def _draw_component(
     pressure = field.component_pressure_pa(component)[frame]
     low, high = scale.limits_pa
     scatter = axes.scatter(
-        field.element_centroid_body_m[:, 0] * 1e3,
         field.element_centroid_body_m[:, 1] * 1e3,
+        field.element_centroid_body_m[:, 0] * 1e3,
         c=pressure,
         s=_marker_sizes(field),
         cmap=scale.colormap_name,
@@ -259,22 +262,46 @@ def _draw_component(
     bar.ax.set_ylabel(f"{component.label} [{scale.unit}]", fontsize=7)
     bar.ax.tick_params(labelsize=6)
     resultant = field.resultant_force_N(component)[frame]
-    axes.set_title(
-        f"{component.label}: {resultant:.4g} N over the sole "
-        f"(peak {scale.peak_pa:.4g} {scale.unit} at "
-        f"{field.peak_time_s(component) * 1e3:.2f} ms)",
-        fontsize=8,
-    )
+    axes.set_title(f"{component.label}: {resultant:.4g} N", fontsize=8)
     _label_sole_axes(axes)
     _stamp(axes, field)
+    _note(
+        axes,
+        f"scale peak {scale.peak_pa:.3g} {scale.unit}\n"
+        f"term peaks at {field.peak_time_s(component) * 1e3:.2f} ms",
+    )
+
+
+def _note(axes: Axes, text: str) -> None:
+    """Draw a small qualifier under the stamp, inside the axes."""
+    axes.text(
+        0.02,
+        0.02,
+        text,
+        transform=axes.transAxes,
+        ha="left",
+        va="bottom",
+        fontsize=6,
+        color="#333333",
+        zorder=9,
+    )
 
 
 def _label_sole_axes(axes: Axes) -> None:
-    """Label a sole-plan axes in millimetres, leading edge at the left."""
-    axes.set_xlabel("leading edge -> trailing edge, body x [mm]", fontsize=7)
-    axes.set_ylabel("heel -> toe, body y [mm]", fontsize=7)
+    """Label a sole plan in millimetres, in the report's own orientation.
+
+    Heel to toe across and leading edge to trailing edge *down*, matching the
+    shaded plan :func:`~.report.sole_map_text` already prints, so the picture
+    and the text describe the sole the same way round. It is also the shape of
+    the object: a wedge sole is roughly 20 mm front to back and 70 mm heel to
+    toe, so this is the orientation that does not waste the panel.
+    """
+    axes.set_xlabel("body y, heel -> toe [mm]", fontsize=7)
+    axes.set_ylabel("body x, leading -> trailing edge [mm]", fontsize=7)
     axes.tick_params(labelsize=6)
     axes.set_aspect("equal", adjustable="box")
+    if not axes.yaxis_inverted():
+        axes.invert_yaxis()
 
 
 def _draw_patch(
@@ -286,19 +313,19 @@ def _draw_patch(
     engaged = patch.engaged[frame]
     sizes = np.clip(patch.element_area_m2 * _MARKER_AREA_PT2, 4.0, 400.0)
     axes.scatter(
-        stations, across, s=sizes, c=_PALE, marker="s", linewidths=0.0, zorder=1
+        across, stations, s=sizes, c=_PALE, marker="s", linewidths=0.0, zorder=1
     )
     if engaged.any():
         axes.scatter(
-            stations[engaged],
             across[engaged],
+            stations[engaged],
             s=sizes[engaged],
             c=status_colour(field.status),
             marker="s",
             linewidths=0.0,
             zorder=2,
         )
-    axes.axvline(
+    axes.axhline(
         patch.leading_edge_m * 1e3,
         color=_EDGE,
         linestyle="--",
@@ -308,15 +335,15 @@ def _draw_patch(
     )
     reach_mm = patch.reach_m[frame] * 1e3
     reach_text = "no contact" if not np.isfinite(reach_mm) else f"{reach_mm:.2f} mm"
-    axes.set_title(
-        f"Contact patch at {patch.time_s[frame] * 1e3:.2f} ms: "
-        f"{patch.area_m2[frame] * 1e4:.2f} cm^2, "
-        f"{reach_text} behind the leading edge",
-        fontsize=8,
-    )
+    axes.set_title(f"Contact patch: {patch.area_m2[frame] * 1e4:.2f} cm^2", fontsize=8)
     _label_sole_axes(axes)
     axes.legend(loc="lower right", fontsize=6, framealpha=0.6)
     _stamp(axes, field)
+    _note(
+        axes,
+        f"{patch.time_s[frame] * 1e3:.2f} ms\n"
+        f"nearest load {reach_text} behind the leading edge",
+    )
 
 
 def _draw_time_series(
@@ -365,17 +392,18 @@ def _draw_time_series(
     axes.legend(
         handles + extra[0],
         labels + extra[1],
-        loc="upper left",
+        loc="lower right",
         fontsize=6,
         framealpha=0.6,
     )
-    axes.set_title(
-        f"Patch {patch.initial_area_m2 * 1e4:.2f} cm^2 at first contact, "
+    axes.set_title("Contact patch area and term resultants", fontsize=8)
+    _stamp(axes, field)
+    _note(
+        axes,
+        f"patch {patch.initial_area_m2 * 1e4:.2f} cm^2 at first contact\n"
         f"peak {patch.peak_area_m2 * 1e4:.2f} cm^2 at "
         f"{patch.peak_area_time_s * 1e3:.2f} ms",
-        fontsize=8,
     )
-    _stamp(axes, field)
 
 
 def draw_shot_frame(
