@@ -16,7 +16,8 @@ This is current operational state. Historical detail belongs in git/GitHub.
   discretization. [#8697](https://github.com/D-sorganization/UpstreamDrift/issues/8697)
   is the active shaft child on branch `research/8684-articulated-shaft-8697`.
   Protected PR [#8715](https://github.com/D-sorganization/UpstreamDrift/pull/8715)
-  was opened from rebased head `7cb5f8b78` onto main `7298dd811`.
+  merged as `0c988f05a`. A narrow follow-up records the qualification in
+  `SPEC.md` without applying the freshness-bypass label.
 - #8556 remains open: no governed participant dataset contains synchronized
   bilateral six-axis grip wrenches. Synthetic traces cannot replace it.
 - NotebookLM review remains blocked on manual Google reauthentication. Never
@@ -63,8 +64,8 @@ This is current operational state. Historical detail belongs in git/GitHub.
 
 ## Immediate Next Steps
 
-1. Shepherd #8715 without bypassing protection, preserve squash auto-merge,
-   and verify its merge commit on remote main.
+1. Shepherd the #8715 SPEC/handoff follow-up without bypassing protection and
+   verify its squash commit on remote main.
 2. Close #8697 only after merge. Update #8684 with mixed matched outcomes and
    retained calibration/higher-mode boundaries.
 3. Create the finite ground/free-moment child under #8684. Qualify it separately
