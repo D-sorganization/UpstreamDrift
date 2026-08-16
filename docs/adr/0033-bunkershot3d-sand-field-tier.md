@@ -133,6 +133,23 @@ clubhead sweeps empty space and returns an identically zero contact wrench.
 | clubhead x span over trajectory | −1.2407 … 1.2407 m |
 | domain x extent                 | ±0.2 m             |
 
+For scale, the F0 baseline measured over the 77 design points of the
+`_review/bunkershot3d-demo` sweep on the same machine:
+
+| quantity             | measured                                  |
+| -------------------- | ----------------------------------------- |
+| F0 runtime per shot  | median **14.4 ms** (mean 15.4, 10.4–26.5) |
+| F0 integration steps | median **46** (max 81)                    |
+| proxy steps per shot | 114,382                                   |
+| **step-count ratio** | **~2,500x**                               |
+
+The ratio matters more than either figure alone: F0's whole appeal is that a
+designer can sweep a design space interactively, and the demo runs all 77
+points in about 17 s. A tier three orders of magnitude more expensive per shot
+is not a drop-in substitute for that loop — it is a separate, deliberate study
+run. Whichever tier is chosen, it is used to _explain_ F0 results, never to
+replace the sweep.
+
 The reference swing traverses 2.48 m at ~24.8 m/s while the domain is 0.4 m
 wide, so only ~16 ms of the 100 ms trajectory places the club inside the box:
 roughly **86 % of the integration budget is spent with the club outside the
