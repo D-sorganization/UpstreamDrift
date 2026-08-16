@@ -16,8 +16,12 @@ import json
 import re
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
-SCHEMA_VERSION = "proximal-distal-claim-audit-v1"
+SCHEMA_VERSION = "proximal-distal-claim-audit-v2"
+ADJUDICATION_OUTCOMES = frozenset(
+    {"supported", "contradicted", "inconclusive", "untested"}
+)
 INCLUDE_PATTERN = re.compile(r"^\s*\{\{<\s*include\s+([^ >]+)\s*>\}\}\s*$")
 DISPLAY_MATH_FENCE_PATTERN = re.compile(r"^\$\$(?:\s*\{[^}]*\})?\s*$")
 CITATION_PATTERN = re.compile(r"(?<!\w)@([A-Za-z0-9_][A-Za-z0-9_:.\-]*)")
@@ -285,6 +289,54 @@ def _validate_source_location(location: str, claim_id: str, root: Path) -> None:
         )
 
 
+def _validate_evidence_locator(artifact: str, claim_id: str, root: Path) -> str:
+    """Validate an evidence locator and return its mechanical locator type."""
+    if not isinstance(artifact, str) or not artifact.strip():
+        raise ValueError(
+            f"{claim_id}: evidence_artifacts entries must be non-empty strings"
+        )
+    if artifact.startswith(("https://", "http://")):
+        hostname = (urlparse(artifact).hostname or "").lower()
+        return "doi" if hostname in {"doi.org", "dx.doi.org"} else "external_url"
+
+    artifact_path_text, separator, fragment = artifact.partition("#")
+    if separator and not fragment:
+        raise ValueError(f"{claim_id}: empty local evidence fragment: {artifact!r}")
+    artifact_path = Path(artifact_path_text)
+    if artifact_path.is_absolute():
+        raise ValueError(
+            f"{claim_id}: local evidence artifact must be repository-relative: "
+            f"{artifact!r}"
+        )
+    resolved_artifact = (root / artifact_path).resolve()
+    if not resolved_artifact.is_relative_to(root):
+        raise ValueError(
+            f"{claim_id}: local evidence artifact escapes repository root: {artifact!r}"
+        )
+    if not resolved_artifact.is_file():
+        raise ValueError(f"{claim_id}: missing local evidence artifact: {artifact!r}")
+    if separator:
+        text = resolved_artifact.read_text(encoding="utf-8")
+        if resolved_artifact.suffix.lower() == ".bib":
+            keys = set(re.findall(r"@\w+\s*\{\s*([^,\s]+)", text))
+            if fragment not in keys:
+                raise ValueError(
+                    f"{claim_id}: missing bibliography key in evidence artifact: "
+                    f"{artifact!r}"
+                )
+            return "bibliography_key"
+        if f"#{fragment}" not in text:
+            raise ValueError(
+                f"{claim_id}: missing local anchor in evidence artifact: {artifact!r}"
+            )
+        return "local_anchor"
+
+    generated_suffixes = {".csv", ".json", ".npz", ".pdf", ".png", ".svg"}
+    if resolved_artifact.suffix.lower() in generated_suffixes:
+        return "generated_artifact"
+    return "local_file"
+
+
 def validate_registry(
     registry_path: Path,
     *,
@@ -324,6 +376,8 @@ def validate_registry(
         "competing_explanations",
         "negative_controls",
     )
+    evidence_locator_types: Counter[str] = Counter()
+    adjudication_outcomes: Counter[str] = Counter()
     for record in claims:
         claim_id = record.get("claim_id", "<missing claim_id>")
         for field in required_text:
@@ -331,32 +385,19 @@ def validate_registry(
                 raise ValueError(f"{claim_id}: {field} must be a non-empty string")
         for field in required_lists:
             _require_list(record, field, claim_id)
+        outcome = record.get("adjudication_outcome")
+        if outcome not in ADJUDICATION_OUTCOMES:
+            raise ValueError(
+                f"{claim_id}: adjudication_outcome must be one of "
+                f"{sorted(ADJUDICATION_OUTCOMES)}"
+            )
+        adjudication_outcomes[outcome] += 1
         for location in record["source_locations"]:
             _validate_source_location(location, claim_id, root)
         for artifact in record["evidence_artifacts"]:
-            if not isinstance(artifact, str) or not artifact.strip():
-                raise ValueError(
-                    f"{claim_id}: evidence_artifacts entries must be non-empty strings"
-                )
-            if artifact.startswith(("https://", "http://")):
-                continue
-            artifact_path_text = artifact.partition("#")[0]
-            artifact_path = Path(artifact_path_text)
-            if artifact_path.is_absolute():
-                raise ValueError(
-                    f"{claim_id}: local evidence artifact must be repository-relative: "
-                    f"{artifact!r}"
-                )
-            resolved_artifact = (root / artifact_path).resolve()
-            if not resolved_artifact.is_relative_to(root):
-                raise ValueError(
-                    f"{claim_id}: local evidence artifact escapes repository root: "
-                    f"{artifact!r}"
-                )
-            if not resolved_artifact.is_file():
-                raise ValueError(
-                    f"{claim_id}: missing local evidence artifact: {artifact!r}"
-                )
+            evidence_locator_types[
+                _validate_evidence_locator(artifact, claim_id, root)
+            ] += 1
 
     paper = registry.get("paper", {})
     source = root / paper.get("source", "")
@@ -500,6 +541,8 @@ def validate_registry(
         "open_release_claim_count": len(open_release_keys),
         "open_release_claim_keys": open_release_keys,
         "source_digest": inventory["source_digest"],
+        "adjudication_outcome_counts": dict(sorted(adjudication_outcomes.items())),
+        "evidence_locator_type_counts": dict(sorted(evidence_locator_types.items())),
     }
 
 

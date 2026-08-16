@@ -2,141 +2,97 @@
 
 Last updated: 2026-08-16
 
-This is current operational state. Historical detail belongs in git/GitHub.
+This is current operational state, not a changelog. History belongs in git and
+GitHub.
 
 ## Program Authority
 
 - Epic [#8557](https://github.com/D-sorganization/UpstreamDrift/issues/8557)
-  governs the proximal-to-distal program; #8595 retains the photographed agenda.
-- #8668 governs subject-scaled articulated contact. Children #8676, #8678,
-  #8680, and #8682 completed inertia, contact projection, bounded bilateral
-  forwarding, and typed slack/contact.
-- [#8684](https://github.com/D-sorganization/UpstreamDrift/issues/8684)
-  governs distributed grip, shaft, and ground pathways. #8685 completed grip
-  discretization. [#8697](https://github.com/D-sorganization/UpstreamDrift/issues/8697)
-  completed the shaft child.
-  Protected PR [#8715](https://github.com/D-sorganization/UpstreamDrift/pull/8715)
-  merged as `0c988f05a`; SPEC/handoff follow-up
-  [#8717](https://github.com/D-sorganization/UpstreamDrift/pull/8717) merged as
-  `051f8dccc`. Both are verified ancestors of remote main.
-- [#8719](https://github.com/D-sorganization/UpstreamDrift/issues/8719) is active
-  on branch `research/8684-ground-free-moment-8719` from main `051f8dccc`;
-  full PR [#8723](https://github.com/D-sorganization/UpstreamDrift/pull/8723) is open.
+  governs the proximal-to-distal research program; #8595 retains the photographed
+  momentum-transfer agenda.
+- #8668 governs subject-scaled articulated contact. Its inertia, contact,
+  bilateral-forwarding, and typed-slack children are complete.
+- #8684 governs distributed grip, shaft, and ground pathways. Grip discretization
+  and the passive shaft slice are merged. Ground issue #8719 closed through
+  protected PR #8723; merge `a1a613999` is verified on remote `main`.
+- [#8724](https://github.com/D-sorganization/UpstreamDrift/issues/8724) is active
+  on branch `research/8557-claim-adjudication-8724`, based exactly on
+  `a1a613999`. This branch is the takeover authority for the checkpoint below.
 - #8556 remains open: no governed participant dataset contains synchronized
   bilateral six-axis grip wrenches. Synthetic traces cannot replace it.
-- NotebookLM review remains blocked on manual Google reauthentication. Never
-  automate credentials, authentication dialogs, CAPTCHA, or two-factor steps.
+- NotebookLM review requires manual Google reauthentication. Never automate
+  credentials, authentication dialogs, CAPTCHA, or two-factor steps. Continue
+  original-source and local-corpus review without treating NotebookLM as authority.
 
-## Qualified Articulated Baseline
+## Qualified Modeling Baseline
 
-- Six profiles, three grip spans, and 13 phases define 234 closed states.
-  Prescribed hands miss grips by 0.171–0.616 m; the reduced-tree solve closes
-  to `1.16e-10 m`. Broad bounds/spheres are not clinical ranges or anatomy.
-- Native MuJoCo and robotics Pinocchio independently qualify the 20-coordinate
-  rigid tree. Bilateral point, typed-slack, and distributed-fiber tiers retain
-  power, passivity, energy, refinement, geometry, and engine-parity controls.
-- The distributed atlas covers 12 states, one/three/five fibers, two velocity
-  signs, two steps, two engines, and nested 4/10/25/50 ms observations. It
-  establishes discretization sensitivity, not measured pressure or benefit.
+- The articulated baseline has 234 closed states across six profiles, three grip
+  spans, and 13 phases. MuJoCo and Pinocchio independently qualify the rigid tree.
+  Broad bounds/spheres are not anatomy, clinical ranges, or coaching evidence.
+- The distributed-grip atlas establishes discretization sensitivity, not measured
+  pressure or benefit.
+- The passive shaft atlas contains 384 trajectories and 1,536 nested summaries.
+  Its speed effect changes sign, rejecting a universal passive-shaft benefit.
+- The finite-ground atlas contains 384 primary and 192 control trajectories. Its
+  preregistered matched screen admits 0/384 cells; a labeled post-hoc screen admits
+  60 with 20 positive and 40 negative speed differences. Do not present this as a
+  universal ground-pathway benefit.
+- Current paper baseline: 231 pages, 1,764,016 bytes, 192 URI links, 246 outline
+  entries, 1,063 narrative candidates, 295 registered claims, and 40 release claims.
 
-## Qualified Shaft Slice
+## #8724 Claim-Adjudication Checkpoint
 
-- Added passive bending/torsion constitutive, forward, atlas, frozen-basis,
-  limiting-step diagnostic, figure, registration, release, and test layers.
-- Coordinates are two tip-normalized first bending modes plus tip twist.
-  Bending inherits the 24-element FE authority at `5.2399 Hz`; declared tapered
-  hollow-section torsion is `70.1260 Hz`. Damping ratio is 0.018. These are
-  synthetic structural references, not equipment calibration.
-- Native WSL cannot solve the FE eigenproblem with its lean SciPy/NumPy stack.
-  Regenerate `articulated_shaft_structural_basis.{json,npz}` under Windows;
-  native runs hash-check that frozen basis without importing SciPy.
-- Coarse-step falsification is retained: 1.0 ms leaves the linear domain for
-  state `(0,0)`/negative velocity; 0.50 ms does so for `(8,0)`/positive
-  velocity. The limiting 0.25/0.125/0.0625 ms residuals refine
-  `0.00776 → 0.00390 → 0.00195 J` while remaining bounded through 50 ms.
-- The registered 0.25/0.125 ms atlas covers 384 trajectories and 1,536 nested
-  summaries. Every domain, power, energy, activation, and parity gate passes.
-  Maximum bend is `1.696 mm`, twist `0.001855 rad`, energy residual
-  `0.007798 → 0.003900`, trajectory parity `3.84e-13`, and force parity
-  `2.15e-10`.
-- Of 384 coupled-versus-rigid cells, 126 match within 5% for peak load and
-  dissipated work. Speed differences span `-0.0285` to `+0.0212 m/s`
-  (82 negative, 44 positive), rejecting a universal passive-shaft speed benefit.
-- The paper is 231 pages and 1,764,016 bytes with 192 URI links and 246 outline
-  entries. Finite-ground body pages 140–143, front matter, availability, and
-  end matter were visually inspected. Inventory/claim/release totals are
-  1,063/295/40; all are reviewed.
+- Registry and inventory use `proximal-distal-claim-audit-v2`. All 295 claims have
+  an estimand-level outcome: 275 `supported`, 5 `inconclusive`, 15 `untested`, and
+  0 `contradicted`.
+- Zero contradicted claims does not mean every originating hypothesis survived.
+  The paper had already narrowed overbroad statements; detailed status, uncertainty,
+  and falsifier fields remain essential context.
+- Evidence locators now resolve by type: 3 bibliography keys, 65 DOI links,
+  48 external URLs, 849 generated artifacts, 1 local anchor, and 1,134 local files.
+  Missing BibTeX keys and local anchors fail closed.
+- `migrate_claim_adjudication_v2.py` is a one-time source-digest-locked migration.
+  Its exception sets were manually reviewed, not inferred from old status strings.
+  Do not relax its digest or claim-count locks after paper edits.
+- `claim_adjudication_summary.py` deterministically generates reviewer JSON/CSV.
+  These are summaries, not evidence or independent human review. Existing Codex
+  audits must not be described as external replication.
+- Checkpoint validation passes: 28 focused tests, registry validation for all
+  1,063 candidates/295 claims, and summary validation. No paper, release, PDF, or
+  full pre-push gate has yet been completed for this branch.
 
-## Active Ground Slice — Executed Atlas Checkpoint
+## Takeover Sequence
 
-- `articulated_ground.py` adds `fixed`, `translation`, `free_moment`, and
-  `coupled` base pathways while the separately rooted club remains grip-coupled.
-  The passive law exposes reaction force, intrinsic/transported moment, energy,
-  damping, and closure; CoP reversal changes transport only.
-- Full non-club inertia/cross terms, Christoffel bias, gravity, common-coordinate
-  grip Jacobians, and forward integration are implemented. Fixed base reduces
-  exactly to the shaft tier; positive-definite inertia, energy, power, contact,
-  domain, and force/moment records are covered by 30 regression tests.
-- A dependency-free Newton/line-search solver balances ground, grip, and
-  gravity at fixed posture. Retain natural-zero, gravity-only, and full
-  conditional-equilibrium initializations as separate sensitivity branches.
-- The 42-trace two-engine diagnostic has 14 monotonically refining energy
-  series, trajectory error below `2.5e-12`, and force error below `1.1e-10`.
-- Initialization is not innocuous. At 0.125 ms, natural-zero versus gravity-
-  only versus conditional-base starts produced peak ground forces of 32.8,
-  565.5, and 510.3 N and 4 ms club speeds of 0.264, 1.908, and 0.946 m/s.
-  The conditional solve balances only base generalized forces, not the full
-  mechanism; retain this limitation and use natural-zero for exact-state atlas
-  killswitch comparisons.
-- The completed atlas contains 384 primary traces (12 states, four pathways,
-  velocity reversal, two steps/engines) plus 192 rigid-shaft and horizontal-
-  restraint-removed controls at 4/10/25/50 ms. All 576 trajectories pass the
-  registered domain, refinement, energy, and native-engine gates. Worst energy
-  residual refines `0.01986 → 0.00995`; maximum trajectory, grip-force, and
-  ground-force discrepancies are `1.77e-10`, `6.41e-10`, and `2.28e-10`.
-- The preregistered 5% peak-grip-load plus total-dissipated-work screen admits
-  **0/384** coupled--fixed cells; total-work discrepancy is 1.72--2.00 because
-  only the coupled path contains ground damping. Do not interpret unmatched
-  positive speed differences as a ground-pathway benefit.
-- A labeled post-hoc non-ground-dissipation screen admits 60 cells: 20 speed
-  differences are positive and 40 negative (`-0.00075` to `+0.01394 m/s`);
-  it is sensitivity evidence, not a replacement for the registered estimand.
-- JSON/NPZ evidence and the six-panel PDF/SVG figure are generated. Atlas and
-  post-hoc evidence tests pass. The 30-test scoped suite, claim/release/
-  readiness audits, title case, source-size gate, and PDF QA pass. The full
-  pre-push hook still exposes unrelated repository-wide Ruff/mypy baseline debt;
-  its unrelated formatter edits were restored.
+1. Scientifically review the five `inconclusive` and 15 `untested` assignments;
+   split composite claims where needed.
+2. Add a normalized summary and limitations table to the paper without implying
+   independent validation. Any paper edit changes the source digest/census: rerun
+   inventory, review changed candidates, update reciprocal mappings and digest;
+   never weaken the validator to make the edit pass.
+3. Register summary artifacts in the release bundle and add explicit contradiction
+   and source-independence gates required by #8724.
+4. Run claim/evidence/release audits, title case, size checks, PDF build and visual
+   inspection, then the full pre-push hook. Resolve actionable failures before a
+   single consolidated push.
+5. Open a ready-for-review protected PR, preserve reviews/checks, merge only when
+   required contexts pass, and verify its merge commit on remote `main`.
+6. Continue calibrated unilateral 3D contact, full-delivery matching/uncertainty,
+   and governed human holdout under #8557. Do not close #8556 without qualifying
+   participant data.
 
-## Immediate Next Steps
-
-1. Shepherd full PR #8723, retain the adverse zero-match result, and complete
-   required CI/review through protected
-   merge; do not repair unrelated fleet-wide lint/type debt in this PR.
-2. After merge, verify the merge commit is an ancestor of remote main, update
-   this handoff on main, and close #8719 only through the merged PR.
-3. Continue to calibrated unilateral 3D contact, full-delivery matching/
-   uncertainty, and governed human holdout;
-   do not close #8556 without qualifying participant data.
-
-## Reproduction and Release Gates
-
-Use Windows Python for the FE basis and WSL `python3` for native atlas runs.
+## Checkpoint Reproduction
 
 ```powershell
-python -m scripts.research.proximal_distal_energy.generate_articulated_shaft_structural_basis
-wsl.exe bash -lc "cd /mnt/c/Users/diete/Repositories/UpstreamDrift-worktrees/articulated-shaft-8697 && python3 -m scripts.research.proximal_distal_energy.run_articulated_shaft_time_step_diagnostic"
-wsl.exe bash -lc "cd /mnt/c/Users/diete/Repositories/UpstreamDrift-worktrees/articulated-shaft-8697 && python3 -m scripts.research.proximal_distal_energy.run_articulated_shaft_atlas"
-wsl.exe bash -lc "cd /mnt/c/Users/diete/Repositories/UpstreamDrift-worktrees/ground-free-moment-8719 && python3 -m scripts.research.proximal_distal_energy.run_articulated_ground_diagnostic"
-wsl.exe bash -lc "cd /mnt/c/Users/diete/Repositories/UpstreamDrift-worktrees/ground-free-moment-8719 && python3 -m scripts.research.proximal_distal_energy.run_articulated_ground_atlas"
-python -m scripts.research.proximal_distal_energy.run_articulated_ground_posthoc_sensitivity
-python -m scripts.research.proximal_distal_energy.make_articulated_ground_figure
-python -m scripts.research.proximal_distal_energy.make_articulated_shaft_figure
-python -m scripts.research.proximal_distal_energy.claim_audit inventory
-python scripts/research/proximal_distal_energy/register_articulated_shaft_claims.py
-python -m scripts.research.proximal_distal_energy.release_claim_review write
-python -m scripts.research.proximal_distal_energy.qualify_open_release write
-python -m pytest tests/research/test_articulated_shaft.py tests/research/test_articulated_shaft_forward.py tests/research/test_articulated_shaft_atlas.py tests/research/test_proximal_distal_release_bundle.py -q
+python -m scripts.research.proximal_distal_energy.claim_adjudication_summary write
+python -m scripts.research.proximal_distal_energy.claim_adjudication_summary validate
 python -m scripts.research.proximal_distal_energy.claim_audit validate
+python -m pytest tests/unit/research/test_proximal_distal_claim_audit.py tests/unit/research/test_claim_adjudication_summary.py -q
+```
+
+Before publication also run:
+
+```powershell
+python -m scripts.research.proximal_distal_energy.claim_audit inventory
 python -m scripts.research.proximal_distal_energy.claim_evidence_integrity validate
 python -m scripts.research.proximal_distal_energy.momentum_question_readiness validate
 python -m scripts.research.proximal_distal_energy.qualify_open_release validate
