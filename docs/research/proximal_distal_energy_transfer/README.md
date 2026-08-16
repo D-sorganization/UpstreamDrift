@@ -279,6 +279,7 @@ python3 -m scripts.research.proximal_distal_energy.make_articulated_shaft_figure
 python3 scripts/research/proximal_distal_energy/register_articulated_shaft_claims.py
 python3 -m scripts.research.proximal_distal_energy.run_articulated_ground_diagnostic
 python3 -m scripts.research.proximal_distal_energy.run_articulated_ground_atlas
+python3 -m scripts.research.proximal_distal_energy.run_articulated_ground_posthoc_sensitivity
 python3 -m scripts.research.proximal_distal_energy.make_articulated_ground_figure
 python3 -m scripts.research.proximal_distal_energy.run_spatial_forward_contact_study
 python3 -m scripts.research.proximal_distal_energy.run_uncertainty_control_study

@@ -39,6 +39,7 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         "articulated_shaft_atlas",
         "articulated_ground_diagnostic",
         "articulated_ground_atlas",
+        "articulated_ground_posthoc_sensitivity",
         "scapulothoracic_contact_screen",
         "spatial_forward_contact",
         "uncertainty_control",
@@ -76,6 +77,9 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
     )
     assert manifest["claims"]["articulated_shaft_bending_torsion"] == (
         "fifty_millisecond_passive_shaft_gate_qualified_with_mixed_matched_outcomes"
+    )
+    assert manifest["claims"]["articulated_ground_free_moment"] == (
+        "fifty_millisecond_finite_ground_gate_qualified_primary_match_empty"
     )
     assert (
         manifest["claims"]["synthetic_bilateral_point_force_sensor_qualification"]
