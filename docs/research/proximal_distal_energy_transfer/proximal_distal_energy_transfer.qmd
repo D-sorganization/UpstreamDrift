@@ -193,7 +193,16 @@ abstract: |
   separated reactions, and a compliant distal club. Its 18-program matched-
   state grid finds that higher initial torso rate can accompany greater delivery
   speed but does not uniformly reduce braking work; exact torso, arm, and wrist
-  killswitches are nonmonotonic. This remains a planar mechanism result. A frozen
+  killswitches are nonmonotonic. This remains a planar mechanism result. The
+  subject-scaled articulated sequence now advances a five-fiber-per-hand grip
+  through 50 ms and then adds passive first-mode bending and torsion under rigid,
+  single-mode, and coupled killswitch branches. All 384 fine-grid shaft
+  trajectories pass the registered linear-domain, work--energy, refinement, and
+  MuJoCo--Pinocchio gates. Among 126 coupled--rigid cells matched within 5% for
+  peak load and dissipated work, final-speed differences include 82 negative and
+  44 positive values. This establishes a state-dependent synthetic elastic
+  pathway and rejects a universal shaft-speed benefit; it does not calibrate
+  equipment or identify a human strategy. A frozen
   participant-held-out bilateral-wrench protocol defines the human falsifier,
   but no governed human outcome is available.
   References, analysis code,

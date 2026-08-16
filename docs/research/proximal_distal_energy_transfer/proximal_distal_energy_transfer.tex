@@ -467,11 +467,21 @@ closed arm--grip constraints, separated reactions, and a compliant
 distal club. Its 18-program matched- state grid finds that higher
 initial torso rate can accompany greater delivery speed but does not
 uniformly reduce braking work; exact torso, arm, and wrist killswitches
-are nonmonotonic. This remains a planar mechanism result. A frozen
-participant-held-out bilateral-wrench protocol defines the human
-falsifier, but no governed human outcome is available. References,
-analysis code, machine-readable results, and provenance are available
-with the document for independent inspection and reuse.
+are nonmonotonic. This remains a planar mechanism result. The
+subject-scaled articulated sequence now advances a five-fiber-per-hand
+grip through 50 ms and then adds passive first-mode bending and torsion
+under rigid, single-mode, and coupled killswitch branches. All 384
+fine-grid shaft trajectories pass the registered linear-domain,
+work--energy, refinement, and MuJoCo--Pinocchio gates. Among 126
+coupled--rigid cells matched within 5\% for peak load and dissipated
+work, final-speed differences include 82 negative and 44 positive
+values. This establishes a state-dependent synthetic elastic pathway and
+rejects a universal shaft-speed benefit; it does not calibrate equipment
+or identify a human strategy. A frozen participant-held-out
+bilateral-wrench protocol defines the human falsifier, but no governed
+human outcome is available. References, analysis code, machine-readable
+results, and provenance are available with the document for independent
+inspection and reuse.
 \end{abstract}
 
 \renewcommand*\contentsname{Table of contents}
@@ -482,7 +492,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, opacitybacktitle=0.6, rightrule=.15mm, colback=white, left=2mm, breakable, toptitle=1mm, arc=.35mm, toprule=.15mm, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, titlerule=0mm, bottomtitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, bottomrule=.15mm, opacityback=0, colframe=quarto-callout-note-color-frame, coltitle=black]
+\begin{tcolorbox}[enhanced jigsaw, bottomtitle=1mm, breakable, opacityback=0, arc=.35mm, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm, leftrule=.75mm, toptitle=1mm, colframe=quarto-callout-note-color-frame, colback=white, left=2mm, opacitybacktitle=0.6, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, coltitle=black, toprule=.15mm, rightrule=.15mm, titlerule=0mm]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -7814,6 +7824,123 @@ numerical horizon only. Shaft bending/torsion, ground/free-moment work,
 matched delivery, and governed human measurements remain required before
 equipment, timing, or strategy inference.
 
+\subsubsection{Passive Shaft Bending and Torsion Under Distributed Grip
+Loading}\label{passive-shaft-bending-and-torsion-under-distributed-grip-loading}
+
+The next intervention admits shaft compliance while holding the
+articulated state authority, five-fiber grip law, initial perturbation,
+and support pathway fixed. The active elastic coordinates are two
+orthogonal tip-normalized bending deflections and a tip twist,
+
+\begin{equation}\phantomsection\label{eq-articulated-shaft-mass}{
+\eta = [\eta_x,\eta_y,\phi]^\mathsf{T}, \qquad
+\mathcal{M}(q)=
+\begin{bmatrix}
+M_r(q) & C_{r\eta}(q)\\
+C_{r\eta}^{\mathsf{T}}(q) & M_\eta
+\end{bmatrix}.
+}\end{equation}
+
+Here \(M_r\) is assembled independently by native MuJoCo or Pinocchio.
+\(C_{r\eta}\) and \(M_\eta\) are formed from the same shaft and clubhead
+body linear/angular Jacobians used by the rigid tree, evaluated against
+the elastic mode velocities. Configuration derivatives of this added
+mass block supply its Christoffel bias. The passive elastic force is
+
+\begin{equation}\phantomsection\label{eq-articulated-shaft-passivity}{
+Q_\eta=-K_\eta\eta-D_\eta\dot\eta, \qquad
+U_\eta=\tfrac12\eta^\mathsf{T}K_\eta\eta,
+\qquad
+P_D=-\dot\eta^\mathsf{T}D_\eta\dot\eta\le 0.
+}\end{equation}
+
+A first-order gravitational deflection term is included in the augmented
+potential. The work--energy ledger therefore contains rigid mechanical
+energy, rigid--elastic kinetic coupling, shaft strain, deflection
+gravity, grip strain, grip damping, and shaft damping. There is no shaft
+actuator, wrist torque, hand driver, or direct club torque. Selecting
+the rigid branch removes all elastic coordinates and delegates exactly
+to the previously qualified distributed-grip integrator.
+
+The bending basis is not refitted in this experiment. A hash-checked
+frozen artifact carries the first mode of the existing 24-element
+Euler--Bernoulli authority into the lean native-engine runtime. Its
+frequency is 5.2399 Hz. A tip-normalized stiffness is reconstructed with
+the articulated shaft/head inertia so that the reduced coordinate
+retains that frequency. The torsional stiffness follows the compliance
+integral of the same tapered hollow section,
+\(k_\phi=[\int_0^L(GJ)^{-1}\,ds]^{-1}\) with \(G=E/[2(1+\nu)]\) and
+\(\nu=0.30\), giving 70.1260 Hz. Both modes use a declared damping ratio
+of 0.018. These are synthetic structural references, not measured
+properties of a golf shaft. The separate six-mode beam authority also
+remains decisive: its one-mode RMS discrepancy is \(6.87\times10^{-7}\)
+m under the slow pulse but \(4.13\times10^{-5}\) m under the short
+pulse. High-frequency conclusions therefore cannot inherit first-mode
+adequacy from the slow-loading result.
+
+The registered atlas crosses twelve articulated states,
+rigid/bending-only/ torsion-only/coupled shaft branches, two initial
+club-velocity signs, 0.25 and 0.125 ms steps, and both native engines.
+The 384 trajectories are each advanced once to 50 ms and summarized at
+nested 4, 10, 25, and 50 ms horizons. All branches begin at zero elastic
+displacement and velocity; their initial total-energy range is exactly
+zero. Two deliberately coarser probes fail the declared linear-domain
+gate: a 1.0 ms torsion trace at state \((0,0)\) with the negative
+velocity sign and a 0.50 ms trace at state \((8,0)\) with the positive
+sign. They are retained as excluded negative controls. For the latter
+state, 0.25, 0.125, and 0.0625 ms maximum absolute work--energy
+residuals halve from 0.00776 to 0.00390 to 0.00195 J while remaining
+bounded through 50 ms; the registered matrix uses the first two bounded
+steps.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=0.98\linewidth,height=\textheight,keepaspectratio]{figures/fig_articulated_shaft_atlas.pdf}
+
+}
+
+\caption{\label{fig-articulated-shaft-atlas}Passive Articulated Shaft
+Bending and Torsion Under Distributed Grip Loading}
+
+\end{figure}%
+
+All fine-grid numerical and native-engine gates pass. Maximum tip
+bending is 1.696 mm, maximum twist is 0.001855 rad, and peak shaft
+strain energy is \(3.33\times10^{-4}\) J; every cell remains within the
+declared 5\% deflection and 10-degree twist bounds. The largest station
+force is 1.621 N and the largest grip-force couple is 0.340 N m. The
+worst normalized work--energy residual decreases from 0.007798 to
+0.003900. Maximum MuJoCo--Pinocchio trajectory and station-force errors
+are \(3.84\times10^{-13}\) and \(2.15\times10^{-10}\) relative, with no
+active-set parity failure. Bending, torsion, and both coupled
+coordinates are independently excited, while their killswitch branches
+contain only the declared coordinates.
+
+The shaft comparison is intentionally screened against load and work
+rather than ranked from unmatched speeds. A coupled and rigid cell is
+called matched only when both peak station load and cumulative
+dissipated work differ by no more than 5\% symmetrically. This admits
+126 of 384 possible comparisons. The coupled-minus-rigid final
+translation-speed difference spans \(-0.0285\) to \(+0.0212\) m/s: 82
+matched cells are negative and 44 are positive. Thus passive shaft
+storage and return can change a delivery proxy in this model, but its
+sign depends on state, velocity branch, horizon, and load/work
+selection. The atlas falsifies a universal speed benefit just as
+directly as it demonstrates a mechanically active elastic pathway.
+Post-registered matching is descriptive, not randomized or causal, and
+it does not determine an optimal human shaft or action.
+
+The contact fibers remain frictionless, memoryless engineering lines
+with state-registered free lengths. Ground reaction and free moment
+remain absent; shaft deformation does not establish tissue loading,
+timing economy, impact performance, or coaching strategy. The next
+separate transport gate must add a finite ground/free-moment pathway
+under the same initial-energy, matched-load/work, killswitch, reversal,
+power, refinement, and two-engine controls before the two pathways are
+combined.
+
 \subsection{Paired Scapula-on-Ellipsoid Geometry
 Screen}\label{paired-scapula-on-ellipsoid-geometry-screen}
 
@@ -7882,13 +8009,15 @@ work--energy, refinement, adverse-load, event, and engine-parity
 controls through 5 ms. The distributed extension then preserves total
 stiffness and damping while advancing one-, three-, and five-fiber
 tension grips through 50 ms with geometry and station-refinement
-controls. It still lacks calibrated tissue, pressure, friction, shaft
-compliance, and ground coupling. The next tests must add shaft and
-ground pathways separately before combining them and repeating
-matched-state, work, load, reversal, and killswitch controls. Only
-trajectories passing those gates may test whether drift-mediated
-transfer reduces timing demand, creates recovery, benefits from slack,
-or supports a human strategy.
+controls. The separate passive-shaft extension adds first-mode bending
+and torsion with initial-energy, matched-load/work, refinement, and
+engine-parity controls; its matched speed differences retain both signs.
+Both tiers still lack calibrated tissue, pressure, friction, and ground
+coupling. The next test must add the ground pathway separately before
+combining it with grip and shaft mechanics. Only trajectories passing
+those gates may test whether drift-mediated transfer reduces timing
+demand, creates recovery, benefits from slack, or supports a human
+strategy.
 
 \section{Falsifiability Gained and Claims Still
 Open}\label{sec-spatial-claim-boundary}
@@ -9537,18 +9666,19 @@ The ladder remains deliberately incomplete:
   remain frictionless engineering lines with state-registered free
   lengths rather than measured pressure, fingers, or tissue; and
 \item
-  every articulated forward branch still uses a rigid club and unchanged
-  support pathway rather than the distributed shaft and
-  ground/free-moment system.
+  the newest articulated branch adds separately qualified first-mode
+  bending and torsion to the distributed grip, but all shaft parameters
+  remain synthetic and the support pathway remains unchanged rather than
+  a finite ground/free-moment system.
 \end{itemize}
 
-The next decisive model tests add shaft bending/torsion and a finite
-ground/free-moment pathway separately before combining them with the
-distributed articulated grip. Each must emit the same common schema and
-retain the exact same-state command-removal branch. Failure of
-force/moment balance, power invariance, contact-rank agreement,
-refinement, or matched-event parity at those tiers would falsify
-transport of the reduced passive-persistence claim.
+The next decisive model test adds a finite ground/free-moment pathway
+before combining it with the qualified distributed grip and passive
+shaft. It must emit the same common schema and retain the exact
+same-state command-removal branch. Failure of force/moment balance,
+power invariance, contact-rank agreement, refinement, or matched-event
+parity at those tiers would falsify transport of the reduced
+passive-persistence claim.
 
 \chapter{Reference Frames, Biological Mechanisms, and the Multi-Engine
 Ladder}\label{sec-frames-biology-engines}
@@ -11573,13 +11703,14 @@ separation and transverse differential force. Existing moving-base and
 two-engine spatial controls reproduce coincident-grip zeros and
 moment-arm reversals. A six-profile audit rejects prescribed states that
 miss closure by 0.171--0.616 m; a bounded follow-up closes all 234
-registered reduced-tree configurations. The resulting hand-carriage
-reference retains all registered cross-engine and energy gates through
-50 ms under nine one-factor adverse or null branches. & Replace the
-carriages with articulated subject-scaled arms, calibrated distributed
-grip and shaft properties, contact loss, and ground coupling; then
-repeat the horizon, geometry, killswitch, and held-out human
-bilateral-wrench tests. \\
+registered reduced-tree configurations. The articulated distributed-grip
+tier now advances twelve selected states through 50 ms, and a separate
+passive-shaft extension adds first-mode bending/torsion with
+matched-load/work and native-engine controls. & Calibrate distributed
+grip and shaft properties, add finite ground/free-moment coupling and
+contact loss, combine the separately qualified pathways, and then repeat
+the horizon, geometry, killswitch, and held-out human bilateral-wrench
+tests. \\
 Which timing patterns matter? & Early distal release changes the
 available geometry; proximal rate, acceleration, braking, and release
 timing interact nonmonotonically. ``Casting'' is not one universal
@@ -11874,6 +12005,19 @@ through 50 ms. Their delivery-state differences therefore demonstrate
 discretization sensitivity, not a physical benefit of slack or
 distributed pressure. Measured contact pressure, friction, shaft/ground
 work, matched tasks, and governed human outcomes remain necessary.
+
+The following articulated shaft atlas then retains the five-fiber grip
+and adds rigid, bending-only, torsion-only, and coupled passive-club
+branches. Its 384 trajectories pass the registered 0.25/0.125 ms
+work--energy, small-deformation, killswitch, and native-engine gates
+through 50 ms; 1.0 and 0.50 ms torsion probes fail closed outside the
+declared linear domain. Of 384 coupled--rigid cells, 126 meet the
+predeclared 5\% peak-load and dissipated-work match. Their final-speed
+differences include 82 negative and 44 positive values. Passive shaft
+response is therefore a state-dependent pathway in this synthetic model,
+not a general speed advantage. Equipment calibration, higher mode
+adequacy under fast loading, ground work, impact, and human outcomes
+remain open.
 
 \section{Evidential Boundary}\label{evidential-boundary}
 

@@ -270,6 +270,12 @@ REVIEW_SPECS: dict[str, dict[str, Any]] = {
         ("PD-CLAIM-286", "PD-CLAIM-287", "PD-CLAIM-288"),
         "Calibrate grip friction and pressure, couple the qualified fibers to shaft bending and torsion, add ground pathways, and test longer matched-work/load delivery against governed bilateral human wrenches.",
     ),
+    "articulated_shaft_bending_torsion": _spec(
+        "reviewed_as_synthetic_first_mode_articulated_result",
+        "passive_shaft_pathway_qualified_with_mixed_matched_outcomes",
+        ("PD-CLAIM-289", "PD-CLAIM-290", "PD-CLAIM-291", "PD-CLAIM-292"),
+        "Calibrate distributed grip and shaft properties, add higher-mode fast-load and finite-ground pathways, then test governed delivery, impact, and human outcomes.",
+    ),
     "scapulothoracic_contact_geometry": _spec(
         "reviewed_as_paired_geometry_screen_with_explicit_boundaries",
         "paired_geometry_screen_partial_with_explicit_boundaries",

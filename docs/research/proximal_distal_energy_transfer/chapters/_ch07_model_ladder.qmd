@@ -451,13 +451,14 @@ The ladder remains deliberately incomplete:
   five-fiber tension grips through 50 ms, but those fibers remain frictionless
   engineering lines with state-registered free lengths rather than measured
   pressure, fingers, or tissue; and
-- every articulated forward branch still uses a rigid club and unchanged
-  support pathway rather than the distributed shaft and ground/free-moment
-  system.
+- the newest articulated branch adds separately qualified first-mode bending
+  and torsion to the distributed grip, but all shaft parameters remain
+  synthetic and the support pathway remains unchanged rather than a finite
+  ground/free-moment system.
 
-The next decisive model tests add shaft bending/torsion and a finite
-ground/free-moment pathway separately before combining them with the
-distributed articulated grip. Each must emit the same common schema and retain
+The next decisive model test adds a finite ground/free-moment pathway before
+combining it with the qualified distributed grip and passive shaft. It must
+emit the same common schema and retain
 the exact same-state command-removal branch. Failure of force/moment balance,
 power invariance, contact-rank agreement, refinement, or matched-event parity
 at those tiers would falsify transport of the reduced passive-persistence
