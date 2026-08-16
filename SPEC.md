@@ -3388,6 +3388,31 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Passing source qualification shall establish traceability and bounded claim
   fit only. It shall not close model, equipment, anatomy, archive, or governed
   participant-held-out human gates.
+
+### F-8557.26: Finite Ground and Intrinsic Free-Moment Pathway
+
+- The finite-base model shall transform only the articulated human body tree;
+  the independently rooted club shall remain coupled through the qualified
+  distributed grip and passive shaft pathways.
+- Base translation and pitch shall enter inertia, posture-varying Christoffel
+  bias, gravity, hand-contact geometry, generalized grip reaction, ground
+  storage/damping, and the closed work--energy ledger. Fixed base shall reduce
+  exactly to the qualified shaft solver.
+- Ground force, intrinsic free moment, and reference-transported moment shall
+  remain distinct. Reversing the center-of-pressure reference shall change
+  only the transported moment, never generalized force or trajectory.
+- Fixed, translation-only, free-moment-only, and coupled pathways shall use
+  common rigid and natural-zero elastic/base initial states. Rigid-shaft and
+  horizontal-restraint-removed controls, velocity reversal, two native
+  engines, time refinement, matched-load/work screening, and domain gates
+  shall be retained.
+- Natural-zero, gravity-only, and conditional base balance shall be reported as
+  separate initialization sensitivities. A base-force balance shall not be
+  called whole-mechanism equilibrium.
+- Zero horizontal stiffness/damping shall be labeled removal of modeled
+  horizontal restraint, not complete Coulomb friction, unilateral contact, or
+  foot mechanics. Synthetic parameters shall not be called force-plate,
+  equipment, participant, human-transfer, timing, or coaching validation.
 - Use `np.vdot` instead of `np.sum(x**2)` and `np.sqrt(np.einsum("ij,ij->i", x, x))` instead of `np.linalg.norm(x, axis=1)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
 - Use `np.einsum('ij,ij->j', x, x)` instead of `np.sum(x * x, axis=0)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
 - (spec-exempt: micro-optimization) Replaced `.iterrows()` with `.to_dict('records')` in `data_processor_widget.py`, `kaggle_validation.py`, and `launch_monitor_analytics/widgets.py` to optimize UI and validation performance.

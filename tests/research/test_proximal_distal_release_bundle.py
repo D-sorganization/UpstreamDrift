@@ -37,6 +37,8 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         "articulated_shaft_structural_basis",
         "articulated_shaft_time_step_diagnostic",
         "articulated_shaft_atlas",
+        "articulated_ground_diagnostic",
+        "articulated_ground_atlas",
         "scapulothoracic_contact_screen",
         "spatial_forward_contact",
         "uncertainty_control",

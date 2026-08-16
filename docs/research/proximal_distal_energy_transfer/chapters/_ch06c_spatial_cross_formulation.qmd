@@ -750,13 +750,93 @@ a mechanically active elastic pathway. Post-registered matching is
 descriptive, not randomized or causal, and it does not determine an optimal
 human shaft or action.
 
-The contact fibers remain frictionless, memoryless engineering lines with
-state-registered free lengths. Ground reaction and free moment remain absent;
-shaft deformation does not establish tissue loading, timing economy, impact
-performance, or coaching strategy. The next separate transport gate must add
-a finite ground/free-moment pathway under the same initial-energy,
-matched-load/work, killswitch, reversal, power, refinement, and two-engine
-controls before the two pathways are combined.
+At this shaft-only tier, the contact fibers remain frictionless, memoryless
+engineering lines with state-registered free lengths, and ground reaction and
+free moment are absent. Shaft deformation does not establish tissue loading,
+timing economy, impact performance, or coaching strategy. The finite-base
+extension below retains the same initial-energy, matched-load/work,
+killswitch, reversal, power, refinement, and two-engine controls.
+
+#### Finite Ground Reaction and Intrinsic Free Moment
+
+The finite-base extension supplies that separate transport gate. Three planar
+coordinates translate the articulated human tree in world $x$ and $z$ and
+rotate it about world $y$,
+
+$$
+b=[x_b,z_b,\theta_b]^\mathsf{T}, \qquad
+\mathcal{M}_g(q)=
+\begin{bmatrix}
+M_{r\eta}(q) & C_{r\eta,b}(q)\\
+C_{r\eta,b}^\mathsf{T}(q) & M_b(q)
+\end{bmatrix}.
+$$ {#eq-articulated-ground-mass}
+
+Only the non-club body tree receives this common base transformation. The club
+remains independently rooted and is connected to the moving hands through the
+same distributed grip fibers. The cross block is assembled from every
+non-club body's translational and angular Jacobians. Its configuration
+derivatives contribute the associated Christoffel bias; base translation and
+rotation also enter gravity and the distributed-contact Jacobians. Thus the
+finite base changes inertia, gravity, hand geometry, grip reaction, and power
+simultaneously rather than adding a prescribed force to a fixed posture.
+
+The synthetic passive support law is
+
+$$
+Q_b=-K_b b-D_b\dot b, \qquad
+U_b=\tfrac12 b^\mathsf{T}K_b b, \qquad
+P_{D,b}=-\dot b^\mathsf{T}D_b\dot b\le 0.
+$$ {#eq-articulated-ground-passivity}
+
+Its first two generalized components form the ground-on-body force
+$F_g=[Q_x,0,Q_z]^\mathsf{T}$ and the third is the intrinsic free moment
+$M_y=Q_\theta$. A moment reported about a different reference point is
+$M_y^{(O)}=M_y+r_zF_x-r_xF_z$. Reversing the declared center-of-pressure
+reference therefore changes the transported moment but not $F_g$, $M_y$, the
+generalized force, or the trajectory. This distinction prevents a reference-
+transport term from being misidentified as an additional physical torque.
+
+Four exact pathway selections are retained: fixed base; translation only;
+intrinsic free moment only; and coupled translation plus free moment. The fixed
+selection has no base coordinate and delegates bit for bit to the qualified
+shaft solver. Two independent controls accompany the coupled selection. One
+removes every shaft elastic coordinate; the other sets horizontal support
+stiffness and damping to zero while retaining vertical support and intrinsic
+free moment. The latter is accurately described as removal of modeled
+horizontal restraint, not as a complete Coulomb-friction or unilateral foot
+contact model.
+
+Initialization is a model variable rather than an invisible convenience. A
+natural-zero base gives identical initial total energy across pathway
+killswitches, but it is not static equilibrium. A gravity-only displacement
+balances the support law while ignoring grip preload. A conditional nonlinear
+solve balances ground, grip, and gravity generalized forces in the three base
+coordinates with posture and club state held fixed. It does not balance the
+remaining rigid coordinates and therefore is not whole-mechanism equilibrium.
+The three choices are retained as separate sensitivity branches; the atlas
+uses natural zero because it is the only exact common-state killswitch
+comparison.
+
+The preregistered atlas uses the same twelve articulated states, two signed
+club-velocity perturbations, 0.25 and 0.125 ms steps, and independent native
+MuJoCo and Pinocchio operators as the shaft study. Each trajectory advances
+once to 50 ms and is summarized at 4, 10, 25, and 50 ms. The four primary
+pathways produce 384 trajectories. Rigid-shaft and horizontal-restraint-
+removed control families add 192. Every cell records grip force and couple,
+active fibers, ground force, intrinsic and transported moments, support and
+shaft strain, damping work, base motion, club speed, virtual-power closure,
+work--energy closure, declared-domain status, and cross-engine parity.
+
+The constitutive values are transparent synthetic references: horizontal and
+vertical stiffnesses are 15 and 30 kN/m; damping values are 400 and 800 N s/m;
+free-moment stiffness is 900 N m/rad; and rotational damping is 45 N m s/rad.
+They have not been fitted to a force plate, pressure map, participant, or golf
+outcome. Consequently this experiment can identify whether the named pathways
+are mechanically active and whether their effects survive killswitch,
+reversal, refinement, and matched-load/work screens. It cannot establish that
+the values represent a golfer, that a pathway is intentionally controlled, or
+that a speed difference is beneficial.
 
 ### Paired Scapula-on-Ellipsoid Geometry Screen
 

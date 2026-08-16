@@ -138,6 +138,14 @@ _RELEASE_METADATA: dict[str, Any] = {
             "command": "python -m scripts.research.proximal_distal_energy.run_articulated_shaft_atlas",
             "tier": "bounded_subject_scaled_distributed_grip_passive_shaft_forward_dynamics",
         },
+        "articulated_ground_diagnostic": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_articulated_ground_diagnostic",
+            "tier": "finite_base_initialization_and_three_level_refinement",
+        },
+        "articulated_ground_atlas": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_articulated_ground_atlas",
+            "tier": "bounded_subject_scaled_finite_ground_and_intrinsic_free_moment",
+        },
         "scapulothoracic_contact_screen": {
             "command": "python -m scripts.research.proximal_distal_energy.run_scapulothoracic_contact_screen",
             "tier": "paired_arm_only_scapula_on_ellipsoid_geometry_screen",
