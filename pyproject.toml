@@ -48,6 +48,12 @@ dependencies = [
     "requests>=2.33.0",
     "python-dotenv>=1.2.2",
     "bokeh>=3.8.2",
+    # Transitive via bokeh, which only requires tornado>=6.2. The floor is
+    # declared here rather than left to bokeh so it binds on every install
+    # path; it previously existed only as a hand-edit in the generated
+    # environment.yml, where it constrained conda users alone and was
+    # scheduled for deletion by the next `make sync-deps` (#8689).
+    "tornado>=6.5.7",
 
     "flask>=3.1.3",
 
