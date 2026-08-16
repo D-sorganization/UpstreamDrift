@@ -202,7 +202,13 @@ abstract: |
   peak load and dissipated work, final-speed differences include 82 negative and
   44 positive values. This establishes a state-dependent synthetic elastic
   pathway and rejects a universal shaft-speed benefit; it does not calibrate
-  equipment or identify a human strategy. A frozen
+  equipment or identify a human strategy. A subsequent finite-base extension
+  adds planar ground reaction and intrinsic free moment. All 576 registered
+  trajectories pass the declared numerical and native-engine gates, but none
+  of 384 coupled--fixed cells meets the preregistered peak-load and total-work
+  match. A labeled post-hoc alternative admits both speed-difference signs.
+  The result qualifies the synthetic mechanism while leaving its isolated
+  delivery effect unidentified. A frozen
   participant-held-out bilateral-wrench protocol defines the human falsifier,
   but no governed human outcome is available.
   References, analysis code,
@@ -283,6 +289,10 @@ format:
 {{< include chapters/_ch06bbb_forward_modal_shaft.qmd >}}
 
 {{< include chapters/_ch06c_spatial_cross_formulation.qmd >}}
+
+{{< include chapters/_ch06ca_articulated_ground.qmd >}}
+
+{{< include chapters/_ch06cb_spatial_cross_tail.qmd >}}
 
 {{< include chapters/_ch06cc_spatial_forward_contact.qmd >}}
 
