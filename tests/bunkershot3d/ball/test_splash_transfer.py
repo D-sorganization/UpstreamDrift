@@ -82,6 +82,7 @@ def delivery(
     displaced_mass_kg: float = 0.25,
     contact_duration_s: float = 0.005,
     speed_m_s: float = 25.0,
+    bed_relative_density: float = 0.5,
     verdict: ValidityVerdict | None = None,
 ) -> SandDelivery:
     """Return a measured strike, as the solver and metrics layer report one.
@@ -91,6 +92,10 @@ def delivery(
         displaced_mass_kg: Divot mass the metrics layer measured.
         contact_duration_s: Time the sole spent engaged.
         speed_m_s: Head speed at entry; the exit is 60% of it.
+        bed_relative_density: Packing state of the bed, which sets the share of
+            the intercepted momentum the ball keeps (issue #8704). The default
+            is mid-range so a test that does not care about the lie is not
+            sitting at either bound.
         verdict: The solver's verdict, defaulting to one formed at
             ``speed_m_s`` on the three standard scales.
 
@@ -103,6 +108,7 @@ def delivery(
         contact_duration_s=contact_duration_s,
         entry_speed_m_s=speed_m_s,
         exit_speed_m_s=0.6 * speed_m_s,
+        bed_relative_density=bed_relative_density,
         verdict=solver_verdict(speed_m_s) if verdict is None else verdict,
     )
 
@@ -323,6 +329,7 @@ class TestDeliveryRefusesNonsense:
                 contact_duration_s=0.005,
                 entry_speed_m_s=25.0,
                 exit_speed_m_s=15.0,
+                bed_relative_density=0.5,
                 verdict=None,  # type: ignore[arg-type]
             )
 

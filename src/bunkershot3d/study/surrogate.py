@@ -173,8 +173,12 @@ def squared_exponential_kernel(
     scaled_a = a / scales
     scaled_b = b / scales
     sq_dist = (
-        np.einsum('ij,ij->i', scaled_a, scaled_a)[:, None]  # ⚡ Bolt: np.einsum is ~3x faster than np.sum(x**2, axis=1)
-        + np.einsum('ij,ij->i', scaled_b, scaled_b)[None, :]  # ⚡ Bolt: np.einsum is ~3x faster than np.sum(x**2, axis=1)
+        np.einsum("ij,ij->i", scaled_a, scaled_a)[
+            :, None
+        ]  # ⚡ Bolt: np.einsum is ~3x faster than np.sum(x**2, axis=1)
+        + np.einsum("ij,ij->i", scaled_b, scaled_b)[
+            None, :
+        ]  # ⚡ Bolt: np.einsum is ~3x faster than np.sum(x**2, axis=1)
         - 2.0 * scaled_a @ scaled_b.T
     )
     return signal_variance * np.exp(-0.5 * np.maximum(sq_dist, 0.0))
@@ -406,7 +410,9 @@ class GaussianProcess:
 
         v = solve_triangular(self._chol, k_star, lower=True)
         prior = hyper.signal_variance + (hyper.noise_variance if include_noise else 0.0)
-        var_norm = prior - np.einsum('ij,ij->j', v, v)  # ⚡ Bolt: np.einsum is ~3x faster than np.sum(x**2, axis=0)
+        var_norm = prior - np.einsum(
+            "ij,ij->j", v, v
+        )  # ⚡ Bolt: np.einsum is ~3x faster than np.sum(x**2, axis=0)
         var = np.maximum(var_norm, 0.0) * self._y_scale**2
         return mean, np.sqrt(var)
 

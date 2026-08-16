@@ -203,18 +203,36 @@ def _divot_lines(outcome: ShotOutcome) -> tuple[str, ...]:
     )
 
 
+DIG_SKID_CAVEAT = (
+    "the dig-versus-skid verdict is UNCALIBRATED and is not a finding: at the "
+    "shipped entry window the slope ratio spans 0.9987-1.0000 over the whole "
+    "design space, and widening the window orders the designs opposite to sole "
+    "depth (#8703)"
+)
+"""The sentence a dig-versus-skid verdict is never shown without (#8703)."""
+
+
 def _dig_skid_lines(outcome: ShotOutcome) -> tuple[str, ...]:
-    """Dig-versus-skid section, or nothing when it was not evaluated."""
+    """Dig-versus-skid section, or nothing when it was not evaluated.
+
+    The verdict never appears without its calibration state. The metric type
+    already refuses to hold one without the other, and this is where that
+    guarantee reaches the reader -- the same rule :data:`CARRY_CAVEAT` applies
+    to carry.
+    """
     if outcome.dig_skid is None:
         return ()
     skid = outcome.dig_skid
     dig_skid_verdict = skid.verdict
+    state = "calibrated" if skid.calibration.calibrated else "UNCALIBRATED"
     return (
         "Dig versus skid",
         _THIN,
-        _line("Verdict", dig_skid_verdict.value.upper()),
+        _line("Verdict", f"{dig_skid_verdict.value.upper()} ({state})"),
         _line("Slope ratio", f"{skid.slope_ratio:.3f}"),
+        _line("Entry window", f"{skid.calibration.entry_window_samples:.2f} samples"),
         _line("Vertical sand impulse", f"{skid.vertical_sand_impulse_Ns:.4g} N.s"),
+        f"  {DIG_SKID_CAVEAT}",
         "",
     )
 
