@@ -21,7 +21,7 @@ This is current operational state. Historical detail belongs in git/GitHub.
   `051f8dccc`. Both are verified ancestors of remote main.
 - [#8719](https://github.com/D-sorganization/UpstreamDrift/issues/8719) is active
   on branch `research/8684-ground-free-moment-8719` from main `051f8dccc`;
-  atlas/paper checkpoint `3fbf17432` and handoff checkpoint `dcc78d7f2` are pushed.
+  full PR [#8723](https://github.com/D-sorganization/UpstreamDrift/pull/8723) is open.
 - #8556 remains open: no governed participant dataset contains synchronized
   bilateral six-axis grip wrenches. Synthetic traces cannot replace it.
 - NotebookLM review remains blocked on manual Google reauthentication. Never
@@ -109,8 +109,8 @@ This is current operational state. Historical detail belongs in git/GitHub.
 
 ## Immediate Next Steps
 
-1. Open a full PR for #8719 from `research/8684-ground-free-moment-8719`, retain
-   the adverse zero-match result, and shepherd required CI/review to protected
+1. Shepherd full PR #8723, retain the adverse zero-match result, and complete
+   required CI/review through protected
    merge; do not repair unrelated fleet-wide lint/type debt in this PR.
 2. After merge, verify the merge commit is an ancestor of remote main, update
    this handoff on main, and close #8719 only through the merged PR.
