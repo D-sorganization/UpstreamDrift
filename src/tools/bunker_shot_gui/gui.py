@@ -38,6 +38,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import (
     QApplication,
+    QFileDialog,
     QGridLayout,
     QHBoxLayout,
     QLabel,
@@ -51,6 +52,8 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from bunkershot3d.fields.store import load_field
+
 from src.shared.python.ui import HoverCopyTextBrowser
 
 from .design import SandCondition, SolverSetup, SwingSetup, WorkbenchInputError
@@ -60,7 +63,8 @@ from .render import field_scales
 from .render3d import SceneScale, scene_scale
 from .report import comparison_report, evaluation_report
 from .shot3d import ShotScene
-from .viewport_widgets import ShotViewportWidget, TracePanelWidget
+from .slices import CursorMap
+from .viewport_widgets import SandSliceWidget, ShotViewportWidget, TracePanelWidget
 from .widgets import (
     ConditionPanel,
     DesignPanel,
@@ -87,6 +91,22 @@ _IDLE_TEXT = (
     "beyond any published validation, so the verdict is part of the answer,\n"
     "not a disclaimer attached to it. When the solver refuses a query no\n"
     "force, depth or carry is reported at all.\n"
+)
+
+_SAND_FIELD_HINT = (
+    "No sand field loaded. F1 fields are computed offline -- a march at "
+    "ADR-0033's bulk resolution takes tens of seconds, so running one here "
+    "would freeze the workbench and running a coarser one would put a "
+    "picture on screen at a resolution nobody chose. Capture one with "
+    "capture_f1_field, store it with save_field, and open it here. The "
+    "field carries its own tier and validity status, checked against the "
+    "file's digest on load."
+)
+
+_STALE_FIELD_HINT = (
+    "Sand field cleared: it was cut from a different run. A cut beside a "
+    "freshly evaluated design would read as that design's sand, which it "
+    "is not. Load the field belonging to this run."
 )
 
 ModelFactory = Callable[[SolverSetup], WorkbenchModel]
@@ -285,10 +305,28 @@ class BunkerShotWidget(QWidget):
         self._field_a.link(self._scene_a)
         self._field_a.link(self._traces_a)
 
+        slice_page = QWidget()
+        cut = QVBoxLayout(slice_page)
+        controls = QHBoxLayout()
+        self._load_field_button = QPushButton("Load sand field (F1)...")
+        self._load_field_button.clicked.connect(self.choose_sand_field)
+        controls.addWidget(self._load_field_button)
+        self._field_note = QLabel(_SAND_FIELD_HINT)
+        self._field_note.setWordWrap(True)
+        controls.addWidget(self._field_note, stretch=1)
+        cut.addLayout(controls)
+        self._slice_a = SandSliceWidget("A: sand cut through the impact zone")
+        cut.addWidget(self._slice_a, stretch=1)
+        # The fourth view on the same transport (#8711). Its own record is a
+        # strided F1 march rather than the F0 shot, so it maps the cursor
+        # rather than taking a slider of its own.
+        self._field_a.link(self._slice_a)
+
         self._views = QTabWidget()
         self._views.addTab(maps_page, "Summed maps")
         self._views.addTab(fields_page, "Sole load field (per element, per sample)")
         self._views.addTab(shot_page, "Shot in 3-D and traces")
+        self._views.addTab(slice_page, "Sand cut (F1 field)")
         column.addWidget(self._views, stretch=3)
 
         self._results = HoverCopyTextBrowser()
@@ -404,6 +442,10 @@ class BunkerShotWidget(QWidget):
             self._window_map_a,
             limits=_density_limits((evaluation,)),
         )
+        # Before the field view is repainted, not after: painting it emits
+        # frame_changed, and a sand cut still linked to the previous shot's
+        # record would be handed an index from a record it does not have.
+        self._clear_sand_field()
         self._paint_field(evaluation, self._field_a, _shared_scales((evaluation,)))
         self._paint_shot(evaluation, _shared_scene_scale((evaluation,)))
         self._bounce_map_b.clear()
@@ -442,9 +484,90 @@ class BunkerShotWidget(QWidget):
         self._paint_maps(
             comparison.right, self._bounce_map_b, self._window_map_b, limits=limits
         )
+        self._clear_sand_field()
         self._paint_field(comparison.left, self._field_a, scales)
         self._paint_field(comparison.right, self._field_b, scales)
         self._paint_shot(comparison.left, _shared_scene_scale(pair))
+
+    def _clear_sand_field(self) -> None:
+        """Drop a loaded sand field before a new run is displayed.
+
+        Two reasons, and both matter.
+
+        A cut belongs to the march that produced it, not to whatever was
+        evaluated most recently. Leaving it on screen beside a fresh
+        design would let it read as that design's sand, which is the
+        relabelling issue #8710 spent a content digest preventing --
+        undone by a stale widget.
+
+        And it must happen **before** the sole-field view is repainted.
+        That view is the transport: painting it emits ``frame_changed``,
+        and a cut whose :class:`~.slices.CursorMap` was built against the
+        previous shot's record would be handed an index out of a record
+        it no longer has. Its ``set_frame`` raises on that, correctly --
+        but a Python exception escaping a Qt slot aborts the process
+        rather than surfacing, so the ordering here is load-bearing and
+        not cosmetic.
+        """
+        if not self._slice_a.has_shot:
+            return
+        self._slice_a.clear()
+        self._field_note.setText(_STALE_FIELD_HINT)
+
+    def choose_sand_field(self) -> None:
+        """Ask for a stored sand field and load it into the cut view."""
+        path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Load a stored F1 sand field",
+            "",
+            "BunkerShot3D result (*.h5);;All files (*)",
+        )
+        if path:
+            self.load_sand_field(path)
+
+    def load_sand_field(self, path: str) -> None:
+        """Load a stored sand field and cut it on the shared cursor.
+
+        Separate from :meth:`choose_sand_field` so the loading can be
+        driven without a file dialog -- by a test, or by a script that
+        already knows the path.
+
+        The field is **loaded, not computed**. An F1 march at ADR-0033's
+        bulk resolution takes tens of seconds; running one inside a
+        button handler would freeze the workbench, and running a coarser
+        one to keep it responsive would put a picture on screen at a
+        resolution nobody chose. So the field is produced offline by
+        :func:`~bunkershot3d.fields.capture.capture_f1_field`, stored by
+        :func:`~bunkershot3d.fields.store.save_field`, and opened here --
+        with the tier and validity status it was written with, which
+        :func:`~bunkershot3d.fields.store.load_field` verifies against
+        the file's own digest before returning it.
+
+        Args:
+            path: Path to a stored result carrying a sand field.
+        """
+        try:
+            series = load_field(path)
+        except (OSError, ValueError) as error:
+            # A refused field must reach the user as a message. It is not a
+            # bug in the workbench: an integrity failure is the loader doing
+            # its job, and a traceback in a terminal nobody is reading would
+            # end with the tab silently staying empty.
+            self._slice_a.clear()
+            self._field_note.setText(f"Could not load {path}\n{error}")
+            logger.warning("sand field refused: %s", error)
+            return
+        transport = self._field_a.n_frames or series.n_frames
+        self._slice_a.set_shot(
+            series,
+            cursor=CursorMap(n_transport=transport, n_field=series.n_frames),
+        )
+        provenance = series.provenance
+        self._field_note.setText(
+            f"{path}\n{provenance.headline()}\n"
+            f"kinematics: {provenance.kinematics}\n"
+            f"{series.retention.describe()}"
+        )
 
     def _paint_field(
         self,
