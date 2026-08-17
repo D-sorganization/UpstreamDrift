@@ -51,6 +51,7 @@ from .report import status_colour
 
 __all__ = [
     "RENDERER",
+    "TIER_MODEL_NAMES",
     "ShotFrameArtists",
     "ViewportFallback",
     "draw_shot_frame",
@@ -64,6 +65,20 @@ __all__ = [
 
 RENDERER = "matplotlib"
 """What actually draws the frame once the 3-D providers have degraded."""
+
+TIER_MODEL_NAMES: dict[FidelityTier, str] = {
+    FidelityTier.F0: "dynamic 3D-RFT",
+    FidelityTier.F1: "plane-strain MPM continuum",
+    FidelityTier.F2: "MPM reference",
+    FidelityTier.F3: "DEM grains",
+}
+"""What each ADR-0032 tier actually solves, for the in-frame stamp.
+
+A tier letter is only meaningful to somebody who has read ADR-0032; the
+model name is what a wedge designer looking at a screenshot can check
+against what they were told they were being shown. F0's constitutive
+shortcut and F1's continuum are different claims and must not share a
+label."""
 
 _MARKER_AREA_PT2 = 4.2e6
 """Points^2 per m^2 of element area. Sized so a 12x5 sole mesh tiles."""
@@ -140,18 +155,24 @@ def validity_stamp(status: EnvelopeStatus, tier: FidelityTier) -> str:
     the sole field, the 3-D scene, the trace panel -- stamps the same words,
     so a designer comparing two of them is not reading two vocabularies.
 
+    The model is named from the tier rather than fixed. Writing
+    "dynamic 3D-RFT" under every tier was right while F0 was the only one;
+    with ADR-0033's F1 continuum drawing through the same stamp it would put
+    F0's constitutive shortcut on a picture of a material-point solve, which
+    is the exact kind of mislabelling an in-frame stamp exists to prevent.
+
     Args:
         status: How much of the frame may be believed.
         tier: Which rung of the ADR-0032 ladder produced it.
 
     Returns:
-        A short stamp: the status, the tier, and the reminder that neither is
-        a measurement. Short enough to sit inside an axes without covering
-        the data it qualifies.
+        A short stamp: the status, the tier, the model behind it, and the
+        reminder that none of it is a measurement. Short enough to sit
+        inside an axes without covering the data it qualifies.
     """
     return (
         f"{status.value.replace('_', ' ').upper()} - "
-        f"{tier.value.upper()} dynamic 3D-RFT\n"
+        f"{tier.value.upper()} {TIER_MODEL_NAMES[tier]}\n"
         "not calibrated for bunker sand"
     )
 
