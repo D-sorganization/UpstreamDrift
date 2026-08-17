@@ -53,6 +53,8 @@ from PyQt6.QtWidgets import (
 
 from src.shared.python.ui import HoverCopyTextBrowser
 
+from .crosstier import CrossTierComparison
+from .crosstier_run import cross_tier_check
 from .design import SandCondition, SolverSetup, SwingSetup, WorkbenchInputError
 from .field import LoadComponent, LoadScale, SoleLoadField
 from .model import DesignEvaluation, WorkbenchComparison, WorkbenchModel
@@ -60,7 +62,11 @@ from .render import field_scales
 from .render3d import SceneScale, scene_scale
 from .report import comparison_report, evaluation_report
 from .shot3d import ShotScene
-from .viewport_widgets import ShotViewportWidget, TracePanelWidget
+from .viewport_widgets import (
+    CrossTierWidget,
+    ShotViewportWidget,
+    TracePanelWidget,
+)
 from .widgets import (
     ConditionPanel,
     DesignPanel,
@@ -239,6 +245,22 @@ class BunkerShotWidget(QWidget):
         self._compare_button = QPushButton("Compare A vs B")
         self._compare_button.clicked.connect(self.run_comparison)
         column.addWidget(self._compare_button)
+
+        # Separate button, and separate for a reason rather than for tidiness.
+        # The cross-tier check marches the F1 continuum once per probe -- F1
+        # has no shot history yet (#8733) -- so it costs minutes where a
+        # design costs milliseconds. Running it on every evaluation would
+        # make the workbench unusable, and running it silently would make
+        # the wait inexplicable.
+        self._cross_tier_button = QPushButton("Cross-tier check A (F0 vs F1)")
+        self._cross_tier_button.setToolTip(
+            "Puts the F1 plane-strain MPM continuum beside F0 on design A. "
+            "Minutes, not milliseconds: F1 has no shot history yet, so each "
+            "probe is a separate march to one recorded pose. Consistency "
+            "between two uncalibrated models is not validation."
+        )
+        self._cross_tier_button.clicked.connect(self.run_cross_tier)
+        column.addWidget(self._cross_tier_button)
         column.addStretch()
 
         scroll = QScrollArea()
@@ -285,10 +307,18 @@ class BunkerShotWidget(QWidget):
         self._field_a.link(self._scene_a)
         self._field_a.link(self._traces_a)
 
+        cross_tier_page = QWidget()
+        cross_tier = QHBoxLayout(cross_tier_page)
+        self._cross_tier = CrossTierWidget("A: F0 against F1, on the shared cursor")
+        cross_tier.addWidget(self._cross_tier)
+        # The fourth follower of the one transport (#8705, #8706, #8708).
+        self._field_a.link(self._cross_tier)
+
         self._views = QTabWidget()
         self._views.addTab(maps_page, "Summed maps")
         self._views.addTab(fields_page, "Sole load field (per element, per sample)")
         self._views.addTab(shot_page, "Shot in 3-D and traces")
+        self._views.addTab(cross_tier_page, "Cross-tier check (F0 vs F1)")
         column.addWidget(self._views, stretch=3)
 
         self._results = HoverCopyTextBrowser()
@@ -360,6 +390,51 @@ class BunkerShotWidget(QWidget):
             return
         self.show_comparison(result)
 
+    def run_cross_tier(self) -> None:
+        """Put F1 beside F0 on design A, on demand.
+
+        Deliberately its own action rather than part of
+        :meth:`run_design_a`: the check marches the continuum once per
+        probe and costs minutes. The banner says so before the wait rather
+        than after it.
+        """
+        inputs = self._read_inputs()
+        if inputs is None:
+            return
+        settings, sand, swing = inputs
+        try:
+            design = self._design_a.design()
+        except WorkbenchInputError as error:
+            self._show_input_error(error)
+            return
+        self._banner.show_busy(
+            "Running the F1 continuum beside F0 on design A. This is minutes, "
+            "not milliseconds: F1 has no shot history yet, so every probe is "
+            "a separate march to one recorded pose."
+        )
+        result = self._guarded(
+            lambda: cross_tier_check(self._model_factory(settings), design, sand, swing)
+        )
+        if result is None:
+            return
+        self.show_cross_tier(result)
+
+    def show_cross_tier(self, comparison: CrossTierComparison) -> None:
+        """Display a cross-tier comparison and open its tab.
+
+        The banner keeps the shot's own verdict. Nothing on this page
+        improves it: agreement between two uncalibrated models is not
+        validation, and the licence statement inside the figure and the
+        status line under it both say so.
+
+        Args:
+            comparison: The comparison to show.
+        """
+        self._banner.show_status(comparison.worst_status)
+        self._cross_tier.set_comparison(comparison)
+        self._views.setCurrentIndex(self._views.count() - 1)
+        self._results.setPlainText(comparison.summary())
+
     def _read_inputs(
         self,
     ) -> tuple[SolverSetup, SandCondition, SwingSetup] | None:
@@ -409,6 +484,11 @@ class BunkerShotWidget(QWidget):
         self._bounce_map_b.clear()
         self._window_map_b.clear()
         self._field_b.clear()
+        # A cross-tier check belongs to the shot it was run on. Leaving the
+        # old one up beside a new design would put two different shots on
+        # one cursor, which is the one thing the shared transport exists to
+        # make impossible.
+        self._cross_tier.clear()
 
     def show_comparison(self, comparison: WorkbenchComparison) -> None:
         """Display an A/B comparison.
@@ -445,6 +525,7 @@ class BunkerShotWidget(QWidget):
         self._paint_field(comparison.left, self._field_a, scales)
         self._paint_field(comparison.right, self._field_b, scales)
         self._paint_shot(comparison.left, _shared_scene_scale(pair))
+        self._cross_tier.clear()
 
     def _paint_field(
         self,
