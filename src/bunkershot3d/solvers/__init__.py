@@ -76,6 +76,7 @@ from .envelope import (
 from .exceptions import (
     CalibrationError,
     OutOfEnvelopeError,
+    ShotTruncatedError,
     SolverError,
     SolverInputError,
 )
@@ -129,6 +130,7 @@ __all__ = [
     "RefusalPolicy",
     "ShotResult",
     "ShotSettings",
+    "ShotTruncatedError",
     "SolverError",
     "SolverInputError",
     "SolverResult",

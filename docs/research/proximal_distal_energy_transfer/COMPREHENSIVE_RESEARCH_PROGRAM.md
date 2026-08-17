@@ -293,6 +293,17 @@ force, and active-set parity gates pass. This demonstrates preload/law
 confounding and software event fidelity, not a benefit of slack or a human
 strategy.
 
+Child issue #8685 isolates distributed-grip discretization before adding shaft
+or ground dynamics. One, three, and five tension fibers per hand preserve equal
+total stiffness and damping across 12 articulated states, two initial velocity
+signs, two time steps, two native engines, and nested 4, 10, 25, and 50 ms
+observations from 288 trajectories. All registered power, passivity,
+work--energy, geometry, time-refinement, station-refinement, active-set, and
+engine-parity gates pass. Multi-fiber grips can be partly open, but no natural
+active-set transition occurs through 50 ms. The result qualifies an engineering
+contact discretization, not measured grip pressure, fingers, friction, shaft
+response, timing economy, delivery benefit, human transfer, or strategy.
+
 Completion of the candidate census is not completion of release review or the
 research program. In
 particular, the audit rejected quantitative small-deflection shaft inference
