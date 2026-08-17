@@ -602,6 +602,43 @@ class WorkbenchModel:
             dynamic_terms_active=bool(swing.dynamic_terms_active),
         )
 
+    def shot_result(
+        self, geometry: WedgeGeometry, sand: SandState, swing: SwingSetup
+    ) -> ShotResult:
+        """Run one shot and return the **record**, before any reduction.
+
+        :meth:`run_shot` reduces the record to designer metrics and throws
+        the poses away. The cross-tier check of issue #8713 needs them
+        back: F1 has no instantaneous answer, so each of its probes is a
+        march to a pose F0 recorded, and a re-derived pose would be a
+        comparison of two different shots.
+
+        Args:
+            geometry: The resolved design vector.
+            sand: The sand state.
+            swing: The delivery.
+
+        Returns:
+            The whole strike.
+
+        Raises:
+            OutOfEnvelopeError: If the solver refuses any step. Unlike
+                :meth:`run_shot` this does not translate the refusal into
+                an outcome, because there is no outcome here to carry it.
+        """
+        build = self.head_build(geometry)
+        return simulate_shot(
+            self.solver(sand, swing),
+            build.elements_body,
+            head_mass_kg=geometry.head_mass_kg,
+            kinematics=entry_kinematics(build, swing),
+            settings=ShotSettings(
+                time_step_s=self._settings.time_step_s,
+                max_time_s=self._settings.max_time_s,
+            ),
+            sole_reference_body_m=build.sole_reference_body_m,
+        )
+
     def run_shot(
         self, geometry: WedgeGeometry, sand: SandState, swing: SwingSetup
     ) -> ShotOutcome:
@@ -619,19 +656,8 @@ class WorkbenchModel:
         solver = self.solver(sand, swing)
         delivered = deliver_wedge(geometry, swing.delivery())
         kinematics = entry_kinematics(build, swing)
-        settings = ShotSettings(
-            time_step_s=self._settings.time_step_s,
-            max_time_s=self._settings.max_time_s,
-        )
         try:
-            result = simulate_shot(
-                solver,
-                build.elements_body,
-                head_mass_kg=geometry.head_mass_kg,
-                kinematics=kinematics,
-                settings=settings,
-                sole_reference_body_m=build.sole_reference_body_m,
-            )
+            result = self.shot_result(geometry, sand, swing)
         except OutOfEnvelopeError as refusal:
             verdict = refusal.verdict
             require(
