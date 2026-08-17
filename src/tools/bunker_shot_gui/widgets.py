@@ -9,6 +9,8 @@ preview anywhere in this package.
 
 from __future__ import annotations
 
+from typing import Protocol
+
 import numpy as np
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QColor, QPainter, QPaintEvent
@@ -47,10 +49,28 @@ from .report import status_colour, status_headline
 __all__ = [
     "ConditionPanel",
     "DesignPanel",
+    "FollowsFrame",
     "GridMapWidget",
     "SoleLoadFieldWidget",
     "VerdictBanner",
 ]
+
+
+class FollowsFrame(Protocol):
+    """A view that can be scrubbed by somebody else's transport.
+
+    Narrow on purpose. A follower is handed a sample index and nothing
+    else -- no way to move the cursor, no way to reach the shot -- so
+    linking a view cannot turn into two views driving each other.
+    """
+
+    def set_frame(self, frame: int) -> None:
+        """Show one sample.
+
+        Args:
+            frame: The sample index.
+        """
+
 
 _EMPTY_CELL = QColor(238, 234, 226)
 _WINDOW_EDGE = QColor(20, 90, 40)
@@ -289,7 +309,7 @@ class SoleLoadFieldWidget(QWidget):
     can be produced in a headless test. This class owns only the transport:
     a frame, a slider, a timer and a play button.
 
-    Two behaviours are deliberate:
+    Three behaviours are deliberate:
 
     * **The colour scale is injected, not inferred.** A comparison hands both
       views one set of scales, so the two panels are directly readable against
@@ -297,7 +317,18 @@ class SoleLoadFieldWidget(QWidget):
       is correct for a single design and wrong for two.
     * **Clearing stops playback.** A refused query must not leave a sole
       animating under a red banner.
+    * **This transport is the workbench's only one.** The 3-D scene view and
+      the trace panel (issues #8706, #8708) show the same shot at the same
+      moment, and a second slider beside them would let the three drift out
+      of step -- which destroys the one thing linking them is for. They
+      follow :attr:`frame_changed` instead, wired by :meth:`link`.
+
+    Attributes:
+        frame_changed: Emitted with the new sample index whenever the frame
+            moves, including on load and on clear.
     """
+
+    frame_changed = pyqtSignal(int)
 
     def __init__(self, title: str, parent: QWidget | None = None) -> None:
         """Build an empty view.
@@ -349,6 +380,17 @@ class SoleLoadFieldWidget(QWidget):
         self._timer = QTimer(self)
         self._timer.setInterval(_FRAME_INTERVAL_MS)
         self._timer.timeout.connect(self.advance)
+
+    def link(self, follower: FollowsFrame) -> None:
+        """Make another view follow this one's cursor.
+
+        Args:
+            follower: Anything with a ``set_frame(int)``. The 3-D scene view
+                and the trace panel are the two in this package; the protocol
+                is deliberately that narrow, so linking a view does not give
+                it a way to drive the transport back.
+        """
+        self.frame_changed.connect(follower.set_frame)
 
     # ------------------------------------------------------------ accessors
 
@@ -507,6 +549,10 @@ class SoleLoadFieldWidget(QWidget):
             f"sample {self._frame + 1} of {self._field.n_frames}  "
             f"({self._field.time_s[self._frame] * 1e3:.2f} ms)"
         )
+        # Emitted last, after this view is consistent: a follower that
+        # repainted against a half-updated cursor would show one moment
+        # while the sole showed another.
+        self.frame_changed.emit(self._frame)
 
 
 class DesignPanel(QGroupBox):
