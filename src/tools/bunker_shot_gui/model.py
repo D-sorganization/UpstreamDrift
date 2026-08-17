@@ -54,6 +54,7 @@ from bunkershot3d.ball import (
 )
 from bunkershot3d.geometry import (
     DeliveredGeometry,
+    StationCamber,
     WedgeGeometry,
     deliver_wedge,
 )
@@ -94,8 +95,8 @@ from .bridge import (
     SoleLoadMap,
     build_head,
     entry_kinematics,
+    sole_load_field,
     sole_load_map,
-    sole_load_trace,
     strike_trace,
 )
 from .design import (
@@ -106,15 +107,18 @@ from .design import (
     WedgeDesign,
     WorkbenchInputError,
 )
+from .field import ContactPatch, SoleLoadField, contact_patch
 
 __all__ = [
     "ATTACK_ANGLE_SWEEP_DEG",
     "COMPARISON_SEED",
     "CarryEstimate",
+    "ContactPatch",
     "DesignEvaluation",
     "HeadBuild",
     "PlayabilityOutcome",
     "ShotOutcome",
+    "SoleLoadField",
     "SoleLoadMap",
     "WorkbenchComparison",
     "WorkbenchModel",
@@ -241,7 +245,13 @@ class ShotOutcome:
         loads: Peak/mean head loads, when the trace supports them.
         divot: Divot geometry, when the sole entered and left the sand.
         dig_skid: The dig-versus-skid discriminator.
-        sole_load: The bounce-utilisation map.
+        sole_load: The bounce-utilisation map: the strike binned onto a
+            12x12 sole grid and summed over time.
+        sole_field: The same load *before* either reduction -- per element,
+            per sample, with the depth-linear and inertial terms separated
+            (issue #8705).
+        contact_patch: The engaged element set followed through the shot
+            (issue #8707).
         carry_m: Carry from the splash and flight models.
         carry_verdict: The validity statement the carry may be quoted under.
             Present whenever ``carry_m`` is, and absent whenever it is not.
@@ -265,6 +275,8 @@ class ShotOutcome:
     divot: DivotMetrics | None = None
     dig_skid: DigSkidResult | None = None
     sole_load: SoleLoadMap | None = None
+    sole_field: SoleLoadField | None = None
+    contact_patch: ContactPatch | None = None
     carry_m: float | None = None
     carry_verdict: ValidityVerdict | None = None
     unavailable: tuple[str, ...] = ()
@@ -295,12 +307,14 @@ class ShotOutcome:
             self.impulse_n_s,
             self.max_depth_m,
             self.carry_m,
+            self.sole_field,
+            self.contact_patch,
         )
         if any(value is not None for value in numbers):
             raise ValueError(
-                "a refused shot must not carry a force, a depth or a carry: "
-                "3D-RFT declined this query, and reporting a number beside a "
-                "REFUSED verdict is exactly what ADR-0032 forbids"
+                "a refused shot must not carry a force, a depth, a carry or a "
+                "load field: 3D-RFT declined this query, and painting a sole "
+                "beside a REFUSED verdict is exactly what ADR-0032 forbids"
             )
 
     @property
@@ -378,6 +392,11 @@ class DesignEvaluation:
             width and bounce, so the declared area in :attr:`geometry` is
             fitted to what the sole admits; carrying the realised value here
             is what lets the report state both (issue #8698).
+        camber_stations: The lofter's per-station camber account, heel to
+            toe. Carried because :attr:`effective_camber_area_m2` alone
+            cannot answer whether the sole was substituted: it is the
+            *declared* width's number, and the relieved heel and toe
+            stations have their own, narrower bands.
     """
 
     design: WedgeDesign
@@ -386,11 +405,31 @@ class DesignEvaluation:
     shot: ShotOutcome
     playability: PlayabilityOutcome
     effective_camber_area_m2: float
+    camber_stations: tuple[StationCamber, ...]
 
     @property
-    def camber_was_clamped(self) -> bool:
-        """Whether the declared camber area had to be substituted."""
+    def aggregate_camber_was_clamped(self) -> bool:
+        """Whether the *declared* camber area itself had to be substituted.
+
+        Narrowly scoped, and ``False`` on the shipped presets even when
+        stations were refitted; see :attr:`any_camber_was_clamped`.
+        """
         return self.effective_camber_area_m2 != self.geometry.sole_camber_area_m2
+
+    @property
+    def clamped_camber_stations(self) -> tuple[StationCamber, ...]:
+        """Every spanwise station refitted to its own constructible band."""
+        return tuple(station for station in self.camber_stations if station.was_clamped)
+
+    @property
+    def any_camber_was_clamped(self) -> bool:
+        """Whether any camber substitution occurred, aggregate or per station.
+
+        Cannot read ``False`` while :attr:`clamped_camber_stations` holds
+        anything, which is the property that stops a one-boolean caller being
+        told a substituted sole was built as declared (issue #8698).
+        """
+        return self.aggregate_camber_was_clamped or bool(self.clamped_camber_stations)
 
     @property
     def verdict(self) -> ValidityVerdict:
@@ -608,9 +647,19 @@ class WorkbenchModel:
             "dig-vs-skid",
             missing,
         )
-        sole_load = _try(
-            lambda: self._sole_map(solver, build, result, kinematics),
-            "bounce utilisation",
+        # One replay of the recorded poses feeds all three load views: the
+        # per-element field (#8705), the patch series (#8707) and the binned
+        # map the workbench already reported. Re-deriving the element
+        # response is the expensive half, so it happens once.
+        field = _try(
+            lambda: sole_load_field(solver, build, result, kinematics.orientation),
+            "per-element sole load",
+            missing,
+        )
+        sole_load = _try(lambda: self._sole_map(field), "bounce utilisation", missing)
+        patch = _try(
+            lambda: None if field is None else contact_patch(field),
+            "contact patch",
             missing,
         )
         carry = _try(
@@ -641,6 +690,8 @@ class WorkbenchModel:
             divot=divot,
             dig_skid=skid,
             sole_load=sole_load,
+            sole_field=field,
+            contact_patch=patch,
             carry_m=None if carry is None else carry.carry_m,
             carry_verdict=None if carry is None else carry.verdict,
             unavailable=tuple(missing),
@@ -676,17 +727,19 @@ class WorkbenchModel:
             bulk_density_kg_m3=sand.bulk_density_kg_m3,
         )
 
-    def _sole_map(
-        self,
-        solver: DRFTSolver,
-        build: HeadBuild,
-        result: ShotResult,
-        kinematics: HeadKinematics,
-    ) -> SoleLoadMap | None:
-        """Replay the trace and resolve the bounce utilisation."""
-        load = sole_load_trace(solver, build, result, kinematics.orientation)
-        if load is None:
+    def _sole_map(self, field: SoleLoadField | None) -> SoleLoadMap | None:
+        """Bin an already-replayed load field into the utilisation map.
+
+        Args:
+            field: The per-element load field, or ``None`` when the trace was
+                too short to replay.
+
+        Returns:
+            The binned map, or ``None``.
+        """
+        if field is None:
             return None
+        load = field.load_trace()
         return sole_load_map(load, bounce_utilisation(load))
 
     # ------------------------------------------------------------ ball flight
@@ -898,14 +951,16 @@ class WorkbenchModel:
                 window=None, unavailable_reason="the playability sweep was not run"
             )
         )
+        # Free: the build is cached, and run_shot has already made it.
+        build = self.head_build(geometry)
         return DesignEvaluation(
             design=design,
             geometry=geometry,
             sand=state,
             shot=shot,
             playability=window,
-            # Free: the build is cached, and run_shot has already made it.
-            effective_camber_area_m2=self.head_build(geometry).effective_camber_area_m2,
+            effective_camber_area_m2=build.effective_camber_area_m2,
+            camber_stations=build.camber_stations,
         )
 
     def compare(
