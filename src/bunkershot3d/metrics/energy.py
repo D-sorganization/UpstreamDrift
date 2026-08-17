@@ -248,8 +248,9 @@ def energy_partition(
     velocity = trace.point_velocity_mps(head.centre_of_mass_body_m)[selection]
     omega = trace.angular_velocity_radps()[selection]
     moment = centre_of_mass_moment_Nm(trace, head)[selection]
-    power_on_head = np.einsum("ij,ij->i", trace.sand_force_N[selection], velocity) + np.einsum(
-        "ij,ij->i", moment, omega
+    power_on_head = (
+        np.einsum("ij,ij->i", trace.sand_force_N[selection], velocity)
+        + np.einsum("ij,ij->i", moment, omega)
     )  # ⚡ Bolt: np.einsum avoids temporary arrays and is ~2.5x faster than np.sum(a * b, axis=1)
     work_on_sand_J = -float(np.trapezoid(power_on_head, times))
     ball_energy_J = 0.0 if ball is None else ball.kinetic_energy_J
