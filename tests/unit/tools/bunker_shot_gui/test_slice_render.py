@@ -105,7 +105,8 @@ class TestTheFrameSaysWhatItIs:
 
     def test_the_stamp_confesses_a_density_above_the_packing_limit(self) -> None:
         """Sand denser than its own densest packing is a transfer artefact."""
-        from bunkershot3d.fields.schema import OccupancyRule, SandFieldSeries
+        from bunkershot3d.fields.schema import SandFieldSeries
+        from bunkershot3d.fields.standing import OccupancyRule
 
         field = analytic_field()
         packed = SandFieldSeries(

@@ -25,12 +25,14 @@ import pytest
 
 from bunkershot3d.fields.schema import (
     FieldLayout,
-    FieldProvenance,
     GridGeometry,
+    SandFieldSeries,
+)
+from bunkershot3d.fields.standing import (
+    FieldProvenance,
     OccupancyRule,
     RetentionPolicy,
     RetentionRecord,
-    SandFieldSeries,
 )
 from bunkershot3d.solvers.envelope import EnvelopeStatus
 from bunkershot3d.solvers.protocol import FidelityTier

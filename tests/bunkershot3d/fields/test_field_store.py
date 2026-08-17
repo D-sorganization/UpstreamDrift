@@ -19,11 +19,13 @@ import pytest
 h5py = pytest.importorskip("h5py", reason="the result schema is HDF5")
 
 from bunkershot3d.fields.schema import (  # noqa: E402
-    FieldIntegrityError,
     FieldLayout,
-    RetentionPolicy,
     SandFieldSeries,
     series_digest,
+)
+from bunkershot3d.fields.standing import (  # noqa: E402
+    FieldIntegrityError,
+    RetentionPolicy,
 )
 from bunkershot3d.fields.store import (  # noqa: E402
     DETERMINISTIC_SEED_NAME,
@@ -441,7 +443,7 @@ def _payload(series: SandFieldSeries):  # type: ignore[no-untyped-def]
 
 def _with_policy(series: SandFieldSeries, policy: RetentionPolicy):  # type: ignore[no-untyped-def]
     """The series' retention record with a different policy on it."""
-    from bunkershot3d.fields.schema import RetentionRecord
+    from bunkershot3d.fields.standing import RetentionRecord
 
     record = series.retention
     return RetentionRecord(

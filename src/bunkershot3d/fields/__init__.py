@@ -5,7 +5,7 @@ tier, so this package is what turns a march of that solver into
 something a view can animate and a reviewer can trace back to the run
 that made it.
 
-Three modules, three jobs:
+Four modules, four jobs:
 
 * :mod:`.schema` -- what a field *is*, tier-neutrally.  A continuum tier
   and a grain tier write the same containers, so switching tiers does
@@ -13,6 +13,9 @@ Three modules, three jobs:
 * :mod:`.capture` -- reading the field out of an F1 march using the
   solver's own transfer operators, at a stride and a crop the caller
   chose deliberately.
+* :mod:`.standing` -- what a field *claims*: tier, validity, where it
+  says there is sand, and what was dropped. Separate from the container
+  because contents and claims change for different reasons.
 * :mod:`.store` -- writing and reading it through
   :mod:`bunkershot3d.io`, with the digest that makes the recorded tier
   and validity status checkable rather than merely present.
@@ -29,23 +32,21 @@ from .capture import (
     sample_grid_field,
 )
 from .schema import (
-    DEFAULT_OCCUPANCY_FLOOR_FRACTION,
-    DENSITY_UNIT,
-    FIELD_SCHEMA_VERSION,
-    SHEAR_RATE_UNIT,
-    TIME_UNIT,
-    VELOCITY_UNIT,
-    FieldIntegrityError,
     FieldLayout,
-    FieldProvenance,
     FieldQuantity,
     GridGeometry,
-    OccupancyRule,
-    RetentionPolicy,
-    RetentionRecord,
     SandFieldFrame,
     SandFieldSeries,
     series_digest,
+)
+from .standing import (
+    DEFAULT_OCCUPANCY_FLOOR_FRACTION,
+    FIELD_SCHEMA_VERSION,
+    FieldIntegrityError,
+    FieldProvenance,
+    OccupancyRule,
+    RetentionPolicy,
+    RetentionRecord,
 )
 from .store import (
     DETERMINISTIC_SEED_NAME,
@@ -54,6 +55,7 @@ from .store import (
     load_field,
     save_field,
 )
+from .units import DENSITY_UNIT, SHEAR_RATE_UNIT, TIME_UNIT, VELOCITY_UNIT
 
 __all__ = [
     "DEFAULT_OCCUPANCY_FLOOR_FRACTION",

@@ -13,19 +13,23 @@ import pytest
 
 from bunkershot3d.exceptions import BunkerShot3DValueError
 from bunkershot3d.fields.schema import (
-    DEFAULT_OCCUPANCY_FLOOR_FRACTION,
-    DENSITY_UNIT,
-    SHEAR_RATE_UNIT,
-    VELOCITY_UNIT,
     FieldLayout,
-    FieldProvenance,
     FieldQuantity,
     GridGeometry,
+    SandFieldSeries,
+    series_digest,
+)
+from bunkershot3d.fields.standing import (
+    DEFAULT_OCCUPANCY_FLOOR_FRACTION,
+    FieldProvenance,
     OccupancyRule,
     RetentionPolicy,
     RetentionRecord,
-    SandFieldSeries,
-    series_digest,
+)
+from bunkershot3d.fields.units import (
+    DENSITY_UNIT,
+    SHEAR_RATE_UNIT,
+    VELOCITY_UNIT,
 )
 from bunkershot3d.provenance.rng import root_seed_sequence, seed_record
 from bunkershot3d.solvers.envelope import MAX_VALIDATED_SPEED_M_S, EnvelopeStatus

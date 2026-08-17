@@ -76,12 +76,14 @@ from ..solvers.mpm.state import ParticleState
 from ..solvers.protocol import IntrusionState
 from .schema import (
     FieldLayout,
-    FieldProvenance,
     GridGeometry,
+    SandFieldSeries,
+)
+from .standing import (
+    FieldProvenance,
     OccupancyRule,
     RetentionPolicy,
     RetentionRecord,
-    SandFieldSeries,
 )
 
 __all__ = [

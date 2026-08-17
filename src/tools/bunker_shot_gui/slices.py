@@ -70,11 +70,13 @@ import numpy as np
 from numpy.typing import NDArray
 
 from bunkershot3d.fields.schema import (
+    FieldLayout,
+    SandFieldSeries,
+)
+from bunkershot3d.fields.units import (
     DENSITY_UNIT,
     SHEAR_RATE_UNIT,
     VELOCITY_UNIT,
-    FieldLayout,
-    SandFieldSeries,
 )
 
 __all__ = [

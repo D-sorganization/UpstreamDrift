@@ -26,7 +26,8 @@ from bunkershot3d.fields.capture import (
     capture_f1_field,
     sample_grid_field,
 )
-from bunkershot3d.fields.schema import FieldLayout, RetentionPolicy
+from bunkershot3d.fields.schema import FieldLayout
+from bunkershot3d.fields.standing import RetentionPolicy
 from bunkershot3d.sand import playing_condition
 from bunkershot3d.sand.presets import PlayingCondition
 from bunkershot3d.solvers import (
