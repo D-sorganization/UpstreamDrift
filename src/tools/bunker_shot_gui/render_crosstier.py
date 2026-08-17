@@ -327,7 +327,15 @@ class CrossTierArtists:
         series.append(f1_points)
         self._draw_gaps(axes, quantity, times, f0_points, f1_points)
 
-        axes.set_ylabel(f"{quantity.label}\n[{quantity.unit}]", fontsize=_LABEL_SIZE)
+        # The speed panel draws a speed; the compared quantity is the gap
+        # between the two curves, which the heading has to say or the axis
+        # reads as though F0 lost 25 m/s.
+        heading = (
+            "Head speed\n(the gap is the loss)"
+            if quantity is ComparedQuantity.SPEED_LOST
+            else quantity.label
+        )
+        axes.set_ylabel(f"{heading}\n[{quantity.unit}]", fontsize=_LABEL_SIZE)
         axes.set_xlim(float(time_ms[0]), float(time_ms[-1]))
         axes.set_ylim(*_limits(series))
         axes.set_autoscale_on(False)
