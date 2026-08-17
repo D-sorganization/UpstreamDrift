@@ -217,6 +217,43 @@ Field extraction and schema (#8710), the visual layers (#8711-#8713), the ball
 as a plane-strain body, and F1's own `simulate_shot` integration are
 deliberately out of this change.
 
+Issues #8706 and #8708 (epic #8699) add the two views that put the sole-load
+field in context: the shot in three dimensions, and the scalar traces beside
+it on one cursor. `ShotScene` carries the pose the march recorded, the free
+surface and the swept divot section; `ShotTraces` carries the sand wrench, the
+sole depth, the speed lost and the contact-patch area, each stored in its own
+stated unit. The 3-D frame is built from the backend-neutral ADR-0027
+`ViewportOverlayPayload` -- the object a MeshCat, Rerun or VTK provider would
+consume -- so the matplotlib fallback cannot drift away from what a real
+backend would show; none of the three providers is installed, so the selection
+degrades and the frame states which renderer drew it. On the nominal 58 deg
+design at 25 m/s the record spans 53 samples over 13.0 ms, the head resolves to
+486 surface points of which 400 are sole, the swept envelope reaches 12.64 mm
+against a 12.59 mm sole-reference depth, and the section closes at 19.24 cm^2.
+Two claims the render is explicitly not making: the sand plane is the model's
+single `free_surface_height_m` and `SandSurface.resolves_grains` is False, F0
+resolving no grains at all; and the divot is the running lower envelope of the
+head's own sole points, so it may only ever deepen -- a floor that rose between
+samples would assert sand transport this tier cannot compute, and is a raise.
+The validity band is the reason #8708 asks for a band rather than a badge.
+`simulate_shot` judges the envelope at every step and keeps only `worst_of`
+those verdicts, so the per-sample statuses are discarded before any caller sees
+them; they are recovered through the solver's own `DRFTSolver.envelope`, which
+judges a state without integrating a force, and the band's worst status is
+pinned against `ShotResult.verdict` rather than asserted equal. On the
+greenside delivery the band is uniform, and that is not a defect:
+`MAX_VALIDATED_SPEED_M_S` is 1.44 m/s, so a 25 m/s head is past the published
+corpus from its first free-flight sample and never returns. At a 1.5 m/s
+delivery the sand slows it back through that ceiling at 46.50 ms of a 190.25 ms
+record, and the whole-shot verdict `BEYOND_VALIDATION` is then wrong for 576 of
+762 samples -- 75.6 % of the record -- which is precisely what a single badge
+in the corner of a panel would have asserted. All three views are scrubbed by
+the transport `SoleLoadFieldWidget` already owned rather than by sliders of
+their own, and the world box and per-panel y-limits are fixed across frames and
+merged across an A/B pair for the same reason #8728 fixed the colour ramp. This
+is a rendering of existing F0 output, not new physics: the scene and the traces
+inherit `BEYOND_VALIDATION`, and no quantity here is calibrated for bunker sand.
+
 Child issue #8697 then couples two first bending modes and one torsional mode
 to that distributed-grip authority. Its registered 0.25/0.125 ms atlas covers
 384 trajectories and 1,536 nested-horizon summaries. Domain, activation,
