@@ -48,7 +48,7 @@ class TestSinusoidFitter:
         result = fitter.fit(sine_2hz)
         assert isinstance(result, FitResult)
         assert result.r_squared > 0.95
-        assert result.solver_status == "success"
+        assert result.success
 
     def test_estimate_initial_params(self, t200: np.ndarray, sine_2hz: Signal) -> None:
         amp, freq, phase, offset = SinusoidFitter.estimate_initial_params(
@@ -81,8 +81,8 @@ class TestSinusoidFitter:
             message="failed",
         )
 
-        assert result.fit_succeeded is False
-        assert result.solver_status == "failure"
+        assert result.success is False
+        assert not result.success
 
     def test_fit_with_initial_guess(self, sine_2hz: Signal) -> None:
         fitter = SinusoidFitter()
@@ -120,7 +120,7 @@ class TestExponentialFitter:
     def test_fit_decay(self, decay_signal: Signal) -> None:
         fitter = ExponentialFitter()
         result = fitter.fit_decay(decay_signal)
-        assert result.solver_status == "success"
+        assert result.success
         assert result.r_squared > 0.95
 
     def test_fit_decay_with_guess(self, decay_signal: Signal) -> None:
@@ -212,7 +212,7 @@ class TestPolynomialFitter:
         sig = Signal(time=t, values=t)
         fitter = PolynomialFitter(order=10)
         result = fitter.fit(sig)
-        assert result.solver_status == "success"
+        assert result.success
 
 
 class TestCustomFunctionFitter:
@@ -234,7 +234,7 @@ class TestCustomFunctionFitter:
         sig = Signal(time=t200, values=vals, name="linear")
         fitter = CustomFunctionFitter.from_expression("a * t + b", ["a", "b"])
         result = fitter.fit(sig, initial_guess=[2.0, 1.0])
-        assert result.solver_status == "success"
+        assert result.success
 
     def test_from_expression_forbidden_pattern_raises(self) -> None:
         with pytest.raises(ValueError):
@@ -249,7 +249,7 @@ class TestCustomFunctionFitter:
 
         fitter = CustomFunctionFitter(model, param_names=["a"])
         result = fitter.fit(sig, initial_guess=[1.0], bounds=([0.1], [5.0]))
-        assert result.solver_status == "success"
+        assert result.success
 
 
 class TestFunctionFitter:
