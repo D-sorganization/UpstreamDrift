@@ -38,6 +38,8 @@ read noise as signal.
 
 from __future__ import annotations
 
+import contextlib
+
 import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
@@ -90,6 +92,11 @@ _PADDING = 0.10
 _LABEL_SIZE = 6
 _TICK_SIZE = 5
 _TEXT_SIZE = 5.5
+_LINE_SPACING = 1.3
+_POINTS_PER_INCH = 72.0
+_BLOCK_GAP_LINES = 1
+_WRAP_CHARS = 78
+_STAMP_WRAP_CHARS = 58
 
 
 def _limits(values: list[np.ndarray]) -> tuple[float, float]:
@@ -137,8 +144,12 @@ class CrossTierArtists:
             len(PANEL_QUANTITIES),
             2,
             width_ratios=(3.0, 2.0),
-            hspace=0.16,
-            wspace=0.22,
+            hspace=0.20,
+            wspace=0.20,
+            left=0.08,
+            right=0.985,
+            top=0.97,
+            bottom=0.06,
         )
         self.panels: list[Axes] = []
         self.cursors: list[Line2D] = []
@@ -156,21 +167,35 @@ class CrossTierArtists:
             self._build_panel(axes, quantity)
         self.panels[-1].set_xlabel("time [ms]", fontsize=_LABEL_SIZE)
 
-        self.crossover_axes = figure.add_subplot(grid[0:2, 1])
+        self.crossover_axes = figure.add_subplot(grid[0, 1])
         self.crossover_marked = False
-        self.crossover_caption = self._build_crossover(self.crossover_axes)
+        self._build_crossover(self.crossover_axes)
 
-        text_axes = figure.add_subplot(grid[2:, 1])
+        # One text column, laid out top-down by a running cursor rather
+        # than by four hand-chosen fractions. Four fixed positions cannot
+        # know how long the blocks are, and the blocks grow with the
+        # number of probes and with every caveat that turns out to apply
+        # -- so they overlapped, which is the one failure a page of
+        # caveats must not have.
+        text_axes = figure.add_subplot(grid[1:, 1])
         text_axes.axis("off")
-        self.agreement_text = self._build_agreement_table(text_axes)
-        self.method_text = self._build_method_note(text_axes)
-        self.licence_text = self._build_licence(text_axes)
+        cursor = _TextColumn(text_axes)
+        self.crossover_caption = cursor.add(
+            self._crossover_caption_text(), colour="#333333"
+        )
+        self.agreement_text = cursor.add(
+            self._agreement_table_text(), colour="#222222", monospace=True
+        )
+        self.method_text = cursor.add(self._method_text(), colour="#444444")
+        self.licence_text = cursor.add(
+            _wrap(comparison.licence(), _WRAP_CHARS), colour="#7a1f1f"
+        )
 
         self.stamp = stamp_axes(
             self.panels[0],
             comparison.worst_status,
             comparison.tiers[1],
-            extra=comparison.licence_stamp(),
+            extra=_wrap(comparison.licence_stamp(), _STAMP_WRAP_CHARS),
         )
         self.readout: Text = self.panels[0].text(
             0.99,
@@ -393,7 +418,7 @@ class CrossTierArtists:
 
     # ------------------------------------------------------------ crossover
 
-    def _build_crossover(self, axes: Axes) -> Text:
+    def _build_crossover(self, axes: Axes) -> None:
         """Draw both inertial shares against speed and mark the crossing."""
         model = self.comparison
         probes = sorted(model.crossover_probes, key=lambda item: item.speed_m_s)
@@ -439,48 +464,33 @@ class CrossTierArtists:
         axes.set_autoscale_on(False)
         axes.tick_params(labelsize=_TICK_SIZE)
         axes.legend(loc="lower right", fontsize=4.5, framealpha=0.6)
+
+    def _crossover_caption_text(self) -> str:
+        """The sentence the crossover panel is captioned with."""
+        model = self.comparison
         source = (
             "declared speed sweep at the deepest recorded pose"
             if model.sweep_probes
             else "probes along the shot"
         )
-        return axes.text(
-            0.0,
-            -0.34,
-            f"{source}\n{_wrap(model.crossover_summary(), 74)}",
-            transform=axes.transAxes,
-            ha="left",
-            va="top",
-            fontsize=_TEXT_SIZE,
-            color="#333333",
+        return _wrap(
+            f"Inertial-share crossover, from the {source}. {model.crossover_summary()}",
+            _WRAP_CHARS,
         )
 
     # ---------------------------------------------------------------- text
 
-    def _build_agreement_table(self, axes: Axes) -> Text:
-        """Write the per-quantity agreement summary into the figure."""
+    def _agreement_table_text(self) -> str:
+        """The per-quantity agreement summary, as drawn text."""
         rows = "\n".join(
-            _wrap(item.summary(), 74, indent="    ")
+            _wrap(item.summary(), _WRAP_CHARS, indent="    ")
             for item in self.comparison.agreements()
         )
-        return axes.text(
-            0.0,
-            1.0,
-            f"Agreement, quantity by quantity\n{rows}",
-            transform=axes.transAxes,
-            ha="left",
-            va="top",
-            fontsize=_TEXT_SIZE,
-            color="#222222",
-            family="monospace",
-        )
+        return f"Agreement, quantity by quantity\n{rows}"
 
-    def _build_method_note(self, axes: Axes) -> Text:
-        """State how the F1 points were produced, in the figure."""
+    def _method_text(self) -> str:
+        """How the F1 points were produced, and what qualifies them."""
         model = self.comparison
-        caveats = [
-            probe.divot_caveat() for probe in model.shot_probes if probe.divot_caveat()
-        ]
         note = (
             f"Method: {model.n_probes} probe(s) of a {model.n_frames}-sample F0 "
             "record. F1 has no shot history yet (#8733), so each F1 point is a "
@@ -488,31 +498,25 @@ class CrossTierArtists:
             "constant-speed approach. The points are therefore not joined. "
             f"{model.resolution_note()}"
         )
-        if caveats:
-            note = f"{note} {caveats[0]}"
-        return axes.text(
-            0.0,
-            0.46,
-            _wrap(note, 76),
-            transform=axes.transAxes,
-            ha="left",
-            va="top",
-            fontsize=_TEXT_SIZE,
-            color="#444444",
-        )
-
-    def _build_licence(self, axes: Axes) -> Text:
-        """Write the licence statement into the figure, not under it."""
-        return axes.text(
-            0.0,
-            0.22,
-            _wrap(self.comparison.licence(), 76),
-            transform=axes.transAxes,
-            ha="left",
-            va="top",
-            fontsize=_TEXT_SIZE,
-            color="#7a1f1f",
-        )
+        with contextlib.suppress(ValueError):
+            # ValueError when the probes bracket no window, in which case
+            # there is no speed-lost row to qualify.
+            note = (
+                f"{note} Speed lost is each tier's resultant projected on the "
+                "direction of travel, integrated over the probed window on the "
+                "same quadrature; F0's own record shows "
+                f"{model.f0_recorded_speed_lost_m_s:.3g} m/s over that window, "
+                "so the gap between that and the F0 row is the quadrature, not "
+                "a divergence."
+            )
+        for caveat in (
+            model.engagement_caveat(),
+            *(probe.divot_caveat() for probe in model.shot_probes),
+        ):
+            if caveat:
+                note = f"{note} {caveat}"
+                break
+        return _wrap(note, _WRAP_CHARS)
 
     # ------------------------------------------------------------ scrubbing
 
@@ -543,6 +547,53 @@ class CrossTierArtists:
             f"|F0| {float(model.f0_force_magnitude_n[index]):.4g} N, "
             f"{float(model.f0_speed_m_s[index]):.4g} m/s"
         )
+
+
+class _TextColumn:
+    """Stacks text blocks down an axes, tracking where the last one ended.
+
+    Four blocks at four hand-chosen fractions cannot know how long each
+    other is, and these blocks grow with the probe count and with every
+    caveat that turns out to apply. Overlapping caveats are the one
+    failure a page of caveats must not have.
+    """
+
+    def __init__(self, axes: Axes) -> None:
+        """Start a column at the top of ``axes``.
+
+        Args:
+            axes: The (invisible) axes to lay text out in.
+        """
+        self._axes = axes
+        self._cursor = 1.0
+        height_in = axes.figure.get_size_inches()[1] * axes.get_position().height
+        self._line = (_TEXT_SIZE * _LINE_SPACING / _POINTS_PER_INCH) / height_in
+
+    def add(self, block: str, *, colour: str, monospace: bool = False) -> Text:
+        """Draw one block below the last and advance the cursor.
+
+        Args:
+            block: The text, already wrapped.
+            colour: Its colour.
+            monospace: Whether to set it in a monospaced family, which the
+                agreement table wants so its columns line up.
+
+        Returns:
+            The text artist.
+        """
+        artist = self._axes.text(
+            0.0,
+            self._cursor,
+            block,
+            transform=self._axes.transAxes,
+            ha="left",
+            va="top",
+            fontsize=_TEXT_SIZE,
+            color=colour,
+            family="monospace" if monospace else None,
+        )
+        self._cursor -= (len(block.splitlines()) + _BLOCK_GAP_LINES) * self._line
+        return artist
 
 
 def _wrap(text: str, width: int, *, indent: str = "") -> str:

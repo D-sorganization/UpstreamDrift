@@ -974,7 +974,10 @@ class CrossTierComparison:
         """What agreement on this page does and does not license."""
         return licence_statement(
             speed_m_s=float(self.f0_speed_m_s.max()),
-            effective_width_m=self.peak_probe.check.effective_width_m,
+            # This comparison's own declared width, not a probe's, because
+            # it is the width both divot masses were formed at and the two
+            # numbers must not be able to disagree.
+            effective_width_m=self.declared_width_m,
         )
 
     def licence_stamp(self) -> str:
