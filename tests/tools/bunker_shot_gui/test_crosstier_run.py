@@ -23,6 +23,8 @@ from bunkershot3d.solvers.envelope import RefusalPolicy
 from bunkershot3d.solvers.mpm.constitutive import SandContinuum
 from bunkershot3d.solvers.mpm.solver import PlaneStrainMPMSolver
 from src.tools.bunker_shot_gui.bridge import (
+    CrossTierInputs,
+    CrossTierSettings,
     compare_tiers,
     entry_kinematics,
     probe_frames,
@@ -95,14 +97,16 @@ def comparison(bench):  # type: ignore[no-untyped-def]
     return compare_tiers(
         f0_solver=bench["f0"],
         f1_solver=bench["f1"],
-        build=bench["build"],
-        result=result,
-        kinematics=bench["kinematics"],
-        f0_divot_section_area_m2=outcome.scene.divot.section_area_m2,
-        band=band,
-        head_mass_kg=bench["geometry"].head_mass_kg,
-        bulk_density_kg_m3=bench["sand"].bulk_density_kg_m3,
-        n_probes=2,
+        inputs=CrossTierInputs(
+            build=bench["build"],
+            result=result,
+            kinematics=bench["kinematics"],
+            f0_divot_section_area_m2=outcome.scene.divot.section_area_m2,
+            band=band,
+            head_mass_kg=bench["geometry"].head_mass_kg,
+            bulk_density_kg_m3=bench["sand"].bulk_density_kg_m3,
+        ),
+        settings=CrossTierSettings(n_probes=2),
     )
 
 
@@ -213,19 +217,24 @@ class TestTheDeclaredSpeedSweep:
         swept = compare_tiers(
             f0_solver=bench["f0"],
             f1_solver=bench["f1"],
-            build=bench["build"],
-            result=result,
-            kinematics=bench["kinematics"],
-            f0_divot_section_area_m2=outcome.scene.divot.section_area_m2,
-            band=band,
-            head_mass_kg=bench["geometry"].head_mass_kg,
-            bulk_density_kg_m3=bench["sand"].bulk_density_kg_m3,
-            n_probes=1,
-            # Fast on purpose. The approach is a fixed distance and the CFL
-            # step is set by the elastic wave speed, so a *slow* probe is the
-            # expensive one: the step count goes as ``(c_p + v) / v``, and a
-            # 4 m/s probe costs order thirty times a 25 m/s one.
-            sweep_speeds_m_s=(22.0, 30.0),
+            inputs=CrossTierInputs(
+                build=bench["build"],
+                result=result,
+                kinematics=bench["kinematics"],
+                f0_divot_section_area_m2=outcome.scene.divot.section_area_m2,
+                band=band,
+                head_mass_kg=bench["geometry"].head_mass_kg,
+                bulk_density_kg_m3=bench["sand"].bulk_density_kg_m3,
+            ),
+            settings=CrossTierSettings(
+                n_probes=1,
+                # Fast on purpose. The approach is a fixed distance and the
+                # CFL step is set by the elastic wave speed, so a *slow*
+                # probe is the expensive one: the step count goes as
+                # ``(c_p + v) / v``, and a 4 m/s probe costs order thirty
+                # times a 25 m/s one.
+                sweep_speeds_m_s=(22.0, 30.0),
+            ),
         )
         speeds = sorted(probe.speed_m_s for probe in swept.sweep_probes)
         assert speeds == pytest.approx([22.0, 30.0])

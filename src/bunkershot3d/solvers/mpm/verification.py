@@ -327,60 +327,94 @@ def energy_residuals(
         SolverInputError: If any particle yields, which would make the
             residual physical dissipation rather than truncation error.
     """
-    residuals: list[ConservationResidual] = []
-    for number in courant_numbers:
-        particles = _particles(
+    return tuple(
+        _energy_residual(
             material,
+            courant_number=float(number),
             cell_size_m=cell_size_m,
             width_m=width_m,
             height_m=height_m,
-        )
-        grid = _open_grid(cell_size_m=cell_size_m, width_m=width_m, height_m=height_m)
-        step_s = float(number) * cell_size_m / material.elastic_wave_speed_m_s
-        n_steps = max(int(round(duration_s / step_s)), 2)
-        solver = _free_solver(
-            material,
-            cell_size_m,
-            walls=_OPEN_DOMAIN,
+            duration_s=duration_s,
             gravity_m_s2=gravity_m_s2,
-            max_steps=n_steps,
         )
-        run = solver.march(
-            particles,
-            None,
-            grid,
-            n_steps=n_steps,
-            time_step_s=step_s,
-            free_surface_height_m=height_m,
-            bed_x_bounds_m=(0.0, width_m),
+        for number in courant_numbers
+    )
+
+
+def _energy_residual(
+    material: SandContinuum,
+    *,
+    courant_number: float,
+    cell_size_m: float,
+    width_m: float,
+    height_m: float,
+    duration_s: float,
+    gravity_m_s2: float,
+) -> ConservationResidual:
+    """One free-fall energy residual, at one Courant number.
+
+    Args:
+        material: The continuum.
+        courant_number: Courant number, which sets the step.
+        cell_size_m: Grid ``dx``.
+        width_m: Block width.
+        height_m: Block height.
+        duration_s: Physical time the run covers.
+        gravity_m_s2: Gravitational acceleration.
+
+    Returns:
+        The truncation-class residual, carrying its step size.
+
+    Raises:
+        SolverInputError: If any particle yields, which would make the
+            residual physical dissipation rather than truncation error.
+    """
+    particles = _particles(
+        material, cell_size_m=cell_size_m, width_m=width_m, height_m=height_m
+    )
+    grid = _open_grid(cell_size_m=cell_size_m, width_m=width_m, height_m=height_m)
+    step_s = courant_number * cell_size_m / material.elastic_wave_speed_m_s
+    n_steps = max(int(round(duration_s / step_s)), 2)
+    solver = _free_solver(
+        material,
+        cell_size_m,
+        walls=_OPEN_DOMAIN,
+        gravity_m_s2=gravity_m_s2,
+        max_steps=n_steps,
+    )
+    run = solver.march(
+        particles,
+        None,
+        grid,
+        n_steps=n_steps,
+        time_step_s=step_s,
+        free_surface_height_m=height_m,
+        bed_x_bounds_m=(0.0, width_m),
+    )
+    yielded = sum(step.n_yielded for step in run.steps)
+    if yielded:
+        raise SolverInputError(
+            f"{yielded} particle(s) yielded during the free-fall energy "
+            "case. A uniformly falling block cannot deform, so this means "
+            "the transfer is not reproducing a uniform velocity field and "
+            "the residual would no longer be truncation error"
         )
-        yielded = sum(step.n_yielded for step in run.steps)
-        if yielded:
-            raise SolverInputError(
-                f"{yielded} particle(s) yielded during the free-fall energy "
-                "case. A uniformly falling block cannot deform, so this means "
-                "the transfer is not reproducing a uniform velocity field and "
-                "the residual would no longer be truncation error"
-            )
-        total = np.array(
-            [
-                step.kinetic_energy_j_per_m
-                + step.elastic_energy_j_per_m
-                + step.gravitational_energy_j_per_m
-                for step in run.steps
-            ]
-        )
-        scale = float(np.abs(total).max())
-        residuals.append(
-            ConservationResidual(
-                name=f"F1 free fall: total energy at C={number:g}",
-                conservation_class=ConservationClass.TRUNCATION,
-                residual=float(np.abs(total - total[0]).max()),
-                scale=scale if scale > 0.0 else 1.0,
-                step_size_s=step_s,
-            )
-        )
-    return tuple(residuals)
+    total = np.array(
+        [
+            step.kinetic_energy_j_per_m
+            + step.elastic_energy_j_per_m
+            + step.gravitational_energy_j_per_m
+            for step in run.steps
+        ]
+    )
+    scale = float(np.abs(total).max())
+    return ConservationResidual(
+        name=f"F1 free fall: total energy at C={courant_number:g}",
+        conservation_class=ConservationClass.TRUNCATION,
+        residual=float(np.abs(total - total[0]).max()),
+        scale=scale if scale > 0.0 else 1.0,
+        step_size_s=step_s,
+    )
 
 
 # ---------------------------------------------------------- elastic column
