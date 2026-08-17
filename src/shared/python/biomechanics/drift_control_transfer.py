@@ -302,7 +302,9 @@ def compute_path_frame(
         raise ValueError("velocity must have shape (T, J, 2)")
     if not np.all(np.isfinite(velocity_array)):
         raise ValueError("velocity must contain only finite values")
-    speed = np.sqrt(np.einsum('...i,...i->...', velocity_array, velocity_array))  # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is ~1.5x faster than np.linalg.norm(..., axis=-1)
+    speed = np.sqrt(
+        np.einsum("...i,...i->...", velocity_array, velocity_array)
+    )  # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is ~1.5x faster than np.linalg.norm(..., axis=-1)
 
     valid = speed > speed_epsilon
     tangent = np.zeros_like(velocity_array)
