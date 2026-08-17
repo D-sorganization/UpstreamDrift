@@ -36,9 +36,11 @@ from dataclasses import dataclass
 import numpy as np
 from numpy.typing import NDArray
 
+from ..exceptions import BunkerShot3DValueError
 from .wedge import WedgeGeometry
 
 __all__ = [
+    "InconstructibleCamberError",
     "SoleProfile",
     "build_section_polygon",
     "build_sole_profile",
@@ -50,6 +52,45 @@ _QUADRATURE_POINTS = 257
 _MIN_PROFILE_POINTS = 12
 _MAX_BULGE = 12.0
 _MAX_GROWTH = 80.0
+
+
+class InconstructibleCamberError(BunkerShot3DValueError):
+    """A camber area no convex, monotone sole of this width can realise.
+
+    Carries the numbers a caller needs to react programmatically instead of
+    parsing the message: what was asked for, the sole width it was asked of,
+    and the band that width admits.  Also a :class:`ValueError`, so callers
+    written against the previous behaviour keep working.
+
+    Attributes:
+        requested_camber_area_m2: The camber area that was asked for.
+        sole_width_m: The sole width it was asked of.
+        constructible_range_m2: ``(low, high)`` the width admits.
+    """
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        requested_camber_area_m2: float,
+        sole_width_m: float,
+        constructible_range_m2: tuple[float, float],
+    ) -> None:
+        """Build the error.
+
+        Args:
+            message: Human-readable explanation, quoting the numbers.
+            requested_camber_area_m2: The camber area that was asked for.
+            sole_width_m: The sole width it was asked of.
+            constructible_range_m2: ``(low, high)`` the width admits.
+        """
+        super().__init__(message)
+        self.requested_camber_area_m2 = float(requested_camber_area_m2)
+        self.sole_width_m = float(sole_width_m)
+        self.constructible_range_m2 = (
+            float(constructible_range_m2[0]),
+            float(constructible_range_m2[1]),
+        )
 
 
 @dataclass(frozen=True, eq=False)
@@ -423,14 +464,17 @@ def build_sole_profile(
     low_area, high_area = min(lower, upper), max(lower, upper)
     if not low_area <= target_area_m2 <= high_area:
         drop_m = width_m * math.tan(geometry.geometric_bounce.angle_rad)
-        raise ValueError(
+        raise InconstructibleCamberError(
             f"a camber area of {target_area_m2 * 1e6:.4g} mm^2 is not "
             f"achievable for a {width_m * 1e3:.4g} mm sole at "
             f"{geometry.entry_height_m * 1e3:.3g} mm entry height and "
             f"{geometry.geometric_bounce.angle_deg:.2f} deg of geometric "
             f"bounce: a convex monotone sole admits "
             f"{low_area * 1e6:.4g} to {high_area * 1e6:.4g} mm^2 "
-            f"(geometric ceiling {0.5 * width_m * drop_m * 1e6:.4g} mm^2)"
+            f"(geometric ceiling {0.5 * width_m * drop_m * 1e6:.4g} mm^2)",
+            requested_camber_area_m2=target_area_m2,
+            sole_width_m=width_m,
+            constructible_range_m2=(low_area, high_area),
         )
 
     bulge = _bracketed_root(
