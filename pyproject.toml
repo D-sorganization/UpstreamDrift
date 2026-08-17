@@ -44,7 +44,9 @@ dependencies = [
     "platformdirs>=4.2.0",
 
     # Runtime security floor constraints documented in issue #3838.
-    "pillow>=12.2.0",
+    # pillow raised to 12.3.0 for PYSEC-2026-2253/2254/2255/2256/2257 and
+    # PYSEC-2026-3451/3452/3453/3454/3493/3494/3495/3496 (#8738).
+    "pillow>=12.3.0",
     "requests>=2.33.0",
     "python-dotenv>=1.2.2",
     "bokeh>=3.8.2",
@@ -54,6 +56,11 @@ dependencies = [
     # environment.yml, where it constrained conda users alone and was
     # scheduled for deletion by the next `make sync-deps` (#8689).
     "tornado>=6.5.7",
+    # Transitive via flask/uvicorn/pip-tools rather than imported directly.
+    # Declared here for the same reason as tornado above: the floor must bind
+    # on every install path, not depend on whichever dependent resolves first.
+    # PYSEC-2026-2132, fixed in 8.3.3 (#8738).
+    "click>=8.3.3",
 
     "flask>=3.1.3",
 
@@ -74,7 +81,9 @@ dependencies = [
     "sqlalchemy>=2.0.0",
     "bcrypt>=4.1.0",
     "PyJWT>=2.13.0",
-    "cryptography>=48.0.1",
+    # 50.0.0 is the first release clearing all three of PYSEC-2026-3552 (fixed
+    # in 50.0.0), PYSEC-2026-3553 and PYSEC-2026-3554 (both 49.0.0) (#8738).
+    "cryptography>=50.0.0",
     "email-validator>=2.0.0",
     # Hardened XML parsing used at module load by src/api/routes/models.py, which
     # is imported by src/api/routes/__init__.py and therefore by every API server
