@@ -103,7 +103,7 @@ VTK) is installed, so the ADR-0027 selection degrades to a stated matplotlib
 plan view. This is a rendering of existing F0 output at higher fidelity, not
 new physics and not calibration: the field inherits `BEYOND_VALIDATION`, and a
 patch trend read across a bounce sweep is reported as a bounce-and-camber
-trend wherever the declared camber was substituted (#8698).
+trend wherever any spanwise station's camber was substituted (#8698).
 
 Issue #8709 (epic #8699) selects the sand-solving tier that backs field
 visualization, recorded as ADR-0033 amending ADR-0032. The epic had assumed the
@@ -234,6 +234,41 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-08-16** - Scoped BunkerShot3D's camber-clamped flag so it cannot
+  understate substitution (`src/bunkershot3d/geometry/lofting.py`,
+  `src/tools/bunker_shot_gui/`, issue #8698, epic #8699). The observability
+  work below left one boolean answering a narrower question than its name
+  implied. `LoftedWedge.camber_was_clamped` compared the declared camber area
+  against the band the **declared** sole width admits. Heel and toe relief
+  narrows the sole toward the ends, and a narrower sole admits a narrower
+  camber band, so the relieved stations are refitted to their own bands while
+  the declaration itself is honoured — and the flag read `False` beside a
+  non-empty `clamped_stations`. That is #8698's own failure mode, silent
+  substitution invisible to a caller, reappearing through the simpler check.
+  Measured at shipped resolution, three of the six shipped presets hit it:
+  `sm9_58_m` declares 42.00 mm² inside its (38.70, 42.44) mm² band and refits
+  3 of 17 stations; `acushnet_example_1` refits 5 of 17; `tour_shaved_heel_lob`
+  refits 13 of 17. All three reported "not clamped".
+
+  Resolved by renaming rather than redefining. Redefining a published boolean
+  in place would have silently changed every existing caller's answer, which
+  is the same failure mode one level up; the rename breaks loudly instead.
+  `camber_was_clamped` becomes `aggregate_camber_was_clamped` (unambiguously
+  the declared-versus-effective question), and a new `any_camber_was_clamped`
+  is true when the declaration **or** any station was substituted, so a caller
+  checking one boolean gets the honest answer and the flag cannot read `False`
+  while `clamped_stations` holds anything. `camber_substitution_m2` becomes
+  `aggregate_camber_substitution_m2`, which also ends its name collision with
+  `StationCamber`'s per-station property. Both meanings are genuinely used, so
+  a single flag could not serve: the workbench's camber-area line needs the
+  aggregate because it prints the declared number, and the contact-patch
+  caveat needs any-station. The camber-area line now also names the refitted
+  station count, so an in-band declaration over refitted stations no longer
+  renders as a clean number. `PATCH_CONFOUND_CAVEAT` is gated on the per-
+  station account rather than the aggregate flag and is restated in terms of
+  stations — gated on the aggregate it was silent on the default design, which
+  is exactly when the caveat is needed.
+
 - **2026-08-16** - Made BunkerShot3D's sole-camber substitution observable
   (`src/bunkershot3d/geometry/`, issue #8698, epic #8699). A wedge sole can
   only realise camber areas inside a band set by its width and bounce, so
@@ -255,7 +290,8 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
   Three complementary changes. (1) `loft_wedge()` returns a new `LoftedWedge`
   carrying `effective_camber_area_m2`, `constructible_camber_range_m2`,
-  `camber_was_clamped`, `camber_substitution_m2` and a per-station
+  `aggregate_camber_was_clamped`, `any_camber_was_clamped`,
+  `aggregate_camber_substitution_m2` and a per-station
   `StationCamber` account; `build_wedge_mesh()` is now a thin wrapper that
   returns only its mesh. (2) `constructible_camber_range_m2` is re-exported
   from `bunkershot3d.geometry` and the top-level package, and
