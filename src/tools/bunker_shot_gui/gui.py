@@ -57,7 +57,10 @@ from .design import SandCondition, SolverSetup, SwingSetup, WorkbenchInputError
 from .field import LoadComponent, LoadScale, SoleLoadField
 from .model import DesignEvaluation, WorkbenchComparison, WorkbenchModel
 from .render import field_scales
+from .render3d import SceneScale, scene_scale
 from .report import comparison_report, evaluation_report
+from .shot3d import ShotScene
+from .viewport_widgets import ShotViewportWidget, TracePanelWidget
 from .widgets import (
     ConditionPanel,
     DesignPanel,
@@ -115,6 +118,41 @@ def _shared_scales(
     """
     fields = _fields(evaluations)
     return field_scales(fields) if fields else None
+
+
+def _scenes(
+    evaluations: tuple[DesignEvaluation, ...],
+) -> tuple[ShotScene, ...]:
+    """Return every 3-D scene among the supplied designs.
+
+    Args:
+        evaluations: The designs about to be drawn together.
+
+    Returns:
+        The scenes, skipping any design whose shot did not produce one.
+    """
+    return tuple(
+        scene
+        for evaluation in evaluations
+        if (scene := evaluation.shot.scene) is not None
+    )
+
+
+def _shared_scene_scale(
+    evaluations: tuple[DesignEvaluation, ...],
+) -> SceneScale | None:
+    """Return the one world box every supplied scene is drawn in.
+
+    Args:
+        evaluations: The designs about to be drawn together.
+
+    Returns:
+        The covering box, or ``None`` when no design produced a scene. The
+        same argument as the colour scales: two divots each framed to their
+        own extent look like the same divot.
+    """
+    scenes = _scenes(evaluations)
+    return scene_scale(scenes) if scenes else None
 
 
 def _density_limits(
@@ -234,9 +272,23 @@ class BunkerShotWidget(QWidget):
         fields.addWidget(self._field_a)
         fields.addWidget(self._field_b)
 
+        shot_page = QWidget()
+        shot = QHBoxLayout(shot_page)
+        self._scene_a = ShotViewportWidget("A: the head through the sand")
+        self._traces_a = TracePanelWidget("A: traces on the shared cursor")
+        shot.addWidget(self._scene_a, stretch=3)
+        shot.addWidget(self._traces_a, stretch=2)
+        # One transport drives all three views of design A (#8706, #8708).
+        # The field view already owns a slider, a timer and a play button;
+        # a second one beside the scene would let the views drift apart,
+        # which is the one thing linking them exists to prevent.
+        self._field_a.link(self._scene_a)
+        self._field_a.link(self._traces_a)
+
         self._views = QTabWidget()
         self._views.addTab(maps_page, "Summed maps")
         self._views.addTab(fields_page, "Sole load field (per element, per sample)")
+        self._views.addTab(shot_page, "Shot in 3-D and traces")
         column.addWidget(self._views, stretch=3)
 
         self._results = HoverCopyTextBrowser()
@@ -353,6 +405,7 @@ class BunkerShotWidget(QWidget):
             limits=_density_limits((evaluation,)),
         )
         self._paint_field(evaluation, self._field_a, _shared_scales((evaluation,)))
+        self._paint_shot(evaluation, _shared_scene_scale((evaluation,)))
         self._bounce_map_b.clear()
         self._window_map_b.clear()
         self._field_b.clear()
@@ -391,6 +444,7 @@ class BunkerShotWidget(QWidget):
         )
         self._paint_field(comparison.left, self._field_a, scales)
         self._paint_field(comparison.right, self._field_b, scales)
+        self._paint_shot(comparison.left, _shared_scene_scale(pair))
 
     def _paint_field(
         self,
@@ -411,6 +465,33 @@ class BunkerShotWidget(QWidget):
             view.clear()
             return
         view.set_shot(field, evaluation.shot.contact_patch, scales=scales)
+
+    def _paint_shot(
+        self,
+        evaluation: DesignEvaluation,
+        scale: SceneScale | None,
+    ) -> None:
+        """Load one design's 3-D scene and traces, or clear both views.
+
+        Args:
+            evaluation: The evaluated design.
+            scale: The world box shared with any other design being drawn,
+                or ``None`` when there is no scene to draw.
+        """
+        shot = evaluation.shot
+        scene, traces = shot.scene, shot.traces
+        if scene is None or scale is None:
+            self._scene_a.clear()
+        else:
+            self._scene_a.set_shot(
+                scene,
+                scale=scale,
+                band=None if traces is None else traces.band,
+            )
+        if traces is None:
+            self._traces_a.clear()
+        else:
+            self._traces_a.set_shot(traces)
 
     def _paint_maps(
         self,
