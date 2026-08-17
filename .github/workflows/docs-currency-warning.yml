@@ -37,7 +37,7 @@ permissions:
 jobs:
   warn:
     timeout-minutes: 30
-    runs-on: ${{ vars.CI_RUNNER_MODE == 'hosted' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
+    runs-on: ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
     steps:
       - name: Check for docs / tests / opt-out
         env:

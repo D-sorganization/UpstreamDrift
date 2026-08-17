@@ -6,6 +6,8 @@ from fastapi.testclient import TestClient
 
 from src.api.routes.observability import router
 
+pytestmark = pytest.mark.unit
+
 
 class MockEngineManager:
     def get_available_engines(self):

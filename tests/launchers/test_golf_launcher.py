@@ -14,6 +14,8 @@ from src.launchers.upstream_drift_launcher import (  # noqa: E402
 )
 from src.launchers.ui_components import StartupResults  # noqa: E402
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def startup_results() -> StartupResults:

@@ -31,10 +31,11 @@ The current evidence boundary includes these known limitations:
   population distributions and measurement uncertainty are not estimated.
 - No human motion or force data are analyzed; the result is mechanistic and
   model-derived, not a skill-group effect.
-- The model ladder now executes reduced full-body common-state inverse dynamics
-  in MuJoCo and an independent Lagrange--Christoffel formulation. The hand
-  loads are prescribed, so independently solved forward two-hand contact is
-  still unexecuted.
+- The model ladder now executes reduced and subject-scaled forward two-hand
+  contact, distributed grip, passive first-mode shaft, and planar finite-base
+  ground/free-moment tiers in MuJoCo and Pinocchio. The interfaces and support
+  law remain synthetic, bilateral, and uncalibrated; three-dimensional
+  unilateral foot contact and governed human validation remain unexecuted.
 
 # Reproducibility Guide {#sec-appendix-repro}
 
@@ -55,6 +56,9 @@ python3 -m scripts.research.proximal_distal_energy.run_forward_two_arm_study
 python3 -m scripts.research.proximal_distal_energy.run_moving_base_flexible_study
 python3 -m scripts.research.proximal_distal_energy.run_shaft_beam_reference
 python3 -m scripts.research.proximal_distal_energy.run_spatial_full_body_study
+python3 -m scripts.research.proximal_distal_energy.run_articulated_ground_diagnostic
+python3 -m scripts.research.proximal_distal_energy.run_articulated_ground_atlas
+python3 -m scripts.research.proximal_distal_energy.run_articulated_ground_posthoc_sensitivity
 python3 -m scripts.research.proximal_distal_energy.run_uncertainty_control_study
 python3 -m scripts.research.proximal_distal_energy.run_experimental_protocol_dry_run
 python3 -m scripts.research.proximal_distal_energy.qualify_open_release validate
@@ -73,6 +77,7 @@ python3 -m scripts.research.proximal_distal_energy.make_shaft_contribution_figur
 python3 -m scripts.research.proximal_distal_energy.make_mechanism_ladder_figures
 python3 -m scripts.research.proximal_distal_energy.make_forward_two_arm_figures
 python3 -m scripts.research.proximal_distal_energy.make_moving_base_flexible_figures
+python3 -m scripts.research.proximal_distal_energy.make_articulated_ground_figure
 python3 -m scripts.research.proximal_distal_energy.make_shaft_beam_reference_figures
 python3 -m scripts.research.proximal_distal_energy.make_spatial_full_body_figures
 python3 -m scripts.research.proximal_distal_energy.make_uncertainty_control_figures
@@ -152,6 +157,9 @@ Recorded outputs:
   residuals, reversal times, sensitivity results, and interpretation boundary.
 - `data/two_hand_wscg_analysis.npz` — local force modes, moment and power
   decompositions, poses, and geometry-counterfactual arrays.
+- `data/bilateral_wrench_identifiability_study.json` — three-dimensional
+  point-force and full bilateral-wrench ranks, null spaces, grip-span sweep,
+  proper-rotation audit, sensing boundary, and explicit nonhuman claims.
 - `data/shaft_contribution_study.json` — matched rigid/flexible results,
   termwise acceleration and power summaries, ablations, 120 robustness cases,
   endpoint windows, timestep convergence, and interpretation boundaries.

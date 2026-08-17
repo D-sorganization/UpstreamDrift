@@ -14,6 +14,8 @@ from src.shared.python.optimization.model_provider import (
     swing_urdf,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def test_rig_has_one_dof_per_swing_joint() -> None:
     rig = build_swing_rig()

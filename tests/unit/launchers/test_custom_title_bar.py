@@ -1,8 +1,11 @@
 from PyQt6.QtCore import Qt, QPointF
 from PyQt6.QtGui import QMouseEvent
+import pytest
 from unittest.mock import MagicMock
 from src.launchers import about_dialog
 from src.launchers.custom_title_bar import CustomTitleBar
+
+pytestmark = pytest.mark.unit
 
 
 def test_custom_title_bar_signals(qapp):

@@ -288,6 +288,204 @@
       "execution_status": "dynamic_constitutive_passivity_and_local_identifiability_screen_complete_delivery_spatial_subject_and_human_tests_open"
     },
     {
+      "id": "MT-E07",
+      "questions": ["Q2"],
+      "title": "Bilateral Wrench Identifiability and Sensor Qualification",
+      "model_tiers": [
+        "instantaneous_linear_measurement_map",
+        "spatial_articulated",
+        "subject_scaled",
+        "governed_human"
+      ],
+      "interventions": [
+        "grip_span_sweep",
+        "proper_rotation",
+        "reference_transport",
+        "point_force_only",
+        "point_force_plus_internal_axial_scalar",
+        "bilateral_six_axis_wrenches",
+        "trajectory_level_noise",
+        "normalized_cross_talk",
+        "cross_talk_calibration_residual",
+        "contact_center_migration",
+        "tracked_contact_centers"
+      ],
+      "controls": [
+        "manufactured_axial_null_mode",
+        "coincident_contact_limit",
+        "rank_and_nullity",
+        "declared_force_and_moment_scaling",
+        "sensor_noise_and_cross_talk",
+        "contact_migration"
+      ],
+      "outcomes": [
+        "structural_rank",
+        "allocation_nullity",
+        "singular_values",
+        "nonzero_condition_ratio",
+        "allocation_recovery_error",
+        "held_out_wrench_closure"
+      ],
+      "uncertainty": [
+        "grip_geometry",
+        "reference_point",
+        "sensor_calibration",
+        "cross_talk",
+        "contact_center_migration",
+        "measurement_noise"
+      ],
+      "falsifier": "A proposed allocation is not unique under the declared measurement map, changes materially within calibrated sensor uncertainty, or fails held-out bilateral wrench closure.",
+      "required_data": [
+        "bilateral_six_axis_grip_wrenches",
+        "time_resolved_contact_centers",
+        "club_kinematics",
+        "sensor_calibration_and_cross_talk_matrix",
+        "synchronization_record"
+      ],
+      "execution_status": "instantaneous_structural_and_synthetic_point_force_trajectory_sensor_qualification_complete_full_wrench_device_subject_and_human_qualification_open"
+    },
+    {
+      "id": "MT-E08",
+      "questions": ["Q2", "Q4", "Q5", "Q7"],
+      "title": "Subject-Scaled Spatial Contact Feasibility",
+      "model_tiers": [
+        "prescribed_subject_scaled_common_state",
+        "closed_contact_inverse_kinematics",
+        "articulated_spatial_forward_contact",
+        "governed_human"
+      ],
+      "interventions": [
+        "stature_and_sex_table_design",
+        "grip_span_sweep",
+        "closed_contact_inverse_kinematics",
+        "same_state_driver_killswitch",
+        "typed_contact_or_tissue_slack"
+      ],
+      "controls": [
+        "bilateral_contact_closure",
+        "joint_limit_and_collision_screen",
+        "constraint_rank_and_conditioning",
+        "coincident_and_reversed_moment_arm",
+        "independent_forward_engine"
+      ],
+      "outcomes": [
+        "hand_to_grip_distance",
+        "contact_constraint_singular_values",
+        "contact_force_couple",
+        "timing_viability_volume",
+        "perturbation_recovery",
+        "delivery_and_load"
+      ],
+      "uncertainty": [
+        "anthropometric_regression",
+        "joint_center_and_axis",
+        "scapular_kinematics",
+        "contact_center",
+        "contact_and_tissue_compliance",
+        "initial_state"
+      ],
+      "falsifier": "A prescribed or solved configuration fails bilateral closure, joint limits, collision, conservation, independent-engine agreement, or the proposed timing, recovery, or slack benefit disappears after those feasibility gates are enforced.",
+      "required_data": [
+        "subject_specific_segment_and_joint_geometry",
+        "scapular_and_wrist_kinematics",
+        "bilateral_six_axis_grip_wrenches",
+        "time_resolved_contact_centers",
+        "contact_tissue_and_shaft_compliance",
+        "club_kinematics_and_impact_outcomes"
+      ],
+      "execution_status": "prescribed_state_rejection_and_234_sample_reduced_tree_closed_contact_limit_collision_screen_complete_compliant_forward_anatomical_and_human_tests_open"
+    },
+    {
+      "id": "MT-E09",
+      "questions": ["Q2", "Q3", "Q5", "Q7"],
+      "title": "Paired Scapulothoracic Contact-Geometry Screen",
+      "model_tiers": ["subject_scaled_reduced_kinematics"],
+      "interventions": [
+        "fixed_versus_mobile_scapular_geometry",
+        "protraction_elevation_upward_rotation_and_winging",
+        "grip_span_and_phase_sweep"
+      ],
+      "controls": [
+        "nested_zero_scapular_coordinates",
+        "fixed_trunk_and_club_pose",
+        "residual_and_solver_termination_separation",
+        "coordinate_bound_activity",
+        "contact_jacobian_rank_and_nullity",
+        "two_meter_adverse_grip_span"
+      ],
+      "outcomes": [
+        "bilateral_contact_residual",
+        "qualified_closure_count",
+        "shoulder_center_excursion",
+        "coordinate_allocation_nullity"
+      ],
+      "uncertainty": [
+        "engineering_ellipsoid_geometry",
+        "coordinate_bounds",
+        "optimizer_termination",
+        "omitted_subject_specific_anatomy_and_contact"
+      ],
+      "falsifier": "The nested mobile model does not reproduce the paired reachability improvement, the adverse span closes, or anatomical and strategy claims are made without articulated anatomy and forward contact.",
+      "required_data": [
+        "subject_specific_scapular_and_glenohumeral_kinematics",
+        "calibrated_bilateral_grip_contact",
+        "full_body_and_club_kinematics"
+      ],
+      "execution_status": "54_state_reduced_geometry_screen_complete_partial_reachability_and_high_allocation_nullity_articulated_forward_test_open"
+    },
+    {
+      "id": "MT-E10",
+      "questions": ["Q1", "Q2", "Q6", "Q7"],
+      "title": "Finite Ground Reaction and Intrinsic Free-Moment Atlas",
+      "model_tiers": [
+        "subject_scaled_articulated_finite_planar_base",
+        "distributed_grip_passive_shaft",
+        "governed_human"
+      ],
+      "interventions": [
+        "fixed_translation_free_moment_and_coupled_pathways",
+        "signed_club_velocity_perturbation",
+        "rigid_shaft_control",
+        "horizontal_restraint_removed_control",
+        "natural_zero_gravity_only_and_conditional_base_initialization"
+      ],
+      "controls": [
+        "exact_fixed_base_reduction",
+        "center_of_pressure_reference_reversal",
+        "common_initial_energy",
+        "peak_grip_load_and_total_dissipated_work_match",
+        "three_level_diagnostic_refinement",
+        "independent_mujoco_and_pinocchio_dynamics"
+      ],
+      "outcomes": [
+        "ground_force",
+        "intrinsic_and_transported_moment",
+        "grip_force_and_couple",
+        "base_translation_and_pitch",
+        "shaft_deformation",
+        "dissipated_work_and_energy_closure",
+        "club_translation_speed"
+      ],
+      "uncertainty": [
+        "initialization_and_preload",
+        "synthetic_support_stiffness_and_damping",
+        "horizontal_restraint_definition",
+        "shaft_and_grip_properties",
+        "time_step_and_horizon",
+        "omitted_unilateral_contact_and_foot_geometry"
+      ],
+      "falsifier": "The finite-base pathway fails fixed-base reduction, power or work-energy closure, refinement, declared domains, reference-transport invariance, native-engine agreement, or a claimed delivery effect lacks its preregistered load--work match.",
+      "required_data": [
+        "synchronized_force_plates",
+        "full_body_and_club_kinematics",
+        "bilateral_six_axis_grip_wrenches",
+        "foot_contact_and_pressure_state",
+        "shaft_deflection",
+        "subject_specific_inertial_and_joint_geometry"
+      ],
+      "execution_status": "576_trajectory_finite_base_numerical_gate_complete_primary_load_total_work_match_empty_calibrated_and_human_tests_open"
+    },
+    {
       "id": "MT-H01",
       "questions": ["Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7"],
       "title": "Participant-Held-Out Human Falsification",

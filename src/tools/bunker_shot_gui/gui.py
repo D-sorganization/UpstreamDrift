@@ -1,25 +1,49 @@
-"""Bunker Shot 3D Simulator GUI.
+"""BunkerShot3D designer workbench (issue #8618, W11 of epic #8607).
 
-Provides an experimental dashboard for sand impact simulation
-using Chrono DEM (mocked for now) with particle visualization.
+The single user-facing surface of the BunkerShot3D club-design tool. It runs
+the **real F0 solver** -- dynamic 3D Resistive Force Theory, the default tier
+of ADR-0032 -- over a parametric wedge sole in a USGA-referenced sand bed, and
+answers the question the tool exists for:
+
+    given two wedge sole geometries, which one performs better, in what
+    conditions, and how confident are we?
+
+Everything numeric lives in :mod:`src.tools.bunker_shot_gui.model` and
+:mod:`src.tools.bunker_shot_gui.report`, both of which import no GUI toolkit.
+This module is the Qt shell around them.
+
+Two behaviours are deliberate and must not be softened:
+
+* **The verdict is shown before the numbers, always.** A greenside bunker shot
+  sits roughly 60x outside 3D-RFT's stated Froude limit, so every result is
+  labelled with how far outside the calibrated envelope it was produced.
+* **A refusal shows no number.** When the solver declines a query the banner
+  turns red, the maps are cleared and the report states why. There is no code
+  path in this package that paints a force beside a ``REFUSED`` verdict.
+
+Running a design blocks the interface for a second or two: the lofted mesh is
+solved by root-finding per station and the playability sweep is
+``playability_points ** 2`` shots. A wait cursor is shown; the work is not
+threaded, because a design tool whose answer arrives out of order with its
+inputs is worse than one that pauses.
 """
 
 from __future__ import annotations
 
 import logging
-from typing import Any
+from collections.abc import Callable
+from typing import Any, TypeVar
 
-import numpy as np
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import (
     QApplication,
-    QDoubleSpinBox,
-    QFormLayout,
-    QGroupBox,
+    QGridLayout,
     QHBoxLayout,
     QLabel,
     QMainWindow,
     QPushButton,
+    QScrollArea,
     QSplitter,
     QStatusBar,
     QVBoxLayout,
@@ -28,247 +52,345 @@ from PyQt6.QtWidgets import (
 
 from src.shared.python.ui import HoverCopyTextBrowser
 
+from .design import SandCondition, SolverSetup, SwingSetup, WorkbenchInputError
+from .model import DesignEvaluation, WorkbenchComparison, WorkbenchModel
+from .report import comparison_report, evaluation_report
+from .widgets import ConditionPanel, DesignPanel, GridMapWidget, VerdictBanner
+
+__all__ = [
+    "BunkerShotWidget",
+    "BunkerShotWindow",
+    "get_dockable_ui",
+]
+
 logger = logging.getLogger(__name__)
 
-# Try to import pyqtgraph
-try:
-    import pyqtgraph as pg  # noqa: F401
-    import pyqtgraph.opengl as gl
+_IDLE_TEXT = (
+    "BunkerShot3D designer workbench\n"
+    "===============================\n\n"
+    "Set the sole parameters, the playing condition and the delivery, then\n"
+    "run design A or compare A against B.\n\n"
+    "Every result carries a validity verdict. At greenside delivery speeds\n"
+    "3D-RFT is roughly 60x outside its stated Froude limit and about 20x\n"
+    "beyond any published validation, so the verdict is part of the answer,\n"
+    "not a disclaimer attached to it. When the solver refuses a query no\n"
+    "force, depth or carry is reported at all.\n"
+)
 
-    PYQTGRAPH_AVAILABLE = True
-except ImportError:
-    PYQTGRAPH_AVAILABLE = False
+ModelFactory = Callable[[SolverSetup], WorkbenchModel]
+
+_ResultT = TypeVar("_ResultT")
 
 
 class BunkerShotWidget(QWidget):
-    """Central widget for the Bunker Shot simulator dashboard."""
+    """The workbench: two candidate soles, one condition, one verdict."""
 
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(
+        self,
+        parent: QWidget | None = None,
+        model_factory: ModelFactory | None = None,
+    ) -> None:
+        """Build the workbench.
+
+        Args:
+            parent: Parent widget.
+            model_factory: Builds the headless model from the study settings.
+                Injected so a test can substitute a cheap stand-in; the
+                production path is :class:`~.model.WorkbenchModel` itself.
+        """
         super().__init__(parent)
+        self._model_factory: ModelFactory = model_factory or WorkbenchModel
         self._build_ui()
 
+    # ------------------------------------------------------------------ build
+
     def _build_ui(self) -> None:
+        """Assemble the controls on the left and the results on the right."""
         layout = QHBoxLayout(self)
         splitter = QSplitter(Qt.Orientation.Horizontal)
-
-        # Left: controls
-        left = QWidget()
-        left_layout = QVBoxLayout(left)
-
-        title = QLabel("Bunker Shot 3D Simulator (Experimental)")
-        title_font = title.font()
-        title_font.setPointSize(14)
-        title_font.setBold(True)
-        title.setFont(title_font)
-        left_layout.addWidget(title)
-
-        # Impact parameters
-        impact_group = QGroupBox("Impact Configuration")
-        impact_form = QFormLayout(impact_group)
-
-        self._velocity_spin = QDoubleSpinBox()
-        self._velocity_spin.setRange(10.0, 60.0)
-        self._velocity_spin.setValue(35.0)
-        self._velocity_spin.setSuffix(" m/s")
-        impact_form.addRow("Clubhead Velocity:", self._velocity_spin)
-
-        self._angle_spin = QDoubleSpinBox()
-        self._angle_spin.setRange(10.0, 60.0)
-        self._angle_spin.setValue(45.0)
-        self._angle_spin.setSuffix("°")
-        impact_form.addRow("Attack Angle:", self._angle_spin)
-
-        self._depth_spin = QDoubleSpinBox()
-        self._depth_spin.setRange(1.0, 10.0)
-        self._depth_spin.setValue(3.0)
-        self._depth_spin.setSuffix(" cm")
-        impact_form.addRow("Entry Depth:", self._depth_spin)
-
-        left_layout.addWidget(impact_group)
-
-        # Run
-        self._run_btn = QPushButton("Simulate Impact")
-        self._run_btn.setStyleSheet(
-            "background-color: #D2B48C; color: black; font-weight: bold; padding: 12px;"
-        )
-        self._run_btn.clicked.connect(self._run_simulation)
-        left_layout.addWidget(self._run_btn)
-
-        left_layout.addStretch()
-        splitter.addWidget(left)
-
-        # Right: results
-        right = QWidget()
-        right_layout = QVBoxLayout(right)
-        results_group = QGroupBox("Visualization Preview (Chrono DEM not yet wired)")
-        results_layout = QVBoxLayout(results_group)
-
-        if PYQTGRAPH_AVAILABLE:
-            self._gl_view = gl.GLViewWidget()
-            self._gl_view.opts["distance"] = 0.5
-            self._gl_view.opts["elevation"] = 20
-            self._gl_view.opts["azimuth"] = 45
-
-            grid = gl.GLGridItem()
-            grid.setSize(x=2, y=2, z=0)
-            grid.setSpacing(x=0.1, y=0.1, z=0)
-            self._gl_view.addItem(grid)
-
-            # Particles
-            self._particles_item = None
-
-            # Impact Vector
-            self._vector_item = None
-
-            results_layout.addWidget(self._gl_view, stretch=3)
-        else:
-            self._gl_view = None
-
-        self._results_text = HoverCopyTextBrowser()
-        self._results_text.setReadOnly(True)
-        self._results_text.setPlainText(
-            "Configure impact parameters and click Run.\n\n"
-            "Note: Chrono DEM physics engine is not yet wired.\n"
-            "Values shown are a procedural preview, not a physics simulation."
-        )
-        results_layout.addWidget(self._results_text)
-        right_layout.addWidget(results_group)
-        splitter.addWidget(right)
-
-        splitter.setSizes([350, 650])
+        splitter.addWidget(self._build_controls())
+        splitter.addWidget(self._build_results())
+        splitter.setSizes([420, 780])
         layout.addWidget(splitter)
 
-    def _run_simulation(self) -> None:
-        """Execute the bunker shot simulation."""
-        v = self._velocity_spin.value()
-        angle = self._angle_spin.value()
-        depth = self._depth_spin.value() / 100.0  # cm to m
+    def _build_controls(self) -> QWidget:
+        """Build the scrollable input column."""
+        inner = QWidget()
+        column = QVBoxLayout(inner)
 
-        # Mock simulation of sand particles
-        num_particles = int(v * depth * 50000)
-        num_particles = min(max(num_particles, 500), 10000)  # limit for GUI
-
-        # Spray pattern based on angle
-        angle_rad = np.radians(angle)
-        vx = v * np.cos(angle_rad)  # noqa: F841
-        vy = v * np.sin(angle_rad)  # noqa: F841
-
-        impact_force = 0.5 * 0.3 * (v**2)  # dummy kinetic energy
-
-        self._results_text.setPlainText(
-            f"Bunker Shot Impact\n"
-            f"{'=' * 40}\n"
-            f"Club Velocity: {v:.1f} m/s\n"
-            f"Attack Angle:  {angle:.1f}°\n"
-            f"Entry Depth:   {depth * 100:.1f} cm\n"
-            f"Est. Force:    {impact_force:.1f} N\n\n"
-            f"Displaced sand particles: ~{num_particles * 10}\n"
-            f"[Preview only — Chrono DEM physics not yet wired]"
+        title = QLabel("BunkerShot3D Designer Workbench")
+        font = title.font()
+        font.setPointSize(13)
+        font.setBold(True)
+        title.setFont(font)
+        column.addWidget(title)
+        column.addWidget(
+            QLabel("F0 tier: dynamic 3D Resistive Force Theory (ADR-0032)")
         )
 
-        if getattr(self, "_gl_view", None) is not None:
-            if self._particles_item is not None:
-                self._gl_view.removeItem(self._particles_item)
-            if self._vector_item is not None:
-                self._gl_view.removeItem(self._vector_item)
+        self._design_a = DesignPanel("Design A (W2 sole parameters)", "A", "sm9_58_m")
+        self._design_b = DesignPanel("Design B (W2 sole parameters)", "B", "sm9_54_f")
+        column.addWidget(self._design_a)
+        column.addWidget(self._design_b)
 
-            # Generate random particles spraying forward and up
-            pos = np.random.normal(size=(num_particles, 3)) * 0.05
-            # Offset them based on impact direction
-            pos[:, 0] += np.random.uniform(0, 0.5, num_particles) * (v / 60.0)
-            pos[:, 2] += np.random.uniform(0, 0.3, num_particles) * np.sin(angle_rad)
-            # Make sure they are mostly above ground
-            pos[:, 2] = np.abs(pos[:, 2])
+        self._conditions = ConditionPanel()
+        column.addWidget(self._conditions)
 
-            color = np.ones((num_particles, 4))
-            color[:, 0] = 0.8  # R
-            color[:, 1] = 0.7  # G
-            color[:, 2] = 0.5  # B
-            color[:, 3] = 0.8  # A
+        self._run_button = QPushButton("Run design A")
+        self._run_button.clicked.connect(self.run_design_a)
+        column.addWidget(self._run_button)
 
-            self._particles_item = gl.GLScatterPlotItem(
-                pos=pos, color=color, size=3, pxMode=True
+        self._compare_button = QPushButton("Compare A vs B")
+        self._compare_button.clicked.connect(self.run_comparison)
+        column.addWidget(self._compare_button)
+        column.addStretch()
+
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setWidget(inner)
+        return scroll
+
+    def _build_results(self) -> QWidget:
+        """Build the verdict banner, the two map columns and the report."""
+        panel = QWidget()
+        column = QVBoxLayout(panel)
+
+        self._banner = VerdictBanner()
+        column.addWidget(self._banner)
+
+        maps = QGridLayout()
+        self._bounce_map_a = GridMapWidget("A: bounce utilisation")
+        self._bounce_map_b = GridMapWidget("B: bounce utilisation")
+        self._window_map_a = GridMapWidget("A: playability window")
+        self._window_map_b = GridMapWidget("B: playability window")
+        maps.addWidget(self._bounce_map_a, 0, 0)
+        maps.addWidget(self._bounce_map_b, 0, 1)
+        maps.addWidget(self._window_map_a, 1, 0)
+        maps.addWidget(self._window_map_b, 1, 1)
+        column.addLayout(maps, stretch=2)
+
+        self._results = HoverCopyTextBrowser()
+        self._results.setReadOnly(True)
+        self._results.setFont(QFont("Consolas", 9))
+        self._results.setLineWrapMode(HoverCopyTextBrowser.LineWrapMode.NoWrap)
+        self._results.setPlainText(_IDLE_TEXT)
+        column.addWidget(self._results, stretch=3)
+        return panel
+
+    # -------------------------------------------------------------- accessors
+
+    @property
+    def report_text(self) -> str:
+        """The report currently displayed."""
+        return self._results.toPlainText()
+
+    @property
+    def verdict_text(self) -> str:
+        """The verdict banner's current text."""
+        return self._banner.text()
+
+    # ------------------------------------------------------------------ runs
+
+    def run_design_a(self) -> None:
+        """Evaluate design A and display the result."""
+        inputs = self._read_inputs()
+        if inputs is None:
+            return
+        settings, sand, swing = inputs
+        try:
+            design = self._design_a.design()
+        except WorkbenchInputError as error:
+            self._show_input_error(error)
+            return
+        self._banner.show_busy("Running the F0 solver over design A...")
+        result = self._guarded(
+            lambda: self._model_factory(settings).evaluate(design, sand, swing)
+        )
+        if result is None:
+            return
+        self.show_evaluation(result)
+
+    def run_comparison(self) -> None:
+        """Evaluate both designs and rank them, with uncertainty attached."""
+        inputs = self._read_inputs()
+        if inputs is None:
+            return
+        settings, sand, swing = inputs
+        try:
+            left = self._design_a.design()
+            right = self._design_b.design()
+        except WorkbenchInputError as error:
+            self._show_input_error(error)
+            return
+        if left.name == right.name:
+            self._show_input_error(
+                WorkbenchInputError(
+                    "designs A and B need different names so the ranking can "
+                    f"report them; both are {left.name!r}"
+                )
             )
-            self._gl_view.addItem(self._particles_item)
+            return
+        self._banner.show_busy("Running the F0 solver over both designs...")
+        result = self._guarded(
+            lambda: self._model_factory(settings).compare(left, right, sand, swing)
+        )
+        if result is None:
+            return
+        self.show_comparison(result)
 
-            # Impact Vector (Clubhead)
-            v_start = np.array([-0.2 * np.cos(angle_rad), 0, 0.2 * np.sin(angle_rad)])
-            v_end = np.array([0, 0, -depth])
-            self._vector_item = gl.GLLinePlotItem(
-                pos=np.vstack((v_start, v_end)),
-                color=(1.0, 0.2, 0.2, 1.0),
-                width=5,
-                antialias=True,
+    def _read_inputs(
+        self,
+    ) -> tuple[SolverSetup, SandCondition, SwingSetup] | None:
+        """Read the shared condition controls, reporting a bad combination."""
+        try:
+            return (
+                self._conditions.solver_setup(),
+                self._conditions.sand_condition(),
+                self._conditions.swing_setup(),
             )
-            self._gl_view.addItem(self._vector_item)
+        except WorkbenchInputError as error:
+            self._show_input_error(error)
+            return None
+
+    def _guarded(self, run: Callable[[], _ResultT]) -> _ResultT | None:
+        """Run the model under a wait cursor, reporting input errors."""
+        application = QApplication.instance()
+        if application is not None:
+            QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+        try:
+            return run()
+        except WorkbenchInputError as error:
+            self._show_input_error(error)
+            return None
+        finally:
+            if application is not None:
+                QApplication.restoreOverrideCursor()
+
+    # -------------------------------------------------------------- rendering
+
+    def show_evaluation(self, evaluation: DesignEvaluation) -> None:
+        """Display one evaluated design.
+
+        Args:
+            evaluation: The evaluated design.
+        """
+        self._banner.show_status(evaluation.shot.status)
+        self._results.setPlainText(evaluation_report(evaluation))
+        self._paint_maps(evaluation, self._bounce_map_a, self._window_map_a)
+        self._bounce_map_b.clear()
+        self._window_map_b.clear()
+
+    def show_comparison(self, comparison: WorkbenchComparison) -> None:
+        """Display an A/B comparison.
+
+        The banner shows the worse of the two verdicts, because a comparison
+        is only as trustworthy as its least trustworthy half.
+
+        Args:
+            comparison: The two evaluations and their ranking.
+        """
+        self._banner.show_status(comparison.worst_status)
+        self._results.setPlainText(
+            "\n".join(
+                (
+                    comparison_report(comparison),
+                    evaluation_report(comparison.left),
+                    evaluation_report(comparison.right),
+                )
+            )
+        )
+        self._paint_maps(comparison.left, self._bounce_map_a, self._window_map_a)
+        self._paint_maps(comparison.right, self._bounce_map_b, self._window_map_b)
+
+    def _paint_maps(
+        self,
+        evaluation: DesignEvaluation,
+        bounce_map: GridMapWidget,
+        window_map: GridMapWidget,
+    ) -> None:
+        """Paint one design's two maps, clearing them when there is no data."""
+        sole_load = evaluation.shot.sole_load
+        if sole_load is None:
+            bounce_map.clear()
+        else:
+            utilisation = sole_load.utilisation
+            bounce_map.set_grid(
+                sole_load.density_pa_s,
+                caption=(
+                    f"{utilisation.utilisation_fraction:.0%} of the sole carried "
+                    f"load; {utilisation.removable_area_m2 * 1e4:.1f} cm^2 removable"
+                ),
+            )
+        playability = evaluation.playability
+        window = playability.window
+        if window is None or playability.carry_verdict is None:
+            window_map.clear()
+        else:
+            # A carry number never appears without the statement it may be
+            # read under (issue #8657): the grid and its verdict travel
+            # together on the outcome, and the caption is where that reaches
+            # the designer.
+            status = playability.carry_verdict.status
+            window_map.set_grid(
+                playability.carry_m,
+                mask=window.in_window,
+                caption=(
+                    f"carry [{status.value.replace('_', ' ').upper()}] vs attack "
+                    f"angle x firmness; window {window.fraction:.0%} of the domain"
+                ),
+            )
+
+    def _show_input_error(self, error: WorkbenchInputError) -> None:
+        """Report an unusable input without pretending it is a verdict."""
+        logger.info("bunker workbench input rejected: %s", error)
+        self._banner.show_error(str(error))
+        self._results.setPlainText(
+            "The inputs do not describe a shot that can be solved.\n\n"
+            f"{error}\n\n"
+            "This is an input error, not a solver verdict: the model was never "
+            "asked for a number."
+        )
+        for widget in (
+            self._bounce_map_a,
+            self._bounce_map_b,
+            self._window_map_a,
+            self._window_map_b,
+        ):
+            widget.clear()
 
     def cleanup(self) -> None:
-        """Release resources."""
+        """Release resources. The workbench holds none beyond its widgets."""
 
 
 class BunkerShotWindow(QMainWindow):
-    """Standalone window for the Bunker Shot simulator."""
+    """Standalone window for the designer workbench."""
 
     def __init__(self, parent: QWidget | None = None) -> None:
+        """Build the window around a :class:`BunkerShotWidget`."""
         super().__init__(parent)
-        self.setWindowTitle("Bunker Shot 3D Simulator")
-        self.setMinimumSize(1000, 700)
+        self.setWindowTitle("BunkerShot3D Designer Workbench")
+        self.setMinimumSize(1200, 800)
         self._widget = BunkerShotWidget(self)
         self.setCentralWidget(self._widget)
         status = QStatusBar()
         self.setStatusBar(status)
-        status.showMessage("Ready. (Chrono DEM Experimental)")
+        status.showMessage(
+            "F0 dynamic RFT. Every result carries a validity verdict; "
+            "out-of-envelope queries are refused, not estimated."
+        )
 
-    def closeEvent(self, event: Any) -> None:
+    def closeEvent(self, event: Any) -> None:  # noqa: N802 - Qt API
+        """Clean the widget up on close."""
         self._widget.cleanup()
         super().closeEvent(event)
 
 
-class _EmbedAdapter:
-    """Embed adapter for the Bunker Shot 3D Simulator."""
-
-    tool_id = "bunker_shot_gui"
-
-    def __init__(self) -> None:
-        self._widget: BunkerShotWidget | None = None
-
-    def embed_capabilities(self) -> Any:
-        from src.shared.python.launcher_embed import EmbedCapabilities
-
-        return EmbedCapabilities(
-            supports_embedded=True,
-            prefers_dock=False,
-            min_size=(800, 600),
-            requires_separate_qapplication=False,
-        )
-
-    def create_main_widget(self, parent: Any) -> Any:
-        self._widget = BunkerShotWidget(parent=parent)
-        return self._widget
-
-    def cleanup(self) -> None:
-        if self._widget is not None:
-            self._widget.cleanup()
-        self._widget = None
-
-    def is_dirty(self) -> bool:
-        return False
-
-
-def _register() -> None:
-    try:
-        from src.shared.python.launcher_embed import register_embeddable_tool
-
-        register_embeddable_tool(_EmbedAdapter())
-    except Exception:  # noqa: BLE001
-        logger.warning("bunker_shot_gui: EmbeddableTool registration failed")
-
-
-_register()
-
-
 def get_dockable_ui() -> BunkerShotWindow:
-    """Return the main window instance for docking in the unified launcher."""
+    """Return the main window instance for docking in the unified launcher.
+
+    Returns:
+        A new workbench window.
+    """
     return BunkerShotWindow()
 
 
@@ -276,6 +398,6 @@ if __name__ == "__main__":
     import sys
 
     app = QApplication(sys.argv)
-    w = BunkerShotWindow()
-    w.show()
+    window = BunkerShotWindow()
+    window.show()
     sys.exit(app.exec())

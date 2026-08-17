@@ -10,7 +10,6 @@ from scripts.research.proximal_distal_energy.release_bundle import (
     validate_release_manifest,
 )
 
-
 ROOT = Path(__file__).resolve().parents[2]
 ARTICLE = ROOT / "docs/research/proximal_distal_energy_transfer"
 pytestmark = pytest.mark.unit
@@ -26,6 +25,22 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         "shaft_beam_reference",
         "torque_allocation_preload",
         "spatial_common_state",
+        "subject_scaled_spatial_geometry",
+        "subject_scaled_closed_contact",
+        "closed_state_forward_bridge",
+        "forward_contact_validity_horizon",
+        "articulated_inertia_cross_engine",
+        "articulated_contact_projection",
+        "articulated_forward_contact",
+        "articulated_slack_atlas",
+        "articulated_distributed_grip_atlas",
+        "articulated_shaft_structural_basis",
+        "articulated_shaft_time_step_diagnostic",
+        "articulated_shaft_atlas",
+        "articulated_ground_diagnostic",
+        "articulated_ground_atlas",
+        "articulated_ground_posthoc_sensitivity",
+        "scapulothoracic_contact_screen",
         "spatial_forward_contact",
         "uncertainty_control",
         "experimental_readiness",
@@ -37,6 +52,8 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         "shoulder_velocity_strategy",
         "joint_matched_proximal_rate",
         "rotating_base_torso_velocity",
+        "bilateral_wrench_identifiability",
+        "bilateral_wrench_sensor_qualification",
     ]
     assert manifest["claims"]["human_experimental"] == "untested"
     assert manifest["claims"]["high_proximal_velocity_universally_beneficial"] == (
@@ -51,6 +68,26 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
     assert manifest["claims"]["global_slack_benefit"] == "unsupported"
     assert manifest["claims"]["single_channel_slack_class_identification"] == (
         "not_established"
+    )
+    assert manifest["claims"]["typed_articulated_slack"] == (
+        "five_millisecond_typed_attachment_event_gate_qualified"
+    )
+    assert manifest["claims"]["distributed_grip_discretization"] == (
+        "fifty_millisecond_distributed_fiber_gate_qualified"
+    )
+    assert manifest["claims"]["articulated_shaft_bending_torsion"] == (
+        "fifty_millisecond_passive_shaft_gate_qualified_with_mixed_matched_outcomes"
+    )
+    assert manifest["claims"]["articulated_ground_free_moment"] == (
+        "fifty_millisecond_finite_ground_gate_qualified_primary_match_empty"
+    )
+    assert (
+        manifest["claims"]["synthetic_bilateral_point_force_sensor_qualification"]
+        == "qualified_for_declared_synthetic_cases"
+    )
+    assert (
+        manifest["claims"]["physical_bilateral_six_axis_device_validation"]
+        == "untested"
     )
     assert (
         manifest["claims"]["distributed_shaft_modal_reduction"]
@@ -71,6 +108,9 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
     assert manifest["claims"]["scapular_or_muscle_strategy_identification"] == (
         "unsupported"
     )
+    assert manifest["claims"]["scapulothoracic_contact_geometry"] == (
+        "partial_reachability_with_high_allocation_nullity_forward_test_open"
+    )
     assert manifest["claims"]["canonical_pose_adapter_round_trip"] == (
         "supported_for_coordinate_representation_only"
     )
@@ -88,6 +128,18 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         == "pending_external_archive"
     )
     assert manifest["resource_framing"] == "neutral_open_research_resource"
+    assert manifest["integrity_authorities"]["claim_evidence_manifest"].startswith(
+        "deterministic_self_excluded"
+    )
+    assert manifest["integrity_authorities"]["external_source_review"].startswith(
+        "offline_url_complete"
+    )
+    assert not any(
+        path.endswith("claim_evidence_manifest.json") for path in manifest["artifacts"]
+    )
+    assert any(
+        path.endswith("external_source_review.json") for path in manifest["artifacts"]
+    )
     assert any(
         path.endswith("fig_shoulder_velocity_strategy_pareto.pdf")
         for path in manifest["artifacts"]

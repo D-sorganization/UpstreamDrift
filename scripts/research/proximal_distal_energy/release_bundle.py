@@ -7,7 +7,13 @@ from pathlib import Path
 from typing import Any
 
 ARTICLE_REL = Path("docs/research/proximal_distal_energy_transfer")
-_EXCLUDED = frozenset({"release_manifest.json", "CHECKSUMS.sha256"})
+_EXCLUDED = frozenset(
+    {
+        "release_manifest.json",
+        "claim_evidence_manifest.json",
+        "CHECKSUMS.sha256",
+    }
+)
 
 
 def _sha256(path: Path) -> str:
@@ -43,6 +49,264 @@ def _artifact_paths(root: Path) -> tuple[Path, ...]:
     )
 
 
+_RELEASE_METADATA: dict[str, Any] = {
+    "schema_version": "proximal-distal-open-release-v1",
+    "release_id": "proximal-distal-model-ladder-2026-08",
+    "resource_framing": "neutral_open_research_resource",
+    "integrity_authorities": {
+        "claim_evidence_manifest": (
+            "deterministic_self_excluded_authority_to_avoid_recursive_hashing"
+        ),
+        "external_source_review": (
+            "offline_url_complete_work_and_claim_adjudication_embedded_in_artifacts"
+        ),
+    },
+    "presets": {
+        "double_pendulum": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_experiments",
+            "tier": "planar_open_chain",
+        },
+        "forward_two_hand": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_forward_two_arm_study",
+            "tier": "planar_constrained_forward",
+        },
+        "moving_base_flexible_club": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_moving_base_flexible_study",
+            "tier": "planar_coupled_base_flex",
+        },
+        "forward_modal_shaft": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_moving_base_modal_shaft_study",
+            "tier": "planar_coupled_base_distributed_modal_shaft",
+        },
+        "shaft_beam_reference": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_shaft_beam_reference",
+            "tier": "synthetic_distributed_shaft_comparison",
+        },
+        "torque_allocation_preload": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_torque_allocation_preload_study",
+            "tier": "matched_task_allocation_and_phenomenological_transmission",
+        },
+        "spatial_common_state": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_spatial_full_body_study",
+            "tier": "reduced_full_body_common_state",
+        },
+        "subject_scaled_spatial_geometry": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_subject_scaled_spatial_geometry",
+            "tier": "prescribed_subject_scaled_contact_closure_audit",
+        },
+        "subject_scaled_closed_contact": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_subject_scaled_closed_contact",
+            "tier": "subject_scaled_bounded_closed_contact_inverse_kinematics",
+        },
+        "closed_state_forward_bridge": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_closed_state_forward_bridge",
+            "tier": "subject_scaled_closed_state_reduced_forward_initialization",
+        },
+        "forward_contact_validity_horizon": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_forward_contact_validity_horizon",
+            "tier": "subject_scaled_closed_state_reduced_forward_horizon_map",
+        },
+        "articulated_inertia_cross_engine": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_articulated_inertia_cross_engine",
+            "tier": "subject_scaled_closed_state_articulated_common_state_dynamics",
+        },
+        "articulated_contact_projection": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_articulated_contact_projection",
+            "tier": "subject_scaled_articulated_contact_initial_acceleration",
+        },
+        "articulated_forward_contact": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_articulated_forward_contact",
+            "tier": "bounded_subject_scaled_articulated_bilateral_attachment_forward_dynamics",
+        },
+        "articulated_slack_atlas": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_articulated_slack_atlas",
+            "tier": "bounded_subject_scaled_typed_unilateral_attachment_forward_dynamics",
+        },
+        "articulated_distributed_grip_atlas": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_distributed_grip_atlas",
+            "tier": "bounded_subject_scaled_distributed_unilateral_grip_forward_dynamics",
+        },
+        "articulated_shaft_structural_basis": {
+            "command": "python -m scripts.research.proximal_distal_energy.generate_articulated_shaft_structural_basis",
+            "tier": "frozen_first_mode_finite_element_structural_authority",
+        },
+        "articulated_shaft_time_step_diagnostic": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_articulated_shaft_time_step_diagnostic",
+            "tier": "limiting_torsion_cell_three_level_refinement",
+        },
+        "articulated_shaft_atlas": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_articulated_shaft_atlas",
+            "tier": "bounded_subject_scaled_distributed_grip_passive_shaft_forward_dynamics",
+        },
+        "articulated_ground_diagnostic": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_articulated_ground_diagnostic",
+            "tier": "finite_base_initialization_and_three_level_refinement",
+        },
+        "articulated_ground_atlas": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_articulated_ground_atlas",
+            "tier": "bounded_subject_scaled_finite_ground_and_intrinsic_free_moment",
+        },
+        "articulated_ground_posthoc_sensitivity": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_articulated_ground_posthoc_sensitivity",
+            "tier": "explicit_post_hoc_primary_match_failure_sensitivity",
+        },
+        "scapulothoracic_contact_screen": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_scapulothoracic_contact_screen",
+            "tier": "paired_arm_only_scapula_on_ellipsoid_geometry_screen",
+        },
+        "spatial_forward_contact": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_spatial_forward_contact_study",
+            "tier": "reduced_two_engine_forward_contact",
+        },
+        "uncertainty_control": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_uncertainty_control_study",
+            "tier": "coupled_uncertainty_control",
+        },
+        "experimental_readiness": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_experimental_protocol_dry_run",
+            "tier": "synthetic_protocol_qualification_only",
+        },
+        "advanced_biological_bridge": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_advanced_biological_bridge",
+            "tier": "frame_invariance_and_reduced_hill_type_mechanism",
+        },
+        "transmission_robustness": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_transmission_robustness_study",
+            "tier": "paired_state_trigger_and_task_robustness",
+        },
+        "timing_viability_adverse_load": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_timing_viability_study",
+            "tier": "common_phase_paired_adverse_load_recovery",
+        },
+        "typed_slack_dynamic_audit": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_typed_slack_dynamic_study",
+            "tier": "synthetic_scalar_dynamic_constitutive_screen",
+        },
+        "shoulder_velocity_pointwise": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_shoulder_velocity_transfer_study",
+            "tier": "planar_fixed_hub_pointwise_phase_sensitivity",
+        },
+        "shoulder_velocity_strategy": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_shoulder_velocity_strategy_study",
+            "tier": "planar_fixed_hub_control_program_search",
+        },
+        "joint_matched_proximal_rate": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_joint_matched_proximal_rate_study",
+            "tier": "planar_fixed_hub_joint_work_load_matching_screen",
+        },
+        "rotating_base_torso_velocity": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_rotating_base_torso_velocity_study",
+            "tier": "planar_rotating_base_two_hand_compliant_club",
+        },
+        "bilateral_wrench_identifiability": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_bilateral_wrench_identifiability_study",
+            "tier": "instantaneous_linear_structural_identifiability",
+        },
+        "bilateral_wrench_sensor_qualification": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_bilateral_wrench_sensor_qualification",
+            "tier": "synthetic_trajectory_point_force_sensor_qualification",
+        },
+    },
+    "claims": {
+        "interaction_dynamics_planar": "supported_at_declared_model_tier",
+        "geometry_transfer_spatial_common_state": "supported_at_declared_model_tier",
+        "distributed_shaft_modal_reduction": "supported_on_synthetic_structural_case",
+        "distributed_modal_shaft_coupled_forward": (
+            "supported_at_declared_planar_mechanism_tier"
+        ),
+        "arm_wrist_allocation_equivalence": (
+            "supported_for_the_declared_same_state_club_task"
+        ),
+        "preload_continuity_advantage": (
+            "conditional_on_the_declared_dead_zone_transmission_family"
+        ),
+        "scapular_or_muscle_strategy_identification": "unsupported",
+        "passive_negative_couple_spatial_forward": (
+            "supported_at_declared_reduced_contact_tier"
+        ),
+        "universal_control_strategy": "unsupported",
+        "human_experimental": "untested",
+        "reference_frame_power_invariance": "supported_to_declared_numerical_tolerance",
+        "muscle_redundancy_same_moment": "supported_at_reduced_hill_type_tier",
+        "canonical_pose_adapter_round_trip": (
+            "supported_for_coordinate_representation_only"
+        ),
+        "drake_opensim_myosuite_human_validation": "unexecuted",
+        "state_triggered_model_robustness": "conditional_with_force_tradeoff",
+        "state_triggered_larger_timing_region": (
+            "falsified_in_registered_moving_base_planar_screen"
+        ),
+        "registered_model_sustained_recovery": "not_observed_in_60_cases",
+        "human_self_stabilization": "untested",
+        "high_proximal_velocity_universally_beneficial": (
+            "falsified_at_declared_planar_tiers"
+        ),
+        "shoulder_velocity_control_strategy": (
+            "conditional_on_phase_geometry_wrist_state_and_objective"
+        ),
+        "rotating_base_torso_velocity_transfer": (
+            "supported_conditionally_at_declared_reduced_model_tier"
+        ),
+        "human_torso_velocity_strategy": "untested",
+        "global_slack_benefit": "unsupported",
+        "single_channel_slack_class_identification": "not_established",
+        "individual_hand_allocation_from_net_wrench": ("structurally_unidentifiable"),
+        "bilateral_human_wrench_validation": "untested",
+        "synthetic_bilateral_point_force_sensor_qualification": (
+            "qualified_for_declared_synthetic_cases"
+        ),
+        "physical_bilateral_six_axis_device_validation": "untested",
+        "subject_scaled_spatial_contact_feasibility": (
+            "prescribed_states_rejected_closed_contact_forward_test_open"
+        ),
+        "subject_scaled_closed_contact_feasibility": (
+            "reduced_tree_closed_contact_screen_and_short_forward_initialization_passed"
+        ),
+        "closed_state_forward_initialization": (
+            "supported_for_234_mappings_and_54_short_cross_engine_cases"
+        ),
+        "closed_state_forward_validity_horizon": (
+            "no_failure_observed_through_registered_50_ms_reduced_model_interval"
+        ),
+        "subject_scaled_articulated_inertia": (
+            "native_common_state_mass_bias_and_inverse_dynamics_qualified"
+        ),
+        "subject_scaled_articulated_contact_projection": (
+            "same_state_bilateral_contact_projection_and_initial_acceleration_qualified"
+        ),
+        "bounded_articulated_forward_contact": (
+            "five_millisecond_bilateral_attachment_forward_gate_qualified"
+        ),
+        "typed_articulated_slack": (
+            "five_millisecond_typed_attachment_event_gate_qualified"
+        ),
+        "distributed_grip_discretization": (
+            "fifty_millisecond_distributed_fiber_gate_qualified"
+        ),
+        "articulated_shaft_bending_torsion": (
+            "fifty_millisecond_passive_shaft_gate_qualified_with_mixed_matched_outcomes"
+        ),
+        "articulated_ground_free_moment": (
+            "fifty_millisecond_finite_ground_gate_qualified_primary_match_empty"
+        ),
+        "scapulothoracic_contact_geometry": (
+            "partial_reachability_with_high_allocation_nullity_forward_test_open"
+        ),
+    },
+    "known_open_gates": [
+        "longer-horizon three-dimensional articulated contact with calibrated unilateral foot support, friction, tissue, and force-plate comparison",
+        "equipment-calibrated distributed beam and grip coupled into a subject-scaled forward solve",
+        "measured tissue-level preload and slack identification",
+        "governed held-out human experimental evaluation",
+        "external archive deposit and persistent identifier",
+    ],
+    "archive": {
+        "persistent_identifier_status": "pending_external_archive",
+        "reason": "Archive deposition is an external publication action and has not been executed.",
+    },
+}
+
+
 def build_release_manifest(root: str | Path) -> dict[str, Any]:
     """Build the current deterministic release qualification record."""
     root_path = Path(root).resolve()
@@ -53,141 +317,7 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
         }
         for path in _artifact_paths(root_path)
     }
-    return {
-        "schema_version": "proximal-distal-open-release-v1",
-        "release_id": "proximal-distal-model-ladder-2026-08",
-        "resource_framing": "neutral_open_research_resource",
-        "presets": {
-            "double_pendulum": {
-                "command": "python -m scripts.research.proximal_distal_energy.run_experiments",
-                "tier": "planar_open_chain",
-            },
-            "forward_two_hand": {
-                "command": "python -m scripts.research.proximal_distal_energy.run_forward_two_arm_study",
-                "tier": "planar_constrained_forward",
-            },
-            "moving_base_flexible_club": {
-                "command": "python -m scripts.research.proximal_distal_energy.run_moving_base_flexible_study",
-                "tier": "planar_coupled_base_flex",
-            },
-            "forward_modal_shaft": {
-                "command": "python -m scripts.research.proximal_distal_energy.run_moving_base_modal_shaft_study",
-                "tier": "planar_coupled_base_distributed_modal_shaft",
-            },
-            "shaft_beam_reference": {
-                "command": "python -m scripts.research.proximal_distal_energy.run_shaft_beam_reference",
-                "tier": "synthetic_distributed_shaft_comparison",
-            },
-            "torque_allocation_preload": {
-                "command": "python -m scripts.research.proximal_distal_energy.run_torque_allocation_preload_study",
-                "tier": "matched_task_allocation_and_phenomenological_transmission",
-            },
-            "spatial_common_state": {
-                "command": "python -m scripts.research.proximal_distal_energy.run_spatial_full_body_study",
-                "tier": "reduced_full_body_common_state",
-            },
-            "spatial_forward_contact": {
-                "command": "python -m scripts.research.proximal_distal_energy.run_spatial_forward_contact_study",
-                "tier": "reduced_two_engine_forward_contact",
-            },
-            "uncertainty_control": {
-                "command": "python -m scripts.research.proximal_distal_energy.run_uncertainty_control_study",
-                "tier": "coupled_uncertainty_control",
-            },
-            "experimental_readiness": {
-                "command": "python -m scripts.research.proximal_distal_energy.run_experimental_protocol_dry_run",
-                "tier": "synthetic_protocol_qualification_only",
-            },
-            "advanced_biological_bridge": {
-                "command": "python -m scripts.research.proximal_distal_energy.run_advanced_biological_bridge",
-                "tier": "frame_invariance_and_reduced_hill_type_mechanism",
-            },
-            "transmission_robustness": {
-                "command": "python -m scripts.research.proximal_distal_energy.run_transmission_robustness_study",
-                "tier": "paired_state_trigger_and_task_robustness",
-            },
-            "timing_viability_adverse_load": {
-                "command": "python -m scripts.research.proximal_distal_energy.run_timing_viability_study",
-                "tier": "common_phase_paired_adverse_load_recovery",
-            },
-            "typed_slack_dynamic_audit": {
-                "command": "python -m scripts.research.proximal_distal_energy.run_typed_slack_dynamic_study",
-                "tier": "synthetic_scalar_dynamic_constitutive_screen",
-            },
-            "shoulder_velocity_pointwise": {
-                "command": "python -m scripts.research.proximal_distal_energy.run_shoulder_velocity_transfer_study",
-                "tier": "planar_fixed_hub_pointwise_phase_sensitivity",
-            },
-            "shoulder_velocity_strategy": {
-                "command": "python -m scripts.research.proximal_distal_energy.run_shoulder_velocity_strategy_study",
-                "tier": "planar_fixed_hub_control_program_search",
-            },
-            "joint_matched_proximal_rate": {
-                "command": "python -m scripts.research.proximal_distal_energy.run_joint_matched_proximal_rate_study",
-                "tier": "planar_fixed_hub_joint_work_load_matching_screen",
-            },
-            "rotating_base_torso_velocity": {
-                "command": "python -m scripts.research.proximal_distal_energy.run_rotating_base_torso_velocity_study",
-                "tier": "planar_rotating_base_two_hand_compliant_club",
-            },
-        },
-        "claims": {
-            "interaction_dynamics_planar": "supported_at_declared_model_tier",
-            "geometry_transfer_spatial_common_state": "supported_at_declared_model_tier",
-            "distributed_shaft_modal_reduction": "supported_on_synthetic_structural_case",
-            "distributed_modal_shaft_coupled_forward": (
-                "supported_at_declared_planar_mechanism_tier"
-            ),
-            "arm_wrist_allocation_equivalence": (
-                "supported_for_the_declared_same_state_club_task"
-            ),
-            "preload_continuity_advantage": (
-                "conditional_on_the_declared_dead_zone_transmission_family"
-            ),
-            "scapular_or_muscle_strategy_identification": "unsupported",
-            "passive_negative_couple_spatial_forward": (
-                "supported_at_declared_reduced_contact_tier"
-            ),
-            "universal_control_strategy": "unsupported",
-            "human_experimental": "untested",
-            "reference_frame_power_invariance": "supported_to_declared_numerical_tolerance",
-            "muscle_redundancy_same_moment": "supported_at_reduced_hill_type_tier",
-            "canonical_pose_adapter_round_trip": (
-                "supported_for_coordinate_representation_only"
-            ),
-            "drake_opensim_myosuite_human_validation": "unexecuted",
-            "state_triggered_model_robustness": "conditional_with_force_tradeoff",
-            "state_triggered_larger_timing_region": (
-                "falsified_in_registered_moving_base_planar_screen"
-            ),
-            "registered_model_sustained_recovery": "not_observed_in_60_cases",
-            "human_self_stabilization": "untested",
-            "high_proximal_velocity_universally_beneficial": (
-                "falsified_at_declared_planar_tiers"
-            ),
-            "shoulder_velocity_control_strategy": (
-                "conditional_on_phase_geometry_wrist_state_and_objective"
-            ),
-            "rotating_base_torso_velocity_transfer": (
-                "supported_conditionally_at_declared_reduced_model_tier"
-            ),
-            "human_torso_velocity_strategy": "untested",
-            "global_slack_benefit": "unsupported",
-            "single_channel_slack_class_identification": "not_established",
-        },
-        "known_open_gates": [
-            "subject-scaled articulated spatial contact with calibrated grip and distributed shaft",
-            "equipment-calibrated distributed beam and grip coupled into a subject-scaled forward solve",
-            "measured tissue-level preload and slack identification",
-            "governed held-out human experimental evaluation",
-            "external archive deposit and persistent identifier",
-        ],
-        "archive": {
-            "persistent_identifier_status": "pending_external_archive",
-            "reason": "Archive deposition is an external publication action and has not been executed.",
-        },
-        "artifacts": artifacts,
-    }
+    return {**_RELEASE_METADATA, "artifacts": artifacts}
 
 
 def validate_release_manifest(

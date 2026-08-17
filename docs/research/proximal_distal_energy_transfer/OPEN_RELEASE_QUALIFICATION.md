@@ -73,8 +73,8 @@ participant data are included or authorized for public release.
 
 ## Open Completion Gates
 
-The manifest records, rather than conceals, five open gates: subject-scaled
-articulated spatial contact with calibrated grip and distributed shaft; an
+The manifest records, rather than conceals, five open gates: full-horizon
+subject-scaled articulated spatial contact with calibrated grip and distributed shaft; an
 equipment-calibrated distributed beam and grip coupled into a subject-scaled
 forward solve; measured tissue-level preload and slack identification;
 governed held-out human evaluation; and external archival deposit with a

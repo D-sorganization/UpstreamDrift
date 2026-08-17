@@ -1,0 +1,991 @@
+{
+  "claim_boundary": {
+    "anatomical_validity": "not_established",
+    "equipment_calibration": "not_established",
+    "forward_trajectory_parity": "not_yet_evaluated",
+    "human_or_coaching_strategy": "not_established",
+    "reduced_state_initialization": "evaluated"
+  },
+  "design": {
+    "case_count": 18,
+    "configuration": {
+      "canonical_club_center_m": [
+        0.58,
+        0.0,
+        1.18
+      ],
+      "perturbation_m": 0.001,
+      "position_closure_tolerance_m": 0.0005,
+      "velocity_closure_tolerance_m_s": 0.005,
+      "work_power_tolerance_w": 1e-10,
+      "zero_preload_force_tolerance_n": 1e-08
+    },
+    "frame_map": "constant initial club-frame rotation and translation; velocities rotate without boost",
+    "mapped_state_count": 234,
+    "time_sample_count": 13,
+    "velocity_estimator": "second-order finite differences along each closed IK path"
+  },
+  "forward_subset": {
+    "all_initial_state_digests_match": true,
+    "cases": [
+      {
+        "case_index": 0,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.12,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 5.960464477539063e-08,
+          "club_position_max_m": 5.945674959447649e-08,
+          "club_position_rms_m": 1.975825923208453e-08,
+          "contact_wrench_relative_rms": 0.00011556548612488551,
+          "normalized_energy_discrepancy": 4.685666965542623e-08
+        },
+        "phase_index": 0,
+        "profile_id": "f-1.55",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 0,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.12,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 5.16191365590357e-08,
+          "club_position_max_m": 8.250944461147468e-08,
+          "club_position_rms_m": 2.7956004940152937e-08,
+          "contact_wrench_relative_rms": 0.0001387448829751752,
+          "normalized_energy_discrepancy": 2.1305315911490652e-07
+        },
+        "phase_index": 6,
+        "profile_id": "f-1.55",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 0,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.12,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 6.664001874625056e-08,
+          "club_position_max_m": 7.50565138464006e-08,
+          "club_position_rms_m": 2.5010545236843705e-08,
+          "contact_wrench_relative_rms": 0.00013328812096217692,
+          "normalized_energy_discrepancy": 3.160483430519889e-08
+        },
+        "phase_index": 12,
+        "profile_id": "f-1.55",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 1,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.18,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 5.960464477539063e-08,
+          "club_position_max_m": 5.9525628962768796e-08,
+          "club_position_rms_m": 1.977583534157446e-08,
+          "contact_wrench_relative_rms": 0.00011640266073398731,
+          "normalized_energy_discrepancy": 4.653054475056706e-08
+        },
+        "phase_index": 0,
+        "profile_id": "f-1.55",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 1,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.18,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 0.0,
+          "club_position_max_m": 8.190659928899967e-08,
+          "club_position_rms_m": 2.7800747389134818e-08,
+          "contact_wrench_relative_rms": 0.00014078362936159982,
+          "normalized_energy_discrepancy": 2.1579717213171534e-07
+        },
+        "phase_index": 6,
+        "profile_id": "f-1.55",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 1,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.18,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 5.960464477539063e-08,
+          "club_position_max_m": 7.530828072413138e-08,
+          "club_position_rms_m": 2.5074980020139345e-08,
+          "contact_wrench_relative_rms": 0.0001385627582529309,
+          "normalized_energy_discrepancy": 3.337525278368503e-08
+        },
+        "phase_index": 12,
+        "profile_id": "f-1.55",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 2,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.24,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 2.9802322387695312e-08,
+          "club_position_max_m": 5.959837913488986e-08,
+          "club_position_rms_m": 1.9795313986248702e-08,
+          "contact_wrench_relative_rms": 0.00011730228688950579,
+          "normalized_energy_discrepancy": 4.617710125387475e-08
+        },
+        "phase_index": 0,
+        "profile_id": "f-1.55",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 2,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.24,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 5.960464477539063e-08,
+          "club_position_max_m": 8.128873401241267e-08,
+          "club_position_rms_m": 2.7631890382387975e-08,
+          "contact_wrench_relative_rms": 0.00014334565044118208,
+          "normalized_energy_discrepancy": 2.1879264977542334e-07
+        },
+        "phase_index": 6,
+        "profile_id": "f-1.55",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 2,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.24,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 6.664001874625056e-08,
+          "club_position_max_m": 7.558600316876902e-08,
+          "club_position_rms_m": 2.5149555878855096e-08,
+          "contact_wrench_relative_rms": 0.00014422643715819052,
+          "normalized_energy_discrepancy": 3.535362580464607e-08
+        },
+        "phase_index": 12,
+        "profile_id": "f-1.55",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 3,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.12,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 2.9802322387695312e-08,
+          "club_position_max_m": 5.925396119563518e-08,
+          "club_position_rms_m": 1.9712081336688536e-08,
+          "contact_wrench_relative_rms": 0.0001157213097937595,
+          "normalized_energy_discrepancy": 4.431419853290208e-08
+        },
+        "phase_index": 0,
+        "profile_id": "f-1.75",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 3,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.12,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 7.884953353001448e-08,
+          "club_position_max_m": 8.267923450766551e-08,
+          "club_position_rms_m": 2.8003277381626233e-08,
+          "contact_wrench_relative_rms": 0.00013889198913574736,
+          "normalized_energy_discrepancy": 2.1273819150735562e-07
+        },
+        "phase_index": 6,
+        "profile_id": "f-1.75",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 3,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.12,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 6.664001874625056e-08,
+          "club_position_max_m": 7.456824327483078e-08,
+          "club_position_rms_m": 2.4894518637261434e-08,
+          "contact_wrench_relative_rms": 0.00012839655692902487,
+          "normalized_energy_discrepancy": 2.592594761097189e-08
+        },
+        "phase_index": 12,
+        "profile_id": "f-1.75",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 4,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.18,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 5.16191365590357e-08,
+          "club_position_max_m": 5.9311413047095465e-08,
+          "club_position_rms_m": 1.9726766622077623e-08,
+          "contact_wrench_relative_rms": 0.00011643361273391585,
+          "normalized_energy_discrepancy": 4.4040959323865536e-08
+        },
+        "phase_index": 0,
+        "profile_id": "f-1.75",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 4,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.18,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 5.960464477539063e-08,
+          "club_position_max_m": 8.218594255166265e-08,
+          "club_position_rms_m": 2.7877309733804797e-08,
+          "contact_wrench_relative_rms": 0.00014026429223261785,
+          "normalized_energy_discrepancy": 2.1494348168005217e-07
+        },
+        "phase_index": 6,
+        "profile_id": "f-1.75",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 4,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.18,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 7.300048299977715e-08,
+          "club_position_max_m": 7.475830491757094e-08,
+          "club_position_rms_m": 2.4943048743121936e-08,
+          "contact_wrench_relative_rms": 0.00013239416214763246,
+          "normalized_energy_discrepancy": 2.729019321634496e-08
+        },
+        "phase_index": 12,
+        "profile_id": "f-1.75",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 5,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.24,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 4.2146848510894035e-08,
+          "club_position_max_m": 5.937176482257665e-08,
+          "club_position_rms_m": 1.9742956569928818e-08,
+          "contact_wrench_relative_rms": 0.00011719506048896845,
+          "normalized_energy_discrepancy": 4.374089357384037e-08
+        },
+        "phase_index": 0,
+        "profile_id": "f-1.75",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 5,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.24,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 0.0,
+          "club_position_max_m": 8.167995256203515e-08,
+          "club_position_rms_m": 2.774016780498786e-08,
+          "contact_wrench_relative_rms": 0.00014199827246649566,
+          "normalized_energy_discrepancy": 2.1737733923998803e-07
+        },
+        "phase_index": 6,
+        "profile_id": "f-1.75",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 5,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.24,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 4.2146848510894035e-08,
+          "club_position_max_m": 7.496810925604167e-08,
+          "club_position_rms_m": 2.4999277230933296e-08,
+          "contact_wrench_relative_rms": 0.0001367267230243019,
+          "normalized_energy_discrepancy": 2.884450722717702e-08
+        },
+        "phase_index": 12,
+        "profile_id": "f-1.75",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 6,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.12,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 6.664001874625056e-08,
+          "club_position_max_m": 5.910566924570355e-08,
+          "club_position_rms_m": 1.9678657246593615e-08,
+          "contact_wrench_relative_rms": 0.00011582012453329105,
+          "normalized_energy_discrepancy": 4.227889682795194e-08
+        },
+        "phase_index": 0,
+        "profile_id": "f-1.95",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 6,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.12,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 2.9802322387695312e-08,
+          "club_position_max_m": 8.281407676759608e-08,
+          "club_position_rms_m": 2.8039970101701008e-08,
+          "contact_wrench_relative_rms": 0.00013908413036453588,
+          "normalized_energy_discrepancy": 2.1258072990804067e-07
+        },
+        "phase_index": 6,
+        "profile_id": "f-1.95",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 6,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.12,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 2.9802322387695312e-08,
+          "club_position_max_m": 7.421463299565983e-08,
+          "club_position_rms_m": 2.4811120573933526e-08,
+          "contact_wrench_relative_rms": 0.00012493714751328423,
+          "normalized_energy_discrepancy": 2.1711903386290032e-08
+        },
+        "phase_index": 12,
+        "profile_id": "f-1.95",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 7,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.18,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 5.960464477539063e-08,
+          "club_position_max_m": 5.915493280089293e-08,
+          "club_position_rms_m": 1.9691300485136295e-08,
+          "contact_wrench_relative_rms": 0.00011643880157372062,
+          "normalized_energy_discrepancy": 4.20249541832618e-08
+        },
+        "phase_index": 0,
+        "profile_id": "f-1.95",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 7,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.18,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 0.0,
+          "club_position_max_m": 8.240434226621341e-08,
+          "club_position_rms_m": 2.7936031784341103e-08,
+          "contact_wrench_relative_rms": 0.00014003424016755846,
+          "normalized_energy_discrepancy": 2.1437882935515518e-07
+        },
+        "phase_index": 6,
+        "profile_id": "f-1.95",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 7,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.18,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 5.960464477539063e-08,
+          "club_position_max_m": 7.436211193500184e-08,
+          "club_position_rms_m": 2.4848732622217228e-08,
+          "contact_wrench_relative_rms": 0.00012804385741194607,
+          "normalized_energy_discrepancy": 2.2827880030718006e-08
+        },
+        "phase_index": 12,
+        "profile_id": "f-1.95",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 8,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.24,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 7.300048299977715e-08,
+          "club_position_max_m": 5.9206447505552205e-08,
+          "club_position_rms_m": 1.9705165283306243e-08,
+          "contact_wrench_relative_rms": 0.00011709790490001875,
+          "normalized_energy_discrepancy": 4.1760880975516557e-08
+        },
+        "phase_index": 0,
+        "profile_id": "f-1.95",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 8,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.24,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 2.9802322387695312e-08,
+          "club_position_max_m": 8.198388946289118e-08,
+          "club_position_rms_m": 2.7822804288911584e-08,
+          "contact_wrench_relative_rms": 0.00014123885539783974,
+          "normalized_energy_discrepancy": 2.1638661351630617e-07
+        },
+        "phase_index": 6,
+        "profile_id": "f-1.95",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 8,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.24,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 5.16191365590357e-08,
+          "club_position_max_m": 7.452403244618863e-08,
+          "club_position_rms_m": 2.4892062296239753e-08,
+          "contact_wrench_relative_rms": 0.00013142547997481525,
+          "normalized_energy_discrepancy": 2.4096397766015798e-08
+        },
+        "phase_index": 12,
+        "profile_id": "f-1.95",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 9,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.12,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 4.2146848510894035e-08,
+          "club_position_max_m": 5.937727712261099e-08,
+          "club_position_rms_m": 1.9740039216815258e-08,
+          "contact_wrench_relative_rms": 0.00011562157620214487,
+          "normalized_energy_discrepancy": 4.5894152478354044e-08
+        },
+        "phase_index": 0,
+        "profile_id": "m-1.55",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 9,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.12,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 2.9802322387695312e-08,
+          "club_position_max_m": 8.256665325566756e-08,
+          "club_position_rms_m": 2.7971883634817964e-08,
+          "contact_wrench_relative_rms": 0.00013876970235155247,
+          "normalized_energy_discrepancy": 2.1293937457755874e-07
+        },
+        "phase_index": 6,
+        "profile_id": "m-1.55",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 9,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.12,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 2.9802322387695312e-08,
+          "club_position_max_m": 7.48708845416051e-08,
+          "club_position_rms_m": 2.4966614120269524e-08,
+          "contact_wrench_relative_rms": 0.00013143109355380446,
+          "normalized_energy_discrepancy": 2.946722688079717e-08
+        },
+        "phase_index": 12,
+        "profile_id": "m-1.55",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 10,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.18,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 4.2146848510894035e-08,
+          "club_position_max_m": 5.944055197604343e-08,
+          "club_position_rms_m": 1.97561385814706e-08,
+          "contact_wrench_relative_rms": 0.00011640143466582769,
+          "normalized_energy_discrepancy": 4.561059441243742e-08
+        },
+        "phase_index": 0,
+        "profile_id": "m-1.55",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 10,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.18,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 5.16191365590357e-08,
+          "club_position_max_m": 8.200448489372275e-08,
+          "club_position_rms_m": 2.782744898842918e-08,
+          "contact_wrench_relative_rms": 0.00014054433580258348,
+          "normalized_energy_discrepancy": 2.1548578565955268e-07
+        },
+        "phase_index": 6,
+        "profile_id": "m-1.55",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 10,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.18,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 4.2146848510894035e-08,
+          "club_position_max_m": 7.509837879884549e-08,
+          "club_position_rms_m": 2.5024811839901224e-08,
+          "contact_wrench_relative_rms": 0.00013621053243277373,
+          "normalized_energy_discrepancy": 3.1050523929820883e-08
+        },
+        "phase_index": 12,
+        "profile_id": "m-1.55",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 11,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.24,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 5.16191365590357e-08,
+          "club_position_max_m": 5.950725527362634e-08,
+          "club_position_rms_m": 1.9773965654866646e-08,
+          "contact_wrench_relative_rms": 0.00011723787766801612,
+          "normalized_energy_discrepancy": 4.529495889471491e-08
+        },
+        "phase_index": 0,
+        "profile_id": "m-1.55",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 11,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.24,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 4.2146848510894035e-08,
+          "club_position_max_m": 8.142841718103982e-08,
+          "club_position_rms_m": 2.767039856694491e-08,
+          "contact_wrench_relative_rms": 0.0001427751837186024,
+          "normalized_energy_discrepancy": 2.1825823459664662e-07
+        },
+        "phase_index": 6,
+        "profile_id": "m-1.55",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 11,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.24,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 7.884953353001448e-08,
+          "club_position_max_m": 7.534894980986303e-08,
+          "club_position_rms_m": 2.5092074156400022e-08,
+          "contact_wrench_relative_rms": 0.00014135521492103032,
+          "normalized_energy_discrepancy": 3.281347638051102e-08
+        },
+        "phase_index": 12,
+        "profile_id": "m-1.55",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 12,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.12,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 2.9802322387695312e-08,
+          "club_position_max_m": 5.9187137267656105e-08,
+          "club_position_rms_m": 1.969679067951849e-08,
+          "contact_wrench_relative_rms": 0.00011574206041204469,
+          "normalized_energy_discrepancy": 4.3508665115155054e-08
+        },
+        "phase_index": 0,
+        "profile_id": "m-1.75",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 12,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.12,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 2.9802322387695312e-08,
+          "club_position_max_m": 8.272945365521002e-08,
+          "club_position_rms_m": 2.8016778008805365e-08,
+          "contact_wrench_relative_rms": 0.00013895261281507423,
+          "normalized_energy_discrepancy": 2.127146423447357e-07
+        },
+        "phase_index": 6,
+        "profile_id": "m-1.75",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 12,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.12,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 5.16191365590357e-08,
+          "club_position_max_m": 7.441690784872282e-08,
+          "club_position_rms_m": 2.4858865485381733e-08,
+          "contact_wrench_relative_rms": 0.00012689568137635613,
+          "normalized_energy_discrepancy": 2.4000655685085803e-08
+        },
+        "phase_index": 12,
+        "profile_id": "m-1.75",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 13,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.18,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 2.9802322387695312e-08,
+          "club_position_max_m": 5.9239837948283835e-08,
+          "club_position_rms_m": 1.9710239893560354e-08,
+          "contact_wrench_relative_rms": 0.00011640475602442134,
+          "normalized_energy_discrepancy": 4.3272544658634615e-08
+        },
+        "phase_index": 0,
+        "profile_id": "m-1.75",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 13,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.18,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 2.9802322387695312e-08,
+          "club_position_max_m": 8.227123048680442e-08,
+          "club_position_rms_m": 2.7899994108851635e-08,
+          "contact_wrench_relative_rms": 0.0001401438664658545,
+          "normalized_energy_discrepancy": 2.1476249578711304e-07
+        },
+        "phase_index": 6,
+        "profile_id": "m-1.75",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 13,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.18,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 4.2146848510894035e-08,
+          "club_position_max_m": 7.458851316844109e-08,
+          "club_position_rms_m": 2.4902653368726485e-08,
+          "contact_wrench_relative_rms": 0.00013049869487511336,
+          "normalized_energy_discrepancy": 2.5187571139895226e-08
+        },
+        "phase_index": 12,
+        "profile_id": "m-1.75",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 14,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.24,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 4.2146848510894035e-08,
+          "club_position_max_m": 5.929504697182611e-08,
+          "club_position_rms_m": 1.9725045310367934e-08,
+          "contact_wrench_relative_rms": 0.00011711144284707064,
+          "normalized_energy_discrepancy": 4.300569678150623e-08
+        },
+        "phase_index": 0,
+        "profile_id": "m-1.75",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 14,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.24,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 2.9802322387695312e-08,
+          "club_position_max_m": 8.180152770541262e-08,
+          "club_position_rms_m": 2.7772930742963032e-08,
+          "contact_wrench_relative_rms": 0.00014165014777028706,
+          "normalized_energy_discrepancy": 2.1702729569028634e-07
+        },
+        "phase_index": 6,
+        "profile_id": "m-1.75",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 14,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.24,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 7.884953353001448e-08,
+          "club_position_max_m": 7.477869185600622e-08,
+          "club_position_rms_m": 2.4953608866517154e-08,
+          "contact_wrench_relative_rms": 0.00013442327365417083,
+          "normalized_energy_discrepancy": 2.6560387667018404e-08
+        },
+        "phase_index": 12,
+        "profile_id": "m-1.75",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 15,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.12,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 5.16191365590357e-08,
+          "club_position_max_m": 5.904976880448443e-08,
+          "club_position_rms_m": 1.9665925401671644e-08,
+          "contact_wrench_relative_rms": 0.00011582809161034763,
+          "normalized_energy_discrepancy": 4.160502342642758e-08
+        },
+        "phase_index": 0,
+        "profile_id": "m-1.95",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 15,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.12,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 5.16191365590357e-08,
+          "club_position_max_m": 8.286002431259712e-08,
+          "club_position_rms_m": 2.8052126759904236e-08,
+          "contact_wrench_relative_rms": 0.00013917463471860213,
+          "normalized_energy_discrepancy": 2.126119351686384e-07
+        },
+        "phase_index": 6,
+        "profile_id": "m-1.95",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 15,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.12,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 5.16191365590357e-08,
+          "club_position_max_m": 7.40901826359319e-08,
+          "club_position_rms_m": 2.478191838050391e-08,
+          "contact_wrench_relative_rms": 0.0001237341332367353,
+          "normalized_energy_discrepancy": 1.998631482535984e-08
+        },
+        "phase_index": 12,
+        "profile_id": "m-1.95",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 16,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.18,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 5.960464477539063e-08,
+          "club_position_max_m": 5.909530247323644e-08,
+          "club_position_rms_m": 1.967761848003959e-08,
+          "contact_wrench_relative_rms": 0.00011640687005771169,
+          "normalized_energy_discrepancy": 4.138128240072092e-08
+        },
+        "phase_index": 0,
+        "profile_id": "m-1.95",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 16,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.18,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 2.9802322387695312e-08,
+          "club_position_max_m": 8.248089602614716e-08,
+          "club_position_rms_m": 2.79561417316431e-08,
+          "contact_wrench_relative_rms": 0.00014000154929014023,
+          "normalized_energy_discrepancy": 2.142834709673025e-07
+        },
+        "phase_index": 6,
+        "profile_id": "m-1.95",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 16,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.18,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 5.960464477539063e-08,
+          "club_position_max_m": 7.42231775629214e-08,
+          "club_position_rms_m": 2.4815796855277807e-08,
+          "contact_wrench_relative_rms": 0.00012652744599237102,
+          "normalized_energy_discrepancy": 2.0943305756304653e-08
+        },
+        "phase_index": 12,
+        "profile_id": "m-1.95",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 17,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.24,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 7.300048299977715e-08,
+          "club_position_max_m": 5.914283785756611e-08,
+          "club_position_rms_m": 1.9690434305907897e-08,
+          "contact_wrench_relative_rms": 0.00011702235675542832,
+          "normalized_energy_discrepancy": 4.114240326202889e-08
+        },
+        "phase_index": 0,
+        "profile_id": "m-1.95",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 17,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.24,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 2.9802322387695312e-08,
+          "club_position_max_m": 8.209218304076289e-08,
+          "club_position_rms_m": 2.7851653861513292e-08,
+          "contact_wrench_relative_rms": 0.00014105056535323925,
+          "normalized_energy_discrepancy": 2.1615900180904646e-07
+        },
+        "phase_index": 6,
+        "profile_id": "m-1.95",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      },
+      {
+        "case_index": 17,
+        "energy_gate_passed": true,
+        "grip_span_m": 0.24,
+        "initial_state_digest_match": true,
+        "observed_metrics": {
+          "club_orientation_max_rad": 4.2146848510894035e-08,
+          "club_position_max_m": 7.436973088167496e-08,
+          "club_position_rms_m": 2.485496708992787e-08,
+          "contact_wrench_relative_rms": 0.0001295819854828236,
+          "normalized_energy_discrepancy": 2.2049789549782872e-08
+        },
+        "phase_index": 12,
+        "profile_id": "m-1.95",
+        "trajectory_gate_passed": true,
+        "wrench_gate_passed": true
+      }
+    ],
+    "declared_tolerances": {
+      "club_orientation_max_limit_rad": 0.035,
+      "club_position_max_limit_m": 0.009,
+      "club_position_rms_limit_m": 0.003,
+      "contact_wrench_relative_rms_limit": 0.1,
+      "normalized_energy_discrepancy_limit": 0.08
+    },
+    "energy_gate_passed": true,
+    "phase_indices": [
+      0,
+      6,
+      12
+    ],
+    "subset_case_count": 54,
+    "tolerance_calibration": "Existing reduced-forward engineering acceptance regions, applied unchanged to the 4 ms closed-state initialization audit; they are not empirical confidence intervals.",
+    "trajectory_gate_passed": true,
+    "wrench_gate_passed": true
+  },
+  "results": {
+    "constitutive_controls": {
+      "action_reaction_residual_n": 0.0,
+      "damping_passive": true,
+      "dissipated_power_w": -0.7200000000000001,
+      "maximum_zero_preload_force_n": 0.0,
+      "stored_power_w": 0.36000000000000004
+    },
+    "maximum_position_closure_error_m": 1.1581682065114323e-10,
+    "maximum_velocity_closure_error_m_s": 0.001284305399522663,
+    "position_closure_gate_passed": true,
+    "unique_initial_state_digest_count": 234,
+    "velocity_closure_gate_passed": true
+  },
+  "schema_version": "closed-state-forward-bridge/v1",
+  "source_schema_version": "subject-scaled-closed-contact/v1",
+  "source_sha256": {
+    "scripts/research/proximal_distal_energy/closed_state_forward_bridge.py": "c40fe682dc2d67367481b99b2fb77571d5c018cac0cbc4efd5fc445379e7c1aa",
+    "scripts/research/proximal_distal_energy/run_closed_state_forward_bridge.py": "2036e603bdacfeb14ce7c105d2a9a86ac89bde40161e1a049bf3ceba99af0ef3",
+    "scripts/research/proximal_distal_energy/spatial_forward_contract.py": "04bb646557de3516d106806e50d7ace90f2ac9243a5a1a57b83a4d6381af071c",
+    "scripts/research/proximal_distal_energy/spatial_forward_engines.py": "4c85f6868cfcbaa43d6a4a3dd6e0a19738bbeb72b8b48b93684d58997c0471da"
+  },
+  "study_id": "subject-scaled-closed-state-forward-contact-bridge"
+}
