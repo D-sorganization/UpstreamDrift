@@ -105,6 +105,50 @@ new physics and not calibration: the field inherits `BEYOND_VALIDATION`, and a
 patch trend read across a bounce sweep is reported as a bounce-and-camber
 trend wherever the declared camber was substituted (#8698).
 
+Issue #8709 (epic #8699) selects the sand-solving tier that backs field
+visualization, recorded as ADR-0033 amending ADR-0032. The epic had assumed the
+MuJoCo F3 grain proxy was available now; measurement withdraws that premise.
+`MPMDriver.setup()` raises before any step, because the generated MJCF omits a
+`density` attribute on grain geoms, so MuJoCo applies its 1000 kg/m^3 default
+instead of the configured 2650 kg/m^3 silica and the 0.4 mm grain inertia
+(5.36e-16) falls below `mjMINVAL`; the measured minimum representable radius is
+0.2266 mm at default density against 0.1864 mm at silica density. The
+`MAX_SPHERES = 1000` cap does not thin the bed but destroys it: the placed
+grains form a single-grain-thick line at y = -0.1496 m, an implied bed depth of
+0.00116 grain diameters, with 0 of 1000 grains inside the clubhead's 50 mm
+y-band, so a repaired run would sweep vacuum and return an identically zero
+wrench. `MPMDriver.run()` also never calls the existing
+`write_grain_state`, so no grain reaches disk. A best-case repaired proxy was
+then benchmarked directly: 3,840 spheres at 18.5 s per 20 ms shot, with 10,000
+spheres failing to allocate, fixing the tractable ceiling near 4,000 spheres --
+1.79e-5 of the 2.149e8 true-scale grains and 0.028 % of the bed by volume,
+which bins to 0.125 grains per cell on a 20^3 grid. Track B requires fields
+(#8710 velocity and density on a grid, #8711 cross-sections with shear
+overlays), which that sample cannot carry, so the decision is F1, narrowed from
+ADR-0032's "reduced-order / 2-D plane-strain continuum" to a 2-D plane-strain
+**MPM** solver: a continuum produces a field by construction, SPH's
+blade-thickness floor follows it into plane strain, and MPM shares its
+constitutive model with the F2 reference. F1 is specified at bulk resolution
+(dx ~ 1-2 mm) for 10-100 mm flow features and is therefore barred from
+reporting club force, which remains F0's. The ball becomes a body inside F1 as
+a plane-strain circular section so that "sand reaching the ball" acquires a
+referent it never had at F0, but it is an infinite cylinder rather than a
+sphere, its flux is per unit width, ball launch stays on the #8657 F0 path, and
+any heel-toe or out-of-plane distribution is refused rather than approximated.
+Field frames are marked illustrative in the raster and in the API rather than
+in captions: provenance composited into the pixels, ordinal colourbars with no
+numeric ticks for non-quotable quantities, a distinct non-photorealistic
+identity, and an export path whose validity verdict has no default. Cross-tier
+comparison against F0 on wrench, depth and divot is a consistency check between
+two uncalibrated models, not a validation; F1's per-unit-width wrench compares
+on shape and timing unconditionally and on magnitude only once the assumed
+effective width is recorded in the manifest. Validation remains at NASA-STD-
+7009B level 0 of 4 against a threshold of 3, with the design point 63.1x
+3D-RFT's stated Froude limit at clubhead scale and 282.2x at the 5 mm leading
+edge, so no F1 output is a physical prediction. The driver defects are tracked
+separately; the tier is not usable until they are repaired or the backend is
+removed.
+
 Child issue #8697 then couples two first bending modes and one torsional mode
 to that distributed-grip authority. Its registered 0.25/0.125 ms atlas covers
 384 trajectories and 1,536 nested-horizon summaries. Domain, activation,
@@ -3502,6 +3546,31 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Passing source qualification shall establish traceability and bounded claim
   fit only. It shall not close model, equipment, anatomy, archive, or governed
   participant-held-out human gates.
+
+### F-8557.26: Finite Ground and Intrinsic Free-Moment Pathway
+
+- The finite-base model shall transform only the articulated human body tree;
+  the independently rooted club shall remain coupled through the qualified
+  distributed grip and passive shaft pathways.
+- Base translation and pitch shall enter inertia, posture-varying Christoffel
+  bias, gravity, hand-contact geometry, generalized grip reaction, ground
+  storage/damping, and the closed work--energy ledger. Fixed base shall reduce
+  exactly to the qualified shaft solver.
+- Ground force, intrinsic free moment, and reference-transported moment shall
+  remain distinct. Reversing the center-of-pressure reference shall change
+  only the transported moment, never generalized force or trajectory.
+- Fixed, translation-only, free-moment-only, and coupled pathways shall use
+  common rigid and natural-zero elastic/base initial states. Rigid-shaft and
+  horizontal-restraint-removed controls, velocity reversal, two native
+  engines, time refinement, matched-load/work screening, and domain gates
+  shall be retained.
+- Natural-zero, gravity-only, and conditional base balance shall be reported as
+  separate initialization sensitivities. A base-force balance shall not be
+  called whole-mechanism equilibrium.
+- Zero horizontal stiffness/damping shall be labeled removal of modeled
+  horizontal restraint, not complete Coulomb friction, unilateral contact, or
+  foot mechanics. Synthetic parameters shall not be called force-plate,
+  equipment, participant, human-transfer, timing, or coaching validation.
 - Use `np.vdot` instead of `np.sum(x**2)` and `np.sqrt(np.einsum("ij,ij->i", x, x))` instead of `np.linalg.norm(x, axis=1)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
 - Use `np.einsum('ij,ij->j', x, x)` instead of `np.sum(x * x, axis=0)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
 - (spec-exempt: micro-optimization) Replaced `.iterrows()` with `.to_dict('records')` in `data_processor_widget.py`, `kaggle_validation.py`, and `launch_monitor_analytics/widgets.py` to optimize UI and validation performance.

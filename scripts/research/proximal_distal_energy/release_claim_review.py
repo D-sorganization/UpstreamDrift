@@ -276,6 +276,12 @@ REVIEW_SPECS: dict[str, dict[str, Any]] = {
         ("PD-CLAIM-289", "PD-CLAIM-290", "PD-CLAIM-291", "PD-CLAIM-292"),
         "Calibrate distributed grip and shaft properties, add higher-mode fast-load and finite-ground pathways, then test governed delivery, impact, and human outcomes.",
     ),
+    "articulated_ground_free_moment": _spec(
+        "reviewed_as_synthetic_finite_base_result_with_adverse_primary_match",
+        "fifty_millisecond_finite_ground_gate_qualified_primary_match_empty",
+        ("PD-CLAIM-293", "PD-CLAIM-294", "PD-CLAIM-295", "PD-CLAIM-296"),
+        "Replace bilateral linear support with calibrated unilateral three-dimensional foot contact and force-plate observations, then repeat matched delivery and governed human tests.",
+    ),
     "scapulothoracic_contact_geometry": _spec(
         "reviewed_as_paired_geometry_screen_with_explicit_boundaries",
         "paired_geometry_screen_partial_with_explicit_boundaries",

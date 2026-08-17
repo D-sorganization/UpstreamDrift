@@ -14,10 +14,14 @@ This is current operational state. Historical detail belongs in git/GitHub.
 - [#8684](https://github.com/D-sorganization/UpstreamDrift/issues/8684)
   governs distributed grip, shaft, and ground pathways. #8685 completed grip
   discretization. [#8697](https://github.com/D-sorganization/UpstreamDrift/issues/8697)
-  is the active shaft child on branch `research/8684-articulated-shaft-8697`.
+  completed the shaft child.
   Protected PR [#8715](https://github.com/D-sorganization/UpstreamDrift/pull/8715)
-  merged as `0c988f05a`. A narrow follow-up records the qualification in
-  `SPEC.md` without applying the freshness-bypass label.
+  merged as `0c988f05a`; SPEC/handoff follow-up
+  [#8717](https://github.com/D-sorganization/UpstreamDrift/pull/8717) merged as
+  `051f8dccc`. Both are verified ancestors of remote main.
+- [#8719](https://github.com/D-sorganization/UpstreamDrift/issues/8719) is active
+  on branch `research/8684-ground-free-moment-8719` from main `051f8dccc`;
+  full PR [#8723](https://github.com/D-sorganization/UpstreamDrift/pull/8723) is open.
 - #8556 remains open: no governed participant dataset contains synchronized
   bilateral six-axis grip wrenches. Synthetic traces cannot replace it.
 - NotebookLM review remains blocked on manual Google reauthentication. Never
@@ -35,7 +39,7 @@ This is current operational state. Historical detail belongs in git/GitHub.
   signs, two steps, two engines, and nested 4/10/25/50 ms observations. It
   establishes discretization sensitivity, not measured pressure or benefit.
 
-## Active Shaft Slice — Complete Locally
+## Qualified Shaft Slice
 
 - Added passive bending/torsion constitutive, forward, atlas, frozen-basis,
   limiting-step diagnostic, figure, registration, release, and test layers.
@@ -58,31 +62,74 @@ This is current operational state. Historical detail belongs in git/GitHub.
 - Of 384 coupled-versus-rigid cells, 126 match within 5% for peak load and
   dissipated work. Speed differences span `-0.0285` to `+0.0212 m/s`
   (82 negative, 44 positive), rejecting a universal passive-shaft speed benefit.
-- The paper is 229 pages and 1,733,358 bytes with 189 URI links and 246 outline
-  entries. New body pages 138–140 and the mechanism figure were visually
-  inspected. Inventory/claim/release totals are 1,047/291/39; all are reviewed.
+- The paper is 231 pages and 1,764,016 bytes with 192 URI links and 246 outline
+  entries. Finite-ground body pages 140–143, front matter, availability, and
+  end matter were visually inspected. Inventory/claim/release totals are
+  1,063/295/40; all are reviewed.
+
+## Active Ground Slice — Executed Atlas Checkpoint
+
+- `articulated_ground.py` adds `fixed`, `translation`, `free_moment`, and
+  `coupled` base pathways while the separately rooted club remains grip-coupled.
+  The passive law exposes reaction force, intrinsic/transported moment, energy,
+  damping, and closure; CoP reversal changes transport only.
+- Full non-club inertia/cross terms, Christoffel bias, gravity, common-coordinate
+  grip Jacobians, and forward integration are implemented. Fixed base reduces
+  exactly to the shaft tier; positive-definite inertia, energy, power, contact,
+  domain, and force/moment records are covered by 30 regression tests.
+- A dependency-free Newton/line-search solver balances ground, grip, and
+  gravity at fixed posture. Retain natural-zero, gravity-only, and full
+  conditional-equilibrium initializations as separate sensitivity branches.
+- The 42-trace two-engine diagnostic has 14 monotonically refining energy
+  series, trajectory error below `2.5e-12`, and force error below `1.1e-10`.
+- Initialization is not innocuous. At 0.125 ms, natural-zero versus gravity-
+  only versus conditional-base starts produced peak ground forces of 32.8,
+  565.5, and 510.3 N and 4 ms club speeds of 0.264, 1.908, and 0.946 m/s.
+  The conditional solve balances only base generalized forces, not the full
+  mechanism; retain this limitation and use natural-zero for exact-state atlas
+  killswitch comparisons.
+- The completed atlas contains 384 primary traces (12 states, four pathways,
+  velocity reversal, two steps/engines) plus 192 rigid-shaft and horizontal-
+  restraint-removed controls at 4/10/25/50 ms. All 576 trajectories pass the
+  registered domain, refinement, energy, and native-engine gates. Worst energy
+  residual refines `0.01986 → 0.00995`; maximum trajectory, grip-force, and
+  ground-force discrepancies are `1.77e-10`, `6.41e-10`, and `2.28e-10`.
+- The preregistered 5% peak-grip-load plus total-dissipated-work screen admits
+  **0/384** coupled--fixed cells; total-work discrepancy is 1.72--2.00 because
+  only the coupled path contains ground damping. Do not interpret unmatched
+  positive speed differences as a ground-pathway benefit.
+- A labeled post-hoc non-ground-dissipation screen admits 60 cells: 20 speed
+  differences are positive and 40 negative (`-0.00075` to `+0.01394 m/s`);
+  it is sensitivity evidence, not a replacement for the registered estimand.
+- JSON/NPZ evidence and the six-panel PDF/SVG figure are generated. Atlas and
+  post-hoc evidence tests pass. The 30-test scoped suite, claim/release/
+  readiness audits, title case, source-size gate, and PDF QA pass. The full
+  pre-push hook still exposes unrelated repository-wide Ruff/mypy baseline debt;
+  its unrelated formatter edits were restored.
 
 ## Immediate Next Steps
 
-1. Shepherd the #8715 SPEC/handoff follow-up without bypassing protection and
-   verify its squash commit on remote main.
-2. Close #8697 only after merge. Update #8684 with mixed matched outcomes and
-   retained calibration/higher-mode boundaries.
-3. Create the finite ground/free-moment child under #8684. Qualify it separately
-   with the same state, energy, load/work, reversal, killswitch, refinement,
-   and two-engine controls before combining ground, grip, and shaft pathways.
-4. Continue to full-delivery matching/uncertainty and governed human holdout;
+1. Shepherd full PR #8723, retain the adverse zero-match result, and complete
+   required CI/review through protected
+   merge; do not repair unrelated fleet-wide lint/type debt in this PR.
+2. After merge, verify the merge commit is an ancestor of remote main, update
+   this handoff on main, and close #8719 only through the merged PR.
+3. Continue to calibrated unilateral 3D contact, full-delivery matching/
+   uncertainty, and governed human holdout;
    do not close #8556 without qualifying participant data.
 
 ## Reproduction and Release Gates
 
 Use Windows Python for the FE basis and WSL `python3` for native atlas runs.
-The full shaft atlas takes about 34 minutes with four ordered workers.
 
 ```powershell
 python -m scripts.research.proximal_distal_energy.generate_articulated_shaft_structural_basis
 wsl.exe bash -lc "cd /mnt/c/Users/diete/Repositories/UpstreamDrift-worktrees/articulated-shaft-8697 && python3 -m scripts.research.proximal_distal_energy.run_articulated_shaft_time_step_diagnostic"
 wsl.exe bash -lc "cd /mnt/c/Users/diete/Repositories/UpstreamDrift-worktrees/articulated-shaft-8697 && python3 -m scripts.research.proximal_distal_energy.run_articulated_shaft_atlas"
+wsl.exe bash -lc "cd /mnt/c/Users/diete/Repositories/UpstreamDrift-worktrees/ground-free-moment-8719 && python3 -m scripts.research.proximal_distal_energy.run_articulated_ground_diagnostic"
+wsl.exe bash -lc "cd /mnt/c/Users/diete/Repositories/UpstreamDrift-worktrees/ground-free-moment-8719 && python3 -m scripts.research.proximal_distal_energy.run_articulated_ground_atlas"
+python -m scripts.research.proximal_distal_energy.run_articulated_ground_posthoc_sensitivity
+python -m scripts.research.proximal_distal_energy.make_articulated_ground_figure
 python -m scripts.research.proximal_distal_energy.make_articulated_shaft_figure
 python -m scripts.research.proximal_distal_energy.claim_audit inventory
 python scripts/research/proximal_distal_energy/register_articulated_shaft_claims.py
