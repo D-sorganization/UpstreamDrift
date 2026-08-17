@@ -113,7 +113,7 @@ class TestSilenceIsOptIn:
         strict = loft_wedge(wedge, **COARSE)
         nearest = loft_wedge(wedge, camber_fit=CamberFit.NEAREST, **COARSE)
         assert strict.effective_camber_area_m2 == nearest.effective_camber_area_m2
-        assert not strict.camber_was_clamped
+        assert not strict.aggregate_camber_was_clamped
 
     def test_an_unknown_policy_is_rejected(self) -> None:
         with pytest.raises(TypeError, match="camber_fit"):
@@ -132,12 +132,13 @@ class TestTheCallerCanDetectTheSubstitution:
         # This is the assertion the issue is about: a caller that declared
         # 45 mm^2 can find out, from the object it was handed, that the mesh
         # it received carries something else.
-        assert result.camber_was_clamped is True
+        assert result.aggregate_camber_was_clamped is True
+        assert result.any_camber_was_clamped is True
         assert result.declared_camber_area_m2 == declared
         assert result.effective_camber_area_m2 != declared
         low, high = result.constructible_camber_range_m2
         assert low <= result.effective_camber_area_m2 <= high
-        assert result.camber_substitution_m2 == pytest.approx(
+        assert result.aggregate_camber_substitution_m2 == pytest.approx(
             result.effective_camber_area_m2 - declared
         )
 
@@ -149,9 +150,9 @@ class TestTheCallerCanDetectTheSubstitution:
         """
         wedge = build_reference_wedge()
         result = loft_wedge(wedge, camber_fit=CamberFit.NEAREST, **COARSE)
-        assert result.camber_was_clamped is False
+        assert result.aggregate_camber_was_clamped is False
         assert result.effective_camber_area_m2 == wedge.sole_camber_area_m2
-        assert result.camber_substitution_m2 == 0.0
+        assert result.aggregate_camber_substitution_m2 == 0.0
         centre = next(
             s for s in result.stations if s.sole_width_m == wedge.sole_width_m
         )
@@ -186,11 +187,13 @@ class TestTheCallerCanDetectTheSubstitution:
         record = {
             "declared_camber_mm2": result.declared_camber_area_m2 * 1e6,
             "effective_camber_mm2": result.effective_camber_area_m2 * 1e6,
-            "camber_was_clamped": result.camber_was_clamped,
+            "aggregate_camber_was_clamped": result.aggregate_camber_was_clamped,
+            "any_camber_was_clamped": result.any_camber_was_clamped,
+            "clamped_station_count": len(result.clamped_stations),
             "constructible_camber_low_mm2": low * 1e6,
             "constructible_camber_high_mm2": high * 1e6,
         }
-        assert record["camber_was_clamped"] is True
+        assert record["aggregate_camber_was_clamped"] is True
         assert record["declared_camber_mm2"] == pytest.approx(45.0)
         assert record["effective_camber_mm2"] != pytest.approx(45.0)
 
@@ -266,4 +269,91 @@ class TestPresetsDeclareWhatTheyBuild:
     @pytest.mark.parametrize("name", preset_names())
     def test_every_preset_lofts_under_the_strict_default(self, name: str) -> None:
         result = loft_wedge(get_preset(name).geometry, **COARSE)
-        assert result.camber_was_clamped is False
+        assert result.aggregate_camber_was_clamped is False
+
+
+class TestTheFlagCannotUnderstateSubstitution:
+    """The scope regression: a `False` boolean over refitted stations.
+
+    ``camber_was_clamped`` compared the declared area against the band the
+    *declared* sole width admits, so it answered only the aggregate question.
+    Heel and toe relief narrows the sole toward the ends and a narrower sole
+    admits a narrower band, so the relieved stations get refitted while the
+    declaration itself is honoured -- and the flag read ``False`` beside a
+    non-empty ``clamped_stations``.
+
+    That is issue #8698's own failure mode (a substitution invisible to its
+    caller) reappearing through the *simpler* check, which is the one most
+    callers reach for.  These tests pin the invariant that closes it.
+    """
+
+    def test_the_broad_flag_cannot_be_false_while_stations_were_clamped(
+        self,
+    ) -> None:
+        """The invariant, stated directly. This is the regression."""
+        wedge = build_reference_wedge(
+            heel_relief_fraction=0.30, toe_relief_fraction=0.05
+        )
+        result = loft_wedge(wedge, n_profile_points=24, n_stations=7)
+
+        assert result.clamped_stations, "fixture must actually clamp a station"
+        assert result.any_camber_was_clamped is True
+        assert not (result.clamped_stations and not result.any_camber_was_clamped)
+
+    def test_the_relieved_case_is_exactly_where_the_two_flags_diverge(self) -> None:
+        """Aggregate honoured, stations refitted -- the misreported case."""
+        wedge = build_reference_wedge(
+            heel_relief_fraction=0.30, toe_relief_fraction=0.05
+        )
+        result = loft_wedge(wedge, n_profile_points=24, n_stations=7)
+
+        # The declaration itself was constructible ...
+        assert result.aggregate_camber_was_clamped is False
+        assert result.effective_camber_area_m2 == wedge.sole_camber_area_m2
+        # ... yet the sole that was built is not the sole that was asked for.
+        assert result.clamped_stations
+        assert result.any_camber_was_clamped is True
+
+    @pytest.mark.parametrize("name", preset_names())
+    def test_the_invariant_holds_on_every_shipped_preset(self, name: str) -> None:
+        """Three of the six shipped grinds refit stations at full resolution."""
+        result = loft_wedge(get_preset(name).geometry, camber_fit=CamberFit.NEAREST)
+        if result.clamped_stations:
+            assert result.any_camber_was_clamped is True
+        assert result.any_camber_was_clamped >= result.aggregate_camber_was_clamped
+
+    def test_the_shipped_default_preset_is_the_documented_case(self) -> None:
+        """`sm9_58_m` is the preset the PR discussion measured: in band, refitted.
+
+        Pinned by name and by number because the docstrings in ``lofting`` and
+        ``report`` both cite it as the worked example.
+        """
+        result = loft_wedge(
+            get_preset("sm9_58_m").geometry, camber_fit=CamberFit.NEAREST
+        )
+        declared_mm2 = result.declared_camber_area_m2 * 1e6
+        low, high = result.constructible_camber_range_m2
+
+        assert declared_mm2 == pytest.approx(42.0, abs=0.01)
+        assert low * 1e6 < declared_mm2 < high * 1e6
+        assert result.aggregate_camber_was_clamped is False
+        assert len(result.clamped_stations) == 3
+        assert result.any_camber_was_clamped is True
+
+    def test_the_narrow_flag_keeps_its_narrow_meaning(self) -> None:
+        """The rename must not have widened the aggregate flag by accident."""
+        result = loft_wedge(
+            _outside_band_wedge(), camber_fit=CamberFit.NEAREST, **COARSE
+        )
+        assert result.aggregate_camber_was_clamped is True
+        assert result.aggregate_camber_substitution_m2 != 0.0
+
+    def test_the_misleading_name_is_gone(self) -> None:
+        """The old name must not survive as an alias reading the old value.
+
+        Leaving it in place -- even deprecated -- would leave the misleading
+        answer reachable, so the rename is a hard break by design.
+        """
+        result = loft_wedge(build_reference_wedge(), **COARSE)
+        assert not hasattr(result, "camber_was_clamped")
+        assert not hasattr(result, "camber_substitution_m2")
