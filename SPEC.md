@@ -2727,13 +2727,47 @@ Beyond standard tools, CI enforces custom checks:
 
 | Workflow                       | Trigger                                | Purpose                                                                               | Blocking?          |
 | ------------------------------ | -------------------------------------- | ------------------------------------------------------------------------------------- | ------------------ |
-| `ci-standard.yml`              | Push/PR                                | Lint, type check, unit/integration tests, workflow inventory, blocking security scans | Yes                |
+| `ci-standard.yml`              | Push/PR (no PR path filter)            | Lint, type check, unit/integration tests, workflow inventory, blocking security scans | Yes                |
 | `quality-gate.yml`             | PR/manual dispatch                     | Blocking repo-wide Law-of-Demeter ratchet for production `src/` Python code           | Yes                |
+| `docs-ci.yml`                  | PR touching docs/markdown              | Docs governance for docs-only PRs                                                     | No (not required)  |
 | `heavy-tests-opt-in.yml`       | Manual dispatch or `/heavy-test` label | Cross-engine and physics validation (long-running)                                    | No (opt-in)        |
 | `nightly-cross-validation.yml` | Daily 2:00 UTC                         | Full multi-engine validation suite against all model variations                       | No (informational) |
 | `tauri-build.yml`              | Tag release                            | Build desktop apps for Windows/macOS/Linux                                            | Yes (for releases) |
 | `vendor-freshness.yml`         | Weekly                                 | Check for stale dependencies and security updates                                     | No (warning-only)  |
 | `docker-size-gates.yml`        | Push                                   | Ensure Docker image size stays <800 MB                                                | Yes                |
+
+### Required Status Checks
+
+Branch protection matches required checks by **context name**, so a check name is
+a repository-level contract: any job carrying a required name publishes under that
+context, and protection is satisfied by whichever job reported. Two rules follow.
+
+**One publisher per required name.** Exactly one job may be named `quality-gate` —
+the `ci-standard.yml` aggregate. Three jobs previously shared the name
+(`ci-standard.yml`, `quality-gate.yml`, `docs-ci.yml`), which allowed a merge while
+the aggregate was failing. `tests/ci/test_ci_infrastructure.py` enforces uniqueness.
+
+**A required check must report on every PR.** A required context that never reports
+blocks the PR indefinitely. A job skipped by a job-level `if:` still publishes a
+check run and counts as satisfied, but a workflow skipped by a trigger **path
+filter** publishes nothing. Required workflows therefore carry no PR path filter and
+skip work per job instead: `ci-standard.yml` classifies the diff in its
+`changed-paths` job and gates the substantive jobs on
+`needs.changed-paths.outputs.code`, so docs-only PRs skip the suite while
+`quality-gate` still reports. The aggregate accepts `skipped` gates only on
+docs-only changes, and only once `pick-runner` and `changed-paths` themselves
+succeeded — otherwise an infrastructure failure that skips everything would read as
+a pass.
+
+| Context            | Published by                       | Required | Notes                                                             |
+| ------------------ | ---------------------------------- | -------- | ----------------------------------------------------------------- |
+| `quality-gate`     | `ci-standard.yml` aggregate        | Yes      | Also required org-wide by the `Repository_Protections` ruleset     |
+| `lod-quality-gate` | `quality-gate.yml`                 | Yes      | No path filter, so it reports on every PR                          |
+| `docs-quality-gate`| `docs-ci.yml`                      | **No**   | Docs-only trigger; requiring it would block every code-only PR     |
+
+Repository-specific required contexts belong on the repo-scoped `Protect Main`
+ruleset. The organization ruleset `Repository_Protections` applies to every repo in
+the org, so contexts added there must exist in all of them.
 
 ## 9. Dependencies
 
