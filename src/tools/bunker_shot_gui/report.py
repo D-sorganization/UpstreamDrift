@@ -389,17 +389,28 @@ def shade_grid(values: np.ndarray, *, peak: float | None = None) -> tuple[str, .
 
 PATCH_CONFOUND_CAVEAT = (
     "the contact patch on this design is a bounce-AND-camber result, not a "
-    "bounce result: the declared camber area was not constructible at this "
-    "sole width and bounce, so the lofter substituted the nearest one (#8698) "
-    "and any patch trend read across a bounce sweep moves both terms at once"
+    "bounce result: at least one spanwise station could not carry the camber "
+    "area its relieved sole width implied, so the lofter refitted that station "
+    "to its own narrower constructible band (#8698) -- and the stations that "
+    "move are the heel and toe, which is where the patch is read, so any patch "
+    "trend across a bounce sweep moves both terms at once"
 )
 """What a patch series may not be read as, when the camber was substituted.
 
 Issue #8707 asks for this explicitly. The patch shrinking across a bounce
 sweep is the mechanism behind more bounce producing *more* depth and force,
-but on the demo sweep the effective camber moved over 24.5-61.6 mm^2 against
-a declared constant 48 mm^2 on 40 of 77 points -- so on any design where the
-substitution fired, "bounce" is not the only thing that changed.
+but where camber was substituted, "bounce" is not the only thing that changed.
+
+**This keys off the per-station account, not off the declared-versus-effective
+aggregate**, because the aggregate is the weaker test and misses the common
+case. Heel and toe relief narrows the sole toward the ends, a narrower sole
+admits a narrower camber band, and so a declaration can be honoured exactly at
+the declared width while the relieved stations are refitted. The shipped
+``sm9_58_m`` preset is precisely that: 42.00 mm^2 declared, 42.00 mm^2
+effective, inside its (38.70, 42.44) mm^2 band -- and three of its seventeen
+stations refitted regardless. Keyed off the aggregate flag this caveat would
+stay silent on the default design; keyed off the stations it fires, which is
+when a caveat earns its place.
 """
 
 
@@ -575,12 +586,19 @@ def playability_text(playability: PlayabilityOutcome) -> str:
 
 
 def _camber_area_text(evaluation: DesignEvaluation) -> str:
-    """State the camber area, and the declared one when they differ.
+    """State the camber area, and every substitution behind it.
 
     A sole of a given width and bounce can only realise camber areas inside a
     band, so a declared value outside it is built as the nearest one that is
     constructible. Reporting only the declared number would tell the designer
     about a sole that was never built (issue #8698).
+
+    The two substitution scopes are reported separately because they are
+    separate facts. The declared number can be honoured exactly while the
+    relieved heel and toe stations - narrower, and so admitting narrower
+    bands - are refitted. Printing only the aggregate result would render the
+    shipped ``sm9_58_m`` preset as a clean "42.0 mm^2" while three of its
+    stations carry something else.
 
     Args:
         evaluation: The evaluated design.
@@ -589,14 +607,20 @@ def _camber_area_text(evaluation: DesignEvaluation) -> str:
         The rendered value.
     """
     effective_mm2 = evaluation.effective_camber_area_m2 * 1e6
-    if not evaluation.camber_was_clamped:
-        return f"{effective_mm2:.1f} mm^2"
-    declared_mm2 = evaluation.geometry.sole_camber_area_m2 * 1e6
-    return (
-        f"{effective_mm2:.1f} mm^2  "
-        f"(declared {declared_mm2:.1f} mm^2; not constructible at this "
-        "sole width and bounce)"
-    )
+    text = f"{effective_mm2:.1f} mm^2"
+    if evaluation.aggregate_camber_was_clamped:
+        declared_mm2 = evaluation.geometry.sole_camber_area_m2 * 1e6
+        text += (
+            f"  (declared {declared_mm2:.1f} mm^2; not constructible at this "
+            "sole width and bounce)"
+        )
+    clamped = evaluation.clamped_camber_stations
+    if clamped:
+        text += (
+            f"  [{len(clamped)} of {len(evaluation.camber_stations)} spanwise "
+            "stations refitted to their own narrower bands]"
+        )
+    return text
 
 
 def evaluation_report(evaluation: DesignEvaluation) -> str:
@@ -635,11 +659,21 @@ def evaluation_report(evaluation: DesignEvaluation) -> str:
     parts = ["\n".join(header), shot_report(evaluation.shot)]
     if evaluation.shot.sole_load is not None:
         parts.append(sole_map_text(evaluation.shot.sole_load))
-    if evaluation.camber_was_clamped and evaluation.shot.contact_patch is not None:
+    clamped_stations = evaluation.clamped_camber_stations
+    if clamped_stations and evaluation.shot.contact_patch is not None:
         # The caveat belongs beside the patch numbers, not only beside the
         # geometry: a designer reading a patch trend across a bounce sweep is
         # exactly the reader who must be told the camber moved with it.
-        parts.append(f"  {PATCH_CONFOUND_CAVEAT}\n")
+        #
+        # Gated on the stations rather than on the aggregate flag: the
+        # aggregate compares the declared area against the *declared* width's
+        # band and is False on the shipped presets, so gating on it would
+        # silence the caveat on exactly the design most people run.
+        parts.append(
+            f"  {PATCH_CONFOUND_CAVEAT}\n"
+            f"  ({len(clamped_stations)} of {len(evaluation.camber_stations)} "
+            "spanwise stations refitted)\n"
+        )
     parts.append(playability_text(evaluation.playability))
     return "\n".join(parts)
 

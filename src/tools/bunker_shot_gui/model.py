@@ -54,6 +54,7 @@ from bunkershot3d.ball import (
 )
 from bunkershot3d.geometry import (
     DeliveredGeometry,
+    StationCamber,
     WedgeGeometry,
     deliver_wedge,
 )
@@ -391,6 +392,11 @@ class DesignEvaluation:
             width and bounce, so the declared area in :attr:`geometry` is
             fitted to what the sole admits; carrying the realised value here
             is what lets the report state both (issue #8698).
+        camber_stations: The lofter's per-station camber account, heel to
+            toe. Carried because :attr:`effective_camber_area_m2` alone
+            cannot answer whether the sole was substituted: it is the
+            *declared* width's number, and the relieved heel and toe
+            stations have their own, narrower bands.
     """
 
     design: WedgeDesign
@@ -399,11 +405,31 @@ class DesignEvaluation:
     shot: ShotOutcome
     playability: PlayabilityOutcome
     effective_camber_area_m2: float
+    camber_stations: tuple[StationCamber, ...]
 
     @property
-    def camber_was_clamped(self) -> bool:
-        """Whether the declared camber area had to be substituted."""
+    def aggregate_camber_was_clamped(self) -> bool:
+        """Whether the *declared* camber area itself had to be substituted.
+
+        Narrowly scoped, and ``False`` on the shipped presets even when
+        stations were refitted; see :attr:`any_camber_was_clamped`.
+        """
         return self.effective_camber_area_m2 != self.geometry.sole_camber_area_m2
+
+    @property
+    def clamped_camber_stations(self) -> tuple[StationCamber, ...]:
+        """Every spanwise station refitted to its own constructible band."""
+        return tuple(station for station in self.camber_stations if station.was_clamped)
+
+    @property
+    def any_camber_was_clamped(self) -> bool:
+        """Whether any camber substitution occurred, aggregate or per station.
+
+        Cannot read ``False`` while :attr:`clamped_camber_stations` holds
+        anything, which is the property that stops a one-boolean caller being
+        told a substituted sole was built as declared (issue #8698).
+        """
+        return self.aggregate_camber_was_clamped or bool(self.clamped_camber_stations)
 
     @property
     def verdict(self) -> ValidityVerdict:
@@ -925,14 +951,16 @@ class WorkbenchModel:
                 window=None, unavailable_reason="the playability sweep was not run"
             )
         )
+        # Free: the build is cached, and run_shot has already made it.
+        build = self.head_build(geometry)
         return DesignEvaluation(
             design=design,
             geometry=geometry,
             sand=state,
             shot=shot,
             playability=window,
-            # Free: the build is cached, and run_shot has already made it.
-            effective_camber_area_m2=self.head_build(geometry).effective_camber_area_m2,
+            effective_camber_area_m2=build.effective_camber_area_m2,
+            camber_stations=build.camber_stations,
         )
 
     def compare(

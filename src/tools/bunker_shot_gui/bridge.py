@@ -43,6 +43,7 @@ from bunkershot3d.geometry import (
     CamberFit,
     LoftedWedge,
     MassProperties,
+    StationCamber,
     WedgeGeometry,
     compute_mass_properties,
     loft_wedge,
@@ -120,9 +121,24 @@ class HeadBuild:
         return self.loft.effective_camber_area_m2
 
     @property
-    def camber_was_clamped(self) -> bool:
-        """Whether the declared camber area had to be substituted."""
-        return self.loft.camber_was_clamped
+    def aggregate_camber_was_clamped(self) -> bool:
+        """Whether the *declared* camber area itself had to be substituted.
+
+        Narrowly scoped, and so ``False`` on the shipped presets even when
+        stations were refitted; see
+        :attr:`~bunkershot3d.geometry.LoftedWedge.aggregate_camber_was_clamped`.
+        """
+        return self.loft.aggregate_camber_was_clamped
+
+    @property
+    def any_camber_was_clamped(self) -> bool:
+        """Whether any camber substitution occurred, aggregate or per station."""
+        return self.loft.any_camber_was_clamped
+
+    @property
+    def camber_stations(self) -> tuple[StationCamber, ...]:
+        """The per-station camber account, heel to toe."""
+        return self.loft.stations
 
     @property
     def head_model(self) -> HeadModel:
