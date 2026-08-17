@@ -118,7 +118,7 @@ def test_the_gui_imports_the_real_solver() -> None:
 
 @pytest.mark.parametrize(
     "module",
-    ["design", "field", "model", "render", "report", "shot3d"],
+    ["design", "field", "model", "render", "report", "shot3d", "traces"],
 )
 def test_the_headless_layer_imports_no_qt(module: str) -> None:
     leaked = _leaked_qt_modules(

@@ -98,6 +98,7 @@ from .bridge import (
     sole_load_field,
     sole_load_map,
     strike_trace,
+    validity_band,
 )
 from .design import (
     FIRMNESS_RANGE_KG_PER_CM2,
@@ -109,6 +110,7 @@ from .design import (
 )
 from .field import ContactPatch, SoleLoadField, contact_patch
 from .shot3d import ShotScene, shot_scene
+from .traces import ShotTraces, shot_traces
 
 __all__ = [
     "ATTACK_ANGLE_SWEEP_DEG",
@@ -120,6 +122,7 @@ __all__ = [
     "PlayabilityOutcome",
     "ShotOutcome",
     "ShotScene",
+    "ShotTraces",
     "SoleLoadField",
     "SoleLoadMap",
     "WorkbenchComparison",
@@ -256,6 +259,8 @@ class ShotOutcome:
             (issue #8707).
         scene: The 3-D scene -- pose, free surface and swept divot section --
             for the animated view (issue #8706).
+        traces: The scalar traces and the per-sample validity band, on the
+            same time axis as the scene and the field (issue #8708).
         carry_m: Carry from the splash and flight models.
         carry_verdict: The validity statement the carry may be quoted under.
             Present whenever ``carry_m`` is, and absent whenever it is not.
@@ -282,6 +287,7 @@ class ShotOutcome:
     sole_field: SoleLoadField | None = None
     contact_patch: ContactPatch | None = None
     scene: ShotScene | None = None
+    traces: ShotTraces | None = None
     carry_m: float | None = None
     carry_verdict: ValidityVerdict | None = None
     unavailable: tuple[str, ...] = ()
@@ -315,6 +321,7 @@ class ShotOutcome:
             self.sole_field,
             self.contact_patch,
             self.scene,
+            self.traces,
         )
         if any(value is not None for value in numbers):
             raise ValueError(
@@ -673,6 +680,23 @@ class WorkbenchModel:
         # march recorded and the divot is accumulated from where the head's
         # own sole points went, so this is geometry over an existing trace.
         scene = _try(lambda: shot_scene(build, result), "3-D shot scene", missing)
+        # The band is a second, much cheaper replay: it judges the envelope
+        # per sample without integrating any force, which is the half of a
+        # solve that a verdict does not depend on.
+        band = _try(
+            lambda: validity_band(solver, build, result, kinematics.orientation),
+            "validity band",
+            missing,
+        )
+        traces = _try(
+            lambda: (
+                None
+                if patch is None or band is None
+                else shot_traces(result, patch, band)
+            ),
+            "scalar traces",
+            missing,
+        )
         carry = _try(
             lambda: self.carry_estimate(
                 geometry, swing, _sand_delivery(result, _measured_divot(divot), sand)
@@ -704,6 +728,7 @@ class WorkbenchModel:
             sole_field=field,
             contact_patch=patch,
             scene=scene,
+            traces=traces,
             carry_m=None if carry is None else carry.carry_m,
             carry_verdict=None if carry is None else carry.verdict,
             unavailable=tuple(missing),

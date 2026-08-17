@@ -66,7 +66,7 @@ from bunkershot3d.solvers import (
 )
 from src.shared.python.visualization.viewport import ViewportOverlayPayload
 
-from .bridge import HeadBuild
+from .bridge import HeadBuild, free_surface_height_m
 
 __all__ = [
     "DIVOT_STATIONS",
@@ -658,38 +658,6 @@ class ShotScene:
         )
 
 
-def _free_surface_height_m(result: ShotResult, path_z: NDArray[np.float64]) -> float:
-    """Recover the free surface the solver judged this shot against.
-
-    ``sole_depth = free_surface - z(sole reference)`` by definition, so the
-    surface is fixed by the trace and does not have to be passed in beside
-    it. Recovering it is what keeps the drawn plane and the solver's own
-    depths from drifting apart.
-
-    Args:
-        result: The shot trace.
-        path_z: ``(T,)`` world ``z`` of the sole reference point.
-
-    Returns:
-        The free surface height [m].
-
-    Raises:
-        ValueError: If the recovered height is not constant over the trace.
-            The solver marches against one fixed surface, so a spread here
-            means the pose and the depths describe different shots -- and a
-            surface drawn from their average would be wrong everywhere.
-    """
-    heights = np.asarray(result.sole_depths_m, dtype=np.float64) + path_z
-    spread = float(heights.max() - heights.min())
-    if spread > 1e-9:
-        raise ValueError(
-            "the free surface recovered from the trace is not constant "
-            f"(spread {spread:.3g} m): the recorded poses and the recorded sole "
-            "depths do not describe the same shot"
-        )
-    return float(heights.mean())
-
-
 def _swept_envelope(
     scene_points_z: NDArray[np.float64],
     scene_points_x: NDArray[np.float64],
@@ -767,8 +735,7 @@ def shot_scene(
     positions = np.asarray(result.positions_m, dtype=np.float64)
     rotations = np.asarray(result.orientations, dtype=np.float64)
 
-    reference_world = np.einsum("tij,j->ti", rotations, reference_body) + positions
-    surface_height = _free_surface_height_m(result, reference_world[:, 2])
+    surface_height = free_surface_height_m(result)
 
     sole_body = points_body[sole_index]
     sole_world = np.einsum("tij,kj->tki", rotations, sole_body) + positions[:, None, :]
