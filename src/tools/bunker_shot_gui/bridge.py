@@ -66,6 +66,7 @@ from src.shared.python.core.contracts import require
 
 from .design import SwingSetup
 from .field import SoleLoadField
+from .traces import ValidityBand
 
 __all__ = [
     "MAP_BINS",
@@ -74,10 +75,12 @@ __all__ = [
     "build_head",
     "delivery_rotation",
     "entry_kinematics",
+    "free_surface_height_m",
     "sole_load_field",
     "sole_load_map",
     "sole_load_trace",
     "strike_trace",
+    "validity_band",
 ]
 
 MAP_BINS = 12
@@ -85,6 +88,9 @@ MAP_BINS = 12
 
 _SOLE_NORMAL_CEILING = 0.0
 """An element belongs to the sole when its outward normal points downward."""
+
+_SURFACE_TOLERANCE_M = 1e-9
+"""Slack on recovering one fixed free surface from a whole trace."""
 
 
 @dataclass(frozen=True)
@@ -379,6 +385,101 @@ def sole_load_field(
         verdict=result.verdict,
         fidelity_tier=result.fidelity_tier,
     )
+
+
+def free_surface_height_m(result: ShotResult) -> float:
+    """Recover the free surface the solver marched this shot against.
+
+    ``sole_depth = free_surface - z(sole reference)`` by definition, so the
+    surface is fixed by the trace and does not have to be carried alongside
+    it. Recovering it is what stops a drawn surface and the solver's own
+    depths drifting apart -- and it means a caller that only has a
+    ``ShotResult`` still knows where the sand was.
+
+    Args:
+        result: The shot trace.
+
+    Returns:
+        World ``z`` of the undisturbed free surface [m].
+
+    Raises:
+        ValueError: If the trace is empty, or the recovered height is not
+            constant. The march runs against one fixed surface, so a spread
+            means the recorded poses and the recorded depths describe
+            different shots, and a surface drawn from their average would be
+            wrong everywhere.
+    """
+    if result.n_steps == 0:
+        raise ValueError("an empty trace fixes no free surface")
+    reference_z = (
+        np.einsum("tij,j->ti", result.orientations, result.sole_reference_body_m)
+        + result.positions_m
+    )[:, 2]
+    heights = np.asarray(result.sole_depths_m, dtype=np.float64) + reference_z
+    spread = float(heights.max() - heights.min())
+    if spread > _SURFACE_TOLERANCE_M:
+        raise ValueError(
+            "the free surface recovered from the trace is not constant "
+            f"(spread {spread:.3g} m): the recorded poses and the recorded sole "
+            "depths do not describe the same shot"
+        )
+    return float(heights.mean())
+
+
+def validity_band(
+    solver: DRFTSolver,
+    build: HeadBuild,
+    result: ShotResult,
+    orientation: NDArray[np.float64],
+) -> ValidityBand | None:
+    """Recover the envelope verdict at every sample of a shot (issue #8708).
+
+    ``simulate_shot`` evaluates the envelope at every step and then keeps
+    only ``worst_of`` those verdicts, so the per-sample statuses exist inside
+    the solver and are gone before the workbench sees them. A single badge is
+    what remains, and a badge cannot say that a shot was inside the stated
+    limits during the free-flight lead-in and outside them from the moment
+    the sole engaged -- which is the transition that matters, because that is
+    when the numbers stop meaning what they appear to mean.
+
+    They are recovered by asking the same solver the same question, through
+    its public :meth:`~bunkershot3d.solvers.drft.DRFTSolver.envelope`, which
+    judges a state without integrating any force. That is deliberately not a
+    second ``solve``: the polynomial is the expensive half and none of it
+    changes a verdict.
+
+    The one input ``envelope`` does not take is the share of active area
+    whose orientation had to be clamped into the fitted domain. That quantity
+    attaches :attr:`~bunkershot3d.solvers.Caveat.UPWARD_FACING_LEADING_EDGE`
+    and never moves a status, so the reconstructed statuses are the statuses
+    the march recorded -- pinned in ``test_shot_traces`` against
+    ``ShotResult.verdict`` rather than left as a claim here.
+
+    Args:
+        solver: The solver the shot was run with.
+        build: The lofted head.
+        result: The shot trace.
+        orientation: The constant body-to-world rotation, as for
+            :func:`sole_load_field`.
+
+    Returns:
+        The band, or ``None`` when the trace is too short to be a band.
+    """
+    if result.n_steps < 2:
+        return None
+    oriented = build.elements_body.transformed(rotation=orientation)
+    surface_m = free_surface_height_m(result)
+    statuses = []
+    for step in range(result.n_steps):
+        position = result.positions_m[step]
+        state = IntrusionState(
+            oriented.translated(position),
+            result.velocities_m_s[step],
+            reference_point_m=position,
+            free_surface_height_m=surface_m,
+        )
+        statuses.append(solver.envelope(state).status)
+    return ValidityBand(time_s=result.times_s, statuses=tuple(statuses))
 
 
 def sole_load_trace(
