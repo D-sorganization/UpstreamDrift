@@ -240,10 +240,11 @@ class ValiditySpan:
     @property
     def label(self) -> str:
         """One line naming the span's verdict and when it applied."""
+        status = self.status
         return (
-            f"{self.status.value.replace('_', ' ').upper()} "
+            f"{status.value.replace('_', ' ').upper()} "
             f"({self.start_s * 1e3:.2f}-{self.end_s * 1e3:.2f} ms): "
-            f"{_STATUS_LABEL[self.status]}"
+            f"{_STATUS_LABEL[status]}"
         )
 
 

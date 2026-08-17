@@ -229,6 +229,28 @@ def _measured_divot(divot: DivotMetrics | None) -> DivotMetrics:
 
 
 @dataclass(frozen=True)
+class _ShotViews:
+    """The five drawable products of one shot, each optional.
+
+    Bundled so :meth:`WorkbenchModel._reduce` receives one value rather than
+    five positional results whose order a reader has to keep straight.
+
+    Attributes:
+        field: The per-element sole load field (#8705).
+        sole_load: That field binned to the 12x12 bounce-utilisation map.
+        patch: The engaged element set through the shot (#8707).
+        scene: The 3-D scene of the head through the sand (#8706).
+        traces: The scalar traces and the validity band (#8708).
+    """
+
+    field: SoleLoadField | None
+    sole_load: SoleLoadMap | None
+    patch: ContactPatch | None
+    scene: ShotScene | None
+    traces: ShotTraces | None
+
+
+@dataclass(frozen=True)
 class ShotOutcome:
     """One shot: its verdict first, its numbers only if there are any.
 
@@ -661,42 +683,7 @@ class WorkbenchModel:
             "dig-vs-skid",
             missing,
         )
-        # One replay of the recorded poses feeds all three load views: the
-        # per-element field (#8705), the patch series (#8707) and the binned
-        # map the workbench already reported. Re-deriving the element
-        # response is the expensive half, so it happens once.
-        field = _try(
-            lambda: sole_load_field(solver, build, result, kinematics.orientation),
-            "per-element sole load",
-            missing,
-        )
-        sole_load = _try(lambda: self._sole_map(field), "bounce utilisation", missing)
-        patch = _try(
-            lambda: None if field is None else contact_patch(field),
-            "contact patch",
-            missing,
-        )
-        # The 3-D scene needs no solving at all: the pose is the pose the
-        # march recorded and the divot is accumulated from where the head's
-        # own sole points went, so this is geometry over an existing trace.
-        scene = _try(lambda: shot_scene(build, result), "3-D shot scene", missing)
-        # The band is a second, much cheaper replay: it judges the envelope
-        # per sample without integrating any force, which is the half of a
-        # solve that a verdict does not depend on.
-        band = _try(
-            lambda: validity_band(solver, build, result, kinematics.orientation),
-            "validity band",
-            missing,
-        )
-        traces = _try(
-            lambda: (
-                None
-                if patch is None or band is None
-                else shot_traces(result, patch, band)
-            ),
-            "scalar traces",
-            missing,
-        )
+        views = self._views(build, solver, result, kinematics, missing)
         carry = _try(
             lambda: self.carry_estimate(
                 geometry, swing, _sand_delivery(result, _measured_divot(divot), sand)
@@ -724,14 +711,84 @@ class WorkbenchModel:
             loads=loads,
             divot=divot,
             dig_skid=skid,
-            sole_load=sole_load,
-            sole_field=field,
-            contact_patch=patch,
-            scene=scene,
-            traces=traces,
+            sole_load=views.sole_load,
+            sole_field=views.field,
+            contact_patch=views.patch,
+            scene=views.scene,
+            traces=views.traces,
             carry_m=None if carry is None else carry.carry_m,
             carry_verdict=None if carry is None else carry.verdict,
             unavailable=tuple(missing),
+        )
+
+    def _views(
+        self,
+        build: HeadBuild,
+        solver: DRFTSolver,
+        result: ShotResult,
+        kinematics: HeadKinematics,
+        missing: list[str],
+    ) -> _ShotViews:
+        """Assemble everything the workbench draws from one completed shot.
+
+        Grouped here rather than inline in :meth:`_reduce` because these five
+        are one story -- the per-element load and everything derived from it,
+        the 3-D scene, and the traces beside it -- and because each is
+        individually optional: a shot too short for an impulse still has a
+        verdict worth reporting.
+
+        Args:
+            build: The lofted head.
+            solver: The solver the shot was run with.
+            result: The shot trace.
+            kinematics: The entry pose, supplying the constant orientation.
+            missing: Reasons collected in place, one per view that could not
+                be built.
+
+        Returns:
+            The views, each ``None`` where it could not be built.
+        """
+        # One replay of the recorded poses feeds all three load views: the
+        # per-element field (#8705), the patch series (#8707) and the binned
+        # map the workbench already reported. Re-deriving the element
+        # response is the expensive half, so it happens once.
+        field = _try(
+            lambda: sole_load_field(solver, build, result, kinematics.orientation),
+            "per-element sole load",
+            missing,
+        )
+        patch = _try(
+            lambda: None if field is None else contact_patch(field),
+            "contact patch",
+            missing,
+        )
+        # The band is a second replay, and a much cheaper one: it judges the
+        # envelope per sample without integrating any force, which is the
+        # half of a solve a verdict does not depend on (#8708).
+        band = _try(
+            lambda: validity_band(solver, build, result, kinematics.orientation),
+            "validity band",
+            missing,
+        )
+        return _ShotViews(
+            field=field,
+            sole_load=_try(
+                lambda: self._sole_map(field), "bounce utilisation", missing
+            ),
+            patch=patch,
+            # The 3-D scene needs no solving at all: the pose is the pose the
+            # march recorded and the divot is accumulated from where the
+            # head's own sole points went (#8706).
+            scene=_try(lambda: shot_scene(build, result), "3-D shot scene", missing),
+            traces=_try(
+                lambda: (
+                    None
+                    if patch is None or band is None
+                    else shot_traces(result, patch, band)
+                ),
+                "scalar traces",
+                missing,
+            ),
         )
 
     def _divot(

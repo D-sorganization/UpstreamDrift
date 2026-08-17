@@ -58,7 +58,12 @@ from numpy.typing import NDArray
 
 from src.shared.python.visualization.viewport import ViewportOverlayPayload
 
-from .render import ViewportFallback, stamp_axes, viewport_fallback
+from .render import (
+    ViewportFallback,
+    stamp_axes,
+    validity_stamp,
+    viewport_fallback,
+)
 from .shot3d import CameraPreset, ShotScene, viewport_payload
 from .traces import ValidityBand
 
@@ -483,9 +488,7 @@ class ShotSceneArtists:
         # verdict on the frames it does not apply to.
         status = scene.status if self._band is None else self._band.status_at(index)
         self._stamp.set_text(
-            f"{status.value.replace('_', ' ').upper()} - "
-            f"{scene.fidelity_tier.value.upper()} dynamic 3D-RFT\n"
-            "not calibrated for bunker sand\n"
+            f"{validity_stamp(status, scene.fidelity_tier)}\n"
             f"renderer: {self._fallback.renderer}"
         )
         self._refresh_note()

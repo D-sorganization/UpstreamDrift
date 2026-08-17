@@ -53,7 +53,45 @@ __all__ = [
     "GridMapWidget",
     "SoleLoadFieldWidget",
     "VerdictBanner",
+    "build_canvas_column",
 ]
+
+
+def build_canvas_column(
+    view: QWidget,
+    title: str,
+    *,
+    width_in: float,
+    height_in: float,
+    minimum_height_px: int,
+) -> tuple[QVBoxLayout, QLabel, MplCanvas]:
+    """Lay a heading above a matplotlib canvas, filling the widget.
+
+    The opening of every animated view in this package -- the sole load
+    field, the 3-D scene and the trace panel -- so it lives here rather than
+    three times over.
+
+    Args:
+        view: The widget to lay out.
+        title: The heading text.
+        width_in: Canvas width in inches.
+        height_in: Canvas height in inches.
+        minimum_height_px: Floor on the canvas height, so a docked view does
+            not collapse the figure to an unreadable strip.
+
+    Returns:
+        The layout, the heading label and the canvas, so the caller can add
+        its own controls underneath and keep hold of the two artists it has
+        to update.
+    """
+    layout = QVBoxLayout(view)
+    layout.setContentsMargins(0, 0, 0, 0)
+    heading = QLabel(title)
+    layout.addWidget(heading)
+    canvas = MplCanvas(width=width_in, height=height_in, dpi=96)
+    canvas.setMinimumHeight(minimum_height_px)
+    layout.addWidget(canvas)
+    return layout, heading, canvas
 
 
 class FollowsFrame(Protocol):
@@ -346,13 +384,13 @@ class SoleLoadFieldWidget(QWidget):
         self._frame = 0
         self._fallback = viewport_fallback()
 
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        self._heading = QLabel(self._title)
-        layout.addWidget(self._heading)
-        self._canvas = MplCanvas(width=9.0, height=5.5, dpi=96)
-        self._canvas.setMinimumHeight(_MIN_FIELD_HEIGHT_PX)
-        layout.addWidget(self._canvas)
+        layout, self._heading, self._canvas = build_canvas_column(
+            self,
+            self._title,
+            width_in=9.0,
+            height_in=5.5,
+            minimum_height_px=_MIN_FIELD_HEIGHT_PX,
+        )
 
         transport = QHBoxLayout()
         self._play_button = QPushButton("Play")

@@ -22,17 +22,15 @@ from PyQt6.QtWidgets import (
     QComboBox,
     QHBoxLayout,
     QLabel,
-    QVBoxLayout,
     QWidget,
 )
-
-from src.shared.python.ui.qt import MplCanvas
 
 from .render import viewport_fallback
 from .render3d import SceneScale, ShotSceneArtists, scene_scale
 from .render_traces import TracePanelArtists
 from .shot3d import CameraPreset, ShotScene
 from .traces import ShotTraces, ValidityBand
+from .widgets import build_canvas_column
 
 __all__ = [
     "ShotViewportWidget",
@@ -71,13 +69,13 @@ class ShotViewportWidget(QWidget):
         self._frame = 0
         self._fallback = viewport_fallback()
 
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        self._heading = QLabel(self._title)
-        layout.addWidget(self._heading)
-        self._canvas = MplCanvas(width=7.5, height=5.0, dpi=96)
-        self._canvas.setMinimumHeight(_MIN_SCENE_HEIGHT_PX)
-        layout.addWidget(self._canvas)
+        layout, self._heading, self._canvas = build_canvas_column(
+            self,
+            self._title,
+            width_in=7.5,
+            height_in=5.0,
+            minimum_height_px=_MIN_SCENE_HEIGHT_PX,
+        )
 
         controls = QHBoxLayout()
         controls.addWidget(QLabel("View:"))
@@ -244,13 +242,13 @@ class TracePanelWidget(QWidget):
         self._artists: TracePanelArtists | None = None
         self._frame = 0
 
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        self._heading = QLabel(self._title)
-        layout.addWidget(self._heading)
-        self._canvas = MplCanvas(width=7.5, height=8.0, dpi=96)
-        self._canvas.setMinimumHeight(_MIN_TRACE_HEIGHT_PX)
-        layout.addWidget(self._canvas)
+        layout, self._heading, self._canvas = build_canvas_column(
+            self,
+            self._title,
+            width_in=7.5,
+            height_in=8.0,
+            minimum_height_px=_MIN_TRACE_HEIGHT_PX,
+        )
         self._readout = QLabel("no shot")
         self._readout.setWordWrap(True)
         layout.addWidget(self._readout)
