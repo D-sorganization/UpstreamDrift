@@ -78,7 +78,7 @@ from .agreement import (
     QuantityAgreement,
     licence_statement,
 )
-from .traces import ValidityBand
+from .traces import ValidityBand, ValiditySpan
 
 __all__ = [
     "DECLARED_AGREEMENT_BAND",
@@ -256,7 +256,7 @@ class CrossTierProbe:
     @property
     def f1_divot_mass_kg(self) -> float:
         """F1's removed section carried to a mass at the same width."""
-        return self.check.f1_divot.displaced_mass_kg(
+        return self.check.f1_divot_mass_kg(
             width_m=self.declared_width_m,
             bulk_density_kg_m3=self.bulk_density_kg_m3,
         )
@@ -264,15 +264,15 @@ class CrossTierProbe:
     @property
     def divot_fully_resolved(self) -> bool:
         """Whether every bin of F1's free surface held sand."""
-        return self.check.f1_divot.fully_resolved
+        return self.check.f1_divot_fully_resolved
 
     def divot_caveat(self) -> str:
         """What has to be said beside F1's divot numbers, or an empty string."""
         if self.divot_fully_resolved:
             return ""
+        empty, total = self.check.f1_divot_bins
         return (
-            f"{self.check.f1_divot.n_empty_bins} of "
-            f"{self.check.f1_divot.n_bins} surface bins held no sand at "
+            f"{empty} of {total} surface bins held no sand at "
             f"{self.time_s * 1e3:.2f} ms, so F1's divot section is a lower bound"
         )
 
@@ -558,6 +558,24 @@ class CrossTierComparison:
     def worst_status(self) -> EnvelopeStatus:
         """The worst verdict anywhere in the record, inherited from F0."""
         return self.band.worst
+
+    def status_at(self, frame: int) -> EnvelopeStatus:
+        """The verdict the numbers at one sample must be read under.
+
+        Args:
+            frame: The sample index.
+
+        Returns:
+            The verdict, straight from F0's band. Nothing here improves it.
+
+        Raises:
+            ValueError: If the index is outside the record.
+        """
+        return self.band.status_at(frame)
+
+    def validity_spans(self) -> tuple[ValiditySpan, ...]:
+        """The contiguous stretches of one verdict, for shading the panels."""
+        return self.band.spans()
 
     @property
     def f0_force_magnitude_n(self) -> NDArray[np.float64]:

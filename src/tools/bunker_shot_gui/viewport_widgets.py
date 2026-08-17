@@ -485,7 +485,7 @@ class CrossTierWidget(QWidget):
         self._artists.update(self._frame)
         self._canvas.draw_idle()
         moment = float(comparison.time_s[self._frame]) * 1e3
-        status = comparison.band.status_at(self._frame)
+        status = comparison.status_at(self._frame)
         self._readout.setText(
             f"{moment:.2f} ms - {status.value.replace('_', ' ').upper()} - "
             f"{comparison.licence_stamp()}"

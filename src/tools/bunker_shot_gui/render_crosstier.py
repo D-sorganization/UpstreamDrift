@@ -353,7 +353,7 @@ class CrossTierArtists:
 
     def _shade_validity(self, axes: Axes) -> None:
         """Shade the record with the verdict that applied over each stretch."""
-        for span in self.comparison.band.spans():
+        for span in self.comparison.validity_spans():
             axes.axvspan(
                 span.start_s * 1e3,
                 span.end_s * 1e3,
@@ -549,7 +549,7 @@ class CrossTierArtists:
         moment = float(model.time_s[index]) * 1e3
         for cursor in self.cursors:
             cursor.set_xdata([moment, moment])
-        status = model.band.status_at(index)
+        status = model.status_at(index)
         self.readout.set_text(
             f"{moment:.2f} ms - {status.value.replace('_', ' ').upper()} - "
             f"|F0| {float(model.f0_force_magnitude_n[index]):.4g} N, "

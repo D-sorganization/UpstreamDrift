@@ -699,6 +699,33 @@ class F0CrossCheck:
         return self.f1_divot.section_area_m2
 
     @property
+    def f1_divot_fully_resolved(self) -> bool:
+        """Whether every surface bin held sand, so the area is complete."""
+        return self.f1_divot.fully_resolved
+
+    @property
+    def f1_divot_bins(self) -> tuple[int, int]:
+        """``(empty, total)`` surface bins the divot was profiled on."""
+        return (self.f1_divot.n_empty_bins, self.f1_divot.n_bins)
+
+    def f1_divot_mass_kg(self, *, width_m: float, bulk_density_kg_m3: float) -> float:
+        """F1's removed section as a mass, at a **declared** width.
+
+        Args:
+            width_m: Declared out-of-plane width [m].
+            bulk_density_kg_m3: Sand bulk density [kg/m^3].
+
+        Returns:
+            The displaced mass [kg].
+
+        Raises:
+            SolverInputError: If either argument is not positive.
+        """
+        return self.f1_divot.displaced_mass_kg(
+            width_m=width_m, bulk_density_kg_m3=bulk_density_kg_m3
+        )
+
+    @property
     def magnitude_ratio(self) -> float:
         """``|F1| / |F0|``. Meaningful only alongside the declared width."""
         f0 = float(np.linalg.norm(self.f0_force_n))
