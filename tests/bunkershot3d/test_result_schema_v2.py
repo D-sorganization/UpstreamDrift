@@ -99,7 +99,9 @@ def test_writer_stamps_integer_schema_version(tmp_path: Path) -> None:
         pass
     with h5py.File(path, "r") as handle:
         version = handle.attrs[SCHEMA_VERSION_ATTR]
-    assert int(version) == SCHEMA_VERSION == 2
+    # v3 added the sand-field payload of issue #8710; the streams below are
+    # unchanged, which is why every other case in this module still stands.
+    assert int(version) == SCHEMA_VERSION == 3
     assert not isinstance(version, (str, bytes)), "version must be an integer"
 
 
