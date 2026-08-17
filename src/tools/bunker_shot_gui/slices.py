@@ -430,7 +430,8 @@ def preset_planes(
     Returns:
         Swing plane, face-normal plane, then the heel-to-toe series.
     """
-    width = float(series.provenance.settings.get("effective_width_m", 0.03))
+    settings = series.provenance.settings
+    width = float(settings.get("effective_width_m", 0.03))
     return (
         swing_plane(height_m=height_m),
         face_normal_plane(face_open_deg=face_open_deg, height_m=height_m),
@@ -613,7 +614,8 @@ def _classify(
     """What this cut is, and what may be said about flow through it."""
     obliquity = plane.obliquity_deg
     offset = plane.offset_m
-    width = float(series.provenance.settings.get("effective_width_m", 0.0))
+    settings = series.provenance.settings
+    width = float(settings.get("effective_width_m", 0.0))
     if width > 0.0 and abs(offset) > 0.5 * width + _TOL:
         raise ValueError(
             f"the cut is {offset * 1e3:+.4g} mm heel-to-toe, outside the "

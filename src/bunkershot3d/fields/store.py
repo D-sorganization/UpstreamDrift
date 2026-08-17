@@ -167,7 +167,8 @@ def _stored_form(series: SandFieldSeries) -> SandFieldSeries:
     point: the digest has to cover the numbers a reader will see, not
     the ones the solver had.
     """
-    dtype = series.retention.policy.store_dtype
+    policy = series.retention.policy
+    dtype = policy.store_dtype
     if dtype == "float64":
         return series
     down = np.dtype(dtype)
@@ -219,13 +220,14 @@ def load_field(path: Path | str) -> SandFieldSeries:
         )
     _require_readable_schema(payload, path)
     series = _series_from(payload)
+    provenance = series.provenance
     recomputed = series_digest(series)
     if recomputed != payload.digest:
         raise FieldIntegrityError(
             f"the sand field in {path} does not match its recorded digest "
             f"(stored {payload.digest[:16]}..., recomputed {recomputed[:16]}...). "
-            f"It declares tier {series.provenance.fidelity_tier.value} and status "
-            f"{series.provenance.envelope_status.value}; one of those, or the "
+            f"It declares tier {provenance.fidelity_tier.value} and status "
+            f"{provenance.envelope_status.value}; one of those, or the "
             "arrays under them, has been changed since it was written."
         )
     return series

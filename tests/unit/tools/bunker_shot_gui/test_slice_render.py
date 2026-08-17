@@ -38,8 +38,15 @@ pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
 
 
 def stamp_text(artists: SliceArtists) -> str:
-    """The in-frame stamp of a drawn cut."""
-    return artists._stamp.get_text()  # noqa: SLF001 - the artist under test
+    """The in-frame stamp of a drawn cut, with its line breaks flattened.
+
+    The stamp is wrapped to fit inside the panel, so where a sentence
+    happens to break is a layout decision. What these tests are about is
+    which claims the frame makes, so the breaks are normalised away
+    rather than pinned -- otherwise re-tuning the wrap width would
+    "fail" a set of honesty assertions that still hold.
+    """
+    return " ".join(artists._stamp.get_text().split())  # noqa: SLF001
 
 
 class TestTheFrameSaysWhatItIs:

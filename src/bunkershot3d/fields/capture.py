@@ -502,6 +502,7 @@ def _provenance(
 ) -> FieldProvenance:
     """Everything needed to trace this field to its run and regenerate it."""
     material = solver.material
+    walls = solver.walls
     settings: dict[str, float | int | str] = {
         "cell_size_m": float(solver.cell_size_m),
         "effective_width_m": float(solver.effective_width_m),
@@ -515,10 +516,10 @@ def _provenance(
         "n_steps": int(setup.n_steps),
         "approach_distance_m": float(setup.approach_distance_m),
         "free_surface_height_m": float(setup.free_surface_height_m),
-        "wall_lower_x": str(solver.walls.lower_x.value),
-        "wall_upper_x": str(solver.walls.upper_x.value),
-        "wall_lower_z": str(solver.walls.lower_z.value),
-        "wall_upper_z": str(solver.walls.upper_z.value),
+        "wall_lower_x": str(walls.lower_x.value),
+        "wall_upper_x": str(walls.upper_x.value),
+        "wall_lower_z": str(walls.lower_z.value),
+        "wall_upper_z": str(walls.upper_z.value),
         "sand_density_kg_m3": float(material.density_kg_m3),
         "sand_shear_modulus_pa": float(material.shear_modulus_pa),
         "sand_lame_lambda_pa": float(material.lame_lambda_pa),

@@ -577,7 +577,7 @@ class SandSliceWidget(QWidget):
         provenance = series.provenance
         self._readout.setText(
             f"{series.time_s[self._frame] * 1e3:.3f} ms - "
-            f"{provenance.envelope_status.value.replace('_', ' ').upper()} - "
+            f"{provenance.status_label} - "
             f"{provenance.fidelity_tier.value} - {provenance.speed_headline()}"
         )
 

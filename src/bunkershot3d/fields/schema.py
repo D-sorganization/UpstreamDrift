@@ -799,10 +799,20 @@ class FieldProvenance:
             f"{MAX_VALIDATED_SPEED_M_S:.2f} m/s published corpus limit"
         )
 
+    @property
+    def status_label(self) -> str:
+        """The envelope status as display text, composed in one place.
+
+        Every view that quotes it -- the frame stamp, the workbench
+        readout, a report -- takes it from here, so a designer reading
+        two of them is not reading two vocabularies.
+        """
+        return str(self.envelope_status.value).replace("_", " ").upper()
+
     def headline(self) -> str:
         """Tier, status and speed standing on one line."""
         return (
-            f"{self.envelope_status.value.replace('_', ' ').upper()} - "
+            f"{self.status_label} - "
             f"{self.fidelity_tier.value} sand field; {self.speed_headline()}"
         )
 

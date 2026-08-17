@@ -88,7 +88,7 @@ _SAMPLES_ALONG = 180
 _SAMPLES_UP = 140
 
 _STAMP_FONT_PT = 5.0
-_STAMP_WRAP_CHARS = 116
+_STAMP_WRAP_CHARS = 104
 _STAMP_HEADROOM = 0.42
 """Extra vertical range above the cut, as a fraction of its own span.
 
@@ -394,8 +394,11 @@ class SliceArtists:
         ]
         packing = occupancy.packing_note(sample.density_kg_m3)
         if packing:
-            lines.append(_wrapped(packing))
-        return "\n".join(lines)
+            lines.append(packing)
+        # Wrapped as a block rather than per line: a stamp that ran off the
+        # side of the panel would be as unreadable as one that had been
+        # cropped, which is the thing drawing it inside the axes prevents.
+        return "\n".join(_wrapped(line) for line in lines)
 
     def _extra_with_stamp(self, sample: SliceSample) -> str:
         """The whole stamp text, since only the extra part changes."""
