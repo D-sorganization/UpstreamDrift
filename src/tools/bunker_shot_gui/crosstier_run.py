@@ -21,7 +21,13 @@ from bunkershot3d.solvers import DRFTSolver, MaterialResponse, RefusalPolicy
 from bunkershot3d.solvers.mpm.constitutive import SandContinuum
 from bunkershot3d.solvers.mpm.solver import PlaneStrainMPMSolver
 
-from .bridge import compare_tiers, entry_kinematics, validity_band
+from .bridge import (
+    CrossTierInputs,
+    CrossTierSettings,
+    compare_tiers,
+    entry_kinematics,
+    validity_band,
+)
 from .crosstier import CrossTierComparison
 from .design import SandCondition, SwingSetup, WedgeDesign, WorkbenchInputError
 from .model import WorkbenchModel
@@ -148,13 +154,17 @@ def cross_tier_check(
             refusal_policy=RefusalPolicy.REPORT,
             max_steps=F1_MAX_STEPS,
         ),
-        build=build,
-        result=result,
-        kinematics=kinematics,
-        f0_divot_section_area_m2=scene.divot.section_area_m2,
-        band=band,
-        head_mass_kg=geometry.head_mass_kg,
-        bulk_density_kg_m3=state.bulk_density_kg_m3,
-        n_probes=n_probes,
-        sweep_speeds_m_s=sweep_speeds_m_s,
+        inputs=CrossTierInputs(
+            build=build,
+            result=result,
+            kinematics=kinematics,
+            f0_divot_section_area_m2=scene.divot.section_area_m2,
+            band=band,
+            head_mass_kg=geometry.head_mass_kg,
+            bulk_density_kg_m3=state.bulk_density_kg_m3,
+        ),
+        settings=CrossTierSettings(
+            n_probes=n_probes,
+            sweep_speeds_m_s=tuple(sweep_speeds_m_s),
+        ),
     )

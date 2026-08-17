@@ -55,7 +55,13 @@ from src.shared.python.ui import HoverCopyTextBrowser
 
 from .crosstier import CrossTierComparison
 from .crosstier_run import cross_tier_check
-from .design import SandCondition, SolverSetup, SwingSetup, WorkbenchInputError
+from .design import (
+    SandCondition,
+    SolverSetup,
+    SwingSetup,
+    WedgeDesign,
+    WorkbenchInputError,
+)
 from .field import LoadComponent, LoadScale, SoleLoadField
 from .model import DesignEvaluation, WorkbenchComparison, WorkbenchModel
 from .render import field_scales
@@ -343,17 +349,32 @@ class BunkerShotWidget(QWidget):
 
     # ------------------------------------------------------------------ runs
 
-    def run_design_a(self) -> None:
-        """Evaluate design A and display the result."""
+    def _design_a_inputs(
+        self,
+    ) -> tuple[SolverSetup, SandCondition, SwingSetup, WedgeDesign] | None:
+        """Read the shared controls and design A, reporting a bad combination.
+
+        Returns:
+            The four inputs every design-A action needs, or ``None`` when
+            one of them could not be read -- in which case the error has
+            already been shown and the caller should simply return.
+        """
         inputs = self._read_inputs()
         if inputs is None:
-            return
+            return None
         settings, sand, swing = inputs
         try:
-            design = self._design_a.design()
+            return (settings, sand, swing, self._design_a.design())
         except WorkbenchInputError as error:
             self._show_input_error(error)
+            return None
+
+    def run_design_a(self) -> None:
+        """Evaluate design A and display the result."""
+        read = self._design_a_inputs()
+        if read is None:
             return
+        settings, sand, swing, design = read
         self._banner.show_busy("Running the F0 solver over design A...")
         result = self._guarded(
             lambda: self._model_factory(settings).evaluate(design, sand, swing)
@@ -398,15 +419,10 @@ class BunkerShotWidget(QWidget):
         probe and costs minutes. The banner says so before the wait rather
         than after it.
         """
-        inputs = self._read_inputs()
-        if inputs is None:
+        read = self._design_a_inputs()
+        if read is None:
             return
-        settings, sand, swing = inputs
-        try:
-            design = self._design_a.design()
-        except WorkbenchInputError as error:
-            self._show_input_error(error)
-            return
+        settings, sand, swing, design = read
         self._banner.show_busy(
             "Running the F1 continuum beside F0 on design A. This is minutes, "
             "not milliseconds: F1 has no shot history yet, so every probe is "
