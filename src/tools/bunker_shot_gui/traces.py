@@ -50,7 +50,7 @@ from enum import Enum
 import numpy as np
 from numpy.typing import NDArray
 
-from bunkershot3d.solvers import EnvelopeStatus, ShotResult
+from bunkershot3d.solvers import EnvelopeStatus, FidelityTier, ShotResult
 
 from .field import ContactPatch
 
@@ -369,11 +369,16 @@ class ShotTraces:
             one cursor scrub all three.
         traces: The scalar traces, names unique.
         band: The envelope verdict over the same record.
+        fidelity_tier: Which rung of the ADR-0032 ladder produced them. A
+            verdict is per sample and a tier is not, so the tier rides on the
+            set while the statuses ride on the band -- and the panel that
+            stamps both reads them from one object rather than guessing.
     """
 
     time_s: NDArray[np.float64]
     traces: tuple[ScalarTrace, ...]
     band: ValidityBand
+    fidelity_tier: FidelityTier = FidelityTier.F0
 
     def __post_init__(self) -> None:
         """Validate the set.
@@ -592,4 +597,9 @@ def shot_traces(
             description="head speed given up since the start of the record",
         ),
     ]
-    return ShotTraces(time_s=times, traces=tuple(traces), band=band)
+    return ShotTraces(
+        time_s=times,
+        traces=tuple(traces),
+        band=band,
+        fidelity_tier=result.fidelity_tier,
+    )
