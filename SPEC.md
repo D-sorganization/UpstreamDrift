@@ -332,7 +332,7 @@ intruder's cross-section outline per frame, without which "ahead of the sole"
 and "up the face" are guesses rather than locations. Colour limits and arrow
 lengths are injected from a `SliceScale` covering every frame of every compared
 design and taken from occupied samples only, so #8728's per-grid auto-scaling
-cannot return in the view where it would do most damage. The cut is the fourth
+cannot return in the view where it would do most damage. The cut is another
 view on the sole-field transport rather than a second slider, but its record is
 a strided F1 march of a declared approach and not the F0 shot, so `CursorMap`
 maps the shared index by fractional progress and says so in frame. Three
@@ -352,6 +352,85 @@ assumption is a required field on every provenance record and is stamped on
 every frame. Nothing here is validated: the field inherits `BEYOND_VALIDATION`,
 `MAX_VALIDATED_SPEED_M_S` is 1.44 m/s so a 25 m/s shot is 17x outside the
 published corpus from its first sample, and the frame says both.
+
+Issue #8713 (epic #8699) then puts the two tiers side by side on the
+quantities both produce, which is the only honest way to show F1 output at
+all: NASA-STD-7009B validation and use history both stand at 0 of 4, and
+`MAX_VALIDATED_SPEED_M_S` is 1.44 m/s, so a 25 m/s record is 17x past the
+published corpus from its first sample and never returns. The view therefore
+states what agreement does and does not license _inside the frame_ rather
+than in a caption -- computed from `vandv.credibility` and the solver's own
+envelope constants, so the sentence cannot drift from the code -- and the
+statement is that consistency between two uncalibrated models is not
+validation, that neither tier's level moves because of anything on the page,
+and that what the comparison _can_ do is falsify. Every ratio is judged
+against a **declared** band of 0.25 on `|ln(F1/F0)|`, declared because issue
+#8616 established there is no measurement of any of these quantities out of
+bunker sand and therefore no model error to calibrate a tolerance against.
+F1 has no whole-shot march yet (#8733), so each F1 point is a separate march
+to one recorded pose under a declared straight-line constant-speed approach;
+the points are drawn unjoined and the figure says why, because a line through
+independent marches would draw a trajectory nobody computed.
+
+At the workbench's own design point -- the 58 deg preset at 25 m/s, a 20 mm
+declared effective width and F1 at dx = 3 mm on an 80 mm bed -- the pair
+disagrees differently from the way ADR-0033's flat test section did, and the
+difference is itself the finding. At the peak of the strike `|F1|/|F0|` is
+**0.384**, not the 1.49-2.68 the 40 x 16 mm section gave: on a lofted head at
+its own declared width F1 reports roughly a third of F0's magnitude rather
+than twice it, so the ratio ADR-0033 measured does not transfer and must not
+be quoted for a wedge. The direction cosine, on the other hand, is **0.996**
+across the loaded stretch against 0.65-0.87 on the test section, so the two
+tiers agree about _where the load points_ far better on real geometry than on
+the section the check was written for. Depth agrees exactly, which is a
+control rather than a result: both tiers are handed the same pose. F1's divot
+section is **1.47x** F0's, which is not a like-for-like disagreement either --
+F0 transports no sand, so its divot is the swept lower envelope of the head,
+while F1's is the depression the sand actually left. Speed lost is F0's
+alone, since F1's section is driven kinematically; what is reported is each
+tier's resultant **projected on the direction of travel** and integrated over
+the probed window on the same quadrature, 8.82 m/s against 4.23 m/s, with
+F0's own record showing 7.80 m/s over that window so the quadrature error is
+visible rather than absorbed into the divergence.
+
+The inertial-share result reproduces exactly and is the sharpest one. Over a
+declared 5/12/25 m/s sweep at the deepest recorded pose, F0 credits
+0.959 -> 0.996 -> 0.999 of its force to its dynamic term while F1 credits
+0.644 -> 0.654 -> 0.658 to momentum flux: F0's `lambda rho v_n^2` grows
+quadratically with nothing bounding it, the continuum's reaction is limited
+by how fast the yield surface lets sand accelerate out of the way, and the
+crossing therefore sits _below_ the whole greenside range. A shot that enters
+at 25 m/s and leaves at 17.2 never decelerates through it, which is why the
+sweep is carried beside the shot probes as its own declared experiment and
+labelled as one.
+
+Two defects in the F1 tier were found by pointing that sweep at a real pose.
+The approach distance was **unbounded**: `_approach` divides the height it has
+to climb by the velocity's vertical direction cosine, and that cosine passes
+through zero at the deepest sample of every real shot -- measured -0.0026 on
+this record, so a 24 mm climb asked for a 9.5 m run-in, and `_build_bed` then
+sized the bed to cover it. Nothing caught it but the step cap, after the
+allocation. It now takes whichever of the two clearances is shorter, backing
+out through the surface or running in from beyond the body's own length, so
+the choice no longer turns on a sign that changes mid-shot. The grid ceiling
+was likewise an accident of the approach: a descending body starts in the air
+and happens to raise it, a horizontal run-in does not, and the first ejected
+particle then leaves the domain. Headroom is now stated in cells. Separately,
+`F0CrossCheck` was comparing two `SolverResult.max_depth_m` fields that do not
+mean the same thing -- F0 reports its deepest _engaged_ element there, the
+#8701 contact diagnostic, while F1 reports the deepest submerged element; they
+coincide on a flat section and differ by 33x on a lofted head -- so the check
+now carries the submerged depth off the shared query and the comparison uses
+that. The view also names, rather than quietly reports, the probes where F0
+has switched itself off: it returns zero the moment no element is both
+submerged and leading-edge while the sole is still in the divot (#8702), and
+the ratios of 51x and 295x at the entry and exit probes are divisions by an
+engagement criterion rather than physical disagreements.
+
+The check is deliberately not on the per-shot path: it costs about 11 minutes
+against milliseconds for a design, so the workbench runs it from its own
+button and the view is empty until asked. It is the fourth follower of the one
+transport `SoleLoadFieldWidget` owns.
 
 Child issue #8697 then couples two first bending modes and one torsional mode
 to that distributed-grip authority. Its registered 0.25/0.125 ms atlas covers
@@ -406,7 +485,7 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.539 |
+| **Spec Version** | 1.0.540 |
 | **Last Spec Update** | 2026-08-16 |
 
 ## 2. Purpose & Mission
@@ -2797,7 +2876,9 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-16 | 1.0.540 | Repaired four CI Standard gates that had never been evaluated: `quality-gate` was pinned to the self-hosted fleet, so no run in the last 30 reached a conclusion and every gate below it was unobserved (routing fixed in #8729). `alembic.ini` now anchors `script_location` with `%(here)s` like `version_locations` already did, because Alembic resolves a relative script path against the current working directory and the autouse `_prevent_repo_root_io` fixture chdirs every test into `tmp_path` (#7935), which made the migration round-trip report a missing `src/api/migrations` that is in fact fully tracked. Restored the `tornado==6.5.8` pin dropped from `requirements.lock` and `requirements-dev.lock` by #8322, which deleted the pin line but left its `# via` comment block orphaned, leaving both locks structurally invalid rather than merely stale. Renewed the 44 mypy exclusion and 6 coverage-gate re-attestation dates from 2026-08-01 to 2026-10-01, aligned with the next `schedule` step where the cap drops to 36 against 44 exclusions; the ratchet `schedule` itself is unchanged and no exclusion was added (#8731). Split the DRY duplication ratchet: `scripts/config/dry_duplication_quarantine.json` records the 511 historical fingerprints with an owner and issue #8695, each capped at its observed count, and the gate now enforces `max(baseline, quarantine)` so newly introduced duplication still fails at its first repeat while historical debt is tracked explicitly instead of being folded invisibly into the baseline by a wholesale regeneration; the gate additionally reports quarantined fingerprints whose count has dropped so the ledger can be tightened. Raised the runtime security floors that `pip-audit` flagged once the lock repair let the audit steps run at all - `pillow>=12.3.0`, `cryptography>=50.0.0` and a newly direct `click>=8.3.3` - clearing PYSEC-2026-2132, PYSEC-2026-3552/3553/3554 and thirteen pillow advisories; `scripts/config/pip_audit_waivers.json` remains empty, so nothing was waived (#8738). `unit-test-gate` (#8735) and `shared-tools-consumer-contracts` (#8732) remain red with root-caused tracking issues rather than being suppressed. |
 | 2026-08-16 | 1.0.539 | Added the passive articulated-shaft qualification: a frozen 24-element bending basis and declared tapered-section torsion extend the distributed-grip authority through rigid, bending, torsion, and coupled activations. The registered 384-trajectory, two-engine, two-step atlas passes domain, activation, power, work--energy, refinement, and parity gates; retained coarse steps fail the linear-domain screen. Among 126 load/work-matched coupled-versus-rigid cells, delivery-speed differences have both signs (-0.0285 to +0.0212 m/s), rejecting a universal passive-shaft speed benefit. The result remains a planar structural reference, not equipment calibration, human validation, physiology, or coaching guidance. |
+| 2026-08-16 | 1.0.541 | Bumped `vendor/ud-tools` from `4744422d3` (2026-07-26) to Tools `main` `6472d0307`, and added `tests/unit/test_gui_launcher_manifest_targets.py`, which resolves every `pyqt6.module` declared in `src/shared/python/gui_launcher/tool_manifest.yaml` to a file in a reachable Tools source tree. The manifest advertised "Rate of Closure Impact Explorer" at `rate_of_closure.ui.pyqt6.main_window` while no Tools checkout the launcher searches contained that module: the tool had not yet landed on Tools `main`, and the vendored pin predated it. Nothing failed, because nothing checked — clicking the entry was the only way to discover it. The new sweep resolves by path tail rather than assuming a flat import root, because Tools nests some tools (`src/signal_processing_studio/python/signal_processing_studio/`) and not others (`src/rate_of_closure/`). Verified against the previous pin: `rate_of_closure` is the only entry that fails, with no false positives across the remaining entries. The check skips when no Tools checkout is present rather than passing vacuously. |
 | 2026-08-15 | 1.0.538 | Added the distributed-grip contact-discretization gate: one, three, and five tension fibers per hand preserve total stiffness and damping across 12 articulated states, two initial velocity signs, two time steps, two native engines, and nested 4/10/25/50 ms observations from 288 trajectories. Geometry null/reversal, virtual-power, passivity, work--energy, time-refinement, station-refinement, active-set, and cross-engine gates pass. The result is synthetic and right-censored; it does not establish physical grip pressure, shaft response, timing economy, delivery benefit, human transfer, or technique. |
 | 2026-08-15 | 1.0.537 | Added the typed unilateral articulated-attachment falsification gate: bilateral, tension-only, and dead-zone tension laws are evaluated across common-displacement and matched-extension comparisons, velocity-sign branches, isolated opening/reattachment probes, three time steps, and native MuJoCo/Pinocchio dynamics. The passive-law, virtual-power, work--energy, refinement, trajectory-parity, force-parity, and active-set-parity contracts pass. Natural five-millisecond branches do not produce opening or reattachment transitions, so event-probe results qualify the implementation only and do not establish a human or coaching strategy. |
 | 2026-08-15 | 1.0.536 | Added the bounded articulated bilateral-attachment forward gate: 18 selected closed states, seven nominal/adverse branches, three time steps, and native MuJoCo/Pinocchio dynamics produce 756 five-millisecond trajectories. Attachment-retention, power, work--energy, refinement, and parity gates pass; the result is explicitly right-censored and does not model unilateral slack, calibrated distributed grip/shaft, ground coupling, late downswing, impact, muscle action, human transfer, or coaching strategy. |

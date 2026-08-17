@@ -41,9 +41,11 @@ from .grid import PlaneStrainGrid
 __all__ = [
     "DomainWalls",
     "ParticleState",
+    "SurfaceDepression",
     "WallCondition",
     "apply_wall_conditions",
     "settled_bed",
+    "surface_depression",
     "surface_profile_m",
 ]
 
@@ -380,3 +382,176 @@ def surface_profile_m(
     if bool(inside.any()):
         np.maximum.at(heights, index[inside], particles.position_m[inside, 1])
     return centres, np.where(np.isfinite(heights), heights, np.nan)
+
+
+@dataclass(frozen=True, slots=True)
+class SurfaceDepression:
+    """How far the free surface fell, and how much section that removed.
+
+    :meth:`~bunkershot3d.solvers.mpm.solver.MPMRun.divot_depth_m` answers
+    the first question alone.  The cross-tier comparison of issue #8713
+    needs the second as well, because F0 reports its divot as an area and
+    a mass (:class:`~bunkershot3d.metrics.divot.DivotMetrics`) and a depth
+    cannot be compared against either.
+
+    The empty-bin count is why this is a value object rather than a float.
+    A bin the sand has left entirely has no surface height at all, so it
+    can contribute no depth to the integral: skipping it under-reports the
+    area and filling it in invents one.  The count therefore travels with
+    the number, and :attr:`fully_resolved` is what a caller checks before
+    quoting it.
+
+    Attributes:
+        section_area_m2: ``integral of (surface - height) dx`` over the
+            populated bins [m^2]. Per unit out-of-plane width, like every
+            other plane-strain quantity in this package.
+        max_depth_m: Deepest single bin, non-negative.
+        n_bins: Bins the profile was taken on.
+        n_empty_bins: Of those, bins holding no particle.
+        bed_width_m: Horizontal extent the profile spans [m].
+    """
+
+    section_area_m2: float
+    max_depth_m: float
+    n_bins: int
+    n_empty_bins: int
+    bed_width_m: float
+
+    def __post_init__(self) -> None:
+        """Validate the measurement.
+
+        Raises:
+            SolverInputError: If the area or depth is negative or not
+                finite, if the bin counts are inconsistent, or if the bed
+                width is not positive. A ``raise`` and not an ``assert``:
+                ``python -O`` strips assertions, and a negative divot area
+                would otherwise reach a comparison as a number.
+        """
+        for name, value in (
+            ("section_area_m2", self.section_area_m2),
+            ("max_depth_m", self.max_depth_m),
+        ):
+            if not math.isfinite(value) or value < 0.0:
+                raise SolverInputError(
+                    f"{name} must be finite and non-negative, got {value!r}"
+                )
+        if int(self.n_bins) < 1:
+            raise SolverInputError(f"n_bins must be positive, got {self.n_bins!r}")
+        if not 0 <= int(self.n_empty_bins) <= int(self.n_bins):
+            raise SolverInputError(
+                f"n_empty_bins must lie in [0, {self.n_bins}], got "
+                f"{self.n_empty_bins!r}"
+            )
+        if not math.isfinite(self.bed_width_m) or self.bed_width_m <= 0.0:
+            raise SolverInputError(
+                f"bed_width_m must be positive, got {self.bed_width_m!r}"
+            )
+
+    @property
+    def fully_resolved(self) -> bool:
+        """Whether every bin held sand, so the area integral is complete."""
+        return self.n_empty_bins == 0
+
+    def displaced_mass_kg(self, *, width_m: float, bulk_density_kg_m3: float) -> float:
+        """Mass of sand this section corresponds to at a **declared** width.
+
+        Plane strain has no out-of-plane extent, so there is no such thing
+        as a mass here until a width is declared.  It is a required keyword
+        with no default for the same reason
+        :attr:`~bunkershot3d.solvers.mpm.solver.PlaneStrainMPMSolver.effective_width_m`
+        is: the number is conditional on an assumption, and the assumption
+        has to be stated by whoever quotes it.
+
+        Args:
+            width_m: Declared out-of-plane width [m].
+            bulk_density_kg_m3: Sand bulk density [kg/m^3].
+
+        Returns:
+            The displaced mass [kg].
+
+        Raises:
+            SolverInputError: If either argument is not positive.
+        """
+        if not math.isfinite(width_m) or width_m <= 0.0:
+            raise SolverInputError(f"width_m must be positive, got {width_m!r}")
+        if not math.isfinite(bulk_density_kg_m3) or bulk_density_kg_m3 <= 0.0:
+            raise SolverInputError(
+                f"bulk_density_kg_m3 must be positive, got {bulk_density_kg_m3!r}"
+            )
+        return self.section_area_m2 * float(width_m) * float(bulk_density_kg_m3)
+
+    def summary(self) -> str:
+        """A line fit for a comparison report."""
+        resolved = (
+            "every bin held sand"
+            if self.fully_resolved
+            else f"{self.n_empty_bins} of {self.n_bins} bins held no sand, so the "
+            "area is a lower bound"
+        )
+        return (
+            f"section {self.section_area_m2 * 1e4:.4g} cm^2 over "
+            f"{self.bed_width_m * 1e3:.4g} mm, deepest "
+            f"{self.max_depth_m * 1e3:.4g} mm ({resolved})"
+        )
+
+
+def surface_depression(
+    particles: ParticleState,
+    *,
+    free_surface_height_m: float,
+    x_bounds_m: tuple[float, float],
+    n_bins: int,
+) -> SurfaceDepression:
+    """Measure the divot the sand itself carries, as a depth **and** an area.
+
+    Read off :func:`surface_profile_m`, so the free surface is wherever the
+    particles stopped rather than a tracked interface.  Heaped shoulders --
+    bins standing *above* the undisturbed level -- are clipped to zero
+    rather than subtracted: the quantity asked for is how much section was
+    removed from below the original surface, and letting a heap cancel a
+    hole would report a shallow divot for a bed that had merely been
+    rearranged.
+
+    Args:
+        particles: The bed, after the march.
+        free_surface_height_m: The undisturbed surface [m].
+        x_bounds_m: Horizontal range to profile.
+        n_bins: Bins across that range.
+
+    Returns:
+        The measurement, carrying its own empty-bin count.
+
+    Raises:
+        SolverInputError: If ``n_bins`` is not positive, if the bounds do
+            not increase, or if **no** bin holds a particle -- which is not
+            a zero divot but an unmeasured one, and a zero would read as
+            the first.
+    """
+    _centres, heights = surface_profile_m(
+        particles, x_bounds_m=x_bounds_m, n_bins=n_bins
+    )
+    populated = np.isfinite(heights)
+    if not bool(populated.any()):
+        raise SolverInputError(
+            "no particle lies inside the profiled range, so the free surface "
+            "was not measured anywhere; a zero divot would read as a measured "
+            "flat bed rather than as an empty window"
+        )
+    depth = np.zeros_like(heights)
+    depth[populated] = np.maximum(
+        float(free_surface_height_m) - heights[populated], 0.0
+    )
+    lower, upper = (float(value) for value in x_bounds_m)
+    # Midpoint, not trapezoid. The profile is a binned maximum -- piecewise
+    # constant over each bin -- rather than a sampled smooth curve, so the
+    # midpoint rule is exact for it, while the trapezoid rule over the bin
+    # *centres* would silently drop half a bin at each end of the bed.
+    bin_width_m = (upper - lower) / float(int(n_bins))
+
+    return SurfaceDepression(
+        section_area_m2=float(depth[populated].sum() * bin_width_m),
+        max_depth_m=float(depth[populated].max()),
+        n_bins=int(n_bins),
+        n_empty_bins=int((~populated).sum()),
+        bed_width_m=upper - lower,
+    )

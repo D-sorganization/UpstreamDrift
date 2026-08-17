@@ -96,8 +96,10 @@ from .solver import (
 from .state import (
     DomainWalls,
     ParticleState,
+    SurfaceDepression,
     WallCondition,
     settled_bed,
+    surface_depression,
     surface_profile_m,
 )
 from .verification import (
@@ -135,6 +137,7 @@ __all__ = [
     "RigidSection",
     "SandContinuum",
     "StepDiagnostics",
+    "SurfaceDepression",
     "WallCondition",
     "apic_angular_momentum",
     "cfl_time_step_s",
@@ -154,6 +157,7 @@ __all__ = [
     "reconstruct",
     "require_quotable",
     "settled_bed",
+    "surface_depression",
     "surface_profile_m",
     "yield_function",
 ]

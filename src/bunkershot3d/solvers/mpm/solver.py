@@ -81,8 +81,10 @@ from .grid import (
 from .state import (
     DomainWalls,
     ParticleState,
+    SurfaceDepression,
     apply_wall_conditions,
     settled_bed,
+    surface_depression,
     surface_profile_m,
 )
 
@@ -105,6 +107,10 @@ for the club's own motion, which enters the same condition."""
 _DIMENSION = 2
 _MASS_FLOOR_KG = 1e-15
 _MIN_APPROACH_CLEARANCE_CELLS = 2.0
+_MIN_DIRECTION = 1e-9
+"""Floor on a direction cosine before it becomes a divisor."""
+_EJECTA_HEADROOM_CELLS = 6.0
+"""Cells of empty grid above the free surface, for sand thrown up."""
 _SURFACE_BINS = 64
 
 _NO_CONTACT = ContactImpulse(
@@ -383,6 +389,34 @@ class MPMRun:
         total = self.averaged_force_n_per_m(window_s)
         stress = self.averaged_stress_force_n_per_m(window_s)
         return stress, total - stress
+
+    def surface_depression(self, *, n_bins: int = _SURFACE_BINS) -> SurfaceDepression:
+        """The divot the *sand* carries: how deep, and how much section.
+
+        Read off the particles, because in MPM the free surface *is*
+        wherever the particles stop.  The depth alone was enough for the
+        cross-check ADR-0033 shipped; comparing against F0's divot needs
+        the area as well, because
+        :class:`~bunkershot3d.metrics.divot.DivotMetrics` reports a
+        section area and a mass and there is nothing to compare a depth
+        against there.
+
+        Args:
+            n_bins: Horizontal bins across the bed.
+
+        Returns:
+            The measurement, carrying its own empty-bin count so a caller
+            can see whether the area is complete or a lower bound.
+
+        Raises:
+            SolverInputError: If no bin holds a particle.
+        """
+        return surface_depression(
+            self.particles,
+            free_surface_height_m=self.free_surface_height_m,
+            x_bounds_m=self.bed_x_bounds_m,
+            n_bins=n_bins,
+        )
 
     def divot_depth_m(self, *, n_bins: int = _SURFACE_BINS) -> float:
         """Deepest depression of the free surface below its original level.
@@ -872,6 +906,27 @@ class PlaneStrainMPMSolver:
     def _approach(self, state: IntrusionState) -> tuple[RigidSection, float]:
         """Reverse the body along its velocity until it is clear of the bed.
 
+        Two ways to be clear, and the shorter one wins
+        ----------------------------------------------
+
+        **Back out through the surface.**  Reversing along the velocity
+        lifts the body by ``distance * |direction_z|``, so clearing the
+        free surface costs ``height / |direction_z|``.
+
+        **Run in from beside the bed.**  Reversing along a mostly
+        horizontal velocity puts the body beyond its own length, which is
+        also clear of where the strike happens.
+
+        Taking whichever is shorter is not a tidy-up.  Choosing on the
+        *sign* of ``direction_z``, as this did, divides by a number that
+        passes through zero in the middle of every real shot: on the
+        workbench's own 25 m/s greenside record the deepest sample has
+        ``direction_z = -0.0026``, so a 24 mm climb asked for a **9.5 m**
+        run-in -- and :meth:`_build_bed` then sizes the bed to cover the
+        whole approach, so an ordinary-looking query allocates a 9.5 m bed
+        and marches tens of thousands of steps.  Nothing caught it but the
+        ``max_steps`` cap, after the allocation.
+
         Returns:
             ``(starting_section, approach_distance_m)``.
 
@@ -893,16 +948,14 @@ class PlaneStrainMPMSolver:
         direction = section.velocity_m_s / speed
         lower, upper = section.bounds_m()
         clearance = _MIN_APPROACH_CLEARANCE_CELLS * self.cell_size_m
+        span = float(upper[0] - lower[0])
+        horizontal = (span + clearance) / max(abs(direction[0]), _MIN_DIRECTION)
+        distance = horizontal
         if direction[1] < 0.0:
-            # Descending: back off until the lowest point clears the surface.
-            distance = (state.free_surface_height_m + clearance - lower[1]) / (
-                -direction[1]
+            vertical = (state.free_surface_height_m + clearance - lower[1]) / max(
+                -direction[1], _MIN_DIRECTION
             )
-        else:
-            # Level or rising: there is no height to back off to, so run in
-            # horizontally from beyond the body's own length.
-            span = float(upper[0] - lower[0])
-            distance = (span + clearance) / max(abs(direction[0]), 1e-9)
+            distance = min(vertical, horizontal)
         distance = max(float(distance), clearance)
         return section.translated(-distance * direction), distance
 
@@ -931,9 +984,23 @@ class PlaneStrainMPMSolver:
         surface = state.free_surface_height_m
         floor = surface - self.bed_depth_m
 
+        # Headroom above the free surface, stated rather than inherited.
+        # A descending approach starts the body in the air and so happens to
+        # raise the grid ceiling on its way past; a horizontal run-in does
+        # not, and the grid top then lands exactly on the free surface --
+        # where the first ejected particle leaves the domain and the run
+        # dies with "a particle left the grid interior". Sand thrown up has
+        # to have somewhere to go whatever the approach looked like.
+        headroom = _EJECTA_HEADROOM_CELLS * self.cell_size_m
         grid = PlaneStrainGrid.covering(
             (bed_lower, min(floor, float(min(lower_start[1], lower_end[1])))),
-            (bed_upper, max(surface, float(max(upper_start[1], upper_end[1])))),
+            (
+                bed_upper,
+                max(
+                    surface + headroom,
+                    float(max(upper_start[1], upper_end[1])),
+                ),
+            ),
             self.cell_size_m,
         )
         particles = settled_bed(
