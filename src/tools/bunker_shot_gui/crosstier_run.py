@@ -132,10 +132,11 @@ def cross_tier_check(
     )
     band = validity_band(f0, build, result, kinematics.orientation)
     scene = shot_scene(build, result)
-    if band is None:
+    if band is None or scene is None:
         raise WorkbenchInputError(
             "the shot recorded fewer than 2 samples, which is too short to "
-            "carry a validity band and therefore too short to cross-check"
+            "carry a validity band or a swept divot section, and therefore too "
+            "short to cross-check"
         )
     return compare_tiers(
         f0_solver=f0,
