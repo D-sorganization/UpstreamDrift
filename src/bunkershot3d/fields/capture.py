@@ -57,6 +57,7 @@ travels with every frame.
 from __future__ import annotations
 
 import math
+from dataclasses import dataclass
 
 import numpy as np
 from numpy.typing import NDArray
@@ -89,6 +90,7 @@ from .standing import (
 __all__ = [
     "F1_KINEMATICS_NOTE",
     "GridFieldSample",
+    "MarchSamples",
     "capture_f1_field",
     "sample_grid_field",
 ]
@@ -110,6 +112,34 @@ The same floor the solver's own grid update uses, so the field's notion
 of "empty" and the solve's notion of "empty" cannot drift apart."""
 
 _DIMENSION = 2
+
+
+@dataclass(frozen=True)
+class MarchSamples:
+    """What one strided march produced, frame by frame.
+
+    Three parallel lists and a final pose used to be passed around
+    together, which is the shape of an object that has not been named
+    yet: they are all indexed by the same frame and are only ever
+    consumed together.
+
+    Attributes:
+        times_s: Frame times, starting at zero for the undisturbed bed.
+        fields: One sampled instant per frame.
+        outlines_m: ``(V, d)`` intruder outline per frame.
+        section: The club pose the march ended on -- the marched pose,
+            not one recomputed from the elapsed time.
+    """
+
+    times_s: list[float]
+    fields: list[GridFieldSample]
+    outlines_m: list[NDArray[np.float64]]
+    section: RigidSection
+
+    @property
+    def n_frames(self) -> int:
+        """Frames sampled."""
+        return len(self.times_s)
 
 
 class GridFieldSample:
@@ -225,9 +255,7 @@ def capture_f1_field(
 
     setup = solver.prepare(state)
     indices, geometry, cropped_note = _crop(setup.grid, keep)
-    times, samples, outlines, final_section, steps = _march_and_sample(
-        solver, setup, keep, indices
-    )
+    marched, steps = _march_and_sample(solver, setup, keep, indices)
     run = MPMRun(
         steps=tuple(steps),
         time_step_s=setup.time_step_s,
@@ -238,52 +266,81 @@ def capture_f1_field(
         # bit-identical, and a run whose section disagreed with the last
         # stored outline at round-off would undercut the whole point of
         # asserting that a strided march is the march.
-        section=final_section,
+        section=marched.section,
         free_surface_height_m=setup.free_surface_height_m,
         bed_x_bounds_m=setup.bed_x_bounds_m,
     )
 
-    stride = keep.stride_for(setup.n_steps)
-    record = RetentionRecord(
-        policy=keep,
+    series = _series(
+        solver,
+        state,
+        setup,
+        verdict,
+        keep,
+        geometry,
+        _retention(keep, setup, indices, marched.n_frames, cropped_note),
+        marched,
+    )
+    return series, run
+
+
+def _retention(
+    policy: RetentionPolicy,
+    setup: MPMSetup,
+    indices: NDArray[np.int64],
+    frames_kept: int,
+    cropped_note: str,
+) -> RetentionRecord:
+    """What the policy actually cost on this march."""
+    stride = policy.stride_for(setup.n_steps)
+    return RetentionRecord(
+        policy=policy,
         steps_marched=setup.n_steps,
         time_stride=stride,
-        frames_kept=len(times),
+        frames_kept=int(frames_kept),
         time_step_s=setup.time_step_s,
         samples_in_domain=setup.grid.n_nodes,
         samples_kept=int(indices.size),
-        dropped=_dropped_lines(keep, setup, stride, indices, cropped_note),
+        dropped=_dropped_lines(policy, setup, stride, indices, cropped_note),
     )
-    store = np.dtype(keep.store_dtype)
-    return (
-        SandFieldSeries(
-            time_s=np.asarray(times, dtype=np.float64),
-            velocity_m_s=np.stack(
-                [sample.velocity_m_s for sample in samples], axis=0
-            ).astype(store, copy=False),
-            density_kg_m3=np.stack(
-                [sample.density_kg_m3 for sample in samples], axis=0
-            ).astype(store, copy=False),
-            shear_rate_1_s=(
-                None
-                if not keep.include_shear_rate
-                else np.stack(
-                    [_require_shear(sample.shear_rate_1_s) for sample in samples],
-                    axis=0,
-                ).astype(store, copy=False)
-            ),
-            positions_m=None,
-            layout=FieldLayout.GRID,
-            geometry=geometry,
-            provenance=_provenance(solver, state, setup, verdict),
-            retention=record,
-            occupancy=OccupancyRule(
-                reference_density_kg_m3=float(solver.material.density_kg_m3),
-                max_admissible_density_kg_m3=_densest_packing_kg_m3(solver),
-            ),
-            body_outline_m=np.stack(outlines, axis=0).astype(store, copy=False),
+
+
+def _series(
+    solver: PlaneStrainMPMSolver,
+    state: IntrusionState,
+    setup: MPMSetup,
+    verdict: ValidityVerdict,
+    policy: RetentionPolicy,
+    geometry: GridGeometry,
+    record: RetentionRecord,
+    marched: MarchSamples,
+) -> SandFieldSeries:
+    """Stack the sampled instants into the stored series."""
+    store = np.dtype(policy.store_dtype)
+
+    def stacked(values: list[NDArray[np.float64]]) -> NDArray[np.float64]:
+        return np.stack(values, axis=0).astype(store, copy=False)
+
+    frames = marched.fields
+    return SandFieldSeries(
+        time_s=np.asarray(marched.times_s, dtype=np.float64),
+        velocity_m_s=stacked([sample.velocity_m_s for sample in frames]),
+        density_kg_m3=stacked([sample.density_kg_m3 for sample in frames]),
+        shear_rate_1_s=(
+            None
+            if not policy.include_shear_rate
+            else stacked([_require_shear(sample.shear_rate_1_s) for sample in frames])
         ),
-        run,
+        positions_m=None,
+        layout=FieldLayout.GRID,
+        geometry=geometry,
+        provenance=_provenance(solver, state, setup, verdict),
+        retention=record,
+        occupancy=OccupancyRule(
+            reference_density_kg_m3=float(solver.material.density_kg_m3),
+            max_admissible_density_kg_m3=_densest_packing_kg_m3(solver),
+        ),
+        body_outline_m=stacked(marched.outlines_m),
     )
 
 
@@ -320,13 +377,7 @@ def _march_and_sample(
     setup: MPMSetup,
     policy: RetentionPolicy,
     indices: NDArray[np.int64],
-) -> tuple[
-    list[float],
-    list[GridFieldSample],
-    list[NDArray[np.float64]],
-    RigidSection,
-    list[StepDiagnostics],
-]:
+) -> tuple[MarchSamples, list[StepDiagnostics]]:
     """March in stride-sized blocks, sampling the field between them.
 
     The undisturbed bed is sampled first, at ``t = 0``, because it is the
@@ -369,7 +420,12 @@ def _march_and_sample(
         times.append(elapsed)
         samples.append(_take(setup, policy, indices))
         outlines.append(np.asarray(section.vertices_m))
-    return times, samples, outlines, section, steps
+    return (
+        MarchSamples(
+            times_s=times, fields=samples, outlines_m=outlines, section=section
+        ),
+        steps,
+    )
 
 
 def _shifted(diagnostic: StepDiagnostics, offset_s: float) -> StepDiagnostics:
