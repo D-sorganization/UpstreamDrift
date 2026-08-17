@@ -29,6 +29,7 @@ from .capture import (
     sample_grid_field,
 )
 from .schema import (
+    DEFAULT_OCCUPANCY_FLOOR_FRACTION,
     DENSITY_UNIT,
     FIELD_SCHEMA_VERSION,
     SHEAR_RATE_UNIT,
@@ -39,6 +40,7 @@ from .schema import (
     FieldProvenance,
     FieldQuantity,
     GridGeometry,
+    OccupancyRule,
     RetentionPolicy,
     RetentionRecord,
     SandFieldFrame,
@@ -54,6 +56,7 @@ from .store import (
 )
 
 __all__ = [
+    "DEFAULT_OCCUPANCY_FLOOR_FRACTION",
     "DENSITY_UNIT",
     "DETERMINISTIC_SEED_NAME",
     "F1_KINEMATICS_NOTE",
@@ -67,6 +70,7 @@ __all__ = [
     "FieldQuantity",
     "GridFieldSample",
     "GridGeometry",
+    "OccupancyRule",
     "RetentionPolicy",
     "RetentionRecord",
     "SandFieldFrame",

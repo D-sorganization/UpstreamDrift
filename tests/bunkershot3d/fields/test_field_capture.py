@@ -205,6 +205,44 @@ class TestTheFieldIsTheSolversOwn:
         assert float(speed[-1].max()) > 0.1
 
 
+class TestOccupancyIsCarriedByTheCapture:
+    """The stencil-tail finding, pinned against a real march."""
+
+    def test_the_reference_density_is_the_material_it_was_solved_in(
+        self, captured: tuple[object, object], material: SandContinuum
+    ) -> None:
+        series, _ = captured
+        assert series.occupancy.reference_density_kg_m3 == pytest.approx(  # type: ignore[attr-defined]
+            material.density_kg_m3
+        )
+
+    def test_the_masked_peak_is_below_the_unmasked_one(
+        self, captured: tuple[object, object]
+    ) -> None:
+        """A stencil tail divides round-off by a millionth of a cell's sand."""
+        series, _ = captured
+        unmasked = float(series.speed_m_s().max())  # type: ignore[attr-defined]
+        masked = series.peak_speed_m_s()  # type: ignore[attr-defined]
+        assert masked < unmasked
+        assert masked > 0.0
+
+    def test_the_masked_peak_is_a_believable_multiple_of_head_speed(
+        self, captured: tuple[object, object]
+    ) -> None:
+        """Splash outruns the sole; it does not outrun it by 87 per cent."""
+        series, _ = captured
+        assert series.peak_speed_m_s() < 2.0 * SHOT_SPEED_M_S  # type: ignore[attr-defined]
+
+    def test_the_masked_speed_is_nan_where_there_is_no_sand(
+        self, captured: tuple[object, object]
+    ) -> None:
+        series, _ = captured
+        masked = series.occupied_speed_m_s()  # type: ignore[attr-defined]
+        occupied = series.occupied()  # type: ignore[attr-defined]
+        assert bool(np.isnan(masked[~occupied]).all())
+        assert not bool(np.isnan(masked[occupied]).any())
+
+
 class TestRetentionIsRecorded:
     """What was dropped is written down, not inferred."""
 
@@ -339,6 +377,41 @@ class TestProvenanceTravelsWithTheField:
         assert settings["effective_width_m"] == pytest.approx(0.030)
         assert settings["n_steps"] > 0
         assert settings["sand_grain_diameter_m"] > 0.0
+
+    def test_the_intruder_outline_travels_with_the_field(
+        self, captured: tuple[object, object]
+    ) -> None:
+        """Without the body, a velocity picture cannot locate the face."""
+        series, _ = captured
+        outline = series.body_outline_m  # type: ignore[attr-defined]
+        assert outline is not None
+        assert outline.shape[0] == series.n_frames  # type: ignore[attr-defined]
+        assert outline.shape[2] == 2
+        assert outline.shape[1] >= 3
+
+    def test_the_outline_advances_along_the_approach(
+        self, captured: tuple[object, object]
+    ) -> None:
+        series, _ = captured
+        outline = series.body_outline_m  # type: ignore[attr-defined]
+        assert float(outline[-1, :, 0].mean()) > float(outline[0, :, 0].mean())
+        assert float(outline[-1, :, 1].mean()) < float(outline[0, :, 1].mean())
+
+    def test_the_outline_round_trips_through_the_store(
+        self, captured: tuple[object, object], tmp_path: object
+    ) -> None:
+        from bunkershot3d.fields.store import load_field, save_field
+
+        series, _ = captured
+        path = save_field(tmp_path / "outline.h5", series)  # type: ignore[operator]
+        loaded = load_field(path)
+        assert loaded.body_outline_m is not None
+        np.testing.assert_allclose(
+            loaded.body_outline_m,
+            series.body_outline_m,  # type: ignore[attr-defined]
+            rtol=1e-6,
+            atol=1e-9,
+        )
 
     def test_the_layout_is_a_grid_with_named_axes(
         self, captured: tuple[object, object]

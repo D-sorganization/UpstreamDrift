@@ -34,6 +34,7 @@ consumer::
     /sand_field/density        (T, N)       [kg/m^3]
     /sand_field/shear_rate     (T, N)       [1/s], optional
     /sand_field/positions      (T, N, D)    [m], PARTICLE layout only
+    /sand_field/body_outline   (T, V, D)    [m], intruder section, optional
     /sand_field.attrs["metadata"]      : str  -- canonical JSON, tier included
     /sand_field.attrs["content_sha256"]: str  -- covers metadata *and* arrays
 
@@ -115,7 +116,13 @@ _WRENCH = "wrench"
 _GRAINS = "grains"
 _TIME = "t"
 _COUNTS = "counts"
-_FIELD_ARRAYS = ("velocity", "density", "shear_rate", "positions")
+_FIELD_ARRAYS = (
+    "velocity",
+    "density",
+    "shear_rate",
+    "positions",
+    "body_outline",
+)
 
 
 class SandFieldPayload(NamedTuple):

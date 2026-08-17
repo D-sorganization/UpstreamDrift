@@ -13,6 +13,7 @@ import pytest
 
 from bunkershot3d.exceptions import BunkerShot3DValueError
 from bunkershot3d.fields.schema import (
+    DEFAULT_OCCUPANCY_FLOOR_FRACTION,
     DENSITY_UNIT,
     SHEAR_RATE_UNIT,
     VELOCITY_UNIT,
@@ -20,6 +21,7 @@ from bunkershot3d.fields.schema import (
     FieldProvenance,
     FieldQuantity,
     GridGeometry,
+    OccupancyRule,
     RetentionPolicy,
     RetentionRecord,
     SandFieldSeries,
@@ -92,6 +94,7 @@ def grid_series(n_frames: int = 3, **overrides: object) -> SandFieldSeries:
         "retention": retention(
             frames_kept=n_frames, samples_in_domain=samples, samples_kept=samples
         ),
+        "occupancy": OccupancyRule(reference_density_kg_m3=1712.0),
     }
     defaults.update(overrides)
     return SandFieldSeries(**defaults)  # type: ignore[arg-type]
@@ -112,6 +115,7 @@ def particle_series(n_frames: int = 3, n_samples: int = 7) -> SandFieldSeries:
         retention=retention(
             frames_kept=n_frames, samples_in_domain=n_samples, samples_kept=n_samples
         ),
+        occupancy=OccupancyRule(reference_density_kg_m3=1712.0),
     )
 
 
@@ -252,6 +256,86 @@ class TestMoreThanOneTierIsRepresentable:
         )
         with pytest.raises(BunkerShot3DValueError, match="samples"):
             grid_series(geometry=wrong)
+
+
+class TestOccupancyIsDeclaredNotChosenByTheViewer:
+    """A nodal velocity is momentum over mass; the tail of a stencil lies."""
+
+    def test_the_floor_is_a_fraction_of_the_reference_density(self) -> None:
+        rule = OccupancyRule(reference_density_kg_m3=1700.0, floor_fraction=0.1)
+        assert rule.floor_kg_m3 == pytest.approx(170.0)
+
+    def test_the_default_floor_is_the_measured_one(self) -> None:
+        """10% is where the reported peak stops moving on the 2 mm capture."""
+        assert OccupancyRule(1700.0).floor_fraction == (
+            DEFAULT_OCCUPANCY_FLOOR_FRACTION
+        )
+        assert DEFAULT_OCCUPANCY_FLOOR_FRACTION == 0.10
+
+    def test_a_near_empty_sample_is_not_reportable_sand(self) -> None:
+        rule = OccupancyRule(reference_density_kg_m3=1712.0)
+        densities = np.array([0.0, 0.0128, 1.2, 171.3, 1700.0])
+        np.testing.assert_array_equal(
+            rule.occupied(densities), [False, False, False, True, True]
+        )
+
+    def test_the_masked_peak_excludes_the_stencil_tail(self) -> None:
+        """The whole reason this rule exists, in one assertion."""
+        series = grid_series(n_frames=2)
+        density = np.array(series.density_kg_m3)
+        velocity = np.array(series.velocity_m_s)
+        density[0, 0] = 1.0e-3  # a stencil tail: essentially no sand
+        velocity[0, 0] = [900.0, 0.0]  # round-off divided by that mass
+        loud = grid_series(
+            n_frames=2,
+            density_kg_m3=density,
+            velocity_m_s=velocity,
+            retention=series.retention,
+        )
+        assert float(loud.speed_m_s().max()) > 800.0
+        assert loud.peak_speed_m_s() < 10.0
+        assert bool(np.isnan(loud.occupied_speed_m_s()[0, 0]))
+
+    def test_a_field_with_no_reportable_sand_reports_zero_not_nan(self) -> None:
+        series = grid_series(n_frames=2)
+        empty = grid_series(
+            n_frames=2,
+            density_kg_m3=np.zeros_like(series.density_kg_m3),
+            retention=series.retention,
+        )
+        assert empty.peak_speed_m_s() == 0.0
+
+    def test_the_rule_describes_itself_in_both_forms(self) -> None:
+        described = OccupancyRule(1712.0).describe()
+        assert "10%" in described
+        assert DENSITY_UNIT in described
+
+    def test_an_impossible_floor_is_refused(self) -> None:
+        with pytest.raises(BunkerShot3DValueError, match="floor_fraction"):
+            OccupancyRule(1700.0, floor_fraction=1.0)
+
+    def test_a_field_cannot_exist_without_an_occupancy_rule(self) -> None:
+        with pytest.raises(TypeError):
+            SandFieldSeries(  # type: ignore[call-arg]
+                time_s=np.zeros(1),
+                velocity_m_s=np.zeros((1, 12, 2)),
+                density_kg_m3=np.zeros((1, 12)),
+                shear_rate_1_s=None,
+                positions_m=None,
+                layout=FieldLayout.GRID,
+                geometry=grid_geometry(),
+                provenance=provenance(),
+                retention=retention(frames_kept=1),
+            )
+
+    def test_the_digest_covers_the_occupancy_rule(self) -> None:
+        """Re-thresholding a stored field is a different claim about it."""
+        series = grid_series()
+        loosened = grid_series(
+            occupancy=OccupancyRule(1712.0, floor_fraction=0.0),
+            retention=series.retention,
+        )
+        assert series_digest(series) != series_digest(loosened)
 
 
 class TestUnitsAreOnTheData:

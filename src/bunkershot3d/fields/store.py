@@ -48,6 +48,7 @@ from .schema import (
     FieldLayout,
     FieldProvenance,
     GridGeometry,
+    OccupancyRule,
     RetentionRecord,
     SandFieldSeries,
     series_digest,
@@ -188,6 +189,8 @@ def _stored_form(series: SandFieldSeries) -> SandFieldSeries:
         geometry=series.geometry,
         provenance=series.provenance,
         retention=series.retention,
+        occupancy=series.occupancy,
+        body_outline_m=cast_optional(series.body_outline_m),
     )
 
 
@@ -237,6 +240,8 @@ def _arrays(series: SandFieldSeries, store_dtype: str) -> dict[str, np.ndarray]:
         arrays["shear_rate"] = series.shear_rate_1_s.astype(dtype)
     if series.positions_m is not None:
         arrays["positions"] = series.positions_m.astype(dtype)
+    if series.body_outline_m is not None:
+        arrays["body_outline"] = series.body_outline_m.astype(dtype)
     return arrays
 
 
@@ -246,9 +251,16 @@ def _series_from(payload: SandFieldPayload) -> SandFieldSeries:
     geometry = metadata.get("geometry")
     shear = payload.arrays.get("shear_rate")
     positions = payload.arrays.get("positions")
+    outline = payload.arrays.get("body_outline")
     if metadata.get("has_shear_rate") and shear is None:
         raise FieldIntegrityError(
             "the field metadata declares a shear rate that is not in the file"
+        )
+    if metadata.get("has_body_outline") and outline is None:
+        raise FieldIntegrityError(
+            "the field metadata declares an intruder outline that is not in the "
+            "file, so a slice could not tell sand ahead of the sole from sand "
+            "riding up the face"
         )
     if metadata.get("has_positions") and positions is None:
         raise FieldIntegrityError(
@@ -265,4 +277,6 @@ def _series_from(payload: SandFieldPayload) -> SandFieldSeries:
         geometry=None if geometry is None else GridGeometry.from_dict(geometry),
         provenance=FieldProvenance.from_dict(metadata["provenance"]),
         retention=RetentionRecord.from_dict(metadata["retention"]),
+        occupancy=OccupancyRule.from_dict(metadata["occupancy"]),
+        body_outline_m=outline,
     )

@@ -136,6 +136,7 @@ class TestRoundTrip:
             geometry=series.geometry,
             provenance=series.provenance,
             retention=_with_policy(series, RetentionPolicy(store_dtype="float64")),
+            occupancy=series.occupancy,
         )
         loaded = load_field(save_field(tmp_path / "exact.h5", exact))
         np.testing.assert_array_equal(loaded.velocity_m_s, exact.velocity_m_s)
@@ -155,6 +156,7 @@ class TestRoundTrip:
             geometry=series.geometry,
             provenance=series.provenance,
             retention=series.retention,
+            occupancy=series.occupancy,
         )
         loaded = load_field(save_field(tmp_path / "nan.h5", marked))
         assert loaded.shear_rate_1_s is not None
@@ -393,6 +395,7 @@ class TestCompressionIsDeliberate:
             geometry=series.geometry,
             provenance=series.provenance,
             retention=_with_policy(series, RetentionPolicy(compression="")),
+            occupancy=series.occupancy,
         )
         path = save_field(tmp_path / "plain.h5", plain)
         with h5py.File(path, "r") as handle:

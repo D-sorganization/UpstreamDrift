@@ -78,6 +78,7 @@ from .schema import (
     FieldLayout,
     FieldProvenance,
     GridGeometry,
+    OccupancyRule,
     RetentionPolicy,
     RetentionRecord,
     SandFieldSeries,
@@ -222,7 +223,7 @@ def capture_f1_field(
 
     setup = solver.prepare(state)
     indices, geometry, cropped_note = _crop(setup.grid, keep)
-    times, samples, steps = _march_and_sample(solver, setup, keep, indices)
+    times, samples, outlines, steps = _march_and_sample(solver, setup, keep, indices)
     run = MPMRun(
         steps=tuple(steps),
         time_step_s=setup.time_step_s,
@@ -267,6 +268,10 @@ def capture_f1_field(
             geometry=geometry,
             provenance=_provenance(solver, state, setup, verdict),
             retention=record,
+            occupancy=OccupancyRule(
+                reference_density_kg_m3=float(solver.material.density_kg_m3)
+            ),
+            body_outline_m=np.stack(outlines, axis=0).astype(store, copy=False),
         ),
         run,
     )
@@ -286,19 +291,29 @@ def _march_and_sample(
     setup: MPMSetup,
     policy: RetentionPolicy,
     indices: NDArray[np.int64],
-) -> tuple[list[float], list[GridFieldSample], list[StepDiagnostics]]:
+) -> tuple[
+    list[float],
+    list[GridFieldSample],
+    list[NDArray[np.float64]],
+    list[StepDiagnostics],
+]:
     """March in stride-sized blocks, sampling the field between them.
 
     The undisturbed bed is sampled first, at ``t = 0``, because it is the
     reference every later frame is read against: without it the animation
     opens on sand that is already moving and gives no sense of what the
     club changed.
+
+    The intruder's own outline is kept alongside each frame, because a
+    velocity field with no body in it cannot answer the question the
+    field was computed for.
     """
     stride = policy.stride_for(setup.n_steps)
     times = [0.0]
     samples = [_take(setup, policy, indices)]
     steps: list[StepDiagnostics] = []
     section: RigidSection = setup.section
+    outlines: list[NDArray[np.float64]] = [np.asarray(section.vertices_m)]
     remaining = setup.n_steps
     elapsed = 0.0
     while remaining > 0:
@@ -323,7 +338,8 @@ def _march_and_sample(
         remaining -= block
         times.append(elapsed)
         samples.append(_take(setup, policy, indices))
-    return times, samples, steps
+        outlines.append(np.asarray(section.vertices_m))
+    return times, samples, outlines, steps
 
 
 def _shifted(diagnostic: StepDiagnostics, offset_s: float) -> StepDiagnostics:
@@ -438,7 +454,7 @@ def _dropped_lines(
     lines: list[str] = []
     if stride > 1:
         lines.append(
-            f"temporal: kept every {stride}th of {setup.n_steps} steps, so "
+            f"temporal: kept 1 step in {stride} of {setup.n_steps}, so "
             f"{setup.n_steps - math.ceil(setup.n_steps / stride)} steps are not "
             f"stored ({stride * setup.time_step_s * 1e6:.3g} us between frames)"
         )

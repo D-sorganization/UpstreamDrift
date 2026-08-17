@@ -64,6 +64,7 @@ from ..solvers.envelope import MAX_VALIDATED_SPEED_M_S, EnvelopeStatus
 from ..solvers.protocol import FidelityTier
 
 __all__ = [
+    "DEFAULT_OCCUPANCY_FLOOR_FRACTION",
     "DENSITY_UNIT",
     "FIELD_SCHEMA_VERSION",
     "SHEAR_RATE_UNIT",
@@ -74,6 +75,7 @@ __all__ = [
     "FieldProvenance",
     "FieldQuantity",
     "GridGeometry",
+    "OccupancyRule",
     "RetentionPolicy",
     "RetentionRecord",
     "SandFieldFrame",
@@ -285,6 +287,101 @@ class GridGeometry:
             cell_size_m=float(payload["cell_size_m"]),
             shape=tuple(int(value) for value in payload["shape"]),
             axis_names=tuple(str(name) for name in payload["axis_names"]),
+        )
+
+
+DEFAULT_OCCUPANCY_FLOOR_FRACTION = 0.10
+"""Density below which a sample is reported as carrying no sand, as a
+fraction of the bulk density.
+
+**Measured, not chosen.**  A grid velocity is nodal momentum divided by
+nodal mass, and at the outer tail of a B-spline stencil that mass is a
+few parts per million of a cell's worth of sand.  Dividing round-off by
+it produces enormous velocities that are numerics, not flow.  On the
+2 mm reference capture of a 25 m/s shot the reported peak sand speed
+runs 46.7 m/s with no floor, 32.2 m/s at 1 %, 29.0 m/s at 10 % and
+28.3 m/s at 50 %: it stops moving at 10 %, and the 46.7 m/s "peak" sits
+on a node holding 7.5e-6 of the bulk density.
+
+The same number falls out of the physics, which is why it is this one
+and not a tuning knob.  At ``dx = 2 mm`` and ``d50 = 0.458 mm`` a single
+grain's cross-section is about 4 % of a cell, so a 10 % floor is
+"fewer than about two and a half grains in this cell" -- below which a
+continuum density is not a measurement of anything, for the same reason
+:data:`~bunkershot3d.solvers.mpm.envelope.MIN_CELLS_PER_GRAIN` refuses a
+sub-grain grid."""
+
+
+@dataclass(frozen=True)
+class OccupancyRule:
+    """Where a field says there is sand, declared rather than assumed.
+
+    Every view masks on this, and it travels inside the file, so two
+    views of the same field cannot disagree about where the sand is and
+    a masked picture cannot be re-thresholded into a different claim by
+    a downstream widget.
+
+    Attributes:
+        reference_density_kg_m3: The material's bulk density, which the
+            floor is a fraction of.
+        floor_fraction: See :data:`DEFAULT_OCCUPANCY_FLOOR_FRACTION`.
+    """
+
+    reference_density_kg_m3: float
+    floor_fraction: float = DEFAULT_OCCUPANCY_FLOOR_FRACTION
+
+    def __post_init__(self) -> None:
+        density = float(self.reference_density_kg_m3)
+        fraction = float(self.floor_fraction)
+        if not math.isfinite(density) or density <= 0.0:
+            raise BunkerShot3DValueError(
+                f"reference_density_kg_m3 must be positive, got "
+                f"{self.reference_density_kg_m3!r}"
+            )
+        if not math.isfinite(fraction) or not 0.0 <= fraction < 1.0:
+            raise BunkerShot3DValueError(
+                f"floor_fraction must lie in [0, 1), got {self.floor_fraction!r}"
+            )
+        object.__setattr__(self, "reference_density_kg_m3", density)
+        object.__setattr__(self, "floor_fraction", fraction)
+
+    @property
+    def floor_kg_m3(self) -> float:
+        """The absolute density floor."""
+        return self.reference_density_kg_m3 * self.floor_fraction
+
+    def occupied(self, density_kg_m3: NDArray[np.float64]) -> NDArray[np.bool_]:
+        """Boolean mask of the samples that hold reportable sand.
+
+        Args:
+            density_kg_m3: Any-shaped density array.
+
+        Returns:
+            A mask of the same shape.
+        """
+        return np.asarray(density_kg_m3) >= self.floor_kg_m3
+
+    def describe(self) -> str:
+        """One line naming the floor in both forms."""
+        return (
+            f"sand where density >= {self.floor_fraction * 100:.3g}% of "
+            f"{self.reference_density_kg_m3:.4g} {DENSITY_UNIT} "
+            f"({self.floor_kg_m3:.4g} {DENSITY_UNIT})"
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """A JSON-safe mapping."""
+        return {
+            "reference_density_kg_m3": float(self.reference_density_kg_m3),
+            "floor_fraction": float(self.floor_fraction),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> OccupancyRule:
+        """Rebuild from :meth:`to_dict`."""
+        return cls(
+            reference_density_kg_m3=float(payload["reference_density_kg_m3"]),
+            floor_fraction=float(payload["floor_fraction"]),
         )
 
 
@@ -723,6 +820,14 @@ class SandFieldSeries:
         geometry: The lattice, required for ``GRID``.
         provenance: Tier, status and settings. Never optional.
         retention: What was dropped to get here. Never optional.
+        occupancy: Where this field says there is sand. Never optional,
+            and never a view's own choice -- see :class:`OccupancyRule`.
+        body_outline_m: ``(T, V, D)`` intruder cross-section outline per
+            frame, in the field's own coordinates, or ``None`` when the
+            run had no intruder. A few dozen numbers a frame, and
+            without them a velocity picture cannot distinguish sand
+            pushed ahead of the sole from sand riding up the face --
+            which is the question the whole view exists to answer.
     """
 
     time_s: NDArray[np.float64]
@@ -734,6 +839,8 @@ class SandFieldSeries:
     geometry: GridGeometry | None
     provenance: FieldProvenance
     retention: RetentionRecord
+    occupancy: OccupancyRule
+    body_outline_m: NDArray[np.float64] | None = None
 
     def __post_init__(self) -> None:
         times = np.asarray(self.time_s, dtype=np.float64).reshape(-1)
@@ -798,12 +905,30 @@ class SandFieldSeries:
                 "a PARTICLE series must carry per-frame positions: its samples "
                 "move, so the geometry cannot imply them"
             )
+        outline = self.body_outline_m
+        if outline is not None:
+            outline = np.asarray(outline, dtype=np.float64)
+            if (
+                outline.ndim != 3
+                or outline.shape[0] != n_frames
+                or outline.shape[2] != dimension
+            ):
+                raise BunkerShot3DValueError(
+                    f"body_outline_m must have shape (T, V, {dimension}) with "
+                    f"T = {n_frames}, got {outline.shape}"
+                )
+            if outline.shape[1] < 3:
+                raise BunkerShot3DValueError(
+                    f"a body outline needs at least 3 vertices to be a section, "
+                    f"got {outline.shape[1]}"
+                )
         object.__setattr__(self, "time_s", times)
         object.__setattr__(self, "velocity_m_s", velocity)
         object.__setattr__(self, "density_kg_m3", density)
         object.__setattr__(self, "shear_rate_1_s", shear)
         object.__setattr__(self, "positions_m", positions)
         object.__setattr__(self, "layout", layout)
+        object.__setattr__(self, "body_outline_m", outline)
 
     @staticmethod
     def _checked_optional(
@@ -848,8 +973,37 @@ class SandFieldSeries:
         return float(self.time_s[-1] - self.time_s[0])
 
     def speed_m_s(self) -> NDArray[np.float64]:
-        """``(T, N)`` velocity magnitudes over the whole run."""
+        """``(T, N)`` velocity magnitudes over the whole run.
+
+        Unmasked, so a caller who wants the raw transfer can have it.
+        Anything that reports or draws a speed wants
+        :meth:`occupied_speed_m_s` instead: a nodal velocity is momentum
+        over mass, and at the tail of a stencil that mass is parts per
+        million of a cell's sand, so the largest numbers in this array
+        are round-off rather than flow.
+        """
         return np.linalg.norm(self.velocity_m_s, axis=2)
+
+    def occupied(self) -> NDArray[np.bool_]:
+        """``(T, N)`` mask of the samples holding reportable sand."""
+        return self.occupancy.occupied(self.density_kg_m3)
+
+    def occupied_speed_m_s(self) -> NDArray[np.float64]:
+        """``(T, N)`` speeds, ``nan`` where there is no reportable sand.
+
+        ``nan`` rather than zero for the same reason the shear rate uses
+        it: an empty cell is not a cell of stationary sand, and a
+        ``nanmax`` over this array is the peak sand speed while a ``max``
+        over :meth:`speed_m_s` is the peak numerical artefact.
+        """
+        return np.where(self.occupied(), self.speed_m_s(), np.nan)
+
+    def peak_speed_m_s(self) -> float:
+        """The fastest reportable sand in the run, or 0 if none moved."""
+        speeds = self.occupied_speed_m_s()
+        if not bool(np.isfinite(speeds).any()):
+            return 0.0
+        return float(np.nanmax(speeds))
 
     def sample_positions_m(self, frame: int) -> NDArray[np.float64]:
         """``(N, d)`` sample positions for one frame.
@@ -917,9 +1071,11 @@ class SandFieldSeries:
             "n_samples": int(self.n_samples),
             "has_shear_rate": self.shear_rate_1_s is not None,
             "has_positions": self.positions_m is not None,
+            "has_body_outline": self.body_outline_m is not None,
             "geometry": None if self.geometry is None else self.geometry.to_dict(),
             "provenance": self.provenance.to_dict(),
             "retention": self.retention.to_dict(),
+            "occupancy": self.occupancy.to_dict(),
             "units": {
                 "time": TIME_UNIT,
                 "velocity": VELOCITY_UNIT,
@@ -969,4 +1125,6 @@ def _digest_arrays(
         arrays.append(("shear_rate_1_s", series.shear_rate_1_s))
     if series.positions_m is not None:
         arrays.append(("positions_m", series.positions_m))
+    if series.body_outline_m is not None:
+        arrays.append(("body_outline_m", series.body_outline_m))
     return arrays
