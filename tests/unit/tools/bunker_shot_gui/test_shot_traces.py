@@ -216,6 +216,61 @@ class TestTheValidityIsABandNotABadge:
             nominal_traces.band.status_at(nominal_traces.n_frames)
 
 
+class TestTheBandCatchesARealMidShotTransition:
+    """The case a badge cannot express, on a shot that actually does it.
+
+    On the nominal greenside delivery the band is uniform, and that is not a
+    bug: ``MAX_VALIDATED_SPEED_M_S`` is 1.44 m/s, so a 25 m/s head is past
+    the published corpus from the first free-flight sample and never comes
+    back. Drop the delivery to 1.5 m/s and the sand slows the head through
+    that ceiling *during the strike*, which is the transition #8708 is about
+    -- so the machinery is exercised against a shot that changes regime
+    rather than only against one that cannot.
+    """
+
+    def test_a_slow_delivery_changes_regime_partway_through(
+        self, decelerating_traces: ShotTraces
+    ) -> None:
+        assert decelerating_traces.band.changes is True
+
+    def test_the_transition_happens_inside_the_record(
+        self, decelerating_traces: ShotTraces
+    ) -> None:
+        spans = decelerating_traces.band.spans()
+        assert len(spans) >= 2
+        crossing = spans[0].end_s
+        assert float(decelerating_traces.time_s[0]) < crossing
+        assert crossing < float(decelerating_traces.time_s[-1])
+
+    def test_the_shot_improves_rather_than_degrades_as_it_slows(
+        self, decelerating_traces: ShotTraces
+    ) -> None:
+        """Losing speed moves the head back toward the published corpus."""
+        spans = decelerating_traces.band.spans()
+        assert spans[0].status is EnvelopeStatus.BEYOND_VALIDATION
+        assert spans[-1].status is EnvelopeStatus.EXTRAPOLATED
+
+    def test_the_worst_span_is_still_the_verdict_the_shot_carries(
+        self, decelerating_shot
+    ) -> None:  # type: ignore[no-untyped-def]
+        """The reconstruction has to hold on a changing shot too."""
+        assert decelerating_shot.traces.band.worst is decelerating_shot.verdict.status
+
+    def test_a_badge_would_have_mislabelled_most_of_the_record(
+        self, decelerating_traces: ShotTraces
+    ) -> None:
+        """Why the band exists, stated as a measurement.
+
+        The whole-shot verdict is the worst one anywhere in it. Here that
+        verdict is wrong for the majority of the record, which is exactly
+        what a single badge in the corner of a panel would assert.
+        """
+        band = decelerating_traces.band
+        worst = band.worst
+        mislabelled = sum(1 for status in band.statuses if status is not worst)
+        assert mislabelled > band.n_frames // 2
+
+
 class TestTheBandDefendsItself:
     """``raise``, never ``assert``."""
 

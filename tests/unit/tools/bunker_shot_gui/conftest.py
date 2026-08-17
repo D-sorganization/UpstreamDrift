@@ -75,6 +75,35 @@ def nominal_shot(model, nominal_design, firm_sand, tour_swing):  # type: ignore[
 
 
 @pytest.fixture(scope="session")
+def decelerating_swing() -> SwingSetup:
+    """A delivery slow enough that the sand slows it out of one regime.
+
+    ``MAX_VALIDATED_SPEED_M_S`` is 1.44 m/s, so a head delivered at 1.5 m/s
+    starts past the published corpus and drops back inside it partway
+    through the strike. It is the fixture that exercises a validity band
+    which actually changes (issue #8708); a greenside 25 m/s delivery never
+    returns to the corpus and so is uniform.
+    """
+    return SwingSetup(clubhead_speed_mps=1.5)
+
+
+@pytest.fixture(scope="session")
+def decelerating_shot(model, nominal_design, firm_sand, decelerating_swing):  # type: ignore[no-untyped-def]
+    """One real F0 shot that changes envelope regime mid-record."""
+    return model.run_shot(
+        nominal_design.geometry(), firm_sand.sand_state(), decelerating_swing
+    )
+
+
+@pytest.fixture(scope="session")
+def decelerating_traces(decelerating_shot):  # type: ignore[no-untyped-def]
+    """The scalar traces of the shot that changes regime."""
+    traces = decelerating_shot.traces
+    assert traces is not None, decelerating_shot.unavailable
+    return traces
+
+
+@pytest.fixture(scope="session")
 def nominal_evaluation(model, nominal_design, firm_sand, tour_swing):  # type: ignore[no-untyped-def]
     """The nominal design evaluated end to end, playability included."""
     return model.evaluate(nominal_design, firm_sand, tour_swing)
