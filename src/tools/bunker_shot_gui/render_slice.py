@@ -530,9 +530,10 @@ def slice_still(
     chosen = frame
     if chosen is None:
         speeds = series.occupied_speed_m_s()
-        peaks = np.where(
-            np.isfinite(speeds).any(axis=1), np.nanmax(speeds, axis=1), -np.inf
-        )
+        # Zero-filled before the reduction rather than masked after it: a
+        # nanmax over an all-nan row is correct but warns, and frame 0 of
+        # every capture is the undisturbed bed.
+        peaks = np.nan_to_num(speeds, nan=0.0).max(axis=1)
         chosen = int(np.argmax(peaks))
     figure = Figure(figsize=figsize)
     draw_slice_frame(figure, series, plane, frame=chosen, scale=scale)

@@ -400,7 +400,7 @@ def body_focus_bounds_m(
     geometry = series.geometry
     if outline is None or geometry is None:
         return None
-    cosine = float(plane.along @ _ALONG_PATH)
+    cosine = _require_in_plane(plane)
     along = (outline[..., 0] - plane.origin_m[0]) / cosine
     margin = float(margin_m)
     lower, upper = geometry.bounds_m()
@@ -415,7 +415,7 @@ def preset_planes(
     *,
     face_open_deg: float = 0.0,
     n_stations: int = 5,
-    height_m: float = 0.0,
+    height_m: float | None = None,
 ) -> tuple[CuttingPlane, ...]:
     """Every named preset for one field, sized from its own settings.
 
@@ -427,17 +427,28 @@ def preset_planes(
         series: The field the planes will cut.
         face_open_deg: Face-open angle for the face-normal preset.
         n_stations: Stations in the heel-to-toe series.
-        height_m: World height of each cut's ``h = 0`` line.
+        height_m: World height of each cut's ``h = 0`` line. Defaults to
+            the field's own recorded free surface, so the "above the free
+            surface" axis label is true rather than approximately true.
 
     Returns:
         Swing plane, face-normal plane, then the heel-to-toe series.
     """
     settings = series.provenance.settings
     width = float(settings.get("effective_width_m", 0.03))
+    # The cut's h = 0 line is the field's own free surface, not world zero.
+    # Every axis this produces is labelled "above the free surface", and a
+    # bed sitting at a non-zero height would make that label a lie by
+    # exactly that height. Capture records the surface for this reason.
+    surface = (
+        float(settings.get("free_surface_height_m", 0.0))
+        if height_m is None
+        else float(height_m)
+    )
     return (
-        swing_plane(height_m=height_m),
-        face_normal_plane(face_open_deg=face_open_deg, height_m=height_m),
-        *heel_to_toe_series(width_m=width, n_stations=n_stations, height_m=height_m),
+        swing_plane(height_m=surface),
+        face_normal_plane(face_open_deg=face_open_deg, height_m=surface),
+        *heel_to_toe_series(width_m=width, n_stations=n_stations, height_m=surface),
     )
 
 
@@ -610,6 +621,38 @@ def sample_plane(
     )
 
 
+def _require_in_plane(plane: CuttingPlane) -> float:
+    """The plane's along-path cosine, refused when it is edge-on.
+
+    Three places divide by this cosine to map a cut coordinate onto the
+    solved plane, and an edge-on cut sends all three to infinity. That
+    used to be caught only inside :func:`sample_plane`, which left
+    :func:`body_focus_bounds_m` -- a public function, called *before* any
+    sampling -- free to hand back infinite bounds. Infinite bounds pass
+    the increasing-bounds check, make every sample point ``nan``, and
+    produce a completely blank cut with no error at all. A blank picture
+    that nobody was told about is the worst failure this package has, so
+    the guard lives with the division.
+
+    Args:
+        plane: The cut.
+
+    Returns:
+        The cosine between the cut's along-axis and the club path.
+
+    Raises:
+        ValueError: If the cut is edge-on to the solved plane.
+    """
+    cosine = float(plane.along @ _ALONG_PATH)
+    if abs(cosine) < _MIN_OBLIQUITY_COS:
+        raise ValueError(
+            "the cut is edge-on to the solved plane, so it meets it in a line "
+            "rather than an area. A plane-strain field has no picture to show "
+            "on that cut."
+        )
+    return cosine
+
+
 def _classify(
     series: SandFieldSeries, plane: CuttingPlane
 ) -> tuple[SliceFidelity, str]:
@@ -625,12 +668,7 @@ def _classify(
             "width is a stated assumption, not a result, so there is nothing "
             "here to extrude into."
         )
-    if abs(float(plane.along @ _ALONG_PATH)) < _MIN_OBLIQUITY_COS:
-        raise ValueError(
-            "the cut is edge-on to the solved plane, so it meets it in a line "
-            "rather than an area. A plane-strain field has no picture to show "
-            "on that cut."
-        )
+    _require_in_plane(plane)
     if obliquity > _TOL:
         return (
             SliceFidelity.PROJECTED,
@@ -663,7 +701,7 @@ def _axes(
         raise ValueError(
             f"a cut needs at least 2 samples on each axis, got {n_along!r} x {n_up!r}"
         )
-    cosine = float(plane.along @ _ALONG_PATH)
+    cosine = _require_in_plane(plane)
     if along_bounds_m is None:
         # The along-axis is compressed by cos(obliquity) when it maps onto the
         # solved plane, so covering the field's x extent needs a longer cut.
@@ -681,6 +719,12 @@ def _axes(
         ("along_bounds_m", along_bounds_m),
         ("up_bounds_m", up_bounds_m),
     ):
+        if not all(math.isfinite(value) for value in bounds):
+            raise ValueError(
+                f"{name} must be finite, got {bounds!r}. An infinite window "
+                "makes every sample nan and draws a blank cut that looks like "
+                "sand nobody moved."
+            )
         if bounds[1] <= bounds[0]:
             raise ValueError(f"{name} must be increasing, got {bounds!r}")
     return (
@@ -749,7 +793,7 @@ def _outline_in_cut(
     if outline is None:
         return None
     section = np.asarray(outline[int(frame)])
-    cosine = float(plane.along @ _ALONG_PATH)
+    cosine = _require_in_plane(plane)
     along = (section[:, 0] - plane.origin_m[0]) / cosine
     up = section[:, 1] - plane.origin_m[2]
     return np.stack([along, up], axis=1)

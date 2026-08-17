@@ -402,6 +402,24 @@ class TestProvenanceTravelsWithTheField:
         assert outline.shape[2] == 2
         assert outline.shape[1] >= 3
 
+    def test_the_run_section_is_the_marched_pose_not_a_recomputed_one(
+        self, captured: tuple[object, object]
+    ) -> None:
+        """Algebraically identical is not bit-identical, and the claim is bits.
+
+        Compared at the stored precision, because the outline went
+        through the retention policy's ``float32`` on the way out. What
+        is being pinned is that the run's pose and the last stored
+        outline are the *same* pose rather than two independent
+        computations of it.
+        """
+        series, run = captured
+        outline = series.body_outline_m  # type: ignore[attr-defined]
+        np.testing.assert_array_equal(
+            np.asarray(run.section.vertices_m, dtype=np.float32),  # type: ignore[attr-defined]
+            np.asarray(outline[-1], dtype=np.float32),
+        )
+
     def test_the_outline_advances_along_the_approach(
         self, captured: tuple[object, object]
     ) -> None:

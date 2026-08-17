@@ -42,6 +42,7 @@ from src.tools.bunker_shot_gui.slices import (
     PlanePreset,
     SliceFidelity,
     SliceScale,
+    body_focus_bounds_m,
     face_normal_plane,
     heel_to_toe_series,
     preset_planes,
@@ -58,7 +59,11 @@ BULK_DENSITY = 1712.0
 
 
 def analytic_field(
-    n_frames: int = 4, *, peak_m_s: float = 20.0, with_body: bool = True
+    n_frames: int = 4,
+    *,
+    peak_m_s: float = 20.0,
+    with_body: bool = True,
+    free_surface_height_m: float = 0.0,
 ) -> SandFieldSeries:
     """A field whose answer is known, so a slice can be checked against it.
 
@@ -68,7 +73,7 @@ def analytic_field(
     """
     shape = (21, 15)
     geometry = GridGeometry(
-        origin_m=np.array([-0.020, -0.014]),
+        origin_m=np.array([-0.020, -0.014 + free_surface_height_m]),
         cell_size_m=CELL_M,
         shape=shape,
         axis_names=("x", "z"),
@@ -84,12 +89,18 @@ def analytic_field(
         velocity[index, :, 0] = peak_m_s * growth * (x - x.min()) / (np.ptp(x) or 1.0)
         velocity[index, :, 1] = peak_m_s * growth * (z - z.min()) / (np.ptp(z) or 1.0)
         # Sand below z = 0, air above: a free surface the mask can find.
-        density[index] = np.where(z <= 0.0, BULK_DENSITY, 0.0)
-        shear[index] = 100.0 * growth * np.where(z <= 0.0, 1.0, 0.0)
+        density[index] = np.where(z <= free_surface_height_m, BULK_DENSITY, 0.0)
+        shear[index] = 100.0 * growth * np.where(z <= free_surface_height_m, 1.0, 0.0)
     outline = None
     if with_body:
+        base = free_surface_height_m
         square = np.array(
-            [[-0.006, 0.0], [0.006, 0.0], [0.006, 0.006], [-0.006, 0.006]]
+            [
+                [-0.006, base],
+                [0.006, base],
+                [0.006, base + 0.006],
+                [-0.006, base + 0.006],
+            ]
         )
         outline = np.stack([square + [0.002 * step, 0.0] for step in range(n_frames)])
     return SandFieldSeries(
@@ -107,7 +118,11 @@ def analytic_field(
             kinematics="declared straight-line approach",
             peak_speed_m_s=25.0,
             refused=("club_force", "out_of_plane"),
-            settings={"effective_width_m": EFFECTIVE_WIDTH_M, "cell_size_m": CELL_M},
+            settings={
+                "effective_width_m": EFFECTIVE_WIDTH_M,
+                "cell_size_m": CELL_M,
+                "free_surface_height_m": free_surface_height_m,
+            },
         ),
         retention=RetentionRecord(
             policy=RetentionPolicy(),
@@ -247,6 +262,67 @@ class TestPlaneStrainIsNotHidden:
         )
         with pytest.raises(ValueError, match="no lattice"):
             sample_plane(particles, 0, swing_plane())
+
+
+class TestAnEdgeOnCutCannotProduceABlankPicture:
+    """A blank cut nobody was told about is the worst failure here."""
+
+    def test_the_focus_bounds_refuse_an_edge_on_plane(self) -> None:
+        """This runs before any sampling, so it needs its own guard."""
+        plane = CuttingPlane(
+            name="edge on",
+            origin_m=np.zeros(3),
+            along=np.array([0.0, 1.0, 0.0]),
+            up=np.array([0.0, 0.0, 1.0]),
+        )
+        with pytest.raises(ValueError, match="edge-on"):
+            body_focus_bounds_m(analytic_field(), plane)
+
+    def test_the_focus_bounds_are_finite_for_an_oblique_plane(self) -> None:
+        bounds = body_focus_bounds_m(
+            analytic_field(), face_normal_plane(face_open_deg=60.0)
+        )
+        assert bounds is not None
+        assert all(np.isfinite(value) for pair in bounds for value in pair)
+
+    def test_an_infinite_window_is_refused_rather_than_drawn(self) -> None:
+        """Infinite bounds pass an increasing check and make every sample nan."""
+        with pytest.raises(ValueError, match="must be finite"):
+            sample_plane(
+                analytic_field(),
+                0,
+                swing_plane(),
+                along_bounds_m=(-np.inf, np.inf),
+            )
+
+
+class TestThePresetsSitOnTheFieldsOwnSurface:
+    """The axis says "above the free surface", so it had better be."""
+
+    def test_the_presets_take_the_recorded_free_surface(self) -> None:
+        field = analytic_field(free_surface_height_m=0.012)
+        for plane in preset_planes(field):
+            assert plane.origin_m[2] == pytest.approx(0.012)
+
+    def test_a_caller_can_still_state_a_height(self) -> None:
+        field = analytic_field(free_surface_height_m=0.012)
+        for plane in preset_planes(field, height_m=0.0):
+            assert plane.origin_m[2] == pytest.approx(0.0)
+
+    def test_a_raised_bed_puts_its_surface_at_h_equals_zero(self) -> None:
+        """Otherwise the sand, the club and the axis label all disagree."""
+        raised = analytic_field(free_surface_height_m=0.012)
+        sample = sample_plane(raised, 0, preset_planes(raised)[0])
+        assert sample.body_outline_m is not None
+        # The body rests on the surface, so the cut reads it at h = 0.
+        assert float(sample.body_outline_m[:, 1].min()) == pytest.approx(0.0)
+
+    def test_ignoring_the_surface_would_offset_everything_by_it(self) -> None:
+        """The defect, demonstrated: a world-zero datum on a raised bed."""
+        raised = analytic_field(free_surface_height_m=0.012)
+        sample = sample_plane(raised, 0, swing_plane(height_m=0.0))
+        assert sample.body_outline_m is not None
+        assert float(sample.body_outline_m[:, 1].min()) == pytest.approx(0.012)
 
 
 class TestVelocityKeepsItsDirection:

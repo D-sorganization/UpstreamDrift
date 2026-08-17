@@ -225,13 +225,20 @@ def capture_f1_field(
 
     setup = solver.prepare(state)
     indices, geometry, cropped_note = _crop(setup.grid, keep)
-    times, samples, outlines, steps = _march_and_sample(solver, setup, keep, indices)
+    times, samples, outlines, final_section, steps = _march_and_sample(
+        solver, setup, keep, indices
+    )
     run = MPMRun(
         steps=tuple(steps),
         time_step_s=setup.time_step_s,
         particles=setup.particles,
         grid=setup.grid,
-        section=setup.section.advanced(setup.time_step_s * setup.n_steps),
+        # The pose the march produced, not one recomputed from the total
+        # elapsed time. The two are algebraically identical and not
+        # bit-identical, and a run whose section disagreed with the last
+        # stored outline at round-off would undercut the whole point of
+        # asserting that a strided march is the march.
+        section=final_section,
         free_surface_height_m=setup.free_surface_height_m,
         bed_x_bounds_m=setup.bed_x_bounds_m,
     )
@@ -317,6 +324,7 @@ def _march_and_sample(
     list[float],
     list[GridFieldSample],
     list[NDArray[np.float64]],
+    RigidSection,
     list[StepDiagnostics],
 ]:
     """March in stride-sized blocks, sampling the field between them.
@@ -361,7 +369,7 @@ def _march_and_sample(
         times.append(elapsed)
         samples.append(_take(setup, policy, indices))
         outlines.append(np.asarray(section.vertices_m))
-    return times, samples, outlines, steps
+    return times, samples, outlines, section, steps
 
 
 def _shifted(diagnostic: StepDiagnostics, offset_s: float) -> StepDiagnostics:

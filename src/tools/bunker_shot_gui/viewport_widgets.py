@@ -747,7 +747,8 @@ def _fastest_frame(series: SandFieldSeries) -> int:
     the frame with the loudest stencil tail would open on numerics.
     """
     speeds = series.occupied_speed_m_s()
-    peaks = np.where(
-        np.isfinite(speeds).any(axis=1), np.nanmax(speeds, axis=1), -np.inf
-    )
+    # Zero-filled before the reduction rather than masked after it: a
+    # nanmax over an all-nan row is correct but warns, and frame 0 of
+    # every capture is the undisturbed bed.
+    peaks = np.nan_to_num(speeds, nan=0.0).max(axis=1)
     return int(np.argmax(peaks))
