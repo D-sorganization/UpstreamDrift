@@ -310,6 +310,38 @@ class TestOccupancyIsDeclaredNotChosenByTheViewer:
         assert "10%" in described
         assert DENSITY_UNIT in described
 
+    def test_a_density_above_the_packing_limit_is_counted_not_clipped(self) -> None:
+        """Sand cannot be denser than its own densest packing."""
+        rule = OccupancyRule(1712.0, max_admissible_density_kg_m3=1747.0)
+        densities = np.array([1600.0, 1740.0, 1900.0, 2914.0])
+        np.testing.assert_array_equal(
+            rule.over_packing_limit(densities), [False, False, True, True]
+        )
+        note = rule.packing_note(densities)
+        assert "2 of 4" in note
+        assert "2914" in note
+        assert "transfer artefact" in note
+
+    def test_a_field_inside_the_limit_gets_no_note(self) -> None:
+        rule = OccupancyRule(1712.0, max_admissible_density_kg_m3=1747.0)
+        assert rule.packing_note(np.array([1600.0, 1700.0])) == ""
+
+    def test_a_rule_with_no_stated_limit_makes_no_claim(self) -> None:
+        rule = OccupancyRule(1712.0)
+        assert rule.packing_note(np.array([9000.0])) == ""
+        assert not bool(rule.over_packing_limit(np.array([9000.0])).any())
+
+    def test_a_limit_below_the_bulk_density_is_refused(self) -> None:
+        with pytest.raises(BunkerShot3DValueError, match="max_admissible"):
+            OccupancyRule(1712.0, max_admissible_density_kg_m3=1000.0)
+
+    def test_the_limit_is_named_in_the_description(self) -> None:
+        described = OccupancyRule(
+            1712.0, max_admissible_density_kg_m3=1747.0
+        ).describe()
+        assert "densest admissible packing" in described
+        assert "1747" in described
+
     def test_an_impossible_floor_is_refused(self) -> None:
         with pytest.raises(BunkerShot3DValueError, match="floor_fraction"):
             OccupancyRule(1700.0, floor_fraction=1.0)

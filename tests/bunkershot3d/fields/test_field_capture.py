@@ -233,6 +233,18 @@ class TestOccupancyIsCarriedByTheCapture:
         series, _ = captured
         assert series.peak_speed_m_s() < 2.0 * SHOT_SPEED_M_S  # type: ignore[attr-defined]
 
+    def test_the_packing_limit_comes_from_the_materials_own_cap(
+        self, captured: tuple[object, object], material: SandContinuum
+    ) -> None:
+        """No new constant: the cap the sand package already carries."""
+        series, _ = captured
+        ceiling = series.occupancy.max_admissible_density_kg_m3  # type: ignore[attr-defined]
+        assert ceiling is not None
+        assert ceiling == pytest.approx(
+            material.density_kg_m3 * math.exp(-material.cap_volumetric_strain)
+        )
+        assert ceiling > material.density_kg_m3
+
     def test_the_masked_speed_is_nan_where_there_is_no_sand(
         self, captured: tuple[object, object]
     ) -> None:

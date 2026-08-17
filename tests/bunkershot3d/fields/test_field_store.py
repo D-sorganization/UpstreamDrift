@@ -214,6 +214,17 @@ class TestTierCannotBeRelabelled:
         assert "F3" in str(caught.value)
         assert "beyond_validation" in str(caught.value)
 
+    def test_a_schema_change_is_not_reported_as_tampering(
+        self, stored: tuple[Path, SandFieldSeries]
+    ) -> None:
+        """ "Regenerate this" and "somebody edited this" are different news."""
+        path, _ = stored
+        _rewrite_metadata(path, _bump_schema_version)
+        with pytest.raises(FieldIntegrityError) as caught:
+            load_field(path)
+        assert "Nothing has been tampered with" in str(caught.value)
+        assert "regenerating" in str(caught.value)
+
     def test_a_field_group_without_its_metadata_is_refused(
         self, stored: tuple[Path, SandFieldSeries]
     ) -> None:
@@ -465,4 +476,10 @@ def _set_tier(metadata: dict, tier: str) -> dict:
 def _set_status(metadata: dict, status: str) -> dict:
     """Return ``metadata`` with a different declared envelope status."""
     metadata["provenance"]["envelope_status"] = status
+    return metadata
+
+
+def _bump_schema_version(metadata: dict) -> dict:
+    """Return ``metadata`` as if a newer field schema had written it."""
+    metadata["field_schema_version"] = int(metadata["field_schema_version"]) + 1
     return metadata

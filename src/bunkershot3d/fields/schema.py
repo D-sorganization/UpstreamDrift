@@ -325,10 +325,21 @@ class OccupancyRule:
         reference_density_kg_m3: The material's bulk density, which the
             floor is a fraction of.
         floor_fraction: See :data:`DEFAULT_OCCUPANCY_FLOOR_FRACTION`.
+        max_admissible_density_kg_m3: The densest bulk density this sand
+            can actually reach, or ``None`` when the tier did not state
+            one. A ceiling, not a clip: samples above it are kept and
+            **counted**, because a nodal density is a scatter of
+            particle masses onto a node and nothing in the transfer
+            bounds it by the packing limit the constitutive model
+            enforces on the particles. Sand denser than its own densest
+            packing is a reporting artefact, and a colour bar running
+            past that limit without saying so states something
+            impossible.
     """
 
     reference_density_kg_m3: float
     floor_fraction: float = DEFAULT_OCCUPANCY_FLOOR_FRACTION
+    max_admissible_density_kg_m3: float | None = None
 
     def __post_init__(self) -> None:
         density = float(self.reference_density_kg_m3)
@@ -342,8 +353,18 @@ class OccupancyRule:
             raise BunkerShot3DValueError(
                 f"floor_fraction must lie in [0, 1), got {self.floor_fraction!r}"
             )
+        ceiling = self.max_admissible_density_kg_m3
+        if ceiling is not None:
+            ceiling = float(ceiling)
+            if not math.isfinite(ceiling) or ceiling < density:
+                raise BunkerShot3DValueError(
+                    f"max_admissible_density_kg_m3 must be at least the bulk "
+                    f"density {density:.6g}, got "
+                    f"{self.max_admissible_density_kg_m3!r}"
+                )
         object.__setattr__(self, "reference_density_kg_m3", density)
         object.__setattr__(self, "floor_fraction", fraction)
+        object.__setattr__(self, "max_admissible_density_kg_m3", ceiling)
 
     @property
     def floor_kg_m3(self) -> float:
@@ -361,12 +382,56 @@ class OccupancyRule:
         """
         return np.asarray(density_kg_m3) >= self.floor_kg_m3
 
-    def describe(self) -> str:
-        """One line naming the floor in both forms."""
+    def over_packing_limit(
+        self, density_kg_m3: NDArray[np.float64]
+    ) -> NDArray[np.bool_]:
+        """Mask of samples denser than this sand can physically pack.
+
+        Args:
+            density_kg_m3: Any-shaped density array.
+
+        Returns:
+            A mask of the same shape; all ``False`` when no limit was
+            stated.
+        """
+        values = np.asarray(density_kg_m3)
+        if self.max_admissible_density_kg_m3 is None:
+            return np.zeros(values.shape, dtype=bool)
+        return values > self.max_admissible_density_kg_m3
+
+    def packing_note(self, density_kg_m3: NDArray[np.float64]) -> str:
+        """How much of a density array is above the packing limit.
+
+        Empty when nothing is, so a caller can append it unconditionally
+        and a clean field carries no apology it does not owe.
+        """
+        if self.max_admissible_density_kg_m3 is None:
+            return ""
+        over = self.over_packing_limit(density_kg_m3)
+        count = int(over.sum())
+        if count == 0:
+            return ""
+        values = np.asarray(density_kg_m3)
         return (
+            f"{count} of {values.size} samples ({count / values.size * 100:.3g}%) "
+            f"exceed the densest packing this sand admits "
+            f"({self.max_admissible_density_kg_m3:.4g} {DENSITY_UNIT}, peak "
+            f"{float(values[over].max()):.4g}); nodal density is a mass scatter "
+            "and is not bounded by it, so that is a transfer artefact"
+        )
+
+    def describe(self) -> str:
+        """One line naming the floor, and the ceiling where there is one."""
+        line = (
             f"sand where density >= {self.floor_fraction * 100:.3g}% of "
             f"{self.reference_density_kg_m3:.4g} {DENSITY_UNIT} "
             f"({self.floor_kg_m3:.4g} {DENSITY_UNIT})"
+        )
+        if self.max_admissible_density_kg_m3 is None:
+            return line
+        return (
+            f"{line}; densest admissible packing "
+            f"{self.max_admissible_density_kg_m3:.4g} {DENSITY_UNIT}"
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -374,14 +439,21 @@ class OccupancyRule:
         return {
             "reference_density_kg_m3": float(self.reference_density_kg_m3),
             "floor_fraction": float(self.floor_fraction),
+            "max_admissible_density_kg_m3": (
+                None
+                if self.max_admissible_density_kg_m3 is None
+                else float(self.max_admissible_density_kg_m3)
+            ),
         }
 
     @classmethod
     def from_dict(cls, payload: Mapping[str, Any]) -> OccupancyRule:
         """Rebuild from :meth:`to_dict`."""
+        ceiling = payload.get("max_admissible_density_kg_m3")
         return cls(
             reference_density_kg_m3=float(payload["reference_density_kg_m3"]),
             floor_fraction=float(payload["floor_fraction"]),
+            max_admissible_density_kg_m3=(None if ceiling is None else float(ceiling)),
         )
 
 
@@ -1049,6 +1121,22 @@ class SandFieldSeries:
                 None if self.shear_rate_1_s is None else self.shear_rate_1_s[position]
             ),
         )
+
+    def require_frame(self, index: int) -> None:
+        """Refuse a frame index that is outside the stored series.
+
+        Public because every view that scrubs this field needs the same
+        refusal in the same words, and a view reaching for a private
+        check would be free to invent a different one -- or, worse, to
+        clamp to an end and show the wrong instant without saying so.
+
+        Args:
+            index: Frame index.
+
+        Raises:
+            BunkerShot3DValueError: If the index is outside the series.
+        """
+        self._require_frame(index)
 
     def _require_frame(self, index: int) -> None:
         """Precondition: ``index`` addresses a stored frame."""

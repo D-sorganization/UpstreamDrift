@@ -269,11 +269,31 @@ def capture_f1_field(
             provenance=_provenance(solver, state, setup, verdict),
             retention=record,
             occupancy=OccupancyRule(
-                reference_density_kg_m3=float(solver.material.density_kg_m3)
+                reference_density_kg_m3=float(solver.material.density_kg_m3),
+                max_admissible_density_kg_m3=_densest_packing_kg_m3(solver),
             ),
             body_outline_m=np.stack(outlines, axis=0).astype(store, copy=False),
         ),
         run,
+    )
+
+
+def _densest_packing_kg_m3(solver: PlaneStrainMPMSolver) -> float:
+    """The densest bulk density this sand can reach, from the cap it carries.
+
+    The constitutive cap is ``eps_v_cap = ln(phi / phi_max)`` on the
+    elastic volumetric strain, so the smallest admissible Jacobian is
+    ``exp(eps_v_cap)`` and the largest admissible density is
+    ``rho_0 / exp(eps_v_cap)``.  No new constant: this is the packing
+    state the sand package already holds, read back out.
+
+    It is a *reporting* ceiling, not a bound the transfer respects.  The
+    return map keeps every particle inside the cap; nodal density is a
+    weighted scatter of particle masses onto a node and nothing stops
+    that sum exceeding it at a compression front.
+    """
+    return float(
+        solver.material.density_kg_m3 * math.exp(-solver.material.cap_volumetric_strain)
     )
 
 

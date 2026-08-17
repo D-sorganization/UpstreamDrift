@@ -44,6 +44,7 @@ from ..provenance.manifest import RunManifest, Validity
 from ..provenance.rng import SeedRecord, root_seed_sequence, seed_record
 from ..solvers.envelope import EnvelopeStatus
 from .schema import (
+    FIELD_SCHEMA_VERSION,
     FieldIntegrityError,
     FieldLayout,
     FieldProvenance,
@@ -216,6 +217,7 @@ def load_field(path: Path | str) -> SandFieldSeries:
             f"{path} records no sand field; it may be a schema v1/v2 result, or "
             "a run that stored only the clubhead and wrench streams"
         )
+    _require_readable_schema(payload, path)
     series = _series_from(payload)
     recomputed = series_digest(series)
     if recomputed != payload.digest:
@@ -227,6 +229,33 @@ def load_field(path: Path | str) -> SandFieldSeries:
             "arrays under them, has been changed since it was written."
         )
     return series
+
+
+def _require_readable_schema(payload: SandFieldPayload, path: Path | str) -> None:
+    """Refuse a field written by a different schema, and say which it is.
+
+    The digest covers the metadata, which carries the schema version, so
+    a schema change breaks every old file's digest.  Without this check
+    the message would be "somebody has changed this since it was
+    written" -- which is alarming, wrong, and would send a reader hunting
+    for tampering that never happened.
+
+    Args:
+        payload: The payload as read.
+        path: Source path, for diagnostics.
+
+    Raises:
+        FieldIntegrityError: If the stored field schema version is not
+            the one this code writes.
+    """
+    stored = int(json.loads(payload.metadata).get("field_schema_version", 0))
+    if stored != FIELD_SCHEMA_VERSION:
+        raise FieldIntegrityError(
+            f"the sand field in {path} was written by field schema version "
+            f"{stored} and this code writes version {FIELD_SCHEMA_VERSION}. "
+            "Nothing has been tampered with; the field needs regenerating from "
+            "the run its provenance sidecar names."
+        )
 
 
 def _arrays(series: SandFieldSeries, store_dtype: str) -> dict[str, np.ndarray]:
