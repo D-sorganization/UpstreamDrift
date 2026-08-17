@@ -32,11 +32,12 @@ No Qt, no arithmetic that is not either the solver's or the metric's.
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 from dataclasses import dataclass
 from functools import lru_cache
 
 import numpy as np
-from numpy.typing import NDArray
+from numpy.typing import ArrayLike, NDArray
 from scipy.spatial.transform import Rotation
 
 from bunkershot3d.geometry import (
@@ -62,8 +63,12 @@ from bunkershot3d.solvers import (
     ShotResult,
     SurfaceElements,
 )
+from bunkershot3d.solvers.mpm.solver import PlaneStrainMPMSolver
+from bunkershot3d.solvers.mpm.verification import cross_check_against_f0
 from src.shared.python.core.contracts import require
 
+from .agreement import DECLARED_AGREEMENT_BAND
+from .crosstier import CrossTierComparison, CrossTierProbe
 from .design import SwingSetup
 from .field import SoleLoadField
 from .traces import ValidityBand
@@ -73,9 +78,11 @@ __all__ = [
     "HeadBuild",
     "SoleLoadMap",
     "build_head",
+    "compare_tiers",
     "delivery_rotation",
     "entry_kinematics",
     "free_surface_height_m",
+    "probe_frames",
     "sole_load_field",
     "sole_load_map",
     "sole_load_trace",
@@ -545,3 +552,252 @@ def _bin_edges(stations: NDArray[np.float64], n_bins: int) -> NDArray[np.float64
     if high <= low:
         high = low + 1.0
     return np.linspace(low, high, n_bins + 1, dtype=np.float64)
+
+
+def probe_frames(result: ShotResult, n_probes: int) -> tuple[int, ...]:
+    """Choose which samples of an F0 record to hand to F1.
+
+    Only **engaged** samples are candidates. A probe taken during the
+    free-flight lead-in would hand both tiers a query with no contact, and
+    two zeroes are not an agreement -- they are a wasted march, and F1's
+    march is the expensive half of this comparison by three orders of
+    magnitude.
+
+    The sample at which F0's own force peaked is always included, because
+    that is the moment the shot-level agreement is quoted at and the moment
+    a designer looks for.
+
+    Args:
+        result: The F0 record.
+        n_probes: How many samples to probe. Clamped to the number of
+            engaged samples available.
+
+    Returns:
+        Sample indices, ascending and unique.
+
+    Raises:
+        ValueError: If ``n_probes`` is not positive, or if the record has
+            no engaged sample at all -- a shot that never touched the sand
+            has nothing to cross-check.
+    """
+    if int(n_probes) < 1:
+        raise ValueError(f"n_probes must be positive, got {n_probes!r}")
+    engaged = np.flatnonzero(np.asarray(result.active_areas_m2) > 0.0)
+    if engaged.size == 0:
+        raise ValueError(
+            "this record has no engaged sample, so there is nothing for the "
+            "field tier to be compared against; the head never reached the sand"
+        )
+    wanted = min(int(n_probes), int(engaged.size))
+    chosen = engaged[np.linspace(0, engaged.size - 1, wanted).round().astype(int)]
+    peak = int(np.argmax(np.linalg.norm(result.forces_n, axis=1)))
+    if peak in set(engaged.tolist()):
+        chosen = np.append(chosen, peak)
+    return tuple(int(frame) for frame in np.unique(chosen))
+
+
+def _state_at(
+    build: HeadBuild,
+    result: ShotResult,
+    kinematics: HeadKinematics,
+    frame: int,
+    *,
+    surface_m: float,
+    speed_m_s: float | None = None,
+) -> IntrusionState:
+    """Rebuild the query ``simulate_shot`` solved at one sample.
+
+    The head does not rotate during the shot, so the recorded position and
+    velocity reproduce the state the march actually solved -- the same
+    replay :func:`sole_load_field` and :func:`validity_band` already use, so
+    all three views describe one shot rather than three re-derivations of
+    it.
+
+    Args:
+        build: The lofted head.
+        result: The F0 record.
+        kinematics: The entry pose, supplying the constant orientation and
+            the angular velocity the march carried.
+        frame: Which sample.
+        surface_m: The free surface the march ran against.
+        speed_m_s: Rescale the recorded velocity to this speed, keeping its
+            direction. Used by the declared speed sweep; ``None`` leaves
+            the recorded velocity untouched.
+
+    Returns:
+        The query, given to both tiers unchanged.
+
+    Raises:
+        ValueError: If a rescale is asked for at a sample with no velocity
+            to take a direction from.
+    """
+    oriented = build.elements_body.transformed(rotation=kinematics.orientation)
+    position = result.positions_m[frame]
+    velocity = np.asarray(result.velocities_m_s[frame], dtype=np.float64)
+    if speed_m_s is not None:
+        recorded = float(np.linalg.norm(velocity))
+        if recorded <= 0.0:
+            raise ValueError(
+                f"sample {frame} has no velocity, so there is no direction to "
+                "rescale for the declared speed sweep"
+            )
+        velocity = velocity * (float(speed_m_s) / recorded)
+    return IntrusionState(
+        oriented.translated(position),
+        velocity,
+        angular_velocity_rad_s=kinematics.angular_velocity_rad_s,
+        reference_point_m=position,
+        free_surface_height_m=surface_m,
+    )
+
+
+def _probe(
+    f0_solver: DRFTSolver,
+    f1_solver: PlaneStrainMPMSolver,
+    state: IntrusionState,
+    *,
+    frame: int,
+    time_s: float,
+    f0_divot_section_area_m2: float,
+    f0_sole_depth_m: float,
+    declared_width_m: float,
+    bulk_density_kg_m3: float,
+) -> CrossTierProbe:
+    """Run one instant through both tiers and wrap the result."""
+    return CrossTierProbe(
+        frame=frame,
+        time_s=time_s,
+        check=cross_check_against_f0(state, f0_solver, f1_solver),
+        f0_divot_section_area_m2=f0_divot_section_area_m2,
+        f0_sole_depth_m=f0_sole_depth_m,
+        declared_width_m=declared_width_m,
+        bulk_density_kg_m3=bulk_density_kg_m3,
+    )
+
+
+def compare_tiers(
+    *,
+    f0_solver: DRFTSolver,
+    f1_solver: PlaneStrainMPMSolver,
+    build: HeadBuild,
+    result: ShotResult,
+    kinematics: HeadKinematics,
+    f0_divot_section_area_m2: ArrayLike,
+    band: ValidityBand,
+    head_mass_kg: float,
+    bulk_density_kg_m3: float,
+    n_probes: int = 4,
+    sweep_speeds_m_s: Sequence[float] = (),
+    agreement_band: float = DECLARED_AGREEMENT_BAND,
+) -> CrossTierComparison:
+    """Run F1 at chosen instants of an F0 record and assemble the comparison.
+
+    Expensive by construction, and the cost is where the honesty is: F1 has
+    no instantaneous answer, so each probe is a whole march from clear of
+    the bed to the queried pose. Four probes of a greenside shot cost of
+    order a minute at the resolution ADR-0033 specifies, which is why this
+    is not on the workbench's per-shot path.
+
+    Both solvers should be built with a permissive refusal policy. A bunker
+    shot is far outside either tier's stated envelope, and a strict policy
+    would refuse before producing anything to compare -- which is a correct
+    refusal and a useless comparison.
+
+    Args:
+        f0_solver: The F0 solver the record was produced with.
+        f1_solver: The F1 solver, carrying its declared effective width.
+        build: The lofted head.
+        result: The F0 record.
+        kinematics: The entry pose, for the constant orientation.
+        f0_divot_section_area_m2: ``(T,)`` F0's swept-envelope section per
+            sample [m^2]. Normally
+            :attr:`~.shot3d.DivotSection.section_area_m2` off the scene the
+            3-D view is drawn from, passed in rather than recomputed so the
+            comparison and that view cannot disagree about one divot.
+        band: F0's per-sample validity band, inherited unchanged.
+        head_mass_kg: The head, for the derived speed-lost integral.
+        bulk_density_kg_m3: The bed's bulk density, for both divot masses.
+        n_probes: How many engaged samples to probe.
+        sweep_speeds_m_s: Speeds for a declared sweep at the deepest
+            recorded pose. Supply these when the crossover matters: a
+            greenside shot does not decelerate through the inertial-share
+            crossing, so the shot probes alone can only report which side
+            of it the whole record sits on. Note that a *slow* probe is the
+            expensive one, not the fast one: the approach is a fixed
+            distance and the CFL step is set by the elastic wave speed, so
+            the step count goes as ``(c_p + v) / v`` and a 4 m/s probe
+            costs order thirty times a 25 m/s one.
+        agreement_band: Half-width of the agreement band on ``|ln ratio|``.
+
+    Returns:
+        The comparison.
+
+    Raises:
+        ValueError: If the record has no engaged sample, or if the divot
+            section does not describe the same record.
+    """
+    section_area = np.asarray(f0_divot_section_area_m2, dtype=np.float64).reshape(-1)
+    if section_area.size != result.n_steps:
+        raise ValueError(
+            "the divot section describes a different record: "
+            f"{section_area.size} samples against {result.n_steps}"
+        )
+    surface_m = free_surface_height_m(result)
+    depths = np.maximum(np.asarray(result.sole_depths_m, dtype=np.float64), 0.0)
+    width = f1_solver.effective_width_m
+
+    frames = probe_frames(result, n_probes)
+    shot_probes = tuple(
+        _probe(
+            f0_solver,
+            f1_solver,
+            _state_at(build, result, kinematics, frame, surface_m=surface_m),
+            frame=frame,
+            time_s=float(result.times_s[frame]),
+            f0_divot_section_area_m2=float(section_area[frame]),
+            f0_sole_depth_m=float(depths[frame]),
+            declared_width_m=width,
+            bulk_density_kg_m3=bulk_density_kg_m3,
+        )
+        for frame in frames
+    )
+
+    deepest = int(np.argmax(depths))
+    sweep_probes = tuple(
+        _probe(
+            f0_solver,
+            f1_solver,
+            _state_at(
+                build,
+                result,
+                kinematics,
+                deepest,
+                surface_m=surface_m,
+                speed_m_s=float(speed),
+            ),
+            frame=deepest,
+            time_s=float(result.times_s[deepest]),
+            f0_divot_section_area_m2=float(section_area[deepest]),
+            f0_sole_depth_m=float(depths[deepest]),
+            declared_width_m=width,
+            bulk_density_kg_m3=bulk_density_kg_m3,
+        )
+        for speed in sweep_speeds_m_s
+    )
+
+    return CrossTierComparison(
+        shot_probes=shot_probes,
+        time_s=np.asarray(result.times_s, dtype=np.float64),
+        f0_force_n=np.asarray(result.forces_n, dtype=np.float64),
+        f0_sole_depth_m=depths,
+        f0_speed_m_s=np.linalg.norm(
+            np.asarray(result.velocities_m_s, dtype=np.float64), axis=1
+        ),
+        f0_divot_section_area_m2=section_area,
+        band=band,
+        head_mass_kg=float(head_mass_kg),
+        declared_width_m=width,
+        bulk_density_kg_m3=float(bulk_density_kg_m3),
+        sweep_probes=sweep_probes,
+        agreement_band=agreement_band,
+    )

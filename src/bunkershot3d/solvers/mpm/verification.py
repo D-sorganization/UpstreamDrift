@@ -643,8 +643,24 @@ class F0CrossCheck:
         f0_inertial_force_n: F0's dynamic part.
         f1_stress_force_n: F1's stress-and-weight part.
         f1_flux_force_n: F1's momentum-flux part.
-        f0_max_depth_m: Deepest submerged point per F0.
-        f1_max_depth_m: The same per F1.
+        submerged_depth_m: Deepest submerged element of the **shared
+            query**, read off the geometry and therefore identical for
+            both tiers. It exists because ``f0_max_depth_m`` and
+            ``f1_max_depth_m`` are *not* the same measurement, despite
+            being the same protocol field: F0 reports its deepest
+            **engaged** element -- leading-edge and submerged, the contact
+            diagnostic issue #8701 warned against conflating with a
+            geometric depth -- while F1 reports the deepest submerged
+            element outright. On the flat sole section this cross-check
+            was written for they coincide; on a lofted head, most of whose
+            elements never lead, they differ by an order of magnitude.
+            Anything comparing depth *across* the tiers must use this
+            field and not those two.
+        f0_max_depth_m: F0's own ``SolverResult.max_depth_m``: its deepest
+            **engaged** element. Not monotone, and zero whenever nothing
+            meets the engagement criterion.
+        f1_max_depth_m: F1's own ``SolverResult.max_depth_m``: the deepest
+            submerged element, engaged or not.
         f1_divot: F1's free-surface depression -- depth *and* section area
             -- which F0 cannot produce at all. F0's own "divot" is the
             swept lower envelope of the head, so the two are different
@@ -660,6 +676,7 @@ class F0CrossCheck:
     f0_inertial_force_n: NDArray[np.float64]
     f1_stress_force_n: NDArray[np.float64]
     f1_flux_force_n: NDArray[np.float64]
+    submerged_depth_m: float
     f0_max_depth_m: float
     f1_max_depth_m: float
     f1_divot: SurfaceDepression
@@ -726,8 +743,10 @@ class F0CrossCheck:
             f"ratio={self.magnitude_ratio:.3g}, "
             f"direction cos={self.direction_agreement:.4f}; "
             f"inertial share F0={self.f0_inertial_fraction:.3f} vs flux share "
-            f"F1={self.f1_flux_fraction:.3f}; depth F0={self.f0_max_depth_m * 1e3:.3g} "
-            f"mm vs F1={self.f1_max_depth_m * 1e3:.3g} mm; F1 divot "
+            f"F1={self.f1_flux_fraction:.3f}; submerged depth "
+            f"{self.submerged_depth_m * 1e3:.3g} mm (F0 engaged "
+            f"{self.f0_max_depth_m * 1e3:.3g} mm, F1 reports "
+            f"{self.f1_max_depth_m * 1e3:.3g} mm); F1 divot "
             f"{self.f1_divot_depth_m * 1e3:.3g} mm deep, "
             f"{self.f1_divot_section_area_m2 * 1e4:.3g} cm^2 in section "
             "(F0 moves no sand, so it produces neither)"
@@ -759,6 +778,7 @@ def cross_check_against_f0(
     width = f1_solver.effective_width_m
     total = (stress_part + flux_part) * width
     depths = -state.element_depths_m()
+    submerged = max(float(depths.max()) if depths.size else 0.0, 0.0)
 
     return F0CrossCheck(
         speed_m_s=state.speed_m_s,
@@ -770,6 +790,7 @@ def cross_check_against_f0(
             [stress_part[0] * width, 0.0, stress_part[1] * width]
         ),
         f1_flux_force_n=np.array([flux_part[0] * width, 0.0, flux_part[1] * width]),
+        submerged_depth_m=submerged,
         f0_max_depth_m=f0_result.max_depth_m,
         f1_max_depth_m=max(float(depths.max()) if depths.size else 0.0, 0.0),
         f1_divot=run.surface_depression(),
