@@ -1,6 +1,8 @@
-"""The 3-D scene view and the trace panel, as Qt views (issues #8706, #8708).
+"""The linked follower views: 3-D scene, traces, cross-tier check.
 
-Neither widget here owns a transport. :class:`~.widgets.SoleLoadFieldWidget`
+Issues #8706 and #8708 for the first two, #8713 for the third.
+
+No widget here owns a transport. :class:`~.widgets.SoleLoadFieldWidget`
 already has one -- a slider, a timer and a play button, built for the sole
 load field -- and #8708 asks for the three views to be scrubbed *in lockstep*,
 which is precisely the thing a second slider would break. Both classes below
@@ -25,20 +27,31 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from .crosstier import CrossTierComparison
 from .render import viewport_fallback
 from .render3d import SceneScale, ShotSceneArtists, scene_scale
+from .render_crosstier import CrossTierArtists
 from .render_traces import TracePanelArtists
 from .shot3d import CameraPreset, ShotScene
 from .traces import ShotTraces, ValidityBand
 from .widgets import build_canvas_column
 
 __all__ = [
+    "CrossTierWidget",
     "ShotViewportWidget",
     "TracePanelWidget",
 ]
 
 _MIN_SCENE_HEIGHT_PX = 340
 _MIN_TRACE_HEIGHT_PX = 420
+_MIN_CROSS_TIER_HEIGHT_PX = 460
+_IDLE_CROSS_TIER = (
+    "The cross-tier check has not been run. It puts F1 -- the 2-D "
+    "plane-strain MPM continuum -- beside F0 on the quantities both tiers "
+    "produce, and it is minutes of solving rather than milliseconds: F1 has "
+    "no shot history yet (#8733), so every probe is its own march to one "
+    "recorded pose."
+)
 
 
 class ShotViewportWidget(QWidget):
@@ -337,4 +350,143 @@ class TracePanelWidget(QWidget):
         self._readout.setText(
             f"{traces.time_display[self._frame]:.2f} {traces.time_unit} - "
             f"{status.value.replace('_', ' ').upper()}"
+        )
+
+
+class CrossTierWidget(QWidget):
+    """F0 against F1 on one cursor, run on demand (issue #8713).
+
+    A follower, like the two views above, and for a stronger reason than
+    tidiness: the whole point of the comparison is that both tiers are
+    describing the *same* moment of the *same* shot, so a cursor of its own
+    would be able to say otherwise.
+
+    It is also **empty until asked**. A cross-tier check is minutes of F1
+    marching -- F1 has no shot history (issue #8733), so each probe is a
+    separate march to one recorded pose -- and putting that on the path of
+    every design evaluation would make the workbench unusable. The
+    workbench runs it from its own button and hands the result here.
+
+    The status line restates the licence rather than leaving it to the
+    figure. Both carry it: the figure because a screenshot keeps its
+    contents and loses its surroundings, the status line because a reader
+    scrubbing the cursor is looking at the widget and not at the caption.
+    """
+
+    def __init__(self, title: str, parent: QWidget | None = None) -> None:
+        """Build an empty view.
+
+        Args:
+            title: Heading shown above the canvas.
+            parent: Parent widget.
+        """
+        super().__init__(parent)
+        self._title = str(title)
+        self._comparison: CrossTierComparison | None = None
+        self._artists: CrossTierArtists | None = None
+        self._frame = 0
+
+        layout, self._heading, self._canvas = build_canvas_column(
+            self,
+            self._title,
+            width_in=11.0,
+            height_in=8.0,
+            minimum_height_px=_MIN_CROSS_TIER_HEIGHT_PX,
+        )
+        self._readout = QLabel(_IDLE_CROSS_TIER)
+        self._readout.setWordWrap(True)
+        self._readout.setTextInteractionFlags(
+            Qt.TextInteractionFlag.TextSelectableByMouse
+        )
+        layout.addWidget(self._readout)
+
+    # ------------------------------------------------------------ accessors
+
+    @property
+    def title(self) -> str:
+        """The heading shown above the canvas."""
+        return self._title
+
+    @property
+    def has_comparison(self) -> bool:
+        """Whether a comparison is loaded."""
+        return self._comparison is not None
+
+    @property
+    def n_frames(self) -> int:
+        """Samples in the loaded F0 record; zero when empty."""
+        return 0 if self._comparison is None else self._comparison.n_frames
+
+    @property
+    def frame_index(self) -> int:
+        """The sample currently under the cursor."""
+        return self._frame
+
+    @property
+    def status_text(self) -> str:
+        """What the status line is saying."""
+        return self._readout.text()
+
+    # --------------------------------------------------------------- content
+
+    def set_comparison(self, comparison: CrossTierComparison) -> None:
+        """Load one comparison and open on the probe F0's force peaked at.
+
+        Args:
+            comparison: The comparison to draw.
+        """
+        self._comparison = comparison
+        self._artists = CrossTierArtists(self._canvas.fig, comparison)
+        self._frame = comparison.peak_probe.frame
+        self._redraw()
+
+    def clear(self) -> None:
+        """Drop the comparison, so nothing stale stays under a new shot."""
+        self._comparison = None
+        self._artists = None
+        self._frame = 0
+        self._readout.setText(_IDLE_CROSS_TIER)
+        self._canvas.fig.clear()
+        self._canvas.draw_idle()
+
+    # ------------------------------------------------------------- following
+
+    def set_frame(self, frame: int) -> None:
+        """Move the cursor to one sample.
+
+        The :class:`~.widgets.FollowsFrame` entry point. A frame arriving
+        for an empty view is ignored rather than refused: the workbench
+        clears views independently, so a transport tick can legitimately
+        reach a view that has just been emptied.
+
+        Args:
+            frame: The sample index.
+
+        Raises:
+            ValueError: If a comparison is loaded and the index is outside
+                its record. A clamped index would leave this view showing a
+                different moment from the one driving it.
+        """
+        if self._comparison is None:
+            return
+        if not 0 <= int(frame) < self._comparison.n_frames:
+            raise ValueError(
+                f"frame {frame} is outside the shot, which has "
+                f"{self._comparison.n_frames} samples"
+            )
+        self._frame = int(frame)
+        self._redraw()
+
+    def _redraw(self) -> None:
+        """Repaint the canvas and restate the licence beside the moment."""
+        comparison = self._comparison
+        if comparison is None or self._artists is None:
+            return
+        self._artists.update(self._frame)
+        self._canvas.draw_idle()
+        moment = float(comparison.time_s[self._frame]) * 1e3
+        status = comparison.band.status_at(self._frame)
+        self._readout.setText(
+            f"{moment:.2f} ms - {status.value.replace('_', ' ').upper()} - "
+            f"{comparison.licence_stamp()}"
         )

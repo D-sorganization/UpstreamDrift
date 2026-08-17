@@ -97,6 +97,15 @@ comparing two tiers has one import site rather than two."""
 
 _STAMP_MAX_CHARS = 240
 
+_ADR_BULK_RESOLUTION_M = (0.001, 0.002)
+"""The cell-size band ADR-0033 specifies for the F1 tier."""
+
+_TIER_F0 = "f0"
+_TIER_F1 = "f1"
+
+_GRAZING_FRACTION = 0.05
+"""Below this share of the peak, F0's force is its engagement criterion."""
+
 
 @dataclass(frozen=True)
 class CrossTierProbe:
@@ -413,13 +422,19 @@ class CrossTierComparison:
             workbench's single transport scrubs.
         f0_force_n: ``(T, 3)`` sand force on the head [N].
         f0_sole_depth_m: ``(T,)`` sole depth below the free surface [m].
-        f0_speed_m_s: ``(T,)`` head speed [m/s].
+        f0_velocity_m_s: ``(T, 3)`` head velocity [m/s]. The vector, not
+            the speed, because the compared speed-lost quantity is each
+            tier's resultant *projected on the direction of travel*.
         f0_divot_section_area_m2: ``(T,)`` swept-envelope section [m^2].
         band: F0's per-sample validity band, inherited unchanged. Nothing
             here improves it.
         head_mass_kg: The head, for the derived speed-lost integral.
         declared_width_m: The out-of-plane width both divot masses use.
         bulk_density_kg_m3: The bed's bulk density, for the same masses.
+        f1_cell_size_m: The grid F1 was solved on [m]. Carried because it
+            is provenance, not a setting: ADR-0033 specifies bulk
+            resolution of 1-2 mm, and a comparison run coarser than that
+            has to say so in the picture rather than in whoever ran it.
         sweep_probes: Probes from a **declared speed sweep** at a fixed
             pose, which is a separate experiment from the shot and is
             labelled as one. Present so the inertial-share crossover can be
@@ -432,12 +447,13 @@ class CrossTierComparison:
     time_s: NDArray[np.float64]
     f0_force_n: NDArray[np.float64]
     f0_sole_depth_m: NDArray[np.float64]
-    f0_speed_m_s: NDArray[np.float64]
+    f0_velocity_m_s: NDArray[np.float64]
     f0_divot_section_area_m2: NDArray[np.float64]
     band: ValidityBand
     head_mass_kg: float
     declared_width_m: float
     bulk_density_kg_m3: float
+    f1_cell_size_m: float
     sweep_probes: tuple[CrossTierProbe, ...] = ()
     agreement_band: float = DECLARED_AGREEMENT_BAND
 
@@ -466,13 +482,14 @@ class CrossTierComparison:
         if np.any(np.diff(times) <= 0.0):
             raise ValueError("time_s must be strictly increasing")
         forces = np.asarray(self.f0_force_n, dtype=np.float64)
-        if forces.shape != (times.size, 3):
-            raise ValueError(
-                f"f0_force_n must have shape {(times.size, 3)}, got {forces.shape}"
-            )
+        velocities = np.asarray(self.f0_velocity_m_s, dtype=np.float64)
+        for name, block in (("f0_force_n", forces), ("f0_velocity_m_s", velocities)):
+            if block.shape != (times.size, 3):
+                raise ValueError(
+                    f"{name} must have shape {(times.size, 3)}, got {block.shape}"
+                )
         columns = {
             "f0_sole_depth_m": np.asarray(self.f0_sole_depth_m, dtype=np.float64),
-            "f0_speed_m_s": np.asarray(self.f0_speed_m_s, dtype=np.float64),
             "f0_divot_section_area_m2": np.asarray(
                 self.f0_divot_section_area_m2, dtype=np.float64
             ),
@@ -507,6 +524,7 @@ class CrossTierComparison:
             ("head_mass_kg", self.head_mass_kg),
             ("declared_width_m", self.declared_width_m),
             ("bulk_density_kg_m3", self.bulk_density_kg_m3),
+            ("f1_cell_size_m", self.f1_cell_size_m),
             ("agreement_band", self.agreement_band),
         ):
             if not math.isfinite(value) or value <= 0.0:
@@ -515,6 +533,7 @@ class CrossTierComparison:
         object.__setattr__(self, "sweep_probes", tuple(self.sweep_probes))
         object.__setattr__(self, "time_s", times)
         object.__setattr__(self, "f0_force_n", forces)
+        object.__setattr__(self, "f0_velocity_m_s", velocities)
         for name, column in columns.items():
             object.__setattr__(self, name, column)
 
@@ -544,6 +563,11 @@ class CrossTierComparison:
     def f0_force_magnitude_n(self) -> NDArray[np.float64]:
         """``(T,)`` resultant magnitude of F0's recorded force [N]."""
         return np.linalg.norm(self.f0_force_n, axis=1)
+
+    @property
+    def f0_speed_m_s(self) -> NDArray[np.float64]:
+        """``(T,)`` head speed [m/s], from the recorded velocity."""
+        return np.linalg.norm(self.f0_velocity_m_s, axis=1)
 
     @property
     def probe_frames(self) -> tuple[int, ...]:
@@ -614,46 +638,98 @@ class CrossTierComparison:
         return (min(frames), max(frames))
 
     @property
-    def f0_speed_lost_m_s(self) -> float:
-        """Speed F0's own record shows the head losing over the probed window."""
+    def f0_recorded_speed_lost_m_s(self) -> float:
+        """Speed F0's own record shows the head losing over the probed window.
+
+        The truth for F0, and *not* the number the agreement row compares:
+        it is read off every sample while F1 is known at a handful, so
+        putting the two side by side would report the quadrature as a
+        divergence. It is stated beside the compared pair so that
+        quadrature error is visible rather than absorbed.
+        """
         first, last = self.probe_window
-        return float(self.f0_speed_m_s[first] - self.f0_speed_m_s[last])
+        speed = self.f0_speed_m_s
+        return float(speed[first] - speed[last])
+
+    @property
+    def f0_speed_lost_m_s(self) -> float:
+        """What F0's force removes from the head over the probed window.
+
+        Integrated the same way as :attr:`f1_speed_lost_m_s`: the resultant
+        projected on the direction of travel, sampled at the probes,
+        interpolated between them and integrated. Same quadrature on both
+        sides, because comparing an exact number against a coarsely
+        sampled one measures the sampling.
+        """
+        return self._projected_speed_lost_m_s(_TIER_F0)
 
     @property
     def f1_speed_lost_m_s(self) -> float:
         """What F1's force would have taken off the same head, same window.
 
-        F0's own per-sample speed decrements, each weighted by the
-        ``|F1| / |F0|`` ratio interpolated onto that sample from the
-        probes. Doing it this way rather than integrating F1's force
-        directly is deliberate: the two tiers' resultants do not point the
-        same way -- the measured direction cosines run 0.65 to 0.87 -- so
-        borrowing F1's *magnitude* while keeping F0's direction states
-        exactly what is and is not being taken from the field tier.
+        The resultant **projected on the direction of travel**, so a force
+        that does not oppose the motion does not decelerate. The measured
+        direction cosines run from 0.14 at a grazing sample to 0.997 at the
+        peak, and a magnitude-only estimate would credit the first of those
+        with as much braking as the second.
 
         One-way coupled, and that is not a detail: F1 was queried at the
         poses and speeds F0's head actually reached, so this is what F1's
         force would have removed from a head that never slowed down more
         than F0 says it did.
         """
-        first, last = self.probe_window
-        ratio = self._probe_ratio_on_record()
-        # Trapezoidal: each interval is weighted by the mean of the ratio at
-        # its two ends, not by the ratio at its start, so a ratio that
-        # varies across the window is not biased towards its opening value.
-        interval = 0.5 * (ratio[first:last] + ratio[first + 1 : last + 1])
-        decrement = -np.diff(self.f0_speed_m_s[first : last + 1])
-        return float((interval * decrement).sum())
+        return self._projected_speed_lost_m_s(_TIER_F1)
 
-    def f1_implied_speed_m_s(self) -> NDArray[np.float64]:
-        """``(T,)`` the speed history F1's force implies, over the probed window.
+    def _projected_force_n(self, tier: str) -> NDArray[np.float64]:
+        """Braking force at each probe: the resultant against the motion.
 
-        Starts from F0's own speed at the first probe and removes the
-        ratio-weighted decrements of :attr:`f1_speed_lost_m_s`, so the two
-        curves leave the same point and the gap between them at the end is
-        exactly the disagreement in speed lost. ``nan`` outside the probed
-        window, because outside it nothing was compared and a continued
-        line would assert a comparison that was never made.
+        Args:
+            tier: ``"f0"`` or ``"f1"``.
+
+        Returns:
+            ``(n_probes,)`` the component of that tier's resultant opposing
+            the travel direction [N], in probe order. Negative where the
+            resultant pushes the head along, which is a real thing a
+            grazing sole can do and is not clipped away.
+        """
+        ordered = sorted(self.shot_probes, key=lambda item: item.frame)
+        braking = np.zeros(len(ordered))
+        for index, probe in enumerate(ordered):
+            velocity = self.f0_velocity_m_s[probe.frame]
+            speed = float(np.linalg.norm(velocity))
+            if speed <= 0.0:
+                continue
+            force = (
+                probe.check.f0_force_n if tier == _TIER_F0 else probe.check.f1_force_n
+            )
+            braking[index] = -float(np.asarray(force) @ velocity) / speed
+        return braking
+
+    def _projected_speed_lost_m_s(self, tier: str) -> float:
+        """Integrate one tier's braking force over the probed window.
+
+        Raises:
+            ValueError: If the probes bracket no window.
+        """
+        _ = self.probe_window
+        ordered = sorted(self.shot_probes, key=lambda item: item.frame)
+        times = np.array([probe.time_s for probe in ordered])
+        return float(
+            np.trapezoid(self._projected_force_n(tier), x=times) / self.head_mass_kg
+        )
+
+    def implied_speed_m_s(self, tier: str = _TIER_F1) -> NDArray[np.float64]:
+        """``(T,)`` the speed history one tier's braking force implies.
+
+        Starts from F0's own recorded speed at the first probe and removes
+        the running integral of the braking force, so both tiers' curves
+        leave the same point and the gap between them at the end is the
+        disagreement in speed lost. ``nan`` outside the probed window,
+        because outside it nothing was compared and a continued line would
+        assert a comparison that was never made.
+
+        Args:
+            tier: ``"f0"`` or ``"f1"``.
 
         Returns:
             The implied speed [m/s].
@@ -662,32 +738,49 @@ class CrossTierComparison:
             ValueError: If the probes bracket no window.
         """
         first, last = self.probe_window
-        ratio = self._probe_ratio_on_record()
-        interval = 0.5 * (ratio[first:last] + ratio[first + 1 : last + 1])
-        decrement = -np.diff(self.f0_speed_m_s[first : last + 1])
+        ordered = sorted(self.shot_probes, key=lambda item: item.frame)
+        times = np.array([probe.time_s for probe in ordered])
+        window = self.time_s[first : last + 1]
+        sampled = np.interp(window, times, self._projected_force_n(tier))
+        lost = np.concatenate(
+            ([0.0], np.cumsum(0.5 * (sampled[:-1] + sampled[1:]) * np.diff(window)))
+        )
         implied = np.full(self.n_frames, np.nan)
-        implied[first] = self.f0_speed_m_s[first]
-        implied[first + 1 : last + 1] = self.f0_speed_m_s[first] - np.cumsum(
-            interval * decrement
+        implied[first : last + 1] = (
+            float(self.f0_speed_m_s[first]) - lost / self.head_mass_kg
         )
         return implied
 
-    def _probe_ratio_on_record(self) -> NDArray[np.float64]:
-        """``(T,)`` the ``|F1| / |F0|`` ratio interpolated onto F0's axis."""
-        frames = np.array(self.probe_frames, dtype=np.float64)
-        ratios = np.array(
-            [
-                probe.f1_force_magnitude_n / probe.f0_force_magnitude_n
-                if probe.f0_force_magnitude_n > 0.0
-                else np.nan
-                for probe in self.shot_probes
-            ]
-        )
-        order = np.argsort(frames)
-        return np.interp(
-            np.arange(self.n_frames, dtype=np.float64),
-            frames[order],
-            ratios[order],
+    def engagement_caveat(self) -> str:
+        """Name the probes where F0 reported almost no force, or say nothing.
+
+        F0 reports zero the moment no element is both submerged *and*
+        leading-edge, which happens while the sole is still geometrically
+        in the divot -- the disengaged tail issue #8702 documents. A ratio
+        formed at such a sample is a division by an engagement criterion
+        rather than by a physical force, and it is by far the largest ratio
+        on the page, so it is named rather than left to dominate.
+
+        Returns:
+            One sentence, or an empty string when every probe carried load.
+        """
+        peak = self.peak_probe.f0_force_magnitude_n
+        if peak <= 0.0:
+            return ""
+        grazing = [
+            probe
+            for probe in sorted(self.shot_probes, key=lambda item: item.frame)
+            if probe.f0_force_magnitude_n < _GRAZING_FRACTION * peak
+        ]
+        if not grazing:
+            return ""
+        moments = ", ".join(f"{probe.time_s * 1e3:.2f} ms" for probe in grazing)
+        return (
+            f"At {moments} F0 reports under {_GRAZING_FRACTION:.0%} of its peak "
+            "force while the sole is still in the divot: it reports zero the "
+            "moment no element is both submerged and leading-edge (#8702). "
+            "Ratios at those probes divide by an engagement criterion, not by "
+            "a physical force, and they are the largest ratios on this page."
         )
 
     # ----------------------------------------------------------- agreement
@@ -850,6 +943,33 @@ class CrossTierComparison:
 
     # ------------------------------------------------------------- licence
 
+    def resolution_note(self) -> str:
+        """State the grid F1 was solved on against ADR-0033's own figure.
+
+        Returns:
+            One sentence, which says the resolution is coarser than the
+            specified band when it is. ADR-0033 bars this tier from
+            quoting club force at *any* resolution, so this is provenance
+            rather than a caveat that could be lifted by refining.
+        """
+        size_mm = self.f1_cell_size_m * 1e3
+        band = (
+            "inside"
+            if _ADR_BULK_RESOLUTION_M[0]
+            <= self.f1_cell_size_m
+            <= _ADR_BULK_RESOLUTION_M[1]
+            else "coarser than"
+            if self.f1_cell_size_m > _ADR_BULK_RESOLUTION_M[1]
+            else "finer than"
+        )
+        return (
+            f"F1 solved at dx = {size_mm:.3g} mm, {band} the "
+            f"{_ADR_BULK_RESOLUTION_M[0] * 1e3:g}-"
+            f"{_ADR_BULK_RESOLUTION_M[1] * 1e3:g} mm bulk resolution ADR-0033 "
+            "specifies; refining does not make the tier quotable for club "
+            "force, which stays F0's."
+        )
+
     def licence(self) -> str:
         """What agreement on this page does and does not license."""
         return licence_statement(
@@ -890,7 +1010,8 @@ class CrossTierComparison:
             "",
             f"Probed {self.n_probes} instant(s) of a {self.n_frames}-sample F0 "
             f"record; each F1 point is its own march to that pose under a "
-            f"declared straight-line approach, not a marched shot (issue #8733).",
+            f"declared straight-line approach, not a marched shot (issue #8733). "
+            f"{self.resolution_note()}",
             "",
             "Agreement, quantity by quantity:",
             rows,
@@ -899,6 +1020,9 @@ class CrossTierComparison:
         ]
         if spans:
             parts += ["", "Divergence:", "\n".join(f"  {line}" for line in spans)]
+        engagement = self.engagement_caveat()
+        if engagement:
+            caveats = [engagement, *caveats]
         if caveats:
             parts += ["", "Caveats:", "\n".join(f"  {line}" for line in caveats)]
         return "\n".join(parts)

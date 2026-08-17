@@ -56,18 +56,25 @@ def cross_check(
     depth_m: float = 0.010,
     f1_section_area_m2: float = 4.0e-4,
     n_empty_bins: int = 0,
+    f1_along_motion: bool = False,
 ) -> F0CrossCheck:
-    """One paired query, built from the shares rather than solved for them."""
-    direction = np.array([1.0, 0.0, -0.4])
+    """One paired query, built from the shares rather than solved for them.
+
+    The default resultant opposes a ``+x`` delivery and lifts, which is
+    what sand does. ``f1_along_motion`` turns F1's around so a test can
+    show that a force which does not oppose the motion does not brake.
+    """
+    direction = np.array([-1.0, 0.0, 0.4])
     direction = direction / np.linalg.norm(direction)
+    f1_direction = -direction if f1_along_motion else direction
     return F0CrossCheck(
         speed_m_s=speed_m_s,
         f0_force_n=f0_force_n * direction,
-        f1_force_n=f1_force_n * direction,
+        f1_force_n=f1_force_n * f1_direction,
         f0_depth_force_n=f0_force_n * (1.0 - f0_inertial_share) * direction,
         f0_inertial_force_n=f0_force_n * f0_inertial_share * direction,
-        f1_stress_force_n=f1_force_n * (1.0 - f1_flux_share) * direction,
-        f1_flux_force_n=f1_force_n * f1_flux_share * direction,
+        f1_stress_force_n=f1_force_n * (1.0 - f1_flux_share) * f1_direction,
+        f1_flux_force_n=f1_force_n * f1_flux_share * f1_direction,
         submerged_depth_m=depth_m,
         f0_max_depth_m=depth_m,
         f1_max_depth_m=depth_m,
@@ -95,6 +102,7 @@ def probe(
     f1_section_area_m2: float = 4.0e-4,
     depth_m: float = 0.010,
     n_empty_bins: int = 0,
+    f1_along_motion: bool = False,
 ) -> CrossTierProbe:
     return CrossTierProbe(
         frame=frame,
@@ -108,6 +116,7 @@ def probe(
             depth_m=depth_m,
             f1_section_area_m2=f1_section_area_m2,
             n_empty_bins=n_empty_bins,
+            f1_along_motion=f1_along_motion,
         ),
         f0_divot_section_area_m2=f0_section_area_m2,
         f0_sole_depth_m=depth_m,
@@ -128,7 +137,9 @@ def comparison(probes: tuple[CrossTierProbe, ...]) -> CrossTierComparison:
         time_s=time_s,
         f0_force_n=force,
         f0_sole_depth_m=np.linspace(0.0, 0.012, 9),
-        f0_speed_m_s=speed,
+        f0_velocity_m_s=np.stack(
+            [speed, np.zeros_like(speed), np.zeros_like(speed)], axis=1
+        ),
         f0_divot_section_area_m2=np.linspace(0.0, 6.0e-4, 9),
         band=ValidityBand(
             time_s=time_s,
@@ -137,6 +148,7 @@ def comparison(probes: tuple[CrossTierProbe, ...]) -> CrossTierComparison:
         head_mass_kg=0.300,
         declared_width_m=0.030,
         bulk_density_kg_m3=1550.0,
+        f1_cell_size_m=0.002,
     )
 
 
@@ -315,44 +327,53 @@ class TestTheComparisonOverlaysThePairOnOneCursor:
 class TestSpeedLostIsDerivedAndSaysSo:
     """F1 is driven kinematically, so it loses no speed of its own."""
 
-    def test_f0s_speed_lost_is_read_off_its_own_record(self) -> None:
+    def test_f0s_recorded_loss_is_read_off_its_own_record(self) -> None:
         model = comparison((probe(2, 2.0e-3), probe(6, 6.0e-3)))
         # The synthetic record runs 25 -> 21 m/s over 9 samples, so the
         # window between samples 2 and 6 is half of the 4 m/s total.
-        assert model.f0_speed_lost_m_s == pytest.approx(2.0)
+        assert model.f0_recorded_speed_lost_m_s == pytest.approx(2.0)
 
-    def test_f1s_speed_lost_borrows_the_magnitude_and_keeps_f0s_direction(
-        self,
-    ) -> None:
-        """F0's own decrements, each weighted by the ``|F1|/|F0|`` ratio.
-
-        Integrating F1's force directly would assume the two resultants
-        point the same way, and the measured direction cosines say they do
-        not.
-        """
+    def test_both_tiers_are_integrated_on_the_same_quadrature(self) -> None:
+        """Comparing an exact number to a sampled one measures the sampling."""
         model = comparison(
             (
                 probe(2, 2.0e-3, f0_force_n=40.0, f1_force_n=60.0),
                 probe(6, 6.0e-3, f0_force_n=40.0, f1_force_n=60.0),
             )
         )
-        assert model.f1_speed_lost_m_s == pytest.approx(1.5 * 2.0, rel=1e-9)
+        # Both constant across the window, so the ratio is exactly the
+        # force ratio and the quadrature cancels.
+        assert model.f1_speed_lost_m_s / model.f0_speed_lost_m_s == pytest.approx(
+            1.5, rel=1e-9
+        )
+        # ... and neither equals the record's own 2.0 m/s, because the
+        # record is 53 samples of a curve and this is a two-point rule.
+        assert model.f0_speed_lost_m_s != pytest.approx(2.0, rel=1e-3)
 
-    def test_a_ratio_that_varies_weights_where_the_deceleration_happened(
-        self,
-    ) -> None:
-        """Not simply the peak ratio times F0's loss."""
-        model = comparison(
+    def test_a_force_that_does_not_oppose_the_motion_does_not_brake(self) -> None:
+        """The reason the projection is taken rather than the magnitude."""
+        opposing = comparison(
             (
-                probe(2, 2.0e-3, f0_force_n=40.0, f1_force_n=40.0),
-                probe(6, 6.0e-3, f0_force_n=40.0, f1_force_n=120.0),
+                probe(2, 2.0e-3, f1_force_n=60.0),
+                probe(6, 6.0e-3, f1_force_n=60.0),
             )
         )
-        # The record decelerates uniformly, so the ratio's mean over the
-        # four intervals -- 1.25, 1.75, 2.25, 2.75 at the interval starts --
-        # is what F0's 2.0 m/s loss is scaled by.
-        assert model.f1_speed_lost_m_s == pytest.approx(2.0 * 2.0, rel=1e-9)
-        assert model.f1_speed_lost_m_s < 3.0 * 2.0
+        along = comparison(
+            (
+                probe(2, 2.0e-3, f1_force_n=60.0),
+                probe(6, 6.0e-3, f1_force_n=60.0, f1_along_motion=True),
+            )
+        )
+        assert along.f1_speed_lost_m_s < opposing.f1_speed_lost_m_s
+        assert along.f1_speed_lost_m_s == pytest.approx(0.0, abs=1e-12)
+
+    def test_the_implied_speed_curve_leaves_from_f0s_own_speed(self) -> None:
+        model = comparison((probe(2, 2.0e-3), probe(6, 6.0e-3)))
+        implied = model.implied_speed_m_s()
+        assert implied[2] == pytest.approx(float(model.f0_speed_m_s[2]))
+        assert np.isnan(implied[0])
+        assert np.isnan(implied[8])
+        assert implied[6] < implied[2]
 
     def test_it_needs_two_probes_to_form_a_window(self) -> None:
         model = comparison((probe(4, 4.0e-3),))
@@ -363,6 +384,40 @@ class TestSpeedLostIsDerivedAndSaysSo:
         model = comparison((probe(2, 2.0e-3), probe(6, 6.0e-3)))
         agreement = model.agreement(ComparedQuantity.SPEED_LOST)
         assert "one-way" in agreement.quantity.note
+
+
+class TestAGrazingProbeIsNamedRatherThanLeftToDominate:
+    """F0 reports zero when nothing leads, and the ratio then divides by that."""
+
+    def test_a_probe_far_below_the_peak_is_named(self) -> None:
+        model = comparison(
+            (
+                probe(2, 2.0e-3, f0_force_n=0.5, f1_force_n=50.0),
+                probe(6, 6.0e-3, f0_force_n=400.0, f1_force_n=150.0),
+            )
+        )
+        caveat = model.engagement_caveat()
+        assert "2.00 ms" in caveat
+        assert "8702" in caveat
+        assert "engagement criterion" in caveat
+
+    def test_a_fully_loaded_probe_set_says_nothing(self) -> None:
+        model = comparison(
+            (
+                probe(2, 2.0e-3, f0_force_n=300.0),
+                probe(6, 6.0e-3, f0_force_n=400.0),
+            )
+        )
+        assert model.engagement_caveat() == ""
+
+    def test_the_summary_carries_the_caveat(self) -> None:
+        model = comparison(
+            (
+                probe(2, 2.0e-3, f0_force_n=0.5, f1_force_n=50.0),
+                probe(6, 6.0e-3, f0_force_n=400.0, f1_force_n=150.0),
+            )
+        )
+        assert "engagement criterion" in model.summary()
 
 
 class TestDivergenceIsMarkedRatherThanLeftForTheEye:
@@ -490,12 +545,13 @@ class TestTheInertialShareCrossover:
             time_s=model.time_s,
             f0_force_n=model.f0_force_n,
             f0_sole_depth_m=model.f0_sole_depth_m,
-            f0_speed_m_s=model.f0_speed_m_s,
+            f0_velocity_m_s=model.f0_velocity_m_s,
             f0_divot_section_area_m2=model.f0_divot_section_area_m2,
             band=model.band,
             head_mass_kg=model.head_mass_kg,
             declared_width_m=model.declared_width_m,
             bulk_density_kg_m3=model.bulk_density_kg_m3,
+            f1_cell_size_m=model.f1_cell_size_m,
             sweep_probes=(
                 probe(
                     0, 0.0, speed_m_s=5.0, f0_inertial_share=0.52, f1_flux_share=0.68

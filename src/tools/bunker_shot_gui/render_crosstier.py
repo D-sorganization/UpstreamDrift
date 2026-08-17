@@ -230,7 +230,7 @@ class CrossTierArtists:
         if quantity is ComparedQuantity.DIVOT_SECTION:
             return (model.f0_divot_section_area_m2 * scale, None)
         try:
-            implied = model.f1_implied_speed_m_s()
+            implied = model.implied_speed_m_s()
         except ValueError:
             implied = None
         return (model.f0_speed_m_s, implied)
@@ -245,7 +245,7 @@ class CrossTierArtists:
         if quantity is ComparedQuantity.SPEED_LOST:
             f0 = np.array([model.f0_speed_m_s[probe.frame] for probe in ordered])
             try:
-                implied = model.f1_implied_speed_m_s()
+                implied = model.implied_speed_m_s()
             except ValueError:
                 return (times, f0, np.full(times.size, np.nan))
             return (times, f0, np.array([implied[probe.frame] for probe in ordered]))
@@ -485,7 +485,8 @@ class CrossTierArtists:
             f"Method: {model.n_probes} probe(s) of a {model.n_frames}-sample F0 "
             "record. F1 has no shot history yet (#8733), so each F1 point is a "
             "separate march to that pose under a declared straight-line "
-            "constant-speed approach. The points are therefore not joined."
+            "constant-speed approach. The points are therefore not joined. "
+            f"{model.resolution_note()}"
         )
         if caveats:
             note = f"{note} {caveats[0]}"

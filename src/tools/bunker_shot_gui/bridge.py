@@ -790,14 +790,13 @@ def compare_tiers(
         time_s=np.asarray(result.times_s, dtype=np.float64),
         f0_force_n=np.asarray(result.forces_n, dtype=np.float64),
         f0_sole_depth_m=depths,
-        f0_speed_m_s=np.linalg.norm(
-            np.asarray(result.velocities_m_s, dtype=np.float64), axis=1
-        ),
+        f0_velocity_m_s=np.asarray(result.velocities_m_s, dtype=np.float64),
         f0_divot_section_area_m2=section_area,
         band=band,
         head_mass_kg=float(head_mass_kg),
         declared_width_m=width,
         bulk_density_kg_m3=float(bulk_density_kg_m3),
+        f1_cell_size_m=float(f1_solver.cell_size_m),
         sweep_probes=sweep_probes,
         agreement_band=agreement_band,
     )

@@ -58,7 +58,14 @@ def comparison(
         time_s=time_s,
         f0_force_n=force,
         f0_sole_depth_m=np.linspace(0.0, 0.012, 9),
-        f0_speed_m_s=np.linspace(25.0, 21.0, 9),
+        f0_velocity_m_s=np.stack(
+            [
+                np.linspace(25.0, 21.0, 9),
+                np.zeros(9),
+                np.zeros(9),
+            ],
+            axis=1,
+        ),
         f0_divot_section_area_m2=np.linspace(0.0, 6.0e-4, 9),
         band=ValidityBand(
             time_s=time_s, statuses=tuple([EnvelopeStatus.BEYOND_VALIDATION] * 9)
@@ -66,6 +73,7 @@ def comparison(
         head_mass_kg=0.300,
         declared_width_m=0.030,
         bulk_density_kg_m3=1550.0,
+        f1_cell_size_m=0.002,
         sweep_probes=sweep,
     )
 
