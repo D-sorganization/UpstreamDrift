@@ -254,6 +254,105 @@ merged across an A/B pair for the same reason #8728 fixed the colour ramp. This
 is a rendering of existing F0 output, not new physics: the scene and the traces
 inherit `BEYOND_VALIDATION`, and no quantity here is calibrated for bunker sand.
 
+Issues #8710 and #8711 (epic #8699) extract the F1 sand field, persist it, and
+cut the impact zone open. The motivating question -- _does the velocity of the
+sand near the face change through impact_ -- now has a measured answer: on the
+2 mm reference capture of a 25 m/s, 20 deg entry into firm sand the peak
+reportable sand speed runs 0 -> 2.86 -> 25.9 -> 28.98 m/s across the marched
+approach, peaking at 116 % of the head speed at `x = +17.0 mm`, `z = +8 mm` --
+above the free surface and past the trailing edge, which is the splash rather
+than the sand under the sole. Every array comes from the solver's own transfer
+operators rather than a reconstruction: density is `scatter_mass` over the cell
+area (plane-strain kg/m over m^2 is kg/m^3 with no fudge factor), velocity is
+the same APIC `scatter_momentum` the next step would perform, and the shear
+rate is `sqrt(2 D : D)` formed at the particles with the solver's own
+`velocity_gradient` -- at the particles rather than by differencing the nodal
+field, because an empty node beside a full one differences to an enormous
+false shear along exactly the free surface the flow of interest sits on. A
+node with no sand gets density 0 and shear rate `nan`, not shear rate 0, since
+zero would assert that sand at the free surface is not shearing. Capture drives
+`march` in stride-sized blocks from one `MPMSetup` (a new public `prepare`,
+which `run` now also goes through) and is asserted bit-for-bit identical to the
+same march taken in one call, so the stored field is the field the solve had.
+**The stored field carries its tier and validity status as data, and the
+statement is checkable**: `FieldProvenance` travels inside the file and
+`series_digest` covers the provenance _and_ the arrays with one SHA-256, so
+renaming `illustrative.h5` to `predictive.h5` changes nothing a reader
+consults, editing the stored tier breaks the digest, and swapping arrays under
+an honest label breaks it too. There is no load-anyway flag and a test asserts
+there is not. A field-schema bump is reported separately from tampering,
+because "regenerate this" and "somebody edited this" are different news. The
+schema represents more than one tier: `FieldLayout.GRID` stores an origin, a
+spacing and a shape so a continuum pays nothing per frame for sample
+positions, `PARTICLE` stores them per frame because for a grain tier they are
+the state, dimension is stored rather than assumed, and both round-trip.
+Persistence is through the existing `io/` layer, bumped to schema v3 with a
+`/sand_field` group; v1 and v2 still read and a file with no field reads back
+as `None` rather than an error. Retention is deliberate and recorded: an
+over-length run is **strided, never truncated**, because cutting the tail off a
+shot removes exactly the part the question is about, and every drop is written
+into `RetentionRecord.dropped` in words. The reference capture keeps 97 frames
+of 286 steps (1 in 3, 14.8 us apart) at float32 with gzip-4, which is 4.15 MB
+against the 44.7 MB a full-rate float64 record would have cost, a 10.8x
+saving, and loads in 0.08 s. Two measurement findings changed the design.
+First, a nodal velocity is momentum over mass, and at the outer tail of a
+B-spline stencil that mass is parts per million of a cell of sand: the
+unmasked peak reads 46.71 m/s -- 187 % of the head -- on a node holding
+7.5e-6 of the bulk density. A density-floor sweep gives 46.71 / 32.22 / 28.98 /
+28.26 m/s at 0 / 1 / 10 / 50 %, so the reported peak stops moving at 10 %, and
+the same number falls out of the physics: at `dx = 2 mm` and `d50 = 0.458 mm`
+one grain is about 4 % of a cell, so a 10 % floor is "fewer than about two and
+a half grains here", below which a continuum density measures nothing for the
+same reason `MIN_CELLS_PER_GRAIN` refuses a sub-grain grid. `OccupancyRule` is
+therefore a required field on every series, inside the file and covered by the
+digest, so two views cannot disagree about where the sand is. Second, the peak
+nodal density reaches 2914 kg/m^3 against a bulk of 1712 and a densest
+admissible packing of 1747 -- derived from the constitutive cap
+`eps_v_cap = ln(phi / phi_max)` the material already carries, so no new
+constant exists. The return map keeps every particle inside that cap; nodal
+density is a weighted mass scatter and nothing bounds _it_, so 1.44 % of
+samples sit above a packing the sand cannot physically reach. That is a
+reporting artefact, it is counted rather than clipped, and the count is
+printed in the frame. **The cross-section view shows what a plane-strain cut
+actually is instead of hiding it.** F1 has no heel-to-toe direction, so the
+heel-to-toe series #8711 asks for cannot be a series of solves: `SliceFidelity`
+labels each cut `SOLVED` (the plane the tier solved), `EXTRUDED` (parallel,
+offset out of plane -- identical numbers by assumption, and a test asserts two
+stations are bit-for-bit equal), or `PROJECTED` (oblique; the along-cut axis
+compressed by `cos(obliquity)`). A station beyond the solver's declared
+`effective_width_m` is refused, because that width is an assumption and there
+is nothing past it to extrude into; an edge-on cut is refused because it meets
+the solved plane in a line rather than an area. Through-cut velocity is `None`
+on a parallel cut and says it is _absent_ rather than measured as zero, and on
+an oblique cut says it is in-plane flow resolved rather than measured
+heel-to-toe flow. Velocity is drawn as magnitude **and** direction -- colour is
+speed, arrows are flow -- because sand pushed ahead of the sole and sand riding
+up the face can carry identical speeds; the field now also carries the
+intruder's cross-section outline per frame, without which "ahead of the sole"
+and "up the face" are guesses rather than locations. Colour limits and arrow
+lengths are injected from a `SliceScale` covering every frame of every compared
+design and taken from occupied samples only, so #8728's per-grid auto-scaling
+cannot return in the view where it would do most damage. The cut is another
+view on the sole-field transport rather than a second slider, but its record is
+a strided F1 march of a declared approach and not the F0 shot, so `CursorMap`
+maps the shared index by fractional progress and says so in frame. Three
+further corrections fell out of building it: `validity_stamp` hard-coded
+"dynamic 3D-RFT" under every tier and would have printed F0's constitutive
+shortcut on a picture of a material-point solve, so the model is now named from
+the tier; the workbench clears a loaded field **before** repainting the sole
+field, because painting it emits `frame_changed` and a cut still mapped to the
+previous shot's record would be handed an index it cannot map -- and a Python
+exception escaping a Qt slot aborts the process rather than surfacing; and a
+sand field is loaded rather than computed in the GUI, because a 2 mm march
+takes about 37 s and a coarser one run to keep the workbench responsive would
+put a picture on screen at a resolution nobody chose. F1 supplies a **declared
+straight-line constant-velocity approach**, not a marched swing (#8733 holds
+whole-shot marching); an approach and a shot animate identically, so the
+assumption is a required field on every provenance record and is stamped on
+every frame. Nothing here is validated: the field inherits `BEYOND_VALIDATION`,
+`MAX_VALIDATED_SPEED_M_S` is 1.44 m/s so a 25 m/s shot is 17x outside the
+published corpus from its first sample, and the frame says both.
+
 Issue #8713 (epic #8699) then puts the two tiers side by side on the
 quantities both produce, which is the only honest way to show F1 output at
 all: NASA-STD-7009B validation and use history both stand at 0 of 4, and
