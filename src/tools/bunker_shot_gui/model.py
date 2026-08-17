@@ -172,12 +172,16 @@ def _strike_scene(ball_depth_m: float) -> StrikeScene:
     )
 
 
-def _sand_delivery(result: ShotResult, divot: DivotMetrics) -> SandDelivery:
+def _sand_delivery(
+    result: ShotResult, divot: DivotMetrics, sand: SandState
+) -> SandDelivery:
     """Bundle what the solver and the metrics layer measured about one strike.
 
     Args:
         result: The F0 shot.
         divot: The divot the same shot cut.
+        sand: The bed it was struck in, supplying the relative density the
+            sand-to-ball transfer efficiency depends on (issue #8704).
 
     Returns:
         The delivery the ball model derives launch from.
@@ -188,6 +192,7 @@ def _sand_delivery(result: ShotResult, divot: DivotMetrics) -> SandDelivery:
         contact_duration_s=result.contact_duration_s,
         entry_speed_m_s=result.entry_speed_m_s,
         exit_speed_m_s=result.exit_speed_m_s,
+        bed_relative_density=sand.relative_density,
         verdict=result.verdict,
     )
 
@@ -368,6 +373,11 @@ class DesignEvaluation:
         sand: The sand state the shot was run in.
         shot: The nominal shot.
         playability: The playability window over the delivery sweep.
+        effective_camber_area_m2: The camber area the lofted head actually
+            carries. A sole cannot host an arbitrarily large camber for its
+            width and bounce, so the declared area in :attr:`geometry` is
+            fitted to what the sole admits; carrying the realised value here
+            is what lets the report state both (issue #8698).
     """
 
     design: WedgeDesign
@@ -375,6 +385,12 @@ class DesignEvaluation:
     sand: SandState
     shot: ShotOutcome
     playability: PlayabilityOutcome
+    effective_camber_area_m2: float
+
+    @property
+    def camber_was_clamped(self) -> bool:
+        """Whether the declared camber area had to be substituted."""
+        return self.effective_camber_area_m2 != self.geometry.sole_camber_area_m2
 
     @property
     def verdict(self) -> ValidityVerdict:
@@ -527,11 +543,10 @@ class WorkbenchModel:
         build = self.head_build(geometry)
         solver = self.solver(sand, swing)
         delivered = deliver_wedge(geometry, swing.delivery())
-        kinematics = entry_kinematics(build, swing, self._settings)
+        kinematics = entry_kinematics(build, swing)
         settings = ShotSettings(
             time_step_s=self._settings.time_step_s,
             max_time_s=self._settings.max_time_s,
-            start_at_first_contact=False,
         )
         try:
             result = simulate_shot(
@@ -540,6 +555,7 @@ class WorkbenchModel:
                 head_mass_kg=geometry.head_mass_kg,
                 kinematics=kinematics,
                 settings=settings,
+                sole_reference_body_m=build.sole_reference_body_m,
             )
         except OutOfEnvelopeError as refusal:
             verdict = refusal.verdict
@@ -569,11 +585,7 @@ class WorkbenchModel:
         """Turn a completed shot into the designer-facing metrics."""
         missing: list[str] = []
         delivered = deliver_wedge(geometry, swing.delivery())
-        trace = strike_trace(
-            result,
-            kinematics.orientation,
-            kinematics.orientation @ build.sole_reference_body_m,
-        )
+        trace = strike_trace(result)
         if trace is None:
             missing.append(
                 "trace metrics: the shot recorded fewer than 3 samples, which is "
@@ -603,7 +615,7 @@ class WorkbenchModel:
         )
         carry = _try(
             lambda: self.carry_estimate(
-                geometry, swing, _sand_delivery(result, _measured_divot(divot))
+                geometry, swing, _sand_delivery(result, _measured_divot(divot), sand)
             ),
             "carry",
             missing,
@@ -617,7 +629,7 @@ class WorkbenchModel:
             impulse_n_s=float(np.linalg.norm(result.impulse_n_s)),
             entry_speed_mps=result.entry_speed_m_s,
             exit_speed_mps=result.exit_speed_m_s,
-            max_depth_m=result.max_depth_m,
+            max_depth_m=result.max_sole_depth_m,
             contact_duration_s=result.contact_duration_s,
             peak_inertial_fraction=(
                 float(result.inertial_fractions.max())
@@ -819,7 +831,7 @@ class WorkbenchModel:
         """
         build = self.head_build(geometry)
         solver = self.solver(sand, swing)
-        kinematics = entry_kinematics(build, swing, self._settings)
+        kinematics = entry_kinematics(build, swing)
         try:
             result = simulate_shot(
                 solver,
@@ -829,18 +841,14 @@ class WorkbenchModel:
                 settings=ShotSettings(
                     time_step_s=self._settings.time_step_s,
                     max_time_s=self._settings.max_time_s,
-                    start_at_first_contact=False,
                 ),
+                sole_reference_body_m=build.sole_reference_body_m,
             )
         except OutOfEnvelopeError:
             reasons.append("the solver refused every point in the delivery sweep")
             return None
         try:
-            trace = strike_trace(
-                result,
-                kinematics.orientation,
-                kinematics.orientation @ build.sole_reference_body_m,
-            )
+            trace = strike_trace(result)
             divot = self._divot(
                 trace,
                 build.head_model,
@@ -849,7 +857,7 @@ class WorkbenchModel:
                 sand,
             )
             return self.carry_estimate(
-                geometry, swing, _sand_delivery(result, _measured_divot(divot))
+                geometry, swing, _sand_delivery(result, _measured_divot(divot), sand)
             )
         except (RuntimeError, ImportError, ValueError) as error:
             reasons.append(f"carry is unavailable: {error}")
@@ -896,6 +904,8 @@ class WorkbenchModel:
             sand=state,
             shot=shot,
             playability=window,
+            # Free: the build is cached, and run_shot has already made it.
+            effective_camber_area_m2=self.head_build(geometry).effective_camber_area_m2,
         )
 
     def compare(

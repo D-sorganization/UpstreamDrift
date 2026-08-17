@@ -122,6 +122,34 @@ _RELEASE_METADATA: dict[str, Any] = {
             "command": "python -m scripts.research.proximal_distal_energy.run_articulated_slack_atlas",
             "tier": "bounded_subject_scaled_typed_unilateral_attachment_forward_dynamics",
         },
+        "articulated_distributed_grip_atlas": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_distributed_grip_atlas",
+            "tier": "bounded_subject_scaled_distributed_unilateral_grip_forward_dynamics",
+        },
+        "articulated_shaft_structural_basis": {
+            "command": "python -m scripts.research.proximal_distal_energy.generate_articulated_shaft_structural_basis",
+            "tier": "frozen_first_mode_finite_element_structural_authority",
+        },
+        "articulated_shaft_time_step_diagnostic": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_articulated_shaft_time_step_diagnostic",
+            "tier": "limiting_torsion_cell_three_level_refinement",
+        },
+        "articulated_shaft_atlas": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_articulated_shaft_atlas",
+            "tier": "bounded_subject_scaled_distributed_grip_passive_shaft_forward_dynamics",
+        },
+        "articulated_ground_diagnostic": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_articulated_ground_diagnostic",
+            "tier": "finite_base_initialization_and_three_level_refinement",
+        },
+        "articulated_ground_atlas": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_articulated_ground_atlas",
+            "tier": "bounded_subject_scaled_finite_ground_and_intrinsic_free_moment",
+        },
+        "articulated_ground_posthoc_sensitivity": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_articulated_ground_posthoc_sensitivity",
+            "tier": "explicit_post_hoc_primary_match_failure_sensitivity",
+        },
         "scapulothoracic_contact_screen": {
             "command": "python -m scripts.research.proximal_distal_energy.run_scapulothoracic_contact_screen",
             "tier": "paired_arm_only_scapula_on_ellipsoid_geometry_screen",
@@ -252,12 +280,21 @@ _RELEASE_METADATA: dict[str, Any] = {
         "typed_articulated_slack": (
             "five_millisecond_typed_attachment_event_gate_qualified"
         ),
+        "distributed_grip_discretization": (
+            "fifty_millisecond_distributed_fiber_gate_qualified"
+        ),
+        "articulated_shaft_bending_torsion": (
+            "fifty_millisecond_passive_shaft_gate_qualified_with_mixed_matched_outcomes"
+        ),
+        "articulated_ground_free_moment": (
+            "fifty_millisecond_finite_ground_gate_qualified_primary_match_empty"
+        ),
         "scapulothoracic_contact_geometry": (
             "partial_reachability_with_high_allocation_nullity_forward_test_open"
         ),
     },
     "known_open_gates": [
-        "longer-horizon subject-scaled articulated spatial contact with calibrated distributed grip, friction, shaft, tissue, and ground coupling",
+        "longer-horizon three-dimensional articulated contact with calibrated unilateral foot support, friction, tissue, and force-plate comparison",
         "equipment-calibrated distributed beam and grip coupled into a subject-scaled forward solve",
         "measured tissue-level preload and slack identification",
         "governed held-out human experimental evaluation",
