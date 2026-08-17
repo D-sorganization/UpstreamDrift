@@ -735,7 +735,7 @@ class TestCIEnvironmentCompatibility:
                 encoding="utf-8",
             ),
         )
-        lod_job = workflow["jobs"]["quality-gate"]
+        lod_job = workflow["jobs"]["lod-quality-gate"]
 
         assert int(lod_job["timeout-minutes"]) >= 15
 
@@ -750,7 +750,7 @@ class TestCIEnvironmentCompatibility:
         workflow_text = workflow_path.read_text(encoding="utf-8")
         workflow = yaml.safe_load(workflow_text)
 
-        assert set(workflow["jobs"]) == {"quality-gate"}
+        assert set(workflow["jobs"]) == {"lod-quality-gate"}
         assert "scripts/ci/check_lod.py" in workflow_text
         assert "src \\" in workflow_text
         assert "--baseline scripts/ci/lod_baseline.txt" in workflow_text
@@ -766,11 +766,50 @@ class TestCIEnvironmentCompatibility:
         workflow_path = REPO_ROOT / ".github" / "workflows" / "quality-gate.yml"
         workflow_text = workflow_path.read_text(encoding="utf-8")
         workflow = yaml.safe_load(workflow_text)
-        job = workflow["jobs"]["quality-gate"]
+        job = workflow["jobs"]["lod-quality-gate"]
 
-        assert job["name"] == "quality-gate"
-        assert job["runs-on"] == "d-sorg-fleet-docker"
+        assert job["name"] == "lod-quality-gate"
+        # The runner comes from the same public/private dispatcher expression as
+        # the rest of CI. This previously asserted a bare `d-sorg-fleet-docker`,
+        # which stopped being true when the expression landed.
+        assert "d-sorg-fleet-docker" in job["runs-on"]
+        # No `paths:` filter is what makes this job safe to require directly: it
+        # reports on every PR, so it can never block on a missing context.
         assert "paths:" not in workflow_text
+
+    def test_required_quality_gate_context_is_published_by_one_workflow(self) -> None:
+        """Exactly one job may be named `quality-gate`.
+
+        `quality-gate` is the required status check on `main` (org ruleset
+        `Repository_Protections`). GitHub matches required checks by context
+        name, so a second job sharing the name publishes a competing check run
+        under the required context and branch protection is satisfied by
+        whichever one reported. On PR #8728 three jobs carried this name: the
+        CI Standard aggregate reported `failure` while docs-ci.yml and
+        quality-gate.yml reported `success`, and the PR merged.
+        """
+        try:
+            import yaml
+        except ImportError:
+            pytest.skip("PyYAML is required for workflow structure checks")
+
+        publishers = []
+        for workflow_path in sorted(
+            (REPO_ROOT / ".github" / "workflows").glob("*.yml")
+        ):
+            workflow = yaml.safe_load(workflow_path.read_text(encoding="utf-8"))
+            if not isinstance(workflow, dict):
+                continue
+            for job_id, job in (workflow.get("jobs") or {}).items():
+                if not isinstance(job, dict):
+                    continue
+                if job.get("name", job_id) == "quality-gate":
+                    publishers.append(f"{workflow_path.name}:{job_id}")
+
+        assert publishers == ["ci-standard.yml:quality-gate"], (
+            "the required `quality-gate` context must be published by the CI "
+            f"Standard aggregate alone, but found: {publishers}"
+        )
 
     def test_helper_workflows_use_pr_scoped_concurrency(self) -> None:
         """Helper checks must not cancel another PR's current check status."""
@@ -812,6 +851,8 @@ class TestCIEnvironmentCompatibility:
 
         assert job["name"] == "quality-gate"
         assert set(job["needs"]) == {
+            "pick-runner",
+            "changed-paths",
             "code-quality",
             "security-scans",
             "repo-structure-gates",
@@ -820,14 +861,54 @@ class TestCIEnvironmentCompatibility:
             "rust-wheel-parity",
         }
         assert job["if"] == "always()"
-        aggregate = next(
+        aggregate_step = next(
             step
             for step in job["steps"]
             if step.get("name") == "Aggregate quality gate results"
-        )["run"]
+        )
+        aggregate = aggregate_step["run"]
 
-        assert "tests:              ${{ needs.tests.result }}" in aggregate
-        assert '${{ needs.tests.result }}" != "success"' in aggregate
+        assert aggregate_step["env"]["TESTS"] == "${{ needs.tests.result }}"
+
+        # A docs-only PR skips the six gates, so `skipped` has to be accepted -
+        # but only once the prerequisites that decide the skip have themselves
+        # succeeded, otherwise an infrastructure failure would skip everything
+        # and read as a pass.
+        assert 'expected="success"' in aggregate
+        assert 'expected="skipped"' in aggregate
+        assert (
+            '[ "$PICK_RUNNER" != "success" ] || [ "$CHANGED_PATHS" != "success" ]'
+            in aggregate
+        )
+
+    def test_ci_standard_runs_on_every_pull_request(self) -> None:
+        """CI Standard must not be path-filtered out of any PR.
+
+        `quality-gate` is a required check, and GitHub blocks a PR forever on a
+        required context that never reports. While this workflow carried a
+        `paths-ignore` for docs, docs-only PRs got the context from docs-ci.yml
+        instead - which is what created the duplicate-name bypass. Skipping is
+        now decided per job by `changed-paths`, not by the trigger.
+        """
+        try:
+            import yaml
+        except ImportError:
+            pytest.skip("PyYAML is required for workflow structure checks")
+
+        workflow = yaml.safe_load(
+            (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+                encoding="utf-8"
+            )
+        )
+        # PyYAML resolves the bare `on:` key to the boolean True.
+        triggers = workflow.get(True, workflow.get("on"))
+        pull_request = triggers["pull_request"]
+
+        assert "paths-ignore" not in pull_request
+        assert "paths" not in pull_request
+        assert workflow["jobs"]["changed-paths"]["outputs"]["code"] == (
+            "${{ steps.detect.outputs.code }}"
+        )
 
     def test_ci_standard_repo_structure_installs_workflow_parser(self) -> None:
         """Workflow YAML guards must run after their parser dependency is present."""

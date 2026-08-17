@@ -10,13 +10,19 @@ on:
       - "LICENSE"
       - ".gitignore"
       - ".github/**"
+  # NO `paths-ignore` here, deliberately. `quality-gate` (below) is a required
+  # status check, and GitHub blocks a PR forever on a required context that
+  # never reports. When this workflow was skipped by path filter, docs-only PRs
+  # had to get `quality-gate` from somewhere else, so docs-ci.yml published a
+  # second check under the same name - which meant branch protection could be
+  # satisfied by the docs check while this aggregate was red (PR #8728).
+  #
+  # Instead the workflow always runs and the `changed-paths` job decides whether
+  # there is any non-docs work to do; the heavy jobs skip on docs-only PRs and
+  # the aggregate reports success in seconds. Docs-only PRs therefore cost one
+  # dispatcher job plus one diff, not the full suite.
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-    paths-ignore:
-      - "docs/**"
-      - "**.md"
-      - "LICENSE"
-      - ".gitignore"
   workflow_dispatch:
   schedule:
     # Weekly run every Monday at 06:00 UTC  -  catches test drift and
@@ -33,6 +39,8 @@ permissions:
 jobs:
   local-only-workflows:
     name: Reject hosted runner routing
+    needs: changed-paths
+    if: needs.changed-paths.outputs.code == 'true'
     runs-on:
       ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
       'd-sorg-fleet-docker' }}
@@ -50,6 +58,8 @@ jobs:
 
   pinned-actions:
     name: Enforce action SHA pinning
+    needs: changed-paths
+    if: needs.changed-paths.outputs.code == 'true'
     runs-on:
       ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
       'd-sorg-fleet-docker' }}
@@ -74,6 +84,8 @@ jobs:
 
   workflow-inventory:
     name: Enforce workflow inventory
+    needs: changed-paths
+    if: needs.changed-paths.outputs.code == 'true'
     runs-on:
       ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
       'd-sorg-fleet-docker' }}
@@ -98,6 +110,8 @@ jobs:
 
   urdf-layering:
     name: Enforce URDF subsystem layering (ADR 0007)
+    needs: changed-paths
+    if: needs.changed-paths.outputs.code == 'true'
     runs-on:
       ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
       'd-sorg-fleet-docker' }}
@@ -164,6 +178,70 @@ jobs:
             echo "- selected target: \`$runner\` (\`$mode\`)"
             echo "- GitHub API calls: \`0\`"
           } >> "$GITHUB_STEP_SUMMARY"
+
+  # Decides whether this ref contains anything besides documentation. Every
+  # substantive job below keys off `code`, so a docs-only PR skips them while
+  # the required `quality-gate` aggregate still reports.
+  #
+  # The patterns below MUST stay in sync with docs-ci.yml's `paths:` filter -
+  # the two are exact complements, and that is what guarantees this workflow
+  # runs (and reports `quality-gate`) on every PR.
+  changed-paths:
+    name: changed-paths
+    runs-on:
+      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
+      'd-sorg-fleet-docker' }}
+    timeout-minutes: 10
+    outputs:
+      code: ${{ steps.detect.outputs.code }}
+    steps:
+      - name: Enable long Git paths
+        run: git config --global core.longpaths true
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+
+      - name: Detect non-docs changes
+        id: detect
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$(dirname "$GITHUB_OUTPUT")"
+
+          # Only pull_request runs can be narrowed; push, schedule and
+          # workflow_dispatch always exercise the full suite.
+          if [ "$EVENT_NAME" != "pull_request" ]; then
+            echo "Event '$EVENT_NAME' always runs the full suite."
+            echo "code=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          changed=$(git diff --name-only "origin/${BASE_REF}...HEAD")
+          echo "Changed files:"
+          echo "$changed"
+
+          code=false
+          while IFS= read -r file; do
+            [ -n "$file" ] || continue
+            case "$file" in
+              docs/* | *.md | LICENSE | .gitignore) ;;
+              *)
+                code=true
+                echo "Non-docs change: $file"
+                ;;
+            esac
+          done <<< "$changed"
+
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          {
+            echo "## Changed paths"
+            echo "- non-docs changes: \`$code\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
   # ---------------------------------------------------------------------------
   # Quality gates are split into independent, parallel jobs (issue #7064) so a
   # single flaky step no longer masks unrelated failures. The required branch-
@@ -177,7 +255,8 @@ jobs:
   # ---------------------------------------------------------------------------
   code-quality:
     name: code-quality
-    needs: pick-runner
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 45
     steps:
@@ -470,7 +549,8 @@ jobs:
   # longer blocks lint/type/structural gates.
   security-scans:
     name: security-scans
-    needs: pick-runner
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 30
     steps:
@@ -698,7 +778,8 @@ jobs:
   # keeps this job fast and independent of the heavier code-quality job.
   repo-structure-gates:
     name: repo-structure-gates
-    needs: pick-runner
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 20
     steps:
@@ -847,7 +928,8 @@ jobs:
   # stacks are covered by their own provisioned lanes.
   unit-test-gate:
     name: unit-test-gate
-    needs: pick-runner
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 25
     steps:
@@ -968,15 +1050,23 @@ jobs:
           exit "$pytest_exit_code"
 
   # Required branch-protection check (issue #7064). The name `quality-gate` is
-  # preserved exactly so existing branch protection rules and the bot workflows
-  # (Jules-Auto-Repair, Jules-PR-AutoFix, Bot-CI-Trigger) keep resolving it.
-  # This job carries no gate logic of its own; it simply fails if any of the
-  # split quality jobs failed, giving a single aggregate status while letting
-  # each underlying job report independently.
+  # preserved exactly so the org ruleset `Repository_Protections` and the bot
+  # workflows (Jules-Auto-Repair, Jules-PR-AutoFix, Bot-CI-Trigger) keep
+  # resolving it. This job carries no gate logic of its own; it simply fails if
+  # any of the split quality jobs failed, giving a single aggregate status while
+  # letting each underlying job report independently.
+  #
+  # This is now the ONLY job in the repo named `quality-gate`. It used to share
+  # the name with jobs in quality-gate.yml and docs-ci.yml, which published
+  # competing check runs under the same required context - on PR #8728 this
+  # aggregate reported `failure` while the other two reported `success` and the
+  # PR merged anyway. They are now `lod-quality-gate` and `docs-quality-gate`.
   quality-gate:
     name: quality-gate
     needs:
       [
+        pick-runner,
+        changed-paths,
         code-quality,
         security-scans,
         repo-structure-gates,
@@ -1002,37 +1092,83 @@ jobs:
     steps:
       - name: Aggregate quality gate results
         shell: bash
+        env:
+          PICK_RUNNER: ${{ needs.pick-runner.result }}
+          CHANGED_PATHS: ${{ needs.changed-paths.result }}
+          CODE_CHANGED: ${{ needs.changed-paths.outputs.code }}
+          CODE_QUALITY: ${{ needs.code-quality.result }}
+          SECURITY_SCANS: ${{ needs.security-scans.result }}
+          REPO_STRUCTURE_GATES: ${{ needs.repo-structure-gates.result }}
+          TESTS: ${{ needs.tests.result }}
+          UNIT_TEST_GATE: ${{ needs.unit-test-gate.result }}
+          RUST_WHEEL_PARITY: ${{ needs.rust-wheel-parity.result }}
         run: |
-          echo "code-quality:        ${{ needs.code-quality.result }}"
-          echo "security-scans:      ${{ needs.security-scans.result }}"
-          echo "repo-structure-gates:${{ needs.repo-structure-gates.result }}"
-          echo "tests:              ${{ needs.tests.result }}"
-          echo "unit-test-gate:      ${{ needs.unit-test-gate.result }}"
-          echo "rust-wheel-parity:   ${{ needs.rust-wheel-parity.result }}"
+          set -uo pipefail
+
+          gates="code-quality:$CODE_QUALITY"
+          gates="$gates security-scans:$SECURITY_SCANS"
+          gates="$gates repo-structure-gates:$REPO_STRUCTURE_GATES"
+          gates="$gates tests:$TESTS"
+          gates="$gates unit-test-gate:$UNIT_TEST_GATE"
+          gates="$gates rust-wheel-parity:$RUST_WHEEL_PARITY"
+
           {
             echo "## Quality Gate Summary"
+            echo ""
+            echo "- non-docs changes: \`$CODE_CHANGED\`"
+            echo ""
             echo "| Job | Result |"
             echo "| --- | ------ |"
-            echo "| code-quality | ${{ needs.code-quality.result }} |"
-            echo "| security-scans | ${{ needs.security-scans.result }} |"
-            echo "| repo-structure-gates | ${{ needs.repo-structure-gates.result }} |"
-            echo "| tests | ${{ needs.tests.result }} |"
-            echo "| unit-test-gate | ${{ needs.unit-test-gate.result }} |"
-            echo "| rust-wheel-parity | ${{ needs.rust-wheel-parity.result }} |"
+            echo "| pick-runner | $PICK_RUNNER |"
+            echo "| changed-paths | $CHANGED_PATHS |"
           } >> "$GITHUB_STEP_SUMMARY"
-          if [ "${{ needs.code-quality.result }}" != "success" ] \
-            || [ "${{ needs.security-scans.result }}" != "success" ] \
-            || [ "${{ needs.repo-structure-gates.result }}" != "success" ] \
-            || [ "${{ needs.tests.result }}" != "success" ] \
-            || [ "${{ needs.unit-test-gate.result }}" != "success" ] \
-            || [ "${{ needs.rust-wheel-parity.result }}" != "success" ]; then
+
+          for entry in $gates; do
+            echo "${entry%%:*}: ${entry#*:}"
+            echo "| ${entry%%:*} | ${entry#*:} |" >> "$GITHUB_STEP_SUMMARY"
+          done
+
+          # The prerequisites must genuinely succeed. Without this check a
+          # failure in pick-runner or changed-paths would skip all six gates
+          # below, and the docs-only `skipped` branch would wave the PR through.
+          if [ "$PICK_RUNNER" != "success" ] || [ "$CHANGED_PATHS" != "success" ]; then
+            echo "::error::quality-gate prerequisites failed (pick-runner=$PICK_RUNNER, changed-paths=$CHANGED_PATHS)."
+            exit 1
+          fi
+
+          if [ "$CODE_CHANGED" = "true" ]; then
+            expected="success"
+          else
+            # Docs-only change: the gates are deliberately skipped. Requiring
+            # exactly `skipped` means a gate that somehow ran (and failed) is
+            # still caught rather than tolerated.
+            expected="skipped"
+          fi
+
+          failed=0
+          for entry in $gates; do
+            name="${entry%%:*}"
+            result="${entry#*:}"
+            if [ "$result" != "$expected" ]; then
+              echo "::error::$name reported '$result', expected '$expected'."
+              failed=1
+            fi
+          done
+
+          if [ "$failed" -ne 0 ]; then
             echo "::error::One or more quality-gate jobs failed."
             exit 1
+          fi
+
+          if [ "$CODE_CHANGED" != "true" ]; then
+            echo "Docs-only change: quality-gate jobs correctly skipped."
+            exit 0
           fi
           echo "All quality-gate jobs succeeded."
 
   core-only-install:
-    needs: pick-runner
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 15
     steps:
@@ -1105,7 +1241,8 @@ jobs:
 
   dependency-consistency:
     name: dependency-consistency
-    needs: pick-runner
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 15
     steps:
@@ -1168,7 +1305,8 @@ jobs:
           python -m pip_audit -r requirements.lock
 
   tests:
-    needs: pick-runner
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 35 # Prevent runaway tests while allowing bounded core-suite completion
     strategy:
@@ -1733,7 +1871,8 @@ jobs:
             --tb=short
 
   alembic-postgres-round-trip:
-    needs: pick-runner
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 45
     services:
@@ -1842,7 +1981,8 @@ jobs:
             -vv --tb=short
 
   shared-tools-consumer-contracts:
-    needs: pick-runner
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 20
     steps:
@@ -1959,7 +2099,8 @@ jobs:
             -v --tb=short
 
   frontend-tests:
-    needs: pick-runner
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 20
     defaults:
@@ -2119,7 +2260,8 @@ jobs:
   # Enforces: format (rustfmt), lint (clippy), tests (cargo test).
   # =============================================================================
   rust-quality-gate:
-    needs: pick-runner
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -2401,6 +2543,8 @@ jobs:
 
   rust-quickstart:
     name: Rust Quickstart
+    needs: changed-paths
+    if: needs.changed-paths.outputs.code == 'true'
     # No `needs: pick-runner` on this job, so it routes directly rather than
     # gaining a dependency edge just to learn where to run.
     runs-on:
@@ -2527,7 +2671,8 @@ jobs:
   # ----------------------------------------------------------------------
   rust-wheel-parity:
     name: rust-wheel-parity
-    needs: pick-runner
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
     # In the required `quality-gate` aggregate's `needs`, so a fleet pin here
     # blocked every merge a second time. Pure `cargo`/`maturin` work with no
     # fleet-local state, so it follows the dispatcher like its siblings.
