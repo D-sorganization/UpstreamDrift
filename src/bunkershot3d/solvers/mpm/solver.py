@@ -81,8 +81,10 @@ from .grid import (
 from .state import (
     DomainWalls,
     ParticleState,
+    SurfaceDepression,
     apply_wall_conditions,
     settled_bed,
+    surface_depression,
     surface_profile_m,
 )
 
@@ -341,6 +343,34 @@ class MPMRun:
         total = self.averaged_force_n_per_m(window_s)
         stress = self.averaged_stress_force_n_per_m(window_s)
         return stress, total - stress
+
+    def surface_depression(self, *, n_bins: int = _SURFACE_BINS) -> SurfaceDepression:
+        """The divot the *sand* carries: how deep, and how much section.
+
+        Read off the particles, because in MPM the free surface *is*
+        wherever the particles stop.  The depth alone was enough for the
+        cross-check ADR-0033 shipped; comparing against F0's divot needs
+        the area as well, because
+        :class:`~bunkershot3d.metrics.divot.DivotMetrics` reports a
+        section area and a mass and there is nothing to compare a depth
+        against there.
+
+        Args:
+            n_bins: Horizontal bins across the bed.
+
+        Returns:
+            The measurement, carrying its own empty-bin count so a caller
+            can see whether the area is complete or a lower bound.
+
+        Raises:
+            SolverInputError: If no bin holds a particle.
+        """
+        return surface_depression(
+            self.particles,
+            free_surface_height_m=self.free_surface_height_m,
+            x_bounds_m=self.bed_x_bounds_m,
+            n_bins=n_bins,
+        )
 
     def divot_depth_m(self, *, n_bins: int = _SURFACE_BINS) -> float:
         """Deepest depression of the free surface below its original level.

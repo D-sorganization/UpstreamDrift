@@ -74,7 +74,13 @@ from ..protocol import IntrusionState, SolverResult
 from .constitutive import SandContinuum, principal_stretches
 from .grid import PlaneStrainGrid
 from .solver import MPMRun, PlaneStrainMPMSolver
-from .state import DomainWalls, ParticleState, WallCondition, settled_bed
+from .state import (
+    DomainWalls,
+    ParticleState,
+    SurfaceDepression,
+    WallCondition,
+    settled_bed,
+)
 
 __all__ = [
     "ColumnEquilibrium",
@@ -639,8 +645,11 @@ class F0CrossCheck:
         f1_flux_force_n: F1's momentum-flux part.
         f0_max_depth_m: Deepest submerged point per F0.
         f1_max_depth_m: The same per F1.
-        f1_divot_depth_m: F1's free-surface depression, which F0 cannot
-            produce at all.
+        f1_divot: F1's free-surface depression -- depth *and* section area
+            -- which F0 cannot produce at all. F0's own "divot" is the
+            swept lower envelope of the head, so the two are different
+            measurements of the same word and the comparison has to say so
+            (issue #8713).
         effective_width_m: The declared width F1's magnitude rests on.
     """
 
@@ -653,8 +662,24 @@ class F0CrossCheck:
     f1_flux_force_n: NDArray[np.float64]
     f0_max_depth_m: float
     f1_max_depth_m: float
-    f1_divot_depth_m: float
+    f1_divot: SurfaceDepression
     effective_width_m: float
+
+    @property
+    def f1_divot_depth_m(self) -> float:
+        """Deepest the sand's own free surface fell [m]."""
+        return self.f1_divot.max_depth_m
+
+    @property
+    def f1_divot_section_area_m2(self) -> float:
+        """Section of sand F1 removed from below the original surface [m^2].
+
+        Per unit out-of-plane width, so it compares directly against
+        :attr:`~bunkershot3d.metrics.divot.DivotMetrics.section_area_m2`
+        without either side declaring a width. The mass does need one; see
+        :meth:`~bunkershot3d.solvers.mpm.state.SurfaceDepression.displaced_mass_kg`.
+        """
+        return self.f1_divot.section_area_m2
 
     @property
     def magnitude_ratio(self) -> float:
@@ -703,7 +728,9 @@ class F0CrossCheck:
             f"inertial share F0={self.f0_inertial_fraction:.3f} vs flux share "
             f"F1={self.f1_flux_fraction:.3f}; depth F0={self.f0_max_depth_m * 1e3:.3g} "
             f"mm vs F1={self.f1_max_depth_m * 1e3:.3g} mm; F1 divot "
-            f"{self.f1_divot_depth_m * 1e3:.3g} mm (F0 produces none)"
+            f"{self.f1_divot_depth_m * 1e3:.3g} mm deep, "
+            f"{self.f1_divot_section_area_m2 * 1e4:.3g} cm^2 in section "
+            "(F0 moves no sand, so it produces neither)"
         )
 
 
@@ -745,7 +772,7 @@ def cross_check_against_f0(
         f1_flux_force_n=np.array([flux_part[0] * width, 0.0, flux_part[1] * width]),
         f0_max_depth_m=f0_result.max_depth_m,
         f1_max_depth_m=max(float(depths.max()) if depths.size else 0.0, 0.0),
-        f1_divot_depth_m=run.divot_depth_m(),
+        f1_divot=run.surface_depression(),
         effective_width_m=width,
     )
 
