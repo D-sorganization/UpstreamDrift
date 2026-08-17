@@ -149,6 +149,74 @@ edge, so no F1 output is a physical prediction. The driver defects are tracked
 separately; the tier is not usable until they are repaired or the backend is
 removed.
 
+ADR-0033's F1 solver core now exists at `src/bunkershot3d/solvers/mpm/`,
+implementing the `GranularSolver` protocol so it is swappable with the F0
+`DRFTSolver` and returns the same `SolverResult` carrying tier and verdict. The
+constitutive model is **rate-independent Drucker-Prager elastoplasticity with a
+compressive cap**, integrated as a return mapping on principal Hencky strains
+(Drucker & Prager 1952; Klar et al. 2016, ACM TOG 35(4):103, which is also the
+F2 reference tier's model so one calibration carries between them). The
+`mu(I)` rheology was rejected on well-posedness rather than on cost: Barker,
+Schaeffer, Bohorquez & Gray (2015, J. Fluid Mech. 779:794-818) show its
+incrementally-linearised equations lose hyperbolicity below `I_1` and above
+`I_2`, so perturbation growth is unbounded in wavenumber and grid refinement
+makes the answer worse -- and both ill-posed regimes sit inside a bunker shot,
+the quiescent bed at `I -> 0` and the leading edge at `I ~ 11`. A tier whose
+deliverable is a GCI-reported field cannot rest on equations that are ill-posed
+in the regime being refined. The compressive cap is read off the sand package
+rather than fitted: `eps_v_cap = ln(phi / phi_max)` from the existing
+`PackingState`, so a loose bed compacts about 15 % and a firm one about 2 %
+without a second set of constants existing; the cohesive cone tip comes from the
+moisture model, and a saturated bed raises rather than guessing its dilation
+suction. Transfers are **APIC** (Jiang et al. 2015, ACM TOG 34(4):51) on
+quadratic B-splines: PIC would damp away the shear structure the tier exists to
+show, FLIP leaves null-space noise that a plastic return map reads as spurious
+yielding, and APIC conserves linear and angular momentum exactly across the
+transfer, which is tested to round-off rather than cited. The timestep is a CFL
+condition on the computed dilatational wave speed `sqrt((lambda + 2 mu) / rho)`
+plus the body speed, checked at runtime with a `raise` because `python -O`
+strips assertions. Sand constants come from `usga_reference_sand` and the
+packing/moisture machinery; the only F1-specific additions are a Hardin &
+Richart (1963) small-strain modulus keyed on the existing void ratio and
+angularity, and a conventional drained Poisson ratio, both recorded in the
+provenance. Measured code verification, through the existing `vandv/`
+conservation, convergence and Celik GCI implementations rather than a second
+copy: mass conserved exactly (residual 0.0); linear momentum matching the
+gravity impulse to round-off; total energy first order in the step (observed
+order 1.00 over Courant 0.4/0.2/0.1, 2.2e-8 relative at the coarsest);
+a relaxed 1-D consolidation column at -409.741 Pa against -403.115 Pa
+closed-form, 1.64 %, with its stored strain energy 5.8 % from
+`W (rho g)^2 H^3 / (6 M)`; and monotone grid convergence over dx = 6/4/3 mm at
+3.70 % -> 2.22 % -> 1.64 %, observed order 1.178, Celik apparent order 1.72,
+`GCI_fine` 1.105 % and `u_num` 2.26 Pa. Two verification cases had to be rebuilt
+around real findings: a generously padded grid put the column's "fixed base"
+two cells below the column and its confining walls two cells outside it, so the
+column stood in free space and fell while reporting a mean stress of 3e-9 Pa
+through an entirely plausible-looking run; and the conventional elastic energy
+case does not exist for cohesionless sand, because a pre-compressed block
+released to oscillate rebounds into tension where the return map correctly
+annihilates the deviatoric strain at the cone tip (129 of 144 particles per
+step), which is physical plastic dissipation and not truncation error. Bagnold
+is unavailable for the same class of reason: it is a consequence of `mu(I)` rate
+dependence, which this solver deliberately does not have. The F0 cross-check on
+a 40 x 16 mm sole section at 20 deg attack, 30 mm declared effective width,
+reports the divergence rather than asserting agreement: `|F1|/|F0|` of 1.96,
+1.49 and 2.68 at 5, 12 and 25 m/s with direction cosines 0.85, 0.65 and 0.87,
+and -- the informative part -- F0's inertial share climbing 0.52 -> 0.93 -> 0.99
+with speed while F1's momentum-flux share stays flat at 0.68 / 0.69 / 0.65. F0's
+`lambda rho v_n^2` term grows quadratically with nothing to bound it, whereas
+the continuum's reaction is limited by how fast the yield surface lets sand be
+accelerated out of the way, so the two tiers disagree by construction in exactly
+the regime a greenside shot occupies. F1 is therefore **verified but not
+validated**: the suite shows it solves its equations correctly and is no
+evidence at all that those equations describe golf bunker sand. Validation stays
+at NASA-STD-7009B level 0 of 4 and the F1 envelope enforces a
+`BEYOND_VALIDATION` floor that no query can beat, since `EXTRAPOLATED` would
+require a published validation set that issue #8616 established does not exist.
+Field extraction and schema (#8710), the visual layers (#8711-#8713), the ball
+as a plane-strain body, and F1's own `simulate_shot` integration are
+deliberately out of this change.
+
 Child issue #8697 then couples two first bending modes and one torsional mode
 to that distributed-grip authority. Its registered 0.25/0.125 ms atlas covers
 384 trajectories and 1,536 nested-horizon summaries. Domain, activation,

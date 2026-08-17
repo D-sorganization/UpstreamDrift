@@ -181,6 +181,15 @@ class Caveat(StrEnum):
     MARGINAL_CONTINUUM = "marginal_continuum"
     ELEMENT_SIZE_EFFECTS = "element_size_effects"
 
+    # F1 (2-D plane-strain MPM, ADR-0033). Structural rather than
+    # empirical: these say what the tier's *formulation* cannot carry, not
+    # how far a fit has been stretched.
+    PLANE_STRAIN_NO_OUT_OF_PLANE = "plane_strain_no_out_of_plane"
+    UNDER_RESOLVED_LEADING_EDGE = "under_resolved_leading_edge"
+    DECLARED_EFFECTIVE_WIDTH = "declared_effective_width"
+    RATE_INDEPENDENT_PLASTICITY = "rate_independent_plasticity"
+    NO_MEASURED_COMPARISON = "no_measured_comparison"
+
 
 _CAVEAT_TEXT: Mapping[Caveat, str] = MappingProxyType(
     {
@@ -248,6 +257,37 @@ _CAVEAT_TEXT: Mapping[Caveat, str] = MappingProxyType(
             "length survives in the dimensionless response and RFT's "
             "superposition argument is no longer exact. Refining the mesh "
             "makes this worse, not better."
+        ),
+        Caveat.PLANE_STRAIN_NO_OUT_OF_PLANE: (
+            "Plane strain has no out-of-plane flow. Sand moving heel to toe "
+            "along the face does not exist in this model, and no refinement "
+            "adds it: it is a property of the formulation, not a setting."
+        ),
+        Caveat.UNDER_RESOLVED_LEADING_EDGE: (
+            "The grid is at bulk resolution, so the leading edge spans only a "
+            "few cells and its local flow is not resolved. This is ADR-0033's "
+            "deliberate choice -- resolving it would drive cell count and CFL "
+            "step into the same intractability trap as DEM -- and it is why "
+            "club force stays F0's to report."
+        ),
+        Caveat.DECLARED_EFFECTIVE_WIDTH: (
+            "A plane-strain load is per unit out-of-plane width. The force "
+            "reported here has been multiplied by a declared effective width, "
+            "which is a modelling assumption and not a result; ADR-0033 "
+            "requires it in the run manifest before any magnitude comparison."
+        ),
+        Caveat.RATE_INDEPENDENT_PLASTICITY: (
+            "The constitutive model is rate-independent Drucker-Prager, so no "
+            "grain-inertial rate dependence is represented. The mu(I) rheology "
+            "would represent it and is ill-posed at both low and high inertial "
+            "number (Barker et al. 2015), which is why it was not used."
+        ),
+        Caveat.NO_MEASURED_COMPARISON: (
+            "No published measurement exists for any quantity this tier "
+            "produces, so its NASA-STD-7009B validation level is 0 of 4 and "
+            "nothing it reports is a physical prediction. Agreement with "
+            "another tier is a consistency check between two uncalibrated "
+            "models, not a validation of either."
         ),
     }
 )
