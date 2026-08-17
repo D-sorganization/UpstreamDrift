@@ -43,6 +43,7 @@ from bunkershot3d.geometry import (
     CamberFit,
     LoftedWedge,
     MassProperties,
+    StationCamber,
     WedgeGeometry,
     compute_mass_properties,
     loft_wedge,
@@ -64,6 +65,7 @@ from bunkershot3d.solvers import (
 from src.shared.python.core.contracts import require
 
 from .design import SwingSetup
+from .field import SoleLoadField
 
 __all__ = [
     "MAP_BINS",
@@ -72,6 +74,7 @@ __all__ = [
     "build_head",
     "delivery_rotation",
     "entry_kinematics",
+    "sole_load_field",
     "sole_load_map",
     "sole_load_trace",
     "strike_trace",
@@ -118,9 +121,24 @@ class HeadBuild:
         return self.loft.effective_camber_area_m2
 
     @property
-    def camber_was_clamped(self) -> bool:
-        """Whether the declared camber area had to be substituted."""
-        return self.loft.camber_was_clamped
+    def aggregate_camber_was_clamped(self) -> bool:
+        """Whether the *declared* camber area itself had to be substituted.
+
+        Narrowly scoped, and so ``False`` on the shipped presets even when
+        stations were refitted; see
+        :attr:`~bunkershot3d.geometry.LoftedWedge.aggregate_camber_was_clamped`.
+        """
+        return self.loft.aggregate_camber_was_clamped
+
+    @property
+    def any_camber_was_clamped(self) -> bool:
+        """Whether any camber substitution occurred, aggregate or per station."""
+        return self.loft.any_camber_was_clamped
+
+    @property
+    def camber_stations(self) -> tuple[StationCamber, ...]:
+        """The per-station camber account, heel to toe."""
+        return self.loft.stations
 
     @property
     def head_model(self) -> HeadModel:
@@ -290,18 +308,25 @@ def strike_trace(result: ShotResult) -> StrikeTrace | None:
     return StrikeTrace.from_shot(result)
 
 
-def sole_load_trace(
+def sole_load_field(
     solver: DRFTSolver,
     build: HeadBuild,
     result: ShotResult,
     orientation: NDArray[np.float64],
-) -> SoleLoadTrace | None:
-    """Replay the trace to recover the compressive load on each sole element.
+) -> SoleLoadField | None:
+    """Replay the trace to recover each sole element's load, term by term.
 
     ``simulate_shot`` records the resultant, not the distribution, so the
     per-element response is re-derived from the recorded poses. The head does
     not rotate during the shot, so replaying the recorded position at the
     recorded velocity reproduces the states the march actually solved.
+
+    The two 3D-RFT tractions are projected **separately** and kept signed
+    (issue #8705). The clamp that makes the load compressive is applied once,
+    to their sum, in :meth:`~.field.SoleLoadField.component_force_N`: sand
+    cannot pull on a sole, but one term can point outward on a steeply raked
+    element while the resultant is still compressive, so clamping the terms
+    individually would invent load the solver never produced.
 
     Args:
         solver: The solver the shot was run with.
@@ -310,7 +335,7 @@ def sole_load_trace(
         orientation: The constant body-to-world rotation.
 
     Returns:
-        The per-element sole loading, or ``None`` when the trace is too short
+        The per-element load field, or ``None`` when the trace is too short
         for an impulse.
     """
     if result.n_steps < 2:
@@ -319,7 +344,9 @@ def sole_load_trace(
     sole_index = np.flatnonzero(build.sole_mask)
     slot = np.full(build.elements_body.n_elements, -1, dtype=np.int64)
     slot[sole_index] = np.arange(sole_index.size)
-    loads = np.zeros((result.n_steps, sole_index.size), dtype=np.float64)
+    shape = (result.n_steps, sole_index.size)
+    depth_load = np.zeros(shape, dtype=np.float64)
+    inertial_load = np.zeros(shape, dtype=np.float64)
     for step in range(result.n_steps):
         position = result.positions_m[step]
         world = oriented.translated(position)
@@ -334,23 +361,51 @@ def sole_load_trace(
         if not keep.any():
             continue
         active = response.index[keep]
-        traction = (
-            response.depth_traction_pa[keep] + response.inertial_traction_pa[keep]
+        normals = world.normals[active]
+        areas = world.areas_m2[active]
+        # The inward projection of each traction: positive is compression.
+        depth_load[step, slot[active]] = (
+            -np.einsum("ij,ij->i", response.depth_traction_pa[keep], normals) * areas
         )
-        # Compression only: the projection onto the inward normal. Sand cannot
-        # pull on a sole, and the depth term's tangential part can point
-        # outward on a steeply raked element without meaning tension.
-        normal_load = (
-            np.maximum(-np.einsum("ij,ij->i", traction, world.normals[active]), 0.0)
-            * world.areas_m2[active]
+        inertial_load[step, slot[active]] = (
+            -np.einsum("ij,ij->i", response.inertial_traction_pa[keep], normals) * areas
         )
-        loads[step, slot[active]] = normal_load
-    return SoleLoadTrace(
+    return SoleLoadField(
         time_s=result.times_s,
         element_centroid_body_m=build.elements_body.centroids_m[sole_index],
         element_area_m2=build.elements_body.areas_m2[sole_index],
-        element_normal_force_N=loads,
+        depth_normal_force_N=depth_load,
+        inertial_normal_force_N=inertial_load,
+        verdict=result.verdict,
+        fidelity_tier=result.fidelity_tier,
     )
+
+
+def sole_load_trace(
+    solver: DRFTSolver,
+    build: HeadBuild,
+    result: ShotResult,
+    orientation: NDArray[np.float64],
+) -> SoleLoadTrace | None:
+    """Return the compressive per-element sole load the W7 metrics consume.
+
+    A thin reduction of :func:`sole_load_field`, kept so a caller that only
+    wants the bounce-utilisation input does not have to know the field exists.
+    The number is unchanged by the term split: the clamped sum of the two
+    tractions is what this function has always returned.
+
+    Args:
+        solver: The solver the shot was run with.
+        build: The lofted head.
+        result: The shot trace.
+        orientation: The constant body-to-world rotation.
+
+    Returns:
+        The per-element sole loading, or ``None`` when the trace is too short
+        for an impulse.
+    """
+    field = sole_load_field(solver, build, result, orientation)
+    return None if field is None else field.load_trace()
 
 
 def sole_load_map(load: SoleLoadTrace, utilisation: BounceUtilisation) -> SoleLoadMap:

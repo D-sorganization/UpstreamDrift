@@ -74,6 +74,36 @@ the magnitude is an assumed placeholder recorded in the launch provenance under
 `bed_packing_dependence`, and ball speed remains `BEYOND_VALIDATION` because
 issue #8616 found no published measurement of ball speed, launch angle or spin
 out of sand.
+Issues #8705 and #8707 (epic #8699) raise the BunkerShot3D sole-load view from
+a summed 12x12 bin to the field the F0 solver actually produces. `simulate_shot`
+builds the club wrench as an integral of a per-element traction and then keeps
+only the resultant; the workbench recovered a 12x12 impulse-density map summed
+over the strike and discarded the rest. `SoleLoadField` now carries the load
+per surface element and per sample with the depth-linear and inertial 3D-RFT
+terms separated, and `ContactPatch` follows the engaged element set, its area,
+its centroid and its gap to the leading edge. The terms are summed and then
+clamped, never clamped and then summed, so the array
+`bounce_utilisation` consumes is bit-for-bit what it consumed before: one
+traction can point outward on a steeply raked element while the resultant is
+still compressive. On the nominal 58 deg design at 25 m/s and the shipped
+discretization the sole resolves to 500 elements over 53 samples; the
+depth-term resultant peaks at 1.991 N at 4.00 ms and the inertial term at
+725.3 N at 4.25 ms, a 99.7 % inertial share of the sole's own resultant against
+the roughly 0.9 whole-body share ADR-0032 predicts. The two terms separate in
+space as well as in time, the depth term loading 5--18 mm behind the leading
+edge and the inertial term 20--28 mm behind it. The contact patch opens at
+1.309 cm^2, peaks at 16.21 cm^2 and closes from 13.09 mm to 3.39 mm behind the
+leading edge before retreating. The separation in time is one sample wide and
+does not survive coarsening: at a 5-station mesh both terms peak in the same
+4 ms bin, so the moment is reported per term rather than a difference being
+asserted. Every frame is drawn with its `EnvelopeStatus` and fidelity tier
+stamped inside the axes rather than in a caption, on colour limits fixed across
+frames and merged across an A/B pair; no 3-D viewport provider (MeshCat, Rerun,
+VTK) is installed, so the ADR-0027 selection degrades to a stated matplotlib
+plan view. This is a rendering of existing F0 output at higher fidelity, not
+new physics and not calibration: the field inherits `BEYOND_VALIDATION`, and a
+patch trend read across a bounce sweep is reported as a bounce-and-camber
+trend wherever any spanwise station's camber was substituted (#8698).
 
 Issue #8709 (epic #8699) selects the sand-solving tier that backs field
 visualization, recorded as ADR-0033 amending ADR-0032. The epic had assumed the
@@ -204,6 +234,41 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-08-16** - Scoped BunkerShot3D's camber-clamped flag so it cannot
+  understate substitution (`src/bunkershot3d/geometry/lofting.py`,
+  `src/tools/bunker_shot_gui/`, issue #8698, epic #8699). The observability
+  work below left one boolean answering a narrower question than its name
+  implied. `LoftedWedge.camber_was_clamped` compared the declared camber area
+  against the band the **declared** sole width admits. Heel and toe relief
+  narrows the sole toward the ends, and a narrower sole admits a narrower
+  camber band, so the relieved stations are refitted to their own bands while
+  the declaration itself is honoured — and the flag read `False` beside a
+  non-empty `clamped_stations`. That is #8698's own failure mode, silent
+  substitution invisible to a caller, reappearing through the simpler check.
+  Measured at shipped resolution, three of the six shipped presets hit it:
+  `sm9_58_m` declares 42.00 mm² inside its (38.70, 42.44) mm² band and refits
+  3 of 17 stations; `acushnet_example_1` refits 5 of 17; `tour_shaved_heel_lob`
+  refits 13 of 17. All three reported "not clamped".
+
+  Resolved by renaming rather than redefining. Redefining a published boolean
+  in place would have silently changed every existing caller's answer, which
+  is the same failure mode one level up; the rename breaks loudly instead.
+  `camber_was_clamped` becomes `aggregate_camber_was_clamped` (unambiguously
+  the declared-versus-effective question), and a new `any_camber_was_clamped`
+  is true when the declaration **or** any station was substituted, so a caller
+  checking one boolean gets the honest answer and the flag cannot read `False`
+  while `clamped_stations` holds anything. `camber_substitution_m2` becomes
+  `aggregate_camber_substitution_m2`, which also ends its name collision with
+  `StationCamber`'s per-station property. Both meanings are genuinely used, so
+  a single flag could not serve: the workbench's camber-area line needs the
+  aggregate because it prints the declared number, and the contact-patch
+  caveat needs any-station. The camber-area line now also names the refitted
+  station count, so an in-band declaration over refitted stations no longer
+  renders as a clean number. `PATCH_CONFOUND_CAVEAT` is gated on the per-
+  station account rather than the aggregate flag and is restated in terms of
+  stations — gated on the aggregate it was silent on the default design, which
+  is exactly when the caveat is needed.
+
 - **2026-08-16** - Made BunkerShot3D's sole-camber substitution observable
   (`src/bunkershot3d/geometry/`, issue #8698, epic #8699). A wedge sole can
   only realise camber areas inside a band set by its width and bounce, so
@@ -225,7 +290,8 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
   Three complementary changes. (1) `loft_wedge()` returns a new `LoftedWedge`
   carrying `effective_camber_area_m2`, `constructible_camber_range_m2`,
-  `camber_was_clamped`, `camber_substitution_m2` and a per-station
+  `aggregate_camber_was_clamped`, `any_camber_was_clamped`,
+  `aggregate_camber_substitution_m2` and a per-station
   `StationCamber` account; `build_wedge_mesh()` is now a thin wrapper that
   returns only its mesh. (2) `constructible_camber_range_m2` is re-exported
   from `bunkershot3d.geometry` and the top-level package, and
