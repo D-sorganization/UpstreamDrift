@@ -108,6 +108,7 @@ from .design import (
     WorkbenchInputError,
 )
 from .field import ContactPatch, SoleLoadField, contact_patch
+from .shot3d import ShotScene, shot_scene
 
 __all__ = [
     "ATTACK_ANGLE_SWEEP_DEG",
@@ -118,6 +119,7 @@ __all__ = [
     "HeadBuild",
     "PlayabilityOutcome",
     "ShotOutcome",
+    "ShotScene",
     "SoleLoadField",
     "SoleLoadMap",
     "WorkbenchComparison",
@@ -252,6 +254,8 @@ class ShotOutcome:
             (issue #8705).
         contact_patch: The engaged element set followed through the shot
             (issue #8707).
+        scene: The 3-D scene -- pose, free surface and swept divot section --
+            for the animated view (issue #8706).
         carry_m: Carry from the splash and flight models.
         carry_verdict: The validity statement the carry may be quoted under.
             Present whenever ``carry_m`` is, and absent whenever it is not.
@@ -277,6 +281,7 @@ class ShotOutcome:
     sole_load: SoleLoadMap | None = None
     sole_field: SoleLoadField | None = None
     contact_patch: ContactPatch | None = None
+    scene: ShotScene | None = None
     carry_m: float | None = None
     carry_verdict: ValidityVerdict | None = None
     unavailable: tuple[str, ...] = ()
@@ -309,12 +314,14 @@ class ShotOutcome:
             self.carry_m,
             self.sole_field,
             self.contact_patch,
+            self.scene,
         )
         if any(value is not None for value in numbers):
             raise ValueError(
-                "a refused shot must not carry a force, a depth, a carry or a "
-                "load field: 3D-RFT declined this query, and painting a sole "
-                "beside a REFUSED verdict is exactly what ADR-0032 forbids"
+                "a refused shot must not carry a force, a depth, a carry, a "
+                "load field or a 3-D scene: 3D-RFT declined this query, and "
+                "animating a head through sand beside a REFUSED verdict is "
+                "exactly what ADR-0032 forbids"
             )
 
     @property
@@ -662,6 +669,10 @@ class WorkbenchModel:
             "contact patch",
             missing,
         )
+        # The 3-D scene needs no solving at all: the pose is the pose the
+        # march recorded and the divot is accumulated from where the head's
+        # own sole points went, so this is geometry over an existing trace.
+        scene = _try(lambda: shot_scene(build, result), "3-D shot scene", missing)
         carry = _try(
             lambda: self.carry_estimate(
                 geometry, swing, _sand_delivery(result, _measured_divot(divot), sand)
@@ -692,6 +703,7 @@ class WorkbenchModel:
             sole_load=sole_load,
             sole_field=field,
             contact_patch=patch,
+            scene=scene,
             carry_m=None if carry is None else carry.carry_m,
             carry_verdict=None if carry is None else carry.verdict,
             unavailable=tuple(missing),
