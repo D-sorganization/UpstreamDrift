@@ -88,6 +88,7 @@ from .grid import (
 from .solver import (
     DEFAULT_CFL_NUMBER,
     MPMRun,
+    MPMSetup,
     PlaneStrainMPMSolver,
     StepDiagnostics,
     cfl_time_step_s,
@@ -126,6 +127,7 @@ __all__ = [
     "F0CrossCheck",
     "GridInterpolation",
     "MPMRun",
+    "MPMSetup",
     "ParticleState",
     "PlaneStrainGrid",
     "PlaneStrainMPMSolver",

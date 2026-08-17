@@ -89,6 +89,7 @@ from .state import (
 __all__ = [
     "DEFAULT_CFL_NUMBER",
     "MPMRun",
+    "MPMSetup",
     "PlaneStrainMPMSolver",
     "StepDiagnostics",
     "cfl_time_step_s",
@@ -215,6 +216,47 @@ class StepDiagnostics:
     gravitational_energy_j_per_m: float
     linear_momentum_kg_m_s: NDArray[np.float64]
     total_mass_kg_per_m: float
+
+
+@dataclass(frozen=True)
+class MPMSetup:
+    """A march that has been built but not yet taken.
+
+    :meth:`PlaneStrainMPMSolver.run` builds this and immediately marches
+    the whole of it.  It is a separate value so that a caller who needs
+    to *look at the sand between steps* -- which is what the field
+    extraction of issue #8710 is -- can march the same problem in strides
+    through :meth:`PlaneStrainMPMSolver.march` without reaching into the
+    solver's privates, and without a second, drifting copy of the bed
+    construction.
+
+    Attributes:
+        grid: The background grid.
+        particles: The settled bed at its starting state. Mutable, and
+            advanced in place by every march that is handed it.
+        section: The club at the start of its approach.
+        n_steps: Steps the approach takes at the queried speed.
+        time_step_s: The CFL step.
+        bed_x_bounds_m: Horizontal extent of the bed.
+        free_surface_height_m: The undisturbed surface.
+        approach_distance_m: How far the body was reversed to clear the
+            bed. This is the length of the **declared** straight-line
+            approach, not a measured swing.
+    """
+
+    grid: PlaneStrainGrid
+    particles: ParticleState
+    section: RigidSection
+    n_steps: int
+    time_step_s: float
+    bed_x_bounds_m: tuple[float, float]
+    free_surface_height_m: float
+    approach_distance_m: float
+
+    @property
+    def duration_s(self) -> float:
+        """Simulation time the full march spans."""
+        return float(self.n_steps) * float(self.time_step_s)
 
 
 @dataclass(frozen=True)
@@ -495,6 +537,34 @@ class PlaneStrainMPMSolver:
 
     # --------------------------------------------------------------- march
 
+    def prepare(self, state: IntrusionState) -> MPMSetup:
+        """Build the bed, the grid and the approach without marching them.
+
+        Args:
+            state: The intrusion query.
+
+        Returns:
+            The setup, ready for :meth:`march`.
+
+        Raises:
+            SolverInputError: If the query is malformed, or has no
+                in-plane motion for the approach to be built from.
+        """
+        self._require_state(state)
+        section, approach_distance_m = self._approach(state)
+        grid, particles, bounds = self._build_bed(state, section, approach_distance_m)
+        step_s = self.time_step_s(state)
+        return MPMSetup(
+            grid=grid,
+            particles=particles,
+            section=section,
+            n_steps=self._approach_steps(state, approach_distance_m, step_s),
+            time_step_s=step_s,
+            bed_x_bounds_m=bounds,
+            free_surface_height_m=float(state.free_surface_height_m),
+            approach_distance_m=float(approach_distance_m),
+        )
+
     def run(self, state: IntrusionState) -> MPMRun:
         """Build the bed and the approach, then march to the queried pose.
 
@@ -508,19 +578,15 @@ class PlaneStrainMPMSolver:
         Returns:
             The run.
         """
-        self._require_state(state)
-        section, approach_distance_m = self._approach(state)
-        grid, particles, bounds = self._build_bed(state, section, approach_distance_m)
-        step_s = self.time_step_s(state)
-        n_steps = self._approach_steps(state, approach_distance_m, step_s)
+        setup = self.prepare(state)
         return self.march(
-            particles,
-            section,
-            grid,
-            n_steps=n_steps,
-            time_step_s=step_s,
-            free_surface_height_m=state.free_surface_height_m,
-            bed_x_bounds_m=bounds,
+            setup.particles,
+            setup.section,
+            setup.grid,
+            n_steps=setup.n_steps,
+            time_step_s=setup.time_step_s,
+            free_surface_height_m=setup.free_surface_height_m,
+            bed_x_bounds_m=setup.bed_x_bounds_m,
         )
 
     def time_step_s(self, state: IntrusionState) -> float:
