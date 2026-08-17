@@ -43,6 +43,7 @@ from matplotlib.lines import Line2D
 from matplotlib.text import Text
 from numpy.typing import NDArray
 
+from bunkershot3d.solvers import EnvelopeStatus, FidelityTier
 from src.shared.python.visualization.viewport import select_viewport_provider
 
 from .field import ContactPatch, LoadComponent, LoadScale, SoleLoadField
@@ -56,6 +57,8 @@ __all__ = [
     "field_scales",
     "frame_stamp",
     "sole_load_still",
+    "stamp_axes",
+    "validity_stamp",
     "viewport_fallback",
 ]
 
@@ -130,22 +133,87 @@ def viewport_fallback() -> ViewportFallback:
     )
 
 
+def validity_stamp(status: EnvelopeStatus, tier: FidelityTier) -> str:
+    """Return the validity line drawn inside a panel.
+
+    The one place this sentence is composed. Every view in this package --
+    the sole field, the 3-D scene, the trace panel -- stamps the same words,
+    so a designer comparing two of them is not reading two vocabularies.
+
+    Args:
+        status: How much of the frame may be believed.
+        tier: Which rung of the ADR-0032 ladder produced it.
+
+    Returns:
+        A short stamp: the status, the tier, and the reminder that neither is
+        a measurement. Short enough to sit inside an axes without covering
+        the data it qualifies.
+    """
+    return (
+        f"{status.value.replace('_', ' ').upper()} - "
+        f"{tier.value.upper()} dynamic 3D-RFT\n"
+        "not calibrated for bunker sand"
+    )
+
+
 def frame_stamp(field: SoleLoadField) -> str:
-    """Return the validity line drawn inside every panel.
+    """Return the validity line for one sole load field.
 
     Args:
         field: The load field being drawn.
 
     Returns:
-        A one-line stamp: the status, the tier, and the reminder that neither
-        is a measurement. Kept short enough to sit inside an axes without
-        covering the data it qualifies.
+        The stamp, from :func:`validity_stamp`.
     """
-    status, tier = field.status, field.fidelity_tier
-    return (
-        f"{status.value.replace('_', ' ').upper()} - "
-        f"{tier.value.upper()} dynamic 3D-RFT\n"
-        "not calibrated for bunker sand"
+    return validity_stamp(field.status, field.fidelity_tier)
+
+
+def stamp_axes(
+    axes: Axes,
+    status: EnvelopeStatus,
+    tier: FidelityTier,
+    *,
+    extra: str = "",
+) -> Text:
+    """Draw the validity stamp inside one axes and return the artist.
+
+    Inside, not beneath: a screenshot of a panel keeps its contents and loses
+    its surroundings, so a caption is a label someone can crop off a picture
+    that is far more persuasive than the table it came from.
+
+    Args:
+        axes: The panel to stamp.
+        status: How much of the frame may be believed.
+        tier: Which rung of the ADR-0032 ladder produced it.
+        extra: An optional further line, for a view that has to qualify
+            itself further -- what the sand plane is, what the divot is.
+
+    Returns:
+        The text artist, so a caller whose status changes per frame can
+        rewrite it rather than draw a second one over the top.
+    """
+    text = validity_stamp(status, tier)
+    # A 3-D axes' ``text`` takes a z as well, and a stamp is not in the
+    # scene -- it is on the glass. ``text2D`` is the flat overlay, and it
+    # exists only on Axes3D, so this is the dispatch rather than a second
+    # copy of the stamp in the 3-D renderer.
+    place = getattr(axes, "text2D", axes.text)
+    return place(
+        0.02,
+        0.98,
+        text if not extra else f"{text}\n{extra}",
+        transform=axes.transAxes,
+        ha="left",
+        va="top",
+        fontsize=6,
+        color="white",
+        bbox={
+            "facecolor": status_colour(status),
+            "edgecolor": "none",
+            "alpha": _STAMP_ALPHA,
+            "boxstyle": "round,pad=0.25",
+        },
+        zorder=10,
     )
 
 
@@ -216,23 +284,7 @@ def _check_patch(field: SoleLoadField, patch: ContactPatch | None) -> None:
 
 def _stamp(axes: Axes, field: SoleLoadField) -> None:
     """Draw the validity stamp inside one axes."""
-    axes.text(
-        0.02,
-        0.98,
-        frame_stamp(field),
-        transform=axes.transAxes,
-        ha="left",
-        va="top",
-        fontsize=6,
-        color="white",
-        bbox={
-            "facecolor": status_colour(field.status),
-            "edgecolor": "none",
-            "alpha": _STAMP_ALPHA,
-            "boxstyle": "round,pad=0.25",
-        },
-        zorder=10,
-    )
+    stamp_axes(axes, field.status, field.fidelity_tier)
 
 
 def _marker_sizes(field: SoleLoadField) -> NDArray[np.float64]:
