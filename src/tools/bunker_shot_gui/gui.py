@@ -46,6 +46,7 @@ from PyQt6.QtWidgets import (
     QScrollArea,
     QSplitter,
     QStatusBar,
+    QTabWidget,
     QVBoxLayout,
     QWidget,
 )
@@ -53,9 +54,17 @@ from PyQt6.QtWidgets import (
 from src.shared.python.ui import HoverCopyTextBrowser
 
 from .design import SandCondition, SolverSetup, SwingSetup, WorkbenchInputError
+from .field import LoadComponent, LoadScale, SoleLoadField
 from .model import DesignEvaluation, WorkbenchComparison, WorkbenchModel
+from .render import field_scales
 from .report import comparison_report, evaluation_report
-from .widgets import ConditionPanel, DesignPanel, GridMapWidget, VerdictBanner
+from .widgets import (
+    ConditionPanel,
+    DesignPanel,
+    GridMapWidget,
+    SoleLoadFieldWidget,
+    VerdictBanner,
+)
 
 __all__ = [
     "BunkerShotWidget",
@@ -80,6 +89,55 @@ _IDLE_TEXT = (
 ModelFactory = Callable[[SolverSetup], WorkbenchModel]
 
 _ResultT = TypeVar("_ResultT")
+
+
+def _fields(
+    evaluations: tuple[DesignEvaluation, ...],
+) -> tuple[SoleLoadField, ...]:
+    """Return the load fields of the evaluations that produced one."""
+    return tuple(
+        evaluation.shot.sole_field
+        for evaluation in evaluations
+        if evaluation.shot.sole_field is not None
+    )
+
+
+def _shared_scales(
+    evaluations: tuple[DesignEvaluation, ...],
+) -> dict[LoadComponent, LoadScale] | None:
+    """Return the one set of colour scales every supplied design is drawn on.
+
+    Args:
+        evaluations: The designs about to be painted together.
+
+    Returns:
+        The merged scales, or ``None`` when no design produced a field.
+    """
+    fields = _fields(evaluations)
+    return field_scales(fields) if fields else None
+
+
+def _density_limits(
+    evaluations: tuple[DesignEvaluation, ...],
+) -> tuple[float, float] | None:
+    """Return the one impulse-density ramp every supplied map is drawn on.
+
+    Args:
+        evaluations: The designs about to be painted together.
+
+    Returns:
+        ``(0, peak)`` over all of them, or ``None`` when no map exists or the
+        maps are empty -- in which case the widget falls back to its own
+        stretch, which for a single empty map is harmless.
+    """
+    maps = [
+        evaluation.shot.sole_load
+        for evaluation in evaluations
+        if evaluation.shot.sole_load is not None
+    ]
+    peaks = [sole_load.peak_density_pa_s for sole_load in maps]
+    top = max(peaks, default=0.0)
+    return (0.0, top) if top > 0.0 else None
 
 
 class BunkerShotWidget(QWidget):
@@ -158,7 +216,8 @@ class BunkerShotWidget(QWidget):
         self._banner = VerdictBanner()
         column.addWidget(self._banner)
 
-        maps = QGridLayout()
+        maps_page = QWidget()
+        maps = QGridLayout(maps_page)
         self._bounce_map_a = GridMapWidget("A: bounce utilisation")
         self._bounce_map_b = GridMapWidget("B: bounce utilisation")
         self._window_map_a = GridMapWidget("A: playability window")
@@ -167,7 +226,18 @@ class BunkerShotWidget(QWidget):
         maps.addWidget(self._bounce_map_b, 0, 1)
         maps.addWidget(self._window_map_a, 1, 0)
         maps.addWidget(self._window_map_b, 1, 1)
-        column.addLayout(maps, stretch=2)
+
+        fields_page = QWidget()
+        fields = QHBoxLayout(fields_page)
+        self._field_a = SoleLoadFieldWidget("A: sole load and contact patch")
+        self._field_b = SoleLoadFieldWidget("B: sole load and contact patch")
+        fields.addWidget(self._field_a)
+        fields.addWidget(self._field_b)
+
+        self._views = QTabWidget()
+        self._views.addTab(maps_page, "Summed maps")
+        self._views.addTab(fields_page, "Sole load field (per element, per sample)")
+        column.addWidget(self._views, stretch=3)
 
         self._results = HoverCopyTextBrowser()
         self._results.setReadOnly(True)
@@ -276,9 +346,16 @@ class BunkerShotWidget(QWidget):
         """
         self._banner.show_status(evaluation.shot.status)
         self._results.setPlainText(evaluation_report(evaluation))
-        self._paint_maps(evaluation, self._bounce_map_a, self._window_map_a)
+        self._paint_maps(
+            evaluation,
+            self._bounce_map_a,
+            self._window_map_a,
+            limits=_density_limits((evaluation,)),
+        )
+        self._paint_field(evaluation, self._field_a, _shared_scales((evaluation,)))
         self._bounce_map_b.clear()
         self._window_map_b.clear()
+        self._field_b.clear()
 
     def show_comparison(self, comparison: WorkbenchComparison) -> None:
         """Display an A/B comparison.
@@ -299,14 +376,49 @@ class BunkerShotWidget(QWidget):
                 )
             )
         )
-        self._paint_maps(comparison.left, self._bounce_map_a, self._window_map_a)
-        self._paint_maps(comparison.right, self._bounce_map_b, self._window_map_b)
+        # Both halves of a comparison are painted on one ramp and one set of
+        # colour scales. Left to themselves each panel stretches to its own
+        # extremes, which makes two grinds look identical however far apart
+        # they are -- the failure this pair of arguments exists to prevent.
+        pair = (comparison.left, comparison.right)
+        limits = _density_limits(pair)
+        scales = _shared_scales(pair)
+        self._paint_maps(
+            comparison.left, self._bounce_map_a, self._window_map_a, limits=limits
+        )
+        self._paint_maps(
+            comparison.right, self._bounce_map_b, self._window_map_b, limits=limits
+        )
+        self._paint_field(comparison.left, self._field_a, scales)
+        self._paint_field(comparison.right, self._field_b, scales)
+
+    def _paint_field(
+        self,
+        evaluation: DesignEvaluation,
+        view: SoleLoadFieldWidget,
+        scales: dict[LoadComponent, LoadScale] | None,
+    ) -> None:
+        """Load one design's per-element field, or clear the view.
+
+        Args:
+            evaluation: The evaluated design.
+            view: The field view to fill.
+            scales: The colour scales both designs share, or ``None`` when
+                there is no field to draw.
+        """
+        field = evaluation.shot.sole_field
+        if field is None or scales is None:
+            view.clear()
+            return
+        view.set_shot(field, evaluation.shot.contact_patch, scales=scales)
 
     def _paint_maps(
         self,
         evaluation: DesignEvaluation,
         bounce_map: GridMapWidget,
         window_map: GridMapWidget,
+        *,
+        limits: tuple[float, float] | None = None,
     ) -> None:
         """Paint one design's two maps, clearing them when there is no data."""
         sole_load = evaluation.shot.sole_load
@@ -316,6 +428,7 @@ class BunkerShotWidget(QWidget):
             utilisation = sole_load.utilisation
             bounce_map.set_grid(
                 sole_load.density_pa_s,
+                limits=limits,
                 caption=(
                     f"{utilisation.utilisation_fraction:.0%} of the sole carried "
                     f"load; {utilisation.removable_area_m2 * 1e4:.1f} cm^2 removable"
@@ -355,6 +468,8 @@ class BunkerShotWidget(QWidget):
             self._bounce_map_b,
             self._window_map_a,
             self._window_map_b,
+            self._field_a,
+            self._field_b,
         ):
             widget.clear()
 

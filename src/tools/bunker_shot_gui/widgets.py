@@ -10,7 +10,7 @@ preview anywhere in this package.
 from __future__ import annotations
 
 import numpy as np
-from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QColor, QPainter, QPaintEvent
 from PyQt6.QtWidgets import (
     QCheckBox,
@@ -18,8 +18,11 @@ from PyQt6.QtWidgets import (
     QDoubleSpinBox,
     QFormLayout,
     QGroupBox,
+    QHBoxLayout,
     QLabel,
     QLineEdit,
+    QPushButton,
+    QSlider,
     QSpinBox,
     QVBoxLayout,
     QWidget,
@@ -27,6 +30,7 @@ from PyQt6.QtWidgets import (
 
 from bunkershot3d.geometry import get_preset
 from bunkershot3d.solvers import EnvelopeStatus
+from src.shared.python.ui.qt import MplCanvas
 
 from .design import (
     SandCondition,
@@ -36,12 +40,15 @@ from .design import (
     grind_preset_names,
     playing_condition_names,
 )
+from .field import ContactPatch, LoadComponent, LoadScale, SoleLoadField
+from .render import ShotFrameArtists, field_scales, viewport_fallback
 from .report import status_colour, status_headline
 
 __all__ = [
     "ConditionPanel",
     "DesignPanel",
     "GridMapWidget",
+    "SoleLoadFieldWidget",
     "VerdictBanner",
 ]
 
@@ -49,6 +56,12 @@ _EMPTY_CELL = QColor(238, 234, 226)
 _WINDOW_EDGE = QColor(20, 90, 40)
 _MIN_MAP_HEIGHT_PX = 150
 _CELL_GAP_PX = 1
+_FRAME_INTERVAL_MS = 120
+"""Transport period. Measured: mutating the artists costs 0.75 ms, and the
+canvas render they sit in costs about 98 ms at the shipped discretization, so
+the interval is set above the renderer's own cost rather than below it. A
+faster timer would not produce a faster animation, only dropped ticks."""
+_MIN_FIELD_HEIGHT_PX = 380
 
 
 class VerdictBanner(QLabel):
@@ -124,6 +137,7 @@ class GridMapWidget(QWidget):
         self._caption = ""
         self._values: np.ndarray = np.zeros((0, 0), dtype=float)
         self._mask: np.ndarray | None = None
+        self._limits: tuple[float, float] | None = None
         self.setMinimumHeight(_MIN_MAP_HEIGHT_PX)
 
     @property
@@ -141,10 +155,16 @@ class GridMapWidget(QWidget):
         """A copy of the grid currently displayed."""
         return self._values.copy()
 
+    @property
+    def limits(self) -> tuple[float, float] | None:
+        """The pinned colour limits, or ``None`` when the grid self-scales."""
+        return self._limits
+
     def clear(self) -> None:
         """Drop the grid, so nothing stale is painted after a refusal."""
         self._values = np.zeros((0, 0), dtype=float)
         self._mask = None
+        self._limits = None
         self._caption = ""
         self.update()
 
@@ -154,6 +174,7 @@ class GridMapWidget(QWidget):
         *,
         mask: np.ndarray | None = None,
         caption: str = "",
+        limits: tuple[float, float] | None = None,
     ) -> None:
         """Display a grid.
 
@@ -161,10 +182,15 @@ class GridMapWidget(QWidget):
             values: ``(n, m)`` array; NaN marks a cell with no data.
             mask: Optional ``(n, m)`` boolean overlay, outlined in green.
             caption: Line painted under the grid.
+            limits: Optional ``(low, high)`` pinning the colour ramp. Without
+                it each grid is stretched to its own extremes, which is right
+                for a single map and wrong for two that are meant to be
+                compared: two grinds each normalised to their own peak look
+                identical whatever the difference between them.
 
         Raises:
-            ValueError: If the array is not two-dimensional, or the mask does
-                not match it.
+            ValueError: If the array is not two-dimensional, the mask does not
+                match it, or the limits are not increasing.
         """
         grid = np.asarray(values, dtype=float)
         if grid.ndim != 2:
@@ -173,8 +199,13 @@ class GridMapWidget(QWidget):
             raise ValueError(
                 f"mask shape {np.shape(mask)} does not match grid shape {grid.shape}"
             )
+        if limits is not None and not limits[0] < limits[1]:
+            raise ValueError(
+                f"colour limits must increase, got {limits[0]} to {limits[1]}"
+            )
         self._values = grid
         self._mask = None if mask is None else np.asarray(mask, dtype=bool)
+        self._limits = None if limits is None else (float(limits[0]), float(limits[1]))
         self._caption = str(caption)
         self.update()
 
@@ -203,8 +234,11 @@ class GridMapWidget(QWidget):
         cell_w = width_px / columns
         cell_h = height_px / rows
         finite = np.isfinite(self._values)
-        peak = float(np.nanmax(self._values)) if finite.any() else 0.0
-        floor = float(np.nanmin(self._values)) if finite.any() else 0.0
+        if self._limits is not None:
+            floor, peak = self._limits
+        else:
+            peak = float(np.nanmax(self._values)) if finite.any() else 0.0
+            floor = float(np.nanmin(self._values)) if finite.any() else 0.0
         span = peak - floor
         for row in range(rows):
             for column in range(columns):
@@ -238,6 +272,241 @@ def _ramp(fraction: float) -> QColor:
     return QColor(
         int(247 - 88 * position), int(233 - 148 * position), int(200 - 168 * position)
     )
+
+
+class SoleLoadFieldWidget(QWidget):
+    """The per-element sole load, animated across the shot (#8705, #8707).
+
+    The workbench's other spatial view, :class:`GridMapWidget`, shows the
+    strike summed over time and binned onto 12x12 cells. This one shows the
+    field the solver actually produced: one value per surface element, one
+    frame per sample, with the depth-linear and inertial terms side by side
+    and the contact patch tracked against the leading edge.
+
+    It does no physics and no drawing of its own. The arithmetic is
+    :mod:`~src.tools.bunker_shot_gui.field`'s and the drawing is
+    :mod:`~src.tools.bunker_shot_gui.render`'s, which is why the same figure
+    can be produced in a headless test. This class owns only the transport:
+    a frame, a slider, a timer and a play button.
+
+    Two behaviours are deliberate:
+
+    * **The colour scale is injected, not inferred.** A comparison hands both
+      views one set of scales, so the two panels are directly readable against
+      each other. A view left to its own devices scales to its own shot, which
+      is correct for a single design and wrong for two.
+    * **Clearing stops playback.** A refused query must not leave a sole
+      animating under a red banner.
+    """
+
+    def __init__(self, title: str, parent: QWidget | None = None) -> None:
+        """Build an empty view.
+
+        Args:
+            title: Heading shown above the canvas.
+            parent: Parent widget.
+        """
+        super().__init__(parent)
+        self._title = str(title)
+        self._field: SoleLoadField | None = None
+        self._patch: ContactPatch | None = None
+        self._scales: dict[LoadComponent, LoadScale] | None = None
+        self._artists: ShotFrameArtists | None = None
+        self._frame = 0
+        self._fallback = viewport_fallback()
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        self._heading = QLabel(self._title)
+        layout.addWidget(self._heading)
+        self._canvas = MplCanvas(width=9.0, height=5.5, dpi=96)
+        self._canvas.setMinimumHeight(_MIN_FIELD_HEIGHT_PX)
+        layout.addWidget(self._canvas)
+
+        transport = QHBoxLayout()
+        self._play_button = QPushButton("Play")
+        self._play_button.clicked.connect(self.toggle_play)
+        transport.addWidget(self._play_button)
+        self._slider = QSlider(Qt.Orientation.Horizontal)
+        self._slider.setRange(0, 0)
+        self._slider.valueChanged.connect(self._on_slider)
+        transport.addWidget(self._slider, stretch=1)
+        self._readout = QLabel("no shot")
+        transport.addWidget(self._readout)
+        layout.addLayout(transport)
+
+        # The full degradation reason names three optional packages and their
+        # install hints, which is four lines of text beside a figure. The
+        # label states the renderer actually in use; the reason is a hover
+        # away rather than a paragraph the designer reads once and never again.
+        self._note = QLabel(
+            f"Renderer: {self._fallback.renderer}"
+            + (" (no 3-D viewport installed)" if self._fallback.degraded else "")
+        )
+        self._note.setToolTip(self._fallback.describe())
+        layout.addWidget(self._note)
+
+        self._timer = QTimer(self)
+        self._timer.setInterval(_FRAME_INTERVAL_MS)
+        self._timer.timeout.connect(self.advance)
+
+    # ------------------------------------------------------------ accessors
+
+    @property
+    def title(self) -> str:
+        """The heading shown above the canvas."""
+        return self._title
+
+    @property
+    def has_shot(self) -> bool:
+        """Whether a field is loaded."""
+        return self._field is not None
+
+    @property
+    def n_frames(self) -> int:
+        """Number of samples in the loaded shot; zero when empty."""
+        return 0 if self._field is None else self._field.n_frames
+
+    @property
+    def frame_index(self) -> int:
+        """The sample currently displayed."""
+        return self._frame
+
+    @property
+    def is_playing(self) -> bool:
+        """Whether the transport is running."""
+        return self._timer.isActive()
+
+    @property
+    def scales(self) -> dict[LoadComponent, LoadScale] | None:
+        """The fixed colour scales in force, or ``None`` when empty."""
+        return self._scales
+
+    @property
+    def renderer_note(self) -> str:
+        """What the ADR-0027 viewport layer left this view drawing with."""
+        return self._fallback.describe()
+
+    # --------------------------------------------------------------- content
+
+    def set_shot(
+        self,
+        field: SoleLoadField,
+        patch: ContactPatch | None = None,
+        *,
+        scales: dict[LoadComponent, LoadScale] | None = None,
+    ) -> None:
+        """Load one shot and open on the moment the sole carried most.
+
+        Args:
+            field: The per-element load field.
+            patch: The contact-patch series, when there is one.
+            scales: Fixed colour scales shared with any other view this one is
+                compared against. Defaults to this field's own.
+
+        Raises:
+            ValueError: If the patch does not describe the same shot as the
+                field; the drawing layer refuses the pair.
+        """
+        self.pause()
+        self._field = field
+        self._patch = patch
+        self._scales = field_scales((field,)) if scales is None else scales
+        # The axes are built once here, not once per frame: rebuilding the
+        # colour bars and re-running the layout pass costs about 250 ms at the
+        # shipped discretization, which is slower than the transport interval.
+        self._artists = ShotFrameArtists(self._canvas.fig, field, patch, self._scales)
+        self._frame = int(field.resultant_force_N(LoadComponent.TOTAL).argmax())
+        self._slider.blockSignals(True)
+        self._slider.setRange(0, field.n_frames - 1)
+        self._slider.setValue(self._frame)
+        self._slider.blockSignals(False)
+        self._redraw()
+
+    def clear(self) -> None:
+        """Drop the shot and stop playing, so nothing stale keeps moving."""
+        self.pause()
+        self._field = None
+        self._patch = None
+        self._scales = None
+        self._artists = None
+        self._frame = 0
+        self._slider.blockSignals(True)
+        self._slider.setRange(0, 0)
+        self._slider.setValue(0)
+        self._slider.blockSignals(False)
+        self._readout.setText("no shot")
+        self._canvas.fig.clear()
+        self._canvas.draw_idle()
+
+    # ------------------------------------------------------------- transport
+
+    def set_frame(self, frame: int) -> None:
+        """Show one sample.
+
+        Args:
+            frame: The sample index.
+
+        Raises:
+            ValueError: If there is no shot, or the index is outside it. A
+                wrapped or clamped index would leave the readout describing a
+                different moment from the one drawn.
+        """
+        if self._field is None:
+            raise ValueError("there is no shot loaded, so no frame can be shown")
+        if not 0 <= int(frame) < self._field.n_frames:
+            raise ValueError(
+                f"frame {frame} is outside the shot, which has "
+                f"{self._field.n_frames} samples"
+            )
+        self._frame = int(frame)
+        self._slider.blockSignals(True)
+        self._slider.setValue(self._frame)
+        self._slider.blockSignals(False)
+        self._redraw()
+
+    def advance(self) -> None:
+        """Step one sample forward, wrapping at the end of the shot."""
+        if self._field is None:
+            return
+        self.set_frame((self._frame + 1) % self._field.n_frames)
+
+    def play(self) -> None:
+        """Start the transport, unless there is nothing to play."""
+        if self._field is None:
+            return
+        self._timer.start()
+        self._play_button.setText("Pause")
+
+    def pause(self) -> None:
+        """Stop the transport."""
+        self._timer.stop()
+        self._play_button.setText("Play")
+
+    def toggle_play(self) -> None:
+        """Play if paused, pause if playing."""
+        if self.is_playing:
+            self.pause()
+        else:
+            self.play()
+
+    # ------------------------------------------------------------- rendering
+
+    def _on_slider(self, value: int) -> None:
+        """Follow the slider."""
+        if self._field is not None:
+            self.set_frame(int(value))
+
+    def _redraw(self) -> None:
+        """Repaint the canvas at the current frame."""
+        if self._field is None or self._artists is None:
+            return
+        self._artists.update(self._frame)
+        self._canvas.draw_idle()
+        self._readout.setText(
+            f"sample {self._frame + 1} of {self._field.n_frames}  "
+            f"({self._field.time_s[self._frame] * 1e3:.2f} ms)"
+        )
 
 
 class DesignPanel(QGroupBox):
