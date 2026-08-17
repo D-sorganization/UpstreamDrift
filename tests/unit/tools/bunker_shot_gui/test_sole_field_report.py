@@ -6,13 +6,16 @@ pasted into an issue and a screenshot cannot be diffed. This module pins the
 text.
 
 It also pins the caveat #8707 asks to be carried: the bounce trend the patch
-view illustrates is confounded by the camber substitution of #8698. Where the
-declared camber was not constructible, a comparison labelled "bounce" is
-really a bounce-and-camber comparison, and the report has to say so next to
-the patch numbers rather than only next to the geometry.
+view illustrates is confounded by the camber substitution of #8698. Where a
+spanwise station could not carry the camber its relieved sole width implied,
+a comparison labelled "bounce" is really a bounce-and-camber comparison, and
+the report has to say so next to the patch numbers rather than only next to
+the geometry.
 """
 
 from __future__ import annotations
+
+import dataclasses
 
 import pytest
 
@@ -86,10 +89,59 @@ class TestTheConfoundIsCarried:
 
     def test_a_clamped_camber_earns_the_caveat(self, nominal_evaluation) -> None:  # type: ignore[no-untyped-def]
         report = evaluation_report(nominal_evaluation)
-        if nominal_evaluation.camber_was_clamped:
+        if nominal_evaluation.clamped_camber_stations:
             assert PATCH_CONFOUND_CAVEAT in report
         else:
             assert PATCH_CONFOUND_CAVEAT not in report
+
+    def test_the_caveat_is_gated_on_stations_not_on_the_aggregate(
+        self, nominal_evaluation
+    ) -> None:  # type: ignore[no-untyped-def]
+        """The point of the rebase, isolated from the lofting resolution.
+
+        The shipped ``sm9_58_m`` preset declares an area its own sole width
+        admits while still refitting stations along the sole, so a caveat
+        gated on the declared-versus-effective aggregate is silent on the
+        default design.  (The session fixture lofts at *coarse* test
+        resolution, where the aggregate happens to clamp too, so the
+        aggregate is neutralised here rather than relied upon; the shipped
+        resolution is pinned in the geometry suite.)
+        """
+        assert nominal_evaluation.clamped_camber_stations, (
+            "this test needs a design that refits stations"
+        )
+
+        # Force the aggregate flag False while leaving the stations refitted:
+        # exactly the state the old gate misread.
+        in_band = dataclasses.replace(
+            nominal_evaluation,
+            effective_camber_area_m2=nominal_evaluation.geometry.sole_camber_area_m2,
+        )
+        assert in_band.aggregate_camber_was_clamped is False
+        assert in_band.clamped_camber_stations
+        assert PATCH_CONFOUND_CAVEAT in evaluation_report(in_band)
+
+    def test_an_unrefitted_design_does_not_carry_the_caveat(
+        self, nominal_evaluation
+    ) -> None:  # type: ignore[no-untyped-def]
+        """The gate must not be trivially true, or the caveat means nothing."""
+        clean = dataclasses.replace(
+            nominal_evaluation,
+            effective_camber_area_m2=nominal_evaluation.geometry.sole_camber_area_m2,
+            camber_stations=(),
+        )
+        assert clean.any_camber_was_clamped is False
+        assert PATCH_CONFOUND_CAVEAT not in evaluation_report(clean)
+
+    def test_the_caveat_counts_the_stations_it_fired_on(
+        self, nominal_evaluation
+    ) -> None:  # type: ignore[no-untyped-def]
+        report = evaluation_report(nominal_evaluation)
+        clamped = nominal_evaluation.clamped_camber_stations
+        if not clamped:
+            pytest.skip("no station was refitted on this design")
+        total = len(nominal_evaluation.camber_stations)
+        assert f"({len(clamped)} of {total} spanwise stations refitted)" in report
 
     def test_a_design_whose_camber_is_substituted_says_so_by_the_patch(
         self, model: WorkbenchModel, firm_sand: SandCondition, tour_swing: SwingSetup
@@ -98,12 +150,23 @@ class TestTheConfoundIsCarried:
         evaluation = model.evaluate(
             wide, firm_sand, tour_swing, include_playability=False
         )
-        if not evaluation.camber_was_clamped:
-            pytest.skip("this geometry realised its declared camber")
+        if not evaluation.clamped_camber_stations:
+            pytest.skip("this geometry realised its declared camber everywhere")
         assert PATCH_CONFOUND_CAVEAT in evaluation_report(evaluation)
 
     def test_the_caveat_names_the_issue_it_comes_from(self) -> None:
         assert "8698" in PATCH_CONFOUND_CAVEAT
+
+    def test_the_caveat_is_stated_in_terms_of_stations(self) -> None:
+        """It must describe what actually triggers it, not the aggregate.
+
+        The previous wording claimed the *declared* area was inconstructible,
+        which is false on the design the caveat fires for.
+        """
+        assert "station" in PATCH_CONFOUND_CAVEAT
+        assert "declared camber area was not constructible" not in (
+            PATCH_CONFOUND_CAVEAT
+        )
 
 
 class TestTheReportIsWiredIn:
