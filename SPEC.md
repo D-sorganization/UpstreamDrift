@@ -254,6 +254,85 @@ merged across an A/B pair for the same reason #8728 fixed the colour ramp. This
 is a rendering of existing F0 output, not new physics: the scene and the traces
 inherit `BEYOND_VALIDATION`, and no quantity here is calibrated for bunker sand.
 
+Issue #8713 (epic #8699) then puts the two tiers side by side on the
+quantities both produce, which is the only honest way to show F1 output at
+all: NASA-STD-7009B validation and use history both stand at 0 of 4, and
+`MAX_VALIDATED_SPEED_M_S` is 1.44 m/s, so a 25 m/s record is 17x past the
+published corpus from its first sample and never returns. The view therefore
+states what agreement does and does not license _inside the frame_ rather
+than in a caption -- computed from `vandv.credibility` and the solver's own
+envelope constants, so the sentence cannot drift from the code -- and the
+statement is that consistency between two uncalibrated models is not
+validation, that neither tier's level moves because of anything on the page,
+and that what the comparison _can_ do is falsify. Every ratio is judged
+against a **declared** band of 0.25 on `|ln(F1/F0)|`, declared because issue
+#8616 established there is no measurement of any of these quantities out of
+bunker sand and therefore no model error to calibrate a tolerance against.
+F1 has no whole-shot march yet (#8733), so each F1 point is a separate march
+to one recorded pose under a declared straight-line constant-speed approach;
+the points are drawn unjoined and the figure says why, because a line through
+independent marches would draw a trajectory nobody computed.
+
+At the workbench's own design point -- the 58 deg preset at 25 m/s, a 20 mm
+declared effective width and F1 at dx = 3 mm on an 80 mm bed -- the pair
+disagrees differently from the way ADR-0033's flat test section did, and the
+difference is itself the finding. At the peak of the strike `|F1|/|F0|` is
+**0.384**, not the 1.49-2.68 the 40 x 16 mm section gave: on a lofted head at
+its own declared width F1 reports roughly a third of F0's magnitude rather
+than twice it, so the ratio ADR-0033 measured does not transfer and must not
+be quoted for a wedge. The direction cosine, on the other hand, is **0.996**
+across the loaded stretch against 0.65-0.87 on the test section, so the two
+tiers agree about _where the load points_ far better on real geometry than on
+the section the check was written for. Depth agrees exactly, which is a
+control rather than a result: both tiers are handed the same pose. F1's divot
+section is **1.47x** F0's, which is not a like-for-like disagreement either --
+F0 transports no sand, so its divot is the swept lower envelope of the head,
+while F1's is the depression the sand actually left. Speed lost is F0's
+alone, since F1's section is driven kinematically; what is reported is each
+tier's resultant **projected on the direction of travel** and integrated over
+the probed window on the same quadrature, 8.82 m/s against 4.23 m/s, with
+F0's own record showing 7.80 m/s over that window so the quadrature error is
+visible rather than absorbed into the divergence.
+
+The inertial-share result reproduces exactly and is the sharpest one. Over a
+declared 5/12/25 m/s sweep at the deepest recorded pose, F0 credits
+0.959 -> 0.996 -> 0.999 of its force to its dynamic term while F1 credits
+0.644 -> 0.654 -> 0.658 to momentum flux: F0's `lambda rho v_n^2` grows
+quadratically with nothing bounding it, the continuum's reaction is limited
+by how fast the yield surface lets sand accelerate out of the way, and the
+crossing therefore sits _below_ the whole greenside range. A shot that enters
+at 25 m/s and leaves at 17.2 never decelerates through it, which is why the
+sweep is carried beside the shot probes as its own declared experiment and
+labelled as one.
+
+Two defects in the F1 tier were found by pointing that sweep at a real pose.
+The approach distance was **unbounded**: `_approach` divides the height it has
+to climb by the velocity's vertical direction cosine, and that cosine passes
+through zero at the deepest sample of every real shot -- measured -0.0026 on
+this record, so a 24 mm climb asked for a 9.5 m run-in, and `_build_bed` then
+sized the bed to cover it. Nothing caught it but the step cap, after the
+allocation. It now takes whichever of the two clearances is shorter, backing
+out through the surface or running in from beyond the body's own length, so
+the choice no longer turns on a sign that changes mid-shot. The grid ceiling
+was likewise an accident of the approach: a descending body starts in the air
+and happens to raise it, a horizontal run-in does not, and the first ejected
+particle then leaves the domain. Headroom is now stated in cells. Separately,
+`F0CrossCheck` was comparing two `SolverResult.max_depth_m` fields that do not
+mean the same thing -- F0 reports its deepest _engaged_ element there, the
+#8701 contact diagnostic, while F1 reports the deepest submerged element; they
+coincide on a flat section and differ by 33x on a lofted head -- so the check
+now carries the submerged depth off the shared query and the comparison uses
+that. The view also names, rather than quietly reports, the probes where F0
+has switched itself off: it returns zero the moment no element is both
+submerged and leading-edge while the sole is still in the divot (#8702), and
+the ratios of 51x and 295x at the entry and exit probes are divisions by an
+engagement criterion rather than physical disagreements.
+
+The check is deliberately not on the per-shot path: it costs about 11 minutes
+against milliseconds for a design, so the workbench runs it from its own
+button and the view is empty until asked. It is the fourth follower of the one
+transport `SoleLoadFieldWidget` owns.
+
 Child issue #8697 then couples two first bending modes and one torsional mode
 to that distributed-grip authority. Its registered 0.25/0.125 ms atlas covers
 384 trajectories and 1,536 nested-horizon summaries. Domain, activation,
