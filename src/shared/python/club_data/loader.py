@@ -580,7 +580,7 @@ class ClubDataLoader:
         data: dict[str, Any] = {}
 
         # ⚡ Bolt: Handle both pandas Series (has .index) and dicts (from df.to_dict('records'))
-        row_keys = row.index if hasattr(row, 'index') else row.keys()
+        row_keys = row.index if hasattr(row, "index") else row.keys()
 
         for field_name, possible_cols in self.CLUB_COLUMN_MAPPINGS.items():
             for col in possible_cols:
@@ -602,7 +602,7 @@ class ClubDataLoader:
         player_name = None
 
         # ⚡ Bolt: Handle both pandas Series (has .index) and dicts (from df.to_dict('records'))
-        row_keys = row.index if hasattr(row, 'index') else row.keys()
+        row_keys = row.index if hasattr(row, "index") else row.keys()
 
         for field_name, possible_cols in self.PLAYER_COLUMN_MAPPINGS.items():
             for col in possible_cols:
