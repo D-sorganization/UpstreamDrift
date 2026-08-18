@@ -149,6 +149,6 @@
 ## 2026-06-25 - [Replacing np.linalg.norm with math.sqrt(np.vdot) and np.sqrt(np.einsum) in GUI property getters]
 **Learning:** In the `CrossTierComparison` and `CrossTierProbe` classes (`crosstier.py`), `np.linalg.norm` is repeatedly used within tight property getters handling traces and arrays. For 1D force and velocity vectors, using `math.sqrt(np.vdot(x, x))` is ~2.2x faster as it bypasses NumPy dispatch overhead. For 2D batch computations over time series arrays, replacing `np.linalg.norm(arr, axis=1)` with `np.sqrt(np.einsum('ij,ij->i', arr, arr))` achieves a ~2x speedup by avoiding intermediate array allocations.
 **Action:** Replaced `np.linalg.norm` with `math.sqrt(np.vdot)` (for 1D vectors) and `np.sqrt(np.einsum)` (for 2D trace arrays) inside the GUI metrics and property getters in `crosstier.py`.
-## 2026-06-25 - [Replacing np.linalg.norm with math.sqrt(np.vdot) and np.sqrt(np.einsum) in bunkershot3d metrics]
-**Learning:** `np.linalg.norm` has significant overhead for both 1D fixed-size small vectors (NumPy dispatch) and 2D arrays along `axis=1` (intermediate array allocations). Replacing these calls with `math.sqrt(np.vdot)` and `np.sqrt(np.einsum)` achieves ~2x performance gains for the trace validation logic in `bunkershot3d/metrics/trace.py`.
-**Action:** Replaced `np.linalg.norm` with these optimized equivalents for vector lengths and quaternion arrays when validating physics trace outputs.
+## 2026-08-18 - NumPy Array Norms
+**Learning:** `np.linalg.norm` is surprisingly slow in Python. For multi-dimensional arrays, `np.sqrt(np.einsum('...i,...i->...'))` is ~1.5x faster. For 1D arrays, `math.sqrt(np.vdot(x, x))` is ~2.2x faster than `float(np.linalg.norm(x))`.
+**Action:** Replace `np.linalg.norm` with `einsum` or `vdot` in critical paths to avoid intermediate array allocations and function dispatch overhead.
