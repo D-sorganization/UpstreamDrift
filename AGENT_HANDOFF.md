@@ -134,8 +134,12 @@ evidence, not from opinion. Each is a reason the parent epic cannot close.
 ## Immediate Next Steps
 
 1. Close the declared gaps above before proposing closure of #8684 or #8668.
-   Friction and distributed loss-of-contact are the two that change scientific
-   conclusions; the manufactured and uncertainty cases are verification debt.
+   They are filed as
+   [#8751](https://github.com/D-sorganization/UpstreamDrift/issues/8751)
+   (grip friction and distributed loss of contact, gaps 1-2) and
+   [#8752](https://github.com/D-sorganization/UpstreamDrift/issues/8752)
+   (manufactured solutions and articulated parameter uncertainty, gaps 3-4).
+   #8751 changes scientific conclusions; #8752 is verification debt.
 2. Continue to calibrated unilateral 3D contact, full-delivery matching/
    uncertainty, and governed human holdout; do not close #8556 without
    qualifying participant data.
