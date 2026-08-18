@@ -8,6 +8,8 @@ import pytest
 
 from ._viewer_test_helpers import ANATOMICAL_28, make_synthetic_model
 
+pytestmark = pytest.mark.unit
+
 pytest.importorskip("PyQt6")
 
 

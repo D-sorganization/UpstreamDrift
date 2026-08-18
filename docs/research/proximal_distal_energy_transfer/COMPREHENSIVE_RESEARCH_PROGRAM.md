@@ -111,7 +111,8 @@ inform acquisition design but are not participant-level deposits satisfying
 the frozen contract. Synthetic traces and paper-level summary curves are
 prohibited substitutes. The companion GUI is tracked by Tools
 [#4430](https://github.com/D-sorganization/Tools/issues/4430), stacked after
-runner-pending PR [#4411](https://github.com/D-sorganization/Tools/pull/4411);
+consolidated PR [#4450](https://github.com/D-sorganization/Tools/pull/4450).
+PR #4411 was intentionally closed as superseded;
 unchanged CI must not be redundantly rerun.
 
 ## Research Collection Review
@@ -127,6 +128,44 @@ retry again redirected to manual Google authentication; no credentials or
 authentication dialogs were automated. Repository evidence and independently
 checked original sources therefore remain the current authority.
 
+## Independently Checked Biomechanics Leads
+
+The following original sources sharpen the next tests without being treated as
+confirmation of the proposed transfer mechanism:
+
+| Source                                                                        | What It Contributes                                                                                                                            | Registered Use and Boundary                                                                                                                                                                                                       |
+| ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Seth et al. (2016)](https://doi.org/10.1371/journal.pone.0141028)            | An OpenSim shoulder complex with a four-degree-of-freedom scapula constrained on an ellipsoidal thorax and comparison with bone-pin kinematics | Use as the first articulated scapulothoracic implementation candidate; repeat contact closure, moment-arm reversal, and killswitch studies. Its kinematic agreement does not identify golf muscle force or a preferred technique. |
+| [Verikas et al. (2016)](https://doi.org/10.3390/s16040592)                    | Bilateral forearm, rhomboid, and trapezius EMG onset and peak measurements in elite golfers                                                    | Use to define candidate channels and synchronization bandwidth for MT-H01. The small observational sample and surface EMG do not identify bilateral grip wrench or causal muscle contribution.                                    |
+| [Silva et al. (2013)](https://doi.org/10.1016/j.jelekin.2013.05.007)          | Demonstrates that golf-swing EMG onset depends on the selected baseline, threshold, and muscle                                                 | Preregister onset-definition sensitivity and prohibit a single threshold from deciding preactivation, passive resistance, or role reversal.                                                                                       |
+| [Mizoguchi and Yoneyama (2005)](https://doi.org/10.1299/jsmesports.2005.0_35) | Distributed radial, tangential, and axial grip-force measurements across fingers and palm                                                      | Add pressure/contact-distribution sensing to the bilateral six-axis wrench plan and test whether point-contact reduction hides internal modes. A proceedings paper is not a governed participant dataset.                         |
+
+The corresponding acquisition minimum is synchronized motion, ground reaction,
+club/shaft state, bilateral six-axis grip wrenches, distributed grip pressure,
+and bilateral forearm/scapular EMG. The analysis must report at least two EMG
+onset definitions, electromechanical-delay sensitivity, contact-center
+migration, and participant-held-out prediction. These additions can distinguish
+several proposed mechanisms; they still cannot make activation, intent, or
+tissue slack uniquely identifiable without an explicit model and adverse
+controls.
+
+## Critical-Question Completion Map
+
+| Handwritten Question                                     | Current Answer                                                                                                                                                                                                 | Decisive Completion Path                                                                                                                                                   |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| How much is drift?                                       | Exactly defined and computed at declared planar states and windows; no model-independent or human fraction exists.                                                                                             | Repeat the work/impulse attribution in articulated spatial forward dynamics and held-out participants with uncertainty intervals and cancellation reporting.               |
+| What are the geometry dependencies?                      | Moment arm, force--velocity projection, reference point, grip span, and constraint conditioning can change magnitude or sign in current tiers.                                                                 | Subject-specific scapula/arms, calibrated grip/contact, distributed shaft, null and sign-reversal controls in two engines.                                                 |
+| What is the timing of momentum flow?                     | Phase-resolved model windows exist; clock versus state-trigger results are conditional and no sustained recovery was observed in 60 registered cases.                                                          | Independent proximal acceleration, braking, and distal-release interventions with common-phase event definitions, observer delay, and held-out perturbations.              |
+| What constitutes casting or early body deceleration?     | Definition-dependent model events are registered; no unique physiological event has been established.                                                                                                          | Preregister competing event definitions and require agreement or report disagreement against motion, wrench, shaft, and impact measurements.                               |
+| Does passive drift reduce timing demand or self-correct? | Not established; the registered screen did not show sustained half-error recovery.                                                                                                                             | Estimate attraction/recovery regions under delay, saturation, contact loads, and subject scaling, then test the frozen human endpoint.                                     |
+| Does maximizing proximal velocity maximize transfer?     | No universal rule is supported; rate effects are nonmonotonic and matching-rule dependent.                                                                                                                     | Full-delivery-state matching with speed, braking work, load, face/path, strike, and robustness Pareto outcomes.                                                            |
+| Is slack useful or necessary?                            | There is no global answer. Five classes are separated; a 1,944-trajectory articulated atlas shows that preload matching reverses open/taut classification, while natural events remain right-censored at 5 ms. | Extend typed laws through distributed matched-work/load delivery, measure the corresponding state, and test benefit, harm, and null regions without cross-class inference. |
+
+This map distinguishes a bounded model answer from project completion. A row is
+complete only when its registered model, measurement, uncertainty, negative
+control, and participant-holdout gates pass; narrative coverage alone is not a
+completion criterion.
+
 ## Delivery Milestones
 
 The photographed momentum-transfer agenda is governed by
@@ -137,7 +176,9 @@ robustness, proximal-velocity dose response, and typed slack. Those questions
 remain subject to the model and human-evidence boundaries below.
 
 1. **Audit Infrastructure:** deterministic candidate inventory, strict claim
-   schema, release reconciliation, link/source checks, and figure-data checks.
+   schema, resolvable `path:line` checks, hash-pinned local support, external-URL
+   inventory, release reconciliation, link/source checks, and figure-data
+   checks.
 2. **Paper Adjudication:** every material claim classified and reviewed; every
    number and figure regenerated; weak claims narrowed, relabeled, or removed.
 3. **Research Map:** source manifests, coverage gaps, competing hypotheses,
@@ -145,7 +186,15 @@ remain subject to the model and human-evidence boundaries below.
 4. **Reusable Uncertainty Authority:** Tools #4142 merged, pinned, and parity
    verified.
 5. **Articulated Spatial Model:** calibrated grip and club, whole-body contact,
-   independent-engine comparison, and discrepancy report.
+   executed closed-contact inverse kinematics, subject-specific joint-limit and
+   mesh-level collision replacement,
+   independent-engine comparison, and discrepancy report. The first
+   subject-scaled atlas is complete and rejects the current prescribed common
+   states as anatomical contact configurations: hand-to-grip error is
+   0.171--0.616 m despite full local constraint rank. The bounded follow-up
+   closes the reduced tree, passes bilateral forward dynamics, and qualifies
+   typed unilateral opening/reattachment under common-displacement and
+   matched-extension controls. Calibrated distributed contact remains open.
 6. **Neuromuscular and Control Models:** activation, redundancy,
    identifiability, robust control, and held-out simulation evidence.
 7. **Human Falsification:** acquire governed synchronized bilateral six-axis
@@ -161,15 +210,15 @@ schema, release qualification, and AffineDrift's pinned review surface. The
 GitHub epic is the scheduling authority; this document defines the durable
 scientific contract.
 
-## Completed Paper-Wide Claim Audit
+## Completed Candidate Census and Ongoing Release Review
 
-The current audit adjudicates all 975 narrative candidates against 258
-atomic claim contracts; no candidate remains unreviewed. Repeated methods,
+The narrative census adjudicates all 1,022 paper candidates against 281 atomic
+claim contracts; no candidate remains unreviewed. That completion status
+applies to candidate coverage, not to scientific closure of every release
+claim. All 33 public release claims now have deterministic review dispositions
+and explicit remaining scientific gates. Repeated methods,
 summary, limitation, and release passages point back to their primary claim
-instead of acquiring stronger authority through repetition. The final pass
-added missing primary records for the rotating-base torso experiment, the
-isolated synthetic beam experiment, and the exploratory-interface/open-release
-boundary.
+instead of acquiring stronger authority through repetition.
 
 The bilateral-wrench extension adds a sensor-level falsifiability result. Two
 separated three-axis point forces map to net club wrench with rank five and one
@@ -184,10 +233,88 @@ and contact tracking are part of the measurement contract. Traceable bilateral
 six-axis device calibration, distributed contact, subject scaling, and held-out
 human qualification remain open.
 
-Completion of the paper audit is not completion of the research program. In
+The first paired scapulothoracic intervention is now executed as MT-E09. With
+trunk and club pose fixed, fixed shoulder centers close none of 54 states; the
+bounded scapula-on-ellipsoid surrogate reaches residual tolerance in 31 and
+passes the separate optimizer-termination gate in 16. Twenty-eight states
+activate a screening bound, the maximum shoulder-center excursion is 0.101 m,
+and the retained 2.0 m adverse span fails. Both contact Jacobians remain full
+row rank while local coordinate nullity increases from two to ten. This is a
+structural result and an identifiability warning, not an anatomical or coaching
+result. The next milestone replaces the surrogate with a validated articulated
+shoulder and calibrated forward grip contact.
+
+The closed-state forward reference now also has a registered validity-horizon
+map. Native MuJoCo and Pinocchio advance all 54 profile--span--phase states
+through 4, 10, 25, and 50 ms under nominal conditions and nine one-factor
+stiffness, damping, hand-mass, timestep, or immediate-driver-off branches. All
+2,160 horizon cases pass the declared trajectory, wrench, normalized-energy,
+and work--energy closure gates. No first failure is observed through 50 ms, so
+the result is explicitly right-censored there. This strengthens the reduced
+hand-carriage reference that the articulated tier must reproduce; it does not
+establish anatomy, calibrated equipment, full delivery, or human strategy.
+
+The first #8668 prerequisite is now executed before adding those contact
+forces. Native MuJoCo and robotics Pinocchio independently assemble the same
+subject-scaled 20-coordinate articulated tree at all 234 closed states. Every
+registered mass-matrix, bias-force, inverse-dynamics, symmetry, and
+positive-definiteness gate passes, with worst relative discrepancies below
+$1.8\times10^{-12}$. This qualifies common-state rigid-body transport and
+removes an engine-assembly confound. It does not execute forward contact or
+establish scapular anatomy, distributed grip or shaft behavior, muscles,
+delivery, or human strategy.
+
+The second #8668 prerequisite now adds finite bilateral Kelvin--Voigt forces at
+all 234 closed states. The point forces arise from a declared club displacement
+and velocity perturbation, project through the articulated hand and grip
+Jacobians, and satisfy action--reaction, virtual-power, passivity, coincident,
+and reversal controls. Native MuJoCo and Pinocchio initial accelerations agree
+to $4.86\times10^{-13}$ relative. Because no forward step is taken, the result
+does not test contact loss, accumulated work, delivery, or a human strategy.
+
+Child issue #8680 advances the articulated tree through a deliberately bounded
+5 ms forward interval. Eighteen profile--span--phase states, seven
+nominal/adverse branches, three time steps, and two native engines produce 756
+trajectories. All registered attachment-retention, virtual-power,
+dissipativity, work--energy, refinement, and cross-engine parity gates pass.
+The worst normalized energy residual decreases from 0.00738 to 0.000854 under
+refinement. This is a right-censored bilateral-attachment result, not a model of
+unilateral slack, calibrated grip or shaft structure, ground coupling, late
+downswing, impact, human transfer, or coaching strategy.
+
+Child issue #8682 adds a distinct typed unilateral-contact gate. Bilateral,
+tension-only, and two radial dead-zone laws are compared under common 1 mm
+displacement and approximately matched extension across 1,944 trajectories.
+The 1.5 mm common-displacement cases remain open while their matched-extension
+counterparts remain taut; no natural branch crosses state before 5 ms.
+Isolated open-to-taut and taut-to-open probes qualify event handling in both
+native engines. All power, passivity, work--energy, refinement, trajectory,
+force, and active-set parity gates pass. This demonstrates preload/law
+confounding and software event fidelity, not a benefit of slack or a human
+strategy.
+
+Child issue #8685 isolates distributed-grip discretization before adding shaft
+or ground dynamics. One, three, and five tension fibers per hand preserve equal
+total stiffness and damping across 12 articulated states, two initial velocity
+signs, two time steps, two native engines, and nested 4, 10, 25, and 50 ms
+observations from 288 trajectories. All registered power, passivity,
+work--energy, geometry, time-refinement, station-refinement, active-set, and
+engine-parity gates pass. Multi-fiber grips can be partly open, but no natural
+active-set transition occurs through 50 ms. The result qualifies an engineering
+contact discretization, not measured grip pressure, fingers, friction, shaft
+response, timing economy, delivery benefit, human transfer, or strategy.
+
+Completion of the candidate census is not completion of release review or the
+research program. In
 particular, the audit rejected quantitative small-deflection shaft inference
 for the current coupled baseline, retained only bounded synthetic structural
 results, found scale-dependent practical rank in the allocation/transmission
 map, and preserves #8556 as an external human-data acquisition gate. Future
 milestones must create new claim records and falsifiers before new conclusions
 enter summaries or conclusions.
+
+The separate claim-evidence integrity manifest covers all 1,875 evidence
+references. It hash-pins 239 distinct repository artifacts and inventories 78
+external URLs. Hash agreement establishes content identity, not independence
+or correctness; URL inventory establishes traceability, not availability or
+scientific validity.

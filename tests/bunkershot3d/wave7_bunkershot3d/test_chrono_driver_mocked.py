@@ -12,52 +12,47 @@ spinning up a full physics engine.
 
 from __future__ import annotations
 
+import math
 from pathlib import Path
 from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
+from _bunker_fixtures_8612 import (
+    QUARTZ_DENSITY,
+    QUARTZ_POISSON_RATIO,
+    QUARTZ_YOUNGS_MODULUS_PA,
+    config_yaml,
+    make_mock_chrono,
+    rayleigh_time,
+)
 
 import bunkershot3d.backends.chrono.driver as chrono_driver_mod
 from bunkershot3d.backends.chrono.driver import (
+    SETTLE_STEPS,
     BackendNotImplementedError,
     ChronoDriver,
 )
 
 
-def _make_mock_chrono() -> MagicMock:
-    """Build a MagicMock that quacks like ``pychrono``."""
-    chrono = MagicMock(name="pychrono")
+def _expected_impact_steps(
+    *, diameter: float, sigma_log: float, duration: float
+) -> int:
+    """Steps a Rayleigh-stable run needs, computed from the physics.
 
-    # ChVector3d(x, y, z) returns an object with .x .y .z attributes
-    def make_vec(x: float = 0.0, y: float = 0.0, z: float = 0.0) -> MagicMock:
-        v = MagicMock()
-        v.x = float(x)
-        v.y = float(y)
-        v.z = float(z)
-        return v
-
-    chrono.ChVector3d.side_effect = make_vec
-
-    # ChBody() returns a fresh MagicMock per call so the driver can hold
-    # the clubhead body and call GetPos/SetPos on it.
-    def make_body() -> MagicMock:
-        body = MagicMock()
-        body.GetPos.return_value = make_vec(0.0, 0.0, 0.0)
-        rot = MagicMock()
-        rot.e0, rot.e1, rot.e2, rot.e3 = 1.0, 0.0, 0.0, 0.0
-        body.GetRot.return_value = rot
-        body.GetAppliedForce.return_value = make_vec(0.0, 0.0, 0.0)
-        body.GetAppliedTorque.return_value = make_vec(0.0, 0.0, 0.0)
-        return body
-
-    chrono.ChBody.side_effect = make_body
-    return chrono
+    The integrator step is 0.2 t_R for the *smallest* grain (+/- 3 sigma in
+    log-space), not ``1 / output_rate_hz`` as before #8612.
+    """
+    r_min = (diameter / 2.0) * math.exp(-3.0 * sigma_log)
+    dt = 0.2 * rayleigh_time(
+        r_min, QUARTZ_DENSITY, QUARTZ_YOUNGS_MODULUS_PA, QUARTZ_POISSON_RATIO
+    )
+    return int(round(duration / dt))
 
 
 @pytest.fixture
 def mock_chrono(monkeypatch: pytest.MonkeyPatch) -> MagicMock:
-    chrono = _make_mock_chrono()
+    chrono = make_mock_chrono()
     monkeypatch.setattr(chrono_driver_mod, "chrono", chrono, raising=False)
     monkeypatch.setattr(chrono_driver_mod, "_HAS_CHRONO", True)
     return chrono
@@ -101,27 +96,17 @@ class TestChronoSetupWithMock:
         self, tmp_path: Path, mock_chrono: MagicMock
     ) -> None:
         # Write a config with cgf=4.0
-        yaml_content = """
-bunker_bed:
-  domain: {length_x: 1.0, width_y: 1.0, depth_z: 0.3}
-  boundary: "fixed"
-grain_population:
-  count: 100
-  diameter_mean: 0.002
-  diameter_sigma_log: 0.1
-  density: 2650.0
-  coarse_graining_factor: 4.0
-contact_model:
-  friction_coefficient: 0.4
-  restitution_coefficient: 0.2
-  youngs_modulus: 1.0e7
-  poisson_ratio: 0.25
-clubhead: {loft_deg: 56.0, bounce_deg: 10.0, width: 0.1, height: 0.05, mass: 0.3}
-trajectory: {file: "x.csv", duration: 0.05}
-output: {downsample_grains: 1, rate_hz: 500.0}
-"""
         cfg = tmp_path / "cg.yaml"
-        cfg.write_text(yaml_content)
+        cfg.write_text(
+            config_yaml(
+                grain_count=100,
+                diameter_mean=0.002,
+                diameter_sigma_log=0.1,
+                length_x=1.0,
+                width_y=1.0,
+                depth_z=0.3,
+            ).replace("coarse_graining_factor: 1.0", "coarse_graining_factor: 4.0")
+        )
         driver = ChronoDriver(cfg)
         driver.setup()
         system = mock_chrono.ChSystemSMC.return_value
@@ -139,8 +124,10 @@ class TestChronoRunWithMock:
         driver.run(out)
 
         system = mock_chrono.ChSystemSMC.return_value
-        # 500 settle steps + 200 impact steps = 700
-        assert system.DoStepDynamics.call_count == 700
+        expected = SETTLE_STEPS + _expected_impact_steps(
+            diameter=0.01, sigma_log=0.1, duration=1.0e-4
+        )
+        assert system.DoStepDynamics.call_count == expected
         assert out.exists()
 
     def test_run_drives_clubhead_in_positive_x(
@@ -150,8 +137,12 @@ class TestChronoRunWithMock:
         driver.setup()
         out = tmp_path / "result.h5"
         driver.run(out)
-        # SetPos called once at setup + 200 times during impact phase = 201
-        assert driver._clubhead_body.SetPos.call_count == 201
+        # SetPos: once at setup, once to park for the settle phase, then once
+        # per impact step.
+        expected = 2 + _expected_impact_steps(
+            diameter=0.01, sigma_log=0.1, duration=1.0e-4
+        )
+        assert driver._clubhead_body.SetPos.call_count == expected
 
 
 class TestChronoRaises:
@@ -204,19 +195,22 @@ def test_chrono_driver_stores_paths(bunker_config_path: Path) -> None:
 def test_chrono_run_clubhead_positions_advance(
     bunker_config_path: Path, mock_chrono: MagicMock, tmp_path: Path
 ) -> None:
-    """During impact phase, GetPos / SetPos sequence advances +x by v*dt each step."""
+    """The clubhead advances monotonically in +x along the prescribed swing."""
     driver = ChronoDriver(bunker_config_path)
     driver.setup()
     out = tmp_path / "r.h5"
     driver.run(out)
 
-    # SetPos was called 1 (setup) + 200 (impact) times. dt = 1/500.
     set_pos_calls = driver._clubhead_body.SetPos.call_args_list
-    assert len(set_pos_calls) == 201
+    expected = 2 + _expected_impact_steps(diameter=0.01, sigma_log=0.1, duration=1.0e-4)
+    assert len(set_pos_calls) == expected
     # All calls receive a ChVector3d (mocked); ensure the constructor was used.
-    assert set_pos_calls and mock_chrono.ChVector3d.called
+    assert mock_chrono.ChVector3d.called
     # Sanity: SetPos was called with positional vec arg
     assert all(len(c.args) == 1 for c in set_pos_calls)
+    xs = [call.args[0].x for call in set_pos_calls[1:]]
+    assert np.all(np.diff(xs) >= -1e-12)
+    assert xs[-1] > xs[0]
 
 
 def test_chrono_setup_floor_and_walls_sized_to_domain(
@@ -235,35 +229,23 @@ def test_chrono_grain_mass_scales_with_cgf(
     tmp_path: Path, mock_chrono: MagicMock
 ) -> None:
     """With cgf>1, individual grain mass is multiplied by cgf (mass = rho * V * cgf)."""
-    # Build config with cgf=8
-    yaml_content = """
-bunker_bed:
-  domain: {length_x: 1.0, width_y: 1.0, depth_z: 0.3}
-  boundary: "fixed"
-grain_population:
-  count: 8
-  diameter_mean: 0.01
-  diameter_sigma_log: 0.0
-  density: 1000.0
-  coarse_graining_factor: 8.0
-contact_model:
-  friction_coefficient: 0.4
-  restitution_coefficient: 0.2
-  youngs_modulus: 1.0e7
-  poisson_ratio: 0.25
-clubhead: {loft_deg: 56.0, bounce_deg: 10.0, width: 0.1, height: 0.05, mass: 0.3}
-trajectory: {file: "x.csv", duration: 0.05}
-output: {downsample_grains: 1, rate_hz: 500.0}
-"""
     cfg = tmp_path / "cg.yaml"
-    cfg.write_text(yaml_content)
+    cfg.write_text(
+        config_yaml(
+            grain_count=8,
+            diameter_mean=0.01,
+            diameter_sigma_log=0.0,
+            length_x=1.0,
+            width_y=1.0,
+            depth_z=0.3,
+        ).replace("coarse_graining_factor: 1.0", "coarse_graining_factor: 8.0")
+    )
     driver = ChronoDriver(cfg)
     driver.setup()
 
     # effective_count = count / cgf = 1 grain
     # Each grain's body.SetMass call has mass = density * 4/3 * pi * r^3 * cgf
-    # r = 0.005, density = 1000, cgf = 8
-    expected_mass = 1000.0 * (4.0 / 3.0) * np.pi * (0.005**3) * 8.0
+    expected_mass = QUARTZ_DENSITY * (4.0 / 3.0) * np.pi * (0.005**3) * 8.0
     # Find the SetMass call on a grain body. ChBody is called multiple times; the
     # grain bodies were created after the walls. With effective_count=1 we expect
     # 1 grain body created. We confirm at least one SetMass call uses ~expected_mass.

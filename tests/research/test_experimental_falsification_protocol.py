@@ -13,6 +13,8 @@ from scripts.research.proximal_distal_energy.run_experimental_protocol_dry_run i
     build_readiness_record,
 )
 
+pytestmark = pytest.mark.unit
+
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "docs/research/proximal_distal_energy_transfer/data"

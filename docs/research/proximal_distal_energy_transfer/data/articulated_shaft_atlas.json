@@ -1,0 +1,132 @@
+{
+  "schema_version": "articulated-shaft-atlas/v1",
+  "study_id": "distributed-grip-articulated-shaft-bending-torsion",
+  "design": {
+    "engine_versions": {
+      "mujoco": "3.8.0",
+      "pinocchio": "3.8.0"
+    },
+    "state_count": 12,
+    "activations": ["rigid", "bending", "torsion", "coupled"],
+    "velocity_branch_count": 2,
+    "time_step_count": 2,
+    "engine_count": 2,
+    "trajectory_count": 384,
+    "horizons_s": [0.004, 0.01, 0.025, 0.05],
+    "grip_station_count_per_hand": 5,
+    "active_driver_or_joint_torque": "none; motion is an initial condition",
+    "initial_energy_control": "zero elastic state gives common initial total energy across activations",
+    "load_work_match": "post-registered coupled-versus-rigid cells within the declared symmetric relative tolerance"
+  },
+  "configuration": {
+    "forward": {
+      "duration_s": 0.05,
+      "time_steps_s": [0.00025, 0.000125],
+      "virtual_power_tolerance_w": 1e-10,
+      "normalized_energy_residual_tolerance": 0.05,
+      "trajectory_relative_tolerance": 1e-7,
+      "refinement_ratio_limit": 0.9
+    },
+    "case_indices": [0, 8, 9, 17],
+    "sample_indices": [0, 6, 12],
+    "activations": ["rigid", "bending", "torsion", "coupled"],
+    "horizons_s": [0.004, 0.01, 0.025, 0.05],
+    "initial_displacement_m": 0.001,
+    "initial_velocity_m_s": 0.05,
+    "station_count_per_hand": 5,
+    "station_width_m": 0.03,
+    "total_stiffness_n_m": 1800.0,
+    "total_damping_n_s_m": 18.0,
+    "match_relative_tolerance": 0.05,
+    "worker_count": 4
+  },
+  "excluded_coarse_step_probes": [
+    {
+      "step_s": 0.001,
+      "state": [0, 0],
+      "activation": "torsion",
+      "velocity_factor": -1.0,
+      "engine": "mujoco",
+      "excluded": true,
+      "reason": "linear shaft domain exceeded during integration"
+    },
+    {
+      "step_s": 0.0005,
+      "state": [8, 0],
+      "activation": "torsion",
+      "velocity_factor": 1.0,
+      "engine": "mujoco",
+      "excluded": true,
+      "reason": "linear shaft domain exceeded during integration"
+    }
+  ],
+  "structural_authority": {
+    "bending_frequency_hz": 5.239897295608328,
+    "torsion_frequency_hz": 70.1259731258229,
+    "fe_bending_frequency_relative_error": 0.0,
+    "one_mode_low_frequency_tip_rms_discrepancy_m": 6.8667282414814e-7,
+    "one_mode_high_frequency_tip_rms_discrepancy_m": 4.133692722463994e-5,
+    "reference_mode_count": 6,
+    "structural_reference_passed": true
+  },
+  "results": {
+    "all_registered_gates_passed": true,
+    "maximum_peak_station_force_n": 1.62120484703201,
+    "maximum_peak_force_couple_nm": 0.3395402416152166,
+    "maximum_tip_bending_m": 0.001695798496286638,
+    "maximum_twist_angle_rad": 0.0018554096534427415,
+    "maximum_peak_shaft_strain_energy_j": 0.0003331452240053234,
+    "maximum_normalized_work_energy_residual": 0.0077983620240835785,
+    "maximum_trajectory_relative_error": 3.8386584286792626e-13,
+    "maximum_force_relative_error": 2.1529555915833498e-10,
+    "active_set_parity_failures": 0,
+    "time_refinement_worst_normalized_residual": [
+      0.0077983620240835785, 0.0039001762629994286
+    ],
+    "time_refinement_passed": true,
+    "maximum_initial_energy_relative_range": 0.0,
+    "initial_energy_match_passed": true,
+    "activation_coordinate_pattern_passed": true,
+    "excitation_controls": {
+      "bending": true,
+      "torsion": true,
+      "coupled_bending": true,
+      "coupled_torsion": true
+    },
+    "matched_load_work_cell_count": 126,
+    "matched_load_work_total_cell_count": 384,
+    "matched_final_speed_difference_range_m_s": [
+      -0.028519582842675667, 0.02123340599224041
+    ],
+    "failed_numerical_cell_count": 0,
+    "failed_parity_cell_count": 0,
+    "failed_small_deflection_cell_count": 0,
+    "failed_twist_cell_count": 0
+  },
+  "limitations": {
+    "calibration_status": "synthetic_reference_not_equipment_calibrated",
+    "shaft_model": "linear first-mode bending in two planes plus linear torsion using rigid lumped shaft/head inertia",
+    "higher_mode_boundary": "the committed six-mode beam shows materially larger discrepancy under short high-frequency loading than under slow loading",
+    "contact_boundary": "frictionless tension fibers with state-registered free lengths; not measured pressure, fingers, or tissue",
+    "support_boundary": "ground reaction and free moment are absent",
+    "matching_boundary": "post-registration matching is descriptive and does not randomize or identify a causal shaft effect",
+    "time_step_boundary": "registered 1.0 and 0.50 ms torsion probes leave the declared linear domain in different articulated states and are excluded; the atlas uses the bounded 0.25/0.125 ms refinement pair",
+    "human_boundary": "no participant, intent, timing-economy, injury, or coaching inference"
+  },
+  "next_gate": "add finite ground/free-moment and uncertainty pathways before full-delivery or human inference",
+  "source_sha256": {
+    "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "8eed52fe4ebbc55fcf753f4703330dd6d768281b0babfbb2adca074b862fc36d",
+    "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
+    "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json": "f07fc33cc76fb80f395cd10b01a30169b6440cec3854be3894024d435bc0f722",
+    "scripts/research/proximal_distal_energy/articulated_distributed_grip.py": "1365d509011e88c1c96bf28874d43720098fd658679bfd40f46258c50b47dd78",
+    "scripts/research/proximal_distal_energy/articulated_distributed_forward.py": "f0bdb296956e51d7dda43d24f5215d67ccb6585562e2393ec0e8e5ce34d52664",
+    "scripts/research/proximal_distal_energy/articulated_shaft.py": "37e7d5a51abd771e359bf81417246424e7d3dfb24e62ebe00201b383087972b1",
+    "scripts/research/proximal_distal_energy/articulated_shaft_forward.py": "d23c535f5fd6ea46f39b497293d5a78ccd16586e6ce0b2327f68113d3e11c544",
+    "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "1536e074e95be61d4ce26502e595b9c60d45792f9d3862f0bb727d504ec8bfb8",
+    "scripts/research/proximal_distal_energy/shaft_beam_reference.py": "1405dc8214cfdf4931ec71e9c1608d284cd44c0fa42d5d42d3c1e338f212481e",
+    "scripts/research/proximal_distal_energy/moving_base_modal_shaft.py": "260adaad2d43b2ce288c8344bb4e432272ff872fc719fe333c5cdcad571680e2",
+    "tests/research/test_articulated_shaft.py": "2dec0b1ad81797e9d33c3c15ad7e88c614367fe14f16b87a0c8accbd2840c273",
+    "tests/research/test_articulated_shaft_forward.py": "56968be215aa81c8182c7ef8f6a11289103058686c929f3907e679efe7d6a432",
+    "tests/research/test_articulated_shaft_atlas.py": "eadc8cf96993d9babc936ea94fff9c5134f12bec6f80dcd7d5b845463cea6d41"
+  }
+}

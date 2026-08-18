@@ -1,15 +1,450 @@
 # SPEC.md — Repository Specification Document
 
-## Current Scientific Audit State (2026-08-14)
+## Current Scientific Audit State (2026-08-16)
 
-Epic #8557 has completed the current paper-wide candidate adjudication contract:
-975/975 candidates, 258 atomic claims, and zero unadjudicated entries. The
-trajectory-level bilateral point-force sensor qualification is included while
-retaining its synthetic scope. This status does not waive
-open empirical or model-fidelity gates; #8556 remains blocked on governed human
-bilateral six-axis grip-wrench acquisition, and all new scientific content must
-regenerate the inventory and reopen adjudication until every new candidate is
-reviewed.
+Epic #8557 has completed the current narrative-candidate adjudication contract:
+1,047/1,047 candidates, 291 atomic claims, and zero unadjudicated entries. This
+status is not scientific closure: all 39 public release claims now have a
+traceable review disposition and zero remain open; each retains its applicable
+model, equipment, anatomy, archival, or governed-human scientific boundary. The
+trajectory-level bilateral point-force sensor qualification and subject-scaled
+spatial contact-closure audit retain their synthetic and prescribed-state
+scopes. The closed-state forward bridge maps all 234 solved states and advances
+54 profile--span--phase cases for 4 ms in native MuJoCo and Pinocchio. This is
+a reduced initialization audit: articulated arms, calibrated contact and shaft
+properties, full-horizon delivery, and human inference remain prohibited.
+Issue #8666 extends that reference through 4, 10, 25, and 50 ms under nominal
+conditions and nine one-factor adverse or null branches. All 2,160 registered
+horizon cases pass the existing cross-engine discrepancy and work--energy
+closure gates. No failure is observed through 50 ms, making the result
+right-censored at that reduced-model horizon rather than a full-delivery or
+anatomical claim.
+Child issue #8676 under issue #8668 records the first articulated prerequisite:
+all 234 closed states are assembled independently in native MuJoCo and robotics
+Pinocchio, and every
+registered mass-matrix, bias-force, inverse-dynamics, symmetry, and
+positive-definiteness gate passes. This common-state result qualifies the
+20-coordinate articulated rigid-body transport only. Forward bilateral
+contact, scapulothoracic anatomy, distributed grip and shaft properties,
+muscles, delivery, and human inference remain prohibited.
+Child issue #8678 applies finite bilateral Kelvin--Voigt forces to those same
+234 states and verifies action--reaction, virtual power, passivity, geometry
+controls, and native MuJoCo/Pinocchio initial-acceleration parity. It advances
+no trajectory; contact loss, accumulated work, calibrated anatomy/equipment,
+delivery, and human inference remain prohibited.
+Child issue #8680 advances 18 selected cross-profile/span/phase states through
+seven nominal/adverse branches, three time steps, and two native engines for a
+total of 756 five-millisecond trajectories. All registered bilateral-
+attachment retention, virtual-power, dissipativity, work--energy, refinement,
+and parity gates pass. This is a right-censored synthetic attachment result;
+unilateral slack, distributed grip and shaft structure, ground coupling, late
+downswing, impact, anatomy, muscle action, and human strategy remain
+prohibited inferences.
+Child issue #8682 then qualifies typed bilateral, tension-only, and radial
+dead-zone point attachments across 1,944 five-millisecond trajectories and
+isolated opening/reattachment probes. Child issue #8685 replaces each hand's
+point attachment with one, three, or five tension fibers while preserving total
+stiffness and damping. Its 288 trajectories are observed at nested 4, 10, 25,
+and 50 ms horizons in MuJoCo and Pinocchio. All registered geometry, power,
+passivity, work--energy, time-refinement, station-refinement, and engine-parity
+gates pass; no natural active-set transition occurs. This qualifies a synthetic
+contact discretization, not measured grip pressure, shaft response, delivery
+benefit, timing economy, human transfer, or technique.
+Issues #8703 and #8704 (epic #8699) withdraw two BunkerShot3D outputs from
+quotable status. The `dig_vs_skid` verdict returned `MARGINAL` at all 77 demo
+design points with slope ratios spanning 0.9987--1.0000: the shipped 10 mm
+entry window is about 0.4 ms at a 25 m/s delivery, over which a 0.3 kg head
+under an order-5 N.s impulse cannot deflect measurably. Resizing the window was
+measured over 48 design points before being rejected -- the ratio span grows
+from 0.0015 at 10 mm to 0.28 at half the divot length, but its correlation with
+maximum sole depth is negative at every informative window (-0.50 to -0.68), so
+a resized window inverts the verdict rather than calibrating it. The ratio is
+pinned at 1 for a vanishing window and at 0 for a window spanning the divot,
+for every design, so no window size is a free parameter. Every `DigSkidResult`
+therefore carries a `DigSkidCalibration` reporting `calibrated=False`, and both
+degenerate window ends are refused rather than clipped. A separating verdict
+requires a quantity that varies with the design -- sole depth does -- and an
+absolute threshold that is not published. Issue #8704 makes the sand-to-ball
+transfer efficiency a function of the bed's relative density,
+`eta(D_r) = efficiency * (1 - packing_sensitivity * (1 - D_r))`, which restores
+the physical ordering of ball speed with lie firmness (firm 11.37 m/s, wet
+8.12, fluffy 7.84, plugged 7.09, against a previous inverted firm 12.13 /
+fluffy 12.55 / plugged 12.60). The direction follows critical-state dilatancy;
+the magnitude is an assumed placeholder recorded in the launch provenance under
+`bed_packing_dependence`, and ball speed remains `BEYOND_VALIDATION` because
+issue #8616 found no published measurement of ball speed, launch angle or spin
+out of sand.
+Issues #8705 and #8707 (epic #8699) raise the BunkerShot3D sole-load view from
+a summed 12x12 bin to the field the F0 solver actually produces. `simulate_shot`
+builds the club wrench as an integral of a per-element traction and then keeps
+only the resultant; the workbench recovered a 12x12 impulse-density map summed
+over the strike and discarded the rest. `SoleLoadField` now carries the load
+per surface element and per sample with the depth-linear and inertial 3D-RFT
+terms separated, and `ContactPatch` follows the engaged element set, its area,
+its centroid and its gap to the leading edge. The terms are summed and then
+clamped, never clamped and then summed, so the array
+`bounce_utilisation` consumes is bit-for-bit what it consumed before: one
+traction can point outward on a steeply raked element while the resultant is
+still compressive. On the nominal 58 deg design at 25 m/s and the shipped
+discretization the sole resolves to 500 elements over 53 samples; the
+depth-term resultant peaks at 1.991 N at 4.00 ms and the inertial term at
+725.3 N at 4.25 ms, a 99.7 % inertial share of the sole's own resultant against
+the roughly 0.9 whole-body share ADR-0032 predicts. The two terms separate in
+space as well as in time, the depth term loading 5--18 mm behind the leading
+edge and the inertial term 20--28 mm behind it. The contact patch opens at
+1.309 cm^2, peaks at 16.21 cm^2 and closes from 13.09 mm to 3.39 mm behind the
+leading edge before retreating. The separation in time is one sample wide and
+does not survive coarsening: at a 5-station mesh both terms peak in the same
+4 ms bin, so the moment is reported per term rather than a difference being
+asserted. Every frame is drawn with its `EnvelopeStatus` and fidelity tier
+stamped inside the axes rather than in a caption, on colour limits fixed across
+frames and merged across an A/B pair; no 3-D viewport provider (MeshCat, Rerun,
+VTK) is installed, so the ADR-0027 selection degrades to a stated matplotlib
+plan view. This is a rendering of existing F0 output at higher fidelity, not
+new physics and not calibration: the field inherits `BEYOND_VALIDATION`, and a
+patch trend read across a bounce sweep is reported as a bounce-and-camber
+trend wherever any spanwise station's camber was substituted (#8698).
+
+Issue #8709 (epic #8699) selects the sand-solving tier that backs field
+visualization, recorded as ADR-0033 amending ADR-0032. The epic had assumed the
+MuJoCo F3 grain proxy was available now; measurement withdraws that premise.
+`MPMDriver.setup()` raises before any step, because the generated MJCF omits a
+`density` attribute on grain geoms, so MuJoCo applies its 1000 kg/m^3 default
+instead of the configured 2650 kg/m^3 silica and the 0.4 mm grain inertia
+(5.36e-16) falls below `mjMINVAL`; the measured minimum representable radius is
+0.2266 mm at default density against 0.1864 mm at silica density. The
+`MAX_SPHERES = 1000` cap does not thin the bed but destroys it: the placed
+grains form a single-grain-thick line at y = -0.1496 m, an implied bed depth of
+0.00116 grain diameters, with 0 of 1000 grains inside the clubhead's 50 mm
+y-band, so a repaired run would sweep vacuum and return an identically zero
+wrench. `MPMDriver.run()` also never calls the existing
+`write_grain_state`, so no grain reaches disk. A best-case repaired proxy was
+then benchmarked directly: 3,840 spheres at 18.5 s per 20 ms shot, with 10,000
+spheres failing to allocate, fixing the tractable ceiling near 4,000 spheres --
+1.79e-5 of the 2.149e8 true-scale grains and 0.028 % of the bed by volume,
+which bins to 0.125 grains per cell on a 20^3 grid. Track B requires fields
+(#8710 velocity and density on a grid, #8711 cross-sections with shear
+overlays), which that sample cannot carry, so the decision is F1, narrowed from
+ADR-0032's "reduced-order / 2-D plane-strain continuum" to a 2-D plane-strain
+**MPM** solver: a continuum produces a field by construction, SPH's
+blade-thickness floor follows it into plane strain, and MPM shares its
+constitutive model with the F2 reference. F1 is specified at bulk resolution
+(dx ~ 1-2 mm) for 10-100 mm flow features and is therefore barred from
+reporting club force, which remains F0's. The ball becomes a body inside F1 as
+a plane-strain circular section so that "sand reaching the ball" acquires a
+referent it never had at F0, but it is an infinite cylinder rather than a
+sphere, its flux is per unit width, ball launch stays on the #8657 F0 path, and
+any heel-toe or out-of-plane distribution is refused rather than approximated.
+Field frames are marked illustrative in the raster and in the API rather than
+in captions: provenance composited into the pixels, ordinal colourbars with no
+numeric ticks for non-quotable quantities, a distinct non-photorealistic
+identity, and an export path whose validity verdict has no default. Cross-tier
+comparison against F0 on wrench, depth and divot is a consistency check between
+two uncalibrated models, not a validation; F1's per-unit-width wrench compares
+on shape and timing unconditionally and on magnitude only once the assumed
+effective width is recorded in the manifest. Validation remains at NASA-STD-
+7009B level 0 of 4 against a threshold of 3, with the design point 63.1x
+3D-RFT's stated Froude limit at clubhead scale and 282.2x at the 5 mm leading
+edge, so no F1 output is a physical prediction. The driver defects are tracked
+separately; the tier is not usable until they are repaired or the backend is
+removed.
+
+ADR-0033's F1 solver core now exists at `src/bunkershot3d/solvers/mpm/`,
+implementing the `GranularSolver` protocol so it is swappable with the F0
+`DRFTSolver` and returns the same `SolverResult` carrying tier and verdict. The
+constitutive model is **rate-independent Drucker-Prager elastoplasticity with a
+compressive cap**, integrated as a return mapping on principal Hencky strains
+(Drucker & Prager 1952; Klar et al. 2016, ACM TOG 35(4):103, which is also the
+F2 reference tier's model so one calibration carries between them). The
+`mu(I)` rheology was rejected on well-posedness rather than on cost: Barker,
+Schaeffer, Bohorquez & Gray (2015, J. Fluid Mech. 779:794-818) show its
+incrementally-linearised equations lose hyperbolicity below `I_1` and above
+`I_2`, so perturbation growth is unbounded in wavenumber and grid refinement
+makes the answer worse -- and both ill-posed regimes sit inside a bunker shot,
+the quiescent bed at `I -> 0` and the leading edge at `I ~ 11`. A tier whose
+deliverable is a GCI-reported field cannot rest on equations that are ill-posed
+in the regime being refined. The compressive cap is read off the sand package
+rather than fitted: `eps_v_cap = ln(phi / phi_max)` from the existing
+`PackingState`, so a loose bed compacts about 15 % and a firm one about 2 %
+without a second set of constants existing; the cohesive cone tip comes from the
+moisture model, and a saturated bed raises rather than guessing its dilation
+suction. Transfers are **APIC** (Jiang et al. 2015, ACM TOG 34(4):51) on
+quadratic B-splines: PIC would damp away the shear structure the tier exists to
+show, FLIP leaves null-space noise that a plastic return map reads as spurious
+yielding, and APIC conserves linear and angular momentum exactly across the
+transfer, which is tested to round-off rather than cited. The timestep is a CFL
+condition on the computed dilatational wave speed `sqrt((lambda + 2 mu) / rho)`
+plus the body speed, checked at runtime with a `raise` because `python -O`
+strips assertions. Sand constants come from `usga_reference_sand` and the
+packing/moisture machinery; the only F1-specific additions are a Hardin &
+Richart (1963) small-strain modulus keyed on the existing void ratio and
+angularity, and a conventional drained Poisson ratio, both recorded in the
+provenance. Measured code verification, through the existing `vandv/`
+conservation, convergence and Celik GCI implementations rather than a second
+copy: mass conserved exactly (residual 0.0); linear momentum matching the
+gravity impulse to round-off; total energy first order in the step (observed
+order 1.00 over Courant 0.4/0.2/0.1, 2.2e-8 relative at the coarsest);
+a relaxed 1-D consolidation column at -409.741 Pa against -403.115 Pa
+closed-form, 1.64 %, with its stored strain energy 5.8 % from
+`W (rho g)^2 H^3 / (6 M)`; and monotone grid convergence over dx = 6/4/3 mm at
+3.70 % -> 2.22 % -> 1.64 %, observed order 1.178, Celik apparent order 1.72,
+`GCI_fine` 1.105 % and `u_num` 2.26 Pa. Two verification cases had to be rebuilt
+around real findings: a generously padded grid put the column's "fixed base"
+two cells below the column and its confining walls two cells outside it, so the
+column stood in free space and fell while reporting a mean stress of 3e-9 Pa
+through an entirely plausible-looking run; and the conventional elastic energy
+case does not exist for cohesionless sand, because a pre-compressed block
+released to oscillate rebounds into tension where the return map correctly
+annihilates the deviatoric strain at the cone tip (129 of 144 particles per
+step), which is physical plastic dissipation and not truncation error. Bagnold
+is unavailable for the same class of reason: it is a consequence of `mu(I)` rate
+dependence, which this solver deliberately does not have. The F0 cross-check on
+a 40 x 16 mm sole section at 20 deg attack, 30 mm declared effective width,
+reports the divergence rather than asserting agreement: `|F1|/|F0|` of 1.96,
+1.49 and 2.68 at 5, 12 and 25 m/s with direction cosines 0.85, 0.65 and 0.87,
+and -- the informative part -- F0's inertial share climbing 0.52 -> 0.93 -> 0.99
+with speed while F1's momentum-flux share stays flat at 0.68 / 0.69 / 0.65. F0's
+`lambda rho v_n^2` term grows quadratically with nothing to bound it, whereas
+the continuum's reaction is limited by how fast the yield surface lets sand be
+accelerated out of the way, so the two tiers disagree by construction in exactly
+the regime a greenside shot occupies. F1 is therefore **verified but not
+validated**: the suite shows it solves its equations correctly and is no
+evidence at all that those equations describe golf bunker sand. Validation stays
+at NASA-STD-7009B level 0 of 4 and the F1 envelope enforces a
+`BEYOND_VALIDATION` floor that no query can beat, since `EXTRAPOLATED` would
+require a published validation set that issue #8616 established does not exist.
+Field extraction and schema (#8710), the visual layers (#8711-#8713), the ball
+as a plane-strain body, and F1's own `simulate_shot` integration are
+deliberately out of this change.
+
+Issues #8706 and #8708 (epic #8699) add the two views that put the sole-load
+field in context: the shot in three dimensions, and the scalar traces beside
+it on one cursor. `ShotScene` carries the pose the march recorded, the free
+surface and the swept divot section; `ShotTraces` carries the sand wrench, the
+sole depth, the speed lost and the contact-patch area, each stored in its own
+stated unit. The 3-D frame is built from the backend-neutral ADR-0027
+`ViewportOverlayPayload` -- the object a MeshCat, Rerun or VTK provider would
+consume -- so the matplotlib fallback cannot drift away from what a real
+backend would show; none of the three providers is installed, so the selection
+degrades and the frame states which renderer drew it. On the nominal 58 deg
+design at 25 m/s the record spans 53 samples over 13.0 ms, the head resolves to
+486 surface points of which 400 are sole, the swept envelope reaches 12.64 mm
+against a 12.59 mm sole-reference depth, and the section closes at 19.24 cm^2.
+Two claims the render is explicitly not making: the sand plane is the model's
+single `free_surface_height_m` and `SandSurface.resolves_grains` is False, F0
+resolving no grains at all; and the divot is the running lower envelope of the
+head's own sole points, so it may only ever deepen -- a floor that rose between
+samples would assert sand transport this tier cannot compute, and is a raise.
+The validity band is the reason #8708 asks for a band rather than a badge.
+`simulate_shot` judges the envelope at every step and keeps only `worst_of`
+those verdicts, so the per-sample statuses are discarded before any caller sees
+them; they are recovered through the solver's own `DRFTSolver.envelope`, which
+judges a state without integrating a force, and the band's worst status is
+pinned against `ShotResult.verdict` rather than asserted equal. On the
+greenside delivery the band is uniform, and that is not a defect:
+`MAX_VALIDATED_SPEED_M_S` is 1.44 m/s, so a 25 m/s head is past the published
+corpus from its first free-flight sample and never returns. At a 1.5 m/s
+delivery the sand slows it back through that ceiling at 46.50 ms of a 190.25 ms
+record, and the whole-shot verdict `BEYOND_VALIDATION` is then wrong for 576 of
+762 samples -- 75.6 % of the record -- which is precisely what a single badge
+in the corner of a panel would have asserted. All three views are scrubbed by
+the transport `SoleLoadFieldWidget` already owned rather than by sliders of
+their own, and the world box and per-panel y-limits are fixed across frames and
+merged across an A/B pair for the same reason #8728 fixed the colour ramp. This
+is a rendering of existing F0 output, not new physics: the scene and the traces
+inherit `BEYOND_VALIDATION`, and no quantity here is calibrated for bunker sand.
+
+Issues #8710 and #8711 (epic #8699) extract the F1 sand field, persist it, and
+cut the impact zone open. The motivating question -- _does the velocity of the
+sand near the face change through impact_ -- now has a measured answer: on the
+2 mm reference capture of a 25 m/s, 20 deg entry into firm sand the peak
+reportable sand speed runs 0 -> 2.86 -> 25.9 -> 28.98 m/s across the marched
+approach, peaking at 116 % of the head speed at `x = +17.0 mm`, `z = +8 mm` --
+above the free surface and past the trailing edge, which is the splash rather
+than the sand under the sole. Every array comes from the solver's own transfer
+operators rather than a reconstruction: density is `scatter_mass` over the cell
+area (plane-strain kg/m over m^2 is kg/m^3 with no fudge factor), velocity is
+the same APIC `scatter_momentum` the next step would perform, and the shear
+rate is `sqrt(2 D : D)` formed at the particles with the solver's own
+`velocity_gradient` -- at the particles rather than by differencing the nodal
+field, because an empty node beside a full one differences to an enormous
+false shear along exactly the free surface the flow of interest sits on. A
+node with no sand gets density 0 and shear rate `nan`, not shear rate 0, since
+zero would assert that sand at the free surface is not shearing. Capture drives
+`march` in stride-sized blocks from one `MPMSetup` (a new public `prepare`,
+which `run` now also goes through) and is asserted bit-for-bit identical to the
+same march taken in one call, so the stored field is the field the solve had.
+**The stored field carries its tier and validity status as data, and the
+statement is checkable**: `FieldProvenance` travels inside the file and
+`series_digest` covers the provenance _and_ the arrays with one SHA-256, so
+renaming `illustrative.h5` to `predictive.h5` changes nothing a reader
+consults, editing the stored tier breaks the digest, and swapping arrays under
+an honest label breaks it too. There is no load-anyway flag and a test asserts
+there is not. A field-schema bump is reported separately from tampering,
+because "regenerate this" and "somebody edited this" are different news. The
+schema represents more than one tier: `FieldLayout.GRID` stores an origin, a
+spacing and a shape so a continuum pays nothing per frame for sample
+positions, `PARTICLE` stores them per frame because for a grain tier they are
+the state, dimension is stored rather than assumed, and both round-trip.
+Persistence is through the existing `io/` layer, bumped to schema v3 with a
+`/sand_field` group; v1 and v2 still read and a file with no field reads back
+as `None` rather than an error. Retention is deliberate and recorded: an
+over-length run is **strided, never truncated**, because cutting the tail off a
+shot removes exactly the part the question is about, and every drop is written
+into `RetentionRecord.dropped` in words. The reference capture keeps 97 frames
+of 286 steps (1 in 3, 14.8 us apart) at float32 with gzip-4, which is 4.15 MB
+against the 44.7 MB a full-rate float64 record would have cost, a 10.8x
+saving, and loads in 0.08 s. Two measurement findings changed the design.
+First, a nodal velocity is momentum over mass, and at the outer tail of a
+B-spline stencil that mass is parts per million of a cell of sand: the
+unmasked peak reads 46.71 m/s -- 187 % of the head -- on a node holding
+7.5e-6 of the bulk density. A density-floor sweep gives 46.71 / 32.22 / 28.98 /
+28.26 m/s at 0 / 1 / 10 / 50 %, so the reported peak stops moving at 10 %, and
+the same number falls out of the physics: at `dx = 2 mm` and `d50 = 0.458 mm`
+one grain is about 4 % of a cell, so a 10 % floor is "fewer than about two and
+a half grains here", below which a continuum density measures nothing for the
+same reason `MIN_CELLS_PER_GRAIN` refuses a sub-grain grid. `OccupancyRule` is
+therefore a required field on every series, inside the file and covered by the
+digest, so two views cannot disagree about where the sand is. Second, the peak
+nodal density reaches 2914 kg/m^3 against a bulk of 1712 and a densest
+admissible packing of 1747 -- derived from the constitutive cap
+`eps_v_cap = ln(phi / phi_max)` the material already carries, so no new
+constant exists. The return map keeps every particle inside that cap; nodal
+density is a weighted mass scatter and nothing bounds _it_, so 1.44 % of
+samples sit above a packing the sand cannot physically reach. That is a
+reporting artefact, it is counted rather than clipped, and the count is
+printed in the frame. **The cross-section view shows what a plane-strain cut
+actually is instead of hiding it.** F1 has no heel-to-toe direction, so the
+heel-to-toe series #8711 asks for cannot be a series of solves: `SliceFidelity`
+labels each cut `SOLVED` (the plane the tier solved), `EXTRUDED` (parallel,
+offset out of plane -- identical numbers by assumption, and a test asserts two
+stations are bit-for-bit equal), or `PROJECTED` (oblique; the along-cut axis
+compressed by `cos(obliquity)`). A station beyond the solver's declared
+`effective_width_m` is refused, because that width is an assumption and there
+is nothing past it to extrude into; an edge-on cut is refused because it meets
+the solved plane in a line rather than an area. Through-cut velocity is `None`
+on a parallel cut and says it is _absent_ rather than measured as zero, and on
+an oblique cut says it is in-plane flow resolved rather than measured
+heel-to-toe flow. Velocity is drawn as magnitude **and** direction -- colour is
+speed, arrows are flow -- because sand pushed ahead of the sole and sand riding
+up the face can carry identical speeds; the field now also carries the
+intruder's cross-section outline per frame, without which "ahead of the sole"
+and "up the face" are guesses rather than locations. Colour limits and arrow
+lengths are injected from a `SliceScale` covering every frame of every compared
+design and taken from occupied samples only, so #8728's per-grid auto-scaling
+cannot return in the view where it would do most damage. The cut is another
+view on the sole-field transport rather than a second slider, but its record is
+a strided F1 march of a declared approach and not the F0 shot, so `CursorMap`
+maps the shared index by fractional progress and says so in frame. Three
+further corrections fell out of building it: `validity_stamp` hard-coded
+"dynamic 3D-RFT" under every tier and would have printed F0's constitutive
+shortcut on a picture of a material-point solve, so the model is now named from
+the tier; the workbench clears a loaded field **before** repainting the sole
+field, because painting it emits `frame_changed` and a cut still mapped to the
+previous shot's record would be handed an index it cannot map -- and a Python
+exception escaping a Qt slot aborts the process rather than surfacing; and a
+sand field is loaded rather than computed in the GUI, because a 2 mm march
+takes about 37 s and a coarser one run to keep the workbench responsive would
+put a picture on screen at a resolution nobody chose. F1 supplies a **declared
+straight-line constant-velocity approach**, not a marched swing (#8733 holds
+whole-shot marching); an approach and a shot animate identically, so the
+assumption is a required field on every provenance record and is stamped on
+every frame. Nothing here is validated: the field inherits `BEYOND_VALIDATION`,
+`MAX_VALIDATED_SPEED_M_S` is 1.44 m/s so a 25 m/s shot is 17x outside the
+published corpus from its first sample, and the frame says both.
+
+Issue #8713 (epic #8699) then puts the two tiers side by side on the
+quantities both produce, which is the only honest way to show F1 output at
+all: NASA-STD-7009B validation and use history both stand at 0 of 4, and
+`MAX_VALIDATED_SPEED_M_S` is 1.44 m/s, so a 25 m/s record is 17x past the
+published corpus from its first sample and never returns. The view therefore
+states what agreement does and does not license _inside the frame_ rather
+than in a caption -- computed from `vandv.credibility` and the solver's own
+envelope constants, so the sentence cannot drift from the code -- and the
+statement is that consistency between two uncalibrated models is not
+validation, that neither tier's level moves because of anything on the page,
+and that what the comparison _can_ do is falsify. Every ratio is judged
+against a **declared** band of 0.25 on `|ln(F1/F0)|`, declared because issue
+#8616 established there is no measurement of any of these quantities out of
+bunker sand and therefore no model error to calibrate a tolerance against.
+F1 has no whole-shot march yet (#8733), so each F1 point is a separate march
+to one recorded pose under a declared straight-line constant-speed approach;
+the points are drawn unjoined and the figure says why, because a line through
+independent marches would draw a trajectory nobody computed.
+
+At the workbench's own design point -- the 58 deg preset at 25 m/s, a 20 mm
+declared effective width and F1 at dx = 3 mm on an 80 mm bed -- the pair
+disagrees differently from the way ADR-0033's flat test section did, and the
+difference is itself the finding. At the peak of the strike `|F1|/|F0|` is
+**0.384**, not the 1.49-2.68 the 40 x 16 mm section gave: on a lofted head at
+its own declared width F1 reports roughly a third of F0's magnitude rather
+than twice it, so the ratio ADR-0033 measured does not transfer and must not
+be quoted for a wedge. The direction cosine, on the other hand, is **0.996**
+across the loaded stretch against 0.65-0.87 on the test section, so the two
+tiers agree about _where the load points_ far better on real geometry than on
+the section the check was written for. Depth agrees exactly, which is a
+control rather than a result: both tiers are handed the same pose. F1's divot
+section is **1.47x** F0's, which is not a like-for-like disagreement either --
+F0 transports no sand, so its divot is the swept lower envelope of the head,
+while F1's is the depression the sand actually left. Speed lost is F0's
+alone, since F1's section is driven kinematically; what is reported is each
+tier's resultant **projected on the direction of travel** and integrated over
+the probed window on the same quadrature, 8.82 m/s against 4.23 m/s, with
+F0's own record showing 7.80 m/s over that window so the quadrature error is
+visible rather than absorbed into the divergence.
+
+The inertial-share result reproduces exactly and is the sharpest one. Over a
+declared 5/12/25 m/s sweep at the deepest recorded pose, F0 credits
+0.959 -> 0.996 -> 0.999 of its force to its dynamic term while F1 credits
+0.644 -> 0.654 -> 0.658 to momentum flux: F0's `lambda rho v_n^2` grows
+quadratically with nothing bounding it, the continuum's reaction is limited
+by how fast the yield surface lets sand accelerate out of the way, and the
+crossing therefore sits _below_ the whole greenside range. A shot that enters
+at 25 m/s and leaves at 17.2 never decelerates through it, which is why the
+sweep is carried beside the shot probes as its own declared experiment and
+labelled as one.
+
+Two defects in the F1 tier were found by pointing that sweep at a real pose.
+The approach distance was **unbounded**: `_approach` divides the height it has
+to climb by the velocity's vertical direction cosine, and that cosine passes
+through zero at the deepest sample of every real shot -- measured -0.0026 on
+this record, so a 24 mm climb asked for a 9.5 m run-in, and `_build_bed` then
+sized the bed to cover it. Nothing caught it but the step cap, after the
+allocation. It now takes whichever of the two clearances is shorter, backing
+out through the surface or running in from beyond the body's own length, so
+the choice no longer turns on a sign that changes mid-shot. The grid ceiling
+was likewise an accident of the approach: a descending body starts in the air
+and happens to raise it, a horizontal run-in does not, and the first ejected
+particle then leaves the domain. Headroom is now stated in cells. Separately,
+`F0CrossCheck` was comparing two `SolverResult.max_depth_m` fields that do not
+mean the same thing -- F0 reports its deepest _engaged_ element there, the
+#8701 contact diagnostic, while F1 reports the deepest submerged element; they
+coincide on a flat section and differ by 33x on a lofted head -- so the check
+now carries the submerged depth off the shared query and the comparison uses
+that. The view also names, rather than quietly reports, the probes where F0
+has switched itself off: it returns zero the moment no element is both
+submerged and leading-edge while the sole is still in the divot (#8702), and
+the ratios of 51x and 295x at the entry and exit probes are divisions by an
+engagement criterion rather than physical disagreements.
+
+The check is deliberately not on the per-shot path: it costs about 11 minutes
+against milliseconds for a design, so the workbench runs it from its own
+button and the view is empty until asked. It is the fourth follower of the one
+transport `SoleLoadFieldWidget` owns.
+
+Child issue #8697 then couples two first bending modes and one torsional mode
+to that distributed-grip authority. Its registered 0.25/0.125 ms atlas covers
+384 trajectories and 1,536 nested-horizon summaries. Domain, activation,
+power, work--energy, refinement, and MuJoCo/Pinocchio parity gates pass. Among
+126 coupled-versus-rigid cells matched within 5% for peak contact load and
+dissipated work, delivery-speed differences span -0.0285 to +0.0212 m/s, with
+82 negative and 44 positive outcomes. The result therefore rejects a universal
+passive-shaft speed benefit. It is a planar structural reference, not physical
+shaft calibration, human validation, physiological inference, or technique.
+
+Issue #8556 remains blocked on governed human bilateral six-axis
+grip-wrench acquisition, and all new scientific content must regenerate the
+inventory and reopen adjudication until every new candidate is reviewed.
 
 <!--
   TEMPLATE VERSION: 1.0.0
@@ -50,8 +485,8 @@ reviewed.
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.524 |
-| **Last Spec Update** | 2026-08-14 |
+| **Spec Version** | 1.0.542 |
+| **Last Spec Update** | 2026-08-16 |
 
 ## 2. Purpose & Mission
 
@@ -82,6 +517,227 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-08-16** - Scoped BunkerShot3D's camber-clamped flag so it cannot
+  understate substitution (`src/bunkershot3d/geometry/lofting.py`,
+  `src/tools/bunker_shot_gui/`, issue #8698, epic #8699). The observability
+  work below left one boolean answering a narrower question than its name
+  implied. `LoftedWedge.camber_was_clamped` compared the declared camber area
+  against the band the **declared** sole width admits. Heel and toe relief
+  narrows the sole toward the ends, and a narrower sole admits a narrower
+  camber band, so the relieved stations are refitted to their own bands while
+  the declaration itself is honoured — and the flag read `False` beside a
+  non-empty `clamped_stations`. That is #8698's own failure mode, silent
+  substitution invisible to a caller, reappearing through the simpler check.
+  Measured at shipped resolution, three of the six shipped presets hit it:
+  `sm9_58_m` declares 42.00 mm² inside its (38.70, 42.44) mm² band and refits
+  3 of 17 stations; `acushnet_example_1` refits 5 of 17; `tour_shaved_heel_lob`
+  refits 13 of 17. All three reported "not clamped".
+
+  Resolved by renaming rather than redefining. Redefining a published boolean
+  in place would have silently changed every existing caller's answer, which
+  is the same failure mode one level up; the rename breaks loudly instead.
+  `camber_was_clamped` becomes `aggregate_camber_was_clamped` (unambiguously
+  the declared-versus-effective question), and a new `any_camber_was_clamped`
+  is true when the declaration **or** any station was substituted, so a caller
+  checking one boolean gets the honest answer and the flag cannot read `False`
+  while `clamped_stations` holds anything. `camber_substitution_m2` becomes
+  `aggregate_camber_substitution_m2`, which also ends its name collision with
+  `StationCamber`'s per-station property. Both meanings are genuinely used, so
+  a single flag could not serve: the workbench's camber-area line needs the
+  aggregate because it prints the declared number, and the contact-patch
+  caveat needs any-station. The camber-area line now also names the refitted
+  station count, so an in-band declaration over refitted stations no longer
+  renders as a clean number. `PATCH_CONFOUND_CAVEAT` is gated on the per-
+  station account rather than the aggregate flag and is restated in terms of
+  stations — gated on the aggregate it was silent on the default design, which
+  is exactly when the caveat is needed.
+
+- **2026-08-16** - Made BunkerShot3D's sole-camber substitution observable
+  (`src/bunkershot3d/geometry/`, issue #8698, epic #8699). A wedge sole can
+  only realise camber areas inside a band set by its width and bounce, so
+  `build_wedge_mesh` fitted a declared `sole_camber_area_m2` that fell outside
+  it to the nearest constructible value. That fit is physically correct and is
+  retained — a narrow sole geometrically cannot host an arbitrarily large
+  camber, and emitting an inconstructible section would be worse — but it was
+  **unobservable**: `constructible_camber_range_m2` was not re-exported from
+  `bunkershot3d.geometry` or the top level, and no result object carried the
+  effective value back, so a caller who declared 48 mm² received a different
+  sole and had no way to find out. Measured on a 77-point demo sweep, the
+  clamp fired on 40 points and moved the effective camber over 24.5–61.6 mm²
+  against a constant declared 48.0 mm².
+
+  This matters most in `bunkershot3d.study`: a `MorrisDesign`,
+  `SaltelliDesign` or `SobolIndices` run over sole width or bounce would
+  attribute variance to a camber the user believes is pinned, and no
+  diagnostic in the artifact would say so.
+
+  Three complementary changes. (1) `loft_wedge()` returns a new `LoftedWedge`
+  carrying `effective_camber_area_m2`, `constructible_camber_range_m2`,
+  `aggregate_camber_was_clamped`, `any_camber_was_clamped`,
+  `aggregate_camber_substitution_m2` and a per-station
+  `StationCamber` account; `build_wedge_mesh()` is now a thin wrapper that
+  returns only its mesh. (2) `constructible_camber_range_m2` is re-exported
+  from `bunkershot3d.geometry` and the top-level package, and
+  `DesignSpace.check_wedge_camber(geometry)` screens the corners of a design
+  box against the band before a sweep spends solver time inside it — the wedge
+  knowledge lives in `geometry/design_bounds.py` and is imported on call, so
+  the study layer keeps its independence from the geometry package. (3)
+  `CamberFit` makes silence opt-in: the default `CamberFit.STRICT` raises
+  `InconstructibleCamberError` when a **declared** camber is outside the band,
+  and `CamberFit.NEAREST` is the explicit opt-in to nearest-constructible
+  behaviour. Relief-scaled stations are always fitted rather than refused,
+  because that request is derived by the lofter rather than declared by the
+  caller — but every substitution, declared or derived, is recorded.
+
+  `STRICT` is the default because it is what the rest of the package already
+  does: `build_sole_profile` raises for exactly this condition one layer down,
+  `DesignSpace.sample` raises rather than silently lose Sobol' balance, and
+  `WedgeGeometry.__post_init__` rejects inadmissible combinations. The lofter
+  was the single place that downgraded a loud failure to a silent one.
+  `InconstructibleCamberError` subclasses `BunkerShot3DValueError`, so
+  existing `except ValueError` sites keep working. Per CLAUDE.md every guard
+  `raise`s and none `assert`s, because `python -O` strips assertions.
+
+  Two consequences fell out of making the check loud. Three shipped grind
+  presets (`acushnet_example_2`, `acushnet_example_3`, `tour_shaved_heel_lob`)
+  declared a camber area their own sole cannot carry, so their meshes had
+  never matched their declarations; their `sole_camber_area_m2` — an
+  `ESTIMATED` field in every preset — is corrected to a constructible value,
+  and the patent-example helper now takes it per example because the band
+  climbs steeply with bounce. And the workbench GUI
+  (`src/tools/bunker_shot_gui/`) opts into `CamberFit.NEAREST` explicitly,
+  because a designer dragging a bounce slider must keep getting a head to look
+  at; having opted in, its evaluation report now states the camber area the
+  head actually carries alongside the declared one.
+
+- **2026-08-15** - Restored the two repository-hygiene guards
+  (`tests/unit/repo_hygiene/test_vendor_submodule_clean.py` and
+  `test_no_shadow_of_tools_shared.py`) to actually enforce. Both were
+  introduced 2026-05-16 (#5623 / PR #5625) and reduced to stubs on 2026-08-01
+  by consolidation commit 0575fb4b8 (#8322), which also emptied the shadow
+  ledger and added four new shadows in the same commit. Three independent
+  mechanisms kept them vacuous: neither file carried a suite marker, so
+  `unit-test-gate`'s `-m "unit and ..."` selector never collected them; both
+  called `pytest.skip` when `vendor/ud-tools` was absent, so they passed
+  vacuously even when collected; and push-to-main runs are cancelled by
+  `cancel-in-progress` concurrency (83 of the last 85), so the only lane that
+  would collect them effectively never completed.
+
+  A missing vendor tree now raises `AssertionError` when `$CI` is set and only
+  skips on a developer machine, matching `test_tools_child_copy_contract.py`.
+  The shadow ledger in `scripts/config/shadow_modules.yaml` is re-established
+  as a no-growth ratchet: 32 grandfathered entries (28 from the original #5623
+  baseline plus the 4 that #8322 added while the guard was off), each carrying
+  a `tracking_issue` and a `sunset_date`. Bare name lists are rejected, expired
+  sunset dates fail, and stale entries must be pruned, so the ledger can only
+  shrink.
+
+  The vendor-clean guard also carried a latent detection bug: it filtered
+  `git status` lines for the prefix `vendor/ud-tools/` (trailing slash), but
+  git collapses all submodule-internal state onto the gitlink entry whose path
+  is exactly `vendor/ud-tools`, with flags `S<c><m><u>`. The predicate could
+  never match. Detection now parses the sub-status field, so modified (`S.M.`)
+  and untracked (`S..U`) content fail while a deliberate pointer bump (`SC..`)
+  passes. A new `test_hygiene_guards_run_in_ci.py` asserts that every workflow
+  job running this package materialises `vendor/ud-tools`, and that
+  `unit-test-gate` does so before invoking pytest.
+
+- **2026-08-15** - Restored input validation on the symbolic solver router
+  (`src/shared/python/calc_backend/routers/symbolic_solver.py`, issue #8675).
+  This file is a shadow copy of a module owned by the Tools repository. Tools
+  hardened its copy on 2026-07-22 by guarding every `parse_expr` call with
+  `validate_expression`; the shadow was forked on 2026-05-20 and never received
+  that change, so it carried six fewer guards than upstream while keeping all
+  four parse sites. The removal was not deliberate — `validate_expression` has
+  no history in this file at all — it is drift by omission.
+
+  The exposure was not theoretical. `sympy.parse_expr` is an _evaluating_
+  parser, and all three affected endpoints (`/api/calc/symbolic/solve`,
+  `/derivative`, `/simplify`) take their expression from the request body, so
+  the input is remote by construction. Against the unguarded module,
+  `__import__("os").getcwd()` executed and returned the server's working
+  directory in the response error string, and `9**9**9**9` hung the worker
+  in an uninterruptible bignum computation that the thread-based pytest
+  timeout could not kill.
+
+  The fix re-adds `from src.shared.python.safe_eval import validate_expression`
+  (UD's own `src.`-prefixed convention, matching the sibling `ode_solver`
+  router) and the four upstream call sites: both sides of an `lhs = rhs`
+  equation, the bare-expression branch of `/solve`, and the single expression
+  on `/derivative` and `/simplify`. Note that a `vendor/ud-tools` submodule
+  bump cannot fix this: the submodule is unpopulated, and
+  `src/shared/python` precedes it in resolution, so the shadow is what is
+  actually imported.
+
+  Regression coverage pins the guard to behaviour rather than to its presence:
+  each endpoint must reject attribute-based calls, attribute access, and
+  exponentiation bombs; legitimate work (`x**2 - 4 = 0`, `x^2` via
+  `convert_xor`, `sin(x)**2 + cos(x)**2`) must still solve; the payload's
+  observable side effect must never appear in a response; and an
+  instrumented-ordering test asserts `parse_expr` never runs ahead of
+  `validate_expression` on any path.
+
+- **2026-08-14** - Rebuilt BunkerShot3D as a multi-fidelity wedge-design tool
+  under epic #8607 (ADR-0032). The package is now organised around the design
+  question — given two sole geometries, which performs better, in what
+  conditions, and how confident are we — rather than around granular backends.
+  Resolved DEM was demoted from the primary path on arithmetic, not preference:
+  the previous canonical configuration held 50,000 grains at 0.4 mm in a
+  0.4x0.3x0.1 m domain, a solid fraction of 1.4e-4 and a settled bed 0.023 mm
+  deep, while a real 100 mm USGA base needs 2.1e8 grains, and the Chrono driver
+  integrated at ~11,900x the Rayleigh stability limit by using the output
+  sampling rate as its timestep. The default tier (F0) is now an analytic
+  dynamic Resistive Force Theory solver at ~14 ms/shot, with DEM retained and
+  explicitly labelled non-viable at true grain scale.
+
+  New public surface: `bunkershot3d.{geometry,sand,domain,solvers,ball,metrics,
+study,vandv,provenance,units}`, with subpackages re-exported by name and a
+  curated flat set; `study` is lazily imported so `postproc` does not require
+  the optimisation extras. The result schema is versioned (contiguous arrays
+  replacing one HDF5 group per timestep, reader accepting v1 and v2) and every
+  run carries a manifest with config and physics hashes, seeds, and a validity
+  verdict.
+
+  **Credibility, stated plainly: verification is real, validation is zero.**
+  Observed orders are 1.004 (energy) and 2.001 (surface quadrature) against a
+  closed-form integral, and an angular-momentum check catches axis swaps that
+  leave the resultant force bit-identical. But no published data exists for ball
+  launch, spin, head deceleration in sand, energy split or ejecta mass, so
+  `ValidationComparison` refuses to construct such a comparison at all. The
+  solver is used ~60x outside RFT's stated Fr < 0.4 envelope and ~20x beyond any
+  published validation; `delta_h` and `lambda` are uncalibrated for a wedge, and
+  every F0 coefficient is borrowed rather than measured. Out-of-envelope queries
+  refuse rather than return a plausible number. See
+  `docs/bunkershot3d/credibility.md`; `docs/bunkershot3d/comparison.md` was
+  rewritten after seven of its eight claims were found to contradict the code.
+
+- **2026-08-14** - Completed the release-level claim-review authority for epic
+  #8557. All 36 release claims now link to supporting atomic claims, evidence,
+  negative controls, falsifiers, uncertainty boundaries, a scientific
+  disposition, and a remaining gate. Open review bookkeeping is zero while
+  human self-stabilization, physical bilateral sensing, and other scientific
+  gates remain explicitly untested or conditional.
+
+- `src/shared/python/club_data/loader.py`: Replaced `.iterrows()` with `df.to_dict('records')` (spec-exempt: micro-optimization)
+
+- **2026-08-14** - Reconciled all nine photographed momentum-transfer source
+  points with inspectable evidence artifacts and a generated readiness audit.
+  Eight retain bounded model answers, partial answers, or a negative
+  general-rule result. MTQ-06, whether passive or drift-mediated transfer
+  reduces timing precision beyond the adverse planar comparison and in people,
+  remains unresolved. Candidate-census completion is now reported separately
+  from 10 pending or in-progress release reviews.
+
+- **2026-08-14** - Added MT-E08 subject-scaled spatial contact-closure audit.
+  Six deterministic de Leva engineering profiles, three grip spans, and 61
+  prescribed states per case expose hand-to-grip miss distances of
+  0.171--0.616 m, with no sample meeting the registered 5 mm tolerance. Every
+  local bilateral contact Jacobian still has rank six, demonstrating that local
+  correction rank does not establish geometric closure. Closed-contact inverse
+  kinematics with joint-limit and collision checks is now a precondition for
+  compliant forward-contact, anatomical, passive-timing, slack, or human-
+  strategy claims.
+
 - **2026-08-14** - Qualified the MT-E07 bilateral point-force estimator over
   deterministic synthetic trajectories with normalized noise and cross-talk,
   cross-talk calibration residual, contact-center migration, and tracked-contact
@@ -101,14 +757,12 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   muscle or scapular action, and governed human validation remain open.
 
 - **2026-08-14** - Added the #8557 handwritten momentum-transfer agenda
-  readiness contract. Nine independently testable points now retain their
-  present answer state, decisive next test, falsifier, data gate, model plan,
-  and participant-held-out human stage in a generated fail-closed audit. Five
-  have bounded model answers, partial answers, or a supported rejection of a
-  general rule; casting as one construct, timing precision, self-correction,
-  and typed slack remain unresolved or definition-gated. The paper audit now
-  covers 956 candidates and 250 claims, while #8556 remains the human-data
-  blocker.
+  readiness contract. Nine independently testable points retain their present
+  answer state, decisive next test, falsifier, data gate, model plan, and
+  participant-held-out human stage in a generated fail-closed audit. Casting
+  is definition-dependent and partly answered; broader timing precision remains
+  unresolved beyond the adverse planar comparison. Issue #8556 remains the
+  human-data blocker.
 
 - **2026-08-13** - Adjudicated the transmission robustness chapter for #8557.
   All four registered programs remain nondominated in every held-out
@@ -206,6 +860,15 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   remain synthetic mechanism tiers; muscle, scapular, tissue-slack, equipment,
   human-performance, and universal-technique claims remain unsupported.
 
+- **2026-08-18** - Connected Launch Monitor Analytics to the private shot
+  corpus. `launch_monitor.corpus.load_private_corpus()` reads the data
+  authority's source-partitioned Parquet corpus (261,666 shots across 27
+  sources at current head) into the canonical schema via the importer's unit
+  tables, with source/metric pushdown, lazy `pyarrow`, the established
+  fail-closed `LAUNCH_MONITOR_DATA_ROOT` convention, and `apex_native`
+  excluded as unit-ambiguous. Also repaired the bare `flight_models` import
+  inside `kaggle_validation.compare_all_models_to_dataset()`, which only
+  resolved under pytest's `pythonpath` and broke installed consumers.
 - **2026-08-11** - Added the first UpstreamDrift consumer boundary for the
   canonical Tools ground-model contracts (Tools #4276). The headless gateway
   validates the exact flight-to-ground request/result and reference-execution
@@ -1750,6 +2413,7 @@ UpstreamDrift/
 | Tools Ground Consumer    | `src/shared/python/ground_model/`      | Headless exact-schema gateway to Tools flight-to-ground v1 records and reference execution; UI and final dependency pins remain tracked |
 | Putting Dynamics         | `src/shared/python/putting_dynamics/`   | Headless heterogeneous-green, collision, loft, hosel-wrench, skid/roll/rest, and hole-capture physics for #8345 |
 | 3D Putting UI            | `src/api/routes/putting_green.py`, `ui/src/pages/PuttingGreen.tsx`, `ui/src/components/visualization/PuttingScene3D.tsx` | Generated-contract R3F playback of the canonical putting model with collision, spin, hosel, surface, camera, and video controls for #8345 P1 |
+| BunkerShot3D Metrics     | `src/bunkershot3d/metrics/`              | Designer-facing metrics for bunker shot analysis: trajectory (dig/skid, depth trace), energy partition (club KE, sand/ball transfer), force/deceleration, head twist (shaft/CG moments), and forgiveness sensitivity gradients. Computed from HDF5 result artifacts for tier-agnostic (F0–F3) analysis per #8614. |
 | Shared Utilities         | `src/shared/`                            | Cross-engine validators, helpers, and exception definitions                                 |
 | Workspace Metadata       | `src/shared/python/workspace/`           | Project/session/dataset metadata store and CC-4 HDF5 result browser view models            |
 | URDF Models              | `shared/models/`                         | Canonical model definitions (URDF format) for golf swings, human body, pendulums            |
@@ -1988,6 +2652,7 @@ overlapping fixture names in nested conftests.
 
 | Tool       | Version | Purpose                                                                            | Blocking? |
 | ---------- | ------- | ---------------------------------------------------------------------------------- | --------- |
+| 2026-08-16 | 1.0.539 | Made BunkerShot3D's F0 solver and W7 metrics compose without hand-padding (issues #8702, #8700, #8701 under epic #8699). `bunkershot3d.solvers.shot.simulate_shot` now records the whole strike rather than the contact: a free-flight lead-in (`ShotSettings.free_flight_lead_steps`, 3.5 steps) brackets the entry crossing, and the march integrates through the disengaged tail until the sole reference is back above the free surface, so both `depth = 0` crossings the divot metrics interpolate are inside the record. `StrikeTrace.from_shot` is the metrics-layer view of an in-memory shot, one sample per recorded sample with nothing synthesised. `ShotSettings.max_time_s` moves from 10 ms to 200 ms because a nominal bunker shot does not clear the sand until ~10.8 ms, and a window that ends first now raises `ShotTruncatedError` from the solver -- naming `max_time_s` and the time reached, and carrying the partial trace -- instead of surfacing as `divot_metrics` refusing to locate an exit; `require_exit=False` keeps deliberate fixed-window marches legal. `ShotResult.depths_m` was engaged-element depth documented as sole depth (non-monotone, and reading zero while the sole was millimetres under), and is split into `engaged_depths_m` and a geometric `sole_depths_m`. `src/tools/bunker_shot_gui/bridge.py` drops its private free-flight placement and ballistic zero-wrench coast-out and consumes the library composition instead. 19 new tests; no new dependencies. |
 | 2026-04-27 | 1.0.83  | Fixed Bandit B604 false positive alerts in test files by adding nosec annotations. |
 | ruff       | latest  | Linting and formatting                                                             | Yes       |
 | mypy       | 1.7+    | Static type checking                                                               | Yes       |
@@ -2220,6 +2885,24 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-18 | 1.0.542 | Added `launch_monitor.corpus.load_private_corpus()`: reads the private data authority's source-partitioned Parquet shot corpus into the canonical launch-monitor schema (importer unit tables, source/metric pushdown, lazy pyarrow, fail-closed `LAUNCH_MONITOR_DATA_ROOT` convention, `apex_native` excluded as unit-ambiguous), exported from the facade with synthetic-fixture tests. Fixed the bare `flight_models` import in `kaggle_validation.compare_all_models_to_dataset()` that only resolved under pytest's `pythonpath`, so installed consumers no longer hit `ModuleNotFoundError`. |
+| 2026-08-16 | 1.0.540 | Repaired four CI Standard gates that had never been evaluated: `quality-gate` was pinned to the self-hosted fleet, so no run in the last 30 reached a conclusion and every gate below it was unobserved (routing fixed in #8729). `alembic.ini` now anchors `script_location` with `%(here)s` like `version_locations` already did, because Alembic resolves a relative script path against the current working directory and the autouse `_prevent_repo_root_io` fixture chdirs every test into `tmp_path` (#7935), which made the migration round-trip report a missing `src/api/migrations` that is in fact fully tracked. Restored the `tornado==6.5.8` pin dropped from `requirements.lock` and `requirements-dev.lock` by #8322, which deleted the pin line but left its `# via` comment block orphaned, leaving both locks structurally invalid rather than merely stale. Renewed the 44 mypy exclusion and 6 coverage-gate re-attestation dates from 2026-08-01 to 2026-10-01, aligned with the next `schedule` step where the cap drops to 36 against 44 exclusions; the ratchet `schedule` itself is unchanged and no exclusion was added (#8731). Split the DRY duplication ratchet: `scripts/config/dry_duplication_quarantine.json` records the 511 historical fingerprints with an owner and issue #8695, each capped at its observed count, and the gate now enforces `max(baseline, quarantine)` so newly introduced duplication still fails at its first repeat while historical debt is tracked explicitly instead of being folded invisibly into the baseline by a wholesale regeneration; the gate additionally reports quarantined fingerprints whose count has dropped so the ledger can be tightened. Raised the runtime security floors that `pip-audit` flagged once the lock repair let the audit steps run at all - `pillow>=12.3.0`, `cryptography>=50.0.0` and a newly direct `click>=8.3.3` - clearing PYSEC-2026-2132, PYSEC-2026-3552/3553/3554 and thirteen pillow advisories; `scripts/config/pip_audit_waivers.json` remains empty, so nothing was waived (#8738). `unit-test-gate` (#8735) and `shared-tools-consumer-contracts` (#8732) remain red with root-caused tracking issues rather than being suppressed. |
+| 2026-08-16 | 1.0.539 | Added the passive articulated-shaft qualification: a frozen 24-element bending basis and declared tapered-section torsion extend the distributed-grip authority through rigid, bending, torsion, and coupled activations. The registered 384-trajectory, two-engine, two-step atlas passes domain, activation, power, work--energy, refinement, and parity gates; retained coarse steps fail the linear-domain screen. Among 126 load/work-matched coupled-versus-rigid cells, delivery-speed differences have both signs (-0.0285 to +0.0212 m/s), rejecting a universal passive-shaft speed benefit. The result remains a planar structural reference, not equipment calibration, human validation, physiology, or coaching guidance. |
+| 2026-08-16 | 1.0.541 | Bumped `vendor/ud-tools` from `4744422d3` (2026-07-26) to Tools `main` `6472d0307`, and added `tests/unit/test_gui_launcher_manifest_targets.py`, which resolves every `pyqt6.module` declared in `src/shared/python/gui_launcher/tool_manifest.yaml` to a file in a reachable Tools source tree. The manifest advertised "Rate of Closure Impact Explorer" at `rate_of_closure.ui.pyqt6.main_window` while no Tools checkout the launcher searches contained that module: the tool had not yet landed on Tools `main`, and the vendored pin predated it. Nothing failed, because nothing checked — clicking the entry was the only way to discover it. The new sweep resolves by path tail rather than assuming a flat import root, because Tools nests some tools (`src/signal_processing_studio/python/signal_processing_studio/`) and not others (`src/rate_of_closure/`). Verified against the previous pin: `rate_of_closure` is the only entry that fails, with no false positives across the remaining entries. The check skips when no Tools checkout is present rather than passing vacuously. |
+| 2026-08-15 | 1.0.538 | Added the distributed-grip contact-discretization gate: one, three, and five tension fibers per hand preserve total stiffness and damping across 12 articulated states, two initial velocity signs, two time steps, two native engines, and nested 4/10/25/50 ms observations from 288 trajectories. Geometry null/reversal, virtual-power, passivity, work--energy, time-refinement, station-refinement, active-set, and cross-engine gates pass. The result is synthetic and right-censored; it does not establish physical grip pressure, shaft response, timing economy, delivery benefit, human transfer, or technique. |
+| 2026-08-15 | 1.0.537 | Added the typed unilateral articulated-attachment falsification gate: bilateral, tension-only, and dead-zone tension laws are evaluated across common-displacement and matched-extension comparisons, velocity-sign branches, isolated opening/reattachment probes, three time steps, and native MuJoCo/Pinocchio dynamics. The passive-law, virtual-power, work--energy, refinement, trajectory-parity, force-parity, and active-set-parity contracts pass. Natural five-millisecond branches do not produce opening or reattachment transitions, so event-probe results qualify the implementation only and do not establish a human or coaching strategy. |
+| 2026-08-15 | 1.0.536 | Added the bounded articulated bilateral-attachment forward gate: 18 selected closed states, seven nominal/adverse branches, three time steps, and native MuJoCo/Pinocchio dynamics produce 756 five-millisecond trajectories. Attachment-retention, power, work--energy, refinement, and parity gates pass; the result is explicitly right-censored and does not model unilateral slack, calibrated distributed grip/shaft, ground coupling, late downswing, impact, muscle action, human transfer, or coaching strategy. |
+| 2026-08-15 | 1.0.535 | Added the subject-scaled articulated contact-projection gate: finite bilateral Kelvin--Voigt forces arise from a declared club perturbation at all 234 closed states, project through the hand and club Jacobians with exact action--reaction and virtual-power controls, and yield matching native MuJoCo/Pinocchio initial accelerations. This is a same-state prerequisite, not a forward contact or human-strategy result. |
+| 2026-08-15 | 1.0.534 | Added the subject-scaled articulated-inertia cross-engine gate: all 234 closed configurations are rebuilt independently in native MuJoCo and robotics Pinocchio, with mass-matrix, bias-force, inverse-dynamics, symmetry, and positive-definiteness equivalence registered before forward bilateral contact. The result qualifies common-state rigid-body transport only and explicitly leaves contact, anatomy, equipment, muscle, delivery, and human claims open. |
+| 2026-08-14 | 1.0.533 | Added the closed-state cross-engine validity-horizon contract: all 54 profile--span--phase states are evaluated at 4, 10, 25, and 50 ms under nominal and nine one-factor adverse/null branches in native MuJoCo and Pinocchio. All 2,160 horizon cases pass trajectory, wrench, energy-discrepancy, and work--energy closure gates; the no-failure result is right-censored at 50 ms and cannot establish articulated anatomy, calibrated equipment, full delivery, or human strategy. |
+| 2026-08-14 | 1.0.532 | Added the closed-state forward-contact bridge: all 234 subject-scaled closed configurations map through a declared rigid coordinate transform with position and velocity closure gates, zero-preload and passivity controls, and unique initial-state digests; 54 early/middle/late profile-span cases enter native MuJoCo and Pinocchio for a short-horizon trajectory, wrench, and energy parity audit. The contract explicitly prohibits promotion to articulated anatomy, calibrated equipment, full-downswing delivery, passive-transfer benefit, or human strategy. |
+| 2026-08-15 | 1.0.531 | Added BunkerShot3D designer metrics module for issue #8614. Implements `bunkershot3d.metrics.trajectory` (TrajectoryMetrics, DivotProfile, dig/skid classification, depth trace, entry/max/exit points), `bunkershot3d.metrics.energy` (EnergyPartition, club KE tracking, energy-to-sand/ball accounting), `bunkershot3d.metrics.force` (ForceMetrics, peak/mean force and moment, deceleration, contact duration), `bunkershot3d.metrics.twist` (TwistMetrics, shaft-axis and CG moments, impulse, twist direction), and `bunkershot3d.metrics.forgiveness` (ForgivenessMetrics, SensitivityGradient, finite-difference sensitivity analysis, forgiveness index). 42 new tests covering all metric categories. Computed from HDF5 result artifacts for fidelity-tier-agnostic (F0–F3) analysis. |
+| 2026-08-15 | 1.0.530 | Added the BunkerShot3D ball model and SwingBallFlightPipeline handoff for issue #8613. Implements `bunkershot3d.ball.lie` (BallLie, BallLieType, BallProperties with USGA specs, submersion/exposed-area geometry), `bunkershot3d.ball.splash` (sand-mediated splash momentum transfer: ejecta velocity, splash impulse, and ball launch from splash), and `bunkershot3d.ball.pipeline` (BunkerShotState, compute_bunker_launch, to_post_impact_state for PostImpactState handoff). 47 new tests covering lie geometry, splash physics, pipeline integration, energy accounting, and tour bunker shot sanity checks. |
+| 2026-08-14 | 1.0.529 | Reconciled the photographed nine-point momentum-transfer agenda with direct evidence-artifact links and an explicit unresolved-point identity; corrected the paper so MTQ-06 timing precision, rather than casting, is the one globally unresolved source point; and separated complete 994-candidate coverage from the 10 of 31 release reviews that remain pending or in progress. |
+| 2026-08-14 | 1.0.528 | Added MT-E09 paired scapulothoracic contact geometry: a fixed-trunk and fixed-club nested comparison separates residual closure, solver termination, bound activity, rank, coordinate nullity, and an adverse grip-span control, while prohibiting anatomical, muscular, transfer, and strategy inference until validated articulated forward contact. |
+| 2026-08-14 | 1.0.527 | Added fail-closed scientific-support integrity for the proximal-to-distal program: all claim source locators must resolve to an in-range repository line; every registered local evidence artifact is SHA-256/size pinned; every external support URL is inventoried without being promoted to scientific validation; omission and tamper controls are executable; and the critical-question roadmap now maps each handwritten question to its bounded current answer, decisive model/measurement gate, and independently checked scapulothoracic, EMG, and distributed-grip acquisition leads. |
+| 2026-08-14 | 1.0.526 | Added the MT-E08 subject-scaled closed-contact inverse-kinematics screen: all 234 profile, grip-span, and phase configurations close with the club pose fixed, full achieved constraint rank, positive broad engineering-limit margins, positive coarse bounding-sphere clearances, and continuous solved paths. The contract preserves these as reduced-tree necessary conditions and advances the next gate to subject-specific anatomy and calibrated compliant forward contact. |
+| 2026-08-14 | 1.0.525 | Added the MT-E08 subject-scaled spatial contact-closure audit: six deterministic de Leva engineering profiles, three grip spans, and 61 states per case fail the 5 mm bilateral closure tolerance despite full local contact-Jacobian rank. The governed evidence, release claims, and scientific boundary now distinguish measurement rank, local kinematic rank, geometric closure, and forward contact dynamics, and require closed-contact inverse kinematics with joint-limit/collision checks before anatomical or human-strategy inference. |
 | 2026-08-14 | 1.0.524 | Added trajectory-level synthetic qualification for the MT-E07 bilateral point-force estimator: 301 samples and 32 seeded trials exercise normalized noise, cross-talk, calibration residual, and contact-center migration controls; a manufactured net-wrench-only failure demonstrates that resultant closure does not identify allocation; and the paper, registries, claim audit, figure, evidence, tests, and handoff retain explicit full-device, distributed-contact, anatomical, and governed-human gates. |
 | 2026-08-14 | 1.0.523 | Added bilateral-wrench structural identifiability: the separated point-force map has rank five and one axial null mode, the axial-scalar augmentation has rank six, and the full bilateral six-axis map has rank six and nullity six under declared scaling and geometry controls. |
 | 2026-08-14 | 1.0.522 | Added a two-excitation typed-slack dynamic audit that separates contact disengagement, transmission dead zone, structural preload, biological series compliance, and control deadband; enforces mechanical passivity and closure where applicable; reports scaled local sensitivity and pairwise output separation; and retains delivery, anatomical, class-identification, intentionality, and human conclusions as open. |
@@ -2766,6 +3449,10 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   incomplete required fields, non-reciprocal candidate-to-claim mappings,
   drift from the public release-claim manifest, or a completed audit status
   while any candidate is unadjudicated or still requires splitting.
+- **F-8557.1e:** Candidate-census completion and release-review completion
+  shall be reported separately. Every public release entry shall retain a
+  non-empty published status and audit state, and the validator shall enumerate
+  all pending or in-progress release keys.
 - **F-8557.1a:** Deterministic numeric, assertive, citation, and
   causal/generalizing triage flags may prioritize review but shall never assign
   scientific materiality or support automatically; Quarto cross-references
@@ -3031,8 +3718,10 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   zone, structural preload, biological series compliance, or control deadband;
   one class shall not be inferred from another.
 - The machine-readable registry shall provide required estimands, controls,
-  falsifiers, and governing issues for all seven questions. Synthetic evidence
-  may design human tests but shall not close human claims.
+  falsifiers, inspectable evidence artifacts, and governing issues for all
+  seven questions and all nine source points. The generated summary shall name
+  every unresolved source-point identifier. Synthetic evidence may design
+  human tests but shall not close human claims.
 - The implementation registry shall freeze model tiers, interventions,
   controls, outcomes, uncertainty axes, required data, falsifiers, and honest
   execution status before new preferred results are selected. The governed
@@ -3070,3 +3759,158 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   Memoryless backlash and reduced biological-compliance surrogates shall be
   named as such, and no scalar constitutive screen shall establish delivery,
   intentionality, anatomical, injury, coaching, or human benefit.
+
+### F-8557.20: Subject-Scaled Spatial Contact-Closure Audit
+
+- Subject scaling shall use declared deterministic engineering profiles and
+  shall not be represented as a participant sample or population distribution.
+- Bilateral geometric closure shall be tested independently of local contact-
+  constraint rank. A full-row-rank Jacobian at an open state shall not be
+  represented as anatomical contact feasibility.
+- The audit shall retain hand-to-grip distances, a preregistered closure
+  tolerance, local singular values and conditioning, point-force wrench rank,
+  axial augmentation rank, and grip-span/couple scaling in machine-readable
+  evidence with deterministic replay tests.
+- Only trajectories passing subject-scaled bilateral closed-contact inverse
+  kinematics, joint-limit checks, and collision checks may seed calibrated
+  compliant forward-contact experiments.
+- Contact closure, local rank, measurement rank, and forward contact dynamics
+  shall remain four distinct gates. None alone establishes passive anatomical
+  contact, reduced neural timing demand, useful slack, or a human strategy.
+
+### F-8557.21: Subject-Scaled Closed-Contact Feasibility Screen
+
+- The solver shall hold all six club coordinates fixed while solving the 14
+  reduced body and arm coordinates against bilateral point-contact residuals.
+- Every sample shall report solver convergence, bilateral closure, achieved
+  constraint rank, broad engineering-limit margin, coarse nonadjacent-body
+  collision clearance, solver effort, and adjacent-sample configuration change.
+- An unreachable grip span shall be retained as an adverse control; numerical
+  solver termination alone shall not count as feasible contact.
+- Joint bounds shall be labeled engineering guards rather than clinical or
+  subject-specific ranges. Bounding-sphere clearance with declared connected
+  and intended-contact exemptions shall not be called anatomical collision
+  qualification.
+- The screen shall not establish contact force, work, passivity, timing demand,
+  self-correction, proximal-speed benefit, typed-slack benefit, human strategy,
+  or coaching advice.
+- Calibrated compliant forward-contact experiments shall initialize from the
+  closed states, replace screening geometry with subject-specific anatomy where
+  available, and retain conservation, null/reversal, killswitch, and
+  independent-engine gates.
+
+### F-8557.22: Claim-Evidence Integrity and Critical-Question Completion
+
+- Every claim source locator shall use a repository-relative `path:line`
+  contract and fail on malformed, escaping, missing, or out-of-range locations.
+- Every local evidence artifact referenced by an atomic claim shall have a
+  deterministic SHA-256 digest, byte size, and reciprocal claim list. Every
+  external evidence URL shall be inventoried with its referring claims.
+- Content identity shall not be called source independence, empirical
+  validation, or scientific correctness. URL inventory shall not be called
+  availability or source verification, and deterministic validation shall not
+  require network access.
+- Each handwritten momentum-transfer question shall retain a bounded current
+  answer, unresolved boundary, decisive next model or measurement, negative
+  controls, uncertainty treatment, and participant-held-out completion gate.
+- Scapulothoracic, EMG, and distributed-grip literature shall inform model and
+  acquisition design only after checking the original source. Surface EMG
+  shall not identify grip wrench, activation onset shall retain baseline and
+  threshold sensitivity, and proceedings-level grip studies shall not satisfy
+  the governed human-data gate.
+
+### F-8557.23: Paired Scapulothoracic Contact-Geometry Screen
+
+- A fixed-shoulder branch shall be nested exactly within the mobile-scapula
+  branch, with identical trunk pose, club pose, grip targets, profiles, spans,
+  phases, residual tolerance, and numerical reporting.
+- Scapular protraction, elevation, upward rotation, and winging shall be
+  declared reduced screening coordinates. The ellipsoid, coordinate ranges,
+  and regularization shall be recorded and shall not be called subject-specific
+  anatomy or a reproduction of an external articulated model.
+- Residual closure, optimizer termination, coordinate-bound activity,
+  shoulder-center excursion, local contact-Jacobian rank, and coordinate
+  nullity shall be reported separately. Full row rank shall not identify the
+  scapular/glenohumeral allocation.
+- An unreachable grip span shall remain as an adverse control. Favorable
+  reachability shall not establish contact force, power, work, passivity,
+  tissue load, club delivery, muscle action, or human strategy.
+- The next gate shall use an independently validated articulated shoulder,
+  governed subject geometry where available, calibrated distributed grip
+  contact, and paired forward dynamics with conservation and null controls.
+
+### F-8557.24: Release-Level Claim-Review Authority
+
+- Every release claim shall map to one or more registered atomic claims with
+  non-empty evidence artifacts, source locations, negative controls,
+  falsifiers, and uncertainty boundaries.
+- The release-level authority shall record the public status, review state,
+  scientific disposition, supporting claim identifiers, and next decisive
+  scientific gate for every release claim.
+- Release-review completion shall mean that no release claim is waiting for
+  adjudication. It shall not imply that a conditional, adverse, unsupported,
+  unexecuted, or untested scientific claim has become validated.
+- Open-resource qualification shall fail closed when the release inventory,
+  atomic evidence contract, registry review states, or generated release-level
+  authority drifts.
+- Human self-stabilization, physical bilateral six-axis device validation,
+  and human torso/strategy claims shall remain untested until governed data and
+  their registered participant-held-out protocols exist.
+
+### F-8557.25: External-Source Qualification Authority
+
+- Every external claim-support URL shall be assigned exactly once to a
+  canonical underlying work. DOI, PubMed, publisher, repository, and
+  author-hosted mirrors shall not be counted as independent replication.
+- Every work shall declare its bibliographic identity, source type, evidence
+  role, project independence, scholarly-record status and check method,
+  scientific disposition, scope, and material limitations.
+- Every work-to-claim link shall state how the source is used and shall retain
+  the atomic claim's uncertainty boundary. Eligible support shall never exceed
+  the claims linked by the claim-evidence inventory.
+- A committed availability snapshot shall cover every external URL. Broken,
+  transient, omitted, duplicated, or unchecked URLs shall fail qualification;
+  automated-access restriction shall remain distinct from a broken link.
+- Open-resource qualification shall invoke the offline validator and fail when
+  the claim evidence, canonical-work grouping, claim assessments,
+  scholarly-record fields, availability coverage, or summary counts drift.
+- Passing source qualification shall establish traceability and bounded claim
+  fit only. It shall not close model, equipment, anatomy, archive, or governed
+  participant-held-out human gates.
+
+### F-8557.26: Finite Ground and Intrinsic Free-Moment Pathway
+
+- The finite-base model shall transform only the articulated human body tree;
+  the independently rooted club shall remain coupled through the qualified
+  distributed grip and passive shaft pathways.
+- Base translation and pitch shall enter inertia, posture-varying Christoffel
+  bias, gravity, hand-contact geometry, generalized grip reaction, ground
+  storage/damping, and the closed work--energy ledger. Fixed base shall reduce
+  exactly to the qualified shaft solver.
+- Ground force, intrinsic free moment, and reference-transported moment shall
+  remain distinct. Reversing the center-of-pressure reference shall change
+  only the transported moment, never generalized force or trajectory.
+- Fixed, translation-only, free-moment-only, and coupled pathways shall use
+  common rigid and natural-zero elastic/base initial states. Rigid-shaft and
+  horizontal-restraint-removed controls, velocity reversal, two native
+  engines, time refinement, matched-load/work screening, and domain gates
+  shall be retained.
+- Natural-zero, gravity-only, and conditional base balance shall be reported as
+  separate initialization sensitivities. A base-force balance shall not be
+  called whole-mechanism equilibrium.
+- Zero horizontal stiffness/damping shall be labeled removal of modeled
+  horizontal restraint, not complete Coulomb friction, unilateral contact, or
+  foot mechanics. Synthetic parameters shall not be called force-plate,
+  equipment, participant, human-transfer, timing, or coaching validation.
+- Use `np.vdot` instead of `np.sum(x**2)` and `np.sqrt(np.einsum("ij,ij->i", x, x))` instead of `np.linalg.norm(x, axis=1)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
+- Use `np.einsum('ij,ij->j', x, x)` instead of `np.sum(x * x, axis=0)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
+- (spec-exempt: micro-optimization) Replaced `.iterrows()` with `.to_dict('records')` in `data_processor_widget.py`, `kaggle_validation.py`, and `launch_monitor_analytics/widgets.py` to optimize UI and validation performance.
+- Use `np.einsum('ij,ij->i', x, x)` instead of `np.sum(x**2, axis=1)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
+- Use `np.einsum('ij,ij->i', A, B)` instead of `np.sum(A * B, axis=1)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
+- Use `np.sqrt(np.einsum('...i,...i->...', x, x))` instead of `np.linalg.norm(x, axis=-1)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
+
+* (spec-exempt: micro-optimization) Vectorized math operations (e.g. `np.einsum`) must be used for performance improvements without altering mathematical correctness.
+
+- Updated norm calculations in `src/tools/bunker_shot_gui/crosstier.py` to use `math.sqrt(np.vdot)` and `np.sqrt(np.einsum)` for improved performance. (spec-exempt: micro-optimization)
+
+* `bunkershot3d/metrics/trace.py`: Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum(...))` for multi-dimensional array norm, and replaced `float(np.linalg.norm)` with `math.sqrt(np.vdot)` for 1D array norm to improve performance. (spec-exempt: micro-optimization)

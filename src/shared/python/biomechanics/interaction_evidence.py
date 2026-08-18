@@ -87,6 +87,8 @@ class PredictionRecord:
     required_model_tiers: tuple[str, ...]
     tolerance_id: str
     status: str = "untested"
+    status_scope: str = ""
+    remaining_gate: str = ""
 
     def __post_init__(self) -> None:
         for name in (
@@ -109,6 +111,13 @@ class PredictionRecord:
         if self.status not in _PREDICTION_STATUSES:
             raise ValueError(
                 f"status must be one of {sorted(_PREDICTION_STATUSES)}, got {self.status!r}"
+            )
+        if self.status != "untested":
+            object.__setattr__(
+                self, "status_scope", _nonempty("status_scope", self.status_scope)
+            )
+            object.__setattr__(
+                self, "remaining_gate", _nonempty("remaining_gate", self.remaining_gate)
             )
 
     def as_record(self) -> dict[str, object]:

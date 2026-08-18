@@ -13,6 +13,8 @@ from scripts.research.proximal_distal_energy.run_shaft_contribution_study import
     write_outputs,
 )
 
+pytestmark = pytest.mark.scientific
+
 RECORD = (
     Path(__file__).resolve().parents[2]
     / "docs"

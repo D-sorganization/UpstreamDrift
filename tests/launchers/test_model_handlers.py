@@ -21,6 +21,8 @@ from src.launchers.launcher_model_handlers import (  # noqa: E402
 )
 from src.launchers.launcher_process_manager import ProcessManager  # noqa: E402
 
+pytestmark = pytest.mark.unit
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 # =============================================================================
