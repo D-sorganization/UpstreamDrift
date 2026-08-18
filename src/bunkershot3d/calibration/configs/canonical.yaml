@@ -1,9 +1,5 @@
 # Canonical Bunker Shot Configuration
 # Used by all three backends (Chrono, LIGGGHTS, MPM)
-#
-# Numeric literals must be written with an explicit exponent sign (1.0e+7, not
-# 1.0e7): YAML 1.1 parses the unsigned form as a *string*, which pydantic then
-# coerces silently. See tests/bunkershot3d/test_backend_stability_8612.py.
 
 bunker_bed:
   domain:
@@ -14,29 +10,17 @@ bunker_bed:
 
 grain_population:
   count: 50000
-  diameter_mean: 4.0e-4 # m (0.4 mm)
+  diameter_mean: 0.0004 # m (0.4 mm)
   diameter_sigma_log: 0.2
   density: 2650.0 # kg/m^3 (silica sand)
   coarse_graining_factor: 1.0 # >1 if scaling up grains
 
 contact_model:
-  # Base parameters used to derive backend-specific constants.
-  #
-  # youngs_modulus is the *measured* quartz value, not the 1e7-1e8 Pa soft-DEM
-  # folklore value this file used to carry (issue #8612). The peak Hertzian
-  # overlap of two grains in a binary impact is
-  #     delta_max/d = [ (15/16) m* v^2 / (E* sqrt(R*)) ]^(2/5) / d
-  # which is *independent of grain size*, so coarse-graining cannot reduce it.
-  # At the 25 m/s tour impact speed of ADR-0032:
-  #     E = 1e7  Pa -> 47 % interpenetration   (grains pass halfway through)
-  #     E = 1e8  Pa -> 19 %
-  #     E = 1e10 Pa -> 3.0 %
-  #     E = 7e10 Pa -> 1.4 %                    <- quartz, and under the 2 % cap
-  # The drivers refuse to run above 2 % (backends/stability.py).
+  # Base parameters used to derive backend-specific constants
   friction_coefficient: 0.5
   restitution_coefficient: 0.3
-  youngs_modulus: 7.0e+10 # Pa (quartz)
-  poisson_ratio: 0.17 # quartz; gives G = 29 GPa
+  youngs_modulus: 1.0e7 # Pa
+  poisson_ratio: 0.25
 
 clubhead:
   loft_deg: 60.0
@@ -47,7 +31,7 @@ clubhead:
 
 trajectory:
   file: "src/bunkershot3d/calibration/configs/reference_swing.csv"
-  duration: 0.1 # s — generate_reference_trajectory() writes a 100 ms segment
+
 output:
   downsample_grains: 10 # Only save grains every N steps
-  rate_hz: 2000.0 # 2kHz wrench output — sampling only, NOT the integrator step
+  rate_hz: 2000.0 # 2kHz wrench output

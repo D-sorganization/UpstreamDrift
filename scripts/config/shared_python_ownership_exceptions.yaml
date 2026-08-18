@@ -1,10 +1,5 @@
 schema_version: 1
 paths:
-  chat/_qt/runtime.py:
-    owner: Unresolved
-    rationale: Extracted from the Tools-owned chat/_chat_dock_widget_qt.py by PR #8553; every sibling in chat/_qt/ has a Tools counterpart, so this helper belongs upstream rather than here.
-    tracking_issue: 8687
-    review_date: "2026-12-31"
   sidekick/calculators/conversion/_concentration.py:
     owner: UpstreamDrift
     rationale: UpstreamDrift-specific process conversion implementation with no same-relative Tools source.

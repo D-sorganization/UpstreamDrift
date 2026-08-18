@@ -14,8 +14,6 @@ from src.shared.python.validation_pkg.kaggle_validation import (
     load_kaggle_dataset,
 )
 
-pytestmark = pytest.mark.unit
-
 # ---------------------------------------------------------------------------
 # ShotRecord dataclass
 # ---------------------------------------------------------------------------

@@ -236,33 +236,6 @@
       "issue": 8271,
       "reason": "Issue #8271: Performance optimization PR modifies file which contains a function exceeding parameter budget (12 > 8).",
       "expires_on": "2026-10-31"
-    },
-    {
-      "path": "src/bunkershot3d/geometry/wedge.py",
-      "symbol": "WedgeGeometry.from_millimetres",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 8609,
-      "reason": "Issue #8609 (epic #8607): from_millimetres is the unit-converting alternative constructor of a value object whose design vector genuinely has ~19 independent parameters - the Acushnet sole schema of US10143900B2/US10661131B2 (loft, lie, geometric bounce, sole width, 1.2 mm datum, entry height, leading and trailing sole radii, camber area, three rocker radii, three relief fractions, face progression, blade length, face height, topline width, head mass). Every one of them is an independent physical dimension of the head, so there is nothing cohesive left to group: the only way under the budget is a dict or **kwargs, which would trade a typed, mypy-checked signature for an untyped bag and move the constructor's invariant checks (bounce against entry height, sole-contour ratio, mass band) off the boundary where they currently fail closed. The count is the domain's, not the code's; the explicit signature is the right design and this exception records that deliberately rather than hiding it.",
-      "expires_on": "2027-08-31"
-    },
-    {
-      "path": "src/bunkershot3d/geometry/presets.py",
-      "symbol": "_retail_wedge",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 8609,
-      "reason": "Issue #8609 (epic #8607): _retail_wedge is the keyword-only builder over the same wedge design vector as WedgeGeometry.from_millimetres, narrowed to the parameters a retail model actually publishes (loft, marketed bounce, head mass, sole width, entry height, camber area, three relief fractions) plus the provenance citations each preset must carry. The parameters are independent published facts about a specific club, not a cohesive sub-object, and collapsing them into a mapping would lose both the type checking and the per-parameter provenance the presets exist to record. Same rationale as the from_millimetres exception above.",
-      "expires_on": "2027-08-31"
-    },
-    {
-      "path": "src/shared/python/simulation_backends/trace_io.py",
-      "symbol": "_write_common",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 8617,
-      "reason": "Pre-existing on origin/main: _write_common already carried 19 parameters before epic #8607 and is byte-identical to the origin/main version. PR #8617 (BunkerShot3D result schema v2) rewrote read_bunkershot3d_result in the same file, and because the architecture budget inspects whole changed files rather than changed functions, the pre-existing signature surfaced as if it were new. It was surfaced, not introduced, by #8617. It is shared platform code - the single write path that keeps Trace and BatchTrace from drifting apart - so decomposing it is a simulation_backends change owned outside this epic, and doing it inside a bunkershot3d PR would put an unreviewed refactor of every engine's trace writer in a granular-physics diff.",
-      "expires_on": "2027-02-28"
     }
   ]
 }

@@ -15,8 +15,6 @@ from src.launchers.launcher_layout_manager import (  # noqa: E402
 from src.launchers.model_registry import ModelSpec  # noqa: E402
 from src.shared.python.config.model_registry import ModelRegistry  # noqa: E402
 
-pytestmark = pytest.mark.unit
-
 
 @pytest.fixture
 def available_models() -> dict[str, ModelSpec]:

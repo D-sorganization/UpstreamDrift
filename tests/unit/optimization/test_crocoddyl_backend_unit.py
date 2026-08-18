@@ -18,8 +18,6 @@ from src.shared.python.optimization.crocoddyl_backend import (
     solve_swing_ddp,
 )
 
-pytestmark = pytest.mark.unit
-
 
 def test_mocked_stack_counts_as_unavailable() -> None:
     assert crocoddyl_available() is False

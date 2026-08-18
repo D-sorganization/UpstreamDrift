@@ -12,8 +12,6 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-pytestmark = pytest.mark.unit
-
 
 class TestExpectedTileIdsMatchesModelsYaml:
     """#5476 — EXPECTED_TILE_IDS must be derived from models.yaml."""

@@ -9,7 +9,6 @@ import numpy as np
 from numpy.typing import NDArray
 
 from scripts.research.proximal_distal_energy.spatial_forward_contract import (
-    CanonicalSpatialState,
     SpatialContactParameters,
     contact_pair,
     driver_target_velocities,
@@ -57,7 +56,6 @@ class SpatialForwardTrace:
     reversed_couple: FloatArray
     energy_balance_residual: FloatArray
     engine_identity: EngineIdentity
-    initial_state_digest: str
     model_digest: str
     driver_disabled_after_killswitch: bool
 
@@ -91,16 +89,11 @@ def run_engine_trace(
     params: SpatialContactParameters,
     *,
     disable_driver_after_killswitch: bool,
-    initial_state: CanonicalSpatialState | None = None,
-    trace_duration: float | None = None,
 ) -> SpatialForwardTrace:
     """Run one actual native forward engine under the common contact law."""
 
-    duration = params.duration if trace_duration is None else trace_duration
-    if not np.isfinite(duration) or not 0.0 < duration <= params.duration:
-        raise ValueError("trace_duration must be finite and in (0, params.duration]")
-    adapter = make_spatial_forward_adapter(engine, params, initial_state)
-    steps = int(round(duration / params.time_step))
+    adapter = make_spatial_forward_adapter(engine, params)
+    steps = int(round(params.duration / params.time_step))
     time = np.linspace(0.0, steps * params.time_step, steps + 1)
     arrays: dict[str, FloatArray] = {
         "hand_positions": np.zeros((steps + 1, 2, 3)),
@@ -255,7 +248,6 @@ def run_engine_trace(
     return SpatialForwardTrace(
         time=time,
         engine_identity=adapter.engine_identity,
-        initial_state_digest=adapter.initial_state_digest,
         model_digest=adapter.model_digest,
         driver_disabled_after_killswitch=disable_driver_after_killswitch,
         **arrays,

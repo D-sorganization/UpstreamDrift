@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+
 ROOT = Path(__file__).resolve().parents[3]
 ARTICLE = ROOT / "docs/research/proximal_distal_energy_transfer"
 QUESTION_REGISTRY = ARTICLE / "data/momentum_transfer_question_registry.json"
@@ -77,8 +78,6 @@ def build_readiness_audit(
             raise ValueError(f"{point['id']} lacks an answer or decisive next test")
         if not point["falsifier"]:
             raise ValueError(f"{point['id']} lacks a falsifier")
-        if not point.get("evidence_artifacts"):
-            raise ValueError(f"{point['id']} lacks inspectable evidence artifacts")
 
         rows.append(
             {
@@ -93,7 +92,6 @@ def build_readiness_audit(
                 "decisive_next_test": point["decisive_next_test"],
                 "falsifier": point["falsifier"],
                 "data_gate": point["data_gate"],
-                "evidence_artifacts": point["evidence_artifacts"],
             }
         )
 
@@ -126,11 +124,6 @@ def build_readiness_audit(
                 row["answer_state"] in {"unresolved", "unresolved_until_typed"}
                 for row in rows
             ),
-            "unresolved_point_ids": [
-                row["id"]
-                for row in rows
-                if row["answer_state"] in {"unresolved", "unresolved_until_typed"}
-            ],
             "model_plan_registered_for_all": all(
                 row["model_plan_state"] in ALLOWED_PLAN_STATES for row in rows
             ),

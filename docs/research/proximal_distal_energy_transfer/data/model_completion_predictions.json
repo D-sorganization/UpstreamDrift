@@ -30,9 +30,7 @@
         "full_body_3d"
       ],
       "tolerance_id": "preoutcome-primary",
-      "status": "supported",
-      "status_scope": "Branched persistence is supported through the declared reduced two-engine spatial forward-contact tier; the complete formal decomposition is available only in lower tiers.",
-      "remaining_gate": "Repeat the formal drift/control ledger in a closed-contact subject-scaled articulated spatial model and then in participant-held-out data."
+      "status": "untested"
     },
     {
       "prediction_id": "PD-H2-P1",
@@ -57,9 +55,7 @@
         "full_body_3d"
       ],
       "tolerance_id": "preoutcome-primary",
-      "status": "supported",
-      "status_scope": "Geometry sign, null, frame, and reference-transport responses are supported through the reduced spatial tiers. The subject-scaled atlas rejects the prescribed common states as closed anatomical configurations.",
-      "remaining_gate": "Solve bilateral closed-contact subject-scaled configurations, repeat the geometry controls in independently integrated articulated models, and test held-out human wrenches."
+      "status": "untested"
     },
     {
       "prediction_id": "PD-H3-P1",
@@ -86,9 +82,7 @@
         "full_body_3d"
       ],
       "tolerance_id": "preoutcome-primary",
-      "status": "supported",
-      "status_scope": "Finite post-killswitch negative force-generated couple is supported in the declared planar and reduced spatial forward-contact models.",
-      "remaining_gate": "Repeat with closed subject-scaled articulated arms, calibrated grip contact, distributed shaft dynamics, and governed human measurements."
+      "status": "untested"
     },
     {
       "prediction_id": "PD-H4-P1",
@@ -115,9 +109,7 @@
         "full_body_3d"
       ],
       "tolerance_id": "preoutcome-primary",
-      "status": "supported",
-      "status_scope": "A preselected opposing-command program improves lower-tail delivery speed in the declared held-out synthetic ensemble, with objective and load tradeoffs retained.",
-      "remaining_gate": "Test physiological activation, co-contraction, subject-scaled capacity, independently identified delays, and participant-held-out outcomes."
+      "status": "untested"
     },
     {
       "prediction_id": "PD-H5-P1",
@@ -145,9 +137,7 @@
         "full_body_3d"
       ],
       "tolerance_id": "preoutcome-primary",
-      "status": "inconclusive",
-      "status_scope": "Qualitative controls transport through reduced planar and spatial tiers, but the subject-scaled audit exposes a structural contact-closure discrepancy in the prescribed full-body common states.",
-      "remaining_gate": "Resolve bilateral contact closure, joint limits, collisions, compliant contact, and distributed club dynamics before claiming articulated full-body transport."
+      "status": "untested"
     }
   ],
   "tolerances": [

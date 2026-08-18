@@ -17,8 +17,6 @@ from unittest.mock import patch
 
 import pytest
 
-pytestmark = pytest.mark.unit
-
 # ---------------------------------------------------------------------------
 # Issue #1779 – SECRET_KEY fallback
 # ---------------------------------------------------------------------------

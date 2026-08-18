@@ -456,44 +456,18 @@ def _point_jacobians(
     return point, jv, jw
 
 
-def point_contact_jacobians(
-    model: SpatialModel,
-    kin: Kinematics,
-    joint_index: int,
-    local_point: Array,
-) -> tuple[Array, Array, Array]:
-    """Return one contact point and its linear and angular Jacobians.
-
-    This public research boundary lets higher-tier falsification studies reuse
-    the canonical articulated-tree kinematics without duplicating the private
-    ancestor walk.  The returned arrays have shapes ``(3,)``, ``(3, nq)``, and
-    ``(3, nq)`` respectively.
-    """
-
-    if not 0 <= joint_index < model.nq:
-        raise ValueError("joint_index must identify a model joint")
-    point = np.asarray(local_point, dtype=np.float64)
-    if point.shape != (3,) or not np.all(np.isfinite(point)):
-        raise ValueError("local_point must be one finite 3-vector")
-    return _point_jacobians(model, kin, joint_index, point)
-
-
 def evaluate_hand_wrenches(
     model: SpatialModel,
     time_s: float,
     *,
     coincident_hands: bool,
     reverse_geometry: bool = False,
-    grip_span_m: float = 0.18,
 ) -> HandWrenchSample:
     """Evaluate the registered two-hand force-couple intervention."""
 
-    if not np.isfinite(grip_span_m) or grip_span_m <= 0.0:
-        raise ValueError("grip_span_m must be finite and positive")
-
     q, qd, _ = prescribed_state(model, time_s)
     kin = forward_kinematics(model, q)
-    separation = 0.0 if coincident_hands else grip_span_m
+    separation = 0.0 if coincident_hands else 0.18
     geometry_sign = -1.0 if reverse_geometry else 1.0
     lead_local = _vec(0, geometry_sign * separation / 2.0, -0.03)
     trail_local = _vec(0, -geometry_sign * separation / 2.0, -0.03)

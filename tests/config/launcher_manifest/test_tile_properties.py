@@ -24,8 +24,6 @@ from src.config.launcher_manifest_loader import (
     LauncherTile,
 )
 
-pytestmark = pytest.mark.unit
-
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 _MATLAB_SUITE_DIALOG = _REPO_ROOT / "src" / "launchers" / "matlab_suite_dialog.py"
 

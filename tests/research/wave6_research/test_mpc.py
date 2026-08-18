@@ -19,8 +19,6 @@ from src.research.mpc.specialized import (
     WholeBodyMPC,
 )
 
-pytestmark = pytest.mark.unit
-
 
 class TestCostFunction:
     def test_running_cost_no_ref(self) -> None:

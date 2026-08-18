@@ -15,10 +15,10 @@ is self-describing and versioned.
 
 Two formats existed before CC-4:
 
-| Format       | Owner                    | Groups                                                                                                              |
-| ------------ | ------------------------ | ------------------------------------------------------------------------------------------------------------------- |
-| `Trace` v1.x | `simulation_backends`    | `/t`, `/q`, `/v`, `/u`                                                                                              |
-| BunkerShot3D | `bunkershot3d.io.schema` | `/clubhead/`, `/wrench/`, `/grains/` (contiguous arrays since BunkerShot3D schema v2; one group per timestep in v1) |
+| Format       | Owner                    | Groups                                           |
+| ------------ | ------------------------ | ------------------------------------------------ |
+| `Trace` v1.x | `simulation_backends`    | `/t`, `/q`, `/v`, `/u`                           |
+| BunkerShot3D | `bunkershot3d.io.schema` | `/clubhead/<t>/`, `/wrench/<t>/`, `/grains/<t>/` |
 
 **v2 unifies them** by extending `Trace` with optional trajectory and
 wrench groups. BunkerShot3D files can be imported via
@@ -117,25 +117,16 @@ counterfactual rollout.
 
 ## BunkerShot3D Profile
 
-BunkerShot3D results have their own versioned schema (an integer
-`schema_version` root attribute, see `bunkershot3d/io/schema.py`). They are
-**import-only** here: `read_bunkershot3d_result` delegates to
-`BunkerShotResultReader`, which accepts both BunkerShot3D schema versions, and
-maps the result to the unified schema as follows:
+BunkerShot3D files use a legacy time-keyed sub-group layout under
+`/clubhead/`, `/wrench/`, and `/grains/`. They are **import-only**:
+`read_bunkershot3d_result` maps them to the unified schema as follows:
 
-| BunkerShot3D v2 (current)          | v1 (legacy, read-only)                     | Trace v2 field                       |
-| ---------------------------------- | ------------------------------------------ | ------------------------------------ |
-| `/clubhead/position` `(T, 3)`      | `/clubhead/t_<t>/position` (3,)            | `markers[:, 0, :]` shape `(T, 1, 3)` |
-| `/wrench/force` + `torque` `(T,3)` | `/wrench/t_<t>/force` + `torque` (3,) each | `wrench` columns `[:3]` + `[3:]`     |
-| `/grains/…`                        | `/grains/t_<t>/…`                          | dropped (not mapped)                 |
-| —                                  | —                                          | `q`, `v` → empty `(T, 0)` arrays     |
-
-v1 files stored one HDF5 group per timestep and were read back in
-`sorted(keys)` order over `t_<time>` strings, which orders wrongly from
-t >= 10 s. The v1 path now orders frames by the numeric `time` attribute
-instead, migrating on read; the source file is never rewritten. A wrench series
-whose length differs from the clubhead series is rejected rather than silently
-mis-aligned.
+| BunkerShot3D                               | Trace v2 field                       |
+| ------------------------------------------ | ------------------------------------ |
+| `/clubhead/t_<t>/position` (3,)            | `markers[:, 0, :]` shape `(T, 1, 3)` |
+| `/wrench/t_<t>/force` + `torque` (3,) each | `wrench` columns `[:3]` + `[3:]`     |
+| `/grains/…`                                | dropped (not mapped)                 |
+| —                                          | `q`, `v` → empty `(T, 0)` arrays     |
 
 BunkerShot3D results are **never** written back in the BunkerShot3D format
 by the analysis layer; all downstream analysis reads `Trace` objects.

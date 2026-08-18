@@ -19,8 +19,6 @@ from src.shared.python.optimization.batch_swing_optimizer import (
 from src.shared.python.simulation_backends.model_params import GolfModelParams
 from src.shared.python.simulation_backends.protocol import BatchTrace
 
-pytestmark = pytest.mark.unit
-
 
 def _trace(q: np.ndarray, v: np.ndarray, dt: float = 0.01) -> BatchTrace:
     t = np.arange(q.shape[1]) * dt

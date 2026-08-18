@@ -11,11 +11,6 @@ from src.shared.python.launch_monitor.comparison import (
     PairwiseMonitorComparison,
     compare_monitors,
 )
-from src.shared.python.launch_monitor.corpus import (
-    CORPUS_COLUMN_MAP,
-    corpus_dataset_path,
-    load_private_corpus,
-)
 from src.shared.python.launch_monitor.dispersion import (
     DispersionResult,
     analyze_dispersion,
@@ -124,15 +119,12 @@ __all__ = [
     "analyze_trend",
     "apply_treatment",
     "compare_monitors",
-    "CORPUS_COLUMN_MAP",
-    "corpus_dataset_path",
     "compute_correlations",
     "compute_pca",
     "compute_vif",
     "detect_profile",
     "fit_predictive_model",
     "import_session",
-    "load_private_corpus",
     "normalize_header",
     "numeric_metric_columns",
 ]

@@ -8,8 +8,6 @@ from fastapi.testclient import TestClient
 from src.api.routes.putting_green import router
 from src.api.dependencies import get_engine_manager, get_task_manager
 
-pytestmark = pytest.mark.unit
-
 
 class MockGreen:
     def __init__(self):
