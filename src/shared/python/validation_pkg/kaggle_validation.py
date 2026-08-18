@@ -296,7 +296,7 @@ def compare_all_models_to_dataset(
 
     if sample_size is None:
         raise ValueError("sample_size must be provided")
-    from flight_models import (
+    from src.shared.python.physics.flight_models import (
         BallFlightModel,
         FlightModelRegistry,
         UnifiedLaunchConditions,
