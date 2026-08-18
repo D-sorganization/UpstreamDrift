@@ -1024,10 +1024,17 @@ jobs:
       - name: Run Green-Suite Unit Gate
         # No `|| true` / `continue-on-error`: any non-skip unit failure must
         # red this job and, via the `quality-gate` aggregate below, block merge.
+        #
+        # UNIT_GATE_QUARANTINE=1 activates the debt ledger in
+        # scripts/config/unit_gate_quarantine.json (issue #8766): tests that
+        # fail deterministically on main from the hollow-merge era are skipped
+        # here — and only here — so the gate stays meaningful for new
+        # regressions. Ledger entries may only be removed, never added.
         env:
           PYTHONPATH: .:src:src/engines/physics_engines/mujoco/python:src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
           QT_QPA_PLATFORM: offscreen
           QT_API: pyqt6
+          UNIT_GATE_QUARANTINE: "1"
         run: |
           set +e
           xvfb-run --auto-servernum python -m pytest \
