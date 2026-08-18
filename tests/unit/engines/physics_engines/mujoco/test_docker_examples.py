@@ -1,27 +1,48 @@
 """Unit tests for Docker examples and utilities."""
 
 import sys
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
-# Mock dm_control and imageio before importing modules
-mock_dm_control = MagicMock()
-mock_imageio = MagicMock()
-
-with patch.dict(
-    sys.modules,
-    {
-        "dm_control": mock_dm_control,
-        "dm_control.suite": mock_dm_control.suite,
-        "dm_control.mjcf": mock_dm_control.mjcf,
-        "imageio": mock_imageio,
-    },
-):
-    from src.engines.physics_engines.mujoco.docker import dump_names
-    from src.engines.physics_engines.mujoco.docker import example_dynamic_stance
+import pytest
 
 
-def test_dump_names_main():
+@pytest.fixture(scope="module")
+def docker_examples():
+    """Import the Docker example modules behind a scoped ``dm_control`` mock.
+
+    Both modules bind ``suite``/``mjcf`` at import time, so the mocks have to be
+    in ``sys.modules`` for the import itself. Installing them at module scope
+    leaks them into everything collected afterwards (#7307), so the patch lives
+    here and the bound references are handed to the tests instead.
+
+    Module-scoped because the imported modules keep the mock they were bound to;
+    a fresh per-test mock would not be visible to already-imported code.
+    """
+    dm_control = MagicMock()
+    imageio = MagicMock()
+    with patch.dict(
+        sys.modules,
+        {
+            "dm_control": dm_control,
+            "dm_control.suite": dm_control.suite,
+            "dm_control.mjcf": dm_control.mjcf,
+            "imageio": imageio,
+        },
+    ):
+        from src.engines.physics_engines.mujoco.docker import dump_names
+        from src.engines.physics_engines.mujoco.docker import example_dynamic_stance
+
+    return SimpleNamespace(
+        dm_control=dm_control,
+        dump_names=dump_names,
+        example_dynamic_stance=example_dynamic_stance,
+    )
+
+
+def test_dump_names_main(docker_examples):
     """Test the dump_names main script."""
+    mock_dm_control = docker_examples.dm_control
     with patch.dict(
         sys.modules,
         {"dm_control": mock_dm_control, "dm_control.suite": mock_dm_control.suite},
@@ -33,7 +54,7 @@ def test_dump_names_main():
         mock_dm_control.suite.load.return_value = mock_env
 
         # Test main execution
-        dump_names.main()
+        docker_examples.dump_names.main()
 
         # Verify it loads the correct suite
         mock_dm_control.suite.load.assert_called_once_with(
@@ -43,18 +64,19 @@ def test_dump_names_main():
         assert mock_env.physics.model.id2name.call_count == 4
 
 
-def test_example_dynamic_stance_get_cmu_xml_path():
+def test_example_dynamic_stance_get_cmu_xml_path(docker_examples):
     """Test get_cmu_xml_path in example_dynamic_stance."""
+    mock_dm_control = docker_examples.dm_control
     with patch.dict(
         sys.modules,
         {"dm_control": mock_dm_control, "dm_control.suite": mock_dm_control.suite},
     ):
         mock_dm_control.suite.__file__ = "/mock/path/to/suite/__init__.py"
-        path = example_dynamic_stance.get_cmu_xml_path()
+        path = docker_examples.example_dynamic_stance.get_cmu_xml_path()
         assert "humanoid_CMU.xml" in path
 
 
-def test_example_dynamic_stance_pd_control():
+def test_example_dynamic_stance_pd_control(docker_examples):
     """Test pd_control logic."""
     mock_physics = MagicMock()
 
@@ -71,7 +93,7 @@ def test_example_dynamic_stance_pd_control():
     target_pose = {"joint1": 1.0}
     actuators = {"joint1": 2}
 
-    action = example_dynamic_stance.pd_control(
+    action = docker_examples.example_dynamic_stance.pd_control(
         mock_physics, target_pose, actuators, kp=10.0, kd=1.0
     )
 
@@ -79,7 +101,7 @@ def test_example_dynamic_stance_pd_control():
     assert action[2] == 10.0  # (10.0 * (1.0 - 0.0)) - (1.0 * 0.0) = 10.0
 
 
-def test_example_dynamic_stance_customize_model():
+def test_example_dynamic_stance_customize_model(docker_examples):
     """Test customize_model geometric coloring."""
     mock_physics = MagicMock()
     mock_physics.model.ngeom = 3
@@ -91,20 +113,24 @@ def test_example_dynamic_stance_customize_model():
     mock_physics.model.id2name = mock_id2name
     mock_physics.model.geom_rgba = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
 
-    example_dynamic_stance.customize_model(mock_physics)
+    docker_examples.example_dynamic_stance.customize_model(mock_physics)
 
     assert mock_physics.model.geom_rgba[0] == [1.0, 1.0, 1.0, 1.0]  # White eye
     assert mock_physics.model.geom_rgba[1] == [0.8, 0.8, 0.8, 1.0]  # Silver club
     assert mock_physics.model.geom_rgba[2] == [0.6, 0.6, 0.6, 1.0]  # Grey shirt
 
 
-@patch.object(example_dynamic_stance.Path, "exists")
-@patch("builtins.open")
-def test_example_dynamic_stance_load_and_patch_xml(mock_open, mock_exists):
+def test_example_dynamic_stance_load_and_patch_xml(docker_examples):
     """Test XML loading and patching."""
-    with patch.dict(
-        sys.modules,
-        {"dm_control": mock_dm_control, "dm_control.mjcf": mock_dm_control.mjcf},
+    mock_dm_control = docker_examples.dm_control
+    example_dynamic_stance = docker_examples.example_dynamic_stance
+    with (
+        patch.object(example_dynamic_stance.Path, "exists") as mock_exists,
+        patch("builtins.open") as mock_open,
+        patch.dict(
+            sys.modules,
+            {"dm_control": mock_dm_control, "dm_control.mjcf": mock_dm_control.mjcf},
+        ),
     ):
         mock_exists.return_value = True
         mock_file = MagicMock()
@@ -120,8 +146,9 @@ def test_example_dynamic_stance_load_and_patch_xml(mock_open, mock_exists):
         mock_dm_control.mjcf.Physics.from_mjcf_model.assert_called_once_with(mock_root)
 
 
-def test_example_dynamic_stance_main():
+def test_example_dynamic_stance_main(docker_examples):
     """Test the main execution loop of dynamic stance."""
+    example_dynamic_stance = docker_examples.example_dynamic_stance
     with (
         patch.object(example_dynamic_stance, "get_cmu_xml_path") as mock_get_path,
         patch.object(example_dynamic_stance, "_setup_physics") as mock_setup,
