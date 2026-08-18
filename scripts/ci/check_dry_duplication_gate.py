@@ -278,25 +278,6 @@ def _baseline_limit(baseline: dict[str, Any], fingerprint: str) -> int:
     return int(entry.get("max_occurrences", 1))
 
 
-def _effective_limit(
-    baseline: dict[str, Any],
-    quarantine: dict[str, Any],
-    fingerprint: str,
-) -> int:
-    """Return the allowed occurrence count across baseline and quarantine.
-
-    The quarantine is a second, explicitly owned ledger of historical debt (see
-    ``_load_quarantine``). A fingerprint listed in neither file still falls back
-    to 1, so *newly introduced* duplication fails on its first repeat exactly as
-    before - the quarantine only ever relaxes fingerprints that were already
-    recorded, and only up to the count captured when they were recorded.
-    """
-    return max(
-        _baseline_limit(baseline, fingerprint),
-        _baseline_limit(quarantine, fingerprint),
-    )
-
-
 def _validate_baseline(baseline: dict[str, Any]) -> list[str]:
     entries = baseline.get("entries", {})
     if not isinstance(entries, dict):
@@ -343,13 +324,11 @@ def collect_findings(
     paths: list[Path],
     config: dict[str, Any],
     baseline: dict[str, Any],
-    quarantine: dict[str, Any] | None = None,
 ) -> list[DuplicateFinding]:
     """Return duplicate logic fingerprints that exceed the allowed baseline."""
     if not repo_root.is_dir():
         raise ValueError(f"repo_root must be an existing directory: {repo_root}")
 
-    quarantine = quarantine or {}
     occurrences_by_fingerprint = _iter_occurrences(
         repo_root=repo_root,
         paths=paths,
@@ -358,7 +337,7 @@ def collect_findings(
     findings: list[DuplicateFinding] = []
     for fingerprint, occurrences in sorted(occurrences_by_fingerprint.items()):
         occurrence_count = len(occurrences)
-        baseline_max = _effective_limit(baseline, quarantine, fingerprint)
+        baseline_max = _baseline_limit(baseline, fingerprint)
         if occurrence_count <= baseline_max:
             continue
         ordered = tuple(
@@ -414,56 +393,6 @@ def build_baseline(
     }
 
 
-def _load_quarantine(repo_root: Path, config: dict[str, Any]) -> dict[str, Any]:
-    """Return the quarantine ledger, or an empty ledger when none is configured.
-
-    The quarantine records duplication that already existed when the gate was
-    first enforced end-to-end, separately from ``dry_duplication_baseline.json``
-    so that the two are not conflated. Regenerating the baseline wholesale would
-    fold historical debt into the same file that records the ratchet's history
-    and silently bless it; keeping it here leaves the debt countable, owned, and
-    attached to an issue.
-    """
-    quarantine_path = str(config.get("quarantine_path", "")).strip()
-    if not quarantine_path:
-        return {}
-    resolved = repo_root / quarantine_path
-    if not resolved.is_file():
-        raise ValueError(f"quarantine_path does not exist: {quarantine_path}")
-    return _load_json(repo_root, Path(quarantine_path))
-
-
-def _stale_quarantine_entries(
-    *,
-    repo_root: Path,
-    paths: list[Path],
-    config: dict[str, Any],
-    quarantine: dict[str, Any],
-) -> list[tuple[str, int, int]]:
-    """Return quarantined fingerprints whose real count has dropped.
-
-    Reported, never fatal: reconciling duplication must not red the gate. It
-    exists so the ledger can be tightened as debt is paid down, rather than
-    quietly holding a ceiling that no longer reflects the tree.
-    """
-    entries = quarantine.get("entries", {})
-    if not isinstance(entries, dict) or not entries:
-        return []
-    counts = {
-        fingerprint: len(occurrences)
-        for fingerprint, occurrences in _iter_occurrences(
-            repo_root=repo_root, paths=paths, config=config
-        ).items()
-    }
-    stale: list[tuple[str, int, int]] = []
-    for fingerprint in sorted(entries):
-        recorded = _baseline_limit(quarantine, fingerprint)
-        actual = counts.get(fingerprint, 0)
-        if actual < recorded:
-            stale.append((fingerprint, recorded, actual))
-    return stale
-
-
 def _write_json(path: Path, data: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -507,25 +436,12 @@ def main(argv: list[str] | None = None) -> int:
             return 0
 
         baseline = _load_json(repo_root, baseline_path)
-        quarantine = _load_quarantine(repo_root, config)
         validation_errors = _validate_baseline(baseline)
-        validation_errors.extend(_validate_baseline(quarantine) if quarantine else [])
         findings = collect_findings(
             repo_root=repo_root,
             paths=paths,
             config=config,
             baseline=baseline,
-            quarantine=quarantine,
-        )
-        stale = (
-            _stale_quarantine_entries(
-                repo_root=repo_root,
-                paths=paths,
-                config=config,
-                quarantine=quarantine,
-            )
-            if quarantine
-            else []
         )
     except (OSError, RuntimeError, SyntaxError, ValueError) as exc:
         logger.error("DRY duplication gate failed: %s", exc)
@@ -547,27 +463,7 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 1
 
-    quarantined = len(quarantine.get("entries", {})) if quarantine else 0
-    if quarantined:
-        logger.info(
-            "OK: DRY duplication gate found no unapproved duplicate growth "
-            "(%s fingerprints quarantined as historical debt, owner %s, %s).",
-            quarantined,
-            quarantine.get("owner", "?"),
-            quarantine.get("issue", "?"),
-        )
-    else:
-        logger.info("OK: DRY duplication gate found no unapproved duplicate growth.")
-
-    if stale:
-        logger.info(
-            "\n%s quarantined fingerprint(s) now occur fewer times than recorded. "
-            "Lower or delete these entries in %s to tighten the ratchet:",
-            len(stale),
-            str(config.get("quarantine_path", "")),
-        )
-        for fingerprint, recorded, actual in stale:
-            logger.info("  %s: recorded %s, now %s", fingerprint[:12], recorded, actual)
+    logger.info("OK: DRY duplication gate found no unapproved duplicate growth.")
     return 0
 
 

@@ -23,8 +23,6 @@ from src.shared.python.pose_estimation.registry import (
     unregister_estimator,
 )
 
-pytestmark = pytest.mark.unit
-
 
 class _FakeEstimator:
     def __init__(self, **options: Any) -> None:

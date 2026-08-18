@@ -23,13 +23,7 @@ concurrency:
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
-    # Dispatcher placement only. This repo is public, so a hosted runner is
-    # free and unmetered; pinning the dispatcher meant every run waited for a
-    # self-hosted slot just to decide where to run. The runner it SELECTS is
-    # unchanged, so no workload moves off the fleet.
-    runs-on:
-      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' &&
-      'ubuntu-latest' || 'd-sorg-fleet-docker' }}
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 2
     outputs:
       runner: ${{ steps.check.outputs.runner }}

@@ -18,8 +18,6 @@ from src.tools.hmr2_sidecar.betas_bridge import (
 )
 from src.tools.hmr2_sidecar.run_hmr2 import NUM_BETAS, _write_stub_artifacts
 
-pytestmark = pytest.mark.unit
-
 _BETAS = [0.5, -1.2, 0.0, 0.3, -0.7, 1.1, 0.05, -0.4, 0.9, 0.2]
 
 

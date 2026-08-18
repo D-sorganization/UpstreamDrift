@@ -19,8 +19,6 @@ import numpy as np
 import pytest
 from src.shared.python.logging_pkg.logging_config import get_logger
 
-pytestmark = pytest.mark.scientific
-
 # Check if pendulum engine dependencies are available
 try:
     from src.engines.physics_engines.pendulum.python.pendulum_physics_engine import (

@@ -23,8 +23,6 @@ from src.unreal_integration.mesh_loader import (
     UnsupportedFormatError,
 )
 
-pytestmark = pytest.mark.unit
-
 
 class TestMeshFormat:
     """Tests for MeshFormat enum."""

@@ -2,16 +2,12 @@
 Tests verifying the MPM driver runs a real physics loop, not a hard-coded mock.
 Resolves issue #5676 (and orig #5553).
 
-Current state (after #8612):
+Current state:
 - The driver uses MuJoCo discrete spheres as a granular media approximation.
-- It has a 500-step relaxation phase (hardcoded, see issue #5676 acceptance
-  criterion).
-- Impact steps are derived from config.trajectory.duration and the *Courant
-  stable* timestep, not the timestep authored in the MJCF.
-- The contact wrench is computed from actual MuJoCo contact forces (not a
-  constant), signed for geom order and including the r x F moment.
-- A trajectory CSV is mandatory: the 5.0 m/s fallback was a silent physical
-  substitution and is now an error.
+- It has a 500-step settle phase (hardcoded, see issue #5676 acceptance criterion).
+- Impact steps are derived from config.trajectory.duration / timestep (not hardcoded).
+- The contact wrench is computed from actual MuJoCo contact forces (not a constant).
+- The fallback velocity (5.0 m/s) is used when no trajectory CSV is supplied.
 
 DbC postconditions:
 - State must evolve over at least 2 timesteps.
@@ -20,6 +16,7 @@ DbC postconditions:
 
 from __future__ import annotations
 
+import textwrap
 from pathlib import Path
 
 import pytest
@@ -29,15 +26,9 @@ mujoco = pytest.importorskip(
 )
 
 import numpy as np  # noqa: E402
-from _bunker_fixtures_8612 import (  # noqa: E402
-    write_config,
-    write_straight_trajectory,
-)
 
 from bunkershot3d.backends.mpm.driver import MPMDriver  # noqa: E402
 from bunkershot3d.io.schema import BunkerShotResultReader  # noqa: E402
-
-_SPEED = 1.0
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -46,16 +37,40 @@ _SPEED = 1.0
 
 @pytest.fixture
 def dummy_config(tmp_path: Path) -> Path:
-    write_straight_trajectory(tmp_path / "swing_data.csv", speed=_SPEED, duration=0.02)
-    return write_config(
-        tmp_path / "canonical.yaml",
-        grain_count=10,
-        diameter_mean=0.01,
-        diameter_sigma_log=0.1,
-        duration=0.005,
-        rate_hz=1000.0,
-        trajectory_file="swing_data.csv",
-    )
+    yaml_content = textwrap.dedent("""\
+        bunker_bed:
+          domain:
+            length_x: 2.0
+            width_y: 1.0
+            depth_z: 0.5
+          boundary: "fixed"
+        grain_population:
+          count: 10
+          diameter_mean: 0.01
+          diameter_sigma_log: 0.1
+          density: 2650.0
+          coarse_graining_factor: 1.0
+        contact_model:
+          friction_coefficient: 0.5
+          restitution_coefficient: 0.3
+          youngs_modulus: 1e7
+          poisson_ratio: 0.25
+        clubhead:
+          loft_deg: 56.0
+          bounce_deg: 10.0
+          width: 0.1
+          height: 0.05
+          mass: 0.3
+        trajectory:
+          duration: 0.005
+          file: "swing_data.csv"
+        output:
+          downsample_grains: 1
+          rate_hz: 1000.0
+    """)
+    config_path = tmp_path / "canonical.yaml"
+    config_path.write_text(yaml_content, encoding="utf-8")
+    return config_path
 
 
 # ---------------------------------------------------------------------------
@@ -80,7 +95,7 @@ def test_driver_state_evolves(dummy_config: Path, tmp_path: Path) -> None:
     reader.close()
 
     assert len(times) >= 2, f"Expected >=2 timesteps, got {len(times)}"
-    # The clubhead follows the prescribed swing along +x.
+    # Clubhead moves along +x at 5.0 m/s when no trajectory file is present
     dist = float(np.linalg.norm(positions[-1] - positions[0]))
     assert dist > 1e-4, f"Clubhead state did not evolve (displacement={dist:.2e} m)"
 

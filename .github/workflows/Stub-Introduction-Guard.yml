@@ -30,7 +30,7 @@ permissions:
 jobs:
   guard:
     timeout-minutes: 30
-    runs-on: ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
+    runs-on: ${{ vars.CI_RUNNER_MODE == 'hosted' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
     steps:
       - name: Check out PR head
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

@@ -13,8 +13,6 @@ from scripts.research.proximal_distal_energy.two_hand_wrench import (
     two_contact_wrench,
 )
 
-pytestmark = pytest.mark.scientific
-
 
 def test_opposed_normal_forces_form_a_pure_couple() -> None:
     positions = np.array([[-0.1, 0.0], [0.1, 0.0]])

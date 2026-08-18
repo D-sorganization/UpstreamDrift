@@ -8,8 +8,6 @@ from types import ModuleType, SimpleNamespace
 
 import pytest
 
-pytestmark = pytest.mark.unit
-
 ROOT = Path(__file__).parent.parent.parent.parent
 SPEC_PATH = ROOT / "sidekick.spec"
 BUILD_SCRIPT = ROOT / "scripts" / "packaging" / "build_sidekick_binary.py"

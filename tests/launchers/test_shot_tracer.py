@@ -11,8 +11,6 @@ from src.launchers.shot_tracer import (  # noqa: E402
     MultiModelShotTracerWindow,
 )
 
-pytestmark = pytest.mark.unit
-
 
 @pytest.fixture
 def mock_flight_models() -> Generator[tuple[MagicMock, MagicMock], None, None]:

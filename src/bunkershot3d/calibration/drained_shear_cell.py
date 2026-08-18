@@ -8,7 +8,7 @@ a real calibration silently received fabricated data.
 
 The stand-in is now reachable only through an explicit ``use_mock=True``
 (or ``backend="mock"``), exactly like :mod:`angle_of_repose`. Every other
-backend raises :class:`~bunkershot3d.exceptions.BackendNotImplementedError`.
+backend raises :class:`~src.bunkershot3d.exceptions.BackendNotImplementedError`.
 """
 
 from __future__ import annotations
