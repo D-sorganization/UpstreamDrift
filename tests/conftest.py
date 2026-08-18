@@ -631,8 +631,15 @@ def pytest_configure(config: pytest.Config) -> None:
         # Always override — even if already present — to ensure a single class identity.
         # xdist workers may have loaded 'contracts' via the short sys.path entry before
         # pytest_configure runs, creating a stale second module instance.
+        # Register every spelling explicitly. Seeding of the src.* spelling
+        # used to happen only as a side effect of earlier imports installing
+        # the alias finder, which made vendored-mode sessions order-dependent
+        # (test_tools_mode_aliases_contract_modules_to_one_identity fails when
+        # run in isolation without this).
         contract_aliases = (
-            ("contracts",) if parent_mode else ("contracts", "shared.python.contracts")
+            ("contracts", "src.shared.python.contracts")
+            if parent_mode
+            else ("contracts", "shared.python.contracts")
         )
         for alias in contract_aliases:
             sys.modules[alias] = canonical_mod
