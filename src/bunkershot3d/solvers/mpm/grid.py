@@ -368,6 +368,28 @@ def _scatter(
     return totals.astype(np.float64, copy=False)
 
 
+def _scatter_planar(
+    grid: PlaneStrainGrid,
+    node_index: NDArray[np.int64],
+    weighted: NDArray[np.float64],
+) -> NDArray[np.float64]:
+    """Scatter both in-plane components of ``weighted`` onto the nodes.
+
+    Plane strain carries exactly two components, so momentum and internal
+    force scatter through the same shape: ``(n_particles, n_stencil, 2)`` in,
+    ``(n_nodes, 2)`` out. Keeping the pair in one place means the component
+    order is fixed once rather than repeated per caller, where a transposed
+    axis would be a silent sign error rather than a failure.
+    """
+    return np.stack(
+        [
+            _scatter(grid, node_index, weighted[:, :, 0]),
+            _scatter(grid, node_index, weighted[:, :, 1]),
+        ],
+        axis=1,
+    )
+
+
 def scatter_mass(
     grid: PlaneStrainGrid,
     stencil: GridInterpolation,
@@ -418,13 +440,7 @@ def scatter_momentum(
     affine_term = np.einsum("nij,naj->nai", affine_velocity, stencil.offset_m)
     carried = particle_velocity_m_s[:, None, :] + affine_term
     weighted = stencil.weight[:, :, None] * particle_mass_kg[:, None, None] * carried
-    return np.stack(
-        [
-            _scatter(grid, stencil.node_index, weighted[:, :, 0]),
-            _scatter(grid, stencil.node_index, weighted[:, :, 1]),
-        ],
-        axis=1,
-    )
+    return _scatter_planar(grid, stencil.node_index, weighted)
 
 
 def scatter_stress_force(
@@ -452,13 +468,7 @@ def scatter_stress_force(
     """
     traction = np.einsum("nkl,nal->nak", cauchy_stress_pa, stencil.weight_gradient)
     weighted = -particle_volume_m2[:, None, None] * traction
-    return np.stack(
-        [
-            _scatter(grid, stencil.node_index, weighted[:, :, 0]),
-            _scatter(grid, stencil.node_index, weighted[:, :, 1]),
-        ],
-        axis=1,
-    )
+    return _scatter_planar(grid, stencil.node_index, weighted)
 
 
 def gather_velocity(
