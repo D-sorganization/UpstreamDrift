@@ -20,8 +20,6 @@ import pytest
 
 from src.launchers import embedded_tool_bootstrap as bootstrap
 
-pytestmark = pytest.mark.unit
-
 
 @pytest.fixture(autouse=True)
 def _reset_bootstrap_state():

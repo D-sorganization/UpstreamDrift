@@ -15,7 +15,7 @@ from typing import TypeAlias
 import numpy as np
 import numpy.typing as npt
 
-from bunkershot3d.postproc.wrench_trace import WrenchTrace
+from src.bunkershot3d.postproc.wrench_trace import WrenchTrace
 
 from .protocol import Trace
 

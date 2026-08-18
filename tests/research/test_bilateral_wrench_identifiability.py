@@ -10,8 +10,6 @@ from scripts.research.proximal_distal_energy.bilateral_wrench_identifiability im
     point_force_wrench_map,
 )
 
-pytestmark = pytest.mark.scientific
-
 
 def _contacts(span_m: float = 0.20) -> np.ndarray:
     return np.array(((-0.5 * span_m, 0.0, 0.0), (0.5 * span_m, 0.0, 0.0)))

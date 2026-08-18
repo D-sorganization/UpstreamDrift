@@ -3,13 +3,9 @@
 import json
 from pathlib import Path
 
-import pytest
-
 from scripts.research.proximal_distal_energy.audit_transmission_stability import (
     build_audit,
 )
-
-pytestmark = pytest.mark.scientific
 
 ROOT = Path(__file__).resolve().parents[2]
 PATH = (

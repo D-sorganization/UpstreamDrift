@@ -52,17 +52,6 @@ modal identification, mesh convergence, and work--energy closure pass. This
 does not calibrate equipment or show that the result survives coupling the
 beam into the two-hand constrained solve.
 
-The articulated finite-base extension closes the next numerical mechanism
-gate while producing an adverse primary inference result. Across 384 pathway
-and 192 independent-control trajectories, both native engines agree, energy
-residuals decrease with step refinement, and all declared shaft/base domains
-hold through 50 ms. Ground force and intrinsic free moment are mechanically
-active, but none of 384 coupled--fixed comparisons meets the preregistered 5%
-peak-load and total-dissipated-work match. A post-hoc non-ground-dissipation
-sensitivity admits 60 cells with both speed-difference signs. The experiment
-therefore qualifies finite-base coupling and rejects a universal delivery
-interpretation; it does not identify a ground-use strategy or human benefit.
-
 The reduced full-body common-state extension resolves implementation transport
 for a narrower spatial estimand. MuJoCo and an independent
 Lagrange--Christoffel formulation agree across 20 coordinates and 61 nonplanar
@@ -71,30 +60,6 @@ reverses the force-generated couple and coincident points remove it exactly.
 Because the forces are prescribed and the state is shared, this supports
 spatial inverse-dynamics and geometry transport but leaves passive forward
 contact inconclusive at that tier.
-
-The subject-scaled contact-closure audit rejects a tempting shortcut at that
-same tier. Six deterministic de Leva profiles retain a full-row-rank local
-contact Jacobian, yet the prescribed anatomical hand points remain
-0.171--0.616 m from the declared grips. Rank and conditioning therefore cannot
-substitute for closed feasible anatomy. The next articulated spatial tier must
-solve bilateral closed-contact inverse kinematics with joint-limit and
-collision checks before its forward contact, timing, recovery, or slack
-results can be interpreted. The registered inverse-kinematics follow-up now
-clears that reduced-tree gate in all 234 profile/span/phase samples while
-holding the club pose fixed. Its minimum engineering-limit margin is 0.103 rad
-and its minimum coarse bounding-sphere clearance is 30.9 mm. These are
-screening results, not measured anatomical ranges or mesh-level clearance;
-they advance the next test to calibrated compliant forward contact from the
-closed states.
-
-A paired arm-only intervention now isolates one omitted structure. With trunk
-and club pose fixed, the fixed-shoulder branch closes none of 54 registered
-states, whereas a bounded scapula-on-ellipsoid surrogate reaches the contact
-residual in 31 states and satisfies both residual and solver-termination gates
-in 16. Full rank persists while coordinate nullity rises from two to ten, so
-the result supports the importance of scapular geometry but also strengthens
-the non-identifiability boundary. It is not an anatomical, muscular, or human
-strategy result.
 
 The reduced spatial forward-contact extension resolves that narrower mechanism
 gate. Native MuJoCo and Pinocchio independently integrate two finite-mass hand
@@ -106,15 +71,6 @@ for 37.5 ms in both engines; coincident and reversed-moment-arm controls close
 exactly, and the work--energy residual decreases under timestep refinement.
 This supports reduced spatial contact persistence, not anatomical arms,
 muscles, calibrated grip tissue, equipment, or human strategy.
-
-The closed-state validity-horizon extension further shows that the same two
-engines remain inside the declared trajectory, wrench, energy-discrepancy, and
-work--energy closure gates for all 2,160 registered cases through 50 ms. The
-matrix spans all profile--span--phase states plus one-factor stiffness,
-damping, hand-mass, timestep, and immediate-driver-off branches. No failure is
-observed inside the registered interval, so the result is right-censored at 50
-ms. It strengthens the reduced numerical reference but does not turn the
-hand-carriage model into articulated anatomy or a full delivery simulation.
 
 The coupled uncertainty/control phase rejects two additional shortcuts. A net
 planar wrench cannot uniquely identify both hand forces, and six summary
@@ -147,21 +103,17 @@ order:
 
 1. **Articulated Spatial Forward-Contact Counterfactual.** Replace the executed
    hand-carriage reference with subject-scaled articulated arms and calibrated
-   grip interfaces. Start from the executed bilateral closed-contact,
-   engineering-limit, and coarse collision-qualified configurations, replace
-   those screens with subject-specific anatomy where available, then preserve the two-engine
-   same-state killswitch, force, couple, power, work, pathway, and closure
-   observables.
+   grip interfaces while preserving the two-engine same-state killswitch,
+   force, couple, power, work, pathway, and closure observables.
 2. **Calibrated Uncertainty and Constrained Control.** Extend the executed
    multivariable screen with population-informed distributions, measurement
    error, profile-likelihood or Bayesian calibration, larger held-out
    ensembles, and a constrained optimal-control comparator.
-3. **Spatial Model-Fidelity Ladder.** Extend the executed planar base rotation,
-   intrinsic free moment, distributed grip, and passive shaft into a three-
-   dimensional club/body solve with calibrated unilateral foot contact and
-   force-plate comparison without changing the registered interface
-   observables. Each rung should carry conservation checks and cross-engine
-   tolerance gates.
+3. **Spatial Model-Fidelity Ladder.** Add base rotation, a three-dimensional
+   club, ground pathways, and couple the executed distributed/modal shaft
+   reference into the forward constrained solve without changing the
+   registered interface observables. Each rung should carry
+   conservation checks and cross-engine tolerance gates.
 4. **Execute the Frozen Human-Data Protocol.** Acquire governed synchronized
    measurements that pass the fixed inclusion, residual, missingness,
    participant-holdout, and provenance gates. Sequence order alone must not be
@@ -208,9 +160,3 @@ and
 The frozen experimental protocol and synthetic readiness classification are
 recorded in [`data/experimental_protocol_v1.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/experimental_protocol_v1.json)
 and [`data/experimental_protocol_readiness.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/experimental_protocol_readiness.json).
-The finite-ground initialization, preregistered atlas, and labeled post-hoc
-matching sensitivity are recorded in
-[`data/articulated_ground_diagnostic.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/articulated_ground_diagnostic.json),
-[`data/articulated_ground_atlas.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/articulated_ground_atlas.json),
-and
-[`data/articulated_ground_posthoc_sensitivity.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/articulated_ground_posthoc_sensitivity.json).

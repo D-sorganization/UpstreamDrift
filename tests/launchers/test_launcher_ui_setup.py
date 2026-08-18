@@ -14,8 +14,6 @@ from PyQt6.QtWidgets import (
 )  # noqa: E402
 from src.launchers.launcher_ui_setup import UISetupManager  # noqa: E402
 
-pytestmark = pytest.mark.unit
-
 
 class DummyLauncher(QMainWindow):
     def __getattr__(self, name: str) -> Any:

@@ -17,15 +17,21 @@ Honesty rules enforced here (issue #7999):
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
 from typing import Any
 
 import structlog
 import yaml
 
-from .angle_of_repose import AngleOfReposeExperiment
-from .drained_shear_cell import DrainedShearCellExperiment
-from .optimizer import CalibrationOptimizer
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
+from src.bunkershot3d.calibration.angle_of_repose import (  # noqa: E402
+    AngleOfReposeExperiment,
+)
+from src.bunkershot3d.calibration.drained_shear_cell import (  # noqa: E402
+    DrainedShearCellExperiment,
+)
+from src.bunkershot3d.calibration.optimizer import CalibrationOptimizer  # noqa: E402
 
 logger = structlog.get_logger()
 

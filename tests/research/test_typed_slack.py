@@ -9,8 +9,6 @@ from scripts.research.proximal_distal_energy.typed_slack import (
     evaluate_slack,
 )
 
-pytestmark = pytest.mark.scientific
-
 
 def test_each_slack_class_has_distinct_engagement_and_energy_state() -> None:
     x = np.array([-0.02, 0.0, 0.02, 0.04])

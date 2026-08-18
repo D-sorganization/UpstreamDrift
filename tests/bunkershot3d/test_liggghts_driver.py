@@ -1,22 +1,22 @@
 """
 Tests for the LIGGGHTS backend driver.
 
-The backend refuses to run (ADR-0032 / #8612 finding B2: the deck contains no
-clubhead), so these tests cover the deck writer and the dump parser, which are
-retained. The refusal itself is pinned in ``test_liggghts_nonviable_8612.py``.
+Unit tests run without LIGGGHTS installed by mocking subprocess.
+Integration tests are skipped when the binary is absent.
 """
 
 from __future__ import annotations
 
+import shutil
+import textwrap
 from pathlib import Path
+from unittest.mock import patch
 
 import numpy as np
 import pytest
-from _bunker_fixtures_8612 import write_config
+
 from bunkershot3d.backends.liggghts.driver import LiggghtsDriver, _iter_dump_frames
 from bunkershot3d.exceptions import BackendNotImplementedError
-
-pytestmark = pytest.mark.unit
 
 # ---------------------------------------------------------------------------
 # Shared fixture
@@ -25,14 +25,39 @@ pytestmark = pytest.mark.unit
 
 @pytest.fixture
 def dummy_config(tmp_path: Path) -> Path:
-    return write_config(
-        tmp_path / "canonical.yaml",
-        grain_count=500,
-        diameter_mean=0.002,
-        diameter_sigma_log=0.1,
-        duration=0.005,
-        rate_hz=500.0,
-    )
+    yaml_content = textwrap.dedent("""\
+        bunker_bed:
+          domain:
+            length_x: 2.0
+            width_y: 1.0
+            depth_z: 0.5
+          boundary: "fixed"
+        grain_population:
+          count: 500
+          diameter_mean: 0.002
+          diameter_sigma_log: 0.1
+          density: 2650.0
+          coarse_graining_factor: 1.0
+        contact_model:
+          friction_coefficient: 0.5
+          restitution_coefficient: 0.3
+          youngs_modulus: 1.0e7
+          poisson_ratio: 0.25
+        clubhead:
+          loft_deg: 56.0
+          bounce_deg: 10.0
+          width: 0.1
+          height: 0.05
+          mass: 0.3
+        trajectory:
+          file: "swing_data.csv"
+        output:
+          downsample_grains: 1
+          rate_hz: 500.0
+        """)
+    config_path = tmp_path / "canonical.yaml"
+    config_path.write_text(yaml_content)
+    return config_path
 
 
 # ---------------------------------------------------------------------------
@@ -51,35 +76,78 @@ class TestLiggghtsDriverInit:
         assert driver.config_path == dummy_config
 
 
-class TestSetupAndRunRefuse:
-    """setup() and run() raise BackendNotImplementedError unconditionally."""
+class TestSetupRaisesWhenBinaryMissing:
+    """setup() must raise BackendNotImplementedError (not FileNotFoundError)
+    when the liggghts binary is absent from PATH."""
 
     def test_setup_raises_backend_not_implemented_error(
         self, dummy_config: Path
     ) -> None:
         driver = LiggghtsDriver(dummy_config)
-        with pytest.raises(BackendNotImplementedError):
+        with (
+            patch("shutil.which", return_value=None),
+            pytest.raises(BackendNotImplementedError),
+        ):
             driver.setup()
 
-    def test_setup_error_message_explains_the_missing_intruder(
+    def test_setup_error_message_mentions_install_location(
         self, dummy_config: Path
     ) -> None:
         driver = LiggghtsDriver(dummy_config)
-        with pytest.raises(BackendNotImplementedError, match="no clubhead"):
+        with (
+            patch("shutil.which", return_value=None),
+            pytest.raises(BackendNotImplementedError, match="lammps.org"),
+        ):
             driver.setup()
 
-    def test_run_raises_backend_not_implemented_error(
+    def test_setup_does_not_raise_file_not_found_error(
+        self, dummy_config: Path
+    ) -> None:
+        driver = LiggghtsDriver(dummy_config)
+        with patch("shutil.which", return_value=None):
+            with pytest.raises(BackendNotImplementedError):
+                driver.setup()
+            # Verify it is NOT a bare FileNotFoundError
+            try:
+                driver.setup()
+            except BackendNotImplementedError:
+                pass  # expected
+            except FileNotFoundError:  # pragma: no cover
+                pytest.fail("setup() leaked a raw FileNotFoundError")
+
+
+class TestRunRaisesWhenBinaryMissing:
+    """run() must also raise BackendNotImplementedError when liggghts is absent."""
+
+    def test_run_raises_backend_not_implemented_error_on_file_not_found(
         self, dummy_config: Path, tmp_path: Path
     ) -> None:
         driver = LiggghtsDriver(dummy_config)
-        with pytest.raises(BackendNotImplementedError):
+        # Patch shutil.which so setup() succeeds (thinks binary exists), but
+        # then patch subprocess.run to raise FileNotFoundError as the OS would.
+        with (
+            patch("shutil.which", return_value="/usr/bin/liggghts"),
+            patch(
+                "subprocess.run",
+                side_effect=FileNotFoundError("No such file or directory: liggghts"),
+            ),
+            pytest.raises(BackendNotImplementedError, match="lammps.org"),
+        ):
             driver.run(tmp_path / "out.h5")
 
-    def test_run_writes_no_output(self, dummy_config: Path, tmp_path: Path) -> None:
-        out = tmp_path / "out.h5"
-        with pytest.raises(BackendNotImplementedError):
-            LiggghtsDriver(dummy_config).run(out)
-        assert not out.exists()
+    def test_called_process_error_propagates(
+        self, dummy_config: Path, tmp_path: Path
+    ) -> None:
+        import subprocess
+
+        driver = LiggghtsDriver(dummy_config)
+        error = subprocess.CalledProcessError(1, "liggghts")
+        with (
+            patch("shutil.which", return_value="/usr/bin/liggghts"),
+            patch("subprocess.run", side_effect=error),
+            pytest.raises(subprocess.CalledProcessError),
+        ):
+            driver.run(tmp_path / "out.h5")
 
 
 class TestInputDeckGeneration:
@@ -218,3 +286,41 @@ class TestParseAndWrite:
 
         with h5py.File(output, "r") as f:
             assert "grains" in f
+
+
+# ---------------------------------------------------------------------------
+# Integration test — skipped when LIGGGHTS binary is absent
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.integration
+@pytest.mark.skipif(
+    shutil.which("liggghts") is None,
+    reason="liggghts not installed",
+)
+class TestLiggghtsIntegration:
+    """Full round-trip test: setup → run → HDF5 output.
+
+    Requires LIGGGHTS to be installed and on PATH.
+    """
+
+    def test_run_produces_output(self, dummy_config: Path, tmp_path: Path) -> None:
+        driver = LiggghtsDriver(dummy_config)
+        output = tmp_path / "result.h5"
+        driver.setup()
+        driver.run(output)
+        assert output.exists()
+        assert output.stat().st_size > 0
+
+    def test_output_contains_grain_states(
+        self, dummy_config: Path, tmp_path: Path
+    ) -> None:
+        import h5py
+
+        driver = LiggghtsDriver(dummy_config)
+        output = tmp_path / "result.h5"
+        driver.run(output)
+
+        with h5py.File(output, "r") as f:
+            assert "grains" in f
+            assert len(f["grains"]) > 0
