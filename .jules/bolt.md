@@ -146,7 +146,7 @@
 ## 2024-08-16 - Sum of Products Between Two Arrays via Einsum
 **Learning:** For calculating the sum of products between two 2D arrays along `axis=1`, `np.einsum('ij,ij->i', A, B)` avoids temporary intermediate array allocations and provides ~2.5x faster execution than `np.sum(A * B, axis=1)`.
 **Action:** Replace `np.sum(A * B, axis=1)` with `np.einsum('ij,ij->i', A, B)` when optimizing numeric array operations on paths like mathematical modeling or load calculations.
-## 2026-06-25 - [Replacing np.linalg.norm with math.sqrt(np.vdot) and np.sqrt(np.einsum) in GUI property getters]
+## 2026-06-25 - [Replacing Np.Linalg.Norm With Math.Sqrt(Np.Vdot) and Np.Sqrt(Np.Einsum) in GUI Property Getters]
 **Learning:** In the `CrossTierComparison` and `CrossTierProbe` classes (`crosstier.py`), `np.linalg.norm` is repeatedly used within tight property getters handling traces and arrays. For 1D force and velocity vectors, using `math.sqrt(np.vdot(x, x))` is ~2.2x faster as it bypasses NumPy dispatch overhead. For 2D batch computations over time series arrays, replacing `np.linalg.norm(arr, axis=1)` with `np.sqrt(np.einsum('ij,ij->i', arr, arr))` achieves a ~2x speedup by avoiding intermediate array allocations.
 **Action:** Replaced `np.linalg.norm` with `math.sqrt(np.vdot)` (for 1D vectors) and `np.sqrt(np.einsum)` (for 2D trace arrays) inside the GUI metrics and property getters in `crosstier.py`.
 ## 2026-08-18 - NumPy Array Norms
