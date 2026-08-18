@@ -516,20 +516,12 @@ def migrate_from_v1(path: str | os.PathLike[str]) -> Trace:
 def read_bunkershot3d_result(path: str | os.PathLike[str]) -> Trace:
     """Convert a BunkerShot3D HDF5 result file into a :class:`Trace`.
 
-    Both BunkerShot3D result schemas are accepted, because the reading is
-    delegated to :class:`bunkershot3d.io.schema.BunkerShotResultReader`, the one
-    component that knows both layouts:
-
-    * **v2** (current): contiguous chunked arrays, ordered as written.
-    * **v1** (legacy): one group per timestep, re-ordered on read by the numeric
-      ``time`` attribute rather than by the ``t_<time>`` key string, which sorted
-      wrongly from t >= 10 s onwards.
-
-    The mapping onto the unified v2 trace schema:
+    BunkerShot3D stores clubhead states and contact wrenches in per-timestep
+    sub-groups (``/clubhead/t_<t>/`` and ``/wrench/t_<t>/``). This function
+    reads those groups and maps them to the unified v2 schema:
 
     * Clubhead positions → ``Trace.markers`` shape ``(T, 1, 3)`` [m].
-    * Contact wrenches → ``Trace.wrench`` shape ``(T, 6)`` [N, N, N, N·m, …],
-      or ``None`` when the run recorded no wrench.
+    * Contact wrenches → ``Trace.wrench`` shape ``(T, 6)`` [N, N, N, N·m, …].
     * ``Trace.q`` / ``Trace.v`` are empty ``(T, 0)`` arrays (no joint states).
     * ``Trace.backend`` is set to ``"bunkershot3d"``.
 
@@ -541,31 +533,33 @@ def read_bunkershot3d_result(path: str | os.PathLike[str]) -> Trace:
 
     Raises:
         TypeError: If ``path`` is not a str or :class:`os.PathLike`.
-        ValueError: If ``path`` is empty, the file lacks a ``/clubhead`` group,
-            records an unsupported BunkerShot3D schema version, or holds a
-            wrench series of a different length than the clubhead series.
+        ValueError: If ``path`` is empty or the file lacks a ``/clubhead``
+            group.
     """
     _validate_path(path)
     spath = os.fspath(path)
-    # Imported lazily: the BunkerShot3D package depends on this module's
-    # package, and the shared trace layer must stay importable without it.
-    from bunkershot3d.io.schema import BunkerShotResultReader
-
-    with BunkerShotResultReader(spath) as reader:
-        times, positions, _ = reader.read_clubhead_states()
-        wrench_times, forces, torques = reader.read_contact_wrenches()
-
-    n = int(times.shape[0])
-    if wrench_times.shape[0] == 0:
-        wrench = None
-    elif wrench_times.shape[0] != n:
-        raise ValueError(
-            f"wrench series has {wrench_times.shape[0]} samples but the clubhead "
-            f"series has {n} in {spath!r}; they must be sampled together"
+    with h5py.File(spath, "r") as f:
+        if "clubhead" not in f:
+            raise ValueError(
+                f"not a BunkerShot3D file: missing /clubhead group in {spath!r}"
+            )
+        clubhead_grp = f["clubhead"]
+        keys = sorted(clubhead_grp.keys())
+        times = np.array([clubhead_grp[k].attrs["time"] for k in keys], dtype=float)
+        positions = np.array(
+            [clubhead_grp[k]["position"][:] for k in keys], dtype=float
         )
-    else:
-        wrench = np.concatenate([forces, torques], axis=1)
 
+        if "wrench" in f:
+            wrench_grp = f["wrench"]
+            wkeys = sorted(wrench_grp.keys())
+            forces = np.array([wrench_grp[k]["force"][:] for k in wkeys], dtype=float)
+            torques = np.array([wrench_grp[k]["torque"][:] for k in wkeys], dtype=float)
+            wrench = np.concatenate([forces, torques], axis=1)
+        else:
+            wrench = None
+
+    n = len(times)
     markers = positions.reshape(n, 1, 3)
     empty = np.empty((n, 0), dtype=float)
     return Trace(

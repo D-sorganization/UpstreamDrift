@@ -10,7 +10,7 @@ from fastapi import Request
 from fastapi.responses import JSONResponse, Response
 
 # Configure async tests
-pytestmark = [pytest.mark.anyio, pytest.mark.unit]
+pytestmark = pytest.mark.anyio
 
 
 @pytest.fixture(scope="module")

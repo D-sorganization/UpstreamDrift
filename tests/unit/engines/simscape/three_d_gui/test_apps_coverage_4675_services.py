@@ -17,8 +17,6 @@ import pytest
 
 from ._apps_coverage_helpers import make_model
 
-pytestmark = pytest.mark.unit
-
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 os.environ.setdefault("MPLBACKEND", "Agg")
 

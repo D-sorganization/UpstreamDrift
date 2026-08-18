@@ -33,9 +33,7 @@ permissions:
 jobs:
   local-only-workflows:
     name: Reject hosted runner routing
-    runs-on:
-      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
-      'd-sorg-fleet-docker' }}
+    runs-on: ${{ vars.CI_RUNNER_MODE == 'hosted' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -50,9 +48,7 @@ jobs:
 
   pinned-actions:
     name: Enforce action SHA pinning
-    runs-on:
-      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
-      'd-sorg-fleet-docker' }}
+    runs-on: ${{ vars.CI_RUNNER_MODE == 'hosted' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
     timeout-minutes: 15
     steps:
       - name: Clean corrupt git objects
@@ -74,9 +70,7 @@ jobs:
 
   workflow-inventory:
     name: Enforce workflow inventory
-    runs-on:
-      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
-      'd-sorg-fleet-docker' }}
+    runs-on: ${{ vars.CI_RUNNER_MODE == 'hosted' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
     timeout-minutes: 15
     steps:
       - name: Clean corrupt git objects
@@ -98,9 +92,7 @@ jobs:
 
   urdf-layering:
     name: Enforce URDF subsystem layering (ADR 0007)
-    runs-on:
-      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
-      'd-sorg-fleet-docker' }}
+    runs-on: ${{ vars.CI_RUNNER_MODE == 'hosted' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
     timeout-minutes: 15
     steps:
       - name: Clean corrupt git objects
@@ -120,50 +112,19 @@ jobs:
         shell: bash
         run: python3 scripts/ci/check_urdf_layering.py
 
-  # -- Dispatcher: route to hosted runners on public repos ---------------------
-  # This repo is public, so standard GitHub-hosted runners are free and
-  # unmetered. Keeping the dispatcher itself pinned to the fleet meant every
-  # downstream job had to wait for a self-hosted slot before it could even
-  # learn where to run. Private repos still fall through to the fleet, so no
-  # Actions minutes are ever billed.
-  #
-  # Reverting: set the repo variable CI_RUNNER_MODE=local.
+  # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
-    runs-on:
-      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
-      'd-sorg-fleet-docker' }}
-    timeout-minutes: 3
+    runs-on: d-sorg-fleet-docker
+    timeout-minutes: 2
     outputs:
       runner: ${{ steps.check.outputs.runner }}
-      mode: ${{ steps.check.outputs.mode }}
     steps:
-      - name: Select runner target without API polling
+      - name: Set runner
         id: check
-        shell: bash
-        env:
-          CI_RUNNER_MODE: ${{ vars.CI_RUNNER_MODE }}
-          REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
-          RUNNER_LABEL: d-sorg-fleet-docker
         run: |
-          mode="${CI_RUNNER_MODE:-auto}"
-          if [ "$REPOSITORY_PRIVATE" != "true" ] && [ "$mode" != "local" ]; then
-            mode="hosted"
-            runner="ubuntu-latest"
-          else
-            mode="local"
-            runner="$RUNNER_LABEL"
-          fi
           mkdir -p "$(dirname "$GITHUB_OUTPUT")"
-          {
-            echo "runner=$runner"
-            echo "mode=$mode"
-          } >> "$GITHUB_OUTPUT"
-          {
-            echo "## Runner Selection"
-            echo "- requested mode: \`${CI_RUNNER_MODE:-unset}\`"
-            echo "- selected target: \`$runner\` (\`$mode\`)"
-            echo "- GitHub API calls: \`0\`"
-          } >> "$GITHUB_STEP_SUMMARY"
+          echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
+          echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
   # ---------------------------------------------------------------------------
   # Quality gates are split into independent, parallel jobs (issue #7064) so a
   # single flaky step no longer masks unrelated failures. The required branch-
@@ -985,19 +946,7 @@ jobs:
         rust-wheel-parity,
       ]
     if: always()
-    # This job is the ONLY required branch-protection check on `main`, and it
-    # carries no gate logic of its own - it just echoes six `needs` results.
-    # Pinning it to the fleet meant every merge in the repo waited on a
-    # self-hosted Docker slot for a five-second summary job. It deliberately
-    # does NOT consume `needs.pick-runner.outputs.runner`: the required check
-    # must not inherit the dispatcher as an extra failure mode. Public repos
-    # get free unmetered hosted runners; private repos still fall through to
-    # the fleet, so no Actions minutes are ever billed.
-    #
-    # Reverting: set the repo variable CI_RUNNER_MODE=local.
-    runs-on:
-      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
-      'd-sorg-fleet-docker' }}
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 5
     steps:
       - name: Aggregate quality gate results
@@ -2124,10 +2073,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-    # The matrix already declares `ubuntu-latest` and several steps gate on
-    # `matrix.os == 'ubuntu-latest'`, so the fleet pin was a straight
-    # contradiction: hosted-shaped work queued behind a self-hosted slot.
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 25
     env:
       CARGO_HOME: ${{ github.workspace }}/.cargo-home
@@ -2401,11 +2347,7 @@ jobs:
 
   rust-quickstart:
     name: Rust Quickstart
-    # No `needs: pick-runner` on this job, so it routes directly rather than
-    # gaining a dependency edge just to learn where to run.
-    runs-on:
-      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
-      'd-sorg-fleet-docker' }}
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 15
     steps:
       - name: Clean corrupt git objects
@@ -2528,10 +2470,7 @@ jobs:
   rust-wheel-parity:
     name: rust-wheel-parity
     needs: pick-runner
-    # In the required `quality-gate` aggregate's `needs`, so a fleet pin here
-    # blocked every merge a second time. Pure `cargo`/`maturin` work with no
-    # fleet-local state, so it follows the dispatcher like its siblings.
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 30
     env:
       CARGO_HOME: ${{ github.workspace }}/.cargo-home

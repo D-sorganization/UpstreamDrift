@@ -29,8 +29,6 @@ from fastapi.routing import APIRoute
 
 from src.api.route_registry import discover_routes, register_routes
 
-pytestmark = pytest.mark.unit
-
 _ROUTE_PARAMETER_RE = re.compile(r"\{[^}/]+\}")
 
 

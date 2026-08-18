@@ -20,8 +20,6 @@ from src.shared.python.optimization.smooth_costs import (
     softplus_excess,
 )
 
-pytestmark = pytest.mark.unit
-
 
 def _trajectory(vel_scale: float, torque_scale: float, trunk_peak: float):
     t = np.linspace(0.0, 1.0, 50)

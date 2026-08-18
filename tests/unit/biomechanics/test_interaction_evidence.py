@@ -219,25 +219,8 @@ def test_manifest_round_trip_and_repository_prediction_registry() -> None:
         "H4",
         "H5",
     }
-    statuses = {
-        prediction.hypothesis_id: prediction.status
-        for prediction in registered.predictions
-    }
-    assert statuses == {
-        "H1": "supported",
-        "H2": "supported",
-        "H3": "supported",
-        "H4": "supported",
-        "H5": "inconclusive",
-    }
-    assert all(prediction.status_scope for prediction in registered.predictions)
-    assert all(prediction.remaining_gate for prediction in registered.predictions)
+    assert all(prediction.status == "untested" for prediction in registered.predictions)
     assert all(prediction.falsifier for prediction in registered.predictions)
-
-
-def test_adjudicated_prediction_requires_scope_and_remaining_gate() -> None:
-    with pytest.raises(ValueError, match="status_scope"):
-        PredictionRecord(**{**_prediction().as_record(), "status": "supported"})
 
 
 def test_manifest_rejects_duplicate_ids_and_missing_tolerances() -> None:

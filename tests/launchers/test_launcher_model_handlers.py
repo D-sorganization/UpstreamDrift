@@ -27,8 +27,6 @@ from src.launchers.launcher_model_handlers import (  # noqa: E402
 from src.config.launcher_manifest_loader import LauncherManifest
 from src.launchers.model_card import MODEL_IMAGES
 
-pytestmark = pytest.mark.unit
-
 
 def test_module_handler() -> None:
     handler = ModuleHandler({"type1", "type2"}, "my_module", "My Module")

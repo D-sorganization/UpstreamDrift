@@ -697,12 +697,7 @@ def _protect_engine_modules() -> Generator[None, None, None]:
     each test and restores them afterward so that corruption cannot leak
     across test boundaries.
     """
-    # list() needed: mutating dict during iteration. The lazy alias meta-path
-    # finder installed by src/shared/python/import_aliases.py can insert into
-    # sys.modules while this comprehension walks it, raising
-    # "RuntimeError: dictionary changed size during iteration" during setup.
-    # The teardown loop below already guards this the same way.
-    protected_keys = {k for k in list(sys.modules) if _matches_protected(k)}
+    protected_keys = {k for k in sys.modules if _matches_protected(k)}
     saved = {k: sys.modules[k] for k in protected_keys}
     yield
     # Remove any engine modules added or mutated during the test

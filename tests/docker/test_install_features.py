@@ -95,10 +95,10 @@ def test_profile_dry_run_works_with_modular_dockerfile_early_copy_set(
 
 def test_bunkershot3d_imports_through_src_package_namespace() -> None:
     """Runtime Docker health checks import BunkerShot3D through ``src``."""
-    import bunkershot3d.backends.chrono.driver as chrono_driver
-    import bunkershot3d.backends.liggghts.driver as liggghts_driver
-    import bunkershot3d.backends.mpm.driver as mpm_driver
-    from bunkershot3d.calibration.angle_of_repose import AngleOfReposeExperiment
+    import src.bunkershot3d.backends.chrono.driver as chrono_driver
+    import src.bunkershot3d.backends.liggghts.driver as liggghts_driver
+    import src.bunkershot3d.backends.mpm.driver as mpm_driver
+    from src.bunkershot3d.calibration.angle_of_repose import AngleOfReposeExperiment
 
     assert chrono_driver.ChronoDriver.__name__ == "ChronoDriver"
     assert liggghts_driver.LiggghtsDriver.__name__ == "LiggghtsDriver"

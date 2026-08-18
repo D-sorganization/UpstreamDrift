@@ -122,9 +122,9 @@ def _validate_marker_xyz(arr: np.ndarray, n: int, m: int) -> None:
         )
     finite = np.isfinite(arr)
     if finite.any():
-        # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is ~1.5x faster than np.linalg.norm(..., axis=-1)
-        clean_arr = np.where(finite.all(axis=-1, keepdims=True), arr, 0.0)
-        norms = np.sqrt(np.einsum("...i,...i->...", clean_arr, clean_arr))
+        norms = np.linalg.norm(
+            np.where(finite.all(axis=-1, keepdims=True), arr, 0.0), axis=-1
+        )
         sample_finite = finite.all(axis=-1)
         if np.any((norms >= MAX_BODY_POSITION_NORM_M) & sample_finite):
             max_n = float(norms[sample_finite].max()) if sample_finite.any() else 0.0

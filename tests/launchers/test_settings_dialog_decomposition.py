@@ -5,8 +5,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-import pytest
-
 from src.launchers import settings_dialog
 from src.launchers._settings_auxiliary_tabs import SettingsAuxiliaryTabsMixin
 from src.launchers.settings_runtime import (
@@ -16,8 +14,6 @@ from src.launchers.settings_runtime import (
     WslScriptDialog,
     compare_version_strings,
 )
-
-pytestmark = pytest.mark.unit
 
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]

@@ -77,9 +77,7 @@ def _coordinate_descent(
     tolerance: float = 1e-9,
 ) -> np.ndarray:
     coefficients = np.zeros(x.shape[1], dtype=float)
-    squared = np.einsum(
-        "ij,ij->j", x, x
-    )  # ⚡ Bolt: np.einsum avoids intermediate arrays and is ~3x faster than np.sum(x * x, axis=0)
+    squared = np.sum(x * x, axis=0)
     for _ in range(iterations):
         previous = coefficients.copy()
         for column in range(x.shape[1]):

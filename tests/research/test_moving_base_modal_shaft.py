@@ -18,8 +18,6 @@ from scripts.research.proximal_distal_energy.moving_base_modal_shaft import (
 )
 from scripts.research.proximal_distal_energy.two_arm_closed_loop import TwoArmControl
 
-pytestmark = pytest.mark.scientific
-
 
 def test_modal_contract_fails_closed() -> None:
     params = ModalShaftCouplingParams.publication_default(mode_count=3)
