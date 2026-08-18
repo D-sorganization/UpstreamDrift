@@ -31,6 +31,8 @@ from src.tools.hmr2_sidecar.run_hmr2 import (
     run_hmr2_sidecar,
 )
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture(autouse=True)
 def _no_ambient_hmr2_command(monkeypatch: pytest.MonkeyPatch) -> None:

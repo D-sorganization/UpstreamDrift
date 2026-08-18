@@ -10,6 +10,8 @@ from src.api.routes.engines import router
 from src.api.dependencies import get_engine_manager
 from src.shared.python.engine_core.engine_registry import EngineType
 
+pytestmark = pytest.mark.unit
+
 
 class MockEngineCapabilities:
     def to_dict(self):

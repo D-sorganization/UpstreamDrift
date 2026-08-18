@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 
 from scripts.research.proximal_distal_energy.typed_slack import SlackParameters
 from scripts.research.proximal_distal_energy.typed_slack_dynamic import (
@@ -9,6 +10,8 @@ from scripts.research.proximal_distal_energy.typed_slack_dynamic import (
     scaled_sensitivity_audit,
     simulate_dynamic_slack,
 )
+
+pytestmark = pytest.mark.scientific
 
 
 def _parameters(kind: str) -> DynamicSlackParameters:

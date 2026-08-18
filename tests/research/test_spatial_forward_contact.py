@@ -10,7 +10,9 @@ import numpy as np
 import pytest
 
 from scripts.research.proximal_distal_energy.spatial_forward_contract import (
+    CanonicalSpatialState,
     SpatialContactParameters,
+    canonical_spatial_state_digest,
     contact_pair,
     transport_wrench,
 )
@@ -32,6 +34,18 @@ def test_spatial_contact_parameters_fail_closed() -> None:
         SpatialContactParameters(
             lead_grip_offset=(0.0, 0.0, 0.0),
             trail_grip_offset=(0.0, 0.0, 0.0),
+        )
+
+
+def test_canonical_initial_state_requires_a_unit_quaternion() -> None:
+    with pytest.raises(ValueError, match="unit length"):
+        CanonicalSpatialState(
+            hand_positions=np.zeros((2, 3)),
+            hand_velocities=np.zeros((2, 3)),
+            club_position=np.zeros(3),
+            club_quaternion_wxyz=np.array([2.0, 0.0, 0.0, 0.0]),
+            club_linear_velocity=np.zeros(3),
+            club_angular_velocity=np.zeros(3),
         )
 
 
@@ -73,7 +87,12 @@ def test_wrench_transport_and_coincident_grip_control() -> None:
 def test_real_engine_adapters_execute_same_initial_contract() -> None:
     pytest.importorskip("mujoco")
     pin = pytest.importorskip("pinocchio")
-    if not hasattr(pin, "Model"):
+    version = getattr(pin, "__version__", None)
+    if (
+        not hasattr(pin, "Model")
+        or not isinstance(version, str)
+        or int(version.split(".")[0]) < 2
+    ):
         pytest.skip("Pinocchio import is not the robotics engine")
 
     from scripts.research.proximal_distal_energy.spatial_forward_engines import (
@@ -100,6 +119,35 @@ def test_real_engine_adapters_execute_same_initial_contract() -> None:
         pinocchio_adapter.canonical_state().club_position,
         atol=1e-12,
     )
+    initial_state = CanonicalSpatialState(
+        hand_positions=np.array([[0.2, 0.11, 1.0], [0.2, -0.11, 1.0]]),
+        hand_velocities=np.array([[0.3, 0.1, -0.2], [0.2, -0.1, -0.2]]),
+        club_position=np.array([0.2, 0.0, 1.03]),
+        club_quaternion_wxyz=np.array([1.0, 0.0, 0.0, 0.0]),
+        club_linear_velocity=np.array([0.25, 0.0, -0.2]),
+        club_angular_velocity=np.array([0.1, -0.2, 0.4]),
+    )
+    digest = canonical_spatial_state_digest(initial_state)
+    mapped_adapters = (
+        make_spatial_forward_adapter("mujoco", params, initial_state),
+        make_spatial_forward_adapter("pinocchio", params, initial_state),
+    )
+    for adapter in mapped_adapters:
+        assert adapter.initial_state_digest == digest
+        achieved = adapter.canonical_state()
+        np.testing.assert_allclose(
+            achieved.hand_positions, initial_state.hand_positions
+        )
+        np.testing.assert_allclose(
+            achieved.hand_velocities, initial_state.hand_velocities
+        )
+        np.testing.assert_allclose(achieved.club_position, initial_state.club_position)
+        np.testing.assert_allclose(
+            achieved.club_linear_velocity, initial_state.club_linear_velocity
+        )
+        np.testing.assert_allclose(
+            achieved.club_angular_velocity, initial_state.club_angular_velocity
+        )
     from scripts.research.proximal_distal_energy.spatial_forward_study import (
         compare_engine_traces,
         run_engine_trace,

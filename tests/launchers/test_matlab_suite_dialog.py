@@ -12,6 +12,9 @@ from __future__ import annotations
 from unittest.mock import MagicMock
 
 from PyQt6.QtWidgets import QDialog, QPushButton, QWidget
+import pytest
+
+pytestmark = pytest.mark.unit
 
 
 class _StubParent(QWidget):
