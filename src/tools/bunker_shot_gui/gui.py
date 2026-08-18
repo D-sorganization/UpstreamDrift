@@ -38,6 +38,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import (
     QApplication,
+    QFileDialog,
     QGridLayout,
     QHBoxLayout,
     QLabel,
@@ -46,16 +47,38 @@ from PyQt6.QtWidgets import (
     QScrollArea,
     QSplitter,
     QStatusBar,
+    QTabWidget,
     QVBoxLayout,
     QWidget,
 )
 
+from bunkershot3d.fields.store import load_field
+
 from src.shared.python.ui import HoverCopyTextBrowser
 
+from .crosstier import CrossTierComparison
+from .crosstier_run import cross_tier_check
 from .design import SandCondition, SolverSetup, SwingSetup, WorkbenchInputError
+from .field import LoadComponent, LoadScale, SoleLoadField
 from .model import DesignEvaluation, WorkbenchComparison, WorkbenchModel
+from .render import field_scales
+from .render3d import SceneScale, scene_scale
 from .report import comparison_report, evaluation_report
-from .widgets import ConditionPanel, DesignPanel, GridMapWidget, VerdictBanner
+from .shot3d import ShotScene
+from .slices import CursorMap
+from .viewport_widgets import (
+    CrossTierWidget,
+    SandSliceWidget,
+    ShotViewportWidget,
+    TracePanelWidget,
+)
+from .widgets import (
+    ConditionPanel,
+    DesignPanel,
+    GridMapWidget,
+    SoleLoadFieldWidget,
+    VerdictBanner,
+)
 
 __all__ = [
     "BunkerShotWidget",
@@ -77,9 +100,109 @@ _IDLE_TEXT = (
     "force, depth or carry is reported at all.\n"
 )
 
+_SAND_FIELD_HINT = (
+    "No sand field loaded. F1 fields are computed offline -- a march at "
+    "ADR-0033's bulk resolution takes tens of seconds, so running one here "
+    "would freeze the workbench and running a coarser one would put a "
+    "picture on screen at a resolution nobody chose. Capture one with "
+    "capture_f1_field, store it with save_field, and open it here. The "
+    "field carries its own tier and validity status, checked against the "
+    "file's digest on load."
+)
+
+_STALE_FIELD_HINT = (
+    "Sand field cleared: it was cut from a different run. A cut beside a "
+    "freshly evaluated design would read as that design's sand, which it "
+    "is not. Load the field belonging to this run."
+)
+
 ModelFactory = Callable[[SolverSetup], WorkbenchModel]
 
 _ResultT = TypeVar("_ResultT")
+
+
+def _fields(
+    evaluations: tuple[DesignEvaluation, ...],
+) -> tuple[SoleLoadField, ...]:
+    """Return the load fields of the evaluations that produced one."""
+    return tuple(
+        evaluation.shot.sole_field
+        for evaluation in evaluations
+        if evaluation.shot.sole_field is not None
+    )
+
+
+def _shared_scales(
+    evaluations: tuple[DesignEvaluation, ...],
+) -> dict[LoadComponent, LoadScale] | None:
+    """Return the one set of colour scales every supplied design is drawn on.
+
+    Args:
+        evaluations: The designs about to be painted together.
+
+    Returns:
+        The merged scales, or ``None`` when no design produced a field.
+    """
+    fields = _fields(evaluations)
+    return field_scales(fields) if fields else None
+
+
+def _scenes(
+    evaluations: tuple[DesignEvaluation, ...],
+) -> tuple[ShotScene, ...]:
+    """Return every 3-D scene among the supplied designs.
+
+    Args:
+        evaluations: The designs about to be drawn together.
+
+    Returns:
+        The scenes, skipping any design whose shot did not produce one.
+    """
+    return tuple(
+        scene
+        for evaluation in evaluations
+        if (scene := evaluation.shot.scene) is not None
+    )
+
+
+def _shared_scene_scale(
+    evaluations: tuple[DesignEvaluation, ...],
+) -> SceneScale | None:
+    """Return the one world box every supplied scene is drawn in.
+
+    Args:
+        evaluations: The designs about to be drawn together.
+
+    Returns:
+        The covering box, or ``None`` when no design produced a scene. The
+        same argument as the colour scales: two divots each framed to their
+        own extent look like the same divot.
+    """
+    scenes = _scenes(evaluations)
+    return scene_scale(scenes) if scenes else None
+
+
+def _density_limits(
+    evaluations: tuple[DesignEvaluation, ...],
+) -> tuple[float, float] | None:
+    """Return the one impulse-density ramp every supplied map is drawn on.
+
+    Args:
+        evaluations: The designs about to be painted together.
+
+    Returns:
+        ``(0, peak)`` over all of them, or ``None`` when no map exists or the
+        maps are empty -- in which case the widget falls back to its own
+        stretch, which for a single empty map is harmless.
+    """
+    maps = [
+        evaluation.shot.sole_load
+        for evaluation in evaluations
+        if evaluation.shot.sole_load is not None
+    ]
+    peaks = [sole_load.peak_density_pa_s for sole_load in maps]
+    top = max(peaks, default=0.0)
+    return (0.0, top) if top > 0.0 else None
 
 
 class BunkerShotWidget(QWidget):
@@ -143,6 +266,22 @@ class BunkerShotWidget(QWidget):
         self._compare_button = QPushButton("Compare A vs B")
         self._compare_button.clicked.connect(self.run_comparison)
         column.addWidget(self._compare_button)
+
+        # Separate button, and separate for a reason rather than for tidiness.
+        # The cross-tier check marches the F1 continuum once per probe -- F1
+        # has no shot history yet (#8733) -- so it costs minutes where a
+        # design costs milliseconds. Running it on every evaluation would
+        # make the workbench unusable, and running it silently would make
+        # the wait inexplicable.
+        self._cross_tier_button = QPushButton("Cross-tier check A (F0 vs F1)")
+        self._cross_tier_button.setToolTip(
+            "Puts the F1 plane-strain MPM continuum beside F0 on design A. "
+            "Minutes, not milliseconds: F1 has no shot history yet, so each "
+            "probe is a separate march to one recorded pose. Consistency "
+            "between two uncalibrated models is not validation."
+        )
+        self._cross_tier_button.clicked.connect(self.run_cross_tier)
+        column.addWidget(self._cross_tier_button)
         column.addStretch()
 
         scroll = QScrollArea()
@@ -158,7 +297,8 @@ class BunkerShotWidget(QWidget):
         self._banner = VerdictBanner()
         column.addWidget(self._banner)
 
-        maps = QGridLayout()
+        maps_page = QWidget()
+        maps = QGridLayout(maps_page)
         self._bounce_map_a = GridMapWidget("A: bounce utilisation")
         self._bounce_map_b = GridMapWidget("B: bounce utilisation")
         self._window_map_a = GridMapWidget("A: playability window")
@@ -167,7 +307,58 @@ class BunkerShotWidget(QWidget):
         maps.addWidget(self._bounce_map_b, 0, 1)
         maps.addWidget(self._window_map_a, 1, 0)
         maps.addWidget(self._window_map_b, 1, 1)
-        column.addLayout(maps, stretch=2)
+
+        fields_page = QWidget()
+        fields = QHBoxLayout(fields_page)
+        self._field_a = SoleLoadFieldWidget("A: sole load and contact patch")
+        self._field_b = SoleLoadFieldWidget("B: sole load and contact patch")
+        fields.addWidget(self._field_a)
+        fields.addWidget(self._field_b)
+
+        shot_page = QWidget()
+        shot = QHBoxLayout(shot_page)
+        self._scene_a = ShotViewportWidget("A: the head through the sand")
+        self._traces_a = TracePanelWidget("A: traces on the shared cursor")
+        shot.addWidget(self._scene_a, stretch=3)
+        shot.addWidget(self._traces_a, stretch=2)
+        # One transport drives all three views of design A (#8706, #8708).
+        # The field view already owns a slider, a timer and a play button;
+        # a second one beside the scene would let the views drift apart,
+        # which is the one thing linking them exists to prevent.
+        self._field_a.link(self._scene_a)
+        self._field_a.link(self._traces_a)
+
+        cross_tier_page = QWidget()
+        cross_tier = QHBoxLayout(cross_tier_page)
+        self._cross_tier = CrossTierWidget("A: F0 against F1, on the shared cursor")
+        cross_tier.addWidget(self._cross_tier)
+        # The fourth follower of the one transport (#8705, #8706, #8708).
+        self._field_a.link(self._cross_tier)
+
+        slice_page = QWidget()
+        cut = QVBoxLayout(slice_page)
+        controls = QHBoxLayout()
+        self._load_field_button = QPushButton("Load sand field (F1)...")
+        self._load_field_button.clicked.connect(self.choose_sand_field)
+        controls.addWidget(self._load_field_button)
+        self._field_note = QLabel(_SAND_FIELD_HINT)
+        self._field_note.setWordWrap(True)
+        controls.addWidget(self._field_note, stretch=1)
+        cut.addLayout(controls)
+        self._slice_a = SandSliceWidget("A: sand cut through the impact zone")
+        cut.addWidget(self._slice_a, stretch=1)
+        # Another view on the same transport (#8711). Its own record is a
+        # strided F1 march rather than the F0 shot, so it maps the cursor
+        # rather than taking a slider of its own.
+        self._field_a.link(self._slice_a)
+
+        self._views = QTabWidget()
+        self._views.addTab(maps_page, "Summed maps")
+        self._views.addTab(fields_page, "Sole load field (per element, per sample)")
+        self._views.addTab(shot_page, "Shot in 3-D and traces")
+        self._views.addTab(cross_tier_page, "Cross-tier check (F0 vs F1)")
+        self._views.addTab(slice_page, "Sand cut (F1 field)")
+        column.addWidget(self._views, stretch=3)
 
         self._results = HoverCopyTextBrowser()
         self._results.setReadOnly(True)
@@ -238,6 +429,51 @@ class BunkerShotWidget(QWidget):
             return
         self.show_comparison(result)
 
+    def run_cross_tier(self) -> None:
+        """Put F1 beside F0 on design A, on demand.
+
+        Deliberately its own action rather than part of
+        :meth:`run_design_a`: the check marches the continuum once per
+        probe and costs minutes. The banner says so before the wait rather
+        than after it.
+        """
+        inputs = self._read_inputs()
+        if inputs is None:
+            return
+        settings, sand, swing = inputs
+        try:
+            design = self._design_a.design()
+        except WorkbenchInputError as error:
+            self._show_input_error(error)
+            return
+        self._banner.show_busy(
+            "Running the F1 continuum beside F0 on design A. This is minutes, "
+            "not milliseconds: F1 has no shot history yet, so every probe is "
+            "a separate march to one recorded pose."
+        )
+        result = self._guarded(
+            lambda: cross_tier_check(self._model_factory(settings), design, sand, swing)
+        )
+        if result is None:
+            return
+        self.show_cross_tier(result)
+
+    def show_cross_tier(self, comparison: CrossTierComparison) -> None:
+        """Display a cross-tier comparison and open its tab.
+
+        The banner keeps the shot's own verdict. Nothing on this page
+        improves it: agreement between two uncalibrated models is not
+        validation, and the licence statement inside the figure and the
+        status line under it both say so.
+
+        Args:
+            comparison: The comparison to show.
+        """
+        self._banner.show_status(comparison.worst_status)
+        self._cross_tier.set_comparison(comparison)
+        self._views.setCurrentIndex(self._views.count() - 1)
+        self._results.setPlainText(comparison.summary())
+
     def _read_inputs(
         self,
     ) -> tuple[SolverSetup, SandCondition, SwingSetup] | None:
@@ -276,9 +512,26 @@ class BunkerShotWidget(QWidget):
         """
         self._banner.show_status(evaluation.shot.status)
         self._results.setPlainText(evaluation_report(evaluation))
-        self._paint_maps(evaluation, self._bounce_map_a, self._window_map_a)
+        self._paint_maps(
+            evaluation,
+            self._bounce_map_a,
+            self._window_map_a,
+            limits=_density_limits((evaluation,)),
+        )
+        # Before the field view is repainted, not after: painting it emits
+        # frame_changed, and a sand cut still linked to the previous shot's
+        # record would be handed an index from a record it does not have.
+        self._clear_sand_field()
+        self._paint_field(evaluation, self._field_a, _shared_scales((evaluation,)))
+        self._paint_shot(evaluation, _shared_scene_scale((evaluation,)))
         self._bounce_map_b.clear()
         self._window_map_b.clear()
+        self._field_b.clear()
+        # A cross-tier check belongs to the shot it was run on. Leaving the
+        # old one up beside a new design would put two different shots on
+        # one cursor, which is the one thing the shared transport exists to
+        # make impossible.
+        self._cross_tier.clear()
 
     def show_comparison(self, comparison: WorkbenchComparison) -> None:
         """Display an A/B comparison.
@@ -299,14 +552,159 @@ class BunkerShotWidget(QWidget):
                 )
             )
         )
-        self._paint_maps(comparison.left, self._bounce_map_a, self._window_map_a)
-        self._paint_maps(comparison.right, self._bounce_map_b, self._window_map_b)
+        # Both halves of a comparison are painted on one ramp and one set of
+        # colour scales. Left to themselves each panel stretches to its own
+        # extremes, which makes two grinds look identical however far apart
+        # they are -- the failure this pair of arguments exists to prevent.
+        pair = (comparison.left, comparison.right)
+        limits = _density_limits(pair)
+        scales = _shared_scales(pair)
+        self._paint_maps(
+            comparison.left, self._bounce_map_a, self._window_map_a, limits=limits
+        )
+        self._paint_maps(
+            comparison.right, self._bounce_map_b, self._window_map_b, limits=limits
+        )
+        self._clear_sand_field()
+        self._paint_field(comparison.left, self._field_a, scales)
+        self._paint_field(comparison.right, self._field_b, scales)
+        self._paint_shot(comparison.left, _shared_scene_scale(pair))
+        self._cross_tier.clear()
+
+    def _clear_sand_field(self) -> None:
+        """Drop a loaded sand field before a new run is displayed.
+
+        Two reasons, and both matter.
+
+        A cut belongs to the march that produced it, not to whatever was
+        evaluated most recently. Leaving it on screen beside a fresh
+        design would let it read as that design's sand, which is the
+        relabelling issue #8710 spent a content digest preventing --
+        undone by a stale widget.
+
+        And it must happen **before** the sole-field view is repainted.
+        That view is the transport: painting it emits ``frame_changed``,
+        and a cut whose :class:`~.slices.CursorMap` was built against the
+        previous shot's record would be handed an index out of a record
+        it no longer has. Its ``set_frame`` raises on that, correctly --
+        but a Python exception escaping a Qt slot aborts the process
+        rather than surfacing, so the ordering here is load-bearing and
+        not cosmetic.
+        """
+        if not self._slice_a.has_shot:
+            return
+        self._slice_a.clear()
+        self._field_note.setText(_STALE_FIELD_HINT)
+
+    def choose_sand_field(self) -> None:
+        """Ask for a stored sand field and load it into the cut view."""
+        path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Load a stored F1 sand field",
+            "",
+            "BunkerShot3D result (*.h5);;All files (*)",
+        )
+        if path:
+            self.load_sand_field(path)
+
+    def load_sand_field(self, path: str) -> None:
+        """Load a stored sand field and cut it on the shared cursor.
+
+        Separate from :meth:`choose_sand_field` so the loading can be
+        driven without a file dialog -- by a test, or by a script that
+        already knows the path.
+
+        The field is **loaded, not computed**. An F1 march at ADR-0033's
+        bulk resolution takes tens of seconds; running one inside a
+        button handler would freeze the workbench, and running a coarser
+        one to keep it responsive would put a picture on screen at a
+        resolution nobody chose. So the field is produced offline by
+        :func:`~bunkershot3d.fields.capture.capture_f1_field`, stored by
+        :func:`~bunkershot3d.fields.store.save_field`, and opened here --
+        with the tier and validity status it was written with, which
+        :func:`~bunkershot3d.fields.store.load_field` verifies against
+        the file's own digest before returning it.
+
+        Args:
+            path: Path to a stored result carrying a sand field.
+        """
+        try:
+            series = load_field(path)
+        except (OSError, ValueError) as error:
+            # A refused field must reach the user as a message. It is not a
+            # bug in the workbench: an integrity failure is the loader doing
+            # its job, and a traceback in a terminal nobody is reading would
+            # end with the tab silently staying empty.
+            self._slice_a.clear()
+            self._field_note.setText(f"Could not load {path}\n{error}")
+            logger.warning("sand field refused: %s", error)
+            return
+        transport = self._field_a.n_frames or series.n_frames
+        self._slice_a.set_shot(
+            series,
+            cursor=CursorMap(n_transport=transport, n_field=series.n_frames),
+        )
+        provenance = series.provenance
+        self._field_note.setText(
+            f"{path}\n{provenance.headline()}\n"
+            f"kinematics: {provenance.kinematics}\n"
+            f"{series.retention.describe()}"
+        )
+
+    def _paint_field(
+        self,
+        evaluation: DesignEvaluation,
+        view: SoleLoadFieldWidget,
+        scales: dict[LoadComponent, LoadScale] | None,
+    ) -> None:
+        """Load one design's per-element field, or clear the view.
+
+        Args:
+            evaluation: The evaluated design.
+            view: The field view to fill.
+            scales: The colour scales both designs share, or ``None`` when
+                there is no field to draw.
+        """
+        field = evaluation.shot.sole_field
+        if field is None or scales is None:
+            view.clear()
+            return
+        view.set_shot(field, evaluation.shot.contact_patch, scales=scales)
+
+    def _paint_shot(
+        self,
+        evaluation: DesignEvaluation,
+        scale: SceneScale | None,
+    ) -> None:
+        """Load one design's 3-D scene and traces, or clear both views.
+
+        Args:
+            evaluation: The evaluated design.
+            scale: The world box shared with any other design being drawn,
+                or ``None`` when there is no scene to draw.
+        """
+        shot = evaluation.shot
+        scene, traces = shot.scene, shot.traces
+        if scene is None or scale is None:
+            self._scene_a.clear()
+        else:
+            self._scene_a.set_shot(
+                scene,
+                scale=scale,
+                band=None if traces is None else traces.band,
+            )
+        if traces is None:
+            self._traces_a.clear()
+        else:
+            self._traces_a.set_shot(traces)
 
     def _paint_maps(
         self,
         evaluation: DesignEvaluation,
         bounce_map: GridMapWidget,
         window_map: GridMapWidget,
+        *,
+        limits: tuple[float, float] | None = None,
     ) -> None:
         """Paint one design's two maps, clearing them when there is no data."""
         sole_load = evaluation.shot.sole_load
@@ -316,21 +714,28 @@ class BunkerShotWidget(QWidget):
             utilisation = sole_load.utilisation
             bounce_map.set_grid(
                 sole_load.density_pa_s,
+                limits=limits,
                 caption=(
                     f"{utilisation.utilisation_fraction:.0%} of the sole carried "
                     f"load; {utilisation.removable_area_m2 * 1e4:.1f} cm^2 removable"
                 ),
             )
-        window = evaluation.playability.window
-        if window is None:
+        playability = evaluation.playability
+        window = playability.window
+        if window is None or playability.carry_verdict is None:
             window_map.clear()
         else:
+            # A carry number never appears without the statement it may be
+            # read under (issue #8657): the grid and its verdict travel
+            # together on the outcome, and the caption is where that reaches
+            # the designer.
+            status = playability.carry_verdict.status
             window_map.set_grid(
-                evaluation.playability.carry_m,
+                playability.carry_m,
                 mask=window.in_window,
                 caption=(
-                    f"carry vs attack angle x firmness; window "
-                    f"{window.fraction:.0%} of the domain"
+                    f"carry [{status.value.replace('_', ' ').upper()}] vs attack "
+                    f"angle x firmness; window {window.fraction:.0%} of the domain"
                 ),
             )
 
@@ -349,6 +754,8 @@ class BunkerShotWidget(QWidget):
             self._bounce_map_b,
             self._window_map_a,
             self._window_map_b,
+            self._field_a,
+            self._field_b,
         ):
             widget.clear()
 

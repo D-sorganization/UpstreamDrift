@@ -26,6 +26,12 @@ Layout
 * :mod:`.elements` -- the structure-of-arrays surface discretisation.
 * :mod:`.drft` -- the solver.
 * :mod:`.shot` -- time-marching one shot, under the 50 ms budget.
+* :mod:`.mpm` -- the **F1** tier (ADR-0033): a 2-D plane-strain material
+  point method. It exists because F0 never forms a sand velocity at any
+  resolution, so the fields epic #8699 needs cannot be post-processed out
+  of it. F1 is imported lazily-by-submodule rather than re-exported here,
+  because it is a study tier costing seconds per shot against F0's
+  milliseconds and should be reached for deliberately.
 
 Honesty summary
 ---------------
@@ -76,6 +82,7 @@ from .envelope import (
 from .exceptions import (
     CalibrationError,
     OutOfEnvelopeError,
+    ShotTruncatedError,
     SolverError,
     SolverInputError,
 )
@@ -129,6 +136,7 @@ __all__ = [
     "RefusalPolicy",
     "ShotResult",
     "ShotSettings",
+    "ShotTruncatedError",
     "SolverError",
     "SolverInputError",
     "SolverResult",

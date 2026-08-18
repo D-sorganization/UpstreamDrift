@@ -229,7 +229,7 @@ def main() -> None:
     next_gate = _find(
         candidates,
         "_ch06c_spatial_cross_formulation.qmd",
-        "The next spatial experiment must retain",
+        "The bounded forward experiment now retains",
     )
     closed_design = _find(
         candidates,
@@ -323,10 +323,10 @@ def main() -> None:
         _claim(
             "PD-CLAIM-262",
             [next_gate],
-            statement="Articulated spatial timing, recovery, and slack claims require calibrated compliant forward contact from closed states plus independent-engine controls before interpretation; reduced-tree inverse-kinematics screening alone is insufficient.",
+            statement="The bounded articulated attachment screen advances closed states through 5 ms with independent-engine controls, but timing, recovery, and slack claims still require longer calibrated forward contact with typed unilateral loss and distributed structure.",
             classification="articulated_spatial_completion_gate",
-            status="closed_contact_screen_complete_forward_contact_not_executed",
-            boundary="This is a dependency-ordered falsification contract, not evidence that compliant articulated dynamics will support the proposed mechanism.",
+            status="bounded_articulated_attachment_forward_gate_complete_longer_calibrated_contact_open",
+            boundary="This remains a dependency-ordered falsification contract; a 5 ms bilateral spring screen is not evidence for unilateral slack, late-downswing persistence, or human strategy.",
             falsifier="A broader anatomical or transfer claim is published without calibrated contact, conservation, and independent-engine checks.",
         ),
         _claim(

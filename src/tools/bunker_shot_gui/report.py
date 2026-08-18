@@ -15,6 +15,7 @@ import numpy as np
 
 from bunkershot3d.solvers import EnvelopeStatus, ValidityVerdict
 
+from .field import ContactPatch, LoadComponent, SoleLoadField
 from .model import (
     DesignEvaluation,
     PlayabilityOutcome,
@@ -24,7 +25,9 @@ from .model import (
 )
 
 __all__ = [
+    "CARRY_CAVEAT",
     "MAX_REPORTED_REASONS",
+    "PATCH_CONFOUND_CAVEAT",
     "SHADE_RAMP",
     "STATUS_COLOUR",
     "STATUS_HEADLINE",
@@ -33,6 +36,7 @@ __all__ = [
     "playability_text",
     "shade_grid",
     "shot_report",
+    "sole_field_text",
     "sole_map_text",
     "status_colour",
     "status_headline",
@@ -202,30 +206,64 @@ def _divot_lines(outcome: ShotOutcome) -> tuple[str, ...]:
     )
 
 
+DIG_SKID_CAVEAT = (
+    "the dig-versus-skid verdict is UNCALIBRATED and is not a finding: at the "
+    "shipped entry window the slope ratio spans 0.9987-1.0000 over the whole "
+    "design space, and widening the window orders the designs opposite to sole "
+    "depth (#8703)"
+)
+"""The sentence a dig-versus-skid verdict is never shown without (#8703)."""
+
+
 def _dig_skid_lines(outcome: ShotOutcome) -> tuple[str, ...]:
-    """Dig-versus-skid section, or nothing when it was not evaluated."""
+    """Dig-versus-skid section, or nothing when it was not evaluated.
+
+    The verdict never appears without its calibration state. The metric type
+    already refuses to hold one without the other, and this is where that
+    guarantee reaches the reader -- the same rule :data:`CARRY_CAVEAT` applies
+    to carry.
+    """
     if outcome.dig_skid is None:
         return ()
     skid = outcome.dig_skid
-    verdict = skid.verdict
+    dig_skid_verdict = skid.verdict
+    state = "calibrated" if skid.calibration.calibrated else "UNCALIBRATED"
     return (
         "Dig versus skid",
         _THIN,
-        _line("Verdict", verdict.value.upper()),
+        _line("Verdict", f"{dig_skid_verdict.value.upper()} ({state})"),
         _line("Slope ratio", f"{skid.slope_ratio:.3f}"),
+        _line("Entry window", f"{skid.calibration.entry_window_samples:.2f} samples"),
         _line("Vertical sand impulse", f"{skid.vertical_sand_impulse_Ns:.4g} N.s"),
+        f"  {DIG_SKID_CAVEAT}",
         "",
     )
 
 
+CARRY_CAVEAT = (
+    "carry is derived from the delivered sand impulse and the measured divot "
+    "mass through an uncalibrated transfer efficiency; no published "
+    "measurement of ball speed or launch angle out of sand exists (#8616)"
+)
+"""The sentence a carry number is never shown without (issue #8657)."""
+
+
 def _ball_lines(outcome: ShotOutcome) -> tuple[str, ...]:
-    """Ball section, or nothing when no carry was computed."""
-    if outcome.carry_m is None:
+    """Ball section, or nothing when no carry was computed.
+
+    The carry never appears without its own validity line: the model type
+    already refuses to hold one without the other, and this is where that
+    guarantee reaches the reader.
+    """
+    verdict = outcome.carry_verdict
+    if outcome.carry_m is None or verdict is None:
         return ()
     return (
         "Ball",
         _THIN,
         _line("Carry", f"{outcome.carry_m:.4g} m"),
+        _line("Carry validity", status_headline(verdict.status)),
+        f"  {CARRY_CAVEAT}",
         "",
     )
 
@@ -292,6 +330,10 @@ def shot_report(outcome: ShotOutcome) -> str:
             "",
         )
     )
+    if outcome.sole_field is not None:
+        lines.extend(
+            sole_field_text(outcome.sole_field, outcome.contact_patch).splitlines()
+        )
     lines.extend(_head_load_lines(outcome))
     lines.extend(_divot_lines(outcome))
     lines.extend(_dig_skid_lines(outcome))
@@ -343,6 +385,103 @@ def shade_grid(values: np.ndarray, *, peak: float | None = None) -> tuple[str, .
         )
         for row, mask in zip(scaled, finite, strict=True)
     )
+
+
+PATCH_CONFOUND_CAVEAT = (
+    "the contact patch on this design is a bounce-AND-camber result, not a "
+    "bounce result: at least one spanwise station could not carry the camber "
+    "area its relieved sole width implied, so the lofter refitted that station "
+    "to its own narrower constructible band (#8698) -- and the stations that "
+    "move are the heel and toe, which is where the patch is read, so any patch "
+    "trend across a bounce sweep moves both terms at once"
+)
+"""What a patch series may not be read as, when the camber was substituted.
+
+Issue #8707 asks for this explicitly. The patch shrinking across a bounce
+sweep is the mechanism behind more bounce producing *more* depth and force,
+but where camber was substituted, "bounce" is not the only thing that changed.
+
+**This keys off the per-station account, not off the declared-versus-effective
+aggregate**, because the aggregate is the weaker test and misses the common
+case. Heel and toe relief narrows the sole toward the ends, a narrower sole
+admits a narrower camber band, and so a declaration can be honoured exactly at
+the declared width while the relieved stations are refitted. The shipped
+``sm9_58_m`` preset is precisely that: 42.00 mm^2 declared, 42.00 mm^2
+effective, inside its (38.70, 42.44) mm^2 band -- and three of its seventeen
+stations refitted regardless. Keyed off the aggregate flag this caveat would
+stay silent on the default design; keyed off the stations it fires, which is
+when a caveat earns its place.
+"""
+
+
+def sole_field_text(field: SoleLoadField, patch: ContactPatch | None = None) -> str:
+    """Render the per-element load field and the contact patch as numbers.
+
+    The animated view answers the same questions by eye. This is what can be
+    pasted into an issue, diffed between two runs, or read where no display
+    exists.
+
+    Args:
+        field: The per-element load field.
+        patch: The contact-patch series, when there is one.
+
+    Returns:
+        A multi-line report, opening with the validity statement the whole
+        section must be read under.
+    """
+    depth, inertial = LoadComponent.DEPTH, LoadComponent.INERTIAL
+    lines = [
+        "Per-element sole load and contact patch",
+        _THIN,
+        _line("Validity", status_headline(field.status)),
+        _line(
+            "Resolution",
+            f"{field.n_elements} sole elements x {field.n_frames} samples "
+            f"(the 12x12 map above is this, binned and summed)",
+        ),
+        _line(
+            f"Peak {depth.label.lower()}",
+            f"{field.peak_resultant_force_N(depth):.4g} N at "
+            f"{field.peak_time_s(depth) * 1e3:.2f} ms",
+        ),
+        f"  {depth.description}",
+        _line(
+            f"Peak {inertial.label.lower()}",
+            f"{field.peak_resultant_force_N(inertial):.4g} N at "
+            f"{field.peak_time_s(inertial) * 1e3:.2f} ms",
+        ),
+        f"  {inertial.description}",
+        _line(
+            "Inertial share at peak load",
+            f"{field.peak_inertial_share:.1%} of the sole's own resultant",
+        ),
+    ]
+    if patch is not None:
+        lines.extend(
+            (
+                _line(
+                    "Patch at first contact",
+                    f"{patch.initial_area_m2 * 1e4:.4g} cm^2 at "
+                    f"{patch.initial_time_s * 1e3:.2f} ms",
+                ),
+                _line(
+                    "Largest patch",
+                    f"{patch.peak_area_m2 * 1e4:.4g} cm^2 at "
+                    f"{patch.peak_area_time_s * 1e3:.2f} ms",
+                ),
+                _line(
+                    "Closest approach to leading edge",
+                    f"{patch.closest_approach_m * 1e3:.2f} mm at "
+                    f"{patch.time_of_closest_approach_s * 1e3:.2f} ms",
+                ),
+                _line(
+                    "Sole span, leading to trailing",
+                    f"{(patch.trailing_edge_m - patch.leading_edge_m) * 1e3:.2f} mm",
+                ),
+            )
+        )
+    lines.append("")
+    return "\n".join(lines)
 
 
 def sole_map_text(sole_load: SoleLoadMap) -> str:
@@ -407,9 +546,15 @@ def playability_text(playability: PlayabilityOutcome) -> str:
             )
         )
     low, high = window.carry_band_m
+    grid_verdict = playability.carry_verdict
     lines = [
         "Playability window (attack angle x sand firmness)",
         _THIN,
+        _line(
+            "Carry validity",
+            status_headline(grid_verdict.status) if grid_verdict else "not measured",
+        ),
+        f"  {CARRY_CAVEAT}",
         _line("Target carry", f"{window.target_carry_m:.4g} m"),
         _line("Acceptance band", f"{low:.4g} to {high:.4g} m"),
         _line("Window area", f"{window.area:.4g} {window.area_unit}"),
@@ -438,6 +583,44 @@ def playability_text(playability: PlayabilityOutcome) -> str:
         lines.append(f"  {angle:>5.1f} {cells}")
     lines.extend(("  (* inside the window, --- refused)", ""))
     return "\n".join(lines)
+
+
+def _camber_area_text(evaluation: DesignEvaluation) -> str:
+    """State the camber area, and every substitution behind it.
+
+    A sole of a given width and bounce can only realise camber areas inside a
+    band, so a declared value outside it is built as the nearest one that is
+    constructible. Reporting only the declared number would tell the designer
+    about a sole that was never built (issue #8698).
+
+    The two substitution scopes are reported separately because they are
+    separate facts. The declared number can be honoured exactly while the
+    relieved heel and toe stations - narrower, and so admitting narrower
+    bands - are refitted. Printing only the aggregate result would render the
+    shipped ``sm9_58_m`` preset as a clean "42.0 mm^2" while three of its
+    stations carry something else.
+
+    Args:
+        evaluation: The evaluated design.
+
+    Returns:
+        The rendered value.
+    """
+    effective_mm2 = evaluation.effective_camber_area_m2 * 1e6
+    text = f"{effective_mm2:.1f} mm^2"
+    if evaluation.aggregate_camber_was_clamped:
+        declared_mm2 = evaluation.geometry.sole_camber_area_m2 * 1e6
+        text += (
+            f"  (declared {declared_mm2:.1f} mm^2; not constructible at this "
+            "sole width and bounce)"
+        )
+    clamped = evaluation.clamped_camber_stations
+    if clamped:
+        text += (
+            f"  [{len(clamped)} of {len(evaluation.camber_stations)} spanwise "
+            "stations refitted to their own narrower bands]"
+        )
+    return text
 
 
 def evaluation_report(evaluation: DesignEvaluation) -> str:
@@ -469,13 +652,28 @@ def evaluation_report(evaluation: DesignEvaluation) -> str:
         _line("Sole entry angle", f"{geometry.sole_entry_angle_deg:.2f} deg"),
         _line("Leading-edge radius", f"{geometry.leading_edge_radius_m * 1e3:.2f} mm"),
         _line("Sole contour ratio", f"{geometry.sole_contour_ratio:.3f}"),
-        _line("Camber area", f"{geometry.sole_camber_area_m2 * 1e6:.1f} mm^2"),
+        _line("Camber area", _camber_area_text(evaluation)),
         _line("Head mass", f"{geometry.head_mass_kg * 1e3:.0f} g"),
         "",
     ]
     parts = ["\n".join(header), shot_report(evaluation.shot)]
     if evaluation.shot.sole_load is not None:
         parts.append(sole_map_text(evaluation.shot.sole_load))
+    clamped_stations = evaluation.clamped_camber_stations
+    if clamped_stations and evaluation.shot.contact_patch is not None:
+        # The caveat belongs beside the patch numbers, not only beside the
+        # geometry: a designer reading a patch trend across a bounce sweep is
+        # exactly the reader who must be told the camber moved with it.
+        #
+        # Gated on the stations rather than on the aggregate flag: the
+        # aggregate compares the declared area against the *declared* width's
+        # band and is False on the shipped presets, so gating on it would
+        # silence the caveat on exactly the design most people run.
+        parts.append(
+            f"  {PATCH_CONFOUND_CAVEAT}\n"
+            f"  ({len(clamped_stations)} of {len(evaluation.camber_stations)} "
+            "spanwise stations refitted)\n"
+        )
     parts.append(playability_text(evaluation.playability))
     return "\n".join(parts)
 

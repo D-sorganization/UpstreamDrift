@@ -48,7 +48,13 @@ profile/span/phase states through 4, 10, 25, and 50 ms under nominal conditions
 and nine one-factor adverse or null branches. All 2,160 horizon cases pass the
 declared cross-engine and work--energy gates; no failure is observed through 50
 ms. This is a right-censored reduced-model result, not a full delivery or
-anatomical validation. A three-tier
+anatomical validation. A native articulated-inertia gate now rebuilds the
+subject-scaled 20-coordinate tree independently in MuJoCo and robotics
+Pinocchio at all 234 closed states. Mass-matrix, bias-force, inverse-dynamics,
+symmetry, and positive-definiteness gates all pass at near machine precision.
+This qualifies common-state articulated rigid-body transport while leaving
+forward contact, scapulothoracic anatomy, distributed grip and shaft,
+muscles, and human strategy open. A three-tier
 hand-path attribution study separates stitched pointwise ZTCF drift,
 same-state control, and separately defined ZVCF reactions for force vectors,
 impulse, power, work, every modeled joint, and four neutral time windows. A
@@ -130,8 +136,9 @@ noise, normalized cross-talk, calibration residual, and contact-center
 migration. It demonstrates that net-wrench closure does not establish force
 allocation and retains physical-device and human validation as open gates.
 MT-E08 now executes the prescribed-state rejection and reduced-tree
-closed-contact screen, then retains independently integrated calibrated
-articulated contact and participant-held-out falsification as open gates.
+closed-contact screen, bounded bilateral forward dynamics, and a typed
+unilateral slack/contact atlas. Calibrated distributed contact, longer
+delivery, and participant-held-out falsification remain open gates.
 The first external-evidence audit slice narrows the introduction and empirical
 evidence synthesis, records reciprocal candidate dispositions, and separates
 sample-specific associations from causal mechanisms. In particular, it corrects
@@ -250,6 +257,30 @@ python3 -m scripts.research.proximal_distal_energy.run_closed_state_forward_brid
 python3 -m scripts.research.proximal_distal_energy.make_closed_state_forward_bridge_figure
 python3 -m scripts.research.proximal_distal_energy.run_forward_contact_validity_horizon
 python3 -m scripts.research.proximal_distal_energy.make_forward_contact_validity_horizon_figure
+python3 -m scripts.research.proximal_distal_energy.run_articulated_inertia_cross_engine
+python3 -m scripts.research.proximal_distal_energy.make_articulated_inertia_cross_engine_figure
+python3 scripts/research/proximal_distal_energy/register_articulated_inertia_claims.py
+python3 -m scripts.research.proximal_distal_energy.run_articulated_contact_projection
+python3 -m scripts.research.proximal_distal_energy.make_articulated_contact_projection_figure
+python3 scripts/research/proximal_distal_energy/register_articulated_contact_projection_claims.py
+python3 -m scripts.research.proximal_distal_energy.run_articulated_forward_contact
+python3 -m scripts.research.proximal_distal_energy.make_articulated_forward_contact_figure
+python3 scripts/research/proximal_distal_energy/register_articulated_forward_contact_claims.py
+python3 -m scripts.research.proximal_distal_energy.run_articulated_slack_atlas
+python3 -m scripts.research.proximal_distal_energy.make_articulated_slack_figure
+python3 scripts/research/proximal_distal_energy/register_articulated_slack_claims.py
+python3 -m scripts.research.proximal_distal_energy.run_distributed_grip_atlas
+python3 -m scripts.research.proximal_distal_energy.make_distributed_grip_figure
+python3 scripts/research/proximal_distal_energy/register_distributed_grip_claims.py
+python3 -m scripts.research.proximal_distal_energy.generate_articulated_shaft_structural_basis
+python3 -m scripts.research.proximal_distal_energy.run_articulated_shaft_time_step_diagnostic
+python3 -m scripts.research.proximal_distal_energy.run_articulated_shaft_atlas
+python3 -m scripts.research.proximal_distal_energy.make_articulated_shaft_figure
+python3 scripts/research/proximal_distal_energy/register_articulated_shaft_claims.py
+python3 -m scripts.research.proximal_distal_energy.run_articulated_ground_diagnostic
+python3 -m scripts.research.proximal_distal_energy.run_articulated_ground_atlas
+python3 -m scripts.research.proximal_distal_energy.run_articulated_ground_posthoc_sensitivity
+python3 -m scripts.research.proximal_distal_energy.make_articulated_ground_figure
 python3 -m scripts.research.proximal_distal_energy.run_spatial_forward_contact_study
 python3 -m scripts.research.proximal_distal_energy.run_uncertainty_control_study
 python3 -m scripts.research.proximal_distal_energy.run_timing_viability_study

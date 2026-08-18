@@ -434,6 +434,58 @@
       "execution_status": "54_state_reduced_geometry_screen_complete_partial_reachability_and_high_allocation_nullity_articulated_forward_test_open"
     },
     {
+      "id": "MT-E10",
+      "questions": ["Q1", "Q2", "Q6", "Q7"],
+      "title": "Finite Ground Reaction and Intrinsic Free-Moment Atlas",
+      "model_tiers": [
+        "subject_scaled_articulated_finite_planar_base",
+        "distributed_grip_passive_shaft",
+        "governed_human"
+      ],
+      "interventions": [
+        "fixed_translation_free_moment_and_coupled_pathways",
+        "signed_club_velocity_perturbation",
+        "rigid_shaft_control",
+        "horizontal_restraint_removed_control",
+        "natural_zero_gravity_only_and_conditional_base_initialization"
+      ],
+      "controls": [
+        "exact_fixed_base_reduction",
+        "center_of_pressure_reference_reversal",
+        "common_initial_energy",
+        "peak_grip_load_and_total_dissipated_work_match",
+        "three_level_diagnostic_refinement",
+        "independent_mujoco_and_pinocchio_dynamics"
+      ],
+      "outcomes": [
+        "ground_force",
+        "intrinsic_and_transported_moment",
+        "grip_force_and_couple",
+        "base_translation_and_pitch",
+        "shaft_deformation",
+        "dissipated_work_and_energy_closure",
+        "club_translation_speed"
+      ],
+      "uncertainty": [
+        "initialization_and_preload",
+        "synthetic_support_stiffness_and_damping",
+        "horizontal_restraint_definition",
+        "shaft_and_grip_properties",
+        "time_step_and_horizon",
+        "omitted_unilateral_contact_and_foot_geometry"
+      ],
+      "falsifier": "The finite-base pathway fails fixed-base reduction, power or work-energy closure, refinement, declared domains, reference-transport invariance, native-engine agreement, or a claimed delivery effect lacks its preregistered load--work match.",
+      "required_data": [
+        "synchronized_force_plates",
+        "full_body_and_club_kinematics",
+        "bilateral_six_axis_grip_wrenches",
+        "foot_contact_and_pressure_state",
+        "shaft_deflection",
+        "subject_specific_inertial_and_joint_geometry"
+      ],
+      "execution_status": "576_trajectory_finite_base_numerical_gate_complete_primary_load_total_work_match_empty_calibrated_and_human_tests_open"
+    },
+    {
       "id": "MT-H01",
       "questions": ["Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7"],
       "title": "Participant-Held-Out Human Falsification",

@@ -1,0 +1,107 @@
+### Paired Scapula-on-Ellipsoid Geometry Screen
+
+The fixed shoulder centers are the next explicit structural intervention. A
+paired arm-only screen holds the prescribed trunk and club pose fixed and
+compares the existing fixed centers with four bounded scapular coordinates per
+side: protraction, elevation, upward rotation, and winging. Protraction and
+elevation move the shoulder center on a declared thoracic ellipsoid; upward
+rotation and winging precede the three glenohumeral rotations. The construction
+is informed by the ellipsoid-constrained OpenSim shoulder complex of
+@seth2016, but it is a reduced kinematic surrogate rather than a reproduction
+of that model.
+
+The screen uses the same six deterministic profiles and three grip spans at
+0.00, 0.12, and 0.24 s, yielding 54 paired states. Only the two arms move; the
+trunk and all six club coordinates remain fixed. The fixed-shoulder problem has
+eight arm coordinates, whereas the scapular problem has sixteen. The fixed
+solution is embedded exactly at zero scapular coordinates, so a larger residual
+in the mobile branch would be a numerical failure rather than a geometric
+finding.
+
+![Scapular Mobility and Bilateral Contact Geometry](figures/fig_scapulothoracic_contact_screen.pdf){#fig-scapulothoracic-contact-screen width=100%}
+
+No fixed-shoulder arm-only state reaches the 0.5 mm bilateral tolerance. The
+mobile-scapula branch reaches that residual in 31 of 54 states, but only 16 of
+54 also receive a successful optimizer termination. Twenty-eight states place
+at least one coordinate on its declared screening bound, and the largest
+shoulder-center excursion is 0.101 m. The retained 2.0 m adverse grip span
+still fails, with 0.480 m maximum bilateral error. These counts expose a
+model-structure effect and a numerical/range boundary; they do not establish
+that the remaining states are anatomically infeasible.
+
+Both paired contact Jacobians have rank six at every registered state. The
+fixed branch therefore has a two-dimensional local coordinate null space and
+the scapular branch has a ten-dimensional null space. Bilateral contact
+position alone cannot allocate motion uniquely among scapular and
+glenohumeral coordinates. Adding scapular mobility materially changes the
+geometric screen while simultaneously increasing allocation
+non-identifiability.
+
+This result advances the model ladder without identifying a human mechanism.
+The ellipsoid radii and angular bounds are engineering values, the screen has
+no subject-specific bone or muscle geometry, and no contact force, power,
+work, passivity, tissue load, or club-delivery outcome is solved. The decisive
+next test replaces this surrogate with the independently validated articulated
+shoulder model, subject-specific anatomy where governed, calibrated grip
+contact, and paired forward dynamics.
+
+The bounded articulated experiments retain the verified closed-state
+initialization. Bilateral and typed point-attachment tiers repeat power,
+work--energy, refinement, adverse-load, event, and engine-parity controls
+through 5 ms. The distributed extension then preserves total stiffness and
+damping while advancing one-, three-, and five-fiber tension grips through
+50 ms with geometry and station-refinement controls. The separate passive-shaft
+extension adds first-mode bending and torsion with initial-energy,
+matched-load/work, refinement, and engine-parity controls; its matched speed
+differences retain both signs. The finite-base extension now combines those
+grip and shaft mechanics with planar ground force and intrinsic free moment;
+its numerical gates pass, but its primary coupled--fixed match is empty. All
+three tiers still lack calibrated tissue, pressure, friction, unilateral foot
+contact, and human observations. Only trajectories passing those next gates
+may test whether drift-mediated transfer reduces timing demand, creates
+recovery, benefits from slack, or supports a human strategy.
+
+## Falsifiability Gained and Claims Still Open {#sec-spatial-claim-boundary}
+
+The executed experiment advances the evidence boundary in three ways.
+
+First, the common spatial wrench is now coupled to a nonplanar reduced
+full-body inverse-dynamics calculation. The earlier three-dimensional result
+was only a frame-transformation audit. Here the mass matrix, bias forces,
+gravity, external generalized loads, and body Jacobians change with a genuine
+spatial state.
+
+Second, the same model is evaluated through independent algorithms. Agreement
+therefore tests implementation transport rather than coordinate relabeling.
+The discovered external-load convention error demonstrates why that test has
+scientific value: two individually plausible calculations disagreed until the
+reported estimand was made identical.
+
+Third, the geometry intervention remains exact in the spatial tier. It supports
+the statement that separated force application points can set club-couple sign
+independently of total force magnitude.
+
+Four stronger statements remain open:
+
+- **Passive Contact Origin Is Inconclusive.** The hand forces are inputs. A
+  forward compliant two-hand solve must determine whether equivalent loads
+  emerge after a distal command killswitch.
+- **Bounded Cross-Engine Attachment Dynamics Do Not Establish Full Contact.**
+  The 5 ms articulated trajectories test divergence, attachment separation,
+  typed unilateral opening and reattachment, power, and energy in two engines.
+  They do not test calibrated distributed grip or shaft mechanics, tissue,
+  friction, late downswing, or impact.
+- **Anatomical Magnitude Is Unsupported.** The reduced tree and spherical
+  inertias are not subject-specific anatomy, muscle, or tissue mechanics. The
+  subject-scaled audit shows that its prescribed states do not close the
+  anatomical hands on the declared grip points; the bounded follow-up closes
+  only a reduced tree under engineering-limit and coarse collision screens.
+- **Human Strategy Is Unsupported.** No measured trajectory or force record is
+  held out for validation, and no coaching prescription follows from this
+  mechanism experiment.
+
+The next chapter tests the reduced contact mechanism under independent forward
+integration. Identifiability and uncertainty are then treated before control
+claims. Parameter compensation can otherwise make a structurally inadequate
+model reproduce one output while assigning the wrong contribution to contact,
+base motion, passive tissue, or actuation.

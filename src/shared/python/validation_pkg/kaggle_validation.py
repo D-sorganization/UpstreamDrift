@@ -237,7 +237,7 @@ def validate_model_against_dataset(
     predictions_list: list[float] = []
     actuals_list: list[float] = []
 
-    for row in sample.to_dict('records'):  # ⚡ Bolt: df.to_dict('records') is ~7x faster than .iterrows() and avoids Series creation overhead
+    for row in sample.to_dict("records"):
         try:
             pred = model_func(
                 row["ball_speed_mph"],
@@ -296,7 +296,7 @@ def compare_all_models_to_dataset(
 
     if sample_size is None:
         raise ValueError("sample_size must be provided")
-    from flight_models import (
+    from src.shared.python.physics.flight_models import (
         BallFlightModel,
         FlightModelRegistry,
         UnifiedLaunchConditions,

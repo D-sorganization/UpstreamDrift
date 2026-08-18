@@ -97,9 +97,7 @@ class SupportPolygon:
         if point is None:
             raise ValueError("point must be provided")
         if not self.contains(point):
-            return (
-                -1.0
-            )  # Or positive distance to polygon? Convention usually margin > 0 is stable.
+            return -1.0  # Or positive distance to polygon? Convention usually margin > 0 is stable.
             # If outside, negative margin.
 
         px, py = point
