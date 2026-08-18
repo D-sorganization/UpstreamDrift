@@ -839,7 +839,7 @@ export interface DatasetStatsResponse {
 }
 
 /**
- * Request body for generalized-force drift-control ratio analysis.
+ * Request body for realized drift-to-input ratio analysis.
  */
 export interface DriftControlRatioRequest {
   drift_generalized_force: number[][];
@@ -1993,6 +1993,8 @@ export interface ValidationError {
   loc: (string | number)[];
   msg: string;
   type: string;
+  input?: unknown;
+  ctx?: Record<string, unknown>;
 }
 
 /**

@@ -1,0 +1,135 @@
+#### Finite Ground Reaction and Intrinsic Free Moment
+
+The finite-base extension supplies that separate transport gate. Three planar
+coordinates translate the articulated human tree in world $x$ and $z$ and
+rotate it about world $y$,
+
+$$
+b=[x_b,z_b,\theta_b]^\mathsf{T}, \qquad
+\mathcal{M}_g(q)=
+\begin{bmatrix}
+M_{r\eta}(q) & C_{r\eta,b}(q)\\
+C_{r\eta,b}^\mathsf{T}(q) & M_b(q)
+\end{bmatrix}.
+$$ {#eq-articulated-ground-mass}
+
+Only the non-club body tree receives this common base transformation. The club
+remains independently rooted and is connected to the moving hands through the
+same distributed grip fibers. The cross block is assembled from every
+non-club body's translational and angular Jacobians. Its configuration
+derivatives contribute the associated Christoffel bias; base translation and
+rotation also enter gravity and the distributed-contact Jacobians. Thus the
+finite base changes inertia, gravity, hand geometry, grip reaction, and power
+simultaneously rather than adding a prescribed force to a fixed posture.
+
+The synthetic passive support law is
+
+$$
+Q_b=-K_b b-D_b\dot b, \qquad
+U_b=\tfrac12 b^\mathsf{T}K_b b, \qquad
+P_{D,b}=-\dot b^\mathsf{T}D_b\dot b\le 0.
+$$ {#eq-articulated-ground-passivity}
+
+Its first two generalized components form the ground-on-body force
+$F_g=[Q_x,0,Q_z]^\mathsf{T}$ and the third is the intrinsic free moment
+$M_y=Q_\theta$. A moment reported about a different reference point is
+$M_y^{(O)}=M_y+r_zF_x-r_xF_z$. Reversing the declared center-of-pressure
+reference therefore changes the transported moment but not $F_g$, $M_y$, the
+generalized force, or the trajectory. This distinction prevents a reference-
+transport term from being misidentified as an additional physical torque.
+
+Four exact pathway selections are retained: fixed base; translation only;
+intrinsic free moment only; and coupled translation plus free moment. The fixed
+selection has no base coordinate and delegates bit for bit to the qualified
+shaft solver. Two independent controls accompany the coupled selection. One
+removes every shaft elastic coordinate; the other sets horizontal support
+stiffness and damping to zero while retaining vertical support and intrinsic
+free moment. The latter is accurately described as removal of modeled
+horizontal restraint, not as a complete Coulomb-friction or unilateral foot
+contact model.
+
+Initialization is a model variable rather than an invisible convenience. A
+natural-zero base gives identical initial total energy across pathway
+killswitches, but it is not static equilibrium. A gravity-only displacement
+balances the support law while ignoring grip preload. A conditional nonlinear
+solve balances ground, grip, and gravity generalized forces in the three base
+coordinates with posture and club state held fixed. It does not balance the
+remaining rigid coordinates and therefore is not whole-mechanism equilibrium.
+The three choices are retained as separate sensitivity branches; the atlas
+uses natural zero because it is the only exact common-state killswitch
+comparison.
+
+The preregistered atlas uses the same twelve articulated states, two signed
+club-velocity perturbations, 0.25 and 0.125 ms steps, and independent native
+MuJoCo and Pinocchio operators as the shaft study. Each trajectory advances
+once to 50 ms and is summarized at 4, 10, 25, and 50 ms. The four primary
+pathways produce 384 trajectories. Rigid-shaft and horizontal-restraint-
+removed control families add 192. Every cell records grip force and couple,
+active fibers, ground force, intrinsic and transported moments, support and
+shaft strain, damping work, base motion, club speed, virtual-power closure,
+work--energy closure, declared-domain status, and cross-engine parity.
+
+The constitutive values are transparent synthetic references: horizontal and
+vertical stiffnesses are 15 and 30 kN/m; damping values are 400 and 800 N s/m;
+free-moment stiffness is 900 N m/rad; and rotational damping is 45 N m s/rad.
+They have not been fitted to a force plate, pressure map, participant, or golf
+outcome. Consequently this experiment can identify whether the named pathways
+are mechanically active and whether their effects survive killswitch,
+reversal, refinement, and matched-load/work screens. It cannot establish that
+the values represent a golfer, that a pathway is intentionally controlled, or
+that a speed difference is beneficial.
+
+The 42-trajectory initialization diagnostic passes every active-set and native-
+engine comparison. Across seven branches and three decreasing steps, all 14
+engine-specific work--energy series decrease monotonically at approximately
+first order. Maximum trajectory and ground-force relative discrepancies are
+below $2.5\times10^{-12}$ and $1.1\times10^{-10}$. The initialization
+sensitivity is material. On the 0.125 ms grid, natural-zero, gravity-only, and
+conditional-base starts produce peak ground forces of 32.8, 565.5, and
+510.3 N and 4 ms club-translation speeds of 0.264, 1.908, and 0.946 m/s.
+These are transient synthetic responses, not alternative estimates of a human
+swing. Their separation shows that an unreported preload convention could
+dominate a short-horizon comparison.
+
+![Finite Ground Reaction and Intrinsic Free Moment in the Articulated Model](figures/fig_articulated_ground_atlas.pdf){#fig-articulated-ground-atlas width=100%}
+
+All 576 atlas trajectories remain inside the declared shaft and base domains
+and pass the numerical and native-engine gates. The worst normalized work--
+energy residual decreases from 0.01986 at 0.25 ms to 0.00995 at 0.125 ms.
+Maximum trajectory, grip-force, and ground-force relative discrepancies are
+$1.77\times10^{-10}$, $6.41\times10^{-10}$, and
+$2.28\times10^{-10}$, respectively. The largest ground-force resultant is
+559.1 N, the largest intrinsic free moment is 14.58 N m, base translation
+remains below 9.79 mm, and base pitch remains below 0.00548 rad. Maximum shaft
+bending and twist remain 1.708 mm and 0.001856 rad. These values qualify the
+declared synthetic computation; they do not calibrate any load magnitude.
+
+The primary load--work screen is adverse. A coupled and fixed cell was
+preregistered as matched only when both peak grip load and total dissipated
+work differed by no more than 5%. None of 384 possible comparisons qualifies.
+The total-work relative difference spans 1.72--2.00 because coupled ground
+damping contributes a dissipative pathway that fixed base cannot contain;
+even a 100% tolerance admits no cell. Although every unmatched coupled-minus-
+fixed 50 ms speed difference is positive on the fine grid, spanning 0.0280--
+0.1772 m/s, those values cannot identify a ground-pathway speed effect because
+the registered work match failed.
+
+A separately labeled post-hoc sensitivity excludes ground damping from the
+work-matching variable while retaining the peak-grip-load screen. At 5%, 60
+cells then qualify: coupled-minus-fixed speed differences include 20 positive
+and 40 negative values and span -0.00075 to +0.01394 m/s. This alternative
+cannot replace the primary estimand, but it demonstrates that the sign is not
+universal once a non-ground dissipation comparison is imposed. Independent
+controls are likewise mixed at 50 ms: coupled-minus-rigid-shaft differences
+span -0.0166 to +0.0181 m/s, and coupled-minus-horizontal-restraint-removed
+differences span -0.00338 to +0.00029 m/s. The finite ground and intrinsic
+free-moment pathways are mechanically active in this model, but their isolated
+delivery contribution is not identified by this experiment.
+
+The support is linear and bilateral; it lacks unilateral normal contact,
+Coulomb friction, segmented feet, measured pressure, and force-plate
+calibration. The 50 ms horizon excludes impact and most of the downswing.
+Accordingly @fig-articulated-ground-atlas and its machine-readable evidence
+support a finite-base software and mechanism qualification with an adverse
+primary matching result, not a conclusion about ground-use strategy, passive
+transfer benefit, timing economy, or human clubhead speed.

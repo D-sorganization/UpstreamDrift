@@ -40,7 +40,13 @@ permissions:
 
 jobs:
   pick-runner:
-    runs-on: d-sorg-fleet-docker
+    # Dispatcher placement only. This repo is public, so a hosted runner is
+    # free and unmetered; pinning the dispatcher meant every run waited for a
+    # self-hosted slot just to decide where to run. The runner it SELECTS is
+    # unchanged, so no workload moves off the fleet.
+    runs-on:
+      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' &&
+      'ubuntu-latest' || 'd-sorg-fleet-docker' }}
     timeout-minutes: 2
     outputs:
       runner: ${{ steps.check.outputs.runner }}
@@ -93,7 +99,7 @@ jobs:
           mkdir -p "${CACHE_BASE}"
 
       - name: Build modular image (profile=${{ matrix.profile }})
-        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a
         with:
           context: .
           file: ./Dockerfile.modular

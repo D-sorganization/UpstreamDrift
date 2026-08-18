@@ -20,6 +20,10 @@ import ast
 import logging
 from pathlib import Path
 
+import pytest
+
+pytestmark = pytest.mark.integration
+
 logger = logging.getLogger(__name__)
 
 # Repository root

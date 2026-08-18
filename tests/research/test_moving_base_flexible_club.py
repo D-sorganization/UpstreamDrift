@@ -20,6 +20,8 @@ from scripts.research.proximal_distal_energy.moving_base_flexible_club import (
 )
 from scripts.research.proximal_distal_energy.two_arm_closed_loop import TwoArmControl
 
+pytestmark = pytest.mark.scientific
+
 
 def test_parameter_contract_fails_closed() -> None:
     params = MovingBaseFlexibleParams.publication_default()

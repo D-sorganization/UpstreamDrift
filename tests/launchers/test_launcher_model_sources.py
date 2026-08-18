@@ -17,6 +17,8 @@ from src.shared.python.config.tools_vendor_authority import (
     ToolsVendorAuthority,
 )
 
+pytestmark = pytest.mark.unit
+
 
 TOOLS_MODEL_IDS = (
     "video_analyzer",

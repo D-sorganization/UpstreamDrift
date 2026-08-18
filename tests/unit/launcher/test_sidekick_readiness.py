@@ -8,6 +8,8 @@ import pytest
 
 from src.launchers import sidekick_readiness as readiness
 
+pytestmark = pytest.mark.unit
+
 
 class _FakeHttpResponse:
     def __init__(self, status: int, body: bytes = b"") -> None:
