@@ -270,9 +270,7 @@ class NonlinearDynamicsMixin:
             lengths = ends - starts
             diagonal_lengths.extend(lengths[lengths >= min_line_length])
 
-        n_diag_points = np.asarray(
-            diagonal_lengths
-        ).sum()  # ⚡ Bolt: .sum() is faster than np.sum()
+        n_diag_points = np.sum(diagonal_lengths)
         det = n_diag_points / n_recurrence_points if n_recurrence_points > 0 else 0.0
         l_max = np.max(diagonal_lengths) if len(diagonal_lengths) > 0 else 0
 
@@ -288,9 +286,7 @@ class NonlinearDynamicsMixin:
             lengths = ends - starts
             vertical_lengths.extend(lengths[lengths >= min_line_length])
 
-        n_vert_points = np.asarray(
-            vertical_lengths
-        ).sum()  # ⚡ Bolt: .sum() is faster than np.sum()
+        n_vert_points = np.sum(vertical_lengths)
         lam = n_vert_points / n_recurrence_points if n_recurrence_points > 0 else 0.0
         tt = float(np.mean(vertical_lengths)) if len(vertical_lengths) > 0 else 0.0
 
@@ -339,7 +335,7 @@ class NonlinearDynamicsMixin:
         c_r = []
 
         for r in radii:
-            count = (dists < r).sum()  # ⚡ Bolt: .sum() is faster than np.sum()
+            count = np.sum(dists < r)
             c_r.append(count / len(dists))
 
         log_r = np.log(radii)
@@ -436,9 +432,7 @@ class NonlinearDynamicsMixin:
             valid_dists = dists[valid_dists_mask]
 
             if len(valid_dists) > 0:
-                divergence[i] += np.log(
-                    valid_dists
-                ).sum()  # ⚡ Bolt: .sum() is faster than np.sum()
+                divergence[i] += np.sum(np.log(valid_dists))
                 counts[i] += len(valid_dists)
 
         counts[counts == 0] = 1.0
@@ -659,9 +653,7 @@ class NonlinearDynamicsMixin:
                 n_intervals = len(m_diffs)
 
                 if n_intervals > 0:
-                    L_m_k += (
-                        m_diffs.sum() * (N - 1) / (n_intervals * k)
-                    )  # ⚡ Bolt: .sum() is faster than np.sum()
+                    L_m_k += np.sum(m_diffs) * (N - 1) / (n_intervals * k)
 
             L_k.append(L_m_k / (k * k))
             x_k.append(np.log(1.0 / k))
