@@ -3900,5 +3900,5 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Use `np.sqrt(np.einsum('...i,...i->...', x, x))` instead of `np.linalg.norm(x, axis=-1)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
 
 * (spec-exempt: micro-optimization) Vectorized math operations (e.g. `np.einsum`) must be used for performance improvements without altering mathematical correctness.
-- Use `np.sqrt(np.einsum('...i,...i->...', arr, arr))` instead of `np.linalg.norm(arr, axis=-1)` or `np.linalg.norm(arr, axis=2)` to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
+
 - Use React.memo() on recursive components (e.g. ModelTree) to prevent unnecessary re-renders of large component trees when parent state changes. (spec-exempt: micro-optimization)

@@ -146,6 +146,3 @@
 ## 2024-08-16 - Sum of Products Between Two Arrays via Einsum
 **Learning:** For calculating the sum of products between two 2D arrays along `axis=1`, `np.einsum('ij,ij->i', A, B)` avoids temporary intermediate array allocations and provides ~2.5x faster execution than `np.sum(A * B, axis=1)`.
 **Action:** Replace `np.sum(A * B, axis=1)` with `np.einsum('ij,ij->i', A, B)` when optimizing numeric array operations on paths like mathematical modeling or load calculations.
-## 2025-02-12 - Replacing np.linalg.norm with np.sqrt(np.einsum) for Performance
-**Learning:** `np.linalg.norm(..., axis=-1)` creates temporary arrays and performs intermediate allocations which slows down the operation significantly. Replacing it with `np.sqrt(np.einsum('...i,...i->...', arr, arr))` achieves identical results but is ~1.5x-2.5x faster. The specific string `'...i,...i->...'` dynamically handles arrays of any dimension size (e.g. 2D or 3D), which is safer and cleaner than explicit `ijk` subscripts.
-**Action:** Use `np.sqrt(np.einsum('...i,...i->...', arr, arr))` instead of `np.linalg.norm` when calculating L2 norms across the final dimension for performance critical code.
