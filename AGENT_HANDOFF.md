@@ -1,6 +1,6 @@
 # Agent Handoff — UpstreamDrift
 
-Last updated: 2026-08-16
+Last updated: 2026-08-17
 
 This is current operational state. Historical detail belongs in git/GitHub.
 
@@ -12,16 +12,15 @@ This is current operational state. Historical detail belongs in git/GitHub.
   #8680, and #8682 completed inertia, contact projection, bounded bilateral
   forwarding, and typed slack/contact.
 - [#8684](https://github.com/D-sorganization/UpstreamDrift/issues/8684)
-  governs distributed grip, shaft, and ground pathways. #8685 completed grip
-  discretization. [#8697](https://github.com/D-sorganization/UpstreamDrift/issues/8697)
-  completed the shaft child.
-  Protected PR [#8715](https://github.com/D-sorganization/UpstreamDrift/pull/8715)
-  merged as `0c988f05a`; SPEC/handoff follow-up
-  [#8717](https://github.com/D-sorganization/UpstreamDrift/pull/8717) merged as
-  `051f8dccc`. Both are verified ancestors of remote main.
-- [#8719](https://github.com/D-sorganization/UpstreamDrift/issues/8719) is active
-  on branch `research/8684-ground-free-moment-8719` from main `051f8dccc`;
-  full PR [#8723](https://github.com/D-sorganization/UpstreamDrift/pull/8723) is open.
+  governs distributed grip, shaft, and ground pathways. **All three filed
+  children are merged**: grip discretization (#8685/#8696), passive shaft
+  (#8697 via PR #8715, `0c988f05a`, with SPEC follow-up #8717 `051f8dccc`), and
+  finite ground/free moment (#8719 via PR #8723, `a1a61399`). All are verified
+  ancestors of remote main.
+- **#8668 and #8684 remain open on purpose.** Every filed child is closed, but
+  both epics declare design elements that have not shipped, so neither is
+  complete against its own acceptance criteria. Do not close them on
+  child-count alone — see Declared Gaps below.
 - #8556 remains open: no governed participant dataset contains synchronized
   bilateral six-axis grip wrenches. Synthetic traces cannot replace it.
 - NotebookLM review remains blocked on manual Google reauthentication. Never
@@ -67,7 +66,7 @@ This is current operational state. Historical detail belongs in git/GitHub.
   end matter were visually inspected. Inventory/claim/release totals are
   1,063/295/40; all are reviewed.
 
-## Active Ground Slice — Executed Atlas Checkpoint
+## Qualified Ground Slice
 
 - `articulated_ground.py` adds `fixed`, `translation`, `free_moment`, and
   `coupled` base pathways while the separately rooted club remains grip-coupled.
@@ -107,16 +106,40 @@ This is current operational state. Historical detail belongs in git/GitHub.
   pre-push hook still exposes unrelated repository-wide Ruff/mypy baseline debt;
   its unrelated formatter edits were restored.
 
+## Declared Gaps — Why #8668 and #8684 Are Still Open
+
+These are read from the epics' own Required Design sections against committed
+evidence, not from opinion. Each is a reason the parent epic cannot close.
+
+1. **Grip friction is not modelled.** #8684 requires "friction bounds" and
+   #8668 requires distributed contact with "friction"; the grip atlas records
+   `friction_tissue_shaft_or_ground: not_modeled`, and the ground law is
+   explicitly "not unilateral normal contact, Coulomb friction, foot
+   segmentation, or measured pressure".
+2. **Loss of contact is unexercised at the distributed tier.** Both epics
+   require unilateral opening and reattachment there. The distributed grip
+   atlas reports `maximum_transition_count: 0` — no station ever opened. Open
+   and reattach events exist only at the single-point typed-slack tier
+   (#8683: 108 opening and 216 reattachment cells), so the distributed claim is
+   untested rather than supported.
+3. **No manufactured-solution cases for the articulated tier.** #8668 requires
+   "manufactured free-body and constrained-motion cases". No
+   `articulated_*` manufactured artifact exists; the only manufactured/
+   uncertainty evidence on main predates the articulated tier.
+4. **No articulated parameter-uncertainty or failure map.** #8668 requires
+   sensitivity to joint-limit, anthropometric, grip, shaft, and ground
+   parameters plus uncertainty and failure maps. Only the planar-tier
+   `uncertainty_control_*` studies exist.
+
 ## Immediate Next Steps
 
-1. Shepherd full PR #8723, retain the adverse zero-match result, and complete
-   required CI/review through protected
-   merge; do not repair unrelated fleet-wide lint/type debt in this PR.
-2. After merge, verify the merge commit is an ancestor of remote main, update
-   this handoff on main, and close #8719 only through the merged PR.
-3. Continue to calibrated unilateral 3D contact, full-delivery matching/
-   uncertainty, and governed human holdout;
-   do not close #8556 without qualifying participant data.
+1. Close the declared gaps above before proposing closure of #8684 or #8668.
+   Friction and distributed loss-of-contact are the two that change scientific
+   conclusions; the manufactured and uncertainty cases are verification debt.
+2. Continue to calibrated unilateral 3D contact, full-delivery matching/
+   uncertainty, and governed human holdout; do not close #8556 without
+   qualifying participant data.
+3. Do not close #8557. It governs the whole program and outlives these tiers.
 
 ## Reproduction and Release Gates
 
