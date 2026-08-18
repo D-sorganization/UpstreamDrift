@@ -52,7 +52,10 @@ jobs:
           # Only pull_request runs from branches in this repository. Fork PRs
           # (head_repository != this repo) are deliberately excluded and keep
           # their manual-approval requirement.
-          ids=$(gh api "repos/$REPO/actions/runs?status=action_required&per_page=100" \
+          # --paginate: the frozen pool has exceeded one page (observed pinned
+          # at exactly 100, the per_page cap), so a single-page sweep can never
+          # drain it while bot branch-updates keep refilling the pool.
+          ids=$(gh api --paginate "repos/$REPO/actions/runs?status=action_required&per_page=100" \
             --jq ".workflow_runs[]
                   | select(.event == \"pull_request\")
                   | select(.head_repository.full_name == \"$REPO\")
