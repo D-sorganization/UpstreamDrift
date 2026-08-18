@@ -9,6 +9,9 @@ preview anywhere in this package.
 
 from __future__ import annotations
 
+import logging
+
+from collections.abc import Callable
 from typing import Protocol
 
 import numpy as np
@@ -109,6 +112,48 @@ class FollowsFrame(Protocol):
             frame: The sample index.
         """
 
+
+def _guarded(follower: FollowsFrame) -> Callable[[int], None]:
+    """Wrap a follower's ``set_frame`` so a raise cannot kill the process.
+
+    Followers refuse an out-of-range index rather than clamping it, which is
+    the right contract: a clamped index would leave one view showing a
+    different moment from the one driving it, and that is precisely the
+    desynchronisation linking the views exists to prevent.
+
+    Delivering that refusal through a Qt signal is the problem. An exception
+    that escapes a slot unwinds through the C++ event loop, which aborts the
+    process with ``0xC0000409`` and **no Python traceback at all** -- so the
+    contract that exists to make a mismatch obvious instead makes it
+    undiagnosable.
+
+    This keeps the refusal and changes only what it costs: the mismatch is
+    logged with its traceback and the offending view stops following, while
+    the transport and every other view carry on. A silent ``pass`` would be
+    the wrong trade in the other direction, hiding the desynchronisation that
+    the raise was added to expose.
+    """
+
+    live = True
+
+    def deliver(frame: int) -> None:
+        nonlocal live
+        if not live:
+            return
+        try:
+            follower.set_frame(frame)
+        except Exception:
+            live = False
+            logger.exception(
+                "%s refused frame %d; it will stop following the transport",
+                type(follower).__name__,
+                frame,
+            )
+
+    return deliver
+
+
+logger = logging.getLogger(__name__)
 
 _EMPTY_CELL = QColor(238, 234, 226)
 _WINDOW_EDGE = QColor(20, 90, 40)
@@ -428,7 +473,7 @@ class SoleLoadFieldWidget(QWidget):
                 is deliberately that narrow, so linking a view does not give
                 it a way to drive the transport back.
         """
-        self.frame_changed.connect(follower.set_frame)
+        self.frame_changed.connect(_guarded(follower))
 
     # ------------------------------------------------------------ accessors
 
