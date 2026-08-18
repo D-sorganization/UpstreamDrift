@@ -903,7 +903,22 @@ class TestCIEnvironmentCompatibility:
         )
 
     def test_unit_gate_sparse_checks_out_pinned_tools_for_ownership_guard(self) -> None:
-        """The guard must inspect the exact Tools pin without materializing all Tools."""
+        """The guard must inspect the exact Tools pin before the unit gate runs.
+
+        PR #8407 (epic #8390) moved the pin/checkout/verify trio from inline
+        unit-test-gate steps into the shared composite action
+        ``.github/actions/fetch-pinned-tools`` without updating this test,
+        which kept asserting the deleted step names and failed on every run
+        since. The semantics this test protects are unchanged and are now
+        asserted where they live: the composite action resolves the pin from
+        the superproject gitlink, checks Tools out at exactly that revision,
+        and verifies the result. One expectation changed deliberately: the
+        old inline step used ``sparse-checkout: src/shared/python``; the
+        composite action documents why sparse checkout is now avoided (a
+        sparse worktree left in a reused runner workspace poisons later jobs
+        that materialize the submodule normally), so this test asserts its
+        absence rather than its presence.
+        """
         try:
             import yaml
         except ImportError:
@@ -917,29 +932,39 @@ class TestCIEnvironmentCompatibility:
         steps = workflow["jobs"]["unit-test-gate"]["steps"]
         step_names = [step.get("name", "") for step in steps]
 
-        resolve_index = step_names.index("Resolve pinned Tools ownership revision")
-        checkout_index = step_names.index("Checkout pinned Tools ownership source")
-        verify_index = step_names.index("Verify pinned Tools ownership source")
+        fetch_index = step_names.index("Fetch pinned Tools packages")
         unit_index = step_names.index("Run Green-Suite Unit Gate")
-        resolve_step = steps[resolve_index]
-        checkout_step = steps[checkout_index]
-        verify_step = steps[verify_index]
+        assert fetch_index < unit_index
+        assert steps[fetch_index]["uses"] == "./.github/actions/fetch-pinned-tools"
 
-        assert resolve_index < checkout_index < verify_index < unit_index
-        assert resolve_step["id"] == "tools-ownership-pin"
-        assert "git ls-tree HEAD vendor/ud-tools" in resolve_step["run"]
-        assert checkout_step["uses"].startswith("actions/checkout@")
-        assert checkout_step["with"]["repository"] == "D-sorganization/Tools"
-        assert (
-            checkout_step["with"]["ref"]
-            == "${{ steps.tools-ownership-pin.outputs.sha }}"
+        action = yaml.safe_load(
+            (
+                REPO_ROOT / ".github" / "actions" / "fetch-pinned-tools" / "action.yml"
+            ).read_text(encoding="utf-8")
         )
+        action_steps = action["runs"]["steps"]
+        action_names = [step.get("name", "") for step in action_steps]
+
+        resolve_index = action_names.index("Resolve pinned Tools revision")
+        checkout_index = action_names.index("Checkout pinned Tools source")
+        verify_index = action_names.index("Verify pinned Tools checkout")
+        assert resolve_index < checkout_index < verify_index
+
+        resolve_step = action_steps[resolve_index]
+        checkout_step = action_steps[checkout_index]
+        verify_step = action_steps[verify_index]
+
+        assert resolve_step["id"] == "pin"
+        assert "git ls-tree HEAD -- vendor/ud-tools" in resolve_step["run"]
+        assert checkout_step["uses"].startswith("actions/checkout@")
+        assert "/Tools" in checkout_step["with"]["repository"]
+        assert checkout_step["with"]["ref"] == "${{ steps.pin.outputs.sha }}"
         assert checkout_step["with"]["path"] == "vendor/ud-tools"
         assert checkout_step["with"]["fetch-depth"] == 1
-        assert checkout_step["with"]["sparse-checkout"].strip() == "src/shared/python"
         assert checkout_step["with"]["persist-credentials"] is False
+        assert "sparse-checkout" not in checkout_step["with"]
         assert "git -C vendor/ud-tools rev-parse HEAD" in verify_step["run"]
-        assert '"${{ steps.tools-ownership-pin.outputs.sha }}"' in verify_step["run"]
+        assert "${{ steps.pin.outputs.sha }}" in verify_step["run"]
 
     def test_release_builds_wheel_from_exact_tools_submodule(self) -> None:
         """Releases must not build an unverifiable wheel from an unpacked sdist."""
