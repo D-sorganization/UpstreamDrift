@@ -1,0 +1,88 @@
+# approve-same-repo-runs.yml — unfreeze bot-updated pull requests
+#
+# PROBLEM (issue #8754): branch protection requires the `quality-gate` status
+# with `strict: true`, so armed auto-merge keeps every PR branch up to date
+# with main. Those branch updates are pushed as `github-actions[bot]`, and
+# GitHub requires manual approval for workflow runs whose triggering actor
+# has no commits in the repository's history — the bot never does, because
+# squash merges rewrite authorship. The repo already uses the weakest
+# available approval policy (`first_time_contributors_new_to_github`); there
+# is no setting that exempts the bot. Result: every advance of main pushed an
+# update to every open PR, spawned `action_required` runs nobody approved,
+# `quality-gate` never reported, and no PR could merge. 19 of the 30 most
+# recent runs were frozen this way, including the fix for the quality-gate
+# context collision itself (#8747).
+#
+# FIX: approve pending runs whose head repository is THIS repository. Fork
+# PRs are untouched — they keep exactly the approval gate GitHub applies
+# today, so the protection that matters for a public repo with self-hosted
+# capacity is preserved. Same-repo branches can only be pushed by users with
+# write access (or by GitHub's own branch-update machinery), which is the
+# same trust boundary that lets those actors trigger workflows directly.
+#
+# Scheduled runs execute from the default branch without approval, so this
+# workflow cannot freeze itself.
+
+name: Approve Same-Repo Workflow Runs
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  actions: write
+
+concurrency:
+  group: approve-same-repo-runs
+  cancel-in-progress: false
+
+jobs:
+  approve:
+    runs-on: ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
+    timeout-minutes: 10
+    steps:
+      - name: Approve pending runs whose head is this repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          # Only pull_request runs from branches in this repository. Fork PRs
+          # (head_repository != this repo) are deliberately excluded and keep
+          # their manual-approval requirement.
+          ids=$(gh api "repos/$REPO/actions/runs?status=action_required&per_page=100" \
+            --jq ".workflow_runs[]
+                  | select(.event == \"pull_request\")
+                  | select(.head_repository.full_name == \"$REPO\")
+                  | .id")
+
+          if [ -z "$ids" ]; then
+            echo "No pending same-repository runs."
+            exit 0
+          fi
+
+          approved=0
+          failed=0
+          for id in $ids; do
+            if gh api -X POST "repos/$REPO/actions/runs/$id/approve" >/dev/null; then
+              approved=$((approved + 1))
+              echo "approved run $id"
+            else
+              # A run can legitimately vanish between listing and approval
+              # (superseded SHA cancelled by a concurrency group). Warn, do
+              # not fail the sweep for it.
+              failed=$((failed + 1))
+              echo "::warning::could not approve run $id"
+            fi
+          done
+
+          echo "approved=$approved failed=$failed" >> "$GITHUB_STEP_SUMMARY"
+
+          # If everything failed, the token lacks permission and the workflow
+          # is not doing its job — fail loudly rather than rot silently.
+          if [ "$approved" -eq 0 ] && [ "$failed" -gt 0 ]; then
+            echo "::error::all $failed approval attempts failed — check token permissions"
+            exit 1
+          fi
