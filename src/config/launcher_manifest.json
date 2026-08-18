@@ -566,21 +566,14 @@
     },
     {
       "id": "bunkershot3d",
-      "name": "BunkerShot3D Designer Workbench",
-      "description": "Wedge sole design against the F0 dynamic-RFT bunker model: W2 sole parameters, W3 sand condition, W7 metrics, A/B comparison, and a validity verdict on every result",
+      "name": "BunkerShot3D",
+      "description": "Sand bunker shot simulation with MPM and LIGGGHTS backends",
       "category": "physics_engine",
       "type": "special_app",
-      "path": "src/tools/bunker_shot_gui/gui.py",
+      "path": "src/bunkershot3d/",
       "logo": "bunkershot3d.svg",
       "status": "gui_ready",
-      "capabilities": [
-        "wedge_sole_design",
-        "sand_simulation",
-        "playability_window",
-        "bounce_utilisation",
-        "ab_comparison",
-        "validity_envelope"
-      ],
+      "capabilities": ["sand_simulation", "mpm", "liggghts", "calibration"],
       "order": 25,
       "web": {
         "mode": "native-window"

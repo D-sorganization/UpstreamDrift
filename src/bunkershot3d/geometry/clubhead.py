@@ -1,13 +1,5 @@
-"""Legacy clubhead geometry generator for BunkerShot3D.
-
-.. deprecated:: issue #8609
-   This 6-vertex triangular prism has no camber, leading-edge radius,
-   relief, grind, rocker, lie or mass properties, and its mesh is never
-   checked for watertightness (audit finding B20).  New code should use
-   :func:`bunkershot3d.geometry.lofting.build_wedge_mesh` with a
-   :class:`bunkershot3d.geometry.wedge.WedgeGeometry`, which produces a
-   verified solid and native mass properties.  It is retained only so
-   existing callers keep working.
+"""
+Clubhead geometry generator for BunkerShot3D.
 """
 
 from pathlib import Path

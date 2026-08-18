@@ -10,8 +10,6 @@ from scripts.research.proximal_distal_energy.timing_viability import (
     viability_mask,
 )
 
-pytestmark = pytest.mark.scientific
-
 
 METRIC_NAMES = (
     "delivery_speed_m_s",

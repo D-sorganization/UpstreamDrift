@@ -63,7 +63,7 @@
     "No measured human trajectory or force record is used as validation data."
   ],
   "source_sha256": {
-    "scripts/research/proximal_distal_energy/spatial_full_body.py": "8e0c3efb06747742cca30f6bc1b9e18a28779a1c187e4b98ba6cde5293d96cfc",
+    "scripts/research/proximal_distal_energy/spatial_full_body.py": "722f56d288265e84523ecced6cdae5104a5e4c690eda4051ac195b30b79c5d53",
     "scripts/research/proximal_distal_energy/run_spatial_full_body_study.py": "4c3f4432f6625ef8bf2a976decba4e9cee384085866e66537f52a7814e2d0835"
   },
   "array_artifact": "spatial_full_body_study.npz"

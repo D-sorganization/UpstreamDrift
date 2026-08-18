@@ -23,8 +23,6 @@ from src.shared.python.physics.rust_kernel import (
     is_rust_available,
 )
 
-pytestmark = pytest.mark.unit
-
 
 @pytest.fixture
 def force_fallback(monkeypatch: pytest.MonkeyPatch) -> None:

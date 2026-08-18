@@ -8,8 +8,6 @@ IK stage must always point at a working solver.
 
 from __future__ import annotations
 
-import pytest
-
 from src.shared.python.motion_pipeline.contracts import (
     Marker,
     MarkerFrame,
@@ -22,8 +20,6 @@ from src.shared.python.motion_pipeline.orchestrator import (
 )
 
 from ._local_fixtures import make_3dof_phantom_rig
-
-pytestmark = pytest.mark.unit
 
 
 def test_default_ik_backend_is_geometric() -> None:

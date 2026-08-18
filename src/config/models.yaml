@@ -144,15 +144,11 @@ models:
       logo: "assets/opensim.png"
       status: "ready"
 
-  # One tile, one entry point (issue #8618). This used to be two: a
-  # "bunkershot3d" tile pointing at a notebook script and a "bunker_shot" tile
-  # pointing at a GUI that never imported the model. The workbench is now the
-  # single user-facing surface of the F0 solver.
   - id: "bunkershot3d"
-    name: "BunkerShot3D Designer Workbench"
-    description: "Wedge sole design against the F0 dynamic-RFT bunker model"
+    name: "BunkerShot3D"
+    description: "3-D Granular Bunker-Shot Simulation"
     type: "special_app"
-    path: "src/tools/bunker_shot_gui/gui.py"
+    path: "notebooks/bunkershot3d/phase1_mvp.py"
     launcher:
       category: "simulation"
       logo: "assets/bunkershot_icon.png"
@@ -220,8 +216,16 @@ models:
       status: "ready"
       default_launch: "tab"
 
-  # The former "bunker_shot" tile was folded into "bunkershot3d" (issue
-  # #8618): two tiles pointed at two different things for one tool.
+  - id: "bunker_shot"
+    name: "Bunker Shot 3D"
+    description: "Sand impact simulation (Chrono DEM Experimental)"
+    type: "special_app"
+    path: "src/tools/bunker_shot_gui/gui.py"
+    launcher:
+      category: "simulation"
+      logo: "bunkershot3d.svg"
+      status: "experimental"
+      default_launch: "tab"
 
   - id: "swing_flight_pipeline"
     name: "Swing → Flight Pipeline"

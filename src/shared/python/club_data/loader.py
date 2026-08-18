@@ -383,10 +383,8 @@ class ClubDataLoader:
         except (RuntimeError, TypeError, ValueError) as e:
             raise ValueError(f"Failed to read Excel file: {e}") from e
 
-        # ⚡ Bolt: Vectorized dictionary conversion is ~7x faster than iterrows()
         clubs = []
-        records = df.to_dict("records")
-        for row in records:
+        for _, row in df.iterrows():
             club_data = self._extract_club_data(row)
             if club_data:
                 club = ClubSpecification.from_dict(club_data)
@@ -422,10 +420,8 @@ class ClubDataLoader:
         except (RuntimeError, TypeError, ValueError) as e:
             raise ValueError(f"Failed to read Excel file: {e}") from e
 
-        # ⚡ Bolt: Vectorized dictionary conversion is ~7x faster than iterrows()
         players = []
-        records = df.to_dict("records")
-        for row in records:
+        for _, row in df.iterrows():
             player_data = self._extract_player_data(row)
             if player_data:
                 players.append(player_data)
@@ -575,16 +571,13 @@ class ClubDataLoader:
                     return col
         return None
 
-    def _extract_club_data(self, row: Any | dict[str, Any]) -> dict[str, Any] | None:
+    def _extract_club_data(self, row: Any) -> dict[str, Any] | None:
         """Extract club data from a DataFrame row."""
         data: dict[str, Any] = {}
 
-        # ⚡ Bolt: Handle both pandas Series (has .index) and dicts (from df.to_dict('records'))
-        row_keys = row.index if hasattr(row, 'index') else row.keys()
-
         for field_name, possible_cols in self.CLUB_COLUMN_MAPPINGS.items():
             for col in possible_cols:
-                if col in row_keys:
+                if col in row.index:
                     value = row[col]
                     if pd.notna(value):
                         data[field_name] = value
@@ -596,17 +589,14 @@ class ClubDataLoader:
 
         return data
 
-    def _extract_player_data(self, row: Any | dict[str, Any]) -> ProPlayerData | None:
+    def _extract_player_data(self, row: Any) -> ProPlayerData | None:
         """Extract player data from a DataFrame row."""
         metrics_data: dict[str, float] = {}
         player_name = None
 
-        # ⚡ Bolt: Handle both pandas Series (has .index) and dicts (from df.to_dict('records'))
-        row_keys = row.index if hasattr(row, 'index') else row.keys()
-
         for field_name, possible_cols in self.PLAYER_COLUMN_MAPPINGS.items():
             for col in possible_cols:
-                if col in row_keys:
+                if col in row.index:
                     value = row[col]
                     if pd.notna(value):
                         if field_name == "player_name":

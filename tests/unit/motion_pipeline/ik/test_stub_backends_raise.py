@@ -23,8 +23,6 @@ from src.shared.python.motion_pipeline.ik.pinocchio_backend import PinocchioIKSo
 
 from ._local_fixtures import make_3dof_phantom_rig, make_phantom_marker_trajectory
 
-pytestmark = pytest.mark.unit
-
 _STUB_SOLVERS = [
     ("mujoco", MuJoCoIKSolver),
     ("drake", DrakeIKSolver),

@@ -15,8 +15,6 @@ import pytest
 
 from unittest.mock import patch
 
-pytestmark = pytest.mark.unit
-
 # =============================================================================
 # Config Parser Tests
 # =============================================================================

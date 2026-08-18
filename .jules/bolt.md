@@ -116,36 +116,3 @@
 
 **Learning:** When summing up values in a NumPy array or calculating constraint violations, replacing `np.sum(array)` with `array.sum()` skips NumPy's internal conversion and dispatch checks. This results in a ~3x performance speedup for small arrays which are often evaluated in tight physics or optimization loops. Additionally, for computing the sum of norms (e.g. `np.sum(np.sqrt(np.einsum(...)))`), moving the `.sum()` to the end of the `np.sqrt` output is functionally equivalent but much faster due to the same reason.
 **Action:** Prefer `array.sum()` over `np.sum(array)` when operating on `np.ndarray` types in performance-critical sections.
-## 2026-06-25 - Pandas iterrows vs vectorized numpy column_stack
-**Learning:** Using `.iterrows()` in pandas to construct 3D point arrays row-by-row is incredibly slow due to python overhead and series creation for each row.
-**Action:** Replace `np.array([[row["X"], row["Y"], row["Z"]] for _, row in df.iterrows()])` with vectorized `np.column_stack((df["X"].values, df["Y"].values, df["Z"].values))` to get >1000x speedup when rendering trajectories.
-
-## 2026-06-25 - Pandas iterrows vs vectorized dictionary assignment
-**Learning:** Iterating over a pandas DataFrame using `.iterrows()` and appending row dictionaries to a list is extremely slow due to Python object overhead and Series creation for every row.
-**Action:** Replaced `.iterrows()` loop with vectorized dictionary assignment (e.g., `new_data[col] = df[col]`) when transforming DataFrame columns into a new DataFrame. This provides a ~700x speedup.
-## 2026-06-25 - Pandas iterrows vs vectorized dictionary conversion
-**Learning:** Iterating over a pandas DataFrame using `.iterrows()` and appending row dictionaries to a list is extremely slow due to Python object overhead and Series creation for every row.
-**Action:** Replaced `.iterrows()` loop with vectorized column mapping and dictionary conversion via `df.to_dict('records')` when transforming DataFrame rows into a list of dictionaries. This provides a ~6.8x speedup.
-## 2026-06-25 - [Replacing np.sum(x**2) with np.vdot(x,x) for performance]
-**Learning:** For calculating the sum of squares of a 1D array, `np.vdot(x, x)` avoids temporary array allocations (unlike `x**2`) and is ~3-4x faster than `np.sum(x**2)`.
-**Action:** Replace `np.sum((a-b)**2)` with `diff = a-b; np.vdot(diff, diff)` and `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum("ij,ij->i", x, x))` when optimizing tight numerical calculation loops.
-
-## 2024-06-25 - [Replacing np.sum(x * x, axis=0) with np.einsum for performance]
-**Learning:** For calculating the sum of squares along an axis (like `axis=0`) on a 2D array, `np.einsum('ij,ij->j', x, x)` avoids temporary intermediate array allocations and provides ~3x faster execution than `np.sum(x * x, axis=0)`.
-**Action:** Replace `np.sum(x * x, axis=0)` with `np.einsum('ij,ij->j', x, x)` when optimizing numeric array code on paths like mathematical modeling or geometry calculation.
-## 2026-06-25 - Pandas iterrows vs vectorized dictionary conversion
-**Learning:** Iterating over a pandas DataFrame using `.iterrows()` and unpacking the resulting Series into a tuple is extremely slow due to Python object overhead and Series creation for every row.
-**Action:** Replaced `.iterrows()` loop with dictionary conversion via `df.to_dict('records')` and iterating over `row.values()` when unpacking DataFrame rows for UI widgets and validation loops. This provides a significant speedup for iteration.
-## 2026-06-25 - Sum of Squares Along an Axis via Einsum
-**Learning:** For calculating the sum of squares along an axis on a 2D array, `np.einsum('ij,ij->i', x, x)` avoids temporary intermediate array allocations and provides ~1.7x faster execution than `np.sum(x**2, axis=1)`.
-**Action:** Replace `np.sum(x**2, axis=1)` with `np.einsum('ij,ij->i', x, x)` when optimizing numeric array code on paths like mathematical modeling or energy calculations.
-## 2026-06-25 - Sum of Products Between Two Arrays via Einsum
-**Learning:** For calculating the sum of products between two 2D arrays along `axis=1`, `np.einsum('ij,ij->i', A, B)` avoids temporary intermediate array allocations and provides ~2.5x faster execution than `np.sum(A * B, axis=1)`.
-**Action:** Replace `np.sum(A * B, axis=1)` with `np.einsum('ij,ij->i', A, B)` when optimizing numeric array operations on paths like mathematical modeling or load calculations.
-
-## 2024-08-16 - Sum of Products Between Two Arrays via Einsum
-**Learning:** For calculating the sum of products between two 2D arrays along `axis=1`, `np.einsum('ij,ij->i', A, B)` avoids temporary intermediate array allocations and provides ~2.5x faster execution than `np.sum(A * B, axis=1)`.
-**Action:** Replace `np.sum(A * B, axis=1)` with `np.einsum('ij,ij->i', A, B)` when optimizing numeric array operations on paths like mathematical modeling or load calculations.
-## 2025-02-12 - Replacing np.linalg.norm with np.sqrt(np.einsum) for Performance
-**Learning:** `np.linalg.norm(..., axis=-1)` creates temporary arrays and performs intermediate allocations which slows down the operation significantly. Replacing it with `np.sqrt(np.einsum('...i,...i->...', arr, arr))` achieves identical results but is ~1.5x-2.5x faster. The specific string `'...i,...i->...'` dynamically handles arrays of any dimension size (e.g. 2D or 3D), which is safer and cleaner than explicit `ijk` subscripts.
-**Action:** Use `np.sqrt(np.einsum('...i,...i->...', arr, arr))` instead of `np.linalg.norm` when calculating L2 norms across the final dimension for performance critical code.

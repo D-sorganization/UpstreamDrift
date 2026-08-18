@@ -6,7 +6,7 @@ import numpy as np
 import numpy.typing as npt
 import pytest
 
-from bunkershot3d.postproc.wrench_trace import WrenchTrace
+from src.bunkershot3d.postproc.wrench_trace import WrenchTrace
 from src.shared.python.simulation_backends.protocol import Trace
 from src.shared.python.simulation_backends.wrench_extractor import (
     WrenchImpulses,

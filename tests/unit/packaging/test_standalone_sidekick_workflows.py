@@ -5,9 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import yaml
-import pytest
-
-pytestmark = pytest.mark.unit
 
 ROOT = Path(__file__).resolve().parents[3]
 PACKAGE_WORKFLOW = ROOT / ".github" / "workflows" / "package-standalone-sidekick.yml"

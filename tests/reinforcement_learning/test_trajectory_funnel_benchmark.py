@@ -8,8 +8,6 @@ from src.reinforcement_learning.trajectory_funnel_benchmark import (
     TrajectoryFunnelBenchmark,
 )
 
-pytestmark = pytest.mark.unit
-
 
 class TestTrajectoryFunnelBenchmark:
     """Basic tests for the TrajectoryFunnelBenchmark class."""

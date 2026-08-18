@@ -95,8 +95,6 @@ with patch.dict("sys.modules", module_patches):
 import src.engines.physics_engines.myosuite.python.myosuite_physics_engine as _myosuite_mod  # noqa: E402
 import src.engines.physics_engines.opensim.python.opensim_physics_engine as _opensim_mod  # noqa: E402
 
-pytestmark = pytest.mark.integration
-
 _opensim_mod.opensim = mock_opensim  # type: ignore[attr-defined]
 _opensim_mod.OPENSIM_AVAILABLE = True  # type: ignore[attr-defined]
 _myosuite_mod.gym = mock_gym  # type: ignore[attr-defined]

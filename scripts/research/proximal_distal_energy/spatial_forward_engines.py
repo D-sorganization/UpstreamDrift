@@ -11,9 +11,6 @@ from numpy.typing import NDArray
 from scripts.research.proximal_distal_energy.spatial_forward_contract import (
     CanonicalSpatialState,
     SpatialContactParameters,
-    canonical_spatial_state_digest,
-    default_spatial_state,
-    rotation_matrix_from_quaternion,
 )
 
 
@@ -52,7 +49,6 @@ class SpatialForwardAdapter(Protocol):
     """Small segregated interface needed by the common experiment runner."""
 
     engine_identity: EngineIdentity
-    initial_state_digest: str
     model_digest: str
 
     def canonical_state(self) -> CanonicalSpatialState:
@@ -68,11 +64,7 @@ class SpatialForwardAdapter(Protocol):
 class MuJoCoSpatialForwardAdapter:
     """MuJoCo forward-dynamics realization of the common reduced model."""
 
-    def __init__(
-        self,
-        params: SpatialContactParameters,
-        initial_state: CanonicalSpatialState | None = None,
-    ) -> None:
+    def __init__(self, params: SpatialContactParameters) -> None:
         try:
             import mujoco
         except ImportError as exc:  # pragma: no cover - optional dependency gate
@@ -82,14 +74,12 @@ class MuJoCoSpatialForwardAdapter:
         self._mujoco = mujoco
         self._params = params
         self.model_digest = params.model_digest()
-        self._initial_state = initial_state or default_spatial_state(params)
-        self.initial_state_digest = canonical_spatial_state_digest(self._initial_state)
         self._model = mujoco.MjModel.from_xml_string(_mujoco_xml(params))
         self._data = mujoco.MjData(self._model)
         self._lead_body = self._model.body("lead_hand").id
         self._trail_body = self._model.body("trail_hand").id
         self._club_body = self._model.body("club").id
-        self._initialize_state(self._initial_state)
+        self._initialize_state()
         self.engine_identity = EngineIdentity(
             library="mujoco",
             version=str(mujoco.__version__),
@@ -99,16 +89,16 @@ class MuJoCoSpatialForwardAdapter:
             velocity_count=int(self._model.nv),
         )
 
-    def _initialize_state(self, state: CanonicalSpatialState) -> None:
-        self._data.qpos[:3] = state.hand_positions[0]
-        self._data.qpos[3:6] = state.hand_positions[1]
-        self._data.qpos[6:9] = state.club_position
-        self._data.qpos[9:13] = state.club_quaternion_wxyz
-        self._data.qvel[:3] = state.hand_velocities[0]
-        self._data.qvel[3:6] = state.hand_velocities[1]
-        self._data.qvel[6:9] = state.club_linear_velocity
-        rotation = rotation_matrix_from_quaternion(state.club_quaternion_wxyz)
-        self._data.qvel[9:12] = rotation.T @ state.club_angular_velocity
+    def _initialize_state(self) -> None:
+        center = np.asarray(self._params.club_initial_position, dtype=float)
+        offsets = np.asarray(
+            [self._params.lead_grip_offset, self._params.trail_grip_offset]
+        )
+        self._data.qpos[:3] = center + offsets[0]
+        self._data.qpos[3:6] = center + offsets[1]
+        self._data.qpos[6:9] = center
+        self._data.qpos[9:13] = np.array([1.0, 0.0, 0.0, 0.0])
+        self._data.qvel[:] = 0.0
         self._mujoco.mj_forward(self._model, self._data)
 
     def _body_velocity(self, body_id: int) -> tuple[FloatArray, FloatArray]:
@@ -188,34 +178,26 @@ class MuJoCoSpatialForwardAdapter:
 class PinocchioSpatialForwardAdapter:
     """Pinocchio ABA realization of the common reduced model."""
 
-    def __init__(
-        self,
-        params: SpatialContactParameters,
-        initial_state: CanonicalSpatialState | None = None,
-    ) -> None:
+    def __init__(self, params: SpatialContactParameters) -> None:
         try:
             import pinocchio as pin
         except ImportError as exc:  # pragma: no cover - optional dependency gate
             raise RuntimeError("Pinocchio is required for this adapter") from exc
         required = ("Model", "JointModelTranslation", "JointModelFreeFlyer", "aba")
-        version = getattr(pin, "__version__", None)
-        version_major = int(version.split(".")[0]) if isinstance(version, str) else 0
-        if version_major < 2 or any(not hasattr(pin, name) for name in required):
+        if any(not hasattr(pin, name) for name in required):
             raise RuntimeError(
                 "the imported pinocchio module is not the robotics engine"
             )
         self._pin = pin
         self._params = params
         self.model_digest = params.model_digest()
-        self._initial_state = initial_state or default_spatial_state(params)
-        self.initial_state_digest = canonical_spatial_state_digest(self._initial_state)
         self._model, self._lead_joint, self._trail_joint, self._club_joint = (
             _build_pinocchio_model(pin, params)
         )
         self._data = self._model.createData()
         self._q = pin.neutral(self._model)
         self._v = np.zeros(self._model.nv)
-        self._initialize_state(self._initial_state)
+        self._initialize_state()
         self.engine_identity = EngineIdentity(
             library="pinocchio",
             version=str(pin.__version__),
@@ -225,26 +207,20 @@ class PinocchioSpatialForwardAdapter:
             velocity_count=int(self._model.nv),
         )
 
-    def _initialize_state(self, state: CanonicalSpatialState) -> None:
-        for hand_index, (joint_id, position) in enumerate(
-            (
-                (self._lead_joint, state.hand_positions[0]),
-                (self._trail_joint, state.hand_positions[1]),
-            )
+    def _initialize_state(self) -> None:
+        center = np.asarray(self._params.club_initial_position, dtype=float)
+        offsets = np.asarray(
+            [self._params.lead_grip_offset, self._params.trail_grip_offset]
+        )
+        for joint_id, position in (
+            (self._lead_joint, center + offsets[0]),
+            (self._trail_joint, center + offsets[1]),
         ):
             joint = self._model.joints[joint_id]
             self._q[joint.idx_q : joint.idx_q + 3] = position
-            self._v[joint.idx_v : joint.idx_v + 3] = state.hand_velocities[hand_index]
         club = self._model.joints[self._club_joint]
-        self._q[club.idx_q : club.idx_q + 3] = state.club_position
-        self._q[club.idx_q + 3 : club.idx_q + 7] = np.roll(
-            state.club_quaternion_wxyz, -1
-        )
-        rotation = rotation_matrix_from_quaternion(state.club_quaternion_wxyz)
-        self._v[club.idx_v : club.idx_v + 3] = rotation.T @ state.club_linear_velocity
-        self._v[club.idx_v + 3 : club.idx_v + 6] = (
-            rotation.T @ state.club_angular_velocity
-        )
+        self._q[club.idx_q : club.idx_q + 3] = center
+        self._q[club.idx_q + 3 : club.idx_q + 7] = np.array([0.0, 0.0, 0.0, 1.0])
         self._forward_kinematics()
 
     def _forward_kinematics(self) -> None:
@@ -385,16 +361,14 @@ def _build_pinocchio_model(
 
 
 def make_spatial_forward_adapter(
-    engine: str,
-    params: SpatialContactParameters,
-    initial_state: CanonicalSpatialState | None = None,
+    engine: str, params: SpatialContactParameters
 ) -> SpatialForwardAdapter:
     """Construct one actual engine adapter; reject unknown names and stubs."""
 
     if engine == "mujoco":
-        return MuJoCoSpatialForwardAdapter(params, initial_state)
+        return MuJoCoSpatialForwardAdapter(params)
     if engine == "pinocchio":
-        return PinocchioSpatialForwardAdapter(params, initial_state)
+        return PinocchioSpatialForwardAdapter(params)
     raise ValueError(f"unsupported spatial forward engine: {engine}")
 
 
