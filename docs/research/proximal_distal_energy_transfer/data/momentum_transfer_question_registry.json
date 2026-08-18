@@ -21,7 +21,12 @@
       "present_answer": "Drift fractions exist only for a named observable, frame, decomposition, and event window; several model tiers close these ledgers, but no universal swing-level percentage exists.",
       "decisive_next_test": "Publish one common estimand table across all forward tiers and repeat it with measurement uncertainty on participant-held-out bilateral-wrench trials.",
       "falsifier": "A registered drift contribution or its forward persistence vanishes, reverses, or is smaller than numerical or measurement uncertainty.",
-      "data_gate": "Common state/input/interface histories are available in models; qualifying governed human bilateral-wrench data are not."
+      "data_gate": "Common state/input/interface histories are available in models; qualifying governed human bilateral-wrench data are not.",
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/results_summary.json",
+        "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.json"
+      ]
     },
     {
       "id": "MTQ-02",
@@ -30,11 +35,19 @@
       "answer_state": "partly_answered",
       "model_plan_state": "partly_executed",
       "human_plan_state": "blocked",
-      "experiment_ids": ["MT-E02", "MT-E07", "MT-H01"],
-      "present_answer": "Force-velocity angle, relative-link angle, signed contact separation, transverse differential force, reference point, and frame transport gate transfer sign, zero, and magnitude in declared analytical, planar, and reduced spatial models. The three-dimensional bilateral measurement map proves that net club wrench leaves an equal-and-opposite axial point-force mode invisible and leaves six allocation dimensions invisible when both hands can apply full six-axis wrenches. A trajectory-level synthetic qualification now shows that net-wrench closure can coexist with 11.86 N bilateral allocation RMSE and that calibrated cross-talk and tracked contact centers are necessary parts of the declared point-force estimator contract.",
-      "decisive_next_test": "Repeat the frozen null and reversal atlas with subject-scaled articulated arms, calibrated grip compliance, distributed club dynamics, and held-out human geometry/wrench measurements; replace the synthetic point-force qualification with traceable bilateral six-axis device calibration, distributed-contact registration, synchronization, and held-out estimation.",
+      "experiment_ids": ["MT-E02", "MT-E07", "MT-E08", "MT-H01"],
+      "present_answer": "Force-velocity angle, relative-link angle, signed contact separation, transverse differential force, reference point, and frame transport gate transfer sign, zero, and magnitude in declared analytical, planar, and reduced spatial models. The three-dimensional bilateral measurement map proves that net club wrench leaves an equal-and-opposite axial point-force mode invisible and leaves six allocation dimensions invisible when both hands can apply full six-axis wrenches. A trajectory-level synthetic qualification now shows that net-wrench closure can coexist with 11.86 N bilateral allocation RMSE and that calibrated cross-talk and tracked contact centers are necessary parts of the declared point-force estimator contract. A six-profile subject-scaled audit further finds 0.171--0.616 m bilateral contact error despite full local constraint rank, rejecting the prescribed common states. A bounded follow-up closes all 234 registered reduced-tree configurations with fixed club pose, full achieved rank, positive broad engineering-limit margins, and positive coarse collision clearances.",
+      "decisive_next_test": "Repeat the frozen null, reversal, and killswitch atlas from the closed states with calibrated grip compliance, distributed club dynamics, subject-specific anatomy, and independent forward engines; replace the synthetic point-force qualification with traceable bilateral six-axis device calibration, distributed-contact registration, synchronization, and held-out human estimation.",
       "falsifier": "A null or sign-reversing geometry does not null or reverse the proposed pathway beyond uncertainty or the result fails an independent engine.",
-      "data_gate": "Reduced-engine controls, a structural sensor-rank audit, and a synthetic trajectory-level point-force qualification exist; a calibrated bilateral six-axis device, subject-scaled scapular/arm/grip geometry, and synchronized governed human wrenches remain unavailable."
+      "data_gate": "Reduced-engine controls, a structural sensor-rank audit, a synthetic trajectory-level point-force qualification, a subject-scaled prescribed-state rejection, and a reduced-tree closed-contact screen exist; subject-specific scapular/arm/grip anatomy, calibrated compliant contact, a bilateral six-axis device, and synchronized governed human wrenches remain unavailable.",
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/momentum_geometry_atlas.json",
+        "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/bilateral_wrench_identifiability_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/bilateral_wrench_sensor_qualification.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json"
+      ]
     },
     {
       "id": "MTQ-03",
@@ -47,7 +60,10 @@
       "present_answer": "Casting is not one mechanism or event; distal-angle, distal-rate, wrist-angle, and event-window definitions can disagree, so no universal causal diagnosis is supported.",
       "decisive_next_test": "Pre-register multiple casting criteria and retain their disagreement while independently intervening on distal release, proximal acceleration, and proximal braking under matched work and delivery state.",
       "falsifier": "A proposed casting mechanism changes sign or disappears under a plausible registered event definition or matched-state/work control.",
-      "data_gate": "Synthetic event definitions can be exercised now; causal human adjudication needs synchronized kinematics, wrenches, and impact outcomes."
+      "data_gate": "Synthetic event definitions can be exercised now; causal human adjudication needs synchronized kinematics, wrenches, and impact outcomes.",
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/timing_failure_mode_study.json"
+      ]
     },
     {
       "id": "MTQ-04",
@@ -60,7 +76,11 @@
       "present_answer": "Pointwise identical-state interventions show a nonmonotonic and sign-changing club-acceleration response; acceleration cannot be treated as a free or universally beneficial input.",
       "decisive_next_test": "Execute forward factorial proximal-acceleration interventions with matched work, peak load, and full delivery state across moving-base, spatial, and subject-scaled tiers.",
       "falsifier": "The proposed early-acceleration benefit plateaus, reverses, or is explained by work, state, orientation, or load differences.",
-      "data_gate": "Pointwise and rotating-base model evidence exists; independent forward causal and human tests remain open."
+      "data_gate": "Pointwise and rotating-base model evidence exists; independent forward causal and human tests remain open.",
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json"
+      ]
     },
     {
       "id": "MTQ-05",
@@ -73,7 +93,11 @@
       "present_answer": "Release timing changes geometry, work timing, and delivery in the tested models, but the selected timing is program-, model-, objective-, and constraint-dependent rather than universal.",
       "decisive_next_test": "Map viable release regions under factorial proximal drive/braking and distal actuation, multiple objectives, matched effort/load, phase uncertainty, and impact outcomes.",
       "falsifier": "The apparent release advantage disappears under matched controls, reverses for a credible objective, or incurs an adverse orientation/load cost.",
-      "data_gate": "Several planar timing grids exist; spatial, subject-scaled, and participant-held-out impact tests remain open."
+      "data_gate": "Several planar timing grids exist; spatial, subject-scaled, and participant-held-out impact tests remain open.",
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/timing_failure_mode_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/timing_viability_study.json"
+      ]
     },
     {
       "id": "MTQ-06",
@@ -82,11 +106,14 @@
       "answer_state": "unresolved",
       "model_plan_state": "registered",
       "human_plan_state": "blocked",
-      "experiment_ids": ["MT-E04", "MT-H01"],
+      "experiment_ids": ["MT-E04", "MT-E08", "MT-H01"],
       "present_answer": "Mechanical passivity at an instant does not imply low preparation or neural timing demand. In the registered common-phase planar screen, the clock policy retained 4/5 robust task-viable phase points and 45 ms of contiguous width, versus 1/5 and no multi-point span for the delayed/noisy state trigger; this falsifies a state-trigger timing-volume advantage in that model, not in people.",
       "decisive_next_test": "Repeat the common-phase viable-volume comparison with independently identified observers, continuous phase sampling, spatial impact outcomes, subject scaling, and participant-held-out perturbations.",
       "falsifier": "The drift-mediated policy has an equal or smaller viable region, worse lower-tail result, or greater delay/phase sensitivity than its comparator.",
-      "data_gate": "The moving-base two-hand planar comparison is executed under common speed, face/path, force, effort, and numerical guards; identified human delays, spatial impact, and participant perturbation trials remain unavailable."
+      "data_gate": "The moving-base two-hand planar comparison is executed under common speed, face/path, force, effort, and numerical guards; identified human delays, spatial impact, and participant perturbation trials remain unavailable.",
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/timing_viability_study.json"
+      ]
     },
     {
       "id": "MTQ-07",
@@ -95,11 +122,15 @@
       "answer_state": "partly_answered",
       "model_plan_state": "partly_executed",
       "human_plan_state": "blocked",
-      "experiment_ids": ["MT-E04", "MT-H01"],
+      "experiment_ids": ["MT-E04", "MT-E08", "MT-H01"],
       "present_answer": "No tested policy has established self-correction. The expanded common-phase screen observed no sustained half-error recovery in any of 60 policy/load/phase cases, so neither clock nor state triggering has a recovery-qualified viable region in this model.",
       "decisive_next_test": "Estimate continuous attraction regions with independently identified observers, stronger feedback families, saturation and external-contact disturbances, then test held-out spatial and human recovery without hidden force or effort cost.",
       "falsifier": "Perturbations do not decay, viable-set return is not more probable, or any benefit requires an undeclared load increase.",
-      "data_gate": "Small and expanded planar recovery screens exist; independently identified spatial observers and governed human perturbation data remain open."
+      "data_gate": "Small and expanded planar recovery screens exist; independently identified spatial observers and governed human perturbation data remain open.",
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/observer_recovery_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/timing_viability_study.json"
+      ]
     },
     {
       "id": "MTQ-08",
@@ -112,7 +143,13 @@
       "present_answer": "Energy-, work-, and load-controlled planar results are nonmonotonic and retain both favorable and adverse higher-rate outcomes, rejecting proximal velocity as a standalone maximization rule at those tiers.",
       "decisive_next_test": "Perform independent forward rate and acceleration interventions with full-delivery-state matching, then search for interior optima across spatial, subject-scaled, and held-out human tiers.",
       "falsifier": "A proposed monotonic benefit contains a plateau, interior optimum, reversal, adverse load, or dependence on the matching rule.",
-      "data_gate": "Planar dose-response evidence exists; causal spatial and human validation remain open."
+      "data_gate": "Planar dose-response evidence exists; causal spatial and human validation remain open.",
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_transfer_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json"
+      ]
     },
     {
       "id": "MTQ-09",
@@ -121,11 +158,15 @@
       "answer_state": "partly_answered",
       "model_plan_state": "partly_executed",
       "human_plan_state": "blocked",
-      "experiment_ids": ["MT-E06", "MT-H01"],
+      "experiment_ids": ["MT-E06", "MT-E08", "MT-H01"],
       "present_answer": "Five declared slack classes have now been exercised separately under two synthetic excitations with class-specific engagement, mechanical passivity where applicable, energy closure, delayed-control boundaries, and local sensitivity audits. No global benefit, necessity, intentionality, or delivery advantage is supported; one scalar output nearly confounds contact disengagement with the biological-compliance surrogate.",
       "decisive_next_test": "Embed one mechanical class at a time in moving-base, two-hand, and spatial delivery models under matched work, load, and state; add a stateful play operator and subject-specific tissue models; then use independent contact, shaft, tendon, activation, and bilateral-wrench measurements to test class identification.",
       "falsifier": "A proposed benefit disappears when slack classes are separated, violates passivity or energy closure, or is non-identifiable from the available measurements.",
-      "data_gate": "Synthetic constitutive, passivity, and local-sensitivity evidence exists; calibrated contact, shaft, muscle-tendon, activation, and human grip-state measurements remain open."
+      "data_gate": "Synthetic constitutive, passivity, and local-sensitivity evidence exists; calibrated contact, shaft, muscle-tendon, activation, and human grip-state measurements remain open.",
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/typed_slack_dynamic_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/typed_slack_study.json"
+      ]
     }
   ],
   "questions": [
@@ -159,6 +200,8 @@
         "moment arm",
         "force-velocity projection",
         "contact couple",
+        "ground force and intrinsic free moment",
+        "base storage and damping work",
         "measurement-map rank and nullity",
         "event-window work",
         "delivery outcome"
@@ -170,10 +213,14 @@
         "bilateral sensor augmentation",
         "proper-frame transform",
         "subject-scaled geometry",
+        "bilateral contact closure",
+        "fixed translation free-moment and coupled pathway killswitches",
+        "center-of-pressure reference reversal",
+        "initialization sensitivity",
         "independent engine"
       ],
       "falsifier": "A registered sign-reversing or null geometry intervention does not change the proposed pathway beyond uncertainty, or the effect fails in an independent engine.",
-      "issues": [8448, 8449, 8556, 8592, 8593, 8595]
+      "issues": [8448, 8449, 8556, 8592, 8593, 8595, 8719]
     },
     {
       "id": "Q3",

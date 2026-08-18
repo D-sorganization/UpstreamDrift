@@ -18,6 +18,8 @@ from typing import Any
 
 import numpy as np
 
+from ..exceptions import BunkerShot3DValueError
+
 #: Default search space when an experiment does not declare its own.
 _DEFAULT_BOUNDS: dict[str, tuple[float, float]] = {
     "friction_coefficient": (0.01, 1.0),
@@ -28,7 +30,7 @@ _DEFAULT_PARAMETERS: tuple[str, ...] = ("friction_coefficient",)
 _SENSITIVITY_TOLERANCE = 1e-12
 
 
-class InertParameterError(ValueError):
+class InertParameterError(BunkerShot3DValueError):
     """Raised when a declared parameter does not affect the objective.
 
     Optimising such a parameter cannot identify it: the returned value is a

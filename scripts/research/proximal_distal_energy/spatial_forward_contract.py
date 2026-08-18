@@ -122,6 +122,44 @@ class CanonicalSpatialState:
             value = np.asarray(getattr(self, name), dtype=float)
             if value.shape != shape or np.any(~np.isfinite(value)):
                 raise ValueError(f"{name} must have finite shape {shape}")
+        quaternion_norm = float(np.linalg.norm(self.club_quaternion_wxyz))
+        if not np.isclose(quaternion_norm, 1.0, atol=1.0e-10):
+            raise ValueError("club_quaternion_wxyz must be unit length")
+
+
+def default_spatial_state(params: SpatialContactParameters) -> CanonicalSpatialState:
+    """Return the legacy zero-preload initial state in canonical coordinates."""
+
+    center = np.asarray(params.club_initial_position, dtype=float)
+    offsets = np.asarray([params.lead_grip_offset, params.trail_grip_offset])
+    return CanonicalSpatialState(
+        hand_positions=center + offsets,
+        hand_velocities=np.zeros((2, 3)),
+        club_position=center,
+        club_quaternion_wxyz=np.array([1.0, 0.0, 0.0, 0.0]),
+        club_linear_velocity=np.zeros(3),
+        club_angular_velocity=np.zeros(3),
+    )
+
+
+def canonical_spatial_state_digest(state: CanonicalSpatialState) -> str:
+    """Return a stable digest of one engine-independent initial state."""
+
+    if not isinstance(state, CanonicalSpatialState):
+        raise TypeError("state must be a CanonicalSpatialState")
+    payload = {
+        field: np.asarray(getattr(state, field), dtype=float).tolist()
+        for field in (
+            "hand_positions",
+            "hand_velocities",
+            "club_position",
+            "club_quaternion_wxyz",
+            "club_linear_velocity",
+            "club_angular_velocity",
+        )
+    }
+    raw = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+    return hashlib.sha256(raw).hexdigest()
 
 
 def rotation_matrix_from_quaternion(quaternion_wxyz: FloatArray) -> FloatArray:
@@ -265,7 +303,9 @@ def driver_target_velocities(
 __all__ = [
     "CanonicalSpatialState",
     "SpatialContactParameters",
+    "canonical_spatial_state_digest",
     "contact_pair",
+    "default_spatial_state",
     "driver_target_velocities",
     "driver_targets",
     "rotation_matrix_from_quaternion",

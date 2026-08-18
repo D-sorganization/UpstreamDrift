@@ -5,12 +5,16 @@ from __future__ import annotations
 from unittest.mock import patch
 
 
+import pytest
+
 from src.shared.python.motion_pipeline.matching.base import MotionMatchingResult
 from src.shared.python.motion_pipeline.matching.trajopt_drake import (
     DrakeTrajoptMatchingSolver,
 )
 
 from ._local_fixtures import make_pendulum_reference_trajectory, make_simple_rig
+
+pytestmark = pytest.mark.unit
 
 
 def test_drake_trajopt_solver_constructs() -> None:

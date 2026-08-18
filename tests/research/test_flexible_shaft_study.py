@@ -16,6 +16,8 @@ from scripts.research.proximal_distal_energy.flexible_shaft_study import (
     velocity_bias_power_identity_residual,
 )
 
+pytestmark = pytest.mark.scientific
+
 
 def test_acceleration_contributions_reconstruct_total() -> None:
     params = FlexibleShaftParams.reference()

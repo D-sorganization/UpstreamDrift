@@ -19,6 +19,8 @@ from src.launchers.launcher_process_manager import (  # noqa: E402
     start_vcxsrv,
 )
 
+pytestmark = pytest.mark.unit
+
 # Convenience patch targets used by launch_script / launch_module tests
 _SECURE_POPEN = "src.launchers.launcher_process_manager.secure_popen"
 _VALIDATE_SCRIPT = "src.launchers.launcher_process_manager.validate_script_path"

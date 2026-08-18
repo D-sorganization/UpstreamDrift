@@ -91,7 +91,27 @@ abstract: |
   $2.14\times10^{-11}$; reversing the hand moment arm reverses a $-4.32$ N m
   force-generated couple, and coincident hands remove it exactly. Because
   contact loads are prescribed, passive spatial contact remains inconclusive
-  at that tier. A subsequent reduced forward-contact experiment independently
+  at that tier. A six-profile subject-scaled audit then shows why local rank is
+  insufficient: its prescribed anatomical hand points miss the declared grips
+  by 0.171--0.616 m even though every local contact Jacobian has rank six. A
+  bounded inverse-kinematics continuation then closes all 234 registered
+  subject-scaled configurations while holding the club pose fixed; every
+  sample retains rank six, stays inside broad reduced-model engineering
+  limits, and passes a coarse nonadjacent-body bounding-sphere screen. This
+  establishes reduced-tree geometric feasibility, not anatomical validity,
+  contact force, passivity, timing benefit, or human strategy. All 234 closed
+  states now enter one canonical forward-state contract with preserved
+  position and velocity closure and zero interface preload. Native MuJoCo and
+  Pinocchio then pass trajectory, wrench, and energy comparisons for a
+  54-case, 4 ms spanning initialization audit. This closes a coordinate and
+  numerical-transport gap, not the full-horizon articulated-contact gate. A
+  preregistered extension then advances the same 54 states through 4, 10, 25,
+  and 50 ms under nominal conditions and nine one-factor adverse or null
+  branches. All 2,160 horizon cases pass the declared cross-engine and
+  work--energy gates; no failure is observed through 50 ms. The result is
+  right-censored at that horizon and remains a reduced hand-carriage result.
+  A subsequent
+  reduced forward-contact experiment independently
   integrates MuJoCo and Pinocchio with two finite-mass hand carriages, paired
   compliant interfaces, and no direct club actuation. Its exact same-state
   driver-killswitch branch retains a negative swing-normal contact couple for
@@ -173,7 +193,22 @@ abstract: |
   separated reactions, and a compliant distal club. Its 18-program matched-
   state grid finds that higher initial torso rate can accompany greater delivery
   speed but does not uniformly reduce braking work; exact torso, arm, and wrist
-  killswitches are nonmonotonic. This remains a planar mechanism result. A frozen
+  killswitches are nonmonotonic. This remains a planar mechanism result. The
+  subject-scaled articulated sequence now advances a five-fiber-per-hand grip
+  through 50 ms and then adds passive first-mode bending and torsion under rigid,
+  single-mode, and coupled killswitch branches. All 384 fine-grid shaft
+  trajectories pass the registered linear-domain, work--energy, refinement, and
+  MuJoCo--Pinocchio gates. Among 126 coupled--rigid cells matched within 5% for
+  peak load and dissipated work, final-speed differences include 82 negative and
+  44 positive values. This establishes a state-dependent synthetic elastic
+  pathway and rejects a universal shaft-speed benefit; it does not calibrate
+  equipment or identify a human strategy. A subsequent finite-base extension
+  adds planar ground reaction and intrinsic free moment. All 576 registered
+  trajectories pass the declared numerical and native-engine gates, but none
+  of 384 coupled--fixed cells meets the preregistered peak-load and total-work
+  match. A labeled post-hoc alternative admits both speed-difference signs.
+  The result qualifies the synthetic mechanism while leaving its isolated
+  delivery effect unidentified. A frozen
   participant-held-out bilateral-wrench protocol defines the human falsifier,
   but no governed human outcome is available.
   References, analysis code,
@@ -254,6 +289,10 @@ format:
 {{< include chapters/_ch06bbb_forward_modal_shaft.qmd >}}
 
 {{< include chapters/_ch06c_spatial_cross_formulation.qmd >}}
+
+{{< include chapters/_ch06ca_articulated_ground.qmd >}}
+
+{{< include chapters/_ch06cb_spatial_cross_tail.qmd >}}
 
 {{< include chapters/_ch06cc_spatial_forward_contact.qmd >}}
 

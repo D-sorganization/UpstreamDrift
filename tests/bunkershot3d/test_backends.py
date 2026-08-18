@@ -2,6 +2,8 @@ import pytest
 
 mujoco = pytest.importorskip("mujoco")
 from pathlib import Path
+
+from _bunker_fixtures_8612 import write_config, write_straight_trajectory
 from bunkershot3d.backends.chrono.driver import BackendNotImplementedError, ChronoDriver
 from bunkershot3d.backends.liggghts.driver import LiggghtsDriver
 from bunkershot3d.backends.mpm.driver import MPMDriver
@@ -14,43 +16,22 @@ try:
 except ImportError:
     _PYCHRONO_AVAILABLE = False
 
+_SPEED = 1.0
+
 
 @pytest.fixture
 def dummy_config(tmp_path: Path) -> Path:
-    yaml_content = """
-    bunker_bed:
-      domain:
-        length_x: 2.0
-        width_y: 1.0
-        depth_z: 0.5
-      boundary: "fixed"
-    grain_population:
-      count: 1000
-      diameter_mean: 0.002
-      diameter_sigma_log: 0.1
-      density: 2650.0
-      coarse_graining_factor: 1.0
-    contact_model:
-      friction_coefficient: 0.5
-      restitution_coefficient: 0.3
-      youngs_modulus: 1e7
-      poisson_ratio: 0.25
-    clubhead:
-      loft_deg: 56.0
-      bounce_deg: 10.0
-      width: 0.1
-      height: 0.05
-      mass: 0.3
-    trajectory:
-      file: "swing_data.csv"
-    output:
-      downsample_grains: 10
-      rate_hz: 500.0
-    """
-    config_path = tmp_path / "canonical.yaml"
-    with open(config_path, "w") as f:
-        f.write(yaml_content)
-    return config_path
+    """A runnable config: quartz stiffness (#8612) plus a resolvable swing."""
+    write_straight_trajectory(tmp_path / "swing_data.csv", speed=_SPEED, duration=0.02)
+    return write_config(
+        tmp_path / "canonical.yaml",
+        grain_count=200,
+        diameter_mean=0.002,
+        diameter_sigma_log=0.1,
+        duration=0.005,
+        rate_hz=500.0,
+        trajectory_file="swing_data.csv",
+    )
 
 
 def test_chrono_driver_init(dummy_config: Path) -> None:
@@ -116,34 +97,32 @@ def test_mpm_driver_execution(dummy_config: Path, tmp_path: Path) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Tests for issue #5553 fixes
+# Tests for issue #5553 fixes, updated for #8612
 # ---------------------------------------------------------------------------
 
 
 def test_mpm_step_count_from_trajectory_duration(
     dummy_config: Path, tmp_path: Path
 ) -> None:
-    """Step count must equal trajectory.duration / model.opt.timestep."""
-    import yaml
+    """Step count follows trajectory.duration and the *derived* timestep.
 
-    # Write a config with a known duration
-    with open(dummy_config) as f:
-        cfg = yaml.safe_load(f)
-    cfg["trajectory"]["duration"] = 0.05  # 50 ms
-    patched = tmp_path / "patched.yaml"
-    with open(patched, "w") as f:
-        yaml.dump(cfg, f)
+    Before #8612 the timestep was the value authored in the MJCF (1 ms). It is
+    now the Courant-stable step for the actual swing speed, so the step count
+    is ``duration / dt`` with ``dt = 0.1 d / v``.
+    """
+    from bunkershot3d.backends.prescribed_motion import load_trajectory
 
-    driver = MPMDriver(patched)
+    driver = MPMDriver(dummy_config)
     driver.setup()
     assert driver.model is not None
 
-    dt = driver.model.opt.timestep
-    expected_steps = int(round(0.05 / dt))
-    n_steps = int(round(driver.config.trajectory.duration / dt))
-    assert n_steps == expected_steps
-    # Sanity: for dt=0.001 and duration=0.05 we expect 50 steps
-    assert n_steps == 50
+    trajectory = load_trajectory(driver.config_path, driver.config)
+    plan = driver._plan(trajectory, 200_000)
+
+    expected_dt = 0.1 * driver.config.to_grain_population().diameter_mean_m / _SPEED
+    assert plan.dt <= expected_dt * 1.001
+    duration_s = driver.config.to_trajectory_source().duration_s
+    assert plan.n_steps == int(round(duration_s / plan.dt))
 
 
 def test_mpm_contact_wrench_shape(dummy_config: Path, tmp_path: Path) -> None:
