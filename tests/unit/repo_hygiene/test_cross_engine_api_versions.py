@@ -6,6 +6,12 @@ import src.shared.python.launcher_embed as launcher_embed
 import src.shared.python.pose_interchange as pose_interchange
 import src.shared.python.realtime as realtime
 
+# Without a suite marker, unit-test-gate's `-m "unit and ..."` selector
+# deselects this file entirely and the guard never runs in CI (#7158).
+# Marked `unit` only: this module imports three src packages at collection
+# time, so `headless_safe` is not claimed without verifying it under xvfb.
+pytestmark = pytest.mark.unit
+
 # The three core cross-engine packages per ADR-0007 / ADR-0012 / ADR-0013.
 # These packages establish canonical representations and integration contracts
 # between engines and thus require strict semver discipline for schemas.
