@@ -16,6 +16,8 @@ from src.shared.python.motion_pipeline.model_bridge import (
     rig_to_urdf,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _rig() -> SkeletonRig:
     joints = {

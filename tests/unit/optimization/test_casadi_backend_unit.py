@@ -24,6 +24,8 @@ from src.shared.python.optimization.casadi_backend import (
 )
 from src.shared.python.optimization.model_provider import swing_joint_limits
 
+pytestmark = pytest.mark.unit
+
 
 def test_mocked_casadi_counts_as_unavailable() -> None:
     assert casadi_available() is False

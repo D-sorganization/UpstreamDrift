@@ -13,6 +13,8 @@ import importlib.util
 
 import pytest
 
+pytestmark = pytest.mark.integration
+
 
 def _module_available(name: str) -> bool:
     """find_spec that tolerates mock modules other suites place in

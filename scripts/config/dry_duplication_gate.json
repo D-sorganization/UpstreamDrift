@@ -13,5 +13,6 @@
     "src/**/tests/**",
     "src/**/vendor/**"
   ],
-  "baseline_path": "scripts/config/dry_duplication_baseline.json"
+  "baseline_path": "scripts/config/dry_duplication_baseline.json",
+  "quarantine_path": "scripts/config/dry_duplication_quarantine.json"
 }

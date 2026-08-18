@@ -15,7 +15,7 @@ from src.shared.python.engine_core.engine_availability import (
 )
 
 # Skip entire module if MuJoCo is not available
-pytestmark = skip_if_unavailable("mujoco")
+pytestmark = [skip_if_unavailable("mujoco"), pytest.mark.unit]
 
 # Explicit attribute lists for MuJoCo C++ types that may not be importable
 # as Python classes for spec=.

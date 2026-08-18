@@ -16,7 +16,7 @@ import pytest
 
 from src.api.services.simulation_service import SimulationService
 
-pytestmark = pytest.mark.anyio
+pytestmark = [pytest.mark.anyio, pytest.mark.unit]
 
 
 @pytest.fixture(scope="module")

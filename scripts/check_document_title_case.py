@@ -230,6 +230,33 @@ def tracked_paths(root: Path) -> list[Path]:
     ]
 
 
+def changed_paths(
+    root: Path, *, ref: str | None = None, staged: bool = False
+) -> list[Path]:
+    """Return document paths present in the selected Git diff."""
+    command = ["git", "diff", "--name-only", "--diff-filter=ACMR"]
+    if staged:
+        command.append("--cached")
+    elif ref:
+        command.append(f"{ref}..HEAD")
+    result = subprocess.run(
+        command,
+        cwd=root,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        check=False,
+    )
+    return [
+        root / name
+        for name in result.stdout.splitlines()
+        if Path(name).suffix.lower() in SUFFIXES
+        and not any(part in EXCLUDED for part in Path(name).parts)
+        and (root / name).is_file()
+    ]
+
+
 def _added_lines_from_diff(diff: str) -> set[int]:
     """Return new-file line numbers from a zero-context unified diff."""
     lines: set[int] = set()
@@ -285,27 +312,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     root = args.root.resolve()
     paths = [item if item.is_absolute() else root / item for item in args.paths]
-    if args.changed_from:
-        result = subprocess.run(
-            [
-                "git",
-                "diff",
-                "--name-only",
-                "--diff-filter=ACMR",
-                f"{args.changed_from}..HEAD",
-            ],
-            cwd=root,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            check=False,
-        )
-        paths = [
-            root / name
-            for name in result.stdout.splitlines()
-            if Path(name).suffix.lower() in SUFFIXES
-        ]
+    if args.changed_from or args.staged:
+        paths = changed_paths(root, ref=args.changed_from, staged=args.staged)
     elif not paths:
         paths = tracked_paths(root)
     findings = []
