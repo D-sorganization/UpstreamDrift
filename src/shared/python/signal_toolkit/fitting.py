@@ -720,10 +720,11 @@ class CustomFunctionFitter:
         }
 
         def custom_func(t: np.ndarray, *args: float) -> np.ndarray:
-            local_dict = dict(safe_dict)
-            local_dict["t"] = t
-            for name, val in zip(param_names, args, strict=False):
-                local_dict[name] = val
+            local_dict = {
+                **safe_dict,
+                "t": t,
+                **dict(zip(param_names, args, strict=False)),
+            }
             return safe_eval(expression, local_dict)
 
         return cls(custom_func, param_names, expression)
