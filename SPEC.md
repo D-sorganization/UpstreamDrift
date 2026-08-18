@@ -3910,6 +3910,7 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Use `np.sqrt(np.einsum('...i,...i->...', x, x))` instead of `np.linalg.norm(x, axis=-1)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
 
 * (spec-exempt: micro-optimization) Vectorized math operations (e.g. `np.einsum`) must be used for performance improvements without altering mathematical correctness.
+
 - Updated norm calculations in `src/tools/bunker_shot_gui/crosstier.py` to use `math.sqrt(np.vdot)` and `np.sqrt(np.einsum)` for improved performance. (spec-exempt: micro-optimization)
 
 * `bunkershot3d/metrics/trace.py`: Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum(...))` for multi-dimensional array norm, and replaced `float(np.linalg.norm)` with `math.sqrt(np.vdot)` for 1D array norm to improve performance. (spec-exempt: micro-optimization)
