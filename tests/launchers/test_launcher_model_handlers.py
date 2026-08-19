@@ -45,7 +45,6 @@ def test_module_handler() -> None:
         module_name="my_module",
         cwd=Path("/repo"),
         extra_python_paths=(),
-        keep_terminal_open=True,
     )
 
 
@@ -72,7 +71,6 @@ def test_script_handler() -> None:
         script_path=Path("/repo") / "script.py",
         cwd=Path("/repo") / "dir",
         extra_python_paths=(),
-        keep_terminal_open=True,
     )
 
 
@@ -372,7 +370,7 @@ class TestProviderExerciseHandler:
         ],
     )
     def test_launch_routes_provider_directory_to_matching_engine_dashboard(
-        self, model_type: str, engine: str, tmp_path: Path
+        self, model_type: str, engine: str
     ) -> None:
         """Provider directories launch a contained exercise dashboard, never a directory."""
 
@@ -382,31 +380,24 @@ class TestProviderExerciseHandler:
             path = "src/provider_models/exercises/bench_press"
             type = model_type
 
-        # The handler validates that the exercise path resolves to a real
-        # directory before launching, so the test repo must actually contain
-        # it - a bare fake path exercises only the rejection branch.
-        exercise_dir = (
-            tmp_path / "src" / "provider_models" / "exercises" / "bench_press"
-        )
-        exercise_dir.mkdir(parents=True)
-
         manager = MagicMock()
         manager.get_subprocess_env.return_value = {}
         manager.launch_script.return_value = "process"
 
-        result = ProviderExerciseHandler().launch(ProviderModel(), tmp_path, manager)
+        result = ProviderExerciseHandler().launch(
+            ProviderModel(), Path("/repo"), manager
+        )
 
         assert result is True
         manager.launch_script.assert_called_once_with(
             name="Bench Press",
-            script_path=tmp_path / "src" / "launchers" / "exercise_dashboard.py",
-            cwd=tmp_path,
+            script_path=Path("/repo") / "src" / "launchers" / "exercise_dashboard.py",
+            cwd=Path("/repo"),
             env={
                 "BIOMECH_EXERCISE": "bench_press",
                 "BIOMECH_ENGINE": engine,
             },
             extra_python_paths=(),
-            keep_terminal_open=True,
         )
         manager.launch_module.assert_not_called()
 

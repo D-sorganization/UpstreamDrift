@@ -1,11 +1,11 @@
 """Versioned HDF5 result schema for BunkerShot3D (issue #8617, B17/B18).
 
-Layout v3 (current)
+Layout v2 (current)
 -------------------
 Root attributes, ``schema_version`` written **first** so a reader can dispatch
 before touching anything else::
 
-    schema_version : int64   -- 3
+    schema_version : int64   -- 2
     format         : str     -- "bunkershot3d-result"
     manifest_*               -- run manifest, see bunkershot3d.provenance
 
@@ -25,24 +25,6 @@ Contiguous, chunked-along-time datasets (no per-timestep groups)::
 Grain frames are stored ragged (concatenated points plus a per-frame count)
 because a downsampled grain population need not have a constant size.
 
-v3 adds the sand-field payload of issue #8710, written whole rather than
-appended because a field is produced by one march and has no streaming
-consumer::
-
-    /sand_field/t              (T,)         sample times [s]
-    /sand_field/velocity       (T, N, D)    [m/s]
-    /sand_field/density        (T, N)       [kg/m^3]
-    /sand_field/shear_rate     (T, N)       [1/s], optional
-    /sand_field/positions      (T, N, D)    [m], PARTICLE layout only
-    /sand_field/body_outline   (T, V, D)    [m], intruder section, optional
-    /sand_field.attrs["metadata"]      : str  -- canonical JSON, tier included
-    /sand_field.attrs["content_sha256"]: str  -- covers metadata *and* arrays
-
-The digest is why the tier is data rather than a filename convention: editing
-the stored tier and re-copying the file breaks it, and
-:mod:`bunkershot3d.fields.store` refuses to load a field whose digest does not
-match its contents.
-
 Layout v1 (legacy, read-only)
 -----------------------------
 One group per timestep -- ``/clubhead/t_0.000500/{position,orientation}`` --
@@ -50,17 +32,16 @@ with the sample time in a ``time`` attribute. 2 kHz x 0.5 s produced 1000 groups
 per stream, and the read path sorted ``f"t_{time:.6f}"`` *as strings*, so frame
 order broke at t >= 10 s ("t_10.000000" sorts before "t_9.500000").
 
-:class:`BunkerShotResultReader` accepts v1, v2 and v3. v1 files are migrated
-**on read** -- ordered by the numeric ``time`` attribute, never by key string,
-and never rewritten in place. A v2 file simply has no ``/sand_field`` group,
-which reads back as "no field was recorded" rather than as an error.
+:class:`BunkerShotResultReader` accepts both. v1 files are migrated **on read**
+-- ordered by the numeric ``time`` attribute, never by key string, and never
+rewritten in place.
 """
 
 from __future__ import annotations
 
 import time as _time
 from pathlib import Path
-from typing import Any, NamedTuple
+from typing import Any
 
 import h5py
 import numpy as np
@@ -71,9 +52,6 @@ from ..provenance import RunManifest
 
 __all__ = [
     "DEFAULT_TIME_CHUNK",
-    "FIELD_DIGEST_ATTR",
-    "FIELD_GROUP",
-    "FIELD_METADATA_ATTR",
     "FORMAT_ATTR",
     "FORMAT_NAME",
     "SCHEMA_VERSION",
@@ -81,14 +59,13 @@ __all__ = [
     "SUPPORTED_SCHEMA_VERSIONS",
     "BunkerShotResultReader",
     "BunkerShotResultWriter",
-    "SandFieldPayload",
 ]
 
 #: Schema version emitted by :class:`BunkerShotResultWriter`.
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 2
 
 #: Schema versions :class:`BunkerShotResultReader` can read.
-SUPPORTED_SCHEMA_VERSIONS = (1, 2, 3)
+SUPPORTED_SCHEMA_VERSIONS = (1, 2)
 
 #: Root attribute holding the integer schema version.
 SCHEMA_VERSION_ATTR = "schema_version"
@@ -102,52 +79,11 @@ FORMAT_NAME = "bunkershot3d-result"
 #: Frames per HDF5 chunk along the time axis.
 DEFAULT_TIME_CHUNK = 1024
 
-#: Group holding the sand-field payload (v3+).
-FIELD_GROUP = "sand_field"
-
-#: Attribute on :data:`FIELD_GROUP` carrying the field metadata as canonical JSON.
-FIELD_METADATA_ATTR = "metadata"
-
-#: Attribute on :data:`FIELD_GROUP` carrying the digest of metadata plus arrays.
-FIELD_DIGEST_ATTR = "content_sha256"
-
 _CLUBHEAD = "clubhead"
 _WRENCH = "wrench"
 _GRAINS = "grains"
 _TIME = "t"
 _COUNTS = "counts"
-_FIELD_ARRAYS = (
-    "velocity",
-    "density",
-    "shear_rate",
-    "positions",
-    "body_outline",
-)
-
-
-class SandFieldPayload(NamedTuple):
-    """A sand field as it sits on disk, before any schema is imposed on it.
-
-    The io layer deliberately does not know what a
-    :class:`~bunkershot3d.fields.schema.SandFieldSeries` is: it moves
-    named arrays, a metadata string and a digest, and
-    :mod:`bunkershot3d.fields.store` is the only place that knows how
-    those become a typed field.  That keeps a change to the field schema
-    from being a change to the file format, which is the whole reason
-    the two carry separate version numbers.
-
-    Attributes:
-        time_s: ``(T,)`` frame times.
-        arrays: Name to array, for the arrays that were written. Names
-            outside :data:`_FIELD_ARRAYS` are rejected on write.
-        metadata: Canonical-JSON metadata, including the fidelity tier.
-        digest: SHA-256 over the metadata and the arrays together.
-    """
-
-    time_s: np.ndarray
-    arrays: dict[str, np.ndarray]
-    metadata: str
-    digest: str
 
 
 class _Appender:
@@ -453,91 +389,6 @@ class BunkerShotResultWriter:
         """
         self._grains.append(time, positions, velocities)
 
-    def write_sand_field(
-        self,
-        payload: SandFieldPayload,
-        *,
-        compression: str = "",
-        compression_level: int = 4,
-    ) -> None:
-        """Write the sand-field payload, once, as whole datasets.
-
-        Unlike the streams, a field is produced by one march and consumed
-        whole, so it is written in one call rather than appended: an
-        appender would buy nothing and would let a half-written field --
-        one with a digest covering frames that are not there -- reach
-        disk.
-
-        Args:
-            payload: The arrays, metadata and digest.
-            compression: HDF5 filter name, or ``""`` for none. Fields are
-                the only datasets in this format large enough for a
-                filter to be worth its CPU.
-            compression_level: Filter level, where the filter takes one.
-
-        Raises:
-            ValueError: If a field group already exists, if an array is
-                not named in the schema, if an array's leading axis does
-                not match the time axis, or if the metadata or digest is
-                empty.
-        """
-        if FIELD_GROUP in self.file:
-            raise ValueError(
-                f"/{FIELD_GROUP} is already written; a result carries one field, "
-                "and a second write would leave the digest covering neither"
-            )
-        if not payload.metadata.strip():
-            raise ValueError(
-                "a sand field must carry its metadata: the fidelity tier and "
-                "validity status live there, not in the filename"
-            )
-        if not payload.digest.strip():
-            raise ValueError(
-                "a sand field must carry its content digest, or its declared "
-                "tier could be edited without trace"
-            )
-        times = np.asarray(payload.time_s, dtype=np.float64).reshape(-1)
-        if times.size == 0:
-            raise ValueError("a sand field must have at least one frame")
-        if np.any(np.diff(times) < 0.0):
-            raise ValueError(
-                "sand field times must be non-decreasing; an out-of-order field "
-                "animates backwards through the impact"
-            )
-        for name, array in payload.arrays.items():
-            if name not in _FIELD_ARRAYS:
-                raise ValueError(
-                    f"unknown sand field array {name!r}; this schema stores "
-                    f"{list(_FIELD_ARRAYS)}"
-                )
-            block = np.asarray(array)
-            if block.ndim < 2 or block.shape[0] != times.size:
-                raise ValueError(
-                    f"{name} must have shape (T, ...) with T = {times.size}, got "
-                    f"{block.shape}"
-                )
-
-        group = self.file.create_group(FIELD_GROUP)
-        group.attrs[FIELD_METADATA_ATTR] = payload.metadata
-        group.attrs[FIELD_DIGEST_ATTR] = payload.digest
-        group.create_dataset(_TIME, data=times)
-        options: dict[str, Any] = {}
-        if compression:
-            options["compression"] = compression
-            if compression == "gzip":
-                options["compression_opts"] = int(compression_level)
-        for name in _FIELD_ARRAYS:
-            if name not in payload.arrays:
-                continue
-            # Copied, because a caller may hand a live view of solver state.
-            block = np.array(payload.arrays[name], copy=True)
-            group.create_dataset(
-                name,
-                data=block,
-                chunks=(1, *block.shape[1:]) if compression else None,
-                **options,
-            )
-
     def set_manifest(self, manifest: RunManifest) -> None:
         """Attach (or replace) the run manifest before closing.
 
@@ -570,25 +421,6 @@ class BunkerShotResultWriter:
             manifest.write_sidecar(
                 self.filepath, artifact_extra={"schema_version": SCHEMA_VERSION}
             )
-
-
-def _as_text(value: Any) -> str:
-    """Return an HDF5 string attribute as ``str``.
-
-    h5py hands back ``bytes`` for fixed-length string attributes and
-    ``str`` for variable-length ones; ``str(b"...")`` would silently
-    produce ``"b'...'"`` and turn a digest comparison into a permanent
-    mismatch, so the two cases are separated here rather than assumed.
-
-    Args:
-        value: The raw attribute value.
-
-    Returns:
-        The value as text.
-    """
-    if isinstance(value, bytes):
-        return value.decode("utf-8")
-    return str(value)
 
 
 def _read_schema_version(handle: h5py.File, path: Path) -> int:
@@ -836,41 +668,6 @@ class BunkerShotResultReader:
         positions = np.split(_read_v2_column(group, "positions", 3), edges)
         velocities = np.split(_read_v2_column(group, "velocities", 3), edges)
         return times, list(positions), list(velocities)
-
-    def read_sand_field(self) -> SandFieldPayload | None:
-        """Read the sand-field payload, or ``None`` if none was recorded.
-
-        A v1 or v2 file, and a v3 file whose run recorded no field, both
-        return ``None``: "no field here" is an answer, not a failure.
-
-        Returns:
-            The payload, or ``None``.
-
-        Raises:
-            ValueError: If the group exists but has lost its metadata or
-                its digest, which would leave the arrays with no
-                recorded tier at all.
-        """
-        group = self.file.get(FIELD_GROUP)
-        if group is None:
-            return None
-        metadata = group.attrs.get(FIELD_METADATA_ATTR)
-        digest = group.attrs.get(FIELD_DIGEST_ATTR)
-        if metadata is None or digest is None:
-            raise ValueError(
-                f"/{FIELD_GROUP} in {self.filepath} has no "
-                f"{FIELD_METADATA_ATTR}/{FIELD_DIGEST_ATTR} attribute, so the "
-                "tier and validity of these arrays are unknowable"
-            )
-        arrays = {
-            name: np.asarray(group[name][()]) for name in _FIELD_ARRAYS if name in group
-        }
-        return SandFieldPayload(
-            time_s=np.asarray(group[_TIME][()], dtype=float),
-            arrays=arrays,
-            metadata=_as_text(metadata),
-            digest=_as_text(digest),
-        )
 
     def close(self) -> None:
         """Close the HDF5 file."""

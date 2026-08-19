@@ -1,4 +1,4 @@
-# BunkerShot3D Pro-Grade Upgrade — State Ledger
+# BunkerShot3D pro-grade upgrade — state ledger
 
 **Read this first on resumption.** Updated 2026-08-14 (22:40 UTC).
 
@@ -6,7 +6,7 @@ Epic: https://github.com/D-sorganization/UpstreamDrift/issues/8607
 
 ---
 
-## CURRENT STATE — Epic COMPLETE
+## CURRENT STATE — epic COMPLETE
 
 **All eleven workstreams merged. PR to `main`: #8655.**
 Suite **2374 passed, 4 skipped** (baseline 157). Gates green except the
@@ -37,7 +37,7 @@ Anything beyond that needs experimental data, which is the honest bottleneck: no
 published values exist for ball launch, spin, head deceleration in sand, energy split or
 ejecta mass, and `ValidationComparison` refuses to fabricate a comparison against them.
 
-## Where Everything Lives
+## Where everything lives
 
 | Thing                                    | Path                                                        |
 | ---------------------------------------- | ----------------------------------------------------------- |
@@ -56,7 +56,7 @@ was lost — worktrees share the main repo's object store, so every merge commit
 was simply re-checked-out on D: — but do not put work-in-progress on C: and assume it will
 still be there. See "Blockers" below.
 
-## Environment Gotchas That Cost Time if Rediscovered
+## Environment gotchas that cost time if rediscovered
 
 - **Push with the venv on PATH** or the pre-push pytest hook runs the wrong interpreter
   (user-site Python 3.12 with a NumPy 1.x/2.4.6 binary mismatch) and fails on unrelated code:
@@ -72,7 +72,7 @@ still be there. See "Blockers" below.
 
 ## Status
 
-### Done and Committed On `feat/bunkershot-pro-epic`
+### Done and committed on `feat/bunkershot-pro-epic`
 
 - `b4dc4757a` — canonicalised the package import root (`src.bunkershot3d` -> `bunkershot3d`),
   removed a `sys.path` mutation at import time, widened the MuJoCo guard to catch `OSError`.
@@ -82,7 +82,7 @@ still be there. See "Blockers" below.
 - Epic #8607 filed with 11 child issues #8608-#8618, all linked, with research findings
   attached as comments on #8609, #8610, #8611, #8613, #8614, #8616.
 
-### Wave 1 — ALL FIVE MERGED Into `feat/bunkershot-pro-epic` (Pushed)
+### Wave 1 — ALL FIVE MERGED into `feat/bunkershot-pro-epic` (pushed)
 
 | Issue | Workstream                        | Commit      |
 | ----- | --------------------------------- | ----------- |
@@ -155,7 +155,7 @@ Follow-ups the merges created:
 - `twist.py:80` — Document that shaft_axis must be in world coordinates
 - `forgiveness.py:186` — Actually use reference_scales for gradient normalization
 
-## How to Resume
+## How to resume
 
 Wave 1 is done and pushed, so resumption starts at wave 2.
 
@@ -172,7 +172,7 @@ Wave 1 is done and pushed, so resumption starts at wave 2.
 5. Merge into `feat/bunkershot-pro-epic`, re-run the suite, push, comment on the issue, tick
    the epic checklist, and update this ledger.
 
-## Non-Negotiables Carried From the ADR
+## Non-negotiables carried from the ADR
 
 - Every result carries a **fidelity tier and a validity verdict**; out-of-envelope queries refuse
   rather than return a plausible number. This matters more than usual because **we are ~60x
@@ -182,7 +182,7 @@ Wave 1 is done and pushed, so resumption starts at wave 2.
   (this package already failed that way once — issue #7999).
 - Safety-critical checks are `raise`, never `assert` (`python -O` strips asserts).
 
-## Blockers Needing the User
+## Blockers needing the user
 
 1. **C: worktree churn.** C: hit 100% mid-run (604 MB free of 953 GB) with 74 UpstreamDrift
    worktrees on it, which broke worktree creation. Something then reaped stale worktrees and

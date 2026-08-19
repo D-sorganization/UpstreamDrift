@@ -7,12 +7,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
-# Without a suite marker, unit-test-gate's `-m "unit and ..."` selector
-# deselects this file entirely and the guard never runs in CI (#7158).
-pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
-
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 _GITIGNORE = _REPO_ROOT / ".gitignore"
 

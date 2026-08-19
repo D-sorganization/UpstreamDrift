@@ -12,7 +12,7 @@ and their broader rationale is documented in the open
 | Question | Present Assessment | What Would Change the Assessment? |
 |---|---|---|
 | How much transfer is drift-mediated? | Conditional on the observable, coordinate and frame, event window, model, and decomposition. Signed drift shares may exceed 100% when control opposes the pathway; pointwise attribution is not forward persistence. | A common acceleration/force/impulse/power/work ledger across tiers, same-state killswitches, uncertainty propagation, and participant-held-out bilateral-wrench evaluation. |
-| Which geometry matters? | Relative-link and force–velocity angles create exact sine/cosine gates; bilateral couple varies with signed grip separation and transverse differential force. Existing moving-base and two-engine spatial controls reproduce coincident-grip zeros and moment-arm reversals. A six-profile audit rejects prescribed states that miss closure by 0.171–0.616 m; a bounded follow-up closes all 234 registered reduced-tree configurations. The articulated distributed-grip and passive-shaft tiers advance twelve selected states through 50 ms. A finite-base extension then adds translation and intrinsic free moment; all numerical gates pass, but none of 384 coupled--fixed cells meets the primary load--total-work match. | Calibrate grip, shaft, unilateral foot contact, and force-plate support; propagate initialization and parameter uncertainty; then repeat the horizon, geometry, killswitch, matched-outcome, and held-out human bilateral-wrench tests. |
+| Which geometry matters? | Relative-link and force–velocity angles create exact sine/cosine gates; bilateral couple varies with signed grip separation and transverse differential force. Existing moving-base and two-engine spatial controls reproduce coincident-grip zeros and moment-arm reversals. A six-profile audit rejects prescribed states that miss closure by 0.171–0.616 m; a bounded follow-up closes all 234 registered reduced-tree configurations. The resulting hand-carriage reference retains all registered cross-engine and energy gates through 50 ms under nine one-factor adverse or null branches. | Replace the carriages with articulated subject-scaled arms, calibrated distributed grip and shaft properties, contact loss, and ground coupling; then repeat the horizon, geometry, killswitch, and held-out human bilateral-wrench tests. |
 | Which timing patterns matter? | Early distal release changes the available geometry; proximal rate, acceleration, braking, and release timing interact nonmonotonically. “Casting” is not one universal event. | Factorial interventions on proximal acceleration, distal release, and braking under matched state and work, with multiple preregistered casting definitions and adverse-load tests. |
 | Does a drift-mediated strategy require less timing precision? | Not supported in the registered moving-base planar comparison. On a common nominal phase grid, the clock policy retained four of five robust task-viable points and 45 ms of contiguous width; the delayed/noisy state trigger retained one point and no multi-point span. This does not measure neural timing demand. | Continuous phase-volume studies with independently identified observers, spatial impact outcomes, subject scaling, and participant-held-out perturbations. |
 | Is a strategy self-correcting? | Not established. The earlier screen produced 13–20% sustained recovery, whereas the expanded phase/load screen produced none in 60 cases. No tested policy has a recovery-qualified viable region. | Continuous attraction-region studies with independently identified observers, stronger feedback families, external-contact disturbances, and human perturbations without hidden load-cost increase. |
@@ -181,38 +181,9 @@ shown for the registered synthetic excitations.](figures/fig_typed_slack_dynamic
 
 This evidence supports only a typed experimental program. It does not show
 that slack is good, bad, intentional, required, or beneficial for delivery.
-The articulated forward atlas now performs the first of those transport tests:
-bilateral, tension-only, and two dead-zone laws are compared under common
-displacement and approximately matched radial extension across 1,944 bounded
-trajectories. The 1.5 mm law remains open under the common 1 mm displacement
-but taut under matched extension; natural branches show no transition before
-5 ms, while isolated boundary probes qualify opening and reattachment. This
-shows why preload matching changes the answer, not that either condition is
-beneficial. Any benefit proposal must still survive longer matched-work/load
-delivery, stateful hysteresis, calibrated distributed contact, and independent
-human measurement.
-
-The next articulated atlas extends a frictionless tension-fiber comparator to
-one, three, and five stations per hand while holding total stiffness and
-damping fixed. Its 288 trajectories pass nested 4, 10, 25, and 50 ms power,
-energy, refinement, geometry-null, and MuJoCo--Pinocchio gates. The one-fiber
-branch stays taut; multi-fiber branches retain partially open active sets but
-show no transition through 50 ms. Their delivery-state differences therefore
-demonstrate discretization sensitivity, not a physical benefit of slack or
-distributed pressure. Measured contact pressure, friction, shaft/ground work,
-matched tasks, and governed human outcomes remain necessary.
-
-The following articulated shaft atlas then retains the five-fiber grip and
-adds rigid, bending-only, torsion-only, and coupled passive-club branches. Its
-384 trajectories pass the registered 0.25/0.125 ms work--energy,
-small-deformation, killswitch, and native-engine gates through 50 ms; 1.0 and
-0.50 ms torsion probes fail closed outside the declared linear domain. Of 384
-coupled--rigid cells, 126 meet the predeclared 5% peak-load and dissipated-work
-match. Their final-speed differences include 82 negative and 44 positive
-values. Passive shaft response is therefore a state-dependent pathway in this
-synthetic model, not a general speed advantage. Equipment calibration, higher
-mode adequacy under fast loading, ground work, impact, and human outcomes
-remain open.
+Any such proposal must still survive matched-energy, zero-slack,
+direction-reversal, passivity, work-energy closure, and independent-measurement
+controls in a forward delivery model.
 
 ## Evidential Boundary
 

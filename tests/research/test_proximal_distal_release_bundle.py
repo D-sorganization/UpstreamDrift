@@ -29,17 +29,6 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         "subject_scaled_closed_contact",
         "closed_state_forward_bridge",
         "forward_contact_validity_horizon",
-        "articulated_inertia_cross_engine",
-        "articulated_contact_projection",
-        "articulated_forward_contact",
-        "articulated_slack_atlas",
-        "articulated_distributed_grip_atlas",
-        "articulated_shaft_structural_basis",
-        "articulated_shaft_time_step_diagnostic",
-        "articulated_shaft_atlas",
-        "articulated_ground_diagnostic",
-        "articulated_ground_atlas",
-        "articulated_ground_posthoc_sensitivity",
         "scapulothoracic_contact_screen",
         "spatial_forward_contact",
         "uncertainty_control",
@@ -68,18 +57,6 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
     assert manifest["claims"]["global_slack_benefit"] == "unsupported"
     assert manifest["claims"]["single_channel_slack_class_identification"] == (
         "not_established"
-    )
-    assert manifest["claims"]["typed_articulated_slack"] == (
-        "five_millisecond_typed_attachment_event_gate_qualified"
-    )
-    assert manifest["claims"]["distributed_grip_discretization"] == (
-        "fifty_millisecond_distributed_fiber_gate_qualified"
-    )
-    assert manifest["claims"]["articulated_shaft_bending_torsion"] == (
-        "fifty_millisecond_passive_shaft_gate_qualified_with_mixed_matched_outcomes"
-    )
-    assert manifest["claims"]["articulated_ground_free_moment"] == (
-        "fifty_millisecond_finite_ground_gate_qualified_primary_match_empty"
     )
     assert (
         manifest["claims"]["synthetic_bilateral_point_force_sensor_qualification"]

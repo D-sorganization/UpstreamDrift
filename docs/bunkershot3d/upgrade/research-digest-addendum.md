@@ -1,10 +1,10 @@
-# Research Digest — ADDENDUM (Read Together With `research-digest.md`)
+# Research digest — ADDENDUM (read together with `research-digest.md`)
 
 Where this contradicts the main digest, **this file wins.**
 
 ---
 
-## 1. The Warning: We Are Far Outside RFT's Validated Envelope
+## 1. The warning: we are far outside RFT's validated envelope
 
 **3D-RFT's own stated limit is Fr = v/sqrt(gL) < 0.4, and the entire RFT/DRFT validation
 corpus tops out at 1.44 m/s.** At v = 25 m/s with L = 0.1 m we are at **Fr = 25** — about
@@ -41,7 +41,7 @@ which bites a bunker shot:
 - **Sharp corners.** "Reduced accuracy along surfaces that sharply vary" — i.e. exactly the
   leading edge and bounce surface we are trying to design.
 
-## 2. DRFT Has TWO Corrections, Not One
+## 2. DRFT has TWO corrections, not one
 
 ```
 t = alpha(beta, gamma) * H(-z_tilde) * |z_tilde|  -  n_hat * lambda * rho * v_n^2
@@ -59,7 +59,7 @@ z_tilde = z + delta_h
    from the F1/F2 tier or from PIV. Vertical/horizontal plate intrusions are the cases where
    delta_h ~ 0, which helps the leading edge but not the sole.
 
-## 3. 3D-RFT, Implementation-Grade
+## 3. 3D-RFT, implementation-grade
 
 Agarwal, Goldman and Kamrin, _PNAS_ 120 (2023), doi:10.1073/pnas.2214017120.
 
@@ -128,9 +128,9 @@ alpha = xi_n * [ |alpha_n|*(-n_hat) + min(mu_surf*|alpha_n|/|alpha_t|, 1) * alph
 coefficients: A00 0.206, A10 0.169, B11 0.212, B01 0.358, B(-1)1 0.055, C11 -0.124,
 C01 0.253, C(-1)1 0.007, D10 0.088.
 
-## 4. Corrections That Supersede the Main Digest
+## 4. Corrections that supersede the main digest
 
-### Wet Sand — Viscous Dissipation Dominates Capillary Cohesion at Clubhead Speed
+### Wet sand — viscous dissipation dominates capillary cohesion at clubhead speed
 
 `F_visc / F_cap = (3/4) * Ca * (R/h)`. For d50 = 0.33 mm, water, v = 25 m/s: **Ca = 0.34**,
 F_cap max = 76 uN, F_visc at h = 1 um = 3210 uN = **42x F_cap**. The crossover gap
@@ -139,7 +139,7 @@ entire bridge lifetime. **The whole quasi-static wet-granular cohesion literatur
 in the wrong regime for impact.** Grain Stokes number ~2400, so lubrication does not prevent
 contact — model it as rate-dependent dissipation, not extra static cohesion.
 
-### Measured Cohesion Is Far Lower Than the Main Digest States
+### Measured cohesion is far lower than the main digest states
 
 Richefeu, El Youssoufi and Radjai (2006), _Phys. Rev. E_ 73:051304: phi is independent of water
 content (sand ~33 deg) and **c saturates at w ~ 1-3%**, because cohesion tracks the _number_ of
@@ -150,7 +150,7 @@ function of moisture. Dynamic stress rho\*v^2 ~ 970 kPa is ~1400x the cohesive s
 moisture enters through the splash layer, the viscous rate term, and packing/crust state — not
 through bulk shear resistance.
 
-### Do NOT Soften Contact Stiffness to 1E7-1E8 Pa
+### Do NOT soften contact stiffness to 1e7-1e8 Pa
 
 Verified in-session: max Hertzian overlap `delta_max/d` is **independent of grain size**, so
 coarse-graining does not help — only stiffness does. At v = 25 m/s:
@@ -171,7 +171,7 @@ _softer_), which fights the overlap constraint directly. Cohesion has three mutu
 incompatible coarse-graining rules (cohesive stress, Bond number, Cohesion number); no single
 criterion suffices.
 
-### Inertial vs Frictional Crossover, and a Force Smoke Test
+### Inertial vs frictional crossover, and a force smoke test
 
 Katsuragi and Durian: inertia dominates when `v^2 > 25*mu*g*z`, i.e. `Fr_z > 3.4`. At 25 m/s,
 z = 5 cm the ratio is **113x** — the rate-independent Coulomb term is ~1% of the load.
@@ -182,7 +182,7 @@ Anchors: `C_d ~ 2` on rho_bulk; `d1 = 3.4 * D_body`, depth-independent;
 in ~5 ms of submerged travel. That is the right order for a real bunker shot — use it as an
 end-to-end sanity check.
 
-### Mu(I) Is Ill-Posed at Both Ends of Our Range
+### mu(I) is ill-posed at both ends of our range
 
 Barker, Schaeffer, Bohorquez and Gray (2015), _JFM_ 779:794. With `chi = (I/mu)*dmu/dI`, the
 system is ill-posed (Hadamard) when `C = 4*chi^2 - 4*chi + mu^2*(1 - chi/2)^2 > 0`. For the
@@ -201,14 +201,14 @@ media) — the high-rate intrusion paper — not a CMAME implicit version. Their
 (`rho < rho_c => sigma = 0`). Their own verdict: results depend far more strongly on `mu_s`
 than on `mu_2` — **calibrate mu_s carefully, mu_2 loosely.**
 
-### MPM Convergence Trap (For W9)
+### MPM convergence trap (for W9)
 
 At ~3.5 particles per cell, standard piecewise-linear MPM **fails to converge beyond ~20 grid
 cells — the error _increases_ with refinement** (Steffen, Kirby and Berzins 2008, _IJNME_
 76:922). Cubic B-spline converges out to 2560 cells at rates near 2. **Do not report a
 grid-convergence study using a linear-basis MPM.**
 
-### Angle of Repose Is a Near-Worthless Identifier, Quantified
+### Angle of repose is a near-worthless identifier, quantified
 
 Three AoR measurement methods on the same powder produced sliding friction spanning 4x, rolling
 friction spanning **300x**, and surface energy spanning 13x — all matching AoR (Gaboriault et
@@ -216,7 +216,7 @@ al. 2026, arXiv:2605.09371). AoR is also a zero-shear-rate measurement, and we a
 I ~ 0.1-10. **Do not calibrate on angle of repose.** This is independent confirmation of
 baseline finding B14.
 
-### A Fully Characterised Real Bunker Sand Exists — Use It as the Seed Preset
+### A fully characterised real bunker sand exists — use it as the seed preset
 
 Covia Signature 500, Turf and Soil Diagnostics file #22040060 (Apr 2022), ASTM F1632 Method B
 and ASTM F1815:
@@ -240,7 +240,7 @@ Sieve (% retained): 1.0 mm 4.5 | 0.5 mm 12.0 | **0.25 mm 53.6** | 0.15 mm 25.1 |
 This partly closes the "no measured bunker-sand properties" gap flagged in the main digest —
 but it is **one commercial sand from one lab report**, not a population. Record it as such.
 
-### Bolton Dilatancy Is at Its Cap in a Bunker
+### Bolton dilatancy is at its cap in a bunker
 
 `I_R = I_D*(Q - ln p') - R`, Q = 10, R = 1 for quartz, capped at `0 <= I_R <= 4`.
 A bunker shears at **p' ~ 0.1-2 kPa**, but Bolton was calibrated at ~150 kPa and above. At
@@ -253,7 +253,7 @@ the club digs and the ball comes out short. **This is the largest dry-side lever
 Flag it explicitly as an extrapolation outside Bolton's calibrated stress range; the I_R <= 4
 cap exists precisely to stop it running away.
 
-### Citation Corrections
+### Citation corrections
 
 - **Third independent confirmation**: the Penner "physics of sand wedges" paper does not exist.
   Penner's complete 74-work publication list was pulled from OpenAlex and AJP vol. 70 searched

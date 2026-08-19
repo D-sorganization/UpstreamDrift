@@ -136,10 +136,10 @@ def _build_claims(
         _claim(
             "PD-CLAIM-273",
             [selected["boundary"], selected["question"], selected["conclusion"]],
-            statement="The 50 ms validity-horizon result strengthens the reduced hand-carriage reference; the articulated tier reproduces its registered logic only through 5 ms, and neither establishes calibrated anatomy/equipment, passive human transfer, timing economy, slack benefit, or coaching strategy.",
+            statement="The validity-horizon result strengthens only the reduced hand-carriage reference and does not establish articulated anatomy, calibrated equipment, passive human transfer, timing economy, slack benefit, or coaching strategy.",
             classification="closed_state_forward_horizon_inference_boundary",
             status="explicitly_bounded",
-            boundary="Longer articulated contact, typed unilateral slack, distributed grip and shaft calibration, ground coupling, delivery, impact, and governed human evidence remain open.",
+            boundary="Articulated subject-scaled contact, distributed grip and shaft calibration, ground coupling, contact loss, delivery, impact, and governed human evidence remain open.",
             falsifier="A model, anatomy, equipment, delivery, or human conclusion is attributed to the reduced 50 ms agreement alone.",
         ),
     ]
@@ -157,9 +157,7 @@ def _replace_changed_candidates(
         review["candidate_id"]: review for review in registry["candidate_reviews"]
     }
     for old_id, candidate in replacements.items():
-        old_review = reviews.pop(old_id, None)
-        if old_review is None:
-            continue
+        old_review = reviews.pop(old_id)
         old_review["candidate_id"] = candidate["candidate_id"]
         reviews[candidate["candidate_id"]] = old_review
         for claim in registry["claims"]:

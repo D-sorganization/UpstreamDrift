@@ -1,4 +1,4 @@
-# BunkerShot3D Upgrade — Research Digest
+# BunkerShot3D upgrade — research digest
 
 Shared context for all implementation agents on epic
 [#8607](https://github.com/D-sorganization/UpstreamDrift/issues/8607).
@@ -7,7 +7,7 @@ before writing code.
 
 ---
 
-## 1. The Solver: DRFT, and Why the Inertial Term Is the Leading Term
+## 1. The solver: DRFT, and why the inertial term is the leading term
 
 Element stress (Agarwal, Karsai, Goldman & Kamrin, _Science Advances_ 2021,
 arXiv:2005.10976):
@@ -56,7 +56,7 @@ literature values (10–30 mm), producing garbage.
 
 ---
 
-## 2. Wedge Geometry: The Acushnet Schema (US10143900B2 / US10661131B2)
+## 2. Wedge geometry: the Acushnet schema (US10143900B2 / US10661131B2)
 
 All measured in a vertical plane perpendicular to the leading edge.
 
@@ -90,7 +90,7 @@ heel/toe relief.
 contact point, >20 deg); marketed bounce is to the ground-contact plane (4–14 deg). Make
 the convention part of the type.
 
-### Effective Bounce — Exact, and a Unit Test
+### Effective bounce — exact, and a unit test
 
 Opening the face rotates the rigid head about the **shaft axis** by Omega:
 
@@ -139,15 +139,15 @@ had one honesty failure of exactly this kind (#7999).
 approx `2*sigma/r`) vs saturated/cavitating.
 
 **Drainage — corrects a common assumption.** A 10 ms impact in USGA sand is globally
-**drained**, not undrained: `k ~ 3e-4 m/s`, `E_oed ~ 20 MPa` -> `c_v = 0.61 m^2/s`, so over
-a 20 mm zone `T = c_v t / L^2 ~ 15`. The real effect is a **local shear-band** dilation whose
+**drained**, not undrained: k ~ 3e-4 m/s, E*oed ~ 20 MPa -> c_v = 0.61 m^2/s, so over a
+20 mm zone T = c_v t / L^2 ~ 15. The real effect is \_local shear-band* dilation whose
 suction is **capped by cavitation at ~ -100 kPa gauge** (~65 kPa extra shear strength,
 order 130 N against a 200–600 N peak). **Implement the cap** — without it a poroelastic
 model invents multi-MPa suction and overpredicts severalfold.
 
 ---
 
-## 4. Why Not the Other Methods
+## 4. Why not the other methods
 
 - **PBD/XPBD — categorically excluded.** Friction limit is proportional to _numerical
   penetration depth_ (Unified Particle Physics 2014 Eq. 23), not normal stress. No yield
@@ -176,7 +176,7 @@ model invents multi-MPa suction and overpredicts severalfold.
   particle. **Requires an NVIDIA GPU, which this machine does not have** — keep optional and
   CI-skippable. Default `voxel_size` 0.1 m; a wedge needs 1–2 mm.
 
-### Kratos MPM Is the Better F1/F2 Tier _for This Machine_ — It Is CPU
+### Kratos MPM is the better F1/F2 tier _for this machine_ — it is CPU
 
 `pip install KratosMPMApplication`. **This is the strongest higher-fidelity option we can
 actually run locally**, and it was found late, so it supersedes "Newton or nothing":
@@ -199,7 +199,7 @@ actually run locally**, and it was found late, so it supersedes "Newton or nothi
   derivative-free (which our DOE/surrogate plan already assumes).
 - Note the rename: `ParticleMechanicsApplication` → **`MPMApplication`**. Older tutorials are stale.
 
-### Do Not Chase an ML Surrogate Yet
+### Do not chase an ML surrogate yet
 
 The GNS literature scores **kinematics, not forces**. Choi & Kumar's barrier-interaction cases
 report runout distance and upstream depth and **no reaction force on the barrier at all**. The
@@ -214,7 +214,7 @@ the traction sum. Plus every published GNS result is gravity-driven at ~1 m/s; w
 If a surrogate is ever trained, put **tool reaction force in the loss** and hold out a geometry
 family to measure force error honestly.
 
-### Citation Warning — Do Not Propagate
+### Citation warning — do not propagate
 
 **"Penner, A. R. (2002), 'The physics of sand wedges', _Am. J. Phys._" appears not to exist.**
 Two independent checks failed to find it: a Crossref journal query over AJP 2002 returns 279

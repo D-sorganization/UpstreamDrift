@@ -192,38 +192,6 @@ dangerous. `bunkershot3d.vandv.require_measurable` raises `NoReferenceDataError`
 so a `ValidationComparison` against them **cannot be constructed** — the refusal is in the
 constructor, not in a review comment.
 
-### The Carry Chain (Issue #8657)
-
-Carry is the headline number and it drives `playability_window_area`, the tool's primary
-scalar objective, so what it rests on matters more than anything else on this page.
-
-It used to rest on a hard-coded 12 cm sand-contact length: the displaced sand was
-estimated as a box (`sole length × entry depth × 0.12 m`) and ball speed came out linear
-in entry depth and blind to everything else. That estimate is gone.
-`bunkershot3d.ball.splash` now partitions the momentum the F0 solver actually delivered
-against the divot mass `bunkershot3d.metrics.divot` measured:
-
-    p_ball = eta · m_ball / (f·m_divot + m_ball) · f·J
-
-`J` and `m_divot` are computed; `f`, the share of the moving sand taken to meet the ball,
-is the exposed-cap taper and is a stated **convention**; `eta` is **uncalibrated** and
-scales the answer linearly. The launch direction is the effective loft, also a convention:
-the momentum the head puts into the bed points forward and _down_, and the free surface
-that turns the ejecta up is not modelled. Every launch result therefore carries a
-`ValidityVerdict` floored at `BEYOND_VALIDATION` and a `SandProvenance` record whose
-`measured_properties()` is empty and is tested to stay empty, and the workbench refuses to
-hold a carry number without that verdict.
-
-One inconsistency between the two computed inputs is reported rather than smoothed away.
-For a nominal greenside shot `J / m_divot` implies a mean ejecta speed **above the head's
-own entry speed**, which sand thrown by that head cannot reach. The cause is stated in
-`metrics/divot.py`: the divot volume is prismatic, counting only the sand under the sole
-path, so the mass that shared the delivered momentum is under-counted. The direction of
-the resulting bias is known — ball speed is over-predicted — and its size is not. The
-verdict says so on every shot where the inequality holds. Capping the ejecta speed would
-hide it and would make ball speed stop responding to impulse, which is the defect this
-change removed.
-
 Two further things are _not_ validation and are labelled as such in the code:
 
 - The addendum's "≈ 1550 N on a 20 × 80 mm sole at 25 m/s" is an analytic estimate from

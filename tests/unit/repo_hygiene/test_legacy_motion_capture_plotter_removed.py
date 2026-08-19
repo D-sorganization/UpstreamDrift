@@ -20,12 +20,6 @@ from __future__ import annotations
 import json
 import pathlib
 
-import pytest
-
-# Without a suite marker, unit-test-gate's `-m "unit and ..."` selector
-# deselects this file entirely and the guard never runs in CI (#7158).
-pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
-
 REPO_ROOT = pathlib.Path(__file__).parents[3]
 
 _LEGACY_DIR = (

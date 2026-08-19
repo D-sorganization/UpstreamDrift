@@ -52,17 +52,6 @@ modal identification, mesh convergence, and work--energy closure pass. This
 does not calibrate equipment or show that the result survives coupling the
 beam into the two-hand constrained solve.
 
-The articulated finite-base extension closes the next numerical mechanism
-gate while producing an adverse primary inference result. Across 384 pathway
-and 192 independent-control trajectories, both native engines agree, energy
-residuals decrease with step refinement, and all declared shaft/base domains
-hold through 50 ms. Ground force and intrinsic free moment are mechanically
-active, but none of 384 coupled--fixed comparisons meets the preregistered 5%
-peak-load and total-dissipated-work match. A post-hoc non-ground-dissipation
-sensitivity admits 60 cells with both speed-difference signs. The experiment
-therefore qualifies finite-base coupling and rejects a universal delivery
-interpretation; it does not identify a ground-use strategy or human benefit.
-
 The reduced full-body common-state extension resolves implementation transport
 for a narrower spatial estimand. MuJoCo and an independent
 Lagrange--Christoffel formulation agree across 20 coordinates and 61 nonplanar
@@ -156,12 +145,11 @@ order:
    multivariable screen with population-informed distributions, measurement
    error, profile-likelihood or Bayesian calibration, larger held-out
    ensembles, and a constrained optimal-control comparator.
-3. **Spatial Model-Fidelity Ladder.** Extend the executed planar base rotation,
-   intrinsic free moment, distributed grip, and passive shaft into a three-
-   dimensional club/body solve with calibrated unilateral foot contact and
-   force-plate comparison without changing the registered interface
-   observables. Each rung should carry conservation checks and cross-engine
-   tolerance gates.
+3. **Spatial Model-Fidelity Ladder.** Add base rotation, a three-dimensional
+   club, ground pathways, and couple the executed distributed/modal shaft
+   reference into the forward constrained solve without changing the
+   registered interface observables. Each rung should carry
+   conservation checks and cross-engine tolerance gates.
 4. **Execute the Frozen Human-Data Protocol.** Acquire governed synchronized
    measurements that pass the fixed inclusion, residual, missingness,
    participant-holdout, and provenance gates. Sequence order alone must not be
@@ -208,9 +196,3 @@ and
 The frozen experimental protocol and synthetic readiness classification are
 recorded in [`data/experimental_protocol_v1.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/experimental_protocol_v1.json)
 and [`data/experimental_protocol_readiness.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/experimental_protocol_readiness.json).
-The finite-ground initialization, preregistered atlas, and labeled post-hoc
-matching sensitivity are recorded in
-[`data/articulated_ground_diagnostic.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/articulated_ground_diagnostic.json),
-[`data/articulated_ground_atlas.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/articulated_ground_atlas.json),
-and
-[`data/articulated_ground_posthoc_sensitivity.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/articulated_ground_posthoc_sensitivity.json).

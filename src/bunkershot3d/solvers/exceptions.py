@@ -11,7 +11,6 @@ from __future__ import annotations
 __all__ = [
     "CalibrationError",
     "OutOfEnvelopeError",
-    "ShotTruncatedError",
     "SolverError",
     "SolverInputError",
 ]
@@ -48,40 +47,6 @@ class OutOfEnvelopeError(SolverError):
     def __init__(self, message: str, *, verdict: object | None = None) -> None:
         super().__init__(message)
         self.verdict = verdict
-
-
-class ShotTruncatedError(SolverError):
-    """The integration window ended before the head came out of the sand.
-
-    This is a *settings* failure, and it is raised here so that it reads
-    as one.  Before it existed the window silently ended mid-strike and
-    the complaint surfaced several layers away, as
-    :func:`~bunkershot3d.metrics.divot.divot_metrics` refusing to locate
-    an exit crossing -- an exception from a metrics function for a
-    problem the caller could only fix in ``ShotSettings`` (issue #8700).
-
-    Attributes:
-        result: The partial :class:`~bunkershot3d.solvers.shot.ShotResult`,
-            so a caller can see how far the march actually got rather
-            than re-running it to find out.
-        max_time_s: The window that ran out.
-        time_reached_s: The last sample time in the partial trace.
-    """
-
-    def __init__(
-        self,
-        message: str,
-        *,
-        result: object,
-        settings: object,
-    ) -> None:
-        super().__init__(message)
-        self.result = result
-        self.max_time_s = float(getattr(settings, "max_time_s", float("nan")))
-        times = getattr(result, "times_s", None)
-        self.time_reached_s = (
-            float(times[-1]) if times is not None and len(times) else 0.0
-        )
 
 
 class CalibrationError(SolverError, ValueError):

@@ -467,23 +467,7 @@ closed arm--grip constraints, separated reactions, and a compliant
 distal club. Its 18-program matched- state grid finds that higher
 initial torso rate can accompany greater delivery speed but does not
 uniformly reduce braking work; exact torso, arm, and wrist killswitches
-are nonmonotonic. This remains a planar mechanism result. The
-subject-scaled articulated sequence now advances a five-fiber-per-hand
-grip through 50 ms and then adds passive first-mode bending and torsion
-under rigid, single-mode, and coupled killswitch branches. All 384
-fine-grid shaft trajectories pass the registered linear-domain,
-work--energy, refinement, and MuJoCo--Pinocchio gates. Among 126
-coupled--rigid cells matched within 5\% for peak load and dissipated
-work, final-speed differences include 82 negative and 44 positive
-values. This establishes a state-dependent synthetic elastic pathway and
-rejects a universal shaft-speed benefit; it does not calibrate equipment
-or identify a human strategy. A subsequent finite-base extension adds
-planar ground reaction and intrinsic free moment. All 576 registered
-trajectories pass the declared numerical and native-engine gates, but
-none of 384 coupled--fixed cells meets the preregistered peak-load and
-total-work match. A labeled post-hoc alternative admits both
-speed-difference signs. The result qualifies the synthetic mechanism
-while leaving its isolated delivery effect unidentified. A frozen
+are nonmonotonic. This remains a planar mechanism result. A frozen
 participant-held-out bilateral-wrench protocol defines the human
 falsifier, but no governed human outcome is available. References,
 analysis code, machine-readable results, and provenance are available
@@ -498,7 +482,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, breakable, coltitle=black, bottomtitle=1mm, colback=white, opacitybacktitle=0.6, toptitle=1mm, colframe=quarto-callout-note-color-frame, left=2mm, opacityback=0, titlerule=0mm, leftrule=.75mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, rightrule=.15mm, bottomrule=.15mm, toprule=.15mm, arc=.35mm]
+\begin{tcolorbox}[enhanced jigsaw, opacitybacktitle=0.6, colback=white, colframe=quarto-callout-note-color-frame, left=2mm, bottomtitle=1mm, breakable, leftrule=.75mm, bottomrule=.15mm, rightrule=.15mm, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, toprule=.15mm, titlerule=0mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, arc=.35mm, opacityback=0, coltitle=black]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -7485,623 +7469,9 @@ extrapolate to the remaining downswing or impact. The carriages, rigid
 club, engineering contact law, and prescribed driver still omit
 articulated arms and scapulae, distributed grip and shaft properties,
 contact loss, ground coupling, and calibrated equipment. The study
-strengthens the reduced cross-engine reference. The articulated tier
-reproduces its power, energy, refinement, and engine- parity logic only
-through 5 ms, not the full 50 ms interval. Neither result establishes
-anatomy, passive human transfer, timing economy, slack benefit, or
-coaching strategy.
-
-\subsubsection{Native Articulated Inertia
-Qualification}\label{native-articulated-inertia-qualification}
-
-The reduced forward-contact result cannot be promoted merely by
-replacing the hand carriages with a more detailed drawing. Before adding
-compliant contact, the two native engines must first agree on the
-inertia and gravity operators of the subject-scaled articulated tree
-itself. The next common-state gate therefore uses all 234 closed
-configurations: six engineering profiles, three grip spans, and 13
-continuation samples. Each model retains the 20-coordinate pelvis,
-torso, bilateral three-axis shoulder, elbow, wrist, and six-coordinate
-rigid-club tree. Segment lengths and masses remain de Leva-derived
-engineering design points; each spherical body inertia is declared as
-\(2mr^2/5\).
-
-MuJoCo independently evaluates its full mass matrix, bias force, and
-inverse dynamics with \texttt{mj\_fullM}, \texttt{qfrc\_bias}, and
-\texttt{mj\_inverse}. Robotics Pinocchio builds the same scalar-joint
-tree and evaluates \texttt{crba}, \texttt{nonLinearEffects}, and
-\texttt{rnea}. Velocities and accelerations are second-order finite
-differences of the closed 13-sample paths. Because both engines receive
-the same achieved state rather than advancing a trajectory, this
-isolates model assembly and native dynamics conventions from contact-law
-and integrator divergence.
-
-\begin{figure}
-
-\centering{
-
-\includegraphics[width=0.96\linewidth,height=\textheight,keepaspectratio]{figures/fig_articulated_inertia_cross_engine.pdf}
-
-}
-
-\caption{\label{fig-articulated-inertia-cross-engine}Native Articulated
-Dynamics Across All Closed States}
-
-\end{figure}%
-
-All 234 states pass the preregistered mass-matrix, bias-force,
-inverse-dynamics, symmetry, and positive-definiteness gates. The largest
-relative mass-matrix error is \(8.62\times10^{-13}\), the largest
-relative bias error is \(1.41\times10^{-12}\), and the largest relative
-inverse-dynamics error is \(1.79\times10^{-12}\). The largest symmetry
-residual is zero at stored precision, and the smallest native
-mass-matrix eigenvalue is \(1.386\times10^{-4}\).
-
-This closes an engine-transport question, not the articulated-contact
-question. The common-state comparison applies no bilateral contact,
-advances no forward trajectory, and adds no scapulothoracic glide,
-forearm pronation--supination, multi-axis wrist, fingers, distributed
-grip, flexible shaft, ground contact, or muscle model. Consequently it
-cannot establish anatomical validity, passive human transfer, timing
-demand, slack benefit, or a coaching strategy. It provides a qualified
-inertial foundation for the next forward-contact falsifier.
-
-\subsubsection{Articulated Contact Projection and Initial
-Acceleration}\label{articulated-contact-projection-and-initial-acceleration}
-
-The next gate adds finite bilateral interaction forces without yet
-advancing a trajectory. At each of the 234 closed states, the club is
-displaced 1 mm and given 0.05 m/s additional velocity along its world
-\(x\) coordinate. Paired Kelvin--Voigt interfaces with the previously
-declared 1,800 N/m stiffness and 18 N s/m damping then generate forces
-from achieved hand--grip displacement and relative velocity. No wrench
-or direct club actuator is prescribed.
-
-For each hand \(i\), the generalized contact load is
-
-\begin{equation}\phantomsection\label{eq-articulated-contact-projection}{
-Q_c = \sum_i\left(J_{g,i}^{\mathsf T}f_i
-      + J_{h,i}^{\mathsf T}(-f_i)\right),
-}\end{equation}
-
-where \(J_g\) and \(J_h\) are the club-grip and hand-point Jacobians.
-This form exposes the action--reaction and virtual-power identities
-directly. MuJoCo and robotics Pinocchio then independently evaluate
-their native mass and bias operators at the perturbed state and solve
-\(\ddot q=M^{-1}(Q_c-h)\). The comparison is therefore an
-initial-acceleration test of force projection into the qualified
-articulated tree, not a forward contact simulation.
-
-\begin{figure}
-
-\centering{
-
-\includegraphics[width=0.87\linewidth,height=\textheight,keepaspectratio]{figures/fig_articulated_contact_projection.pdf}
-
-}
-
-\caption{\label{fig-articulated-contact-projection}Articulated Contact
-Projection and Initial Acceleration Across All Closed States}
-
-\end{figure}%
-
-All 234 states pass. The largest contact force is 2.708 N, the largest
-zero-preload leakage is \(2.08\times10^{-7}\) N, and the largest
-virtual-power residual is \(3.89\times10^{-16}\) W. Damping power is
-non-positive at every state. Coincident moment arms remove the force
-couple exactly, reversing both moment arms reverses it exactly, and the
-largest MuJoCo--Pinocchio generalized initial-acceleration discrepancy
-is \(4.85\times10^{-13}\) relative.
-
-This closes the same-state contact-projection question only. No
-trajectory is integrated, so contact loss, recovery, numerical stability
-over time, delivered speed, accumulated work, and late-downswing torque
-duration remain untested. The interfaces, anatomy, club, and ground
-pathway remain uncalibrated. It therefore cannot establish passive human
-transfer, slack benefit, timing economy, or coaching strategy. The next
-falsifier is bounded integration with contact-loss, adverse-load,
-refinement, power, and work--energy controls.
-
-\subsubsection{Bounded Articulated Bilateral-Attachment Forward
-Dynamics}\label{bounded-articulated-bilateral-attachment-forward-dynamics}
-
-The forward gate advances eighteen selected closed states spanning all
-six synthetic profiles, all three grip spans, and three phase samples.
-Seven registered branches cover nominal parameters, half and double
-stiffness, half and double damping, reversed initial club velocity, and
-zero preload. Each branch is advanced for 5 ms at 1.0, 0.5, and 0.25 ms
-time steps with native MuJoCo and robotics Pinocchio mass and bias
-operators, producing 756 bounded trajectories. No active joint torque,
-hand driver, or direct club actuator is applied during the interval.
-
-Each trajectory begins from an achieved closed configuration. The
-nominal and one-factor branches add the declared 1 mm club displacement
-and 0.05 m/s club velocity perturbations before evaluating the same two
-bilateral Kelvin--Voigt attachments. These are tensile-and-compressive
-attachment springs, not unilateral collision contacts. ``Retention''
-therefore means that attachment separation stays below a predeclared 10
-mm numerical screening threshold; it does not mean that anatomical grip
-contact, tissue preload, or slack has been identified.
-
-The mechanical ledger adds native rigid-body kinetic and gravitational
-potential energy to the two attachment strain energies,
-
-\begin{equation}\phantomsection\label{eq-articulated-forward-energy}{
-E = T + V_g + \sum_i \frac{1}{2}k\lVert d_i\rVert^2,
-\qquad
-R_E(t)=E(t)-E(0)-\int_0^t P_d\,\mathrm{d}t,
-}\end{equation}
-
-where \(P_d\leq 0\) is the declared damping power. Semi-implicit Euler
-advances the common coordinates, while each engine independently
-evaluates its mass and bias operators at every step. The registered
-gates cover the 10 mm attachment threshold, action--reaction virtual
-power, non-positive damping, normalized work--energy residual below
-0.02, monotone refinement with a fine-to-coarse ratio below 0.8, and
-cross-engine trajectory and force-history differences below \(10^{-7}\)
-relative.
-
-\begin{figure}
-
-\centering{
-
-\includegraphics[width=0.9\linewidth,height=\textheight,keepaspectratio]{figures/fig_articulated_forward_contact.pdf}
-
-}
-
-\caption{\label{fig-articulated-forward-contact}Bounded Articulated
-Bilateral-Attachment Forward Dynamics Across Registered States and
-Controls}
-
-\end{figure}%
-
-All registered five-millisecond trajectories pass. The largest
-attachment separation is 1.229 mm and the largest contact force is
-17.761 N. The worst normalized work--energy residual decreases from
-0.00738 to 0.00170 and then 0.000854 as the step is halved. The largest
-virtual-power residual is \(3.55\times10^{-15}\) W; damping power
-remains negative; and the largest MuJoCo--Pinocchio trajectory and
-force-history discrepancies are \(1.54\times10^{-14}\) and
-\(1.06\times10^{-11}\) relative, respectively.
-
-This is a right-censored synthetic result: no registered failure occurs
-before 5 ms, but persistence later in the downswing or through impact is
-not tested. The result does not model unilateral slack, distributed grip
-pressure, shaft bending or torsion, ground coupling, calibrated anatomy,
-muscle action, or participant-specific control. It therefore cannot
-establish passive human transfer, timing economy, a benefit of avoiding
-slack, or a coaching strategy. Those questions require longer
-typed-slack trajectories and the governed bilateral six-axis grip-wrench
-data identified in the human protocol.
-
-\subsubsection{Typed Unilateral Slack and Reattachment
-Falsification}\label{typed-unilateral-slack-and-reattachment-falsification}
-
-The next gate replaces the ambiguous word \emph{slack} with three
-explicit passive constitutive classes. The bilateral comparator retains
-the vector Kelvin--Voigt law above. The tension-only law acts along the
-instantaneous hand--grip separation direction, and the dead-zone law
-adds a declared free length \(s\). For separation magnitude \(r\),
-radial extension \(e=\max(r-s,0)\), radial rate \(\dot e\), and
-direction \(n\), the unilateral law is
-
-\begin{equation}\phantomsection\label{eq-articulated-slack-law}{
-f =
-\begin{cases}
-\left[k e+c\max(\dot e,0)\right]n, & e>0,\\
-0, & e=0.
-\end{cases}
-}\end{equation}
-
-The loading-only damper is a declared modeling choice: it prevents a
-damper from creating compressive force during unloading and retains the
-non-positive dissipation identity \(P_d=-c\max(\dot e,0)\dot e\leq0\).
-It is not a tissue model. An open interface transmits exactly zero
-force, while equal-and-opposite active-interface forces are projected
-through the same hand and grip Jacobians as the bilateral gate.
-
-The atlas evaluates eighteen articulated states across four law settings
-(bilateral, tension-only, and 0.5 and 1.5 mm dead zones), two preload
-controls, and both signs of the initial club-velocity perturbation. The
-common-displacement control applies 1 mm to every law. The
-matched-extension control adds the dead-zone width to that displacement,
-making the initial radial spring energy approximately equal to the
-bilateral/tension-only value. This distinction prevents a change in
-preload energy from being silently called a slack effect. Two separate
-zero-background-velocity probes cross the 1.5 mm boundary in opposite
-directions; they verify opening and reattachment logic but are not
-natural-state predictions. Three time steps and two native engines yield
-1,944 five-millisecond trajectories.
-
-\begin{figure}
-
-\centering{
-
-\includegraphics[width=0.94\linewidth,height=\textheight,keepaspectratio]{figures/fig_articulated_slack_atlas.pdf}
-
-}
-
-\caption{\label{fig-articulated-slack-atlas}Typed Unilateral Slack and
-Reattachment Across Natural-State and Boundary-Crossing Controls}
-
-\end{figure}%
-
-All numerical and cross-engine gates pass. Across the complete atlas,
-the largest force is 23.643 N, virtual-power residual is
-\(2.13\times10^{-14}\) W, and positive damping-power maximum is zero.
-The worst normalized work--energy residual decreases from 0.01923 to
-0.01097 and then 0.00480 under refinement. Maximum trajectory and
-force-history differences between MuJoCo and Pinocchio are
-\(1.32\times10^{-15}\) and \(1.82\times10^{-12}\) relative, with no
-active-set parity failure.
-
-The natural-state branches produce no opening or reattachment transition
-in 5 ms. The 1.5 mm dead-zone/common-displacement branch remains open
-throughout, whereas the matched-extension branch remains taut; this is
-direct evidence that law choice and preload matching can reverse the
-contact classification without changing the articulated state authority.
-The boundary probes produce 108 opening-cell and 216 reattachment-cell
-observations, with at most two active-set transitions. These event
-counts qualify the implementation only.
-
-The result therefore falsifies any claim that a scalar label such as
-``slack'' has a unique model consequence. It does not show that slack is
-beneficial, necessary, intentional, self-correcting, or less
-timing-sensitive. Natural events remain right-censored at 5 ms, and the
-laws have no calibrated tissue, friction, distributed grip pressure,
-shaft compliance, ground coupling, or human wrench data. Longer
-distributed-contact trajectories and the governed participant protocol
-remain necessary before a delivery or coaching inference.
-
-\subsubsection{Distributed Grip Contact Discretization Across Nested
-Horizons}\label{distributed-grip-contact-discretization-across-nested-horizons}
-
-The next gate isolates contact discretization before admitting shaft or
-ground degrees of freedom. Each hand receives \(N\in\{1,3,5\}\) tension
-fibers across a declared 30 mm grip-axis width. Fiber \(j\) has free
-length \(\ell_{0j}=\|d_j(q_0)\|\) at the unperturbed closed state and
-
-\begin{equation}\phantomsection\label{eq-distributed-grip-fibers}{
-e_j=\max(\|d_j\|-\ell_{0j},0),\qquad
-k_j=\frac{k_{\mathrm{grip}}}{N},\qquad
-c_j=\frac{c_{\mathrm{grip}}}{N}.
-}\end{equation}
-
-Thus station count does not silently multiply total grip stiffness or
-damping, and finite off-axis reference length does not become hidden
-preload. Closure residuals below \(10^{-8}\) m are treated as zero; the
-one-fiber configuration then reproduces the point tension law and its
-forward trajectory. Every fiber retains equal-and-opposite force,
-loading-only damping, strain energy, active state, and virtual-power
-accounting. Replacing all realized application points by their midpoint
-removes the force couple exactly, while reversing all moment arms
-reverses it exactly without changing the realized forces.
-
-The atlas selects twelve states spanning four profile--grip cases and
-three phase samples. Forward and reversed initial club-velocity
-perturbations, one-, three-, and five-fiber grips, 1.0 and 0.5 ms steps,
-and native MuJoCo and Pinocchio produce 288 trajectories. Each
-trajectory is advanced once to 50 ms and summarized at nested 4, 10, 25,
-and 50 ms horizons, yielding 1,152 engine--horizon summaries without
-resetting the state at each horizon. No active joint torque, hand
-driver, or direct club actuation is applied.
-
-\begin{figure}
-
-\centering{
-
-\includegraphics[width=0.96\linewidth,height=\textheight,keepaspectratio]{figures/fig_articulated_distributed_grip_atlas.pdf}
-
-}
-
-\caption{\label{fig-articulated-distributed-grip-atlas}Distributed Grip
-Discretization Across Nested Articulated Horizons}
-
-\end{figure}%
-
-All registered numerical and native-engine gates pass. The largest
-station force is 4.030 N and the largest force couple is 0.375 N m.
-Coincident and reversed-moment-arm residuals are exactly zero; the
-largest virtual-power residual is \(1.14\times10^{-15}\) W and positive
-damping power is zero. The worst normalized work--energy residual
-decreases from 0.03119 to 0.01560 when the step is halved. Maximum
-trajectory and station-force discrepancies between engines are
-\(7.97\times10^{-14}\) and \(2.85\times10^{-12}\) relative, with no
-active-set parity failure. At the fine step, the largest
-three-to-five-fiber state discrepancy is 0.00355 relative; the
-one-to-three discrepancy is 0.0419.
-
-The active-set result is structural rather than a benefit result. The
-one-fiber comparator remains fully taut, whereas the off-axis
-multi-fiber grips retain at least one open fiber over 66.7--100\% of
-samples in the registered cells. No active-set transition occurs, so
-opening or reattachment is right-censored through 50 ms. At 50 ms, the
-engine-averaged ensemble mean club translation speeds are 0.2444,
-0.2379, and 0.2314 m/s for one, three, and five fibers. These
-unmatched-load values show discretization dependence; they do not rank
-physical grips or establish that partial opening helps or harms
-delivery.
-
-The fibers remain memoryless, frictionless engineering lines rather than
-calibrated pressure, fingers, tissue, or measured grip mechanics. The
-club is rigid and the support pathway is unchanged. Consequently this
-gate establishes contact-discretization sensitivity and a 50 ms
-numerical horizon only. Shaft bending/torsion, ground/free-moment work,
-matched delivery, and governed human measurements remain required before
-equipment, timing, or strategy inference.
-
-\subsubsection{Passive Shaft Bending and Torsion Under Distributed Grip
-Loading}\label{passive-shaft-bending-and-torsion-under-distributed-grip-loading}
-
-The next intervention admits shaft compliance while holding the
-articulated state authority, five-fiber grip law, initial perturbation,
-and support pathway fixed. The active elastic coordinates are two
-orthogonal tip-normalized bending deflections and a tip twist,
-
-\begin{equation}\phantomsection\label{eq-articulated-shaft-mass}{
-\eta = [\eta_x,\eta_y,\phi]^\mathsf{T}, \qquad
-\mathcal{M}(q)=
-\begin{bmatrix}
-M_r(q) & C_{r\eta}(q)\\
-C_{r\eta}^{\mathsf{T}}(q) & M_\eta
-\end{bmatrix}.
-}\end{equation}
-
-Here \(M_r\) is assembled independently by native MuJoCo or Pinocchio.
-\(C_{r\eta}\) and \(M_\eta\) are formed from the same shaft and clubhead
-body linear/angular Jacobians used by the rigid tree, evaluated against
-the elastic mode velocities. Configuration derivatives of this added
-mass block supply its Christoffel bias. The passive elastic force is
-
-\begin{equation}\phantomsection\label{eq-articulated-shaft-passivity}{
-Q_\eta=-K_\eta\eta-D_\eta\dot\eta, \qquad
-U_\eta=\tfrac12\eta^\mathsf{T}K_\eta\eta,
-\qquad
-P_D=-\dot\eta^\mathsf{T}D_\eta\dot\eta\le 0.
-}\end{equation}
-
-A first-order gravitational deflection term is included in the augmented
-potential. The work--energy ledger therefore contains rigid mechanical
-energy, rigid--elastic kinetic coupling, shaft strain, deflection
-gravity, grip strain, grip damping, and shaft damping. There is no shaft
-actuator, wrist torque, hand driver, or direct club torque. Selecting
-the rigid branch removes all elastic coordinates and delegates exactly
-to the previously qualified distributed-grip integrator.
-
-The bending basis is not refitted in this experiment. A hash-checked
-frozen artifact carries the first mode of the existing 24-element
-Euler--Bernoulli authority into the lean native-engine runtime. Its
-frequency is 5.2399 Hz. A tip-normalized stiffness is reconstructed with
-the articulated shaft/head inertia so that the reduced coordinate
-retains that frequency. The torsional stiffness follows the compliance
-integral of the same tapered hollow section,
-\(k_\phi=[\int_0^L(GJ)^{-1}\,ds]^{-1}\) with \(G=E/[2(1+\nu)]\) and
-\(\nu=0.30\), giving 70.1260 Hz. Both modes use a declared damping ratio
-of 0.018. These are synthetic structural references, not measured
-properties of a golf shaft. The separate six-mode beam authority also
-remains decisive: its one-mode RMS discrepancy is \(6.87\times10^{-7}\)
-m under the slow pulse but \(4.13\times10^{-5}\) m under the short
-pulse. High-frequency conclusions therefore cannot inherit first-mode
-adequacy from the slow-loading result.
-
-The registered atlas crosses twelve articulated states,
-rigid/bending-only/ torsion-only/coupled shaft branches, two initial
-club-velocity signs, 0.25 and 0.125 ms steps, and both native engines.
-The 384 trajectories are each advanced once to 50 ms and summarized at
-nested 4, 10, 25, and 50 ms horizons. All branches begin at zero elastic
-displacement and velocity; their initial total-energy range is exactly
-zero. Two deliberately coarser probes fail the declared linear-domain
-gate: a 1.0 ms torsion trace at state \((0,0)\) with the negative
-velocity sign and a 0.50 ms trace at state \((8,0)\) with the positive
-sign. They are retained as excluded negative controls. For the latter
-state, 0.25, 0.125, and 0.0625 ms maximum absolute work--energy
-residuals halve from 0.00776 to 0.00390 to 0.00195 J while remaining
-bounded through 50 ms; the registered matrix uses the first two bounded
-steps.
-
-\begin{figure}
-
-\centering{
-
-\includegraphics[width=0.98\linewidth,height=\textheight,keepaspectratio]{figures/fig_articulated_shaft_atlas.pdf}
-
-}
-
-\caption{\label{fig-articulated-shaft-atlas}Passive Articulated Shaft
-Bending and Torsion Under Distributed Grip Loading}
-
-\end{figure}%
-
-All fine-grid numerical and native-engine gates pass. Maximum tip
-bending is 1.696 mm, maximum twist is 0.001855 rad, and peak shaft
-strain energy is \(3.33\times10^{-4}\) J; every cell remains within the
-declared 5\% deflection and 10-degree twist bounds. The largest station
-force is 1.621 N and the largest grip-force couple is 0.340 N m. The
-worst normalized work--energy residual decreases from 0.007798 to
-0.003900. Maximum MuJoCo--Pinocchio trajectory and station-force errors
-are \(3.84\times10^{-13}\) and \(2.15\times10^{-10}\) relative, with no
-active-set parity failure. Bending, torsion, and both coupled
-coordinates are independently excited, while their killswitch branches
-contain only the declared coordinates.
-
-The shaft comparison is intentionally screened against load and work
-rather than ranked from unmatched speeds. A coupled and rigid cell is
-called matched only when both peak station load and cumulative
-dissipated work differ by no more than 5\% symmetrically. This admits
-126 of 384 possible comparisons. The coupled-minus-rigid final
-translation-speed difference spans \(-0.0285\) to \(+0.0212\) m/s: 82
-matched cells are negative and 44 are positive. Thus passive shaft
-storage and return can change a delivery proxy in this model, but its
-sign depends on state, velocity branch, horizon, and load/work
-selection. The atlas falsifies a universal speed benefit just as
-directly as it demonstrates a mechanically active elastic pathway.
-Post-registered matching is descriptive, not randomized or causal, and
-it does not determine an optimal human shaft or action.
-
-At this shaft-only tier, the contact fibers remain frictionless,
-memoryless engineering lines with state-registered free lengths, and
-ground reaction and free moment are absent. Shaft deformation does not
-establish tissue loading, timing economy, impact performance, or
-coaching strategy. The finite-base extension below retains the same
-initial-energy, matched-load/work, killswitch, reversal, power,
-refinement, and two-engine controls.
-
-\subsubsection{Finite Ground Reaction and Intrinsic Free
-Moment}\label{finite-ground-reaction-and-intrinsic-free-moment}
-
-The finite-base extension supplies that separate transport gate. Three
-planar coordinates translate the articulated human tree in world \(x\)
-and \(z\) and rotate it about world \(y\),
-
-\begin{equation}\phantomsection\label{eq-articulated-ground-mass}{
-b=[x_b,z_b,\theta_b]^\mathsf{T}, \qquad
-\mathcal{M}_g(q)=
-\begin{bmatrix}
-M_{r\eta}(q) & C_{r\eta,b}(q)\\
-C_{r\eta,b}^\mathsf{T}(q) & M_b(q)
-\end{bmatrix}.
-}\end{equation}
-
-Only the non-club body tree receives this common base transformation.
-The club remains independently rooted and is connected to the moving
-hands through the same distributed grip fibers. The cross block is
-assembled from every non-club body's translational and angular
-Jacobians. Its configuration derivatives contribute the associated
-Christoffel bias; base translation and rotation also enter gravity and
-the distributed-contact Jacobians. Thus the finite base changes inertia,
-gravity, hand geometry, grip reaction, and power simultaneously rather
-than adding a prescribed force to a fixed posture.
-
-The synthetic passive support law is
-
-\begin{equation}\phantomsection\label{eq-articulated-ground-passivity}{
-Q_b=-K_b b-D_b\dot b, \qquad
-U_b=\tfrac12 b^\mathsf{T}K_b b, \qquad
-P_{D,b}=-\dot b^\mathsf{T}D_b\dot b\le 0.
-}\end{equation}
-
-Its first two generalized components form the ground-on-body force
-\(F_g=[Q_x,0,Q_z]^\mathsf{T}\) and the third is the intrinsic free
-moment \(M_y=Q_\theta\). A moment reported about a different reference
-point is \(M_y^{(O)}=M_y+r_zF_x-r_xF_z\). Reversing the declared
-center-of-pressure reference therefore changes the transported moment
-but not \(F_g\), \(M_y\), the generalized force, or the trajectory. This
-distinction prevents a reference- transport term from being
-misidentified as an additional physical torque.
-
-Four exact pathway selections are retained: fixed base; translation
-only; intrinsic free moment only; and coupled translation plus free
-moment. The fixed selection has no base coordinate and delegates bit for
-bit to the qualified shaft solver. Two independent controls accompany
-the coupled selection. One removes every shaft elastic coordinate; the
-other sets horizontal support stiffness and damping to zero while
-retaining vertical support and intrinsic free moment. The latter is
-accurately described as removal of modeled horizontal restraint, not as
-a complete Coulomb-friction or unilateral foot contact model.
-
-Initialization is a model variable rather than an invisible convenience.
-A natural-zero base gives identical initial total energy across pathway
-killswitches, but it is not static equilibrium. A gravity-only
-displacement balances the support law while ignoring grip preload. A
-conditional nonlinear solve balances ground, grip, and gravity
-generalized forces in the three base coordinates with posture and club
-state held fixed. It does not balance the remaining rigid coordinates
-and therefore is not whole-mechanism equilibrium. The three choices are
-retained as separate sensitivity branches; the atlas uses natural zero
-because it is the only exact common-state killswitch comparison.
-
-The preregistered atlas uses the same twelve articulated states, two
-signed club-velocity perturbations, 0.25 and 0.125 ms steps, and
-independent native MuJoCo and Pinocchio operators as the shaft study.
-Each trajectory advances once to 50 ms and is summarized at 4, 10, 25,
-and 50 ms. The four primary pathways produce 384 trajectories.
-Rigid-shaft and horizontal-restraint- removed control families add 192.
-Every cell records grip force and couple, active fibers, ground force,
-intrinsic and transported moments, support and shaft strain, damping
-work, base motion, club speed, virtual-power closure, work--energy
-closure, declared-domain status, and cross-engine parity.
-
-The constitutive values are transparent synthetic references: horizontal
-and vertical stiffnesses are 15 and 30 kN/m; damping values are 400 and
-800 N s/m; free-moment stiffness is 900 N m/rad; and rotational damping
-is 45 N m s/rad. They have not been fitted to a force plate, pressure
-map, participant, or golf outcome. Consequently this experiment can
-identify whether the named pathways are mechanically active and whether
-their effects survive killswitch, reversal, refinement, and
-matched-load/work screens. It cannot establish that the values represent
-a golfer, that a pathway is intentionally controlled, or that a speed
-difference is beneficial.
-
-The 42-trajectory initialization diagnostic passes every active-set and
-native- engine comparison. Across seven branches and three decreasing
-steps, all 14 engine-specific work--energy series decrease monotonically
-at approximately first order. Maximum trajectory and ground-force
-relative discrepancies are below \(2.5\times10^{-12}\) and
-\(1.1\times10^{-10}\). The initialization sensitivity is material. On
-the 0.125 ms grid, natural-zero, gravity-only, and conditional-base
-starts produce peak ground forces of 32.8, 565.5, and 510.3 N and 4 ms
-club-translation speeds of 0.264, 1.908, and 0.946 m/s. These are
-transient synthetic responses, not alternative estimates of a human
-swing. Their separation shows that an unreported preload convention
-could dominate a short-horizon comparison.
-
-\begin{figure}
-
-\centering{
-
-\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_articulated_ground_atlas.pdf}
-
-}
-
-\caption{\label{fig-articulated-ground-atlas}Finite Ground Reaction and
-Intrinsic Free Moment in the Articulated Model}
-
-\end{figure}%
-
-All 576 atlas trajectories remain inside the declared shaft and base
-domains and pass the numerical and native-engine gates. The worst
-normalized work-- energy residual decreases from 0.01986 at 0.25 ms to
-0.00995 at 0.125 ms. Maximum trajectory, grip-force, and ground-force
-relative discrepancies are \(1.77\times10^{-10}\),
-\(6.41\times10^{-10}\), and \(2.28\times10^{-10}\), respectively. The
-largest ground-force resultant is 559.1 N, the largest intrinsic free
-moment is 14.58 N m, base translation remains below 9.79 mm, and base
-pitch remains below 0.00548 rad. Maximum shaft bending and twist remain
-1.708 mm and 0.001856 rad. These values qualify the declared synthetic
-computation; they do not calibrate any load magnitude.
-
-The primary load--work screen is adverse. A coupled and fixed cell was
-preregistered as matched only when both peak grip load and total
-dissipated work differed by no more than 5\%. None of 384 possible
-comparisons qualifies. The total-work relative difference spans
-1.72--2.00 because coupled ground damping contributes a dissipative
-pathway that fixed base cannot contain; even a 100\% tolerance admits no
-cell. Although every unmatched coupled-minus- fixed 50 ms speed
-difference is positive on the fine grid, spanning 0.0280-- 0.1772 m/s,
-those values cannot identify a ground-pathway speed effect because the
-registered work match failed.
-
-A separately labeled post-hoc sensitivity excludes ground damping from
-the work-matching variable while retaining the peak-grip-load screen. At
-5\%, 60 cells then qualify: coupled-minus-fixed speed differences
-include 20 positive and 40 negative values and span -0.00075 to +0.01394
-m/s. This alternative cannot replace the primary estimand, but it
-demonstrates that the sign is not universal once a non-ground
-dissipation comparison is imposed. Independent controls are likewise
-mixed at 50 ms: coupled-minus-rigid-shaft differences span -0.0166 to
-+0.0181 m/s, and coupled-minus-horizontal-restraint-removed differences
-span -0.00338 to +0.00029 m/s. The finite ground and intrinsic
-free-moment pathways are mechanically active in this model, but their
-isolated delivery contribution is not identified by this experiment.
-
-The support is linear and bilateral; it lacks unilateral normal contact,
-Coulomb friction, segmented feet, measured pressure, and force-plate
-calibration. The 50 ms horizon excludes impact and most of the
-downswing. Accordingly Figure~\ref{fig-articulated-ground-atlas} and its
-machine-readable evidence support a finite-base software and mechanism
-qualification with an adverse primary matching result, not a conclusion
-about ground-use strategy, passive transfer benefit, timing economy, or
-human clubhead speed.
+strengthens the reduced cross-engine reference that the articulated tier
+must reproduce; it does not establish anatomy, passive human transfer,
+timing economy, slack benefit, or coaching strategy.
 
 \subsection{Paired Scapula-on-Ellipsoid Geometry
 Screen}\label{paired-scapula-on-ellipsoid-geometry-screen}
@@ -8165,22 +7535,14 @@ the independently validated articulated shoulder model, subject-specific
 anatomy where governed, calibrated grip contact, and paired forward
 dynamics.
 
-The bounded articulated experiments retain the verified closed-state
-initialization. Bilateral and typed point-attachment tiers repeat power,
-work--energy, refinement, adverse-load, event, and engine-parity
-controls through 5 ms. The distributed extension then preserves total
-stiffness and damping while advancing one-, three-, and five-fiber
-tension grips through 50 ms with geometry and station-refinement
-controls. The separate passive-shaft extension adds first-mode bending
-and torsion with initial-energy, matched-load/work, refinement, and
-engine-parity controls; its matched speed differences retain both signs.
-The finite-base extension now combines those grip and shaft mechanics
-with planar ground force and intrinsic free moment; its numerical gates
-pass, but its primary coupled--fixed match is empty. All three tiers
-still lack calibrated tissue, pressure, friction, unilateral foot
-contact, and human observations. Only trajectories passing those next
-gates may test whether drift-mediated transfer reduces timing demand,
-creates recovery, benefits from slack, or supports a human strategy.
+The next spatial experiment must retain the verified closed-state
+initialization while replacing the hand carriages with articulated
+forward dynamics, expose contact loss and tissue/shaft compliance as
+typed states, and repeat the coincident, reversal, killswitch, power,
+and work--energy controls in two independent engines. Only trajectories
+passing those gates may be used to test whether drift-mediated transfer
+reduces timing demand, creates recovery, benefits from slack, or
+supports a human strategy.
 
 \section{Falsifiability Gained and Claims Still
 Open}\label{sec-spatial-claim-boundary}
@@ -8213,12 +7575,11 @@ Four stronger statements remain open:
   inputs. A forward compliant two-hand solve must determine whether
   equivalent loads emerge after a distal command killswitch.
 \item
-  \textbf{Bounded Cross-Engine Attachment Dynamics Do Not Establish Full
-  Contact.} The 5 ms articulated trajectories test divergence,
-  attachment separation, typed unilateral opening and reattachment,
-  power, and energy in two engines. They do not test calibrated
-  distributed grip or shaft mechanics, tissue, friction, late downswing,
-  or impact.
+  \textbf{Forward Cross-Engine Contact Is Untested at This Tier.}
+  Same-state inverse dynamics removes trajectory divergence by design.
+  The independently integrated reduced contact experiment in
+  Section~\ref{sec-spatial-forward-contact} addresses that separate
+  estimand without promoting this prescribed-load result.
 \item
   \textbf{Anatomical Magnitude Is Unsupported.} The reduced tree and
   spherical inertias are not subject-specific anatomy, muscle, or tissue
@@ -9121,12 +8482,14 @@ Qualification}\label{sec-open-release}
 \section{Release Contract}\label{release-contract}
 
 The scientific product is distributed as an open research resource
-rather than as evidence for a software platform. Canonical presets
-identify reproducible entry points across the analytical, moving-base,
-two-hand, distributed-shaft, articulated-contact, passive-shaft,
-finite-ground, uncertainty/control, and experimental-readiness tiers.
-Preset names preserve the model ladder and never imply that a higher
-unexecuted tier is available.
+rather than as evidence for a software platform. Ten presets identify
+reproducible entry points: analytical double pendulum, forward two-hand,
+coupled moving-base/flexible-club, isolated synthetic distributed shaft,
+forward distributed modal shaft, matched-task arm--wrist allocation and
+transmission, reduced spatial common state, reduced two-engine spatial
+forward contact, uncertainty/control, and experimental readiness. Preset
+names preserve the model ladder and never imply that a higher unexecuted
+tier is available.
 
 The release manifest hashes the report source and PDF, chapter source,
 linked bibliography, evidence JSON/NPZ/CSV, publication PDF/SVG figures,
@@ -9179,20 +8542,19 @@ feasibility as supported at their declared tiers, geometry response as
 supported through reduced spatial common-state inverse dynamics, and
 modal reduction behavior as supported on a synthetic structural shaft
 case. It records forward distributed-shaft coupling as supported only
-for the declared synthetic planar tier. It records the
-finite-ground/free-moment mechanism as numerically qualified with an
-empty preregistered matched set, post-killswitch contact persistence as
-supported only in the reduced spatial carriage model, human predictions
-as untested, and a universal controller as unsupported.
+for the declared synthetic planar tier. It records post-killswitch
+contact persistence as supported only in the reduced spatial carriage
+model, human predictions as untested, and a universal controller as
+unsupported.
 
-Five release-level completion gates remain visible: three-dimensional
-articulated contact with calibrated unilateral foot support, force-plate
-comparison, grip, and shaft; equipment-calibrated beam and measured grip
-properties; measured tissue-level preload and slack identification;
-governed held-out human evaluation; and external archive deposit with a
-persistent identifier. Archive deposition changes external state and has
-not been performed. A reproducible local bundle is not described as a
-permanently archived release until that deposit is verified.
+Five release-level completion gates remain visible: subject-scaled
+articulated spatial contact with calibrated grip and distributed shaft;
+equipment-calibrated beam and measured grip properties; measured
+tissue-level preload and slack identification; governed held-out human
+evaluation; and external archive deposit with a persistent identifier.
+Archive deposition changes external state and has not been performed. A
+reproducible local bundle is not described as a permanently archived
+release until that deposit is verified.
 
 \chapter{A Common-Observable Ladder Toward Higher-Order
 Models}\label{sec-model-ladder}
@@ -9601,10 +8963,8 @@ This executes independent forward spatial contact at a reduced mechanism
 tier. It does not add anatomical arms, subject-specific inertias,
 muscles, measured grip compliance, a distributed shaft, or human
 observations. The evidence boundary therefore moves from ``forward
-contact unexecuted'' to ``reduced forward contact supported.'' The later
-articulated tier adds right-censored 5 ms bilateral and typed unilateral
-attachment results, including isolated opening and reattachment probes.
-Calibrated distributed contact and human transport remain untested.
+contact unexecuted'' to ``reduced forward contact supported; articulated
+human transport untested.''
 
 \section{What Survives, What Changes, and What Remains
 Open}\label{sec-ladder-discrepancy}
@@ -9625,7 +8985,7 @@ Executed Mechanisms and the Remaining Boundary}
 The discrepancy matrix in Figure~\ref{fig-ladder-discrepancy-matrix}
 summarizes the branched evidence boundary. Its cells are explicit
 capability memberships, not a triangular claim that every later model
-contains every earlier mechanism. Eleven bounded findings are supported
+contains every earlier mechanism. Nine bounded findings are supported
 somewhere in the executed ladder:
 
 \begin{enumerate}
@@ -9658,25 +9018,14 @@ somewhere in the executed ladder:
 \item
   that forward-contact result transports through native MuJoCo and
   Pinocchio dynamics within declared trajectory, wrench, orientation,
-  and energy regions; and
-\item
-  typed dead-zone and preload choices can reverse whether the same
-  articulated state is classified as open or taut, while explicit
-  boundary probes reproduce opening and reattachment in both native
-  engines; and
-\item
-  finite base translation and intrinsic free moment are mechanically
-  active under the declared passive law, although the preregistered
-  fixed--coupled total-work match admits no cell and therefore
-  identifies no delivery effect.
+  and energy regions.
 \end{enumerate}
 
 Other claims do not yet survive because they have not been tested. The
 present analysis does not show that the reduced result survives
-anatomical arms, that the synthetic shaft/support values are calibrated,
+anatomical arms, that its magnitude is invariant to a distributed shaft,
 or that independently authored native humanoid models produce matched
-human force histories. Those are separate structural and empirical
-questions.
+force histories. Those are separate structural and empirical questions.
 
 \subsection{Tier-by-Tier
 Interpretation}\label{sec-ladder-tier-interpretation}
@@ -9739,16 +9088,6 @@ killswitch, long-axis rotation, swing-plane evolution, and reduced
 ground-pathway bookkeeping. It transports the declared mechanism through
 two native engines. Its hand carriages and declared contact law prevent
 anatomical, tissue, muscle, or human inference.
-
-\textbf{Articulated Finite Ground and Free Moment.} This tier adds
-planar base translation and pitch to the closed-state articulated body,
-distributed grip, and passive first-mode shaft. The support force,
-intrinsic free moment, reference-transported moment, storage, damping,
-and augmented inertia/gravity ledger are explicit. All 576 trajectories
-pass their declared numerical and native-engine gates, but the primary
-fixed--coupled total-work match admits no cell. The tier therefore
-qualifies the finite-base mechanism and exposes an adverse
-identifiability result; it does not establish a ground-use benefit.
 
 \textbf{Articulated Full-Body Forward Contact.} This tier remains open
 because it must replace the carriages with subject-scaled articulated
@@ -9838,26 +9177,17 @@ The ladder remains deliberately incomplete:
   inertia elements rather than solved contact and subject-specific
   anatomy; and
 \item
-  the reduced forward spatial tier uses two translational hand
-  carriages; the subject-scaled articulated tier now advances one-,
-  three-, and five-fiber tension grips through 50 ms, but those fibers
-  remain frictionless engineering lines with state-registered free
-  lengths rather than measured pressure, fingers, or tissue; and
-\item
-  the newest articulated branch adds separately qualified first-mode
-  bending and torsion to the distributed grip; the subsequent
-  finite-base branch adds planar ground force and intrinsic free moment,
-  but all shaft/support parameters remain synthetic and the ground law
-  is linear and bilateral.
+  the forward spatial tier uses two translational hand carriages,
+  declared Kelvin--Voigt contacts, and a rigid club rather than
+  anatomical arms, measured tissue, or the distributed shaft.
 \end{itemize}
 
-The next decisive model test replaces the synthetic bilateral support
-with calibrated unilateral foot contact and force-plate observations
-while retaining the common wrench, power, initialization, killswitch,
-refinement, and independent-engine schema. Failure of force/moment
-balance, power invariance, contact-rank agreement, refinement, or
-participant-held-out prediction would falsify transport of the reduced
-mechanism.
+The next decisive model test replaces the carriages with subject-scaled
+articulated arms and couples the distributed shaft while emitting the
+same common schema and preserving the exact same-state command-removal
+branch. Failure of force/moment balance, power invariance, contact-rank
+agreement, or matched-event parity at that tier would falsify transport
+of the reduced passive-persistence claim.
 
 \chapter{Reference Frames, Biological Mechanisms, and the Multi-Engine
 Ladder}\label{sec-frames-biology-engines}
@@ -11882,14 +11212,13 @@ separation and transverse differential force. Existing moving-base and
 two-engine spatial controls reproduce coincident-grip zeros and
 moment-arm reversals. A six-profile audit rejects prescribed states that
 miss closure by 0.171--0.616 m; a bounded follow-up closes all 234
-registered reduced-tree configurations. The articulated distributed-grip
-and passive-shaft tiers advance twelve selected states through 50 ms. A
-finite-base extension then adds translation and intrinsic free moment;
-all numerical gates pass, but none of 384 coupled--fixed cells meets the
-primary load--total-work match. & Calibrate grip, shaft, unilateral foot
-contact, and force-plate support; propagate initialization and parameter
-uncertainty; then repeat the horizon, geometry, killswitch,
-matched-outcome, and held-out human bilateral-wrench tests. \\
+registered reduced-tree configurations. The resulting hand-carriage
+reference retains all registered cross-engine and energy gates through
+50 ms under nine one-factor adverse or null branches. & Replace the
+carriages with articulated subject-scaled arms, calibrated distributed
+grip and shaft properties, contact loss, and ground coupling; then
+repeat the horizon, geometry, killswitch, and held-out human
+bilateral-wrench tests. \\
 Which timing patterns matter? & Early distal release changes the
 available geometry; proximal rate, acceleration, braking, and release
 timing interact nonmonotonically. ``Casting'' is not one universal
@@ -12162,41 +11491,9 @@ registered synthetic excitations.}
 
 This evidence supports only a typed experimental program. It does not
 show that slack is good, bad, intentional, required, or beneficial for
-delivery. The articulated forward atlas now performs the first of those
-transport tests: bilateral, tension-only, and two dead-zone laws are
-compared under common displacement and approximately matched radial
-extension across 1,944 bounded trajectories. The 1.5 mm law remains open
-under the common 1 mm displacement but taut under matched extension;
-natural branches show no transition before 5 ms, while isolated boundary
-probes qualify opening and reattachment. This shows why preload matching
-changes the answer, not that either condition is beneficial. Any benefit
-proposal must still survive longer matched-work/load delivery, stateful
-hysteresis, calibrated distributed contact, and independent human
-measurement.
-
-The next articulated atlas extends a frictionless tension-fiber
-comparator to one, three, and five stations per hand while holding total
-stiffness and damping fixed. Its 288 trajectories pass nested 4, 10, 25,
-and 50 ms power, energy, refinement, geometry-null, and
-MuJoCo--Pinocchio gates. The one-fiber branch stays taut; multi-fiber
-branches retain partially open active sets but show no transition
-through 50 ms. Their delivery-state differences therefore demonstrate
-discretization sensitivity, not a physical benefit of slack or
-distributed pressure. Measured contact pressure, friction, shaft/ground
-work, matched tasks, and governed human outcomes remain necessary.
-
-The following articulated shaft atlas then retains the five-fiber grip
-and adds rigid, bending-only, torsion-only, and coupled passive-club
-branches. Its 384 trajectories pass the registered 0.25/0.125 ms
-work--energy, small-deformation, killswitch, and native-engine gates
-through 50 ms; 1.0 and 0.50 ms torsion probes fail closed outside the
-declared linear domain. Of 384 coupled--rigid cells, 126 meet the
-predeclared 5\% peak-load and dissipated-work match. Their final-speed
-differences include 82 negative and 44 positive values. Passive shaft
-response is therefore a state-dependent pathway in this synthetic model,
-not a general speed advantage. Equipment calibration, higher mode
-adequacy under fast loading, ground work, impact, and human outcomes
-remain open.
+delivery. Any such proposal must still survive matched-energy,
+zero-slack, direction-reversal, passivity, work-energy closure, and
+independent-measurement controls in a forward delivery model.
 
 \section{Evidential Boundary}\label{evidential-boundary}
 
@@ -12354,19 +11651,6 @@ convergence, and work--energy closure pass. This does not calibrate
 equipment or show that the result survives coupling the beam into the
 two-hand constrained solve.
 
-The articulated finite-base extension closes the next numerical
-mechanism gate while producing an adverse primary inference result.
-Across 384 pathway and 192 independent-control trajectories, both native
-engines agree, energy residuals decrease with step refinement, and all
-declared shaft/base domains hold through 50 ms. Ground force and
-intrinsic free moment are mechanically active, but none of 384
-coupled--fixed comparisons meets the preregistered 5\% peak-load and
-total-dissipated-work match. A post-hoc non-ground-dissipation
-sensitivity admits 60 cells with both speed-difference signs. The
-experiment therefore qualifies finite-base coupling and rejects a
-universal delivery interpretation; it does not identify a ground-use
-strategy or human benefit.
-
 The reduced full-body common-state extension resolves implementation
 transport for a narrower spatial estimand. MuJoCo and an independent
 Lagrange--Christoffel formulation agree across 20 coordinates and 61
@@ -12470,12 +11754,11 @@ order:
   measurement error, profile-likelihood or Bayesian calibration, larger
   held-out ensembles, and a constrained optimal-control comparator.
 \item
-  \textbf{Spatial Model-Fidelity Ladder.} Extend the executed planar
-  base rotation, intrinsic free moment, distributed grip, and passive
-  shaft into a three- dimensional club/body solve with calibrated
-  unilateral foot contact and force-plate comparison without changing
-  the registered interface observables. Each rung should carry
-  conservation checks and cross-engine tolerance gates.
+  \textbf{Spatial Model-Fidelity Ladder.} Add base rotation, a
+  three-dimensional club, ground pathways, and couple the executed
+  distributed/modal shaft reference into the forward constrained solve
+  without changing the registered interface observables. Each rung
+  should carry conservation checks and cross-engine tolerance gates.
 \item
   \textbf{Execute the Frozen Human-Data Protocol.} Acquire governed
   synchronized measurements that pass the fixed inclusion, residual,
@@ -12533,12 +11816,6 @@ are recorded in
 \href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/experimental_protocol_v1.json}{\texttt{data/experimental\_protocol\_v1.json}}
 and
 \href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/experimental_protocol_readiness.json}{\texttt{data/experimental\_protocol\_readiness.json}}.
-The finite-ground initialization, preregistered atlas, and labeled
-post-hoc matching sensitivity are recorded in
-\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/articulated_ground_diagnostic.json}{\texttt{data/articulated\_ground\_diagnostic.json}},
-\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/articulated_ground_atlas.json}{\texttt{data/articulated\_ground\_atlas.json}},
-and
-\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/articulated_ground_posthoc_sensitivity.json}{\texttt{data/articulated\_ground\_posthoc\_sensitivity.json}}.
 
 \chapter{Software and Data Availability}\label{sec-appendix-inventory}
 
@@ -12588,12 +11865,10 @@ The current evidence boundary includes these known limitations:
   No human motion or force data are analyzed; the result is mechanistic
   and model-derived, not a skill-group effect.
 \item
-  The model ladder now executes reduced and subject-scaled forward
-  two-hand contact, distributed grip, passive first-mode shaft, and
-  planar finite-base ground/free-moment tiers in MuJoCo and Pinocchio.
-  The interfaces and support law remain synthetic, bilateral, and
-  uncalibrated; three-dimensional unilateral foot contact and governed
-  human validation remain unexecuted.
+  The model ladder now executes reduced full-body common-state inverse
+  dynamics in MuJoCo and an independent Lagrange--Christoffel
+  formulation. The hand loads are prescribed, so independently solved
+  forward two-hand contact is still unexecuted.
 \end{itemize}
 
 \chapter{Reproducibility Guide}\label{sec-appendix-repro}
@@ -12616,9 +11891,6 @@ From the repository root (Python 3.11+ with the project dependencies):
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_moving\_base\_flexible\_study}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_shaft\_beam\_reference}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_spatial\_full\_body\_study}
-\ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_articulated\_ground\_diagnostic}
-\ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_articulated\_ground\_atlas}
-\ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_articulated\_ground\_posthoc\_sensitivity}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_uncertainty\_control\_study}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_experimental\_protocol\_dry\_run}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.qualify\_open\_release validate}
@@ -12637,7 +11909,6 @@ From the repository root (Python 3.11+ with the project dependencies):
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.make\_mechanism\_ladder\_figures}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.make\_forward\_two\_arm\_figures}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.make\_moving\_base\_flexible\_figures}
-\ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.make\_articulated\_ground\_figure}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.make\_shaft\_beam\_reference\_figures}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.make\_spatial\_full\_body\_figures}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.make\_uncertainty\_control\_figures}

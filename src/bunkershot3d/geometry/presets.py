@@ -126,18 +126,9 @@ class GrindPreset:
 
 
 def _patent_example(
-    name: str,
-    bounce_deg: float,
-    sole_width_mm: float,
-    entry_height_mm: float,
-    camber_area_mm2: float,
+    name: str, bounce_deg: float, sole_width_mm: float, entry_height_mm: float
 ) -> GrindPreset:
-    """One of the patent's worked bounce angles on a claim-band sole.
-
-    The camber area is per-example rather than shared: the band a convex,
-    monotone sole admits climbs steeply with bounce, so one number cannot be
-    constructible at 15.99, 18.42 and 20.78 degrees at once (issue #8698).
-    """
+    """One of the patent's worked bounce angles on a claim-band sole."""
     geometry = WedgeGeometry.from_millimetres(
         loft_deg=56.0,
         lie_deg=64.0,
@@ -146,7 +137,7 @@ def _patent_example(
         entry_height_mm=entry_height_mm,
         leading_edge_radius_mm=7.5,
         trailing_edge_radius_mm=42.0,
-        sole_camber_area_mm2=camber_area_mm2,
+        sole_camber_area_mm2=44.0,
         centre_rocker_radius_mm=250.0,
         heel_rocker_radius_mm=95.0,
         toe_rocker_radius_mm=135.0,
@@ -182,15 +173,6 @@ def _patent_example(
                 kind=ProvenanceKind.ESTIMATED,
                 source="midpoint of the most-preferred 15-22 mm band",
                 note="not the patent's own example value",
-            ),
-            "sole_camber_area_m2": ParameterProvenance(
-                kind=ProvenanceKind.ESTIMATED,
-                source="inside the claimed band and constructible at this bounce",
-                note=(
-                    "chosen so a convex monotone sole of this width can "
-                    "actually realise it; the patent bands alone do not "
-                    "guarantee that (issue #8698)"
-                ),
             ),
         },
     )
@@ -281,9 +263,9 @@ def _retail_wedge(
 
 def _build_registry() -> dict[str, GrindPreset]:
     presets = [
-        _patent_example("acushnet_example_1", 15.99, 22.0, 3.0, 44.0),
-        _patent_example("acushnet_example_2", 18.42, 22.0, 3.0, 50.0),
-        _patent_example("acushnet_example_3", 20.78, 22.0, 3.0, 55.0),
+        _patent_example("acushnet_example_1", 15.99, 22.0, 3.0),
+        _patent_example("acushnet_example_2", 18.42, 22.0, 3.0),
+        _patent_example("acushnet_example_3", 20.78, 22.0, 3.0),
         _retail_wedge(
             name="sm9_54_f",
             description=(
@@ -329,18 +311,14 @@ def _build_registry() -> dict[str, GrindPreset]:
                 "anchor: a tour 11 deg lob wedge measures about 4 deg with a "
                 "shaved heel and the face open - roughly 7 deg from grind "
                 "plus rotation. The dimensions here are estimates built to "
-                "reproduce that behaviour, not a copy of any retail head. "
-                "At 5 deg marketed bounce on a 20 mm sole the camber area "
-                "is almost fully determined - a convex monotone sole admits "
-                "a band barely 0.3 mm^2 wide - so it is not a free "
-                "parameter of this grind (issue #8698)."
+                "reproduce that behaviour, not a copy of any retail head."
             ),
             loft_deg=60.0,
             marketed_bounce_deg=5.0,
             head_mass_g=302.0,
             sole_width_mm=20.0,
             entry_height_mm=2.6,
-            camber_area_mm2=29.4,
+            camber_area_mm2=38.0,
             heel_relief_fraction=0.25,
             toe_relief_fraction=0.15,
             trailing_relief_fraction=0.35,

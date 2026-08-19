@@ -985,19 +985,7 @@ jobs:
         rust-wheel-parity,
       ]
     if: always()
-    # This job is the ONLY required branch-protection check on `main`, and it
-    # carries no gate logic of its own - it just echoes six `needs` results.
-    # Pinning it to the fleet meant every merge in the repo waited on a
-    # self-hosted Docker slot for a five-second summary job. It deliberately
-    # does NOT consume `needs.pick-runner.outputs.runner`: the required check
-    # must not inherit the dispatcher as an extra failure mode. Public repos
-    # get free unmetered hosted runners; private repos still fall through to
-    # the fleet, so no Actions minutes are ever billed.
-    #
-    # Reverting: set the repo variable CI_RUNNER_MODE=local.
-    runs-on:
-      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
-      'd-sorg-fleet-docker' }}
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 5
     steps:
       - name: Aggregate quality gate results
@@ -2124,10 +2112,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-    # The matrix already declares `ubuntu-latest` and several steps gate on
-    # `matrix.os == 'ubuntu-latest'`, so the fleet pin was a straight
-    # contradiction: hosted-shaped work queued behind a self-hosted slot.
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 25
     env:
       CARGO_HOME: ${{ github.workspace }}/.cargo-home
@@ -2401,11 +2386,7 @@ jobs:
 
   rust-quickstart:
     name: Rust Quickstart
-    # No `needs: pick-runner` on this job, so it routes directly rather than
-    # gaining a dependency edge just to learn where to run.
-    runs-on:
-      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
-      'd-sorg-fleet-docker' }}
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 15
     steps:
       - name: Clean corrupt git objects
@@ -2528,10 +2509,7 @@ jobs:
   rust-wheel-parity:
     name: rust-wheel-parity
     needs: pick-runner
-    # In the required `quality-gate` aggregate's `needs`, so a fleet pin here
-    # blocked every merge a second time. Pure `cargo`/`maturin` work with no
-    # fleet-local state, so it follows the dispatcher like its siblings.
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 30
     env:
       CARGO_HOME: ${{ github.workspace }}/.cargo-home

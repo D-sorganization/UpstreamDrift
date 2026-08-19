@@ -200,8 +200,6 @@
         "moment arm",
         "force-velocity projection",
         "contact couple",
-        "ground force and intrinsic free moment",
-        "base storage and damping work",
         "measurement-map rank and nullity",
         "event-window work",
         "delivery outcome"
@@ -214,13 +212,10 @@
         "proper-frame transform",
         "subject-scaled geometry",
         "bilateral contact closure",
-        "fixed translation free-moment and coupled pathway killswitches",
-        "center-of-pressure reference reversal",
-        "initialization sensitivity",
         "independent engine"
       ],
       "falsifier": "A registered sign-reversing or null geometry intervention does not change the proposed pathway beyond uncertainty, or the effect fails in an independent engine.",
-      "issues": [8448, 8449, 8556, 8592, 8593, 8595, 8719]
+      "issues": [8448, 8449, 8556, 8592, 8593, 8595]
     },
     {
       "id": "Q3",

@@ -403,12 +403,7 @@ class SolverSetup:
         n_profile_points: Sole samples per lofted cross-section.
         n_stations: Cross-sections from heel to toe.
         time_step_s: Fixed integration step.
-        max_time_s: Hard stop for one shot, lead-in included. A nominal
-            wedge strike is over in 12-18 ms, but a low-bounce grind digs
-            for well over 100 ms before its sole comes back out, and a
-            window that ends first is a truncated shot the solver refuses
-            to hand on (issue #8700). It costs nothing when the shot is
-            ordinary: the march stops at the exit, not at the wall.
+        max_time_s: Hard stop for one shot.
         target_carry_m: Carry the playability window is measured against.
         carry_tolerance_fraction: Half-width of the acceptance band.
         playability_points: Stations per playability axis; the grid costs
@@ -419,7 +414,7 @@ class SolverSetup:
     n_profile_points: int = 24
     n_stations: int = 11
     time_step_s: float = 2.5e-4
-    max_time_s: float = 0.200
+    max_time_s: float = 0.030
     target_carry_m: float = 12.0
     carry_tolerance_fraction: float = 0.10
     playability_points: int = 5

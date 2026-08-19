@@ -3,11 +3,11 @@
   "authority": "D-sorganization/UpstreamDrift#8557",
   "interpretation": "Review completion means every release claim has traceable atomic support, controls, falsifiers, boundaries, and a remaining gate. It does not mean every scientific claim is validated.",
   "summary": {
-    "release_claim_count": 40,
-    "reviewed_release_claim_count": 40,
+    "release_claim_count": 33,
+    "reviewed_release_claim_count": 33,
     "open_release_review_count": 0,
-    "scientifically_open_gate_count": 40,
-    "atomic_claim_count": 295
+    "scientifically_open_gate_count": 33,
+    "atomic_claim_count": 272
   },
   "release_claim_reviews": [
     {
@@ -181,18 +181,19 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:55",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:57",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:105",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:14",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:24",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:31",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:40",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:47",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:5",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:16",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:26",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:33",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:42",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:49",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch05_platform.qmd:3",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch05_platform.qmd:13",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch05_platform.qmd:26",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:135",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:91",
         "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:3",
-        "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:90",
-        "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:101",
+        "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:85",
+        "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:96",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:35",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:43",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:52",
@@ -213,6 +214,7 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:197",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:205",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06bbb_forward_modal_shaft.qmd:212",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:56",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:46"
       ],
       "negative_controls": [
@@ -374,8 +376,9 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:204",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:207",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:220",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:128",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:145"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:66",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:84",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:101"
       ],
       "negative_controls": [
         "same state and matched club task",
@@ -465,7 +468,7 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:186",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:188",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:195",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:219"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:178"
       ],
       "negative_controls": [
         "same state and matched club task",
@@ -546,9 +549,10 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:204",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:207",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:220",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:128",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:145",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:219"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:66",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:84",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:101",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:178"
       ],
       "negative_controls": [
         "proper rotation and reference transport",
@@ -877,9 +881,9 @@
         "scripts/research/proximal_distal_energy/run_typed_slack_dynamic_study.py"
       ],
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:98",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:107",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:121"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:86",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:95",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:109"
       ],
       "negative_controls": [
         "same-state killswitch",
@@ -921,9 +925,9 @@
         "scripts/research/proximal_distal_energy/run_typed_slack_dynamic_study.py"
       ],
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:98",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:107",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:121"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:86",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:95",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:109"
       ],
       "negative_controls": [
         "same-state killswitch",
@@ -980,13 +984,15 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07c_transmission_robustness.qmd:167",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07c_transmission_robustness.qmd:170",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07c_transmission_robustness.qmd:187",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:145",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:66",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:101",
         "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:12",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:65",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:75",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:98",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:107",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:121"
+        "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:14",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:53",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:63",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:86",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:95",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:109"
       ],
       "negative_controls": [
         "common random numbers",
@@ -1050,9 +1056,8 @@
       ],
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:187",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:128",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:152",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:116",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:140",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:201",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:212",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:221",
@@ -1300,7 +1305,7 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:476",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:479",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:492",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:219"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:178"
       ],
       "negative_controls": [
         "energy matching",
@@ -1351,14 +1356,12 @@
         "scripts/research/proximal_distal_energy/run_typed_slack_dynamic_study.py"
       ],
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:128",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:152",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:159",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:167",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:178",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:182",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:195"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:116",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:140",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:147",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:155",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:166",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:170"
       ],
       "negative_controls": [
         "same-state killswitch",
@@ -1402,12 +1405,10 @@
         "scripts/research/proximal_distal_energy/run_typed_slack_dynamic_study.py"
       ],
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:159",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:167",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:178",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:182",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:195",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:147",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:155",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:166",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:170"
       ],
       "negative_controls": [
         "same-state killswitch",
@@ -1659,19 +1660,17 @@
         "tests/research/test_scapulothoracic_contact_screen.py"
       ],
       "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd:10",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:263",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:269",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:281",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:75",
-        "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd:10",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:54",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:64",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:289",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:506",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:515",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:286",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:3",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:13",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:40"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:415",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:128",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:445",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:380"
       ],
       "negative_controls": [
         "bilateral distance-to-contact closure",
@@ -1687,7 +1686,7 @@
       "uncertainty_boundaries": [
         "The profiles are synthetic regression-based design points and the trajectories are prescribed rather than solved for bilateral contact.",
         "The forces and contact points are prescribed and do not arise from anatomical compliant forward contact.",
-        "This remains a dependency-ordered falsification contract; a 5 ms bilateral spring screen is not evidence for unilateral slack, late-downswing persistence, or human strategy."
+        "This is a dependency-ordered falsification contract, not evidence that compliant articulated dynamics will support the proposed mechanism."
       ],
       "remaining_scientific_gate": "Calibrated compliant forward contact with subject-measured geometry and trajectories."
     },
@@ -1732,18 +1731,16 @@
         "tests/research/test_scapulothoracic_contact_screen.py"
       ],
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:506",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:515",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:286",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:3",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:13",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:40",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:415",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:128",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:445",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:380",
+        "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd:10",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:299",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:310",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:55",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:75",
-        "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd:10",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:54",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:64",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:318"
       ],
       "negative_controls": [
@@ -1758,7 +1755,7 @@
         "A force, transfer, timing, slack, or human claim is attributed to this inverse-kinematics evidence alone."
       ],
       "uncertainty_boundaries": [
-        "This remains a dependency-ordered falsification contract; a 5 ms bilateral spring screen is not evidence for unilateral slack, late-downswing persistence, or human strategy.",
+        "This is a dependency-ordered falsification contract, not evidence that compliant articulated dynamics will support the proposed mechanism.",
         "The joint bounds are broad engineering guards and collision uses bounding spheres with declared exemptions; neither is subject-specific anatomical qualification.",
         "Scapular glide, forearm pronation-supination, multi-axis wrist, fingers, distributed tissue contact, calibrated compliance, and participant measurements are absent."
       ],
@@ -1806,15 +1803,16 @@
         "tests/research/test_scapulothoracic_contact_screen.py"
       ],
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:506",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:515",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:286",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:3",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:13",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:40",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:90",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:23",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:32"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:415",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:128",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:445",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:380",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:370",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:390",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:79",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:399",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:407"
       ],
       "negative_controls": [
         "bilateral distance-to-contact closure",
@@ -1829,7 +1827,7 @@
         "Any anatomical, muscular, transfer, or strategy conclusion is attributed to this reduced geometry screen alone."
       ],
       "uncertainty_boundaries": [
-        "This remains a dependency-ordered falsification contract; a 5 ms bilateral spring screen is not evidence for unilateral slack, late-downswing persistence, or human strategy.",
+        "This is a dependency-ordered falsification contract, not evidence that compliant articulated dynamics will support the proposed mechanism.",
         "The ellipsoid and ranges are declared engineering surrogates; residual closure and solver termination are separate gates, and active bounds do not prove anatomical infeasibility.",
         "Full task rank establishes only local contact authority; it does not select an anatomical coordinate allocation or motor strategy.",
         "Subject-specific anatomy, articulated shoulder validation, calibrated distributed grip contact, muscle actuation, and forward dynamics remain open."
@@ -1847,56 +1845,37 @@
         "PD-CLAIM-270"
       ],
       "evidence_artifacts": [
-        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
-        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.npz",
-        "docs/research/proximal_distal_energy_transfer/figures/fig_subject_scaled_spatial_geometry.pdf",
-        "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
-        "scripts/research/proximal_distal_energy/run_subject_scaled_spatial_geometry.py",
-        "scripts/research/proximal_distal_energy/make_subject_scaled_spatial_geometry_figures.py",
-        "tests/research/test_subject_scaled_spatial_geometry.py",
-        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
-        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
-        "docs/research/proximal_distal_energy_transfer/figures/fig_subject_scaled_closed_contact.pdf",
-        "scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py",
-        "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py",
-        "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py",
-        "tests/research/test_subject_scaled_closed_contact.py",
         "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.json",
         "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.npz",
         "docs/research/proximal_distal_energy_transfer/figures/fig_closed_state_forward_bridge.pdf",
         "scripts/research/proximal_distal_energy/closed_state_forward_bridge.py",
         "scripts/research/proximal_distal_energy/run_closed_state_forward_bridge.py",
         "scripts/research/proximal_distal_energy/make_closed_state_forward_bridge_figure.py",
-        "tests/research/test_closed_state_forward_bridge.py",
-        "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
-        "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.npz",
-        "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf",
-        "scripts/research/proximal_distal_energy/scapulothoracic_contact_screen.py",
-        "scripts/research/proximal_distal_energy/run_scapulothoracic_contact_screen.py",
-        "scripts/research/proximal_distal_energy/make_scapulothoracic_contact_figures.py",
-        "tests/research/test_scapulothoracic_contact_screen.py"
+        "scripts/research/proximal_distal_energy/register_closed_state_forward_bridge_claims.py",
+        "tests/research/test_closed_state_forward_bridge.py"
       ],
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:329",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:340",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:348",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:357"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:357",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:415"
       ],
       "negative_controls": [
-        "bilateral distance-to-contact closure",
-        "constraint Jacobian rank and singular values",
-        "grip-span sweep",
-        "point-force wrench-map rank and axial augmentation"
+        "position and velocity closure",
+        "exact zero-preload contact",
+        "action-reaction and damping passivity",
+        "independent-engine state-digest and trajectory comparison"
       ],
       "falsifiers": [
-        "Any mapped state exceeds the registered position or velocity closure tolerance or develops nonzero force at exact closure.",
-        "An engine pair receives a different initial-state digest or fails any registered trajectory, wrench, or energy comparison gate.",
-        "A mechanism, delivery, anatomy, or coaching conclusion is attributed to the initialization audit alone."
+        "Any mapped state exceeds a registered closure tolerance or develops nonzero force at exact closure.",
+        "An engine pair receives a different digest or fails any registered comparison gate.",
+        "A mechanism, delivery, anatomy, or coaching conclusion is attributed to this initialization audit alone."
       ],
       "uncertainty_boundaries": [
-        "Velocities are finite differences along reduced-tree inverse-kinematics paths; the mapping does not add anatomical dynamics or equipment calibration.",
-        "The forward solvers use finite-mass hand carriages after initialization and the 4 ms window is not a downswing or delivery simulation.",
-        "Full-horizon articulated contact, calibrated grip and shaft properties, typed contact loss, adverse-load controls, and governed human validation remain open."
+        "Velocities are finite differences along reduced-tree inverse-kinematics paths; the mapping adds neither anatomical dynamics nor equipment calibration.",
+        "Finite-mass hand carriages replace articulated arms after initialization, and 4 ms is not a downswing or delivery simulation.",
+        "Full-horizon articulated contact, calibrated grip and shaft properties, adverse-load controls, and governed human validation remain open."
       ],
       "remaining_scientific_gate": "Replace hand carriages with articulated arms and run full-horizon calibrated contact controls."
     },
@@ -1922,10 +1901,9 @@
       ],
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:370",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:382",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:110",
         "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd:10",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:54",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:382",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:99",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:394",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14"
       ],
@@ -1944,405 +1922,9 @@
       "uncertainty_boundaries": [
         "The design varies engineering factors one at a time and does not sample a calibrated joint parameter distribution.",
         "Passing through 50 ms supplies no evidence beyond 50 ms and does not constitute a full delivery or impact simulation.",
-        "Longer articulated contact, typed unilateral slack, distributed grip and shaft calibration, ground coupling, delivery, impact, and governed human evidence remain open."
+        "Articulated subject-scaled contact, distributed grip and shaft calibration, ground coupling, contact loss, delivery, impact, and governed human evidence remain open."
       ],
       "remaining_scientific_gate": "Replace hand carriages with articulated subject-scaled arms and repeat the horizon, adverse-load, contact-loss, and energy controls with calibrated grip and shaft properties."
-    },
-    {
-      "release_claim_key": "subject_scaled_articulated_inertia",
-      "published_status": "native_common_state_mass_bias_and_inverse_dynamics_qualified",
-      "audit_state": "reviewed_as_common_state_articulated_dynamics_result",
-      "scientific_disposition": "native_articulated_inertia_operators_agree_at_declared_closed_states",
-      "supporting_claim_ids": [
-        "PD-CLAIM-274",
-        "PD-CLAIM-275",
-        "PD-CLAIM-276"
-      ],
-      "evidence_artifacts": [
-        "docs/research/proximal_distal_energy_transfer/data/articulated_inertia_cross_engine.json",
-        "docs/research/proximal_distal_energy_transfer/data/articulated_inertia_cross_engine.npz",
-        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_inertia_cross_engine.pdf",
-        "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py",
-        "scripts/research/proximal_distal_energy/run_articulated_inertia_cross_engine.py",
-        "scripts/research/proximal_distal_energy/make_articulated_inertia_cross_engine_figure.py",
-        "scripts/research/proximal_distal_energy/register_articulated_inertia_claims.py",
-        "tests/research/test_articulated_inertia_cross_engine.py"
-      ],
-      "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:407",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:417",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:428",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:436"
-      ],
-      "negative_controls": [
-        "independent engine model assembly",
-        "mass-matrix symmetry gate",
-        "positive-definiteness eigenvalue gate",
-        "mass, bias, and inverse-dynamics operators checked separately",
-        "all 234 closed states retained"
-      ],
-      "falsifiers": [
-        "Any closed state is omitted, model dimensions or joint order differ, or an engine does not use its named native operators.",
-        "Any reproduced state exceeds a registered relative tolerance, loses symmetry, or has a nonpositive mass-matrix eigenvalue.",
-        "A contact, anatomy, equipment, muscle, delivery, or human claim is attributed to common-state inertia parity alone."
-      ],
-      "uncertainty_boundaries": [
-        "Segment geometry and spherical inertias are engineering design values rather than participant-specific anatomy.",
-        "The result tests rigid-body operator agreement and does not advance contact or a delivery trajectory.",
-        "Compliant bilateral contact, detailed anatomy, equipment, ground, delivery, and governed human evidence remain open."
-      ],
-      "remaining_scientific_gate": "Apply bilateral compliant contact to the qualified articulated tree and repeat horizon, adverse-load, contact-loss, refinement, power, and energy controls."
-    },
-    {
-      "release_claim_key": "subject_scaled_articulated_contact_projection",
-      "published_status": "same_state_bilateral_contact_projection_and_initial_acceleration_qualified",
-      "audit_state": "reviewed_as_same_state_articulated_contact_projection_result",
-      "scientific_disposition": "bilateral_contact_projection_and_native_initial_acceleration_qualified",
-      "supporting_claim_ids": [
-        "PD-CLAIM-277",
-        "PD-CLAIM-278",
-        "PD-CLAIM-279"
-      ],
-      "evidence_artifacts": [
-        "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.json",
-        "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.npz",
-        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_contact_projection.pdf",
-        "scripts/research/proximal_distal_energy/articulated_contact_projection.py",
-        "scripts/research/proximal_distal_energy/run_articulated_contact_projection.py",
-        "scripts/research/proximal_distal_energy/make_articulated_contact_projection_figure.py",
-        "scripts/research/proximal_distal_energy/register_articulated_contact_projection_claims.py",
-        "tests/research/test_articulated_contact_projection.py"
-      ],
-      "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:447",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:454",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:461",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:471",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:478"
-      ],
-      "negative_controls": [
-        "zero-preload closed-state control",
-        "exact action-reaction and virtual-power identities",
-        "non-positive damping power",
-        "coincident and reversed moment-arm controls",
-        "all 234 closed states retained"
-      ],
-      "falsifiers": [
-        "Any force is prescribed independently of achieved contact state, action-reaction or virtual power fails, or a closed state is omitted.",
-        "Any reproduced state exceeds a registered residual or native acceleration tolerance.",
-        "A trajectory, human, equipment, or strategy claim is attributed to this initial-acceleration gate alone."
-      ],
-      "uncertainty_boundaries": [
-        "The contact law, geometry, and perturbation are engineering values rather than participant or equipment calibration.",
-        "The result is one same-state acceleration evaluation and contains no forward trajectory or accumulated work.",
-        "Forward integration, calibrated structure/contact, ground, and governed human evidence remain open."
-      ],
-      "remaining_scientific_gate": "Integrate a bounded articulated bilateral-contact horizon and repeat contact-loss, adverse-load, refinement, power, and work-energy controls."
-    },
-    {
-      "release_claim_key": "bounded_articulated_forward_contact",
-      "published_status": "five_millisecond_bilateral_attachment_forward_gate_qualified",
-      "audit_state": "reviewed_as_right_censored_synthetic_forward_result",
-      "scientific_disposition": "five_millisecond_bilateral_attachment_forward_gate_qualified",
-      "supporting_claim_ids": [
-        "PD-CLAIM-280",
-        "PD-CLAIM-281",
-        "PD-CLAIM-282"
-      ],
-      "evidence_artifacts": [
-        "docs/research/proximal_distal_energy_transfer/data/articulated_forward_contact.json",
-        "docs/research/proximal_distal_energy_transfer/data/articulated_forward_contact.npz",
-        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_forward_contact.pdf",
-        "scripts/research/proximal_distal_energy/articulated_forward_contact.py",
-        "scripts/research/proximal_distal_energy/run_articulated_forward_contact.py",
-        "scripts/research/proximal_distal_energy/make_articulated_forward_contact_figure.py",
-        "scripts/research/proximal_distal_energy/register_articulated_forward_contact_claims.py",
-        "tests/research/test_articulated_forward_contact.py"
-      ],
-      "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:488",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:497",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:525",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:533"
-      ],
-      "negative_controls": [
-        "zero-preload branch",
-        "initial-velocity reversal",
-        "one-factor stiffness and damping perturbations",
-        "three-step refinement",
-        "independent native MuJoCo and Pinocchio operators"
-      ],
-      "falsifiers": [
-        "A trajectory is omitted, an unregistered active drive is applied, or force is clipped without a typed event.",
-        "Any reproduced trajectory exceeds a registered gate or refinement fails to reduce the worst energy residual.",
-        "A human, equipment, slack, late-downswing, or coaching claim is attributed to this five-millisecond synthetic screen alone."
-      ],
-      "uncertainty_boundaries": [
-        "The attachments, parameters, states, and retention threshold are synthetic engineering constructs.",
-        "The result is right-censored at five milliseconds and is not calibrated to anatomy, equipment, ground reaction, or human data.",
-        "Longer horizons, typed unilateral slack, calibrated distributed structures, ground coupling, and governed bilateral human wrenches remain open."
-      ],
-      "remaining_scientific_gate": "Extend the right-censored horizon with typed unilateral slack, calibrated distributed grip and shaft compliance, ground coupling, and governed bilateral human wrenches."
-    },
-    {
-      "release_claim_key": "typed_articulated_slack",
-      "published_status": "five_millisecond_typed_attachment_event_gate_qualified",
-      "audit_state": "reviewed_as_right_censored_synthetic_contact_result",
-      "scientific_disposition": "five_millisecond_typed_attachment_event_gate_qualified",
-      "supporting_claim_ids": [
-        "PD-CLAIM-283",
-        "PD-CLAIM-284",
-        "PD-CLAIM-285"
-      ],
-      "evidence_artifacts": [
-        "docs/research/proximal_distal_energy_transfer/data/articulated_slack_atlas.json",
-        "docs/research/proximal_distal_energy_transfer/data/articulated_slack_atlas.npz",
-        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_slack_atlas.pdf",
-        "scripts/research/proximal_distal_energy/articulated_slack_contact.py",
-        "scripts/research/proximal_distal_energy/articulated_slack_forward.py",
-        "scripts/research/proximal_distal_energy/articulated_slack_atlas.py",
-        "scripts/research/proximal_distal_energy/run_articulated_slack_atlas.py",
-        "scripts/research/proximal_distal_energy/make_articulated_slack_figure.py",
-        "scripts/research/proximal_distal_energy/register_articulated_slack_claims.py",
-        "tests/research/test_articulated_slack_contact.py",
-        "tests/research/test_articulated_slack_forward.py"
-      ],
-      "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:544",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:566",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:559",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:580",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:588",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:596",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:286",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:182"
-      ],
-      "negative_controls": [
-        "bilateral and zero-slack tension comparators",
-        "common-displacement versus matched-extension preload",
-        "initial-velocity reversal",
-        "open-to-taut and taut-to-open event probes",
-        "three-step refinement and two native dynamics operators"
-      ],
-      "falsifiers": [
-        "An open interface transmits force, a law creates compression contrary to its contract, or a preload control is omitted.",
-        "Any reproduced cell exceeds a registered numerical/parity gate or an event probe fails to cross the declared boundary.",
-        "A biological, benefit, timing, delivery, or coaching claim is attributed to this bounded synthetic atlas alone."
-      ],
-      "uncertainty_boundaries": [
-        "The passive laws and parameters are synthetic point-attachment comparators, not tissue or intent.",
-        "Natural event absence is right-censored; probe events qualify implementation and are not natural-state predictions.",
-        "Longer distributed grip/shaft contact, calibrated tissue/friction/ground, matched delivery, and governed human measurements remain open."
-      ],
-      "remaining_scientific_gate": "Extend the right-censored typed laws through calibrated distributed grip and shaft contact, longer matched-work/load delivery, ground coupling, and governed bilateral human wrenches."
-    },
-    {
-      "release_claim_key": "distributed_grip_discretization",
-      "published_status": "fifty_millisecond_distributed_fiber_gate_qualified",
-      "audit_state": "reviewed_as_right_censored_synthetic_discretization_result",
-      "scientific_disposition": "fifty_millisecond_distributed_fiber_gate_qualified",
-      "supporting_claim_ids": [
-        "PD-CLAIM-286",
-        "PD-CLAIM-287",
-        "PD-CLAIM-288"
-      ],
-      "evidence_artifacts": [
-        "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_grip_atlas.json",
-        "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_grip_atlas.npz",
-        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_distributed_grip_atlas.pdf",
-        "scripts/research/proximal_distal_energy/articulated_distributed_grip.py",
-        "scripts/research/proximal_distal_energy/articulated_distributed_forward.py",
-        "scripts/research/proximal_distal_energy/articulated_distributed_atlas.py",
-        "scripts/research/proximal_distal_energy/run_distributed_grip_atlas.py",
-        "scripts/research/proximal_distal_energy/make_distributed_grip_figure.py",
-        "scripts/research/proximal_distal_energy/register_distributed_grip_claims.py",
-        "tests/research/test_articulated_distributed_grip.py",
-        "tests/research/test_articulated_distributed_forward.py",
-        "tests/research/test_articulated_distributed_atlas.py"
-      ],
-      "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:606",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:617",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:626",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:636",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:646",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:195",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:656",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:48"
-      ],
-      "negative_controls": [
-        "one-fiber point-law reduction",
-        "equal total stiffness and damping across station counts",
-        "coincident and reversed moment arms",
-        "initial-velocity reversal",
-        "time-step, station-count, and native-engine comparisons"
-      ],
-      "falsifiers": [
-        "Station count changes total stiffness, horizons are reinitialized, or the one-fiber reduction fails.",
-        "Any reproduced cell exceeds a gate, a geometric control fails, or a reported active transition is absent from committed evidence.",
-        "A physical, biological, equipment, timing, or coaching claim is attributed to this synthetic atlas alone."
-      ],
-      "uncertainty_boundaries": [
-        "The fibers are frictionless engineering lines, not measured pressure, fingers, or tissue.",
-        "No-transition observations are right-censored, and delivery states are not matched for load or work.",
-        "Shaft bending/torsion, ground/free-moment work, friction, tissue, matched delivery, and governed human measurements remain open."
-      ],
-      "remaining_scientific_gate": "Calibrate grip friction and pressure, couple the qualified fibers to shaft bending and torsion, add ground pathways, and test longer matched-work/load delivery against governed bilateral human wrenches."
-    },
-    {
-      "release_claim_key": "articulated_shaft_bending_torsion",
-      "published_status": "fifty_millisecond_passive_shaft_gate_qualified_with_mixed_matched_outcomes",
-      "audit_state": "reviewed_as_synthetic_first_mode_articulated_result",
-      "scientific_disposition": "passive_shaft_pathway_qualified_with_mixed_matched_outcomes",
-      "supporting_claim_ids": [
-        "PD-CLAIM-289",
-        "PD-CLAIM-290",
-        "PD-CLAIM-291",
-        "PD-CLAIM-292"
-      ],
-      "evidence_artifacts": [
-        "docs/research/proximal_distal_energy_transfer/data/articulated_shaft_structural_basis.json",
-        "docs/research/proximal_distal_energy_transfer/data/articulated_shaft_structural_basis.npz",
-        "docs/research/proximal_distal_energy_transfer/data/articulated_shaft_time_step_diagnostic.json",
-        "docs/research/proximal_distal_energy_transfer/data/articulated_shaft_atlas.json",
-        "docs/research/proximal_distal_energy_transfer/data/articulated_shaft_atlas.npz",
-        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_shaft_atlas.pdf",
-        "scripts/research/proximal_distal_energy/generate_articulated_shaft_structural_basis.py",
-        "scripts/research/proximal_distal_energy/articulated_shaft.py",
-        "scripts/research/proximal_distal_energy/articulated_shaft_forward.py",
-        "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py",
-        "scripts/research/proximal_distal_energy/articulated_shaft_time_step_diagnostic.py",
-        "scripts/research/proximal_distal_energy/run_articulated_shaft_atlas.py",
-        "scripts/research/proximal_distal_energy/run_articulated_shaft_time_step_diagnostic.py",
-        "scripts/research/proximal_distal_energy/make_articulated_shaft_figure.py",
-        "tests/research/test_articulated_shaft.py",
-        "tests/research/test_articulated_shaft_forward.py",
-        "tests/research/test_articulated_shaft_atlas.py"
-      ],
-      "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:665",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:679",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:692",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:700",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:205",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:714",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:729",
-        "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd:10",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:54",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:740",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:753",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:48"
-      ],
-      "negative_controls": [
-        "exact rigid reduction and coordinate killswitches",
-        "zero elastic initial state and matched initial total energy",
-        "initial-velocity reversal and load/work matching",
-        "excluded 1.0 and 0.50 millisecond linear-domain probes",
-        "three-level limiting-cell refinement and native-engine parity",
-        "one-mode versus six-mode structural reference"
-      ],
-      "falsifiers": [
-        "The augmented mass loses positive definiteness in-domain, rigid reduction differs, or elastic storage/damping power fails its identity.",
-        "The frozen basis hash is stale, its reconstructed frequency differs from the FE authority, or the reported six-mode discrepancies do not reproduce.",
-        "Any committed cell violates a registered gate, either coarse exclusion does not reproduce, or the limiting-cell residual does not decrease at finer steps.",
-        "The match rule or counts fail to reproduce, all matched differences have one sign, or a universal equipment/human conclusion is attributed to this atlas."
-      ],
-      "uncertainty_boundaries": [
-        "The coordinates use synthetic lumped shaft/head inertia and first-order small-deformation kinematics.",
-        "No physical shaft is identified; the first-mode approximation is not adequate by inheritance for high-frequency loading.",
-        "The horizon is right-censored and excludes calibrated friction, tissue, ground, higher-mode fast response, delivery, and impact.",
-        "Post-registered matching is descriptive and cannot identify a causal equipment effect or human strategy."
-      ],
-      "remaining_scientific_gate": "Calibrate distributed grip and shaft properties, add higher-mode fast-load and finite-ground pathways, then test governed delivery, impact, and human outcomes."
-    },
-    {
-      "release_claim_key": "articulated_ground_free_moment",
-      "published_status": "fifty_millisecond_finite_ground_gate_qualified_primary_match_empty",
-      "audit_state": "reviewed_as_synthetic_finite_base_result_with_adverse_primary_match",
-      "scientific_disposition": "fifty_millisecond_finite_ground_gate_qualified_primary_match_empty",
-      "supporting_claim_ids": [
-        "PD-CLAIM-293",
-        "PD-CLAIM-294",
-        "PD-CLAIM-295",
-        "PD-CLAIM-296"
-      ],
-      "evidence_artifacts": [
-        "docs/research/proximal_distal_energy_transfer/data/articulated_ground_diagnostic.json",
-        "docs/research/proximal_distal_energy_transfer/data/articulated_ground_atlas.json",
-        "docs/research/proximal_distal_energy_transfer/data/articulated_ground_atlas.npz",
-        "docs/research/proximal_distal_energy_transfer/data/articulated_ground_posthoc_sensitivity.json",
-        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_ground_atlas.pdf",
-        "scripts/research/proximal_distal_energy/articulated_ground.py",
-        "scripts/research/proximal_distal_energy/articulated_ground_forward.py",
-        "scripts/research/proximal_distal_energy/articulated_ground_diagnostic.py",
-        "scripts/research/proximal_distal_energy/articulated_ground_atlas.py",
-        "scripts/research/proximal_distal_energy/articulated_ground_posthoc_sensitivity.py",
-        "scripts/research/proximal_distal_energy/run_articulated_ground_diagnostic.py",
-        "scripts/research/proximal_distal_energy/run_articulated_ground_atlas.py",
-        "scripts/research/proximal_distal_energy/run_articulated_ground_posthoc_sensitivity.py",
-        "scripts/research/proximal_distal_energy/make_articulated_ground_figure.py",
-        "tests/research/test_articulated_ground.py",
-        "tests/research/test_articulated_ground_forward.py",
-        "tests/research/test_articulated_ground_diagnostic.py",
-        "tests/research/test_articulated_ground_diagnostic_evidence.py",
-        "tests/research/test_articulated_ground_atlas.py",
-        "tests/research/test_articulated_ground_atlas_evidence.py",
-        "tests/research/test_articulated_ground_posthoc_sensitivity.py",
-        "tests/research/test_articulated_ground_reference_invariance.py"
-      ],
-      "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:3",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:16",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:25",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:33",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:41",
-        "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd:10",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:753",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:305",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:329",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:390",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:451",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:453",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:55",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:5",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:54",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:48",
-        "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:14",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:51",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:82",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:62",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:72",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:96",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:107",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:117",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:129",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:299",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:472",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:148",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:64"
-      ],
-      "negative_controls": [
-        "exact fixed-base and zero-energy reductions",
-        "translation-only and intrinsic-free-moment-only pathways",
-        "rigid-shaft and horizontal-restraint-removed controls",
-        "center-of-pressure reference reversal",
-        "three-level diagnostic refinement and two-engine parity",
-        "primary-match failure retained without tolerance widening"
-      ],
-      "falsifiers": [
-        "Fixed-base reduction, power closure, moment transport, or positive-definite augmented inertia fails in the registered domain.",
-        "Any diagnostic branch fails refinement/parity or the reported initialization separation does not reproduce.",
-        "A committed trajectory violates a registered domain, refinement, energy, or native-engine gate.",
-        "A primary match exists under the registered rule, the post-hoc counts fail to reproduce, or unmatched differences are presented as identified effects."
-      ],
-      "uncertainty_boundaries": [
-        "The support is planar, linear, bilateral, and synthetic; it is not a calibrated foot--ground model.",
-        "Conditional equilibrium balances base coordinates only and none of the initializations estimates a human preload state.",
-        "Loads and material values are uncalibrated, the horizon excludes impact, and numerical qualification is not efficacy evidence.",
-        "The post-hoc screen cannot replace the primary estimand or support a ground-use, timing, coaching, equipment, or human benefit claim."
-      ],
-      "remaining_scientific_gate": "Replace bilateral linear support with calibrated unilateral three-dimensional foot contact and force-plate observations, then repeat matched delivery and governed human tests."
     }
   ]
 }

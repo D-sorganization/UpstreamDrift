@@ -87,7 +87,7 @@ def _build_claims(candidates: list[dict[str, Any]]) -> tuple[list[dict[str, Any]
     mapping = _find(candidates, "All 234 position mappings retain")
     forward = _find(candidates, "A spanning subset advances")
     boundary = _find(candidates, "This is an initialization and short-horizon")
-    next_gate = _find(candidates, "The bounded forward experiment now retains")
+    next_gate = _find(candidates, "The next spatial experiment must retain")
     claims = [
         _claim(
             "PD-CLAIM-268",
@@ -115,7 +115,7 @@ def _build_claims(candidates: list[dict[str, Any]]) -> tuple[list[dict[str, Any]
             statement="The bridge removes an initialization gap but does not establish calibrated equipment, articulated anatomy, tissue loading, passive transfer, delivery benefit, slack benefit, or human strategy.",
             classification="closed_state_forward_bridge_inference_boundary",
             status="explicitly_bounded",
-            boundary="The articulated result is right-censored at 5 ms; typed unilateral slack, calibrated distributed grip and shaft properties, ground coupling, and governed human validation remain open.",
+            boundary="Full-horizon articulated contact, calibrated grip and shaft properties, adverse-load controls, and governed human validation remain open.",
             falsifier="A mechanism, delivery, anatomy, or coaching conclusion is attributed to this initialization audit alone.",
             model_domain="Coordinate mapping, constitutive controls, and 4 ms reduced forward initialization only.",
         ),
@@ -147,17 +147,7 @@ def _reconcile_reviews(
         ]
     for claim in claims:
         for candidate_id in claim["candidate_ids"]:
-            review = reviews.setdefault(
-                candidate_id,
-                {
-                    "candidate_id": candidate_id,
-                    "disposition": "material_claims_mapped",
-                    "claim_ids": [],
-                    "rationale": "This passage states or bounds the closed-state forward bridge.",
-                    "reviewer": "Codex technical audit",
-                    "last_verified_on": DATE,
-                },
-            )
+            review = reviews[candidate_id]
             review["disposition"] = "material_claims_mapped"
             review["claim_ids"] = sorted(set(review["claim_ids"]) | {claim["claim_id"]})
             review["last_verified_on"] = DATE
@@ -187,9 +177,8 @@ def _update_release(registry: dict[str, Any]) -> None:
     registry["audit_scope"]["current_scope"] = (
         "The complete paper inventory is adjudicated. Subject-scaled closed contact "
         "passes its reduced-tree screen, and all 234 states map into a 54-case "
-        "short-horizon two-engine initialization audit. A later articulated "
-        "attachment screen is right-censored at 5 ms; calibrated structure and "
-        "governed human validation remain unexecuted."
+        "short-horizon two-engine initialization audit. Calibrated articulated "
+        "forward contact and governed human validation remain unexecuted."
     )
 
 
