@@ -21,6 +21,7 @@ from __future__ import annotations
 import hashlib
 import os
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 
@@ -45,7 +46,14 @@ CORPUS_COLUMN_MAP: dict[str, tuple[str, str]] = {
     "carry_yd": ("carry_distance", "yd"),
     "total_yd": ("total_distance", "yd"),
     "descent_angle_deg": ("descent_angle", "deg"),
+    "lateral_carry_yd": ("lateral_carry", "yd"),
+    "flight_time_s": ("flight_time", "s"),
 }
+
+# Identity columns carried straight through when the corpus provides them.
+# captured_at is what the Trends analysis binds to; a corpus built before the
+# data authority added it simply lacks the column.
+OPTIONAL_IDENTITY_COLUMNS: tuple[str, ...] = ("captured_at",)
 
 
 def corpus_dataset_path(root: str | Path | None = None) -> Path:
@@ -58,6 +66,74 @@ def corpus_dataset_path(root: str | Path | None = None) -> Path:
             "Launch-Monitor-Flight-Model-Campaign checkout"
         )
     return Path(resolved) / "data" / "authority" / "database" / "shot_corpus_parquet"
+
+
+def _selected_column_map(metrics: list[str] | None) -> dict[str, tuple[str, str]]:
+    """Narrow the corpus column map to an optional canonical-metric allowlist."""
+    if metrics is None:
+        return dict(CORPUS_COLUMN_MAP)
+    unknown = set(metrics) - {name for name, _ in CORPUS_COLUMN_MAP.values()}
+    if unknown:
+        raise ValueError(f"Unknown corpus metrics requested: {sorted(unknown)}")
+    return {
+        column: (name, unit)
+        for column, (name, unit) in CORPUS_COLUMN_MAP.items()
+        if name in metrics
+    }
+
+
+def _source_filter(
+    pyarrow_dataset: Any, dataset_dir: Path, sources: list[str] | None
+) -> Any:
+    """Build the partition filter for a ``source_id`` allowlist, if any."""
+    if sources is None:
+        return None
+    available = {
+        entry.name.split("=", 1)[1]
+        for entry in dataset_dir.iterdir()
+        if entry.is_dir() and entry.name.startswith("source_id=")
+    }
+    unknown = set(sources) - available
+    if unknown:
+        raise ValueError(f"Unknown corpus sources requested: {sorted(unknown)}")
+    return pyarrow_dataset.field("source_id").isin(sources)
+
+
+def _canonicalize_metrics(
+    frame: pd.DataFrame, selected_map: dict[str, tuple[str, str]]
+) -> pd.DataFrame:
+    """Convert native corpus columns to canonical units and metric names."""
+    from src.shared.python.launch_monitor.schema import METRICS
+
+    present = {
+        column: value
+        for column, value in selected_map.items()
+        if column in frame.columns
+    }
+    for column, (name, unit) in present.items():
+        frame[column] = _convert(frame[column], unit, METRICS[name].canonical_unit)
+    return frame.rename(columns={column: name for column, (name, _) in present.items()})
+
+
+def _apply_identity(frame: pd.DataFrame) -> pd.DataFrame:
+    """Derive ``shot_id`` and rename corpus identity columns to the schema."""
+    identity = (
+        frame["source_id"].astype(str)
+        + "\x1f"
+        + frame["file"].astype(str)
+        + "\x1f"
+        + frame["row_index"].astype(str)
+    )
+    frame["shot_id"] = identity.map(
+        lambda value: hashlib.sha256(value.encode()).hexdigest()[:20]
+    )
+    return frame.rename(
+        columns={
+            "source_id": "session_id",
+            "monitor": "monitor_vendor",
+            "row_index": "source_row",
+        }
+    ).drop(columns=["file"])
 
 
 def load_private_corpus(
@@ -94,63 +170,28 @@ def load_private_corpus(
             "may predate the Parquet corpus - sync it to a newer commit"
         )
 
-    selected_map = dict(CORPUS_COLUMN_MAP)
-    if metrics is not None:
-        unknown = set(metrics) - {name for name, _ in CORPUS_COLUMN_MAP.values()}
-        if unknown:
-            raise ValueError(f"Unknown corpus metrics requested: {sorted(unknown)}")
-        selected_map = {
-            column: (name, unit)
-            for column, (name, unit) in CORPUS_COLUMN_MAP.items()
-            if name in metrics
-        }
-
+    selected_map = _selected_column_map(metrics)
     dataset = pyarrow_dataset.dataset(
         dataset_dir, format="parquet", partitioning="hive"
     )
-    filter_expression = None
-    if sources is not None:
-        available = {
-            entry.name.split("=", 1)[1]
-            for entry in dataset_dir.iterdir()
-            if entry.is_dir() and entry.name.startswith("source_id=")
-        }
-        unknown_sources = set(sources) - available
-        if unknown_sources:
-            raise ValueError(
-                f"Unknown corpus sources requested: {sorted(unknown_sources)}"
-            )
-        filter_expression = pyarrow_dataset.field("source_id").isin(sources)
+    # A corpus pinned before a column was introduced simply lacks it; select
+    # what the dataset actually has rather than failing the whole read.
+    available_columns = set(dataset.schema.names)
+    requested = [
+        "source_id",
+        "monitor",
+        "club",
+        "file",
+        "row_index",
+        *OPTIONAL_IDENTITY_COLUMNS,
+        *selected_map,
+    ]
     table = dataset.to_table(
-        columns=["source_id", "monitor", "club", "file", "row_index", *selected_map],
-        filter=filter_expression,
-    )
-    frame = table.to_pandas()
-
-    from src.shared.python.launch_monitor.schema import METRICS
-
-    for column, (name, unit) in selected_map.items():
-        frame[column] = _convert(frame[column], unit, METRICS[name].canonical_unit)
-    frame = frame.rename(
-        columns={column: name for column, (name, _) in selected_map.items()}
+        columns=[name for name in requested if name in available_columns],
+        filter=_source_filter(pyarrow_dataset, dataset_dir, sources),
     )
 
-    identity = (
-        frame["source_id"].astype(str)
-        + "\x1f"
-        + frame["file"].astype(str)
-        + "\x1f"
-        + frame["row_index"].astype(str)
-    )
-    frame["shot_id"] = identity.map(
-        lambda value: hashlib.sha256(value.encode()).hexdigest()[:20]
-    )
-    frame = frame.rename(
-        columns={
-            "source_id": "session_id",
-            "monitor": "monitor_vendor",
-            "row_index": "source_row",
-        }
-    ).drop(columns=["file"])
+    frame = _canonicalize_metrics(table.to_pandas(), selected_map)
+    frame = _apply_identity(frame)
     frame["observation_kind"] = "shot"
     return frame

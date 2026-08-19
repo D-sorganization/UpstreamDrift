@@ -485,7 +485,7 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.547 |
+| **Spec Version** | 1.0.548 |
 | **Last Spec Update** | 2026-08-19 |
 
 ## 2. Purpose & Mission
@@ -896,6 +896,14 @@ study,vandv,provenance,units}`, with subpackages re-exported by name and a
   tabs remain inert for corpus data because the corpus carries no capture
   timestamp or lateral carry; both gaps are tracked as data-authority issues
   #18 and #19 and are recoverable from retained native fields.
+- **2026-08-19** - Bound the Launch Monitor Analytics Dispersion and Trends
+  tabs to corpus data. The data authority now extracts lateral carry, flight
+  time, and a capture date, and `launch_monitor.corpus` maps them onto the
+  canonical `lateral_carry` (m), `flight_time` (s), and `captured_at` fields.
+  Both tabs were previously inert against the corpus for want of a lateral
+  coordinate and a time column; they now run over 20,099 and 8,488 shots
+  respectively. Column selection is filtered against the dataset schema, so a
+  corpus pinned before those columns exist still loads.
 - **2026-08-18** - Connected Launch Monitor Analytics to the private shot
   corpus. `launch_monitor.corpus.load_private_corpus()` reads the data
   authority's source-partitioned Parquet corpus (261,666 shots across 27
@@ -2688,6 +2696,7 @@ overlapping fixture names in nested conftests.
 
 | Tool       | Version | Purpose                                                                            | Blocking? |
 | ---------- | ------- | ---------------------------------------------------------------------------------- | --------- |
+| 2026-08-19 | 1.0.544 | Mapped the data authority's new `lateral_carry_yd`, `flight_time_s`, and `captured_at` corpus columns onto the canonical `lateral_carry`/`flight_time`/`captured_at` fields in `launch_monitor.corpus`, making the Dispersion (20,099 shots) and Trends (8,488 shots) tabs runnable against corpus data for the first time. Column selection now filters against the dataset schema so an older pinned corpus still loads. |
 | 2026-08-18 | 1.0.544 | Bumped `vendor/ud-tools` to the heavy-hit epic merge (Tools #4562/#4568): the coupled ball-head-hands impact model quantifying hand/body influence (<1% ball-speed effect for physiological hands, rigid-shaft upper bound reported), the `swing_sim.body_chain/1` golfer-model interchange with runtime-free MJCF/URDF/.osim parsers (MuJoCo, Drake, Pinocchio, OpenSim), and the `golf_club.impact_coupling_report/1` counterfactual wire. Launcher-manifest smoke test green on the new pin. |
 | 2026-08-18 | 1.0.543 | Bumped `vendor/ud-tools` 6472d03 -> ac59066: Tools' Club Fitting Tester epic C1-C5 (Tools #4549/#4557) - shared mesh inertia tensor, shaft forward-dynamics delivery deltas, the `golf_club.fitting_document/1` OEM wire, the `swing_sim.delivery_trajectory/1` biomech interchange with Drake/MuJoCo/OpenSim export adapters, and the counterfactual fitting engine emitting `golf_club.fitting_report/1`. Launcher-manifest smoke test green on the new pin. |
 | 2026-08-16 | 1.0.539 | Made BunkerShot3D's F0 solver and W7 metrics compose without hand-padding (issues #8702, #8700, #8701 under epic #8699). `bunkershot3d.solvers.shot.simulate_shot` now records the whole strike rather than the contact: a free-flight lead-in (`ShotSettings.free_flight_lead_steps`, 3.5 steps) brackets the entry crossing, and the march integrates through the disengaged tail until the sole reference is back above the free surface, so both `depth = 0` crossings the divot metrics interpolate are inside the record. `StrikeTrace.from_shot` is the metrics-layer view of an in-memory shot, one sample per recorded sample with nothing synthesised. `ShotSettings.max_time_s` moves from 10 ms to 200 ms because a nominal bunker shot does not clear the sand until ~10.8 ms, and a window that ends first now raises `ShotTruncatedError` from the solver -- naming `max_time_s` and the time reached, and carrying the partial trace -- instead of surfacing as `divot_metrics` refusing to locate an exit; `require_exit=False` keeps deliberate fixed-window marches legal. `ShotResult.depths_m` was engaged-element depth documented as sole depth (non-monotone, and reading zero while the sole was millimetres under), and is split into `engaged_depths_m` and a geometric `sole_depths_m`. `src/tools/bunker_shot_gui/bridge.py` drops its private free-flight placement and ballistic zero-wrench coast-out and consumes the library composition instead. 19 new tests; no new dependencies. |
