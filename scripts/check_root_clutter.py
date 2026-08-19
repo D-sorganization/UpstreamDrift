@@ -16,6 +16,9 @@ ALLOWLIST = frozenset(
         "SECURITY.md",
         "SPEC.md",
         "AGENTS.md",
+        # Agent handoff log linked from AGENTS.md; a deliberate root doc
+        # alongside AGENTS.md / CLAUDE.md / GEMINI.md (issue #8771).
+        "AGENT_HANDOFF.md",
         "pyproject.toml",
         "Makefile",
         "Cargo.toml",

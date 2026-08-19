@@ -20,6 +20,8 @@ from scripts.research.proximal_distal_energy.subject_scaled_spatial_geometry imp
     default_synthetic_profiles,
 )
 
+pytestmark = pytest.mark.scientific
+
 ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = ROOT / "docs/research/proximal_distal_energy_transfer/data"
 

@@ -15,6 +15,8 @@ from scripts.research.proximal_distal_energy.register_articulated_inertia_claims
     _reconcile,
 )
 
+pytestmark = pytest.mark.scientific
+
 ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = ROOT / "docs/research/proximal_distal_energy_transfer/data"
 

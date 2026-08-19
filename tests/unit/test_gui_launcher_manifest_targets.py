@@ -21,6 +21,8 @@ import pytest
 
 from src.shared.python.gui_launcher.manifest_loader import load_manifest
 
+pytestmark = pytest.mark.unit
+
 _UD_ROOT = Path(__file__).resolve().parents[2]
 
 

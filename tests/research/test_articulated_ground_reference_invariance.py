@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import replace
 
 import numpy as np
-
+import pytest
 from scripts.research.proximal_distal_energy.articulated_distributed_grip import (
     DistributedGripConfig,
 )
@@ -22,6 +22,8 @@ from scripts.research.proximal_distal_energy.subject_scaled_spatial_geometry imp
     build_subject_scaled_model,
     default_synthetic_profiles,
 )
+
+pytestmark = pytest.mark.scientific
 
 
 def test_center_of_pressure_reversal_changes_only_reported_transport_moment() -> None:

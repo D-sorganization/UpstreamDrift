@@ -30,6 +30,8 @@ from scripts.research.proximal_distal_energy.subject_scaled_spatial_geometry imp
     default_synthetic_profiles,
 )
 
+pytestmark = pytest.mark.scientific
+
 
 def _case(activation: str = "coupled"):
     model = build_subject_scaled_model(default_synthetic_profiles()[0])[0]

@@ -8,6 +8,8 @@ from scripts.research.proximal_distal_energy.articulated_ground_atlas import (
     ArticulatedGroundAtlasConfig,
 )
 
+pytestmark = pytest.mark.scientific
+
 
 def test_ground_atlas_contract_is_complete_and_fails_closed() -> None:
     config = ArticulatedGroundAtlasConfig()

@@ -5,6 +5,9 @@ import json
 from pathlib import Path
 
 import numpy as np
+import pytest
+
+pytestmark = pytest.mark.scientific
 
 
 ROOT = Path(__file__).resolve().parents[2]

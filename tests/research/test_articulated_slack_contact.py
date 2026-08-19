@@ -14,6 +14,8 @@ from scripts.research.proximal_distal_energy.subject_scaled_spatial_geometry imp
     default_synthetic_profiles,
 )
 
+pytestmark = pytest.mark.scientific
+
 
 def test_attachment_law_configuration_fails_closed() -> None:
     with pytest.raises(ValueError, match="stiffness"):

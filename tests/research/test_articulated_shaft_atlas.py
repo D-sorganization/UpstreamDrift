@@ -10,6 +10,8 @@ from scripts.research.proximal_distal_energy.articulated_shaft_atlas import (
     ArticulatedShaftAtlasConfig,
 )
 
+pytestmark = pytest.mark.scientific
+
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "docs/research/proximal_distal_energy_transfer/data"
 

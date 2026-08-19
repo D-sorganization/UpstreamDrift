@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import pytest
 from scripts.research.proximal_distal_energy.articulated_ground_diagnostic import (
     BRANCHES,
     ENGINES,
     STEPS_S,
 )
+
+pytestmark = pytest.mark.scientific
 
 
 def test_ground_diagnostic_design_is_preregistered_and_complete() -> None:

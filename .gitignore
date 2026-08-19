@@ -235,3 +235,12 @@ stderr.txt
 stdout.txt
 error3.txt
 test_event_filter.py
+
+# Stray pytest/export artifacts that repeatedly land at the repo root
+# (issue #7935; removed from tracking in #8771).
+/base.csv
+/base.json
+/base.mat
+/base.h5
+/base.*.provenance.json
+/pytest_report*.txt

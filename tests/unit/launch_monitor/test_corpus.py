@@ -15,6 +15,8 @@ from src.shared.python.launch_monitor.corpus import (
     load_private_corpus,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _synthetic_checkout(tmp_path: Path) -> Path:
     checkout = tmp_path / "checkout"
