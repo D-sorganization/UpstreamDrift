@@ -12,6 +12,8 @@ DEFAULT_PDF = (
     / "proximal_distal_energy_transfer"
     / "proximal_distal_energy_transfer.pdf"
 )
+
+
 def _load_fitz():
     try:
         import fitz

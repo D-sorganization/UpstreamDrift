@@ -485,8 +485,8 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version**        | 1.0.550                                            |
-| **Last Spec Update**    | 2026-08-19                                         |
+| **Spec Version** | 1.0.550 |
+| **Last Spec Update** | 2026-08-19 |
 
 ## 2. Purpose & Mission
 
@@ -549,7 +549,7 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   importing a submodule executes every parent package `__init__` first: once
   `src/shared/python/__init__.py` grew an eager `from . import ai`, and `ai/`
   is not in the slice, every modular image build died at `ImportError: cannot
-  import name 'ai' from partially initialized module`. The script now loads
+import name 'ai' from partially initialized module`. The script now loads
   `features.py` from its path with no parent package, which is what its own
   comment always claimed ("read the features module in isolation") and what
   makes the builder slice self-sufficient regardless of what any package
@@ -3015,6 +3015,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 ## 12. Change Log
 
+| 2026-08-19 | 1.0.551 | Stabilized main CI and pre-commit health: fixed ruff linting errors across engines, addressed Bandit B314 XML parsing findings with defusedxml in `scripts/check_document_title_case.py` and proximal-distal chart extraction, reverted broken TypeScript bump in UI frontend to resolve `npm ci` ERESOLVE failure, and cleaned up CI delta scan triggers (#8768). |
 | 2026-08-19 | 1.0.550 | Closed CI Standard's false-green `tests` lane: `mapfile < <(git diff ...)` discarded git's exit code, so an unresolvable push diff base (`fatal: bad object`) produced empty change sets that the skip branch read as "nothing changed" and exited 0 - `main` @ `6b68f94` reported `tests (3.11)`/`tests (3.12)` green over 14 tests while the ~2,500-test unit suite never ran. Diffs are now captured through files so `-e` catches a failed diff, an unresolvable diff base fails loudly instead of being inferred as "no changes", pushes to the default branch always run the full lane unscoped, and a genuine no-op skip emits a `::warning::` plus a job-summary block saying the suite was not executed. The `Check for core test relevant changes` pre-step is hardened the same way, and `tests/ci/test_ci_infrastructure.py` gains two regression guards for the new contract (#8771). |
 | 2026-08-19 | 1.0.549 | Repaired all five `profile-size-matrix` Docker builds. `scripts/docker/install_features.py` reached the feature registry through `from src.shared.python.feature_registry.features import ...`, which executes every parent package `__init__`; `Dockerfile.modular`'s builder stage deliberately copies only `__init__.py`, `engine_core/` and `feature_registry/` so profile resolution does not invalidate the layer cache, so an eager `from . import ai` in that `__init__` broke every modular build with `ImportError: cannot import name 'ai' from partially initialized module`. The script now loads `features.py` by path with no parent package - what its own comment always claimed - making the builder slice self-sufficient regardless of what any package `__init__` imports later; the module is registered in `sys.modules` before execution because `@dataclass` resolves `cls.__module__` through it. Verified against a reconstructed builder slice: all five profiles resolve with `src/shared/python/__init__.py` left exactly as it is on `main`, since it is a Tools-owned child copy (#8771). |
 | 2026-08-19 | 1.0.548 | Git-ignored the root-level test-run artefacts (`base.csv`, `base.json`, `base.mat`, `base.h5`, `base.*.provenance.json`, `pytest_report*.txt`, `golf_modeling_suite.db`). `_prevent_repo_root_io` stops tests producing them (#7935) but nothing stopped them being staged: #8322 committed nine such files at the root and #8747 deleted them again. Patterns are root-anchored, so the tracked `docs/research/proximal_distal_energy_transfer/data/wscg_two_hand_raw/base.csv` fixture is not affected; verified no tracked path is newly ignored (#8771). |
