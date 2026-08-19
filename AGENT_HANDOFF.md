@@ -1,167 +1,149 @@
 # Agent Handoff — UpstreamDrift
 
-Last updated: 2026-08-18
+Last updated: 2026-08-19
 
 This is current operational state. Historical detail belongs in git/GitHub.
 
+## Read This First — How Merging Works Now
+
+Three workflows used to publish the required `quality-gate` status, so whichever
+reported first satisfied branch protection and PRs merged while the real
+aggregate was failing. #8747 fixed this and #8754 is closed. Consequences:
+
+- The **only** required check is `quality-gate`, published solely by the
+  aggregate job in `.github/workflows/ci-standard.yml`. The LoD gate publishes
+  `lod-quality-gate`; docs CI publishes `docs-quality-gate`. **Never rename a
+  job back to `quality-gate`** — that recreates the collision.
+- If your run sits in `action_required`, wait: `approve-same-repo-runs.yml`
+  approves same-repository runs every five minutes (fork PRs keep the manual
+  gate). Do not disable it — branch updates come from a bot GitHub treats as a
+  first-time contributor forever.
+- `repo-structure-gates` runs its steps **sequentially and fail-fast**, so a red
+  step hides every later one. Run the battery below first, or spend a CI cycle
+  per hidden layer.
+- The `tests` job is **change-scoped**: touching `src` coverage targets runs a
+  dependency-light lane over `tests/unit/shared_python`, `tests/unit/sidekick`,
+  `tests/unit/robotics`, and the mypy-budget test, where debt stays invisible
+  until a PR does real source work.
+
+### Two Debt Ledgers — Remove-Only Ratchets
+
+`scripts/config/unit_gate_quarantine.json` (520 node IDs, #8766) skips tests
+that fail deterministically on main from the hollow-merge era, applied by
+`_apply_unit_gate_quarantine` in `tests/conftest.py` only when
+`UNIT_GATE_QUARANTINE=1` — which only the unit gate and `tests` job set.
+`scripts/config/dry_duplication_quarantine.json` (#8763) does the same for
+duplication fingerprints. **Entries may only be removed, never added** — a new
+failure must red the gate. #8768 clears main's own ruff/bandit/frontend debt.
+
+### Traps That Cost Real Time
+
+- **Committed evidence records hash-pin their sources.** Fourteen files under
+  `tests/research/` are frozen by `source_sha256` maps in
+  `docs/research/proximal_distal_energy_transfer/data/`. Editing one — even to
+  add a pytest marker — breaks evidence currency; use
+  `scripts/config/suite_marker_baseline.json` instead, and never rewrite a
+  pinned hash without rerunning the experiment behind it.
+- **A small PR can carry a huge payload.** Two "one-line optimization" PRs
+  (#8638, #8746) were cut from stale bases and reverted main by thousands of
+  lines. Compare diffstat against changed-file count before trusting one.
+- **Never count CI failures with `tail`** — one showed six of 447.
+
 ## Program Authority
 
-- Epic [#8557](https://github.com/D-sorganization/UpstreamDrift/issues/8557)
-  governs the proximal-to-distal program; #8595 retains the photographed agenda.
-- #8668 governs subject-scaled articulated contact. Children #8676, #8678,
-  #8680, and #8682 completed inertia, contact projection, bounded bilateral
-  forwarding, and typed slack/contact.
-- #8684 governs distributed grip, shaft, and ground pathways. #8685 completed
-  grip discretization; #8697 completed the shaft child.
-  Protected PR #8715 merged as `0c988f05a`; SPEC/handoff follow-up #8717 merged
-  as `051f8dccc`. Both are verified ancestors of remote main.
-- #8719 is active on branch `research/8684-ground-free-moment-8719` from main
-  `051f8dccc`; full PR #8723 is open.
+- Epic #8557 governs the proximal-to-distal program and #8595 retains the
+  photographed agenda; both stay open.
+- #8668 governs subject-scaled articulated contact; children #8676/#8678/#8680/
+  #8682 completed inertia, contact projection, bilateral forwarding, and slack.
+- #8684 governs distributed grip, shaft, and ground. Every child merged — grip
+  (#8685), shaft (#8697 via #8715/#8717), ground (#8719 via #8723) — and it
+  stays open on its declared gaps #8751 (grip friction and loss of contact) and
+  #8752 (manufactured solutions, parameter uncertainty), the next research work.
 - #8556 remains open: no governed participant dataset contains synchronized
   bilateral six-axis grip wrenches. Synthetic traces cannot replace it.
 - NotebookLM review remains blocked on manual Google reauthentication. Never
   automate credentials, authentication dialogs, CAPTCHA, or two-factor steps.
 
-## Qualified Articulated Baseline
+## Qualified Baseline — And Its Limits
 
-- Six profiles, three grip spans, and 13 phases define 234 closed states.
-  Prescribed hands miss grips by 0.171–0.616 m; the reduced-tree solve closes
-  to `1.16e-10 m`. Broad bounds/spheres are not clinical ranges or anatomy.
-- Native MuJoCo and robotics Pinocchio independently qualify the 20-coordinate
-  rigid tree. Bilateral point, typed-slack, and distributed-fiber tiers retain
-  power, passivity, energy, refinement, geometry, and engine-parity controls.
-- The distributed atlas covers 12 states, one/three/five fibers, two velocity
-  signs, two steps, two engines, and nested 4/10/25/50 ms observations. It
-  establishes discretization sensitivity, not measured pressure or benefit.
+Native MuJoCo and robotics Pinocchio independently qualify the 20-coordinate
+rigid tree over 234 closed states, and every tier through ground retains power,
+passivity, energy, refinement, geometry, and engine-parity controls (numbers in
+`SPEC.md`). All of it is a synthetic structural reference — not equipment
+calibration, anatomy, physiology, or coaching guidance. The adverse results
+below are load-bearing; do not quietly drop them.
 
-## Qualified Shaft Slice
-
-- Added passive bending/torsion constitutive, forward, atlas, frozen-basis,
-  limiting-step diagnostic, figure, registration, release, and test layers.
-- Coordinates are two tip-normalized first bending modes plus tip twist.
-  Bending inherits the 24-element FE authority at `5.2399 Hz`; declared tapered
-  hollow-section torsion is `70.1260 Hz`. Damping ratio is 0.018. These are
-  synthetic structural references, not equipment calibration.
-- Native WSL cannot solve the FE eigenproblem with its lean SciPy/NumPy stack.
-  Regenerate `articulated_shaft_structural_basis.{json,npz}` under Windows;
-  native runs hash-check that frozen basis without importing SciPy.
-- Coarse-step falsification is retained: 1.0 ms leaves the linear domain for
-  state `(0,0)`/negative velocity; 0.50 ms does so for `(8,0)`/positive
-  velocity. The limiting 0.25/0.125/0.0625 ms residuals refine
-  `0.00776 → 0.00390 → 0.00195 J` while remaining bounded through 50 ms.
-- The registered 0.25/0.125 ms atlas covers 384 trajectories and 1,536 nested
-  summaries. Every domain, power, energy, activation, and parity gate passes.
-  Maximum bend is `1.696 mm`, twist `0.001855 rad`, energy residual
-  `0.007798 → 0.003900`, trajectory parity `3.84e-13`, and force parity
-  `2.15e-10`.
-- Of 384 coupled-versus-rigid cells, 126 match within 5% for peak load and
-  dissipated work. Speed differences span `-0.0285` to `+0.0212 m/s`
-  (82 negative, 44 positive), rejecting a universal passive-shaft speed benefit.
-- The paper is 231 pages and 1,764,016 bytes with 192 URI links and 246 outline
-  entries. Finite-ground body pages 140–143, front matter, availability, and
-  end matter were visually inspected. Inventory/claim/release totals are
-  1,063/295/40; all are reviewed.
-
-## Active Ground Slice — Executed Atlas Checkpoint
-
-- `articulated_ground.py` adds `fixed`, `translation`, `free_moment`, and
-  `coupled` base pathways while the separately rooted club remains grip-coupled.
-  The passive law exposes reaction force, intrinsic/transported moment, energy,
-  damping, and closure; CoP reversal changes transport only.
-- Full non-club inertia/cross terms, Christoffel bias, gravity, common-coordinate
-  grip Jacobians, and forward integration are implemented. Fixed base reduces
-  exactly to the shaft tier; positive-definite inertia, energy, power, contact,
-  domain, and force/moment records are covered by 30 regression tests.
-- A dependency-free Newton/line-search solver balances ground, grip, and
-  gravity at fixed posture. Retain natural-zero, gravity-only, and full
-  conditional-equilibrium initializations as separate sensitivity branches.
-- The 42-trace two-engine diagnostic has 14 monotonically refining energy
-  series, trajectory error below `2.5e-12`, and force error below `1.1e-10`.
-- Initialization is not innocuous. At 0.125 ms, natural-zero versus gravity-
-  only versus conditional-base starts produced peak ground forces of 32.8,
-  565.5, and 510.3 N and 4 ms club speeds of 0.264, 1.908, and 0.946 m/s.
-  The conditional solve balances only base generalized forces, not the full
-  mechanism; retain this limitation and use natural-zero for exact-state atlas
+- Of 384 coupled-versus-rigid shaft cells, 126 match on load and work; speed
+  differences span `-0.0285` to `+0.0212 m/s` (82 negative), **rejecting a
+  universal passive-shaft speed benefit**.
+- The preregistered ground screen admits **0/384** coupled--fixed cells, because
+  only the coupled path contains ground damping. A labeled post-hoc screen
+  admits 60 cells with mixed signs — sensitivity evidence, not the registered
+  estimand. **Do not read unmatched positive speed differences as a
+  ground-pathway benefit.**
+- Initialization is not innocuous: natural-zero, gravity-only, and conditional
+  starts gave peak ground forces of 32.8, 565.5, and 510.3 N. The conditional
+  solve balances only base generalized forces; use natural-zero for exact-state
   killswitch comparisons.
-- The completed atlas contains 384 primary traces (12 states, four pathways,
-  velocity reversal, two steps/engines) plus 192 rigid-shaft and horizontal-
-  restraint-removed controls at 4/10/25/50 ms. All 576 trajectories pass the
-  registered domain, refinement, energy, and native-engine gates. Worst energy
-  residual refines `0.01986 → 0.00995`; maximum trajectory, grip-force, and
-  ground-force discrepancies are `1.77e-10`, `6.41e-10`, and `2.28e-10`.
-- The preregistered 5% peak-grip-load plus total-dissipated-work screen admits
-  **0/384** coupled--fixed cells; total-work discrepancy is 1.72--2.00 because
-  only the coupled path contains ground damping. Do not interpret unmatched
-  positive speed differences as a ground-pathway benefit.
-- A labeled post-hoc non-ground-dissipation screen admits 60 cells: 20 speed
-  differences are positive and 40 negative (`-0.00075` to `+0.01394 m/s`);
-  it is sensitivity evidence, not a replacement for the registered estimand.
-- JSON/NPZ evidence and the six-panel PDF/SVG figure are generated. Atlas and
-  post-hoc evidence tests pass. The 30-test scoped suite, claim/release/
-  readiness audits, title case, source-size gate, and PDF QA pass. The full
-  pre-push hook still exposes unrelated repository-wide Ruff/mypy baseline debt;
-  its unrelated formatter edits were restored.
+- Coarse steps leave the linear domain (1.0 ms at `(0,0)`; 0.50 ms at `(8,0)`).
+  Regenerate the shaft FE basis under Windows — native WSL cannot solve the
+  eigenproblem on its lean SciPy stack, and native runs hash-check that basis.
 
 ## Vendored Tools Dependency (`vendor/ud-tools`)
 
-Tools is a **leaf dependency vendored as a submodule**; UpstreamDrift consumes
-its shared Python through `vendor/ud-tools`. Never edit shared code inside the
-vendored copy — Tools is the source of truth, and edits made here are orphaned
-(Tools #4495 exists because three fixes were lost that way). Fix upstream in
-Tools, then bump the pin.
+Tools is a **leaf dependency vendored as a submodule**. Never edit shared code
+inside the vendored copy — Tools is the source of truth and edits here are
+orphaned (Tools #4495 exists because three fixes were lost that way). The same
+rule binds the **child copies** under `src/shared/python/`:
+`tests/unit/repo_hygiene/test_tools_child_copy_contract.py` fails any PR editing
+one, so when a gate demands a change inside a child copy the fix belongs in
+Tools. `src/shared/python/ai/auth` is excluded from the placeholder scan for
+exactly that reason; #8770 tracks the Tools-side cleanup.
 
-Current pin: Tools `b0f7975ac`, which carries two epics' worth of golf physics
-the launcher surfaces — the **club-fitting** stack (`shared/python/golf_club/`:
-mesh inertia tensor, shaft delivery deltas, OEM fitting document, counterfactual
-engine) and the **heavy-hit** stack (`impact_coupling.py` plus
-`shared/python/swing_sim/model_interchange/`, which imports golfer models from
-MJCF/URDF/`.osim` — MuJoCo, Drake, Pinocchio, OpenSim — by runtime-free XML
-parsing). PR [#8767](https://github.com/D-sorganization/UpstreamDrift/pull/8767)
-made that bump.
+Current pin: Tools `b0f7975ac` (PR #8767), carrying the **club-fitting** stack
+(`shared/python/golf_club/`: mesh inertia tensor, shaft delivery deltas, OEM
+fitting document, counterfactual engine) and the **heavy-hit** stack
+(`impact_coupling.py` plus `shared/python/swing_sim/model_interchange/`, which
+imports MJCF/URDF/`.osim` golfer models by XML parsing).
 
 **Gate for any pin bump:** `tests/unit/test_gui_launcher_manifest_targets.py`
-(25 tests) — it asserts every launcher manifest entry resolves to a real
-importable target, so a Tools rename that breaks a GUI is caught here rather
-than at runtime. Run it with `PYTHONPATH` set to repo root **and** `src`.
+(25 tests) asserts every launcher manifest entry resolves to a real importable
+target, catching a Tools rename that breaks a GUI. Run it with `PYTHONPATH` set
+to repo root **and** `src`.
 
 ## Immediate Next Steps
 
-1. Shepherd full PR #8723, retain the adverse zero-match result, and complete
-   required CI/review through protected
-   merge; do not repair unrelated fleet-wide lint/type debt in this PR.
-2. After merge, verify the merge commit is an ancestor of remote main, update
-   this handoff on main, and close #8719 only through the merged PR.
-3. Continue to calibrated unilateral 3D contact, full-delivery matching/
-   uncertainty, and governed human holdout;
-   do not close #8556 without qualifying participant data.
+1. Land #8768 (main's ruff, bandit, frontend-lock debt) — auto-merge armed.
+2. Start #8751 or #8752, the declared gaps blocking #8684. Keep the adverse
+   results above intact; a gap closes with evidence, never by restatement.
+3. Burn down #8766 by removing ledger entries as clusters are fixed — theme API
+   drift and the sidekick ownership manifest are the largest.
+4. Do the Tools-side work in #8770 so the auth child copy can be unfrozen here.
+5. Continue toward calibrated unilateral 3D contact, full-delivery matching and
+   uncertainty, and a governed human holdout — #8556/#8557 need real data.
 
-## Reproduction and Release Gates
+## Gate Commands
 
-Use Windows Python for the FE basis and WSL `python3` for native atlas runs.
+Run this locally before pushing; it mirrors the sequential CI steps:
 
-```powershell
-python -m scripts.research.proximal_distal_energy.generate_articulated_shaft_structural_basis
-wsl.exe bash -lc "cd /mnt/c/Users/diete/Repositories/UpstreamDrift-worktrees/articulated-shaft-8697 && python3 -m scripts.research.proximal_distal_energy.run_articulated_shaft_time_step_diagnostic"
-wsl.exe bash -lc "cd /mnt/c/Users/diete/Repositories/UpstreamDrift-worktrees/articulated-shaft-8697 && python3 -m scripts.research.proximal_distal_energy.run_articulated_shaft_atlas"
-wsl.exe bash -lc "cd /mnt/c/Users/diete/Repositories/UpstreamDrift-worktrees/ground-free-moment-8719 && python3 -m scripts.research.proximal_distal_energy.run_articulated_ground_diagnostic"
-wsl.exe bash -lc "cd /mnt/c/Users/diete/Repositories/UpstreamDrift-worktrees/ground-free-moment-8719 && python3 -m scripts.research.proximal_distal_energy.run_articulated_ground_atlas"
-python -m scripts.research.proximal_distal_energy.run_articulated_ground_posthoc_sensitivity
-python -m scripts.research.proximal_distal_energy.make_articulated_ground_figure
-python -m scripts.research.proximal_distal_energy.make_articulated_shaft_figure
-python -m scripts.research.proximal_distal_energy.claim_audit inventory
-python scripts/research/proximal_distal_energy/register_articulated_shaft_claims.py
-python -m scripts.research.proximal_distal_energy.release_claim_review write
-python -m scripts.research.proximal_distal_energy.qualify_open_release write
-python -m pytest tests/research/test_articulated_shaft.py tests/research/test_articulated_shaft_forward.py tests/research/test_articulated_shaft_atlas.py tests/research/test_proximal_distal_release_bundle.py -q
-python -m scripts.research.proximal_distal_energy.claim_audit validate
-python -m scripts.research.proximal_distal_energy.claim_evidence_integrity validate
-python -m scripts.research.proximal_distal_energy.momentum_question_readiness validate
-python -m scripts.research.proximal_distal_energy.qualify_open_release validate
-python scripts/check_document_title_case.py --changed-from origin/main
+```bash
+python scripts/check_spec_paths.py && python scripts/check_root_clutter.py
+python scripts/check_test_layout.py && python scripts/check_pytest_intree_testpaths.py
+python scripts/ci/check_suite_marker_ratchet.py && python scripts/ci/check_dry_duplication_gate.py
+python scripts/check_module_size_budget.py --max-lines 1500 --include src
 python scripts/check_doc_size_budget.py
-pre-commit run --hook-stage pre-push --all-files
+python -m ruff check . && python -m ruff format --check .
 ```
 
+Research reproduction runs from `scripts/research/proximal_distal_energy/` as
+`python -m` modules: `generate_articulated_shaft_structural_basis` (Windows
+Python only), then `run_articulated_shaft_atlas`,
+`run_articulated_ground_atlas`, and
+`run_articulated_ground_posthoc_sensitivity`. Re-validate the ledger with
+`claim_audit`, `claim_evidence_integrity`, `momentum_question_readiness`, and
+`qualify_open_release`, each with `validate`, then `pytest tests/research -q`.
+
 Do not infer human technique, physiology, injury, timing demand, or coaching
-advice; close #8556/#8557; bypass protection; force-push; admin-merge; or rerun
-unchanged runner-capacity failures.
+advice; close #8556/#8557; bypass branch protection; force-push; admin-merge;
+add ledger entries; edit hash-pinned or Tools-owned files; or rerun unchanged
+runner-capacity failures.
