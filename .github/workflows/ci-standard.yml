@@ -906,9 +906,15 @@ jobs:
       # because they already have a tracked owner and follow-up path.
       - name: Verify No Placeholders
         shell: bash
+        # src/shared/python/ai/auth is a Tools-owned child copy: the
+        # child-copy contract (tests/unit/repo_hygiene/
+        # test_tools_child_copy_contract.py) forbids editing it here, so a
+        # placeholder violation inside it is unfixable in this repo — the
+        # TODO cleanup must land in D-sorganization/Tools and arrive via a
+        # vendor pin bump (tracked in #8770). Excluded until then.
         run: |
           violations=$(
-            find . \( -path "./.git" -o -path "./.mypy_cache" -o -path "./.ruff_cache" -o -path "./__pycache__" -o -path "./archive" -o -path "./check_code_quality" -o -path "./scripts" -o -path "./tests/tools" -o -path "./vendor" \) -prune -o -type f -name "*.py" -print0 \
+            find . \( -path "./.git" -o -path "./.mypy_cache" -o -path "./.ruff_cache" -o -path "./__pycache__" -o -path "./archive" -o -path "./check_code_quality" -o -path "./scripts" -o -path "./tests/tools" -o -path "./vendor" -o -path "./src/shared/python/ai/auth" \) -prune -o -type f -name "*.py" -print0 \
               | xargs -0 grep -nE "TODO|FIXME" \
               | grep -vE "TODO(\(#?[0-9]+|:.*#[0-9]+)" || true
           )
