@@ -235,3 +235,16 @@ stderr.txt
 stdout.txt
 error3.txt
 test_event_filter.py
+
+# Test-run artefacts that have twice been committed at the repo root.
+# The autouse `_prevent_repo_root_io` fixture in tests/conftest.py chdirs
+# tests into tmp_path to stop them being produced (#7935), but nothing
+# stopped them being staged: #8322 committed all nine, and #8747 had to
+# delete them again. Ignoring the names closes the loop (#8771).
+/base.csv
+/base.json
+/base.mat
+/base.h5
+/base.*.provenance.json
+/pytest_report*.txt
+/golf_modeling_suite.db
