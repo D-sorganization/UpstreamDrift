@@ -1,6 +1,6 @@
 # Agent Handoff — UpstreamDrift
 
-Last updated: 2026-08-16
+Last updated: 2026-08-18
 
 This is current operational state. Historical detail belongs in git/GitHub.
 
@@ -11,17 +11,12 @@ This is current operational state. Historical detail belongs in git/GitHub.
 - #8668 governs subject-scaled articulated contact. Children #8676, #8678,
   #8680, and #8682 completed inertia, contact projection, bounded bilateral
   forwarding, and typed slack/contact.
-- [#8684](https://github.com/D-sorganization/UpstreamDrift/issues/8684)
-  governs distributed grip, shaft, and ground pathways. #8685 completed grip
-  discretization. [#8697](https://github.com/D-sorganization/UpstreamDrift/issues/8697)
-  completed the shaft child.
-  Protected PR [#8715](https://github.com/D-sorganization/UpstreamDrift/pull/8715)
-  merged as `0c988f05a`; SPEC/handoff follow-up
-  [#8717](https://github.com/D-sorganization/UpstreamDrift/pull/8717) merged as
-  `051f8dccc`. Both are verified ancestors of remote main.
-- [#8719](https://github.com/D-sorganization/UpstreamDrift/issues/8719) is active
-  on branch `research/8684-ground-free-moment-8719` from main `051f8dccc`;
-  full PR [#8723](https://github.com/D-sorganization/UpstreamDrift/pull/8723) is open.
+- #8684 governs distributed grip, shaft, and ground pathways. #8685 completed
+  grip discretization; #8697 completed the shaft child.
+  Protected PR #8715 merged as `0c988f05a`; SPEC/handoff follow-up #8717 merged
+  as `051f8dccc`. Both are verified ancestors of remote main.
+- #8719 is active on branch `research/8684-ground-free-moment-8719` from main
+  `051f8dccc`; full PR #8723 is open.
 - #8556 remains open: no governed participant dataset contains synchronized
   bilateral six-axis grip wrenches. Synthetic traces cannot replace it.
 - NotebookLM review remains blocked on manual Google reauthentication. Never
@@ -106,6 +101,28 @@ This is current operational state. Historical detail belongs in git/GitHub.
   readiness audits, title case, source-size gate, and PDF QA pass. The full
   pre-push hook still exposes unrelated repository-wide Ruff/mypy baseline debt;
   its unrelated formatter edits were restored.
+
+## Vendored Tools Dependency (`vendor/ud-tools`)
+
+Tools is a **leaf dependency vendored as a submodule**; UpstreamDrift consumes
+its shared Python through `vendor/ud-tools`. Never edit shared code inside the
+vendored copy — Tools is the source of truth, and edits made here are orphaned
+(Tools #4495 exists because three fixes were lost that way). Fix upstream in
+Tools, then bump the pin.
+
+Current pin: Tools `b0f7975ac`, which carries two epics' worth of golf physics
+the launcher surfaces — the **club-fitting** stack (`shared/python/golf_club/`:
+mesh inertia tensor, shaft delivery deltas, OEM fitting document, counterfactual
+engine) and the **heavy-hit** stack (`impact_coupling.py` plus
+`shared/python/swing_sim/model_interchange/`, which imports golfer models from
+MJCF/URDF/`.osim` — MuJoCo, Drake, Pinocchio, OpenSim — by runtime-free XML
+parsing). PR [#8767](https://github.com/D-sorganization/UpstreamDrift/pull/8767)
+made that bump.
+
+**Gate for any pin bump:** `tests/unit/test_gui_launcher_manifest_targets.py`
+(25 tests) — it asserts every launcher manifest entry resolves to a real
+importable target, so a Tools rename that breaks a GUI is caught here rather
+than at runtime. Run it with `PYTHONPATH` set to repo root **and** `src`.
 
 ## Immediate Next Steps
 
