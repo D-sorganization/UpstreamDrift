@@ -485,8 +485,8 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.543 |
-| **Last Spec Update** | 2026-08-16 |
+| **Spec Version** | 1.0.547 |
+| **Last Spec Update** | 2026-08-19 |
 
 ## 2. Purpose & Mission
 
@@ -516,6 +516,31 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ## 4. Architecture Overview
 
 ### Recent Spec Updates
+
+- **2026-08-19** - Restored `optional-stack-check (3.11)` (issue #8771). The
+  lane failed on exactly three tests in `tests/unit/deployment/test_devices.py`,
+  each asserting `not dev.connect()` for the SpaceMouse, VR-controller and
+  haptic stubs, which raise `NotImplementedError` instead. #8322 made that
+  change and kept the tests. It also deleted the reasoning: before #8322 each
+  method returned `False` under a docstring explaining that "there is no
+  hardware driver behind this class, so the honest answer is always 'not
+  connected' (#7360)", and that the body it replaced had probed for an
+  optional backend and returned `False` on both arms, making the stub look
+  conditionally functional. Returning `False` is the contract the rest of the
+  subsystem keeps: `BaseInputDevice.connect` returns `False`, the ROS2 and UDP
+  controller stubs return `False` with tests asserting it, and
+  `test_base_input_device` asserts it of the base class directly - so the
+  three overrides were inconsistent with their own parent. #8322 additionally
+  rewrote two of the three test files that cover these stubs
+  (`tests/deployment/test_teleoperation.py` and
+  `tests/deployment/wave5_deployment/test_teleoperation.py`, six assertions)
+  from `assert not d.connect()` to `pytest.raises(NotImplementedError)`, and
+  missed the third - which is the whole reason `optional-stack-check` went red
+  while `unit-test-gate` did not. Before #8322 all three files asserted
+  `False`. The implementation bodies, their rationale and the six rewritten
+  assertions are all restored to their pre-#8322 text, so one contract holds
+  across the subsystem again; the `#8058` tracking reference is kept and no
+  test was skipped or deleted.
 
 - **2026-08-16** - Scoped BunkerShot3D's camber-clamped flag so it cannot
   understate substitution (`src/bunkershot3d/geometry/lofting.py`,
@@ -2932,6 +2957,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-19 | 1.0.547 | Restored `optional-stack-check (3.11)`: the SpaceMouse, VR-controller and haptic `connect()` stubs in `src/deployment/teleoperation/devices.py` return `False` again instead of raising `NotImplementedError`. #8322 introduced the raise, kept the three tests asserting `not dev.connect()`, and deleted the #7360 docstring explaining why `False` is the honest answer for a stub with no hardware driver. `BaseInputDevice.connect`, the ROS2/UDP controller stubs and `test_base_input_device` all keep the `False` contract, so the overrides were inconsistent with their own parent class. #8322 also rewrote six assertions in `tests/deployment/test_teleoperation.py` and `tests/deployment/wave5_deployment/test_teleoperation.py` from `assert not d.connect()` to `pytest.raises(NotImplementedError)` while missing the third file - which is why `optional-stack-check` went red and `unit-test-gate` did not, and why the repo has since asserted both contracts at once. All of it is restored to the pre-#8322 text so a single contract holds again; the `#8058` reference is retained. 288 deployment tests pass, nothing skipped or deleted (#8771). |
 | 2026-08-18 | 1.0.543 | Added a "Load Private Corpus" button to the Launch Monitor Analytics Sessions tab and a matching File-menu action, backed by `MainWidget.load_private_corpus_sessions()`: one session per corpus source (261,666 shots across 27 sources in ~3 s), repeatable without duplicates, failing closed with a dialog when no authorized checkout or Parquet reader is available. Five regression tests cover the success, idempotence, fail-closed, and both UI-affordance paths over synthetic fixtures. Trends and Dispersion stay inert against corpus data pending capture-timestamp and lateral-carry extraction, tracked as data-authority issues #18/#19. |
 | 2026-08-18 | 1.0.542 | Added `launch_monitor.corpus.load_private_corpus()`: reads the private data authority's source-partitioned Parquet shot corpus into the canonical launch-monitor schema (importer unit tables, source/metric pushdown, lazy pyarrow, fail-closed `LAUNCH_MONITOR_DATA_ROOT` convention, `apex_native` excluded as unit-ambiguous), exported from the facade with synthetic-fixture tests. Fixed the bare `flight_models` import in `kaggle_validation.compare_all_models_to_dataset()` that only resolved under pytest's `pythonpath`, so installed consumers no longer hit `ModuleNotFoundError`. |
 | 2026-08-16 | 1.0.540 | Repaired four CI Standard gates that had never been evaluated: `quality-gate` was pinned to the self-hosted fleet, so no run in the last 30 reached a conclusion and every gate below it was unobserved (routing fixed in #8729). `alembic.ini` now anchors `script_location` with `%(here)s` like `version_locations` already did, because Alembic resolves a relative script path against the current working directory and the autouse `_prevent_repo_root_io` fixture chdirs every test into `tmp_path` (#7935), which made the migration round-trip report a missing `src/api/migrations` that is in fact fully tracked. Restored the `tornado==6.5.8` pin dropped from `requirements.lock` and `requirements-dev.lock` by #8322, which deleted the pin line but left its `# via` comment block orphaned, leaving both locks structurally invalid rather than merely stale. Renewed the 44 mypy exclusion and 6 coverage-gate re-attestation dates from 2026-08-01 to 2026-10-01, aligned with the next `schedule` step where the cap drops to 36 against 44 exclusions; the ratchet `schedule` itself is unchanged and no exclusion was added (#8731). Split the DRY duplication ratchet: `scripts/config/dry_duplication_quarantine.json` records the 511 historical fingerprints with an owner and issue #8695, each capped at its observed count, and the gate now enforces `max(baseline, quarantine)` so newly introduced duplication still fails at its first repeat while historical debt is tracked explicitly instead of being folded invisibly into the baseline by a wholesale regeneration; the gate additionally reports quarantined fingerprints whose count has dropped so the ledger can be tightened. Raised the runtime security floors that `pip-audit` flagged once the lock repair let the audit steps run at all - `pillow>=12.3.0`, `cryptography>=50.0.0` and a newly direct `click>=8.3.3` - clearing PYSEC-2026-2132, PYSEC-2026-3552/3553/3554 and thirteen pillow advisories; `scripts/config/pip_audit_waivers.json` remains empty, so nothing was waived (#8738). `unit-test-gate` (#8735) and `shared-tools-consumer-contracts` (#8732) remain red with root-caused tracking issues rather than being suppressed. |

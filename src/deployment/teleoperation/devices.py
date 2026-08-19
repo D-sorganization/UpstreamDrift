@@ -155,12 +155,23 @@ class SpaceMouseInput(BaseInputDevice):
     def connect(self) -> bool:
         """Connect to SpaceMouse.
 
-        NOT IMPLEMENTED. There is no hardware driver behind this class (#8058).
+        NOT IMPLEMENTED. There is no hardware driver behind this class, so the
+        honest answer is always "not connected" (#7360). The previous body
+        probed for ("pyspacemouse", "hid") and then returned ``False`` on
+        both arms of the branch, which made the stub look conditionally
+        functional -- installing the backend changed nothing. Tracked by #8058.
 
-        Raises:
-            NotImplementedError: Always raised since hardware backend is missing.
+        Returning ``False`` rather than raising is the deliberate contract: it
+        matches ``BaseInputDevice.connect``, the ROS2/UDP controller stubs, and
+        the graceful-degradation path every caller and test relies on. #8322
+        swapped it for a ``NotImplementedError`` (#8771) and kept the tests,
+        which has redded ``optional-stack-check`` ever since.
+
+        Returns:
+            Always ``False``.
         """
-        raise NotImplementedError("Hardware driver not implemented (#8058).")
+        self._is_connected = False
+        return False
 
     def update(self) -> None:
         """Update SpaceMouse state."""
@@ -210,12 +221,23 @@ class VRControllerInput(BaseInputDevice):
     def connect(self) -> bool:
         """Connect to VR system.
 
-        NOT IMPLEMENTED. There is no hardware driver behind this class (#8058).
+        NOT IMPLEMENTED. There is no hardware driver behind this class, so the
+        honest answer is always "not connected" (#7360). The previous body
+        probed for ("openvr",) and then returned ``False`` on
+        both arms of the branch, which made the stub look conditionally
+        functional -- installing the backend changed nothing. Tracked by #8058.
 
-        Raises:
-            NotImplementedError: Always raised since hardware backend is missing.
+        Returning ``False`` rather than raising is the deliberate contract: it
+        matches ``BaseInputDevice.connect``, the ROS2/UDP controller stubs, and
+        the graceful-degradation path every caller and test relies on. #8322
+        swapped it for a ``NotImplementedError`` (#8771) and kept the tests,
+        which has redded ``optional-stack-check`` ever since.
+
+        Returns:
+            Always ``False``.
         """
-        raise NotImplementedError("Hardware driver not implemented (#8058).")
+        self._is_connected = False
+        return False
 
     def update(self) -> None:
         """Update VR controller state."""
@@ -270,12 +292,23 @@ class HapticDeviceInput(BaseInputDevice):
     def connect(self) -> bool:
         """Connect to haptic device.
 
-        NOT IMPLEMENTED. There is no hardware driver behind this class (#8058).
+        NOT IMPLEMENTED. There is no hardware driver behind this class, so the
+        honest answer is always "not connected" (#7360). The previous body
+        probed for ("forcedimension", "dhd") and then returned ``False`` on
+        both arms of the branch, which made the stub look conditionally
+        functional -- installing the backend changed nothing. Tracked by #8058.
 
-        Raises:
-            NotImplementedError: Always raised since hardware backend is missing.
+        Returning ``False`` rather than raising is the deliberate contract: it
+        matches ``BaseInputDevice.connect``, the ROS2/UDP controller stubs, and
+        the graceful-degradation path every caller and test relies on. #8322
+        swapped it for a ``NotImplementedError`` (#8771) and kept the tests,
+        which has redded ``optional-stack-check`` ever since.
+
+        Returns:
+            Always ``False``.
         """
-        raise NotImplementedError("Hardware driver not implemented (#8058).")
+        self._is_connected = False
+        return False
 
     def update(self) -> None:
         """Update haptic device state."""
