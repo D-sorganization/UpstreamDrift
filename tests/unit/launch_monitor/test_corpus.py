@@ -16,6 +16,9 @@ from src.shared.python.launch_monitor.corpus import (
 )
 
 
+pytestmark = pytest.mark.unit
+
+
 def _synthetic_checkout(tmp_path: Path) -> Path:
     checkout = tmp_path / "checkout"
     dataset = checkout / "data" / "authority" / "database" / "shot_corpus_parquet"

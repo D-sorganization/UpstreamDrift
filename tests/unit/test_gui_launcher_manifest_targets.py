@@ -24,6 +24,9 @@ from src.shared.python.gui_launcher.manifest_loader import load_manifest
 _UD_ROOT = Path(__file__).resolve().parents[2]
 
 
+pytestmark = pytest.mark.unit
+
+
 def _tools_source_roots() -> list[Path]:
     """Return the Tools source trees the launcher can resolve modules from.
 
