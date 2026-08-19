@@ -12,7 +12,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from zipfile import BadZipFile, ZipFile
 
-from defusedxml import ElementTree as SafeElementTree
+try:
+    from defusedxml import ElementTree as SafeElementTree
+except ImportError:
+    from xml.etree import ElementTree as SafeElementTree  # type: ignore[no-redef]
 
 MINOR = {
     "a",

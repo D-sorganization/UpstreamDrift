@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-evidence-integrity-v1",
   "registry": {
     "path": "docs/research/proximal_distal_energy_transfer/data/claim_audit_registry.json",
-    "sha256": "e8c92dddb0df8a5617a8c15a4af6767051d4526830382beb94053a37b77cb350"
+    "sha256": "3e502309d5dfda76e4133b5b144fd971ff724da0ee91c221a7d6aa2cd6dbe313"
   },
   "scope": {
     "local_artifact_semantics": "content_integrity_not_independent_validation",
@@ -3647,8 +3647,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd": {
-      "sha256": "506a3b42771e6ad3d0f617d15959fba6d0aa6ad0ee77ec79d6116c4773198073",
-      "bytes": 26674,
+      "sha256": "b423b97fb2543e08c9ff0e89dce0707dffd186ea58cbf2a885a868bf44a75822",
+      "bytes": 26283,
       "referenced_by": [
         "PD-CLAIM-008",
         "PD-CLAIM-021",
@@ -3656,22 +3656,22 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch03_evidence.qmd": {
-      "sha256": "738df6d2f5a4f618d1d39923b9162198838a8534e44dc5cf3af20b07325d8c0d",
-      "bytes": 10072,
+      "sha256": "cc37eb8407ec718f4a0d2f32f6d569270213478bdb78e605c1f1b8a668a38a54",
+      "bytes": 9919,
       "referenced_by": [
         "PD-CLAIM-021"
       ]
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch03_interaction_forces.qmd": {
-      "sha256": "4b33992960a78300d04a3067c484f297f20d4ea68cda0cb3700b2fc261b1ea98",
-      "bytes": 22351,
+      "sha256": "4abd665cb1fcfcea881d0cfbc3bb24f1a493d1d2b823705caf893c32ba55c9cf",
+      "bytes": 21928,
       "referenced_by": [
         "PD-CLAIM-008"
       ]
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd": {
-      "sha256": "1ad16235fe0faf9d23ceb9c3a03252e2243d37369bc0cc1ecb994e64b50a3eb0",
-      "bytes": 33135,
+      "sha256": "054f2e3cf95570f13450513daf7d3432248d3b7ab34d650ecd99d6f6b29609a4",
+      "bytes": 32604,
       "referenced_by": [
         "PD-CLAIM-081",
         "PD-CLAIM-082",
@@ -3694,22 +3694,22 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch06e_experimental_protocol.qmd": {
-      "sha256": "e6a029ef9e6cd81d5488adfd9f899a26de3e5b01099d84f7eb490ff57a95c06b",
-      "bytes": 8332,
+      "sha256": "553d6dff25beece91964847777b81250379e8d5e5293c6c70ef1c94ef6599e1e",
+      "bytes": 8200,
       "referenced_by": [
         "PD-CLAIM-061"
       ]
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch07b_frames_biology_engines.qmd": {
-      "sha256": "af08b875e93cf93aed071872381a6ad7ed01a2c903a4707240736fe876cd61a4",
-      "bytes": 15681,
+      "sha256": "9683dc0c4c1a42319bce9555bfff8503ab3e056bee79ba1797a0230977d7e557",
+      "bytes": 15407,
       "referenced_by": [
         "PD-CLAIM-073"
       ]
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd": {
-      "sha256": "0b64f59091975b42194a37ba7ad59faf4e906c512e8af3b824fda483b069df75",
-      "bytes": 21205,
+      "sha256": "aff7a289086fe47090525a44c8d11b1bb4aa0f138308a7e3bf192a154b3790d7",
+      "bytes": 20935,
       "referenced_by": [
         "PD-CLAIM-242",
         "PD-CLAIM-243",
@@ -3764,8 +3764,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_grip_atlas.json": {
-      "sha256": "557424bc183a113a0b7f4e2be7e6a12a81a94489ff854ca91fdafb5dfe2a5f08",
-      "bytes": 5030,
+      "sha256": "dfc91f6712aab2eeaa8d67c3be9069d4110eb14b2f92dbed23fed2f8bc6add36",
+      "bytes": 5242,
       "referenced_by": [
         "PD-CLAIM-286",
         "PD-CLAIM-287",
@@ -3773,8 +3773,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_grip_atlas.npz": {
-      "sha256": "1a9e59e0414ef00ffbe361af2d96e613930251385730003de5e55888b791cc4d",
-      "bytes": 164397,
+      "sha256": "ada25d86edc1e438e911c2145c3c107377a7b54d2ff58dbcfe78689b9297915c",
+      "bytes": 115538,
       "referenced_by": [
         "PD-CLAIM-286",
         "PD-CLAIM-287",
@@ -5035,8 +5035,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/wscg_two_hand_raw/ztcf.csv": {
-      "sha256": "47445e57db5246f695177b4644bcd67237593ed1fb40ddb38e286cab19a1e12a",
-      "bytes": 3628977,
+      "sha256": "f557e510da33b4e38b9a1d5c7f51e0fceaf51b67d559dcf76b69559b58461ac3",
+      "bytes": 3626175,
       "referenced_by": [
         "PD-CLAIM-002"
       ]
@@ -5051,8 +5051,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_distributed_grip_atlas.pdf": {
-      "sha256": "d86fe9033b257131b8593a9264ad8c635a994dc1ffc3882bb041c30e328a9dbd",
-      "bytes": 29168,
+      "sha256": "f8de7d0f36ef678f742fc3e4f78af4cc243cecc2486807dac9fe31e2009f2987",
+      "bytes": 29097,
       "referenced_by": [
         "PD-CLAIM-286",
         "PD-CLAIM-287",
@@ -5262,8 +5262,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/references.bib": {
-      "sha256": "70c45ead7689b3195116df2b3ca985f5c76778656292269edb31b6f4a3e07e14",
-      "bytes": 44112,
+      "sha256": "befdd73b9ec20dbeb2eb696cfd5f139d59f12ad510d69e6c685c3f33f59e77d7",
+      "bytes": 42931,
       "referenced_by": [
         "PD-CLAIM-035",
         "PD-CLAIM-036",
@@ -5271,8 +5271,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "6fd4bbeead5457a84669abb4fd3487ceb8a52b20880228503168934bc4fa53fd",
-      "bytes": 129760,
+      "sha256": "f737814dfb1863f0b4b8fabfd3b04a535391e70e7990152087b24dac1fdc24f0",
+      "bytes": 130576,
       "referenced_by": [
         "PD-CLAIM-241"
       ]
@@ -5305,8 +5305,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/articulated_distributed_atlas.py": {
-      "sha256": "5a0b6eebb7041bc51ceadf633f13cde9b687601563f2faac8d0fb40f0c5dbb0f",
-      "bytes": 22359,
+      "sha256": "c3a1ad93c7693f4a557ff7f56b1d3598f8927a33657cb5cefc13cab3a84ffd15",
+      "bytes": 22505,
       "referenced_by": [
         "PD-CLAIM-286",
         "PD-CLAIM-287",
@@ -5314,8 +5314,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/articulated_distributed_forward.py": {
-      "sha256": "f0bdb296956e51d7dda43d24f5215d67ccb6585562e2393ec0e8e5ce34d52664",
-      "bytes": 9058,
+      "sha256": "288d349a890cbe57bab1d1f3b222d2a32e332744487582794893a2c213234bae",
+      "bytes": 13032,
       "referenced_by": [
         "PD-CLAIM-286",
         "PD-CLAIM-287",
@@ -5323,8 +5323,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/articulated_distributed_grip.py": {
-      "sha256": "8277410c523b941364f8451ca84d2d9dc384024630d0ad85e316a928ab712206",
-      "bytes": 12679,
+      "sha256": "1d25ac5dbbb27d2bf67240c3cab18aa7c0a988f68cbb24fcf305bb5b2b37cca2",
+      "bytes": 18087,
       "referenced_by": [
         "PD-CLAIM-286",
         "PD-CLAIM-287",
@@ -5871,8 +5871,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/register_distributed_grip_claims.py": {
-      "sha256": "7964e68145016661a1db1d8524256c8f69e5c756af3ba82e10a97e02d8b10686",
-      "bytes": 12487,
+      "sha256": "915b274284e90d0e4eeabb28b90d8fa94c4c21b819a6923eae01ed9477361a82",
+      "bytes": 12550,
       "referenced_by": [
         "PD-CLAIM-286",
         "PD-CLAIM-287",
@@ -6573,29 +6573,29 @@
       ]
     },
     "src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/core/processing/calculate_work_impulse.m": {
-      "sha256": "0bca8f376b1af178bce9d418e6020a2b168190ba23892b5201a86041b5f855b4",
-      "bytes": 12314,
+      "sha256": "1faa482381017eec3cf610d14efce1461f5fff868c2233cff401ac3b22d98ad4",
+      "bytes": 12031,
       "referenced_by": [
         "PD-CLAIM-096"
       ]
     },
     "src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/core/processing/process_data_tables.m": {
-      "sha256": "2ade479df0cba455967bca061885479ee586029467a93c90c61927c1148ee41f",
-      "bytes": 5317,
+      "sha256": "5a858d7445a1a79e7d6ab437becebcaa70972c95ba4ffcb0e16951497f3ff5f7",
+      "bytes": 5181,
       "referenced_by": [
         "PD-CLAIM-096"
       ]
     },
     "src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/core/simulation/run_single_ztcf_point.m": {
-      "sha256": "d2d243f2986c80aa987af19207e33181a23109d3c5344ae68a3341247de55089",
-      "bytes": 1801,
+      "sha256": "85946656fd37823a122ab41dc81814dc57c9da0ede5553f0de887ba284e70c5b",
+      "bytes": 1740,
       "referenced_by": [
         "PD-CLAIM-096"
       ]
     },
     "src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/core/simulation/run_ztcf_simulation.m": {
-      "sha256": "a81c2856efdcd9385a04d018926efa1ce33de9fe4b653502339af99f9544eaec",
-      "bytes": 9414,
+      "sha256": "53040cbedf510d4a89fbde9bc0965e6196d94fbdaf3527f2e044ad707c2e929f",
+      "bytes": 9118,
       "referenced_by": [
         "PD-CLAIM-096"
       ]
@@ -6636,8 +6636,8 @@
       ]
     },
     "tests/research/test_articulated_distributed_atlas.py": {
-      "sha256": "1ab770adcb930aa183b28247d809befb9e117167df61f6abc3db391356856aa0",
-      "bytes": 2749,
+      "sha256": "59b5cca925728c0a6256b2cf2e7fc8c5804413b29442fda3c7328e6e48e131d0",
+      "bytes": 2787,
       "referenced_by": [
         "PD-CLAIM-286",
         "PD-CLAIM-287",
@@ -6692,8 +6692,8 @@
       ]
     },
     "tests/research/test_articulated_ground_atlas_evidence.py": {
-      "sha256": "d79c1ab9cecf1b44cb009d79e9a9a925562e90cc367946a9ede0f86a43adbf9d",
-      "bytes": 1947,
+      "sha256": "c20236f6e57b6388cd8bc306049ae939460349b53147655969464ec828bb280a",
+      "bytes": 2000,
       "referenced_by": [
         "PD-CLAIM-293",
         "PD-CLAIM-294",
@@ -6712,8 +6712,8 @@
       ]
     },
     "tests/research/test_articulated_ground_diagnostic_evidence.py": {
-      "sha256": "45f0ca46f6bed29929c300fb85fb6778b8221cfbd31e64132df396b2391a508b",
-      "bytes": 2120,
+      "sha256": "42e4faabd054f18e0dc7b5695a525836085dc30f65fc4aca701de035c314f74c",
+      "bytes": 2173,
       "referenced_by": [
         "PD-CLAIM-293",
         "PD-CLAIM-294",
@@ -6742,8 +6742,8 @@
       ]
     },
     "tests/research/test_articulated_ground_reference_invariance.py": {
-      "sha256": "ae76cf358b7ab5e6dd030191915794c0c3a8186f9ad0e1ad6668fe645d198306",
-      "bytes": 2399,
+      "sha256": "4ce0595096794a6918a2da5b2dfdcb1ebcba64b39bbe94dd819d08d33cd2c21d",
+      "bytes": 2452,
       "referenced_by": [
         "PD-CLAIM-293",
         "PD-CLAIM-294",
@@ -6752,8 +6752,8 @@
       ]
     },
     "tests/research/test_articulated_inertia_cross_engine.py": {
-      "sha256": "420262d481f63bc562f59e653d9590f5298e6117160a0dbcdce57f448331c703",
-      "bytes": 4483,
+      "sha256": "e36233b82896d69793fd1d7d8c7b1a0adeaf0439cc82edc15f25b11effd7fe24",
+      "bytes": 4521,
       "referenced_by": [
         "PD-CLAIM-274",
         "PD-CLAIM-275",

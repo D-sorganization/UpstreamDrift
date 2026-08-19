@@ -77,6 +77,7 @@ class DistributedIntegrationCase:
     initial_club_velocity_m_s: float
     engine: str
     grip: DistributedGripConfig
+    initial_state_velocity_factor: float = 1.0
 
 
 @dataclass(slots=True)
@@ -84,16 +85,26 @@ class _Buffers:
     q: FloatArray
     qd: FloatArray
     force: FloatArray
+    normal_force: FloatArray
+    tangential_force: FloatArray
     extension: FloatArray
     active_count: NDArray[np.int_]
+    slipping_count: NDArray[np.int_]
     couple: FloatArray
     concentration: FloatArray
     coincident_couple: FloatArray
     reversal_residual: FloatArray
     virtual_power: FloatArray
     dissipation: FloatArray
+    normal_dissipation: FloatArray
+    tangential_dissipation: FloatArray
+    normal_power: FloatArray
+    tangential_power: FloatArray
     strain: FloatArray
     mechanical: FloatArray
+    coulomb_utilization: FloatArray
+    sliding_speed: FloatArray
+    station_active: NDArray[np.bool_]
 
 
 def _validate_case(
@@ -115,6 +126,7 @@ def _validate_case(
         case.time_step_s,
         case.initial_club_displacement_m,
         case.initial_club_velocity_m_s,
+        case.initial_state_velocity_factor,
     )
     if any(not np.isfinite(value) for value in scalars):
         raise ValueError("integration scalars must be finite")
@@ -126,22 +138,32 @@ def _validate_case(
     return steps
 
 
-def _buffers(sample_count: int, nq: int) -> _Buffers:
+def _buffers(sample_count: int, nq: int, station_count_per_hand: int) -> _Buffers:
     states = np.empty((sample_count, nq))
     return _Buffers(
         q=states,
         qd=np.empty_like(states),
         force=np.empty(sample_count),
+        normal_force=np.empty(sample_count),
+        tangential_force=np.empty(sample_count),
         extension=np.empty(sample_count),
         active_count=np.empty(sample_count, dtype=int),
+        slipping_count=np.empty(sample_count, dtype=int),
         couple=np.empty((sample_count, 3)),
         concentration=np.empty(sample_count),
         coincident_couple=np.empty(sample_count),
         reversal_residual=np.empty(sample_count),
         virtual_power=np.empty(sample_count),
         dissipation=np.empty(sample_count),
+        normal_dissipation=np.empty(sample_count),
+        tangential_dissipation=np.empty(sample_count),
+        normal_power=np.empty(sample_count),
+        tangential_power=np.empty(sample_count),
         strain=np.empty(sample_count),
         mechanical=np.empty(sample_count),
+        coulomb_utilization=np.empty(sample_count),
+        sliding_speed=np.empty(sample_count),
+        station_active=np.empty((sample_count, 2, station_count_per_hand), dtype=bool),
     )
 
 
@@ -155,47 +177,107 @@ def _record(
 ) -> None:
     buffers.q[index], buffers.qd[index] = position, velocity
     buffers.force[index] = snapshot.maximum_station_force_n
+    buffers.normal_force[index] = (
+        float(np.max(np.linalg.norm(snapshot.normal_force_on_club_n, axis=2)))
+        if snapshot.normal_force_on_club_n is not None
+        else snapshot.maximum_station_force_n
+    )
+    buffers.tangential_force[index] = snapshot.maximum_tangential_force_n
     buffers.extension[index] = snapshot.maximum_extension_m
     buffers.active_count[index] = snapshot.active_station_count
+    buffers.slipping_count[index] = (
+        int(np.count_nonzero(snapshot.slipping_station))
+        if snapshot.slipping_station is not None
+        else 0
+    )
     buffers.couple[index] = snapshot.force_couple_vector_nm
     buffers.concentration[index] = snapshot.load_concentration
     buffers.coincident_couple[index] = snapshot.coincident_couple_residual_nm
     buffers.reversal_residual[index] = snapshot.reversed_couple_sign_residual_nm
     buffers.virtual_power[index] = snapshot.virtual_power_residual_w
     buffers.dissipation[index] = snapshot.dissipation_power_w
+    buffers.normal_dissipation[index] = snapshot.normal_dissipation_power_w
+    buffers.tangential_dissipation[index] = snapshot.tangential_dissipation_power_w
+    buffers.normal_power[index] = snapshot.normal_power_w
+    buffers.tangential_power[index] = snapshot.tangential_power_w
     buffers.strain[index] = snapshot.strain_energy_j
     buffers.mechanical[index] = mechanical_energy(model, position, velocity)
+    buffers.coulomb_utilization[index] = snapshot.coulomb_limit_utilization
+    buffers.sliding_speed[index] = snapshot.maximum_sliding_speed_m_s
+    buffers.station_active[index] = snapshot.active_station
 
 
 def _result(
     buffers: _Buffers, case: DistributedIntegrationCase
-) -> dict[str, NDArray[Any]]:
+) -> dict[str, NDArray[Any] | str | int | float]:
     cumulative = np.zeros(buffers.dissipation.size)
     cumulative[1:] = np.cumsum(
         0.5 * (buffers.dissipation[1:] + buffers.dissipation[:-1]) * case.time_step_s
+    )
+    cum_norm_diss = np.zeros(buffers.normal_dissipation.size)
+    cum_norm_diss[1:] = np.cumsum(
+        0.5
+        * (buffers.normal_dissipation[1:] + buffers.normal_dissipation[:-1])
+        * case.time_step_s
+    )
+    cum_tan_diss = np.zeros(buffers.tangential_dissipation.size)
+    cum_tan_diss[1:] = np.cumsum(
+        0.5
+        * (buffers.tangential_dissipation[1:] + buffers.tangential_dissipation[:-1])
+        * case.time_step_s
     )
     total = buffers.mechanical + buffers.strain
     active = buffers.active_count > 0
     transitions = np.zeros(active.size, dtype=bool)
     transitions[1:] = active[1:] != active[:-1]
+
+    # Per-station transitions
+    station_transitions = np.zeros(buffers.station_active.shape, dtype=bool)
+    station_transitions[1:] = buffers.station_active[1:] != buffers.station_active[:-1]
+    total_transitions_count = int(np.count_nonzero(station_transitions))
+
+    total_stations = 2 * case.grip.station_count_per_hand
+    if np.any(buffers.active_count == 0):
+        first_failure = "full_loss_of_contact"
+    elif np.any(buffers.active_count < total_stations):
+        first_failure = "partial_opening"
+    elif np.any(buffers.slipping_count > 0):
+        first_failure = "slip_occurring"
+    else:
+        first_failure = "stable_attached"
+
     return {
         "time_s": np.arange(active.size) * case.time_step_s,
         "q": buffers.q,
         "qd": buffers.qd,
         "maximum_station_force_n": buffers.force,
+        "normal_force_n": buffers.normal_force,
+        "tangential_force_n": buffers.tangential_force,
         "maximum_extension_m": buffers.extension,
         "active_station_count": buffers.active_count,
+        "slipping_station_count": buffers.slipping_count,
         "active_set_transition": transitions,
+        "station_transitions": station_transitions,
+        "total_transition_count": total_transitions_count,
+        "first_failure_class": first_failure,
         "force_couple_vector_nm": buffers.couple,
         "station_load_concentration": buffers.concentration,
         "coincident_couple_residual_nm": buffers.coincident_couple,
         "reversed_couple_sign_residual_nm": buffers.reversal_residual,
         "virtual_power_residual_w": buffers.virtual_power,
         "dissipation_power_w": buffers.dissipation,
+        "normal_dissipation_power_w": buffers.normal_dissipation,
+        "tangential_dissipation_power_w": buffers.tangential_dissipation,
+        "normal_power_w": buffers.normal_power,
+        "tangential_power_w": buffers.tangential_power,
         "strain_energy_j": buffers.strain,
         "mechanical_energy_j": buffers.mechanical,
         "total_energy_j": total,
         "cumulative_dissipation_j": cumulative,
+        "cumulative_normal_dissipation_j": cum_norm_diss,
+        "cumulative_tangential_dissipation_j": cum_tan_diss,
+        "coulomb_limit_utilization": buffers.coulomb_utilization,
+        "maximum_sliding_speed_m_s": buffers.sliding_speed,
         "work_energy_residual_j": total - total[0] - cumulative,
     }
 
@@ -215,11 +297,14 @@ def integrate_distributed_grip(
         hand_contact_local_x_m=case.hand_contact_local_x_m,
         config=case.grip,
     )
-    position, velocity = np.asarray(case.q).copy(), np.asarray(case.qd).copy()
+    position, velocity = (
+        np.asarray(case.q).copy(),
+        np.asarray(case.qd).copy() * case.initial_state_velocity_factor,
+    )
     position[14] += case.initial_club_displacement_m
     velocity[14] += case.initial_club_velocity_m_s
     operator = native_dynamics_operator(case.engine, model)
-    buffers = _buffers(step_count + 1, model.nq)
+    buffers = _buffers(step_count + 1, model.nq, case.grip.station_count_per_hand)
     for index in range(step_count + 1):
         snapshot = evaluate_distributed_grip(
             model,
