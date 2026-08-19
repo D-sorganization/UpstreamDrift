@@ -1353,24 +1353,38 @@ jobs:
         id: core-test-changes
         shell: bash
         run: |
+          set -euo pipefail
+
           if [ "${{ github.event_name }}" != "pull_request" ]; then
             echo "skip=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
           git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
-          mapfile -d '' core_test_targets < <(
-            git diff --name-only --diff-filter=ACMRT -z "origin/${{ github.base_ref }}" HEAD -- \
-              'src/**/*.py' \
-              'tests/**/*.py' \
-              'pyproject.toml' \
-              'requirements*.txt' \
-              'environment.yml' \
-              ':(exclude)src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/**'
-          )
+
+          # Same failure shape as the core-test diff below (#8771): a diff that
+          # errors out must not degrade into "nothing changed". Verify the base
+          # resolves, and capture the diff through a file so `-e` catches a
+          # failed `git diff` instead of silently yielding an empty array.
+          if ! git rev-parse --verify --quiet "origin/${{ github.base_ref }}^{commit}" >/dev/null; then
+            echo "::error::Cannot resolve base ref 'origin/${{ github.base_ref }}' after fetch."
+            echo "::error::Refusing to infer 'no relevant changes' from an unresolvable base ref."
+            exit 1
+          fi
+
+          git diff --name-only --diff-filter=ACMRT -z "origin/${{ github.base_ref }}" HEAD -- \
+            'src/**/*.py' \
+            'tests/**/*.py' \
+            'pyproject.toml' \
+            'requirements*.txt' \
+            'environment.yml' \
+            ':(exclude)src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/**' \
+            > "$RUNNER_TEMP/core_test_targets.txt"
+          mapfile -d '' core_test_targets < "$RUNNER_TEMP/core_test_targets.txt"
+
           if [ "${#core_test_targets[@]}" -eq 0 ]; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
-            echo "No core Python/test/dependency changes detected; skipping test matrix for this PR."
+            echo "::warning::Test matrix NOT EXECUTED - no core Python/test/dependency changes against origin/${{ github.base_ref }}."
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
@@ -1523,6 +1537,21 @@ jobs:
           )
           dependency_light_targets=()
 
+          # Route `git diff` output through a file instead of a process
+          # substitution. `mapfile -t x < <(git diff ...)` discards git's exit
+          # code: a `fatal: bad object <sha>` leaves the array empty, and an
+          # empty array is indistinguishable from "nothing changed". That is
+          # exactly how `tests` reported success on `main` @ 6b68f94 without
+          # running the suite - the push diff base was not in the shallow
+          # checkout, all four diffs failed with `fatal: bad object`, and the
+          # skip branch below exited 0 (#8771). A plain redirect lets the
+          # step's `-e` make a failed diff fatal instead.
+          diff_into() {
+            local out="$1"
+            shift
+            git diff --name-only "$@" >"$out"
+          }
+
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             # Fetch base branch with enough depth for merge-base resolution.
             # When the base branch has advanced, shallow fetches may not have
@@ -1532,61 +1561,71 @@ jobs:
             # Try to compute merge-base for accurate diff. If merge-base fails
             # (e.g., due to shallow history), fall back to direct base ref diff.
             merge_base=$(git merge-base "origin/${{ github.base_ref }}" HEAD 2>/dev/null || echo "")
-
-            if [ -n "$merge_base" ]; then
-              # Use merge-base for accurate three-way diff
-              mapfile -t changed_tests < <(
-                git diff --name-only --diff-filter=ACMRT "$merge_base" HEAD -- 'tests/**/*.py'
-              )
-            else
+            if [ -z "$merge_base" ]; then
               # Merge-base not available (shallow history), fall back to
               # direct diff against base ref. This may include extra changes
               # but ensures tests run rather than silently skipping.
               echo "NOTE: merge-base unavailable; using direct diff against origin/${{ github.base_ref }}"
-              mapfile -t changed_tests < <(
-                git diff --name-only --diff-filter=ACMRT "origin/${{ github.base_ref }}" HEAD -- 'tests/**/*.py'
-              )
             fi
             diff_base="${merge_base:-origin/${{ github.base_ref }}}"
+          elif [ "${{ github.event_name }}" = "push" ] \
+            && [ "${{ github.ref_name }}" = "${{ github.event.repository.default_branch }}" ]; then
+            # Trunk pushes always run the full lane, unscoped. Path-scoping is
+            # a pull-request latency optimisation; on the default branch it is
+            # a correctness hole, because a commit that happens to touch no
+            # Python then carries a green badge for a suite it never ran.
+            echo "::notice::Push to the default branch - running the full core lane, unscoped (#8771)."
+            diff_base=""
           elif [ "${{ github.event_name }}" = "push" ] \
             && [ -n "${{ github.event.before }}" ] \
             && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
             diff_base="${{ github.event.before }}"
-            mapfile -t changed_tests < <(
-              git diff --name-only --diff-filter=ACMRT "$diff_base" HEAD -- 'tests/**/*.py'
-            )
           else
             diff_base=""
           fi
 
+          # A diff base git cannot resolve must fail loudly. Inferring
+          # "nothing changed" from an unresolvable base is how a green check
+          # ends up covering a suite that was never executed.
+          if [ -n "$diff_base" ] \
+            && ! git rev-parse --verify --quiet "${diff_base}^{commit}" >/dev/null; then
+            echo "::error::Cannot resolve the core-test diff base '${diff_base}'."
+            echo "::error::Refusing to infer 'no relevant changes' from an unresolvable diff base."
+            exit 1
+          fi
+
           if [ -n "$diff_base" ]; then
-            mapfile -t deleted_tests < <(
-              git diff --name-only --diff-filter=D "$diff_base" HEAD -- 'tests/**/*.py'
-            )
+            diff_into "$RUNNER_TEMP/core_changed_tests.txt" \
+              --diff-filter=ACMRT "$diff_base" HEAD -- 'tests/**/*.py'
+            mapfile -t changed_tests < "$RUNNER_TEMP/core_changed_tests.txt"
+
+            diff_into "$RUNNER_TEMP/core_deleted_tests.txt" \
+              --diff-filter=D "$diff_base" HEAD -- 'tests/**/*.py'
+            mapfile -t deleted_tests < "$RUNNER_TEMP/core_deleted_tests.txt"
             if [ "${#deleted_tests[@]}" -gt 0 ]; then
               echo "::error::Deleted Python test files require review before CI can proceed."
               printf '  %s\n' "${deleted_tests[@]}"
               exit 1
             fi
 
-            mapfile -t changed_core_targets < <(
-              git diff --name-only --diff-filter=ACMRT "$diff_base" HEAD -- \
+            diff_into "$RUNNER_TEMP/core_changed_targets.txt" \
+              --diff-filter=ACMRT "$diff_base" HEAD -- \
                 'src/**/*.py' \
                 'tests/**/*.py' \
                 'pyproject.toml' \
                 'requirements*.txt' \
                 'environment.yml' \
                 ':(exclude)src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/**'
-            )
+            mapfile -t changed_core_targets < "$RUNNER_TEMP/core_changed_targets.txt"
 
-            mapfile -t changed_coverage_targets < <(
-              git diff --name-only --diff-filter=ACMRT "$diff_base" HEAD -- \
+            diff_into "$RUNNER_TEMP/core_coverage_targets.txt" \
+              --diff-filter=ACMRT "$diff_base" HEAD -- \
                 'src/**/*.py' \
                 'pyproject.toml' \
                 'requirements*.txt' \
                 'environment.yml' \
                 ':(exclude)src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/**'
-            )
+            mapfile -t changed_coverage_targets < "$RUNNER_TEMP/core_coverage_targets.txt"
 
             if [ "${#changed_coverage_targets[@]}" -gt 0 ]; then
               coverage_args=()
@@ -1602,7 +1641,22 @@ jobs:
             fi
 
             if [ "${#changed_tests[@]}" -eq 0 ] && [ "${#changed_core_targets[@]}" -eq 0 ]; then
-              echo "No core Python/test/dependency changes detected; skipping core tests for this workflow-only PR."
+              # Reached only for a pull request or a non-default-branch push
+              # whose diff base resolved cleanly and contained no Python. Say
+              # so loudly: this check passing means "not evaluated", not
+              # "suite green", and a reader must be able to tell them apart
+              # (#8771).
+              echo "::warning::Core test suite NOT EXECUTED - diff base ${diff_base} shows no Python/test/dependency changes."
+              {
+                echo "## Core Test Suite: not executed"
+                echo
+                echo "No \`src/**/*.py\`, \`tests/**/*.py\` or dependency-manifest change"
+                echo "against diff base \`${diff_base}\`, so the core suite was skipped."
+                echo
+                echo "**This check passing does not mean the suite is green.**"
+                echo "The full lane always runs on pushes to the default branch."
+              } >> "$GITHUB_STEP_SUMMARY"
+              echo "core_suite_executed=false" >> "$GITHUB_OUTPUT"
               exit 0
             elif [ "${#changed_coverage_targets[@]}" -gt 0 ]; then
               echo "Source/dependency targets changed; running scoped dependency-light unit targets for this PR."

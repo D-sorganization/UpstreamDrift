@@ -485,8 +485,8 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
 
-| **Spec Version** | 1.0.549 |
-| **Last Spec Update** | 2026-08-19 |
+| **Spec Version**        | 1.0.550                                            |
+| **Last Spec Update**    | 2026-08-19                                         |
 
 ## 2. Purpose & Mission
 
@@ -517,6 +517,29 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-08-19** - Closed the false-green hole in CI Standard's `tests` lane
+  (issue #8771). `main` @ `6b68f94` reported `tests (3.11)` / `tests (3.12)`
+  as successful without running the unit suite. The lane derives its scope
+  from `git diff <base> HEAD`, but read that diff through
+  `mapfile -t x < <(git diff ...)`, which discards git's exit code. The push
+  diff base was not present in the shallow checkout, so all four diffs failed
+  with `fatal: bad object 59ecef7d...`, every `changed_*` array came back
+  empty, and the "no core Python/test/dependency changes detected" branch
+  exited 0. The green badge covered 14 tests, not ~2,500. Three changes: the
+  diffs are captured through files so the step's `-e` makes a failed diff
+  fatal; an unresolvable diff base is now an explicit `::error::` and exit 1
+  rather than an inferred "nothing changed"; and pushes to the default branch
+  always run the full lane unscoped, because path-scoping is a pull-request
+  latency optimisation and on trunk it lets a commit that touches no Python
+  vouch for a suite it never ran. A genuine "nothing relevant changed" skip
+  now emits a `::warning::` and a job-summary block stating that the suite was
+  not executed, so a passing check can be told apart from a green suite. The
+  same silent-failure shape in the `Check for core test relevant changes`
+  pre-step is hardened identically, and `tests/ci/test_ci_infrastructure.py`
+  gains two guards asserting the new contract - a failed diff cannot be
+  read as "nothing changed", and trunk pushes are never path-scoped.
+  pre-step is hardened identically.
+
 - **2026-08-19** - Repaired all five `profile-size-matrix` Docker builds
   (issue #8771). `Dockerfile.modular`'s builder stage copies a deliberate
   minimal slice - `src/shared/python/__init__.py`, `engine_core/` and
@@ -535,6 +558,40 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   because `@dataclass` resolves `cls.__module__` through it while processing
   the class body. `src/shared/python/__init__.py` is a Tools-owned child copy
   and is deliberately left untouched.
+
+- **2026-08-19** - Git-ignored the test-run artefacts that have twice been
+  committed at the repository root (issue #8771). The autouse
+  `_prevent_repo_root_io` fixture chdirs every test into `tmp_path` so they are
+  not produced (#7935), but nothing stopped them being staged once they
+  existed: #8322 committed all nine (`base.csv`, `base.json`, `base.mat`, two
+  `.provenance.json` files, three `pytest_report*.txt` and a one-off patch
+  script) and #8747 had to delete them again while repairing the root-clutter
+  gate. The names are now ignored, anchored to the root so the tracked
+  `docs/research/.../base.csv` fixture is unaffected.
+- **2026-08-19** - Restored `optional-stack-check (3.11)` (issue #8771). The
+  lane failed on exactly three tests in `tests/unit/deployment/test_devices.py`,
+  each asserting `not dev.connect()` for the SpaceMouse, VR-controller and
+  haptic stubs, which raise `NotImplementedError` instead. #8322 made that
+  change and kept the tests. It also deleted the reasoning: before #8322 each
+  method returned `False` under a docstring explaining that "there is no
+  hardware driver behind this class, so the honest answer is always 'not
+  connected' (#7360)", and that the body it replaced had probed for an
+  optional backend and returned `False` on both arms, making the stub look
+  conditionally functional. Returning `False` is the contract the rest of the
+  subsystem keeps: `BaseInputDevice.connect` returns `False`, the ROS2 and UDP
+  controller stubs return `False` with tests asserting it, and
+  `test_base_input_device` asserts it of the base class directly - so the
+  three overrides were inconsistent with their own parent. #8322 additionally
+  rewrote two of the three test files that cover these stubs
+  (`tests/deployment/test_teleoperation.py` and
+  `tests/deployment/wave5_deployment/test_teleoperation.py`, six assertions)
+  from `assert not d.connect()` to `pytest.raises(NotImplementedError)`, and
+  missed the third - which is the whole reason `optional-stack-check` went red
+  while `unit-test-gate` did not. Before #8322 all three files asserted
+  `False`. The implementation bodies, their rationale and the six rewritten
+  assertions are all restored to their pre-#8322 text, so one contract holds
+  across the subsystem again; the `#8058` tracking reference is kept and no
+  test was skipped or deleted.
 
 - **2026-08-16** - Scoped BunkerShot3D's camber-clamped flag so it cannot
   understate substitution (`src/bunkershot3d/geometry/lofting.py`,
@@ -2958,8 +3015,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 ## 12. Change Log
 
-| Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-19 | 1.0.550 | Closed CI Standard's false-green `tests` lane: `mapfile < <(git diff ...)` discarded git's exit code, so an unresolvable push diff base (`fatal: bad object`) produced empty change sets that the skip branch read as "nothing changed" and exited 0 - `main` @ `6b68f94` reported `tests (3.11)`/`tests (3.12)` green over 14 tests while the ~2,500-test unit suite never ran. Diffs are now captured through files so `-e` catches a failed diff, an unresolvable diff base fails loudly instead of being inferred as "no changes", pushes to the default branch always run the full lane unscoped, and a genuine no-op skip emits a `::warning::` plus a job-summary block saying the suite was not executed. The `Check for core test relevant changes` pre-step is hardened the same way, and `tests/ci/test_ci_infrastructure.py` gains two regression guards for the new contract (#8771). |
 | 2026-08-19 | 1.0.549 | Repaired all five `profile-size-matrix` Docker builds. `scripts/docker/install_features.py` reached the feature registry through `from src.shared.python.feature_registry.features import ...`, which executes every parent package `__init__`; `Dockerfile.modular`'s builder stage deliberately copies only `__init__.py`, `engine_core/` and `feature_registry/` so profile resolution does not invalidate the layer cache, so an eager `from . import ai` in that `__init__` broke every modular build with `ImportError: cannot import name 'ai' from partially initialized module`. The script now loads `features.py` by path with no parent package - what its own comment always claimed - making the builder slice self-sufficient regardless of what any package `__init__` imports later; the module is registered in `sys.modules` before execution because `@dataclass` resolves `cls.__module__` through it. Verified against a reconstructed builder slice: all five profiles resolve with `src/shared/python/__init__.py` left exactly as it is on `main`, since it is a Tools-owned child copy (#8771). |
 | 2026-08-19 | 1.0.548 | Git-ignored the root-level test-run artefacts (`base.csv`, `base.json`, `base.mat`, `base.h5`, `base.*.provenance.json`, `pytest_report*.txt`, `golf_modeling_suite.db`). `_prevent_repo_root_io` stops tests producing them (#7935) but nothing stopped them being staged: #8322 committed nine such files at the root and #8747 deleted them again. Patterns are root-anchored, so the tracked `docs/research/proximal_distal_energy_transfer/data/wscg_two_hand_raw/base.csv` fixture is not affected; verified no tracked path is newly ignored (#8771). |
 | 2026-08-19 | 1.0.547 | Restored `optional-stack-check (3.11)`: the SpaceMouse, VR-controller and haptic `connect()` stubs in `src/deployment/teleoperation/devices.py` return `False` again instead of raising `NotImplementedError`. #8322 introduced the raise, kept the three tests asserting `not dev.connect()`, and deleted the #7360 docstring explaining why `False` is the honest answer for a stub with no hardware driver. `BaseInputDevice.connect`, the ROS2/UDP controller stubs and `test_base_input_device` all keep the `False` contract, so the overrides were inconsistent with their own parent class. #8322 also rewrote six assertions in `tests/deployment/test_teleoperation.py` and `tests/deployment/wave5_deployment/test_teleoperation.py` from `assert not d.connect()` to `pytest.raises(NotImplementedError)` while missing the third file - which is why `optional-stack-check` went red and `unit-test-gate` did not, and why the repo has since asserted both contracts at once. All of it is restored to the pre-#8322 text so a single contract holds again; the `#8058` reference is retained. 288 deployment tests pass, nothing skipped or deleted (#8771). |

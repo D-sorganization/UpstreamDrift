@@ -1586,7 +1586,7 @@ class TestCIEnvironmentCompatibility:
     def test_core_test_matrix_push_uses_changed_file_scope_when_before_sha_exists(
         self,
     ) -> None:
-        """Push test runs should not fall through to full-suite OOM by default."""
+        """Non-trunk push runs stay scoped so they do not fall through to OOM."""
         workflow = (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
             encoding="utf-8"
         )
@@ -1599,11 +1599,67 @@ class TestCIEnvironmentCompatibility:
         assert '"${{ github.event_name }}" = "push"' in core_test_step
         assert "${{ github.event.before }}" in core_test_step
         assert 'diff_base="${{ github.event.before }}"' in core_test_step
+        assert '--diff-filter=ACMRT "$diff_base" HEAD' in core_test_step
+        assert "Core test suite NOT EXECUTED" in core_test_step
+
+    def test_core_test_matrix_cannot_report_green_without_running(self) -> None:
+        """A `tests` pass must mean the suite ran, or say loudly that it did not.
+
+        `main` @ 6b68f94 reported `tests (3.11)` / `tests (3.12)` successful
+        while the unit suite never ran: the push diff base was absent from the
+        shallow checkout, every `git diff` failed with `fatal: bad object`, and
+        because the results were read through `mapfile < <(git diff ...)` -
+        which discards the exit code - the empty arrays were taken as "nothing
+        changed" and the step exited 0 (issue #8771).
+
+        Three invariants keep that closed, asserted here rather than left to
+        the next reader of the shell.
+        """
+        workflow = (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+            encoding="utf-8"
+        )
+        core_test_step = workflow[
+            workflow.index("- name: Run Core Test Suite") : workflow.index(
+                "- name: Stop Xvfb",
+            )
+        ]
+
+        # 1. Diffs are captured through a file, so the step's `-e` sees a
+        #    failed `git diff` instead of an indistinguishable empty array.
+        assert "mapfile -t changed_tests < <(" not in core_test_step
+        assert 'git diff --name-only "$@" >"$out"' in core_test_step
+
+        # 2. An unresolvable diff base fails loudly, never "nothing changed".
         assert (
-            'git diff --name-only --diff-filter=ACMRT "$diff_base" HEAD'
+            'git rev-parse --verify --quiet "${diff_base}^{commit}"' in core_test_step
+        )
+        assert "Cannot resolve the core-test diff base" in core_test_step
+
+        # 3. Trunk pushes always run the full lane. Path scoping on the default
+        #    branch lets a non-Python commit vouch for a suite it never ran.
+        assert (
+            '"${{ github.ref_name }}" = "${{ github.event.repository.default_branch }}"'
             in core_test_step
         )
-        assert "No core Python/test/dependency changes detected" in core_test_step
+
+    def test_core_test_change_detection_fails_on_unresolvable_base(self) -> None:
+        """The pre-step gating the whole matrix must not skip on a failed diff."""
+        workflow = (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+            encoding="utf-8"
+        )
+        start = workflow.index("- name: Check for core test relevant changes")
+        detect_step = workflow[
+            start : workflow.index("- name: Install System Dependencies", start)
+        ]
+
+        assert "set -euo pipefail" in detect_step
+        assert (
+            'git rev-parse --verify --quiet "origin/${{ github.base_ref }}^{commit}"'
+            in detect_step
+        )
+        assert "Cannot resolve base ref" in detect_step
+        assert "mapfile -d '' core_test_targets < <(" not in detect_step
+        assert "Test matrix NOT EXECUTED" in detect_step
 
     def test_mypy_baseline_push_uses_changed_source_scope_when_before_sha_exists(
         self,
