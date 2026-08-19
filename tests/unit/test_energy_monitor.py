@@ -18,7 +18,7 @@ from src.shared.python.physics.energy_monitor import (
     EnergySnapshot,
     IntegrationFailureError,
 )
-from src.shared.python.tests.mock_physics_engine import (
+from tests.support.mock_physics_engine import (
     MockPhysicsEngine,
     as_physics_engine,
 )

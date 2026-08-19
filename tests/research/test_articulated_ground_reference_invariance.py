@@ -24,6 +24,11 @@ from scripts.research.proximal_distal_energy.subject_scaled_spatial_geometry imp
 )
 
 
+import pytest
+
+pytestmark = pytest.mark.scientific
+
+
 def test_center_of_pressure_reversal_changes_only_reported_transport_moment() -> None:
     model = build_subject_scaled_model(default_synthetic_profiles()[0])[0]
     ground = ArticulatedGroundConfig()

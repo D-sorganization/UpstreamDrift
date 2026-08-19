@@ -72,6 +72,22 @@ def _as_direction_batch(directions: np.ndarray) -> np.ndarray:
     return directions
 
 
+def _unit_direction_batch(directions: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Normalise a direction batch, flagging near-zero rows as degenerate.
+
+    Returns ``(unit, degenerate)``: ``unit`` holds unit-length rows (zeros
+    where degenerate) and ``degenerate`` is the 1-D mask of near-zero inputs.
+    """
+    directions = _as_direction_batch(directions)
+    # Bolt optimization: np.einsum avoids intermediate allocations, significantly faster than np.linalg.norm(..., axis=1)
+    norms = np.sqrt(np.einsum("...i,...i->...", directions, directions))[..., None]
+    degenerate = (norms < 1e-10).ravel()
+    unit = np.divide(
+        directions, norms, out=np.zeros_like(directions), where=norms >= 1e-10
+    )
+    return unit, degenerate
+
+
 @dataclass
 class Box(GeometricPrimitive):
     """Axis-aligned box primitive.
@@ -256,13 +272,7 @@ class Capsule(GeometricPrimitive):
 
     def compute_support_batch(self, directions: np.ndarray) -> np.ndarray:
         """Vectorised support mapping (see base class)."""
-        directions = _as_direction_batch(directions)
-        # Bolt optimization: np.einsum avoids intermediate allocations, significantly faster than np.linalg.norm(..., axis=1)
-        norms = np.sqrt(np.einsum("...i,...i->...", directions, directions))[..., None]
-        degenerate = (norms < 1e-10).ravel()
-        unit = np.divide(
-            directions, norms, out=np.zeros_like(directions), where=norms >= 1e-10
-        )
+        unit, degenerate = _unit_direction_batch(directions)
         toward_b = unit @ (self.point_b - self.point_a) >= 0
         base = np.where(toward_b[:, None], self.point_b, self.point_a)
         result = base + self.radius * unit
@@ -384,13 +394,7 @@ class Cylinder(GeometricPrimitive):
 
     def compute_support_batch(self, directions: np.ndarray) -> np.ndarray:
         """Vectorised support mapping (see base class)."""
-        directions = _as_direction_batch(directions)
-        # Bolt optimization: np.einsum avoids intermediate allocations, significantly faster than np.linalg.norm(..., axis=1)
-        norms = np.sqrt(np.einsum("...i,...i->...", directions, directions))[..., None]
-        degenerate = (norms < 1e-10).ravel()
-        unit = np.divide(
-            directions, norms, out=np.zeros_like(directions), where=norms >= 1e-10
-        )
+        unit, degenerate = _unit_direction_batch(directions)
 
         along = unit @ self.axis
         d_perp = unit - along[:, None] * self.axis
