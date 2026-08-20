@@ -74,13 +74,14 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     each full two-engine/reversal/refinement/killswitch atlas, reports movement
     from 126/384 shaft and 0/384 ground, and retains failures. Checkpoints now
     reject scientific-design drift while allowing worker-count changes; the
-    governed figure rejects incomplete data. Commits through `9f751e997` are
-    local; remote is `9cefa56ff`. Nominal shaft is checkpointed at 126/384. The
+    governed figure rejects incomplete data. Commits through `a9dea43e2` are
+    local; remote is `35812682a`. Nominal shaft is checkpointed at 126/384. The
     first ground attempt exposed NumPy's removed `trapz`; `9f751e997` replaces
     it with `trapezoid`. The resumed 12-worker campaign is exec session `61684`.
     Inspect it and the checkpoint before starting anything. The red evidence
-    test is `test_articulated_headline_uncertainty_evidence.py`; full data, figure,
-    paper/claims/release integration, push, and protected publication remain.
+    test is `test_articulated_headline_uncertainty_evidence.py`; paper methods,
+    artifact documentation, source hashes, and summary contract are implemented.
+    Full data, figure, claims/release integration, and publication remain.
 - The release has 295 atomic claims and 40 reviewed release claims; all 40
   retain at least one scientifically open gate. #8724 still owns normalized
   four-way adjudication and independent review.
@@ -115,7 +116,6 @@ copy or child copies under `src/shared/python/`; Tools is the source of truth.
 1. Publish #8451, then sync its exact revision and digests through AffineDrift.
 2. Continue #8789's remaining Docker/quarantine/baseline work without overlap.
 3. Complete #8752 and burn down #8766 without widening either contract.
-4. Advance calibrated contact, full-delivery uncertainty, and #8556.
 
 ## Gate Commands
 
