@@ -62,6 +62,8 @@ def test_registry_preserves_critical_scientific_distinctions() -> None:
     geometry = by_point["MTQ-02"]
     assert "six corners retain 52/52 feasible states" in geometry["present_answer"]
     assert "case-0/phase-12 IK nonconvergence" in geometry["present_answer"]
+    assert "83 feasible headline states" in geometry["present_answer"]
+    assert "Neither structural campaign nor the preflight" in geometry["present_answer"]
     assert (
         "Propagate every feasible #8800 scaled authority"
         in (geometry["decisive_next_test"])
@@ -73,6 +75,10 @@ def test_registry_preserves_critical_scientific_distinctions() -> None:
         "docs/research/proximal_distal_energy_transfer/data/"
         "articulated_structural_authority_campaign.json"
         in geometry["evidence_artifacts"]
+    )
+    assert (
+        "docs/research/proximal_distal_energy_transfer/data/"
+        "articulated_structural_propagation_plan.json" in geometry["evidence_artifacts"]
     )
 
 
