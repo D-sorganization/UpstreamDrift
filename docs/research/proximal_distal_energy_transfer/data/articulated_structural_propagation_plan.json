@@ -3,6 +3,7 @@
   "status": "ready",
   "authority_campaign_sha256": "d8115073dc1b506f145196b08c96d7cb3cf00e8cf29099970e2f7b0fbe6d63f3",
   "design_sha256": "8e5f246645e27c8f0f66a87859c63c470c43e579bccb50848124174944e11e07",
+  "contract_sha256": "cbb42e950e6509e4a5e375943aaa2ad4124601bebca79d7443b3c656ecdb32a2",
   "design": {
     "case_indices": [
       0,
@@ -115,6 +116,30 @@
       "power_residual_tolerance_w": 1e-08
     },
     "parallelism": "worker_count is operational and excluded from the scientific design digest"
+  },
+  "acceptance": {
+    "nominal_reproduction": {
+      "shaft_matched_cell_count": 126,
+      "shaft_total_cell_count": 384,
+      "ground_matched_cell_count": 0,
+      "ground_total_cell_count": 384
+    },
+    "required_controls": [
+      "both native engines",
+      "velocity reversal",
+      "time-step refinement",
+      "pathway killswitches",
+      "unchanged load-work matching"
+    ],
+    "failure_policy": "retain every planned or dynamic failure without imputation",
+    "invalidators": [
+      "nominal headline counts do not reproduce",
+      "a planned state is missing or duplicated",
+      "an authority, model, source, configuration, or result digest differs",
+      "a registered numerical, parity, power, energy, domain, or control gate fails",
+      "a failed state or branch is silently omitted or replaced"
+    ],
+    "interpretation": "engineering OAT sensitivity only; no population, human, causal coaching, or universal performance inference"
   },
   "corners": [
     {
@@ -711,8 +736,8 @@
     "scripts/research/proximal_distal_energy/articulated_atlas_authority.py": "191174f7fea921a3b52054f85d735b45ee0ca93090aaa733f59221d45de0af0d",
     "scripts/research/proximal_distal_energy/articulated_scaled_authority.py": "6d41ef265dd88d61bdf70f1ff78a17716c9293e6260f307c253df43f441b7d83",
     "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py": "166ab2ebec88a0c53abc54c6b565ba0a3f82caf800449e822164177f31289549",
-    "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": "e528b1be8e3167b459d0a968ef0e60e8e20dc81d083bdf863a6bcb9d2c57050c",
-    "tests/research/test_articulated_structural_propagation_plan.py": "67a08b099ae51564a8a26f387ac1e0fb404a08f75405cb1889e4e211e7ba8a72",
+    "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": "805f5a51557faee353ea7cebbb32b6a00aad2aa74cbb50383cf95c63aec1bb30",
+    "tests/research/test_articulated_structural_propagation_plan.py": "57013453b1d27f08bc6daa6e26bfe8c53527f88dfa69ef6bb1454a35215a17e9",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "8eed52fe4ebbc55fcf753f4703330dd6d768281b0babfbb2adca074b862fc36d",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
     "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json": "f07fc33cc76fb80f395cd10b01a30169b6440cec3854be3894024d435bc0f722",

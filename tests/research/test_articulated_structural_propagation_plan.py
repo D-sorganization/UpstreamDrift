@@ -33,6 +33,7 @@ def test_plan_binds_all_seven_authority_corners(plan) -> None:
     assert len(plan["corners"]) == 7
     assert len(plan["authority_campaign_sha256"]) == 64
     assert len(plan["design_sha256"]) == 64
+    assert len(plan["contract_sha256"]) == 64
     assert plan["design"]["case_indices"] == [0, 8, 9, 17]
     assert plan["design"]["phase_indices"] == [0, 6, 12]
     assert "worker_count" not in plan["design"]["shaft_configuration"]
@@ -46,6 +47,27 @@ def test_plan_binds_all_seven_authority_corners(plan) -> None:
         "scripts/research/proximal_distal_energy/articulated_ground_forward.py",
         "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
     } < set(plan["source_sha256"])
+
+
+def test_plan_preregisters_falsification_and_interpretation_boundaries(plan) -> None:
+    acceptance = plan["acceptance"]
+
+    assert acceptance["nominal_reproduction"] == {
+        "shaft_matched_cell_count": 126,
+        "shaft_total_cell_count": 384,
+        "ground_matched_cell_count": 0,
+        "ground_total_cell_count": 384,
+    }
+    assert set(acceptance["required_controls"]) == {
+        "both native engines",
+        "velocity reversal",
+        "time-step refinement",
+        "pathway killswitches",
+        "unchanged load-work matching",
+    }
+    assert "without imputation" in acceptance["failure_policy"]
+    assert len(acceptance["invalidators"]) == 5
+    assert "no population, human" in acceptance["interpretation"]
 
 
 def test_nominal_plan_reproduces_registered_atlas_sizes(plan) -> None:

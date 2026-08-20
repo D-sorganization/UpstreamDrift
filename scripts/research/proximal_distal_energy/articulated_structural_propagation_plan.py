@@ -157,12 +157,45 @@ def build_structural_propagation_plan(
     design_sha = hashlib.sha256(
         json.dumps(design, sort_keys=True, separators=(",", ":")).encode("utf-8")
     ).hexdigest()
+    acceptance = {
+        "nominal_reproduction": {
+            "shaft_matched_cell_count": 126,
+            "shaft_total_cell_count": 384,
+            "ground_matched_cell_count": 0,
+            "ground_total_cell_count": 384,
+        },
+        "required_controls": [
+            "both native engines",
+            "velocity reversal",
+            "time-step refinement",
+            "pathway killswitches",
+            "unchanged load-work matching",
+        ],
+        "failure_policy": "retain every planned or dynamic failure without imputation",
+        "invalidators": [
+            "nominal headline counts do not reproduce",
+            "a planned state is missing or duplicated",
+            "an authority, model, source, configuration, or result digest differs",
+            "a registered numerical, parity, power, energy, domain, or control gate fails",
+            "a failed state or branch is silently omitted or replaced",
+        ],
+        "interpretation": "engineering OAT sensitivity only; no population, human, causal coaching, or universal performance inference",
+    }
+    contract_sha = hashlib.sha256(
+        json.dumps(
+            {"design_sha256": design_sha, "acceptance": acceptance},
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+    ).hexdigest()
     return {
         "schema_version": "articulated-structural-propagation-plan/v1",
         "status": "ready",
         "authority_campaign_sha256": _sha256(campaign_path),
         "design_sha256": design_sha,
+        "contract_sha256": contract_sha,
         "design": design,
+        "acceptance": acceptance,
         "corners": corners,
         "source_sha256": {path: _sha256(ROOT / path) for path in SOURCE_PATHS},
         "limitations": {
