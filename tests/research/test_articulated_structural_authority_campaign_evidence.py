@@ -90,3 +90,4 @@ def test_article_retains_every_corner_and_propagation_boundary() -> None:
     assert "case 0, phase\n12" in chapter
     assert "does not yet establish sensitivity of either\nheadline estimand" in chapter
     assert "nominal model instead of its bound scaled model" in chapter
+    assert "figures/fig_articulated_structural_authority.pdf" in chapter

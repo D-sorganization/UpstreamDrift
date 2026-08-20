@@ -20,6 +20,13 @@ and stops before silently omitting an infeasible selected state.
 | Joint-Limit Scale 0.85 | 52/52 | $1.03\times10^{-10}$ | 0.0885 | 0.0491 |
 | Joint-Limit Scale 1.15 | 52/52 | $1.03\times10^{-10}$ | 0.1185 | 0.0491 |
 
+![Structural Authority Across Registered Engineering Corners](figures/fig_articulated_structural_authority.pdf){#fig-articulated-structural-authority width=100%}
+
+Figure @fig-articulated-structural-authority keeps feasibility, joint-limit
+margin, and coarse collision clearance visually distinct. Red denotes the
+retained low-height failure; it does not denote a participant category or a
+measured risk threshold.
+
 The low-height corner retains one `ik_nonconvergence` result at case 0, phase
 12. Its effectively zero joint-limit margin identifies a boundary-conditioned
 solve in this reduced engineering model. It is neither evidence that a
