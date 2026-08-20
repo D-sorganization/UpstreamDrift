@@ -138,6 +138,26 @@ def test_covariation_api_rejects_forbidden_pseudo_identity(
     assert "cannot be used as player identity" in str(response.json()["detail"])
 
 
+def test_covariation_api_reports_missing_selected_columns_structurally(
+    client: TestClient,
+) -> None:
+    response = client.post(
+        "/tools/launch-monitor-analytics/v2/player-covariation",
+        json={
+            "records": _records(),
+            "request": {
+                "x_column": "face_angle",
+                "y_column": "not_in_source",
+                "player_column": "player_id",
+            },
+            "context": _context(),
+        },
+    )
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Columns not present in dataset: not_in_source"
+
+
 def test_pair_scan_api_returns_ranked_and_unavailable_pairs(
     client: TestClient,
 ) -> None:
