@@ -11,6 +11,8 @@ from scripts.research.proximal_distal_energy.make_articulated_headline_uncertain
     render_headline_uncertainty_figure,
 )
 
+pytestmark = pytest.mark.scientific
+
 
 def _record() -> dict[str, object]:
     return {
