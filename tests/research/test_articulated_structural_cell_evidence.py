@@ -99,6 +99,32 @@ def test_cell_evidence_rejects_paired_values_outside_persistent_support() -> Non
         validate_structural_cell_evidence(evidence)
 
 
+def test_cell_evidence_rejects_support_or_resolution_inconsistency() -> None:
+    nominal = _cells((True, False), (0.0, 0.0))
+    corner = _cells((True, False), (0.004, 0.0))
+    comparison = compare_common_support(nominal, corner)
+    evidence = build_structural_cell_evidence(
+        corner,
+        gate_status=np.ones(2, dtype=bool),
+        failure_class=np.asarray(["none", "none"]),
+        comparison=comparison,
+    )
+    evidence["matched_load_work"][0] = False
+    with pytest.raises(ValueError, match="matched state"):
+        validate_structural_cell_evidence(evidence)
+    assert corner.matched.tolist() == [True, False]
+
+    evidence = build_structural_cell_evidence(
+        corner,
+        gate_status=np.ones(2, dtype=bool),
+        failure_class=np.asarray(["none", "none"]),
+        comparison=comparison,
+    )
+    evidence["corner_minus_nominal_speed_difference_m_s"][0] = 0.0005
+    with pytest.raises(ValueError, match="reproduce change threshold"):
+        validate_structural_cell_evidence(evidence)
+
+
 def test_cell_evidence_rejects_gate_failure_without_classification() -> None:
     cells = _cells((False,), (0.0,))
     with pytest.raises(ValueError, match="failed gates require a failure class"):

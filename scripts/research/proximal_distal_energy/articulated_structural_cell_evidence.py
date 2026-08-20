@@ -69,8 +69,8 @@ def build_structural_cell_evidence(
     """Build one pathway/corner cell pack without inventing paired outcomes."""
 
     size = len(cells.identities)
-    gates = np.asarray(gate_status, dtype=bool)
-    failures = np.asarray(failure_class, dtype=str)
+    gates = np.asarray(gate_status, dtype=bool).copy()
+    failures = np.asarray(failure_class, dtype=str).copy()
     if gates.shape != (size,) or failures.shape != (size,):
         raise ValueError("gate and failure arrays must align with cell identities")
     missing_failure = (~gates) & np.isin(failures, ("", "none", "feasible"))
@@ -116,24 +116,24 @@ def build_structural_cell_evidence(
         "cell_identity": np.asarray(
             [_encoded_identity(value) for value in cells.identities]
         ),
-        "matched_load_work": np.asarray(cells.matched, dtype=bool),
+        "matched_load_work": np.asarray(cells.matched, dtype=bool).copy(),
         "matched_final_speed_difference_m_s": np.asarray(
             cells.final_speed_difference_m_s, dtype=float
-        ),
+        ).copy(),
         "load_match_relative_error": np.asarray(
             cells.load_match_relative_error, dtype=float
-        ),
+        ).copy(),
         "work_match_relative_error": np.asarray(
             cells.work_match_relative_error, dtype=float
-        ),
+        ).copy(),
         "gate_status": gates,
         "failure_class": failures,
         "two_engine_speed_difference_discrepancy_m_s": np.asarray(
             cells.two_engine_speed_difference_discrepancy_m_s, dtype=float
-        ),
+        ).copy(),
         "time_step_speed_difference_discrepancy_m_s": np.asarray(
             cells.time_step_speed_difference_discrepancy_m_s, dtype=float
-        ),
+        ).copy(),
         "resolution_threshold_m_s": threshold,
         "corner_minus_nominal_speed_difference_m_s": outcome_change,
         "resolved_outcome_change": resolved,
@@ -199,6 +199,13 @@ def validate_structural_cell_evidence(arrays: dict[str, Array]) -> None:
     }
     if not set(status.tolist()) <= allowed_status:
         raise ValueError("cell evidence comparison status is not registered")
+    matched = np.asarray(arrays["matched_load_work"], dtype=bool)
+    must_be_matched = np.isin(
+        status, ("persistent_resolved", "persistent_unresolved", "entered_support")
+    )
+    must_be_unmatched = np.isin(status, ("exited_support", "common_unmatched"))
+    if np.any(must_be_matched & ~matched) or np.any(must_be_unmatched & matched):
+        raise ValueError("matched state does not agree with comparison support status")
     persistent = np.isin(status, ("persistent_resolved", "persistent_unresolved"))
     threshold = np.asarray(arrays["resolution_threshold_m_s"], dtype=float)
     outcome_change = np.asarray(
@@ -219,6 +226,9 @@ def validate_structural_cell_evidence(arrays: dict[str, Array]) -> None:
         raise ValueError(
             "resolved outcome status must agree with persistent classification"
         )
+    expected_resolved = persistent & (np.abs(outcome_change) > threshold)
+    if np.any(resolved != expected_resolved):
+        raise ValueError("resolved outcome status does not reproduce change threshold")
     observed = str(np.asarray(arrays["evidence_sha256"]).item())
     if len(observed) != 64 or observed != _digest(arrays):
         raise RuntimeError("cell evidence digest does not reproduce")

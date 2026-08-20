@@ -298,6 +298,8 @@ def build_structural_propagation_plan(
             "nonpersistent_resolution_rule": "store NaN thresholds and false resolved status outside persistent common support",
             "missing_execution_rule": "retain nominal-only and corner-only execution identities separately; label corner-only cells explicitly rather than as common unmatched",
             "paired_outcome_rule": "store finite corner-minus-nominal speed change and resolution only on persistent common support; store NaN and false resolved status elsewhere",
+            "support_consistency_rule": "matching state must agree with entered, exited, persistent, and common-unmatched status; resolved labels must reproduce the stored change and threshold",
+            "ownership_rule": "cell packs own detached copies of input-derived arrays so validation or downstream mutation cannot alter source headline cells",
             "write_policy": "validate then write compressed NPZ through an atomic temporary replacement",
             "assembly_rule": "derive cell identities, outcomes, and gate classifications from one atlas mapping",
             "corner_assembly_rule": "release only complete feasible execution with disjoint retained-failure states, passing global and per-cell gates, aligned common support, and complete authority provenance",
