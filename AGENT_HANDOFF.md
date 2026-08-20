@@ -86,7 +86,7 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     minimum margin; joint-limit-high retains 0.1185 rad. Their maximum closure
     errors are 1.03e-10 m and minimum collision clearances are 0.0491 m. The
     Evidence passes 3/3. A write/validate preflight excludes workers and binds
-    83 feasible/one failed states, scales, authority/model hashes, and both atlases.
+    83 feasible/one failed states, scales, authority/model/full-source hashes.
     The governed feasibility/margin figure has embedded CID TrueType text and
     passes its retained-failure contract. Q2/H5 and the machine-readable
     prediction registry no longer repeat the obsolete failed-closure narrative.
