@@ -15,13 +15,15 @@ from scripts.research.proximal_distal_energy import (
 pytestmark = pytest.mark.scientific
 
 
-def _fake_record(count: int) -> tuple[dict[str, Any], dict[str, Any]]:
+def _fake_record(
+    count: int, *, gates_passed: bool = True
+) -> tuple[dict[str, Any], dict[str, Any]]:
     return (
         {
             "results": {
                 "matched_load_work_cell_count": count,
                 "matched_load_work_total_cell_count": 384,
-                "all_registered_gates_passed": True,
+                "all_registered_gates_passed": gates_passed,
             }
         },
         {},
@@ -54,7 +56,10 @@ def test_campaign_reports_headline_movement_and_retains_failures(
 ) -> None:
     def fake_shaft(config: study.ArticulatedShaftAtlasConfig):
         count = round(126 * config.bending_frequency_scale)
-        return _fake_record(count)
+        return _fake_record(
+            count,
+            gates_passed=config.torsional_stiffness_scale != 1.44,
+        )
 
     def fake_ground(config: study.ArticulatedGroundAtlasConfig):
         if config.ground_free_moment_damping_scale == 1.5:
@@ -78,6 +83,14 @@ def test_campaign_reports_headline_movement_and_retains_failures(
         if row["corner_id"] == "shaft_bending_frequency_scale-high"
     )
     assert bending_high["shaft"]["matched_cell_count_change_from_nominal"] > 0
+    gate_failure = next(
+        row
+        for row in record["corners"]
+        if row["corner_id"] == "shaft_torsional_stiffness_scale-high"
+    )
+    assert gate_failure["shaft"]["status"] == "failed_retained"
+    assert gate_failure["shaft"]["failure_class"] == "RegisteredGateFailure"
+    assert gate_failure["shaft"]["matched_cell_count"] is None
     failed = next(
         row
         for row in record["corners"]

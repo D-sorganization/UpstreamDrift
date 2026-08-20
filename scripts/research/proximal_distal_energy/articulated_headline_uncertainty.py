@@ -183,6 +183,15 @@ def _run_pathway(
             "all_registered_gates_passed": False,
         }
     results = record["results"]
+    if results["all_registered_gates_passed"] is not True:
+        return {
+            "status": "failed_retained",
+            "failure_class": "RegisteredGateFailure",
+            "failure_message": "one or more registered atlas gates failed",
+            "matched_cell_count": None,
+            "total_cell_count": results["matched_load_work_total_cell_count"],
+            "all_registered_gates_passed": False,
+        }
     return {
         "status": "completed",
         "failure_class": None,
@@ -251,7 +260,21 @@ def _existing_rows(
         or design.get("axes") != expected_axes
     ):
         raise RuntimeError("headline uncertainty checkpoint design does not match")
-    return {row["corner_id"]: row for row in record.get("corners", [])}
+    rows = record.get("corners", [])
+    for row in rows:
+        for pathway in ("shaft", "ground"):
+            result = row.get(pathway, {})
+            if (
+                result.get("status") == "completed"
+                and result.get("all_registered_gates_passed") is not True
+            ):
+                result.update(
+                    status="failed_retained",
+                    failure_class="RegisteredGateFailure",
+                    failure_message="one or more registered atlas gates failed",
+                    matched_cell_count=None,
+                )
+    return {row["corner_id"]: row for row in rows}
 
 
 def _not_affected() -> dict[str, Any]:
