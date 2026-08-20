@@ -292,6 +292,8 @@ python3 -m scripts.research.proximal_distal_energy.run_articulated_ground_diagno
 python3 -m scripts.research.proximal_distal_energy.run_articulated_ground_atlas
 python3 -m scripts.research.proximal_distal_energy.run_articulated_ground_posthoc_sensitivity
 python3 -m scripts.research.proximal_distal_energy.make_articulated_ground_figure
+python3 -m scripts.research.proximal_distal_energy.articulated_headline_uncertainty
+python3 -m scripts.research.proximal_distal_energy.make_articulated_headline_uncertainty_figure
 python3 -m scripts.research.proximal_distal_energy.run_spatial_forward_contact_study
 python3 -m scripts.research.proximal_distal_energy.run_uncertainty_control_study
 python3 -m scripts.research.proximal_distal_energy.run_timing_viability_study
