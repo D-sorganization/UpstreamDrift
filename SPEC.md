@@ -485,6 +485,7 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Owner**               | D-sorganization                                    |
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
+| **Current Version**     | 2.1.1                                              |
 | **Spec Version**        | 1.0.554                                            |
 | **Last Spec Update**    | 2026-08-20                                         |
 
