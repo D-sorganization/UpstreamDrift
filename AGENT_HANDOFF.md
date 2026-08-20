@@ -75,7 +75,7 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     branches and can use 20 workers; a real restart-equivalence test passes.
     The shaft atlas remains capped at 12 workers; the campaign uses 20 workers
     for the independent ground branches.
-    The red full-evidence test stays uncommitted until all 19 corners finish.
+    Completion-only headline/structural evidence tests stay untracked until data finish.
   - #8800 is **OPEN** and blocks #8752. Its governed generator regenerates all
     13 phase states for cases 0/8/9/17; nominal is 52/52 feasible and reproduces
     committed states within 1e-8 rad. JSON/NPZ evidence rejects source/content
