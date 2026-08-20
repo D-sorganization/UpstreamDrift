@@ -149,6 +149,34 @@ class ArticulatedAtlasAuthority:
                     states.append((case_index, phase_index))
         return tuple(states)
 
+    def model_hashes(self) -> dict[str, str]:
+        """Return canonical hashes for every selected corner-consistent model."""
+
+        hashes: dict[str, str] = {}
+        for case_index in self.selected_case_indices:
+            case = int(case_index)
+            model, metadata = self.build_case_model(case)
+            hashes[str(case)] = self.validate_case_model(case, model, metadata)
+        return hashes
+
+    def provenance_record(self) -> dict[str, Any]:
+        """Describe the structural authority needed to bind an atlas execution."""
+
+        return {
+            "schema_version": "articulated-atlas-authority/v1",
+            "authority_sha256": self.authority_sha256,
+            "scales": {
+                "height": self.height_scale,
+                "body_mass": self.body_mass_scale,
+                "joint_limit": self.joint_limit_scale,
+            },
+            "selected_case_indices": [
+                int(value) for value in self.selected_case_indices
+            ],
+            "retained_failures": [dict(value) for value in self.selected_failures()],
+            "model_sha256": self.model_hashes(),
+        }
+
     def profile_for_case(self, case_index: int) -> SyntheticSubjectProfile:
         """Return the exact scaled synthetic profile for one selected case."""
 

@@ -86,6 +86,36 @@ def test_authority_rejects_invalid_phase_access(authority) -> None:
         authority.feasible_states((0,), (-1,))
 
 
+def test_authority_provenance_binds_scales_failures_and_models(authority) -> None:
+    feasible = authority.feasible.copy()
+    feasible[0, 12] = False
+    failure_class = authority.failure_class.copy()
+    failure_class[0, 12] = "ik_nonconvergence"
+    corner = replace(
+        authority,
+        feasible=feasible,
+        failure_class=failure_class,
+        height_scale=0.90,
+        body_mass_scale=0.85,
+        joint_limit_scale=1.15,
+        authority_sha256="a" * 64,
+    )
+
+    record = corner.provenance_record()
+
+    assert record["authority_sha256"] == "a" * 64
+    assert record["scales"] == {
+        "height": 0.90,
+        "body_mass": 0.85,
+        "joint_limit": 1.15,
+    }
+    assert record["retained_failures"] == [
+        {"case_index": 0, "phase_index": 12, "failure_class": "ik_nonconvergence"}
+    ]
+    assert set(record["model_sha256"]) == {"0", "8", "9", "17"}
+    assert all(len(value) == 64 for value in record["model_sha256"].values())
+
+
 def test_authority_rejects_unregistered_case_access(authority) -> None:
     with pytest.raises(ValueError, match="selected case"):
         authority.build_case_model(1)
