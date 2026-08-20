@@ -3,7 +3,7 @@
   "status": "ready",
   "authority_campaign_sha256": "d8115073dc1b506f145196b08c96d7cb3cf00e8cf29099970e2f7b0fbe6d63f3",
   "design_sha256": "8e5f246645e27c8f0f66a87859c63c470c43e579bccb50848124174944e11e07",
-  "contract_sha256": "de7b1d4f982cfee55bed3c8dbabb20a993e1eab96773b4b0d135ecde53f0bda6",
+  "contract_sha256": "b88a37a70840181204f42a145abf6ba62147e35a6b2c8b036def0811577fb326",
   "design": {
     "case_indices": [
       0,
@@ -229,6 +229,34 @@
         "load": "peak grip force",
         "work": "terminal total dissipated work"
       }
+    },
+    "gate_derivation": {
+      "shaft": {
+        "compared_branches": [
+          "rigid",
+          "coupled"
+        ],
+        "per_cell_components": [
+          "numerical_gates_passed",
+          "parity_gates_passed",
+          "small_deflection_gate_passed",
+          "twist_gate_passed"
+        ]
+      },
+      "ground": {
+        "compared_branches": [
+          "fixed",
+          "coupled"
+        ],
+        "per_cell_components": [
+          "primary_numerical",
+          "primary_parity"
+        ]
+      },
+      "branch_rule": "a cell passes only when both compared branches pass every registered per-cell component",
+      "parity_rule": "branch parity is evaluated once per state velocity step and horizon, then broadcast identically across both engine identities",
+      "failure_rule": "retain every failed component in deterministic registered order; do not collapse simultaneous failures",
+      "release_rule": "per-cell comparison gates do not replace the corner-level all_registered_gates_passed release control"
     },
     "cell_evidence_storage": {
       "schema_version": "articulated-structural-cell-evidence/v1",
@@ -898,13 +926,15 @@
     "scripts/research/proximal_distal_energy/articulated_scaled_authority.py": "6d41ef265dd88d61bdf70f1ff78a17716c9293e6260f307c253df43f441b7d83",
     "scripts/research/proximal_distal_energy/articulated_structural_common_support.py": "d413fd0a6d95cebf760cb4b715f6038d2fea86ec5afbeb6b337fe988fead7165",
     "scripts/research/proximal_distal_energy/articulated_structural_cell_evidence.py": "96a7905bf14d1ac4d134ac589465f9135c67a13066338121ae705ef8e3158755",
+    "scripts/research/proximal_distal_energy/articulated_structural_gate_status.py": "d3d8fa2a1421d9f85d97c99657e72995e4b6971fa96a029d7c41edd7308bb748",
     "scripts/research/proximal_distal_energy/articulated_structural_result.py": "c7080d6ad97383612562bbf8b1f127c61cad0bd968ac776636fc4c45632466c2",
     "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py": "166ab2ebec88a0c53abc54c6b565ba0a3f82caf800449e822164177f31289549",
-    "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": "814f7134dd1ac16bec924fdf41d160c623a6f57f5c047d7162b2c9aec9e3d4e1",
+    "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": "598cec183b537f1b2c2a4fc1f36fe2a806ca7345f312619e3253d2d458cae4ed",
     "tests/research/test_articulated_structural_common_support.py": "09b30a814ad300a7b6a9b729ba61c8ea65817bd9510d0daa1e1fe70f3a70b9b1",
     "tests/research/test_articulated_structural_cell_evidence.py": "5fdfc728e56123af9936a3f1aa8b06abff7df74978a3bfa35c588036c08c0c81",
+    "tests/research/test_articulated_structural_gate_status.py": "b13daca404fdb1643ebabb04d00561a36100349006623b889ba391cf283a9323",
     "tests/research/test_articulated_structural_result.py": "e6fd8a2ee9872955bd2cc4eb06f39c291e3971bc3a1dd942beaa9620ad5f8a92",
-    "tests/research/test_articulated_structural_propagation_plan.py": "669eedd38885a692ce5aedf35861a24b3b70578044ef43fda2275b405b7bbf64",
+    "tests/research/test_articulated_structural_propagation_plan.py": "b4d660cece18887ed78334524e36fce6fe6bbe5ddb55fbf97875805f9a41c8bb",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "8eed52fe4ebbc55fcf753f4703330dd6d768281b0babfbb2adca074b862fc36d",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
     "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json": "f07fc33cc76fb80f395cd10b01a30169b6440cec3854be3894024d435bc0f722",

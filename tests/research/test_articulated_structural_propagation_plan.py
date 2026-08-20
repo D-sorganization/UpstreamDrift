@@ -45,11 +45,13 @@ def test_plan_binds_all_seven_authority_corners(plan) -> None:
         "scripts/research/proximal_distal_energy/articulated_atlas_authority.py",
         "scripts/research/proximal_distal_energy/articulated_structural_common_support.py",
         "scripts/research/proximal_distal_energy/articulated_structural_cell_evidence.py",
+        "scripts/research/proximal_distal_energy/articulated_structural_gate_status.py",
         "scripts/research/proximal_distal_energy/articulated_structural_result.py",
         "scripts/research/proximal_distal_energy/articulated_shaft_forward.py",
         "scripts/research/proximal_distal_energy/articulated_ground_forward.py",
         "tests/research/test_articulated_structural_common_support.py",
         "tests/research/test_articulated_structural_cell_evidence.py",
+        "tests/research/test_articulated_structural_gate_status.py",
         "tests/research/test_articulated_structural_result.py",
         "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
     } < set(plan["source_sha256"])
@@ -160,6 +162,24 @@ def test_plan_binds_restart_and_cell_level_evidence_contract(plan) -> None:
         "load": "peak grip force",
         "work": "terminal total dissipated work",
     }
+    gates = evidence["gate_derivation"]
+    assert gates["shaft"] == {
+        "compared_branches": ["rigid", "coupled"],
+        "per_cell_components": [
+            "numerical_gates_passed",
+            "parity_gates_passed",
+            "small_deflection_gate_passed",
+            "twist_gate_passed",
+        ],
+    }
+    assert gates["ground"] == {
+        "compared_branches": ["fixed", "coupled"],
+        "per_cell_components": ["primary_numerical", "primary_parity"],
+    }
+    assert "both compared branches" in gates["branch_rule"]
+    assert "broadcast identically" in gates["parity_rule"]
+    assert "every failed component" in gates["failure_rule"]
+    assert "do not replace" in gates["release_rule"]
     storage = evidence["cell_evidence_storage"]
     assert storage["schema_version"] == "articulated-structural-cell-evidence/v1"
     assert "without pickle" in storage["identity_encoding"]
