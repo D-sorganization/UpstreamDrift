@@ -69,6 +69,22 @@ def test_authority_retains_and_rejects_infeasible_selected_state(authority) -> N
     with pytest.raises(RuntimeError, match="selected authority states are infeasible"):
         failed.require_selected_feasible()
 
+    model, metadata = failed.build_case_model(0)
+    assert failed.validate_case_model(0, model, metadata) == model.canonical_hash
+    assert failed.feasible_states((0,), (3, 4, 5)) == ((0, 3), (0, 5))
+    with pytest.raises(
+        RuntimeError,
+        match="case=0, phase=4, failure=joint_limit_failure",
+    ):
+        failed.require_state_feasible(0, 4)
+
+
+def test_authority_rejects_invalid_phase_access(authority) -> None:
+    with pytest.raises(ValueError, match="phase_index"):
+        authority.require_state_feasible(0, 13)
+    with pytest.raises(ValueError, match="phase_index"):
+        authority.feasible_states((0,), (-1,))
+
 
 def test_authority_rejects_unregistered_case_access(authority) -> None:
     with pytest.raises(ValueError, match="selected case"):

@@ -119,6 +119,36 @@ class ArticulatedAtlasAuthority:
                 f"selected authority states are infeasible: {len(failures)} failure(s)"
             )
 
+    def require_state_feasible(self, case_index: int, phase_index: int) -> None:
+        """Reject one failed phase without invalidating other phases in its case."""
+
+        self._require_selected_case(case_index)
+        if not isinstance(phase_index, int) or not 0 <= phase_index < 13:
+            raise ValueError("phase_index must lie in [0, 13)")
+        if not self.feasible[case_index, phase_index]:
+            failure = str(self.failure_class[case_index, phase_index])
+            raise RuntimeError(
+                "selected authority state is infeasible: "
+                f"case={case_index}, phase={phase_index}, failure={failure}"
+            )
+
+    def feasible_states(
+        self,
+        case_indices: tuple[int, ...],
+        phase_indices: tuple[int, ...],
+    ) -> tuple[tuple[int, int], ...]:
+        """Return the feasible subset of a registered Cartesian state design."""
+
+        states: list[tuple[int, int]] = []
+        for case_index in case_indices:
+            self._require_selected_case(case_index)
+            for phase_index in phase_indices:
+                if not isinstance(phase_index, int) or not 0 <= phase_index < 13:
+                    raise ValueError("phase_index must lie in [0, 13)")
+                if self.feasible[case_index, phase_index]:
+                    states.append((case_index, phase_index))
+        return tuple(states)
+
     def profile_for_case(self, case_index: int) -> SyntheticSubjectProfile:
         """Return the exact scaled synthetic profile for one selected case."""
 
@@ -135,9 +165,9 @@ class ArticulatedAtlasAuthority:
         )
 
     def build_case_model(self, case_index: int) -> tuple[SpatialModel, dict[str, Any]]:
-        """Build the corner-consistent model and reject an infeasible case."""
+        """Build the corner-consistent model independently of phase feasibility."""
 
-        self._require_case_feasible(case_index)
+        self._require_selected_case(case_index)
         return build_subject_scaled_model(self.profile_for_case(case_index))
 
     def validate_case_model(
@@ -160,11 +190,6 @@ class ArticulatedAtlasAuthority:
             self.selected_case_indices.tolist()
         ):
             raise ValueError("case_index must be a selected case")
-
-    def _require_case_feasible(self, case_index: int) -> None:
-        self._require_selected_case(case_index)
-        if not np.all(self.feasible[case_index]):
-            raise RuntimeError("selected authority states are infeasible")
 
 
 __all__ = ["ArticulatedAtlasAuthority"]
