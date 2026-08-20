@@ -209,12 +209,44 @@ def build_structural_propagation_plan(
         "interaction_rule": "one-at-a-time corners do not estimate higher-order parameter interactions",
         "multiplicity": "report all registered OAT corners descriptively; do not select favorable corners or assign confirmatory p-values",
     }
+    evidence_contract = {
+        "schema_version": "articulated-structural-propagation/v1",
+        "checkpoint_identity_fields": [
+            "corner_id",
+            "authority_sha256",
+            "scales",
+            "model_sha256",
+            "atlas_source_sha256",
+            "scientific_configuration_sha256",
+            "state_slot",
+            "state",
+            "pathway",
+            "branch_kind",
+            "branch_slot",
+        ],
+        "required_cell_arrays": {
+            pathway: [
+                "cell_identity",
+                "match_mask",
+                "final_speed_difference_m_s",
+                "peak_load_match_relative_error",
+                "dissipated_work_match_relative_error",
+                "gate_status",
+                "failure_class",
+            ]
+            for pathway in ("shaft", "ground")
+        },
+        "write_policy": "write checkpoints and the final record atomically",
+        "completion_policy": "complete only after all seven corners are accounted for",
+        "partial_record_policy": "an in-progress or partial record must not qualify as release evidence",
+    }
     contract_sha = hashlib.sha256(
         json.dumps(
             {
                 "design_sha256": design_sha,
                 "acceptance": acceptance,
                 "analysis": analysis,
+                "evidence_contract": evidence_contract,
             },
             sort_keys=True,
             separators=(",", ":"),
@@ -229,6 +261,7 @@ def build_structural_propagation_plan(
         "design": design,
         "acceptance": acceptance,
         "analysis": analysis,
+        "evidence_contract": evidence_contract,
         "corners": corners,
         "source_sha256": {path: _sha256(ROOT / path) for path in SOURCE_PATHS},
         "limitations": {

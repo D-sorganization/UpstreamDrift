@@ -98,6 +98,39 @@ def test_plan_requires_common_support_and_rejects_count_as_benefit(plan) -> None
     assert "do not select favorable corners" in analysis["multiplicity"]
 
 
+def test_plan_binds_restart_and_cell_level_evidence_contract(plan) -> None:
+    evidence = plan["evidence_contract"]
+
+    assert evidence["schema_version"] == "articulated-structural-propagation/v1"
+    assert set(evidence["checkpoint_identity_fields"]) == {
+        "corner_id",
+        "authority_sha256",
+        "scales",
+        "model_sha256",
+        "atlas_source_sha256",
+        "scientific_configuration_sha256",
+        "state_slot",
+        "state",
+        "pathway",
+        "branch_kind",
+        "branch_slot",
+    }
+    for pathway in ("shaft", "ground"):
+        required = set(evidence["required_cell_arrays"][pathway])
+        assert {
+            "cell_identity",
+            "match_mask",
+            "final_speed_difference_m_s",
+            "peak_load_match_relative_error",
+            "dissipated_work_match_relative_error",
+            "gate_status",
+            "failure_class",
+        } <= required
+    assert "atomic" in evidence["write_policy"]
+    assert "all seven corners" in evidence["completion_policy"]
+    assert "must not qualify" in evidence["partial_record_policy"]
+
+
 def test_nominal_plan_reproduces_registered_atlas_sizes(plan) -> None:
     nominal = plan["corners"][0]
 

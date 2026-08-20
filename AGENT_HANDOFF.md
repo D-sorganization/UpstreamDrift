@@ -95,6 +95,8 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     evidence passes 3/3. Write/validate preflight excludes workers, requires common
     support, binds 83/1 states, full hashes, invalidators, scaling-mismatch and
     infeasible-limit controls, tolerance-aware resolution, and engineering secants.
+    Its v1 evidence contract preserves checkpoint identity and per-cell match,
+    outcome, error, gate, and failure arrays; partial records cannot qualify.
     The governed feasibility/margin figure has embedded CID TrueType text and
     passes its retained-failure contract. Q2/H5 and the machine-readable
     prediction registry no longer repeat the obsolete failed-closure narrative.
