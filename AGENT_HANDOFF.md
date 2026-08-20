@@ -81,7 +81,17 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     Inspect it and the checkpoint before starting anything. The red evidence
     test is `test_articulated_headline_uncertainty_evidence.py`; paper methods,
     artifact documentation, source hashes, and summary contract are implemented.
-    Full data, figure, claims/release integration, and publication remain.
+    Full data, figure, claims/release integration, and publication remain. Do
+    not close #8752 from the 19-corner campaign alone: issue reconciliation on
+    2026-08-20 confirmed that its headline corners cover grip, shaft, and
+    finite-ground constitutive bounds, while height, body-mass, and joint-limit
+    perturbations currently enter only the separate closed-state/LHS failure
+    map. The committed `articulated_uncertainty_study` artifact also predates
+    the improved closure-regeneration implementation. Regenerate and govern
+    that artifact, then either propagate registered anthropometric and
+    joint-limit corners through both headline atlases or record an explicit
+    issue-level acceptance amendment; the present evidence must not be
+    described as full headline propagation over every bound named by #8752.
 - The release has 295 atomic claims and 40 reviewed release claims; all 40
   retain at least one scientifically open gate. #8724 still owns normalized
   four-way adjudication and independent review.
