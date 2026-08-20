@@ -1,11 +1,12 @@
 {
-  "schema_version": "proximal-distal-claim-evidence-integrity-v1",
+  "schema_version": "proximal-distal-claim-evidence-integrity-v2",
   "registry": {
     "path": "docs/research/proximal_distal_energy_transfer/data/claim_audit_registry.json",
     "sha256": "3e502309d5dfda76e4133b5b144fd971ff724da0ee91c221a7d6aa2cd6dbe313"
   },
   "scope": {
     "local_artifact_semantics": "content_integrity_not_independent_validation",
+    "artifact_canonicalization": "utf8_crlf_to_lf;binary_raw",
     "external_url_semantics": "inventory_only_not_scientific_validation",
     "network_access_required": false
   },
@@ -5271,8 +5272,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "e30f03d0f0d4ba90e8a80f012d09ec2fa48d1ced024bc1b88138123fba09431e",
-      "bytes": 128094,
+      "sha256": "fcb8453af9e55bc0ad1caffe73d528a301beab085d4652eac608101086231a30",
+      "bytes": 128758,
       "referenced_by": [
         "PD-CLAIM-241"
       ]
@@ -5556,8 +5557,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/extract_wscg_charts.py": {
-      "sha256": "d7a7bd2811b9e91fc413d431c6af37ca520ca0b51f75f71579b7ecd58a215bb5",
-      "bytes": 4931,
+      "sha256": "061978934e128d134cc1ca638bab2ec2ea93181910aeca4754fa64daabbb4ec9",
+      "bytes": 4901,
       "referenced_by": [
         "PD-CLAIM-060"
       ]
@@ -6573,29 +6574,29 @@
       ]
     },
     "src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/core/processing/calculate_work_impulse.m": {
-      "sha256": "0bca8f376b1af178bce9d418e6020a2b168190ba23892b5201a86041b5f855b4",
-      "bytes": 12314,
+      "sha256": "1faa482381017eec3cf610d14efce1461f5fff868c2233cff401ac3b22d98ad4",
+      "bytes": 12031,
       "referenced_by": [
         "PD-CLAIM-096"
       ]
     },
     "src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/core/processing/process_data_tables.m": {
-      "sha256": "2ade479df0cba455967bca061885479ee586029467a93c90c61927c1148ee41f",
-      "bytes": 5317,
+      "sha256": "5a858d7445a1a79e7d6ab437becebcaa70972c95ba4ffcb0e16951497f3ff5f7",
+      "bytes": 5181,
       "referenced_by": [
         "PD-CLAIM-096"
       ]
     },
     "src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/core/simulation/run_single_ztcf_point.m": {
-      "sha256": "d2d243f2986c80aa987af19207e33181a23109d3c5344ae68a3341247de55089",
-      "bytes": 1801,
+      "sha256": "85946656fd37823a122ab41dc81814dc57c9da0ede5553f0de887ba284e70c5b",
+      "bytes": 1740,
       "referenced_by": [
         "PD-CLAIM-096"
       ]
     },
     "src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/core/simulation/run_ztcf_simulation.m": {
-      "sha256": "a81c2856efdcd9385a04d018926efa1ce33de9fe4b653502339af99f9544eaec",
-      "bytes": 9414,
+      "sha256": "53040cbedf510d4a89fbde9bc0965e6196d94fbdaf3527f2e044ad707c2e929f",
+      "bytes": 9118,
       "referenced_by": [
         "PD-CLAIM-096"
       ]

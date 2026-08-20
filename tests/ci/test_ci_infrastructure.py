@@ -858,6 +858,7 @@ class TestCIEnvironmentCompatibility:
             "repo-structure-gates",
             "tests",
             "unit-test-gate",
+            "publication-quality",
             "rust-wheel-parity",
         }
         assert job["if"] == "always()"
@@ -869,8 +870,11 @@ class TestCIEnvironmentCompatibility:
         aggregate = aggregate_step["run"]
 
         assert aggregate_step["env"]["TESTS"] == "${{ needs.tests.result }}"
+        assert aggregate_step["env"]["PUBLICATION_QUALITY"] == (
+            "${{ needs.publication-quality.result }}"
+        )
 
-        # A docs-only PR skips the six gates, so `skipped` has to be accepted -
+        # A docs-only PR skips the general gates, so `skipped` has to be accepted -
         # but only once the prerequisites that decide the skip have themselves
         # succeeded, otherwise an infrastructure failure would skip everything
         # and read as a pass.
@@ -908,6 +912,9 @@ class TestCIEnvironmentCompatibility:
         assert "paths" not in pull_request
         assert workflow["jobs"]["changed-paths"]["outputs"]["code"] == (
             "${{ steps.detect.outputs.code }}"
+        )
+        assert workflow["jobs"]["changed-paths"]["outputs"]["publication"] == (
+            "${{ steps.detect.outputs.publication }}"
         )
 
     def test_ci_standard_repo_structure_installs_workflow_parser(self) -> None:

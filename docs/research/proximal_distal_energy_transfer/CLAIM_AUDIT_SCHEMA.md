@@ -19,6 +19,11 @@ The machine-readable authorities are:
   claim-specific scientific qualification and availability snapshot for every
   external reference.
 
+The evidence manifest canonicalizes CRLF to LF for valid UTF-8 evidence before
+computing its SHA-256 digest and byte count; binary evidence remains byte-exact.
+This keeps the same committed text portable across Windows and Linux checkouts
+without weakening binary artifact identity.
+
 ## Candidate Inventory
 
 `python -m scripts.research.proximal_distal_energy.claim_audit inventory`

@@ -83,6 +83,9 @@ _RELEASE_METADATA: dict[str, Any] = {
         "external_source_review": (
             "offline_url_complete_work_and_claim_adjudication_embedded_in_artifacts"
         ),
+        "publication_quality": (
+            "runtime_revision_and_manifest_digest_bound_every_page_pdf_inspection"
+        ),
     },
     "presets": {
         "double_pendulum": {

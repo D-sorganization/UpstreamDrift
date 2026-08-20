@@ -135,6 +135,9 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
     assert manifest["integrity_authorities"]["external_source_review"].startswith(
         "offline_url_complete"
     )
+    assert manifest["integrity_authorities"]["publication_quality"].startswith(
+        "runtime_revision_and_manifest_digest_bound"
+    )
     assert not any(
         path.endswith("claim_evidence_manifest.json") for path in manifest["artifacts"]
     )
@@ -144,6 +147,9 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
     assert any(
         path.endswith("fig_shoulder_velocity_strategy_pareto.pdf")
         for path in manifest["artifacts"]
+    )
+    assert any(
+        path.endswith("publication_quality.py") for path in manifest["artifacts"]
     )
 
 

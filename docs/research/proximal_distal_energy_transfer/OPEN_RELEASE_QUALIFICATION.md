@@ -35,9 +35,20 @@ python -m scripts.research.proximal_distal_energy.qualify_open_release validate
 `validate` fails on a missing file, changed bytes, unsafe path, or record
 mismatch. Regeneration is an explicit `write` action after all scientific and
 visual gates pass; validation never silently updates expected hashes.
-The final lossless compaction gate preserves page, URI-link, and outline
-counts. It applies no arbitrary manuscript-size ceiling; repository CI instead
-checks PDF identity and GitHub's 100,000,000-byte hard file boundary.
+The final lossless compaction and web-linearization gate preserves page,
+URI-link, and outline counts. The publication-quality gate then binds the PDF
+to an exact source revision and release-manifest digest, renders every page,
+validates navigation and metadata, and reports font and tagged-structure
+posture. It applies no arbitrary manuscript-size ceiling; repository CI instead
+checks PDF identity and GitHub's 100,000,000-byte hard file boundary. See
+[`PUBLICATION_QUALITY.md`](PUBLICATION_QUALITY.md) for the normative profile and
+cross-repository publication contract.
+
+The current 231-page candidate passes the computational publication profile
+and is linearized for fast web access. It does not pass the archival profile:
+the PDF remains untagged and retains Type 3 and unembedded font resources. No
+archival-accessibility claim is made until those findings are closed and the
+full document is visually reinspected.
 
 ## Claim Status
 
@@ -62,6 +73,8 @@ checks PDF identity and GitHub's 100,000,000-byte hard file boundary.
   declared tiers; full dynamic-state and trajectory parity across all five
   engines remains untested.
 - Human experimental predictions remain untested.
+- Computational publication readiness does not promote an untested human,
+  equipment-calibration, or coaching claim.
 
 ## License and Source Boundaries
 

@@ -231,6 +231,7 @@ the finding-by-finding record in
 | [`EXPERIMENTAL_FALSIFICATION_PROTOCOL.md`](EXPERIMENTAL_FALSIFICATION_PROTOCOL.md)                   | Frozen human-data acquisition, split, analysis, and inference-boundary protocol   |
 | [`REVIEWER_WORKBENCH.md`](REVIEWER_WORKBENCH.md)                                                     | Claim-first figure, evidence, and download index by model tier                    |
 | [`COMPANION_WORKBENCH.md`](COMPANION_WORKBENCH.md)                                                   | Interactive PyQt6 and React/Tauri model guide, experiments, and evidence boundary |
+| [`PUBLICATION_QUALITY.md`](PUBLICATION_QUALITY.md)                                                   | PDF quality profiles, source authority, protected publication, and handoff        |
 | [`ADVERSARIAL_REVIEW_ADJUDICATION.md`](ADVERSARIAL_REVIEW_ADJUDICATION.md)                           | Verified disposition and remediation record for the independent technical review  |
 | [`DATA_DICTIONARY.md`](DATA_DICTIONARY.md)                                                           | Artifact and recurring-field definitions with interpretation boundaries           |
 | [`release_manifest.json`](release_manifest.json)                                                     | Hash-pinned presets, claim status, artifacts, and open release gates              |
@@ -329,16 +330,24 @@ python3 -m scripts.research.proximal_distal_energy.make_uncertainty_control_figu
 python3 -m scripts.research.proximal_distal_energy.run_bilateral_wrench_identifiability_study
 python3 -m scripts.research.proximal_distal_energy.run_bilateral_wrench_sensor_qualification
 # document
+python3 -m pip install -e '.[publication]'
 cd docs/research/proximal_distal_energy_transfer
 quarto render proximal_distal_energy_transfer.qmd --to pdf
 cd ../../..
 python3 -m scripts.research.proximal_distal_energy.optimize_article_pdf
+python3 -m scripts.research.proximal_distal_energy.qualify_open_release validate \
+  --source-revision "$(git rev-parse HEAD)" \
+  --publication-profile computational
 ```
 
 Requires Quarto + a LaTeX distribution (TeX Live with `lmodern`), and
 Python 3.11+ with `numpy`, `matplotlib`, `pydantic`, `simpleeval`,
-`pandas`, and `pymupdf`. The final command performs lossless PDF object/stream
-compaction and fails if the page, URI-link, or outline contract changes.
+`pandas`, `pymupdf`, and `pikepdf`. The optimizer performs lossless PDF
+object/stream compaction plus web linearization and fails if the page,
+URI-link, or outline contract changes. The final validation binds the PDF to
+the exact source revision and release-manifest digest, renders every page, and
+reports the separate computational and archival publication profiles described
+in [`PUBLICATION_QUALITY.md`](PUBLICATION_QUALITY.md).
 Experiments are deterministic. The open-chain studies use fixed-step RK4; the
 forward constrained two-hand study uses velocity Verlet with mass-metric
 position and velocity projection. Parameters and numerical contracts are
