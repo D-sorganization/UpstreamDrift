@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 from scripts.research.proximal_distal_energy.articulated_structural_propagation_plan import (
+    CAMPAIGN,
     build_structural_propagation_plan,
 )
 
@@ -42,7 +43,8 @@ def test_nominal_plan_reproduces_registered_atlas_sizes(plan) -> None:
     assert nominal["feasible_state_count"] == 12
     assert nominal["expected_shaft_trajectory_count"] == 384
     assert nominal["expected_ground_trajectory_count"] == 576
-    assert nominal["expected_headline_cell_count_per_atlas"] == 384
+    assert nominal["expected_shaft_headline_cell_count"] == 384
+    assert nominal["expected_ground_headline_cell_count"] == 384
 
 
 def test_low_height_plan_retains_failure_and_runs_other_states(plan) -> None:
@@ -58,7 +60,8 @@ def test_low_height_plan_retains_failure_and_runs_other_states(plan) -> None:
     assert [0, 12] not in low_height["feasible_states"]
     assert low_height["expected_shaft_trajectory_count"] == 352
     assert low_height["expected_ground_trajectory_count"] == 528
-    assert low_height["expected_headline_cell_count_per_atlas"] == 352
+    assert low_height["expected_shaft_headline_cell_count"] == 352
+    assert low_height["expected_ground_headline_cell_count"] == 352
 
 
 def test_every_corner_binds_models_and_accounts_for_states(plan) -> None:
@@ -76,3 +79,23 @@ def test_committed_plan_is_exactly_reproducible(plan) -> None:
     committed = json.loads(COMMITTED.read_text(encoding="utf-8"))
 
     assert committed == plan
+
+
+def test_plan_rejects_incomplete_campaign(tmp_path) -> None:
+    campaign = json.loads(CAMPAIGN.read_text(encoding="utf-8"))
+    campaign["status"] = "in_progress"
+    candidate = tmp_path / "campaign.json"
+    candidate.write_text(json.dumps(campaign), encoding="utf-8")
+
+    with pytest.raises(RuntimeError, match="must be complete"):
+        build_structural_propagation_plan(candidate)
+
+
+def test_plan_rejects_campaign_authority_digest_mismatch(tmp_path) -> None:
+    campaign = json.loads(CAMPAIGN.read_text(encoding="utf-8"))
+    campaign["corners"][0]["authority_sha256"] = "b" * 64
+    candidate = tmp_path / "campaign.json"
+    candidate.write_text(json.dumps(campaign), encoding="utf-8")
+
+    with pytest.raises(RuntimeError, match="digests do not match"):
+        build_structural_propagation_plan(candidate)

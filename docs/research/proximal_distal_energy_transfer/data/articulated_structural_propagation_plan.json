@@ -84,7 +84,8 @@
       ],
       "expected_shaft_trajectory_count": 384,
       "expected_ground_trajectory_count": 576,
-      "expected_headline_cell_count_per_atlas": 384,
+      "expected_shaft_headline_cell_count": 384,
+      "expected_ground_headline_cell_count": 384,
       "authority": {
         "schema_version": "articulated-atlas-authority/v1",
         "authority_sha256": "2554dc6750ec03415c98761670bd6f21facb1e6213eba5909723dfbe9e77ff45",
@@ -130,7 +131,8 @@
       ],
       "expected_shaft_trajectory_count": 352,
       "expected_ground_trajectory_count": 528,
-      "expected_headline_cell_count_per_atlas": 352,
+      "expected_shaft_headline_cell_count": 352,
+      "expected_ground_headline_cell_count": 352,
       "authority": {
         "schema_version": "articulated-atlas-authority/v1",
         "authority_sha256": "69de8badceb381d88d23a8870e2da2156e7901d55080ac57239bc3459e36d95b",
@@ -177,7 +179,8 @@
       ],
       "expected_shaft_trajectory_count": 384,
       "expected_ground_trajectory_count": 576,
-      "expected_headline_cell_count_per_atlas": 384,
+      "expected_shaft_headline_cell_count": 384,
+      "expected_ground_headline_cell_count": 384,
       "authority": {
         "schema_version": "articulated-atlas-authority/v1",
         "authority_sha256": "5215a93249e243d3d06ade163e7a247bb1fcc71c295ae30a9afff7a48991e66c",
@@ -218,7 +221,8 @@
       ],
       "expected_shaft_trajectory_count": 384,
       "expected_ground_trajectory_count": 576,
-      "expected_headline_cell_count_per_atlas": 384,
+      "expected_shaft_headline_cell_count": 384,
+      "expected_ground_headline_cell_count": 384,
       "authority": {
         "schema_version": "articulated-atlas-authority/v1",
         "authority_sha256": "1bf48bc3ac7d0e4981f9f6800b5b78f1482f2117c24a79529ca50e11f9c0ef6f",
@@ -259,7 +263,8 @@
       ],
       "expected_shaft_trajectory_count": 384,
       "expected_ground_trajectory_count": 576,
-      "expected_headline_cell_count_per_atlas": 384,
+      "expected_shaft_headline_cell_count": 384,
+      "expected_ground_headline_cell_count": 384,
       "authority": {
         "schema_version": "articulated-atlas-authority/v1",
         "authority_sha256": "c31a07a40b36c8046cb47f5cf55333ba9fb3ad42afe446463b7c31743535a601",
@@ -300,7 +305,8 @@
       ],
       "expected_shaft_trajectory_count": 384,
       "expected_ground_trajectory_count": 576,
-      "expected_headline_cell_count_per_atlas": 384,
+      "expected_shaft_headline_cell_count": 384,
+      "expected_ground_headline_cell_count": 384,
       "authority": {
         "schema_version": "articulated-atlas-authority/v1",
         "authority_sha256": "8688c2121b31fb8f36841cf3a952b37116990993b302b72218a1a69acc596d26",
@@ -341,7 +347,8 @@
       ],
       "expected_shaft_trajectory_count": 384,
       "expected_ground_trajectory_count": 576,
-      "expected_headline_cell_count_per_atlas": 384,
+      "expected_shaft_headline_cell_count": 384,
+      "expected_ground_headline_cell_count": 384,
       "authority": {
         "schema_version": "articulated-atlas-authority/v1",
         "authority_sha256": "1e8c4f2cdc558de9ef9d3b7504c072a7fa43903f27512f656dc59c55e71fcd1f",
@@ -363,8 +370,8 @@
   ],
   "source_sha256": {
     "scripts/research/proximal_distal_energy/articulated_atlas_authority.py": "191174f7fea921a3b52054f85d735b45ee0ca93090aaa733f59221d45de0af0d",
-    "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": "8bb1d6171b50c5d0f9c3563284a7941e35bba8ad96a1ebeaa1c032b389cc99c7",
-    "tests/research/test_articulated_structural_propagation_plan.py": "be263cff180cd6f80e729ca3799d1301a30d1b3fcd3de431e0513c8b45b7d12e"
+    "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": "af17cd09fde7e816131e263cf9d092ab56fca33b790333f531114fc01969beb9",
+    "tests/research/test_articulated_structural_propagation_plan.py": "be0aa654748039da7a9d652d2cc9601cee16fec2419db1165e35ee17bd96d797"
   },
   "limitations": {
     "scope": "engineering OAT corners, not a participant distribution",

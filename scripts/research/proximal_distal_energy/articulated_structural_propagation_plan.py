@@ -72,8 +72,15 @@ def _corner_plan(
     failures = _planned_failures(authority, states)
     if len(feasible) + len(failures) != len(states):
         raise RuntimeError("every requested state must be feasible or retained failed")
-    paired_cells = (
+    shaft_headline_cells = (
         len(feasible) * 2 * len(shaft.forward.time_steps_s) * 2 * len(shaft.horizons_s)
+    )
+    ground_headline_cells = (
+        len(feasible)
+        * 2
+        * len(ground.forward.time_steps_s)
+        * 2
+        * len(ground.horizons_s)
     )
     return {
         "corner_id": row["corner_id"],
@@ -92,7 +99,8 @@ def _corner_plan(
         * 2
         * len(ground.forward.time_steps_s)
         * 2,
-        "expected_headline_cell_count_per_atlas": paired_cells,
+        "expected_shaft_headline_cell_count": shaft_headline_cells,
+        "expected_ground_headline_cell_count": ground_headline_cells,
         "authority": authority.provenance_record(),
     }
 
