@@ -33,8 +33,10 @@ SOURCE_PATHS = tuple(
         (
             "scripts/research/proximal_distal_energy/articulated_atlas_authority.py",
             "scripts/research/proximal_distal_energy/articulated_scaled_authority.py",
+            "scripts/research/proximal_distal_energy/articulated_structural_common_support.py",
             "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py",
             "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py",
+            "tests/research/test_articulated_structural_common_support.py",
             "tests/research/test_articulated_structural_propagation_plan.py",
             *SHAFT_SOURCE_PATHS,
             *GROUND_SOURCE_PATHS,

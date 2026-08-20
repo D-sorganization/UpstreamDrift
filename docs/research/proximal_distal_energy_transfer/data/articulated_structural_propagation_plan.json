@@ -887,9 +887,11 @@
   "source_sha256": {
     "scripts/research/proximal_distal_energy/articulated_atlas_authority.py": "191174f7fea921a3b52054f85d735b45ee0ca93090aaa733f59221d45de0af0d",
     "scripts/research/proximal_distal_energy/articulated_scaled_authority.py": "6d41ef265dd88d61bdf70f1ff78a17716c9293e6260f307c253df43f441b7d83",
+    "scripts/research/proximal_distal_energy/articulated_structural_common_support.py": "179e3f994cccd92720b5f02d25fdafb3b190f0053a8cb15699ce076831f36c0b",
     "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py": "166ab2ebec88a0c53abc54c6b565ba0a3f82caf800449e822164177f31289549",
-    "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": "0a8d09f925bf26d60d0a523e18c77710c69e50cc45fa1ef5c5993b709ffb0c2a",
-    "tests/research/test_articulated_structural_propagation_plan.py": "43dea890a25a469b648850569a1fd2bf18eed8305a83c3fc4bef822cd2370125",
+    "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": "96d7e0991b45c0efe4be6a0b329d65cb30d231491802cee73965e8d57d5c6fa4",
+    "tests/research/test_articulated_structural_common_support.py": "3bdc445c7a95bcda290447299058a9d6214e8c04c76096d7b8a47984beae7c64",
+    "tests/research/test_articulated_structural_propagation_plan.py": "2c1114a589003ea1db981f2ee9aa224ff292c4aff6311e20d76b4dd1d11cc4cd",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "8eed52fe4ebbc55fcf753f4703330dd6d768281b0babfbb2adca074b862fc36d",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
     "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json": "f07fc33cc76fb80f395cd10b01a30169b6440cec3854be3894024d435bc0f722",
