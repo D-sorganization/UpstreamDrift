@@ -233,6 +233,21 @@ def test_manifest_round_trip_and_repository_prediction_registry() -> None:
     assert all(prediction.status_scope for prediction in registered.predictions)
     assert all(prediction.remaining_gate for prediction in registered.predictions)
     assert all(prediction.falsifier for prediction in registered.predictions)
+    by_hypothesis = {
+        prediction.hypothesis_id: prediction for prediction in registered.predictions
+    }
+    assert "All 234 registered subject-scaled configurations close" in (
+        by_hypothesis["H2"].status_scope
+    )
+    assert "Six of seven registered structural corners" in (
+        by_hypothesis["H5"].status_scope
+    )
+    assert "corner-wise headline propagation remains open" in (
+        by_hypothesis["H5"].status_scope
+    )
+    assert "calibrated human transport remains untested" in (
+        by_hypothesis["H5"].remaining_gate
+    )
 
 
 def test_adjudicated_prediction_requires_scope_and_remaining_gate() -> None:

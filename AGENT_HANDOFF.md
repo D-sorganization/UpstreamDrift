@@ -85,7 +85,10 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     completion-only evidence gate passes 3/3, loads every retained artifact,
     and binds the seven-corner table and propagation boundary into the article.
     The governed feasibility/margin figure has embedded CID TrueType text and
-    passes its retained-failure contract; full-paper rendering remains pending.
+    passes its retained-failure contract. Q2/H5 and the machine-readable
+    prediction registry no longer repeat the obsolete failed-closure narrative.
+    Release-manifest/checksum regeneration and full-paper rendering must wait
+    until the live headline record is complete, or they could admit partial data.
 - The release has 295 atomic claims and 40 reviewed release claims; all 40
   retain at least one scientifically open gate. #8724 still owns normalized
   four-way adjudication and independent review.
