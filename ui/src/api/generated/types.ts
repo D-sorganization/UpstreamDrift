@@ -303,6 +303,23 @@ export interface AppearanceSettings {
   font_scale: number;
 }
 
+/**
+ * One descriptive association or a typed unavailable state.
+ */
+export interface AssociationEstimateV1 {
+  state: "available" | "unavailable";
+  reason_code?: "insufficient_samples" | "insufficient_groups" | "constant_x" | "constant_y" | "constant_both" | null;
+  sample_count: number;
+  group_count: number;
+  pearson_r?: number | null;
+  spearman_r?: number | null;
+  slope?: number | null;
+  intercept?: number | null;
+  r_squared?: number | null;
+  ci_lower?: number | null;
+  ci_upper?: number | null;
+}
+
 export interface AvailabilityV1 {
   state: "available" | "unavailable";
   reason_code?: string | null;
@@ -741,6 +758,58 @@ export interface CourseStateValueV1 {
   context: string;
   target: string;
   distance_yards: number;
+}
+
+/**
+ * Row and player exclusions used by a selected-pair analysis.
+ */
+export interface CovariationMissingnessV1 {
+  input_row_count: number;
+  pairwise_complete_row_count: number;
+  missing_by_variable: Record<string, number>;
+  non_numeric_by_variable: Record<string, number>;
+  non_finite_by_variable: Record<string, number>;
+  excluded_by_reason: Record<string, number>;
+  eligible_player_count: number;
+  excluded_player_count_by_reason: Record<string, number>;
+  policy: "pairwise";
+}
+
+/**
+ * One deterministically ranked pair from an exploratory scan.
+ */
+export interface CovariationPairRankV1 {
+  rank: number;
+  state: "available" | "unavailable";
+  reason_code?: "insufficient_eligible_players" | null;
+  x_column: string;
+  y_column: string;
+  x_unit: MetricUnitsV2;
+  y_unit: MetricUnitsV2;
+  random_effect_r?: number | null;
+  fixed_effect_r?: number | null;
+  within_player_r?: number | null;
+  between_player_r?: number | null;
+  contributor_count: number;
+  total_sample_count: number;
+  input_row_count: number;
+  pairwise_complete_row_count: number;
+  excluded_row_count: number;
+  i_squared_pct?: number | null;
+  direction_consistency?: number | null;
+}
+
+/**
+ * Named uncertainty methods and their scientific limits.
+ */
+export interface CovariationUncertaintyV1 {
+  confidence_level: number;
+  per_player_interval: "fisher-z";
+  pooled_interval: "fisher-z-unclustered";
+  within_player_interval: "unavailable-clustered";
+  fixed_effect_method: "inverse-variance-fisher-z";
+  random_effect_method: "dersimonian-laird-fisher-z";
+  assumptions: string[];
 }
 
 /**
@@ -1611,6 +1680,25 @@ export interface MeasurementToolsResponse {
   measurements?: MeasurementResult[];
 }
 
+/**
+ * Fixed/random Fisher-z synthesis with heterogeneity diagnostics.
+ */
+export interface MetaAnalysisSummaryV1 {
+  state: "available" | "unavailable";
+  reason_code?: "insufficient_eligible_players" | null;
+  contributor_count: number;
+  total_sample_count: number;
+  fixed_effect_r?: number | null;
+  fixed_ci_lower?: number | null;
+  fixed_ci_upper?: number | null;
+  random_effect_r?: number | null;
+  random_ci_lower?: number | null;
+  random_ci_upper?: number | null;
+  tau_squared?: number | null;
+  q_statistic?: number | null;
+  i_squared_pct?: number | null;
+}
+
 export interface MetricUnitsV2 {
   canonical_unit: string;
   display_unit: string;
@@ -1784,6 +1872,100 @@ export interface PlaybackResponse {
   status: string;
   current_frame: number;
   total_frames: number;
+}
+
+/**
+ * A player-level estimate and normalized meta-analysis weights.
+ */
+export interface PlayerAssociationV1 {
+  player_id: string;
+  estimate: AssociationEstimateV1;
+  fixed_weight?: number | null;
+  random_weight?: number | null;
+}
+
+/**
+ * Bounded records, selected pair, and explicit evidence context.
+ */
+export interface PlayerCovariationPayloadV1 {
+  records: Record<string, unknown>[];
+  request: PlayerCovariationRequestV1;
+  context?: AnalysisContextV2;
+}
+
+/**
+ * Select one variable pair and the player-level inference rules.
+ */
+export interface PlayerCovariationRequestV1 {
+  x_column: string;
+  y_column: string;
+  player_column: string;
+  min_samples: number;
+  confidence_level: number;
+}
+
+/**
+ * Evidence-bearing result for one selected variable pair.
+ */
+export interface PlayerCovariationResultV1 {
+  contract_version: "launch-monitor-player-covariation/1.0.0";
+  analysis_kind: "selected_pair";
+  status: "available" | "partial" | "unavailable";
+  request: PlayerCovariationRequestV1;
+  pooled: AssociationEstimateV1;
+  within_player: AssociationEstimateV1;
+  between_player: AssociationEstimateV1;
+  per_player: PlayerAssociationV1[];
+  meta_analysis: MetaAnalysisSummaryV1;
+  missingness: CovariationMissingnessV1;
+  units: Record<string, MetricUnitsV2>;
+  lineage: AnalysisLineageV2;
+  availability: AvailabilityV2[];
+  uncertainty: CovariationUncertaintyV1;
+  player_identity: PlayerIdentityV2;
+  vendor_provenance: VendorProvenanceV2[];
+  claims?: ClaimsV2;
+  definitions: Record<string, string>;
+  warnings: string[];
+}
+
+/**
+ * Bounded records and a bounded exploratory pair-scan request.
+ */
+export interface PlayerCovariationScanPayloadV1 {
+  records: Record<string, unknown>[];
+  request: PlayerCovariationScanRequestV1;
+  context?: AnalysisContextV2;
+}
+
+/**
+ * Select a bounded exploratory all-pairs scan.
+ */
+export interface PlayerCovariationScanRequestV1 {
+  player_column: string;
+  numeric_columns: string[];
+  min_samples: number;
+  confidence_level: number;
+}
+
+/**
+ * Evidence-bearing deterministic exploratory pair ranking.
+ */
+export interface PlayerCovariationScanResultV1 {
+  contract_version: "launch-monitor-player-covariation/1.0.0";
+  analysis_kind: "pair_scan";
+  status: "available" | "partial" | "unavailable";
+  request: PlayerCovariationScanRequestV1;
+  pair_count: number;
+  available_pair_count: number;
+  unavailable_pair_count: number;
+  ranking: CovariationPairRankV1[];
+  lineage: AnalysisLineageV2;
+  player_identity: PlayerIdentityV2;
+  vendor_provenance: VendorProvenanceV2[];
+  claims?: ClaimsV2;
+  warnings: string[];
+  method_description: string;
 }
 
 /**

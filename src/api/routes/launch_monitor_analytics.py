@@ -23,6 +23,7 @@ from src.shared.python.launch_monitor import (
     CONTRACT_VERSION,
     CONTRACT_VERSION_V2,
     OUTCOME_PROXY_CONTRACT_VERSION,
+    PLAYER_COVARIATION_CONTRACT_VERSION,
     STROKES_GAINED_CONTRACT_VERSION,
     AnalysisContextV2,
     AnalysisMode,
@@ -34,13 +35,20 @@ from src.shared.python.launch_monitor import (
     MissingPolicy,
     OutcomeProxyRequestV1,
     OutcomeProxyResultV1,
+    PlayerCovariationRequestV1,
+    PlayerCovariationResultV1,
+    PlayerCovariationScanRequestV1,
+    PlayerCovariationScanResultV1,
     StrokesGainedAnalysisResultV1,
     StrokesGainedRequestV1,
     analyze_outcome_proxy,
+    analyze_player_covariation_v1,
     analyze_source_backed_strokes_gained,
     analyze_variables,
     analyze_variables_v2,
     contract_v2_json_schema,
+    player_covariation_contract_json_schema,
+    scan_player_covariation_v1,
     strokes_gained_contract_json_schema,
 )
 from src.shared.python.launch_monitor.dataset_reference import (
@@ -107,6 +115,22 @@ class OutcomeProxyPayloadV1(BaseModel):
     request: OutcomeProxyRequestV1
 
 
+class PlayerCovariationPayloadV1(BaseModel):
+    """Bounded records, selected pair, and explicit evidence context."""
+
+    records: list[dict[str, Any]] = Field(min_length=1, max_length=20_000)
+    request: PlayerCovariationRequestV1
+    context: AnalysisContextV2 = Field(default_factory=AnalysisContextV2)
+
+
+class PlayerCovariationScanPayloadV1(BaseModel):
+    """Bounded records and a bounded exploratory pair-scan request."""
+
+    records: list[dict[str, Any]] = Field(min_length=1, max_length=20_000)
+    request: PlayerCovariationScanRequestV1
+    context: AnalysisContextV2 = Field(default_factory=AnalysisContextV2)
+
+
 @lru_cache(maxsize=1)
 def get_launch_monitor_dataset_job_service() -> DatasetJobService:
     """Return the bounded process-local service for administrator roots."""
@@ -153,6 +177,8 @@ async def capabilities() -> dict[str, object]:
         "dataset_reference_jobs": True,
         "dataset_job_maximum_page_size": MAX_PAGE_SIZE,
         "dataset_job_inline_rows_allowed": False,
+        "player_covariation_contract_version": (PLAYER_COVARIATION_CONTRACT_VERSION),
+        "population_meta_analysis": True,
     }
 
 
@@ -242,6 +268,14 @@ async def get_dataset_job_results(
         raise HTTPException(status_code=404, detail="Dataset job not found") from exc
 
 
+@router.get("/contracts/player-covariation/v1")
+@handle_api_errors
+async def player_covariation_contract_v1() -> dict[str, object]:
+    """Publish the canonical player/population covariation schema."""
+
+    return player_covariation_contract_json_schema()
+
+
 @router.post("/analyze")
 @handle_api_errors
 async def analyze(payload: AnalyzePayload) -> dict[str, object]:
@@ -269,6 +303,42 @@ async def analyze_v2(payload: AnalyzePayloadV2) -> LaunchMonitorAnalysisResultV2
         model_provenance=payload.model_provenance,
     )
     return result
+
+
+@router.post(
+    "/v2/player-covariation",
+    response_model=PlayerCovariationResultV1,
+    response_model_exclude_none=True,
+)
+@handle_api_errors
+async def analyze_player_covariation(
+    payload: PlayerCovariationPayloadV1,
+) -> PlayerCovariationResultV1:
+    """Analyze one variable pair across explicitly identified players."""
+
+    return analyze_player_covariation_v1(
+        pd.DataFrame.from_records(payload.records),
+        payload.request,
+        context=payload.context,
+    )
+
+
+@router.post(
+    "/v2/player-covariation/scan",
+    response_model=PlayerCovariationScanResultV1,
+    response_model_exclude_none=True,
+)
+@handle_api_errors
+async def scan_player_covariation(
+    payload: PlayerCovariationScanPayloadV1,
+) -> PlayerCovariationScanResultV1:
+    """Rank a bounded exploratory set of variable pairs."""
+
+    return scan_player_covariation_v1(
+        pd.DataFrame.from_records(payload.records),
+        payload.request,
+        context=payload.context,
+    )
 
 
 @router.post(

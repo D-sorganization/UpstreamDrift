@@ -1,0 +1,1426 @@
+{
+  "$defs": {
+    "AnalysisLineageV2": {
+      "additionalProperties": false,
+      "properties": {
+        "authority": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatasetAuthorityV2"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "backing_records": {
+          "items": {
+            "$ref": "#/$defs/BackingRecordV2"
+          },
+          "title": "Backing Records",
+          "type": "array"
+        },
+        "dataset_fingerprint_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Dataset Fingerprint Sha256",
+          "type": "string"
+        },
+        "sources": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/SourceFileReferenceV2"
+          },
+          "title": "Sources",
+          "type": "array"
+        },
+        "transformations": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/TransformRecordV2"
+          },
+          "title": "Transformations",
+          "type": "array"
+        }
+      },
+      "required": ["dataset_fingerprint_sha256", "backing_records"],
+      "title": "AnalysisLineageV2",
+      "type": "object"
+    },
+    "AssociationEstimateV1": {
+      "additionalProperties": false,
+      "description": "One descriptive association or a typed unavailable state.",
+      "properties": {
+        "ci_lower": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": -1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ci Lower"
+        },
+        "ci_upper": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": -1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ci Upper"
+        },
+        "group_count": {
+          "minimum": 0,
+          "title": "Group Count",
+          "type": "integer"
+        },
+        "intercept": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Intercept"
+        },
+        "pearson_r": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": -1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pearson R"
+        },
+        "r_squared": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "R Squared"
+        },
+        "reason_code": {
+          "anyOf": [
+            {
+              "enum": [
+                "insufficient_samples",
+                "insufficient_groups",
+                "constant_x",
+                "constant_y",
+                "constant_both"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason Code"
+        },
+        "sample_count": {
+          "minimum": 0,
+          "title": "Sample Count",
+          "type": "integer"
+        },
+        "slope": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Slope"
+        },
+        "spearman_r": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": -1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Spearman R"
+        },
+        "state": {
+          "enum": ["available", "unavailable"],
+          "title": "State",
+          "type": "string"
+        }
+      },
+      "required": ["state", "sample_count", "group_count"],
+      "title": "AssociationEstimateV1",
+      "type": "object"
+    },
+    "AvailabilityV2": {
+      "additionalProperties": false,
+      "properties": {
+        "message": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Message"
+        },
+        "observed_count": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Observed Count"
+        },
+        "reason_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason Code"
+        },
+        "required_count": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Required Count"
+        },
+        "result_path": {
+          "title": "Result Path",
+          "type": "string"
+        },
+        "state": {
+          "enum": ["available", "unavailable"],
+          "title": "State",
+          "type": "string"
+        }
+      },
+      "required": ["result_path", "state"],
+      "title": "AvailabilityV2",
+      "type": "object"
+    },
+    "BackingRecordV2": {
+      "additionalProperties": false,
+      "description": "Stable reference to exactly one input record without copying values.",
+      "properties": {
+        "record_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Record Sha256",
+          "type": "string"
+        },
+        "session_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id"
+        },
+        "shot_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Shot Id"
+        },
+        "source_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Id"
+        },
+        "source_row": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Row"
+        },
+        "unlinked_reason": {
+          "anyOf": [
+            {
+              "enum": [
+                "no_source_reference_declared",
+                "session_not_linked_to_source_reference"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unlinked Reason"
+        }
+      },
+      "required": ["record_sha256"],
+      "title": "BackingRecordV2",
+      "type": "object"
+    },
+    "ClaimsV2": {
+      "additionalProperties": false,
+      "properties": {
+        "causal_inference": {
+          "default": false,
+          "title": "Causal Inference",
+          "type": "boolean"
+        },
+        "device_certification": {
+          "default": false,
+          "title": "Device Certification",
+          "type": "boolean"
+        },
+        "device_emulation": {
+          "default": false,
+          "title": "Device Emulation",
+          "type": "boolean"
+        },
+        "vendor_comparison": {
+          "default": "descriptive",
+          "enum": ["descriptive", "matched_agreement"],
+          "title": "Vendor Comparison",
+          "type": "string"
+        }
+      },
+      "title": "ClaimsV2",
+      "type": "object"
+    },
+    "CovariationMissingnessV1": {
+      "additionalProperties": false,
+      "description": "Row and player exclusions used by a selected-pair analysis.",
+      "properties": {
+        "eligible_player_count": {
+          "minimum": 0,
+          "title": "Eligible Player Count",
+          "type": "integer"
+        },
+        "excluded_by_reason": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Excluded By Reason",
+          "type": "object"
+        },
+        "excluded_player_count_by_reason": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Excluded Player Count By Reason",
+          "type": "object"
+        },
+        "input_row_count": {
+          "minimum": 0,
+          "title": "Input Row Count",
+          "type": "integer"
+        },
+        "missing_by_variable": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Missing By Variable",
+          "type": "object"
+        },
+        "non_finite_by_variable": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Non Finite By Variable",
+          "type": "object"
+        },
+        "non_numeric_by_variable": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Non Numeric By Variable",
+          "type": "object"
+        },
+        "pairwise_complete_row_count": {
+          "minimum": 0,
+          "title": "Pairwise Complete Row Count",
+          "type": "integer"
+        },
+        "policy": {
+          "const": "pairwise",
+          "default": "pairwise",
+          "title": "Policy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "input_row_count",
+        "pairwise_complete_row_count",
+        "missing_by_variable",
+        "non_numeric_by_variable",
+        "non_finite_by_variable",
+        "excluded_by_reason",
+        "eligible_player_count",
+        "excluded_player_count_by_reason"
+      ],
+      "title": "CovariationMissingnessV1",
+      "type": "object"
+    },
+    "CovariationPairRankV1": {
+      "additionalProperties": false,
+      "description": "One deterministically ranked pair from an exploratory scan.",
+      "properties": {
+        "between_player_r": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": -1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Between Player R"
+        },
+        "contributor_count": {
+          "minimum": 0,
+          "title": "Contributor Count",
+          "type": "integer"
+        },
+        "direction_consistency": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Direction Consistency"
+        },
+        "excluded_row_count": {
+          "minimum": 0,
+          "title": "Excluded Row Count",
+          "type": "integer"
+        },
+        "fixed_effect_r": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": -1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fixed Effect R"
+        },
+        "i_squared_pct": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "I Squared Pct"
+        },
+        "input_row_count": {
+          "minimum": 0,
+          "title": "Input Row Count",
+          "type": "integer"
+        },
+        "pairwise_complete_row_count": {
+          "minimum": 0,
+          "title": "Pairwise Complete Row Count",
+          "type": "integer"
+        },
+        "random_effect_r": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": -1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Random Effect R"
+        },
+        "rank": {
+          "minimum": 1,
+          "title": "Rank",
+          "type": "integer"
+        },
+        "reason_code": {
+          "anyOf": [
+            {
+              "const": "insufficient_eligible_players",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason Code"
+        },
+        "state": {
+          "enum": ["available", "unavailable"],
+          "title": "State",
+          "type": "string"
+        },
+        "total_sample_count": {
+          "minimum": 0,
+          "title": "Total Sample Count",
+          "type": "integer"
+        },
+        "within_player_r": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": -1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Within Player R"
+        },
+        "x_column": {
+          "minLength": 1,
+          "title": "X Column",
+          "type": "string"
+        },
+        "x_unit": {
+          "$ref": "#/$defs/MetricUnitsV2"
+        },
+        "y_column": {
+          "minLength": 1,
+          "title": "Y Column",
+          "type": "string"
+        },
+        "y_unit": {
+          "$ref": "#/$defs/MetricUnitsV2"
+        }
+      },
+      "required": [
+        "rank",
+        "state",
+        "x_column",
+        "y_column",
+        "x_unit",
+        "y_unit",
+        "contributor_count",
+        "total_sample_count",
+        "input_row_count",
+        "pairwise_complete_row_count",
+        "excluded_row_count"
+      ],
+      "title": "CovariationPairRankV1",
+      "type": "object"
+    },
+    "CovariationUncertaintyV1": {
+      "additionalProperties": false,
+      "description": "Named uncertainty methods and their scientific limits.",
+      "properties": {
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "confidence_level": {
+          "exclusiveMaximum": 1.0,
+          "exclusiveMinimum": 0.5,
+          "title": "Confidence Level",
+          "type": "number"
+        },
+        "fixed_effect_method": {
+          "const": "inverse-variance-fisher-z",
+          "default": "inverse-variance-fisher-z",
+          "title": "Fixed Effect Method",
+          "type": "string"
+        },
+        "per_player_interval": {
+          "const": "fisher-z",
+          "default": "fisher-z",
+          "title": "Per Player Interval",
+          "type": "string"
+        },
+        "pooled_interval": {
+          "const": "fisher-z-unclustered",
+          "default": "fisher-z-unclustered",
+          "title": "Pooled Interval",
+          "type": "string"
+        },
+        "random_effect_method": {
+          "const": "dersimonian-laird-fisher-z",
+          "default": "dersimonian-laird-fisher-z",
+          "title": "Random Effect Method",
+          "type": "string"
+        },
+        "within_player_interval": {
+          "const": "unavailable-clustered",
+          "default": "unavailable-clustered",
+          "title": "Within Player Interval",
+          "type": "string"
+        }
+      },
+      "required": ["confidence_level", "assumptions"],
+      "title": "CovariationUncertaintyV1",
+      "type": "object"
+    },
+    "DatasetAuthorityV2": {
+      "additionalProperties": false,
+      "description": "Commit-addressable authority for the analyzed dataset.",
+      "properties": {
+        "commit": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{40}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Commit"
+        },
+        "dataset_id": {
+          "minLength": 1,
+          "title": "Dataset Id",
+          "type": "string"
+        },
+        "dataset_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dataset Path"
+        },
+        "manifest_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Manifest Sha256"
+        },
+        "repository": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Repository"
+        }
+      },
+      "required": ["dataset_id"],
+      "title": "DatasetAuthorityV2",
+      "type": "object"
+    },
+    "MetaAnalysisSummaryV1": {
+      "additionalProperties": false,
+      "description": "Fixed/random Fisher-z synthesis with heterogeneity diagnostics.",
+      "properties": {
+        "contributor_count": {
+          "minimum": 0,
+          "title": "Contributor Count",
+          "type": "integer"
+        },
+        "fixed_ci_lower": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": -1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fixed Ci Lower"
+        },
+        "fixed_ci_upper": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": -1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fixed Ci Upper"
+        },
+        "fixed_effect_r": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": -1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fixed Effect R"
+        },
+        "i_squared_pct": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "I Squared Pct"
+        },
+        "q_statistic": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Q Statistic"
+        },
+        "random_ci_lower": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": -1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Random Ci Lower"
+        },
+        "random_ci_upper": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": -1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Random Ci Upper"
+        },
+        "random_effect_r": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": -1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Random Effect R"
+        },
+        "reason_code": {
+          "anyOf": [
+            {
+              "const": "insufficient_eligible_players",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason Code"
+        },
+        "state": {
+          "enum": ["available", "unavailable"],
+          "title": "State",
+          "type": "string"
+        },
+        "tau_squared": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tau Squared"
+        },
+        "total_sample_count": {
+          "minimum": 0,
+          "title": "Total Sample Count",
+          "type": "integer"
+        }
+      },
+      "required": ["state", "contributor_count", "total_sample_count"],
+      "title": "MetaAnalysisSummaryV1",
+      "type": "object"
+    },
+    "MetricUnitsV2": {
+      "additionalProperties": false,
+      "properties": {
+        "authority": {
+          "enum": ["canonical_registry", "source_declared", "unknown"],
+          "title": "Authority",
+          "type": "string"
+        },
+        "canonical_unit": {
+          "title": "Canonical Unit",
+          "type": "string"
+        },
+        "display_unit": {
+          "title": "Display Unit",
+          "type": "string"
+        }
+      },
+      "required": ["canonical_unit", "display_unit", "authority"],
+      "title": "MetricUnitsV2",
+      "type": "object"
+    },
+    "PlayerAssociationV1": {
+      "additionalProperties": false,
+      "description": "A player-level estimate and normalized meta-analysis weights.",
+      "properties": {
+        "estimate": {
+          "$ref": "#/$defs/AssociationEstimateV1"
+        },
+        "fixed_weight": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fixed Weight"
+        },
+        "player_id": {
+          "minLength": 1,
+          "title": "Player Id",
+          "type": "string"
+        },
+        "random_weight": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Random Weight"
+        }
+      },
+      "required": ["player_id", "estimate"],
+      "title": "PlayerAssociationV1",
+      "type": "object"
+    },
+    "PlayerCovariationRequestV1": {
+      "additionalProperties": false,
+      "description": "Select one variable pair and the player-level inference rules.",
+      "properties": {
+        "confidence_level": {
+          "default": 0.95,
+          "exclusiveMaximum": 1.0,
+          "exclusiveMinimum": 0.5,
+          "title": "Confidence Level",
+          "type": "number"
+        },
+        "min_samples": {
+          "default": 4,
+          "minimum": 4,
+          "title": "Min Samples",
+          "type": "integer"
+        },
+        "player_column": {
+          "minLength": 1,
+          "title": "Player Column",
+          "type": "string"
+        },
+        "x_column": {
+          "minLength": 1,
+          "title": "X Column",
+          "type": "string"
+        },
+        "y_column": {
+          "minLength": 1,
+          "title": "Y Column",
+          "type": "string"
+        }
+      },
+      "required": ["x_column", "y_column", "player_column"],
+      "title": "PlayerCovariationRequestV1",
+      "type": "object"
+    },
+    "PlayerCovariationResultV1": {
+      "additionalProperties": false,
+      "description": "Evidence-bearing result for one selected variable pair.",
+      "properties": {
+        "analysis_kind": {
+          "const": "selected_pair",
+          "default": "selected_pair",
+          "title": "Analysis Kind",
+          "type": "string"
+        },
+        "availability": {
+          "items": {
+            "$ref": "#/$defs/AvailabilityV2"
+          },
+          "title": "Availability",
+          "type": "array"
+        },
+        "between_player": {
+          "$ref": "#/$defs/AssociationEstimateV1"
+        },
+        "claims": {
+          "$ref": "#/$defs/ClaimsV2"
+        },
+        "contract_version": {
+          "const": "launch-monitor-player-covariation/1.0.0",
+          "default": "launch-monitor-player-covariation/1.0.0",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "definitions": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Definitions",
+          "type": "object"
+        },
+        "lineage": {
+          "$ref": "#/$defs/AnalysisLineageV2"
+        },
+        "meta_analysis": {
+          "$ref": "#/$defs/MetaAnalysisSummaryV1"
+        },
+        "missingness": {
+          "$ref": "#/$defs/CovariationMissingnessV1"
+        },
+        "per_player": {
+          "items": {
+            "$ref": "#/$defs/PlayerAssociationV1"
+          },
+          "title": "Per Player",
+          "type": "array"
+        },
+        "player_identity": {
+          "$ref": "#/$defs/PlayerIdentityV2"
+        },
+        "pooled": {
+          "$ref": "#/$defs/AssociationEstimateV1"
+        },
+        "request": {
+          "$ref": "#/$defs/PlayerCovariationRequestV1"
+        },
+        "status": {
+          "enum": ["available", "partial", "unavailable"],
+          "title": "Status",
+          "type": "string"
+        },
+        "uncertainty": {
+          "$ref": "#/$defs/CovariationUncertaintyV1"
+        },
+        "units": {
+          "additionalProperties": {
+            "$ref": "#/$defs/MetricUnitsV2"
+          },
+          "title": "Units",
+          "type": "object"
+        },
+        "vendor_provenance": {
+          "items": {
+            "$ref": "#/$defs/VendorProvenanceV2"
+          },
+          "title": "Vendor Provenance",
+          "type": "array"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        },
+        "within_player": {
+          "$ref": "#/$defs/AssociationEstimateV1"
+        }
+      },
+      "required": [
+        "status",
+        "request",
+        "pooled",
+        "within_player",
+        "between_player",
+        "per_player",
+        "meta_analysis",
+        "missingness",
+        "units",
+        "lineage",
+        "availability",
+        "uncertainty",
+        "player_identity",
+        "vendor_provenance",
+        "definitions",
+        "warnings"
+      ],
+      "title": "PlayerCovariationResultV1",
+      "type": "object"
+    },
+    "PlayerCovariationScanRequestV1": {
+      "additionalProperties": false,
+      "description": "Select a bounded exploratory all-pairs scan.",
+      "properties": {
+        "confidence_level": {
+          "default": 0.95,
+          "exclusiveMaximum": 1.0,
+          "exclusiveMinimum": 0.5,
+          "title": "Confidence Level",
+          "type": "number"
+        },
+        "min_samples": {
+          "default": 4,
+          "minimum": 4,
+          "title": "Min Samples",
+          "type": "integer"
+        },
+        "numeric_columns": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 20,
+          "title": "Numeric Columns",
+          "type": "array"
+        },
+        "player_column": {
+          "minLength": 1,
+          "title": "Player Column",
+          "type": "string"
+        }
+      },
+      "required": ["player_column"],
+      "title": "PlayerCovariationScanRequestV1",
+      "type": "object"
+    },
+    "PlayerCovariationScanResultV1": {
+      "additionalProperties": false,
+      "description": "Evidence-bearing deterministic exploratory pair ranking.",
+      "properties": {
+        "analysis_kind": {
+          "const": "pair_scan",
+          "default": "pair_scan",
+          "title": "Analysis Kind",
+          "type": "string"
+        },
+        "available_pair_count": {
+          "minimum": 0,
+          "title": "Available Pair Count",
+          "type": "integer"
+        },
+        "claims": {
+          "$ref": "#/$defs/ClaimsV2"
+        },
+        "contract_version": {
+          "const": "launch-monitor-player-covariation/1.0.0",
+          "default": "launch-monitor-player-covariation/1.0.0",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "lineage": {
+          "$ref": "#/$defs/AnalysisLineageV2"
+        },
+        "method_description": {
+          "title": "Method Description",
+          "type": "string"
+        },
+        "pair_count": {
+          "minimum": 0,
+          "title": "Pair Count",
+          "type": "integer"
+        },
+        "player_identity": {
+          "$ref": "#/$defs/PlayerIdentityV2"
+        },
+        "ranking": {
+          "items": {
+            "$ref": "#/$defs/CovariationPairRankV1"
+          },
+          "title": "Ranking",
+          "type": "array"
+        },
+        "request": {
+          "$ref": "#/$defs/PlayerCovariationScanRequestV1"
+        },
+        "status": {
+          "enum": ["available", "partial", "unavailable"],
+          "title": "Status",
+          "type": "string"
+        },
+        "unavailable_pair_count": {
+          "minimum": 0,
+          "title": "Unavailable Pair Count",
+          "type": "integer"
+        },
+        "vendor_provenance": {
+          "items": {
+            "$ref": "#/$defs/VendorProvenanceV2"
+          },
+          "title": "Vendor Provenance",
+          "type": "array"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "status",
+        "request",
+        "pair_count",
+        "available_pair_count",
+        "unavailable_pair_count",
+        "ranking",
+        "lineage",
+        "player_identity",
+        "vendor_provenance",
+        "warnings",
+        "method_description"
+      ],
+      "title": "PlayerCovariationScanResultV1",
+      "type": "object"
+    },
+    "PlayerIdentityV2": {
+      "additionalProperties": false,
+      "description": "Declared identity evidence; identity is never inferred from layout.",
+      "properties": {
+        "evidence": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence"
+        },
+        "identifier_column": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Explicit player identifier column; session, club, source, file, and row-position fields are forbidden.",
+          "not": {
+            "enum": [
+              "club",
+              "club_id",
+              "file",
+              "file_name",
+              "filename",
+              "row_order",
+              "session",
+              "session_id",
+              "source",
+              "source_id",
+              "source_row"
+            ]
+          },
+          "title": "Identifier Column"
+        },
+        "trust_level": {
+          "default": "not_provided",
+          "enum": [
+            "not_provided",
+            "explicit_user_attested",
+            "pseudonymous_stable",
+            "verified_external",
+            "untrusted_inferred"
+          ],
+          "title": "Trust Level",
+          "type": "string"
+        }
+      },
+      "title": "PlayerIdentityV2",
+      "type": "object"
+    },
+    "SourceFileReferenceV2": {
+      "additionalProperties": false,
+      "description": "Content-addressed source and the sessions it backs.",
+      "properties": {
+        "file_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "File Sha256",
+          "type": "string"
+        },
+        "rights_status": {
+          "default": "unknown",
+          "enum": [
+            "public_redistributable",
+            "restricted_internal",
+            "permission_required",
+            "unknown"
+          ],
+          "title": "Rights Status",
+          "type": "string"
+        },
+        "session_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Session Ids",
+          "type": "array"
+        },
+        "source_id": {
+          "minLength": 1,
+          "title": "Source Id",
+          "type": "string"
+        },
+        "source_uri": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Uri"
+        }
+      },
+      "required": ["source_id", "file_sha256"],
+      "title": "SourceFileReferenceV2",
+      "type": "object"
+    },
+    "TransformRecordV2": {
+      "additionalProperties": false,
+      "description": "Versioned transformation applied before analysis.",
+      "properties": {
+        "parameters_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Parameters Sha256",
+          "type": "string"
+        },
+        "transform_id": {
+          "minLength": 1,
+          "title": "Transform Id",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": ["transform_id", "version", "parameters_sha256"],
+      "title": "TransformRecordV2",
+      "type": "object"
+    },
+    "VendorProvenanceV2": {
+      "additionalProperties": false,
+      "properties": {
+        "metric_statuses": {
+          "additionalProperties": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Metric Statuses",
+          "type": "object"
+        },
+        "models": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Models",
+          "type": "array"
+        },
+        "row_count": {
+          "minimum": 1,
+          "title": "Row Count",
+          "type": "integer"
+        },
+        "software_versions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Software Versions",
+          "type": "array"
+        },
+        "vendor": {
+          "title": "Vendor",
+          "type": "string"
+        }
+      },
+      "required": [
+        "vendor",
+        "models",
+        "software_versions",
+        "row_count",
+        "metric_statuses"
+      ],
+      "title": "VendorProvenanceV2",
+      "type": "object"
+    }
+  },
+  "description": "Schema root covering selected-pair and exploratory-scan results.",
+  "discriminator": {
+    "mapping": {
+      "pair_scan": "#/$defs/PlayerCovariationScanResultV1",
+      "selected_pair": "#/$defs/PlayerCovariationResultV1"
+    },
+    "propertyName": "analysis_kind"
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/PlayerCovariationResultV1"
+    },
+    {
+      "$ref": "#/$defs/PlayerCovariationScanResultV1"
+    }
+  ],
+  "title": "PlayerCovariationContractV1"
+}

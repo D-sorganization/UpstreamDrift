@@ -1,0 +1,477 @@
+{
+  "context": {
+    "order_evidence": {
+      "trust_level": "not_provided"
+    },
+    "player_identity": {
+      "evidence": "Synthetic golden labels are stable by construction.",
+      "identifier_column": "player_id",
+      "trust_level": "explicit_user_attested"
+    },
+    "session_identity": {
+      "trust_level": "not_provided"
+    },
+    "source_units": {},
+    "sources": [
+      {
+        "file_sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+        "rights_status": "public_redistributable",
+        "session_ids": [],
+        "source_id": "golden-source"
+      }
+    ],
+    "transformations": []
+  },
+  "description": "Synthetic aggregation-reversal fixture; no observed player data.",
+  "expected_result": {
+    "analysis_kind": "selected_pair",
+    "availability": [
+      {
+        "message": null,
+        "observed_count": null,
+        "reason_code": null,
+        "required_count": null,
+        "result_path": "pooled",
+        "state": "available"
+      },
+      {
+        "message": null,
+        "observed_count": null,
+        "reason_code": null,
+        "required_count": null,
+        "result_path": "within_player",
+        "state": "available"
+      },
+      {
+        "message": null,
+        "observed_count": null,
+        "reason_code": null,
+        "required_count": null,
+        "result_path": "between_player",
+        "state": "available"
+      },
+      {
+        "message": null,
+        "observed_count": null,
+        "reason_code": null,
+        "required_count": null,
+        "result_path": "per_player.0",
+        "state": "available"
+      },
+      {
+        "message": null,
+        "observed_count": null,
+        "reason_code": null,
+        "required_count": null,
+        "result_path": "per_player.1",
+        "state": "available"
+      },
+      {
+        "message": null,
+        "observed_count": null,
+        "reason_code": null,
+        "required_count": null,
+        "result_path": "meta_analysis",
+        "state": "available"
+      }
+    ],
+    "between_player": {
+      "ci_lower": null,
+      "ci_upper": null,
+      "group_count": 2,
+      "intercept": 4.144373695229228e-15,
+      "pearson_r": 1.0,
+      "r_squared": 1.0,
+      "reason_code": null,
+      "sample_count": 2,
+      "slope": 1.0000000000000002,
+      "spearman_r": 0.9999999999999999,
+      "state": "available"
+    },
+    "claims": {
+      "causal_inference": false,
+      "device_certification": false,
+      "device_emulation": false,
+      "vendor_comparison": "descriptive"
+    },
+    "contract_version": "launch-monitor-player-covariation/1.0.0",
+    "definitions": {
+      "between_player": "Association between unweighted player means.",
+      "meta_analysis": "Fixed and DerSimonian-Laird random effects in Fisher-z space.",
+      "pooled": "Association across all pairwise-complete shots.",
+      "within_player": "Association after centering x and y by player."
+    },
+    "lineage": {
+      "authority": null,
+      "backing_records": [
+        {
+          "record_sha256": "7dc4e6b5656028138aff27ac503e922d78ef90663f1a41ac64d34a488386bfe7",
+          "session_id": null,
+          "shot_id": "shot-0",
+          "source_id": "golden-source",
+          "source_row": 0,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "5752cac249314276dbad855e04e2677cafbddeeed35a78774e47d706606bfc16",
+          "session_id": null,
+          "shot_id": "shot-1",
+          "source_id": "golden-source",
+          "source_row": 1,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "a920e653ab99387d34d5e0610e90be696c8f917c2bd6198c4d89389aea30417f",
+          "session_id": null,
+          "shot_id": "shot-2",
+          "source_id": "golden-source",
+          "source_row": 2,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "40d0ab157ab4296357697c1537220eb434c3d5228131a83d85ccae535b4dce0d",
+          "session_id": null,
+          "shot_id": "shot-3",
+          "source_id": "golden-source",
+          "source_row": 3,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "c26342221bef320f355e1367c50dd0de1dac7ceaba54166010ab9d5a6c31432f",
+          "session_id": null,
+          "shot_id": "shot-4",
+          "source_id": "golden-source",
+          "source_row": 4,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "08ebd4135c117e6944b0d0495df43d1aefdebe760ddc64b7a63f6c4d867c5d87",
+          "session_id": null,
+          "shot_id": "shot-5",
+          "source_id": "golden-source",
+          "source_row": 5,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "0d896f57042c0afabc9a7eed99ee7a1868c8904f4022e3749c668f989b0d4792",
+          "session_id": null,
+          "shot_id": "shot-6",
+          "source_id": "golden-source",
+          "source_row": 6,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "d20780262a00f106774ed9ffb3e3aed743ee3f53c70018171769959da46bea92",
+          "session_id": null,
+          "shot_id": "shot-7",
+          "source_id": "golden-source",
+          "source_row": 7,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "048fb5bb66ba7f0052f06ba62bd423626340e6e66f4d966939f32145c28edf6a",
+          "session_id": null,
+          "shot_id": "shot-8",
+          "source_id": "golden-source",
+          "source_row": 8,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "d917ce440aee7054affa35cb8de02e99dee2befbac0b390929dc78138f1f6c69",
+          "session_id": null,
+          "shot_id": "shot-9",
+          "source_id": "golden-source",
+          "source_row": 9,
+          "unlinked_reason": null
+        }
+      ],
+      "dataset_fingerprint_sha256": "e70db95e21940bda8a802dea02354cbb122bf436f80dd973de741dd9a1007372",
+      "sources": [
+        {
+          "file_sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+          "rights_status": "public_redistributable",
+          "session_ids": [],
+          "source_id": "golden-source",
+          "source_uri": null
+        }
+      ],
+      "transformations": []
+    },
+    "meta_analysis": {
+      "contributor_count": 2,
+      "fixed_ci_lower": -0.9999998591364454,
+      "fixed_ci_upper": -0.9999929009502644,
+      "fixed_effect_r": -0.999999,
+      "i_squared_pct": 0.0,
+      "q_statistic": 0.0,
+      "random_ci_lower": -0.9999998591364454,
+      "random_ci_upper": -0.9999929009502644,
+      "random_effect_r": -0.999999,
+      "reason_code": null,
+      "state": "available",
+      "tau_squared": 0.0,
+      "total_sample_count": 10
+    },
+    "missingness": {
+      "eligible_player_count": 2,
+      "excluded_by_reason": {
+        "blank_player_identity": 0,
+        "pairwise_incomplete": 0
+      },
+      "excluded_player_count_by_reason": {},
+      "input_row_count": 10,
+      "missing_by_variable": {
+        "club_path": 0,
+        "face_angle": 0
+      },
+      "non_finite_by_variable": {
+        "club_path": 0,
+        "face_angle": 0
+      },
+      "non_numeric_by_variable": {
+        "club_path": 0,
+        "face_angle": 0
+      },
+      "pairwise_complete_row_count": 10,
+      "policy": "pairwise"
+    },
+    "per_player": [
+      {
+        "estimate": {
+          "ci_lower": -0.9999999374511345,
+          "ci_upper": -0.9999840126121023,
+          "group_count": 1,
+          "intercept": 3.999999999999999,
+          "pearson_r": -1.0,
+          "r_squared": 1.0,
+          "reason_code": null,
+          "sample_count": 5,
+          "slope": -1.0000000000000002,
+          "spearman_r": -0.9999999999999999,
+          "state": "available"
+        },
+        "fixed_weight": 0.5,
+        "player_id": "A",
+        "random_weight": 0.5
+      },
+      {
+        "estimate": {
+          "ci_lower": -0.9999999374511345,
+          "ci_upper": -0.9999840126121023,
+          "group_count": 1,
+          "intercept": 23.999999999999968,
+          "pearson_r": -1.0,
+          "r_squared": 1.0,
+          "reason_code": null,
+          "sample_count": 5,
+          "slope": -0.9999999999999983,
+          "spearman_r": -0.9999999999999999,
+          "state": "available"
+        },
+        "fixed_weight": 0.5,
+        "player_id": "B",
+        "random_weight": 0.5
+      }
+    ],
+    "player_identity": {
+      "evidence": "Synthetic golden labels are stable by construction.",
+      "identifier_column": "player_id",
+      "trust_level": "explicit_user_attested"
+    },
+    "pooled": {
+      "ci_lower": 0.4792941896328254,
+      "ci_upper": 0.9642853273243961,
+      "group_count": 2,
+      "intercept": 1.037037037037038,
+      "pearson_r": 0.8518518518518519,
+      "r_squared": 0.7256515775034293,
+      "reason_code": null,
+      "sample_count": 10,
+      "slope": 0.8518518518518521,
+      "spearman_r": 0.5151515151515151,
+      "state": "available"
+    },
+    "request": {
+      "confidence_level": 0.95,
+      "min_samples": 4,
+      "player_column": "player_id",
+      "x_column": "face_angle",
+      "y_column": "club_path"
+    },
+    "status": "available",
+    "uncertainty": {
+      "assumptions": [
+        "Player effects are descriptive and do not establish causality.",
+        "Fisher-z intervals assume approximately independent observations.",
+        "The pooled interval is not adjusted for repeated shots by player.",
+        "DerSimonian-Laird estimates between-player effect heterogeneity.",
+        "Population generalization requires a representative player sample."
+      ],
+      "confidence_level": 0.95,
+      "fixed_effect_method": "inverse-variance-fisher-z",
+      "per_player_interval": "fisher-z",
+      "pooled_interval": "fisher-z-unclustered",
+      "random_effect_method": "dersimonian-laird-fisher-z",
+      "within_player_interval": "unavailable-clustered"
+    },
+    "units": {
+      "club_path": {
+        "authority": "canonical_registry",
+        "canonical_unit": "rad",
+        "display_unit": "deg"
+      },
+      "face_angle": {
+        "authority": "canonical_registry",
+        "canonical_unit": "rad",
+        "display_unit": "deg"
+      }
+    },
+    "vendor_provenance": [
+      {
+        "metric_statuses": {},
+        "models": ["golden-comparable"],
+        "row_count": 10,
+        "software_versions": ["fixture-1"],
+        "vendor": "TrackMan"
+      }
+    ],
+    "warnings": [
+      "Associations are observational and do not establish causality.",
+      "Pooled and between-player estimates do not substitute for within-player effects.",
+      "Possible aggregation reversal: pooled and within-player Pearson correlations have opposite signs; inspect group structure."
+    ],
+    "within_player": {
+      "ci_lower": null,
+      "ci_upper": null,
+      "group_count": 2,
+      "intercept": 9.930136612989089e-17,
+      "pearson_r": -1.0,
+      "r_squared": 1.0,
+      "reason_code": null,
+      "sample_count": 10,
+      "slope": -1.0,
+      "spearman_r": -1.0,
+      "state": "available"
+    }
+  },
+  "fixture_version": "launch-monitor-player-covariation-golden/1.0.0",
+  "records": [
+    {
+      "club_path": 4,
+      "face_angle": 0,
+      "monitor_model": "golden-comparable",
+      "monitor_vendor": "TrackMan",
+      "player_id": "A",
+      "shot_id": "shot-0",
+      "software_version": "fixture-1",
+      "source_id": "golden-source",
+      "source_row": 0
+    },
+    {
+      "club_path": 3,
+      "face_angle": 1,
+      "monitor_model": "golden-comparable",
+      "monitor_vendor": "TrackMan",
+      "player_id": "A",
+      "shot_id": "shot-1",
+      "software_version": "fixture-1",
+      "source_id": "golden-source",
+      "source_row": 1
+    },
+    {
+      "club_path": 2,
+      "face_angle": 2,
+      "monitor_model": "golden-comparable",
+      "monitor_vendor": "TrackMan",
+      "player_id": "A",
+      "shot_id": "shot-2",
+      "software_version": "fixture-1",
+      "source_id": "golden-source",
+      "source_row": 2
+    },
+    {
+      "club_path": 1,
+      "face_angle": 3,
+      "monitor_model": "golden-comparable",
+      "monitor_vendor": "TrackMan",
+      "player_id": "A",
+      "shot_id": "shot-3",
+      "software_version": "fixture-1",
+      "source_id": "golden-source",
+      "source_row": 3
+    },
+    {
+      "club_path": 0,
+      "face_angle": 4,
+      "monitor_model": "golden-comparable",
+      "monitor_vendor": "TrackMan",
+      "player_id": "A",
+      "shot_id": "shot-4",
+      "software_version": "fixture-1",
+      "source_id": "golden-source",
+      "source_row": 4
+    },
+    {
+      "club_path": 14,
+      "face_angle": 10,
+      "monitor_model": "golden-comparable",
+      "monitor_vendor": "TrackMan",
+      "player_id": "B",
+      "shot_id": "shot-5",
+      "software_version": "fixture-1",
+      "source_id": "golden-source",
+      "source_row": 5
+    },
+    {
+      "club_path": 13,
+      "face_angle": 11,
+      "monitor_model": "golden-comparable",
+      "monitor_vendor": "TrackMan",
+      "player_id": "B",
+      "shot_id": "shot-6",
+      "software_version": "fixture-1",
+      "source_id": "golden-source",
+      "source_row": 6
+    },
+    {
+      "club_path": 12,
+      "face_angle": 12,
+      "monitor_model": "golden-comparable",
+      "monitor_vendor": "TrackMan",
+      "player_id": "B",
+      "shot_id": "shot-7",
+      "software_version": "fixture-1",
+      "source_id": "golden-source",
+      "source_row": 7
+    },
+    {
+      "club_path": 11,
+      "face_angle": 13,
+      "monitor_model": "golden-comparable",
+      "monitor_vendor": "TrackMan",
+      "player_id": "B",
+      "shot_id": "shot-8",
+      "software_version": "fixture-1",
+      "source_id": "golden-source",
+      "source_row": 8
+    },
+    {
+      "club_path": 10,
+      "face_angle": 14,
+      "monitor_model": "golden-comparable",
+      "monitor_vendor": "TrackMan",
+      "player_id": "B",
+      "shot_id": "shot-9",
+      "software_version": "fixture-1",
+      "source_id": "golden-source",
+      "source_row": 9
+    }
+  ],
+  "request": {
+    "confidence_level": 0.95,
+    "min_samples": 4,
+    "player_column": "player_id",
+    "x_column": "face_angle",
+    "y_column": "club_path"
+  }
+}

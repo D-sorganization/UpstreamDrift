@@ -142,6 +142,38 @@ The HTTP surfaces are:
 - `POST /tools/launch-monitor-analytics/v2/analyze` for v2 results;
 - `POST /tools/launch-monitor-analytics/analyze` for compatible v1 clients.
 
+## Player Covariation and Population Synthesis
+
+Contract `launch-monitor-player-covariation/1.0.0` separates four questions
+that a pooled correlation cannot answer by itself:
+
+- the association across all pairwise-complete rows;
+- the association after centering each variable within player;
+- the association between player means; and
+- per-player estimates combined with fixed- and random-effects Fisher-z
+  population summaries.
+
+The population result reports Q, tau-squared, and I-squared heterogeneity,
+contributor counts, explicit confidence methods, and assumptions. Small or
+constant player groups and insufficient population evidence are typed
+`unavailable`; missing, non-numeric, non-finite, and blank-player rows remain
+counted rather than silently disappearing. Aggregation reversals are warned.
+
+Every request requires an explicitly attested or externally verified player
+identifier that exactly matches the grouping column. Session, club, source,
+filename, and row fields remain forbidden pseudo-identities. The response also
+retains selected-variable units, vendor/model provenance, dataset authority,
+source references, and source-joinable backing-record hashes. Unknown source
+fields may be selected, but an undeclared unit stays `unknown`.
+
+The bounded pair scan is exploratory and deterministic. It exposes unavailable
+pairs and multiplicity warnings; rankings do not establish causality or a
+universal player relationship. Its HTTP surfaces are:
+
+- `GET /tools/launch-monitor-analytics/contracts/player-covariation/v1`;
+- `POST /tools/launch-monitor-analytics/v2/player-covariation`; and
+- `POST /tools/launch-monitor-analytics/v2/player-covariation/scan`.
+
 ## Source-Backed Strokes Gained
 
 Contract `launch-monitor-strokes-gained-analysis/1.0.0` is the canonical

@@ -5,9 +5,17 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pandas as pd
+
 from src.shared.python.launch_monitor import (
+    AnalysisContextV2,
+    PlayerCovariationRequestV1,
+    PlayerIdentityV2,
+    SourceFileReferenceV2,
+    analyze_player_covariation_v1,
     contract_v2_json_schema,
     dataset_job_contract_json_schema,
+    player_covariation_contract_json_schema,
     strokes_gained_contract_json_schema,
 )
 
@@ -22,6 +30,57 @@ def _write_schema(destination: Path, schema: dict[str, object]) -> None:
         json.dumps(schema, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
+
+
+def player_covariation_golden_fixture() -> dict[str, object]:
+    """Return a deterministic synthetic consumer fixture and expected result."""
+
+    records = [
+        {
+            "shot_id": f"shot-{index}",
+            "source_id": "golden-source",
+            "source_row": index,
+            "player_id": "A" if index < 5 else "B",
+            "face_angle": index if index < 5 else index + 5,
+            "club_path": 4 - index if index < 5 else 19 - index,
+            "monitor_vendor": "TrackMan",
+            "monitor_model": "golden-comparable",
+            "software_version": "fixture-1",
+        }
+        for index in range(10)
+    ]
+    request = PlayerCovariationRequestV1(
+        x_column="face_angle",
+        y_column="club_path",
+        player_column="player_id",
+    )
+    context = AnalysisContextV2(
+        player_identity=PlayerIdentityV2(
+            trust_level="explicit_user_attested",
+            identifier_column="player_id",
+            evidence="Synthetic golden labels are stable by construction.",
+        ),
+        sources=(
+            SourceFileReferenceV2(
+                source_id="golden-source",
+                file_sha256="3" * 64,
+                rights_status="public_redistributable",
+            ),
+        ),
+    )
+    result = analyze_player_covariation_v1(
+        pd.DataFrame.from_records(records), request, context=context
+    )
+    return {
+        "fixture_version": "launch-monitor-player-covariation-golden/1.0.0",
+        "description": (
+            "Synthetic aggregation-reversal fixture; no observed player data."
+        ),
+        "records": records,
+        "request": request.model_dump(mode="json"),
+        "context": context.model_dump(mode="json", exclude_none=True),
+        "expected_result": result.model_dump(mode="json", exclude_none=False),
+    }
 
 
 def main() -> None:
@@ -40,6 +99,14 @@ def main() -> None:
     _write_schema(
         contract_root / "launch-monitor-dataset-job-v1.schema.json",
         dataset_job_contract_json_schema(),
+    )
+    _write_schema(
+        contract_root / "launch-monitor-player-covariation-v1.schema.json",
+        player_covariation_contract_json_schema(),
+    )
+    _write_schema(
+        contract_root / "fixtures" / "launch-monitor-player-covariation-v1.golden.json",
+        player_covariation_golden_fixture(),
     )
 
 

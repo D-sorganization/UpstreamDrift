@@ -568,6 +568,52 @@ def _metric_units(metric: str, context: AnalysisContextV2) -> MetricUnitsV2:
     )
 
 
+def analysis_lineage_v2(
+    frame: pd.DataFrame,
+    context: AnalysisContextV2,
+    selected_columns: tuple[str, ...],
+) -> AnalysisLineageV2:
+    """Build reusable v2 lineage from selected columns and exact input rows.
+
+    The dataset fingerprint binds the ordered backing-record hashes and selected
+    columns. Every backing row either joins a declared source or carries the
+    existing explicit unlinked reason.
+    """
+
+    if not selected_columns or any(not column for column in selected_columns):
+        raise ValueError("selected_columns must contain non-empty names")
+    missing = sorted(set(selected_columns).difference(frame.columns))
+    if missing:
+        raise ValueError(f"Columns not present in dataset: {', '.join(missing)}")
+    records = _backing_records(frame, context)
+    fingerprint_payload = {
+        "selected_columns": selected_columns,
+        "record_sha256": [record.record_sha256 for record in records],
+    }
+    serialized = json.dumps(fingerprint_payload, separators=(",", ":"))
+    return AnalysisLineageV2(
+        dataset_fingerprint_sha256=sha256(serialized.encode("utf-8")).hexdigest(),
+        authority=context.authority,
+        transformations=context.transformations,
+        sources=context.sources,
+        backing_records=records,
+    )
+
+
+def metric_units_v2(metric: str, context: AnalysisContextV2) -> MetricUnitsV2:
+    """Resolve canonical or explicitly source-declared units for one metric."""
+
+    return _metric_units(metric, context)
+
+
+def vendor_provenance_v2(
+    frame: pd.DataFrame, selected: tuple[str, ...]
+) -> tuple[VendorProvenanceV2, ...]:
+    """Collect bounded vendor/model provenance for reusable v2 analyses."""
+
+    return _vendor_provenance(frame, selected)
+
+
 def _uncertainty(request: FlexibleAnalysisRequest) -> UncertaintyV2:
     """Describe the uncertainty methods requested by the analysis contract."""
 
@@ -715,6 +761,9 @@ __all__ = [
     "UncertaintyV2",
     "VendorProvenanceV2",
     "adapt_v2_to_v1",
+    "analysis_lineage_v2",
     "analyze_variables_v2",
     "contract_v2_json_schema",
+    "metric_units_v2",
+    "vendor_provenance_v2",
 ]

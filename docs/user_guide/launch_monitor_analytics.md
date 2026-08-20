@@ -208,6 +208,38 @@ the v2 context; otherwise the unit and authority are `unknown`. An unknown unit
 is never silently treated as canonical. Backing rows similarly name their
 declared content-addressed source or state why no source link is available.
 
+### Analyze Within-Player and Population Covariation
+
+Use the player-covariation operation only when the dataset contains a stable,
+explicitly attested or externally verified player identifier. Select any two
+numeric canonical or retained source variables. Retained fields remain
+selectable, but an undeclared source unit is shown as `unknown`, not promoted to
+a canonical unit.
+
+Read the outputs as separate descriptive views:
+
+- **Pooled** describes all usable rows and can be dominated by player mix.
+- **Within player** removes each player's mean before calculating association.
+- **Between player** describes the association among player means.
+- **Per player** reports each eligible player's estimate and population weight.
+- **Population meta-analysis** reports fixed/random Fisher-z summaries and Q,
+  tau-squared, and I-squared heterogeneity.
+
+If pooled and within-player directions differ, the result warns about an
+aggregation reversal. Do not interpret the pooled result as the player's swing
+pattern. A large random-effects correlation with high heterogeneity likewise
+does not mean every player follows that pattern.
+
+The all-pairs scan is for hypothesis generation. It ranks a bounded set of
+numeric pairs deterministically, retains structured unavailable pairs, and
+warns about multiple comparisons. Validate any selected relationship on new or
+held-out sessions before using it for coaching. Correlation alone does not show
+causality, improvement, or device-model equivalence.
+
+Exports retain source references and source-joinable backing hashes rather
+than copying restricted row values. Selected-pair results contain player labels;
+store and share them according to the source dataset's privacy and usage terms.
+
 ### Source-Backed Strokes Gained
 
 True strokes gained requires more than carry and lateral dispersion. Each row
