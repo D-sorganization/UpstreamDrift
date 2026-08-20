@@ -85,8 +85,9 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     case 0/phase 12 `ik_nonconvergence`. Joint-limit-low retains 0.0885 rad
     minimum margin; joint-limit-high retains 0.1185 rad. Their maximum closure
     errors are 1.03e-10 m and minimum collision clearances are 0.0491 m. The
-    Evidence passes 3/3. Write/validate preflight excludes workers, requires common
-    support, and binds 83/1 states, full hashes, controls, invalidators, and limits.
+    evidence passes 3/3. Write/validate preflight excludes workers, requires common
+    support, binds 83/1 states, full hashes, controls, invalidators, and limits, and
+    preregisters tolerance-aware resolution plus separate engineering secants.
     The governed feasibility/margin figure has embedded CID TrueType text and
     passes its retained-failure contract. Q2/H5 and the machine-readable
     prediction registry no longer repeat the obsolete failed-closure narrative.
