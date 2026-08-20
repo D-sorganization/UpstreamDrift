@@ -4146,3 +4146,4 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - `spec-exempt`: Replaced `np.sum(A * B)` with `np.vdot(A.ravel(), B.ravel())` in `src/bunkershot3d/study/surrogate.py` to optimize 2D array dot product without changing logic.
 
 - Replaced `np.concatenate` with in-place slice assignment in `TrajectoryFunnelBenchmark._policy_action` to optimize array construction in tight simulation loops. (spec-exempt: micro-optimization)
+- Security: Added `X-Launcher-CSRF-Token` to CORS `allow_headers` in `src/api/server.py` and `src/api/local_server.py` to fix CORS preflight rejections for the local launcher UI.

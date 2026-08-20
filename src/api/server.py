@@ -302,7 +302,12 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     # SECURITY: Restrict headers - do NOT use "*"
-    allow_headers=["Content-Type", "Authorization", "X-API-Key"],
+    allow_headers=[
+        "Content-Type",
+        "Authorization",
+        "X-API-Key",
+        "X-Launcher-CSRF-Token",
+    ],
 )
 
 # Rate limiting
