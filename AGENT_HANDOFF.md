@@ -94,7 +94,8 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     errors are 1.03e-10 m and minimum collision clearances are 0.0491 m. The
     evidence passes 3/3. Write/validate preflight excludes workers, requires common
     support, binds 83/1 states, full hashes, invalidators, scaling-mismatch and
-    infeasible-limit controls, tolerance-aware resolution, and engineering secants.
+    infeasible-limit controls, a preoutcome 0.001 m/s numerical resolution floor,
+    engine/step discrepancy thresholds, and engineering secants.
     Its v1 evidence contract preserves checkpoint identity and per-cell arrays.
     Shaft matching is coupled/rigid station-force/dissipated-work; ground matching
     is coupled/fixed grip-force/total-work. Partial records cannot qualify.

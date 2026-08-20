@@ -92,6 +92,7 @@ def test_plan_requires_common_support_and_rejects_count_as_benefit(plan) -> None
     assert "not outcome direction or causal benefit" in analysis["count_rule"]
     assert "two-engine discrepancy" in analysis["resolution_rule"]
     assert "otherwise report unresolved, not no effect" in analysis["resolution_rule"]
+    assert analysis["outcome_absolute_resolution_tolerance_m_s"] == 0.001
     assert "do not label either a derivative" in analysis["oat_secant_rule"]
     assert "nonmonotonic engineering sensitivity" in analysis["nonmonotonicity_rule"]
     assert "do not estimate higher-order" in analysis["interaction_rule"]
@@ -125,6 +126,10 @@ def test_plan_binds_restart_and_cell_level_evidence_contract(plan) -> None:
             "work_match_relative_error",
             "gate_status",
             "failure_class",
+            "two_engine_speed_difference_discrepancy_m_s",
+            "time_step_speed_difference_discrepancy_m_s",
+            "resolution_threshold_m_s",
+            "resolved_outcome_change",
         } <= required
     semantics = evidence["matching_metric_semantics"]
     assert semantics["shaft"] == {
@@ -140,6 +145,7 @@ def test_plan_binds_restart_and_cell_level_evidence_contract(plan) -> None:
     assert "atomic" in evidence["write_policy"]
     assert "all seven corners" in evidence["completion_policy"]
     assert "must not qualify" in evidence["partial_record_policy"]
+    assert "not device accuracy" in evidence["resolution_boundary"]
 
 
 def test_nominal_plan_reproduces_registered_atlas_sizes(plan) -> None:

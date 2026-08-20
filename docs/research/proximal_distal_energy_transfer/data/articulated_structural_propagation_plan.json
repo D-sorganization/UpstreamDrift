@@ -3,7 +3,7 @@
   "status": "ready",
   "authority_campaign_sha256": "d8115073dc1b506f145196b08c96d7cb3cf00e8cf29099970e2f7b0fbe6d63f3",
   "design_sha256": "8e5f246645e27c8f0f66a87859c63c470c43e579bccb50848124174944e11e07",
-  "contract_sha256": "928f1a1d0062e6f5182ca69b8b6aa097f3497bf1d8d6d6a10716fd9af66a894c",
+  "contract_sha256": "eaa8bf9c586331ba1d87e149657a211856704b99b026241c5c28e9c6fe158776",
   "design": {
     "case_indices": [
       0,
@@ -163,6 +163,7 @@
     "support_rule": "never compare corner outcome ranges as paired effects without persistent common matching support",
     "zero_nominal_ground_rule": "a corner admitting cells when nominal ground admits 0/384 is support emergence, not evidence of paired ground-pathway benefit",
     "count_rule": "matched-count movement diagnoses conditioning-set sensitivity, not outcome direction or causal benefit",
+    "outcome_absolute_resolution_tolerance_m_s": 0.001,
     "resolution_rule": "classify a persistent-support corner-minus-nominal outcome change as resolved only when its magnitude exceeds the maximum declared tolerance, two-engine discrepancy, and fine-versus-coarse time-step discrepancy; otherwise report unresolved, not no effect",
     "oat_secant_rule": "report low-to-nominal and nominal-to-high engineering secants separately; do not label either a derivative or population effect",
     "nonmonotonicity_rule": "retain opposing or materially unequal one-sided secants as nonmonotonic engineering sensitivity rather than averaging them",
@@ -192,7 +193,11 @@
         "load_match_relative_error",
         "work_match_relative_error",
         "gate_status",
-        "failure_class"
+        "failure_class",
+        "two_engine_speed_difference_discrepancy_m_s",
+        "time_step_speed_difference_discrepancy_m_s",
+        "resolution_threshold_m_s",
+        "resolved_outcome_change"
       ],
       "ground": [
         "cell_identity",
@@ -201,7 +206,11 @@
         "load_match_relative_error",
         "work_match_relative_error",
         "gate_status",
-        "failure_class"
+        "failure_class",
+        "two_engine_speed_difference_discrepancy_m_s",
+        "time_step_speed_difference_discrepancy_m_s",
+        "resolution_threshold_m_s",
+        "resolved_outcome_change"
       ]
     },
     "matching_metric_semantics": {
@@ -218,7 +227,8 @@
     },
     "write_policy": "write checkpoints and the final record atomically",
     "completion_policy": "complete only after all seven corners are accounted for",
-    "partial_record_policy": "an in-progress or partial record must not qualify as release evidence"
+    "partial_record_policy": "an in-progress or partial record must not qualify as release evidence",
+    "resolution_boundary": "the 0.001 m/s floor is a preregistered synthetic numerical interpretation threshold, not device accuracy or human measurement uncertainty"
   },
   "corners": [
     {
@@ -815,8 +825,8 @@
     "scripts/research/proximal_distal_energy/articulated_atlas_authority.py": "191174f7fea921a3b52054f85d735b45ee0ca93090aaa733f59221d45de0af0d",
     "scripts/research/proximal_distal_energy/articulated_scaled_authority.py": "6d41ef265dd88d61bdf70f1ff78a17716c9293e6260f307c253df43f441b7d83",
     "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py": "166ab2ebec88a0c53abc54c6b565ba0a3f82caf800449e822164177f31289549",
-    "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": "c945017e110a64282c74c4bd387276f14badae3f386fefe5b48e62f70c9d93ef",
-    "tests/research/test_articulated_structural_propagation_plan.py": "6f4e5915148777c715cde55c667bdd63314440ed252c6b69cff8c6ef69415011",
+    "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": "10488a6267e2a23b0a653eb1041b66413fca04e2d623f695006a181a3c0a62aa",
+    "tests/research/test_articulated_structural_propagation_plan.py": "bae0dfd3e08664e76b5379e4ad1b7539007e5e50a16650a228f83b3b0fb0a637",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "8eed52fe4ebbc55fcf753f4703330dd6d768281b0babfbb2adca074b862fc36d",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
     "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json": "f07fc33cc76fb80f395cd10b01a30169b6440cec3854be3894024d435bc0f722",

@@ -203,6 +203,7 @@ def build_structural_propagation_plan(
         "support_rule": "never compare corner outcome ranges as paired effects without persistent common matching support",
         "zero_nominal_ground_rule": "a corner admitting cells when nominal ground admits 0/384 is support emergence, not evidence of paired ground-pathway benefit",
         "count_rule": "matched-count movement diagnoses conditioning-set sensitivity, not outcome direction or causal benefit",
+        "outcome_absolute_resolution_tolerance_m_s": 0.001,
         "resolution_rule": "classify a persistent-support corner-minus-nominal outcome change as resolved only when its magnitude exceeds the maximum declared tolerance, two-engine discrepancy, and fine-versus-coarse time-step discrepancy; otherwise report unresolved, not no effect",
         "oat_secant_rule": "report low-to-nominal and nominal-to-high engineering secants separately; do not label either a derivative or population effect",
         "nonmonotonicity_rule": "retain opposing or materially unequal one-sided secants as nonmonotonic engineering sensitivity rather than averaging them",
@@ -233,6 +234,10 @@ def build_structural_propagation_plan(
                 "work_match_relative_error",
                 "gate_status",
                 "failure_class",
+                "two_engine_speed_difference_discrepancy_m_s",
+                "time_step_speed_difference_discrepancy_m_s",
+                "resolution_threshold_m_s",
+                "resolved_outcome_change",
             ]
             for pathway in ("shaft", "ground")
         },
@@ -251,6 +256,7 @@ def build_structural_propagation_plan(
         "write_policy": "write checkpoints and the final record atomically",
         "completion_policy": "complete only after all seven corners are accounted for",
         "partial_record_policy": "an in-progress or partial record must not qualify as release evidence",
+        "resolution_boundary": "the 0.001 m/s floor is a preregistered synthetic numerical interpretation threshold, not device accuracy or human measurement uncertainty",
     }
     contract_sha = hashlib.sha256(
         json.dumps(
