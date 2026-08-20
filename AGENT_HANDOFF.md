@@ -67,14 +67,10 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
   - #8752 is **OPEN** on `research/8752-articulated-uncertainty`. The v2
     40-sample closed-state/LHS study is finite and energy-closed but every row
     retains partial opening. The 19-corner headline campaign is incomplete:
-    earlier nominal results were 126/384 shaft and 0/384 ground, but their
-    per-pathway source basis was unavailable after legacy migration. They now
-    fail closed and are being rerun from remote source basis `fbff8dc53` in
-    local exec session `64656`; inspect the checkpoint before any restart.
-    The ground atlas now checkpoints each of 72 independent pathway/control
-    branches and can use 20 workers; a real restart-equivalence test passes.
-    The shaft atlas remains capped at 12 workers; the campaign uses 20 workers
-    for the independent ground branches.
+    nominal shaft recomputation completed at 126/384 with all four computation
+    hashes verified against remote basis `fbff8dc53`. Nominal ground is active
+    in exec session `64656` with 20 workers and 72 independently digest-bound
+    branch checkpoints; a real restart-equivalence test passes.
     Completion-only headline/structural evidence tests stay untracked until data finish.
   - #8800 is **OPEN** and blocks #8752. Its governed generator regenerates all
     13 phase states for cases 0/8/9/17; nominal is 52/52 feasible and reproduces
