@@ -50,6 +50,7 @@ def test_momentum_transfer_registry_is_complete_and_falsifiable() -> None:
 def test_registry_preserves_critical_scientific_distinctions() -> None:
     payload = json.loads(REGISTRY.read_text(encoding="utf-8"))
     by_id = {question["id"]: question for question in payload["questions"]}
+    by_point = {point["id"]: point for point in payload["critical_points"]}
 
     assert "cancellation indicator" in by_id["Q1"]["required_controls"]
     assert "alternative casting criteria" in by_id["Q3"]["required_controls"]
@@ -58,6 +59,21 @@ def test_registry_preserves_critical_scientific_distinctions() -> None:
     assert "interior-optimum search" in by_id["Q6"]["required_controls"]
     assert "one slack class at a time" in by_id["Q7"]["required_controls"]
     assert by_id["Q7"]["status"] == "partly_answered"
+    geometry = by_point["MTQ-02"]
+    assert "six corners retain 52/52 feasible states" in geometry["present_answer"]
+    assert "case-0/phase-12 IK nonconvergence" in geometry["present_answer"]
+    assert (
+        "Propagate every feasible #8800 scaled authority"
+        in (geometry["decisive_next_test"])
+    )
+    assert (
+        "Complete #8800 authority regeneration" not in (geometry["decisive_next_test"])
+    )
+    assert (
+        "docs/research/proximal_distal_energy_transfer/data/"
+        "articulated_structural_authority_campaign.json"
+        in geometry["evidence_artifacts"]
+    )
 
 
 def test_every_source_point_links_to_inspectable_evidence() -> None:
