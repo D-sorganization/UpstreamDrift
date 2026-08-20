@@ -4,14 +4,15 @@ Last updated: 2026-08-20
 
 ## Active Publication-Quality Slice (#8451)
 
-PR #8793 owns the PDF quality contract: UpstreamDrift is authoritative,
-AffineDrift is its pinned publisher, and Tools/Sidekick only link. The
+PR #8793 merged the PDF quality contract at `6e28baef54a0`: UpstreamDrift is
+authoritative, AffineDrift is its pinned publisher, and Tools/Sidekick only
+link. The
 web-linearized 231-page candidate passes full-page inspection; missing tags,
 110 Type 3 resources, and two unembedded resources block archival release.
 Phase 0 landed in UpstreamDrift #8791, AffineDrift #3884, and Tools #4586.
-After the protected merge, sync the exact revision and PDF/manifest digests to
-AffineDrift. #8789 owns Docker/quarantine/baseline; #8556, equipment calibration,
-and archival/PID release remain open. Details:
+AffineDrift #3880/#3887/#3888 now provide the immutable monograph projection,
+release pin, and verifier. #8789 owns Docker/quarantine/baseline; #8556,
+equipment calibration, and archival/PID release remain open. Details:
 `docs/research/proximal_distal_energy_transfer/PUBLICATION_QUALITY.md`.
 
 ## Read This First — How Merging Works Now
