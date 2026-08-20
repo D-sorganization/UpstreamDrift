@@ -66,9 +66,10 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     retains partial opening. The 19-corner headline campaign is incomplete:
     nominal completed at shaft 126/384 and ground 0/384; every gate and all four
     source hashes match remote basis `fbff8dc53`. Exec session `64656` completed
-    grip-stiffness-low shaft at 182/384 (+56 nominal); ground has 65/72 durable,
-    unique v1 branches under design digest `32ccf54bee70`; the corner and 1/19
-    campaign record remain incomplete.
+    grip-stiffness-low completed at shaft 182/384 (+56 nominal) and ground 0/384
+    with every gate passing. Its 72/72 checkpoints have exact unique identities,
+    one v1 schema/design digest `32ccf54bee70`, finite payloads, and registered
+    shapes. The campaign has 2/19 corners complete and is running stiffness-high.
     All 72 nominal branch checkpoints retain exact trajectory/force/ground-force
     parity and restart equivalence.
     The completion-only headline evidence test stays untracked until data finish.
