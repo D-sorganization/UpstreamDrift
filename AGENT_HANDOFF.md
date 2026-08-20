@@ -73,7 +73,7 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     nominal shaft recomputation completed at 126/384 with all four computation
     hashes verified against remote basis `fbff8dc53`. Nominal ground is active
     in exec session `64656` with 20 workers and 72 independently digest-bound
-    branch checkpoints; 25/72 are durable, digest-bound, and record exact
+    branch checkpoints; 27/72 are durable, digest-bound, and record exact
     trajectory/force/ground-force parity. A real restart-equivalence test passes.
     The completion-only headline evidence test stays untracked until data finish.
   - #8800 is **OPEN** and blocks #8752. Its governed generator regenerates all
@@ -116,11 +116,6 @@ reference — not equipment calibration, anatomy, physiology, or coaching guidan
 - Initialization: natural-zero, gravity-only, and conditional starts gave peak
   ground forces of 32.8, 565.5, and 510.3 N.
 
-## Vendored Tools Dependency (`vendor/ud-tools`)
-
-Tools is a **leaf dependency vendored as a submodule**. Never edit the vendored
-copy or child copies under `src/shared/python/`; Tools is the source of truth.
-
 ## Immediate Next Steps
 
 1. Publish #8451, then sync its exact revision and digests through AffineDrift.
@@ -129,19 +124,15 @@ copy or child copies under `src/shared/python/`; Tools is the source of truth.
 
 ## Gate Commands
 
-Run this locally before pushing; it mirrors the sequential CI steps:
-
 ```bash
-python scripts/check_spec_paths.py && python scripts/check_root_clutter.py && \
-  python scripts/check_test_layout.py && python scripts/check_pytest_intree_testpaths.py
+python scripts/check_spec_paths.py && python scripts/check_root_clutter.py
+python scripts/check_test_layout.py && python scripts/check_pytest_intree_testpaths.py
 python scripts/ci/check_suite_marker_ratchet.py && python scripts/ci/check_dry_duplication_gate.py
 python scripts/ci/check_architecture_budget.py
 python scripts/check_module_size_budget.py --max-lines 1500 --include src
 python scripts/check_doc_size_budget.py
 python -m ruff check . && python -m ruff format --check .
 ```
-
-Research validation:
 
 ```bash
 python -m scripts.research.proximal_distal_energy.claim_audit validate
