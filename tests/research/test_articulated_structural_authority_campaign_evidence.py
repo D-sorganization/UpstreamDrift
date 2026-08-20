@@ -18,6 +18,7 @@ RECORD = DATA / "articulated_structural_authority_campaign.json"
 ARTICLE = ROOT / "docs/research/proximal_distal_energy_transfer"
 CHAPTER = ARTICLE / "chapters/_ch06caaa_structural_authority.qmd"
 MANUSCRIPT = ARTICLE / "proximal_distal_energy_transfer.qmd"
+QUESTION_PROGRAM = ARTICLE / "MOMENTUM_TRANSFER_QUESTION_PROGRAM.md"
 pytestmark = pytest.mark.scientific
 
 
@@ -91,3 +92,15 @@ def test_article_retains_every_corner_and_propagation_boundary() -> None:
     assert "does not yet establish sensitivity of either\nheadline estimand" in chapter
     assert "nominal model instead of its bound scaled model" in chapter
     assert "figures/fig_articulated_structural_authority.pdf" in chapter
+
+
+def test_question_program_distinguishes_authority_from_propagation() -> None:
+    program = QUESTION_PROGRAM.read_text(encoding="utf-8")
+
+    assert "six corners retain 52/52 feasible states" in program
+    assert "low-height corner retains one case-0/phase-12 IK nonconvergence" in program
+    assert (
+        "authority regeneration propagates through both headline estimands" in program
+    )
+    assert "not a human feasibility or prevalence result" in program
+    assert "Propagate every feasible #8800 authority" in program
