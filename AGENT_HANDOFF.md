@@ -77,7 +77,7 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     retains partial opening. The 19-corner headline campaign is incomplete:
     nominal completed at shaft 126/384 and ground 0/384; every gate and all four
     source hashes match remote basis `fbff8dc53`. Exec session `64656` completed
-    grip-stiffness-low shaft at 182/384 (+56 nominal); ground has 25/72 durable,
+    grip-stiffness-low shaft at 182/384 (+56 nominal); ground has 43/72 durable,
     unique v1 branches under design digest `32ccf54bee70`; the corner and 1/19
     campaign record remain incomplete.
     All 72 nominal branch checkpoints retain exact trajectory/force/ground-force
@@ -95,7 +95,8 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     evidence passes 3/3. Write/validate preflight excludes workers, requires common
     support, binds 83/1 states, full hashes, invalidators, scaling-mismatch and
     infeasible-limit controls, a preoutcome 0.001 m/s numerical resolution floor,
-    engine/step discrepancy thresholds, and engineering secants.
+    engine/step discrepancy thresholds, and span-normalized one-sided secants that
+    cannot be ranked as cross-parameter importance.
     Its v1 evidence contract preserves checkpoint identity and per-cell arrays.
     Shaft matching is coupled/rigid station-force/dissipated-work; ground matching
     is coupled/fixed grip-force/total-work. Partial records cannot qualify.

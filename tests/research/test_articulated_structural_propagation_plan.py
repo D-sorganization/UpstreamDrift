@@ -94,6 +94,8 @@ def test_plan_requires_common_support_and_rejects_count_as_benefit(plan) -> None
     assert "otherwise report unresolved, not no effect" in analysis["resolution_rule"]
     assert analysis["outcome_absolute_resolution_tolerance_m_s"] == 0.001
     assert "do not label either a derivative" in analysis["oat_secant_rule"]
+    assert "registered scale-factor span" in analysis["secant_definition"]
+    assert "not comparable parameter-importance" in analysis["secant_boundary"]
     assert "nonmonotonic engineering sensitivity" in analysis["nonmonotonicity_rule"]
     assert "do not estimate higher-order" in analysis["interaction_rule"]
     assert "do not select favorable corners" in analysis["multiplicity"]
@@ -146,6 +148,15 @@ def test_plan_binds_restart_and_cell_level_evidence_contract(plan) -> None:
     assert "all seven corners" in evidence["completion_policy"]
     assert "must not qualify" in evidence["partial_record_policy"]
     assert "not device accuracy" in evidence["resolution_boundary"]
+    assert set(evidence["required_axis_summary_fields"]) == {
+        "axis_name",
+        "low_scale",
+        "nominal_scale",
+        "high_scale",
+        "low_to_nominal_secant_m_s_per_unit_scale",
+        "nominal_to_high_secant_m_s_per_unit_scale",
+        "nonmonotonic_classification",
+    }
 
 
 def test_nominal_plan_reproduces_registered_atlas_sizes(plan) -> None:
