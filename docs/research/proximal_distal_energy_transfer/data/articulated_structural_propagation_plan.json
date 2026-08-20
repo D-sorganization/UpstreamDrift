@@ -893,7 +893,7 @@
     "scripts/research/proximal_distal_energy/articulated_structural_result.py": "c7080d6ad97383612562bbf8b1f127c61cad0bd968ac776636fc4c45632466c2",
     "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py": "166ab2ebec88a0c53abc54c6b565ba0a3f82caf800449e822164177f31289549",
     "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": "30d218516bc9246d66baab01c37e33127983de71ed118f98de25f81549048381",
-    "tests/research/test_articulated_structural_common_support.py": "819b406bab7d4e8fc602a7c2192e98587f7bf1370a171cfd4a2d2d0e8de93c05",
+    "tests/research/test_articulated_structural_common_support.py": "09b30a814ad300a7b6a9b729ba61c8ea65817bd9510d0daa1e1fe70f3a70b9b1",
     "tests/research/test_articulated_structural_result.py": "e6fd8a2ee9872955bd2cc4eb06f39c291e3971bc3a1dd942beaa9620ad5f8a92",
     "tests/research/test_articulated_structural_propagation_plan.py": "0c0d41c9927a6fb2c9c85ed13210218c6b34c5d7d1278f6d1a309d04939dfe48",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "8eed52fe4ebbc55fcf753f4703330dd6d768281b0babfbb2adca074b862fc36d",

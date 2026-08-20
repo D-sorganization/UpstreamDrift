@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import numpy as np
 import pytest
 
@@ -17,6 +19,8 @@ from scripts.research.proximal_distal_energy.articulated_structural_common_suppo
 )
 
 pytestmark = pytest.mark.scientific
+ROOT = Path(__file__).resolve().parents[2]
+DATA = ROOT / "docs/research/proximal_distal_energy_transfer/data"
 
 
 def _arrays(
@@ -76,6 +80,31 @@ def test_extract_headline_cells_rejects_shape_or_identity_drift() -> None:
     arrays = _arrays(((0, 0), (0, 0)), matched_indices=())
     with pytest.raises(ValueError, match="cell identities must be unique"):
         extract_headline_cells("shaft", arrays)
+
+
+@pytest.mark.parametrize(
+    ("pathway", "artifact", "expected_matched"),
+    [
+        ("shaft", "articulated_shaft_atlas.npz", 126),
+        ("ground", "articulated_ground_atlas.npz", 0),
+    ],
+)
+def test_committed_nominal_atlases_reproduce_registered_support(
+    pathway: str, artifact: str, expected_matched: int
+) -> None:
+    with np.load(DATA / artifact) as arrays:
+        cells = extract_headline_cells(pathway, arrays)
+
+    assert len(cells.identities) == 384
+    assert np.count_nonzero(cells.matched) == expected_matched
+    assert np.all(np.isfinite(cells.two_engine_speed_difference_discrepancy_m_s))
+    assert np.all(np.isfinite(cells.time_step_speed_difference_discrepancy_m_s))
+    self_comparison = compare_common_support(cells, cells)
+    assert len(self_comparison.persistent_identities) == expected_matched
+    assert np.all(self_comparison.persistent_speed_change_m_s == 0.0)
+    assert not np.any(self_comparison.resolved_outcome_change)
+    if pathway == "ground":
+        assert self_comparison.has_paired_outcome is False
 
 
 def test_common_support_excludes_missing_states_and_preserves_transitions() -> None:

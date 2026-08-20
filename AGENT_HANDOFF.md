@@ -88,7 +88,7 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     cannot be ranked as cross-parameter importance.
     Its v1 evidence contract preserves checkpoint identity and per-cell arrays. Shaft matching is coupled/rigid station-force/dissipated-work; ground matching is coupled/fixed grip-force/total-work. Planned, feasible, and executed denominators remain separate; partial records cannot qualify.
     The figure contract exposes support transitions, resolution, secants, and failures with searchable vector text and color-independent status encoding.
-    Common-support analysis preserves identities, denominators, failures, numerical resolution, and unpooled one-sided secants; shared-support axis records use an unweighted median/full range or null. The atomic plan-bound result requires all seven corners and six axis/pathway summaries and rejects partial/tampered evidence. Results remain model-dependent, not causal, population, mechanism, ranking, or coaching claims.
+    Common-support analysis directly reproduces nominal shaft 126/384 and ground 0/384 while preserving identities, denominators, failures, resolution, and unpooled secants; shared-support axis records use a median/range or null. The atomic plan-bound result requires seven corners and six axis/pathway summaries and rejects partial/tampered evidence. Results remain model-dependent, not causal, population, mechanism, ranking, or coaching claims.
     The governed feasibility/margin figure has embedded CID TrueType text and
     passes its retained-failure contract. Q2/H5 and the machine-readable
     prediction registry no longer repeat the obsolete failed-closure narrative.
