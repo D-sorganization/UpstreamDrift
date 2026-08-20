@@ -170,6 +170,8 @@ def build_structural_propagation_plan(
             "time-step refinement",
             "pathway killswitches",
             "unchanged load-work matching",
+            "inconsistent authority-model scaling must fail closed",
+            "deliberately infeasible joint-limit state must remain classified",
         ],
         "failure_policy": "retain every planned or dynamic failure without imputation",
         "invalidators": [

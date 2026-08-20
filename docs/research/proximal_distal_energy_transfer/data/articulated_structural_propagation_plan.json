@@ -3,7 +3,7 @@
   "status": "ready",
   "authority_campaign_sha256": "d8115073dc1b506f145196b08c96d7cb3cf00e8cf29099970e2f7b0fbe6d63f3",
   "design_sha256": "8e5f246645e27c8f0f66a87859c63c470c43e579bccb50848124174944e11e07",
-  "contract_sha256": "407c44f5cb7da5e5d99c73e342eaa9f0b9d2a71093f301fcc49312fe11189159",
+  "contract_sha256": "55d6206112c550d5349752be9d46c5844aff32b5d20f31cf26e36946466a1577",
   "design": {
     "case_indices": [
       0,
@@ -129,7 +129,9 @@
       "velocity reversal",
       "time-step refinement",
       "pathway killswitches",
-      "unchanged load-work matching"
+      "unchanged load-work matching",
+      "inconsistent authority-model scaling must fail closed",
+      "deliberately infeasible joint-limit state must remain classified"
     ],
     "failure_policy": "retain every planned or dynamic failure without imputation",
     "invalidators": [
@@ -762,8 +764,8 @@
     "scripts/research/proximal_distal_energy/articulated_atlas_authority.py": "191174f7fea921a3b52054f85d735b45ee0ca93090aaa733f59221d45de0af0d",
     "scripts/research/proximal_distal_energy/articulated_scaled_authority.py": "6d41ef265dd88d61bdf70f1ff78a17716c9293e6260f307c253df43f441b7d83",
     "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py": "166ab2ebec88a0c53abc54c6b565ba0a3f82caf800449e822164177f31289549",
-    "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": "b4be021fea03bc4f8f4732cf2a878e63ea2e247f1c02e91527b01b84cd128f81",
-    "tests/research/test_articulated_structural_propagation_plan.py": "5dbcdab2fabdab38ea3a3757ce976267bb0b83d867ab54bb35361cb844cc1c76",
+    "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": "325bf6682f5ca639b2ccd42d08693791b201021621ac1203793ee965d0e2298e",
+    "tests/research/test_articulated_structural_propagation_plan.py": "7d43ec49580fb635bfecc2334fe73c561840de6a39e0c15256f7e70efc2dce61",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "8eed52fe4ebbc55fcf753f4703330dd6d768281b0babfbb2adca074b862fc36d",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
     "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json": "f07fc33cc76fb80f395cd10b01a30169b6440cec3854be3894024d435bc0f722",

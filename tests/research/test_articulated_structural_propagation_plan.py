@@ -64,6 +64,8 @@ def test_plan_preregisters_falsification_and_interpretation_boundaries(plan) -> 
         "time-step refinement",
         "pathway killswitches",
         "unchanged load-work matching",
+        "inconsistent authority-model scaling must fail closed",
+        "deliberately infeasible joint-limit state must remain classified",
     }
     assert "without imputation" in acceptance["failure_policy"]
     assert len(acceptance["invalidators"]) == 5
