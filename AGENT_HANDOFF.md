@@ -57,9 +57,8 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
 - #8668 governs subject-scaled articulated contact; its qualification program
   remains open because #8751 and #8752 have unmet acceptance criteria.
 - #8684 governs distributed grip, shaft, and ground:
-  - #8751 is **OPEN**. PR #8783 added preliminary multi-station friction,
-    power decomposition, and event probes. Branch
-    `research/8751-friction-atlas` now has an unmerged v3 atlas with 576
+  - #8751 is **CLOSED** by protected squash merge PR #8797 at remote-main
+    commit `7c8f1547d39a5c182b52d44aeddd3330c3074b75`. The v3 atlas has 576
     nominal trajectories and 24 event probes. It adds full-state velocity
     reversal, frictionless/$\mu=0.35$ comparators, station-level opening and
     reattachment counts, cross-engine active-set parity, nested horizon and
@@ -74,22 +73,25 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     atlas gates, claim audit (1,068/1,068 candidates; 295 claims), 571-artifact
     release integrity, document governance/title case, file-size, architecture,
     and scoped Ruff checks. The optimized paper is 232 pages, 1.77 MB, with 192
-    URI links and 246 outline entries. PR #8797 is open with protected squash
-    auto-merge enabled. Its first hosted run exposed one actionable architecture
-    budget failure (`_record`, 125 > 100 lines); the record construction is now
-    split into focused helpers, and the exact architecture gate, scoped Ruff,
-    governed regeneration, release validation, and 18 focused scientific tests
-    pass locally. Commit/push of that correction, replacement CI, remote-main
-    verification, and issue closure remain for #8751.
+    URI links and 246 outline entries. The hosted architecture correction and all
+    required checks passed before auto-merge; the merge commit is verified as
+    remote `main`, and #8751 closed automatically.
   - #8796 is **OPEN** under #8557/#8684 for the stronger attached-to-open and
     stateful finite-static-friction extension. It owns static-cone feasibility,
     subsequent stick--slip evolution, attached-state first failure, and an
     infeasible manufactured case. Do not fold those unqualified results into
     #8751 or describe the impulsive stick control as a trajectory law.
   - #8752 is **OPEN**. PR #8783 added preliminary manufactured and Latin
-    hypercube screens, but production-runner/two-engine manufactured cases,
-    full shaft/ground parameter coverage, per-corner refinement, headline
-    estimand movement, and uncertainty-adequacy evidence remain open.
+    hypercube screens. Branch `research/8752-articulated-uncertainty` now routes
+    both manufactured cases through the production semi-implicit stepping kernel
+    and both native dynamics adapters, replaces fabricated momentum-conservation
+    zeros with explicit non-applicability for forced motion, gates actual
+    constraint position/velocity drift, and includes deliberately perturbed
+    free and constrained forcing controls that fail closed. Four focused tests
+    and scoped Ruff pass locally. Full joint-limit, shaft, and ground parameter
+    coverage; reversal and killswitch branches; per-corner refinement; headline
+    126/384 shaft and 0/384 ground estimand movement; governed artifacts; paper
+    integration; and protected publication remain open.
 - The release has 295 atomic claims and 40 reviewed release claims; all 40
   retain at least one scientifically open gate. #8724 still owns normalized
   four-way adjudication and independent review.
@@ -142,7 +144,7 @@ child copies under `src/shared/python/`.
 
 1. Publish #8451, then sync its exact revision and digests through AffineDrift.
 2. Continue #8789's remaining Docker/quarantine/baseline work without overlap.
-3. Complete #8751/#8752 and burn down #8766 without widening either contract.
+3. Complete #8752 and burn down #8766 without widening either contract.
 4. Advance calibrated contact, full-delivery uncertainty, and #8556; defer
    Sidekick until the scientific and Tools boundaries are stable.
 

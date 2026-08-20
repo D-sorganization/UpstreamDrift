@@ -61,8 +61,12 @@ def test_manufactured_free_body_closed_form_checks() -> None:
     )
     assert result.closed_form_check_passed is True
     assert result.inverse_dynamics_residual < 1e-10
+    assert result.manufactured_acceleration_residual < 1e-10
     assert result.observed_convergence_order >= 0.8
     assert result.mechanical_energy_conservation_error < 0.05
+    assert set(result.engine_step_errors) == {"mujoco", "pinocchio"}
+    assert result.linear_momentum_conservation_error is None
+    assert result.angular_momentum_conservation_error is None
 
     # Errors must decrease monotonically with step size
     steps = sorted(result.integration_step_errors.keys())
@@ -85,5 +89,33 @@ def test_manufactured_constrained_motion_checks() -> None:
         hand_contact_local_x_m=hand_x,
     )
     assert result.closed_form_check_passed is True
+    assert result.constraint_residual < 1e-10
+    assert result.constraint_velocity_residual < 1e-10
     assert result.equilibrium_residual < 1e-10
     assert result.action_reaction_residual_n < 1e-12
+    assert set(result.engine_constraint_residuals) == {"mujoco", "pinocchio"}
+
+
+def test_manufactured_controls_reject_deliberately_perturbed_forcing() -> None:
+    """Both manufactured controls must fail closed when their forcing is perturbed."""
+
+    model, metadata, q, grip_span_m = _closed_state()
+    free = evaluate_manufactured_free_body(
+        model,
+        q,
+        duration_s=0.01,
+        time_steps_s=(0.002, 0.001, 0.0005),
+        torque_scale=1.01,
+    )
+    constrained = evaluate_manufactured_constrained_motion(
+        model,
+        q,
+        duration_s=0.01,
+        grip_span_m=grip_span_m,
+        hand_contact_local_x_m=float(metadata["hand_contact_local_x_m"]),
+        constraint_force_scale=0.99,
+    )
+    assert free.manufactured_acceleration_residual > 1e-6
+    assert free.closed_form_check_passed is False
+    assert constrained.lagrange_multiplier_residual > 1e-3
+    assert constrained.closed_form_check_passed is False

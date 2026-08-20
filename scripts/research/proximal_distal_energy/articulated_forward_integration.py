@@ -119,6 +119,24 @@ def native_dynamics_operator(
         return evaluate_fallback
 
 
+def advance_semi_implicit(
+    position: FloatArray,
+    velocity: FloatArray,
+    generalized_force: FloatArray,
+    time_step_s: float,
+    dynamics_operator: Callable[
+        [FloatArray, FloatArray], tuple[FloatArray, FloatArray]
+    ],
+) -> tuple[FloatArray, FloatArray]:
+    """Advance the production articulated stepping kernel by one time step."""
+
+    matrix, bias = dynamics_operator(position, velocity)
+    acceleration = np.linalg.solve(matrix, generalized_force - bias)
+    next_velocity = velocity + time_step_s * acceleration
+    next_position = position + time_step_s * next_velocity
+    return next_position, next_velocity
+
+
 def _validate_case(
     model: SpatialModel,
     case: ForwardIntegrationCase,
@@ -238,17 +256,19 @@ def integrate_articulated_contact(
         )
         _record_sample(buffers, index, position, velocity, snapshot, model)
         if index < step_count:
-            matrix, bias = native_operator(position, velocity)
-            acceleration = np.linalg.solve(
-                matrix, snapshot.generalized_contact_force - bias
+            position, velocity = advance_semi_implicit(
+                position,
+                velocity,
+                snapshot.generalized_contact_force,
+                case.time_step_s,
+                native_operator,
             )
-            velocity = velocity + case.time_step_s * acceleration
-            position = position + case.time_step_s * velocity
     return _trace_result(buffers, case)
 
 
 __all__ = [
     "ForwardIntegrationCase",
+    "advance_semi_implicit",
     "integrate_articulated_contact",
     "native_dynamics_operator",
 ]
