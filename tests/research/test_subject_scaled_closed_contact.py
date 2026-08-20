@@ -37,6 +37,8 @@ def test_closed_contact_config_and_joint_bounds_fail_closed() -> None:
         ClosedContactConfig(closure_tolerance_m=0.0)
     with pytest.raises(ValueError, match="regularization_weight"):
         ClosedContactConfig(regularization_weight=-1.0)
+    with pytest.raises(ValueError, match="joint_limit_scale"):
+        ClosedContactConfig(joint_limit_scale=0.49)
 
     model, _ = _representative_model()
     lower, upper = engineering_joint_bounds(model)
@@ -44,6 +46,11 @@ def test_closed_contact_config_and_joint_bounds_fail_closed() -> None:
     assert np.all(lower < upper)
     assert np.all(np.isneginf(lower[model.club_dof_indices]))
     assert np.all(np.isposinf(upper[model.club_dof_indices]))
+    narrow_lower, narrow_upper = engineering_joint_bounds(model, 0.8)
+    np.testing.assert_allclose(narrow_lower[:14], 0.8 * lower[:14])
+    np.testing.assert_allclose(narrow_upper[:14], 0.8 * upper[:14])
+    with pytest.raises(ValueError, match="joint_limit_scale"):
+        engineering_joint_bounds(model, 1.51)
 
 
 def test_solver_closes_both_contacts_without_moving_the_club() -> None:

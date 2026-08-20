@@ -45,6 +45,7 @@ class ClosedContactConfig:
     regularization_weight: float = 1.0e-2
     maximum_function_evaluations: int = 1000
     solver_tolerance: float = 1.0e-11
+    joint_limit_scale: float = 1.0
 
     def __post_init__(self) -> None:
         if not np.isfinite(self.closure_tolerance_m) or not (
@@ -65,6 +66,10 @@ class ClosedContactConfig:
             1.0e-14 <= self.solver_tolerance <= 1.0e-6
         ):
             raise ValueError("solver_tolerance must be in [1e-14, 1e-6]")
+        if not np.isfinite(self.joint_limit_scale) or not (
+            0.5 <= self.joint_limit_scale <= 1.5
+        ):
+            raise ValueError("joint_limit_scale must be in [0.5, 1.5]")
 
 
 @dataclass(frozen=True, slots=True)
@@ -87,7 +92,9 @@ class ClosedContactSolution:
     cost: float
 
 
-def engineering_joint_bounds(model: SpatialModel) -> tuple[FloatArray, FloatArray]:
+def engineering_joint_bounds(
+    model: SpatialModel, joint_limit_scale: float = 1.0
+) -> tuple[FloatArray, FloatArray]:
     """Return declared reduced-model bounds; club coordinates remain fixed.
 
     These broad bounds prevent periodic wraparound and extreme reduced-tree
@@ -97,6 +104,8 @@ def engineering_joint_bounds(model: SpatialModel) -> tuple[FloatArray, FloatArra
 
     if model.nq != 20 or model.club_dof_indices.tolist() != list(range(14, 20)):
         raise ValueError("closed-contact bounds require the canonical 20-DOF tree")
+    if not np.isfinite(joint_limit_scale) or not 0.5 <= joint_limit_scale <= 1.5:
+        raise ValueError("joint_limit_scale must be in [0.5, 1.5]")
     lower = np.full(model.nq, -np.inf, dtype=np.float64)
     upper = np.full(model.nq, np.inf, dtype=np.float64)
     named_bounds = {
@@ -117,7 +126,9 @@ def engineering_joint_bounds(model: SpatialModel) -> tuple[FloatArray, FloatArra
     }
     for index, joint in enumerate(model.joints[:ACTIVE_DOF_COUNT]):
         try:
-            lower[index], upper[index] = named_bounds[joint.name]
+            base_lower, base_upper = named_bounds[joint.name]
+            lower[index] = joint_limit_scale * base_lower
+            upper[index] = joint_limit_scale * base_upper
         except KeyError as error:
             raise ValueError(f"no declared bound for {joint.name}") from error
     return lower, upper
@@ -223,7 +234,7 @@ def solve_closed_contact_configuration(
     if not isinstance(config, ClosedContactConfig):
         raise TypeError("config must be a ClosedContactConfig")
 
-    lower, upper = engineering_joint_bounds(model)
+    lower, upper = engineering_joint_bounds(model, config.joint_limit_scale)
     active = np.arange(ACTIVE_DOF_COUNT)
     seed = (
         q_reference.copy() if q_seed is None else np.asarray(q_seed, dtype=float).copy()

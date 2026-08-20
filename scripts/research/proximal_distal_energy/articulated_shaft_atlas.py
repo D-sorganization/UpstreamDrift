@@ -510,6 +510,18 @@ def _pair_relative(left: FloatArray, right: FloatArray, floor: float) -> FloatAr
     return np.abs(left - right) / scale
 
 
+def _excitation_controls(buffers: _Buffers) -> dict[str, bool]:
+    bending = ACTIVATIONS.index("bending")
+    torsion = ACTIVATIONS.index("torsion")
+    coupled = ACTIVATIONS.index("coupled")
+    return {
+        "bending": bool(np.max(buffers.maximum_bending[:, bending]) > 1.0e-10),
+        "torsion": bool(np.max(buffers.maximum_twist[:, torsion]) > 1.0e-12),
+        "coupled_bending": bool(np.max(buffers.maximum_bending[:, coupled]) > 1.0e-10),
+        "coupled_torsion": bool(np.max(buffers.maximum_twist[:, coupled]) > 1.0e-12),
+    }
+
+
 def _gates(
     buffers: _Buffers,
     config: ArticulatedShaftAtlasConfig,
@@ -570,20 +582,7 @@ def _gates(
     expected_nan[ACTIVATIONS.index("torsion"), 2] = False
     expected_nan[ACTIVATIONS.index("coupled"), :] = False
     observed_nan = np.all(np.isnan(buffers.final_elastic), axis=(0, 2, 3, 4, 5))
-    excitation = {
-        "bending": bool(
-            np.max(buffers.maximum_bending[:, ACTIVATIONS.index("bending")]) > 1.0e-10
-        ),
-        "torsion": bool(
-            np.max(buffers.maximum_twist[:, ACTIVATIONS.index("torsion")]) > 1.0e-12
-        ),
-        "coupled_bending": bool(
-            np.max(buffers.maximum_bending[:, ACTIVATIONS.index("coupled")]) > 1.0e-10
-        ),
-        "coupled_torsion": bool(
-            np.max(buffers.maximum_twist[:, ACTIVATIONS.index("coupled")]) > 1.0e-12
-        ),
-    }
+    excitation = _excitation_controls(buffers)
     structural_reference_passed = bool(
         properties.fe_bending_frequency_relative_error <= 1.0e-12
         and beam_record["convergence"]["maximum_relative_change_24_to_48"] <= 0.01
@@ -667,6 +666,69 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _structural_record(
+    properties: ArticulatedShaftProperties,
+    beam_record: dict[str, Any],
+    gates: dict[str, Any],
+) -> dict[str, Any]:
+    comparison = beam_record["comparison"]
+    return {
+        "bending_frequency_hz": properties.bending_frequency_hz,
+        "torsion_frequency_hz": properties.torsion_frequency_hz,
+        "fe_bending_frequency_relative_error": properties.fe_bending_frequency_relative_error,
+        "one_mode_low_frequency_tip_rms_discrepancy_m": comparison[
+            "low_frequency_tip_rms_discrepancy_m"
+        ],
+        "one_mode_high_frequency_tip_rms_discrepancy_m": comparison[
+            "high_frequency_tip_rms_discrepancy_m"
+        ],
+        "reference_mode_count": comparison["reference_mode_count"],
+        "structural_reference_passed": gates["structural_reference_passed"],
+    }
+
+
+def _result_record(
+    buffers: _Buffers, gates: dict[str, Any], all_passed: bool
+) -> dict[str, Any]:
+    matched = gates["matched"]
+    matched_delta = gates["matched_speed_difference"][matched]
+    return {
+        "all_registered_gates_passed": all_passed,
+        "maximum_peak_station_force_n": float(np.max(buffers.peak_force)),
+        "maximum_peak_force_couple_nm": float(np.max(buffers.peak_couple)),
+        "maximum_tip_bending_m": float(np.max(buffers.maximum_bending)),
+        "maximum_twist_angle_rad": float(np.max(buffers.maximum_twist)),
+        "maximum_peak_shaft_strain_energy_j": float(np.max(buffers.peak_shaft_energy)),
+        "maximum_normalized_work_energy_residual": float(
+            np.max(buffers.normalized_energy_residual)
+        ),
+        "maximum_trajectory_relative_error": float(np.max(buffers.trajectory_parity)),
+        "maximum_force_relative_error": float(np.max(buffers.force_parity)),
+        "active_set_parity_failures": int(np.count_nonzero(~buffers.active_set_parity)),
+        "time_refinement_worst_normalized_residual": gates["time_refinement"].tolist(),
+        "time_refinement_passed": gates["time_refinement_passed"],
+        "maximum_initial_energy_relative_range": float(
+            np.max(gates["initial_energy_relative_range"])
+        ),
+        "initial_energy_match_passed": gates["initial_energy_match_passed"],
+        "activation_coordinate_pattern_passed": gates["activation_nan_pattern_passed"],
+        "excitation_controls": gates["excitation"],
+        "matched_load_work_cell_count": int(np.count_nonzero(matched)),
+        "matched_load_work_total_cell_count": int(matched.size),
+        "matched_final_speed_difference_range_m_s": (
+            [float(np.min(matched_delta)), float(np.max(matched_delta))]
+            if matched_delta.size
+            else None
+        ),
+        "failed_numerical_cell_count": int(np.count_nonzero(~gates["numerical"])),
+        "failed_parity_cell_count": int(np.count_nonzero(~gates["parity"])),
+        "failed_small_deflection_cell_count": int(
+            np.count_nonzero(~gates["small_deflection"])
+        ),
+        "failed_twist_cell_count": int(np.count_nonzero(~gates["twist"])),
+    }
+
+
 def _record(
     states: tuple[tuple[int, int], ...],
     buffers: _Buffers,
@@ -677,8 +739,6 @@ def _record(
     versions: dict[str, str],
     coarse_probes: list[dict[str, Any]],
 ) -> dict[str, Any]:
-    matched = gates["matched"]
-    matched_delta = gates["matched_speed_difference"][matched]
     all_passed = bool(
         np.all(gates["numerical"])
         and np.all(gates["parity"])
@@ -714,64 +774,8 @@ def _record(
         },
         "configuration": asdict(config),
         "excluded_coarse_step_probes": coarse_probes,
-        "structural_authority": {
-            "bending_frequency_hz": properties.bending_frequency_hz,
-            "torsion_frequency_hz": properties.torsion_frequency_hz,
-            "fe_bending_frequency_relative_error": properties.fe_bending_frequency_relative_error,
-            "one_mode_low_frequency_tip_rms_discrepancy_m": beam_record["comparison"][
-                "low_frequency_tip_rms_discrepancy_m"
-            ],
-            "one_mode_high_frequency_tip_rms_discrepancy_m": beam_record["comparison"][
-                "high_frequency_tip_rms_discrepancy_m"
-            ],
-            "reference_mode_count": beam_record["comparison"]["reference_mode_count"],
-            "structural_reference_passed": gates["structural_reference_passed"],
-        },
-        "results": {
-            "all_registered_gates_passed": all_passed,
-            "maximum_peak_station_force_n": float(np.max(buffers.peak_force)),
-            "maximum_peak_force_couple_nm": float(np.max(buffers.peak_couple)),
-            "maximum_tip_bending_m": float(np.max(buffers.maximum_bending)),
-            "maximum_twist_angle_rad": float(np.max(buffers.maximum_twist)),
-            "maximum_peak_shaft_strain_energy_j": float(
-                np.max(buffers.peak_shaft_energy)
-            ),
-            "maximum_normalized_work_energy_residual": float(
-                np.max(buffers.normalized_energy_residual)
-            ),
-            "maximum_trajectory_relative_error": float(
-                np.max(buffers.trajectory_parity)
-            ),
-            "maximum_force_relative_error": float(np.max(buffers.force_parity)),
-            "active_set_parity_failures": int(
-                np.count_nonzero(~buffers.active_set_parity)
-            ),
-            "time_refinement_worst_normalized_residual": gates[
-                "time_refinement"
-            ].tolist(),
-            "time_refinement_passed": gates["time_refinement_passed"],
-            "maximum_initial_energy_relative_range": float(
-                np.max(gates["initial_energy_relative_range"])
-            ),
-            "initial_energy_match_passed": gates["initial_energy_match_passed"],
-            "activation_coordinate_pattern_passed": gates[
-                "activation_nan_pattern_passed"
-            ],
-            "excitation_controls": gates["excitation"],
-            "matched_load_work_cell_count": int(np.count_nonzero(matched)),
-            "matched_load_work_total_cell_count": int(matched.size),
-            "matched_final_speed_difference_range_m_s": (
-                [float(np.min(matched_delta)), float(np.max(matched_delta))]
-                if matched_delta.size
-                else None
-            ),
-            "failed_numerical_cell_count": int(np.count_nonzero(~gates["numerical"])),
-            "failed_parity_cell_count": int(np.count_nonzero(~gates["parity"])),
-            "failed_small_deflection_cell_count": int(
-                np.count_nonzero(~gates["small_deflection"])
-            ),
-            "failed_twist_cell_count": int(np.count_nonzero(~gates["twist"])),
-        },
+        "structural_authority": _structural_record(properties, beam_record, gates),
+        "results": _result_record(buffers, gates, all_passed),
         "limitations": {
             "calibration_status": properties.calibration_status,
             "shaft_model": "linear first-mode bending in two planes plus linear torsion using rigid lumped shaft/head inertia",

@@ -635,6 +635,60 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _result_record(
+    primary: _Buffers,
+    controls: _Buffers,
+    gates: dict[str, Any],
+    all_passed: bool,
+) -> dict[str, Any]:
+    matched = gates["matched"]
+    matched_delta = gates["matched_speed_difference"][matched]
+    return {
+        "all_registered_gates_passed": all_passed,
+        "maximum_normalized_work_energy_residual": float(
+            max(
+                np.max(primary.normalized_energy_residual),
+                np.max(controls.normalized_energy_residual),
+            )
+        ),
+        "maximum_trajectory_relative_error": float(
+            max(
+                np.max(primary.trajectory_parity),
+                np.max(controls.trajectory_parity),
+            )
+        ),
+        "maximum_ground_force_n": float(np.max(primary.peak_ground_force)),
+        "maximum_intrinsic_free_moment_nm": float(
+            np.max(primary.peak_intrinsic_moment)
+        ),
+        "time_refinement_worst_normalized_residual": gates["time_refinement"].tolist(),
+        "time_refinement_passed": gates["time_refinement_passed"],
+        "maximum_initial_energy_relative_range": float(
+            np.max(gates["initial_energy_relative_range"])
+        ),
+        "initial_energy_match_passed": gates["initial_energy_match_passed"],
+        "matched_load_work_cell_count": int(np.count_nonzero(matched)),
+        "matched_load_work_total_cell_count": int(matched.size),
+        "matched_final_speed_difference_range_m_s": (
+            [float(np.min(matched_delta)), float(np.max(matched_delta))]
+            if matched_delta.size
+            else None
+        ),
+        "failed_primary_numerical_cell_count": int(
+            np.count_nonzero(~gates["primary_numerical"])
+        ),
+        "failed_control_numerical_cell_count": int(
+            np.count_nonzero(~gates["control_numerical"])
+        ),
+        "failed_primary_parity_cell_count": int(
+            np.count_nonzero(~gates["primary_parity"])
+        ),
+        "failed_control_parity_cell_count": int(
+            np.count_nonzero(~gates["control_parity"])
+        ),
+    }
+
+
 def _record(
     states: tuple[tuple[int, int], ...],
     primary: _Buffers,
@@ -643,8 +697,6 @@ def _record(
     gates: dict[str, Any],
     versions: dict[str, str],
 ) -> dict[str, Any]:
-    matched = gates["matched"]
-    matched_delta = gates["matched_speed_difference"][matched]
     all_passed = bool(
         np.all(gates["primary_numerical"])
         and np.all(gates["control_numerical"])
@@ -678,52 +730,7 @@ def _record(
             "center_of_pressure_reversal": "reference-transport invariance is contract-tested because center of pressure does not enter generalized force",
         },
         "configuration": asdict(config),
-        "results": {
-            "all_registered_gates_passed": all_passed,
-            "maximum_normalized_work_energy_residual": float(
-                max(
-                    np.max(primary.normalized_energy_residual),
-                    np.max(controls.normalized_energy_residual),
-                )
-            ),
-            "maximum_trajectory_relative_error": float(
-                max(
-                    np.max(primary.trajectory_parity),
-                    np.max(controls.trajectory_parity),
-                )
-            ),
-            "maximum_ground_force_n": float(np.max(primary.peak_ground_force)),
-            "maximum_intrinsic_free_moment_nm": float(
-                np.max(primary.peak_intrinsic_moment)
-            ),
-            "time_refinement_worst_normalized_residual": gates[
-                "time_refinement"
-            ].tolist(),
-            "time_refinement_passed": gates["time_refinement_passed"],
-            "maximum_initial_energy_relative_range": float(
-                np.max(gates["initial_energy_relative_range"])
-            ),
-            "initial_energy_match_passed": gates["initial_energy_match_passed"],
-            "matched_load_work_cell_count": int(np.count_nonzero(matched)),
-            "matched_load_work_total_cell_count": int(matched.size),
-            "matched_final_speed_difference_range_m_s": (
-                [float(np.min(matched_delta)), float(np.max(matched_delta))]
-                if matched_delta.size
-                else None
-            ),
-            "failed_primary_numerical_cell_count": int(
-                np.count_nonzero(~gates["primary_numerical"])
-            ),
-            "failed_control_numerical_cell_count": int(
-                np.count_nonzero(~gates["control_numerical"])
-            ),
-            "failed_primary_parity_cell_count": int(
-                np.count_nonzero(~gates["primary_parity"])
-            ),
-            "failed_control_parity_cell_count": int(
-                np.count_nonzero(~gates["control_parity"])
-            ),
-        },
+        "results": _result_record(primary, controls, gates, all_passed),
         "limitations": {
             "calibration_status": "synthetic_reference_not_human_or_force_plate_calibrated",
             "ground_law": "linear planar x-z translation and free pitch moment; not unilateral normal contact, Coulomb friction, foot segmentation, or measured pressure",

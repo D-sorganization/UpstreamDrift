@@ -7,7 +7,7 @@ maps and failure maps.
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 import json
 from pathlib import Path
 from typing import Any
@@ -27,6 +27,12 @@ from scripts.research.proximal_distal_energy.spatial_full_body import (
     BodySpec,
     JointSpec,
     SpatialModel,
+    prescribed_state,
+)
+from scripts.research.proximal_distal_energy.subject_scaled_closed_contact import (
+    ClosedContactConfig,
+    ClosedContactSolution,
+    solve_closed_contact_configuration,
 )
 from scripts.research.proximal_distal_energy.subject_scaled_spatial_geometry import (
     build_subject_scaled_model,
@@ -136,6 +142,111 @@ class ArticulatedUncertaintyConfig:
     club_mass_range: tuple[float, float] = (0.28, 0.42)
     club_moi_range: tuple[float, float] = (0.80, 1.25)
     velocity_range: tuple[float, float] = (0.01, 0.20)
+
+
+@dataclass(frozen=True, slots=True)
+class UncertainClosedState:
+    """A regenerated anthropometric state and its explicit domain status."""
+
+    model: SpatialModel
+    metadata: dict[str, Any]
+    q: FloatArray
+    qd: FloatArray
+    feasible: bool
+    failure_class: str
+    maximum_closure_error_m: float
+    minimum_joint_limit_margin_rad: float
+    minimum_collision_clearance_m: float
+
+
+def _failure_class(solution: ClosedContactSolution) -> str:
+    if not solution.solver_converged:
+        return "ik_nonconvergence"
+    if not solution.contact_closed:
+        return "bilateral_closure_failure"
+    if not solution.joint_limits_satisfied:
+        return "joint_limit_failure"
+    if not solution.collision_free:
+        return "collision_domain_failure"
+    if solution.constraint_jacobian_rank != 6:
+        return "constraint_rank_failure"
+    return "feasible"
+
+
+def resolve_uncertain_closed_state(
+    *,
+    profile_index: int,
+    grip_span_m: float,
+    sample_time_s: float,
+    height_scale: float,
+    mass_scale: float,
+    joint_limit_scale: float,
+    difference_step_s: float = 1.0e-4,
+) -> UncertainClosedState:
+    """Regenerate bilateral closure after anthropometric/limit perturbation."""
+
+    profiles = default_synthetic_profiles()
+    if not isinstance(profile_index, int) or not 0 <= profile_index < len(profiles):
+        raise ValueError("profile_index is outside the synthetic design")
+    for name, value in (
+        ("grip_span_m", grip_span_m),
+        ("height_scale", height_scale),
+        ("mass_scale", mass_scale),
+        ("difference_step_s", difference_step_s),
+    ):
+        if not np.isfinite(value) or value <= 0.0:
+            raise ValueError(f"{name} must be finite and positive")
+    if not np.isfinite(sample_time_s) or sample_time_s < 0.0:
+        raise ValueError("sample_time_s must be finite and nonnegative")
+    base = profiles[profile_index]
+    profile = replace(
+        base,
+        profile_id=f"{base.profile_id}-u",
+        height_m=base.height_m * height_scale,
+        mass_kg=base.mass_kg * mass_scale,
+    )
+    model, metadata = build_subject_scaled_model(profile)
+    times = np.array(
+        [
+            max(0.0, sample_time_s - difference_step_s),
+            sample_time_s,
+            sample_time_s + difference_step_s,
+        ]
+    )
+    solutions: list[ClosedContactSolution] = []
+    seed: FloatArray | None = None
+    contact_config = ClosedContactConfig(joint_limit_scale=joint_limit_scale)
+    for time_s in times:
+        reference, _, _ = prescribed_state(model, float(time_s))
+        solution = solve_closed_contact_configuration(
+            model,
+            q_reference=reference,
+            grip_span_m=grip_span_m,
+            hand_contact_local_x_m=float(metadata["hand_contact_local_x_m"]),
+            q_seed=seed,
+            config=contact_config,
+        )
+        solutions.append(solution)
+        seed = solution.q if solution.contact_closed else None
+    center = solutions[1]
+    qd = (solutions[2].q - solutions[0].q) / (times[2] - times[0])
+    return UncertainClosedState(
+        model=model,
+        metadata=metadata,
+        q=center.q,
+        qd=qd,
+        feasible=all(solution.feasible for solution in solutions),
+        failure_class=_failure_class(center),
+        maximum_closure_error_m=max(
+            float(np.max(solution.hand_to_grip_distance_m)) for solution in solutions
+        ),
+        minimum_joint_limit_margin_rad=min(
+            solution.minimum_joint_limit_margin_rad for solution in solutions
+        ),
+        minimum_collision_clearance_m=min(
+            solution.minimum_collision_clearance_m for solution in solutions
+        ),
+    )
 
 
 def _scale_model(

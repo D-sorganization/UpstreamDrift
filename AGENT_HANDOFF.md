@@ -92,8 +92,14 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     bending-frequency, torsional-stiffness, shaft-damping, ground-translation,
     and free-moment uncertainty controls through the production shaft and ground
     atlas configurations; 12 focused constitutive/atlas contract tests pass.
-    Full joint-limit and anthropometric propagation; reversal and killswitch
-    branches; per-corner refinement; headline
+    The canonical closed-contact solver now accepts bounded joint-limit scaling,
+    and `resolve_uncertain_closed_state` rebuilds scaled anthropometry, re-solves
+    bilateral closure, retains collision/limit/rank failure classes, and derives
+    a local closed-state velocity. Four focused closure/resolution tests pass;
+    an existing broad two-profile atlas test exceeded the repository's 90-second
+    local pytest timeout and is reserved for the registered campaign. Wiring the
+    resolver into every campaign cell; reversal and killswitch branches;
+    per-corner refinement; headline
     126/384 shaft and 0/384 ground estimand movement; governed artifacts; paper
     integration; and protected publication remain open.
 - The release has 295 atomic claims and 40 reviewed release claims; all 40
