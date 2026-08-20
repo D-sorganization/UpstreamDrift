@@ -29,6 +29,10 @@ def test_articulated_shaft_contract_fails_closed() -> None:
         ArticulatedShaftConfig(poisson_ratio=0.5)
     with pytest.raises(ValueError, match="shaft_length_m"):
         ArticulatedShaftConfig(shaft_length_m=0.0)
+    with pytest.raises(ValueError, match="bending_frequency_scale"):
+        ArticulatedShaftConfig(bending_frequency_scale=0.0)
+    with pytest.raises(ValueError, match="torsional_stiffness_scale"):
+        ArticulatedShaftConfig(torsional_stiffness_scale=-1.0)
 
 
 def test_modal_and_torsional_properties_are_positive_and_traceable() -> None:
@@ -47,6 +51,26 @@ def test_modal_and_torsional_properties_are_positive_and_traceable() -> None:
     )
     assert np.min(np.linalg.eigvalsh(properties.elastic_mass)) > 0.0
     assert np.min(np.linalg.eigvalsh(properties.elastic_stiffness)) > 0.0
+
+
+def test_registered_modal_scales_change_only_the_declared_frequencies() -> None:
+    model = _model()
+    nominal = build_articulated_shaft(model)
+    scaled = build_articulated_shaft(
+        model,
+        ArticulatedShaftConfig(
+            bending_frequency_scale=0.8,
+            torsional_stiffness_scale=1.44,
+        ),
+    )
+
+    assert scaled.bending_frequency_hz == pytest.approx(
+        0.8 * nominal.bending_frequency_hz
+    )
+    assert scaled.torsion_frequency_hz == pytest.approx(
+        1.2 * nominal.torsion_frequency_hz
+    )
+    np.testing.assert_allclose(scaled.elastic_mass, nominal.elastic_mass)
 
 
 @pytest.mark.parametrize(

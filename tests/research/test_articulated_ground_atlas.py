@@ -32,3 +32,9 @@ def test_ground_atlas_contract_is_complete_and_fails_closed() -> None:
         ArticulatedGroundAtlasConfig(worker_count=0)
     with pytest.raises(ValueError, match="horizons_s"):
         ArticulatedGroundAtlasConfig(horizons_s=(0.004, 0.049))
+    with pytest.raises(ValueError, match="shaft_damping_ratio"):
+        ArticulatedGroundAtlasConfig(shaft_damping_ratio=1.0)
+    with pytest.raises(ValueError, match="ground_translation_stiffness_scale"):
+        ArticulatedGroundAtlasConfig(ground_translation_stiffness_scale=0.0)
+    with pytest.raises(ValueError, match="ground_free_moment_damping_scale"):
+        ArticulatedGroundAtlasConfig(ground_free_moment_damping_scale=-1.0)

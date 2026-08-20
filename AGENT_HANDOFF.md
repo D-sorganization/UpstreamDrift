@@ -88,8 +88,12 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     zeros with explicit non-applicability for forced motion, gates actual
     constraint position/velocity drift, and includes deliberately perturbed
     free and constrained forcing controls that fail closed. Four focused tests
-    and scoped Ruff pass locally. Full joint-limit, shaft, and ground parameter
-    coverage; reversal and killswitch branches; per-corner refinement; headline
+    and scoped Ruff pass locally. The same branch now also exposes validated
+    bending-frequency, torsional-stiffness, shaft-damping, ground-translation,
+    and free-moment uncertainty controls through the production shaft and ground
+    atlas configurations; 12 focused constitutive/atlas contract tests pass.
+    Full joint-limit and anthropometric propagation; reversal and killswitch
+    branches; per-corner refinement; headline
     126/384 shaft and 0/384 ground estimand movement; governed artifacts; paper
     integration; and protected publication remain open.
 - The release has 295 atomic claims and 40 reviewed release claims; all 40

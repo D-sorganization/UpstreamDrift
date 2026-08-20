@@ -70,6 +70,9 @@ class ArticulatedShaftAtlasConfig:
     station_width_m: float = 0.03
     total_stiffness_n_m: float = 1800.0
     total_damping_n_s_m: float = 18.0
+    shaft_damping_ratio: float = 0.018
+    bending_frequency_scale: float = 1.0
+    torsional_stiffness_scale: float = 1.0
     match_relative_tolerance: float = 0.05
     worker_count: int = 4
 
@@ -101,11 +104,15 @@ class ArticulatedShaftAtlasConfig:
             "station_width_m",
             "total_stiffness_n_m",
             "total_damping_n_s_m",
+            "bending_frequency_scale",
+            "torsional_stiffness_scale",
             "match_relative_tolerance",
         ):
             value = float(getattr(self, name))
             if not np.isfinite(value) or value <= 0.0:
                 raise ValueError(f"{name} must be finite and positive")
+        if not 0.0 <= self.shaft_damping_ratio < 1.0:
+            raise ValueError("shaft_damping_ratio must lie in [0, 1)")
 
     @staticmethod
     def _indices(name: str, values: tuple[int, ...], upper: int) -> None:
@@ -259,6 +266,7 @@ def _run_pair(
     case_base: dict[str, Any],
     activation: str,
     forward: ShaftForwardConfig,
+    atlas_config: ArticulatedShaftAtlasConfig,
 ) -> dict[str, dict[str, NDArray[Any]]]:
     traces = {}
     for engine in ("mujoco", "pinocchio"):
@@ -267,7 +275,12 @@ def _run_pair(
                 model,
                 ShaftIntegrationCase(
                     engine=engine,
-                    shaft=ArticulatedShaftConfig(activation=activation),  # type: ignore[arg-type]
+                    shaft=ArticulatedShaftConfig(
+                        activation=activation,  # type: ignore[arg-type]
+                        damping_ratio=atlas_config.shaft_damping_ratio,
+                        bending_frequency_scale=atlas_config.bending_frequency_scale,
+                        torsional_stiffness_scale=atlas_config.torsional_stiffness_scale,
+                    ),
                     **case_base,
                 ),
                 forward,
@@ -356,7 +369,7 @@ def _run_state(
                     "grip": grip,
                 }
                 try:
-                    traces = _run_pair(model, base, activation, config.forward)
+                    traces = _run_pair(model, base, activation, config.forward, config)
                 except Exception as error:
                     raise RuntimeError(
                         "shaft atlas cell failed: "
@@ -369,7 +382,14 @@ def _run_state(
                     traces,
                     config,
                 )
-    return build_articulated_shaft(model)
+    return build_articulated_shaft(
+        model,
+        ArticulatedShaftConfig(
+            damping_ratio=config.shaft_damping_ratio,
+            bending_frequency_scale=config.bending_frequency_scale,
+            torsional_stiffness_scale=config.torsional_stiffness_scale,
+        ),
+    )
 
 
 def _run_state_job(
@@ -430,7 +450,12 @@ def _excluded_step_probe(
         initial_club_velocity_m_s=velocity_factor * config.initial_velocity_m_s,
         engine="mujoco",
         grip=grip,
-        shaft=ArticulatedShaftConfig(activation="torsion"),
+        shaft=ArticulatedShaftConfig(
+            activation="torsion",
+            damping_ratio=config.shaft_damping_ratio,
+            bending_frequency_scale=config.bending_frequency_scale,
+            torsional_stiffness_scale=config.torsional_stiffness_scale,
+        ),
     )
     try:
         integrate_articulated_shaft(

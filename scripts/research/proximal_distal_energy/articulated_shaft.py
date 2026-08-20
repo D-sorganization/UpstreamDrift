@@ -41,6 +41,8 @@ class ArticulatedShaftConfig:
     shaft_length_m: float = 1.08
     poisson_ratio: float = 0.30
     damping_ratio: float = 0.018
+    bending_frequency_scale: float = 1.0
+    torsional_stiffness_scale: float = 1.0
     small_deflection_limit: float = 0.05
     twist_limit_rad: float = np.deg2rad(10.0)
     derivative_step_rad: float = 1.0e-6
@@ -53,6 +55,8 @@ class ArticulatedShaftConfig:
             "small_deflection_limit",
             "twist_limit_rad",
             "derivative_step_rad",
+            "bending_frequency_scale",
+            "torsional_stiffness_scale",
         ):
             value = getattr(self, name)
             if not np.isfinite(value) or value <= 0.0:
@@ -200,7 +204,8 @@ def build_articulated_shaft(
 
     if not isinstance(config, ArticulatedShaftConfig):
         raise TypeError("config must be an ArticulatedShaftConfig")
-    body_modes, bending_frequency = _body_modes(model, config)
+    body_modes, reference_bending_frequency = _body_modes(model, config)
+    bending_frequency = reference_bending_frequency * config.bending_frequency_scale
     full_mass = np.zeros((3, 3))
     for body in body_modes:
         full_mass[0, 0] += (
@@ -211,7 +216,7 @@ def build_articulated_shaft(
         )
         full_mass[2, 2] += body.inertia_kg_m2 * body.torsion_shape**2
     bending_stiffness = full_mass[0, 0] * (2.0 * np.pi * bending_frequency) ** 2
-    torsion_stiffness = _torsion_stiffness(config)
+    torsion_stiffness = _torsion_stiffness(config) * config.torsional_stiffness_scale
     full_stiffness = np.diag([bending_stiffness, bending_stiffness, torsion_stiffness])
     full_damping = np.diag(
         2.0
@@ -236,7 +241,11 @@ def build_articulated_shaft(
         bending_frequency_hz=bending_frequency,
         torsion_frequency_hz=float(torsion_frequency),
         fe_bending_frequency_relative_error=float(
-            abs(reconstructed - bending_frequency) / bending_frequency
+            abs(
+                reconstructed / config.bending_frequency_scale
+                - reference_bending_frequency
+            )
+            / reference_bending_frequency
         ),
     )
 

@@ -72,6 +72,13 @@ class ArticulatedGroundAtlasConfig:
     station_width_m: float = 0.03
     total_stiffness_n_m: float = 1800.0
     total_damping_n_s_m: float = 18.0
+    shaft_damping_ratio: float = 0.018
+    shaft_bending_frequency_scale: float = 1.0
+    shaft_torsional_stiffness_scale: float = 1.0
+    ground_translation_stiffness_scale: float = 1.0
+    ground_translation_damping_scale: float = 1.0
+    ground_free_moment_stiffness_scale: float = 1.0
+    ground_free_moment_damping_scale: float = 1.0
     match_relative_tolerance: float = 0.05
     parity_relative_tolerance: float = 1.0e-8
     power_residual_tolerance_w: float = 1.0e-8
@@ -107,6 +114,12 @@ class ArticulatedGroundAtlasConfig:
             "station_width_m",
             "total_stiffness_n_m",
             "total_damping_n_s_m",
+            "shaft_bending_frequency_scale",
+            "shaft_torsional_stiffness_scale",
+            "ground_translation_stiffness_scale",
+            "ground_translation_damping_scale",
+            "ground_free_moment_stiffness_scale",
+            "ground_free_moment_damping_scale",
             "match_relative_tolerance",
             "parity_relative_tolerance",
             "power_residual_tolerance_w",
@@ -114,6 +127,8 @@ class ArticulatedGroundAtlasConfig:
             value = float(getattr(self, name))
             if not np.isfinite(value) or value <= 0.0:
                 raise ValueError(f"{name} must be finite and positive")
+        if not 0.0 <= self.shaft_damping_ratio < 1.0:
+            raise ValueError("shaft_damping_ratio must lie in [0, 1)")
 
     @staticmethod
     def _indices(name: str, values: tuple[int, ...], upper: int) -> None:
@@ -351,15 +366,53 @@ def _record_pair(
         )
 
 
+def _shaft_config(
+    config: ArticulatedGroundAtlasConfig, activation: str = "coupled"
+) -> ArticulatedShaftConfig:
+    return ArticulatedShaftConfig(
+        activation=activation,  # type: ignore[arg-type]
+        damping_ratio=config.shaft_damping_ratio,
+        bending_frequency_scale=config.shaft_bending_frequency_scale,
+        torsional_stiffness_scale=config.shaft_torsional_stiffness_scale,
+    )
+
+
+def _ground_config(
+    config: ArticulatedGroundAtlasConfig,
+    activation: str = "coupled",
+    *,
+    remove_horizontal_restraint: bool = False,
+) -> ArticulatedGroundConfig:
+    stiffness = (
+        15_000.0 * config.ground_translation_stiffness_scale,
+        30_000.0 * config.ground_translation_stiffness_scale,
+    )
+    damping = (
+        400.0 * config.ground_translation_damping_scale,
+        800.0 * config.ground_translation_damping_scale,
+    )
+    if remove_horizontal_restraint:
+        stiffness = (0.0, stiffness[1])
+        damping = (0.0, damping[1])
+    return ArticulatedGroundConfig(
+        activation=activation,  # type: ignore[arg-type]
+        translation_stiffness_n_m=stiffness,
+        translation_damping_n_s_m=damping,
+        free_moment_stiffness_nm_rad=(
+            900.0 * config.ground_free_moment_stiffness_scale
+        ),
+        free_moment_damping_nm_s_rad=(45.0 * config.ground_free_moment_damping_scale),
+    )
+
+
 def _ground_control(
-    name: str,
+    name: str, config: ArticulatedGroundAtlasConfig
 ) -> tuple[ArticulatedShaftConfig, ArticulatedGroundConfig]:
     if name == "rigid_shaft":
-        return ArticulatedShaftConfig(activation="rigid"), ArticulatedGroundConfig()
+        return _shaft_config(config, "rigid"), _ground_config(config)
     if name == "horizontal_restraint_removed":
-        return ArticulatedShaftConfig(), ArticulatedGroundConfig(
-            translation_stiffness_n_m=(0.0, 30_000.0),
-            translation_damping_n_s_m=(0.0, 800.0),
+        return _shaft_config(config), _ground_config(
+            config, remove_horizontal_restraint=True
         )
     raise ValueError(f"unknown ground control {name!r}")
 
@@ -429,8 +482,8 @@ def _run_state(
                 traces = _run_pair(
                     model,
                     base,
-                    ArticulatedShaftConfig(),
-                    ArticulatedGroundConfig(activation=activation),  # type: ignore[arg-type]
+                    _shaft_config(config),
+                    _ground_config(config, activation),
                     config.forward,
                 )
                 _record_pair(
@@ -440,7 +493,7 @@ def _run_state(
                     config,
                 )
     for control_slot, name in enumerate(config.control_names):
-        shaft, ground = _ground_control(name)
+        shaft, ground = _ground_control(name, config)
         for velocity_slot, factor in enumerate(VELOCITY_FACTORS):
             for step_slot, step_s in enumerate(config.forward.time_steps_s):
                 base = {

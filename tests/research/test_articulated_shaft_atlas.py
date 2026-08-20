@@ -23,6 +23,10 @@ def test_shaft_atlas_configuration_fails_closed() -> None:
         ArticulatedShaftAtlasConfig(horizons_s=(0.004, 0.049))
     with pytest.raises(ValueError, match="worker_count"):
         ArticulatedShaftAtlasConfig(worker_count=0)
+    with pytest.raises(ValueError, match="shaft_damping_ratio"):
+        ArticulatedShaftAtlasConfig(shaft_damping_ratio=1.0)
+    with pytest.raises(ValueError, match="bending_frequency_scale"):
+        ArticulatedShaftAtlasConfig(bending_frequency_scale=0.0)
 
 
 def test_committed_shaft_atlas_is_complete_and_current() -> None:
