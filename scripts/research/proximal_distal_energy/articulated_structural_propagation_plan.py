@@ -371,6 +371,7 @@ def build_structural_propagation_plan(
         ],
         "renderer_rule": "render all five panels only from a validated figure-data record; fail before writing on any semantic or digest inconsistency",
         "publication_rule": "revalidate the exact governed plan, complete result, and all 14 referenced no-pickle cell packs before writing figure data or a vector figure",
+        "publication_command": "python -m scripts.research.proximal_distal_energy.articulated_structural_publication",
     }
     integration_contract = {
         "required_surfaces": [

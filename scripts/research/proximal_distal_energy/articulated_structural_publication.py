@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import argparse
 from pathlib import Path, PurePosixPath
+from collections.abc import Sequence
 from typing import Any
 
 from scripts.research.proximal_distal_energy.articulated_structural_cell_evidence import (
@@ -21,6 +23,14 @@ from scripts.research.proximal_distal_energy.articulated_structural_figure_data 
 from scripts.research.proximal_distal_energy.articulated_structural_result import (
     validate_structural_propagation_bundle_against_plan,
 )
+
+ROOT = Path(__file__).resolve().parents[3]
+DATA = ROOT / "docs/research/proximal_distal_energy_transfer/data"
+FIGURES = ROOT / "docs/research/proximal_distal_energy_transfer/figures"
+DEFAULT_RESULT = DATA / "articulated_structural_propagation_result.json"
+DEFAULT_PLAN = DATA / "articulated_structural_propagation_plan.json"
+DEFAULT_FIGURE_DATA = DATA / "articulated_structural_figure_data.json"
+DEFAULT_FIGURE = FIGURES / "articulated_structural_sensitivity.svg"
 
 
 def _load_bound_packs(
@@ -60,4 +70,25 @@ def publish_structural_figure_bundle(
     return record
 
 
-__all__ = ["publish_structural_figure_bundle"]
+def main(argv: Sequence[str] | None = None) -> None:
+    """Publish the canonical bundle or explicitly supplied review artifacts."""
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--result", type=Path, default=DEFAULT_RESULT)
+    parser.add_argument("--plan", type=Path, default=DEFAULT_PLAN)
+    parser.add_argument("--figure-data", type=Path, default=DEFAULT_FIGURE_DATA)
+    parser.add_argument("--figure", type=Path, default=DEFAULT_FIGURE)
+    args = parser.parse_args(argv)
+    publish_structural_figure_bundle(
+        result_path=args.result,
+        plan_path=args.plan,
+        figure_data_output=args.figure_data,
+        figure_output=args.figure,
+    )
+
+
+if __name__ == "__main__":
+    main()
+
+
+__all__ = ["main", "publish_structural_figure_bundle"]

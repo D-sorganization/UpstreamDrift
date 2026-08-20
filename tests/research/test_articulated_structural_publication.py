@@ -16,6 +16,7 @@ from scripts.research.proximal_distal_energy.articulated_structural_common_suppo
     HeadlineCells,
 )
 from scripts.research.proximal_distal_energy.articulated_structural_publication import (
+    main,
     publish_structural_figure_bundle,
 )
 from scripts.research.proximal_distal_energy.articulated_structural_result import (
@@ -120,14 +121,21 @@ def test_publication_revalidates_bundle_and_emits_searchable_assets(tmp_path) ->
     data_output = tmp_path / "figure-data.json"
     figure_output = tmp_path / "figure.svg"
 
-    record = publish_structural_figure_bundle(
-        result_path=result_path,
-        plan_path=PLAN,
-        figure_data_output=data_output,
-        figure_output=figure_output,
+    main(
+        [
+            "--result",
+            str(result_path),
+            "--plan",
+            str(PLAN),
+            "--figure-data",
+            str(data_output),
+            "--figure",
+            str(figure_output),
+        ]
     )
 
-    assert json.loads(data_output.read_text(encoding="utf-8")) == record
+    record = json.loads(data_output.read_text(encoding="utf-8"))
+    assert record["schema_version"] == "articulated-structural-figure-data/v1"
     figure = figure_output.read_text(encoding="utf-8")
     assert "Nominal Ground Matching: 0/384" in figure
     assert "No Human Or Coaching Inference" in figure

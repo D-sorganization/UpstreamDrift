@@ -3,7 +3,7 @@
   "status": "ready",
   "authority_campaign_sha256": "d8115073dc1b506f145196b08c96d7cb3cf00e8cf29099970e2f7b0fbe6d63f3",
   "design_sha256": "8e5f246645e27c8f0f66a87859c63c470c43e579bccb50848124174944e11e07",
-  "contract_sha256": "7733cda0235941d3bd5dc700eb538f5be41638a74d5ac94191e312963caf34af",
+  "contract_sha256": "886ad72794ca6d927a14af2194c675257fe9e38ff4a12d1736169c241fb3b9d7",
   "design": {
     "case_indices": [
       0,
@@ -335,7 +335,8 @@
       "units and alt text"
     ],
     "renderer_rule": "render all five panels only from a validated figure-data record; fail before writing on any semantic or digest inconsistency",
-    "publication_rule": "revalidate the exact governed plan, complete result, and all 14 referenced no-pickle cell packs before writing figure data or a vector figure"
+    "publication_rule": "revalidate the exact governed plan, complete result, and all 14 referenced no-pickle cell packs before writing figure data or a vector figure",
+    "publication_command": "python -m scripts.research.proximal_distal_energy.articulated_structural_publication"
   },
   "integration_contract": {
     "required_surfaces": [
@@ -958,10 +959,10 @@
     "scripts/research/proximal_distal_energy/articulated_structural_figure.py": "3aa01c48e1ddfa0e902058eee547ae68d44364fe320fcbc98486b581858d4635",
     "scripts/research/proximal_distal_energy/articulated_structural_figure_data.py": "7ab4b2f00945b7674559490eb9359d4d23300ff03fda272f5e73d9b2c3a7ae6d",
     "scripts/research/proximal_distal_energy/articulated_structural_gate_status.py": "d3d8fa2a1421d9f85d97c99657e72995e4b6971fa96a029d7c41edd7308bb748",
-    "scripts/research/proximal_distal_energy/articulated_structural_publication.py": "2f933010a30800ed2ad46d7f3d8bd7263cea12332fe683b3f478f2c1f401652f",
+    "scripts/research/proximal_distal_energy/articulated_structural_publication.py": "97eefd74745b22dd0321d39004086ec63926467fc777e649f4aaedb5bf7e5229",
     "scripts/research/proximal_distal_energy/articulated_structural_result.py": "9008282795796c9b77a5d55d2abb8fa99864257c185c2b0fe3a5660e4ac1ffcc",
     "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py": "166ab2ebec88a0c53abc54c6b565ba0a3f82caf800449e822164177f31289549",
-    "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": "1dee9ef2007d1a634b2d74c34bd9f0ca153a32fb4a40b247037e05ca14187334",
+    "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": "3b14b59c6cb9e0d327bfde2ba43ff7d185939487100e2f9da4b2d37d22682ed4",
     "tests/research/test_articulated_structural_axis_evidence.py": "c4bfc99b429d65a4dcff6036b460a89b89e6b7cd3238b6771d80a021ca60db55",
     "tests/research/test_articulated_structural_common_support.py": "a16b6ffc8fb55bf03ad6ad00b8a0a31ea97e97ab4f7542035a127f221d641ff3",
     "tests/research/test_articulated_structural_cell_evidence.py": "5bf6eb79d09f889bffb91c0d650eb2c22dc3b0c36d0cd59931f2bd577c26975d",
@@ -969,7 +970,7 @@
     "tests/research/test_articulated_structural_figure.py": "8735fb7addbc576e1026daec39086e6cf1e090b66d1c88efdb8e7fefd53f66fe",
     "tests/research/test_articulated_structural_figure_data.py": "060123f532ad8728ed6d40e394fd31199712613493de7711f165ad30326be4a1",
     "tests/research/test_articulated_structural_gate_status.py": "b13daca404fdb1643ebabb04d00561a36100349006623b889ba391cf283a9323",
-    "tests/research/test_articulated_structural_publication.py": "0eee85f1634df11967c9d69ef76275af658a8b18632bdb0bb499113eb5465893",
+    "tests/research/test_articulated_structural_publication.py": "37de9c1f98bd756dbd5fec515efb7d587f332cd1fa01cabbbc2d6ddf6342b53d",
     "tests/research/test_articulated_structural_result.py": "a95c8d4ce5f3c88088b87e62af68a912001eeadf8ed6724d4d3a1ee773d7b900",
     "tests/research/test_articulated_structural_propagation_plan.py": "be1d43712d0ac4f9cae1fcc2302c4cc0d53e2f6b69c35215844bfe19964ae3cf",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "8eed52fe4ebbc55fcf753f4703330dd6d768281b0babfbb2adca074b862fc36d",
