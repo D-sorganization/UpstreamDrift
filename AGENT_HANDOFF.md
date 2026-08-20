@@ -80,8 +80,8 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     13 phase states for cases 0/8/9/17; nominal is 52/52 feasible and reproduces
     committed states within 1e-8 rad. JSON/NPZ evidence rejects source/content
     drift. `ArticulatedAtlasAuthority` binds exact scaled models and retains
-    infeasible phases; the checkpointed seven-corner authority campaign is
-    implemented and unit-green but not yet generated. After the live campaign,
+    infeasible phases. Seven-corner authority generation is active in local
+    exec session `15825` with per-corner checkpoints. After both campaigns,
     connect it to both atlases; constitutive-only coverage remains partial.
 - The release has 295 atomic claims and 40 reviewed release claims; all 40
   retain at least one scientifically open gate. #8724 still owns normalized
