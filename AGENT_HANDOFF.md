@@ -70,18 +70,18 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
   - #8752 is **OPEN** on `research/8752-articulated-uncertainty`. The v2
     40-sample closed-state/LHS study is finite and energy-closed but every row
     retains partial opening. The 19-corner headline campaign is incomplete:
-    nominal shaft recomputation completed at 126/384 with all four computation
-    hashes verified against remote basis `fbff8dc53`. Nominal ground is active
-    in exec session `64656` with 20 workers and 72 independently digest-bound
-    branch checkpoints; 53/72 are durable, digest-bound, and record exact
-    trajectory/force/ground-force parity. A real restart-equivalence test passes.
+    nominal completed at shaft 126/384 and ground 0/384; every gate and all four
+    source hashes match remote basis `fbff8dc53`. Exec session `64656` advanced
+    to grip-stiffness-low shaft with 12 workers; the record has 1/19 corners.
+    All 72 nominal branch checkpoints retain exact trajectory/force/ground-force
+    parity and restart equivalence.
     The completion-only headline evidence test stays untracked until data finish.
   - #8800 is **OPEN** and blocks #8752. Its governed generator regenerates all
     13 phase states for cases 0/8/9/17; nominal is 52/52 feasible and reproduces
     committed states within 1e-8 rad. JSON/NPZ evidence rejects source/content
     drift. `ArticulatedAtlasAuthority` binds exact scaled models, builds per case,
-    gates per phase, and retains failures. The seven-corner campaign completed:
-    both mass, and both joint-limit corners are 52/52 feasible; height-low retains
+    gates per phase, and retains failures. Seven corners completed: nominal,
+    height-high, both mass, and both joint-limit are 52/52; height-low retains
     case 0/phase 12 `ik_nonconvergence`. Joint-limit-low retains 0.0885 rad
     minimum margin; joint-limit-high retains 0.1185 rad. Their maximum closure
     errors are 1.03e-10 m and minimum collision clearances are 0.0491 m. The
