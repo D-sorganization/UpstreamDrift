@@ -1,9 +1,9 @@
 # SPEC.md — Repository Specification Document
 
-## Current Scientific Audit State (2026-08-19)
+## Current Scientific Audit State (2026-08-20)
 
 Epic #8557 has completed the current narrative-candidate adjudication contract:
-1,063 reviewed candidates and 295 atomic claims. This status is not scientific
+1,068 reviewed candidates and 295 atomic claims. This status is not scientific
 closure: all 40 public release claims have a traceable review disposition, and
 each retains its applicable open
 model, equipment, anatomy, archival, or governed-human scientific boundary. The
@@ -50,10 +50,18 @@ passivity, work--energy, time-refinement, station-refinement, and engine-parity
 gates pass; no natural active-set transition occurs. This qualifies a synthetic
 contact discretization, not measured grip pressure, shaft response, delivery
 benefit, timing economy, human transfer, or technique.
-Issue #8751 remains open. Its preliminary multi-station Coulomb implementation
-and contact probes do not yet supply the registered stick and velocity-reversal
-controls, cross-engine active-set parity, nested 4/10/25/50 ms outcome atlas,
-or production release evidence required by the issue.
+Issue #8751 remains open. The in-progress `research/8751-friction-atlas` v3
+slice supplies full-state velocity reversal, frictionless and finite-friction
+nested-horizon outcomes, station-level event direction, cross-engine active-set
+parity, and a 144-cell mass-metric impulsive perfect-stick bound. The latter is
+checked against an analytic manufactured solution, constrains tangential
+velocity to $9.65\times10^{-11}$ m/s or less, has zero stored-precision native
+velocity discrepancy, and captures $9.84\times10^{-9}$--$0.37665$ J of kinetic
+energy across the registered states. It is an instantaneous ideal-constraint
+control, not evidence that static friction can supply the impulse or maintain a
+stick trajectory. The event probe begins disengaged, so attached-to-open first
+failure, static-friction feasibility/evolution, production release evidence,
+and protected merge verification remain required before #8751 can close.
 Issue #8752 also remains open. Its first manufactured and Latin-hypercube screen
 does not yet run through both production engine adapters, include a deliberately
 perturbed failure case, refine every uncertainty corner, or propagate uncertainty

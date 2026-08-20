@@ -235,16 +235,30 @@ def _result(
     station_transitions = np.zeros(buffers.station_active.shape, dtype=bool)
     station_transitions[1:] = buffers.station_active[1:] != buffers.station_active[:-1]
     total_transitions_count = int(np.count_nonzero(station_transitions))
+    opening_count = int(
+        np.count_nonzero(buffers.station_active[:-1] & ~buffers.station_active[1:])
+    )
+    reattachment_count = int(
+        np.count_nonzero(~buffers.station_active[:-1] & buffers.station_active[1:])
+    )
 
     total_stations = 2 * case.grip.station_count_per_hand
-    if np.any(buffers.active_count == 0):
-        first_failure = "full_loss_of_contact"
-    elif np.any(buffers.active_count < total_stations):
-        first_failure = "partial_opening"
-    elif np.any(buffers.slipping_count > 0):
-        first_failure = "slip_occurring"
-    else:
-        first_failure = "stable_attached"
+    candidates: list[tuple[int, int, str]] = []
+    open_indices = np.flatnonzero(buffers.active_count < total_stations)
+    if open_indices.size:
+        first_open = int(open_indices[0])
+        open_class = (
+            "full_loss_of_contact"
+            if buffers.active_count[first_open] == 0
+            else "partial_opening"
+        )
+        candidates.append((first_open, 0, open_class))
+    slip_indices = np.flatnonzero(buffers.slipping_count > 0)
+    if slip_indices.size:
+        candidates.append((int(slip_indices[0]), 1, "slip_occurring"))
+    first_index, _, first_failure = (
+        min(candidates) if candidates else (-1, 0, "stable_attached")
+    )
 
     return {
         "time_s": np.arange(active.size) * case.time_step_s,
@@ -257,9 +271,15 @@ def _result(
         "active_station_count": buffers.active_count,
         "slipping_station_count": buffers.slipping_count,
         "active_set_transition": transitions,
+        "station_active": buffers.station_active,
         "station_transitions": station_transitions,
         "total_transition_count": total_transitions_count,
+        "opening_transition_count": opening_count,
+        "reattachment_transition_count": reattachment_count,
         "first_failure_class": first_failure,
+        "first_failure_time_s": (
+            float(first_index * case.time_step_s) if first_index >= 0 else float("nan")
+        ),
         "force_couple_vector_nm": buffers.couple,
         "station_load_concentration": buffers.concentration,
         "coincident_couple_residual_nm": buffers.coincident_couple,

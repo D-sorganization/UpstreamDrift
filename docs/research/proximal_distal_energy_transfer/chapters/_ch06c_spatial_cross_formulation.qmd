@@ -601,7 +601,7 @@ friction, distributed grip pressure, shaft compliance, ground coupling, or
 human wrench data. Longer distributed-contact trajectories and the governed
 participant protocol remain necessary before a delivery or coaching inference.
 
-#### Distributed Grip Contact Discretization Across Nested Horizons
+#### Distributed Grip Friction and Contact Events Across Nested Horizons
 
 The next gate isolates contact discretization before admitting shaft or ground
 degrees of freedom. Each hand receives $N\in\{1,3,5\}$ tension fibers across a
@@ -614,6 +614,37 @@ k_j=\frac{k_{\mathrm{grip}}}{N},\qquad
 c_j=\frac{c_{\mathrm{grip}}}{N}.
 $$ {#eq-distributed-grip-fibers}
 
+The frictionless comparator sets $\mu=0$.  The finite comparator uses the
+equipment-provisional bound $\mu=0.35$ and a memoryless tangential damper,
+
+$$
+v_{tj}=v_j-(\hat d_j^\mathsf{T}v_j)\hat d_j,\qquad
+F_{tj}=\min\!\left(\frac{c_t}{N}\|v_{tj}\|,
+\mu\|F_{nj}\|\right)\frac{v_{tj}}{\|v_{tj}\|}.
+$$ {#eq-distributed-grip-friction}
+
+The force on the club follows the relative sliding velocity so that interface
+power is nonpositive. This is a bounded regularized Coulomb comparator, not a
+static-friction, bristle, hysteresis, measured-tissue, or perfect-stick law.
+
+An instantaneous perfect-stick control supplies a deliberately different upper
+bound. For the active fibers, let $J_t$ stack two orthonormal tangential
+velocity rows per station and let $M$ be the native engine mass matrix. The
+minimum kinetic-energy change that removes the registered tangential velocity
+is the mass-metric projection
+
+$$
+\dot q^+=\dot q^- - M^{-1}J_t^\mathsf{T}\lambda,
+\qquad
+\lambda=(J_tM^{-1}J_t^\mathsf{T})^+J_t\dot q^-,
+$$ {#eq-distributed-grip-stick-projection}
+
+where $(\cdot)^+$ is the Moore--Penrose inverse. The captured kinetic energy is
+$\Delta K=\tfrac12\dot q^{-\mathsf T}M\dot q^--
+\tfrac12\dot q^{+\mathsf T}M\dot q^+\geq0$. This is an impulsive, single-state
+constraint bound. It does not assert that static friction can supply
+$\lambda$, determine subsequent contact evolution, or represent tissue.
+
 Thus station count does not silently multiply total grip stiffness or damping,
 and finite off-axis reference length does not become hidden preload. Closure
 residuals below $10^{-8}$ m are treated as zero; the one-fiber configuration
@@ -624,41 +655,55 @@ by their midpoint removes the force couple exactly, while reversing all moment
 arms reverses it exactly without changing the realized forces.
 
 The atlas selects twelve states spanning four profile--grip cases and three
-phase samples. Forward and reversed initial club-velocity perturbations, one-,
-three-, and five-fiber grips, 1.0 and 0.5 ms steps, and native MuJoCo and
-Pinocchio produce 288 trajectories. Each trajectory is advanced once to 50 ms
-and summarized at nested 4, 10, 25, and 50 ms horizons, yielding 1,152
-engine--horizon summaries without resetting the state at each horizon. No
-active joint torque, hand driver, or direct club actuation is applied.
+phase samples. The complete registered generalized velocity and the added
+club perturbation are reversed together. Crossing that control with one-,
+three-, and five-fiber grips, $\mu\in\{0,0.35\}$, 1.0 and 0.5 ms steps, and
+native MuJoCo and Pinocchio produces 576 trajectories. Each trajectory is
+advanced once to 50 ms and summarized at nested 4, 10, 25, and 50 ms horizons,
+yielding 2,304 engine--horizon summaries without resetting the state. A
+separate 24-trajectory dead-zone probe crosses station count, friction bound,
+step, and engine. No active joint torque, hand driver, or direct club actuation
+is applied. A separate 144-cell stick projection crosses the twelve states,
+three station counts, complete velocity reversal, and both native mass
+matrices.
 
-![Distributed Grip Discretization Across Nested Articulated Horizons](figures/fig_articulated_distributed_grip_atlas.pdf){#fig-articulated-distributed-grip-atlas width=96%}
+![Distributed Grip Friction and Contact Events Across Nested Articulated Horizons](figures/fig_articulated_distributed_grip_atlas.pdf){#fig-articulated-distributed-grip-atlas width=96%}
 
 All registered numerical and native-engine gates pass. The largest station
-force is 4.030 N and the largest force couple is 0.375 N m. Coincident and
+force is 4.021 N and the largest force couple is 0.434 N m. Coincident and
 reversed-moment-arm residuals are exactly zero; the largest virtual-power
-residual is $1.14\times10^{-15}$ W and positive damping power is zero. The
-worst normalized work--energy residual decreases from 0.03119 to 0.01560 when
-the step is halved. Maximum trajectory and station-force discrepancies between
-engines are $7.97\times10^{-14}$ and $2.85\times10^{-12}$ relative, with no
-active-set parity failure. At the fine step, the largest three-to-five-fiber
-state discrepancy is 0.00355 relative; the one-to-three discrepancy is 0.0419.
+residual is $1.22\times10^{-15}$ W and positive damping power is zero. The
+worst normalized work--energy residual decreases from 0.03346 to 0.01673 when
+the step is halved. Trajectory and station-force discrepancies between engines
+are zero at the stored precision, with no nominal or event active-set parity
+failure. At the fine step, the largest three-to-five-fiber state discrepancy
+is 0.00300 relative; the one-to-three discrepancy is 0.04188.
 
-The active-set result is structural rather than a benefit result. The
-one-fiber comparator remains fully taut, whereas the off-axis multi-fiber
-grips retain at least one open fiber over 66.7--100% of samples in the
-registered cells. No active-set transition occurs, so opening or reattachment
-is right-censored through 50 ms. At 50 ms, the engine-averaged ensemble mean
-club translation speeds are 0.2444, 0.2379, and 0.2314 m/s for one, three, and
-five fibers. These unmatched-load values show discretization dependence; they
-do not rank physical grips or establish that partial opening helps or harms
-delivery.
+The active-set and friction results are structural rather than benefit results.
+No nominal active-set transition occurs, so natural opening or reattachment
+remains right-censored through 50 ms. The dead-zone probes record 80 opening
+and 186 reattachment station events, with at most 21 transitions in one
+trajectory and exact engine agreement. Those probes begin fully disengaged;
+they qualify event direction and repeated active-set handling, but not an
+attached-to-open first-failure experiment. At 50 ms, finite-friction minus
+frictionless speed differences range from -0.0483 to +0.0462 m/s, with a
+median of +0.00056 m/s. Mixed signs reject a universal finite-friction speed
+benefit in this unmatched synthetic matrix.
 
-The fibers remain memoryless, frictionless engineering lines rather than
-calibrated pressure, fingers, tissue, or measured grip mechanics. The club is
-rigid and the support pathway is unchanged. Consequently this gate establishes
-contact-discretization sensitivity and a 50 ms numerical horizon only. Shaft
-bending/torsion, ground/free-moment work, matched delivery, and governed human
-measurements remain required before equipment, timing, or strategy inference.
+The perfect-stick control removes registered active-station tangential velocity
+to at most $9.65\times10^{-11}$ m/s. MuJoCo and Pinocchio return identical
+projected velocities at stored precision and identical active sets. The
+instantaneous captured kinetic energy ranges from $9.84\times10^{-9}$ to
+$0.37665$ J across the registered matrix. These values bound the kinetic change
+for an ideal sticking impulse at each sampled state; they are not predictions
+of realizable grip work or evidence that sticking improves delivery.
+
+The fibers remain memoryless engineering lines rather than calibrated pressure,
+fingers, tissue, or measured grip mechanics. The club is rigid and the support
+pathway is unchanged. An attached-to-open event probe, static-friction
+feasibility and subsequent stick--slip evolution, matched delivery,
+shaft/ground coupling, and governed human measurements remain required before
+equipment, timing, or strategy inference.
 
 #### Passive Shaft Bending and Torsion Under Distributed Grip Loading
 

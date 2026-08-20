@@ -232,11 +232,47 @@ def test_station_opening_and_reattachment_transitions_and_first_failure() -> Non
 
     total_transitions = int(result["total_transition_count"])
     assert total_transitions > 0
+    assert int(result["opening_transition_count"]) > 0
+    assert int(result["reattachment_transition_count"]) > 0
+    assert np.asarray(result["station_active"]).shape == (101, 2, 3)
     assert result["first_failure_class"] in (
         "partial_opening",
         "full_loss_of_contact",
         "slip_occurring",
     )
+    assert float(result["first_failure_time_s"]) == pytest.approx(0.0)
+
+
+def test_complete_registered_velocity_reversal_is_applied_at_initial_state() -> None:
+    """The reversal comparator must reverse the full state, not one perturbation."""
+    model, metadata, q, grip_span_m = _closed_state()
+    qd = np.linspace(-0.4, 0.5, model.nq)
+    perturbation = 0.07
+    case = DistributedIntegrationCase(
+        q=q,
+        qd=qd,
+        grip_span_m=grip_span_m,
+        hand_contact_local_x_m=float(metadata["hand_contact_local_x_m"]),
+        time_step_s=0.001,
+        initial_club_displacement_m=0.001,
+        initial_club_velocity_m_s=-perturbation,
+        initial_state_velocity_factor=-1.0,
+        engine="mujoco",
+        grip=DistributedGripConfig(
+            station_count_per_hand=3,
+            station_width_m=0.03,
+            friction_coefficient=0.35,
+        ),
+    )
+
+    result = integrate_distributed_grip(
+        model,
+        case,
+        DistributedForwardConfig(duration_s=0.004, time_steps_s=(0.001, 0.0005)),
+    )
+    expected = -qd
+    expected[14] -= perturbation
+    assert np.allclose(result["qd"][0], expected)
 
 
 def test_nested_horizons_with_right_censoring() -> None:

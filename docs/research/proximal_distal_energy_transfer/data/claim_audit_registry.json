@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "46dc909be65d129414533e41800f4f68a118c2086faf7def710dcfe4c38a03ac",
+    "source_digest": "882079a730d2383b8b3b071c8a770fceb6d97b35915bbd3eef030acd586f393f",
     "baseline_commit": "a4b53e39b"
   },
   "audit_scope": {
@@ -11,7 +11,7 @@
     "release_review_completion_status": "complete",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "The complete paper inventory is adjudicated. The finite-base ground and intrinsic-free-moment tier passes registered numerical gates, while its primary coupled--fixed matching set is empty and no effect is identified."
+    "current_scope": "The complete paper inventory is adjudicated. Articulated point-attachment and finite-friction distributed-fiber tiers pass their registered gates through 5 and 50 ms. Calibrated shaft, ground, tissue, and governed human validation remain open."
   },
   "dependencies": [
     {
@@ -227,7 +227,7 @@
     },
     {
       "release_claim_key": "distributed_grip_discretization",
-      "published_status": "fifty_millisecond_distributed_fiber_gate_qualified",
+      "published_status": "fifty_millisecond_finite_friction_gate_qualified",
       "audit_state": "reviewed_as_right_censored_synthetic_discretization_result"
     },
     {
@@ -10278,7 +10278,7 @@
       ],
       "rationale": "This passage states or bounds the distributed-grip gate.",
       "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-15"
+      "last_verified_on": "2026-08-20"
     },
     {
       "candidate_id": "PD-CAND-0a0a52b22a81c843",
@@ -10288,67 +10288,7 @@
       ],
       "rationale": "This passage states or bounds the distributed-grip gate.",
       "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-15"
-    },
-    {
-      "candidate_id": "PD-CAND-ba742bf9c01f716e",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-286"
-      ],
-      "rationale": "This passage states or bounds the distributed-grip gate.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-15"
-    },
-    {
-      "candidate_id": "PD-CAND-9ee6e09e54f876be",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-287"
-      ],
-      "rationale": "This passage states or bounds the distributed-grip gate.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-15"
-    },
-    {
-      "candidate_id": "PD-CAND-0a5e2304b59129dd",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-287"
-      ],
-      "rationale": "This passage states or bounds the distributed-grip gate.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-15"
-    },
-    {
-      "candidate_id": "PD-CAND-20fbda78e3de59ef",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-288"
-      ],
-      "rationale": "This passage states or bounds the distributed-grip gate.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-15"
-    },
-    {
-      "candidate_id": "PD-CAND-edbbdf59e8d58a29",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "The figure include points to governed evidence without a standalone claim.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-15"
-    },
-    {
-      "candidate_id": "PD-CAND-8de255425ce45d75",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-253",
-        "PD-CLAIM-287",
-        "PD-CLAIM-288"
-      ],
-      "rationale": "This repeated ladder or boundary passage inherits the primary claim limits.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-15"
+      "last_verified_on": "2026-08-20"
     },
     {
       "candidate_id": "PD-CAND-637aabb92dc1e8ad",
@@ -10929,6 +10869,116 @@
       "rationale": "Repeated summary inherits claim bounds.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-16"
+    },
+    {
+      "candidate_id": "PD-CAND-4aee1cc3e2b54c5b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-287"
+      ],
+      "rationale": "This passage states or bounds the distributed-grip gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-d65894f827877c37",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-287"
+      ],
+      "rationale": "This passage states or bounds the distributed-grip gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-2b1147e55fb570e6",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "The figure include points to governed evidence without a standalone claim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-1109890d6fa7a70a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-286"
+      ],
+      "rationale": "This passage states or bounds the distributed-grip gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-f5a95edc89ff9322",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-286"
+      ],
+      "rationale": "This passage states or bounds the distributed-grip gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-42f3114a01bd2942",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-286"
+      ],
+      "rationale": "This passage states or bounds the distributed-grip gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-b48121dd9ea5996b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-286"
+      ],
+      "rationale": "This passage states or bounds the distributed-grip gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-bcf7e266e79119d2",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-287"
+      ],
+      "rationale": "This passage states or bounds the distributed-grip gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-9447cc8112faefbc",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-288"
+      ],
+      "rationale": "This passage states or bounds the distributed-grip gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-b7b46260431e11bb",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-253",
+        "PD-CLAIM-287",
+        "PD-CLAIM-288"
+      ],
+      "rationale": "This repeated ladder or boundary passage inherits the primary claim limits.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-043bebf7674017dd",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-286"
+      ],
+      "rationale": "This passage states or bounds the distributed-grip gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
     }
   ],
   "claims": [
@@ -21102,10 +21152,10 @@
         "PD-CAND-5bb964996c957e8b",
         "PD-CAND-c6f3dffde5c055ae",
         "PD-CAND-0e5d5314a405698d",
-        "PD-CAND-8de255425ce45d75",
-        "PD-CAND-b927f3a0c6a4132b"
+        "PD-CAND-b927f3a0c6a4132b",
+        "PD-CAND-b7b46260431e11bb"
       ],
-      "statement": "Typed scalar and articulated point-contact audits separate slack classes, and a 288-trajectory distributed-fiber atlas exposes station-count and active-set sensitivity; none establishes physical class identity or benefit.",
+      "statement": "Typed scalar and articulated point-contact audits separate slack classes, and a 576-trajectory finite-friction distributed-fiber atlas exposes station-count and active-set sensitivity while an instantaneous ideal-stick projection supplies a kinetic capture bound; none establishes physical class identity or benefit.",
       "classification": "typed_slack_dynamic_passivity_and_identifiability_audit",
       "published_status": "constitutive_mechanical_closure_supported_class_identification_not_established",
       "audit_status": "evidence_boundary_and_falsification_contract_checked",
@@ -23914,156 +23964,6 @@
       "last_verified_on": "2026-08-15"
     },
     {
-      "claim_id": "PD-CLAIM-286",
-      "candidate_ids": [
-        "PD-CAND-76ea04ded2d830ea",
-        "PD-CAND-0a0a52b22a81c843",
-        "PD-CAND-ba742bf9c01f716e"
-      ],
-      "statement": "A registered articulated atlas compares one-, three-, and five-fiber tension grips with equal total stiffness/damping, state-registered free lengths, and nested 4--50 ms horizons.",
-      "classification": "distributed_grip_discretization_design",
-      "published_status": "complete_for_declared_synthetic_matrix",
-      "audit_status": "distributed_grip_horizon_and_discretization_checked",
-      "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:606",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:617",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:626"
-      ],
-      "evidence_artifacts": [
-        "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_grip_atlas.json",
-        "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_grip_atlas.npz",
-        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_distributed_grip_atlas.pdf",
-        "scripts/research/proximal_distal_energy/articulated_distributed_grip.py",
-        "scripts/research/proximal_distal_energy/articulated_distributed_forward.py",
-        "scripts/research/proximal_distal_energy/articulated_distributed_atlas.py",
-        "scripts/research/proximal_distal_energy/run_distributed_grip_atlas.py",
-        "scripts/research/proximal_distal_energy/make_distributed_grip_figure.py",
-        "scripts/research/proximal_distal_energy/register_distributed_grip_claims.py",
-        "tests/research/test_articulated_distributed_grip.py",
-        "tests/research/test_articulated_distributed_forward.py",
-        "tests/research/test_articulated_distributed_atlas.py"
-      ],
-      "model_domain": "Twelve synthetic articulated states, one/three/five fibers per hand, two initial velocity signs, two time steps, two native engines, and nested 4/10/25/50 millisecond observations from 288 trajectories.",
-      "uncertainty_boundary": "The fibers are frictionless engineering lines, not measured pressure, fingers, or tissue.",
-      "competing_explanations": [
-        "fiber geometry rather than physical pressure distribution",
-        "state-registered free lengths rather than tissue preload",
-        "rigid-club or unchanged-support dynamics",
-        "unmatched load and delivery state"
-      ],
-      "negative_controls": [
-        "one-fiber point-law reduction",
-        "equal total stiffness and damping across station counts",
-        "coincident and reversed moment arms",
-        "initial-velocity reversal",
-        "time-step, station-count, and native-engine comparisons"
-      ],
-      "falsifier": "Station count changes total stiffness, horizons are reinitialized, or the one-fiber reduction fails.",
-      "adjudication": "Discretization and active-set results are reported without assigning measured pressure, benefit, human intent, or coaching meaning.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-15"
-    },
-    {
-      "claim_id": "PD-CLAIM-287",
-      "candidate_ids": [
-        "PD-CAND-9ee6e09e54f876be",
-        "PD-CAND-0a5e2304b59129dd",
-        "PD-CAND-8de255425ce45d75"
-      ],
-      "statement": "All 288 trajectories pass registered power, passivity, work-energy, geometry, refinement, and MuJoCo--Pinocchio gates through 50 ms; multi-fiber active sets are partly open but do not transition.",
-      "classification": "distributed_grip_discretization_result",
-      "published_status": "supported_through_declared_fifty_millisecond_synthetic_horizon",
-      "audit_status": "distributed_grip_horizon_and_discretization_checked",
-      "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:636",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:646",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:195"
-      ],
-      "evidence_artifacts": [
-        "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_grip_atlas.json",
-        "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_grip_atlas.npz",
-        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_distributed_grip_atlas.pdf",
-        "scripts/research/proximal_distal_energy/articulated_distributed_grip.py",
-        "scripts/research/proximal_distal_energy/articulated_distributed_forward.py",
-        "scripts/research/proximal_distal_energy/articulated_distributed_atlas.py",
-        "scripts/research/proximal_distal_energy/run_distributed_grip_atlas.py",
-        "scripts/research/proximal_distal_energy/make_distributed_grip_figure.py",
-        "scripts/research/proximal_distal_energy/register_distributed_grip_claims.py",
-        "tests/research/test_articulated_distributed_grip.py",
-        "tests/research/test_articulated_distributed_forward.py",
-        "tests/research/test_articulated_distributed_atlas.py"
-      ],
-      "model_domain": "Twelve synthetic articulated states, one/three/five fibers per hand, two initial velocity signs, two time steps, two native engines, and nested 4/10/25/50 millisecond observations from 288 trajectories.",
-      "uncertainty_boundary": "No-transition observations are right-censored, and delivery states are not matched for load or work.",
-      "competing_explanations": [
-        "fiber geometry rather than physical pressure distribution",
-        "state-registered free lengths rather than tissue preload",
-        "rigid-club or unchanged-support dynamics",
-        "unmatched load and delivery state"
-      ],
-      "negative_controls": [
-        "one-fiber point-law reduction",
-        "equal total stiffness and damping across station counts",
-        "coincident and reversed moment arms",
-        "initial-velocity reversal",
-        "time-step, station-count, and native-engine comparisons"
-      ],
-      "falsifier": "Any reproduced cell exceeds a gate, a geometric control fails, or a reported active transition is absent from committed evidence.",
-      "adjudication": "Discretization and active-set results are reported without assigning measured pressure, benefit, human intent, or coaching meaning.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-15"
-    },
-    {
-      "claim_id": "PD-CLAIM-288",
-      "candidate_ids": [
-        "PD-CAND-20fbda78e3de59ef",
-        "PD-CAND-8de255425ce45d75",
-        "PD-CAND-61fd7d95e06327e9"
-      ],
-      "statement": "Distributed fibers establish discretization sensitivity, and a separate passive first-mode shaft atlas establishes state-dependent elastic response; neither establishes physical grip, equipment, timing, human, or strategy benefit.",
-      "classification": "distributed_grip_inference_boundary",
-      "published_status": "explicitly_bounded",
-      "audit_status": "distributed_grip_horizon_and_discretization_checked",
-      "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:656",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:195",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:48"
-      ],
-      "evidence_artifacts": [
-        "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_grip_atlas.json",
-        "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_grip_atlas.npz",
-        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_distributed_grip_atlas.pdf",
-        "scripts/research/proximal_distal_energy/articulated_distributed_grip.py",
-        "scripts/research/proximal_distal_energy/articulated_distributed_forward.py",
-        "scripts/research/proximal_distal_energy/articulated_distributed_atlas.py",
-        "scripts/research/proximal_distal_energy/run_distributed_grip_atlas.py",
-        "scripts/research/proximal_distal_energy/make_distributed_grip_figure.py",
-        "scripts/research/proximal_distal_energy/register_distributed_grip_claims.py",
-        "tests/research/test_articulated_distributed_grip.py",
-        "tests/research/test_articulated_distributed_forward.py",
-        "tests/research/test_articulated_distributed_atlas.py"
-      ],
-      "model_domain": "Twelve synthetic articulated states, one/three/five fibers per hand, two initial velocity signs, two time steps, two native engines, and nested 4/10/25/50 millisecond observations from 288 trajectories.",
-      "uncertainty_boundary": "Shaft bending/torsion, ground/free-moment work, friction, tissue, matched delivery, and governed human measurements remain open.",
-      "competing_explanations": [
-        "fiber geometry rather than physical pressure distribution",
-        "state-registered free lengths rather than tissue preload",
-        "rigid-club or unchanged-support dynamics",
-        "unmatched load and delivery state"
-      ],
-      "negative_controls": [
-        "one-fiber point-law reduction",
-        "equal total stiffness and damping across station counts",
-        "coincident and reversed moment arms",
-        "initial-velocity reversal",
-        "time-step, station-count, and native-engine comparisons"
-      ],
-      "falsifier": "A physical, biological, equipment, timing, or coaching claim is attributed to this synthetic atlas alone.",
-      "adjudication": "Discretization and active-set results are reported without assigning measured pressure, benefit, human intent, or coaching meaning.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-15"
-    },
-    {
       "claim_id": "PD-CLAIM-289",
       "candidate_ids": [
         "PD-CAND-637aabb92dc1e8ad",
@@ -24614,6 +24514,182 @@
       "adjudication": "The finite-base mechanism is reported with an empty primary matched set; unmatched speed differences are not interpreted as an effect.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-16"
+    },
+    {
+      "claim_id": "PD-CLAIM-286",
+      "candidate_ids": [
+        "PD-CAND-76ea04ded2d830ea",
+        "PD-CAND-0a0a52b22a81c843",
+        "PD-CAND-1109890d6fa7a70a",
+        "PD-CAND-f5a95edc89ff9322",
+        "PD-CAND-42f3114a01bd2942",
+        "PD-CAND-043bebf7674017dd",
+        "PD-CAND-b48121dd9ea5996b"
+      ],
+      "statement": "A registered articulated atlas compares frictionless and equipment-provisional finite-friction one-, three-, and five-fiber tension grips with equal total stiffness/damping, complete velocity reversal, state-registered free lengths, and nested 4--50 ms horizons.",
+      "classification": "distributed_grip_friction_design",
+      "published_status": "complete_for_declared_synthetic_matrix",
+      "audit_status": "distributed_grip_friction_horizon_and_events_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:606",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:648",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:617",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:626",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:630",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:642",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:657"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_grip_atlas.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_grip_atlas.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_distributed_grip_atlas.pdf",
+        "scripts/research/proximal_distal_energy/articulated_distributed_grip.py",
+        "scripts/research/proximal_distal_energy/articulated_distributed_forward.py",
+        "scripts/research/proximal_distal_energy/articulated_distributed_atlas.py",
+        "scripts/research/proximal_distal_energy/run_distributed_grip_atlas.py",
+        "scripts/research/proximal_distal_energy/make_distributed_grip_figure.py",
+        "scripts/research/proximal_distal_energy/register_distributed_grip_claims.py",
+        "tests/research/test_articulated_distributed_grip.py",
+        "tests/research/test_articulated_distributed_forward.py",
+        "tests/research/test_articulated_distributed_atlas.py",
+        "tests/research/test_articulated_distributed_friction.py"
+      ],
+      "model_domain": "Twelve synthetic articulated states, one/three/five fibers per hand, frictionless and finite-friction bounds, complete velocity reversal, two time steps, two native engines, and nested 4/10/25/50 millisecond observations from 576 nominal trajectories plus 24 event probes and 144 instantaneous mass-metric perfect-stick projections.",
+      "uncertainty_boundary": "The fibers are memoryless engineering lines and the stick control is an instantaneous ideal constraint, not a static-friction trajectory, measured pressure, fingers, or tissue.",
+      "competing_explanations": [
+        "fiber geometry rather than physical pressure distribution",
+        "state-registered free lengths rather than tissue preload",
+        "rigid-club or unchanged-support dynamics",
+        "unmatched load and delivery state",
+        "memoryless finite-friction regularization rather than static-friction evolution",
+        "instantaneous perfect-stick projection rather than a feasible stick trajectory"
+      ],
+      "negative_controls": [
+        "one-fiber point-law reduction",
+        "equal total stiffness and damping across station counts",
+        "coincident and reversed moment arms",
+        "initial-velocity reversal",
+        "frictionless finite-friction comparison",
+        "opening and reattachment event-direction probes",
+        "analytic mass-metric projection manufactured solution",
+        "time-step, station-count, and native-engine comparisons"
+      ],
+      "falsifier": "Station count changes total stiffness, horizons are reinitialized, velocity reversal is partial, or the frictionless reduction fails.",
+      "adjudication": "Discretization and active-set results are reported without assigning measured pressure, benefit, human intent, or coaching meaning.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "claim_id": "PD-CLAIM-287",
+      "candidate_ids": [
+        "PD-CAND-4aee1cc3e2b54c5b",
+        "PD-CAND-d65894f827877c37",
+        "PD-CAND-bcf7e266e79119d2",
+        "PD-CAND-b7b46260431e11bb"
+      ],
+      "statement": "All 576 nominal trajectories pass registered power, passivity, work-energy, geometry, refinement, and MuJoCo--Pinocchio gates through 50 ms; 24 disengaged-start probes contain opening and reattachment with exact active-set parity, finite-friction speed effects have mixed signs, and 144 ideal stick projections satisfy their velocity constraint with nonnegative kinetic-energy capture.",
+      "classification": "distributed_grip_friction_result",
+      "published_status": "supported_through_declared_fifty_millisecond_synthetic_horizon",
+      "audit_status": "distributed_grip_friction_horizon_and_events_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:672",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:682",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:693",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:195"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_grip_atlas.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_grip_atlas.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_distributed_grip_atlas.pdf",
+        "scripts/research/proximal_distal_energy/articulated_distributed_grip.py",
+        "scripts/research/proximal_distal_energy/articulated_distributed_forward.py",
+        "scripts/research/proximal_distal_energy/articulated_distributed_atlas.py",
+        "scripts/research/proximal_distal_energy/run_distributed_grip_atlas.py",
+        "scripts/research/proximal_distal_energy/make_distributed_grip_figure.py",
+        "scripts/research/proximal_distal_energy/register_distributed_grip_claims.py",
+        "tests/research/test_articulated_distributed_grip.py",
+        "tests/research/test_articulated_distributed_forward.py",
+        "tests/research/test_articulated_distributed_atlas.py",
+        "tests/research/test_articulated_distributed_friction.py"
+      ],
+      "model_domain": "Twelve synthetic articulated states, one/three/five fibers per hand, frictionless and finite-friction bounds, complete velocity reversal, two time steps, two native engines, and nested 4/10/25/50 millisecond observations from 576 nominal trajectories plus 24 event probes and 144 instantaneous mass-metric perfect-stick projections.",
+      "uncertainty_boundary": "Nominal transitions are right-censored, event probes begin disengaged, and delivery states are not matched for load or work.",
+      "competing_explanations": [
+        "fiber geometry rather than physical pressure distribution",
+        "state-registered free lengths rather than tissue preload",
+        "rigid-club or unchanged-support dynamics",
+        "unmatched load and delivery state",
+        "memoryless finite-friction regularization rather than static-friction evolution",
+        "instantaneous perfect-stick projection rather than a feasible stick trajectory"
+      ],
+      "negative_controls": [
+        "one-fiber point-law reduction",
+        "equal total stiffness and damping across station counts",
+        "coincident and reversed moment arms",
+        "initial-velocity reversal",
+        "frictionless finite-friction comparison",
+        "opening and reattachment event-direction probes",
+        "analytic mass-metric projection manufactured solution",
+        "time-step, station-count, and native-engine comparisons"
+      ],
+      "falsifier": "Any reproduced cell exceeds a gate, cross-engine active sets differ, an event direction is absent, finite friction has one favorable sign across the registered matrix, or a stick projection violates its tangential-velocity or nonnegative-capture-energy contract.",
+      "adjudication": "Discretization and active-set results are reported without assigning measured pressure, benefit, human intent, or coaching meaning.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "claim_id": "PD-CLAIM-288",
+      "candidate_ids": [
+        "PD-CAND-9447cc8112faefbc",
+        "PD-CAND-b7b46260431e11bb"
+      ],
+      "statement": "The distributed-fiber atlas establishes finite-friction and discretization sensitivity, not physical grip-pressure or friction benefit, slack benefit, equipment response, timing economy, human transfer, or strategy.",
+      "classification": "distributed_grip_inference_boundary",
+      "published_status": "explicitly_bounded",
+      "audit_status": "distributed_grip_friction_horizon_and_events_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:701",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:195"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_grip_atlas.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_grip_atlas.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_distributed_grip_atlas.pdf",
+        "scripts/research/proximal_distal_energy/articulated_distributed_grip.py",
+        "scripts/research/proximal_distal_energy/articulated_distributed_forward.py",
+        "scripts/research/proximal_distal_energy/articulated_distributed_atlas.py",
+        "scripts/research/proximal_distal_energy/run_distributed_grip_atlas.py",
+        "scripts/research/proximal_distal_energy/make_distributed_grip_figure.py",
+        "scripts/research/proximal_distal_energy/register_distributed_grip_claims.py",
+        "tests/research/test_articulated_distributed_grip.py",
+        "tests/research/test_articulated_distributed_forward.py",
+        "tests/research/test_articulated_distributed_atlas.py",
+        "tests/research/test_articulated_distributed_friction.py"
+      ],
+      "model_domain": "Twelve synthetic articulated states, one/three/five fibers per hand, frictionless and finite-friction bounds, complete velocity reversal, two time steps, two native engines, and nested 4/10/25/50 millisecond observations from 576 nominal trajectories plus 24 event probes and 144 instantaneous mass-metric perfect-stick projections.",
+      "uncertainty_boundary": "Static-friction feasibility and stick--slip evolution, attached-to-open first failure, shaft/ground coupling, tissue, matched delivery, and governed human measurements remain open.",
+      "competing_explanations": [
+        "fiber geometry rather than physical pressure distribution",
+        "state-registered free lengths rather than tissue preload",
+        "rigid-club or unchanged-support dynamics",
+        "unmatched load and delivery state",
+        "memoryless finite-friction regularization rather than static-friction evolution",
+        "instantaneous perfect-stick projection rather than a feasible stick trajectory"
+      ],
+      "negative_controls": [
+        "one-fiber point-law reduction",
+        "equal total stiffness and damping across station counts",
+        "coincident and reversed moment arms",
+        "initial-velocity reversal",
+        "frictionless finite-friction comparison",
+        "opening and reattachment event-direction probes",
+        "analytic mass-metric projection manufactured solution",
+        "time-step, station-count, and native-engine comparisons"
+      ],
+      "falsifier": "A physical, biological, equipment, timing, or coaching claim is attributed to this synthetic atlas alone.",
+      "adjudication": "Discretization and active-set results are reported without assigning measured pressure, benefit, human intent, or coaching meaning.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
     }
   ]
 }

@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[3]
 ARTICLE = ROOT / "docs/research/proximal_distal_energy_transfer"
 REGISTRY = ARTICLE / "data/claim_audit_registry.json"
 INVENTORY = ARTICLE / "data/claim_candidate_inventory.json"
-DATE = "2026-08-15"
+DATE = "2026-08-20"
 CLAIM_IDS = {"PD-CLAIM-286", "PD-CLAIM-287", "PD-CLAIM-288"}
 ARTIFACTS = [
     "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_grip_atlas.json",
@@ -46,14 +46,30 @@ def _selected(candidates: list[dict[str, Any]]) -> dict[str, Any]:
     return {
         "law": _find(candidates, chapter, "The next gate isolates contact"),
         "control": _find(candidates, chapter, "Thus station count does not"),
+        "friction_law": _find(candidates, chapter, "The frictionless comparator sets"),
+        "friction_boundary": _find(
+            candidates, chapter, "The force on the club follows"
+        ),
+        "stick_law": _find(
+            candidates, chapter, "An instantaneous perfect-stick control"
+        ),
+        "stick_boundary": _find(
+            candidates, chapter, "where $(\\cdot)^+$ is the Moore--Penrose inverse"
+        ),
         "design": _find(candidates, chapter, "The atlas selects twelve"),
-        "figure": _find(candidates, chapter, "![Distributed Grip Discretization"),
+        "figure": _find(
+            candidates, chapter, "![Distributed Grip Friction and Contact Events"
+        ),
         "numerics": _find(candidates, chapter, "All registered numerical"),
-        "active": _find(candidates, chapter, "The active-set result is structural"),
-        "boundary": _find(candidates, chapter, "The fibers remain memoryless"),
-        "summary": _find(candidates, chapter, "The bounded articulated experiments"),
-        "ladder": _find(candidates, "_ch07_model_ladder.qmd", "- the three-link"),
-        "next": _find(candidates, "_ch07_model_ladder.qmd", "The next decisive"),
+        "active": _find(
+            candidates,
+            chapter,
+            "The active-set and friction results are structural",
+        ),
+        "stick_result": _find(candidates, chapter, "The perfect-stick control removes"),
+        "boundary": _find(
+            candidates, chapter, "The fibers remain memoryless engineering"
+        ),
         "slack": _find(
             candidates,
             "_ch08b_momentum_transfer_questions.qmd",
@@ -77,7 +93,7 @@ def _claim(
         "statement": statement,
         "classification": classification,
         "published_status": status,
-        "audit_status": "distributed_grip_horizon_and_discretization_checked",
+        "audit_status": "distributed_grip_friction_horizon_and_events_checked",
         "source_locations": [
             f"{candidate['source_path']}:{candidate['line_start']}"
             for candidate in candidates
@@ -85,8 +101,10 @@ def _claim(
         "evidence_artifacts": ARTIFACTS,
         "model_domain": (
             "Twelve synthetic articulated states, one/three/five fibers per hand, "
-            "two initial velocity signs, two time steps, two native engines, and "
-            "nested 4/10/25/50 millisecond observations from 288 trajectories."
+            "frictionless and finite-friction bounds, complete velocity reversal, "
+            "two time steps, two native engines, and nested 4/10/25/50 millisecond "
+            "observations from 576 nominal trajectories plus 24 event probes and "
+            "144 instantaneous mass-metric perfect-stick projections."
         ),
         "uncertainty_boundary": boundary,
         "competing_explanations": [
@@ -94,12 +112,17 @@ def _claim(
             "state-registered free lengths rather than tissue preload",
             "rigid-club or unchanged-support dynamics",
             "unmatched load and delivery state",
+            "memoryless finite-friction regularization rather than static-friction evolution",
+            "instantaneous perfect-stick projection rather than a feasible stick trajectory",
         ],
         "negative_controls": [
             "one-fiber point-law reduction",
             "equal total stiffness and damping across station counts",
             "coincident and reversed moment arms",
             "initial-velocity reversal",
+            "frictionless finite-friction comparison",
+            "opening and reattachment event-direction probes",
+            "analytic mass-metric projection manufactured solution",
             "time-step, station-count, and native-engine comparisons",
         ],
         "falsifier": falsifier,
@@ -116,29 +139,37 @@ def _claims(selected: dict[str, Any]) -> list[dict[str, Any]]:
     return [
         _claim(
             "PD-CLAIM-286",
-            [selected["law"], selected["control"], selected["design"]],
-            "A registered articulated atlas compares one-, three-, and five-fiber tension grips with equal total stiffness/damping, state-registered free lengths, and nested 4--50 ms horizons.",
-            "distributed_grip_discretization_design",
+            [
+                selected["law"],
+                selected["control"],
+                selected["friction_law"],
+                selected["friction_boundary"],
+                selected["stick_law"],
+                selected["stick_boundary"],
+                selected["design"],
+            ],
+            "A registered articulated atlas compares frictionless and equipment-provisional finite-friction one-, three-, and five-fiber tension grips with equal total stiffness/damping, complete velocity reversal, state-registered free lengths, and nested 4--50 ms horizons.",
+            "distributed_grip_friction_design",
             "complete_for_declared_synthetic_matrix",
-            "The fibers are frictionless engineering lines, not measured pressure, fingers, or tissue.",
-            "Station count changes total stiffness, horizons are reinitialized, or the one-fiber reduction fails.",
+            "The fibers are memoryless engineering lines and the stick control is an instantaneous ideal constraint, not a static-friction trajectory, measured pressure, fingers, or tissue.",
+            "Station count changes total stiffness, horizons are reinitialized, velocity reversal is partial, or the frictionless reduction fails.",
         ),
         _claim(
             "PD-CLAIM-287",
-            [selected["numerics"], selected["active"]],
-            "All 288 trajectories pass registered power, passivity, work-energy, geometry, refinement, and MuJoCo--Pinocchio gates through 50 ms; multi-fiber active sets are partly open but do not transition.",
-            "distributed_grip_discretization_result",
+            [selected["numerics"], selected["active"], selected["stick_result"]],
+            "All 576 nominal trajectories pass registered power, passivity, work-energy, geometry, refinement, and MuJoCo--Pinocchio gates through 50 ms; 24 disengaged-start probes contain opening and reattachment with exact active-set parity, finite-friction speed effects have mixed signs, and 144 ideal stick projections satisfy their velocity constraint with nonnegative kinetic-energy capture.",
+            "distributed_grip_friction_result",
             "supported_through_declared_fifty_millisecond_synthetic_horizon",
-            "No-transition observations are right-censored, and delivery states are not matched for load or work.",
-            "Any reproduced cell exceeds a gate, a geometric control fails, or a reported active transition is absent from committed evidence.",
+            "Nominal transitions are right-censored, event probes begin disengaged, and delivery states are not matched for load or work.",
+            "Any reproduced cell exceeds a gate, cross-engine active sets differ, an event direction is absent, finite friction has one favorable sign across the registered matrix, or a stick projection violates its tangential-velocity or nonnegative-capture-energy contract.",
         ),
         _claim(
             "PD-CLAIM-288",
             [selected["boundary"]],
-            "The distributed-fiber atlas establishes discretization sensitivity, not physical grip-pressure benefit, slack benefit, equipment response, timing economy, human transfer, or strategy.",
+            "The distributed-fiber atlas establishes finite-friction and discretization sensitivity, not physical grip-pressure or friction benefit, slack benefit, equipment response, timing economy, human transfer, or strategy.",
             "distributed_grip_inference_boundary",
             "explicitly_bounded",
-            "Shaft bending/torsion, ground/free-moment work, friction, tissue, matched delivery, and governed human measurements remain open.",
+            "Static-friction feasibility and stick--slip evolution, attached-to-open first failure, shaft/ground coupling, tissue, matched delivery, and governed human measurements remain open.",
             "A physical, biological, equipment, timing, or coaching claim is attributed to this synthetic atlas alone.",
         ),
     ]
@@ -149,7 +180,19 @@ def _review_primary(
     selected: dict[str, Any],
     claims: list[dict[str, Any]],
 ) -> None:
-    for name in ("law", "control", "design", "numerics", "active", "boundary"):
+    for name in (
+        "law",
+        "control",
+        "friction_law",
+        "friction_boundary",
+        "stick_law",
+        "stick_boundary",
+        "design",
+        "numerics",
+        "active",
+        "stick_result",
+        "boundary",
+    ):
         candidate = selected[name]
         reviews[candidate["candidate_id"]] = {
             "candidate_id": candidate["candidate_id"],
@@ -179,9 +222,6 @@ def _attach_repeated(
     selected: dict[str, Any],
 ) -> None:
     mapping = {
-        "summary": ("PD-CLAIM-128", "PD-CLAIM-262", "PD-CLAIM-288"),
-        "ladder": ("PD-CLAIM-128", "PD-CLAIM-288"),
-        "next": ("PD-CLAIM-128", "PD-CLAIM-288"),
         "slack": ("PD-CLAIM-253", "PD-CLAIM-287", "PD-CLAIM-288"),
     }
     claims = {claim["claim_id"]: claim for claim in registry["claims"]}
@@ -205,21 +245,12 @@ def _attach_repeated(
             "reviewer": "Codex technical audit",
             "last_verified_on": DATE,
         }
-    claims["PD-CLAIM-128"]["statement"] = (
-        "The discrepancy matrix records explicit branch capabilities rather than "
-        "cumulative triangular inheritance; eleven bounded findings are supported "
-        "somewhere in executed tiers, while calibrated anatomical, shaft, ground, "
-        "and independently measured human transport remain untested."
-    )
     claims["PD-CLAIM-253"]["statement"] = (
         "Typed scalar and articulated point-contact audits separate slack classes, "
-        "and a 288-trajectory distributed-fiber atlas exposes station-count and "
-        "active-set sensitivity; none establishes physical class identity or benefit."
-    )
-    claims["PD-CLAIM-262"]["statement"] = (
-        "Articulated point-attachment screens pass through 5 ms and the distributed "
-        "fiber discretization passes through 50 ms, but timing, recovery, equipment, "
-        "and benefit claims require calibrated shaft, ground, tissue, and human data."
+        "and a 576-trajectory finite-friction distributed-fiber atlas exposes "
+        "station-count and active-set sensitivity while an instantaneous ideal-stick "
+        "projection supplies a kinetic capture bound; none establishes physical "
+        "class identity or benefit."
     )
 
 
@@ -252,13 +283,13 @@ def main() -> None:
     }
     release["distributed_grip_discretization"] = {
         "release_claim_key": "distributed_grip_discretization",
-        "published_status": "fifty_millisecond_distributed_fiber_gate_qualified",
-        "audit_state": "reviewed_as_synthetic_discretization_result",
+        "published_status": "fifty_millisecond_finite_friction_gate_qualified",
+        "audit_state": "reviewed_as_synthetic_friction_and_discretization_result",
     }
     registry["release_claim_inventory"] = list(release.values())
     registry["audit_scope"]["current_scope"] = (
         "The complete paper inventory is adjudicated. Articulated point-attachment "
-        "and distributed-fiber tiers pass their registered gates through 5 and 50 ms. "
+        "and finite-friction distributed-fiber tiers pass their registered gates through 5 and 50 ms. "
         "Calibrated shaft, ground, tissue, and governed human validation remain open."
     )
     registry["paper"]["source_digest"] = inventory["source_digest"]

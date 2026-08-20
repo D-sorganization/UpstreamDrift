@@ -1,6 +1,6 @@
 {
-  "schema_version": "articulated-distributed-grip-atlas/v1",
-  "study_id": "distributed-grip-contact-discretization",
+  "schema_version": "articulated-distributed-grip-atlas/v3",
+  "study_id": "distributed-grip-friction-contact-atlas",
   "design": {
     "engine_versions": {
       "mujoco": "3.3.4",
@@ -12,17 +12,22 @@
       3,
       5
     ],
+    "friction_coefficients": [
+      0.0,
+      0.35
+    ],
     "velocity_branch_count": 2,
     "time_step_count": 2,
     "engine_count": 2,
-    "trajectory_count": 288,
+    "trajectory_count": 576,
     "horizons_s": [
       0.004,
       0.01,
       0.025,
       0.05
     ],
-    "active_driver_or_joint_torque": "none; motion is an initial condition"
+    "active_driver_or_joint_torque": "none; motion is an initial condition",
+    "velocity_reversal": "the complete registered generalized velocity and added club perturbation are sign-reversed"
   },
   "configuration": {
     "forward": {
@@ -52,6 +57,10 @@
       3,
       5
     ],
+    "friction_coefficients": [
+      0.0,
+      0.35
+    ],
     "horizons_s": [
       0.004,
       0.01,
@@ -63,30 +72,43 @@
     "initial_velocity_m_s": 0.05,
     "total_stiffness_n_m": 1800.0,
     "total_damping_n_s_m": 18.0,
-    "station_refinement_tolerance": 0.05
+    "station_refinement_tolerance": 0.05,
+    "event_probe_slack_distance_m": 0.0015,
+    "event_probe_velocity_m_s": -0.8
   },
   "results": {
-    "maximum_peak_station_force_n": 4.0297582179258224,
-    "maximum_peak_force_couple_nm": 0.37496023896043856,
+    "maximum_peak_station_force_n": 4.021274058414114,
+    "maximum_peak_force_couple_nm": 0.4344427542728466,
     "maximum_open_fraction": 1.0,
     "maximum_transition_count": 0,
-    "maximum_station_load_concentration": 0.7699527320405432,
+    "maximum_registered_event_transition_count": 21,
+    "registered_event_opening_count": 80,
+    "registered_event_reattachment_count": 186,
+    "event_active_set_parity_failures": 0,
+    "maximum_stick_projection_residual_m_s": 9.644937626340777e-11,
+    "maximum_stick_velocity_relative_error": 0.0,
+    "stick_active_set_parity_failures": 0,
+    "stick_capture_energy_range_j": [
+      9.839105530318193e-09,
+      0.37664840792427867
+    ],
+    "maximum_station_load_concentration": 0.820363593977165,
     "maximum_coincident_couple_residual_nm": 0.0,
     "maximum_reversed_couple_sign_residual_nm": 0.0,
-    "maximum_virtual_power_residual_w": 9.71445146547012e-16,
+    "maximum_virtual_power_residual_w": 1.2212453270876722e-15,
     "maximum_positive_dissipation_power_w": 0.0,
-    "maximum_normalized_work_energy_residual": 0.031188832197237875,
+    "maximum_normalized_work_energy_residual": 0.03346282496030918,
     "maximum_trajectory_relative_error": 0.0,
     "maximum_force_relative_error": 0.0,
     "active_set_parity_failures": 0,
     "failed_numerical_cell_count": 0,
     "failed_parity_cell_count": 0,
     "time_refinement_worst_normalized_residual": [
-      0.031188832197237875,
-      0.015597566866522868
+      0.03346282496030918,
+      0.016734236783381585
     ],
     "time_refinement_passed": true,
-    "maximum_fine_step_three_to_five_station_error": 0.0035518017981562133,
+    "maximum_fine_step_three_to_five_station_error": 0.0030030637957723866,
     "station_refinement_passed": true,
     "all_registered_gates_passed": true
   },
@@ -97,24 +119,26 @@
     "right_censoring": "absence of an event through 50 ms is right-censored at the registered horizon"
   },
   "claim_boundary": {
-    "supported": "distributed tension-fiber discretization can be compared without silently increasing total stiffness or reinitializing horizons",
+    "supported": "finite bounded Coulomb friction and frictionless distributed tension-fiber comparators can be compared without silently increasing total stiffness or reinitializing horizons; registered probes contain opening and reattachment",
     "measured_pressure_or_finger_anatomy": "not_identified",
-    "friction_tissue_shaft_or_ground": "not_modeled",
+    "friction_tissue_or_measured_coefficient": "not_identified; coefficients are equipment-provisional bounds",
+    "perfect_stick_bound": "mass-metric impulsive tangential-velocity projection only; not a static-friction trajectory or tissue law",
     "timing_economy_or_human_strategy": "untested"
   },
   "next_gate": "add separately qualified shaft bending/torsion and finite ground/free-moment pathways before combined inference",
   "source_sha256": {
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "8eed52fe4ebbc55fcf753f4703330dd6d768281b0babfbb2adca074b862fc36d",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
-    "scripts/research/proximal_distal_energy/articulated_distributed_grip.py": "006b3bc8114cbe3db61788ab3ebf1b024301723e2907fe7a145542dc5839bcd5",
-    "scripts/research/proximal_distal_energy/articulated_distributed_forward.py": "288d349a890cbe57bab1d1f3b222d2a32e332744487582794893a2c213234bae",
-    "scripts/research/proximal_distal_energy/articulated_distributed_atlas.py": "c3a1ad93c7693f4a557ff7f56b1d3598f8927a33657cb5cefc13cab3a84ffd15",
+    "scripts/research/proximal_distal_energy/articulated_distributed_grip.py": "1d25ac5dbbb27d2bf67240c3cab18aa7c0a988f68cbb24fcf305bb5b2b37cca2",
+    "scripts/research/proximal_distal_energy/articulated_distributed_forward.py": "3422db8884ecdba7938f7100253b0d261c4cd51a5d1c052ac65ae57586d16d63",
+    "scripts/research/proximal_distal_energy/articulated_distributed_atlas.py": "cb8882b32a532bed1ed4fc8c927a2020f89f38990ed583c52dd7b1d7c52c0359",
     "scripts/research/proximal_distal_energy/articulated_slack_contact.py": "79ad8644029ff8d447eae2e697a5ed7deceb173c000e5ef2b4f53be6c791ad69",
     "scripts/research/proximal_distal_energy/articulated_forward_integration.py": "3942fe624a4ed4642a61e68f2fd5029eb92df9dc0fff08617a2f62883e443b9a",
     "scripts/research/proximal_distal_energy/articulated_forward_contract.py": "c2f2a89bbb90da5e41488e4763327afe126f6be6be70da73c41c74adca52349a",
     "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py": "c2b01f1d8de0b25daa39c03ae97d3ef51512264f3a2978766a7360aed5d9cda8",
     "tests/research/test_articulated_distributed_grip.py": "f79a5a74e399352581f1e6f81a4642cd09aaed8ed21e02635ef87c7a12b18d69",
     "tests/research/test_articulated_distributed_forward.py": "2e0c6e9749afd61ae88a297d94f5e101152ecba268ea8ce42051ee2cfcb4c008",
-    "tests/research/test_articulated_distributed_friction.py": "640c5bddefca596908ecb40a13eee2b5f15438cfbcc73a648bd1fba3f7e7f694"
+    "tests/research/test_articulated_distributed_friction.py": "7b91050578a415483e2380210f80fd2559b399664b1e282d8531a088d501f4d7",
+    "tests/research/test_articulated_distributed_atlas.py": "7ab56bf424e72912b536a170c3680f7bb48ea28e9716bb58bd59356588de50c0"
   }
 }

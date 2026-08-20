@@ -192,14 +192,20 @@ beneficial. Any benefit proposal must still survive longer matched-work/load
 delivery, stateful hysteresis, calibrated distributed contact, and independent
 human measurement.
 
-The next articulated atlas extends a frictionless tension-fiber comparator to
-one, three, and five stations per hand while holding total stiffness and
-damping fixed. Its 288 trajectories pass nested 4, 10, 25, and 50 ms power,
-energy, refinement, geometry-null, and MuJoCo--Pinocchio gates. The one-fiber
-branch stays taut; multi-fiber branches retain partially open active sets but
-show no transition through 50 ms. Their delivery-state differences therefore
-demonstrate discretization sensitivity, not a physical benefit of slack or
-distributed pressure. Measured contact pressure, friction, shaft/ground work,
+The next articulated atlas crosses frictionless and equipment-provisional
+$\mu=0.35$ tension-fiber comparators with one, three, and five stations per hand
+while holding total stiffness and damping fixed. Its 576 trajectories pass
+nested 4, 10, 25, and 50 ms power, energy, refinement, geometry-null, and
+MuJoCo--Pinocchio gates. Separate probes record opening and reattachment with
+exact engine agreement, but begin disengaged and do not qualify an
+attached-to-open first failure. Finite-friction minus frictionless 50 ms speed
+differences have mixed signs. The result therefore demonstrates sensitivity,
+not a physical benefit of friction, slack, or distributed pressure. A
+mass-metric impulsive perfect-stick control bounds instantaneous kinetic-energy
+capture at $9.84\times10^{-9}$--$0.37665$ J while enforcing tangential velocity
+below $9.65\times10^{-11}$ m/s with exact stored-precision engine parity. It
+does not test static-friction feasibility or subsequent stick--slip evolution.
+Attached-to-open first failure, measured contact, coupled shaft/ground work,
 matched tasks, and governed human outcomes remain necessary.
 
 The following articulated shaft atlas then retains the five-fiber grip and

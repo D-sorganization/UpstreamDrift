@@ -58,9 +58,34 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
   remains open because #8751 and #8752 have unmet acceptance criteria.
 - #8684 governs distributed grip, shaft, and ground:
   - #8751 is **OPEN**. PR #8783 added preliminary multi-station friction,
-    power decomposition, and event probes, but stick/reversal controls,
-    cross-engine active-set parity, registered horizon/refinement maps, and
-    paper/release integration remain open.
+    power decomposition, and event probes. Branch
+    `research/8751-friction-atlas` now has an unmerged v3 atlas with 576
+    nominal trajectories and 24 event probes. It adds full-state velocity
+    reversal, frictionless/$\mu=0.35$ comparators, station-level opening and
+    reattachment counts, cross-engine active-set parity, nested horizon and
+    refinement maps, and 144 mass-metric impulsive perfect-stick projections.
+    The stick control has an analytic manufactured-solution test; its maximum
+    tangential residual is $9.65\times10^{-11}$ m/s, native projected-velocity
+    discrepancy is zero, and captured kinetic energy spans
+    $9.84\times10^{-9}$--$0.37665$ J. It is not a static-friction trajectory.
+    The event probe begins disengaged, but #8751 requires event direction and a
+    reported first-failure class rather than an attached-to-open start. Its
+    complete local acceptance set now passes: 18 focused scientific tests, all
+    atlas gates, claim audit (1,068/1,068 candidates; 295 claims), 571-artifact
+    release integrity, document governance/title case, file-size, architecture,
+    and scoped Ruff checks. The optimized paper is 232 pages, 1.77 MB, with 192
+    URI links and 246 outline entries. PR #8797 is open with protected squash
+    auto-merge enabled. Its first hosted run exposed one actionable architecture
+    budget failure (`_record`, 125 > 100 lines); the record construction is now
+    split into focused helpers, and the exact architecture gate, scoped Ruff,
+    governed regeneration, release validation, and 18 focused scientific tests
+    pass locally. Commit/push of that correction, replacement CI, remote-main
+    verification, and issue closure remain for #8751.
+  - #8796 is **OPEN** under #8557/#8684 for the stronger attached-to-open and
+    stateful finite-static-friction extension. It owns static-cone feasibility,
+    subsequent stick--slip evolution, attached-state first failure, and an
+    infeasible manufactured case. Do not fold those unqualified results into
+    #8751 or describe the impulsive stick control as a trajectory law.
   - #8752 is **OPEN**. PR #8783 added preliminary manufactured and Latin
     hypercube screens, but production-runner/two-engine manufactured cases,
     full shaft/ground parameter coverage, per-corner refinement, headline
@@ -72,6 +97,10 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
   while keeping binary evidence byte-exact. This closes the hosted-checkout
   mismatch without weakening content identity; #8789 retains its separate
   Docker/quarantine/baseline scope.
+- Release-manifest validation for the #8751 worktree currently passes with 571
+  artifacts and zero mismatches after canonical regeneration. #8789 still owns
+  the broader portable canonical-byte and cross-repository truth-recovery gate;
+  revalidate from a clean checkout after merge before declaring that gate done.
 - #8556 remains open: no governed participant dataset contains synchronized
   bilateral six-axis grip wrenches. Synthetic traces cannot replace it.
 

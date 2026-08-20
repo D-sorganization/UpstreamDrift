@@ -8,6 +8,7 @@ import pytest
 
 from scripts.research.proximal_distal_energy.articulated_distributed_atlas import (
     DistributedAtlasConfig,
+    _project_stick_velocity,
 )
 from scripts.research.proximal_distal_energy.articulated_distributed_forward import (
     DistributedForwardConfig,
@@ -39,20 +40,48 @@ def test_default_atlas_declares_nested_horizon_and_equal_total_stiffness() -> No
     config = DistributedAtlasConfig()
 
     assert config.station_counts == (1, 3, 5)
+    assert config.friction_coefficients == (0.0, 0.35)
     assert config.horizons_s == (0.004, 0.01, 0.025, 0.05)
     assert config.horizons_s[-1] == config.forward.duration_s
     assert config.total_stiffness_n_m == 1800.0
+    with pytest.raises(ValueError, match="friction_coefficients"):
+        DistributedAtlasConfig(friction_coefficients=(0.35,))
+
+
+def test_mass_metric_stick_projection_has_an_analytic_solution() -> None:
+    mass = np.diag([2.0, 3.0, 5.0])
+    velocity = np.array([4.0, -2.0, 1.5])
+    jacobian = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
+
+    projected, residual, capture_energy, impulse_norm = _project_stick_velocity(
+        mass, velocity, jacobian
+    )
+
+    np.testing.assert_allclose(projected, [0.0, 0.0, 1.5], atol=1.0e-14)
+    assert residual < 1.0e-14
+    assert capture_energy == pytest.approx(22.0)
+    assert impulse_norm == pytest.approx(np.hypot(8.0, 6.0))
+    assert capture_energy == pytest.approx(
+        0.5 * velocity @ mass @ velocity - 0.5 * projected @ mass @ projected
+    )
 
 
 def test_committed_distributed_atlas_is_complete_finite_and_qualified() -> None:
     summary = json.loads(
         (DATA / "articulated_distributed_grip_atlas.json").read_text(encoding="utf-8")
     )
-    assert summary["schema_version"] == "articulated-distributed-grip-atlas/v1"
-    assert summary["design"]["trajectory_count"] == 288
+    assert summary["schema_version"] == "articulated-distributed-grip-atlas/v3"
+    assert summary["design"]["trajectory_count"] == 576
     assert summary["design"]["station_counts_per_hand"] == [1, 3, 5]
+    assert summary["design"]["friction_coefficients"] == [0.0, 0.35]
     assert summary["design"]["horizons_s"] == [0.004, 0.01, 0.025, 0.05]
-    assert summary["results"]["maximum_transition_count"] == 0
+    assert summary["results"]["maximum_registered_event_transition_count"] > 0
+    assert summary["results"]["registered_event_opening_count"] > 0
+    assert summary["results"]["registered_event_reattachment_count"] > 0
+    assert summary["results"]["event_active_set_parity_failures"] == 0
+    assert summary["results"]["maximum_stick_projection_residual_m_s"] < 1e-10
+    assert summary["results"]["maximum_stick_velocity_relative_error"] < 1e-7
+    assert summary["results"]["stick_active_set_parity_failures"] == 0
     assert summary["results"]["failed_numerical_cell_count"] == 0
     assert summary["results"]["failed_parity_cell_count"] == 0
     assert summary["results"]["active_set_parity_failures"] == 0
@@ -61,8 +90,16 @@ def test_committed_distributed_atlas_is_complete_finite_and_qualified() -> None:
     assert summary["results"]["all_registered_gates_passed"]
 
     with np.load(DATA / "articulated_distributed_grip_atlas.npz") as arrays:
-        assert arrays["peak_station_force_n"].shape == (12, 3, 2, 2, 2, 4)
-        assert arrays["trajectory_relative_error"].shape == (12, 3, 2, 2, 4)
+        assert arrays["peak_station_force_n"].shape == (12, 3, 2, 2, 2, 2, 4)
+        assert arrays["trajectory_relative_error"].shape == (12, 3, 2, 2, 2, 4)
+        assert arrays["event_transition_count"].shape == (3, 2, 2, 2)
+        assert np.any(arrays["event_opening_count"] > 0)
+        assert np.any(arrays["event_reattachment_count"] > 0)
+        assert np.all(arrays["event_active_set_parity"])
+        assert arrays["stick_projection_residual_m_s"].shape == (12, 3, 2, 2)
+        assert np.all(arrays["stick_projection_residual_m_s"] < 1e-10)
+        assert np.all(arrays["stick_capture_energy_j"] >= 0.0)
+        assert np.all(arrays["stick_active_set_parity"])
         assert np.all(np.isfinite(arrays["peak_station_force_n"]))
         assert np.all(np.isfinite(arrays["final_q"]))
         assert np.all(arrays["numerical_gates_passed"])
