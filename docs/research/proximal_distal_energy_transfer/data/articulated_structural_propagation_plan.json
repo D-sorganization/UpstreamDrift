@@ -3,7 +3,7 @@
   "status": "ready",
   "authority_campaign_sha256": "d8115073dc1b506f145196b08c96d7cb3cf00e8cf29099970e2f7b0fbe6d63f3",
   "design_sha256": "8e5f246645e27c8f0f66a87859c63c470c43e579bccb50848124174944e11e07",
-  "contract_sha256": "8c5846aca994683928a2c892aa80f150d48f536ee97ab3f0d3b542b51440901c",
+  "contract_sha256": "98eba41bea107c36773a806ccc5638a2fcd7e4aae4ad8de32942005150bf3905",
   "design": {
     "case_indices": [
       0,
@@ -276,6 +276,7 @@
       "nominal_to_high_secant_m_s_per_unit_scale",
       "nonmonotonic_classification"
     ],
+    "axis_assembly_rule": "require the registered low/high corner pair on one pathway; preserve separate one-sided support and emit null when shared persistent support is empty",
     "required_corner_summary_fields": [
       "corner_id",
       "pathway",
@@ -928,19 +929,21 @@
   "source_sha256": {
     "scripts/research/proximal_distal_energy/articulated_atlas_authority.py": "191174f7fea921a3b52054f85d735b45ee0ca93090aaa733f59221d45de0af0d",
     "scripts/research/proximal_distal_energy/articulated_scaled_authority.py": "6d41ef265dd88d61bdf70f1ff78a17716c9293e6260f307c253df43f441b7d83",
+    "scripts/research/proximal_distal_energy/articulated_structural_axis_evidence.py": "a3caa27c3313cf14304cde50d0c9fcaaa6a5c19f28b6445cc12ce4cfb8e72086",
     "scripts/research/proximal_distal_energy/articulated_structural_common_support.py": "4a03f6970a46498698a059c440ede2e70e9a454f62cd6c272c4a49405a63adb1",
     "scripts/research/proximal_distal_energy/articulated_structural_cell_evidence.py": "6fcef64af0594dc23ce23f69e6f871dc5d53bc72040817e14b1f3a738c2b9b6c",
     "scripts/research/proximal_distal_energy/articulated_structural_corner_evidence.py": "3099199b788f1537aec2594171e64209d4805380884d4fc7137397c57f83e12a",
     "scripts/research/proximal_distal_energy/articulated_structural_gate_status.py": "d3d8fa2a1421d9f85d97c99657e72995e4b6971fa96a029d7c41edd7308bb748",
     "scripts/research/proximal_distal_energy/articulated_structural_result.py": "18cad25f020fdc1f79c4dd402d78d73bcfa9564339af3f64dad78704d523c3b5",
     "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py": "166ab2ebec88a0c53abc54c6b565ba0a3f82caf800449e822164177f31289549",
-    "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": "ae6e104f7126361d9e732d6245f386e577b6a84dd2833c281195821893877468",
+    "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": "6a4f9dcfde44b57ff827317aabb121efa64dbdb4b50f1d9c39702b6f980170ce",
+    "tests/research/test_articulated_structural_axis_evidence.py": "13fcd3f8c6aee2148cc41b752df56bde5a40570242cb82bfe5ab999fbdd26b8e",
     "tests/research/test_articulated_structural_common_support.py": "b8a5c11bd86f56bab2651fe5e31aacee0c68d99f46153bba145d0f532cedf6d0",
     "tests/research/test_articulated_structural_cell_evidence.py": "a5801c3ee1113575099a3aaf48f829bdfa33d05fdbd2b85527fcd0f0eaead319",
     "tests/research/test_articulated_structural_corner_evidence.py": "67160f1288c89fc7f158354f82771c122390a3d0556e29f5cdffad47d133bf49",
     "tests/research/test_articulated_structural_gate_status.py": "b13daca404fdb1643ebabb04d00561a36100349006623b889ba391cf283a9323",
     "tests/research/test_articulated_structural_result.py": "0204deff357a8afe181679fa2a687862543d84d6eb904f2ea991d580fa20fba9",
-    "tests/research/test_articulated_structural_propagation_plan.py": "922de1e91379930beb2bd646ab5f02b1f1b7bbd2efab5b6a9b9575312da6e528",
+    "tests/research/test_articulated_structural_propagation_plan.py": "23303943c734078438b4768072e715471286e15f7c6521135ce78118f15d7e0a",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "8eed52fe4ebbc55fcf753f4703330dd6d768281b0babfbb2adca074b862fc36d",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
     "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json": "f07fc33cc76fb80f395cd10b01a30169b6440cec3854be3894024d435bc0f722",

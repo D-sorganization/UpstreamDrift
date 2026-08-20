@@ -43,6 +43,7 @@ def test_plan_binds_all_seven_authority_corners(plan) -> None:
         "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py",
         "scripts/research/proximal_distal_energy/articulated_ground_atlas.py",
         "scripts/research/proximal_distal_energy/articulated_atlas_authority.py",
+        "scripts/research/proximal_distal_energy/articulated_structural_axis_evidence.py",
         "scripts/research/proximal_distal_energy/articulated_structural_common_support.py",
         "scripts/research/proximal_distal_energy/articulated_structural_cell_evidence.py",
         "scripts/research/proximal_distal_energy/articulated_structural_corner_evidence.py",
@@ -50,6 +51,7 @@ def test_plan_binds_all_seven_authority_corners(plan) -> None:
         "scripts/research/proximal_distal_energy/articulated_structural_result.py",
         "scripts/research/proximal_distal_energy/articulated_shaft_forward.py",
         "scripts/research/proximal_distal_energy/articulated_ground_forward.py",
+        "tests/research/test_articulated_structural_axis_evidence.py",
         "tests/research/test_articulated_structural_common_support.py",
         "tests/research/test_articulated_structural_cell_evidence.py",
         "tests/research/test_articulated_structural_corner_evidence.py",
@@ -206,6 +208,8 @@ def test_plan_binds_restart_and_cell_level_evidence_contract(plan) -> None:
         "nominal_to_high_secant_m_s_per_unit_scale",
         "nonmonotonic_classification",
     }
+    assert "registered low/high corner pair" in evidence["axis_assembly_rule"]
+    assert "emit null" in evidence["axis_assembly_rule"]
     assert set(evidence["required_corner_summary_fields"]) == {
         "corner_id",
         "pathway",

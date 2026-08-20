@@ -33,6 +33,7 @@ SOURCE_PATHS = tuple(
         (
             "scripts/research/proximal_distal_energy/articulated_atlas_authority.py",
             "scripts/research/proximal_distal_energy/articulated_scaled_authority.py",
+            "scripts/research/proximal_distal_energy/articulated_structural_axis_evidence.py",
             "scripts/research/proximal_distal_energy/articulated_structural_common_support.py",
             "scripts/research/proximal_distal_energy/articulated_structural_cell_evidence.py",
             "scripts/research/proximal_distal_energy/articulated_structural_corner_evidence.py",
@@ -40,6 +41,7 @@ SOURCE_PATHS = tuple(
             "scripts/research/proximal_distal_energy/articulated_structural_result.py",
             "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py",
             "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py",
+            "tests/research/test_articulated_structural_axis_evidence.py",
             "tests/research/test_articulated_structural_common_support.py",
             "tests/research/test_articulated_structural_cell_evidence.py",
             "tests/research/test_articulated_structural_corner_evidence.py",
@@ -305,6 +307,7 @@ def build_structural_propagation_plan(
             "nominal_to_high_secant_m_s_per_unit_scale",
             "nonmonotonic_classification",
         ],
+        "axis_assembly_rule": "require the registered low/high corner pair on one pathway; preserve separate one-sided support and emit null when shared persistent support is empty",
         "required_corner_summary_fields": [
             "corner_id",
             "pathway",
