@@ -57,6 +57,8 @@ def test_extract_headline_cells_normalizes_both_atlas_schemas(pathway: str) -> N
     assert np.flatnonzero(cells.matched).tolist() == [0, 7]
     assert cells.identities[0] == (0, 0, 1.0, 0.00025, "mujoco", 0.004)
     assert cells.pathway == pathway
+    assert cells.two_engine_speed_difference_discrepancy_m_s[0] == pytest.approx(0.004)
+    assert cells.time_step_speed_difference_discrepancy_m_s[0] == pytest.approx(0.008)
 
 
 def test_extract_headline_cells_rejects_shape_or_identity_drift() -> None:
@@ -88,6 +90,8 @@ def test_common_support_excludes_missing_states_and_preserves_transitions() -> N
     assert comparison.exited_identities == (nominal.identities[1],)
     assert comparison.entered_identities == (corner.identities[2],)
     assert comparison.persistent_speed_change_m_s.tolist() == pytest.approx([0.004])
+    assert comparison.resolution_threshold_m_s.tolist() == pytest.approx([0.008])
+    assert comparison.resolved_outcome_change.tolist() == [False]
 
 
 def test_zero_nominal_ground_support_cannot_produce_a_paired_benefit() -> None:
@@ -103,4 +107,40 @@ def test_zero_nominal_ground_support_cannot_produce_a_paired_benefit() -> None:
     assert len(comparison.entered_identities) == 1
     assert comparison.persistent_identities == ()
     assert comparison.persistent_speed_change_m_s.size == 0
+    assert comparison.resolution_threshold_m_s.size == 0
+    assert comparison.resolved_outcome_change.size == 0
     assert comparison.has_paired_outcome is False
+
+
+def test_resolution_uses_floor_and_both_corner_numerical_discrepancies() -> None:
+    nominal_arrays = _arrays(((0, 0),), matched_indices=(0,))
+    corner_arrays = _arrays(((0, 0),), matched_indices=(0,))
+    nominal_arrays["matched_final_speed_difference_m_s"].fill(0.0)
+    corner_arrays["matched_final_speed_difference_m_s"].fill(0.004)
+    resolved = compare_common_support(
+        extract_headline_cells("shaft", nominal_arrays),
+        extract_headline_cells("shaft", corner_arrays),
+        absolute_resolution_floor_m_s=0.001,
+    )
+    assert resolved.resolution_threshold_m_s.tolist() == pytest.approx([0.001])
+    assert resolved.resolved_outcome_change.tolist() == [True]
+
+    corner_arrays["matched_final_speed_difference_m_s"].ravel()[4] = 0.009
+    unresolved = compare_common_support(
+        extract_headline_cells("shaft", nominal_arrays),
+        extract_headline_cells("shaft", corner_arrays),
+        absolute_resolution_floor_m_s=0.001,
+    )
+    assert unresolved.resolution_threshold_m_s.tolist() == pytest.approx([0.005])
+    assert unresolved.resolved_outcome_change.tolist() == [False]
+
+
+@pytest.mark.parametrize("floor", [-0.001, float("nan"), float("inf")])
+def test_resolution_floor_must_be_finite_and_nonnegative(floor: float) -> None:
+    cells = extract_headline_cells("shaft", _arrays(((0, 0),), matched_indices=()))
+    with pytest.raises(ValueError, match="resolution floor"):
+        compare_common_support(
+            cells,
+            cells,
+            absolute_resolution_floor_m_s=floor,
+        )

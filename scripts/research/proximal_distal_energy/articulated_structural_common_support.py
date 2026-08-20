@@ -25,6 +25,8 @@ class HeadlineCells:
     final_speed_difference_m_s: FloatArray
     load_match_relative_error: FloatArray
     work_match_relative_error: FloatArray
+    two_engine_speed_difference_discrepancy_m_s: FloatArray
+    time_step_speed_difference_discrepancy_m_s: FloatArray
 
     def __post_init__(self) -> None:
         size = len(self.identities)
@@ -33,6 +35,8 @@ class HeadlineCells:
             self.final_speed_difference_m_s,
             self.load_match_relative_error,
             self.work_match_relative_error,
+            self.two_engine_speed_difference_discrepancy_m_s,
+            self.time_step_speed_difference_discrepancy_m_s,
         )
         if any(value.shape != (size,) for value in fields):
             raise ValueError("headline cell fields must align with cell identities")
@@ -56,6 +60,25 @@ class CommonSupportComparison:
     entered_identities: tuple[CellIdentity, ...]
     exited_identities: tuple[CellIdentity, ...]
     persistent_speed_change_m_s: FloatArray
+    resolution_threshold_m_s: FloatArray
+    resolved_outcome_change: BoolArray
+
+    def __post_init__(self) -> None:
+        size = len(self.persistent_identities)
+        if self.persistent_speed_change_m_s.shape != (size,) or (
+            self.resolution_threshold_m_s.shape != (size,)
+        ):
+            raise ValueError(
+                "persistent outcomes must align with persistent identities"
+            )
+        if self.resolved_outcome_change.shape != (size,) or (
+            self.resolved_outcome_change.dtype != np.bool_
+        ):
+            raise ValueError("resolved outcome status must be an aligned Boolean array")
+        if np.any(self.resolution_threshold_m_s < 0.0) or not np.all(
+            np.isfinite(self.resolution_threshold_m_s)
+        ):
+            raise ValueError("resolution thresholds must be finite and nonnegative")
 
     @property
     def has_paired_outcome(self) -> bool:
@@ -126,6 +149,10 @@ def extract_headline_cells(
         for engine_slot in range(2)
         for horizon_slot in range(4)
     )
+    engine_discrepancy = np.abs(speed[:, :, :, 0, :] - speed[:, :, :, 1, :])
+    engine_discrepancy = np.repeat(engine_discrepancy[:, :, :, None, :], 2, axis=3)
+    step_discrepancy = np.abs(speed[:, :, 0, :, :] - speed[:, :, 1, :, :])
+    step_discrepancy = np.repeat(step_discrepancy[:, :, None, :, :], 2, axis=2)
     return HeadlineCells(
         pathway=pathway,
         identities=identities,
@@ -133,17 +160,26 @@ def extract_headline_cells(
         final_speed_difference_m_s=np.ravel(speed),
         load_match_relative_error=np.ravel(load_error),
         work_match_relative_error=np.ravel(work_error),
+        two_engine_speed_difference_discrepancy_m_s=np.ravel(engine_discrepancy),
+        time_step_speed_difference_discrepancy_m_s=np.ravel(step_discrepancy),
     )
 
 
 def compare_common_support(
     nominal: HeadlineCells,
     corner: HeadlineCells,
+    *,
+    absolute_resolution_floor_m_s: float = 0.001,
 ) -> CommonSupportComparison:
     """Compare matching only where both corners executed the same identity."""
 
     if nominal.pathway != corner.pathway:
         raise ValueError("common-support pathways must agree")
+    if (
+        not np.isfinite(absolute_resolution_floor_m_s)
+        or absolute_resolution_floor_m_s < 0.0
+    ):
+        raise ValueError("absolute resolution floor must be finite and nonnegative")
     nominal_index = {
         identity: index for index, identity in enumerate(nominal.identities)
     }
@@ -179,6 +215,27 @@ def compare_common_support(
         ],
         dtype=float,
     )
+    resolution_threshold = np.asarray(
+        [
+            max(
+                absolute_resolution_floor_m_s,
+                nominal.two_engine_speed_difference_discrepancy_m_s[
+                    nominal_index[identity]
+                ],
+                corner.two_engine_speed_difference_discrepancy_m_s[
+                    corner_index[identity]
+                ],
+                nominal.time_step_speed_difference_discrepancy_m_s[
+                    nominal_index[identity]
+                ],
+                corner.time_step_speed_difference_discrepancy_m_s[
+                    corner_index[identity]
+                ],
+            )
+            for identity in persistent
+        ],
+        dtype=float,
+    )
     return CommonSupportComparison(
         pathway=nominal.pathway,
         common_executed_cell_count=len(common),
@@ -188,6 +245,8 @@ def compare_common_support(
         entered_identities=entered,
         exited_identities=exited,
         persistent_speed_change_m_s=speed_change,
+        resolution_threshold_m_s=resolution_threshold,
+        resolved_outcome_change=np.abs(speed_change) > resolution_threshold,
     )
 
 
