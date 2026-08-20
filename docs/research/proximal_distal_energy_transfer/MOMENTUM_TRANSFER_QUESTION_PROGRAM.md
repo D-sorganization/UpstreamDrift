@@ -253,8 +253,9 @@ claims.
 - [#8450](https://github.com/D-sorganization/UpstreamDrift/issues/8450) and
   [#8556](https://github.com/D-sorganization/UpstreamDrift/issues/8556) own
   governed human validation.
-- [#8592](https://github.com/D-sorganization/UpstreamDrift/issues/8592) and
-  [#8593](https://github.com/D-sorganization/UpstreamDrift/issues/8593) own
-  subject-scaled models, participant digital twins, and population ensembles.
+- [#8592](https://github.com/D-sorganization/UpstreamDrift/issues/8592) archives
+  the completed subject-scaled neuromusculoskeletal groundwork;
+  [#8593](https://github.com/D-sorganization/UpstreamDrift/issues/8593) remains
+  open for participant-calibrated digital twins and population ensembles.
 - [#8557](https://github.com/D-sorganization/UpstreamDrift/issues/8557) remains
   the scheduling and scientific-governance authority.

@@ -107,6 +107,8 @@ def test_question_program_distinguishes_authority_from_propagation() -> None:
     )
     assert "not a human feasibility or prevalence result" in program
     assert "Propagate every feasible #8800 authority" in program
+    assert "completed subject-scaled neuromusculoskeletal groundwork" in program
+    assert "open for participant-calibrated digital twins" in program
 
 
 def test_falsification_matrix_reconciles_closed_states_and_open_sensitivity() -> None:
