@@ -291,9 +291,8 @@ class PowerWorkMetricsMixin:
         d_pos = pos[1:] - pos[:-1]
         d_vel = vel[1:] - vel[:-1]
 
-        dist = np.hypot(d_pos, d_vel)
-        # ⚡ Bolt: np.hypot and calling .sum() directly on array is ~2.2x faster than np.sqrt(a**2 + b**2) + np.sum()
-        result = float(dist.sum())
+        dist = np.sqrt(d_pos**2 + d_vel**2)
+        result = float(np.sum(dist))
         ensure(result >= 0, "phase space path length must be non-negative", result)
         return result
 
