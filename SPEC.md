@@ -1,11 +1,11 @@
 # SPEC.md — Repository Specification Document
 
-## Current Scientific Audit State (2026-08-16)
+## Current Scientific Audit State (2026-08-19)
 
 Epic #8557 has completed the current narrative-candidate adjudication contract:
-1,047/1,047 candidates, 291 atomic claims, and zero unadjudicated entries. This
-status is not scientific closure: all 39 public release claims now have a
-traceable review disposition and zero remain open; each retains its applicable
+1,063 reviewed candidates and 295 atomic claims. This status is not scientific
+closure: all 40 public release claims have a traceable review disposition, and
+each retains its applicable open
 model, equipment, anatomy, archival, or governed-human scientific boundary. The
 trajectory-level bilateral point-force sensor qualification and subject-scaled
 spatial contact-closure audit retain their synthetic and prescribed-state
@@ -50,8 +50,15 @@ passivity, work--energy, time-refinement, station-refinement, and engine-parity
 gates pass; no natural active-set transition occurs. This qualifies a synthetic
 contact discretization, not measured grip pressure, shaft response, delivery
 benefit, timing economy, human transfer, or technique.
-Issue #8751 qualifies multi-station bounded Coulomb friction and loss of contact on the articulated tier. Each station evaluates a bounded Coulomb cone friction law with equipment-provisional friction coefficients, full tangential and normal force vectors, per-station power ledgers (normal, tangential, dissipative), and passivity guarantees. A frictionless comparator (mu = 0) is retained and verified for identical equivalence. Active-set opening and reattachment transitions and first-failure classifications (stable_attached, partial_opening, full_loss_of_contact, slip_occurring) are reported across nested 4, 10, 25, and 50 ms horizons with right-censoring. All 288 registered trajectory cells pass the numerical, power, passivity, time-refinement, station-refinement, and cross-engine parity gates.
-Issue #8752 establishes manufactured-solution controls and parameter-uncertainty sweeps for the articulated tier. Harmonic manufactured solutions verify exact closed-form inverse-dynamics equilibrium, asymptotic forward numerical convergence rate (observed order >= 0.8), and work-energy theorem closure to sub-tolerance levels. Constrained-motion checks verify kinematic constraint satisfaction, Lagrange multipliers, virtual power closure, and action-reaction parity. Latin Hypercube Sampling sweeps across joint limits, anthropometrics, grip stiffness/damping, shaft modes, and ground parameters generate PRCC sensitivity maps and multi-class failure distributions under energy-closed forward integration.
+Issue #8751 remains open. Its preliminary multi-station Coulomb implementation
+and contact probes do not yet supply the registered stick and velocity-reversal
+controls, cross-engine active-set parity, nested 4/10/25/50 ms outcome atlas,
+or production release evidence required by the issue.
+Issue #8752 also remains open. Its first manufactured and Latin-hypercube screen
+does not yet run through both production engine adapters, include a deliberately
+perturbed failure case, refine every uncertainty corner, or propagate uncertainty
+through the registered shaft and ground headline estimands. Neither preliminary
+study supports human, anatomical, equipment, or coaching inference.
 Issues #8703 and #8704 (epic #8699) withdraw two BunkerShot3D outputs from
 quotable status. The `dig_vs_skid` verdict returned `MARGINAL` at all 77 demo
 design points with slope ratios spanning 0.9987--1.0000: the shipped 10 mm
@@ -3047,6 +3054,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 2026-08-20 | 1.0.556 | ⚡ Bolt: Fast NumPy reductions and norm computations across motion matching, physics engines, and visualization modules (issue #8782). |
 | 2026-08-20 | 1.0.554 | Recovered BunkerShot3D cross-tier plumbing and MPM code verification inside CI architecture and file budgets (issue #8743, #8741). Verified 177 tests across conservation, analytic elastic column, GCI mesh convergence, and F0 cross-check cases without regressions. |
+| 2026-08-19 | 1.0.554 | fix(research): Made release-integrity hashing invariant to platform checkout line endings, regenerated the 568-artifact and 295-claim authorities, corrected the public release count to 40, and restored #8751/#8752 to their truthful open acceptance state. |
 | 2026-08-19 | 1.0.553 | docs(research): Updated `docs/research/proximal_distal_energy_transfer/README.md` to cite the canonical web monograph and PDF publication hosted in the AffineDrift repository (`https://affinedrift.com/articles/proximal_distal_energy_transfer/index.html`), clearly establishing UpstreamDrift's architectural role as the computational research engine, simulation pipeline host, and evidence data ledger. |
 | 2026-08-19 | 1.0.552 | Qualified distributed grip friction and loss of contact (#8751) and added manufactured-solution and parameter-uncertainty controls for the articulated tier (#8752). Implemented multi-station Coulomb friction cone contact and interface power decomposition in `articulated_distributed_grip.py`, `articulated_distributed_forward.py`, and `articulated_distributed_atlas.py`. Verified normal/tangential work, passivity, and first-failure classifications across station opening and reattachment transitions (`maximum_transition_count > 0`). Authored closed-form manufactured free-body and constrained-motion verifications in `articulated_manufactured_solution.py`. Added Latin hypercube sampling and PRCC parameter sensitivity sweeps across joint limits, anthropometrics, grip stiffness/damping, shaft modes, and ground impedance in `articulated_uncertainty_study.py`. All 10 new research tests and release integrity checks pass. |
 | 2026-08-19 | 1.0.551 | Stabilized main CI and pre-commit health: fixed ruff linting errors across engines, addressed Bandit B314 XML parsing findings with defusedxml in `scripts/check_document_title_case.py` and proximal-distal chart extraction, reverted broken TypeScript bump in UI frontend to resolve `npm ci` ERESOLVE failure, and cleaned up CI delta scan triggers (#8768). |

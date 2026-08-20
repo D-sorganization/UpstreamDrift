@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -162,6 +163,25 @@ def test_validator_fails_closed_on_tampered_file(tmp_path: Path) -> None:
     manifest["artifacts"] = {str(copied): manifest["artifacts"][first]}
     with pytest.raises(ValueError, match="release manifest validation failed"):
         validate_release_manifest(ROOT, manifest)
+
+
+def test_validator_normalizes_checked_out_text_line_endings(tmp_path: Path) -> None:
+    """A release manifest must validate identically on Windows and POSIX."""
+    artifact = tmp_path / "paper.md"
+    artifact.write_bytes(b"first\r\nsecond\r\n")
+    canonical = b"first\nsecond\n"
+    manifest = {
+        "artifacts": {
+            "paper.md": {
+                "sha256": hashlib.sha256(canonical).hexdigest(),
+                "bytes": len(canonical),
+            }
+        }
+    }
+
+    report = validate_release_manifest(tmp_path, manifest)
+
+    assert report == {"valid": True, "artifact_count": 1, "mismatches": []}
 
 
 def test_checksum_file_is_sorted_and_covers_every_artifact() -> None:

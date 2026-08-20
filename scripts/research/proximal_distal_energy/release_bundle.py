@@ -14,10 +14,33 @@ _EXCLUDED = frozenset(
         "CHECKSUMS.sha256",
     }
 )
+_CANONICAL_TEXT_SUFFIXES = frozenset(
+    {".bib", ".cff", ".csv", ".json", ".md", ".py", ".qmd", ".svg"}
+)
 
 
-def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+def canonical_artifact_bytes(path: Path) -> bytes:
+    """Return platform-stable bytes for a release artifact.
+
+    Git normalizes the declared text formats to LF in repository objects, but
+    an existing Windows worktree can retain CRLF bytes after attribute changes.
+    Hashing the canonical representation keeps release qualification identical
+    across clean POSIX and Windows checkouts without altering binary evidence.
+    """
+    content = path.read_bytes()
+    if path.suffix.lower() in _CANONICAL_TEXT_SUFFIXES:
+        return content.replace(b"\r\n", b"\n")
+    return content
+
+
+def artifact_sha256(path: Path) -> str:
+    """Return the SHA-256 digest of the canonical artifact representation."""
+    return hashlib.sha256(canonical_artifact_bytes(path)).hexdigest()
+
+
+def artifact_size(path: Path) -> int:
+    """Return the byte length of the canonical artifact representation."""
+    return len(canonical_artifact_bytes(path))
 
 
 def _artifact_paths(root: Path) -> tuple[Path, ...]:
@@ -312,8 +335,8 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
     root_path = Path(root).resolve()
     artifacts = {
         path.relative_to(root_path).as_posix(): {
-            "sha256": _sha256(path),
-            "bytes": path.stat().st_size,
+            "sha256": artifact_sha256(path),
+            "bytes": artifact_size(path),
         }
         for path in _artifact_paths(root_path)
     }
@@ -341,9 +364,9 @@ def validate_release_manifest(
         if not isinstance(expected, dict):
             mismatches.append(f"invalid record: {relative}")
             continue
-        if _sha256(path) != expected.get("sha256"):
+        if artifact_sha256(path) != expected.get("sha256"):
             mismatches.append(f"hash mismatch: {relative}")
-        if path.stat().st_size != expected.get("bytes"):
+        if artifact_size(path) != expected.get("bytes"):
             mismatches.append(f"size mismatch: {relative}")
     if mismatches:
         raise ValueError(

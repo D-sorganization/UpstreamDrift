@@ -19,9 +19,9 @@ aggregate was failing. #8747 fixed this and #8754 is closed. Consequences:
   gate). Do not disable it — branch updates come from a bot GitHub treats as a
   first-time contributor forever.
 - `repo-structure-gates` runs its steps **sequentially and fail-fast**, so a red
-  step hides every later one. Run the battery below first, or spend a CI cycle
-  per hidden- Function length limit: `check_architecture_budget.py` enforces maximum 100
-  lines per function for changed production Python files.
+  step hides every later one. Run the battery below first rather than spending
+  a CI cycle per hidden failure. `check_architecture_budget.py` enforces a
+  maximum of 100 lines per changed production Python function.
 
 ### Two Debt Ledgers — Remove-Only Ratchets
 
@@ -47,13 +47,27 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
 ## Program Authority & Physics Epics State
 
 - Epic #8557 governs the proximal-to-distal program; #8595 retains the agenda.
-- #8668 governs subject-scaled articulated contact; all child issues completed.
+- #8789 is the Phase 0 truth-recovery gate for #8557. It keeps repository
+  handoffs, GitHub issue states, release evidence, publication metadata, and CI
+  from disagreeing.
+- #8668 governs subject-scaled articulated contact; its qualification program
+  remains open because #8751 and #8752 have unmet acceptance criteria.
 - #8684 governs distributed grip, shaft, and ground:
-  - #8751 (Grip Friction & Loss of Contact) **COMPLETED** (PR #8783): Multi-station
-    Coulomb cone friction, power decomposition, unilateral contact transitions.
-  - #8752 (Manufactured Controls & LHS Uncertainty) **COMPLETED** (PR #8783):
-    Manufactured harmonic free-body & constrained checks, LHS parameter sweeps.
-- Release Bundle: 568 artifacts and 295 claims validated with 0 mismatches.
+  - #8751 is **OPEN**. PR #8783 added preliminary multi-station friction,
+    power decomposition, and event probes, but stick/reversal controls,
+    cross-engine active-set parity, registered horizon/refinement maps, and
+    paper/release integration remain open.
+  - #8752 is **OPEN**. PR #8783 added preliminary manufactured and Latin
+    hypercube screens, but production-runner/two-engine manufactured cases,
+    full shaft/ground parameter coverage, per-corner refinement, headline
+    estimand movement, and uncertainty-adequacy evidence remain open.
+- The release has 295 atomic claims and 40 reviewed release claims; all 40
+  retain at least one scientifically open gate. #8724 still owns normalized
+  four-way adjudication and independent review.
+- Release-manifest validation on Windows exposed line-ending dependence plus
+  genuinely stale hashes from post-release edits. #8789 owns the portable
+  canonical-byte fix and manifest regeneration; do not report zero mismatches
+  until `qualify_open_release validate` passes from a clean checkout.
 - #8556 remains open: no governed participant dataset contains synchronized
   bilateral six-axis grip wrenches. Synthetic traces cannot replace it.
 
@@ -85,12 +99,14 @@ child copies under `src/shared/python/`.
 
 ## Immediate Next Steps
 
-1. **Sidekick Unified Integration**: Implement `docs/development/epic_sidekick_unified_impact_model_and_launcher_integration.md`
-   (Phases S1–S5: unified sidebar across launcher tiles and Rate of Closure).
-2. Burn down #8766 by removing unit quarantine ledger entries as clusters are fixed.
-3. Advance toward calibrated unilateral 3D contact, full-delivery matching and
+1. Complete #8789 Phase 0: portable release integrity, truthful handoffs,
+   release-blocking CI, and synchronized AffineDrift publication metadata.
+2. Complete #8751 and #8752 against their unchanged acceptance criteria.
+3. Burn down #8766 by removing unit quarantine ledger entries as clusters are fixed.
+4. Advance toward calibrated unilateral 3D contact, full-delivery matching and
    uncertainty, and a governed human holdout (#8556/#8557).
-4. Ingest latest research release manifest hashes into companion articles.
+5. Implement the Sidekick integration epic after the scientific release gates
+   and Tools ownership boundaries are stable.
 
 ## Gate Commands
 
@@ -117,6 +133,7 @@ pytest tests/research -q
 ```
 
 Do not infer human technique, physiology, injury, timing demand, or coaching
-advice; close #8556/#8557; bypass branch protection; force-push; admin-merge;
-add ledger entries; edit hash-pinned or Tools-owned files; or rerun unchanged
+advice; close #8556/#8557 without governed evidence; bypass branch protection;
+force-push; admin-merge; add ledger entries; edit hash-pinned or Tools-owned
+files without regenerating their authorities; or rerun unchanged
 runner-capacity failures.

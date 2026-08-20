@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
+
+from .release_bundle import artifact_sha256, artifact_size
 
 ARTICLE_REL = Path("docs/research/proximal_distal_energy_transfer")
 REGISTRY_REL = ARTICLE_REL / "data/claim_audit_registry.json"
@@ -17,10 +18,6 @@ SCHEMA_VERSION = "proximal-distal-claim-evidence-integrity-v1"
 
 def _repository_root() -> Path:
     return Path(__file__).resolve().parents[3]
-
-
-def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def _local_path(reference: str, root: Path) -> tuple[str, Path]:
@@ -72,8 +69,8 @@ def build_claim_evidence_manifest(
     for relative in sorted(local_claims):
         path = root_path / relative
         local_artifacts[relative] = {
-            "sha256": _sha256(path),
-            "bytes": path.stat().st_size,
+            "sha256": artifact_sha256(path),
+            "bytes": artifact_size(path),
             "referenced_by": sorted(local_claims[relative]),
         }
     external_urls = {}
@@ -89,7 +86,7 @@ def build_claim_evidence_manifest(
         "schema_version": SCHEMA_VERSION,
         "registry": {
             "path": registry_file.relative_to(root_path).as_posix(),
-            "sha256": _sha256(registry_file),
+            "sha256": artifact_sha256(registry_file),
         },
         "scope": {
             "local_artifact_semantics": "content_integrity_not_independent_validation",

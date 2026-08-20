@@ -13,7 +13,7 @@ The machine-readable prediction definitions are stored in
 evidence bundle generated after its tolerance and intervention were registered.
 
 The complementary
-[`data/release_claim_review.json`](data/release_claim_review.json) covers all 31
+[`data/release_claim_review.json`](data/release_claim_review.json) covers all 40
 claims exposed by the qualified release. It records the supporting atomic
 claims, controls, falsifiers, uncertainty boundaries, and the next scientific
 gate for each one. Its completed review state means that no release claim is

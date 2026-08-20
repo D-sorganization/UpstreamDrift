@@ -3764,8 +3764,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_grip_atlas.json": {
-      "sha256": "dfc91f6712aab2eeaa8d67c3be9069d4110eb14b2f92dbed23fed2f8bc6add36",
-      "bytes": 5242,
+      "sha256": "e9ba73748760c511dd9e3af4ce5acbc8d7e9cb7be764c04bade21661025b0438",
+      "bytes": 5122,
       "referenced_by": [
         "PD-CLAIM-286",
         "PD-CLAIM-287",
@@ -5271,8 +5271,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "f737814dfb1863f0b4b8fabfd3b04a535391e70e7990152087b24dac1fdc24f0",
-      "bytes": 130576,
+      "sha256": "e30f03d0f0d4ba90e8a80f012d09ec2fa48d1ced024bc1b88138123fba09431e",
+      "bytes": 128094,
       "referenced_by": [
         "PD-CLAIM-241"
       ]
@@ -5556,8 +5556,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/extract_wscg_charts.py": {
-      "sha256": "1b8d6fe6222cd228564f9b0f7bca539fd799465d78ae81785153f17d0ceda054",
-      "bytes": 4899,
+      "sha256": "d7a7bd2811b9e91fc413d431c6af37ca520ca0b51f75f71579b7ecd58a215bb5",
+      "bytes": 4931,
       "referenced_by": [
         "PD-CLAIM-060"
       ]
@@ -6573,29 +6573,29 @@
       ]
     },
     "src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/core/processing/calculate_work_impulse.m": {
-      "sha256": "1faa482381017eec3cf610d14efce1461f5fff868c2233cff401ac3b22d98ad4",
-      "bytes": 12031,
+      "sha256": "0bca8f376b1af178bce9d418e6020a2b168190ba23892b5201a86041b5f855b4",
+      "bytes": 12314,
       "referenced_by": [
         "PD-CLAIM-096"
       ]
     },
     "src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/core/processing/process_data_tables.m": {
-      "sha256": "5a858d7445a1a79e7d6ab437becebcaa70972c95ba4ffcb0e16951497f3ff5f7",
-      "bytes": 5181,
+      "sha256": "2ade479df0cba455967bca061885479ee586029467a93c90c61927c1148ee41f",
+      "bytes": 5317,
       "referenced_by": [
         "PD-CLAIM-096"
       ]
     },
     "src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/core/simulation/run_single_ztcf_point.m": {
-      "sha256": "85946656fd37823a122ab41dc81814dc57c9da0ede5553f0de887ba284e70c5b",
-      "bytes": 1740,
+      "sha256": "d2d243f2986c80aa987af19207e33181a23109d3c5344ae68a3341247de55089",
+      "bytes": 1801,
       "referenced_by": [
         "PD-CLAIM-096"
       ]
     },
     "src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/core/simulation/run_ztcf_simulation.m": {
-      "sha256": "53040cbedf510d4a89fbde9bc0965e6196d94fbdaf3527f2e044ad707c2e929f",
-      "bytes": 9118,
+      "sha256": "a81c2856efdcd9385a04d018926efa1ce33de9fe4b653502339af99f9544eaec",
+      "bytes": 9414,
       "referenced_by": [
         "PD-CLAIM-096"
       ]
