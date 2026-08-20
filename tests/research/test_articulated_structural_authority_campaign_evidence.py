@@ -20,6 +20,7 @@ CHAPTER = ARTICLE / "chapters/_ch06caaa_structural_authority.qmd"
 MANUSCRIPT = ARTICLE / "proximal_distal_energy_transfer.qmd"
 QUESTION_PROGRAM = ARTICLE / "MOMENTUM_TRANSFER_QUESTION_PROGRAM.md"
 FALSIFICATION_MATRIX = ARTICLE / "MODEL_COMPLETION_FALSIFICATION_MATRIX.md"
+CONCLUSIONS = ARTICLE / "chapters/_ch09_conclusions.qmd"
 pytestmark = pytest.mark.scientific
 
 
@@ -120,3 +121,18 @@ def test_falsification_matrix_reconciles_closed_states_and_open_sensitivity() ->
     assert "original prescribed cases fail the 5 mm gate" in matrix
     assert "Retain the prescribed-pose mismatch as a negative control" in matrix
     assert "compare it with the solved 234-state closed atlas" in matrix
+
+
+def test_conclusions_advance_to_structural_propagation_without_human_overreach() -> (
+    None
+):
+    conclusions = CONCLUSIONS.read_text(encoding="utf-8")
+
+    assert "qualified 20-coordinate tree" in conclusions
+    assert "126 satisfy the unchanged load--work match" in conclusions
+    assert "none of 384 finite-ground coupled--fixed cells" in conclusions
+    assert "Complete Structural-Corner Headline Propagation" in conclusions
+    assert "Do not substitute nominal\n   anatomy" in conclusions
+    assert "issues/8557" in conclusions
+    assert "closed falsification epic" in conclusions
+    assert "Replace the executed\n   hand-carriage reference" not in conclusions

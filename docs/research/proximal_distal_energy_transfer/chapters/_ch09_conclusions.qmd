@@ -76,16 +76,14 @@ The subject-scaled contact-closure audit rejects a tempting shortcut at that
 same tier. Six deterministic de Leva profiles retain a full-row-rank local
 contact Jacobian, yet the prescribed anatomical hand points remain
 0.171--0.616 m from the declared grips. Rank and conditioning therefore cannot
-substitute for closed feasible anatomy. The next articulated spatial tier must
-solve bilateral closed-contact inverse kinematics with joint-limit and
-collision checks before its forward contact, timing, recovery, or slack
-results can be interpreted. The registered inverse-kinematics follow-up now
+substitute for closed feasible anatomy. The next articulated spatial tier
+therefore had to solve bilateral closed-contact inverse kinematics with
+joint-limit and collision checks before interpreting forward contact, timing,
+recovery, or slack results. The registered inverse-kinematics follow-up now
 clears that reduced-tree gate in all 234 profile/span/phase samples while
 holding the club pose fixed. Its minimum engineering-limit margin is 0.103 rad
 and its minimum coarse bounding-sphere clearance is 30.9 mm. These are
-screening results, not measured anatomical ranges or mesh-level clearance;
-they advance the next test to calibrated compliant forward contact from the
-closed states.
+screening results, not measured anatomical ranges or mesh-level clearance.
 
 A paired arm-only intervention now isolates one omitted structure. With trunk
 and club pose fixed, the fixed-shoulder branch closes none of 54 registered
@@ -116,6 +114,27 @@ observed inside the registered interval, so the result is right-censored at 50
 ms. It strengthens the reduced numerical reference but does not turn the
 hand-carriage model into articulated anatomy or a full delivery simulation.
 
+The subject-scaled articulated sequence subsequently replaces the hand
+carriages with the qualified 20-coordinate tree. Native MuJoCo and Pinocchio
+independently qualify inertia, bias force, inverse dynamics, and finite-contact
+projection over all 234 closed states. Selected states then advance through
+articulated bilateral contact, distributed grip, passive bending and torsion,
+and finite-base ground pathways with registered reversal, refinement,
+killswitch, domain, energy, and engine-parity controls. Among 384 shaft cells,
+126 satisfy the unchanged load--work match and retain both positive and
+negative speed differences; none of 384 finite-ground coupled--fixed cells
+satisfies its primary match. These results reject universal elastic or ground
+pathway benefits rather than establishing human transfer strategies.
+
+A seven-corner structural authority campaign now regenerates four headline
+cases over all 13 phase samples. Nominal, both body-mass, both joint-limit, and
+high-height corners retain 52/52 feasible states. The low-height corner retains
+51/52 and one case-0/phase-12 IK nonconvergence at an effectively zero
+joint-limit margin. This failure is part of the result, not a participant
+classification. The scaled authorities still must propagate through both
+native-engine headline atlases before the shaft and ground conclusions can be
+called structurally robust.
+
 The coupled uncertainty/control phase rejects two additional shortcuts. A net
 planar wrench cannot uniquely identify both hand forces, and six summary
 observables cannot identify the complete 12-parameter vector. Separate
@@ -136,22 +155,21 @@ The open-resource layer now supplies model-tier presets, a hash-pinned release
 manifest, standard checksums, a data dictionary, citation metadata, and a
 claim-first reviewer workbench. Validation fails closed on artifact drift. The
 bundle remains a qualified local release candidate rather than a persistent
-archive: articulated subject-scaled contact, equipment-calibrated beam
-coupling, governed human evaluation, and external identifier deposit remain
-open.
+archive: calibrated articulated anatomy and contact, equipment-calibrated beam
+coupling, completed structural-corner headline propagation, governed human
+evaluation, and external identifier deposit remain open.
 
 ## Research Priorities {#sec-future}
 
 The next work should reduce the largest inferential risks in dependency
 order:
 
-1. **Articulated Spatial Forward-Contact Counterfactual.** Replace the executed
-   hand-carriage reference with subject-scaled articulated arms and calibrated
-   grip interfaces. Start from the executed bilateral closed-contact,
-   engineering-limit, and coarse collision-qualified configurations, replace
-   those screens with subject-specific anatomy where available, then preserve the two-engine
-   same-state killswitch, force, couple, power, work, pathway, and closure
-   observables.
+1. **Complete Structural-Corner Headline Propagation.** Pass every feasible
+   digest-bound scaled authority through the exact native-engine shaft and
+   finite-ground atlases. Retain the low-height failure in the denominator and
+   preserve reversal, refinement, pathway killswitch, force, couple, power,
+   work, domain, and unchanged matching controls. Do not substitute nominal
+   anatomy or treat regeneration alone as dynamic robustness.
 2. **Calibrated Uncertainty and Constrained Control.** Extend the executed
    multivariable screen with population-informed distributions, measurement
    error, profile-likelihood or Bayesian calibration, larger held-out
@@ -176,10 +194,12 @@ order:
    and explicit license boundaries. Archive validated releases with a
    persistent identifier.
 
-The implementation roadmap and acceptance criteria are tracked in
-[the open research epic](https://github.com/D-sorganization/UpstreamDrift/issues/8426).
-The matched-task allocation and transmission program is tracked separately in
-[its falsification epic](https://github.com/D-sorganization/UpstreamDrift/issues/8497).
+The canonical implementation roadmap and dependency-ordered acceptance criteria
+are tracked in
+[the open research epic](https://github.com/D-sorganization/UpstreamDrift/issues/8557).
+The completed matched-task allocation groundwork is archived in
+[its closed falsification epic](https://github.com/D-sorganization/UpstreamDrift/issues/8497);
+remaining empirical allocation tests stay governed by the open research epic.
 
 # Code and Data Availability {.unnumbered}
 
