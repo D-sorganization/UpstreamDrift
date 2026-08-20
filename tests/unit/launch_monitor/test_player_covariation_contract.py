@@ -250,6 +250,9 @@ def test_contract_schema_and_consumer_golden_are_fresh() -> None:
     assert GOLDEN_PATH.is_file()
     committed = json.loads(GOLDEN_PATH.read_text(encoding="utf-8"))
     assert committed == player_covariation_golden_fixture()
+    assert committed["expected_result"]["analysis_kind"] == "selected_pair"
+    assert committed["expected_scan_result"]["analysis_kind"] == "pair_scan"
+    assert committed["expected_scan_result"]["pair_count"] == 3
 
 
 def test_generic_analysis_contract_versions_remain_unchanged() -> None:

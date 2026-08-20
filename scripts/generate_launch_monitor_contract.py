@@ -10,12 +10,14 @@ import pandas as pd
 from src.shared.python.launch_monitor import (
     AnalysisContextV2,
     PlayerCovariationRequestV1,
+    PlayerCovariationScanRequestV1,
     PlayerIdentityV2,
     SourceFileReferenceV2,
     analyze_player_covariation_v1,
     contract_v2_json_schema,
     dataset_job_contract_json_schema,
     player_covariation_contract_json_schema,
+    scan_player_covariation_v1,
     strokes_gained_contract_json_schema,
 )
 
@@ -43,6 +45,7 @@ def player_covariation_golden_fixture() -> dict[str, object]:
             "player_id": "A" if index < 5 else "B",
             "face_angle": index if index < 5 else index + 5,
             "club_path": 4 - index if index < 5 else 19 - index,
+            "ball_speed": 100 + 2 * index,
             "monitor_vendor": "TrackMan",
             "monitor_model": "golden-comparable",
             "software_version": "fixture-1",
@@ -71,6 +74,13 @@ def player_covariation_golden_fixture() -> dict[str, object]:
     result = analyze_player_covariation_v1(
         pd.DataFrame.from_records(records), request, context=context
     )
+    scan_request = PlayerCovariationScanRequestV1(
+        player_column="player_id",
+        numeric_columns=("face_angle", "club_path", "ball_speed"),
+    )
+    scan_result = scan_player_covariation_v1(
+        pd.DataFrame.from_records(records), scan_request, context=context
+    )
     return {
         "fixture_version": "launch-monitor-player-covariation-golden/1.0.0",
         "description": (
@@ -78,8 +88,10 @@ def player_covariation_golden_fixture() -> dict[str, object]:
         ),
         "records": records,
         "request": request.model_dump(mode="json"),
+        "scan_request": scan_request.model_dump(mode="json"),
         "context": context.model_dump(mode="json", exclude_none=True),
         "expected_result": result.model_dump(mode="json", exclude_none=False),
+        "expected_scan_result": scan_result.model_dump(mode="json", exclude_none=False),
     }
 
 

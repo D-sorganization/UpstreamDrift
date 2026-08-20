@@ -105,7 +105,7 @@
       "authority": null,
       "backing_records": [
         {
-          "record_sha256": "7dc4e6b5656028138aff27ac503e922d78ef90663f1a41ac64d34a488386bfe7",
+          "record_sha256": "72dcce261cfc01d949a510a2422f85dec0bea8d5b0a35cb0d6c59acfc64b1880",
           "session_id": null,
           "shot_id": "shot-0",
           "source_id": "golden-source",
@@ -113,7 +113,7 @@
           "unlinked_reason": null
         },
         {
-          "record_sha256": "5752cac249314276dbad855e04e2677cafbddeeed35a78774e47d706606bfc16",
+          "record_sha256": "564bca41b045d8a846636d536645ac02e4204c0c5ca0b79adff7f1138d6ddba9",
           "session_id": null,
           "shot_id": "shot-1",
           "source_id": "golden-source",
@@ -121,7 +121,7 @@
           "unlinked_reason": null
         },
         {
-          "record_sha256": "a920e653ab99387d34d5e0610e90be696c8f917c2bd6198c4d89389aea30417f",
+          "record_sha256": "e8631e941beacc94b98bd7a4356e13764f59f8538626af3d98f792e16e90fbbc",
           "session_id": null,
           "shot_id": "shot-2",
           "source_id": "golden-source",
@@ -129,7 +129,7 @@
           "unlinked_reason": null
         },
         {
-          "record_sha256": "40d0ab157ab4296357697c1537220eb434c3d5228131a83d85ccae535b4dce0d",
+          "record_sha256": "22c85a83bed37113a1999232c16f8652c1aeda9b9b3ee76eff1ea53db1d53055",
           "session_id": null,
           "shot_id": "shot-3",
           "source_id": "golden-source",
@@ -137,7 +137,7 @@
           "unlinked_reason": null
         },
         {
-          "record_sha256": "c26342221bef320f355e1367c50dd0de1dac7ceaba54166010ab9d5a6c31432f",
+          "record_sha256": "746e8891c6754e886437083a1ccb4daad9c6fb6f3b4ba4a45b01043bd12d3644",
           "session_id": null,
           "shot_id": "shot-4",
           "source_id": "golden-source",
@@ -145,7 +145,7 @@
           "unlinked_reason": null
         },
         {
-          "record_sha256": "08ebd4135c117e6944b0d0495df43d1aefdebe760ddc64b7a63f6c4d867c5d87",
+          "record_sha256": "638d50f22970752a745d8cfc9ed523e26ef233605c6dbf19e25ea6d83177f75e",
           "session_id": null,
           "shot_id": "shot-5",
           "source_id": "golden-source",
@@ -153,7 +153,7 @@
           "unlinked_reason": null
         },
         {
-          "record_sha256": "0d896f57042c0afabc9a7eed99ee7a1868c8904f4022e3749c668f989b0d4792",
+          "record_sha256": "675ce774545b4eba17b33ae512061529254b836ce9d441069f6da095a06ff9b9",
           "session_id": null,
           "shot_id": "shot-6",
           "source_id": "golden-source",
@@ -161,7 +161,7 @@
           "unlinked_reason": null
         },
         {
-          "record_sha256": "d20780262a00f106774ed9ffb3e3aed743ee3f53c70018171769959da46bea92",
+          "record_sha256": "3742f15f41d06866da937d20f0f3c672e14e0614acc85723560891b933742cd1",
           "session_id": null,
           "shot_id": "shot-7",
           "source_id": "golden-source",
@@ -169,7 +169,7 @@
           "unlinked_reason": null
         },
         {
-          "record_sha256": "048fb5bb66ba7f0052f06ba62bd423626340e6e66f4d966939f32145c28edf6a",
+          "record_sha256": "f600b1f7ee8b7fe94bcead4335b136d7bb9bef7613295ace62420d307cff9c01",
           "session_id": null,
           "shot_id": "shot-8",
           "source_id": "golden-source",
@@ -177,7 +177,7 @@
           "unlinked_reason": null
         },
         {
-          "record_sha256": "d917ce440aee7054affa35cb8de02e99dee2befbac0b390929dc78138f1f6c69",
+          "record_sha256": "bd71cd6aec570c0b9d9242b8b3541cbde6f3048d2666788f4cd64f87faeb31b9",
           "session_id": null,
           "shot_id": "shot-9",
           "source_id": "golden-source",
@@ -185,7 +185,7 @@
           "unlinked_reason": null
         }
       ],
-      "dataset_fingerprint_sha256": "e70db95e21940bda8a802dea02354cbb122bf436f80dd973de741dd9a1007372",
+      "dataset_fingerprint_sha256": "0fa4f18085d33727b1f87c5f0c0ec5307ce17052f3c1f56ca82626d576b26e6e",
       "sources": [
         {
           "file_sha256": "3333333333333333333333333333333333333333333333333333333333333333",
@@ -354,9 +354,232 @@
       "state": "available"
     }
   },
+  "expected_scan_result": {
+    "analysis_kind": "pair_scan",
+    "available_pair_count": 3,
+    "claims": {
+      "causal_inference": false,
+      "device_certification": false,
+      "device_emulation": false,
+      "vendor_comparison": "descriptive"
+    },
+    "contract_version": "launch-monitor-player-covariation/1.0.0",
+    "lineage": {
+      "authority": null,
+      "backing_records": [
+        {
+          "record_sha256": "72dcce261cfc01d949a510a2422f85dec0bea8d5b0a35cb0d6c59acfc64b1880",
+          "session_id": null,
+          "shot_id": "shot-0",
+          "source_id": "golden-source",
+          "source_row": 0,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "564bca41b045d8a846636d536645ac02e4204c0c5ca0b79adff7f1138d6ddba9",
+          "session_id": null,
+          "shot_id": "shot-1",
+          "source_id": "golden-source",
+          "source_row": 1,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "e8631e941beacc94b98bd7a4356e13764f59f8538626af3d98f792e16e90fbbc",
+          "session_id": null,
+          "shot_id": "shot-2",
+          "source_id": "golden-source",
+          "source_row": 2,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "22c85a83bed37113a1999232c16f8652c1aeda9b9b3ee76eff1ea53db1d53055",
+          "session_id": null,
+          "shot_id": "shot-3",
+          "source_id": "golden-source",
+          "source_row": 3,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "746e8891c6754e886437083a1ccb4daad9c6fb6f3b4ba4a45b01043bd12d3644",
+          "session_id": null,
+          "shot_id": "shot-4",
+          "source_id": "golden-source",
+          "source_row": 4,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "638d50f22970752a745d8cfc9ed523e26ef233605c6dbf19e25ea6d83177f75e",
+          "session_id": null,
+          "shot_id": "shot-5",
+          "source_id": "golden-source",
+          "source_row": 5,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "675ce774545b4eba17b33ae512061529254b836ce9d441069f6da095a06ff9b9",
+          "session_id": null,
+          "shot_id": "shot-6",
+          "source_id": "golden-source",
+          "source_row": 6,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "3742f15f41d06866da937d20f0f3c672e14e0614acc85723560891b933742cd1",
+          "session_id": null,
+          "shot_id": "shot-7",
+          "source_id": "golden-source",
+          "source_row": 7,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "f600b1f7ee8b7fe94bcead4335b136d7bb9bef7613295ace62420d307cff9c01",
+          "session_id": null,
+          "shot_id": "shot-8",
+          "source_id": "golden-source",
+          "source_row": 8,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "bd71cd6aec570c0b9d9242b8b3541cbde6f3048d2666788f4cd64f87faeb31b9",
+          "session_id": null,
+          "shot_id": "shot-9",
+          "source_id": "golden-source",
+          "source_row": 9,
+          "unlinked_reason": null
+        }
+      ],
+      "dataset_fingerprint_sha256": "76fd304d0ba8d03e0d439c78effc9423db659c844e67b5f727f0eb87a2e29bce",
+      "sources": [
+        {
+          "file_sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+          "rights_status": "public_redistributable",
+          "session_ids": [],
+          "source_id": "golden-source",
+          "source_uri": null
+        }
+      ],
+      "transformations": []
+    },
+    "method_description": "Pairs rank by absolute random-effects Pearson correlation, then eligible-player count and lexical variable names.",
+    "pair_count": 3,
+    "player_identity": {
+      "evidence": "Synthetic golden labels are stable by construction.",
+      "identifier_column": "player_id",
+      "trust_level": "explicit_user_attested"
+    },
+    "ranking": [
+      {
+        "between_player_r": 1.0,
+        "contributor_count": 2,
+        "direction_consistency": 1.0,
+        "excluded_row_count": 0,
+        "fixed_effect_r": -0.999999,
+        "i_squared_pct": 0.0,
+        "input_row_count": 10,
+        "pairwise_complete_row_count": 10,
+        "random_effect_r": -0.999999,
+        "rank": 1,
+        "reason_code": null,
+        "state": "available",
+        "total_sample_count": 10,
+        "within_player_r": -1.0,
+        "x_column": "ball_speed",
+        "x_unit": {
+          "authority": "canonical_registry",
+          "canonical_unit": "m/s",
+          "display_unit": "mph"
+        },
+        "y_column": "club_path",
+        "y_unit": {
+          "authority": "canonical_registry",
+          "canonical_unit": "rad",
+          "display_unit": "deg"
+        }
+      },
+      {
+        "between_player_r": 1.0,
+        "contributor_count": 2,
+        "direction_consistency": 1.0,
+        "excluded_row_count": 0,
+        "fixed_effect_r": 0.999999,
+        "i_squared_pct": 0.0,
+        "input_row_count": 10,
+        "pairwise_complete_row_count": 10,
+        "random_effect_r": 0.999999,
+        "rank": 2,
+        "reason_code": null,
+        "state": "available",
+        "total_sample_count": 10,
+        "within_player_r": 1.0,
+        "x_column": "ball_speed",
+        "x_unit": {
+          "authority": "canonical_registry",
+          "canonical_unit": "m/s",
+          "display_unit": "mph"
+        },
+        "y_column": "face_angle",
+        "y_unit": {
+          "authority": "canonical_registry",
+          "canonical_unit": "rad",
+          "display_unit": "deg"
+        }
+      },
+      {
+        "between_player_r": 1.0,
+        "contributor_count": 2,
+        "direction_consistency": 1.0,
+        "excluded_row_count": 0,
+        "fixed_effect_r": -0.999999,
+        "i_squared_pct": 0.0,
+        "input_row_count": 10,
+        "pairwise_complete_row_count": 10,
+        "random_effect_r": -0.999999,
+        "rank": 3,
+        "reason_code": null,
+        "state": "available",
+        "total_sample_count": 10,
+        "within_player_r": -1.0,
+        "x_column": "club_path",
+        "x_unit": {
+          "authority": "canonical_registry",
+          "canonical_unit": "rad",
+          "display_unit": "deg"
+        },
+        "y_column": "face_angle",
+        "y_unit": {
+          "authority": "canonical_registry",
+          "canonical_unit": "rad",
+          "display_unit": "deg"
+        }
+      }
+    ],
+    "request": {
+      "confidence_level": 0.95,
+      "min_samples": 4,
+      "numeric_columns": ["face_angle", "club_path", "ball_speed"],
+      "player_column": "player_id"
+    },
+    "status": "available",
+    "unavailable_pair_count": 0,
+    "vendor_provenance": [
+      {
+        "metric_statuses": {},
+        "models": ["golden-comparable"],
+        "row_count": 10,
+        "software_versions": ["fixture-1"],
+        "vendor": "TrackMan"
+      }
+    ],
+    "warnings": [
+      "Exploratory scan evaluated 3 pairs; rankings are not confirmatory.",
+      "Multiplicity increases false-positive risk; validate selected relationships on held-out data.",
+      "Correlation does not imply causality or population generalizability."
+    ]
+  },
   "fixture_version": "launch-monitor-player-covariation-golden/1.0.0",
   "records": [
     {
+      "ball_speed": 100,
       "club_path": 4,
       "face_angle": 0,
       "monitor_model": "golden-comparable",
@@ -368,6 +591,7 @@
       "source_row": 0
     },
     {
+      "ball_speed": 102,
       "club_path": 3,
       "face_angle": 1,
       "monitor_model": "golden-comparable",
@@ -379,6 +603,7 @@
       "source_row": 1
     },
     {
+      "ball_speed": 104,
       "club_path": 2,
       "face_angle": 2,
       "monitor_model": "golden-comparable",
@@ -390,6 +615,7 @@
       "source_row": 2
     },
     {
+      "ball_speed": 106,
       "club_path": 1,
       "face_angle": 3,
       "monitor_model": "golden-comparable",
@@ -401,6 +627,7 @@
       "source_row": 3
     },
     {
+      "ball_speed": 108,
       "club_path": 0,
       "face_angle": 4,
       "monitor_model": "golden-comparable",
@@ -412,6 +639,7 @@
       "source_row": 4
     },
     {
+      "ball_speed": 110,
       "club_path": 14,
       "face_angle": 10,
       "monitor_model": "golden-comparable",
@@ -423,6 +651,7 @@
       "source_row": 5
     },
     {
+      "ball_speed": 112,
       "club_path": 13,
       "face_angle": 11,
       "monitor_model": "golden-comparable",
@@ -434,6 +663,7 @@
       "source_row": 6
     },
     {
+      "ball_speed": 114,
       "club_path": 12,
       "face_angle": 12,
       "monitor_model": "golden-comparable",
@@ -445,6 +675,7 @@
       "source_row": 7
     },
     {
+      "ball_speed": 116,
       "club_path": 11,
       "face_angle": 13,
       "monitor_model": "golden-comparable",
@@ -456,6 +687,7 @@
       "source_row": 8
     },
     {
+      "ball_speed": 118,
       "club_path": 10,
       "face_angle": 14,
       "monitor_model": "golden-comparable",
@@ -473,5 +705,11 @@
     "player_column": "player_id",
     "x_column": "face_angle",
     "y_column": "club_path"
+  },
+  "scan_request": {
+    "confidence_level": 0.95,
+    "min_samples": 4,
+    "numeric_columns": ["face_angle", "club_path", "ball_speed"],
+    "player_column": "player_id"
   }
 }
