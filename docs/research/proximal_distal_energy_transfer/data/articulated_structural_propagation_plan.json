@@ -4,21 +4,52 @@
   "authority_campaign_sha256": "d8115073dc1b506f145196b08c96d7cb3cf00e8cf29099970e2f7b0fbe6d63f3",
   "design_sha256": "8e5f246645e27c8f0f66a87859c63c470c43e579bccb50848124174944e11e07",
   "design": {
-    "case_indices": [0, 8, 9, 17],
-    "phase_indices": [0, 6, 12],
+    "case_indices": [
+      0,
+      8,
+      9,
+      17
+    ],
+    "phase_indices": [
+      0,
+      6,
+      12
+    ],
     "shaft_configuration": {
       "forward": {
         "duration_s": 0.05,
-        "time_steps_s": [0.00025, 0.000125],
+        "time_steps_s": [
+          0.00025,
+          0.000125
+        ],
         "virtual_power_tolerance_w": 1e-10,
         "normalized_energy_residual_tolerance": 0.05,
-        "trajectory_relative_tolerance": 1e-7,
+        "trajectory_relative_tolerance": 1e-07,
         "refinement_ratio_limit": 0.9
       },
-      "case_indices": [0, 8, 9, 17],
-      "sample_indices": [0, 6, 12],
-      "activations": ["rigid", "bending", "torsion", "coupled"],
-      "horizons_s": [0.004, 0.01, 0.025, 0.05],
+      "case_indices": [
+        0,
+        8,
+        9,
+        17
+      ],
+      "sample_indices": [
+        0,
+        6,
+        12
+      ],
+      "activations": [
+        "rigid",
+        "bending",
+        "torsion",
+        "coupled"
+      ],
+      "horizons_s": [
+        0.004,
+        0.01,
+        0.025,
+        0.05
+      ],
       "initial_displacement_m": 0.001,
       "initial_velocity_m_s": 0.05,
       "station_count_per_hand": 5,
@@ -33,14 +64,39 @@
     "ground_configuration": {
       "forward": {
         "duration_s": 0.05,
-        "time_steps_s": [0.00025, 0.000125],
+        "time_steps_s": [
+          0.00025,
+          0.000125
+        ],
         "normalized_energy_residual_tolerance": 0.05
       },
-      "case_indices": [0, 8, 9, 17],
-      "sample_indices": [0, 6, 12],
-      "ground_activations": ["fixed", "translation", "free_moment", "coupled"],
-      "control_names": ["rigid_shaft", "horizontal_restraint_removed"],
-      "horizons_s": [0.004, 0.01, 0.025, 0.05],
+      "case_indices": [
+        0,
+        8,
+        9,
+        17
+      ],
+      "sample_indices": [
+        0,
+        6,
+        12
+      ],
+      "ground_activations": [
+        "fixed",
+        "translation",
+        "free_moment",
+        "coupled"
+      ],
+      "control_names": [
+        "rigid_shaft",
+        "horizontal_restraint_removed"
+      ],
+      "horizons_s": [
+        0.004,
+        0.01,
+        0.025,
+        0.05
+      ],
       "initial_club_displacement_m": 0.001,
       "initial_club_velocity_m_s": 0.05,
       "station_count_per_hand": 5,
@@ -55,8 +111,8 @@
       "ground_free_moment_stiffness_scale": 1.0,
       "ground_free_moment_damping_scale": 1.0,
       "match_relative_tolerance": 0.05,
-      "parity_relative_tolerance": 1e-8,
-      "power_residual_tolerance_w": 1e-8
+      "parity_relative_tolerance": 1e-08,
+      "power_residual_tolerance_w": 1e-08
     },
     "parallelism": "worker_count is operational and excluded from the scientific design digest"
   },
@@ -68,18 +124,54 @@
       "feasible_state_count": 12,
       "retained_failures": [],
       "feasible_states": [
-        [0, 0],
-        [0, 6],
-        [0, 12],
-        [8, 0],
-        [8, 6],
-        [8, 12],
-        [9, 0],
-        [9, 6],
-        [9, 12],
-        [17, 0],
-        [17, 6],
-        [17, 12]
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          6
+        ],
+        [
+          0,
+          12
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          8,
+          6
+        ],
+        [
+          8,
+          12
+        ],
+        [
+          9,
+          0
+        ],
+        [
+          9,
+          6
+        ],
+        [
+          9,
+          12
+        ],
+        [
+          17,
+          0
+        ],
+        [
+          17,
+          6
+        ],
+        [
+          17,
+          12
+        ]
       ],
       "expected_shaft_trajectory_count": 384,
       "expected_ground_trajectory_count": 576,
@@ -93,7 +185,12 @@
           "body_mass": 1.0,
           "joint_limit": 1.0
         },
-        "selected_case_indices": [0, 8, 9, 17],
+        "selected_case_indices": [
+          0,
+          8,
+          9,
+          17
+        ],
         "retained_failures": [],
         "model_sha256": {
           "0": "672f983841884df9d41c0eb814a1fda4da65bb960029620169c84b00dffca1d9",
@@ -116,17 +213,50 @@
         }
       ],
       "feasible_states": [
-        [0, 0],
-        [0, 6],
-        [8, 0],
-        [8, 6],
-        [8, 12],
-        [9, 0],
-        [9, 6],
-        [9, 12],
-        [17, 0],
-        [17, 6],
-        [17, 12]
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          6
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          8,
+          6
+        ],
+        [
+          8,
+          12
+        ],
+        [
+          9,
+          0
+        ],
+        [
+          9,
+          6
+        ],
+        [
+          9,
+          12
+        ],
+        [
+          17,
+          0
+        ],
+        [
+          17,
+          6
+        ],
+        [
+          17,
+          12
+        ]
       ],
       "expected_shaft_trajectory_count": 352,
       "expected_ground_trajectory_count": 528,
@@ -140,7 +270,12 @@
           "body_mass": 1.0,
           "joint_limit": 1.0
         },
-        "selected_case_indices": [0, 8, 9, 17],
+        "selected_case_indices": [
+          0,
+          8,
+          9,
+          17
+        ],
         "retained_failures": [
           {
             "case_index": 0,
@@ -163,18 +298,54 @@
       "feasible_state_count": 12,
       "retained_failures": [],
       "feasible_states": [
-        [0, 0],
-        [0, 6],
-        [0, 12],
-        [8, 0],
-        [8, 6],
-        [8, 12],
-        [9, 0],
-        [9, 6],
-        [9, 12],
-        [17, 0],
-        [17, 6],
-        [17, 12]
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          6
+        ],
+        [
+          0,
+          12
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          8,
+          6
+        ],
+        [
+          8,
+          12
+        ],
+        [
+          9,
+          0
+        ],
+        [
+          9,
+          6
+        ],
+        [
+          9,
+          12
+        ],
+        [
+          17,
+          0
+        ],
+        [
+          17,
+          6
+        ],
+        [
+          17,
+          12
+        ]
       ],
       "expected_shaft_trajectory_count": 384,
       "expected_ground_trajectory_count": 576,
@@ -188,7 +359,12 @@
           "body_mass": 1.0,
           "joint_limit": 1.0
         },
-        "selected_case_indices": [0, 8, 9, 17],
+        "selected_case_indices": [
+          0,
+          8,
+          9,
+          17
+        ],
         "retained_failures": [],
         "model_sha256": {
           "0": "39705f77763314c4738b1f7cd10598d01f402464acadc70b08ea645d087319d3",
@@ -205,18 +381,54 @@
       "feasible_state_count": 12,
       "retained_failures": [],
       "feasible_states": [
-        [0, 0],
-        [0, 6],
-        [0, 12],
-        [8, 0],
-        [8, 6],
-        [8, 12],
-        [9, 0],
-        [9, 6],
-        [9, 12],
-        [17, 0],
-        [17, 6],
-        [17, 12]
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          6
+        ],
+        [
+          0,
+          12
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          8,
+          6
+        ],
+        [
+          8,
+          12
+        ],
+        [
+          9,
+          0
+        ],
+        [
+          9,
+          6
+        ],
+        [
+          9,
+          12
+        ],
+        [
+          17,
+          0
+        ],
+        [
+          17,
+          6
+        ],
+        [
+          17,
+          12
+        ]
       ],
       "expected_shaft_trajectory_count": 384,
       "expected_ground_trajectory_count": 576,
@@ -230,7 +442,12 @@
           "body_mass": 0.85,
           "joint_limit": 1.0
         },
-        "selected_case_indices": [0, 8, 9, 17],
+        "selected_case_indices": [
+          0,
+          8,
+          9,
+          17
+        ],
         "retained_failures": [],
         "model_sha256": {
           "0": "69b7d82ba4510cdcd24d1838ddaac796c5f7c9afef50856be9308969309e00fc",
@@ -247,18 +464,54 @@
       "feasible_state_count": 12,
       "retained_failures": [],
       "feasible_states": [
-        [0, 0],
-        [0, 6],
-        [0, 12],
-        [8, 0],
-        [8, 6],
-        [8, 12],
-        [9, 0],
-        [9, 6],
-        [9, 12],
-        [17, 0],
-        [17, 6],
-        [17, 12]
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          6
+        ],
+        [
+          0,
+          12
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          8,
+          6
+        ],
+        [
+          8,
+          12
+        ],
+        [
+          9,
+          0
+        ],
+        [
+          9,
+          6
+        ],
+        [
+          9,
+          12
+        ],
+        [
+          17,
+          0
+        ],
+        [
+          17,
+          6
+        ],
+        [
+          17,
+          12
+        ]
       ],
       "expected_shaft_trajectory_count": 384,
       "expected_ground_trajectory_count": 576,
@@ -272,7 +525,12 @@
           "body_mass": 1.15,
           "joint_limit": 1.0
         },
-        "selected_case_indices": [0, 8, 9, 17],
+        "selected_case_indices": [
+          0,
+          8,
+          9,
+          17
+        ],
         "retained_failures": [],
         "model_sha256": {
           "0": "96c79b39fc0c8c02151a26b1cc404bd0208729027c02c2ab48239470e50a197c",
@@ -289,18 +547,54 @@
       "feasible_state_count": 12,
       "retained_failures": [],
       "feasible_states": [
-        [0, 0],
-        [0, 6],
-        [0, 12],
-        [8, 0],
-        [8, 6],
-        [8, 12],
-        [9, 0],
-        [9, 6],
-        [9, 12],
-        [17, 0],
-        [17, 6],
-        [17, 12]
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          6
+        ],
+        [
+          0,
+          12
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          8,
+          6
+        ],
+        [
+          8,
+          12
+        ],
+        [
+          9,
+          0
+        ],
+        [
+          9,
+          6
+        ],
+        [
+          9,
+          12
+        ],
+        [
+          17,
+          0
+        ],
+        [
+          17,
+          6
+        ],
+        [
+          17,
+          12
+        ]
       ],
       "expected_shaft_trajectory_count": 384,
       "expected_ground_trajectory_count": 576,
@@ -314,7 +608,12 @@
           "body_mass": 1.0,
           "joint_limit": 0.85
         },
-        "selected_case_indices": [0, 8, 9, 17],
+        "selected_case_indices": [
+          0,
+          8,
+          9,
+          17
+        ],
         "retained_failures": [],
         "model_sha256": {
           "0": "672f983841884df9d41c0eb814a1fda4da65bb960029620169c84b00dffca1d9",
@@ -331,18 +630,54 @@
       "feasible_state_count": 12,
       "retained_failures": [],
       "feasible_states": [
-        [0, 0],
-        [0, 6],
-        [0, 12],
-        [8, 0],
-        [8, 6],
-        [8, 12],
-        [9, 0],
-        [9, 6],
-        [9, 12],
-        [17, 0],
-        [17, 6],
-        [17, 12]
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          6
+        ],
+        [
+          0,
+          12
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          8,
+          6
+        ],
+        [
+          8,
+          12
+        ],
+        [
+          9,
+          0
+        ],
+        [
+          9,
+          6
+        ],
+        [
+          9,
+          12
+        ],
+        [
+          17,
+          0
+        ],
+        [
+          17,
+          6
+        ],
+        [
+          17,
+          12
+        ]
       ],
       "expected_shaft_trajectory_count": 384,
       "expected_ground_trajectory_count": 576,
@@ -356,7 +691,12 @@
           "body_mass": 1.0,
           "joint_limit": 1.15
         },
-        "selected_case_indices": [0, 8, 9, 17],
+        "selected_case_indices": [
+          0,
+          8,
+          9,
+          17
+        ],
         "retained_failures": [],
         "model_sha256": {
           "0": "672f983841884df9d41c0eb814a1fda4da65bb960029620169c84b00dffca1d9",
@@ -371,8 +711,8 @@
     "scripts/research/proximal_distal_energy/articulated_atlas_authority.py": "191174f7fea921a3b52054f85d735b45ee0ca93090aaa733f59221d45de0af0d",
     "scripts/research/proximal_distal_energy/articulated_scaled_authority.py": "6d41ef265dd88d61bdf70f1ff78a17716c9293e6260f307c253df43f441b7d83",
     "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py": "166ab2ebec88a0c53abc54c6b565ba0a3f82caf800449e822164177f31289549",
-    "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": "ead78430257bce1404362698990d5575e12c203fc2e4cd6337910a3a239fb2d2",
-    "tests/research/test_articulated_structural_propagation_plan.py": "9ba715f3f7f8ed9fe3e4b9a717da78a583de1144cf5e828934df713bb358e4d0",
+    "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": "a0ee3fce1f4499763e2324c4bcdd12a40abb3acec15e558fc4a9c5dff2ac5735",
+    "tests/research/test_articulated_structural_propagation_plan.py": "85af906fee9982a4fd10e6f874f5789a0d71ba396f68d3210b9ba70a4b139165",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "8eed52fe4ebbc55fcf753f4703330dd6d768281b0babfbb2adca074b862fc36d",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
     "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json": "f07fc33cc76fb80f395cd10b01a30169b6440cec3854be3894024d435bc0f722",

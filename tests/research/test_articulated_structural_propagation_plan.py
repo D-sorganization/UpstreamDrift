@@ -89,9 +89,11 @@ def test_every_corner_binds_models_and_accounts_for_states(plan) -> None:
 
 
 def test_committed_plan_is_exactly_reproducible(plan) -> None:
-    committed = json.loads(COMMITTED.read_text(encoding="utf-8"))
+    committed_text = COMMITTED.read_text(encoding="utf-8")
+    committed = json.loads(committed_text)
 
     assert committed == plan
+    assert committed_text == json.dumps(plan, indent=2) + "\n"
     assert validate_structural_propagation_plan() == plan
 
 
