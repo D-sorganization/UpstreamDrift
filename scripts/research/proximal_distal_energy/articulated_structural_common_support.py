@@ -110,6 +110,15 @@ class OneSidedEngineeringSecants:
         return False
 
 
+@dataclass(frozen=True, slots=True)
+class SecantClassification:
+    """Resolution-aware classification on shared persistent support only."""
+
+    shared_persistent_identities: tuple[CellIdentity, ...]
+    cell_classification: tuple[str, ...]
+    overall: str
+
+
 def _headline_array(arrays: Mapping[str, Any], *names: str, dtype: Any) -> NDArray[Any]:
     for name in names:
         if name in arrays:
@@ -316,12 +325,66 @@ def build_one_sided_engineering_secants(
     )
 
 
+def classify_one_sided_engineering_secants(
+    secants: OneSidedEngineeringSecants,
+) -> SecantClassification:
+    """Flag resolved opposition or material inequality without averaging."""
+
+    low_index = {
+        identity: index
+        for index, identity in enumerate(secants.low_to_nominal_identities)
+    }
+    high_index = {
+        identity: index
+        for index, identity in enumerate(secants.nominal_to_high_identities)
+    }
+    shared = tuple(
+        identity
+        for identity in secants.low_to_nominal_identities
+        if identity in high_index
+    )
+    classes: list[str] = []
+    for identity in shared:
+        low_slot = low_index[identity]
+        high_slot = high_index[identity]
+        low = secants.low_to_nominal_m_s_per_unit_scale[low_slot]
+        high = secants.nominal_to_high_m_s_per_unit_scale[high_slot]
+        low_resolution = secants.low_to_nominal_resolution_per_unit_scale[low_slot]
+        high_resolution = secants.nominal_to_high_resolution_per_unit_scale[high_slot]
+        if abs(low) <= low_resolution or abs(high) <= high_resolution:
+            classes.append("resolution_limited")
+        elif low * high < 0.0:
+            classes.append("resolved_opposing")
+        elif abs(low - high) > low_resolution + high_resolution:
+            classes.append("resolved_materially_unequal")
+        else:
+            classes.append("resolved_direction_consistent")
+
+    if not classes:
+        overall = "insufficient_shared_persistent_support"
+    elif "resolved_opposing" in classes:
+        overall = "resolved_opposing_on_shared_support"
+    elif "resolved_materially_unequal" in classes:
+        overall = "resolved_materially_unequal_on_shared_support"
+    elif "resolution_limited" in classes:
+        overall = "resolution_limited_on_shared_support"
+    else:
+        overall = "resolved_direction_consistent_on_shared_support"
+    return SecantClassification(
+        shared_persistent_identities=shared,
+        cell_classification=tuple(classes),
+        overall=overall,
+    )
+
+
 __all__ = [
     "CellIdentity",
     "CommonSupportComparison",
     "HeadlineCells",
     "OneSidedEngineeringSecants",
+    "SecantClassification",
     "build_one_sided_engineering_secants",
+    "classify_one_sided_engineering_secants",
     "compare_common_support",
     "extract_headline_cells",
 ]

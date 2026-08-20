@@ -7,6 +7,7 @@ import pytest
 
 from scripts.research.proximal_distal_energy.articulated_structural_common_support import (
     build_one_sided_engineering_secants,
+    classify_one_sided_engineering_secants,
     compare_common_support,
     extract_headline_cells,
 )
@@ -200,3 +201,57 @@ def test_one_sided_secants_require_ordered_finite_scales(
             nominal_scale=nominal,
             high_scale=high,
         )
+
+
+def _classified_secants(
+    low_change_m_s: float,
+    high_change_m_s: float,
+    *,
+    low_match: int = 0,
+    high_match: int = 0,
+):
+    nominal_arrays = _arrays(((0, 0),), matched_indices=(0, 1))
+    low_arrays = _arrays(((0, 0),), matched_indices=(low_match,))
+    high_arrays = _arrays(((0, 0),), matched_indices=(high_match,))
+    for arrays in (nominal_arrays, low_arrays, high_arrays):
+        arrays["matched_final_speed_difference_m_s"].fill(0.0)
+    low_arrays["matched_final_speed_difference_m_s"].fill(low_change_m_s)
+    high_arrays["matched_final_speed_difference_m_s"].fill(high_change_m_s)
+    nominal = extract_headline_cells("shaft", nominal_arrays)
+    low = compare_common_support(nominal, extract_headline_cells("shaft", low_arrays))
+    high = compare_common_support(nominal, extract_headline_cells("shaft", high_arrays))
+    return classify_one_sided_engineering_secants(
+        build_one_sided_engineering_secants(
+            "height_scale",
+            low,
+            high,
+            low_scale=0.8,
+            nominal_scale=1.0,
+            high_scale=1.2,
+        )
+    )
+
+
+@pytest.mark.parametrize(
+    ("low_change", "high_change", "expected"),
+    [
+        (-0.004, -0.004, "resolved_opposing_on_shared_support"),
+        (-0.004, 0.0012, "resolved_materially_unequal_on_shared_support"),
+        (-0.004, 0.004, "resolved_direction_consistent_on_shared_support"),
+        (-0.004, 0.0005, "resolution_limited_on_shared_support"),
+    ],
+)
+def test_nonmonotonicity_classification_is_resolution_aware(
+    low_change: float, high_change: float, expected: str
+) -> None:
+    classification = _classified_secants(low_change, high_change)
+    assert classification.overall == expected
+    assert len(classification.shared_persistent_identities) == 1
+    assert len(classification.cell_classification) == 1
+
+
+def test_nonmonotonicity_requires_shared_persistent_support() -> None:
+    classification = _classified_secants(-0.004, 0.004, low_match=0, high_match=1)
+    assert classification.overall == "insufficient_shared_persistent_support"
+    assert classification.shared_persistent_identities == ()
+    assert classification.cell_classification == ()

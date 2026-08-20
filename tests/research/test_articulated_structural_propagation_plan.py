@@ -100,6 +100,13 @@ def test_plan_requires_common_support_and_rejects_count_as_benefit(plan) -> None
     assert "registered scale-factor span" in analysis["secant_definition"]
     assert "not comparable parameter-importance" in analysis["secant_boundary"]
     assert "nonmonotonic engineering sensitivity" in analysis["nonmonotonicity_rule"]
+    assert (
+        "identities persistent on both sides"
+        in analysis["nonmonotonicity_decision_rule"]
+    )
+    assert (
+        "sum of both numerical resolutions" in analysis["nonmonotonicity_decision_rule"]
+    )
     assert "do not estimate higher-order" in analysis["interaction_rule"]
     assert "do not select favorable corners" in analysis["multiplicity"]
 

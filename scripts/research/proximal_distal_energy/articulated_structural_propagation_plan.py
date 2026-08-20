@@ -212,6 +212,7 @@ def build_structural_propagation_plan(
         "secant_definition": "divide each persistent-common-support outcome change by the registered scale-factor span for that one-sided interval",
         "secant_boundary": "secants use engineering bounds and are not comparable parameter-importance measures across axes",
         "nonmonotonicity_rule": "retain opposing or materially unequal one-sided secants as nonmonotonic engineering sensitivity rather than averaging them",
+        "nonmonotonicity_decision_rule": "classify only identities persistent on both sides; unresolved if either secant does not exceed its numerical resolution, opposing if resolved signs differ, and materially unequal if the resolved same-sign difference exceeds the sum of both numerical resolutions",
         "interaction_rule": "one-at-a-time corners do not estimate higher-order parameter interactions",
         "multiplicity": "report all registered OAT corners descriptively; do not select favorable corners or assign confirmatory p-values",
     }
