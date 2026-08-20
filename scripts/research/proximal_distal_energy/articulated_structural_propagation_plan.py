@@ -40,6 +40,7 @@ SOURCE_PATHS = tuple(
             "scripts/research/proximal_distal_energy/articulated_structural_figure.py",
             "scripts/research/proximal_distal_energy/articulated_structural_figure_data.py",
             "scripts/research/proximal_distal_energy/articulated_structural_gate_status.py",
+            "scripts/research/proximal_distal_energy/articulated_structural_publication.py",
             "scripts/research/proximal_distal_energy/articulated_structural_result.py",
             "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py",
             "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py",
@@ -50,6 +51,7 @@ SOURCE_PATHS = tuple(
             "tests/research/test_articulated_structural_figure.py",
             "tests/research/test_articulated_structural_figure_data.py",
             "tests/research/test_articulated_structural_gate_status.py",
+            "tests/research/test_articulated_structural_publication.py",
             "tests/research/test_articulated_structural_result.py",
             "tests/research/test_articulated_structural_propagation_plan.py",
             *SHAFT_SOURCE_PATHS,
@@ -368,6 +370,7 @@ def build_structural_propagation_plan(
             "units and alt text",
         ],
         "renderer_rule": "render all five panels only from a validated figure-data record; fail before writing on any semantic or digest inconsistency",
+        "publication_rule": "revalidate the exact governed plan, complete result, and all 14 referenced no-pickle cell packs before writing figure data or a vector figure",
     }
     integration_contract = {
         "required_surfaces": [

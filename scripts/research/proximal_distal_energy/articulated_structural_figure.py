@@ -91,6 +91,15 @@ def _transition_panel(axis: Any, rows: list[dict[str, Any]]) -> None:
 def _outcome_panel(axis: Any, rows: list[dict[str, Any]]) -> None:
     keys = list(dict.fromkeys((row["corner_id"], row["pathway"]) for row in rows))
     positions = {key: index for index, key in enumerate(keys)}
+    if not rows:
+        axis.text(
+            0.5,
+            0.5,
+            "No Persistent Paired Outcomes",
+            ha="center",
+            va="center",
+            transform=axis.transAxes,
+        )
     for resolved, marker, label in (
         (False, "o", "Unresolved At Registered Threshold"),
         (True, "^", "Resolved"),
@@ -118,7 +127,8 @@ def _outcome_panel(axis: Any, rows: list[dict[str, Any]]) -> None:
     axis.set_ylabel("Corner - Nominal Speed Difference (m/s)")
     axis.set_title("C. Persistent Outcome Change And Resolution Status")
     axis.grid(axis="y", alpha=0.25)
-    axis.legend(fontsize=7, loc="best")
+    if rows:
+        axis.legend(fontsize=7, loc="best")
 
 
 def _range_error(value: float, value_range: list[float]) -> np.ndarray:
@@ -128,7 +138,14 @@ def _range_error(value: float, value_range: list[float]) -> np.ndarray:
 def _secant_panel(axis: Any, rows: list[dict[str, Any]]) -> None:
     for index, row in enumerate(rows):
         if row["shared_persistent_cell_count"] == 0:
-            axis.scatter(index, 0.0, marker="x", color="#6b7280", s=45)
+            axis.scatter(
+                index,
+                0.0,
+                marker="x",
+                color="#6b7280",
+                s=45,
+                label="Insufficient Shared Support" if index == 0 else None,
+            )
             continue
         for offset, value_name, range_name, marker, label in (
             (
