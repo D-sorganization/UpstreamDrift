@@ -227,14 +227,26 @@ def build_structural_propagation_plan(
         "required_cell_arrays": {
             pathway: [
                 "cell_identity",
-                "match_mask",
-                "final_speed_difference_m_s",
-                "peak_load_match_relative_error",
-                "dissipated_work_match_relative_error",
+                "matched_load_work",
+                "matched_final_speed_difference_m_s",
+                "load_match_relative_error",
+                "work_match_relative_error",
                 "gate_status",
                 "failure_class",
             ]
             for pathway in ("shaft", "ground")
+        },
+        "matching_metric_semantics": {
+            "shaft": {
+                "comparison": "coupled versus rigid",
+                "load": "peak station force",
+                "work": "terminal dissipated work",
+            },
+            "ground": {
+                "comparison": "coupled versus fixed",
+                "load": "peak grip force",
+                "work": "terminal total dissipated work",
+            },
         },
         "write_policy": "write checkpoints and the final record atomically",
         "completion_policy": "complete only after all seven corners are accounted for",

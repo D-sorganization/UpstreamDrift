@@ -119,13 +119,24 @@ def test_plan_binds_restart_and_cell_level_evidence_contract(plan) -> None:
         required = set(evidence["required_cell_arrays"][pathway])
         assert {
             "cell_identity",
-            "match_mask",
-            "final_speed_difference_m_s",
-            "peak_load_match_relative_error",
-            "dissipated_work_match_relative_error",
+            "matched_load_work",
+            "matched_final_speed_difference_m_s",
+            "load_match_relative_error",
+            "work_match_relative_error",
             "gate_status",
             "failure_class",
         } <= required
+    semantics = evidence["matching_metric_semantics"]
+    assert semantics["shaft"] == {
+        "comparison": "coupled versus rigid",
+        "load": "peak station force",
+        "work": "terminal dissipated work",
+    }
+    assert semantics["ground"] == {
+        "comparison": "coupled versus fixed",
+        "load": "peak grip force",
+        "work": "terminal total dissipated work",
+    }
     assert "atomic" in evidence["write_policy"]
     assert "all seven corners" in evidence["completion_policy"]
     assert "must not qualify" in evidence["partial_record_policy"]
