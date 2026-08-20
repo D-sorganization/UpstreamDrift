@@ -76,9 +76,9 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     13 phase states for cases 0/8/9/17; nominal is 52/52 feasible and reproduces
     committed states within 1e-8 rad. JSON/NPZ evidence rejects source/content
     drift. `ArticulatedAtlasAuthority` binds exact scaled models and retains
-    infeasible phases. Seven-corner session `15825` has checkpointed nominal
-    52/52 feasible with the exact prior digest and is running height-low. Then
-    connect it to both atlases; constitutive-only coverage remains partial.
+    infeasible phases. Session `15825` has nominal 52/52 with the exact prior
+    digest; height-low retains case 0/phase 12 `ik_nonconvergence` and height-high
+    is running. Then connect feasible corners to both atlases; coverage is partial.
 - The release has 295 atomic claims and 40 reviewed release claims; all 40
   retain at least one scientifically open gate. #8724 still owns normalized
   four-way adjudication and independent review.
