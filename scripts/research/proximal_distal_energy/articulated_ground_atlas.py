@@ -286,7 +286,7 @@ def _record_horizon(
     )
     buffers.peak_ground_energy[slot] = np.max(trace["ground_strain_energy_j"][section])
     buffers.terminal_ground_work[slot] = -float(
-        np.trapz(trace["ground_damping_power_w"][section], trace["time_s"][section])
+        np.trapezoid(trace["ground_damping_power_w"][section], trace["time_s"][section])
     )
     buffers.terminal_total_work[slot] = -float(trace["cumulative_dissipation_j"][end])
     buffers.normalized_energy_residual[slot] = np.max(np.abs(residual)) / max(
