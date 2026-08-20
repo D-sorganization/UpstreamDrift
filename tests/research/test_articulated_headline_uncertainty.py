@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any
 
@@ -110,3 +111,31 @@ def test_campaign_checkpoint_resumes_without_repeating_completed_cells(
     assert first["status"] == second["status"] == "complete"
     assert calls == first_calls
     assert len(second["corners"]) == 19
+
+
+def test_checkpoint_rejects_scientific_design_drift_but_not_worker_change(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.setattr(
+        study, "run_articulated_shaft_atlas", lambda _: _fake_record(126)
+    )
+    monkeypatch.setattr(
+        study, "run_articulated_ground_atlas", lambda _: _fake_record(0)
+    )
+    checkpoint = tmp_path / "headline.json"
+    study.run_headline_uncertainty(
+        study.HeadlineUncertaintyConfig(worker_count=1), checkpoint_path=checkpoint
+    )
+
+    study.run_headline_uncertainty(
+        study.HeadlineUncertaintyConfig(worker_count=2), checkpoint_path=checkpoint
+    )
+    record = json.loads(checkpoint.read_text(encoding="utf-8"))
+    record["design"]["axes"][0]["low"] = 0.61
+    checkpoint.write_text(json.dumps(record), encoding="utf-8")
+
+    with pytest.raises(RuntimeError, match="design does not match"):
+        study.run_headline_uncertainty(
+            study.HeadlineUncertaintyConfig(worker_count=2),
+            checkpoint_path=checkpoint,
+        )

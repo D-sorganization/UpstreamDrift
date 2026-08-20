@@ -235,12 +235,22 @@ def _checkpoint(path: Path | None, record: dict[str, Any]) -> None:
         path.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
 
 
-def _existing_rows(path: Path | None) -> dict[str, dict[str, Any]]:
+def _existing_rows(
+    path: Path | None,
+    config: HeadlineUncertaintyConfig,
+) -> dict[str, dict[str, Any]]:
     if path is None or not path.exists():
         return {}
     record = json.loads(path.read_text(encoding="utf-8"))
     if record.get("schema_version") != "articulated-headline-uncertainty/v1":
         raise RuntimeError("headline uncertainty checkpoint schema is unsupported")
+    expected_axes = json.loads(json.dumps([asdict(axis) for axis in config.axes]))
+    design = record.get("design", {})
+    if (
+        design.get("corner_count") != len(registered_corners(config))
+        or design.get("axes") != expected_axes
+    ):
+        raise RuntimeError("headline uncertainty checkpoint design does not match")
     return {row["corner_id"]: row for row in record.get("corners", [])}
 
 
@@ -260,7 +270,7 @@ def run_headline_uncertainty(
 ) -> dict[str, Any]:
     """Run all registered full-atlas corners and retain every failure."""
 
-    existing = _existing_rows(checkpoint_path)
+    existing = _existing_rows(checkpoint_path, config)
     rows: list[dict[str, Any]] = []
     for corner in registered_corners(config):
         row = existing.get(corner.corner_id, asdict(corner))
