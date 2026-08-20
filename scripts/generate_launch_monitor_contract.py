@@ -5,18 +5,14 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from src.shared.python.launch_monitor import contract_v2_json_schema
+from src.shared.python.launch_monitor import (
+    contract_v2_json_schema,
+    strokes_gained_contract_json_schema,
+)
 
 
-def main() -> None:
-    """Write the deterministic schema artifact from the Python authority."""
-
-    root = Path(__file__).resolve().parents[1]
-    destination = (
-        root / "docs" / "api" / "contracts" / "launch-monitor-analysis-v2.schema.json"
-    )
+def _write_schema(destination: Path, schema: dict[str, object]) -> None:
     destination.parent.mkdir(parents=True, exist_ok=True)
-    schema = contract_v2_json_schema()
     if destination.is_file():
         existing = json.loads(destination.read_text(encoding="utf-8"))
         if existing == schema:
@@ -24,6 +20,21 @@ def main() -> None:
     destination.write_text(
         json.dumps(schema, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
+    )
+
+
+def main() -> None:
+    """Write the deterministic schema artifact from the Python authority."""
+
+    root = Path(__file__).resolve().parents[1]
+    contract_root = root / "docs" / "api" / "contracts"
+    _write_schema(
+        contract_root / "launch-monitor-analysis-v2.schema.json",
+        contract_v2_json_schema(),
+    )
+    _write_schema(
+        contract_root / "launch-monitor-strokes-gained-v1.schema.json",
+        strokes_gained_contract_json_schema(),
     )
 
 

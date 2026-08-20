@@ -168,6 +168,28 @@ the v2 context; otherwise the unit and authority are `unknown`. An unknown unit
 is never silently treated as canonical. Backing rows similarly name their
 declared content-addressed source or state why no source link is available.
 
+### Source-Backed Strokes Gained
+
+True strokes gained requires more than carry and lateral dispersion. Each row
+must identify the start and finish lie, context, target or hole, and distance.
+The expected-strokes benchmark must be versioned, cited by HTTP(S) source URL,
+license-declared, and protected by the canonical table SHA-256. The application
+fails closed when a row is outside benchmark support or lacks a required state.
+
+The governed result reports:
+
+- `SG = E(start state) - 1 - E(finish state)` in strokes;
+- the exact benchmark version, source, license, and hash;
+- row-level interpolation inputs, input hashes, and exclusions;
+- sampling confidence intervals and benchmark uncertainty when supplied;
+- explicit units and non-causal limitations; and
+- player/session/club and longitudinal summaries only for user-attested or
+  externally verified identifiers and order fields.
+
+Target-relative radial error remains available as a dispersion proxy in yards.
+It is explicitly labeled **not strokes gained** because it has no versioned
+expected-strokes baseline or complete course state.
+
 ### Public Reference Data
 
 The source-traceable public dataset is maintained in the separate

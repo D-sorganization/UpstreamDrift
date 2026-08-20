@@ -142,6 +142,34 @@ The HTTP surfaces are:
 - `POST /tools/launch-monitor-analytics/v2/analyze` for v2 results;
 - `POST /tools/launch-monitor-analytics/analyze` for compatible v1 clients.
 
+## Source-Backed Strokes Gained
+
+Contract `launch-monitor-strokes-gained-analysis/1.0.0` is the canonical
+scoring boundary. A valid request supplies every shot's start and finish lie,
+context, target/hole, and distance plus an expected-strokes table conforming to
+`launch-monitor-strokes-gained-baseline/2.0.0`. The table carries a source URL,
+license declaration, version, and canonical SHA-256. Equivalent numeric values
+and row orders produce the same hash; tampering and duplicate course states are
+rejected.
+
+The analysis interpolates only within an exact lie/context/target stratum and
+never extrapolates outside table support. Its result includes the formula,
+units, row and dataset hashes, interpolated benchmark points, exclusions,
+sampling and optional benchmark uncertainty, and conservative claim flags.
+Player, session, and club summaries require an explicit trusted identifier and
+evidence. Longitudinal slopes additionally require an explicit numeric order
+field and are descriptive, not causal.
+
+The scoring HTTP surfaces are:
+
+- `GET /tools/launch-monitor-analytics/contracts/strokes-gained/v1`;
+- `POST /tools/launch-monitor-analytics/v2/strokes-gained`; and
+- `POST /tools/launch-monitor-analytics/v2/outcome-proxy`.
+
+The outcome-proxy endpoint reports target-relative radial error in yards. Its
+typed claims explicitly state that it is not strokes gained and is not
+source-backed. Carry/lateral dispersion must never be relabeled as SG.
+
 The v2 response model is registered with FastAPI, so it is also present in the
 application OpenAPI document. The checked-in schema is generated from the same
 Pydantic authority and guarded against drift:

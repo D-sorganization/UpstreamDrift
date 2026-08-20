@@ -111,6 +111,11 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
   for unit/lineage/missingness/source/uncertainty/identity authority and bounded
   vendor/model claims. Player grouping requires an explicit trusted identity;
   never infer it from session, club, filename, source layout, or row order.
+- UpstreamDrift #8803 owns canonical source-backed strokes gained. The v1 SG
+  result requires a hash-verified v2 expected-strokes table and explicit start/
+  finish lie, context, target, and distance. The separate outcome-proxy result
+  has typed `is_strokes_gained=false` claims. Tools #4584 consumes this seam;
+  do not duplicate the scoring authority in React or PyQt.
 
 ## Qualified Baseline — And Its Limits
 

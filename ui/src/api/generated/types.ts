@@ -301,6 +301,14 @@ export interface AppearanceSettings {
   font_scale: number;
 }
 
+export interface AvailabilityV1 {
+  state: "available" | "unavailable";
+  reason_code?: string | null;
+  message?: string | null;
+  observed_count: number;
+  required_count: number;
+}
+
 export interface AvailabilityV2 {
   result_path: string;
   state: "available" | "unavailable";
@@ -389,6 +397,15 @@ export interface BallFlightTrajectorySample {
   time_s: number;
   position_m: number[];
   velocity_mps: number[];
+}
+
+export interface BaselineProvenanceV1 {
+  baseline_id: string;
+  version: string;
+  source_url: string;
+  license: string;
+  table_sha256: string;
+  contract_version: string;
 }
 
 /**
@@ -640,6 +657,13 @@ export interface ClaimsV2 {
   causal_inference: boolean;
 }
 
+export interface ConfidenceIntervalV1 {
+  lower: number;
+  upper: number;
+  level: number;
+  method: string;
+}
+
 /**
  * Request body for deterministic contraction-rate estimation.
  */
@@ -700,6 +724,21 @@ export interface CounterfactualRequest {
   kind: string;
   /** When true and no counterfactual data is stored yet, replay the recorded frames through the engine (expensive) */
   run_post_hoc: boolean;
+}
+
+export interface CourseStateColumnsV1 {
+  lie_column: string;
+  context_column: string;
+  target_column: string;
+  distance_column: string;
+  distance_unit: "yd" | "m";
+}
+
+export interface CourseStateValueV1 {
+  lie: string;
+  context: string;
+  target: string;
+  distance_yards: number;
 }
 
 /**
@@ -1004,6 +1043,53 @@ export interface EnvironmentPreset {
   length_m: number;
 }
 
+export interface EstimateSummaryV1 {
+  count: number;
+  mean?: number | null;
+  standard_deviation?: number | null;
+  standard_error?: number | null;
+  confidence_interval?: ConfidenceIntervalV1 | null;
+}
+
+export interface ExcludedRowV1 {
+  source_index: number;
+  shot_id?: string | null;
+  reason_code: "missing_course_state" | "invalid_distance" | "outside_baseline";
+  message: string;
+}
+
+export interface ExclusionSummaryV1 {
+  input_row_count: number;
+  included_row_count: number;
+  total_excluded: number;
+  by_reason: Record<string, number>;
+}
+
+/**
+ * Hash-verified expected-strokes benchmark and publication metadata.
+ */
+export interface ExpectedStrokesBaselineV2 {
+  contract_version: "launch-monitor-strokes-gained-baseline/2.0.0";
+  baseline_id: string;
+  version: string;
+  source_url: string;
+  license: string;
+  table_sha256: string;
+  states: ExpectedStrokesStateV2[];
+}
+
+/**
+ * One benchmark point for an explicit target-aware course state.
+ */
+export interface ExpectedStrokesStateV2 {
+  lie: string;
+  context: string;
+  target: string;
+  distance_yards: number;
+  expected_strokes: number;
+  standard_error?: number | null;
+}
+
 /**
  * Request model for executing a control feature.
  */
@@ -1183,6 +1269,21 @@ export interface GreenReadingResponse {
   slopes: number[][];
 }
 
+export interface GroupSummaryV1 {
+  dimension: "player" | "session" | "club";
+  group_value: string;
+  estimate: EstimateSummaryV1;
+  trust_level: "explicit_user_attested" | "pseudonymous_stable" | "verified_external";
+  evidence: string;
+}
+
+export interface GroupingDimensionV1 {
+  dimension: "player" | "session" | "club";
+  column: string;
+  trust_level: "explicit_user_attested" | "pseudonymous_stable" | "verified_external";
+  evidence: string;
+}
+
 export interface HTTPValidationError {
   detail?: ValidationError[];
 }
@@ -1215,6 +1316,12 @@ export interface InstallRequest {
 export interface InstallResponse {
   install: Record<string, unknown>;
   post_install_report?: FeatureReportModel | null;
+}
+
+export interface InterpolationV1 {
+  lower_distance_yards: number;
+  upper_distance_yards: number;
+  fraction: number;
 }
 
 /**
@@ -1372,6 +1479,29 @@ export interface LoginResponse {
   user: UserResponse;
 }
 
+export interface LongitudinalDimensionV1 {
+  order_column: string;
+  order_unit: string;
+  group_column?: string | null;
+  group_dimension?: "player" | "session" | "club" | null;
+  trust_level: "explicit_user_attested" | "pseudonymous_stable" | "verified_external";
+  evidence: string;
+  min_samples: number;
+}
+
+export interface LongitudinalSummaryV1 {
+  group_dimension: "player" | "session" | "club" | "all";
+  group_value: string;
+  sample_count: number;
+  slope: number;
+  intercept: number;
+  r_squared: number;
+  p_value: number;
+  slope_unit: string;
+  trust_level: "explicit_user_attested" | "pseudonymous_stable" | "verified_external";
+  evidence: string;
+}
+
 /**
  * Request model for distance measurement between bodies. See issue #1179
  */
@@ -1503,6 +1633,54 @@ export interface NotificationSettings {
   toast_duration_ms: number;
   /** 'all' shows every toast, 'errors' only errors/warnings, 'silent' suppresses all toasts. */
   verbosity: "all" | "errors" | "silent";
+}
+
+export interface OutcomeProxyClaimsV1 {
+  is_strokes_gained: false;
+  source_backed: false;
+  causal_inference: false;
+}
+
+/**
+ * Bounded records and explicitly non-SG outcome-proxy request.
+ */
+export interface OutcomeProxyPayloadV1 {
+  records: Record<string, unknown>[];
+  request: OutcomeProxyRequestV1;
+}
+
+export interface OutcomeProxyRequestV1 {
+  carry_column: string;
+  lateral_column: string;
+  carry_unit: "yd" | "m";
+  lateral_unit: "yd" | "m";
+  target_distance_yards: number;
+  shot_id_column?: string | null;
+  confidence_level: number;
+  min_samples: number;
+}
+
+export interface OutcomeProxyResultV1 {
+  contract_version: "launch-monitor-outcome-proxy/1.0.0";
+  status: "available" | "partial" | "unavailable";
+  metric_name: "expected_proximity_dispersion_proxy";
+  unit: "yd";
+  value_summary: EstimateSummaryV1;
+  row_results: OutcomeProxyRowV1[];
+  exclusions: ExclusionSummaryV1;
+  formula: string;
+  units: Record<string, string>;
+  claims?: OutcomeProxyClaimsV1;
+  limitations: string[];
+}
+
+export interface OutcomeProxyRowV1 {
+  source_index: number;
+  shot_id?: string | null;
+  carry_yards: number;
+  lateral_yards: number;
+  target_distance_yards: number;
+  radial_error_yards: number;
 }
 
 /**
@@ -1867,6 +2045,81 @@ export interface SpeedControlResponse {
   speed_factor: number;
   /** Status message */
   status: string;
+}
+
+export interface StrokesGainedAnalysisResultV1 {
+  contract_version: "launch-monitor-strokes-gained-analysis/1.0.0";
+  status: "available" | "partial" | "unavailable";
+  metric_name: "source_backed_strokes_gained";
+  unit: "strokes";
+  value_summary: EstimateSummaryV1;
+  baseline: BaselineProvenanceV1;
+  formula: string;
+  units: Record<string, string>;
+  availability: AvailabilityV1;
+  uncertainty: StrokesGainedUncertaintyV1;
+  row_results: StrokesGainedRowV1[];
+  excluded_rows: ExcludedRowV1[];
+  exclusions: ExclusionSummaryV1;
+  group_summaries: GroupSummaryV1[];
+  longitudinal_summaries: LongitudinalSummaryV1[];
+  analysis_context: AnalysisContextV2;
+  dataset_fingerprint_sha256: string;
+  claims?: StrokesGainedClaimsV1;
+  warnings: string[];
+  limitations: string[];
+}
+
+export interface StrokesGainedClaimsV1 {
+  is_strokes_gained: true;
+  source_backed: true;
+  device_emulation: false;
+  device_certification: false;
+  causal_inference: false;
+}
+
+/**
+ * Bounded records, verified benchmark, and governed SG request.
+ */
+export interface StrokesGainedPayloadV1 {
+  records: Record<string, unknown>[];
+  baseline: ExpectedStrokesBaselineV2;
+  request: StrokesGainedRequestV1;
+  context?: AnalysisContextV2;
+}
+
+export interface StrokesGainedRequestV1 {
+  start: CourseStateColumnsV1;
+  finish: CourseStateColumnsV1;
+  shot_id_column?: string | null;
+  confidence_level: number;
+  min_samples: number;
+  summaries: GroupingDimensionV1[];
+  longitudinal?: LongitudinalDimensionV1 | null;
+}
+
+export interface StrokesGainedRowV1 {
+  source_index: number;
+  shot_id?: string | null;
+  input_record_sha256: string;
+  start: CourseStateValueV1;
+  finish: CourseStateValueV1;
+  expected_start: number;
+  expected_finish: number;
+  benchmark_standard_error?: number | null;
+  strokes_gained: number;
+  start_interpolation: InterpolationV1;
+  finish_interpolation: InterpolationV1;
+  groups?: Record<string, string>;
+  longitudinal_order?: number | null;
+}
+
+export interface StrokesGainedUncertaintyV1 {
+  sampling_method: string;
+  confidence_level: number;
+  benchmark_method: string;
+  benchmark_standard_error_mean?: number | null;
+  assumptions: string[];
 }
 
 /**

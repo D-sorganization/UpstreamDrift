@@ -501,7 +501,7 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.558                                            |
+| **Spec Version**        | 1.0.559                                            |
 | **Last Spec Update**    | 2026-08-20                                         |
 
 ## 2. Purpose & Mission
@@ -533,6 +533,19 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-08-20** - Added the canonical source-backed strokes-gained authority
+  under `src/shared/python/launch_monitor/`. The contract requires complete
+  start and finish course states and a versioned, licensed, HTTP(S)-sourced,
+  SHA-256-verified expected-strokes baseline. It interpolates only within an
+  exact lie/context/target stratum, fails closed on extrapolation, retains row
+  and dataset hashes plus backing benchmark values and exclusions, and reports
+  uncertainty as unavailable when the source supplies no standard errors.
+  Trusted identifiers and numeric ordering are required for grouped or
+  longitudinal summaries. A separate outcome-proxy contract reports
+  target-relative radial error but is structurally forbidden from claiming
+  strokes gained. FastAPI publishes both contracts and their generated OpenAPI
+  types for React consumers; these descriptive results make no causal,
+  device-emulation, device-certification, or independent endorsement claim.
 - **2026-08-20** - Recovered BunkerShot3D cross-tier plumbing and MPM code verification
   inside CI architecture and file budgets (issue #8743, #8741). Brings `solvers/mpm/verification.py`
   and `bunker_shot_gui/bridge.py` inside budget gates, verifying 177 tests across conservation,
@@ -2555,7 +2568,7 @@ UpstreamDrift/
 | Rust Physics Kernels     | `rust_core/upstream-physics/`            | High-performance compiled physics routines for critical paths, including initial flexible shaft FEM element primitives |
 | Configuration Manager    | `src/config/`                            | Centralized configuration loading, validation, and environment management                   |
 | Analysis Tool CLIs       | `src/tools/drift_control/`, `src/tools/contraction/` | Headless AffineDrift-compatible drift/control, contraction, and Floquet analysis tools |
-| Launch Monitor Analytics | `src/tools/launch_monitor_analytics/`, `src/shared/python/launch_monitor/` | PyQt6, FastAPI, and headless vendor-neutral import plus arbitrary-field analysis; contract v2 adds unit authority, exact lineage, identity trust, uncertainty, and typed unavailable states while retaining v1 compatibility |
+| Launch Monitor Analytics | `src/tools/launch_monitor_analytics/`, `src/shared/python/launch_monitor/` | PyQt6, FastAPI, and headless vendor-neutral analysis; contract v2 adds traceable arbitrary-field analysis, while the source-backed SG contract verifies benchmark provenance, fails closed outside exact strata, and keeps directional outcome proxies explicitly separate from strokes gained |
 | Tools Ground Consumer    | `src/shared/python/ground_model/`      | Headless exact-schema gateway to Tools flight-to-ground v1 records and reference execution; UI and final dependency pins remain tracked |
 | Putting Dynamics         | `src/shared/python/putting_dynamics/`   | Headless heterogeneous-green, collision, loft, hosel-wrench, skid/roll/rest, and hole-capture physics for #8345 |
 | 3D Putting UI            | `src/api/routes/putting_green.py`, `ui/src/pages/PuttingGreen.tsx`, `ui/src/components/visualization/PuttingScene3D.tsx` | Generated-contract R3F playback of the canonical putting model with collision, spin, hosel, surface, camera, and video controls for #8345 P1 |
@@ -2599,6 +2612,7 @@ Engine tier metadata is declared in each in-scope engine package with
 | F15 | Sidekick AI assistant              | 🔄     | In-app and standalone AI assistant surface (PyQt + React/Tauri + `sidekick.standalone.*`) with streaming, RAG, session history, persisted standalone preferences, onboarding, and agentic tool dispatch. See `docs/sidekick/README.md` and ADR-0018. |
 | F16 | Model-training controller          | 🔄     | In-launcher training dashboard (PR3) with scheduler, dataset library, resource monitor, engine-compat gate, and ML/RL-aware stats. Backend contracts + scheduler land in `src/shared/python/training/` (PRs 1–2); GUI tab, tab-backgrounding refactor, and CVAE wiring in PRs 3–5. |
 | F17 | Tools ground-model integration     | 🔄     | Headless v1 consumer gateway validates the canonical Tools façade and degrades safely when absent; exact dependency pins, FastAPI, PyQt, React, parity, and protected release remain open under Tools #4276. |
+| F18 | Source-backed strokes gained       | ✅     | Canonical Python and FastAPI contracts score complete course-state transitions against a versioned, hash-verified expected-strokes source; provenance, backing values, exclusions, uncertainty, and identity trust remain explicit, while outcome proxies cannot claim SG. |
 
 ### API / Interface Contract
 
@@ -2613,6 +2627,9 @@ Engine tier metadata is declared in each in-scope engine package with
 - `GET /engines` — List available physics engines and their status
 - `POST /export` — Export simulation model to URDF, MATLAB, or other formats
 - `POST /api/v1/motion-pipeline/run` — Run motion-pipeline preprocessing, scaling, IK, and motion-matching for uploaded capture files
+- `GET /tools/launch-monitor-analytics/contracts/strokes-gained/v1` — Publish the canonical source-backed SG result schema
+- `POST /tools/launch-monitor-analytics/v2/strokes-gained` — Score explicit start/finish states against a supplied, source-verified expected-strokes baseline
+- `POST /tools/launch-monitor-analytics/v2/outcome-proxy` — Compute target-relative radial error under a contract that forbids an SG claim
 
 **API Production-Readiness Contracts**:
 
@@ -2684,6 +2701,7 @@ Engine tier metadata is declared in each in-scope engine package with
 | Biomechanical Models     | URDF          | `shared/models/`                | URDF 1.0 standard with custom muscle actuator extensions |
 | Motion Capture Data      | C3D, BVH, TRC | External mocap systems or files | Standard formats with marker sets and frame data         |
 | Launch Monitor Sessions  | CSV, TSV, TXT, XLS, XLSX, JSON | Common launch-monitor exports or user-mapped files | Canonical shot schema with source columns, unit/status metadata, and import manifest |
+| Expected-Strokes Baseline | JSON | Declared HTTP(S) source with license and SHA-256 | Versioned lie/context/target/distance states with unique points and optional standard errors |
 | Optimization Constraints | JSON          | User input or configuration     | Custom constraint schema in `src/config/`                |
 | Control Parameters       | YAML/JSON     | Configuration files or API      | Engine-specific parameter maps validated against schemas |
 
@@ -2696,7 +2714,7 @@ Engine tier metadata is declared in each in-scope engine package with
 | IK/ID Solutions          | JSON/MATLAB            | API response or file        | Joint angles (IK) and joint torques (ID) with confidence metrics   |
 | Optimized Trajectories   | URDF/MATLAB            | File export                 | Trajectory-optimized model definitions with optimal control inputs |
 | Visualization Data       | JSON (Three.js format) | GUI or web client           | 3D geometry, animation keyframes, and rendering parameters         |
-| Launch Monitor Analytics | CSV/JSON/project bundle | GUI or file export | Treated observations, provenance manifests, association/model results, dispersion, and trend summaries |
+| Launch Monitor Analytics | CSV/JSON/project bundle | GUI, API, or file export | Treated observations, provenance manifests, association/model results, dispersion, trends, source-backed SG with backing benchmark values, and non-SG outcome proxies |
 
 ### Configuration
 
@@ -2741,6 +2759,10 @@ UpstreamDrift employs a comprehensive test pyramid with multiple specialized cat
 - **Cross-Engine Tests**: Validate physics consistency across multiple engines with tolerance thresholds
 - **Physics Validation Tests**: Verify results against known ground truth (analytical solutions, published benchmarks)
 - **Golf Ball-Flight Source Contracts**: Validate documented aerodynamic, impact, and atmosphere assumptions against `docs/physics/GOLF_BALL_FLIGHT_IMPACT_SOURCE_MAP.md`
+- **Launch-Monitor Scoring Contracts**: Verify baseline hashing and provenance,
+  exact-stratum interpolation, fail-closed extrapolation, identity-safe grouping,
+  uncertainty availability, API schemas, and the prohibition on relabeling an
+  outcome proxy as strokes gained.
 - **Dependency Source Contracts**: Validate generated dependency artifacts against `pyproject.toml` and fail CI when lockfiles or `environment.yml` drift
 - **Documentation Governance Contracts**: Validate the canonical `docs/index.md` directory catalog, rendered documentation hub link, Markdown/Quarto size budget, and significant-word title capitalization for changed Markdown, Quarto, LaTeX, Word, and PDF documents.
 - **Benchmark Tests**: Performance regression detection and optimization validation
@@ -2756,6 +2778,7 @@ UpstreamDrift employs a comprehensive test pyramid with multiple specialized cat
 | Cross-Engine                | `tests/cross_engine/`       | pytest              | `@pytest.mark.gate` + `requires_<engine>` |
 | Physics Validation          | `tests/analytical/`, `tests/integration/conservation_laws/` | pytest              | `@pytest.mark.unit` / `@pytest.mark.integration` |
 | Golf Source Contracts       | `tests/unit/shared_python/` | pytest              | source-map contract tests           |
+| Launch-Monitor Scoring      | `tests/unit/launch_monitor/`, `tests/api/` | pytest | source-backed SG domain and API contract tests |
 | Dependency Source Contracts | `tests/unit/scripts/`       | pytest              | generated dependency contract tests |
 | Benchmarks                  | `tests/benchmarks/`         | pytest-benchmark    | `@pytest.mark.benchmark`            |
 | Property-Based              | `tests/unit/`               | hypothesis + pytest | `@hypothesis.given` (no dedicated marker) |
@@ -2786,6 +2809,8 @@ overlapping fixture names in nested conftests.
 - [ ] IK solver converges within 10 iterations for standard human poses
 - [ ] ID computation returns physically plausible torques (within 2-sigma of analytical)
 - [ ] Ball-flight atmosphere utilities reject non-finite or out-of-troposphere altitudes and stay traceable to documented golf source contracts
+- [ ] Source-backed SG rejects unverifiable baselines, incomplete course states, extrapolation, and untrusted grouped identity while preserving row-level backing evidence
+- [ ] Outcome-proxy responses remain explicitly non-SG in both domain and OpenAPI contracts
 - [ ] FastAPI endpoints return 200 for valid requests and 400 for invalid schema
 - [ ] GUI loads model and renders 3D visualization without crashing
 - [ ] Trajectory optimization improves cost function by >20% over initial guess
@@ -3068,6 +3093,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-20 | 1.0.559 | Added the canonical source-backed strokes-gained and separate outcome-proxy contracts for #8803. SG requires complete start/finish course state and a versioned expected-strokes baseline with HTTP(S) source, license declaration, canonical SHA-256, and unique stratum/distance points. Exact-stratum interpolation is allowed; extrapolation fails closed. Results preserve formula, units, row and dataset hashes, backing benchmark values, exclusions, uncertainty availability, conservative claims, and identity evidence for grouped or longitudinal analysis. FastAPI publishes the schema and analysis endpoints, and generated React declarations remain locked to OpenAPI. The radial-error outcome proxy is structurally prohibited from claiming strokes gained. |
 | 2026-08-20 | 1.0.558 | Closed PR #8793's first protected publication run failures without weakening either gate. Claim-evidence schema v2 hashes valid UTF-8 evidence after canonical CRLF-to-LF normalization while preserving byte-exact binary hashes, so identical committed evidence validates across Windows and Linux checkouts. A focused regression pins both newline forms to one digest and canonical byte count. The PDF finding helper now owns expected metadata as one parameter object, bringing the changed production function back within the repository's eight-parameter architecture budget. |
 | 2026-08-20 | 1.0.557 | Added the release-bound proximal-to-distal publication-quality contract for #8451. The exact UpstreamDrift revision and release-manifest digest now bind a full-PDF inspection covering metadata, outline and link validity, per-page rendering, extractable text, tagging, font resources, and web optimization. CI Standard runs the validator in a dedicated path-scoped job aggregated into the sole required `quality-gate`, so missing optional tooling cannot silently skip protected inspection. The current 231-page candidate passes the computational profile and is losslessly linearized, while the stricter archival profile remains fail-closed on the disclosed untagged, Type 3, and unembedded-font gaps. The contract preserves UpstreamDrift as scientific source authority, AffineDrift as a revision-pinned generated publisher, and human qualification as a separate governed gate. |
 | 2026-08-20 | 1.0.556 | ⚡ Bolt: Fast NumPy reductions and norm computations across motion matching, physics engines, and visualization modules (issue #8782). |
@@ -4147,3 +4173,4 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 
 - Replaced `np.concatenate` with in-place slice assignment in `TrajectoryFunnelBenchmark._policy_action` to optimize array construction in tight simulation loops. (spec-exempt: micro-optimization)
 - Security: Added `X-Launcher-CSRF-Token` to CORS `allow_headers` in `src/api/server.py` and `src/api/local_server.py` to fix CORS preflight rejections for the local launcher UI.
+- Added canonical source-backed strokes-gained contract schema and analytics routes (`ADR-0035`, `docs/api/contracts/launch-monitor-strokes-gained-v1.schema.json`).
