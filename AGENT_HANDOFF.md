@@ -2,7 +2,7 @@
 
 Last updated: 2026-08-20
 
-## Active Publication-Quality Slice (#8451)
+## Publication Quality Status (#8451 Closed; Archival Gates Open)
 
 PR #8793 merged the PDF quality contract at `6e28baef54a0`: UpstreamDrift is
 authoritative, AffineDrift is its pinned publisher, and Tools/Sidekick only
@@ -122,9 +122,9 @@ reference — not equipment calibration, anatomy, physiology, or coaching guidan
 
 ## Immediate Next Steps
 
-1. Publish #8451, then sync its exact revision and digests through AffineDrift.
+1. Complete #8752 and its blocking structural propagation issue #8800.
 2. Continue #8789's remaining Docker/quarantine/baseline work without overlap.
-3. Complete #8752 and burn down #8766 without widening either contract.
+3. Burn down #8766 without widening its registered contract.
 
 ## Gate Commands
 
