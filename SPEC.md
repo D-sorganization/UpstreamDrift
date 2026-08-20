@@ -486,9 +486,8 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-
-| **Spec Version**        | 1.0.551                                            |
-| **Last Spec Update**    | 2026-08-19                                         |
+| **Spec Version**        | 1.0.555                                            |
+| **Last Spec Update**    | 2026-08-20                                         |
 
 ## 2. Purpose & Mission
 
@@ -519,6 +518,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-08-20** - Recovered BunkerShot3D cross-tier plumbing and MPM code verification
+  inside CI architecture and file budgets (issue #8743, #8741). Brings `solvers/mpm/verification.py`
+  and `bunker_shot_gui/bridge.py` inside budget gates, verifying 177 tests across conservation,
+  analytic elastic column, GCI mesh convergence, and F0 cross-check cases without regressions.
 - **2026-08-19** - Corrected the AI provider-adapter tests that had not
   followed deliberate implementation changes (issue #8771). 19 tests under
   `tests/unit/shared_python/ai/adapters/` fail on `main`; ten of them are
@@ -3040,6 +3043,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 ## 12. Change Log
 
+| 2026-08-20 | 1.0.554 | Recovered BunkerShot3D cross-tier plumbing and MPM code verification inside CI architecture and file budgets (issue #8743, #8741). Verified 177 tests across conservation, analytic elastic column, GCI mesh convergence, and F0 cross-check cases without regressions. |
 | 2026-08-19 | 1.0.553 | docs(research): Updated `docs/research/proximal_distal_energy_transfer/README.md` to cite the canonical web monograph and PDF publication hosted in the AffineDrift repository (`https://affinedrift.com/articles/proximal_distal_energy_transfer/index.html`), clearly establishing UpstreamDrift's architectural role as the computational research engine, simulation pipeline host, and evidence data ledger. |
 | 2026-08-19 | 1.0.552 | Qualified distributed grip friction and loss of contact (#8751) and added manufactured-solution and parameter-uncertainty controls for the articulated tier (#8752). Implemented multi-station Coulomb friction cone contact and interface power decomposition in `articulated_distributed_grip.py`, `articulated_distributed_forward.py`, and `articulated_distributed_atlas.py`. Verified normal/tangential work, passivity, and first-failure classifications across station opening and reattachment transitions (`maximum_transition_count > 0`). Authored closed-form manufactured free-body and constrained-motion verifications in `articulated_manufactured_solution.py`. Added Latin hypercube sampling and PRCC parameter sensitivity sweeps across joint limits, anthropometrics, grip stiffness/damping, shaft modes, and ground impedance in `articulated_uncertainty_study.py`. All 10 new research tests and release integrity checks pass. |
 | 2026-08-19 | 1.0.551 | Stabilized main CI and pre-commit health: fixed ruff linting errors across engines, addressed Bandit B314 XML parsing findings with defusedxml in `scripts/check_document_title_case.py` and proximal-distal chart extraction, reverted broken TypeScript bump in UI frontend to resolve `npm ci` ERESOLVE failure, and cleaned up CI delta scan triggers (#8768). |

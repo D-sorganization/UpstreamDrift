@@ -179,7 +179,7 @@ class CrossTierArtists:
         # caveats must not have.
         text_axes = figure.add_subplot(grid[1:, 1])
         text_axes.axis("off")
-        cursor = _TextColumn(text_axes)
+        cursor = _TextColumn(text_axes, figure)
         self.crossover_caption = cursor.add(
             self._crossover_caption_text(), colour="#333333"
         )
@@ -566,15 +566,18 @@ class _TextColumn:
     failure a page of caveats must not have.
     """
 
-    def __init__(self, axes: Axes) -> None:
+    def __init__(self, axes: Axes, figure: Figure) -> None:
         """Start a column at the top of ``axes``.
 
         Args:
             axes: The (invisible) axes to lay text out in.
+            figure: The figure it belongs to, passed rather than read off
+                the axes because ``Axes.figure`` may be a ``SubFigure``,
+                which has no size in inches to measure a line against.
         """
         self._axes = axes
         self._cursor = 1.0
-        height_in = axes.figure.get_size_inches()[1] * axes.get_position().height
+        height_in = figure.get_size_inches()[1] * axes.get_position().height
         self._line = (_TEXT_SIZE * _LINE_SPACING / _POINTS_PER_INCH) / height_in
 
     def add(self, block: str, *, colour: str, monospace: bool = False) -> Text:

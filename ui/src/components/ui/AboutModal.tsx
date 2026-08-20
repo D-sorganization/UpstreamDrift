@@ -12,6 +12,7 @@ import { X, ExternalLink, Loader2, AlertTriangle } from 'lucide-react';
 import { fetchAboutInfo, type AboutInfo } from '@/api/about';
 import packageJson from '../../../package.json';
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const FRONTEND_VERSION: string = packageJson.version;
 
 interface Props {

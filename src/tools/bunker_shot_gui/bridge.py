@@ -32,7 +32,6 @@ No Qt, no arithmetic that is not either the solver's or the metric's.
 from __future__ import annotations
 
 import math
-from collections.abc import Sequence
 from dataclasses import dataclass
 from functools import lru_cache
 
@@ -77,6 +76,9 @@ __all__ = [
     "MAP_BINS",
     "HeadBuild",
     "SoleLoadMap",
+    "CrossTierInputs",
+    "CrossTierSettings",
+    "ProbeSite",
     "build_head",
     "compare_tiers",
     "delivery_rotation",
@@ -651,61 +653,40 @@ def _state_at(
     )
 
 
-def _probe(
-    f0_solver: DRFTSolver,
-    f1_solver: PlaneStrainMPMSolver,
-    state: IntrusionState,
-    *,
-    frame: int,
-    time_s: float,
-    f0_divot_section_area_m2: float,
-    f0_sole_depth_m: float,
-    declared_width_m: float,
-    bulk_density_kg_m3: float,
-) -> CrossTierProbe:
-    """Run one instant through both tiers and wrap the result."""
-    return CrossTierProbe(
-        frame=frame,
-        time_s=time_s,
-        check=cross_check_against_f0(state, f0_solver, f1_solver),
-        f0_divot_section_area_m2=f0_divot_section_area_m2,
-        f0_sole_depth_m=f0_sole_depth_m,
-        declared_width_m=declared_width_m,
-        bulk_density_kg_m3=bulk_density_kg_m3,
-    )
+@dataclass(frozen=True, slots=True)
+class ProbeSite:
+    """One sample of an F0 record, and the assumptions a probe there rests on.
+
+    Bundled because the alternative is nine positional facts travelling
+    together to two functions: the sample they came from, the two F0
+    quantities read off it, and the two declared constants both tiers'
+    divot masses are formed at. A caller that can pass those in the wrong
+    order can silently draw one sample's F1 answer at another sample's
+    moment.
+
+    Attributes:
+        frame: Index into the F0 record.
+        time_s: The moment [s].
+        f0_divot_section_area_m2: F0's swept-envelope section there [m^2].
+        f0_sole_depth_m: F0's sole depth there [m].
+        declared_width_m: The out-of-plane width **both** divot masses are
+            formed at.
+        bulk_density_kg_m3: The bed's bulk density, for the same masses.
+    """
+
+    frame: int
+    time_s: float
+    f0_divot_section_area_m2: float
+    f0_sole_depth_m: float
+    declared_width_m: float
+    bulk_density_kg_m3: float
 
 
-def compare_tiers(
-    *,
-    f0_solver: DRFTSolver,
-    f1_solver: PlaneStrainMPMSolver,
-    build: HeadBuild,
-    result: ShotResult,
-    kinematics: HeadKinematics,
-    f0_divot_section_area_m2: ArrayLike,
-    band: ValidityBand,
-    head_mass_kg: float,
-    bulk_density_kg_m3: float,
-    n_probes: int = 4,
-    sweep_speeds_m_s: Sequence[float] = (),
-    agreement_band: float = DECLARED_AGREEMENT_BAND,
-) -> CrossTierComparison:
-    """Run F1 at chosen instants of an F0 record and assemble the comparison.
+@dataclass(frozen=True)
+class CrossTierInputs:
+    """One F0 record and everything needed to put F1 beside it.
 
-    Expensive by construction, and the cost is where the honesty is: F1 has
-    no instantaneous answer, so each probe is a whole march from clear of
-    the bed to the queried pose. Four probes of a greenside shot cost of
-    order a minute at the resolution ADR-0033 specifies, which is why this
-    is not on the workbench's per-shot path.
-
-    Both solvers should be built with a permissive refusal policy. A bunker
-    shot is far outside either tier's stated envelope, and a strict policy
-    would refuse before producing anything to compare -- which is a correct
-    refusal and a useless comparison.
-
-    Args:
-        f0_solver: The F0 solver the record was produced with.
-        f1_solver: The F1 solver, carrying its declared effective width.
+    Attributes:
         build: The lofted head.
         result: The F0 record.
         kinematics: The entry pose, for the constant orientation.
@@ -717,6 +698,22 @@ def compare_tiers(
         band: F0's per-sample validity band, inherited unchanged.
         head_mass_kg: The head, for the derived speed-lost integral.
         bulk_density_kg_m3: The bed's bulk density, for both divot masses.
+    """
+
+    build: HeadBuild
+    result: ShotResult
+    kinematics: HeadKinematics
+    f0_divot_section_area_m2: ArrayLike
+    band: ValidityBand
+    head_mass_kg: float
+    bulk_density_kg_m3: float
+
+
+@dataclass(frozen=True, slots=True)
+class CrossTierSettings:
+    """How much of an F0 record to probe, and against what band.
+
+    Attributes:
         n_probes: How many engaged samples to probe.
         sweep_speeds_m_s: Speeds for a declared sweep at the deepest
             recorded pose. Supply these when the crossover matters: a
@@ -728,6 +725,85 @@ def compare_tiers(
             the step count goes as ``(c_p + v) / v`` and a 4 m/s probe
             costs order thirty times a 25 m/s one.
         agreement_band: Half-width of the agreement band on ``|ln ratio|``.
+    """
+
+    n_probes: int = 4
+    sweep_speeds_m_s: tuple[float, ...] = ()
+    agreement_band: float = DECLARED_AGREEMENT_BAND
+
+
+def _probe(
+    f0_solver: DRFTSolver,
+    f1_solver: PlaneStrainMPMSolver,
+    state: IntrusionState,
+    site: ProbeSite,
+) -> CrossTierProbe:
+    """Run one instant through both tiers and wrap the result.
+
+    Args:
+        f0_solver: The F0 solver.
+        f1_solver: The F1 solver.
+        state: The query, given to both tiers unchanged.
+        site: Where in the record it came from, and under what assumptions.
+
+    Returns:
+        The paired probe.
+    """
+    return CrossTierProbe(
+        frame=site.frame,
+        time_s=site.time_s,
+        check=cross_check_against_f0(state, f0_solver, f1_solver),
+        f0_divot_section_area_m2=site.f0_divot_section_area_m2,
+        f0_sole_depth_m=site.f0_sole_depth_m,
+        declared_width_m=site.declared_width_m,
+        bulk_density_kg_m3=site.bulk_density_kg_m3,
+    )
+
+
+def _site(
+    inputs: CrossTierInputs,
+    frame: int,
+    *,
+    section_area: NDArray[np.float64],
+    depths: NDArray[np.float64],
+    declared_width_m: float,
+) -> ProbeSite:
+    """Read one sample's F0 quantities off the record."""
+    return ProbeSite(
+        frame=frame,
+        time_s=float(inputs.result.times_s[frame]),
+        f0_divot_section_area_m2=float(section_area[frame]),
+        f0_sole_depth_m=float(depths[frame]),
+        declared_width_m=declared_width_m,
+        bulk_density_kg_m3=float(inputs.bulk_density_kg_m3),
+    )
+
+
+def compare_tiers(
+    *,
+    f0_solver: DRFTSolver,
+    f1_solver: PlaneStrainMPMSolver,
+    inputs: CrossTierInputs,
+    settings: CrossTierSettings | None = None,
+) -> CrossTierComparison:
+    """Run F1 at chosen instants of an F0 record and assemble the comparison.
+
+    Expensive by construction, and the cost is where the honesty is: F1 has
+    no instantaneous answer, so each probe is a whole march from clear of
+    the bed to the queried pose. Four probes of a greenside shot cost of
+    order ten minutes at the resolution the workbench uses, which is why
+    this is not on its per-shot path.
+
+    Both solvers should be built with a permissive refusal policy. A bunker
+    shot is far outside either tier's stated envelope, and a strict policy
+    would refuse before producing anything to compare -- which is a correct
+    refusal and a useless comparison.
+
+    Args:
+        f0_solver: The F0 solver the record was produced with.
+        f1_solver: The F1 solver, carrying its declared effective width.
+        inputs: The record and the constants it is read under.
+        settings: How much to probe; the defaults if omitted.
 
     Returns:
         The comparison.
@@ -736,7 +812,11 @@ def compare_tiers(
         ValueError: If the record has no engaged sample, or if the divot
             section does not describe the same record.
     """
-    section_area = np.asarray(f0_divot_section_area_m2, dtype=np.float64).reshape(-1)
+    chosen = CrossTierSettings() if settings is None else settings
+    result = inputs.result
+    section_area = np.asarray(
+        inputs.f0_divot_section_area_m2, dtype=np.float64
+    ).reshape(-1)
     if section_area.size != result.n_steps:
         raise ValueError(
             "the divot section describes a different record: "
@@ -746,57 +826,44 @@ def compare_tiers(
     depths = np.maximum(np.asarray(result.sole_depths_m, dtype=np.float64), 0.0)
     width = f1_solver.effective_width_m
 
-    frames = probe_frames(result, n_probes)
-    shot_probes = tuple(
-        _probe(
-            f0_solver,
-            f1_solver,
-            _state_at(build, result, kinematics, frame, surface_m=surface_m),
-            frame=frame,
-            time_s=float(result.times_s[frame]),
-            f0_divot_section_area_m2=float(section_area[frame]),
-            f0_sole_depth_m=float(depths[frame]),
-            declared_width_m=width,
-            bulk_density_kg_m3=bulk_density_kg_m3,
-        )
-        for frame in frames
-    )
-
-    deepest = int(np.argmax(depths))
-    sweep_probes = tuple(
-        _probe(
+    def _at(frame: int, speed_m_s: float | None = None) -> CrossTierProbe:
+        return _probe(
             f0_solver,
             f1_solver,
             _state_at(
-                build,
+                inputs.build,
                 result,
-                kinematics,
-                deepest,
+                inputs.kinematics,
+                frame,
                 surface_m=surface_m,
-                speed_m_s=float(speed),
+                speed_m_s=speed_m_s,
             ),
-            frame=deepest,
-            time_s=float(result.times_s[deepest]),
-            f0_divot_section_area_m2=float(section_area[deepest]),
-            f0_sole_depth_m=float(depths[deepest]),
-            declared_width_m=width,
-            bulk_density_kg_m3=bulk_density_kg_m3,
+            _site(
+                inputs,
+                frame,
+                section_area=section_area,
+                depths=depths,
+                declared_width_m=width,
+            ),
         )
-        for speed in sweep_speeds_m_s
-    )
 
+    deepest = int(np.argmax(depths))
     return CrossTierComparison(
-        shot_probes=shot_probes,
+        shot_probes=tuple(
+            _at(frame) for frame in probe_frames(result, chosen.n_probes)
+        ),
         time_s=np.asarray(result.times_s, dtype=np.float64),
         f0_force_n=np.asarray(result.forces_n, dtype=np.float64),
         f0_sole_depth_m=depths,
         f0_velocity_m_s=np.asarray(result.velocities_m_s, dtype=np.float64),
         f0_divot_section_area_m2=section_area,
-        band=band,
-        head_mass_kg=float(head_mass_kg),
+        band=inputs.band,
+        head_mass_kg=float(inputs.head_mass_kg),
         declared_width_m=width,
-        bulk_density_kg_m3=float(bulk_density_kg_m3),
+        bulk_density_kg_m3=float(inputs.bulk_density_kg_m3),
         f1_cell_size_m=float(f1_solver.cell_size_m),
-        sweep_probes=sweep_probes,
-        agreement_band=agreement_band,
+        sweep_probes=tuple(
+            _at(deepest, float(speed)) for speed in chosen.sweep_speeds_m_s
+        ),
+        agreement_band=chosen.agreement_band,
     )
