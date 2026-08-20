@@ -90,6 +90,7 @@ def test_plan_requires_common_support_and_rejects_count_as_benefit(plan) -> None
         in analysis["zero_nominal_ground_rule"]
     )
     assert "not outcome direction or causal benefit" in analysis["count_rule"]
+    assert "planned, feasible, and executed" in analysis["denominator_rule"]
     assert "two-engine discrepancy" in analysis["resolution_rule"]
     assert "otherwise report unresolved, not no effect" in analysis["resolution_rule"]
     assert analysis["outcome_absolute_resolution_tolerance_m_s"] == 0.001
@@ -156,6 +157,18 @@ def test_plan_binds_restart_and_cell_level_evidence_contract(plan) -> None:
         "low_to_nominal_secant_m_s_per_unit_scale",
         "nominal_to_high_secant_m_s_per_unit_scale",
         "nonmonotonic_classification",
+    }
+    assert set(evidence["required_corner_summary_fields"]) == {
+        "corner_id",
+        "requested_state_count",
+        "feasible_state_count",
+        "retained_failures",
+        "planned_headline_cell_count",
+        "executed_headline_cell_count",
+        "matched_cell_count",
+        "matched_fraction_of_feasible",
+        "all_registered_gates_passed",
+        "authority",
     }
 
 

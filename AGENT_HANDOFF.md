@@ -99,7 +99,8 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     cannot be ranked as cross-parameter importance.
     Its v1 evidence contract preserves checkpoint identity and per-cell arrays.
     Shaft matching is coupled/rigid station-force/dissipated-work; ground matching
-    is coupled/fixed grip-force/total-work. Partial records cannot qualify.
+    is coupled/fixed grip-force/total-work. Planned, feasible, and executed
+    denominators remain separate; partial records cannot qualify.
     The governed feasibility/margin figure has embedded CID TrueType text and
     passes its retained-failure contract. Q2/H5 and the machine-readable
     prediction registry no longer repeat the obsolete failed-closure narrative.
