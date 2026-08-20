@@ -94,7 +94,13 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     both headline atlases or record an explicit issue-level acceptance
     amendment. #8800 now owns the full authority-regeneration and headline-
     propagation dependency; the present evidence must not be described as full
-    headline propagation over every bound named by #8752.
+    headline propagation over every bound named by #8752. Its standalone
+    `articulated_scaled_authority.py` generator and focused tests are now
+    implemented: selected cases regenerate all 13 phase states, nominal
+    reproduction is bounded at 1e-8 rad, failures remain classified, and
+    configuration/source/content drift fails closed. Do not connect it to the
+    shaft or ground atlas until the live campaign checkpoints, because those
+    atlas files are part of the running record's hashed source basis.
 - The release has 295 atomic claims and 40 reviewed release claims; all 40
   retain at least one scientifically open gate. #8724 still owns normalized
   four-way adjudication and independent review.
