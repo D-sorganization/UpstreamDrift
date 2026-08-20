@@ -5,9 +5,10 @@ from __future__ import annotations
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import asdict, dataclass, fields
 import hashlib
+import json
 import multiprocessing
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import numpy as np
 from numpy.typing import NDArray
@@ -53,7 +54,9 @@ SOURCE_PATHS = (
     "tests/research/test_articulated_ground.py",
     "tests/research/test_articulated_ground_forward.py",
     "tests/research/test_articulated_ground_atlas.py",
+    "tests/research/test_articulated_ground_checkpoint.py",
 )
+BranchKind = Literal["primary", "control"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -106,8 +109,8 @@ class ArticulatedGroundAtlasConfig:
                 raise ValueError("every horizon must be divisible by every time step")
         if self.station_count_per_hand < 1 or self.station_count_per_hand % 2 == 0:
             raise ValueError("station_count_per_hand must be a positive odd integer")
-        if not isinstance(self.worker_count, int) or not 1 <= self.worker_count <= 12:
-            raise ValueError("worker_count must be an integer from one through twelve")
+        if not isinstance(self.worker_count, int) or not 1 <= self.worker_count <= 20:
+            raise ValueError("worker_count must be an integer from one through twenty")
         for name in (
             "initial_club_displacement_m",
             "initial_club_velocity_m_s",
@@ -231,6 +234,109 @@ def _buffers(shape: tuple[int, ...], nq: int) -> _Buffers:
         ground_force_parity=np.empty(parity_shape),
         active_set_parity=np.empty(parity_shape, dtype=bool),
     )
+
+
+def _execution_digest(
+    authority: _Authority,
+    config: ArticulatedGroundAtlasConfig,
+) -> str:
+    """Bind branch checkpoints to scientific design, authority, and source code."""
+
+    configuration = asdict(config)
+    configuration.pop("worker_count")
+    digest = hashlib.sha256(
+        json.dumps(
+            configuration,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+    )
+    for array in (
+        authority.time_s,
+        authority.profile_index,
+        authority.grip_span_m,
+        authority.solution_q,
+    ):
+        contiguous = np.ascontiguousarray(array)
+        digest.update(str(contiguous.dtype).encode("ascii"))
+        digest.update(np.asarray(contiguous.shape, dtype=np.int64).tobytes())
+        digest.update(contiguous.tobytes())
+    for path in SOURCE_PATHS:
+        digest.update(path.encode("utf-8"))
+        digest.update(hashlib.sha256((ROOT / path).read_bytes()).digest())
+    return digest.hexdigest()
+
+
+def _save_branch_checkpoint(
+    path: Path,
+    *,
+    digest: str,
+    state_slot: int,
+    state: tuple[int, int],
+    kind: BranchKind,
+    branch_slot: int,
+    buffer: _Buffers,
+) -> None:
+    """Atomically retain one complete branch without weakening its design bind."""
+
+    metadata = {
+        "schema_version": "articulated-ground-branch-checkpoint/v1",
+        "design_digest": digest,
+        "state_slot": state_slot,
+        "state": list(state),
+        "kind": kind,
+        "branch_slot": branch_slot,
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    with temporary.open("wb") as stream:
+        np.savez_compressed(
+            stream,
+            __metadata__=np.asarray(json.dumps(metadata, sort_keys=True)),
+            **{field.name: getattr(buffer, field.name) for field in fields(_Buffers)},
+        )
+    temporary.replace(path)
+
+
+def _load_branch_checkpoint(
+    path: Path,
+    *,
+    digest: str,
+    state_slot: int,
+    state: tuple[int, int],
+    kind: BranchKind,
+    branch_slot: int,
+) -> _Buffers:
+    """Load one branch and fail closed on design, identity, or field drift."""
+
+    with np.load(path, allow_pickle=False) as source:
+        expected_fields = {field.name for field in fields(_Buffers)}
+        if set(source.files) != expected_fields | {"__metadata__"}:
+            raise RuntimeError("ground branch checkpoint fields do not match")
+        metadata = json.loads(str(source["__metadata__"].item()))
+        arrays = {name: np.asarray(source[name]) for name in expected_fields}
+    expected = {
+        "schema_version": "articulated-ground-branch-checkpoint/v1",
+        "design_digest": digest,
+        "state_slot": state_slot,
+        "state": list(state),
+        "kind": kind,
+        "branch_slot": branch_slot,
+    }
+    if metadata.get("design_digest") != digest:
+        raise RuntimeError("ground branch checkpoint design digest does not match")
+    if metadata != expected:
+        raise RuntimeError("ground branch checkpoint identity does not match")
+    return _Buffers(**arrays)
+
+
+def _branch_checkpoint_path(
+    directory: Path,
+    state_slot: int,
+    kind: BranchKind,
+    branch_slot: int,
+) -> Path:
+    return directory / f"state-{state_slot:02d}-{kind}-{branch_slot:02d}.npz"
 
 
 def _relative_error(left: Any, right: Any) -> float:
@@ -442,13 +548,15 @@ def _run_pair(
     return traces
 
 
-def _run_state(
+def _run_branch(
     authority: _Authority,
-    primary: _Buffers,
-    controls: _Buffers,
     config: ArticulatedGroundAtlasConfig,
     state: tuple[int, int],
-) -> None:
+    kind: BranchKind,
+    branch_slot: int,
+) -> _Buffers:
+    """Run one pathway or killswitch branch across signed/refined cells."""
+
     case_index, sample = state
     profiles = default_synthetic_profiles()
     model, metadata = build_subject_scaled_model(
@@ -463,75 +571,79 @@ def _run_state(
         total_stiffness_n_m=config.total_stiffness_n_m,
         total_damping_n_s_m=config.total_damping_n_s_m,
     )
-    for pathway_slot, activation in enumerate(config.ground_activations):
-        for velocity_slot, factor in enumerate(VELOCITY_FACTORS):
-            for step_slot, step_s in enumerate(config.forward.time_steps_s):
-                base = {
-                    "q": authority.solution_q[case_index, sample],
-                    "qd": velocity[sample],
-                    "grip_span_m": float(authority.grip_span_m[case_index]),
-                    "hand_contact_local_x_m": float(metadata["hand_contact_local_x_m"]),
-                    "time_step_s": step_s,
-                    "initial_club_displacement_m": config.initial_club_displacement_m,
-                    "initial_club_velocity_m_s": factor
-                    * config.initial_club_velocity_m_s,
-                    "initial_base_displacement": (0.0, 0.0, 0.0),
-                    "initial_base_velocity": (0.0, 0.0, 0.0),
-                    "grip": grip,
-                }
-                traces = _run_pair(
-                    model,
-                    base,
-                    _shaft_config(config),
-                    _ground_config(config, activation),
-                    config.forward,
-                )
-                _record_pair(
-                    primary,
-                    (0, pathway_slot, velocity_slot, step_slot),
-                    traces,
-                    config,
-                )
-    for control_slot, name in enumerate(config.control_names):
-        shaft, ground = _ground_control(name, config)
-        for velocity_slot, factor in enumerate(VELOCITY_FACTORS):
-            for step_slot, step_s in enumerate(config.forward.time_steps_s):
-                base = {
-                    "q": authority.solution_q[case_index, sample],
-                    "qd": velocity[sample],
-                    "grip_span_m": float(authority.grip_span_m[case_index]),
-                    "hand_contact_local_x_m": float(metadata["hand_contact_local_x_m"]),
-                    "time_step_s": step_s,
-                    "initial_club_displacement_m": config.initial_club_displacement_m,
-                    "initial_club_velocity_m_s": factor
-                    * config.initial_club_velocity_m_s,
-                    "initial_base_displacement": (0.0, 0.0, 0.0),
-                    "initial_base_velocity": (0.0, 0.0, 0.0),
-                    "grip": grip,
-                }
-                traces = _run_pair(model, base, shaft, ground, config.forward)
-                _record_pair(
-                    controls,
-                    (0, control_slot, velocity_slot, step_slot),
-                    traces,
-                    config,
-                )
-
-
-def _state_job(
-    payload: tuple[_Authority, ArticulatedGroundAtlasConfig, int, tuple[int, int]],
-) -> tuple[int, _Buffers, _Buffers]:
-    authority, config, state_slot, state = payload
+    if kind == "primary":
+        if not 0 <= branch_slot < len(config.ground_activations):
+            raise ValueError("primary branch slot is outside the registered design")
+        shaft = _shaft_config(config)
+        ground = _ground_config(config, config.ground_activations[branch_slot])
+    elif kind == "control":
+        if not 0 <= branch_slot < len(config.control_names):
+            raise ValueError("control branch slot is outside the registered design")
+        shaft, ground = _ground_control(config.control_names[branch_slot], config)
+    else:  # pragma: no cover - BranchKind is enforced by registered descriptors.
+        raise ValueError("branch kind must be primary or control")
     tail = (2, len(config.forward.time_steps_s), 2, len(config.horizons_s))
-    primary = _buffers((1, len(config.ground_activations), *tail), 20)
-    controls = _buffers((1, len(config.control_names), *tail), 20)
-    _run_state(authority, primary, controls, config, state)
-    return state_slot, primary, controls
+    local = _buffers((1, 1, *tail), 20)
+    for velocity_slot, factor in enumerate(VELOCITY_FACTORS):
+        for step_slot, step_s in enumerate(config.forward.time_steps_s):
+            base = {
+                "q": authority.solution_q[case_index, sample],
+                "qd": velocity[sample],
+                "grip_span_m": float(authority.grip_span_m[case_index]),
+                "hand_contact_local_x_m": float(metadata["hand_contact_local_x_m"]),
+                "time_step_s": step_s,
+                "initial_club_displacement_m": config.initial_club_displacement_m,
+                "initial_club_velocity_m_s": factor * config.initial_club_velocity_m_s,
+                "initial_base_displacement": (0.0, 0.0, 0.0),
+                "initial_base_velocity": (0.0, 0.0, 0.0),
+                "grip": grip,
+            }
+            traces = _run_pair(
+                model,
+                base,
+                shaft,
+                ground,
+                config.forward,
+            )
+            _record_pair(
+                local,
+                (0, 0, velocity_slot, step_slot),
+                traces,
+                config,
+            )
+    return local
 
 
-def _merge_state(target: _Buffers, state_slot: int, source: _Buffers) -> None:
+def _branch_job(
+    payload: tuple[
+        _Authority,
+        ArticulatedGroundAtlasConfig,
+        int,
+        tuple[int, int],
+        BranchKind,
+        int,
+    ],
+) -> tuple[int, tuple[int, int], BranchKind, int, _Buffers]:
+    authority, config, state_slot, state, kind, branch_slot = payload
+    return (
+        state_slot,
+        state,
+        kind,
+        branch_slot,
+        _run_branch(authority, config, state, kind, branch_slot),
+    )
+
+
+def _merge_branch(
+    target: _Buffers,
+    state_slot: int,
+    branch_slot: int,
+    source: _Buffers,
+) -> None:
     for field in fields(_Buffers):
-        getattr(target, field.name)[state_slot] = getattr(source, field.name)[0]
+        getattr(target, field.name)[state_slot, branch_slot] = getattr(
+            source, field.name
+        )[0, 0]
 
 
 def _pair_relative(left: FloatArray, right: FloatArray, floor: float) -> FloatArray:
@@ -747,6 +859,8 @@ def _record(
 
 def run_articulated_ground_atlas(
     config: ArticulatedGroundAtlasConfig = ArticulatedGroundAtlasConfig(),
+    *,
+    state_checkpoint_dir: Path | None = None,
 ) -> tuple[dict[str, Any], dict[str, NDArray[Any]]]:
     """Run the registered primary and falsification-control trajectories."""
 
@@ -764,28 +878,91 @@ def run_articulated_ground_atlas(
     tail = (2, len(config.forward.time_steps_s), 2, len(config.horizons_s))
     primary = _buffers((len(states), len(config.ground_activations), *tail), 20)
     controls = _buffers((len(states), len(config.control_names), *tail), 20)
-    jobs = tuple(
-        (authority, config, state_slot, state)
-        for state_slot, state in enumerate(states)
-    )
+    descriptors: list[tuple[int, tuple[int, int], BranchKind, int]] = []
+    for state_slot, state in enumerate(states):
+        descriptors.extend(
+            (state_slot, state, "primary", branch_slot)
+            for branch_slot in range(len(config.ground_activations))
+        )
+        descriptors.extend(
+            (state_slot, state, "control", branch_slot)
+            for branch_slot in range(len(config.control_names))
+        )
+    digest = _execution_digest(authority, config)
+    jobs = []
+    completed = 0
+    for state_slot, state, kind, branch_slot in descriptors:
+        checkpoint = (
+            _branch_checkpoint_path(
+                state_checkpoint_dir,
+                state_slot,
+                kind,
+                branch_slot,
+            )
+            if state_checkpoint_dir is not None
+            else None
+        )
+        if checkpoint is not None and checkpoint.exists():
+            local = _load_branch_checkpoint(
+                checkpoint,
+                digest=digest,
+                state_slot=state_slot,
+                state=state,
+                kind=kind,
+                branch_slot=branch_slot,
+            )
+            _merge_branch(
+                primary if kind == "primary" else controls,
+                state_slot,
+                branch_slot,
+                local,
+            )
+            completed += 1
+            print(
+                f"ground atlas branch {completed}/{len(descriptors)} restored: "
+                f"{state} {kind} {branch_slot}",
+                flush=True,
+            )
+        else:
+            jobs.append((authority, config, state_slot, state, kind, branch_slot))
     executor = None
-    if config.worker_count == 1:
-        results = map(_state_job, jobs)
+    if not jobs:
+        results = iter(())
+    elif config.worker_count == 1:
+        results = map(_branch_job, jobs)
     else:
         executor = ProcessPoolExecutor(
-            max_workers=min(config.worker_count, len(states)),
+            max_workers=min(config.worker_count, len(jobs)),
             mp_context=multiprocessing.get_context("spawn"),
         )
-        results = executor.map(_state_job, jobs)
+        results = executor.map(_branch_job, jobs)
     try:
-        for completed, (state_slot, local_primary, local_controls) in enumerate(
-            results, 1
-        ):
-            _merge_state(primary, state_slot, local_primary)
-            _merge_state(controls, state_slot, local_controls)
+        for state_slot, state, kind, branch_slot, local in results:
+            _merge_branch(
+                primary if kind == "primary" else controls,
+                state_slot,
+                branch_slot,
+                local,
+            )
+            if state_checkpoint_dir is not None:
+                _save_branch_checkpoint(
+                    _branch_checkpoint_path(
+                        state_checkpoint_dir,
+                        state_slot,
+                        kind,
+                        branch_slot,
+                    ),
+                    digest=digest,
+                    state_slot=state_slot,
+                    state=state,
+                    kind=kind,
+                    branch_slot=branch_slot,
+                    buffer=local,
+                )
+            completed += 1
             print(
-                f"ground atlas state {completed}/{len(states)} complete: "
-                f"{states[state_slot]}",
+                f"ground atlas branch {completed}/{len(descriptors)} complete: "
+                f"{state} {kind} {branch_slot}",
                 flush=True,
             )
     finally:

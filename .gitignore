@@ -248,3 +248,6 @@ test_event_filter.py
 /base.*.provenance.json
 /pytest_report*.txt
 /golf_modeling_suite.db
+
+# Recoverable full-atlas uncertainty branch checkpoints (generated, governed by digest).
+/docs/research/proximal_distal_energy_transfer/data/.articulated_headline_uncertainty_checkpoints/

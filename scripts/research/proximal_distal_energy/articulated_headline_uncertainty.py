@@ -27,8 +27,14 @@ SOURCE_PATHS = (
     "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py",
     "scripts/research/proximal_distal_energy/articulated_ground_atlas.py",
     "tests/research/test_articulated_headline_uncertainty.py",
-    "tests/research/test_articulated_headline_uncertainty_evidence.py",
 )
+
+
+def _source_hashes() -> dict[str, str]:
+    return {
+        path: hashlib.sha256((ROOT / path).read_bytes()).hexdigest()
+        for path in SOURCE_PATHS
+    }
 
 
 @dataclass(frozen=True, slots=True)
@@ -96,8 +102,8 @@ class HeadlineUncertaintyConfig:
     )
 
     def __post_init__(self) -> None:
-        if not isinstance(self.worker_count, int) or not 1 <= self.worker_count <= 12:
-            raise ValueError("worker_count must be an integer from one through twelve")
+        if not isinstance(self.worker_count, int) or not 1 <= self.worker_count <= 20:
+            raise ValueError("worker_count must be an integer from one through twenty")
         names = [axis.name for axis in self.axes]
         if not names or len(names) != len(set(names)):
             raise ValueError("uncertainty axis names must be nonempty and unique")
@@ -128,7 +134,7 @@ def registered_corners(
 def _shaft_config(
     corner: RegisteredCorner, config: HeadlineUncertaintyConfig
 ) -> ArticulatedShaftAtlasConfig:
-    result = ArticulatedShaftAtlasConfig(worker_count=config.worker_count)
+    result = ArticulatedShaftAtlasConfig(worker_count=min(config.worker_count, 12))
     updates: dict[str, float] = {}
     if corner.axis_name == "grip_stiffness_scale":
         updates["total_stiffness_n_m"] = result.total_stiffness_n_m * corner.value
@@ -170,26 +176,45 @@ def _run_pathway(
     pathway: Pathway,
     corner: RegisteredCorner,
     config: HeadlineUncertaintyConfig,
+    *,
+    execution_source_sha256: dict[str, str],
+    state_checkpoint_dir: Path | None = None,
 ) -> dict[str, Any]:
+    observed_sources = _source_hashes()
+    if observed_sources != execution_source_sha256:
+        return _source_drift_failure(execution_source_sha256, observed_sources)
     try:
         if pathway == "shaft":
             record, _ = run_articulated_shaft_atlas(_shaft_config(corner, config))
         else:
-            record, _ = run_articulated_ground_atlas(_ground_config(corner, config))
+            record, _ = run_articulated_ground_atlas(
+                _ground_config(corner, config),
+                state_checkpoint_dir=state_checkpoint_dir,
+            )
     except (
         RuntimeError,
         ValueError,
         np.linalg.LinAlgError,
         FloatingPointError,
     ) as error:
-        return {
+        result = {
             "status": "failed_retained",
             "failure_class": type(error).__name__,
             "failure_message": str(error),
             "matched_cell_count": None,
             "total_cell_count": 384,
             "all_registered_gates_passed": False,
+            "computed_source_sha256": execution_source_sha256,
         }
+        observed_sources = _source_hashes()
+        return (
+            _source_drift_failure(execution_source_sha256, observed_sources)
+            if observed_sources != execution_source_sha256
+            else result
+        )
+    observed_sources = _source_hashes()
+    if observed_sources != execution_source_sha256:
+        return _source_drift_failure(execution_source_sha256, observed_sources)
     results = record["results"]
     if results["all_registered_gates_passed"] is not True:
         return {
@@ -199,6 +224,7 @@ def _run_pathway(
             "matched_cell_count": None,
             "total_cell_count": results["matched_load_work_total_cell_count"],
             "all_registered_gates_passed": False,
+            "computed_source_sha256": execution_source_sha256,
         }
     return {
         "status": "completed",
@@ -207,6 +233,22 @@ def _run_pathway(
         "matched_cell_count": results["matched_load_work_cell_count"],
         "total_cell_count": results["matched_load_work_total_cell_count"],
         "all_registered_gates_passed": results["all_registered_gates_passed"],
+        "computed_source_sha256": execution_source_sha256,
+    }
+
+
+def _source_drift_failure(
+    execution_sources: dict[str, str], observed_sources: dict[str, str]
+) -> dict[str, Any]:
+    return {
+        "status": "failed_retained",
+        "failure_class": "SourceDrift",
+        "failure_message": "campaign sources changed during pathway execution",
+        "matched_cell_count": None,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": False,
+        "computed_source_sha256": execution_sources,
+        "observed_source_sha256": observed_sources,
     }
 
 
@@ -273,10 +315,7 @@ def _record(
         "configuration": asdict(config),
         "corners": rows,
         "results": _campaign_results(rows) if status == "complete" else None,
-        "source_sha256": {
-            path: hashlib.sha256((ROOT / path).read_bytes()).hexdigest()
-            for path in SOURCE_PATHS
-        },
+        "source_sha256": _source_hashes(),
         "limitations": {
             "interaction_order": "one-at-a-time corners do not estimate higher-order parameter interactions",
             "calibration": "bounds are engineering ranges, not measured participant or equipment properties",
@@ -307,9 +346,12 @@ def _existing_rows(
     ):
         raise RuntimeError("headline uncertainty checkpoint design does not match")
     rows = record.get("corners", [])
+    legacy_sources = record.get("source_sha256", {})
     for row in rows:
         for pathway in ("shaft", "ground"):
             result = row.get(pathway, {})
+            if result.get("status") in {"completed", "failed_retained"}:
+                result.setdefault("computed_source_sha256", legacy_sources)
             if (
                 result.get("status") == "completed"
                 and result.get("all_registered_gates_passed") is not True
@@ -339,6 +381,7 @@ def run_headline_uncertainty(
 ) -> dict[str, Any]:
     """Run all registered full-atlas corners and retain every failure."""
 
+    execution_sources = _source_hashes()
     existing = _existing_rows(checkpoint_path, config)
     rows: list[dict[str, Any]] = []
     for corner in registered_corners(config):
@@ -352,7 +395,19 @@ def run_headline_uncertainty(
             }:
                 continue
             row[pathway] = (
-                _run_pathway(pathway, corner, config)
+                _run_pathway(
+                    pathway,
+                    corner,
+                    config,
+                    execution_source_sha256=execution_sources,
+                    state_checkpoint_dir=(
+                        checkpoint_path.parent
+                        / ".articulated_headline_uncertainty_checkpoints"
+                        / corner.corner_id
+                        if checkpoint_path is not None and pathway == "ground"
+                        else None
+                    ),
+                )
                 if pathway in corner.pathways or corner.corner_id == "nominal"
                 else _not_affected()
             )

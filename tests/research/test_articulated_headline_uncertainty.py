@@ -51,6 +51,13 @@ def test_registered_design_covers_every_required_constitutive_axis() -> None:
         study.HeadlineUncertaintyConfig(worker_count=0)
 
 
+def test_twenty_worker_campaign_limits_shaft_atlas_to_twelve_workers() -> None:
+    config = study.HeadlineUncertaintyConfig(worker_count=20)
+    corner = study.registered_corners(config)[0]
+
+    assert study._shaft_config(corner, config).worker_count == 12
+
+
 def test_campaign_reports_headline_movement_and_retains_failures(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -61,7 +68,7 @@ def test_campaign_reports_headline_movement_and_retains_failures(
             gates_passed=config.torsional_stiffness_scale != 1.44,
         )
 
-    def fake_ground(config: study.ArticulatedGroundAtlasConfig):
+    def fake_ground(config: study.ArticulatedGroundAtlasConfig, **_):
         if config.ground_free_moment_damping_scale == 1.5:
             raise RuntimeError("manufactured corner failure")
         count = round(4 * (config.ground_translation_stiffness_scale - 1.0))
@@ -79,7 +86,6 @@ def test_campaign_reports_headline_movement_and_retains_failures(
         "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py",
         "scripts/research/proximal_distal_energy/articulated_ground_atlas.py",
         "tests/research/test_articulated_headline_uncertainty.py",
-        "tests/research/test_articulated_headline_uncertainty_evidence.py",
     }
     assert all(len(digest) == 64 for digest in record["source_sha256"].values())
     nominal = record["corners"][0]
@@ -119,6 +125,30 @@ def test_campaign_reports_headline_movement_and_retains_failures(
     ]
 
 
+def test_pathway_fails_closed_when_source_changes_during_execution(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    config = study.HeadlineUncertaintyConfig(worker_count=1)
+    corner = study.registered_corners(config)[0]
+    launch_sources = {"source.py": "a" * 64}
+    monkeypatch.setattr(
+        study, "run_articulated_shaft_atlas", lambda _: _fake_record(126)
+    )
+    monkeypatch.setattr(study, "_source_hashes", lambda: {"source.py": "b" * 64})
+
+    result = study._run_pathway(
+        "shaft",
+        corner,
+        config,
+        execution_source_sha256=launch_sources,
+    )
+
+    assert result["status"] == "failed_retained"
+    assert result["failure_class"] == "SourceDrift"
+    assert result["computed_source_sha256"] == launch_sources
+    assert result["observed_source_sha256"] == {"source.py": "b" * 64}
+
+
 def test_campaign_checkpoint_resumes_without_repeating_completed_cells(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
@@ -128,7 +158,7 @@ def test_campaign_checkpoint_resumes_without_repeating_completed_cells(
         calls["shaft"] += 1
         return _fake_record(126)
 
-    def fake_ground(_: study.ArticulatedGroundAtlasConfig):
+    def fake_ground(_: study.ArticulatedGroundAtlasConfig, **__):
         calls["ground"] += 1
         return _fake_record(0)
 
@@ -138,11 +168,19 @@ def test_campaign_checkpoint_resumes_without_repeating_completed_cells(
     config = study.HeadlineUncertaintyConfig(worker_count=1)
     first = study.run_headline_uncertainty(config, checkpoint_path=checkpoint)
     first_calls = calls.copy()
+    legacy = json.loads(checkpoint.read_text(encoding="utf-8"))
+    for row in legacy["corners"]:
+        for pathway in ("shaft", "ground"):
+            row[pathway].pop("computed_source_sha256", None)
+    legacy_sources = {"legacy/source.py": "a" * 64}
+    legacy["source_sha256"] = legacy_sources
+    checkpoint.write_text(json.dumps(legacy), encoding="utf-8")
     second = study.run_headline_uncertainty(config, checkpoint_path=checkpoint)
 
     assert first["status"] == second["status"] == "complete"
     assert calls == first_calls
     assert len(second["corners"]) == 19
+    assert second["corners"][0]["shaft"]["computed_source_sha256"] == legacy_sources
 
 
 def test_checkpoint_rejects_scientific_design_drift_but_not_worker_change(
@@ -152,7 +190,7 @@ def test_checkpoint_rejects_scientific_design_drift_but_not_worker_change(
         study, "run_articulated_shaft_atlas", lambda _: _fake_record(126)
     )
     monkeypatch.setattr(
-        study, "run_articulated_ground_atlas", lambda _: _fake_record(0)
+        study, "run_articulated_ground_atlas", lambda _, **__: _fake_record(0)
     )
     checkpoint = tmp_path / "headline.json"
     study.run_headline_uncertainty(
