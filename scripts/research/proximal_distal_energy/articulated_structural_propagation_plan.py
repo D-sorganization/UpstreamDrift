@@ -201,6 +201,10 @@ def build_structural_propagation_plan(
         "support_rule": "never compare corner outcome ranges as paired effects without persistent common matching support",
         "zero_nominal_ground_rule": "a corner admitting cells when nominal ground admits 0/384 is support emergence, not evidence of paired ground-pathway benefit",
         "count_rule": "matched-count movement diagnoses conditioning-set sensitivity, not outcome direction or causal benefit",
+        "resolution_rule": "classify a persistent-support corner-minus-nominal outcome change as resolved only when its magnitude exceeds the maximum declared tolerance, two-engine discrepancy, and fine-versus-coarse time-step discrepancy; otherwise report unresolved, not no effect",
+        "oat_secant_rule": "report low-to-nominal and nominal-to-high engineering secants separately; do not label either a derivative or population effect",
+        "nonmonotonicity_rule": "retain opposing or materially unequal one-sided secants as nonmonotonic engineering sensitivity rather than averaging them",
+        "interaction_rule": "one-at-a-time corners do not estimate higher-order parameter interactions",
         "multiplicity": "report all registered OAT corners descriptively; do not select favorable corners or assign confirmatory p-values",
     }
     contract_sha = hashlib.sha256(

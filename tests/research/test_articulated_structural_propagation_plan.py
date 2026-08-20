@@ -88,6 +88,11 @@ def test_plan_requires_common_support_and_rejects_count_as_benefit(plan) -> None
         in analysis["zero_nominal_ground_rule"]
     )
     assert "not outcome direction or causal benefit" in analysis["count_rule"]
+    assert "two-engine discrepancy" in analysis["resolution_rule"]
+    assert "otherwise report unresolved, not no effect" in analysis["resolution_rule"]
+    assert "do not label either a derivative" in analysis["oat_secant_rule"]
+    assert "nonmonotonic engineering sensitivity" in analysis["nonmonotonicity_rule"]
+    assert "do not estimate higher-order" in analysis["interaction_rule"]
     assert "do not select favorable corners" in analysis["multiplicity"]
 
 
