@@ -152,6 +152,8 @@ def audit_ground_checkpoint_directory(
         content.update(bytes.fromhex(_sha256(path)))
     if len(set(identities)) != len(identities):
         raise RuntimeError("checkpoint identities must be unique")
+    if len(set(states.values())) != len(states):
+        raise RuntimeError("checkpoint state slots must map to unique states")
     if schemas != {SCHEMA_VERSION}:
         raise RuntimeError("checkpoint schema is not registered")
     if len(design_digests) != 1 or any(
@@ -165,13 +167,25 @@ def audit_ground_checkpoint_directory(
     }
     if len(files) == expected_count and set(identities) != expected_identities:
         raise RuntimeError("complete checkpoint set does not cover registration")
+    branches_by_state = {
+        state_slot: {
+            (kind, branch_slot)
+            for observed_slot, _, kind, branch_slot in identities
+            if observed_slot == state_slot
+        }
+        for state_slot in states
+    }
+    complete_state_count = sum(
+        value == set(BRANCHES) for value in branches_by_state.values()
+    )
     return {
         "schema_version": "articulated-checkpoint-audit/v1",
         "status": "complete" if len(files) == expected_count else "partial",
         "checkpoint_count": len(files),
         "expected_checkpoint_count": expected_count,
         "unique_identity_count": len(set(identities)),
-        "completed_state_slot_count": len(states),
+        "observed_state_slot_count": len(states),
+        "complete_state_slot_count": complete_state_count,
         "checkpoint_schema_version": next(iter(schemas)),
         "design_digest": next(iter(design_digests)),
         "reference_sha256": _sha256(reference),

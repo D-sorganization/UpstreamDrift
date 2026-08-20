@@ -25,10 +25,11 @@ def _write_checkpoint(
     design_digest: str = DESIGN_DIGEST,
     value: float = 1.0,
     shape: tuple[int, ...] = (2,),
+    state: tuple[int, int] | None = None,
 ) -> None:
     metadata = {
         "state_slot": state_slot,
-        "state": [state_slot, 0],
+        "state": list(state or (state_slot, 0)),
         "kind": kind,
         "branch_slot": branch_slot,
         "schema_version": "articulated-ground-branch-checkpoint/v1",
@@ -44,7 +45,12 @@ def _write_checkpoint(
         )
 
 
-def _write_state(directory: Path, state_slot: int = 0) -> None:
+def _write_state(
+    directory: Path,
+    state_slot: int = 0,
+    *,
+    state: tuple[int, int] | None = None,
+) -> None:
     for kind, count in (("primary", 4), ("control", 2)):
         for branch_slot in range(count):
             _write_checkpoint(
@@ -52,6 +58,7 @@ def _write_state(directory: Path, state_slot: int = 0) -> None:
                 state_slot=state_slot,
                 kind=kind,
                 branch_slot=branch_slot,
+                state=state,
             )
 
 
@@ -67,7 +74,8 @@ def test_checkpoint_audit_distinguishes_complete_and_partial_sets(tmp_path) -> N
     assert report["status"] == "complete"
     assert report["checkpoint_count"] == 6
     assert report["unique_identity_count"] == 6
-    assert report["completed_state_slot_count"] == 1
+    assert report["observed_state_slot_count"] == 1
+    assert report["complete_state_slot_count"] == 1
     assert report["design_digest"] == DESIGN_DIGEST
     assert len(report["checkpoint_set_sha256"]) == 64
 
@@ -82,6 +90,8 @@ def test_checkpoint_audit_distinguishes_complete_and_partial_sets(tmp_path) -> N
         partial, reference=reference, expected_count=6, allow_partial=True
     )
     assert partial_report["status"] == "partial"
+    assert partial_report["observed_state_slot_count"] == 1
+    assert partial_report["complete_state_slot_count"] == 0
     with pytest.raises(RuntimeError, match="count is incomplete"):
         audit_ground_checkpoint_directory(
             partial, reference=reference, expected_count=6
@@ -132,4 +142,16 @@ def test_checkpoint_audit_rejects_metadata_filename_disagreement(tmp_path) -> No
     with pytest.raises(RuntimeError, match="filename does not match"):
         audit_ground_checkpoint_directory(
             directory, reference=reference, expected_count=6
+        )
+
+
+def test_checkpoint_audit_rejects_duplicate_state_mapping(tmp_path) -> None:
+    directory = tmp_path / "checkpoints"
+    _write_state(directory, 0)
+    _write_state(directory, 1, state=(0, 0))
+    reference = directory / "state-00-primary-00.npz"
+
+    with pytest.raises(RuntimeError, match="map to unique states"):
+        audit_ground_checkpoint_directory(
+            directory, reference=reference, expected_count=12
         )
