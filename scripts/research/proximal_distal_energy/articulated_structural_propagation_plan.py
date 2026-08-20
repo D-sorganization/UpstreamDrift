@@ -291,6 +291,7 @@ def build_structural_propagation_plan(
             "digest_rule": "bind every array name, dtype, shape, and byte payload except the stored digest",
             "nonpersistent_resolution_rule": "store NaN thresholds and false resolved status outside persistent common support",
             "write_policy": "validate then write compressed NPZ through an atomic temporary replacement",
+            "assembly_rule": "derive cell identities, outcomes, and gate classifications from one atlas mapping",
         },
         "required_axis_summary_fields": [
             "axis_name",

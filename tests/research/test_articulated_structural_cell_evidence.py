@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import numpy as np
 import pytest
 
 from scripts.research.proximal_distal_energy.articulated_structural_cell_evidence import (
     build_structural_cell_evidence,
+    build_structural_cell_evidence_from_atlas,
     load_structural_cell_evidence,
     validate_structural_cell_evidence,
     write_structural_cell_evidence,
@@ -17,6 +20,8 @@ from scripts.research.proximal_distal_energy.articulated_structural_common_suppo
 )
 
 pytestmark = pytest.mark.scientific
+ROOT = Path(__file__).resolve().parents[2]
+DATA = ROOT / "docs/research/proximal_distal_energy_transfer/data"
 
 
 def _cells(matched: tuple[bool, ...], speed: tuple[float, ...]) -> HeadlineCells:
@@ -83,6 +88,27 @@ def test_cell_evidence_rejects_gate_failure_without_classification() -> None:
             gate_status=np.asarray([False]),
             failure_class=np.asarray(["none"]),
         )
+
+
+@pytest.mark.parametrize(
+    ("pathway", "filename"),
+    [
+        ("shaft", "articulated_shaft_atlas.npz"),
+        ("ground", "articulated_ground_atlas.npz"),
+    ],
+)
+def test_cell_evidence_assembles_identity_and_gates_from_one_atlas(
+    pathway, filename
+) -> None:
+    with np.load(DATA / filename, allow_pickle=False) as source:
+        arrays = {name: np.asarray(source[name]) for name in source.files}
+
+    evidence = build_structural_cell_evidence_from_atlas(pathway, arrays)
+
+    assert evidence["cell_identity"].shape == (384,)
+    assert np.all(evidence["gate_status"])
+    assert set(evidence["failure_class"].tolist()) == {"none"}
+    assert evidence["pathway"].item() == pathway
 
 
 def test_cell_evidence_round_trip_is_atomic_and_tamper_evident(tmp_path) -> None:

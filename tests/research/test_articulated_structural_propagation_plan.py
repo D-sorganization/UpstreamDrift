@@ -188,6 +188,7 @@ def test_plan_binds_restart_and_cell_level_evidence_contract(plan) -> None:
         "outside persistent common support" in storage["nonpersistent_resolution_rule"]
     )
     assert "atomic temporary replacement" in storage["write_policy"]
+    assert "from one atlas mapping" in storage["assembly_rule"]
     assert "atomic" in evidence["write_policy"]
     assert "all seven corners" in evidence["completion_policy"]
     assert "must not qualify" in evidence["partial_record_policy"]

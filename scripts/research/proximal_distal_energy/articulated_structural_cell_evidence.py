@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
+from collections.abc import Mapping
 from typing import Any
 
 import numpy as np
@@ -13,6 +14,11 @@ from numpy.typing import NDArray
 from scripts.research.proximal_distal_energy.articulated_structural_common_support import (
     CommonSupportComparison,
     HeadlineCells,
+    Pathway,
+    extract_headline_cells,
+)
+from scripts.research.proximal_distal_energy.articulated_structural_gate_status import (
+    derive_structural_cell_gate_status,
 )
 
 Array = NDArray[Any]
@@ -130,6 +136,24 @@ def build_structural_cell_evidence(
     return arrays
 
 
+def build_structural_cell_evidence_from_atlas(
+    pathway: Pathway,
+    atlas_arrays: Mapping[str, Any],
+    *,
+    comparison: CommonSupportComparison | None = None,
+) -> dict[str, Array]:
+    """Build identities, outcomes, and gate evidence from one atlas mapping."""
+
+    cells = extract_headline_cells(pathway, atlas_arrays)
+    gates = derive_structural_cell_gate_status(pathway, atlas_arrays)
+    return build_structural_cell_evidence(
+        cells,
+        gate_status=gates.gate_status,
+        failure_class=gates.failure_class,
+        comparison=comparison,
+    )
+
+
 def validate_structural_cell_evidence(arrays: dict[str, Array]) -> None:
     """Validate schema, alignment, classifications, and content digest."""
 
@@ -184,6 +208,7 @@ __all__ = [
     "REQUIRED_CELL_FIELDS",
     "SCHEMA_VERSION",
     "build_structural_cell_evidence",
+    "build_structural_cell_evidence_from_atlas",
     "load_structural_cell_evidence",
     "validate_structural_cell_evidence",
     "write_structural_cell_evidence",
