@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, replace
+import hashlib
 import json
 from pathlib import Path
 from typing import Any, Literal
@@ -21,6 +22,13 @@ from scripts.research.proximal_distal_energy.articulated_shaft_atlas import (
 ROOT = Path(__file__).resolve().parents[3]
 DATA = ROOT / "docs/research/proximal_distal_energy_transfer/data"
 Pathway = Literal["shaft", "ground"]
+SOURCE_PATHS = (
+    "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py",
+    "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py",
+    "scripts/research/proximal_distal_energy/articulated_ground_atlas.py",
+    "tests/research/test_articulated_headline_uncertainty.py",
+    "tests/research/test_articulated_headline_uncertainty_evidence.py",
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -231,6 +239,10 @@ def _record(
         },
         "configuration": asdict(config),
         "corners": rows,
+        "source_sha256": {
+            path: hashlib.sha256((ROOT / path).read_bytes()).hexdigest()
+            for path in SOURCE_PATHS
+        },
         "limitations": {
             "interaction_order": "one-at-a-time corners do not estimate higher-order parameter interactions",
             "calibration": "bounds are engineering ranges, not measured participant or equipment properties",

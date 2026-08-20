@@ -74,6 +74,14 @@ def test_campaign_reports_headline_movement_and_retains_failures(
     )
 
     assert record["design"]["corner_count"] == 19
+    assert set(record["source_sha256"]) == {
+        "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py",
+        "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py",
+        "scripts/research/proximal_distal_energy/articulated_ground_atlas.py",
+        "tests/research/test_articulated_headline_uncertainty.py",
+        "tests/research/test_articulated_headline_uncertainty_evidence.py",
+    }
+    assert all(len(digest) == 64 for digest in record["source_sha256"].values())
     nominal = record["corners"][0]
     assert nominal["shaft"]["matched_cell_count"] == 126
     assert nominal["ground"]["matched_cell_count"] == 0
