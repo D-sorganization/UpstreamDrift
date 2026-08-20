@@ -208,20 +208,19 @@ jobs:
         env:
           EVENT_NAME: ${{ github.event_name }}
           BASE_REF: ${{ github.base_ref }}
-          BEFORE_SHA: ${{ github.event.before }}
         run: |
           set -euo pipefail
           mkdir -p "$(dirname "$GITHUB_OUTPUT")"
 
-          if [ "$EVENT_NAME" = "pull_request" ]; then
-            changed=$(git diff --name-only "origin/${BASE_REF}...HEAD")
-          elif [ "$EVENT_NAME" = "push" ] && [ -n "${BEFORE_SHA:-}" ] && [ "${BEFORE_SHA:-}" != "0000000000000000000000000000000000000000" ]; then
-            changed=$(git diff --name-only "${BEFORE_SHA}...HEAD")
-          else
-            echo "Event '$EVENT_NAME' without before SHA runs the full suite."
+          # Only pull_request runs can be narrowed; push, schedule and
+          # workflow_dispatch always exercise the full suite.
+          if [ "$EVENT_NAME" != "pull_request" ]; then
+            echo "Event '$EVENT_NAME' always runs the full suite."
             echo "code=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
+
+          changed=$(git diff --name-only "origin/${BASE_REF}...HEAD")
           echo "Changed files:"
           echo "$changed"
 
@@ -318,18 +317,8 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
-            diff_base="origin/${{ github.base_ref }}"
-          elif [ "${{ github.event_name }}" = "push" ] \
-            && [ -n "${{ github.event.before }}" ] \
-            && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
-            diff_base="${{ github.event.before }}"
-          else
-            diff_base=""
-          fi
-
-          if [ -n "$diff_base" ]; then
             mapfile -d '' py_files < <(
-              git diff --name-only --diff-filter=ACMRT -z "$diff_base" HEAD -- '*.py'
+              git diff --name-only --diff-filter=ACMRT -z "origin/${{ github.base_ref }}" HEAD -- '*.py'
             )
             if [ "${#py_files[@]}" -eq 0 ]; then
               echo "No changed Python files; skipping Ruff lint check."
@@ -349,18 +338,8 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
-            diff_base="origin/${{ github.base_ref }}"
-          elif [ "${{ github.event_name }}" = "push" ] \
-            && [ -n "${{ github.event.before }}" ] \
-            && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
-            diff_base="${{ github.event.before }}"
-          else
-            diff_base=""
-          fi
-
-          if [ -n "$diff_base" ]; then
             mapfile -d '' py_files < <(
-              git diff --name-only --diff-filter=ACMRT -z "$diff_base" HEAD -- '*.py'
+              git diff --name-only --diff-filter=ACMRT -z "origin/${{ github.base_ref }}" HEAD -- '*.py'
             )
             if [ "${#py_files[@]}" -eq 0 ]; then
               echo "No changed Python files; skipping Ruff format check."
@@ -680,23 +659,13 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
-            diff_base="origin/${{ github.base_ref }}"
-          elif [ "${{ github.event_name }}" = "push" ] \
-            && [ -n "${{ github.event.before }}" ] \
-            && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
-            diff_base="${{ github.event.before }}"
-          else
-            diff_base=""
-          fi
-
-          if [ -n "$diff_base" ]; then
             mapfile -d '' bandit_targets < <(
-              git diff --name-only --diff-filter=ACMRT -z "$diff_base" HEAD -- \
+              git diff --name-only --diff-filter=ACMRT -z "origin/${{ github.base_ref }}" HEAD -- \
                 'src/**/*.py' \
                 'scripts/**/*.py'
             )
             if [ "${#bandit_targets[@]}" -eq 0 ]; then
-              echo "No changed source/application Python files supported by Bandit; skipping Bandit delta scan."
+              echo "No changed source/application Python files supported by Bandit; skipping PR Bandit delta scan."
               exit 0
             fi
             set +e

@@ -109,6 +109,7 @@ jobs:
             echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
           else
             echo "Running directly on host. Sharing tool cache."
+            sudo chown -R $(id -u):$(id -g) /home/dieterolson/actions-runners 2>/dev/null || true
           fi
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
@@ -271,6 +272,7 @@ jobs:
             echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
           else
             echo "Running directly on host. Sharing tool cache."
+            sudo chown -R $(id -u):$(id -g) /home/dieterolson/actions-runners 2>/dev/null || true
           fi
 
       - name: Set up Python ${{ matrix.python-version }}

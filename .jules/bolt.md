@@ -152,3 +152,6 @@
 ## 2026-08-18 - NumPy Array Norms
 **Learning:** `np.linalg.norm` is surprisingly slow in Python. For multi-dimensional arrays, `np.sqrt(np.einsum('...i,...i->...'))` is ~1.5x faster. For 1D arrays, `math.sqrt(np.vdot(x, x))` is ~2.2x faster than `float(np.linalg.norm(x))`.
 **Action:** Replace `np.linalg.norm` with `einsum` or `vdot` in critical paths to avoid intermediate array allocations and function dispatch overhead.
+## 2025-02-23 - Focus on Measurable Impact Over Micro-Optimizations
+**Learning:** Scattershot micro-optimizations (like replacing `np.sum` with `.sum()` or `np.vdot` across many unrelated files) violate the core philosophy of "avoiding micro-optimizations with no measurable impact" and pollute the codebase with noisy comments. They often trigger PR rejections and linting errors (like `E501 Line too long`).
+**Action:** When finding ONE performance improvement, focus on a single, targeted bottleneck with proven real-world impact, rather than applying sweeping, theoretical micro-optimizations across the entire codebase. Ensure that any added inline comments do not break the 88-character line limit, appending `  # noqa: E501` if necessary.

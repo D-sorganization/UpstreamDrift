@@ -13,10 +13,9 @@ from pathlib import Path
 from zipfile import BadZipFile, ZipFile
 
 try:
-    from defusedxml import ElementTree as SafeElementTree
+    from defusedxml import ElementTree
 except ImportError:
-    from xml.etree import ElementTree as SafeElementTree  # type: ignore[no-redef]
-
+    from xml.etree import ElementTree  # type: ignore[no-redef]
 MINOR = {
     "a",
     "an",
@@ -167,8 +166,8 @@ def findings_for_text(path: Path, text: str) -> list[Finding]:
 def findings_for_docx(path: Path, shown: Path) -> list[Finding]:
     try:
         with ZipFile(path) as archive:
-            root = SafeElementTree.fromstring(archive.read("word/document.xml"))
-    except (BadZipFile, KeyError, SafeElementTree.ParseError):
+            root = ElementTree.fromstring(archive.read("word/document.xml"))
+    except (BadZipFile, KeyError, ElementTree.ParseError):
         return []
     findings = []
     for number, paragraph in enumerate(root.findall(".//w:p", DOCX_NS), 1):
