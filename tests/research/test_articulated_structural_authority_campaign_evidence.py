@@ -19,6 +19,7 @@ ARTICLE = ROOT / "docs/research/proximal_distal_energy_transfer"
 CHAPTER = ARTICLE / "chapters/_ch06caaa_structural_authority.qmd"
 MANUSCRIPT = ARTICLE / "proximal_distal_energy_transfer.qmd"
 QUESTION_PROGRAM = ARTICLE / "MOMENTUM_TRANSFER_QUESTION_PROGRAM.md"
+FALSIFICATION_MATRIX = ARTICLE / "MODEL_COMPLETION_FALSIFICATION_MATRIX.md"
 pytestmark = pytest.mark.scientific
 
 
@@ -104,3 +105,15 @@ def test_question_program_distinguishes_authority_from_propagation() -> None:
     )
     assert "not a human feasibility or prevalence result" in program
     assert "Propagate every feasible #8800 authority" in program
+
+
+def test_falsification_matrix_reconciles_closed_states_and_open_sensitivity() -> None:
+    matrix = FALSIFICATION_MATRIX.read_text(encoding="utf-8")
+
+    assert (
+        "subject-scaled common states fail bilateral anatomical closure" not in matrix
+    )
+    assert "all 234 subject-scaled states closed" in matrix
+    assert "seven structural corners have not yet propagated" in matrix
+    assert "structural sensitivity of the headline estimands" in matrix
+    assert "human transport remain unresolved" in matrix
