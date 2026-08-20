@@ -125,6 +125,34 @@ def test_result_retains_units_vendor_provenance_and_source_joinable_rows() -> No
     assert result.claims.device_emulation is False
 
 
+def test_population_synthesis_reports_material_heterogeneity() -> None:
+    frame = pd.DataFrame(
+        {
+            "source_id": ["synthetic-source"] * 18,
+            "player_id": ["positive"] * 6 + ["mixed"] * 6 + ["negative"] * 6,
+            "x": list(range(6)) * 3,
+            "y": list(range(6)) + [0, 1, 0, 1, 0, 1] + list(reversed(range(6))),
+        }
+    )
+    result = analyze_player_covariation_v1(
+        frame,
+        PlayerCovariationRequestV1(
+            x_column="x", y_column="y", player_column="player_id"
+        ),
+        context=_context().model_copy(
+            update={"source_units": {"x": "deg", "y": "deg"}}
+        ),
+    )
+
+    assert result.meta_analysis.state == "available"
+    assert result.meta_analysis.q_statistic is not None
+    assert result.meta_analysis.q_statistic > 1
+    assert result.meta_analysis.tau_squared is not None
+    assert result.meta_analysis.tau_squared > 0
+    assert result.meta_analysis.i_squared_pct is not None
+    assert result.meta_analysis.i_squared_pct > 50
+
+
 def test_player_analysis_requires_matching_trusted_identity() -> None:
     request = PlayerCovariationRequestV1(
         x_column="face_angle",
