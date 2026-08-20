@@ -37,6 +37,19 @@ class DummyAdapter(BaseAgentAdapter):
     def validate_connection(self) -> tuple[bool, str]:
         return True, "OK"
 
+    # `list_models` and `thinking_capabilities` became abstract in #5635 when
+    # the shared chat dock grew Provider/Model/Thinking dropdowns. A test
+    # double for the interface has to move with the interface.
+    def list_models(self) -> list[str]:
+        return ["dummy-model"]
+
+    def thinking_capabilities(self) -> object:
+        from src.shared.python.chat_contracts.models import (
+            make_none_only_capabilities,
+        )
+
+        return make_none_only_capabilities(provider="dummy")
+
 
 def test_tool_declaration_init() -> None:
     """Test ToolDeclaration initialization."""
