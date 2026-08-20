@@ -4,16 +4,7 @@ Last updated: 2026-08-20
 
 ## Publication Quality Status (#8451 Closed; Archival Gates Open)
 
-PR #8793 merged the PDF quality contract at `6e28baef54a0`: UpstreamDrift is
-authoritative, AffineDrift is its pinned publisher, and Tools/Sidekick only
-link. The
-web-linearized 231-page candidate passes full-page inspection; missing tags,
-110 Type 3 resources, and two unembedded resources block archival release.
-Phase 0 landed in UpstreamDrift #8791, AffineDrift #3884, and Tools #4586.
-AffineDrift #3880/#3887/#3888 now provide the immutable monograph projection,
-release pin, and verifier. #8789 owns Docker/quarantine/baseline; #8556,
-equipment calibration, and archival/PID release remain open. Details:
-`docs/research/proximal_distal_energy_transfer/PUBLICATION_QUALITY.md`.
+PR #8793 merged the PDF quality contract at `6e28baef54a0`: UpstreamDrift is authoritative, AffineDrift is its pinned publisher, and Tools/Sidekick only link. The web-linearized 231-page candidate passes full-page inspection; missing tags, 110 Type 3 resources, and two unembedded resources block archival release. Phase 0 landed in UpstreamDrift #8791, AffineDrift #3884, and Tools #4586. AffineDrift #3880/#3887/#3888 provide the immutable monograph projection, release pin, and verifier. #8789 owns Docker/quarantine/baseline; #8556, equipment calibration, and archival/PID release remain open. Details: `docs/research/proximal_distal_energy_transfer/PUBLICATION_QUALITY.md`.
 
 ## Read This First — How Merging Works Now
 
@@ -50,10 +41,8 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
 ## Program Authority & Physics Epics State
 
 - Epic #8557 governs the proximal-to-distal program; #8595 retains the agenda.
-- Tools #4142 remains open; immutable ensemble/sensitivity consumption and
-  cross-repository parity remain required before #8557 can close.
-- Tools #4430 remains open after #4450 (`8f654b3a1552`); the rotating-base
-  provider, Python/TypeScript parity, rendered QA, and UpstreamDrift pin remain due.
+- Tools #4142 remains open; immutable ensemble/sensitivity consumption and cross-repository parity remain required before #8557 can close.
+- Tools #4430 remains open after #4450 (`8f654b3a1552`); the rotating-base provider, Python/TypeScript parity, rendered QA, and UpstreamDrift pin remain due.
 - Live issue audit confirms #8557/#8426/#8443 remain open; #8458, #8497,
   #8505, #8493, and #8499 are closed groundwork. README and conclusions now
   distinguish canonical/current governance from historical completed epics.
@@ -97,12 +86,9 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     infeasible-limit controls, a preoutcome 0.001 m/s numerical resolution floor,
     engine/step discrepancy thresholds, and span-normalized one-sided secants that
     cannot be ranked as cross-parameter importance.
-    Its v1 evidence contract preserves checkpoint identity and per-cell arrays.
-    Shaft matching is coupled/rigid station-force/dissipated-work; ground matching
-    is coupled/fixed grip-force/total-work. Planned, feasible, and executed
-    denominators remain separate; partial records cannot qualify.
-    The figure contract exposes support transitions, resolution, secants, and
-    failures with searchable vector text and color-independent status encoding.
+    Its v1 evidence contract preserves checkpoint identity and per-cell arrays. Shaft matching is coupled/rigid station-force/dissipated-work; ground matching is coupled/fixed grip-force/total-work. Planned, feasible, and executed denominators remain separate; partial records cannot qualify.
+    The figure contract exposes support transitions, resolution, secants, and failures with searchable vector text and color-independent status encoding.
+    The integration contract requires the paper, falsification matrix, question program, prediction/question/claim registries, and data dictionary to move together; results remain model-dependent sensitivities and cannot become causal, population, mechanism, parameter-ranking, or coaching claims.
     The governed feasibility/margin figure has embedded CID TrueType text and
     passes its retained-failure contract. Q2/H5 and the machine-readable
     prediction registry no longer repeat the obsolete failed-closure narrative.
@@ -118,10 +104,7 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
 
 ## Qualified Baseline — And Its Limits
 
-Native MuJoCo and robotics Pinocchio independently qualify the 20-coordinate
-rigid tree over 234 closed states, with power, passivity, energy, refinement,
-geometry, and engine-parity controls. All of it is a synthetic structural
-reference — not equipment calibration, anatomy, physiology, or coaching guidance.
+Native MuJoCo and robotics Pinocchio independently qualify the 20-coordinate rigid tree over 234 closed states, with power, passivity, energy, refinement, geometry, and engine-parity controls. All of it is a synthetic structural reference — not equipment calibration, anatomy, physiology, or coaching guidance.
 
 - Of 384 coupled-versus-rigid shaft cells, 126 match on load and work; speed
   differences span `-0.0285` to `+0.0212 m/s` (82 negative), **rejecting a

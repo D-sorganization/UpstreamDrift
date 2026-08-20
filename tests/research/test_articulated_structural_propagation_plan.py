@@ -195,6 +195,29 @@ def test_plan_preregisters_nonmisleading_publication_figure(plan) -> None:
     }
 
 
+def test_plan_binds_paper_claim_and_release_integration(plan) -> None:
+    integration = plan["integration_contract"]
+
+    assert set(integration["required_surfaces"]) == {
+        "proximal_distal_energy_transfer.qmd",
+        "MODEL_COMPLETION_FALSIFICATION_MATRIX.md",
+        "MOMENTUM_TRANSFER_QUESTION_PROGRAM.md",
+        "data/model_completion_predictions.json",
+        "data/momentum_transfer_question_registry.json",
+        "data/claim_audit_registry.json",
+        "DATA_DICTIONARY.md",
+    }
+    assert integration["claim_classification"] == "model-dependent sensitivity"
+    assert "complete and validated" in integration["release_promotion_rule"]
+    assert set(integration["prohibited_promotions"]) == {
+        "population robustness",
+        "causal parameter effect",
+        "cross-parameter importance ranking",
+        "human mechanism",
+        "coaching recommendation",
+    }
+
+
 def test_nominal_plan_reproduces_registered_atlas_sizes(plan) -> None:
     nominal = plan["corners"][0]
 

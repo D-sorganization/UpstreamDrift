@@ -301,6 +301,29 @@ def build_structural_propagation_plan(
             "units and alt text",
         ],
     }
+    integration_contract = {
+        "required_surfaces": [
+            "proximal_distal_energy_transfer.qmd",
+            "MODEL_COMPLETION_FALSIFICATION_MATRIX.md",
+            "MOMENTUM_TRANSFER_QUESTION_PROGRAM.md",
+            "data/model_completion_predictions.json",
+            "data/momentum_transfer_question_registry.json",
+            "data/claim_audit_registry.json",
+            "DATA_DICTIONARY.md",
+        ],
+        "claim_classification": "model-dependent sensitivity",
+        "release_promotion_rule": (
+            "promote into release claims only after the complete and validated "
+            "result, figure, paper language, and registries agree"
+        ),
+        "prohibited_promotions": [
+            "population robustness",
+            "causal parameter effect",
+            "cross-parameter importance ranking",
+            "human mechanism",
+            "coaching recommendation",
+        ],
+    }
     contract_sha = hashlib.sha256(
         json.dumps(
             {
@@ -309,6 +332,7 @@ def build_structural_propagation_plan(
                 "analysis": analysis,
                 "evidence_contract": evidence_contract,
                 "figure_contract": figure_contract,
+                "integration_contract": integration_contract,
             },
             sort_keys=True,
             separators=(",", ":"),
@@ -325,6 +349,7 @@ def build_structural_propagation_plan(
         "analysis": analysis,
         "evidence_contract": evidence_contract,
         "figure_contract": figure_contract,
+        "integration_contract": integration_contract,
         "corners": corners,
         "source_sha256": {path: _sha256(ROOT / path) for path in SOURCE_PATHS},
         "limitations": {

@@ -3,7 +3,7 @@
   "status": "ready",
   "authority_campaign_sha256": "d8115073dc1b506f145196b08c96d7cb3cf00e8cf29099970e2f7b0fbe6d63f3",
   "design_sha256": "8e5f246645e27c8f0f66a87859c63c470c43e579bccb50848124174944e11e07",
-  "contract_sha256": "ed535480039504b303df73c4701256cb29a6b724df28477525aed8ec9075ffb6",
+  "contract_sha256": "5477bf893f1c59c81bbfee58311cf791a2f113c42109a694731072f8c4040e04",
   "design": {
     "case_indices": [
       0,
@@ -271,6 +271,26 @@
       "embedded searchable text",
       "color-independent status encoding",
       "units and alt text"
+    ]
+  },
+  "integration_contract": {
+    "required_surfaces": [
+      "proximal_distal_energy_transfer.qmd",
+      "MODEL_COMPLETION_FALSIFICATION_MATRIX.md",
+      "MOMENTUM_TRANSFER_QUESTION_PROGRAM.md",
+      "data/model_completion_predictions.json",
+      "data/momentum_transfer_question_registry.json",
+      "data/claim_audit_registry.json",
+      "DATA_DICTIONARY.md"
+    ],
+    "claim_classification": "model-dependent sensitivity",
+    "release_promotion_rule": "promote into release claims only after the complete and validated result, figure, paper language, and registries agree",
+    "prohibited_promotions": [
+      "population robustness",
+      "causal parameter effect",
+      "cross-parameter importance ranking",
+      "human mechanism",
+      "coaching recommendation"
     ]
   },
   "corners": [
@@ -868,8 +888,8 @@
     "scripts/research/proximal_distal_energy/articulated_atlas_authority.py": "191174f7fea921a3b52054f85d735b45ee0ca93090aaa733f59221d45de0af0d",
     "scripts/research/proximal_distal_energy/articulated_scaled_authority.py": "6d41ef265dd88d61bdf70f1ff78a17716c9293e6260f307c253df43f441b7d83",
     "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py": "166ab2ebec88a0c53abc54c6b565ba0a3f82caf800449e822164177f31289549",
-    "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": "a20bc983448efa00669f295dca0890440866698149efd12371c896df9b916d6a",
-    "tests/research/test_articulated_structural_propagation_plan.py": "e63641424e0ec1252e0f7ea1b84a7d06e666047352f1dc6a74d7a811f999d763",
+    "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": "0a8d09f925bf26d60d0a523e18c77710c69e50cc45fa1ef5c5993b709ffb0c2a",
+    "tests/research/test_articulated_structural_propagation_plan.py": "43dea890a25a469b648850569a1fd2bf18eed8305a83c3fc4bef822cd2370125",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "8eed52fe4ebbc55fcf753f4703330dd6d768281b0babfbb2adca074b862fc36d",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
     "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json": "f07fc33cc76fb80f395cd10b01a30169b6440cec3854be3894024d435bc0f722",
