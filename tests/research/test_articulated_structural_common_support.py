@@ -6,10 +6,12 @@ import numpy as np
 import pytest
 
 from scripts.research.proximal_distal_energy.articulated_structural_common_support import (
+    build_corner_support_summary,
     build_one_sided_engineering_secants,
     classify_one_sided_engineering_secants,
     compare_common_support,
     extract_headline_cells,
+    require_corner_release_evidence,
 )
 
 pytestmark = pytest.mark.scientific
@@ -255,3 +257,115 @@ def test_nonmonotonicity_requires_shared_persistent_support() -> None:
     assert classification.overall == "insufficient_shared_persistent_support"
     assert classification.shared_persistent_identities == ()
     assert classification.cell_classification == ()
+
+
+def _authority_record() -> dict[str, object]:
+    return {
+        "authority_sha256": "a" * 64,
+        "scales": {"height": 1.0, "body_mass": 1.0, "joint_limit": 1.0},
+        "model_sha256": {"0": "b" * 64},
+    }
+
+
+def test_corner_summary_preserves_all_support_denominators() -> None:
+    cells = extract_headline_cells(
+        "shaft",
+        _arrays(
+            tuple((0, phase) for phase in range(12)), matched_indices=tuple(range(126))
+        ),
+    )
+    summary = build_corner_support_summary(
+        "nominal",
+        cells,
+        requested_state_count=12,
+        feasible_state_count=12,
+        retained_failures=(),
+        planned_headline_cell_count=384,
+        all_registered_gates_passed=True,
+        authority=_authority_record(),
+    )
+
+    assert summary.planned_headline_cell_count == 384
+    assert summary.feasible_headline_cell_count == 384
+    assert summary.executed_headline_cell_count == 384
+    assert summary.matched_cell_count == 126
+    assert summary.matched_fraction_of_feasible == pytest.approx(126 / 384)
+    assert summary.complete_execution is True
+    assert summary.qualifies_as_release_evidence is True
+    require_corner_release_evidence(summary)
+
+
+def test_corner_summary_retains_infeasible_state_outside_denominator() -> None:
+    states = tuple((case, phase) for case in (0, 8, 9, 17) for phase in (0, 6, 12))
+    states = tuple(state for state in states if state != (0, 12))
+    cells = extract_headline_cells("shaft", _arrays(states, matched_indices=()))
+    failure = {
+        "case_index": 0,
+        "phase_index": 12,
+        "failure_class": "ik_nonconvergence",
+    }
+    summary = build_corner_support_summary(
+        "height_scale-low",
+        cells,
+        requested_state_count=12,
+        feasible_state_count=11,
+        retained_failures=(failure,),
+        planned_headline_cell_count=384,
+        all_registered_gates_passed=True,
+        authority=_authority_record(),
+    )
+
+    assert summary.retained_failures == (failure,)
+    assert summary.feasible_headline_cell_count == 352
+    assert summary.executed_headline_cell_count == 352
+    assert summary.matched_fraction_of_feasible == 0.0
+    assert summary.qualifies_as_release_evidence is True
+
+
+def test_partial_corner_cannot_qualify_as_release_evidence() -> None:
+    cells = extract_headline_cells(
+        "shaft", _arrays(tuple((0, phase) for phase in range(11)), matched_indices=())
+    )
+    summary = build_corner_support_summary(
+        "nominal",
+        cells,
+        requested_state_count=12,
+        feasible_state_count=12,
+        retained_failures=(),
+        planned_headline_cell_count=384,
+        all_registered_gates_passed=True,
+        authority=_authority_record(),
+    )
+
+    assert summary.complete_execution is False
+    assert summary.qualifies_as_release_evidence is False
+    with pytest.raises(RuntimeError, match="does not qualify"):
+        require_corner_release_evidence(summary)
+
+
+def test_corner_summary_rejects_erased_failure_or_bad_plan_denominator() -> None:
+    cells = extract_headline_cells(
+        "ground", _arrays(((0, 0),), matched_indices=(), ground_names=True)
+    )
+    with pytest.raises(ValueError, match="retained failure states"):
+        build_corner_support_summary(
+            "height_scale-low",
+            cells,
+            requested_state_count=2,
+            feasible_state_count=1,
+            retained_failures=(),
+            planned_headline_cell_count=64,
+            all_registered_gates_passed=True,
+            authority=_authority_record(),
+        )
+    with pytest.raises(ValueError, match="planned headline denominator"):
+        build_corner_support_summary(
+            "nominal",
+            cells,
+            requested_state_count=1,
+            feasible_state_count=1,
+            retained_failures=(),
+            planned_headline_cell_count=31,
+            all_registered_gates_passed=True,
+            authority=_authority_record(),
+        )

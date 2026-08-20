@@ -66,7 +66,7 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     retains partial opening. The 19-corner headline campaign is incomplete:
     nominal completed at shaft 126/384 and ground 0/384; every gate and all four
     source hashes match remote basis `fbff8dc53`. Exec session `64656` completed
-    grip-stiffness-low shaft at 182/384 (+56 nominal); ground has 51/72 durable,
+    grip-stiffness-low shaft at 182/384 (+56 nominal); ground has 53/72 durable,
     unique v1 branches under design digest `32ccf54bee70`; the corner and 1/19
     campaign record remain incomplete.
     All 72 nominal branch checkpoints retain exact trajectory/force/ground-force
@@ -88,7 +88,7 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     cannot be ranked as cross-parameter importance.
     Its v1 evidence contract preserves checkpoint identity and per-cell arrays. Shaft matching is coupled/rigid station-force/dissipated-work; ground matching is coupled/fixed grip-force/total-work. Planned, feasible, and executed denominators remain separate; partial records cannot qualify.
     The figure contract exposes support transitions, resolution, secants, and failures with searchable vector text and color-independent status encoding.
-    Common-support analysis keys case/phase/velocity/step/engine/horizon, excludes missing states, applies the 0.001 m/s floor plus engine/step discrepancies, and keeps one-sided secants unpooled. On identities persistent both ways, it distinguishes resolved opposition, same-sign material inequality above summed resolutions, direction consistency, and resolution limits. Results remain model-dependent sensitivities, not causal, population, mechanism, ranking, or coaching claims.
+    Common-support analysis keys case/phase/velocity/step/engine/horizon, keeps planned/feasible/executed/matched denominators distinct, retains failed states, rejects partial release evidence, applies the 0.001 m/s plus engine/step resolution, and keeps one-sided secants unpooled. Shared support is classified as resolved opposition, material inequality, consistency, or resolution-limited. Results remain model-dependent, not causal, population, mechanism, ranking, or coaching claims.
     The governed feasibility/margin figure has embedded CID TrueType text and
     passes its retained-failure contract. Q2/H5 and the machine-readable
     prediction registry no longer repeat the obsolete failed-closure narrative.

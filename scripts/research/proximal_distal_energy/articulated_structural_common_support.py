@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from collections import Counter
 from dataclasses import dataclass
 from typing import Any, Literal
 
@@ -117,6 +118,35 @@ class SecantClassification:
     shared_persistent_identities: tuple[CellIdentity, ...]
     cell_classification: tuple[str, ...]
     overall: str
+
+
+@dataclass(frozen=True, slots=True)
+class CornerSupportSummary:
+    """Explicit planned, feasible, executed, and matched support accounting."""
+
+    corner_id: str
+    requested_state_count: int
+    feasible_state_count: int
+    retained_failures: tuple[dict[str, int | str], ...]
+    planned_headline_cell_count: int
+    feasible_headline_cell_count: int
+    executed_headline_cell_count: int
+    matched_cell_count: int
+    matched_fraction_of_feasible: float
+    all_registered_gates_passed: bool
+    authority: dict[str, Any]
+
+    @property
+    def complete_execution(self) -> bool:
+        """Return whether every feasible state supplied all 32 headline cells."""
+
+        return self.executed_headline_cell_count == self.feasible_headline_cell_count
+
+    @property
+    def qualifies_as_release_evidence(self) -> bool:
+        """Require complete execution and every registered gate."""
+
+        return self.complete_execution and self.all_registered_gates_passed
 
 
 def _headline_array(arrays: Mapping[str, Any], *names: str, dtype: Any) -> NDArray[Any]:
@@ -377,14 +407,92 @@ def classify_one_sided_engineering_secants(
     )
 
 
+def build_corner_support_summary(
+    corner_id: str,
+    cells: HeadlineCells,
+    *,
+    requested_state_count: int,
+    feasible_state_count: int,
+    retained_failures: tuple[Mapping[str, Any], ...],
+    planned_headline_cell_count: int,
+    all_registered_gates_passed: bool,
+    authority: Mapping[str, Any],
+) -> CornerSupportSummary:
+    """Account for every state and cell without changing the match denominator."""
+
+    if not corner_id.strip():
+        raise ValueError("corner_id must be nonempty")
+    if (
+        not isinstance(requested_state_count, int)
+        or not isinstance(feasible_state_count, int)
+        or not 0 <= feasible_state_count <= requested_state_count
+        or requested_state_count < 1
+    ):
+        raise ValueError("state counts must satisfy 0 <= feasible <= requested")
+    expected_planned = requested_state_count * 32
+    if planned_headline_cell_count != expected_planned:
+        raise ValueError(
+            "planned headline denominator must equal requested states times 32"
+        )
+    normalized_failures = tuple(
+        {
+            "case_index": int(failure["case_index"]),
+            "phase_index": int(failure["phase_index"]),
+            "failure_class": str(failure["failure_class"]),
+        }
+        for failure in retained_failures
+    )
+    failure_states = {
+        (failure["case_index"], failure["phase_index"])
+        for failure in normalized_failures
+    }
+    if len(failure_states) != requested_state_count - feasible_state_count:
+        raise ValueError("retained failure states must account for infeasible states")
+    state_counts = Counter((identity[0], identity[1]) for identity in cells.identities)
+    if any(count != 32 for count in state_counts.values()):
+        raise ValueError("every executed state must contain exactly 32 headline cells")
+    if len(state_counts) > feasible_state_count:
+        raise ValueError("executed states cannot exceed feasible states")
+    required_authority = {"authority_sha256", "scales", "model_sha256"}
+    if not required_authority.issubset(authority):
+        raise ValueError("authority record is incomplete")
+    executed = len(cells.identities)
+    matched = int(np.count_nonzero(cells.matched))
+    return CornerSupportSummary(
+        corner_id=corner_id,
+        requested_state_count=requested_state_count,
+        feasible_state_count=feasible_state_count,
+        retained_failures=normalized_failures,
+        planned_headline_cell_count=planned_headline_cell_count,
+        feasible_headline_cell_count=feasible_state_count * 32,
+        executed_headline_cell_count=executed,
+        matched_cell_count=matched,
+        matched_fraction_of_feasible=matched / executed if executed else 0.0,
+        all_registered_gates_passed=bool(all_registered_gates_passed),
+        authority=dict(authority),
+    )
+
+
+def require_corner_release_evidence(summary: CornerSupportSummary) -> None:
+    """Fail closed when partial execution or a registered gate remains."""
+
+    if not summary.qualifies_as_release_evidence:
+        raise RuntimeError(
+            f"corner {summary.corner_id} does not qualify as release evidence"
+        )
+
+
 __all__ = [
     "CellIdentity",
     "CommonSupportComparison",
+    "CornerSupportSummary",
     "HeadlineCells",
     "OneSidedEngineeringSecants",
     "SecantClassification",
+    "build_corner_support_summary",
     "build_one_sided_engineering_secants",
     "classify_one_sided_engineering_secants",
     "compare_common_support",
     "extract_headline_cells",
+    "require_corner_release_evidence",
 ]
