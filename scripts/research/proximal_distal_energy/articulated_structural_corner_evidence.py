@@ -42,6 +42,7 @@ def assemble_structural_corner_pathway_evidence(
     corner_atlas_arrays: Mapping[str, Any],
     *,
     corner_id: str,
+    cell_evidence_artifact: str,
     requested_state_count: int,
     feasible_state_count: int,
     retained_failures: tuple[Mapping[str, Any], ...],
@@ -77,6 +78,7 @@ def assemble_structural_corner_pathway_evidence(
         authority=authority,
     )
     corner_record = corner_support_summary_record(summary)
+    corner_record["cell_evidence_artifact"] = cell_evidence_artifact
     corner_record["cell_evidence_sha256"] = str(cell_evidence["evidence_sha256"].item())
     return StructuralCornerPathwayEvidence(
         pathway=pathway,

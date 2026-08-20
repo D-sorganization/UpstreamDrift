@@ -3,18 +3,27 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
+import numpy as np
 import pytest
 
+from scripts.research.proximal_distal_energy.articulated_structural_cell_evidence import (
+    build_structural_cell_evidence_from_atlas,
+    write_structural_cell_evidence,
+)
 from scripts.research.proximal_distal_energy.articulated_structural_result import (
     AXIS_PATHWAYS,
     CORNER_PATHWAYS,
     assemble_structural_propagation_result,
+    validate_structural_propagation_bundle,
     validate_structural_propagation_result,
     write_structural_propagation_result,
 )
 
 pytestmark = pytest.mark.scientific
+ROOT = Path(__file__).resolve().parents[2]
+DATA = ROOT / "docs/research/proximal_distal_energy_transfer/data"
 
 
 def _corner(corner_id: str, pathway: str) -> dict[str, object]:
@@ -36,6 +45,7 @@ def _corner(corner_id: str, pathway: str) -> dict[str, object]:
     return {
         "corner_id": corner_id,
         "pathway": pathway,
+        "cell_evidence_artifact": f"cells/{corner_id}-{pathway}.npz",
         "cell_evidence_sha256": ("d" if pathway == "shaft" else "e") * 64,
         "requested_state_count": requested,
         "feasible_state_count": feasible,
@@ -147,3 +157,65 @@ def test_result_write_is_atomic_exact_and_tamper_evident(tmp_path) -> None:
     output.write_text(json.dumps(tampered, indent=2) + "\n", encoding="utf-8")
     with pytest.raises(RuntimeError, match="does not reproduce"):
         validate_structural_propagation_result(output, "c" * 64)
+
+
+def test_result_bundle_reopens_and_reconciles_every_cell_pack(tmp_path) -> None:
+    packs = {}
+    for pathway in ("shaft", "ground"):
+        with np.load(DATA / f"articulated_{pathway}_atlas.npz") as source:
+            arrays = {name: np.asarray(source[name]) for name in source.files}
+        packs[pathway] = build_structural_cell_evidence_from_atlas(pathway, arrays)
+    corners = []
+    for corner_id, pathway in CORNER_PATHWAYS:
+        corner = _corner(corner_id, pathway)
+        pack = packs[pathway]
+        corner["feasible_state_count"] = 12
+        corner["retained_failures"] = []
+        corner["feasible_headline_cell_count"] = 384
+        corner["executed_headline_cell_count"] = 384
+        corner["cell_evidence_sha256"] = str(pack["evidence_sha256"].item())
+        corner["matched_cell_count"] = int(np.count_nonzero(pack["matched_load_work"]))
+        corner["matched_fraction_of_feasible"] = (
+            corner["matched_cell_count"] / corner["executed_headline_cell_count"]
+        )
+        write_structural_cell_evidence(
+            pack, tmp_path / corner["cell_evidence_artifact"]
+        )
+        corners.append(corner)
+    record = assemble_structural_propagation_result(
+        plan_contract_sha256="c" * 64,
+        corner_records=tuple(corners),
+        axis_records=tuple(_axis(*value) for value in AXIS_PATHWAYS),
+    )
+    output = tmp_path / "result.json"
+    write_structural_propagation_result(record, output)
+
+    assert validate_structural_propagation_bundle(output, "c" * 64) == record
+    tampered_path = tmp_path / corners[0]["cell_evidence_artifact"]
+    with np.load(tampered_path, allow_pickle=False) as source:
+        tampered = {name: np.asarray(source[name]).copy() for name in source.files}
+    tampered["matched_load_work"][0] = ~tampered["matched_load_work"][0]
+    with tampered_path.open("wb") as stream:
+        np.savez_compressed(stream, **tampered)
+    with pytest.raises(RuntimeError, match="artifact is invalid"):
+        validate_structural_propagation_bundle(output, "c" * 64)
+
+
+def test_result_rejects_unsafe_or_duplicate_cell_artifacts() -> None:
+    corners = [_corner(*value) for value in CORNER_PATHWAYS]
+    axes = tuple(_axis(*value) for value in AXIS_PATHWAYS)
+    corners[0]["cell_evidence_artifact"] = "../escape.npz"
+    with pytest.raises(ValueError, match="safe relative NPZ"):
+        assemble_structural_propagation_result(
+            plan_contract_sha256="c" * 64,
+            corner_records=tuple(corners),
+            axis_records=axes,
+        )
+    corners = [_corner(*value) for value in CORNER_PATHWAYS]
+    corners[1]["cell_evidence_artifact"] = corners[0]["cell_evidence_artifact"]
+    with pytest.raises(ValueError, match="artifact paths must be unique"):
+        assemble_structural_propagation_result(
+            plan_contract_sha256="c" * 64,
+            corner_records=tuple(corners),
+            axis_records=axes,
+        )

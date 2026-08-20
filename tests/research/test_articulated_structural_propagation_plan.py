@@ -210,9 +210,12 @@ def test_plan_binds_restart_and_cell_level_evidence_contract(plan) -> None:
     }
     assert "registered low/high corner pair" in evidence["axis_assembly_rule"]
     assert "emit null" in evidence["axis_assembly_rule"]
+    assert "unique safe relative NPZ paths" in evidence["bundle_validation_rule"]
+    assert "reconcile pathway, digest" in evidence["bundle_validation_rule"]
     assert set(evidence["required_corner_summary_fields"]) == {
         "corner_id",
         "pathway",
+        "cell_evidence_artifact",
         "cell_evidence_sha256",
         "requested_state_count",
         "feasible_state_count",

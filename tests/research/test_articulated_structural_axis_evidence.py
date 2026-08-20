@@ -43,6 +43,7 @@ def _corner(
         nominal,
         nominal,
         corner_id=corner_id,
+        cell_evidence_artifact=f"cells/{corner_id}-{pathway}.npz",
         requested_state_count=12,
         feasible_state_count=12,
         retained_failures=(),

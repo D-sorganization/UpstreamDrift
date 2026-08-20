@@ -4,10 +4,14 @@ from __future__ import annotations
 
 import hashlib
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 import numpy as np
+
+from scripts.research.proximal_distal_energy.articulated_structural_cell_evidence import (
+    load_structural_cell_evidence,
+)
 
 CORNER_IDS = (
     "nominal",
@@ -42,6 +46,7 @@ def _validate_corner(record: dict[str, Any]) -> None:
     required = {
         "corner_id",
         "pathway",
+        "cell_evidence_artifact",
         "cell_evidence_sha256",
         "requested_state_count",
         "feasible_state_count",
@@ -81,8 +86,24 @@ def _validate_corner(record: dict[str, Any]) -> None:
     authority = record["authority"]
     if not {"authority_sha256", "scales", "model_sha256"}.issubset(authority):
         raise ValueError("corner authority record is incomplete")
+    artifact_text = str(record["cell_evidence_artifact"])
+    artifact = PurePosixPath(artifact_text)
+    if (
+        not artifact_text
+        or artifact.is_absolute()
+        or ".." in artifact.parts
+        or artifact.suffix != ".npz"
+        or artifact.as_posix() != artifact_text
+    ):
+        raise ValueError(
+            "corner cell-evidence artifact must be a safe relative NPZ path"
+        )
     evidence_sha256 = str(record["cell_evidence_sha256"])
-    if len(evidence_sha256) != 64:
+    try:
+        valid_digest = len(evidence_sha256) == 64 and int(evidence_sha256, 16) >= 0
+    except ValueError:
+        valid_digest = False
+    if not valid_digest:
         raise ValueError("corner cell-evidence digest must be SHA-256")
 
 
@@ -148,6 +169,9 @@ def assemble_structural_propagation_result(
     if len(axes) != len(axis_records) or set(axes) != set(AXIS_PATHWAYS):
         raise ValueError("result must contain exactly the registered axis pathways")
     ordered_corners = [dict(corners[value]) for value in CORNER_PATHWAYS]
+    artifacts = [value["cell_evidence_artifact"] for value in ordered_corners]
+    if len(set(artifacts)) != len(artifacts):
+        raise ValueError("corner cell-evidence artifact paths must be unique")
     ordered_axes = [dict(axes[value]) for value in AXIS_PATHWAYS]
     for record in ordered_corners:
         _validate_corner(record)
@@ -208,11 +232,43 @@ def validate_structural_propagation_result(
     return rebuilt
 
 
+def validate_structural_propagation_bundle(
+    path: Path, plan_contract_sha256: str
+) -> dict[str, Any]:
+    """Reopen every referenced cell pack and reconcile it to the result."""
+
+    record = validate_structural_propagation_result(path, plan_contract_sha256)
+    for corner in record["corners"]:
+        artifact = PurePosixPath(corner["cell_evidence_artifact"])
+        evidence_path = path.parent.joinpath(*artifact.parts)
+        try:
+            evidence = load_structural_cell_evidence(evidence_path)
+        except (OSError, RuntimeError, ValueError) as error:
+            raise RuntimeError(
+                "structural cell-evidence artifact is invalid"
+            ) from error
+        if str(evidence["pathway"].item()) != corner["pathway"]:
+            raise RuntimeError("structural cell-evidence pathway does not agree")
+        if str(evidence["evidence_sha256"].item()) != corner["cell_evidence_sha256"]:
+            raise RuntimeError("structural cell-evidence digest does not agree")
+        if evidence["cell_identity"].size != corner["executed_headline_cell_count"]:
+            raise RuntimeError(
+                "structural cell-evidence execution count does not agree"
+            )
+        if (
+            int(np.count_nonzero(evidence["matched_load_work"]))
+            != corner["matched_cell_count"]
+        ):
+            raise RuntimeError("structural cell-evidence matched count does not agree")
+    return record
+
+
 __all__ = [
     "AXIS_PATHWAYS",
     "CORNER_IDS",
     "CORNER_PATHWAYS",
     "assemble_structural_propagation_result",
+    "validate_structural_propagation_bundle",
     "validate_structural_propagation_result",
     "write_structural_propagation_result",
 ]

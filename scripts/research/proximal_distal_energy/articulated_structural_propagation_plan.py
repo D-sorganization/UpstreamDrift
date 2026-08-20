@@ -308,9 +308,11 @@ def build_structural_propagation_plan(
             "nonmonotonic_classification",
         ],
         "axis_assembly_rule": "require the registered low/high corner pair on one pathway; preserve separate one-sided support and emit null when shared persistent support is empty",
+        "bundle_validation_rule": "use unique safe relative NPZ paths; reopen all 14 cell packs with pickle disabled and reconcile pathway, digest, executed count, and matched count to the result",
         "required_corner_summary_fields": [
             "corner_id",
             "pathway",
+            "cell_evidence_artifact",
             "cell_evidence_sha256",
             "requested_state_count",
             "feasible_state_count",
