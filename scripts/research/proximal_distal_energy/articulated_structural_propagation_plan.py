@@ -181,9 +181,35 @@ def build_structural_propagation_plan(
         ],
         "interpretation": "engineering OAT sensitivity only; no population, human, causal coaching, or universal performance inference",
     }
+    analysis = {
+        "cell_identity_fields": [
+            "case_index",
+            "phase_index",
+            "velocity_factor",
+            "time_step_s",
+            "engine",
+            "horizon_s",
+        ],
+        "per_corner_estimands": [
+            "matched count and fraction",
+            "matched final-speed-difference range and sign counts",
+            "matching cells entered, exited, and persistent versus nominal",
+            "corner-minus-nominal speed difference on persistent common support",
+            "load- and work-match error distributions",
+            "retained state, branch, and gate failure classes",
+        ],
+        "support_rule": "never compare corner outcome ranges as paired effects without persistent common matching support",
+        "zero_nominal_ground_rule": "a corner admitting cells when nominal ground admits 0/384 is support emergence, not evidence of paired ground-pathway benefit",
+        "count_rule": "matched-count movement diagnoses conditioning-set sensitivity, not outcome direction or causal benefit",
+        "multiplicity": "report all registered OAT corners descriptively; do not select favorable corners or assign confirmatory p-values",
+    }
     contract_sha = hashlib.sha256(
         json.dumps(
-            {"design_sha256": design_sha, "acceptance": acceptance},
+            {
+                "design_sha256": design_sha,
+                "acceptance": acceptance,
+                "analysis": analysis,
+            },
             sort_keys=True,
             separators=(",", ":"),
         ).encode("utf-8")
@@ -196,6 +222,7 @@ def build_structural_propagation_plan(
         "contract_sha256": contract_sha,
         "design": design,
         "acceptance": acceptance,
+        "analysis": analysis,
         "corners": corners,
         "source_sha256": {path: _sha256(ROOT / path) for path in SOURCE_PATHS},
         "limitations": {

@@ -70,6 +70,27 @@ def test_plan_preregisters_falsification_and_interpretation_boundaries(plan) -> 
     assert "no population, human" in acceptance["interpretation"]
 
 
+def test_plan_requires_common_support_and_rejects_count_as_benefit(plan) -> None:
+    analysis = plan["analysis"]
+
+    assert analysis["cell_identity_fields"] == [
+        "case_index",
+        "phase_index",
+        "velocity_factor",
+        "time_step_s",
+        "engine",
+        "horizon_s",
+    ]
+    assert "persistent common matching support" in analysis["support_rule"]
+    assert "0/384" in analysis["zero_nominal_ground_rule"]
+    assert (
+        "not evidence of paired ground-pathway benefit"
+        in analysis["zero_nominal_ground_rule"]
+    )
+    assert "not outcome direction or causal benefit" in analysis["count_rule"]
+    assert "do not select favorable corners" in analysis["multiplicity"]
+
+
 def test_nominal_plan_reproduces_registered_atlas_sizes(plan) -> None:
     nominal = plan["corners"][0]
 
