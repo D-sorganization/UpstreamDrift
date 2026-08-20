@@ -1,0 +1,49 @@
+#### Structural Authority Across Registered Engineering Corners
+
+The headline uncertainty campaign cannot legitimately reuse nominal articulated
+states after changing height, body mass, or the joint-limit envelope. Those
+changes alter either the model or its admissible configuration set before the
+shaft and ground pathways are evaluated. A separate authority campaign therefore
+regenerates all 13 phase states for headline cases 0, 8, 9, and 17 at nominal and
+at six registered low/high one-at-a-time structural corners. Each JSON/NPZ pair
+binds its configuration, source files, selected states, failure classes, and
+array contents by digest. The atlas adapter rejects nominal-model substitution
+and stops before silently omitting an infeasible selected state.
+
+| Registered Corner | Feasible States | Maximum Closure Error (m) | Minimum Joint-Limit Margin (rad) | Minimum Collision Clearance (m) |
+|---|---:|---:|---:|---:|
+| Nominal | 52/52 | $1.03\times10^{-10}$ | 0.1035 | 0.0491 |
+| Height Scale 0.90 | 51/52 | $7.80\times10^{-10}$ | $1.80\times10^{-16}$ | 0.0562 |
+| Height Scale 1.10 | 52/52 | $8.94\times10^{-11}$ | 0.1806 | 0.0421 |
+| Body-Mass Scale 0.85 | 52/52 | $1.03\times10^{-10}$ | 0.1035 | 0.0491 |
+| Body-Mass Scale 1.15 | 52/52 | $1.03\times10^{-10}$ | 0.1035 | 0.0491 |
+| Joint-Limit Scale 0.85 | 52/52 | $1.03\times10^{-10}$ | 0.0885 | 0.0491 |
+| Joint-Limit Scale 1.15 | 52/52 | $1.03\times10^{-10}$ | 0.1185 | 0.0491 |
+
+The low-height corner retains one `ik_nonconvergence` result at case 0, phase
+12. Its effectively zero joint-limit margin identifies a boundary-conditioned
+solve in this reduced engineering model. It is neither evidence that a
+corresponding human configuration is impossible nor permission to delete the
+state and report 51/51 success. The unchanged geometry metrics at the two
+body-mass corners are also expected: this intervention changes inertial mass
+without changing segment lengths or the registered joint envelope. That
+separation is a model-integrity check, not evidence that mass cannot change a
+subsequent dynamic transfer result.
+
+The campaign therefore establishes inspectable model and state authority for
+the declared corners, but it does not yet establish sensitivity of either
+headline estimand. Completion requires passing each feasible corner's exact
+scaled model and state into both native-engine shaft and finite-ground atlases,
+retaining the low-height failure in the denominator, and repeating the full
+reversal, refinement, pathway-killswitch, and unchanged load--work matching
+controls. A corner is falsified as propagation evidence if its configuration or
+content digest fails, if a registered failure disappears, or if the atlas runs
+against the nominal model instead of its bound scaled model.
+
+The checkpointed campaign record is available as
+[`articulated_structural_authority_campaign.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/articulated_structural_authority_campaign.json),
+with one governed JSON/NPZ pair per corner. The executable registration is
+available as
+[`articulated_structural_authority_campaign.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py),
+and the fail-closed propagation adapter is available as
+[`articulated_atlas_authority.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/scripts/research/proximal_distal_energy/articulated_atlas_authority.py).

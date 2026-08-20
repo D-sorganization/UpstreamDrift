@@ -15,6 +15,9 @@ from scripts.research.proximal_distal_energy.articulated_scaled_authority import
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "docs/research/proximal_distal_energy_transfer/data"
 RECORD = DATA / "articulated_structural_authority_campaign.json"
+ARTICLE = ROOT / "docs/research/proximal_distal_energy_transfer"
+CHAPTER = ARTICLE / "chapters/_ch06caaa_structural_authority.qmd"
+MANUSCRIPT = ARTICLE / "proximal_distal_energy_transfer.qmd"
 pytestmark = pytest.mark.scientific
 
 
@@ -66,3 +69,24 @@ def test_every_generated_corner_loads_without_deleting_failures() -> None:
         observed_failures = int((~authority.feasible[selected]).sum())
         assert observed_failures == row["failure_count"]
         assert len(authority.authority_sha256) == 64
+
+
+def test_article_retains_every_corner_and_propagation_boundary() -> None:
+    chapter = CHAPTER.read_text(encoding="utf-8")
+    manuscript = MANUSCRIPT.read_text(encoding="utf-8")
+
+    assert "{{< include chapters/_ch06caaa_structural_authority.qmd >}}" in manuscript
+    for label in (
+        "Nominal",
+        "Height Scale 0.90",
+        "Height Scale 1.10",
+        "Body-Mass Scale 0.85",
+        "Body-Mass Scale 1.15",
+        "Joint-Limit Scale 0.85",
+        "Joint-Limit Scale 1.15",
+    ):
+        assert f"| {label} |" in chapter
+    assert "51/52" in chapter
+    assert "case 0, phase\n12" in chapter
+    assert "does not yet establish sensitivity of either\nheadline estimand" in chapter
+    assert "nominal model instead of its bound scaled model" in chapter

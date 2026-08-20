@@ -294,6 +294,8 @@ format:
 
 {{< include chapters/_ch06caa_articulated_uncertainty_screen.qmd >}}
 
+{{< include chapters/_ch06caaa_structural_authority.qmd >}}
+
 {{< include chapters/_ch06cab_articulated_headline_uncertainty.qmd >}}
 
 {{< include chapters/_ch06cb_spatial_cross_tail.qmd >}}

@@ -82,7 +82,8 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     case 0/phase 12 `ik_nonconvergence`. Joint-limit-low retains 0.0885 rad
     minimum margin; joint-limit-high retains 0.1185 rad. Their maximum closure
     errors are 1.03e-10 m and minimum collision clearances are 0.0491 m. The
-    completion-only evidence gate passes 2/2 and loads every retained artifact.
+    completion-only evidence gate passes 3/3, loads every retained artifact,
+    and binds the seven-corner table and propagation boundary into the article.
 - The release has 295 atomic claims and 40 reviewed release claims; all 40
   retain at least one scientifically open gate. #8724 still owns normalized
   four-way adjudication and independent review.
