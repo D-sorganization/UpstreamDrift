@@ -254,7 +254,9 @@ def build_structural_propagation_plan(
                 "two_engine_speed_difference_discrepancy_m_s",
                 "time_step_speed_difference_discrepancy_m_s",
                 "resolution_threshold_m_s",
+                "corner_minus_nominal_speed_difference_m_s",
                 "resolved_outcome_change",
+                "comparison_status",
             ]
             for pathway in ("shaft", "ground")
         },
@@ -290,11 +292,12 @@ def build_structural_propagation_plan(
             "release_rule": "per-cell comparison gates do not replace the corner-level all_registered_gates_passed release control",
         },
         "cell_evidence_storage": {
-            "schema_version": "articulated-structural-cell-evidence/v1",
+            "schema_version": "articulated-structural-cell-evidence/v2",
             "identity_encoding": "canonical JSON Unicode strings without pickle",
             "digest_rule": "bind every array name, dtype, shape, and byte payload except the stored digest",
             "nonpersistent_resolution_rule": "store NaN thresholds and false resolved status outside persistent common support",
             "missing_execution_rule": "retain nominal-only and corner-only execution identities separately; label corner-only cells explicitly rather than as common unmatched",
+            "paired_outcome_rule": "store finite corner-minus-nominal speed change and resolution only on persistent common support; store NaN and false resolved status elsewhere",
             "write_policy": "validate then write compressed NPZ through an atomic temporary replacement",
             "assembly_rule": "derive cell identities, outcomes, and gate classifications from one atlas mapping",
             "corner_assembly_rule": "release only complete feasible execution with disjoint retained-failure states, passing global and per-cell gates, aligned common support, and complete authority provenance",

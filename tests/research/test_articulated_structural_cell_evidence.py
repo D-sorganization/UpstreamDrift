@@ -64,6 +64,7 @@ def test_cell_evidence_preserves_required_fields_and_support_status() -> None:
         "two_engine_speed_difference_discrepancy_m_s",
         "time_step_speed_difference_discrepancy_m_s",
         "resolution_threshold_m_s",
+        "corner_minus_nominal_speed_difference_m_s",
         "resolved_outcome_change",
         "comparison_status",
         "evidence_sha256",
@@ -74,10 +75,28 @@ def test_cell_evidence_preserves_required_fields_and_support_status() -> None:
         "entered_support",
     ]
     assert evidence["resolution_threshold_m_s"][0] == pytest.approx(0.001)
+    assert evidence["corner_minus_nominal_speed_difference_m_s"][0] == pytest.approx(
+        0.004
+    )
     assert np.isnan(evidence["resolution_threshold_m_s"][1:]).all()
+    assert np.isnan(evidence["corner_minus_nominal_speed_difference_m_s"][1:]).all()
     assert evidence["resolved_outcome_change"].tolist() == [True, False, False]
     assert len(str(evidence["evidence_sha256"].item())) == 64
     validate_structural_cell_evidence(evidence)
+
+
+def test_cell_evidence_rejects_paired_values_outside_persistent_support() -> None:
+    nominal = _cells((True, False), (0.0, 0.0))
+    corner = _cells((True, False), (0.004, 0.0))
+    evidence = build_structural_cell_evidence(
+        corner,
+        gate_status=np.ones(2, dtype=bool),
+        failure_class=np.asarray(["none", "none"]),
+        comparison=compare_common_support(nominal, corner),
+    )
+    evidence["corner_minus_nominal_speed_difference_m_s"][1] = 0.0
+    with pytest.raises(ValueError, match="NaN outside persistent support"):
+        validate_structural_cell_evidence(evidence)
 
 
 def test_cell_evidence_rejects_gate_failure_without_classification() -> None:

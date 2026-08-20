@@ -153,7 +153,9 @@ def test_plan_binds_restart_and_cell_level_evidence_contract(plan) -> None:
             "two_engine_speed_difference_discrepancy_m_s",
             "time_step_speed_difference_discrepancy_m_s",
             "resolution_threshold_m_s",
+            "corner_minus_nominal_speed_difference_m_s",
             "resolved_outcome_change",
+            "comparison_status",
         } <= required
     semantics = evidence["matching_metric_semantics"]
     assert semantics["shaft"] == {
@@ -185,7 +187,7 @@ def test_plan_binds_restart_and_cell_level_evidence_contract(plan) -> None:
     assert "every failed component" in gates["failure_rule"]
     assert "do not replace" in gates["release_rule"]
     storage = evidence["cell_evidence_storage"]
-    assert storage["schema_version"] == "articulated-structural-cell-evidence/v1"
+    assert storage["schema_version"] == "articulated-structural-cell-evidence/v2"
     assert "without pickle" in storage["identity_encoding"]
     assert "name, dtype, shape, and byte payload" in storage["digest_rule"]
     assert (
@@ -193,6 +195,8 @@ def test_plan_binds_restart_and_cell_level_evidence_contract(plan) -> None:
     )
     assert "nominal-only and corner-only" in storage["missing_execution_rule"]
     assert "rather than as common unmatched" in storage["missing_execution_rule"]
+    assert "only on persistent common support" in storage["paired_outcome_rule"]
+    assert "NaN and false resolved status" in storage["paired_outcome_rule"]
     assert "atomic temporary replacement" in storage["write_policy"]
     assert "from one atlas mapping" in storage["assembly_rule"]
     assert "disjoint retained-failure states" in storage["corner_assembly_rule"]

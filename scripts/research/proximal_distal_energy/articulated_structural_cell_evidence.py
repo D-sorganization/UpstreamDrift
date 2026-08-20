@@ -22,7 +22,7 @@ from scripts.research.proximal_distal_energy.articulated_structural_gate_status 
 )
 
 Array = NDArray[Any]
-SCHEMA_VERSION = "articulated-structural-cell-evidence/v1"
+SCHEMA_VERSION = "articulated-structural-cell-evidence/v2"
 REQUIRED_CELL_FIELDS = {
     "cell_identity",
     "matched_load_work",
@@ -34,6 +34,7 @@ REQUIRED_CELL_FIELDS = {
     "two_engine_speed_difference_discrepancy_m_s",
     "time_step_speed_difference_discrepancy_m_s",
     "resolution_threshold_m_s",
+    "corner_minus_nominal_speed_difference_m_s",
     "resolved_outcome_change",
     "comparison_status",
 }
@@ -79,6 +80,7 @@ def build_structural_cell_evidence(
         raise ValueError("passing gates cannot retain a failure class")
 
     threshold = np.full(size, np.nan)
+    outcome_change = np.full(size, np.nan)
     resolved = np.zeros(size, dtype=bool)
     status = np.full(size, "not_compared", dtype="U32")
     if comparison is not None:
@@ -93,6 +95,9 @@ def build_structural_cell_evidence(
             slot = index[identity]
             comparison_slot = persistent_index[identity]
             threshold[slot] = comparison.resolution_threshold_m_s[comparison_slot]
+            outcome_change[slot] = comparison.persistent_speed_change_m_s[
+                comparison_slot
+            ]
             resolved[slot] = comparison.resolved_outcome_change[comparison_slot]
             status[slot] = (
                 "persistent_resolved" if resolved[slot] else "persistent_unresolved"
@@ -130,6 +135,7 @@ def build_structural_cell_evidence(
             cells.time_step_speed_difference_discrepancy_m_s, dtype=float
         ),
         "resolution_threshold_m_s": threshold,
+        "corner_minus_nominal_speed_difference_m_s": outcome_change,
         "resolved_outcome_change": resolved,
         "comparison_status": status,
     }
@@ -181,6 +187,38 @@ def validate_structural_cell_evidence(arrays: dict[str, Array]) -> None:
     failures = np.asarray(arrays["failure_class"], dtype=str)
     if np.any((~gates) & np.isin(failures, ("", "none", "feasible"))):
         raise ValueError("failed gates require a failure class")
+    status = np.asarray(arrays["comparison_status"], dtype=str)
+    allowed_status = {
+        "not_compared",
+        "persistent_resolved",
+        "persistent_unresolved",
+        "entered_support",
+        "exited_support",
+        "corner_only_executed",
+        "common_unmatched",
+    }
+    if not set(status.tolist()) <= allowed_status:
+        raise ValueError("cell evidence comparison status is not registered")
+    persistent = np.isin(status, ("persistent_resolved", "persistent_unresolved"))
+    threshold = np.asarray(arrays["resolution_threshold_m_s"], dtype=float)
+    outcome_change = np.asarray(
+        arrays["corner_minus_nominal_speed_difference_m_s"], dtype=float
+    )
+    resolved = np.asarray(arrays["resolved_outcome_change"], dtype=bool)
+    if not np.all(np.isfinite(threshold[persistent])) or not np.all(
+        np.isfinite(outcome_change[persistent])
+    ):
+        raise ValueError("persistent support requires finite change and resolution")
+    if np.any(np.isfinite(threshold[~persistent])) or np.any(
+        np.isfinite(outcome_change[~persistent])
+    ):
+        raise ValueError(
+            "paired change and resolution must be NaN outside persistent support"
+        )
+    if np.any(resolved != (status == "persistent_resolved")):
+        raise ValueError(
+            "resolved outcome status must agree with persistent classification"
+        )
     observed = str(np.asarray(arrays["evidence_sha256"]).item())
     if len(observed) != 64 or observed != _digest(arrays):
         raise RuntimeError("cell evidence digest does not reproduce")
