@@ -309,6 +309,7 @@ def build_structural_propagation_plan(
         ],
         "axis_assembly_rule": "require the registered low/high corner pair on one pathway; preserve separate one-sided support and emit null when shared persistent support is empty",
         "bundle_validation_rule": "use unique safe relative NPZ paths; reopen all 14 cell packs with pickle disabled and reconcile pathway, digest, executed count, and matched count to the result",
+        "plan_reconciliation_rule": "validate the exact governed plan and require every result corner authority, state denominator, retained failure, and axis scale to reproduce it",
         "required_corner_summary_fields": [
             "corner_id",
             "pathway",

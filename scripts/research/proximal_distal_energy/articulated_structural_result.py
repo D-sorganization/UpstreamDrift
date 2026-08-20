@@ -30,6 +30,11 @@ AXIS_PATHWAYS = tuple(
     for axis in ("height_scale", "body_mass_scale", "joint_limit_scale")
     for pathway in ("shaft", "ground")
 )
+AXIS_SCALE_KEYS = {
+    "height_scale": "height",
+    "body_mass_scale": "body_mass",
+    "joint_limit_scale": "joint_limit",
+}
 
 
 def _serialized(record: dict[str, Any]) -> bytes:
@@ -263,12 +268,78 @@ def validate_structural_propagation_bundle(
     return record
 
 
+def reconcile_structural_result_to_plan(
+    record: dict[str, Any], plan: dict[str, Any]
+) -> dict[str, Any]:
+    """Require result denominators, authorities, and scales to match the plan."""
+
+    if plan.get("status") != "ready" or plan.get("contract_sha256") != record.get(
+        "plan_contract_sha256"
+    ):
+        raise RuntimeError("structural result does not bind the registered plan")
+    planned = {str(value.get("corner_id")): value for value in plan.get("corners", [])}
+    if set(planned) != set(CORNER_IDS) or len(planned) != len(plan.get("corners", [])):
+        raise RuntimeError("structural plan corner set is incomplete or duplicated")
+    for corner in record["corners"]:
+        expected = planned[corner["corner_id"]]
+        pathway = corner["pathway"]
+        comparisons = {
+            "requested_state_count": expected["requested_state_count"],
+            "feasible_state_count": expected["feasible_state_count"],
+            "retained_failures": expected["retained_failures"],
+            "planned_headline_cell_count": expected["requested_state_count"] * 32,
+            "feasible_headline_cell_count": expected[
+                f"expected_{pathway}_headline_cell_count"
+            ],
+            "executed_headline_cell_count": expected[
+                f"expected_{pathway}_headline_cell_count"
+            ],
+            "authority": expected["authority"],
+        }
+        if any(corner[name] != value for name, value in comparisons.items()):
+            raise RuntimeError("structural corner evidence does not match the plan")
+    for axis in record["axes"]:
+        scale_key = AXIS_SCALE_KEYS[axis["axis_name"]]
+        expected_scales = (
+            planned[f"{axis['axis_name']}-low"]["authority"]["scales"][scale_key],
+            planned["nominal"]["authority"]["scales"][scale_key],
+            planned[f"{axis['axis_name']}-high"]["authority"]["scales"][scale_key],
+        )
+        observed_scales = (
+            axis["low_scale"],
+            axis["nominal_scale"],
+            axis["high_scale"],
+        )
+        if observed_scales != expected_scales:
+            raise RuntimeError("structural axis scales do not match the plan")
+    return record
+
+
+def validate_structural_propagation_bundle_against_plan(
+    result_path: Path, plan_path: Path
+) -> dict[str, Any]:
+    """Validate the exact governed plan, result JSON, and all cell packs."""
+
+    from scripts.research.proximal_distal_energy.articulated_structural_propagation_plan import (
+        validate_structural_propagation_plan,
+    )
+
+    plan = validate_structural_propagation_plan(plan_path)
+    record = validate_structural_propagation_bundle(
+        result_path, plan["contract_sha256"]
+    )
+    return reconcile_structural_result_to_plan(record, plan)
+
+
 __all__ = [
     "AXIS_PATHWAYS",
+    "AXIS_SCALE_KEYS",
     "CORNER_IDS",
     "CORNER_PATHWAYS",
     "assemble_structural_propagation_result",
+    "reconcile_structural_result_to_plan",
     "validate_structural_propagation_bundle",
+    "validate_structural_propagation_bundle_against_plan",
     "validate_structural_propagation_result",
     "write_structural_propagation_result",
 ]

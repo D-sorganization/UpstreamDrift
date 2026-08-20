@@ -16,6 +16,7 @@ from scripts.research.proximal_distal_energy.articulated_structural_result impor
     AXIS_PATHWAYS,
     CORNER_PATHWAYS,
     assemble_structural_propagation_result,
+    reconcile_structural_result_to_plan,
     validate_structural_propagation_bundle,
     validate_structural_propagation_result,
     write_structural_propagation_result,
@@ -24,6 +25,11 @@ from scripts.research.proximal_distal_energy.articulated_structural_result impor
 pytestmark = pytest.mark.scientific
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "docs/research/proximal_distal_energy_transfer/data"
+AXIS_BOUNDS = {
+    "height_scale": ("height", 0.9, 1.1),
+    "body_mass_scale": ("body_mass", 0.85, 1.15),
+    "joint_limit_scale": ("joint_limit", 0.85, 1.15),
+}
 
 
 def _corner(corner_id: str, pathway: str) -> dict[str, object]:
@@ -42,6 +48,12 @@ def _corner(corner_id: str, pathway: str) -> dict[str, object]:
         else []
     )
     matched = 1 if pathway == "shaft" else 0
+    scales = {"height": 1.0, "body_mass": 1.0, "joint_limit": 1.0}
+    for axis_name, (scale_key, low, high) in AXIS_BOUNDS.items():
+        if corner_id == f"{axis_name}-low":
+            scales[scale_key] = low
+        elif corner_id == f"{axis_name}-high":
+            scales[scale_key] = high
     return {
         "corner_id": corner_id,
         "pathway": pathway,
@@ -58,19 +70,20 @@ def _corner(corner_id: str, pathway: str) -> dict[str, object]:
         "all_registered_gates_passed": True,
         "authority": {
             "authority_sha256": "a" * 64,
-            "scales": {"height": 1.0, "body_mass": 1.0, "joint_limit": 1.0},
+            "scales": scales,
             "model_sha256": {"0": "b" * 64},
         },
     }
 
 
 def _axis(axis_name: str, pathway: str) -> dict[str, object]:
+    _, low, high = AXIS_BOUNDS[axis_name]
     return {
         "axis_name": axis_name,
         "pathway": pathway,
-        "low_scale": 0.9,
+        "low_scale": low,
         "nominal_scale": 1.0,
-        "high_scale": 1.1,
+        "high_scale": high,
         "shared_persistent_cell_count": 0,
         "summary_statistic": (
             "unweighted median on identities persistent in both one-sided comparisons"
@@ -90,6 +103,28 @@ def _result():
         corner_records=tuple(_corner(*value) for value in reversed(CORNER_PATHWAYS)),
         axis_records=tuple(_axis(*value) for value in reversed(AXIS_PATHWAYS)),
     )
+
+
+def _plan() -> dict[str, object]:
+    corners = []
+    for corner_id, _ in CORNER_PATHWAYS[::2]:
+        source = _corner(corner_id, "shaft")
+        corners.append(
+            {
+                "corner_id": corner_id,
+                "requested_state_count": source["requested_state_count"],
+                "feasible_state_count": source["feasible_state_count"],
+                "retained_failures": source["retained_failures"],
+                "expected_shaft_headline_cell_count": source[
+                    "feasible_headline_cell_count"
+                ],
+                "expected_ground_headline_cell_count": source[
+                    "feasible_headline_cell_count"
+                ],
+                "authority": source["authority"],
+            }
+        )
+    return {"status": "ready", "contract_sha256": "c" * 64, "corners": corners}
 
 
 def test_complete_result_is_deterministic_and_plan_bound() -> None:
@@ -219,3 +254,30 @@ def test_result_rejects_unsafe_or_duplicate_cell_artifacts() -> None:
             corner_records=tuple(corners),
             axis_records=axes,
         )
+
+
+def test_result_reconciliation_binds_corner_authority_and_axis_scales() -> None:
+    record = _result()
+    plan = _plan()
+
+    assert reconcile_structural_result_to_plan(record, plan) == record
+    altered = json.loads(json.dumps(plan))
+    altered["corners"][0]["authority"]["authority_sha256"] = "f" * 64
+    with pytest.raises(RuntimeError, match="corner evidence"):
+        reconcile_structural_result_to_plan(record, altered)
+    altered = json.loads(json.dumps(plan))
+    altered["corners"][1]["authority"]["scales"]["height"] = 0.8
+    with pytest.raises(RuntimeError, match="corner evidence"):
+        reconcile_structural_result_to_plan(record, altered)
+
+
+def test_result_reconciliation_rejects_plan_identity_or_denominator_drift() -> None:
+    record = _result()
+    plan = _plan()
+    plan["contract_sha256"] = "f" * 64
+    with pytest.raises(RuntimeError, match="registered plan"):
+        reconcile_structural_result_to_plan(record, plan)
+    plan = _plan()
+    plan["corners"][1]["expected_shaft_headline_cell_count"] = 320
+    with pytest.raises(RuntimeError, match="corner evidence"):
+        reconcile_structural_result_to_plan(record, plan)

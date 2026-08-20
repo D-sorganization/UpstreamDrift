@@ -212,6 +212,8 @@ def test_plan_binds_restart_and_cell_level_evidence_contract(plan) -> None:
     assert "emit null" in evidence["axis_assembly_rule"]
     assert "unique safe relative NPZ paths" in evidence["bundle_validation_rule"]
     assert "reconcile pathway, digest" in evidence["bundle_validation_rule"]
+    assert "exact governed plan" in evidence["plan_reconciliation_rule"]
+    assert "corner authority" in evidence["plan_reconciliation_rule"]
     assert set(evidence["required_corner_summary_fields"]) == {
         "corner_id",
         "pathway",
