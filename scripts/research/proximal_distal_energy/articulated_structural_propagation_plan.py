@@ -282,6 +282,25 @@ def build_structural_propagation_plan(
         "partial_record_policy": "an in-progress or partial record must not qualify as release evidence",
         "resolution_boundary": "the 0.001 m/s floor is a preregistered synthetic numerical interpretation threshold, not device accuracy or human measurement uncertainty",
     }
+    figure_contract = {
+        "required_panels": [
+            "planned feasible executed and matched support",
+            "entered exited and persistent common matching support",
+            "persistent-support outcome changes with resolution status",
+            "one-sided engineering secants with nonmonotonicity",
+            "retained state branch and gate failures",
+        ],
+        "zero_ground_support_rule": "show nominal ground 0/384 prominently and do not depict emerged support as a paired benefit",
+        "secant_label_rule": "label engineering secants as not parameter-importance rankings",
+        "resolution_display_rule": "mark changes below the combined threshold as unresolved rather than zero",
+        "support_display_rule": "show planned, feasible, executed, and matched denominators for every corner",
+        "accessibility": [
+            "vector-safe PDF or SVG",
+            "embedded searchable text",
+            "color-independent status encoding",
+            "units and alt text",
+        ],
+    }
     contract_sha = hashlib.sha256(
         json.dumps(
             {
@@ -289,6 +308,7 @@ def build_structural_propagation_plan(
                 "acceptance": acceptance,
                 "analysis": analysis,
                 "evidence_contract": evidence_contract,
+                "figure_contract": figure_contract,
             },
             sort_keys=True,
             separators=(",", ":"),
@@ -304,6 +324,7 @@ def build_structural_propagation_plan(
         "acceptance": acceptance,
         "analysis": analysis,
         "evidence_contract": evidence_contract,
+        "figure_contract": figure_contract,
         "corners": corners,
         "source_sha256": {path: _sha256(ROOT / path) for path in SOURCE_PATHS},
         "limitations": {

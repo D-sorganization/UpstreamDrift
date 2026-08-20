@@ -172,6 +172,29 @@ def test_plan_binds_restart_and_cell_level_evidence_contract(plan) -> None:
     }
 
 
+def test_plan_preregisters_nonmisleading_publication_figure(plan) -> None:
+    figure = plan["figure_contract"]
+
+    assert figure["required_panels"] == [
+        "planned feasible executed and matched support",
+        "entered exited and persistent common matching support",
+        "persistent-support outcome changes with resolution status",
+        "one-sided engineering secants with nonmonotonicity",
+        "retained state branch and gate failures",
+    ]
+    assert "0/384" in figure["zero_ground_support_rule"]
+    assert "paired benefit" in figure["zero_ground_support_rule"]
+    assert "not parameter-importance" in figure["secant_label_rule"]
+    assert "unresolved" in figure["resolution_display_rule"]
+    assert "denominators" in figure["support_display_rule"]
+    assert set(figure["accessibility"]) == {
+        "vector-safe PDF or SVG",
+        "embedded searchable text",
+        "color-independent status encoding",
+        "units and alt text",
+    }
+
+
 def test_nominal_plan_reproduces_registered_atlas_sizes(plan) -> None:
     nominal = plan["corners"][0]
 

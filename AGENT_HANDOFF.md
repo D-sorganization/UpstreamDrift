@@ -101,6 +101,8 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     Shaft matching is coupled/rigid station-force/dissipated-work; ground matching
     is coupled/fixed grip-force/total-work. Planned, feasible, and executed
     denominators remain separate; partial records cannot qualify.
+    The figure contract exposes support transitions, resolution, secants, and
+    failures with searchable vector text and color-independent status encoding.
     The governed feasibility/margin figure has embedded CID TrueType text and
     passes its retained-failure contract. Q2/H5 and the machine-readable
     prediction registry no longer repeat the obsolete failed-closure narrative.
