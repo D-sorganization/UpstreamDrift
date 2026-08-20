@@ -3,7 +3,7 @@
   "status": "ready",
   "authority_campaign_sha256": "d8115073dc1b506f145196b08c96d7cb3cf00e8cf29099970e2f7b0fbe6d63f3",
   "design_sha256": "8e5f246645e27c8f0f66a87859c63c470c43e579bccb50848124174944e11e07",
-  "contract_sha256": "1bf07c61a5cf3351f9521deb762b15a814223bdd2a9ca135d58c2fc409e55d0f",
+  "contract_sha256": "4e2cad8309bb0954fbfaa06e7a003a49c75a1d4c9091f5025c3adfaa87a7baf4",
   "design": {
     "case_indices": [
       0,
@@ -264,7 +264,8 @@
       "digest_rule": "bind every array name, dtype, shape, and byte payload except the stored digest",
       "nonpersistent_resolution_rule": "store NaN thresholds and false resolved status outside persistent common support",
       "write_policy": "validate then write compressed NPZ through an atomic temporary replacement",
-      "assembly_rule": "derive cell identities, outcomes, and gate classifications from one atlas mapping"
+      "assembly_rule": "derive cell identities, outcomes, and gate classifications from one atlas mapping",
+      "corner_assembly_rule": "release only complete feasible execution with disjoint retained-failure states, passing global and per-cell gates, aligned common support, and complete authority provenance"
     },
     "required_axis_summary_fields": [
       "axis_name",
@@ -925,17 +926,19 @@
   "source_sha256": {
     "scripts/research/proximal_distal_energy/articulated_atlas_authority.py": "191174f7fea921a3b52054f85d735b45ee0ca93090aaa733f59221d45de0af0d",
     "scripts/research/proximal_distal_energy/articulated_scaled_authority.py": "6d41ef265dd88d61bdf70f1ff78a17716c9293e6260f307c253df43f441b7d83",
-    "scripts/research/proximal_distal_energy/articulated_structural_common_support.py": "d413fd0a6d95cebf760cb4b715f6038d2fea86ec5afbeb6b337fe988fead7165",
+    "scripts/research/proximal_distal_energy/articulated_structural_common_support.py": "4103551e5d3174bf24f92cda2127309af3891bf2373ca2694c1576dc13a51f8b",
     "scripts/research/proximal_distal_energy/articulated_structural_cell_evidence.py": "6fcef64af0594dc23ce23f69e6f871dc5d53bc72040817e14b1f3a738c2b9b6c",
+    "scripts/research/proximal_distal_energy/articulated_structural_corner_evidence.py": "15f9a9697ad251d4df00fa7c4acce550ede3e10d950b3576dd785600d45765e9",
     "scripts/research/proximal_distal_energy/articulated_structural_gate_status.py": "d3d8fa2a1421d9f85d97c99657e72995e4b6971fa96a029d7c41edd7308bb748",
     "scripts/research/proximal_distal_energy/articulated_structural_result.py": "c7080d6ad97383612562bbf8b1f127c61cad0bd968ac776636fc4c45632466c2",
     "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py": "166ab2ebec88a0c53abc54c6b565ba0a3f82caf800449e822164177f31289549",
-    "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": "634de214832346d59c20c81722d6875bb946c4f2abaad25026fcd1f1553b082b",
-    "tests/research/test_articulated_structural_common_support.py": "09b30a814ad300a7b6a9b729ba61c8ea65817bd9510d0daa1e1fe70f3a70b9b1",
+    "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": "4c9cd299d7375e1ee6728593a1a33a516685b32d2efbd8302f14253d189ebd16",
+    "tests/research/test_articulated_structural_common_support.py": "4a51c9d946b1e994cefd4a8819c6c2e2cd8a909a96bca86c1ab2e8388a39b567",
     "tests/research/test_articulated_structural_cell_evidence.py": "a5801c3ee1113575099a3aaf48f829bdfa33d05fdbd2b85527fcd0f0eaead319",
+    "tests/research/test_articulated_structural_corner_evidence.py": "d889dabf9320a41fc83a502a400b5dd227463464d24a7b2fb26d6c6ddfd05f33",
     "tests/research/test_articulated_structural_gate_status.py": "b13daca404fdb1643ebabb04d00561a36100349006623b889ba391cf283a9323",
     "tests/research/test_articulated_structural_result.py": "e6fd8a2ee9872955bd2cc4eb06f39c291e3971bc3a1dd942beaa9620ad5f8a92",
-    "tests/research/test_articulated_structural_propagation_plan.py": "deb5d91265643a513f3e6ce5832f058edd12847917d1c807edb02c641a85b4f0",
+    "tests/research/test_articulated_structural_propagation_plan.py": "e19c1384da34800cf6ce68cf394e21acd190dfb1f176d84a1fd938bd09cda992",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "8eed52fe4ebbc55fcf753f4703330dd6d768281b0babfbb2adca074b862fc36d",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
     "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json": "f07fc33cc76fb80f395cd10b01a30169b6440cec3854be3894024d435bc0f722",

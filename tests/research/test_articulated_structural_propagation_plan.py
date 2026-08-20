@@ -45,12 +45,14 @@ def test_plan_binds_all_seven_authority_corners(plan) -> None:
         "scripts/research/proximal_distal_energy/articulated_atlas_authority.py",
         "scripts/research/proximal_distal_energy/articulated_structural_common_support.py",
         "scripts/research/proximal_distal_energy/articulated_structural_cell_evidence.py",
+        "scripts/research/proximal_distal_energy/articulated_structural_corner_evidence.py",
         "scripts/research/proximal_distal_energy/articulated_structural_gate_status.py",
         "scripts/research/proximal_distal_energy/articulated_structural_result.py",
         "scripts/research/proximal_distal_energy/articulated_shaft_forward.py",
         "scripts/research/proximal_distal_energy/articulated_ground_forward.py",
         "tests/research/test_articulated_structural_common_support.py",
         "tests/research/test_articulated_structural_cell_evidence.py",
+        "tests/research/test_articulated_structural_corner_evidence.py",
         "tests/research/test_articulated_structural_gate_status.py",
         "tests/research/test_articulated_structural_result.py",
         "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
@@ -189,6 +191,8 @@ def test_plan_binds_restart_and_cell_level_evidence_contract(plan) -> None:
     )
     assert "atomic temporary replacement" in storage["write_policy"]
     assert "from one atlas mapping" in storage["assembly_rule"]
+    assert "disjoint retained-failure states" in storage["corner_assembly_rule"]
+    assert "global and per-cell gates" in storage["corner_assembly_rule"]
     assert "atomic" in evidence["write_policy"]
     assert "all seven corners" in evidence["completion_policy"]
     assert "must not qualify" in evidence["partial_record_policy"]

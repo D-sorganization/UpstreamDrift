@@ -429,6 +429,25 @@ def test_corner_release_record_has_registered_machine_readable_fields() -> None:
     assert record["authority"]["authority_sha256"] == "a" * 64
 
 
+def test_corner_summary_rejects_executed_retained_failure_state() -> None:
+    cells = extract_headline_cells(
+        "shaft", _arrays(((0, 0),), matched_indices=tuple(range(32)))
+    )
+    with pytest.raises(ValueError, match="cannot also be executed"):
+        build_corner_support_summary(
+            "overlap",
+            cells,
+            requested_state_count=2,
+            feasible_state_count=1,
+            retained_failures=(
+                {"case_index": 0, "phase_index": 0, "failure_class": "failed"},
+            ),
+            planned_headline_cell_count=64,
+            all_registered_gates_passed=True,
+            authority=_authority_record(),
+        )
+
+
 def _axis_inputs(*, shared_support: bool = True):
     nominal_arrays = _arrays(((0, 0),), matched_indices=(0, 1))
     low_arrays = _arrays(((0, 0),), matched_indices=(0, 1))

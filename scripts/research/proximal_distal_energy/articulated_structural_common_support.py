@@ -451,6 +451,8 @@ def build_corner_support_summary(
     state_counts = Counter((identity[0], identity[1]) for identity in cells.identities)
     if any(count != 32 for count in state_counts.values()):
         raise ValueError("every executed state must contain exactly 32 headline cells")
+    if failure_states.intersection(state_counts):
+        raise ValueError("retained failure states cannot also be executed")
     if len(state_counts) > feasible_state_count:
         raise ValueError("executed states cannot exceed feasible states")
     required_authority = {"authority_sha256", "scales", "model_sha256"}
