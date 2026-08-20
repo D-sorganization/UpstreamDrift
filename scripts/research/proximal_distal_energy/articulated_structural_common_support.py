@@ -482,6 +482,86 @@ def require_corner_release_evidence(summary: CornerSupportSummary) -> None:
         )
 
 
+def corner_support_summary_record(summary: CornerSupportSummary) -> dict[str, Any]:
+    """Serialize one release-qualified corner using registered denominator names."""
+
+    require_corner_release_evidence(summary)
+    return {
+        "corner_id": summary.corner_id,
+        "requested_state_count": summary.requested_state_count,
+        "feasible_state_count": summary.feasible_state_count,
+        "retained_failures": list(summary.retained_failures),
+        "planned_headline_cell_count": summary.planned_headline_cell_count,
+        "feasible_headline_cell_count": summary.feasible_headline_cell_count,
+        "executed_headline_cell_count": summary.executed_headline_cell_count,
+        "matched_cell_count": summary.matched_cell_count,
+        "matched_fraction_of_feasible": summary.matched_fraction_of_feasible,
+        "all_registered_gates_passed": summary.all_registered_gates_passed,
+        "authority": summary.authority,
+    }
+
+
+def build_axis_summary_record(
+    secants: OneSidedEngineeringSecants,
+    classification: SecantClassification,
+) -> dict[str, Any]:
+    """Summarize only shared persistent identities without pooling either side."""
+
+    low_index = {
+        identity: index
+        for index, identity in enumerate(secants.low_to_nominal_identities)
+    }
+    high_index = {
+        identity: index
+        for index, identity in enumerate(secants.nominal_to_high_identities)
+    }
+    expected_shared = tuple(
+        identity
+        for identity in secants.low_to_nominal_identities
+        if identity in high_index
+    )
+    if classification.shared_persistent_identities != expected_shared or len(
+        classification.cell_classification
+    ) != len(expected_shared):
+        raise ValueError("secant classification does not match shared support")
+    low = np.asarray(
+        [
+            secants.low_to_nominal_m_s_per_unit_scale[low_index[value]]
+            for value in expected_shared
+        ],
+        dtype=float,
+    )
+    high = np.asarray(
+        [
+            secants.nominal_to_high_m_s_per_unit_scale[high_index[value]]
+            for value in expected_shared
+        ],
+        dtype=float,
+    )
+
+    def median(values: FloatArray) -> float | None:
+        return float(np.median(values)) if values.size else None
+
+    def value_range(values: FloatArray) -> list[float] | None:
+        return [float(np.min(values)), float(np.max(values))] if values.size else None
+
+    return {
+        "axis_name": secants.axis_name,
+        "pathway": secants.pathway,
+        "low_scale": secants.low_scale,
+        "nominal_scale": secants.nominal_scale,
+        "high_scale": secants.high_scale,
+        "shared_persistent_cell_count": len(expected_shared),
+        "summary_statistic": "unweighted median on identities persistent in both one-sided comparisons",
+        "low_to_nominal_secant_m_s_per_unit_scale": median(low),
+        "nominal_to_high_secant_m_s_per_unit_scale": median(high),
+        "low_to_nominal_secant_range_m_s_per_unit_scale": value_range(low),
+        "nominal_to_high_secant_range_m_s_per_unit_scale": value_range(high),
+        "cell_classification_counts": dict(Counter(classification.cell_classification)),
+        "nonmonotonic_classification": classification.overall,
+    }
+
+
 __all__ = [
     "CellIdentity",
     "CommonSupportComparison",
@@ -489,10 +569,12 @@ __all__ = [
     "HeadlineCells",
     "OneSidedEngineeringSecants",
     "SecantClassification",
+    "build_axis_summary_record",
     "build_corner_support_summary",
     "build_one_sided_engineering_secants",
     "classify_one_sided_engineering_secants",
     "compare_common_support",
+    "corner_support_summary_record",
     "extract_headline_cells",
     "require_corner_release_evidence",
 ]

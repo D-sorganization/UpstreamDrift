@@ -6,10 +6,12 @@ import numpy as np
 import pytest
 
 from scripts.research.proximal_distal_energy.articulated_structural_common_support import (
+    build_axis_summary_record,
     build_corner_support_summary,
     build_one_sided_engineering_secants,
     classify_one_sided_engineering_secants,
     compare_common_support,
+    corner_support_summary_record,
     extract_headline_cells,
     require_corner_release_evidence,
 )
@@ -369,3 +371,89 @@ def test_corner_summary_rejects_erased_failure_or_bad_plan_denominator() -> None
             all_registered_gates_passed=True,
             authority=_authority_record(),
         )
+
+
+def test_corner_release_record_has_registered_machine_readable_fields() -> None:
+    cells = extract_headline_cells(
+        "ground", _arrays(((0, 0),), matched_indices=(), ground_names=True)
+    )
+    summary = build_corner_support_summary(
+        "nominal",
+        cells,
+        requested_state_count=1,
+        feasible_state_count=1,
+        retained_failures=(),
+        planned_headline_cell_count=32,
+        all_registered_gates_passed=True,
+        authority=_authority_record(),
+    )
+
+    record = corner_support_summary_record(summary)
+
+    assert record["corner_id"] == "nominal"
+    assert record["planned_headline_cell_count"] == 32
+    assert record["feasible_headline_cell_count"] == 32
+    assert record["executed_headline_cell_count"] == 32
+    assert record["matched_cell_count"] == 0
+    assert record["matched_fraction_of_feasible"] == 0.0
+    assert record["all_registered_gates_passed"] is True
+    assert record["authority"]["authority_sha256"] == "a" * 64
+
+
+def _axis_inputs(*, shared_support: bool = True):
+    nominal_arrays = _arrays(((0, 0),), matched_indices=(0, 1))
+    low_arrays = _arrays(((0, 0),), matched_indices=(0, 1))
+    high_indices = (0, 1) if shared_support else (2, 3)
+    high_arrays = _arrays(((0, 0),), matched_indices=high_indices)
+    nominal_arrays["matched_final_speed_difference_m_s"].fill(0.0)
+    low_arrays["matched_final_speed_difference_m_s"].fill(-0.004)
+    high_arrays["matched_final_speed_difference_m_s"].fill(0.004)
+    nominal = extract_headline_cells("shaft", nominal_arrays)
+    low = compare_common_support(nominal, extract_headline_cells("shaft", low_arrays))
+    high = compare_common_support(nominal, extract_headline_cells("shaft", high_arrays))
+    secants = build_one_sided_engineering_secants(
+        "height_scale",
+        low,
+        high,
+        low_scale=0.8,
+        nominal_scale=1.0,
+        high_scale=1.2,
+    )
+    return secants, classify_one_sided_engineering_secants(secants)
+
+
+def test_axis_summary_uses_declared_unweighted_shared_support_median() -> None:
+    secants, classification = _axis_inputs()
+
+    record = build_axis_summary_record(secants, classification)
+
+    assert record["axis_name"] == "height_scale"
+    assert record["low_scale"] == 0.8
+    assert record["nominal_scale"] == 1.0
+    assert record["high_scale"] == 1.2
+    assert record["shared_persistent_cell_count"] == 2
+    assert record["summary_statistic"] == (
+        "unweighted median on identities persistent in both one-sided comparisons"
+    )
+    assert record["low_to_nominal_secant_m_s_per_unit_scale"] == pytest.approx(0.02)
+    assert record["nominal_to_high_secant_m_s_per_unit_scale"] == pytest.approx(0.02)
+    assert record["low_to_nominal_secant_range_m_s_per_unit_scale"] == pytest.approx(
+        [0.02, 0.02]
+    )
+    assert record["nonmonotonic_classification"] == (
+        "resolved_direction_consistent_on_shared_support"
+    )
+
+
+def test_axis_summary_with_no_shared_support_emits_null_not_a_pooled_value() -> None:
+    secants, classification = _axis_inputs(shared_support=False)
+
+    record = build_axis_summary_record(secants, classification)
+
+    assert record["shared_persistent_cell_count"] == 0
+    assert record["low_to_nominal_secant_m_s_per_unit_scale"] is None
+    assert record["nominal_to_high_secant_m_s_per_unit_scale"] is None
+    assert record["low_to_nominal_secant_range_m_s_per_unit_scale"] is None
+    assert record["nonmonotonic_classification"] == (
+        "insufficient_shared_persistent_support"
+    )

@@ -107,6 +107,8 @@ def test_plan_requires_common_support_and_rejects_count_as_benefit(plan) -> None
     assert (
         "sum of both numerical resolutions" in analysis["nonmonotonicity_decision_rule"]
     )
+    assert "unweighted median and full range" in analysis["axis_summary_rule"]
+    assert "emit null rather than pool" in analysis["axis_summary_rule"]
     assert "do not estimate higher-order" in analysis["interaction_rule"]
     assert "do not select favorable corners" in analysis["multiplicity"]
 

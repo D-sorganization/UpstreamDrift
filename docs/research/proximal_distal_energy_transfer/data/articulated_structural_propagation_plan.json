@@ -3,7 +3,7 @@
   "status": "ready",
   "authority_campaign_sha256": "d8115073dc1b506f145196b08c96d7cb3cf00e8cf29099970e2f7b0fbe6d63f3",
   "design_sha256": "8e5f246645e27c8f0f66a87859c63c470c43e579bccb50848124174944e11e07",
-  "contract_sha256": "34cb895344c2d438ead068a5e9d2fc8b762f7281149ebf06b8631881970bd369",
+  "contract_sha256": "2801373855b98cf468b8b76a3087d20ffd7cc2ffdb7bc2c8d9963799ac5a2c8d",
   "design": {
     "case_indices": [
       0,
@@ -171,6 +171,7 @@
     "secant_boundary": "secants use engineering bounds and are not comparable parameter-importance measures across axes",
     "nonmonotonicity_rule": "retain opposing or materially unequal one-sided secants as nonmonotonic engineering sensitivity rather than averaging them",
     "nonmonotonicity_decision_rule": "classify only identities persistent on both sides; unresolved if either secant does not exceed its numerical resolution, opposing if resolved signs differ, and materially unequal if the resolved same-sign difference exceeds the sum of both numerical resolutions",
+    "axis_summary_rule": "report the unweighted median and full range separately for each one-sided secant using only identities persistent in both one-sided comparisons; emit null rather than pool when shared support is empty",
     "interaction_rule": "one-at-a-time corners do not estimate higher-order parameter interactions",
     "multiplicity": "report all registered OAT corners descriptively; do not select favorable corners or assign confirmatory p-values"
   },
@@ -888,11 +889,11 @@
   "source_sha256": {
     "scripts/research/proximal_distal_energy/articulated_atlas_authority.py": "191174f7fea921a3b52054f85d735b45ee0ca93090aaa733f59221d45de0af0d",
     "scripts/research/proximal_distal_energy/articulated_scaled_authority.py": "6d41ef265dd88d61bdf70f1ff78a17716c9293e6260f307c253df43f441b7d83",
-    "scripts/research/proximal_distal_energy/articulated_structural_common_support.py": "2244c3199486688e3d008620c0c17f5c8123aa9256b63a70bfcac33314dc6ef7",
+    "scripts/research/proximal_distal_energy/articulated_structural_common_support.py": "d413fd0a6d95cebf760cb4b715f6038d2fea86ec5afbeb6b337fe988fead7165",
     "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py": "166ab2ebec88a0c53abc54c6b565ba0a3f82caf800449e822164177f31289549",
-    "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": "b679cfb5ed90279125870d9ca26a2172bec6934990890297f44cbcf3377a22df",
-    "tests/research/test_articulated_structural_common_support.py": "fe0debe3d432037ee259fe4183df2fa346f384aadb92841eb231651acaec8291",
-    "tests/research/test_articulated_structural_propagation_plan.py": "7838c7de63945baf5b525d058899f87e7aa6304917d5b961f5c9704460064efd",
+    "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": "4b568b3830f455079eed623048dbe2281df82d6d77458ae6782c957c7564d1c0",
+    "tests/research/test_articulated_structural_common_support.py": "819b406bab7d4e8fc602a7c2192e98587f7bf1370a171cfd4a2d2d0e8de93c05",
+    "tests/research/test_articulated_structural_propagation_plan.py": "2b3a3dfd1510097517c22353bb271bca118f349dc894a75d377e5c0206f837a2",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "8eed52fe4ebbc55fcf753f4703330dd6d768281b0babfbb2adca074b862fc36d",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
     "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json": "f07fc33cc76fb80f395cd10b01a30169b6440cec3854be3894024d435bc0f722",
