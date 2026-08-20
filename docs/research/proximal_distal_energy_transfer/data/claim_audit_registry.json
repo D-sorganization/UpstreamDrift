@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "882079a730d2383b8b3b071c8a770fceb6d97b35915bbd3eef030acd586f393f",
+    "source_digest": "6982464c766df93e45a172a65bfd0e7c0dab5d1c7602334fc726aee6fb985fdd",
     "baseline_commit": "a4b53e39b"
   },
   "audit_scope": {
@@ -11,7 +11,7 @@
     "release_review_completion_status": "complete",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "The complete paper inventory is adjudicated. Articulated point-attachment and finite-friction distributed-fiber tiers pass their registered gates through 5 and 50 ms. Calibrated shaft, ground, tissue, and governed human validation remain open."
+    "current_scope": "The complete 1,092-candidate paper inventory is adjudicated. The local articulated screen is conditional on partial opening, structural authorities retain one low-height failure, and both structural propagation and the 19-corner headline campaign remain open without human or coaching promotion."
   },
   "dependencies": [
     {
@@ -8409,18 +8409,6 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-9bdb0446f034d972",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-260",
-        "PD-CLAIM-263",
-        "PD-CLAIM-264"
-      ],
-      "rationale": "This passage states or bounds the subject-scaled contact-geometry audit.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-14"
-    },
-    {
       "candidate_id": "PD-CAND-9c65c424209437d6",
       "disposition": "material_claims_mapped",
       "claim_ids": [
@@ -9533,16 +9521,6 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-2641f160380c0508",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-223"
-      ],
-      "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13"
-    },
-    {
       "candidate_id": "PD-CAND-efee29754ee09df2",
       "disposition": "material_claims_mapped",
       "claim_ids": [
@@ -9551,14 +9529,6 @@
         "PD-CLAIM-234"
       ],
       "rationale": "This repeated methods, summary, limitation, provenance, or model-tier passage is bounded by the independently audited primary claim records.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13"
-    },
-    {
-      "candidate_id": "PD-CAND-5f49580176ce4034",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "This heading, equation fragment, figure/table anchor, command block, navigation statement, or repository pointer asserts no standalone scientific result.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
     },
@@ -10436,20 +10406,6 @@
       "last_verified_on": "2026-08-16"
     },
     {
-      "candidate_id": "PD-CAND-b927f3a0c6a4132b",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-243",
-        "PD-CLAIM-247",
-        "PD-CLAIM-253",
-        "PD-CLAIM-273",
-        "PD-CLAIM-296"
-      ],
-      "rationale": "Repeated summary inherits claim bounds.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-16"
-    },
-    {
       "candidate_id": "PD-CAND-4b9c6076fe0d13de",
       "disposition": "material_claims_mapped",
       "claim_ids": [
@@ -10503,17 +10459,6 @@
       "claim_ids": [
         "PD-CLAIM-128",
         "PD-CLAIM-293",
-        "PD-CLAIM-296"
-      ],
-      "rationale": "Repeated summary inherits claim bounds.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-16"
-    },
-    {
-      "candidate_id": "PD-CAND-a0ea93e52f20179e",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-128",
         "PD-CLAIM-296"
       ],
       "rationale": "Repeated summary inherits claim bounds.",
@@ -10977,6 +10922,310 @@
         "PD-CLAIM-286"
       ],
       "rationale": "This passage states or bounds the distributed-grip gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-a65a2f89e0218125",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-297"
+      ],
+      "rationale": "Articulated screen claim or boundary.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-7f43d06d8a7b7a6f",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-297"
+      ],
+      "rationale": "Articulated screen claim or boundary.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-0da8ef2eb15e323d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-298"
+      ],
+      "rationale": "Articulated screen claim or boundary.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-30f2136ae7f1fd6a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-299"
+      ],
+      "rationale": "Articulated screen claim or boundary.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-dd5aaf18bf1e0f8c",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-299"
+      ],
+      "rationale": "Articulated screen claim or boundary.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-689d0872b14fe849",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-300"
+      ],
+      "rationale": "Articulated screen claim or boundary.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-8d34a8287be5fb39",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Figure or governed-artifact pointer.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-25d1a2b7d3a2156a",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Figure or governed-artifact pointer.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-5ee4cc7fd13382d9",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-301"
+      ],
+      "rationale": "Structural authority claim, boundary, or evidence pointer.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-5a8cd4e69b5a28fd",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Structural authority claim, boundary, or evidence pointer.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-32081bbe22915843",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-302"
+      ],
+      "rationale": "Structural authority claim, boundary, or evidence pointer.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-b1a0a1909be1cad3",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Structural authority claim, boundary, or evidence pointer.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-c0d8d8a3baccda1d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-302"
+      ],
+      "rationale": "Structural authority claim, boundary, or evidence pointer.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-a4618f008c2ba36b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-302"
+      ],
+      "rationale": "Structural authority claim, boundary, or evidence pointer.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-2b561c179729119b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-303"
+      ],
+      "rationale": "Structural authority claim, boundary, or evidence pointer.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-37b5dce1797e4228",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Structural authority claim, boundary, or evidence pointer.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-21efb27efb9d68aa",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-304"
+      ],
+      "rationale": "Headline uncertainty design, boundary, or figure pointer.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-1bfe41dc9f4291c7",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-304"
+      ],
+      "rationale": "Headline uncertainty design, boundary, or figure pointer.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-fd14656e7d2f25ae",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Headline uncertainty design, boundary, or figure pointer.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-f86dae8e82392c96",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Headline uncertainty design, boundary, or figure pointer.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-d4b7109ffccb30d4",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-304"
+      ],
+      "rationale": "Headline uncertainty design, boundary, or figure pointer.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-c98873ad285d455a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Headline uncertainty design, boundary, or figure pointer.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-6e1796a49ac6cc58",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-243",
+        "PD-CLAIM-247",
+        "PD-CLAIM-253",
+        "PD-CLAIM-273",
+        "PD-CLAIM-296",
+        "PD-CLAIM-297",
+        "PD-CLAIM-298",
+        "PD-CLAIM-300",
+        "PD-CLAIM-301",
+        "PD-CLAIM-302",
+        "PD-CLAIM-303"
+      ],
+      "rationale": "Repeated synthesis inherits the mapped primary claim boundaries.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-3f9a28e3958ab30a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-260",
+        "PD-CLAIM-263",
+        "PD-CLAIM-264"
+      ],
+      "rationale": "Repeated synthesis inherits the mapped primary claim boundaries.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-69e32304194fe1cf",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-287",
+        "PD-CLAIM-288",
+        "PD-CLAIM-289",
+        "PD-CLAIM-290",
+        "PD-CLAIM-291",
+        "PD-CLAIM-292",
+        "PD-CLAIM-293",
+        "PD-CLAIM-294",
+        "PD-CLAIM-295",
+        "PD-CLAIM-296"
+      ],
+      "rationale": "Repeated synthesis inherits the mapped primary claim boundaries.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-a6cbaeac4e561b78",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-301",
+        "PD-CLAIM-302",
+        "PD-CLAIM-303"
+      ],
+      "rationale": "Repeated synthesis inherits the mapped primary claim boundaries.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-5a645df3aad4e211",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-223",
+        "PD-CLAIM-241",
+        "PD-CLAIM-303"
+      ],
+      "rationale": "Repeated synthesis inherits the mapped primary claim boundaries.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-a49b9e81333cef61",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-128",
+        "PD-CLAIM-206",
+        "PD-CLAIM-234",
+        "PD-CLAIM-303"
+      ],
+      "rationale": "Repeated synthesis inherits the mapped primary claim boundaries.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-1efe7a3110de4a16",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This is an issue-tracker navigation statement.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-20"
     }
@@ -15556,12 +15805,12 @@
         "PD-CAND-fa317f5558bbc8c0",
         "PD-CAND-4227942ef5fed003",
         "PD-CAND-66d5d2a169f5d47a",
-        "PD-CAND-a0ea93e52f20179e",
         "PD-CAND-23a5405a8339d96a",
         "PD-CAND-6c690d4f4d4a97b0",
         "PD-CAND-934c0eef653e994d",
         "PD-CAND-61fd7d95e06327e9",
-        "PD-CAND-2c4a85fe3da9c0ad"
+        "PD-CAND-2c4a85fe3da9c0ad",
+        "PD-CAND-a49b9e81333cef61"
       ],
       "statement": "The discrepancy matrix records explicit branch capabilities rather than cumulative triangular inheritance; twelve bounded findings are supported somewhere in executed tiers, while calibrated anatomical, shaft, ground, and independently measured human transport remain untested.",
       "classification": "model_discrepancy_and_survival_boundary",
@@ -15582,7 +15831,8 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:54",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:64",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:48",
-        "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:14"
+        "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:14",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:167"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
@@ -15607,7 +15857,7 @@
       "falsifier": "A rendered cell disagrees with the record or prose claims untested branch inheritance.",
       "adjudication": "All reciprocal chapter candidates were checked against executable evidence and narrowed where a branch, transform audit, or reduced model did not support the stronger reading.",
       "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13"
+      "last_verified_on": "2026-08-20"
     },
     {
       "claim_id": "PD-CLAIM-129",
@@ -19175,7 +19425,8 @@
         "PD-CAND-c06392d08940ad2e",
         "PD-CAND-a61ee0b6aa1a4bbd",
         "PD-CAND-8fadc01cf2fdc629",
-        "PD-CAND-efee29754ee09df2"
+        "PD-CAND-efee29754ee09df2",
+        "PD-CAND-a49b9e81333cef61"
       ],
       "statement": "Bilateral six-axis wrenches, pressure, constrained inverse dynamics, stiffness/delay, EMG, shaft, launch, and participant holdout are required to test the allocation and preload predictions; those human results remain unexecuted.",
       "classification": "registered_measurement_and_human_falsification_gate",
@@ -19186,7 +19437,8 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:207",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:220",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:128",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:145"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:145",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:167"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/torque_allocation_preload_study.json",
@@ -19216,7 +19468,7 @@
       "falsifier": "Measured allocation forces or delays fail the prediction, held-out benefit disappears, or human support is claimed without the registered modalities.",
       "adjudication": "All chapter passages were checked against regenerated allocation and transmission evidence, original-source boundaries, explicit numerical equivalence, temporal resolution, and the governed human-data gate.",
       "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13"
+      "last_verified_on": "2026-08-20"
     },
     {
       "claim_id": "PD-CLAIM-207",
@@ -20166,10 +20418,10 @@
         "PD-CAND-9d0c920870e583ce",
         "PD-CAND-7c01f798d7a8ab44",
         "PD-CAND-bab8e8cd5403f689",
-        "PD-CAND-2641f160380c0508",
         "PD-CAND-601f18c64a7c62fa",
         "PD-CAND-c214da13b0628ac2",
-        "PD-CAND-13cb53f154dc0811"
+        "PD-CAND-13cb53f154dc0811",
+        "PD-CAND-5a645df3aad4e211"
       ],
       "statement": "The study is an open synthetic numerical experiment, not calibrated equipment or human evidence.",
       "classification": "scope_and_provenance",
@@ -20198,7 +20450,8 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:135",
         "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:3",
         "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:90",
-        "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:101"
+        "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:101",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:154"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/moving_base_modal_shaft_study.json",
@@ -20228,7 +20481,7 @@
       "falsifier": "The resource is presented as calibrated or prescriptive.",
       "adjudication": "Every passage was reconciled to regenerated hash-bound JSON/NPZ authority; obsolete run values were replaced and the failed model-use screen was promoted to the claim boundary.",
       "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13"
+      "last_verified_on": "2026-08-20"
     },
     {
       "claim_id": "PD-CLAIM-224",
@@ -20742,7 +20995,8 @@
         "PD-CAND-522bf874f102b668",
         "PD-CAND-4fb5c6e7be3a4809",
         "PD-CAND-efee29754ee09df2",
-        "PD-CAND-fc0fb848d84d02cb"
+        "PD-CAND-fc0fb848d84d02cb",
+        "PD-CAND-a49b9e81333cef61"
       ],
       "statement": "Biological impedance, repeatability, coaching, ball flight, and self-stabilization remain open participant-held-out experimental questions.",
       "classification": "bounded_research_program",
@@ -20754,7 +21008,8 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07c_transmission_robustness.qmd:170",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07c_transmission_robustness.qmd:187",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:145",
-        "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:12"
+        "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:12",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:167"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/transmission_robustness_study.json",
@@ -20787,7 +21042,7 @@
       "falsifier": "Model proxies are relabeled biological validation or prescription.",
       "adjudication": "All passages were reconciled to regenerated hash-bound authority, Pareto jackknives, rank thresholds, and out-of-local-envelope prediction error.",
       "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13"
+      "last_verified_on": "2026-08-20"
     },
     {
       "claim_id": "PD-CLAIM-242",
@@ -20844,7 +21099,7 @@
     {
       "claim_id": "PD-CLAIM-243",
       "candidate_ids": [
-        "PD-CAND-b927f3a0c6a4132b"
+        "PD-CAND-6e1796a49ac6cc58"
       ],
       "statement": "The seven-question table retains observable-specific drift attribution and bounded current answers after adding the geometry and recovery studies.",
       "classification": "critical_question_answer_map",
@@ -20887,7 +21142,7 @@
       "falsifier": "A conditional model entry is presented as a universal or human conclusion.",
       "adjudication": "Reconciled to the existing claim audit, machine-readable question registry, and prospective experiment contract without promoting model evidence to human evidence.",
       "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-14"
+      "last_verified_on": "2026-08-20"
     },
     {
       "claim_id": "PD-CLAIM-244",
@@ -21098,7 +21353,7 @@
       "candidate_ids": [
         "PD-CAND-f68d06799fe605bf",
         "PD-CAND-db74be00a06f8889",
-        "PD-CAND-b927f3a0c6a4132b"
+        "PD-CAND-6e1796a49ac6cc58"
       ],
       "statement": "Energy-, work-, and load-controlled planar evidence rejects maximizing proximal velocity as a general rule at those tiers, while five distinct slack classes require separate state, energy, and measurement tests.",
       "classification": "nonmonotonic_velocity_and_typed_slack_boundary",
@@ -21143,7 +21398,7 @@
       "falsifier": "A planar reversal is promoted to a human optimum or one slack class is inferred from another.",
       "adjudication": "Reconciled to the existing claim audit, machine-readable question registry, and prospective experiment contract without promoting model evidence to human evidence.",
       "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-14"
+      "last_verified_on": "2026-08-20"
     },
     {
       "claim_id": "PD-CLAIM-253",
@@ -21152,8 +21407,8 @@
         "PD-CAND-5bb964996c957e8b",
         "PD-CAND-c6f3dffde5c055ae",
         "PD-CAND-0e5d5314a405698d",
-        "PD-CAND-b927f3a0c6a4132b",
-        "PD-CAND-b7b46260431e11bb"
+        "PD-CAND-b7b46260431e11bb",
+        "PD-CAND-6e1796a49ac6cc58"
       ],
       "statement": "Typed scalar and articulated point-contact audits separate slack classes, and a 576-trajectory finite-friction distributed-fiber atlas exposes station-count and active-set sensitivity while an instantaneous ideal-stick projection supplies a kinetic capture bound; none establishes physical class identity or benefit.",
       "classification": "typed_slack_dynamic_passivity_and_identifiability_audit",
@@ -21201,7 +21456,7 @@
       "falsifier": "A mechanical class violates passivity or closure, the result depends on mixing classes, or independent measurements and held-out data contradict the registered near-confounding and non-identification boundary.",
       "adjudication": "Reconciled to the existing claim audit, machine-readable question registry, and prospective experiment contract without promoting model evidence to human evidence.",
       "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-14"
+      "last_verified_on": "2026-08-20"
     },
     {
       "claim_id": "PD-CLAIM-248",
@@ -21915,9 +22170,9 @@
       "candidate_ids": [
         "PD-CAND-e545036d232f53fc",
         "PD-CAND-b30af9f570f239dc",
-        "PD-CAND-b927f3a0c6a4132b"
+        "PD-CAND-6e1796a49ac6cc58"
       ],
-      "statement": "The 50 ms validity-horizon result strengthens the reduced hand-carriage reference; the articulated tier reproduces its registered logic only through 5 ms, and neither establishes calibrated anatomy/equipment, passive human transfer, timing economy, slack benefit, or coaching strategy.",
+      "statement": "The 50 ms validity-horizon result strengthens the reduced hand-carriage reference; the articulated point-contact tier remains qualified only through 5 ms, while later distributed-grip, shaft, and ground tiers separately reach 50 ms. None establishes calibrated anatomy/equipment or human strategy.",
       "classification": "closed_state_forward_horizon_inference_boundary",
       "published_status": "explicitly_bounded",
       "audit_status": "paired_cross_engine_horizon_adverse_load_and_energy_controls_checked",
@@ -21937,7 +22192,7 @@
         "tests/research/test_forward_contact_validity_horizon.py"
       ],
       "model_domain": "Six synthetic profiles, three grip spans, three phase states, ten one-factor branches, four horizons, and two native engines.",
-      "uncertainty_boundary": "Longer articulated contact, typed unilateral slack, distributed grip and shaft calibration, ground coupling, delivery, impact, and governed human evidence remain open.",
+      "uncertainty_boundary": "The tiers use different contact, shaft, support, and state contracts; their horizon results cannot be pooled into a calibrated human persistence claim.",
       "competing_explanations": [
         "shared reduced model structure",
         "engineering contact and driver parameters",
@@ -21954,7 +22209,7 @@
       "falsifier": "A model, anatomy, equipment, delivery, or human conclusion is attributed to the reduced 50 ms agreement alone.",
       "adjudication": "All registered outcomes were retained. No failure was observed through 50 ms, so persistence is reported as right-censored rather than extrapolated.",
       "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-14"
+      "last_verified_on": "2026-08-20"
     },
     {
       "claim_id": "PD-CLAIM-260",
@@ -21962,9 +22217,9 @@
         "PD-CAND-bc0368729ddb9738",
         "PD-CAND-7b6cd5358472b395",
         "PD-CAND-80616653a4fc60a7",
-        "PD-CAND-9bdb0446f034d972",
         "PD-CAND-f9b891e62e1d24de",
-        "PD-CAND-6c690d4f4d4a97b0"
+        "PD-CAND-6c690d4f4d4a97b0",
+        "PD-CAND-3f9a28e3958ab30a"
       ],
       "statement": "Across six deterministic de Leva design profiles, three grip spans, and 61 prescribed states, anatomical hand points miss the declared grips by 0.171--0.616 m even though every local bilateral contact Jacobian has rank six and condition number 5.35--6.40.",
       "classification": "subject_scaled_spatial_contact_closure_audit",
@@ -22025,7 +22280,7 @@
       "falsifier": "Regeneration places every anatomical hand point within the frozen 5 mm tolerance or the published rank, condition, or distance ranges do not reproduce.",
       "adjudication": "The executable atlas was regenerated from canonical anthropometrics and the shared spatial model; favorable rank and couple-scaling controls are retained alongside the adverse contact-closure result.",
       "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-14"
+      "last_verified_on": "2026-08-20"
     },
     {
       "claim_id": "PD-CLAIM-261",
@@ -22165,9 +22420,9 @@
         "PD-CAND-9c65c424209437d6",
         "PD-CAND-c39cc01504847772",
         "PD-CAND-9dd9306ab117189e",
-        "PD-CAND-9bdb0446f034d972",
         "PD-CAND-f9b891e62e1d24de",
-        "PD-CAND-6c690d4f4d4a97b0"
+        "PD-CAND-6c690d4f4d4a97b0",
+        "PD-CAND-3f9a28e3958ab30a"
       ],
       "statement": "All 234 registered profile, grip-span, and phase configurations close both point contacts while holding the club pose fixed; every achieved constraint Jacobian has rank six, the worst closure residual is 1.16e-10 m, the minimum engineering-limit margin is 0.103 rad, and the minimum coarse collision clearance is 30.9 mm.",
       "classification": "subject_scaled_closed_contact_inverse_kinematics_screen",
@@ -22228,14 +22483,14 @@
       "falsifier": "Regeneration loses any registered closure, rank, bound, collision, fixed-club, or continuity gate beyond numerical tolerance.",
       "adjudication": "The executable atlas was regenerated from canonical anthropometrics and the shared spatial model; favorable rank and couple-scaling controls are retained alongside the adverse contact-closure result.",
       "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-14"
+      "last_verified_on": "2026-08-20"
     },
     {
       "claim_id": "PD-CLAIM-264",
       "candidate_ids": [
         "PD-CAND-684ed6cb396eac0e",
         "PD-CAND-9dd9306ab117189e",
-        "PD-CAND-9bdb0446f034d972"
+        "PD-CAND-3f9a28e3958ab30a"
       ],
       "statement": "Closed-contact inverse kinematics is a necessary geometric gate and does not establish anatomy, contact force, work, passivity, timing demand, self-correction, slack benefit, or human strategy.",
       "classification": "closed_contact_inference_boundary",
@@ -22293,7 +22548,7 @@
       "falsifier": "A force, transfer, timing, slack, or human claim is attributed to this inverse-kinematics evidence alone.",
       "adjudication": "The executable atlas was regenerated from canonical anthropometrics and the shared spatial model; favorable rank and couple-scaling controls are retained alongside the adverse contact-closure result.",
       "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-14"
+      "last_verified_on": "2026-08-20"
     },
     {
       "claim_id": "PD-CLAIM-265",
@@ -22915,7 +23170,8 @@
         "PD-CAND-788e4fc5a7ff1dc5",
         "PD-CAND-9da5c12ad10a77c9",
         "PD-CAND-0044f981df612835",
-        "PD-CAND-5b93ad1d66007a40"
+        "PD-CAND-5b93ad1d66007a40",
+        "PD-CAND-5a645df3aad4e211"
       ],
       "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
       "source_locations": [
@@ -22927,7 +23183,8 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:24",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:31",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:40",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:47"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:47",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:154"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/COMPANION_WORKBENCH.md",
@@ -22945,7 +23202,7 @@
       ],
       "adjudication": "Reconciled to committed machine evidence with the stated model and human boundaries retained.",
       "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13",
+      "last_verified_on": "2026-08-20",
       "claim_id": "PD-CLAIM-241",
       "statement": "The companion workbench is exploratory and the open-resource bundle is provenance infrastructure: scientific authority remains the scripted, pinned, fail-closed evidence release rather than either interface or repository branding.",
       "classification": "open_resource_and_exploratory_interface_boundary",
@@ -23968,7 +24225,8 @@
       "candidate_ids": [
         "PD-CAND-637aabb92dc1e8ad",
         "PD-CAND-7a6aeabd1f23b68f",
-        "PD-CAND-4809ea0d2f316f61"
+        "PD-CAND-4809ea0d2f316f61",
+        "PD-CAND-69e32304194fe1cf"
       ],
       "statement": "A passive augmented articulated model couples two tip-normalized bending coordinates and one twist coordinate to native rigid dynamics while retaining a named energy and passivity ledger and exact rigid reduction.",
       "classification": "articulated_passive_shaft_formulation",
@@ -23977,7 +24235,8 @@
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:665",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:679",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:692"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:692",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:117"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_shaft_structural_basis.json",
@@ -24017,13 +24276,14 @@
       "falsifier": "The augmented mass loses positive definiteness in-domain, rigid reduction differs, or elastic storage/damping power fails its identity.",
       "adjudication": "The passive elastic pathway is reported with mixed matched outcomes and without assigning equipment, human, timing, or coaching benefit.",
       "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-15"
+      "last_verified_on": "2026-08-20"
     },
     {
       "claim_id": "PD-CLAIM-290",
       "candidate_ids": [
         "PD-CAND-51f06505262bb0ec",
-        "PD-CAND-bf1c55e354cd8bd6"
+        "PD-CAND-bf1c55e354cd8bd6",
+        "PD-CAND-69e32304194fe1cf"
       ],
       "statement": "The articulated bending coordinate reproduces the frozen 5.2399 Hz first FE mode and the declared tapered-section torsion coordinate is 70.1260 Hz; the six-mode authority shows materially greater one-mode error under short loading.",
       "classification": "articulated_shaft_structural_authority",
@@ -24031,7 +24291,8 @@
       "audit_status": "articulated_shaft_mechanism_and_boundary_checked",
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:700",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:205"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:205",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:117"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_shaft_structural_basis.json",
@@ -24071,7 +24332,7 @@
       "falsifier": "The frozen basis hash is stale, its reconstructed frequency differs from the FE authority, or the reported six-mode discrepancies do not reproduce.",
       "adjudication": "The passive elastic pathway is reported with mixed matched outcomes and without assigning equipment, human, timing, or coaching benefit.",
       "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-15"
+      "last_verified_on": "2026-08-20"
     },
     {
       "claim_id": "PD-CLAIM-291",
@@ -24080,7 +24341,8 @@
         "PD-CAND-ee105a0c11986c3f",
         "PD-CAND-bf1c55e354cd8bd6",
         "PD-CAND-f9b891e62e1d24de",
-        "PD-CAND-6c690d4f4d4a97b0"
+        "PD-CAND-6c690d4f4d4a97b0",
+        "PD-CAND-69e32304194fe1cf"
       ],
       "statement": "All 384 registered fine-grid trajectories pass linear-domain, power, work-energy refinement, activation, and MuJoCo--Pinocchio gates through 50 ms after two coarser torsion probes fail closed.",
       "classification": "articulated_shaft_numerical_result",
@@ -24091,7 +24353,8 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:729",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:205",
         "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd:10",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:54"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:54",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:117"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_shaft_structural_basis.json",
@@ -24131,7 +24394,7 @@
       "falsifier": "Any committed cell violates a registered gate, either coarse exclusion does not reproduce, or the limiting-cell residual does not decrease at finer steps.",
       "adjudication": "The passive elastic pathway is reported with mixed matched outcomes and without assigning equipment, human, timing, or coaching benefit.",
       "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-15"
+      "last_verified_on": "2026-08-20"
     },
     {
       "claim_id": "PD-CLAIM-292",
@@ -24141,7 +24404,8 @@
         "PD-CAND-f9b891e62e1d24de",
         "PD-CAND-12eb97d219020156",
         "PD-CAND-6c690d4f4d4a97b0",
-        "PD-CAND-61fd7d95e06327e9"
+        "PD-CAND-61fd7d95e06327e9",
+        "PD-CAND-69e32304194fe1cf"
       ],
       "statement": "Among 126 coupled--rigid cells matched within 5% for peak load and dissipated work, final-speed differences include 82 negative and 44 positive values, rejecting a universal passive-shaft speed benefit in the declared model.",
       "classification": "articulated_shaft_matched_outcome_boundary",
@@ -24153,7 +24417,8 @@
         "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd:10",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:753",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:54",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:48"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:48",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:117"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_shaft_structural_basis.json",
@@ -24193,7 +24458,7 @@
       "falsifier": "The match rule or counts fail to reproduce, all matched differences have one sign, or a universal equipment/human conclusion is attributed to this atlas.",
       "adjudication": "The passive elastic pathway is reported with mixed matched outcomes and without assigning equipment, human, timing, or coaching benefit.",
       "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-15"
+      "last_verified_on": "2026-08-20"
     },
     {
       "claim_id": "PD-CLAIM-293",
@@ -24214,7 +24479,8 @@
         "PD-CAND-23a5405a8339d96a",
         "PD-CAND-6c690d4f4d4a97b0",
         "PD-CAND-61fd7d95e06327e9",
-        "PD-CAND-2c4a85fe3da9c0ad"
+        "PD-CAND-2c4a85fe3da9c0ad",
+        "PD-CAND-69e32304194fe1cf"
       ],
       "statement": "A passive finite-base extension couples planar translation and pitch to the non-club articulated tree, exposes ground reaction and intrinsic free moment separately from reference transport, and reduces exactly to the fixed shaft tier.",
       "classification": "articulated_finite_ground_formulation",
@@ -24237,7 +24503,8 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:5",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:54",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:48",
-        "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:14"
+        "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:14",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:117"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_ground_diagnostic.json",
@@ -24282,7 +24549,7 @@
       "falsifier": "Fixed-base reduction, power closure, moment transport, or positive-definite augmented inertia fails in the registered domain.",
       "adjudication": "The finite-base mechanism is reported with an empty primary matched set; unmatched speed differences are not interpreted as an effect.",
       "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-16"
+      "last_verified_on": "2026-08-20"
     },
     {
       "claim_id": "PD-CLAIM-294",
@@ -24290,7 +24557,8 @@
         "PD-CAND-c2dcc5485dcfd3cd",
         "PD-CAND-4865dad66812058c",
         "PD-CAND-f9b891e62e1d24de",
-        "PD-CAND-4b9c6076fe0d13de"
+        "PD-CAND-4b9c6076fe0d13de",
+        "PD-CAND-69e32304194fe1cf"
       ],
       "statement": "All 42 diagnostic traces refine monotonically and agree across native engines, while natural-zero, gravity-only, and conditional-base initializations produce materially different short-transient loads and speeds.",
       "classification": "articulated_ground_initialization_sensitivity",
@@ -24300,7 +24568,8 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:51",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:82",
         "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd:10",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:55"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:55",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:117"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_ground_diagnostic.json",
@@ -24345,7 +24614,7 @@
       "falsifier": "Any diagnostic branch fails refinement/parity or the reported initialization separation does not reproduce.",
       "adjudication": "The finite-base mechanism is reported with an empty primary matched set; unmatched speed differences are not interpreted as an effect.",
       "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-16"
+      "last_verified_on": "2026-08-20"
     },
     {
       "claim_id": "PD-CLAIM-295",
@@ -24359,7 +24628,8 @@
         "PD-CAND-23a5405a8339d96a",
         "PD-CAND-6c690d4f4d4a97b0",
         "PD-CAND-61fd7d95e06327e9",
-        "PD-CAND-2c4a85fe3da9c0ad"
+        "PD-CAND-2c4a85fe3da9c0ad",
+        "PD-CAND-69e32304194fe1cf"
       ],
       "statement": "All 576 registered finite-ground trajectories pass declared shaft/base domains, refinement, work--energy, and MuJoCo--Pinocchio parity gates through 50 ms.",
       "classification": "articulated_ground_numerical_result",
@@ -24375,7 +24645,8 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:5",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:54",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:48",
-        "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:14"
+        "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:14",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:117"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_ground_diagnostic.json",
@@ -24420,7 +24691,7 @@
       "falsifier": "A committed trajectory violates a registered domain, refinement, energy, or native-engine gate.",
       "adjudication": "The finite-base mechanism is reported with an empty primary matched set; unmatched speed differences are not interpreted as an effect.",
       "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-16"
+      "last_verified_on": "2026-08-20"
     },
     {
       "claim_id": "PD-CLAIM-296",
@@ -24436,14 +24707,14 @@
         "PD-CAND-b9431c1dd8029d1e",
         "PD-CAND-66d5d2a169f5d47a",
         "PD-CAND-1838289af000fbed",
-        "PD-CAND-b927f3a0c6a4132b",
         "PD-CAND-4b9c6076fe0d13de",
-        "PD-CAND-a0ea93e52f20179e",
         "PD-CAND-23a5405a8339d96a",
         "PD-CAND-6c690d4f4d4a97b0",
         "PD-CAND-934c0eef653e994d",
         "PD-CAND-61fd7d95e06327e9",
-        "PD-CAND-2c4a85fe3da9c0ad"
+        "PD-CAND-2c4a85fe3da9c0ad",
+        "PD-CAND-6e1796a49ac6cc58",
+        "PD-CAND-69e32304194fe1cf"
       ],
       "statement": "None of 384 coupled--fixed cells meets the preregistered 5% peak-load and total-work match; a post-hoc non-ground-work screen admits 60 cells with both speed-difference signs, leaving the isolated delivery effect unidentified.",
       "classification": "articulated_ground_adverse_matching_result",
@@ -24468,7 +24739,8 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:54",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:64",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:48",
-        "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:14"
+        "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:14",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:117"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_ground_diagnostic.json",
@@ -24513,7 +24785,7 @@
       "falsifier": "A primary match exists under the registered rule, the post-hoc counts fail to reproduce, or unmatched differences are presented as identified effects.",
       "adjudication": "The finite-base mechanism is reported with an empty primary matched set; unmatched speed differences are not interpreted as an effect.",
       "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-16"
+      "last_verified_on": "2026-08-20"
     },
     {
       "claim_id": "PD-CLAIM-286",
@@ -24585,7 +24857,8 @@
         "PD-CAND-4aee1cc3e2b54c5b",
         "PD-CAND-d65894f827877c37",
         "PD-CAND-bcf7e266e79119d2",
-        "PD-CAND-b7b46260431e11bb"
+        "PD-CAND-b7b46260431e11bb",
+        "PD-CAND-69e32304194fe1cf"
       ],
       "statement": "All 576 nominal trajectories pass registered power, passivity, work-energy, geometry, refinement, and MuJoCo--Pinocchio gates through 50 ms; 24 disengaged-start probes contain opening and reattachment with exact active-set parity, finite-friction speed effects have mixed signs, and 144 ideal stick projections satisfy their velocity constraint with nonnegative kinetic-energy capture.",
       "classification": "distributed_grip_friction_result",
@@ -24595,7 +24868,8 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:672",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:682",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:693",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:195"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:195",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:117"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_grip_atlas.json",
@@ -24641,7 +24915,8 @@
       "claim_id": "PD-CLAIM-288",
       "candidate_ids": [
         "PD-CAND-9447cc8112faefbc",
-        "PD-CAND-b7b46260431e11bb"
+        "PD-CAND-b7b46260431e11bb",
+        "PD-CAND-69e32304194fe1cf"
       ],
       "statement": "The distributed-fiber atlas establishes finite-friction and discretization sensitivity, not physical grip-pressure or friction benefit, slack benefit, equipment response, timing economy, human transfer, or strategy.",
       "classification": "distributed_grip_inference_boundary",
@@ -24649,7 +24924,8 @@
       "audit_status": "distributed_grip_friction_horizon_and_events_checked",
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:701",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:195"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:195",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:117"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_grip_atlas.json",
@@ -24688,6 +24964,408 @@
       ],
       "falsifier": "A physical, biological, equipment, timing, or coaching claim is attributed to this synthetic atlas alone.",
       "adjudication": "Discretization and active-set results are reported without assigning measured pressure, benefit, human intent, or coaching meaning.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "claim_id": "PD-CLAIM-297",
+      "candidate_ids": [
+        "PD-CAND-a65a2f89e0218125",
+        "PD-CAND-7f43d06d8a7b7a6f",
+        "PD-CAND-6e1796a49ac6cc58"
+      ],
+      "statement": "A deterministic 40-row articulated screen perturbs nine declared engineering inputs, rebuilds and recloses each model, retains every failure state, and computes PRCCs only on finite response rows.",
+      "classification": "articulated_engineering_uncertainty_design",
+      "published_status": "registered_and_executed_for_declared_synthetic_screen",
+      "audit_status": "design_rows_closure_status_and_response_contract_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06caa_articulated_uncertainty_screen.qmd:3",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06caa_articulated_uncertainty_screen.qmd:13",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_uncertainty_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_uncertainty_study.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_uncertainty_screen.pdf",
+        "scripts/research/proximal_distal_energy/articulated_uncertainty_study.py",
+        "scripts/research/proximal_distal_energy/register_articulated_uncertainty_claims.py",
+        "tests/research/test_articulated_uncertainty_study.py"
+      ],
+      "model_domain": "Forty deterministic rows over height, mass, joint limits, grip, friction, club properties, and initial velocity in a local distributed-contact trajectory.",
+      "uncertainty_boundary": "The ranges are engineering bounds, not participant or equipment distributions, and the screen does not estimate interactions.",
+      "competing_explanations": [
+        "finite deterministic design rather than a sampled population",
+        "excitation and contact-law dependence",
+        "monotone association rather than causal parameter effect",
+        "partial opening rather than robust maintained contact"
+      ],
+      "negative_controls": [
+        "deterministic registered Latin-hypercube rows",
+        "fresh model and bilateral-closure solve for each row",
+        "retained feasibility and contact statuses",
+        "finite-response and five-percent energy-closure gates"
+      ],
+      "falsifier": "A registered row is omitted, does not rebuild and reclose its model, or a nonfinite response enters the PRCC calculation.",
+      "adjudication": "The design is treated as a deterministic model screen, not as population uncertainty or causal identification.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "claim_id": "PD-CLAIM-298",
+      "candidate_ids": [
+        "PD-CAND-0da8ef2eb15e323d",
+        "PD-CAND-6e1796a49ac6cc58"
+      ],
+      "statement": "All 40 registered rows have finite response vectors and remain within the 5% work-energy gate, but every local trajectory partially opens, rejecting robust full-contact interpretation for this screen.",
+      "classification": "articulated_uncertainty_adverse_contact_result",
+      "published_status": "finite_energy_closed_but_contact_domain_adverse",
+      "audit_status": "all_rows_statuses_and_energy_gate_reconciled",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06caa_articulated_uncertainty_screen.qmd:25",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_uncertainty_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_uncertainty_study.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_uncertainty_screen.pdf",
+        "scripts/research/proximal_distal_energy/articulated_uncertainty_study.py",
+        "scripts/research/proximal_distal_energy/register_articulated_uncertainty_claims.py",
+        "tests/research/test_articulated_uncertainty_study.py"
+      ],
+      "model_domain": "The registered 40-row local articulated uncertainty screen.",
+      "uncertainty_boundary": "Finite integration after partial opening does not establish maintained physical grip contact, human strategy, or delivery benefit.",
+      "competing_explanations": [
+        "finite deterministic design rather than a sampled population",
+        "excitation and contact-law dependence",
+        "monotone association rather than causal parameter effect",
+        "partial opening rather than robust maintained contact"
+      ],
+      "negative_controls": [
+        "deterministic registered Latin-hypercube rows",
+        "fresh model and bilateral-closure solve for each row",
+        "retained feasibility and contact statuses",
+        "finite-response and five-percent energy-closure gates"
+      ],
+      "falsifier": "Any row is nonfinite, exceeds the declared energy gate, or lacks the reported partial-opening status.",
+      "adjudication": "The adverse contact-domain result is retained and conditions every downstream association.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "claim_id": "PD-CLAIM-299",
+      "candidate_ids": [
+        "PD-CAND-30f2136ae7f1fd6a",
+        "PD-CAND-dd5aaf18bf1e0f8c"
+      ],
+      "statement": "The largest absolute conditional PRCCs are +0.936 for initial velocity versus peak force, -0.500 for height versus force couple, -0.940 for friction versus sliding speed, -0.760 for height versus transitions, and +0.931 for mass versus the bounded numerical residual.",
+      "classification": "conditional_articulated_prcc_screen",
+      "published_status": "descriptive_associations_for_registered_finite_rows",
+      "audit_status": "prcc_values_status_conditioning_and_boundaries_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06caa_articulated_uncertainty_screen.qmd:33",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06caa_articulated_uncertainty_screen.qmd:44"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_uncertainty_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_uncertainty_study.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_uncertainty_screen.pdf",
+        "scripts/research/proximal_distal_energy/articulated_uncertainty_study.py",
+        "scripts/research/proximal_distal_energy/register_articulated_uncertainty_claims.py",
+        "tests/research/test_articulated_uncertainty_study.py"
+      ],
+      "model_domain": "Finite rows of the declared deterministic local screen.",
+      "uncertainty_boundary": "PRCC magnitudes are neither causal effects nor cross-parameter importance rankings and have no population interval.",
+      "competing_explanations": [
+        "finite deterministic design rather than a sampled population",
+        "excitation and contact-law dependence",
+        "monotone association rather than causal parameter effect",
+        "partial opening rather than robust maintained contact"
+      ],
+      "negative_controls": [
+        "deterministic registered Latin-hypercube rows",
+        "fresh model and bilateral-closure solve for each row",
+        "retained feasibility and contact statuses",
+        "finite-response and five-percent energy-closure gates"
+      ],
+      "falsifier": "The committed rows do not reproduce the stated PRCC values.",
+      "adjudication": "Associations are reported with status conditioning and without causal, population, performance, or coaching promotion.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "claim_id": "PD-CLAIM-300",
+      "candidate_ids": [
+        "PD-CAND-689d0872b14fe849",
+        "PD-CAND-6e1796a49ac6cc58"
+      ],
+      "statement": "The local articulated screen does not propagate structural variation through the 126/384 shaft or 0/384 ground headline estimands and therefore cannot establish their structural robustness.",
+      "classification": "articulated_uncertainty_inference_boundary",
+      "published_status": "explicitly_open_headline_propagation_gate",
+      "audit_status": "local_screen_and_headline_estimands_separated",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06caa_articulated_uncertainty_screen.qmd:58",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_uncertainty_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_uncertainty_study.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_uncertainty_screen.pdf",
+        "scripts/research/proximal_distal_energy/articulated_uncertainty_study.py",
+        "scripts/research/proximal_distal_energy/register_articulated_uncertainty_claims.py",
+        "tests/research/test_articulated_uncertainty_study.py",
+        "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py",
+        "scripts/research/proximal_distal_energy/register_articulated_uncertainty_claims.py",
+        "tests/research/test_articulated_headline_uncertainty.py"
+      ],
+      "model_domain": "Relationship between the local screen and full headline atlases.",
+      "uncertainty_boundary": "No dynamic structural-corner robustness is claimed.",
+      "competing_explanations": [
+        "finite deterministic design rather than a sampled population",
+        "excitation and contact-law dependence",
+        "monotone association rather than causal parameter effect",
+        "partial opening rather than robust maintained contact"
+      ],
+      "negative_controls": [
+        "deterministic registered Latin-hypercube rows",
+        "fresh model and bilateral-closure solve for each row",
+        "retained feasibility and contact statuses",
+        "finite-response and five-percent energy-closure gates"
+      ],
+      "falsifier": "The paper promotes local PRCC or contact-status results as completed headline uncertainty propagation.",
+      "adjudication": "The missing propagation is recorded as an acceptance boundary.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "claim_id": "PD-CLAIM-301",
+      "candidate_ids": [
+        "PD-CAND-5ee4cc7fd13382d9",
+        "PD-CAND-6e1796a49ac6cc58",
+        "PD-CAND-a6cbaeac4e561b78"
+      ],
+      "statement": "A seven-corner structural campaign regenerates all 13 phase states for four headline cases and digest-binds configuration, sources, states, failures, arrays, and corner-consistent model identity.",
+      "classification": "structural_corner_authority_contract",
+      "published_status": "qualified_as_digest_bound_execution_authority",
+      "audit_status": "authority_generation_identity_and_failure_contract_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06caaa_structural_authority.qmd:3",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:129"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_structural_authority_campaign.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_structural_propagation_plan.json",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_structural_authority.pdf",
+        "scripts/research/proximal_distal_energy/articulated_scaled_authority.py",
+        "scripts/research/proximal_distal_energy/articulated_atlas_authority.py",
+        "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py",
+        "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py",
+        "scripts/research/proximal_distal_energy/register_articulated_uncertainty_claims.py",
+        "tests/research/test_articulated_scaled_authority.py",
+        "tests/research/test_articulated_atlas_authority.py",
+        "tests/research/test_articulated_structural_authority_campaign.py",
+        "tests/research/test_articulated_structural_propagation_plan.py"
+      ],
+      "model_domain": "Nominal and low/high height, body-mass, and joint-limit engineering corners for cases 0, 8, 9, and 17 over 13 phases.",
+      "uncertainty_boundary": "Authority qualification alone is not a dynamic transfer result.",
+      "competing_explanations": [
+        "engineering scaling rather than calibrated participant anatomy",
+        "inverse-kinematics conditioning near a joint-limit boundary",
+        "coarse collision surrogates rather than mesh contact",
+        "authority regeneration without dynamic propagation"
+      ],
+      "negative_controls": [
+        "all thirteen phase states regenerated at every corner",
+        "configuration source and array digest validation",
+        "nominal-model substitution rejection",
+        "retained infeasible state and denominator"
+      ],
+      "falsifier": "A digest drifts, a selected state disappears, or an atlas substitutes the nominal model for a scaled authority.",
+      "adjudication": "The authority is accepted only as model/state provenance for later dynamic execution.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "claim_id": "PD-CLAIM-302",
+      "candidate_ids": [
+        "PD-CAND-32081bbe22915843",
+        "PD-CAND-c0d8d8a3baccda1d",
+        "PD-CAND-a4618f008c2ba36b",
+        "PD-CAND-6e1796a49ac6cc58",
+        "PD-CAND-a6cbaeac4e561b78"
+      ],
+      "statement": "Six structural corners retain 52/52 feasible selected states; the low-height corner retains 51/52 and one case-0 phase-12 IK nonconvergence at an effectively zero joint-limit margin.",
+      "classification": "structural_corner_feasibility_result",
+      "published_status": "qualified_with_one_retained_boundary_failure",
+      "audit_status": "corner_counts_margins_clearances_and_failure_reconciled",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06caaa_structural_authority.qmd:15",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06caaa_structural_authority.qmd:25",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06caaa_structural_authority.qmd:30",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:129"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_structural_authority_campaign.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_structural_propagation_plan.json",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_structural_authority.pdf",
+        "scripts/research/proximal_distal_energy/articulated_scaled_authority.py",
+        "scripts/research/proximal_distal_energy/articulated_atlas_authority.py",
+        "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py",
+        "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py",
+        "scripts/research/proximal_distal_energy/register_articulated_uncertainty_claims.py",
+        "tests/research/test_articulated_scaled_authority.py",
+        "tests/research/test_articulated_atlas_authority.py",
+        "tests/research/test_articulated_structural_authority_campaign.py",
+        "tests/research/test_articulated_structural_propagation_plan.py"
+      ],
+      "model_domain": "The seven registered structural authority corners.",
+      "uncertainty_boundary": "Engineering feasibility and coarse clearance do not establish human anatomy, attainable technique, or injury risk.",
+      "competing_explanations": [
+        "engineering scaling rather than calibrated participant anatomy",
+        "inverse-kinematics conditioning near a joint-limit boundary",
+        "coarse collision surrogates rather than mesh contact",
+        "authority regeneration without dynamic propagation"
+      ],
+      "negative_controls": [
+        "all thirteen phase states regenerated at every corner",
+        "configuration source and array digest validation",
+        "nominal-model substitution rejection",
+        "retained infeasible state and denominator"
+      ],
+      "falsifier": "Feasible counts, the retained failure identity, joint-limit margin, or authority digests fail reproduction.",
+      "adjudication": "The low-height failure remains in the denominator and is not treated as a participant classification.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "claim_id": "PD-CLAIM-303",
+      "candidate_ids": [
+        "PD-CAND-2b561c179729119b",
+        "PD-CAND-6e1796a49ac6cc58",
+        "PD-CAND-a6cbaeac4e561b78",
+        "PD-CAND-5a645df3aad4e211",
+        "PD-CAND-a49b9e81333cef61"
+      ],
+      "statement": "Structural authority regeneration does not establish sensitivity of either headline; completion requires each feasible scaled authority in both full atlases with the retained failure and all original controls.",
+      "classification": "structural_headline_propagation_boundary",
+      "published_status": "registered_but_not_yet_executed",
+      "audit_status": "propagation_acceptance_and_invalidation_contract_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06caaa_structural_authority.qmd:40",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:129",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:154",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:167"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_structural_authority_campaign.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_structural_propagation_plan.json",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_structural_authority.pdf",
+        "scripts/research/proximal_distal_energy/articulated_scaled_authority.py",
+        "scripts/research/proximal_distal_energy/articulated_atlas_authority.py",
+        "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py",
+        "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py",
+        "scripts/research/proximal_distal_energy/register_articulated_uncertainty_claims.py",
+        "tests/research/test_articulated_scaled_authority.py",
+        "tests/research/test_articulated_atlas_authority.py",
+        "tests/research/test_articulated_structural_authority_campaign.py",
+        "tests/research/test_articulated_structural_propagation_plan.py"
+      ],
+      "model_domain": "Planned propagation from structural authorities to both atlases.",
+      "uncertainty_boundary": "No structural robustness, human mechanism, or strategy is claimed.",
+      "competing_explanations": [
+        "engineering scaling rather than calibrated participant anatomy",
+        "inverse-kinematics conditioning near a joint-limit boundary",
+        "coarse collision surrogates rather than mesh contact",
+        "authority regeneration without dynamic propagation"
+      ],
+      "negative_controls": [
+        "all thirteen phase states regenerated at every corner",
+        "configuration source and array digest validation",
+        "nominal-model substitution rejection",
+        "retained infeasible state and denominator"
+      ],
+      "falsifier": "Nominal anatomy is reused, a retained failure is dropped, or any registered dynamic or provenance gate fails.",
+      "adjudication": "The unexecuted dynamic propagation remains an explicit gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "claim_id": "PD-CLAIM-304",
+      "candidate_ids": [
+        "PD-CAND-21efb27efb9d68aa",
+        "PD-CAND-1bfe41dc9f4291c7",
+        "PD-CAND-d4b7109ffccb30d4"
+      ],
+      "statement": "A registered 19-corner one-at-a-time campaign repeats affected full shaft and ground atlases across nine engineering axes while retaining both engines, reversal, refinement, killswitches, horizons, matching, and failures.",
+      "classification": "articulated_headline_uncertainty_design",
+      "published_status": "registered_execution_in_progress",
+      "audit_status": "design_bounds_controls_and_partial_record_boundary_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cab_articulated_headline_uncertainty.qmd:3",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cab_articulated_headline_uncertainty.qmd:13",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cab_articulated_headline_uncertainty.qmd:35"
+      ],
+      "evidence_artifacts": [
+        "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py",
+        "scripts/research/proximal_distal_energy/register_articulated_uncertainty_claims.py",
+        "tests/research/test_articulated_headline_uncertainty.py"
+      ],
+      "model_domain": "Nominal plus low/high grip, shaft, and ground constitutive engineering corners over the complete production atlases.",
+      "uncertainty_boundary": "One-at-a-time bounds are not a joint distribution, calibration, or population uncertainty analysis.",
+      "competing_explanations": [
+        "one-at-a-time engineering corners rather than a joint distribution",
+        "matching-set movement rather than an outcome effect",
+        "short synthetic trajectory and constitutive parameter dependence",
+        "unpropagated structural authority variation"
+      ],
+      "negative_controls": [
+        "complete production atlases rather than reduced surrogates",
+        "both native engines and velocity reversal",
+        "time-step refinement and pathway killswitches",
+        "unchanged load-work matching and retained failures"
+      ],
+      "falsifier": "A corner uses a reduced surrogate, changes the matching rule, loses a control, or a partial record is promoted as completion.",
+      "adjudication": "Only the preregistered design and current in-progress status are supported; no completed sensitivity result is asserted.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "claim_id": "PD-CLAIM-305",
+      "candidate_ids": [
+        "PD-CAND-fd14656e7d2f25ae",
+        "PD-CAND-c98873ad285d455a"
+      ],
+      "statement": "Headline matched-count movement diagnoses sensitivity of the comparability set; it is not an outcome effect, probability, pathway benefit, parameter interaction, or human/coaching result.",
+      "classification": "articulated_headline_estimand_and_inference_boundary",
+      "published_status": "explicitly_bounded",
+      "audit_status": "estimand_matching_and_nonpromotion_rules_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cab_articulated_headline_uncertainty.qmd:23",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cab_articulated_headline_uncertainty.qmd:43"
+      ],
+      "evidence_artifacts": [
+        "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py",
+        "scripts/research/proximal_distal_energy/register_articulated_uncertainty_claims.py",
+        "tests/research/test_articulated_headline_uncertainty.py"
+      ],
+      "model_domain": "Interpretation contract for the registered headline campaign.",
+      "uncertainty_boundary": "Equipment calibration, participant anatomy/contact, unilateral ground, impact, delivery, and held-out bilateral-wrench evidence remain open.",
+      "competing_explanations": [
+        "one-at-a-time engineering corners rather than a joint distribution",
+        "matching-set movement rather than an outcome effect",
+        "short synthetic trajectory and constitutive parameter dependence",
+        "unpropagated structural authority variation"
+      ],
+      "negative_controls": [
+        "complete production atlases rather than reduced surrogates",
+        "both native engines and velocity reversal",
+        "time-step refinement and pathway killswitches",
+        "unchanged load-work matching and retained failures"
+      ],
+      "falsifier": "Matched-count change or emerged ground support is described as a speed, causal, human, or coaching benefit.",
+      "adjudication": "The count estimand and every prohibited promotion are stated separately from eventual outcome analysis.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-20"
     }

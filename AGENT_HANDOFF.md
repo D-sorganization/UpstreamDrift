@@ -95,9 +95,7 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     prediction registry no longer repeat the obsolete failed-closure narrative.
     Release-manifest/checksum regeneration and full-paper rendering must wait
     until the live headline record is complete, or they could admit partial data.
-- The release has 295 atomic claims and 40 reviewed release claims; all 40
-  retain at least one scientifically open gate. #8724 still owns normalized
-  four-way adjudication and independent review.
+- The refreshed 1,092-candidate census has no unadjudicated passages and 304 atomic claims. Deterministic claim and evidence validators pass over 2,172 references, 321 hash-pinned local artifacts, and 78 external URLs. PD-CLAIM-297--305 govern the local uncertainty screen, adverse partial opening, conditional PRCCs, structural authority, retained low-height failure, open propagation, and in-progress headline design without promoting any partial result; five focused contracts pass. The 40 reviewed release claims retain scientifically open gates; #8724 still owns normalized four-way adjudication and independent review.
 - PR #8793 canonicalizes UTF-8 claim evidence before hashing; #8789 retains
   Docker/quarantine/baseline and clean-checkout truth-recovery scope.
 - #8556 remains open: no governed participant dataset contains synchronized

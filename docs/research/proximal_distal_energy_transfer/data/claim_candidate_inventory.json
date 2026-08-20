@@ -1,9 +1,9 @@
 {
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper_source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-  "source_digest": "882079a730d2383b8b3b071c8a770fceb6d97b35915bbd3eef030acd586f393f",
-  "source_count": 35,
-  "candidate_count": 1068,
+  "source_digest": "6982464c766df93e45a172a65bfd0e7c0dab5d1c7602334fc726aee6fb985fdd",
+  "source_count": 38,
+  "candidate_count": 1092,
   "candidates": [
     {
       "candidate_id": "PD-CAND-f9b891e62e1d24de",
@@ -11272,6 +11272,359 @@
       "review_state": "unadjudicated"
     },
     {
+      "candidate_id": "PD-CAND-a65a2f89e0218125",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06caa_articulated_uncertainty_screen.qmd",
+      "line_start": 3,
+      "line_end": 11,
+      "text": "The articulated qualification cannot treat one nominal anatomy, joint-limit envelope, grip, or equipment definition as if it were universal. A registered deterministic Latin-hypercube screen therefore perturbs nine engineering inputs: height scale (0.90--1.10), body-mass scale (0.85--1.15), joint-limit scale (0.85--1.15), total grip stiffness (1000--3000 N/m), grip damping (10--35 N s/m), friction coefficient (0.15--0.65), club mass (0.28--0.42 kg), club moment-of-inertia scale (0.80--1.25), and initial club velocity (0.01--0.20 m/s). These bounds are declared engineering ranges, not measured distributions of golfers or equipment.",
+      "text_sha256": "a0f8504a941b2b5a23f77ad3d645f218681eb5939f84bbfb9c5827e0578803f2",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": false,
+      "priority_score": 5,
+      "triage_flags": [
+        "numeric",
+        "causal_or_generalizing_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-7f43d06d8a7b7a6f",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06caa_articulated_uncertainty_screen.qmd",
+      "line_start": 13,
+      "line_end": 23,
+      "text": "Each of the 40 samples rebuilds the subject-scaled model, changes height and mass independently, rescales the joint-limit envelope, and re-solves bilateral hand-to-grip closure before forward integration. A sample that fails inverse kinematics, bilateral closure, the joint-limit screen, the coarse collision screen, or the six-row constraint-rank check is retained with an explicit status and excluded from response correlation. A feasible sample is advanced through the distributed-grip production path with the registered timestep pair. Peak station force, peak force couple, maximum sliding speed, transition count, and normalized work--energy residual are recorded. Partial rank correlations (PRCCs) are calculated only over rows whose five responses are finite.",
+      "text_sha256": "a9776e1b8a6b6ef22026971919ecae9983a61c09ad900e698933f6ed4c293a15",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": false,
+      "priority_score": 2,
+      "triage_flags": [
+        "numeric"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-0da8ef2eb15e323d",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06caa_articulated_uncertainty_screen.qmd",
+      "line_start": 25,
+      "line_end": 31,
+      "text": "All 40 registered rows produced finite response vectors and satisfied the 5% normalized work--energy closure gate; the maximum residual was 0.00696. Every row nevertheless recorded partial opening as its first contact-domain status. That adverse result rejects any reading of this excitation as robustly full-contact across the declared envelope. It does not invalidate the retained trajectory calculations, but it conditions their PRCC screen on trajectories that open at least one station.",
+      "text_sha256": "cb84058a9d70d33c38e67ed6f2f56569d0f5765cb1cb74f5aca80b2911af4909",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": true,
+      "priority_score": 4,
+      "triage_flags": [
+        "numeric",
+        "assertive_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-30f2136ae7f1fd6a",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06caa_articulated_uncertainty_screen.qmd",
+      "line_start": 33,
+      "line_end": 40,
+      "text": "Within that conditional screen, the largest absolute PRCC for peak station force was initial velocity (+0.936); for peak force couple, height scale (-0.500); for maximum sliding speed, friction coefficient (-0.940); for total transition count, height scale (-0.760); and for normalized work--energy residual, body-mass scale (+0.931). The final association concerns a numerical diagnostic that remained inside its gate, not a physical performance outcome. The finite design supplies neither sampling intervals nor evidence that these rankings persist under interactions or another excitation.",
+      "text_sha256": "404ec26a2749b03a185e030186f19bdac71fe873cbb6c52ad17a34e6dbcce365",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": true,
+      "priority_score": 4,
+      "triage_flags": [
+        "numeric",
+        "assertive_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-8d34a8287be5fb39",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06caa_articulated_uncertainty_screen.qmd",
+      "line_start": 42,
+      "line_end": 42,
+      "text": "![Articulated Closed-State and Local-Trajectory Uncertainty Screen](figures/fig_articulated_uncertainty_screen.pdf){#fig-articulated-uncertainty-screen width=100%}",
+      "text_sha256": "1d91f8f151b5f947ff9ff022ddef961730df5a6043fa8c1d828a5ca11d90bfc7",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": false,
+      "priority_score": 2,
+      "triage_flags": [
+        "numeric"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-dd5aaf18bf1e0f8c",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06caa_articulated_uncertainty_screen.qmd",
+      "line_start": 44,
+      "line_end": 49,
+      "text": "Figure @fig-articulated-uncertainty-screen preserves two different questions. The left panel is an exploratory monotone-sensitivity screen conditional on this finite deterministic design. The right panel retains the status of every sample, including geometry-domain failures and contact transitions. A large PRCC magnitude is not a causal parameter effect, and a trajectory status is not a player classification. No population confidence interval is estimated.",
+      "text_sha256": "a1615e7ca2b1e35e165b046368e7fb255cb993af061bae6318a7a50551b5a0d8",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": false,
+      "priority_score": 3,
+      "triage_flags": [
+        "causal_or_generalizing_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-25d1a2b7d3a2156a",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06caa_articulated_uncertainty_screen.qmd",
+      "line_start": 51,
+      "line_end": 56,
+      "text": "The governed record and arrays are available as [`articulated_uncertainty_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/articulated_uncertainty_study.json) and [`articulated_uncertainty_study.npz`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/articulated_uncertainty_study.npz), with the executable analysis in [`articulated_uncertainty_study.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/scripts/research/proximal_distal_energy/articulated_uncertainty_study.py).",
+      "text_sha256": "9464e38e797b4e8df622c3c5d3eaebf10e2475eecc0e69a1fcb837df125490f2",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": false,
+      "priority_score": 0,
+      "triage_flags": [],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-689d0872b14fe849",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06caa_articulated_uncertainty_screen.qmd",
+      "line_start": 58,
+      "line_end": 63,
+      "text": "This screen answers whether local closure and distributed-contact calculations remain numerically inspectable across the declared ranges. It does **not** propagate anthropometric or joint-limit variation through the complete 126/384 shaft and 0/384 ground headline estimands. That distinction is an open acceptance boundary for the articulated uncertainty milestone, rather than evidence that the headline conclusions are anatomically robust.",
+      "text_sha256": "3e9c3b6160e102431141b654a046c0fcc3d0511bae3054159585efc32d345184",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": true,
+      "priority_score": 4,
+      "triage_flags": [
+        "numeric",
+        "assertive_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-5ee4cc7fd13382d9",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06caaa_structural_authority.qmd",
+      "line_start": 3,
+      "line_end": 11,
+      "text": "The headline uncertainty campaign cannot legitimately reuse nominal articulated states after changing height, body mass, or the joint-limit envelope. Those changes alter either the model or its admissible configuration set before the shaft and ground pathways are evaluated. A separate authority campaign therefore regenerates all 13 phase states for headline cases 0, 8, 9, and 17 at nominal and at six registered low/high one-at-a-time structural corners. Each JSON/NPZ pair binds its configuration, source files, selected states, failure classes, and array contents by digest. The atlas adapter rejects nominal-model substitution and stops before silently omitting an infeasible selected state.",
+      "text_sha256": "5b80d8cb92c590a6572d1505383ca2a597e3bc560ca30b53fafbc5321893030e",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": true,
+      "priority_score": 4,
+      "triage_flags": [
+        "numeric",
+        "assertive_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-5a8cd4e69b5a28fd",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06caaa_structural_authority.qmd",
+      "line_start": 13,
+      "line_end": 13,
+      "text": "| Registered Corner | Feasible States | Maximum Closure Error (m) | Minimum Joint-Limit Margin (rad) | Minimum Collision Clearance (m) |",
+      "text_sha256": "6a2f7c3dc62077b7b71beabbcb72ba1e9450ecc9b3c3142ec6a1f36fdbd80b5e",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": false,
+      "priority_score": 0,
+      "triage_flags": [],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-32081bbe22915843",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06caaa_structural_authority.qmd",
+      "line_start": 15,
+      "line_end": 21,
+      "text": "| Nominal | 52/52 | $1.03\\times10^{-10}$ | 0.1035 | 0.0491 | | Height Scale 0.90 | 51/52 | $7.80\\times10^{-10}$ | $1.80\\times10^{-16}$ | 0.0562 | | Height Scale 1.10 | 52/52 | $8.94\\times10^{-11}$ | 0.1806 | 0.0421 | | Body-Mass Scale 0.85 | 52/52 | $1.03\\times10^{-10}$ | 0.1035 | 0.0491 | | Body-Mass Scale 1.15 | 52/52 | $1.03\\times10^{-10}$ | 0.1035 | 0.0491 | | Joint-Limit Scale 0.85 | 52/52 | $1.03\\times10^{-10}$ | 0.0885 | 0.0491 | | Joint-Limit Scale 1.15 | 52/52 | $1.03\\times10^{-10}$ | 0.1185 | 0.0491 |",
+      "text_sha256": "2a2aa50a6f623229ea3c052f901c2e7c500575c81459ff195f51299b3adff0f7",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": false,
+      "priority_score": 2,
+      "triage_flags": [
+        "numeric"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-b1a0a1909be1cad3",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06caaa_structural_authority.qmd",
+      "line_start": 23,
+      "line_end": 23,
+      "text": "![Structural Authority Across Registered Engineering Corners](figures/fig_articulated_structural_authority.pdf){#fig-articulated-structural-authority width=100%}",
+      "text_sha256": "189b9d8dadd243286d4109334385fcad28ee2078af8ad2cdfdc7eb49a6342d57",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": false,
+      "priority_score": 2,
+      "triage_flags": [
+        "numeric"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-c0d8d8a3baccda1d",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06caaa_structural_authority.qmd",
+      "line_start": 25,
+      "line_end": 28,
+      "text": "Figure @fig-articulated-structural-authority keeps feasibility, joint-limit margin, and coarse collision clearance visually distinct. Red denotes the retained low-height failure; it does not denote a participant category or a measured risk threshold.",
+      "text_sha256": "9453a7bc4910e13428da984b30d8164011e0db169805aeb3a38d781f6eff6c01",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": false,
+      "priority_score": 0,
+      "triage_flags": [],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-a4618f008c2ba36b",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06caaa_structural_authority.qmd",
+      "line_start": 30,
+      "line_end": 38,
+      "text": "The low-height corner retains one `ik_nonconvergence` result at case 0, phase 12. Its effectively zero joint-limit margin identifies a boundary-conditioned solve in this reduced engineering model. It is neither evidence that a corresponding human configuration is impossible nor permission to delete the state and report 51/51 success. The unchanged geometry metrics at the two body-mass corners are also expected: this intervention changes inertial mass without changing segment lengths or the registered joint envelope. That separation is a model-integrity check, not evidence that mass cannot change a subsequent dynamic transfer result.",
+      "text_sha256": "d2070817a6f9c67a7274d3c69ad77e896d9d3f4392304c56967a9cd386c4c1af",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": true,
+      "priority_score": 4,
+      "triage_flags": [
+        "numeric",
+        "assertive_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-2b561c179729119b",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06caaa_structural_authority.qmd",
+      "line_start": 40,
+      "line_end": 48,
+      "text": "The campaign therefore establishes inspectable model and state authority for the declared corners, but it does not yet establish sensitivity of either headline estimand. Completion requires passing each feasible corner's exact scaled model and state into both native-engine shaft and finite-ground atlases, retaining the low-height failure in the denominator, and repeating the full reversal, refinement, pathway-killswitch, and unchanged load--work matching controls. A corner is falsified as propagation evidence if its configuration or content digest fails, if a registered failure disappears, or if the atlas runs against the nominal model instead of its bound scaled model.",
+      "text_sha256": "a36b186a77d75ff8ed27e5b2dd8b78de170a0d8962a51ca86d2a2e5b129ee4ab",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": true,
+      "priority_score": 2,
+      "triage_flags": [
+        "assertive_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-37b5dce1797e4228",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06caaa_structural_authority.qmd",
+      "line_start": 50,
+      "line_end": 56,
+      "text": "The checkpointed campaign record is available as [`articulated_structural_authority_campaign.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/articulated_structural_authority_campaign.json), with one governed JSON/NPZ pair per corner. The executable registration is available as [`articulated_structural_authority_campaign.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py), and the fail-closed propagation adapter is available as [`articulated_atlas_authority.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/scripts/research/proximal_distal_energy/articulated_atlas_authority.py).",
+      "text_sha256": "a74cb14d3bc102facc2ed511bfbe2de1bb8cccd48a0e952419d2cee2d0b2dc1e",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": false,
+      "priority_score": 0,
+      "triage_flags": [],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-21efb27efb9d68aa",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06cab_articulated_headline_uncertainty.qmd",
+      "line_start": 3,
+      "line_end": 11,
+      "text": "The shaft and finite-ground results above are conditional on synthetic grip, shaft, and support properties. A point count alone does not show whether the headline survives plausible engineering variation. The registered uncertainty campaign therefore repeats the complete production atlases at nominal and at low and high one-at-a-time corners. It does not replace either atlas with a reduced surrogate. Every affected corner retains both native engines, complete velocity reversal, the registered timestep refinement pair, pathway killswitches, the same 4--50 ms horizons, and the same 5% peak-load and dissipated-work matching rule.",
+      "text_sha256": "9fde17637afbf4117027cf4aa3fe5549890b4a0c406b790b20457849203afcc1",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": true,
+      "priority_score": 4,
+      "triage_flags": [
+        "numeric",
+        "assertive_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-1bfe41dc9f4291c7",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06cab_articulated_headline_uncertainty.qmd",
+      "line_start": 13,
+      "line_end": 21,
+      "text": "The design contains one nominal case and 18 corners over nine axes. Grip total stiffness is scaled to 0.6 and 1.4 of nominal, and grip total damping to 0.5 and 1.5. First bending frequency is scaled to 0.8 and 1.2; torsional stiffness to 0.64 and 1.44, corresponding to 0.8 and 1.2 frequency-scale endpoints when inertia is fixed; and shaft damping ratio spans 0.009--0.036 around 0.018. Ground translation stiffness, translation damping, intrinsic-free-moment stiffness, and intrinsic-free-moment damping each span 0.5--1.5 of nominal. These are transparent engineering bounds, not measured distributions of players, grips, shafts, footwear, or surfaces.",
+      "text_sha256": "79d94c5bff716b70f0d2ca3d21657e3c217fbb6000d6f7e8259d7da9ecd0cd9b",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": false,
+      "priority_score": 2,
+      "triage_flags": [
+        "numeric"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-fd14656e7d2f25ae",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06cab_articulated_headline_uncertainty.qmd",
+      "line_start": 23,
+      "line_end": 31,
+      "text": "The estimand is deliberately narrow. For each corner, the campaign reports the number of coupled-versus-reference cells that still satisfy the unchanged load--work comparability screen and its change from the nominal 126/384 shaft and 0/384 ground counts. A change in count means that comparability classification is sensitive to that parameter. It is not an effect size, a probability, evidence that a pathway improves clubhead speed, or permission to interpret unmatched speed differences. A ground corner moving above zero, for example, would identify cells eligible for the already registered matched comparison; it would not establish a ground-use benefit.",
+      "text_sha256": "8dc49a16c2accf4dd1e80afaa7b61aca7836c25038c2d7d95bd71ac20c7ef92d",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": true,
+      "priority_score": 4,
+      "triage_flags": [
+        "numeric",
+        "assertive_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-f86dae8e82392c96",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06cab_articulated_headline_uncertainty.qmd",
+      "line_start": 33,
+      "line_end": 33,
+      "text": "![Articulated Headline Sensitivity Across Registered Engineering Bounds](figures/fig_articulated_headline_uncertainty.pdf){#fig-articulated-headline-uncertainty width=100%}",
+      "text_sha256": "b2fa05324a2cc0d6ea9856e89fd9bb55ec59cd16f91779f59f1c99858ba8ebdd",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": false,
+      "priority_score": 2,
+      "triage_flags": [
+        "numeric"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-d4b7109ffccb30d4",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06cab_articulated_headline_uncertainty.qmd",
+      "line_start": 35,
+      "line_end": 41,
+      "text": "Figure @fig-articulated-headline-uncertainty shows low and high count changes separately for the shaft and finite-ground screens. A failed corner remains in the machine-readable record and appears explicitly rather than being removed from the denominator. The governed record is available as [`data/articulated_headline_uncertainty.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/articulated_headline_uncertainty.json), and the executable design is available as [`articulated_headline_uncertainty.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py).",
+      "text_sha256": "42dbf13a26f1014ca8cbdf47fb2694de41dcc59d22f05a92637b2d396329dbc6",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": true,
+      "priority_score": 2,
+      "triage_flags": [
+        "assertive_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-c98873ad285d455a",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06cab_articulated_headline_uncertainty.qmd",
+      "line_start": 43,
+      "line_end": 49,
+      "text": "This one-at-a-time design exposes first-order fragility and adverse numerical corners, but it does not estimate parameter interactions or a joint uncertainty distribution. Survival across these bounds remains qualification only for the declared synthetic model. Equipment calibration, participant-specific contact and anatomy, unilateral foot contact, impact, full-downswing delivery, and held-out bilateral-wrench validation remain required before any human or coaching interpretation.",
+      "text_sha256": "6faff42bc894c54afd8ae46be2771703b65ec6aaae1432e561b5be0b1fa6859d",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": true,
+      "priority_score": 5,
+      "triage_flags": [
+        "assertive_language",
+        "causal_or_generalizing_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
       "candidate_id": "PD-CAND-dc20436d26d339c0",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd",
       "line_start": 3,
@@ -16543,12 +16896,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-b927f3a0c6a4132b",
+      "candidate_id": "PD-CAND-6e1796a49ac6cc58",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
       "line_start": 14,
       "line_end": 20,
-      "text": "| How much transfer is drift-mediated? | Conditional on the observable, coordinate and frame, event window, model, and decomposition. Signed drift shares may exceed 100% when control opposes the pathway; pointwise attribution is not forward persistence. | A common acceleration/force/impulse/power/work ledger across tiers, same-state killswitches, uncertainty propagation, and participant-held-out bilateral-wrench evaluation. | | Which geometry matters? | Relative-link and force\u2013velocity angles create exact sine/cosine gates; bilateral couple varies with signed grip separation and transverse differential force. Existing moving-base and two-engine spatial controls reproduce coincident-grip zeros and moment-arm reversals. A six-profile audit rejects prescribed states that miss closure by 0.171\u20130.616 m; a bounded follow-up closes all 234 registered reduced-tree configurations. The articulated distributed-grip and passive-shaft tiers advance twelve selected states through 50 ms. A finite-base extension then adds translation and intrinsic free moment; all numerical gates pass, but none of 384 coupled--fixed cells meets the primary load--total-work match. | Calibrate grip, shaft, unilateral foot contact, and force-plate support; propagate initialization and parameter uncertainty; then repeat the horizon, geometry, killswitch, matched-outcome, and held-out human bilateral-wrench tests. | | Which timing patterns matter? | Early distal release changes the available geometry; proximal rate, acceleration, braking, and release timing interact nonmonotonically. \u201cCasting\u201d is not one universal event. | Factorial interventions on proximal acceleration, distal release, and braking under matched state and work, with multiple preregistered casting definitions and adverse-load tests. | | Does a drift-mediated strategy require less timing precision? | Not supported in the registered moving-base planar comparison. On a common nominal phase grid, the clock policy retained four of five robust task-viable points and 45 ms of contiguous width; the delayed/noisy state trigger retained one point and no multi-point span. This does not measure neural timing demand. | Continuous phase-volume studies with independently identified observers, spatial impact outcomes, subject scaling, and participant-held-out perturbations. | | Is a strategy self-correcting? | Not established. The earlier screen produced 13\u201320% sustained recovery, whereas the expanded phase/load screen produced none in 60 cases. No tested policy has a recovery-qualified viable region. | Continuous attraction-region studies with independently identified observers, stronger feedback families, external-contact disturbances, and human perturbations without hidden load-cost increase. | | Should proximal velocity be maximized? | No general rule is supported. Exact equal-energy rate sweeps are nonmonotonic. A 216-program common-time screen yields 46 disjoint work/load-matched pairs with 20 favorable and 26 adverse higher-rate outcomes. An identical-state acceleration sweep also reverses the club-acceleration response before impact. | Full-delivery-state-matched forward rate and acceleration interventions, extended across spatial and subject-scaled models and held-out participants. | | Is slack beneficial or necessary? | Partly answered at a synthetic constitutive tier. Five declared classes have been exercised separately, but no global benefit, necessity, intentionality, or delivery advantage is supported. One scalar output nearly confounds contact disengagement with the biological-compliance surrogate. | Embed one class at a time in moving-base, two-hand, and spatial delivery models under matched state, work, and load; add stateful backlash and subject-specific tissue models; acquire independent contact, shaft, tendon, activation, and bilateral-wrench measurements. |",
-      "text_sha256": "0928ef5bdeb5f140cd8c30733f4330a8e5d2c60249db52a72d11b7168806d988",
+      "text": "| How much transfer is drift-mediated? | Conditional on the observable, coordinate and frame, event window, model, and decomposition. Signed drift shares may exceed 100% when control opposes the pathway; pointwise attribution is not forward persistence. | A common acceleration/force/impulse/power/work ledger across tiers, same-state killswitches, uncertainty propagation, and participant-held-out bilateral-wrench evaluation. | | Which geometry matters? | Relative-link and force\u2013velocity angles create exact sine/cosine gates; bilateral couple varies with signed grip separation and transverse differential force. Existing moving-base and two-engine spatial controls reproduce coincident-grip zeros and moment-arm reversals. A six-profile audit rejects prescribed states that miss closure by 0.171\u20130.616 m; a bounded follow-up closes all 234 registered reduced-tree configurations. The articulated distributed-grip and passive-shaft tiers advance twelve selected states through 50 ms. A finite-base extension then adds translation and intrinsic free moment; all numerical gates pass, but none of 384 coupled--fixed cells meets the primary load--total-work match. A 40-sample height, mass, joint-limit, grip, friction, club, and velocity screen retains finite energy-closed responses but partially opens in every local trajectory; it does not propagate those structural bounds through either headline count. | Regenerate the headline authority across anthropometric and joint-limit corners; calibrate grip, shaft, unilateral foot contact, and force-plate support; then repeat the horizon, geometry, killswitch, matched-outcome, and held-out human bilateral-wrench tests. | | Which timing patterns matter? | Early distal release changes the available geometry; proximal rate, acceleration, braking, and release timing interact nonmonotonically. \u201cCasting\u201d is not one universal event. | Factorial interventions on proximal acceleration, distal release, and braking under matched state and work, with multiple preregistered casting definitions and adverse-load tests. | | Does a drift-mediated strategy require less timing precision? | Not supported in the registered moving-base planar comparison. On a common nominal phase grid, the clock policy retained four of five robust task-viable points and 45 ms of contiguous width; the delayed/noisy state trigger retained one point and no multi-point span. This does not measure neural timing demand. | Continuous phase-volume studies with independently identified observers, spatial impact outcomes, subject scaling, and participant-held-out perturbations. | | Is a strategy self-correcting? | Not established. The earlier screen produced 13\u201320% sustained recovery, whereas the expanded phase/load screen produced none in 60 cases. No tested policy has a recovery-qualified viable region. | Continuous attraction-region studies with independently identified observers, stronger feedback families, external-contact disturbances, and human perturbations without hidden load-cost increase. | | Should proximal velocity be maximized? | No general rule is supported. Exact equal-energy rate sweeps are nonmonotonic. A 216-program common-time screen yields 46 disjoint work/load-matched pairs with 20 favorable and 26 adverse higher-rate outcomes. An identical-state acceleration sweep also reverses the club-acceleration response before impact. | Full-delivery-state-matched forward rate and acceleration interventions, extended across spatial and subject-scaled models and held-out participants. | | Is slack beneficial or necessary? | Partly answered at a synthetic constitutive tier. Five declared classes have been exercised separately, but no global benefit, necessity, intentionality, or delivery advantage is supported. One scalar output nearly confounds contact disengagement with the biological-compliance surrogate. | Embed one class at a time in moving-base, two-hand, and spatial delivery models under matched state, work, and load; add stateful backlash and subject-specific tissue models; acquire independent contact, shaft, tendon, activation, and bilateral-wrench measurements. |",
+      "text_sha256": "ae3b34f46c9a9ccfb098c5bd462cddbeff4f566a62e53f56e25224cf84d56669",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": true,
@@ -17132,12 +17485,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-9bdb0446f034d972",
+      "candidate_id": "PD-CAND-3f9a28e3958ab30a",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd",
       "line_start": 75,
-      "line_end": 88,
-      "text": "The subject-scaled contact-closure audit rejects a tempting shortcut at that same tier. Six deterministic de Leva profiles retain a full-row-rank local contact Jacobian, yet the prescribed anatomical hand points remain 0.171--0.616 m from the declared grips. Rank and conditioning therefore cannot substitute for closed feasible anatomy. The next articulated spatial tier must solve bilateral closed-contact inverse kinematics with joint-limit and collision checks before its forward contact, timing, recovery, or slack results can be interpreted. The registered inverse-kinematics follow-up now clears that reduced-tree gate in all 234 profile/span/phase samples while holding the club pose fixed. Its minimum engineering-limit margin is 0.103 rad and its minimum coarse bounding-sphere clearance is 30.9 mm. These are screening results, not measured anatomical ranges or mesh-level clearance; they advance the next test to calibrated compliant forward contact from the closed states.",
-      "text_sha256": "15b0d6233cf8528fc117463ac3a48d38ea233b3ca79157fa6753c03acf156f62",
+      "line_end": 86,
+      "text": "The subject-scaled contact-closure audit rejects a tempting shortcut at that same tier. Six deterministic de Leva profiles retain a full-row-rank local contact Jacobian, yet the prescribed anatomical hand points remain 0.171--0.616 m from the declared grips. Rank and conditioning therefore cannot substitute for closed feasible anatomy. The next articulated spatial tier therefore had to solve bilateral closed-contact inverse kinematics with joint-limit and collision checks before interpreting forward contact, timing, recovery, or slack results. The registered inverse-kinematics follow-up now clears that reduced-tree gate in all 234 profile/span/phase samples while holding the club pose fixed. Its minimum engineering-limit margin is 0.103 rad and its minimum coarse bounding-sphere clearance is 30.9 mm. These are screening results, not measured anatomical ranges or mesh-level clearance.",
+      "text_sha256": "8957b207ac363a431b4f5bfa3aec605b32e94f033150f278fadb08335916dad0",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": true,
@@ -17151,8 +17504,8 @@
     {
       "candidate_id": "PD-CAND-1caf11fb82f2f6aa",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd",
-      "line_start": 90,
-      "line_end": 97,
+      "line_start": 88,
+      "line_end": 95,
       "text": "A paired arm-only intervention now isolates one omitted structure. With trunk and club pose fixed, the fixed-shoulder branch closes none of 54 registered states, whereas a bounded scapula-on-ellipsoid surrogate reaches the contact residual in 31 states and satisfies both residual and solver-termination gates in 16. Full rank persists while coordinate nullity rises from two to ten, so the result supports the importance of scapular geometry but also strengthens the non-identifiability boundary. It is not an anatomical, muscular, or human strategy result.",
       "text_sha256": "d9b7474fa3c74d314a1b16001e756204b16d8f7a20e1b14c6f72c569c7b006cd",
       "citation_keys": [],
@@ -17168,8 +17521,8 @@
     {
       "candidate_id": "PD-CAND-3a28f92e6b8aa6a3",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd",
-      "line_start": 99,
-      "line_end": 108,
+      "line_start": 97,
+      "line_end": 106,
       "text": "The reduced spatial forward-contact extension resolves that narrower mechanism gate. Native MuJoCo and Pinocchio independently integrate two finite-mass hand carriages, paired compliant interfaces, and a free rigid club without direct club actuation. Their baseline and same-state killswitch trajectories satisfy the declared position, orientation, wrench, and energy regions. Removing the complete grounded driver leaves a negative force-generated swing-normal couple for 37.5 ms in both engines; coincident and reversed-moment-arm controls close exactly, and the work--energy residual decreases under timestep refinement. This supports reduced spatial contact persistence, not anatomical arms, muscles, calibrated grip tissue, equipment, or human strategy.",
       "text_sha256": "307686ae1479e821ad1a155503102b6fdff191ca8df65f0e8d29bb25655b3972",
       "citation_keys": [],
@@ -17186,8 +17539,8 @@
     {
       "candidate_id": "PD-CAND-b30af9f570f239dc",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd",
-      "line_start": 110,
-      "line_end": 117,
+      "line_start": 108,
+      "line_end": 115,
       "text": "The closed-state validity-horizon extension further shows that the same two engines remain inside the declared trajectory, wrench, energy-discrepancy, and work--energy closure gates for all 2,160 registered cases through 50 ms. The matrix spans all profile--span--phase states plus one-factor stiffness, damping, hand-mass, timestep, and immediate-driver-off branches. No failure is observed inside the registered interval, so the result is right-censored at 50 ms. It strengthens the reduced numerical reference but does not turn the hand-carriage model into articulated anatomy or a full delivery simulation.",
       "text_sha256": "cc3d19fcfe860d082795f0f823659b7e96471695ec4816d8b70183822011d845",
       "citation_keys": [],
@@ -17201,10 +17554,45 @@
       "review_state": "unadjudicated"
     },
     {
+      "candidate_id": "PD-CAND-69e32304194fe1cf",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd",
+      "line_start": 117,
+      "line_end": 127,
+      "text": "The subject-scaled articulated sequence subsequently replaces the hand carriages with the qualified 20-coordinate tree. Native MuJoCo and Pinocchio independently qualify inertia, bias force, inverse dynamics, and finite-contact projection over all 234 closed states. Selected states then advance through articulated bilateral contact, distributed grip, passive bending and torsion, and finite-base ground pathways with registered reversal, refinement, killswitch, domain, energy, and engine-parity controls. Among 384 shaft cells, 126 satisfy the unchanged load--work match and retain both positive and negative speed differences; none of 384 finite-ground coupled--fixed cells satisfies its primary match. These results reject universal elastic or ground pathway benefits rather than establishing human transfer strategies.",
+      "text_sha256": "c16b0a21f16040148de9ef3055f2723fdbbbfad7557312477865493735293e6c",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": true,
+      "priority_score": 7,
+      "triage_flags": [
+        "numeric",
+        "assertive_language",
+        "causal_or_generalizing_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-a6cbaeac4e561b78",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd",
+      "line_start": 129,
+      "line_end": 136,
+      "text": "A seven-corner structural authority campaign now regenerates four headline cases over all 13 phase samples. Nominal, both body-mass, both joint-limit, and high-height corners retain 52/52 feasible states. The low-height corner retains 51/52 and one case-0/phase-12 IK nonconvergence at an effectively zero joint-limit margin. This failure is part of the result, not a participant classification. The scaled authorities still must propagate through both native-engine headline atlases before the shaft and ground conclusions can be called structurally robust.",
+      "text_sha256": "d7b7dce083abd0408fbb1ac1a9b029bc01cc24c985d6651dc21d460353ab3649",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": true,
+      "priority_score": 4,
+      "triage_flags": [
+        "numeric",
+        "assertive_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
       "candidate_id": "PD-CAND-58e2fdab32244d00",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd",
-      "line_start": 119,
-      "line_end": 126,
+      "line_start": 138,
+      "line_end": 145,
       "text": "The coupled uncertainty/control phase rejects two additional shortcuts. A net planar wrench cannot uniquely identify both hand forces, and six summary observables cannot identify the complete 12-parameter vector. Separate training and held-out ensembles leave objective-dependent tradeoffs among all eight command programs. Early restraint improves held-out lower-tail speed relative to late drive but increases the planar face/path error, so the result supports a conditional model mechanism rather than a universal or physiological strategy.",
       "text_sha256": "0623392842a8b8d93bfdb1b8298273ba9bc0680f274d5974db7cbee5890a18f5",
       "citation_keys": [],
@@ -17221,8 +17609,8 @@
     {
       "candidate_id": "PD-CAND-8fadc01cf2fdc629",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd",
-      "line_start": 128,
-      "line_end": 133,
+      "line_start": 147,
+      "line_end": 152,
       "text": "The experimental phase is preregistered but not empirically executed. Its machine-readable protocol fixes six synchronized modalities, participant-level holdout, identity-safe provenance, filtering and residual sensitivities, and four prediction-specific falsifiers. The synthetic dry run passes all intake and fail-closed controls, but it cannot advance H1--H4. Governed human data are still required.",
       "text_sha256": "652ee026810a3536d63d37736f4a84dab0a9a2dec0e3f173594aee27b53dcc9c",
       "citation_keys": [],
@@ -17233,12 +17621,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-2641f160380c0508",
+      "candidate_id": "PD-CAND-5a645df3aad4e211",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd",
-      "line_start": 135,
-      "line_end": 141,
-      "text": "The open-resource layer now supplies model-tier presets, a hash-pinned release manifest, standard checksums, a data dictionary, citation metadata, and a claim-first reviewer workbench. Validation fails closed on artifact drift. The bundle remains a qualified local release candidate rather than a persistent archive: articulated subject-scaled contact, equipment-calibrated beam coupling, governed human evaluation, and external identifier deposit remain open.",
-      "text_sha256": "1d38f12efaa9def90247911f3f580a98a9003a821c63d51a9fbb790add907e49",
+      "line_start": 154,
+      "line_end": 160,
+      "text": "The open-resource layer now supplies model-tier presets, a hash-pinned release manifest, standard checksums, a data dictionary, citation metadata, and a claim-first reviewer workbench. Validation fails closed on artifact drift. The bundle remains a qualified local release candidate rather than a persistent archive: calibrated articulated anatomy and contact, equipment-calibrated beam coupling, completed structural-corner headline propagation, governed human evaluation, and external identifier deposit remain open.",
+      "text_sha256": "5821cb1dae65e96febe6335c8e25657d0a09bafd68313ede92bdb197c64974f9",
       "citation_keys": [],
       "has_numeric_content": false,
       "has_assertive_language": true,
@@ -17252,8 +17640,8 @@
     {
       "candidate_id": "PD-CAND-efee29754ee09df2",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd",
-      "line_start": 145,
-      "line_end": 146,
+      "line_start": 164,
+      "line_end": 165,
       "text": "The next work should reduce the largest inferential risks in dependency order:",
       "text_sha256": "07513d405d6a2dec80de362e100344a58900b15d92e7c1b05bd76a35d1357608",
       "citation_keys": [],
@@ -17264,12 +17652,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-a0ea93e52f20179e",
+      "candidate_id": "PD-CAND-a49b9e81333cef61",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd",
-      "line_start": 148,
-      "line_end": 177,
-      "text": "1. **Articulated Spatial Forward-Contact Counterfactual.** Replace the executed hand-carriage reference with subject-scaled articulated arms and calibrated grip interfaces. Start from the executed bilateral closed-contact, engineering-limit, and coarse collision-qualified configurations, replace those screens with subject-specific anatomy where available, then preserve the two-engine same-state killswitch, force, couple, power, work, pathway, and closure observables. 2. **Calibrated Uncertainty and Constrained Control.** Extend the executed multivariable screen with population-informed distributions, measurement error, profile-likelihood or Bayesian calibration, larger held-out ensembles, and a constrained optimal-control comparator. 3. **Spatial Model-Fidelity Ladder.** Extend the executed planar base rotation, intrinsic free moment, distributed grip, and passive shaft into a three- dimensional club/body solve with calibrated unilateral foot contact and force-plate comparison without changing the registered interface observables. Each rung should carry conservation checks and cross-engine tolerance gates. 4. **Execute the Frozen Human-Data Protocol.** Acquire governed synchronized measurements that pass the fixed inclusion, residual, missingness, participant-holdout, and provenance gates. Sequence order alone must not be treated as evidence of energy transfer. 5. **Arm--Wrist Allocation and Preload Falsification.** Execute the bilateral grip-wrench, pressure, activation, stiffness, and participant-holdout tests registered in @sec-torque-allocation-preload. Treat the dead-zone mechanism as rejected if its predicted gap is absent under documented low tangent stiffness or if any performance difference disappears on holdout. 6. **Open-Resource Release.** Maintain deterministic commands, machine-readable results, data dictionaries, checksums, citation metadata, and explicit license boundaries. Archive validated releases with a persistent identifier.",
-      "text_sha256": "d6b675ef43eaa4ccf1859c1f12ff56053eb445fd8c5e54fa37a92f35e5b9e126",
+      "line_start": 167,
+      "line_end": 195,
+      "text": "1. **Complete Structural-Corner Headline Propagation.** Pass every feasible digest-bound scaled authority through the exact native-engine shaft and finite-ground atlases. Retain the low-height failure in the denominator and preserve reversal, refinement, pathway killswitch, force, couple, power, work, domain, and unchanged matching controls. Do not substitute nominal anatomy or treat regeneration alone as dynamic robustness. 2. **Calibrated Uncertainty and Constrained Control.** Extend the executed multivariable screen with population-informed distributions, measurement error, profile-likelihood or Bayesian calibration, larger held-out ensembles, and a constrained optimal-control comparator. 3. **Spatial Model-Fidelity Ladder.** Extend the executed planar base rotation, intrinsic free moment, distributed grip, and passive shaft into a three- dimensional club/body solve with calibrated unilateral foot contact and force-plate comparison without changing the registered interface observables. Each rung should carry conservation checks and cross-engine tolerance gates. 4. **Execute the Frozen Human-Data Protocol.** Acquire governed synchronized measurements that pass the fixed inclusion, residual, missingness, participant-holdout, and provenance gates. Sequence order alone must not be treated as evidence of energy transfer. 5. **Arm--Wrist Allocation and Preload Falsification.** Execute the bilateral grip-wrench, pressure, activation, stiffness, and participant-holdout tests registered in @sec-torque-allocation-preload. Treat the dead-zone mechanism as rejected if its predicted gap is absent under documented low tangent stiffness or if any performance difference disappears on holdout. 6. **Open-Resource Release.** Maintain deterministic commands, machine-readable results, data dictionaries, checksums, citation metadata, and explicit license boundaries. Archive validated releases with a persistent identifier.",
+      "text_sha256": "5fce794bf00d6056912a329bba111798441037b9c992cf77ded328aa1498d771",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": true,
@@ -17282,12 +17670,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-5f49580176ce4034",
+      "candidate_id": "PD-CAND-1efe7a3110de4a16",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd",
-      "line_start": 179,
-      "line_end": 182,
-      "text": "The implementation roadmap and acceptance criteria are tracked in [the open research epic](https://github.com/D-sorganization/UpstreamDrift/issues/8426). The matched-task allocation and transmission program is tracked separately in [its falsification epic](https://github.com/D-sorganization/UpstreamDrift/issues/8497).",
-      "text_sha256": "69f0dfa6c4a5d553181cbe3053fb91cc0ed7d41646ffbcfb44478310936488af",
+      "line_start": 197,
+      "line_end": 202,
+      "text": "The canonical implementation roadmap and dependency-ordered acceptance criteria are tracked in [the open research epic](https://github.com/D-sorganization/UpstreamDrift/issues/8557). The completed matched-task allocation groundwork is archived in [its closed falsification epic](https://github.com/D-sorganization/UpstreamDrift/issues/8497); remaining empirical allocation tests stay governed by the open research epic.",
+      "text_sha256": "a3c305311d5f4dadc1e0fc37d50e13fc34f9f5ad78cf99bbd95e1cbf9a5d43d0",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": false,
@@ -17300,8 +17688,8 @@
     {
       "candidate_id": "PD-CAND-6a984b208c9fd567",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd",
-      "line_start": 186,
-      "line_end": 216,
+      "line_start": 206,
+      "line_end": 236,
       "text": "Analysis code, tests, figures, machine-readable outputs, and parameter records are available in the [open-source repository](https://github.com/D-sorganization/UpstreamDrift/tree/main/docs/research/proximal_distal_energy_transfer). The repository name identifies provenance only; none of the scientific claims depend on adoption of the broader software project. The principal summary is recorded in [`data/results_summary.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/results_summary.json), and the parameter-sensitivity results are recorded in [`data/e1d_parameter_sensitivity.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/e1d_parameter_sensitivity.json). The spatial common-state evidence is recorded in [`data/spatial_full_body_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json). The two-engine spatial forward-contact evidence is recorded in [`data/spatial_forward_contact_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json). The uncertainty, identifiability, and control evidence is recorded in [`data/uncertainty_control_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.json). The distributed-shaft structural evidence is recorded in [`data/shaft_beam_reference.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json). The forward distributed-modal shaft and arm--wrist allocation evidence are recorded in [`data/moving_base_modal_shaft_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/moving_base_modal_shaft_study.json) and [`data/torque_allocation_preload_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/torque_allocation_preload_study.json). The frozen experimental protocol and synthetic readiness classification are recorded in [`data/experimental_protocol_v1.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/experimental_protocol_v1.json) and [`data/experimental_protocol_readiness.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/experimental_protocol_readiness.json). The finite-ground initialization, preregistered atlas, and labeled post-hoc matching sensitivity are recorded in [`data/articulated_ground_diagnostic.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/articulated_ground_diagnostic.json), [`data/articulated_ground_atlas.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/articulated_ground_atlas.json), and [`data/articulated_ground_posthoc_sensitivity.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/articulated_ground_posthoc_sensitivity.json).",
       "text_sha256": "118b77c7117e431f1f3857ee049e7323abb90acc09b269e6df550e9805665c6f",
       "citation_keys": [],

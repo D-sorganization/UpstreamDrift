@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-evidence-integrity-v2",
   "registry": {
     "path": "docs/research/proximal_distal_energy_transfer/data/claim_audit_registry.json",
-    "sha256": "10b5ec2b311553e802e28e63c3b8cbe646e6007079d6f46ee15874ed67c87def"
+    "sha256": "afb6b4b63567518dc79f163280571e6bc59963c943a4aa5784b7683f7bedee81"
   },
   "scope": {
     "local_artifact_semantics": "content_integrity_not_independent_validation",
@@ -11,9 +11,9 @@
     "network_access_required": false
   },
   "summary": {
-    "claim_count": 295,
-    "evidence_reference_count": 2103,
-    "local_artifact_count": 302,
+    "claim_count": 304,
+    "evidence_reference_count": 2172,
+    "local_artifact_count": 321,
     "external_url_count": 78
   },
   "claims": {
@@ -3604,6 +3604,120 @@
         "tests/research/test_articulated_distributed_friction.py"
       ],
       "external_references": []
+    },
+    "PD-CLAIM-297": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_uncertainty_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_uncertainty_study.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_uncertainty_screen.pdf",
+        "scripts/research/proximal_distal_energy/articulated_uncertainty_study.py",
+        "scripts/research/proximal_distal_energy/register_articulated_uncertainty_claims.py",
+        "tests/research/test_articulated_uncertainty_study.py"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-298": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_uncertainty_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_uncertainty_study.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_uncertainty_screen.pdf",
+        "scripts/research/proximal_distal_energy/articulated_uncertainty_study.py",
+        "scripts/research/proximal_distal_energy/register_articulated_uncertainty_claims.py",
+        "tests/research/test_articulated_uncertainty_study.py"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-299": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_uncertainty_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_uncertainty_study.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_uncertainty_screen.pdf",
+        "scripts/research/proximal_distal_energy/articulated_uncertainty_study.py",
+        "scripts/research/proximal_distal_energy/register_articulated_uncertainty_claims.py",
+        "tests/research/test_articulated_uncertainty_study.py"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-300": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_uncertainty_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_uncertainty_study.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_uncertainty_screen.pdf",
+        "scripts/research/proximal_distal_energy/articulated_uncertainty_study.py",
+        "scripts/research/proximal_distal_energy/register_articulated_uncertainty_claims.py",
+        "tests/research/test_articulated_uncertainty_study.py",
+        "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py",
+        "scripts/research/proximal_distal_energy/register_articulated_uncertainty_claims.py",
+        "tests/research/test_articulated_headline_uncertainty.py"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-301": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_structural_authority_campaign.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_structural_propagation_plan.json",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_structural_authority.pdf",
+        "scripts/research/proximal_distal_energy/articulated_scaled_authority.py",
+        "scripts/research/proximal_distal_energy/articulated_atlas_authority.py",
+        "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py",
+        "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py",
+        "scripts/research/proximal_distal_energy/register_articulated_uncertainty_claims.py",
+        "tests/research/test_articulated_scaled_authority.py",
+        "tests/research/test_articulated_atlas_authority.py",
+        "tests/research/test_articulated_structural_authority_campaign.py",
+        "tests/research/test_articulated_structural_propagation_plan.py"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-302": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_structural_authority_campaign.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_structural_propagation_plan.json",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_structural_authority.pdf",
+        "scripts/research/proximal_distal_energy/articulated_scaled_authority.py",
+        "scripts/research/proximal_distal_energy/articulated_atlas_authority.py",
+        "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py",
+        "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py",
+        "scripts/research/proximal_distal_energy/register_articulated_uncertainty_claims.py",
+        "tests/research/test_articulated_scaled_authority.py",
+        "tests/research/test_articulated_atlas_authority.py",
+        "tests/research/test_articulated_structural_authority_campaign.py",
+        "tests/research/test_articulated_structural_propagation_plan.py"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-303": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_structural_authority_campaign.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_structural_propagation_plan.json",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_structural_authority.pdf",
+        "scripts/research/proximal_distal_energy/articulated_scaled_authority.py",
+        "scripts/research/proximal_distal_energy/articulated_atlas_authority.py",
+        "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py",
+        "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py",
+        "scripts/research/proximal_distal_energy/register_articulated_uncertainty_claims.py",
+        "tests/research/test_articulated_scaled_authority.py",
+        "tests/research/test_articulated_atlas_authority.py",
+        "tests/research/test_articulated_structural_authority_campaign.py",
+        "tests/research/test_articulated_structural_propagation_plan.py"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-304": {
+      "local_references": [
+        "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py",
+        "scripts/research/proximal_distal_energy/register_articulated_uncertainty_claims.py",
+        "tests/research/test_articulated_headline_uncertainty.py"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-305": {
+      "local_references": [
+        "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py",
+        "scripts/research/proximal_distal_energy/register_articulated_uncertainty_claims.py",
+        "tests/research/test_articulated_headline_uncertainty.py"
+      ],
+      "external_references": []
     }
   },
   "local_artifacts": {
@@ -3628,8 +3742,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/MOMENTUM_TRANSFER_QUESTION_PROGRAM.md": {
-      "sha256": "049b4888fa338cf54d344c75c095cd1769b4d4b8b25d7792680df5b1d556370d",
-      "bytes": 27247,
+      "sha256": "4ae87fb10c732bae23b8f6f1dd0f451093d07b839c9804219b0f823316a52ddb",
+      "bytes": 36505,
       "referenced_by": [
         "PD-CLAIM-242",
         "PD-CLAIM-243",
@@ -3712,8 +3826,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd": {
-      "sha256": "7551efd27dbee5f3518ba9c3b2046c5d72c5f89e49db84eae498a40904871d65",
-      "bytes": 21390,
+      "sha256": "c73272655658f2aff564316537686a66dc0bca541a281daace9f76c236ec4467",
+      "bytes": 21663,
       "referenced_by": [
         "PD-CLAIM-242",
         "PD-CLAIM-243",
@@ -3927,6 +4041,44 @@
         "PD-CLAIM-283",
         "PD-CLAIM-284",
         "PD-CLAIM-285"
+      ]
+    },
+    "docs/research/proximal_distal_energy_transfer/data/articulated_structural_authority_campaign.json": {
+      "sha256": "d8115073dc1b506f145196b08c96d7cb3cf00e8cf29099970e2f7b0fbe6d63f3",
+      "bytes": 7833,
+      "referenced_by": [
+        "PD-CLAIM-301",
+        "PD-CLAIM-302",
+        "PD-CLAIM-303"
+      ]
+    },
+    "docs/research/proximal_distal_energy_transfer/data/articulated_structural_propagation_plan.json": {
+      "sha256": "da3044d14fec0ca9ad46e4663b96d55bf772d8340758c8b0290f86e76f6edd91",
+      "bytes": 34904,
+      "referenced_by": [
+        "PD-CLAIM-301",
+        "PD-CLAIM-302",
+        "PD-CLAIM-303"
+      ]
+    },
+    "docs/research/proximal_distal_energy_transfer/data/articulated_uncertainty_study.json": {
+      "sha256": "d82309b2c95b74db8c429f743163716a04465e6f7b13170d1bdbebe6b1f6863b",
+      "bytes": 3111,
+      "referenced_by": [
+        "PD-CLAIM-297",
+        "PD-CLAIM-298",
+        "PD-CLAIM-299",
+        "PD-CLAIM-300"
+      ]
+    },
+    "docs/research/proximal_distal_energy_transfer/data/articulated_uncertainty_study.npz": {
+      "sha256": "271ea2d339a37ccaac7528efed17cc9467f94c306b80c831d81fea02bb393691",
+      "bytes": 6363,
+      "referenced_by": [
+        "PD-CLAIM-297",
+        "PD-CLAIM-298",
+        "PD-CLAIM-299",
+        "PD-CLAIM-300"
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/bilateral_wrench_identifiability_study.json": {
@@ -4311,8 +4463,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_question_registry.json": {
-      "sha256": "ad4d78e04c752def2ab2e054f7357f8772767fa27e4bab402ed5b487e3011066",
-      "bytes": 20510,
+      "sha256": "fc18d8035e1e49cb9f564b9258288ed05513b8452489e55a1376503770ede822",
+      "bytes": 22045,
       "referenced_by": [
         "PD-CLAIM-242",
         "PD-CLAIM-243",
@@ -4327,8 +4479,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_readiness_audit.json": {
-      "sha256": "5442940996f0a3ec9c179974fe8c2716f1b0fca6f2070ec1e4d8a2933269450c",
-      "bytes": 15056,
+      "sha256": "2e3b037c648be899b47bad379928d50863ad6453ef7f97ba7f57f15342fd4f4e",
+      "bytes": 16520,
       "referenced_by": [
         "PD-CLAIM-242",
         "PD-CLAIM-243",
@@ -5110,6 +5262,25 @@
         "PD-CLAIM-285"
       ]
     },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_structural_authority.pdf": {
+      "sha256": "323e8a33572390dc234189f408ce4c8fcab4614cf85ed2d5b65be682061725eb",
+      "bytes": 15642,
+      "referenced_by": [
+        "PD-CLAIM-301",
+        "PD-CLAIM-302",
+        "PD-CLAIM-303"
+      ]
+    },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_uncertainty_screen.pdf": {
+      "sha256": "841c9105fc6373cc2c2b7cc4abb3b64821387a66e045fce4b802bce4a823941b",
+      "bytes": 27603,
+      "referenced_by": [
+        "PD-CLAIM-297",
+        "PD-CLAIM-298",
+        "PD-CLAIM-299",
+        "PD-CLAIM-300"
+      ]
+    },
     "docs/research/proximal_distal_energy_transfer/figures/fig_bilateral_wrench_identifiability.pdf": {
       "sha256": "ccbb12f537a033ce63b084ab3d36f197d2b413a6c8bf3972df6df295a150a847",
       "bytes": 22061,
@@ -5299,6 +5470,15 @@
         "PD-CLAIM-198"
       ]
     },
+    "scripts/research/proximal_distal_energy/articulated_atlas_authority.py": {
+      "sha256": "191174f7fea921a3b52054f85d735b45ee0ca93090aaa733f59221d45de0af0d",
+      "bytes": 9408,
+      "referenced_by": [
+        "PD-CLAIM-301",
+        "PD-CLAIM-302",
+        "PD-CLAIM-303"
+      ]
+    },
     "scripts/research/proximal_distal_energy/articulated_contact_projection.py": {
       "sha256": "a5914695739fd3f2137c3be0905f707b8de11f4dea3edc1d0c04897853149fd3",
       "bytes": 21143,
@@ -5355,8 +5535,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": {
-      "sha256": "f426e07021b22b1cc0096e7731914b06cab0a58bfd08aa9d0fa0c32efd45f48a",
-      "bytes": 31154,
+      "sha256": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
+      "bytes": 38306,
       "referenced_by": [
         "PD-CLAIM-293",
         "PD-CLAIM-294",
@@ -5394,6 +5574,15 @@
         "PD-CLAIM-296"
       ]
     },
+    "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py": {
+      "sha256": "ff47449935ac54feee1d631ddb59dd98657d1af0f4454210e5721243f7874ab1",
+      "bytes": 16631,
+      "referenced_by": [
+        "PD-CLAIM-300",
+        "PD-CLAIM-304",
+        "PD-CLAIM-305"
+      ]
+    },
     "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py": {
       "sha256": "37f051cae4dd3ebd9c5f3d3305d50083a6a7743e4f8689883e70eff93ee2b5cd",
       "bytes": 13340,
@@ -5403,9 +5592,18 @@
         "PD-CLAIM-276"
       ]
     },
+    "scripts/research/proximal_distal_energy/articulated_scaled_authority.py": {
+      "sha256": "6d41ef265dd88d61bdf70f1ff78a17716c9293e6260f307c253df43f441b7d83",
+      "bytes": 17713,
+      "referenced_by": [
+        "PD-CLAIM-301",
+        "PD-CLAIM-302",
+        "PD-CLAIM-303"
+      ]
+    },
     "scripts/research/proximal_distal_energy/articulated_shaft.py": {
-      "sha256": "314371699ad92854817fb0f79bc60cd9e7febd827d2c5c9ad0a8a3a632a5ece1",
-      "bytes": 16337,
+      "sha256": "475312660c49badfefc7a582d36c49253b79a8ecf2d2dbd72f6d1704368aeeae",
+      "bytes": 16742,
       "referenced_by": [
         "PD-CLAIM-289",
         "PD-CLAIM-290",
@@ -5414,8 +5612,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": {
-      "sha256": "acb98cbb0e5d6eed102d71891a19ce884e3dad0e60240188d2c335a331ebb9f9",
-      "bytes": 34746,
+      "sha256": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
+      "bytes": 35994,
       "referenced_by": [
         "PD-CLAIM-289",
         "PD-CLAIM-290",
@@ -5468,6 +5666,34 @@
         "PD-CLAIM-283",
         "PD-CLAIM-284",
         "PD-CLAIM-285"
+      ]
+    },
+    "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py": {
+      "sha256": "166ab2ebec88a0c53abc54c6b565ba0a3f82caf800449e822164177f31289549",
+      "bytes": 8533,
+      "referenced_by": [
+        "PD-CLAIM-301",
+        "PD-CLAIM-302",
+        "PD-CLAIM-303"
+      ]
+    },
+    "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": {
+      "sha256": "89c6c741ea366ab0f324323cfa45ca99cd5f73a18c5f3fcf7d39c8b071a862e1",
+      "bytes": 23696,
+      "referenced_by": [
+        "PD-CLAIM-301",
+        "PD-CLAIM-302",
+        "PD-CLAIM-303"
+      ]
+    },
+    "scripts/research/proximal_distal_energy/articulated_uncertainty_study.py": {
+      "sha256": "92e7e73450055769ffbb5de1152d85ef1ef41cfb83d554aedaa4bc68c963ba5f",
+      "bytes": 18996,
+      "referenced_by": [
+        "PD-CLAIM-297",
+        "PD-CLAIM-298",
+        "PD-CLAIM-299",
+        "PD-CLAIM-300"
       ]
     },
     "scripts/research/proximal_distal_energy/audit_results_chapter.py": {
@@ -5872,6 +6098,21 @@
         "PD-CLAIM-283",
         "PD-CLAIM-284",
         "PD-CLAIM-285"
+      ]
+    },
+    "scripts/research/proximal_distal_energy/register_articulated_uncertainty_claims.py": {
+      "sha256": "3248702154c95a2e2aa49cfc61e042555006f603620b8d06e50ae470757fa48d",
+      "bytes": 27579,
+      "referenced_by": [
+        "PD-CLAIM-297",
+        "PD-CLAIM-298",
+        "PD-CLAIM-299",
+        "PD-CLAIM-300",
+        "PD-CLAIM-301",
+        "PD-CLAIM-302",
+        "PD-CLAIM-303",
+        "PD-CLAIM-304",
+        "PD-CLAIM-305"
       ]
     },
     "scripts/research/proximal_distal_energy/register_distributed_grip_claims.py": {
@@ -6425,8 +6666,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py": {
-      "sha256": "b62fd2d7b90bb0593d660c362ebfc266cb905f0d808593b2c978a515275a3d0a",
-      "bytes": 20061,
+      "sha256": "c48f22da72d0b09856e3d0879dab2f48b2ce4bf57d99c2234d21b6d431386674",
+      "bytes": 22073,
       "referenced_by": [
         "PD-CLAIM-260",
         "PD-CLAIM-261",
@@ -6630,6 +6871,15 @@
         "PD-CLAIM-198"
       ]
     },
+    "tests/research/test_articulated_atlas_authority.py": {
+      "sha256": "212fb2d3413e06ea55fbf4ca8ba141057b020438c25efc8a17668766d083d349",
+      "bytes": 4405,
+      "referenced_by": [
+        "PD-CLAIM-301",
+        "PD-CLAIM-302",
+        "PD-CLAIM-303"
+      ]
+    },
     "tests/research/test_articulated_contact_projection.py": {
       "sha256": "9f4e84a6293cce4406478defdb44ad049bbd4be18d2a042c06b508cb45272995",
       "bytes": 3575,
@@ -6695,8 +6945,8 @@
       ]
     },
     "tests/research/test_articulated_ground_atlas.py": {
-      "sha256": "ced9b080d69c0619d8e3a7bfadb2eefecec103f0b64b807a35b4ed2585b25529",
-      "bytes": 1277,
+      "sha256": "3b8298a0dd73f87131b4221165255517c2b51210a56d9d92043361b46735d03f",
+      "bytes": 1715,
       "referenced_by": [
         "PD-CLAIM-293",
         "PD-CLAIM-294",
@@ -6764,6 +7014,15 @@
         "PD-CLAIM-296"
       ]
     },
+    "tests/research/test_articulated_headline_uncertainty.py": {
+      "sha256": "72204c041461619284dccea2c8202f75b4b21d2d35766c570ed366ac12db49ef",
+      "bytes": 8081,
+      "referenced_by": [
+        "PD-CLAIM-300",
+        "PD-CLAIM-304",
+        "PD-CLAIM-305"
+      ]
+    },
     "tests/research/test_articulated_inertia_cross_engine.py": {
       "sha256": "e36233b82896d69793fd1d7d8c7b1a0adeaf0439cc82edc15f25b11effd7fe24",
       "bytes": 4521,
@@ -6773,9 +7032,18 @@
         "PD-CLAIM-276"
       ]
     },
+    "tests/research/test_articulated_scaled_authority.py": {
+      "sha256": "cac187334194b7e3230a837a710b3e6c82d5350fc59468e0b48936aaed3a40e2",
+      "bytes": 3868,
+      "referenced_by": [
+        "PD-CLAIM-301",
+        "PD-CLAIM-302",
+        "PD-CLAIM-303"
+      ]
+    },
     "tests/research/test_articulated_shaft.py": {
-      "sha256": "6a46ad7aba60db597c99cb96369dfd90dbabba8db30b644c926415a45b28e4f9",
-      "bytes": 3923,
+      "sha256": "2ed59b08e0a5daf99064b00c8596d25f8b33dbe2821e30375d76e129f605b93c",
+      "bytes": 4809,
       "referenced_by": [
         "PD-CLAIM-289",
         "PD-CLAIM-290",
@@ -6784,8 +7052,8 @@
       ]
     },
     "tests/research/test_articulated_shaft_atlas.py": {
-      "sha256": "ede9b804aad5058a283a08b8214ba2b1630e223cec56c8158f6ded2342ab6869",
-      "bytes": 2314,
+      "sha256": "8fcd1961c5bab7ee57357f6c47dec5169240199a2f723f829de30b1b6550a38e",
+      "bytes": 2574,
       "referenced_by": [
         "PD-CLAIM-289",
         "PD-CLAIM-290",
@@ -6819,6 +7087,34 @@
         "PD-CLAIM-283",
         "PD-CLAIM-284",
         "PD-CLAIM-285"
+      ]
+    },
+    "tests/research/test_articulated_structural_authority_campaign.py": {
+      "sha256": "0a721f2403a7caa6efc4426a6e09f689810b2e99d5ac890a9431d757d984ab0f",
+      "bytes": 3683,
+      "referenced_by": [
+        "PD-CLAIM-301",
+        "PD-CLAIM-302",
+        "PD-CLAIM-303"
+      ]
+    },
+    "tests/research/test_articulated_structural_propagation_plan.py": {
+      "sha256": "be1d43712d0ac4f9cae1fcc2302c4cc0d53e2f6b69c35215844bfe19964ae3cf",
+      "bytes": 16424,
+      "referenced_by": [
+        "PD-CLAIM-301",
+        "PD-CLAIM-302",
+        "PD-CLAIM-303"
+      ]
+    },
+    "tests/research/test_articulated_uncertainty_study.py": {
+      "sha256": "31a6387d0ce8c3ccd7228fe21147847bd2a969ab2f1cf8e00992de7a992570a8",
+      "bytes": 2986,
+      "referenced_by": [
+        "PD-CLAIM-297",
+        "PD-CLAIM-298",
+        "PD-CLAIM-299",
+        "PD-CLAIM-300"
       ]
     },
     "tests/research/test_bilateral_wrench_identifiability.py": {
@@ -7165,8 +7461,8 @@
       ]
     },
     "tests/research/test_subject_scaled_closed_contact.py": {
-      "sha256": "e5d9dcbef9c0915db89a7bda6f4e42d3301c4218db1dff7fa04bea3bedeae803",
-      "bytes": 5909,
+      "sha256": "e48548b04dfc7c0ac5c998e4292a80fa505b1b7a8080ad41898289516cce9b46",
+      "bytes": 6339,
       "referenced_by": [
         "PD-CLAIM-260",
         "PD-CLAIM-261",
@@ -7369,8 +7665,8 @@
       ]
     },
     "tests/unit/biomechanics/test_interaction_evidence.py": {
-      "sha256": "266205c1d08d2161092d42350f6feb901ae0ec743271aacdb24b7345bdfcab6d",
-      "bytes": 10743,
+      "sha256": "8d5bb60361dee1c86b0db8795cd0633d1f7c146ccee2bf3e846f8f3541c05a98",
+      "bytes": 11307,
       "referenced_by": [
         "PD-CLAIM-073"
       ]
