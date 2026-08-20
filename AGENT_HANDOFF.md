@@ -107,10 +107,10 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
 ## Launch-Monitor Analytics Authority
 
 - Tools #4583 and UpstreamDrift #8790 govern `LaunchMonitorAnalysisResultV2`
-  (`2.0.0`); v1 remains compatible. Use `/tools/launch-monitor-analytics/v2/analyze`
-  for unit/lineage/missingness/source/uncertainty/identity authority and bounded
-  vendor/model claims. Player grouping requires an explicit trusted identity;
-  never infer it from session, club, filename, source layout, or row order.
+  (`2.0.0`); v1 remains compatible. #8805 rejects session, club, source, filename,
+  and row pseudo-identities even when attested, and separates session/order evidence.
+  The v2 endpoint supplies traceable authority and bounded vendor/model claims;
+  player grouping still requires an explicit trusted identity.
 - UpstreamDrift #8803 owns canonical source-backed strokes gained. The v1 SG
   result requires a hash-verified v2 expected-strokes table and explicit start/
   finish lie, context, target, and distance. The separate outcome-proxy result

@@ -293,6 +293,72 @@ def test_v2_analyze_reports_missing_selected_column_as_contract_error(
     assert "missing_metric" in response.json()["detail"]
 
 
+@pytest.mark.parametrize(
+    "identifier_column",
+    ["session_id", "club", "source_id", "filename", "row_order", "source_row"],
+)
+def test_v2_api_rejects_attested_player_pseudo_identity(
+    client: TestClient, identifier_column: str
+) -> None:
+    response = client.post(
+        "/tools/launch-monitor-analytics/v2/analyze",
+        json={
+            "records": _records(),
+            "analysis": {
+                "outcome": "ball_speed",
+                "predictors": ["club_speed"],
+                "analysis_mode": "correlation",
+                "group_by": identifier_column,
+            },
+            "context": {
+                "player_identity": {
+                    "trust_level": "explicit_user_attested",
+                    "identifier_column": identifier_column,
+                    "evidence": "The user attested this source field.",
+                }
+            },
+        },
+    )
+
+    assert response.status_code == 422
+    assert "cannot be used as player identity" in str(response.json()["detail"])
+
+
+def test_v2_api_accepts_separate_session_and_order_evidence(
+    client: TestClient,
+) -> None:
+    response = client.post(
+        "/tools/launch-monitor-analytics/v2/analyze",
+        json={
+            "records": _records(),
+            "analysis": {
+                "outcome": "ball_speed",
+                "predictors": ["club_speed"],
+                "analysis_mode": "correlation",
+            },
+            "context": {
+                "session_identity": {
+                    "trust_level": "explicit_user_attested",
+                    "identifier_column": "session_id",
+                    "evidence": "The owner attested the session boundaries.",
+                },
+                "order_evidence": {
+                    "trust_level": "source_reported",
+                    "order_column": "shot_id",
+                    "order_kind": "source_sequence",
+                    "unit": "shot",
+                    "evidence": "The export preserves device shot order.",
+                },
+            },
+        },
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["session_identity"]["identifier_column"] == "session_id"
+    assert payload["order_evidence"]["order_kind"] == "source_sequence"
+
+
 def test_analyze_rejects_aggregate_regression(client: TestClient) -> None:
     records = _records()
     for record in records:

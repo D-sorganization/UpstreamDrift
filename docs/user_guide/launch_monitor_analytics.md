@@ -156,10 +156,13 @@ an exported result independently auditable without copying restricted source
 values into the result.
 
 Player grouping in v2 requires an explicitly supplied trusted identifier and
-evidence. The application never infers identity from session, club, filename,
-directory structure, or row order. Vendor names remain vendor-comparable
-labels; no result claims firmware reproduction, device emulation, or device
-certification.
+evidence. The application rejects session, club, source, filename, and row
+fields as player identifiers even if they are user-attested. Session boundaries
+and chronological/ordinal order are declared independently with their own
+identifier or order column, trust level, unit where applicable, and evidence.
+Declaring either one never establishes player identity. Vendor names remain
+vendor-comparable labels; no result claims firmware reproduction, device
+emulation, or device certification.
 
 All canonical metrics and retained numeric source fields remain available for
 selection. Canonical fields use the metric registry's units. A retained source

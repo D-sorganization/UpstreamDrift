@@ -179,11 +179,22 @@ python -m scripts.generate_launch_monitor_contract
 ```
 
 Grouping by a player field fails closed unless `player_identity` declares a
-trusted identifier column and evidence. Session, club, source filename, file
-layout, and row order are never accepted as player identity. Insufficient or
-rank-deficient regression is returned as an explicit unavailable result rather
-than an apparently successful null result. Invalid columns, unsafe pooling, and
-other request-contract violations still fail with a descriptive error.
+trusted identifier column and evidence. `PlayerIdentityV2` rejects `session`,
+`session_id`, club, source, file/filename, row-order, and source-row fields even
+when the caller attests them. This is a request-contract error (`422` at the
+HTTP boundary), not an unavailable statistical result.
+
+`session_identity` separately declares a session identifier, trust level, and
+evidence. `order_evidence` declares an order column, whether it is a timestamp,
+ordinal, or source sequence, its unit, trust level, and evidence. Missing or
+untrusted session/order evidence does not block analyses that do not use it.
+Future longitudinal operations must report their result as unavailable when
+required evidence is absent; they must never infer a player, session, or time
+scale from club, source layout, filename, or row position. Insufficient or
+rank-deficient regression is likewise returned as an explicit unavailable
+result rather than an apparently successful null result. Invalid columns,
+unsafe pooling, and other request-contract violations fail with a descriptive
+error.
 
 Every canonical metric and retained numeric `source::<header>` field remains
 selectable. Registry metrics carry registry-authoritative canonical/display

@@ -196,6 +196,8 @@ export interface ActuatorUpdateRequest {
 export interface AnalysisContextV2 {
   authority?: DatasetAuthorityV2 | null;
   player_identity?: PlayerIdentityV2;
+  session_identity?: SessionIdentityV2;
+  order_evidence?: OrderEvidenceV2;
   transformations: TransformRecordV2[];
   sources: SourceFileReferenceV2[];
   source_units?: Record<string, string>;
@@ -1384,6 +1386,8 @@ export interface LaunchMonitorAnalysisResultV2 {
   availability: AvailabilityV2[];
   uncertainty: UncertaintyV2;
   player_identity: PlayerIdentityV2;
+  session_identity?: SessionIdentityV2;
+  order_evidence?: OrderEvidenceV2;
   vendor_provenance: VendorProvenanceV2[];
   model_provenance: ModelProvenanceV2[];
   claims?: ClaimsV2;
@@ -1635,6 +1639,17 @@ export interface NotificationSettings {
   verbosity: "all" | "errors" | "silent";
 }
 
+/**
+ * Evidence defining chronological or ordinal order for longitudinal work.
+ */
+export interface OrderEvidenceV2 {
+  trust_level: "not_provided" | "explicit_user_attested" | "source_reported" | "verified_external" | "untrusted_inferred";
+  order_column?: string | null;
+  order_kind?: "timestamp" | "ordinal" | "source_sequence" | null;
+  unit?: string | null;
+  evidence?: string | null;
+}
+
 export interface OutcomeProxyClaimsV1 {
   is_strokes_gained: false;
   source_backed: false;
@@ -1709,6 +1724,7 @@ export interface PlaybackResponse {
  */
 export interface PlayerIdentityV2 {
   trust_level: "not_provided" | "explicit_user_attested" | "pseudonymous_stable" | "verified_external" | "untrusted_inferred";
+  /** Explicit player identifier column; session, club, source, file, and row-position fields are forbidden. */
   identifier_column?: string | null;
   evidence?: string | null;
 }
@@ -1929,6 +1945,15 @@ export interface ScatterAnalysisResponse {
   total_simulations: number;
   average_distance_from_hole: number;
   make_percentage: number;
+}
+
+/**
+ * Evidence for repeated-observation session boundaries, never a player ID.
+ */
+export interface SessionIdentityV2 {
+  trust_level: "not_provided" | "explicit_user_attested" | "source_reported" | "verified_external" | "untrusted_inferred";
+  identifier_column?: string | null;
+  evidence?: string | null;
 }
 
 /**

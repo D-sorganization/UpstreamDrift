@@ -15,8 +15,14 @@
           ],
           "default": null
         },
+        "order_evidence": {
+          "$ref": "#/$defs/OrderEvidenceV2"
+        },
         "player_identity": {
           "$ref": "#/$defs/PlayerIdentityV2"
+        },
+        "session_identity": {
+          "$ref": "#/$defs/SessionIdentityV2"
         },
         "source_units": {
           "additionalProperties": {
@@ -511,9 +517,138 @@
       "title": "LongitudinalSummaryV1",
       "type": "object"
     },
+    "OrderEvidenceV2": {
+      "additionalProperties": false,
+      "description": "Evidence defining chronological or ordinal order for longitudinal work.",
+      "properties": {
+        "evidence": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence"
+        },
+        "order_column": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Order Column"
+        },
+        "order_kind": {
+          "anyOf": [
+            {
+              "enum": ["timestamp", "ordinal", "source_sequence"],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Order Kind"
+        },
+        "trust_level": {
+          "default": "not_provided",
+          "enum": [
+            "not_provided",
+            "explicit_user_attested",
+            "source_reported",
+            "verified_external",
+            "untrusted_inferred"
+          ],
+          "title": "Trust Level",
+          "type": "string"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit"
+        }
+      },
+      "title": "OrderEvidenceV2",
+      "type": "object"
+    },
     "PlayerIdentityV2": {
       "additionalProperties": false,
       "description": "Declared identity evidence; identity is never inferred from layout.",
+      "properties": {
+        "evidence": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence"
+        },
+        "identifier_column": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Explicit player identifier column; session, club, source, file, and row-position fields are forbidden.",
+          "not": {
+            "enum": [
+              "club",
+              "club_id",
+              "file",
+              "file_name",
+              "filename",
+              "row_order",
+              "session",
+              "session_id",
+              "source",
+              "source_id",
+              "source_row"
+            ]
+          },
+          "title": "Identifier Column"
+        },
+        "trust_level": {
+          "default": "not_provided",
+          "enum": [
+            "not_provided",
+            "explicit_user_attested",
+            "pseudonymous_stable",
+            "verified_external",
+            "untrusted_inferred"
+          ],
+          "title": "Trust Level",
+          "type": "string"
+        }
+      },
+      "title": "PlayerIdentityV2",
+      "type": "object"
+    },
+    "SessionIdentityV2": {
+      "additionalProperties": false,
+      "description": "Evidence for repeated-observation session boundaries, never a player ID.",
       "properties": {
         "evidence": {
           "anyOf": [
@@ -544,7 +679,7 @@
           "enum": [
             "not_provided",
             "explicit_user_attested",
-            "pseudonymous_stable",
+            "source_reported",
             "verified_external",
             "untrusted_inferred"
           ],
@@ -552,7 +687,7 @@
           "type": "string"
         }
       },
-      "title": "PlayerIdentityV2",
+      "title": "SessionIdentityV2",
       "type": "object"
     },
     "SourceFileReferenceV2": {

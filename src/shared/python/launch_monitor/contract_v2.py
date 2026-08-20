@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 from dataclasses import asdict, replace
 from hashlib import sha256
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 import numpy as np
 import pandas as pd
@@ -33,11 +33,48 @@ PlayerIdentityTrust = Literal[
     "verified_external",
     "untrusted_inferred",
 ]
+SessionIdentityTrust = Literal[
+    "not_provided",
+    "explicit_user_attested",
+    "source_reported",
+    "verified_external",
+    "untrusted_inferred",
+]
+OrderEvidenceTrust = Literal[
+    "not_provided",
+    "explicit_user_attested",
+    "source_reported",
+    "verified_external",
+    "untrusted_inferred",
+]
+OrderKind = Literal["timestamp", "ordinal", "source_sequence"]
 AvailabilityState = Literal["available", "partial", "unavailable"]
 UnlinkedReason = Literal[
     "no_source_reference_declared",
     "session_not_linked_to_source_reference",
 ]
+
+_FORBIDDEN_PLAYER_IDENTIFIERS = frozenset(
+    {
+        "session",
+        "session_id",
+        "club",
+        "club_id",
+        "source",
+        "source_id",
+        "file",
+        "filename",
+        "file_name",
+        "row_order",
+        "source_row",
+    }
+)
+
+
+def _normalized_identifier(value: str) -> str:
+    normalized = value.strip().lower()
+    normalized = normalized.replace("-", "_")
+    return normalized.replace(" ", "_")
 
 
 class _ContractModel(BaseModel):
@@ -60,11 +97,30 @@ class PlayerIdentityV2(_ContractModel):
     """Declared identity evidence; identity is never inferred from layout."""
 
     trust_level: PlayerIdentityTrust = "not_provided"
-    identifier_column: str | None = None
+    identifier_column: str | None = Field(
+        default=None,
+        description=(
+            "Explicit player identifier column; session, club, source, file, and "
+            "row-position fields are forbidden."
+        ),
+        json_schema_extra={
+            "not": {"enum": cast(list[Any], sorted(_FORBIDDEN_PLAYER_IDENTIFIERS))}
+        },
+    )
     evidence: str | None = None
 
     @model_validator(mode="after")
     def require_explicit_evidence(self) -> PlayerIdentityV2:
+        normalized_column = (
+            _normalized_identifier(self.identifier_column)
+            if self.identifier_column is not None
+            else None
+        )
+        if normalized_column in _FORBIDDEN_PLAYER_IDENTIFIERS:
+            raise ValueError(
+                f"{self.identifier_column!r} cannot be used as player identity; "
+                "declare session and order evidence separately"
+            )
         if self.trust_level in {
             "explicit_user_attested",
             "pseudonymous_stable",
@@ -73,6 +129,59 @@ class PlayerIdentityV2(_ContractModel):
             raise ValueError(
                 "trusted player identity requires identifier_column and evidence"
             )
+        return self
+
+
+class SessionIdentityV2(_ContractModel):
+    """Evidence for repeated-observation session boundaries, never a player ID."""
+
+    trust_level: SessionIdentityTrust = "not_provided"
+    identifier_column: str | None = None
+    evidence: str | None = None
+
+    @model_validator(mode="after")
+    def require_complete_evidence(self) -> SessionIdentityV2:
+        if self.trust_level != "not_provided" and (
+            not self.identifier_column or not self.evidence
+        ):
+            raise ValueError(
+                "declared session identity requires identifier_column and evidence"
+            )
+        if self.trust_level == "not_provided" and (
+            self.identifier_column is not None or self.evidence is not None
+        ):
+            raise ValueError(
+                "session identity fields require a non-default trust_level"
+            )
+        return self
+
+
+class OrderEvidenceV2(_ContractModel):
+    """Evidence defining chronological or ordinal order for longitudinal work."""
+
+    trust_level: OrderEvidenceTrust = "not_provided"
+    order_column: str | None = None
+    order_kind: OrderKind | None = None
+    unit: str | None = None
+    evidence: str | None = None
+
+    @model_validator(mode="after")
+    def require_complete_evidence(self) -> OrderEvidenceV2:
+        evidence_fields = (
+            self.order_column,
+            self.order_kind,
+            self.unit,
+            self.evidence,
+        )
+        if self.trust_level != "not_provided" and not all(evidence_fields):
+            raise ValueError(
+                "declared order evidence requires order_column, order_kind, unit, "
+                "and evidence"
+            )
+        if self.trust_level == "not_provided" and any(
+            field is not None for field in evidence_fields
+        ):
+            raise ValueError("order evidence fields require a non-default trust_level")
         return self
 
 
@@ -104,6 +213,8 @@ class AnalysisContextV2(_ContractModel):
 
     authority: DatasetAuthorityV2 | None = None
     player_identity: PlayerIdentityV2 = Field(default_factory=PlayerIdentityV2)
+    session_identity: SessionIdentityV2 = Field(default_factory=SessionIdentityV2)
+    order_evidence: OrderEvidenceV2 = Field(default_factory=OrderEvidenceV2)
     transformations: tuple[TransformRecordV2, ...] = ()
     sources: tuple[SourceFileReferenceV2, ...] = ()
     source_units: dict[str, str] = Field(default_factory=dict)
@@ -227,6 +338,8 @@ class LaunchMonitorAnalysisResultV2(_ContractModel):
     availability: tuple[AvailabilityV2, ...]
     uncertainty: UncertaintyV2
     player_identity: PlayerIdentityV2
+    session_identity: SessionIdentityV2 = Field(default_factory=SessionIdentityV2)
+    order_evidence: OrderEvidenceV2 = Field(default_factory=OrderEvidenceV2)
     vendor_provenance: tuple[VendorProvenanceV2, ...]
     model_provenance: tuple[ModelProvenanceV2, ...] = ()
     claims: ClaimsV2 = Field(default_factory=ClaimsV2)
@@ -559,6 +672,8 @@ def analyze_variables_v2(
         availability=availability,
         uncertainty=_uncertainty(request),
         player_identity=resolved_context.player_identity,
+        session_identity=resolved_context.session_identity,
+        order_evidence=resolved_context.order_evidence,
         vendor_provenance=_vendor_provenance(frame, selected),
         model_provenance=model_provenance,
         warnings=result.warnings,
@@ -592,7 +707,9 @@ __all__ = [
     "LaunchMonitorAnalysisResultV2",
     "MetricUnitsV2",
     "ModelProvenanceV2",
+    "OrderEvidenceV2",
     "PlayerIdentityV2",
+    "SessionIdentityV2",
     "SourceFileReferenceV2",
     "TransformRecordV2",
     "UncertaintyV2",
