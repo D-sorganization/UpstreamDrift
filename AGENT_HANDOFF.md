@@ -49,6 +49,9 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
 ## Program Authority & Physics Epics State
 
 - Epic #8557 governs the proximal-to-distal program; #8595 retains the agenda.
+- Live issue audit confirms #8557/#8426/#8443 remain open; #8458, #8497,
+  #8505, #8493, and #8499 are closed groundwork. README and conclusions now
+  distinguish canonical/current governance from historical completed epics.
 - #8789 is the Phase 0 truth-recovery gate for #8557. It keeps repository
   handoffs, GitHub issue states, release evidence, publication metadata, and CI
   from disagreeing.
