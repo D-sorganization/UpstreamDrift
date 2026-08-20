@@ -69,11 +69,12 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     retains partial opening. The 19-corner headline campaign is incomplete:
     earlier nominal results were 126/384 shaft and 0/384 ground, but their
     per-pathway source basis was unavailable after legacy migration. They now
-    fail closed as `provenance_unverified` and must be rerun. No process is active.
+    fail closed and are being rerun from remote source basis `fbff8dc53` in
+    local exec session `64656`; inspect the checkpoint before any restart.
     The ground atlas now checkpoints each of 72 independent pathway/control
     branches and can use 20 workers; a real restart-equivalence test passes.
-    The shaft atlas remains capped at 12 workers. Commit and push the stable
-    source basis before resuming, then run the headline module with 20 workers.
+    The shaft atlas remains capped at 12 workers; the campaign uses 20 workers
+    for the independent ground branches.
     The red full-evidence test stays uncommitted until all 19 corners finish.
   - #8800 is **OPEN** and blocks #8752. Its governed scaled-authority generator
     regenerates all 13 phase states for cases 0/8/9/17. The nominal baseline is
