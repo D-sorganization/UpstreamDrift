@@ -85,10 +85,12 @@ child copies under `src/shared/python/`.
 
 ## Immediate Next Steps
 
-1. Burn down #8766 by removing unit quarantine ledger entries as clusters are fixed.
-2. Advance toward calibrated unilateral 3D contact, full-delivery matching and
+1. **Sidekick Unified Integration**: Implement `docs/development/epic_sidekick_unified_impact_model_and_launcher_integration.md`
+   (Phases S1–S5: unified sidebar across launcher tiles and Rate of Closure).
+2. Burn down #8766 by removing unit quarantine ledger entries as clusters are fixed.
+3. Advance toward calibrated unilateral 3D contact, full-delivery matching and
    uncertainty, and a governed human holdout (#8556/#8557).
-3. Ingest latest research release manifest hashes into companion articles.
+4. Ingest latest research release manifest hashes into companion articles.
 
 ## Gate Commands
 
@@ -117,5 +119,4 @@ pytest tests/research -q
 Do not infer human technique, physiology, injury, timing demand, or coaching
 advice; close #8556/#8557; bypass branch protection; force-push; admin-merge;
 add ledger entries; edit hash-pinned or Tools-owned files; or rerun unchanged
-runner-capacity failures.erun unchanged
 runner-capacity failures.
