@@ -74,8 +74,8 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     each full two-engine/reversal/refinement/killswitch atlas, reports movement
     from 126/384 shaft and 0/384 ground, and retains failures. Checkpoints now
     reject scientific-design drift while allowing worker-count changes; the
-    governed figure rejects incomplete data. Commits through `0d7fabd3d` are
-    local; remote is `35812682a`. Nominal shaft is checkpointed at 126/384. The
+    governed figure rejects incomplete data. Publication-contract commits are
+    checkpointed locally; verify origin before takeover. Nominal shaft is 126/384.
     first ground attempt exposed NumPy's removed `trapz`; `9f751e997` replaces
     it with `trapezoid`. The resumed 12-worker campaign is exec session `61684`.
     Inspect it and the checkpoint before starting anything. The red evidence
