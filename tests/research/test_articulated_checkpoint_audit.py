@@ -68,7 +68,10 @@ def test_checkpoint_audit_distinguishes_complete_and_partial_sets(tmp_path) -> N
     reference = complete / "state-00-primary-00.npz"
 
     report = audit_ground_checkpoint_directory(
-        complete, reference=reference, expected_count=6
+        complete,
+        reference=reference,
+        expected_design_digest=DESIGN_DIGEST,
+        expected_count=6,
     )
 
     assert report["status"] == "complete"
@@ -87,14 +90,28 @@ def test_checkpoint_audit_distinguishes_complete_and_partial_sets(tmp_path) -> N
         branch_slot=0,
     )
     partial_report = audit_ground_checkpoint_directory(
-        partial, reference=reference, expected_count=6, allow_partial=True
+        partial,
+        reference=reference,
+        expected_design_digest=DESIGN_DIGEST,
+        expected_count=6,
+        allow_partial=True,
     )
     assert partial_report["status"] == "partial"
     assert partial_report["observed_state_slot_count"] == 1
     assert partial_report["complete_state_slot_count"] == 0
     with pytest.raises(RuntimeError, match="count is incomplete"):
         audit_ground_checkpoint_directory(
-            partial, reference=reference, expected_count=6
+            partial,
+            reference=reference,
+            expected_design_digest=DESIGN_DIGEST,
+            expected_count=6,
+        )
+    with pytest.raises(ValueError, match="expected design digest"):
+        audit_ground_checkpoint_directory(
+            complete,
+            reference=reference,
+            expected_design_digest="not-a-digest",
+            expected_count=6,
         )
 
 
@@ -124,7 +141,10 @@ def test_checkpoint_audit_rejects_mixed_or_invalid_payloads(
 
     with pytest.raises(RuntimeError, match=message):
         audit_ground_checkpoint_directory(
-            directory, reference=reference, expected_count=6
+            directory,
+            reference=reference,
+            expected_design_digest=DESIGN_DIGEST,
+            expected_count=6,
         )
 
 
@@ -141,7 +161,10 @@ def test_checkpoint_audit_rejects_metadata_filename_disagreement(tmp_path) -> No
 
     with pytest.raises(RuntimeError, match="filename does not match"):
         audit_ground_checkpoint_directory(
-            directory, reference=reference, expected_count=6
+            directory,
+            reference=reference,
+            expected_design_digest=DESIGN_DIGEST,
+            expected_count=6,
         )
 
 
@@ -153,5 +176,8 @@ def test_checkpoint_audit_rejects_duplicate_state_mapping(tmp_path) -> None:
 
     with pytest.raises(RuntimeError, match="map to unique states"):
         audit_ground_checkpoint_directory(
-            directory, reference=reference, expected_count=12
+            directory,
+            reference=reference,
+            expected_design_digest=DESIGN_DIGEST,
+            expected_count=12,
         )

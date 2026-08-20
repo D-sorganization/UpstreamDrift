@@ -115,6 +115,7 @@ def audit_ground_checkpoint_directory(
     directory: Path,
     *,
     reference: Path,
+    expected_design_digest: str,
     expected_count: int = 72,
     allow_partial: bool = False,
 ) -> dict[str, Any]:
@@ -122,6 +123,8 @@ def audit_ground_checkpoint_directory(
 
     if expected_count <= 0 or expected_count % len(BRANCHES):
         raise ValueError("expected checkpoint count must contain complete states")
+    if not _valid_sha256(expected_design_digest):
+        raise ValueError("expected design digest must be SHA-256")
     files = sorted(directory.glob("*.npz"))
     if (
         not files
@@ -156,10 +159,8 @@ def audit_ground_checkpoint_directory(
         raise RuntimeError("checkpoint state slots must map to unique states")
     if schemas != {SCHEMA_VERSION}:
         raise RuntimeError("checkpoint schema is not registered")
-    if len(design_digests) != 1 or any(
-        not _valid_sha256(value) for value in design_digests
-    ):
-        raise RuntimeError("checkpoint design digest is not uniform SHA-256")
+    if design_digests != {expected_design_digest}:
+        raise RuntimeError("checkpoint design digest does not match registration")
     expected_identities = {
         (state_slot, states.get(state_slot), kind, branch_slot)
         for state_slot in range(expected_state_count)
@@ -197,12 +198,14 @@ def main(argv: Sequence[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("directory", type=Path)
     parser.add_argument("--reference", type=Path, required=True)
+    parser.add_argument("--expected-design-digest", required=True)
     parser.add_argument("--expected-count", type=int, default=72)
     parser.add_argument("--allow-partial", action="store_true")
     args = parser.parse_args(argv)
     report = audit_ground_checkpoint_directory(
         args.directory,
         reference=args.reference,
+        expected_design_digest=args.expected_design_digest,
         expected_count=args.expected_count,
         allow_partial=args.allow_partial,
     )

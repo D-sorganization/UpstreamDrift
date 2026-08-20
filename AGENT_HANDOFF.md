@@ -69,7 +69,7 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     grip-stiffness-low completed at shaft 182/384 (+56 nominal) and ground 0/384
     with every gate passing. Its 72/72 checkpoints have exact unique identities,
     one v1 schema/design digest `32ccf54bee70`, finite payloads, and registered
-    shapes. The campaign has 2/19 corners complete; stiffness-high shaft finished at 80/384 with gates passing, and its ground pathway is running (recorded as pending, not complete). The reusable `articulated_checkpoint_audit` CLI classifies the first 25/72 checkpoints as partial with four complete of five observed state slots; they are no-pickle, finite, uniquely identity-correct, schema/design uniform, and shape/dtype-conformant with nominal. Set digest `933ce25a5afa`; seven adverse/contract tests pass.
+    shapes. The campaign has 2/19 corners complete; stiffness-high shaft finished at 80/384 with gates passing, and its ground pathway is running (recorded as pending, not complete). The reusable `articulated_checkpoint_audit` CLI classifies the first 25/72 checkpoints as partial with four complete of five observed state slots; they are no-pickle, finite, uniquely identity-correct, match the explicitly required schema/design digest, and are shape/dtype-conformant with nominal. Set digest `933ce25a5afa`; seven adverse/contract tests pass.
     All 72 nominal branch checkpoints retain exact trajectory/force/ground-force
     parity and restart equivalence.
     The completion-only headline evidence test stays untracked until data finish.
