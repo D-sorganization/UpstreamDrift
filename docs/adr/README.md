@@ -41,6 +41,7 @@ This directory tracks architecture-impacting decisions for UpstreamDrift.
 | [0034](0034-launch-monitor-analysis-contract-v2.md)   | Launch Monitor Analysis Contract V2                                               | Accepted | 2026-08-19 |
 | [0035](0035-source-backed-strokes-gained-contract.md) | Source-Backed Strokes-Gained Contract                                             | Accepted | 2026-08-20 |
 | [0036](0036-launch-monitor-identity-boundaries.md)    | Launch Monitor Player, Session, and Order Identity Boundaries                     | Accepted | 2026-08-20 |
+| [0037](0037-immutable-launch-monitor-dataset-jobs.md) | Immutable Launch-Monitor Dataset Jobs                                             | Accepted | 2026-08-20 |
 
 Note: ADR 0013 was amended on 2026-05-31 to document the CC-32
 canonical-core app-shell registry reuse of the embeddable-tool contract.

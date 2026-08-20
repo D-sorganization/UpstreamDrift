@@ -22,6 +22,7 @@ from src.shared.python.launch_monitor.dataset_reference_verification import (
     SOURCE_SUMMARY_RELATIVE_PATH,
     VerifiedDataset,
     normalize_repository,
+    open_parquet_dataset,
     parse_json_bytes,
     safe_fixed_child,
     sha256_file,
@@ -109,17 +110,7 @@ def _verified_backing_rows(dataset: VerifiedDataset) -> dict[str, dict[str, Any]
 def _read_dataset_columns(
     dataset: VerifiedDataset, columns: Sequence[str]
 ) -> pd.DataFrame:
-    try:
-        import pyarrow.dataset as pyarrow_dataset
-    except ImportError as exc:  # pragma: no cover
-        raise unavailable(
-            "dependency_unavailable",
-            "Parquet support is unavailable; install the data extra.",
-            retryable=True,
-        ) from exc
-    table = pyarrow_dataset.dataset(
-        dataset.dataset_path, format="parquet", partitioning="hive"
-    ).to_table(columns=list(columns))
+    table = open_parquet_dataset(dataset.dataset_path).to_table(columns=list(columns))
     return cast(pd.DataFrame, table.to_pandas())
 
 

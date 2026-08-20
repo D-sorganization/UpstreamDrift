@@ -234,7 +234,8 @@ def _verify_manifest_rows(manifest: Mapping[str, Any], expected: int) -> None:
         )
 
 
-def _verify_parquet_rows(dataset_path: Path, expected: int) -> None:
+def open_parquet_dataset(dataset_path: Path) -> Any:
+    """Open the fixed Parquet authority or return a structured unavailable state."""
     try:
         import pyarrow.dataset as pyarrow_dataset
     except ImportError as exc:  # pragma: no cover
@@ -244,9 +245,18 @@ def _verify_parquet_rows(dataset_path: Path, expected: int) -> None:
             retryable=True,
         ) from exc
     try:
-        observed = pyarrow_dataset.dataset(
+        return pyarrow_dataset.dataset(
             dataset_path, format="parquet", partitioning="hive"
-        ).count_rows()
+        )
+    except (OSError, ValueError) as exc:
+        raise unavailable(
+            "authority_unavailable", "The corpus Parquet dataset is unreadable."
+        ) from exc
+
+
+def _verify_parquet_rows(dataset_path: Path, expected: int) -> None:
+    try:
+        observed = open_parquet_dataset(dataset_path).count_rows()
     except (OSError, ValueError) as exc:
         raise unavailable(
             "authority_unavailable", "The corpus Parquet dataset is unreadable."
@@ -320,6 +330,7 @@ __all__ = [
     "VerifiedDataset",
     "dataset_content_sha256",
     "normalize_repository",
+    "open_parquet_dataset",
     "parse_json_bytes",
     "safe_fixed_child",
     "sha256_file",

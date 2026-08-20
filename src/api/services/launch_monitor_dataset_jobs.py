@@ -197,10 +197,12 @@ class DatasetJobService:
         with self._lock:
             job = self._jobs[job_id]
             job.status = "running"
+        request = job.request
+        dataset_ref = request.dataset
         try:
-            root = self._roots.resolve(job.request.dataset.root_id)
-            dataset = verify_dataset_reference(root, job.request.dataset)
-            results = execute_dataset_operation(dataset, job.request.operation)
+            root = self._roots.resolve(dataset_ref.root_id)
+            dataset = verify_dataset_reference(root, dataset_ref)
+            results = execute_dataset_operation(dataset, request.operation)
         except DatasetUnavailableError as exc:
             self._finish(job_id, status="unavailable", unavailable=exc.state)
         except (OSError, ValueError, KeyError, TypeError):
@@ -238,16 +240,17 @@ class DatasetJobService:
                 job = self._jobs[job_id]
             except KeyError as exc:
                 raise KeyError("dataset job not found") from exc
+            request = job.request
+            dataset_ref = request.dataset
+            row_count = (
+                dataset_ref.expected_row_count if job.status == "completed" else 0
+            )
             return DatasetJobStatusV1(
                 job_id=job_id,
                 status=job.status,
                 submitted_at_utc=job.submitted_at_utc,
                 completed_at_utc=job.completed_at_utc,
-                input_row_count=(
-                    job.request.dataset.expected_row_count
-                    if job.status == "completed"
-                    else 0
-                ),
+                input_row_count=row_count,
                 result_item_count=len(job.results),
                 unavailable=job.unavailable,
             )
