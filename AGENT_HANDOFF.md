@@ -107,7 +107,8 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     executes the existing full atlasses, thereby retaining both engines,
     reversal, per-corner refinement, and pathway killswitches. It records exact
     movement from the 126/384 shaft and 0/384 ground counts and retains failed
-    corners instead of deleting them; two orchestration tests pass. Running the
+    corners instead of deleting them. It checkpoints after every pathway and
+    resumes without repeating completed cells; three orchestration tests pass. Running the
     full campaign, governed artifacts, paper integration, and protected
     publication remain open.
 - The release has 295 atomic claims and 40 reviewed release claims; all 40

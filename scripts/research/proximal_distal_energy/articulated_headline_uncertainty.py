@@ -205,34 +205,18 @@ def _movement(rows: list[dict[str, Any]], pathway: Pathway) -> None:
         )
 
 
-def run_headline_uncertainty(
-    config: HeadlineUncertaintyConfig = HeadlineUncertaintyConfig(),
+def _record(
+    config: HeadlineUncertaintyConfig,
+    rows: list[dict[str, Any]],
+    status: str,
 ) -> dict[str, Any]:
-    """Run all registered full-atlas corners and retain every failure."""
-
-    rows: list[dict[str, Any]] = []
-    for corner in registered_corners(config):
-        row: dict[str, Any] = asdict(corner)
-        for pathway in ("shaft", "ground"):
-            row[pathway] = (
-                _run_pathway(pathway, corner, config)
-                if pathway in corner.pathways or corner.corner_id == "nominal"
-                else {
-                    "status": "not_affected",
-                    "matched_cell_count": None,
-                    "total_cell_count": 384,
-                    "all_registered_gates_passed": None,
-                }
-            )
-        rows.append(row)
-    for pathway in ("shaft", "ground"):
-        _movement(rows, pathway)
     return {
         "schema_version": "articulated-headline-uncertainty/v1",
         "study_id": "articulated-shaft-ground-headline-uncertainty",
+        "status": status,
         "design": {
             "method": "registered_nominal_plus_one_at_a_time_low_high_corners",
-            "corner_count": len(rows),
+            "corner_count": len(registered_corners(config)),
             "axes": [asdict(axis) for axis in config.axes],
             "controls": "each full atlas retains both engines, velocity reversal, timestep refinement, and pathway killswitches",
         },
@@ -246,10 +230,66 @@ def run_headline_uncertainty(
     }
 
 
+def _checkpoint(path: Path | None, record: dict[str, Any]) -> None:
+    if path is not None:
+        path.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+
+
+def _existing_rows(path: Path | None) -> dict[str, dict[str, Any]]:
+    if path is None or not path.exists():
+        return {}
+    record = json.loads(path.read_text(encoding="utf-8"))
+    if record.get("schema_version") != "articulated-headline-uncertainty/v1":
+        raise RuntimeError("headline uncertainty checkpoint schema is unsupported")
+    return {row["corner_id"]: row for row in record.get("corners", [])}
+
+
+def _not_affected() -> dict[str, Any]:
+    return {
+        "status": "not_affected",
+        "matched_cell_count": None,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": None,
+    }
+
+
+def run_headline_uncertainty(
+    config: HeadlineUncertaintyConfig = HeadlineUncertaintyConfig(),
+    *,
+    checkpoint_path: Path | None = None,
+) -> dict[str, Any]:
+    """Run all registered full-atlas corners and retain every failure."""
+
+    existing = _existing_rows(checkpoint_path)
+    rows: list[dict[str, Any]] = []
+    for corner in registered_corners(config):
+        row = existing.get(corner.corner_id, asdict(corner))
+        for pathway in ("shaft", "ground"):
+            current = row.get(pathway, {})
+            if current.get("status") in {
+                "completed",
+                "failed_retained",
+                "not_affected",
+            }:
+                continue
+            row[pathway] = (
+                _run_pathway(pathway, corner, config)
+                if pathway in corner.pathways or corner.corner_id == "nominal"
+                else _not_affected()
+            )
+            ordered = rows + [row]
+            _checkpoint(checkpoint_path, _record(config, ordered, "in_progress"))
+        rows.append(row)
+    for pathway in ("shaft", "ground"):
+        _movement(rows, pathway)
+    record = _record(config, rows, "complete")
+    _checkpoint(checkpoint_path, record)
+    return record
+
+
 def main() -> None:
-    record = run_headline_uncertainty()
     path = DATA / "articulated_headline_uncertainty.json"
-    path.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+    run_headline_uncertainty(checkpoint_path=path)
     print(f"Saved: {path}")
 
 

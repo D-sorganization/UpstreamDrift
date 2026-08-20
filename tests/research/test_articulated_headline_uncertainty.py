@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -83,3 +84,29 @@ def test_campaign_reports_headline_movement_and_retains_failures(
     )
     assert failed["ground"]["status"] == "failed_retained"
     assert failed["ground"]["matched_cell_count"] is None
+
+
+def test_campaign_checkpoint_resumes_without_repeating_completed_cells(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    calls = {"shaft": 0, "ground": 0}
+
+    def fake_shaft(_: study.ArticulatedShaftAtlasConfig):
+        calls["shaft"] += 1
+        return _fake_record(126)
+
+    def fake_ground(_: study.ArticulatedGroundAtlasConfig):
+        calls["ground"] += 1
+        return _fake_record(0)
+
+    monkeypatch.setattr(study, "run_articulated_shaft_atlas", fake_shaft)
+    monkeypatch.setattr(study, "run_articulated_ground_atlas", fake_ground)
+    checkpoint = tmp_path / "headline.json"
+    config = study.HeadlineUncertaintyConfig(worker_count=1)
+    first = study.run_headline_uncertainty(config, checkpoint_path=checkpoint)
+    first_calls = calls.copy()
+    second = study.run_headline_uncertainty(config, checkpoint_path=checkpoint)
+
+    assert first["status"] == second["status"] == "complete"
+    assert calls == first_calls
+    assert len(second["corners"]) == 19
