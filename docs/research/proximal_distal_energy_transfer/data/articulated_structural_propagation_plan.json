@@ -1,0 +1,374 @@
+{
+  "schema_version": "articulated-structural-propagation-plan/v1",
+  "status": "ready",
+  "authority_campaign_sha256": "d8115073dc1b506f145196b08c96d7cb3cf00e8cf29099970e2f7b0fbe6d63f3",
+  "design_sha256": "c592ae4b1ed863b043c95d109b249a01396553479017dd340112915ab0c055ca",
+  "design": {
+    "case_indices": [0, 8, 9, 17],
+    "phase_indices": [0, 6, 12],
+    "shaft_configuration": {
+      "forward": {
+        "duration_s": 0.05,
+        "time_steps_s": [0.00025, 0.000125],
+        "virtual_power_tolerance_w": 1e-10,
+        "normalized_energy_residual_tolerance": 0.05,
+        "trajectory_relative_tolerance": 1e-7,
+        "refinement_ratio_limit": 0.9
+      },
+      "case_indices": [0, 8, 9, 17],
+      "sample_indices": [0, 6, 12],
+      "activations": ["rigid", "bending", "torsion", "coupled"],
+      "horizons_s": [0.004, 0.01, 0.025, 0.05],
+      "initial_displacement_m": 0.001,
+      "initial_velocity_m_s": 0.05,
+      "station_count_per_hand": 5,
+      "station_width_m": 0.03,
+      "total_stiffness_n_m": 1800.0,
+      "total_damping_n_s_m": 18.0,
+      "shaft_damping_ratio": 0.018,
+      "bending_frequency_scale": 1.0,
+      "torsional_stiffness_scale": 1.0,
+      "match_relative_tolerance": 0.05,
+      "worker_count": 4
+    },
+    "ground_configuration": {
+      "forward": {
+        "duration_s": 0.05,
+        "time_steps_s": [0.00025, 0.000125],
+        "normalized_energy_residual_tolerance": 0.05
+      },
+      "case_indices": [0, 8, 9, 17],
+      "sample_indices": [0, 6, 12],
+      "ground_activations": ["fixed", "translation", "free_moment", "coupled"],
+      "control_names": ["rigid_shaft", "horizontal_restraint_removed"],
+      "horizons_s": [0.004, 0.01, 0.025, 0.05],
+      "initial_club_displacement_m": 0.001,
+      "initial_club_velocity_m_s": 0.05,
+      "station_count_per_hand": 5,
+      "station_width_m": 0.03,
+      "total_stiffness_n_m": 1800.0,
+      "total_damping_n_s_m": 18.0,
+      "shaft_damping_ratio": 0.018,
+      "shaft_bending_frequency_scale": 1.0,
+      "shaft_torsional_stiffness_scale": 1.0,
+      "ground_translation_stiffness_scale": 1.0,
+      "ground_translation_damping_scale": 1.0,
+      "ground_free_moment_stiffness_scale": 1.0,
+      "ground_free_moment_damping_scale": 1.0,
+      "match_relative_tolerance": 0.05,
+      "parity_relative_tolerance": 1e-8,
+      "power_residual_tolerance_w": 1e-8,
+      "worker_count": 4
+    }
+  },
+  "corners": [
+    {
+      "corner_id": "nominal",
+      "status": "ready",
+      "requested_state_count": 12,
+      "feasible_state_count": 12,
+      "retained_failures": [],
+      "feasible_states": [
+        [0, 0],
+        [0, 6],
+        [0, 12],
+        [8, 0],
+        [8, 6],
+        [8, 12],
+        [9, 0],
+        [9, 6],
+        [9, 12],
+        [17, 0],
+        [17, 6],
+        [17, 12]
+      ],
+      "expected_shaft_trajectory_count": 384,
+      "expected_ground_trajectory_count": 576,
+      "expected_headline_cell_count_per_atlas": 384,
+      "authority": {
+        "schema_version": "articulated-atlas-authority/v1",
+        "authority_sha256": "2554dc6750ec03415c98761670bd6f21facb1e6213eba5909723dfbe9e77ff45",
+        "scales": {
+          "height": 1.0,
+          "body_mass": 1.0,
+          "joint_limit": 1.0
+        },
+        "selected_case_indices": [0, 8, 9, 17],
+        "retained_failures": [],
+        "model_sha256": {
+          "0": "672f983841884df9d41c0eb814a1fda4da65bb960029620169c84b00dffca1d9",
+          "8": "3e28fac7dd5474fc579196c4842c81c567710fb32f5813d8382c52b9c5a0919e",
+          "9": "99a996961d6070ab6779b96269ff993ed56170d0b52b00b7d83e6d88f7dc3dfb",
+          "17": "06769ceec8c02dccff36188d320c2ebeb1a62fb82d9b9058112e9111bbcb4f39"
+        }
+      }
+    },
+    {
+      "corner_id": "height_scale-low",
+      "status": "ready_with_retained_failure",
+      "requested_state_count": 12,
+      "feasible_state_count": 11,
+      "retained_failures": [
+        {
+          "case_index": 0,
+          "phase_index": 12,
+          "failure_class": "ik_nonconvergence"
+        }
+      ],
+      "feasible_states": [
+        [0, 0],
+        [0, 6],
+        [8, 0],
+        [8, 6],
+        [8, 12],
+        [9, 0],
+        [9, 6],
+        [9, 12],
+        [17, 0],
+        [17, 6],
+        [17, 12]
+      ],
+      "expected_shaft_trajectory_count": 352,
+      "expected_ground_trajectory_count": 528,
+      "expected_headline_cell_count_per_atlas": 352,
+      "authority": {
+        "schema_version": "articulated-atlas-authority/v1",
+        "authority_sha256": "69de8badceb381d88d23a8870e2da2156e7901d55080ac57239bc3459e36d95b",
+        "scales": {
+          "height": 0.9,
+          "body_mass": 1.0,
+          "joint_limit": 1.0
+        },
+        "selected_case_indices": [0, 8, 9, 17],
+        "retained_failures": [
+          {
+            "case_index": 0,
+            "phase_index": 12,
+            "failure_class": "ik_nonconvergence"
+          }
+        ],
+        "model_sha256": {
+          "0": "5df0b4e1a8d72f62beda568797b0772c59978830d503702cfb2cd3f8388893d0",
+          "8": "25621dd4f7936f8d5d4579615197f457d166f1486a8873ce04e9c1e612c42cbf",
+          "9": "29488cb197e7ee51c5c235c91aa4fa8c6b42e058f55c9cde601bb3bff1c18b6f",
+          "17": "11c6554b138dac6340e6a40b640412bce9c5dc505f7aa2fee8d42dcd955c2549"
+        }
+      }
+    },
+    {
+      "corner_id": "height_scale-high",
+      "status": "ready",
+      "requested_state_count": 12,
+      "feasible_state_count": 12,
+      "retained_failures": [],
+      "feasible_states": [
+        [0, 0],
+        [0, 6],
+        [0, 12],
+        [8, 0],
+        [8, 6],
+        [8, 12],
+        [9, 0],
+        [9, 6],
+        [9, 12],
+        [17, 0],
+        [17, 6],
+        [17, 12]
+      ],
+      "expected_shaft_trajectory_count": 384,
+      "expected_ground_trajectory_count": 576,
+      "expected_headline_cell_count_per_atlas": 384,
+      "authority": {
+        "schema_version": "articulated-atlas-authority/v1",
+        "authority_sha256": "5215a93249e243d3d06ade163e7a247bb1fcc71c295ae30a9afff7a48991e66c",
+        "scales": {
+          "height": 1.1,
+          "body_mass": 1.0,
+          "joint_limit": 1.0
+        },
+        "selected_case_indices": [0, 8, 9, 17],
+        "retained_failures": [],
+        "model_sha256": {
+          "0": "39705f77763314c4738b1f7cd10598d01f402464acadc70b08ea645d087319d3",
+          "8": "2246a61ebc9482b70975d73e4e3a84d73b9f200d21afcc786d05d601ef83247d",
+          "9": "82dceb54a652a63cb3b7cb1fda98765edb52b89e581a95cdab64d283ffe8d0bb",
+          "17": "5648a93232569cd554ad3e687d7d58a70607132b2ce0a1a7ae03e8122c8c2385"
+        }
+      }
+    },
+    {
+      "corner_id": "body_mass_scale-low",
+      "status": "ready",
+      "requested_state_count": 12,
+      "feasible_state_count": 12,
+      "retained_failures": [],
+      "feasible_states": [
+        [0, 0],
+        [0, 6],
+        [0, 12],
+        [8, 0],
+        [8, 6],
+        [8, 12],
+        [9, 0],
+        [9, 6],
+        [9, 12],
+        [17, 0],
+        [17, 6],
+        [17, 12]
+      ],
+      "expected_shaft_trajectory_count": 384,
+      "expected_ground_trajectory_count": 576,
+      "expected_headline_cell_count_per_atlas": 384,
+      "authority": {
+        "schema_version": "articulated-atlas-authority/v1",
+        "authority_sha256": "1bf48bc3ac7d0e4981f9f6800b5b78f1482f2117c24a79529ca50e11f9c0ef6f",
+        "scales": {
+          "height": 1.0,
+          "body_mass": 0.85,
+          "joint_limit": 1.0
+        },
+        "selected_case_indices": [0, 8, 9, 17],
+        "retained_failures": [],
+        "model_sha256": {
+          "0": "69b7d82ba4510cdcd24d1838ddaac796c5f7c9afef50856be9308969309e00fc",
+          "8": "105a4239cdf2e50c46c76c12a31c539c09a1c7f7a6f87a9d39662180b103cc60",
+          "9": "a524eb0c29209552161e6470dd7c61055f18a86970b59fa5e3b4834c838bd334",
+          "17": "dc052d9ee2e7dc176841f16c4a79389fc6918e6c18b5e85b8fe180184f4c311d"
+        }
+      }
+    },
+    {
+      "corner_id": "body_mass_scale-high",
+      "status": "ready",
+      "requested_state_count": 12,
+      "feasible_state_count": 12,
+      "retained_failures": [],
+      "feasible_states": [
+        [0, 0],
+        [0, 6],
+        [0, 12],
+        [8, 0],
+        [8, 6],
+        [8, 12],
+        [9, 0],
+        [9, 6],
+        [9, 12],
+        [17, 0],
+        [17, 6],
+        [17, 12]
+      ],
+      "expected_shaft_trajectory_count": 384,
+      "expected_ground_trajectory_count": 576,
+      "expected_headline_cell_count_per_atlas": 384,
+      "authority": {
+        "schema_version": "articulated-atlas-authority/v1",
+        "authority_sha256": "c31a07a40b36c8046cb47f5cf55333ba9fb3ad42afe446463b7c31743535a601",
+        "scales": {
+          "height": 1.0,
+          "body_mass": 1.15,
+          "joint_limit": 1.0
+        },
+        "selected_case_indices": [0, 8, 9, 17],
+        "retained_failures": [],
+        "model_sha256": {
+          "0": "96c79b39fc0c8c02151a26b1cc404bd0208729027c02c2ab48239470e50a197c",
+          "8": "4c102f9a7d31c96403987a59329b22994e8e748a43aabdb06adb82968d12cc90",
+          "9": "0547b4c45a35454bceeef94b7165b617c3b4c82223025234669bc236b1c82873",
+          "17": "ed98ee3e674f4490be30d47eaf92cb2dcd09b7c876adc472a9a8207d6403c380"
+        }
+      }
+    },
+    {
+      "corner_id": "joint_limit_scale-low",
+      "status": "ready",
+      "requested_state_count": 12,
+      "feasible_state_count": 12,
+      "retained_failures": [],
+      "feasible_states": [
+        [0, 0],
+        [0, 6],
+        [0, 12],
+        [8, 0],
+        [8, 6],
+        [8, 12],
+        [9, 0],
+        [9, 6],
+        [9, 12],
+        [17, 0],
+        [17, 6],
+        [17, 12]
+      ],
+      "expected_shaft_trajectory_count": 384,
+      "expected_ground_trajectory_count": 576,
+      "expected_headline_cell_count_per_atlas": 384,
+      "authority": {
+        "schema_version": "articulated-atlas-authority/v1",
+        "authority_sha256": "8688c2121b31fb8f36841cf3a952b37116990993b302b72218a1a69acc596d26",
+        "scales": {
+          "height": 1.0,
+          "body_mass": 1.0,
+          "joint_limit": 0.85
+        },
+        "selected_case_indices": [0, 8, 9, 17],
+        "retained_failures": [],
+        "model_sha256": {
+          "0": "672f983841884df9d41c0eb814a1fda4da65bb960029620169c84b00dffca1d9",
+          "8": "3e28fac7dd5474fc579196c4842c81c567710fb32f5813d8382c52b9c5a0919e",
+          "9": "99a996961d6070ab6779b96269ff993ed56170d0b52b00b7d83e6d88f7dc3dfb",
+          "17": "06769ceec8c02dccff36188d320c2ebeb1a62fb82d9b9058112e9111bbcb4f39"
+        }
+      }
+    },
+    {
+      "corner_id": "joint_limit_scale-high",
+      "status": "ready",
+      "requested_state_count": 12,
+      "feasible_state_count": 12,
+      "retained_failures": [],
+      "feasible_states": [
+        [0, 0],
+        [0, 6],
+        [0, 12],
+        [8, 0],
+        [8, 6],
+        [8, 12],
+        [9, 0],
+        [9, 6],
+        [9, 12],
+        [17, 0],
+        [17, 6],
+        [17, 12]
+      ],
+      "expected_shaft_trajectory_count": 384,
+      "expected_ground_trajectory_count": 576,
+      "expected_headline_cell_count_per_atlas": 384,
+      "authority": {
+        "schema_version": "articulated-atlas-authority/v1",
+        "authority_sha256": "1e8c4f2cdc558de9ef9d3b7504c072a7fa43903f27512f656dc59c55e71fcd1f",
+        "scales": {
+          "height": 1.0,
+          "body_mass": 1.0,
+          "joint_limit": 1.15
+        },
+        "selected_case_indices": [0, 8, 9, 17],
+        "retained_failures": [],
+        "model_sha256": {
+          "0": "672f983841884df9d41c0eb814a1fda4da65bb960029620169c84b00dffca1d9",
+          "8": "3e28fac7dd5474fc579196c4842c81c567710fb32f5813d8382c52b9c5a0919e",
+          "9": "99a996961d6070ab6779b96269ff993ed56170d0b52b00b7d83e6d88f7dc3dfb",
+          "17": "06769ceec8c02dccff36188d320c2ebeb1a62fb82d9b9058112e9111bbcb4f39"
+        }
+      }
+    }
+  ],
+  "source_sha256": {
+    "scripts/research/proximal_distal_energy/articulated_atlas_authority.py": "191174f7fea921a3b52054f85d735b45ee0ca93090aaa733f59221d45de0af0d",
+    "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": "8bb1d6171b50c5d0f9c3563284a7941e35bba8ad96a1ebeaa1c032b389cc99c7",
+    "tests/research/test_articulated_structural_propagation_plan.py": "be263cff180cd6f80e729ca3799d1301a30d1b3fcd3de431e0513c8b45b7d12e"
+  },
+  "limitations": {
+    "scope": "engineering OAT corners, not a participant distribution",
+    "evidence": "execution plan only; no headline result is implied",
+    "human_inference": "none"
+  }
+}

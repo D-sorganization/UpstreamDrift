@@ -85,8 +85,8 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     case 0/phase 12 `ik_nonconvergence`. Joint-limit-low retains 0.0885 rad
     minimum margin; joint-limit-high retains 0.1185 rad. Their maximum closure
     errors are 1.03e-10 m and minimum collision clearances are 0.0491 m. The
-    completion-only evidence gate passes 3/3, loads every retained artifact,
-    and binds the seven-corner table and propagation boundary into the article.
+    Evidence passes 3/3. A deterministic preflight binds every feasible/failed
+    state, scale, authority digest, and model hash to both unchanged atlas designs.
     The governed feasibility/margin figure has embedded CID TrueType text and
     passes its retained-failure contract. Q2/H5 and the machine-readable
     prediction registry no longer repeat the obsolete failed-closure narrative.

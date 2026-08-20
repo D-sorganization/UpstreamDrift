@@ -297,6 +297,7 @@ python3 -m scripts.research.proximal_distal_energy.make_articulated_uncertainty_
 python3 -m scripts.research.proximal_distal_energy.articulated_scaled_authority
 python3 -m scripts.research.proximal_distal_energy.articulated_structural_authority_campaign
 python3 -m scripts.research.proximal_distal_energy.make_articulated_structural_authority_figure
+python3 -m scripts.research.proximal_distal_energy.articulated_structural_propagation_plan
 python3 -m scripts.research.proximal_distal_energy.articulated_headline_uncertainty
 python3 -m scripts.research.proximal_distal_energy.make_articulated_headline_uncertainty_figure
 python3 -m scripts.research.proximal_distal_energy.run_spatial_forward_contact_study

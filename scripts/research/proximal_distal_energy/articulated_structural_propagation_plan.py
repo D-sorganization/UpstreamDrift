@@ -1,0 +1,150 @@
+"""Build the fail-closed structural-corner headline propagation plan."""
+
+from __future__ import annotations
+
+from dataclasses import asdict
+import hashlib
+import json
+from pathlib import Path
+from typing import Any
+
+from scripts.research.proximal_distal_energy.articulated_atlas_authority import (
+    ArticulatedAtlasAuthority,
+)
+from scripts.research.proximal_distal_energy.articulated_ground_atlas import (
+    ArticulatedGroundAtlasConfig,
+)
+from scripts.research.proximal_distal_energy.articulated_scaled_authority import (
+    load_scaled_authority,
+)
+from scripts.research.proximal_distal_energy.articulated_shaft_atlas import (
+    ArticulatedShaftAtlasConfig,
+)
+
+ROOT = Path(__file__).resolve().parents[3]
+DATA = ROOT / "docs/research/proximal_distal_energy_transfer/data"
+CAMPAIGN = DATA / "articulated_structural_authority_campaign.json"
+DEFAULT_OUTPUT = DATA / "articulated_structural_propagation_plan.json"
+SOURCE_PATHS = (
+    "scripts/research/proximal_distal_energy/articulated_atlas_authority.py",
+    "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py",
+    "tests/research/test_articulated_structural_propagation_plan.py",
+)
+
+
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _planned_failures(
+    authority: ArticulatedAtlasAuthority,
+    states: tuple[tuple[int, int], ...],
+) -> list[dict[str, int | str]]:
+    requested = set(states)
+    return [
+        dict(failure)
+        for failure in authority.selected_failures()
+        if (int(failure["case_index"]), int(failure["phase_index"])) in requested
+    ]
+
+
+def _corner_plan(
+    row: dict[str, Any],
+    shaft: ArticulatedShaftAtlasConfig,
+    ground: ArticulatedGroundAtlasConfig,
+    data_directory: Path,
+) -> dict[str, Any]:
+    scaled = load_scaled_authority(
+        data_directory / row["record_artifact"],
+        data_directory / row["array_artifact"],
+    )
+    authority = ArticulatedAtlasAuthority.from_scaled(scaled)
+    if authority.authority_sha256 != row["authority_sha256"]:
+        raise RuntimeError("campaign and authority artifact digests do not match")
+    if shaft.case_indices != ground.case_indices or (
+        shaft.sample_indices != ground.sample_indices
+    ):
+        raise ValueError("shaft and ground atlases must use the same registered states")
+    states = tuple(
+        (case, phase) for case in shaft.case_indices for phase in shaft.sample_indices
+    )
+    feasible = authority.feasible_states(shaft.case_indices, shaft.sample_indices)
+    failures = _planned_failures(authority, states)
+    if len(feasible) + len(failures) != len(states):
+        raise RuntimeError("every requested state must be feasible or retained failed")
+    paired_cells = (
+        len(feasible) * 2 * len(shaft.forward.time_steps_s) * 2 * len(shaft.horizons_s)
+    )
+    return {
+        "corner_id": row["corner_id"],
+        "status": "ready_with_retained_failure" if failures else "ready",
+        "requested_state_count": len(states),
+        "feasible_state_count": len(feasible),
+        "retained_failures": failures,
+        "feasible_states": [list(state) for state in feasible],
+        "expected_shaft_trajectory_count": len(feasible)
+        * len(shaft.activations)
+        * 2
+        * len(shaft.forward.time_steps_s)
+        * 2,
+        "expected_ground_trajectory_count": len(feasible)
+        * (len(ground.ground_activations) + len(ground.control_names))
+        * 2
+        * len(ground.forward.time_steps_s)
+        * 2,
+        "expected_headline_cell_count_per_atlas": paired_cells,
+        "authority": authority.provenance_record(),
+    }
+
+
+def build_structural_propagation_plan(
+    campaign_path: Path = CAMPAIGN,
+    *,
+    data_directory: Path = DATA,
+) -> dict[str, Any]:
+    """Bind every registered structural authority to both headline designs."""
+
+    campaign = json.loads(campaign_path.read_text(encoding="utf-8"))
+    if campaign.get("status") != "complete" or len(campaign.get("corners", [])) != 7:
+        raise RuntimeError("the seven-corner authority campaign must be complete")
+    shaft = ArticulatedShaftAtlasConfig()
+    ground = ArticulatedGroundAtlasConfig()
+    corners = [
+        _corner_plan(row, shaft, ground, data_directory) for row in campaign["corners"]
+    ]
+    design = json.loads(
+        json.dumps(
+            {
+                "case_indices": list(shaft.case_indices),
+                "phase_indices": list(shaft.sample_indices),
+                "shaft_configuration": asdict(shaft),
+                "ground_configuration": asdict(ground),
+            }
+        )
+    )
+    design_sha = hashlib.sha256(
+        json.dumps(design, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+    return {
+        "schema_version": "articulated-structural-propagation-plan/v1",
+        "status": "ready",
+        "authority_campaign_sha256": _sha256(campaign_path),
+        "design_sha256": design_sha,
+        "design": design,
+        "corners": corners,
+        "source_sha256": {path: _sha256(ROOT / path) for path in SOURCE_PATHS},
+        "limitations": {
+            "scope": "engineering OAT corners, not a participant distribution",
+            "evidence": "execution plan only; no headline result is implied",
+            "human_inference": "none",
+        },
+    }
+
+
+def main() -> None:
+    record = build_structural_propagation_plan()
+    DEFAULT_OUTPUT.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+
+
+if __name__ == "__main__":
+    main()
