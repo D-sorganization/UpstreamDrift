@@ -33,6 +33,11 @@ def test_plan_binds_all_seven_authority_corners(plan) -> None:
     assert len(plan["design_sha256"]) == 64
     assert plan["design"]["case_indices"] == [0, 8, 9, 17]
     assert plan["design"]["phase_indices"] == [0, 6, 12]
+    assert {
+        "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py",
+        "scripts/research/proximal_distal_energy/articulated_ground_atlas.py",
+        "scripts/research/proximal_distal_energy/articulated_atlas_authority.py",
+    } < set(plan["source_sha256"])
 
 
 def test_nominal_plan_reproduces_registered_atlas_sizes(plan) -> None:

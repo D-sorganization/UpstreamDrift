@@ -27,6 +27,10 @@ CAMPAIGN = DATA / "articulated_structural_authority_campaign.json"
 DEFAULT_OUTPUT = DATA / "articulated_structural_propagation_plan.json"
 SOURCE_PATHS = (
     "scripts/research/proximal_distal_energy/articulated_atlas_authority.py",
+    "scripts/research/proximal_distal_energy/articulated_scaled_authority.py",
+    "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py",
+    "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py",
+    "scripts/research/proximal_distal_energy/articulated_ground_atlas.py",
     "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py",
     "tests/research/test_articulated_structural_propagation_plan.py",
 )
