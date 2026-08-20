@@ -78,7 +78,7 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     drift. `ArticulatedAtlasAuthority` binds exact scaled models and retains
     infeasible phases. Session `15825` has nominal 52/52 with the exact prior
     digest; height-low retains case 0/phase 12 `ik_nonconvergence`; height-high
-    and mass-low are 52/52 feasible; mass-high is running. Propagation is open.
+    and both mass corners are 52/52 feasible; joint-limit-low is running.
 - The release has 295 atomic claims and 40 reviewed release claims; all 40
   retain at least one scientifically open gate. #8724 still owns normalized
   four-way adjudication and independent review.
