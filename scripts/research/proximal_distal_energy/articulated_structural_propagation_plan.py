@@ -341,6 +341,13 @@ def build_structural_propagation_plan(
     figure_contract = {
         "data_schema_version": "articulated-structural-figure-data/v1",
         "data_rule": "derive all panels deterministically from the complete result and exactly 14 digest-bound cell packs; do not filter favorable corners or cells",
+        "data_validation": [
+            "require exact registered corner-pathway and axis-pathway order",
+            "reconcile planned feasible executed matched and common-support counts",
+            "reproduce every persistent outcome resolution label from its finite change and threshold",
+            "reconcile retained failures to infeasible state denominators",
+            "bind the result and figure-data SHA-256 digests and canonical UTF-8 JSON bytes",
+        ],
         "required_panels": [
             "planned feasible executed and matched support",
             "entered exited and persistent common matching support",

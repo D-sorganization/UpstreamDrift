@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 from pathlib import Path
 
 import numpy as np
@@ -16,6 +17,7 @@ from scripts.research.proximal_distal_energy.articulated_structural_corner_evide
 )
 from scripts.research.proximal_distal_energy.articulated_structural_figure_data import (
     build_structural_figure_data,
+    validate_structural_figure_data,
     write_structural_figure_data,
 )
 from scripts.research.proximal_distal_energy.articulated_structural_result import (
@@ -89,6 +91,16 @@ def _result_and_packs():
     return result, packs
 
 
+def _redigest(record: dict) -> dict:
+    payload = {
+        key: value for key, value in record.items() if key != "figure_data_sha256"
+    }
+    record["figure_data_sha256"] = hashlib.sha256(
+        json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+    return record
+
+
 def test_figure_data_exposes_all_panels_and_ground_boundary() -> None:
     result, packs = _result_and_packs()
 
@@ -122,3 +134,55 @@ def test_figure_data_rejects_missing_pack_and_writes_atomically(tmp_path) -> Non
     write_structural_figure_data(figure, output)
     assert not output.with_suffix(".json.tmp").exists()
     assert json.loads(output.read_text()) == figure
+    assert validate_structural_figure_data(output, result["result_sha256"]) == figure
+
+
+@pytest.mark.parametrize(
+    ("tamper", "message"),
+    [
+        (
+            lambda value: value["support"][2].__setitem__("persistent_cell_count", 125),
+            "support transitions",
+        ),
+        (
+            lambda value: value["persistent_outcomes"][0].__setitem__("resolved", True),
+            "resolution status",
+        ),
+        (
+            lambda value: value["support"].__setitem__(
+                slice(0, 2), list(reversed(value["support"][:2]))
+            ),
+            "registered order",
+        ),
+        (
+            lambda value: value.__setitem__("nominal_ground_matched_cell_count", 1),
+            "nominal ground",
+        ),
+    ],
+)
+def test_figure_data_rejects_redigested_semantic_tampering(
+    tmp_path, tamper, message
+) -> None:
+    result, packs = _result_and_packs()
+    figure = build_structural_figure_data(result, packs)
+    tamper(figure)
+    _redigest(figure)
+
+    with pytest.raises(ValueError, match=message):
+        write_structural_figure_data(figure, tmp_path / "tampered.json")
+
+
+def test_figure_data_rejects_wrong_result_binding_and_noncanonical_bytes(
+    tmp_path,
+) -> None:
+    result, packs = _result_and_packs()
+    figure = build_structural_figure_data(result, packs)
+    output = tmp_path / "figure-data.json"
+    write_structural_figure_data(figure, output)
+
+    with pytest.raises(RuntimeError, match="result binding"):
+        validate_structural_figure_data(output, "a" * 64)
+
+    output.write_text(json.dumps(figure, separators=(",", ":")), encoding="utf-8")
+    with pytest.raises(RuntimeError, match="exact bytes"):
+        validate_structural_figure_data(output, result["result_sha256"])
