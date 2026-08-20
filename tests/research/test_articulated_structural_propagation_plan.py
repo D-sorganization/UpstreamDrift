@@ -35,6 +35,9 @@ def test_plan_binds_all_seven_authority_corners(plan) -> None:
     assert len(plan["design_sha256"]) == 64
     assert plan["design"]["case_indices"] == [0, 8, 9, 17]
     assert plan["design"]["phase_indices"] == [0, 6, 12]
+    assert "worker_count" not in plan["design"]["shaft_configuration"]
+    assert "worker_count" not in plan["design"]["ground_configuration"]
+    assert plan["design"]["parallelism"].startswith("worker_count is operational")
     assert {
         "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py",
         "scripts/research/proximal_distal_energy/articulated_ground_atlas.py",

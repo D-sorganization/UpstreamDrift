@@ -41,6 +41,14 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _scientific_configuration(config: Any) -> dict[str, Any]:
+    """Exclude operational parallelism from the scientific design bind."""
+
+    configuration = asdict(config)
+    configuration.pop("worker_count")
+    return configuration
+
+
 def _planned_failures(
     authority: ArticulatedAtlasAuthority,
     states: tuple[tuple[int, int], ...],
@@ -130,8 +138,9 @@ def build_structural_propagation_plan(
             {
                 "case_indices": list(shaft.case_indices),
                 "phase_indices": list(shaft.sample_indices),
-                "shaft_configuration": asdict(shaft),
-                "ground_configuration": asdict(ground),
+                "shaft_configuration": _scientific_configuration(shaft),
+                "ground_configuration": _scientific_configuration(ground),
+                "parallelism": "worker_count is operational and excluded from the scientific design digest",
             }
         )
     )

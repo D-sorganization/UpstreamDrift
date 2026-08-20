@@ -2,7 +2,7 @@
   "schema_version": "articulated-structural-propagation-plan/v1",
   "status": "ready",
   "authority_campaign_sha256": "d8115073dc1b506f145196b08c96d7cb3cf00e8cf29099970e2f7b0fbe6d63f3",
-  "design_sha256": "c592ae4b1ed863b043c95d109b249a01396553479017dd340112915ab0c055ca",
+  "design_sha256": "8e5f246645e27c8f0f66a87859c63c470c43e579bccb50848124174944e11e07",
   "design": {
     "case_indices": [0, 8, 9, 17],
     "phase_indices": [0, 6, 12],
@@ -28,8 +28,7 @@
       "shaft_damping_ratio": 0.018,
       "bending_frequency_scale": 1.0,
       "torsional_stiffness_scale": 1.0,
-      "match_relative_tolerance": 0.05,
-      "worker_count": 4
+      "match_relative_tolerance": 0.05
     },
     "ground_configuration": {
       "forward": {
@@ -57,9 +56,9 @@
       "ground_free_moment_damping_scale": 1.0,
       "match_relative_tolerance": 0.05,
       "parity_relative_tolerance": 1e-8,
-      "power_residual_tolerance_w": 1e-8,
-      "worker_count": 4
-    }
+      "power_residual_tolerance_w": 1e-8
+    },
+    "parallelism": "worker_count is operational and excluded from the scientific design digest"
   },
   "corners": [
     {
@@ -374,8 +373,8 @@
     "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py": "166ab2ebec88a0c53abc54c6b565ba0a3f82caf800449e822164177f31289549",
     "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
     "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
-    "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": "646d89a6d46e19a9e401ec40ece586df2db04163f206c0dab8fa98847bc1b702",
-    "tests/research/test_articulated_structural_propagation_plan.py": "a8eecff408fe0ee3cf8416af0707f68628219a925bf25be678d1b47a17891027"
+    "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": "3ebaaa6941279342ac2621dc843098af49b0675f022a212f89f52301503e9980",
+    "tests/research/test_articulated_structural_propagation_plan.py": "4bcf83c5e8e7775b07d47b63c7e85f02eeeb1fd4f34451b93dbcec41d6380591"
   },
   "limitations": {
     "scope": "engineering OAT corners, not a participant distribution",
