@@ -1,0 +1,63 @@
+#### Articulated Closed-State and Local-Trajectory Uncertainty
+
+The articulated qualification cannot treat one nominal anatomy, joint-limit
+envelope, grip, or equipment definition as if it were universal. A registered
+deterministic Latin-hypercube screen therefore perturbs nine engineering
+inputs: height scale (0.90--1.10), body-mass scale (0.85--1.15), joint-limit
+scale (0.85--1.15), total grip stiffness (1000--3000 N/m), grip damping
+(10--35 N s/m), friction coefficient (0.15--0.65), club mass
+(0.28--0.42 kg), club moment-of-inertia scale (0.80--1.25), and initial club
+velocity (0.01--0.20 m/s). These bounds are declared engineering ranges, not
+measured distributions of golfers or equipment.
+
+Each of the 40 samples rebuilds the subject-scaled model, changes height and
+mass independently, rescales the joint-limit envelope, and re-solves bilateral
+hand-to-grip closure before forward integration. A sample that fails inverse
+kinematics, bilateral closure, the joint-limit screen, the coarse collision
+screen, or the six-row constraint-rank check is retained with an explicit
+status and excluded from response correlation. A feasible sample is advanced
+through the distributed-grip production path with the registered timestep
+pair. Peak station force, peak force couple, maximum sliding speed, transition
+count, and normalized work--energy residual are recorded. Partial rank
+correlations (PRCCs) are calculated only over rows whose five responses are
+finite.
+
+All 40 registered rows produced finite response vectors and satisfied the 5%
+normalized work--energy closure gate; the maximum residual was 0.00696. Every
+row nevertheless recorded partial opening as its first contact-domain status.
+That adverse result rejects any reading of this excitation as robustly
+full-contact across the declared envelope. It does not invalidate the retained
+trajectory calculations, but it conditions their PRCC screen on trajectories
+that open at least one station.
+
+Within that conditional screen, the largest absolute PRCC for peak station
+force was initial velocity (+0.936); for peak force couple, height scale
+(-0.500); for maximum sliding speed, friction coefficient (-0.940); for total
+transition count, height scale (-0.760); and for normalized work--energy
+residual, body-mass scale (+0.931). The final association concerns a numerical
+diagnostic that remained inside its gate, not a physical performance outcome.
+The finite design supplies neither sampling intervals nor evidence that these
+rankings persist under interactions or another excitation.
+
+![Articulated Closed-State and Local-Trajectory Uncertainty Screen](figures/fig_articulated_uncertainty_screen.pdf){#fig-articulated-uncertainty-screen width=100%}
+
+Figure @fig-articulated-uncertainty-screen preserves two different questions.
+The left panel is an exploratory monotone-sensitivity screen conditional on
+this finite deterministic design. The right panel retains the status of every
+sample, including geometry-domain failures and contact transitions. A large
+PRCC magnitude is not a causal parameter effect, and a trajectory status is
+not a player classification. No population confidence interval is estimated.
+
+The governed record and arrays are available as
+[`articulated_uncertainty_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/articulated_uncertainty_study.json)
+and
+[`articulated_uncertainty_study.npz`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/articulated_uncertainty_study.npz),
+with the executable analysis in
+[`articulated_uncertainty_study.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/scripts/research/proximal_distal_energy/articulated_uncertainty_study.py).
+
+This screen answers whether local closure and distributed-contact calculations
+remain numerically inspectable across the declared ranges. It does **not**
+propagate anthropometric or joint-limit variation through the complete
+126/384 shaft and 0/384 ground headline estimands. That distinction is an
+open acceptance boundary for the articulated uncertainty milestone, rather
+than evidence that the headline conclusions are anatomically robust.

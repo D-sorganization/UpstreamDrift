@@ -1,6 +1,11 @@
 {
-  "schema_version": "articulated-uncertainty-study/v1",
+  "schema_version": "articulated-uncertainty-study/v2",
   "study_id": "articulated-parameter-uncertainty-and-sensitivity",
+  "design": {
+    "method": "deterministic_latin_hypercube",
+    "parameter_count": 9,
+    "sample_retention": "every registered sample and its trajectory status remain in the NPZ"
+  },
   "configuration": {
     "sample_count": 40,
     "seed": 8752,
@@ -8,8 +13,11 @@
     "time_step_s": 0.001,
     "station_count_per_hand": 3,
     "station_width_m": 0.03,
-    "arm_length_range": [0.9, 1.1],
+    "authority_case_index": 0,
+    "authority_sample_index": 6,
+    "height_scale_range": [0.9, 1.1],
     "body_mass_range": [0.85, 1.15],
+    "joint_limit_scale_range": [0.85, 1.15],
     "grip_stiffness_range": [1000.0, 3000.0],
     "grip_damping_range": [10.0, 35.0],
     "friction_range": [0.15, 0.65],
@@ -18,8 +26,9 @@
     "velocity_range": [0.01, 0.2]
   },
   "uncertainty_parameters": [
-    "arm_length_scale",
+    "height_scale",
     "body_mass_scale",
+    "joint_limit_scale",
     "grip_stiffness_n_m",
     "grip_damping_n_s_m",
     "friction_coefficient",
@@ -37,30 +46,40 @@
   "results": {
     "sample_count": 40,
     "failure_distribution": {
-      "full_loss_of_contact": 17,
-      "partial_opening": 5,
-      "slip_occurring": 18
+      "partial_opening": 40
     },
-    "mean_peak_force_n": 1.3313622811061852,
-    "mean_peak_couple_nm": 0.021177282350221684,
-    "maximum_normalized_work_energy_residual": 0.00840018178309055,
+    "analysis_included_count": 40,
+    "mean_peak_force_n": 1.4773969607883917,
+    "mean_peak_couple_nm": 0.025458172371325027,
+    "maximum_normalized_work_energy_residual": 0.006964330962568778,
     "all_simulations_energy_closed": true,
     "top_sensitivities": {
       "peak_station_force_n": {
-        "arm_length_scale": -0.8230126606620907
+        "initial_velocity_m_s": 0.9358840328584125
       },
       "peak_force_couple_nm": {
-        "arm_length_scale": -0.691833683146763
+        "height_scale": -0.5001833046762751
       },
       "max_sliding_speed_m_s": {
-        "arm_length_scale": -0.6804714269300097
+        "friction_coefficient": -0.9395861262303173
       },
       "total_transition_count": {
-        "initial_velocity_m_s": -0.1232505392820473
+        "height_scale": -0.7604506056267615
       },
       "normalized_work_energy_residual": {
-        "body_mass_scale": 0.967783504061888
+        "body_mass_scale": 0.9307024179975171
       }
     }
+  },
+  "source_sha256": {
+    "scripts/research/proximal_distal_energy/articulated_uncertainty_study.py": "92e7e73450055769ffbb5de1152d85ef1ef41cfb83d554aedaa4bc68c963ba5f",
+    "tests/research/test_articulated_uncertainty_study.py": "31a6387d0ce8c3ccd7228fe21147847bd2a969ab2f1cf8e00992de7a992570a8",
+    "tests/research/test_articulated_uncertainty_evidence.py": "f3eeab1ea98928bceecbaf76ffd567524f41f9c2f2c6d2da6787be0fd65ef78b"
+  },
+  "limitations": {
+    "headline_estimands": "this local trajectory screen does not propagate the 126/384 shaft or 0/384 ground headline estimands",
+    "calibration": "bounds are engineering ranges, not measured participant or equipment properties",
+    "human_inference": "this synthetic structural screen does not support human or coaching inference",
+    "prcc": "PRCC rankings are exploratory for this deterministic finite design; no population interval or causal parameter effect is estimated"
   }
 }

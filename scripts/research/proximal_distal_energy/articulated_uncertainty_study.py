@@ -8,6 +8,7 @@ maps and failure maps.
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, replace
+import hashlib
 import json
 from pathlib import Path
 from typing import Any
@@ -40,6 +41,11 @@ from scripts.research.proximal_distal_energy.subject_scaled_spatial_geometry imp
 FloatArray = NDArray[np.float64]
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DATA_DIR = REPO_ROOT / "docs/research/proximal_distal_energy_transfer/data"
+SOURCE_PATHS = (
+    "scripts/research/proximal_distal_energy/articulated_uncertainty_study.py",
+    "tests/research/test_articulated_uncertainty_study.py",
+    "tests/research/test_articulated_uncertainty_evidence.py",
+)
 
 
 def latin_hypercube(samples: int, dimensions: int, *, seed: int) -> FloatArray:
@@ -397,8 +403,15 @@ def _build_uncertainty_study_record(
         "analysis_included": analysis_included,
     }
     record = {
-        "schema_version": "articulated-uncertainty-study/v1",
+        "schema_version": "articulated-uncertainty-study/v2",
         "study_id": "articulated-parameter-uncertainty-and-sensitivity",
+        "design": {
+            "method": "deterministic_latin_hypercube",
+            "parameter_count": len(UNCERTAINTY_PARAMETERS),
+            "sample_retention": (
+                "every registered sample and its trajectory status remain in the NPZ"
+            ),
+        },
         "configuration": asdict(config),
         "uncertainty_parameters": list(UNCERTAINTY_PARAMETERS),
         "output_metrics": list(OUTPUT_METRICS),
@@ -423,6 +436,28 @@ def _build_uncertainty_study_record(
                 }
                 for m, metric in enumerate(OUTPUT_METRICS)
             },
+        },
+        "source_sha256": {
+            path: hashlib.sha256((REPO_ROOT / path).read_bytes()).hexdigest()
+            for path in SOURCE_PATHS
+        },
+        "limitations": {
+            "headline_estimands": (
+                "this local trajectory screen does not propagate the 126/384 shaft "
+                "or 0/384 ground headline estimands"
+            ),
+            "calibration": (
+                "bounds are engineering ranges, not measured participant or "
+                "equipment properties"
+            ),
+            "human_inference": (
+                "this synthetic structural screen does not support human or "
+                "coaching inference"
+            ),
+            "prcc": (
+                "PRCC rankings are exploratory for this deterministic finite design; "
+                "no population interval or causal parameter effect is estimated"
+            ),
         },
     }
     return record, arrays

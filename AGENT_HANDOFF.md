@@ -85,13 +85,16 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     not close #8752 from the 19-corner campaign alone: issue reconciliation on
     2026-08-20 confirmed that its headline corners cover grip, shaft, and
     finite-ground constitutive bounds, while height, body-mass, and joint-limit
-    perturbations currently enter only the separate closed-state/LHS failure
-    map. The committed `articulated_uncertainty_study` artifact also predates
-    the improved closure-regeneration implementation. Regenerate and govern
-    that artifact, then either propagate registered anthropometric and
-    joint-limit corners through both headline atlases or record an explicit
-    issue-level acceptance amendment; the present evidence must not be
-    described as full headline propagation over every bound named by #8752.
+    perturbations enter the separate closed-state/LHS failure map. That v2
+    artifact has now been regenerated from the improved closure-regeneration
+    implementation: all 40 rows are finite and energy-closed, but all 40 retain
+    partial opening. Its governed PRCC/status figure, evidence tests, data
+    dictionary entry, commands, and paper section are implemented locally.
+    Either propagate registered anthropometric and joint-limit corners through
+    both headline atlases or record an explicit issue-level acceptance
+    amendment. #8800 now owns the full authority-regeneration and headline-
+    propagation dependency; the present evidence must not be described as full
+    headline propagation over every bound named by #8752.
 - The release has 295 atomic claims and 40 reviewed release claims; all 40
   retain at least one scientifically open gate. #8724 still owns normalized
   four-way adjudication and independent review.
