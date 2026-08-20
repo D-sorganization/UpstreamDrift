@@ -44,10 +44,12 @@ def test_plan_binds_all_seven_authority_corners(plan) -> None:
         "scripts/research/proximal_distal_energy/articulated_ground_atlas.py",
         "scripts/research/proximal_distal_energy/articulated_atlas_authority.py",
         "scripts/research/proximal_distal_energy/articulated_structural_common_support.py",
+        "scripts/research/proximal_distal_energy/articulated_structural_cell_evidence.py",
         "scripts/research/proximal_distal_energy/articulated_structural_result.py",
         "scripts/research/proximal_distal_energy/articulated_shaft_forward.py",
         "scripts/research/proximal_distal_energy/articulated_ground_forward.py",
         "tests/research/test_articulated_structural_common_support.py",
+        "tests/research/test_articulated_structural_cell_evidence.py",
         "tests/research/test_articulated_structural_result.py",
         "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
     } < set(plan["source_sha256"])
@@ -158,6 +160,14 @@ def test_plan_binds_restart_and_cell_level_evidence_contract(plan) -> None:
         "load": "peak grip force",
         "work": "terminal total dissipated work",
     }
+    storage = evidence["cell_evidence_storage"]
+    assert storage["schema_version"] == "articulated-structural-cell-evidence/v1"
+    assert "without pickle" in storage["identity_encoding"]
+    assert "name, dtype, shape, and byte payload" in storage["digest_rule"]
+    assert (
+        "outside persistent common support" in storage["nonpersistent_resolution_rule"]
+    )
+    assert "atomic temporary replacement" in storage["write_policy"]
     assert "atomic" in evidence["write_policy"]
     assert "all seven corners" in evidence["completion_policy"]
     assert "must not qualify" in evidence["partial_record_policy"]
