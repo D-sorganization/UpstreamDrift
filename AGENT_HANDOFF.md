@@ -79,10 +79,10 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
   - #8800 is **OPEN** and blocks #8752. Its governed generator regenerates all
     13 phase states for cases 0/8/9/17; nominal is 52/52 feasible and reproduces
     committed states within 1e-8 rad. JSON/NPZ evidence rejects source/content
-    drift. The new `ArticulatedAtlasAuthority` builds the exact scaled model,
-    rejects nominal-model substitution, and retains infeasible phases. After
-    the live campaign, connect it to both atlases and propagate all registered
-    height, mass, and joint-limit corners; constitutive-only coverage is partial.
+    drift. `ArticulatedAtlasAuthority` binds exact scaled models and retains
+    infeasible phases; the checkpointed seven-corner authority campaign is
+    implemented and unit-green but not yet generated. After the live campaign,
+    connect it to both atlases; constitutive-only coverage remains partial.
 - The release has 295 atomic claims and 40 reviewed release claims; all 40
   retain at least one scientifically open gate. #8724 still owns normalized
   four-way adjudication and independent review.
