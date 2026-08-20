@@ -104,8 +104,9 @@ def test_structural_figure_is_searchable_vector_and_exposes_boundaries(
     tmp_path,
 ) -> None:
     output = tmp_path / "structural-sensitivity.svg"
+    record = _record()
 
-    render_structural_figure(_record(), output)
+    render_structural_figure(record, output)
 
     text = output.read_text(encoding="utf-8")
     assert text.startswith("<?xml")
@@ -120,6 +121,8 @@ def test_structural_figure_is_searchable_vector_and_exposes_boundaries(
         "Support, persistent outcomes, secants, and retained failures",
     ):
         assert label in text
+    assert record["figure_data_sha256"] in text
+    assert record["result_sha256"] in text
     assert "Body_Mass" not in text
 
 

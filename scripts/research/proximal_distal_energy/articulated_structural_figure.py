@@ -256,7 +256,9 @@ def render_structural_figure(record: dict[str, Any], output: Path) -> None:
         figure.get_layout_engine().set(rect=(0.0, 0.0, 1.0, 0.93))
         description = (
             "Support, persistent outcomes, secants, and retained failures from "
-            "synthetic engineering models."
+            "synthetic engineering models. "
+            f"Figure data SHA-256: {record['figure_data_sha256']}. "
+            f"Result SHA-256: {record['result_sha256']}."
         )
         metadata = {"Title": "Articulated Structural Propagation Sensitivity"}
         metadata["Description" if output.suffix.lower() == ".svg" else "Subject"] = (

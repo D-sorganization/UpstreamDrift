@@ -140,6 +140,8 @@ def test_publication_revalidates_bundle_and_emits_searchable_assets(tmp_path) ->
     assert "Nominal Ground Matching: 0/384" in figure
     assert "No Human Or Coaching Inference" in figure
     assert "No Persistent Paired Outcomes" in figure
+    assert record["figure_data_sha256"] in figure
+    assert record["result_sha256"] in figure
 
 
 def test_publication_rejects_output_contract_before_writing(tmp_path) -> None:
