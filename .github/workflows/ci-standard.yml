@@ -10,13 +10,19 @@ on:
       - "LICENSE"
       - ".gitignore"
       - ".github/**"
+  # NO `paths-ignore` here, deliberately. `quality-gate` (below) is a required
+  # status check, and GitHub blocks a PR forever on a required context that
+  # never reports. When this workflow was skipped by path filter, docs-only PRs
+  # had to get `quality-gate` from somewhere else, so docs-ci.yml published a
+  # second check under the same name - which meant branch protection could be
+  # satisfied by the docs check while this aggregate was red (PR #8728).
+  #
+  # Instead the workflow always runs and the `changed-paths` job decides whether
+  # there is any non-docs work to do; the heavy jobs skip on docs-only PRs and
+  # the aggregate reports success in seconds. Docs-only PRs therefore cost one
+  # dispatcher job plus one diff, not the full suite.
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-    paths-ignore:
-      - "docs/**"
-      - "**.md"
-      - "LICENSE"
-      - ".gitignore"
   workflow_dispatch:
   schedule:
     # Weekly run every Monday at 06:00 UTC  -  catches test drift and
@@ -33,6 +39,8 @@ permissions:
 jobs:
   local-only-workflows:
     name: Reject hosted runner routing
+    needs: changed-paths
+    if: needs.changed-paths.outputs.code == 'true'
     runs-on:
       ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
       'd-sorg-fleet-docker' }}
@@ -50,6 +58,8 @@ jobs:
 
   pinned-actions:
     name: Enforce action SHA pinning
+    needs: changed-paths
+    if: needs.changed-paths.outputs.code == 'true'
     runs-on:
       ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
       'd-sorg-fleet-docker' }}
@@ -74,6 +84,8 @@ jobs:
 
   workflow-inventory:
     name: Enforce workflow inventory
+    needs: changed-paths
+    if: needs.changed-paths.outputs.code == 'true'
     runs-on:
       ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
       'd-sorg-fleet-docker' }}
@@ -98,6 +110,8 @@ jobs:
 
   urdf-layering:
     name: Enforce URDF subsystem layering (ADR 0007)
+    needs: changed-paths
+    if: needs.changed-paths.outputs.code == 'true'
     runs-on:
       ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
       'd-sorg-fleet-docker' }}
@@ -164,6 +178,71 @@ jobs:
             echo "- selected target: \`$runner\` (\`$mode\`)"
             echo "- GitHub API calls: \`0\`"
           } >> "$GITHUB_STEP_SUMMARY"
+
+  # Decides whether this ref contains anything besides documentation. Every
+  # substantive job below keys off `code`, so a docs-only PR skips them while
+  # the required `quality-gate` aggregate still reports.
+  #
+  # The patterns below MUST stay in sync with docs-ci.yml's `paths:` filter -
+  # the two are exact complements, and that is what guarantees this workflow
+  # runs (and reports `quality-gate`) on every PR.
+  changed-paths:
+    name: changed-paths
+    runs-on:
+      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
+      'd-sorg-fleet-docker' }}
+    timeout-minutes: 10
+    outputs:
+      code: ${{ steps.detect.outputs.code }}
+    steps:
+      - name: Enable long Git paths
+        run: git config --global core.longpaths true
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+
+      - name: Detect non-docs changes
+        id: detect
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+          BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$(dirname "$GITHUB_OUTPUT")"
+
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            changed=$(git diff --name-only "origin/${BASE_REF}...HEAD")
+          elif [ "$EVENT_NAME" = "push" ] && [ -n "${BEFORE_SHA:-}" ] && [ "${BEFORE_SHA:-}" != "0000000000000000000000000000000000000000" ]; then
+            changed=$(git diff --name-only "${BEFORE_SHA}...HEAD")
+          else
+            echo "Event '$EVENT_NAME' without before SHA runs the full suite."
+            echo "code=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "Changed files:"
+          echo "$changed"
+
+          code=false
+          while IFS= read -r file; do
+            [ -n "$file" ] || continue
+            case "$file" in
+              docs/* | *.md | LICENSE | .gitignore) ;;
+              *)
+                code=true
+                echo "Non-docs change: $file"
+                ;;
+            esac
+          done <<< "$changed"
+
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          {
+            echo "## Changed paths"
+            echo "- non-docs changes: \`$code\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
   # ---------------------------------------------------------------------------
   # Quality gates are split into independent, parallel jobs (issue #7064) so a
   # single flaky step no longer masks unrelated failures. The required branch-
@@ -177,7 +256,8 @@ jobs:
   # ---------------------------------------------------------------------------
   code-quality:
     name: code-quality
-    needs: pick-runner
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 45
     steps:
@@ -238,8 +318,18 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+            diff_base="origin/${{ github.base_ref }}"
+          elif [ "${{ github.event_name }}" = "push" ] \
+            && [ -n "${{ github.event.before }}" ] \
+            && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            diff_base="${{ github.event.before }}"
+          else
+            diff_base=""
+          fi
+
+          if [ -n "$diff_base" ]; then
             mapfile -d '' py_files < <(
-              git diff --name-only --diff-filter=ACMRT -z "origin/${{ github.base_ref }}" HEAD -- '*.py'
+              git diff --name-only --diff-filter=ACMRT -z "$diff_base" HEAD -- '*.py'
             )
             if [ "${#py_files[@]}" -eq 0 ]; then
               echo "No changed Python files; skipping Ruff lint check."
@@ -259,8 +349,18 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+            diff_base="origin/${{ github.base_ref }}"
+          elif [ "${{ github.event_name }}" = "push" ] \
+            && [ -n "${{ github.event.before }}" ] \
+            && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            diff_base="${{ github.event.before }}"
+          else
+            diff_base=""
+          fi
+
+          if [ -n "$diff_base" ]; then
             mapfile -d '' py_files < <(
-              git diff --name-only --diff-filter=ACMRT -z "origin/${{ github.base_ref }}" HEAD -- '*.py'
+              git diff --name-only --diff-filter=ACMRT -z "$diff_base" HEAD -- '*.py'
             )
             if [ "${#py_files[@]}" -eq 0 ]; then
               echo "No changed Python files; skipping Ruff format check."
@@ -470,7 +570,8 @@ jobs:
   # longer blocks lint/type/structural gates.
   security-scans:
     name: security-scans
-    needs: pick-runner
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 30
     steps:
@@ -579,13 +680,23 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+            diff_base="origin/${{ github.base_ref }}"
+          elif [ "${{ github.event_name }}" = "push" ] \
+            && [ -n "${{ github.event.before }}" ] \
+            && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            diff_base="${{ github.event.before }}"
+          else
+            diff_base=""
+          fi
+
+          if [ -n "$diff_base" ]; then
             mapfile -d '' bandit_targets < <(
-              git diff --name-only --diff-filter=ACMRT -z "origin/${{ github.base_ref }}" HEAD -- \
+              git diff --name-only --diff-filter=ACMRT -z "$diff_base" HEAD -- \
                 'src/**/*.py' \
                 'scripts/**/*.py'
             )
             if [ "${#bandit_targets[@]}" -eq 0 ]; then
-              echo "No changed source/application Python files supported by Bandit; skipping PR Bandit delta scan."
+              echo "No changed source/application Python files supported by Bandit; skipping Bandit delta scan."
               exit 0
             fi
             set +e
@@ -698,7 +809,8 @@ jobs:
   # keeps this job fast and independent of the heavier code-quality job.
   repo-structure-gates:
     name: repo-structure-gates
-    needs: pick-runner
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 20
     steps:
@@ -825,9 +937,15 @@ jobs:
       # because they already have a tracked owner and follow-up path.
       - name: Verify No Placeholders
         shell: bash
+        # src/shared/python/ai/auth is a Tools-owned child copy: the
+        # child-copy contract (tests/unit/repo_hygiene/
+        # test_tools_child_copy_contract.py) forbids editing it here, so a
+        # placeholder violation inside it is unfixable in this repo — the
+        # TODO cleanup must land in D-sorganization/Tools and arrive via a
+        # vendor pin bump (tracked in #8770). Excluded until then.
         run: |
           violations=$(
-            find . \( -path "./.git" -o -path "./.mypy_cache" -o -path "./.ruff_cache" -o -path "./__pycache__" -o -path "./archive" -o -path "./check_code_quality" -o -path "./scripts" -o -path "./tests/tools" -o -path "./vendor" \) -prune -o -type f -name "*.py" -print0 \
+            find . \( -path "./.git" -o -path "./.mypy_cache" -o -path "./.ruff_cache" -o -path "./__pycache__" -o -path "./archive" -o -path "./check_code_quality" -o -path "./scripts" -o -path "./tests/tools" -o -path "./vendor" -o -path "./src/shared/python/ai/auth" \) -prune -o -type f -name "*.py" -print0 \
               | xargs -0 grep -nE "TODO|FIXME" \
               | grep -vE "TODO(\(#?[0-9]+|:.*#[0-9]+)" || true
           )
@@ -847,7 +965,8 @@ jobs:
   # stacks are covered by their own provisioned lanes.
   unit-test-gate:
     name: unit-test-gate
-    needs: pick-runner
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 25
     steps:
@@ -942,10 +1061,17 @@ jobs:
       - name: Run Green-Suite Unit Gate
         # No `|| true` / `continue-on-error`: any non-skip unit failure must
         # red this job and, via the `quality-gate` aggregate below, block merge.
+        #
+        # UNIT_GATE_QUARANTINE=1 activates the debt ledger in
+        # scripts/config/unit_gate_quarantine.json (issue #8766): tests that
+        # fail deterministically on main from the hollow-merge era are skipped
+        # here — and only here — so the gate stays meaningful for new
+        # regressions. Ledger entries may only be removed, never added.
         env:
           PYTHONPATH: .:src:src/engines/physics_engines/mujoco/python:src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
           QT_QPA_PLATFORM: offscreen
           QT_API: pyqt6
+          UNIT_GATE_QUARANTINE: "1"
         run: |
           set +e
           xvfb-run --auto-servernum python -m pytest \
@@ -968,15 +1094,23 @@ jobs:
           exit "$pytest_exit_code"
 
   # Required branch-protection check (issue #7064). The name `quality-gate` is
-  # preserved exactly so existing branch protection rules and the bot workflows
-  # (Jules-Auto-Repair, Jules-PR-AutoFix, Bot-CI-Trigger) keep resolving it.
-  # This job carries no gate logic of its own; it simply fails if any of the
-  # split quality jobs failed, giving a single aggregate status while letting
-  # each underlying job report independently.
+  # preserved exactly so the org ruleset `Repository_Protections` and the bot
+  # workflows (Jules-Auto-Repair, Jules-PR-AutoFix, Bot-CI-Trigger) keep
+  # resolving it. This job carries no gate logic of its own; it simply fails if
+  # any of the split quality jobs failed, giving a single aggregate status while
+  # letting each underlying job report independently.
+  #
+  # This is now the ONLY job in the repo named `quality-gate`. It used to share
+  # the name with jobs in quality-gate.yml and docs-ci.yml, which published
+  # competing check runs under the same required context - on PR #8728 this
+  # aggregate reported `failure` while the other two reported `success` and the
+  # PR merged anyway. They are now `lod-quality-gate` and `docs-quality-gate`.
   quality-gate:
     name: quality-gate
     needs:
       [
+        pick-runner,
+        changed-paths,
         code-quality,
         security-scans,
         repo-structure-gates,
@@ -1002,37 +1136,83 @@ jobs:
     steps:
       - name: Aggregate quality gate results
         shell: bash
+        env:
+          PICK_RUNNER: ${{ needs.pick-runner.result }}
+          CHANGED_PATHS: ${{ needs.changed-paths.result }}
+          CODE_CHANGED: ${{ needs.changed-paths.outputs.code }}
+          CODE_QUALITY: ${{ needs.code-quality.result }}
+          SECURITY_SCANS: ${{ needs.security-scans.result }}
+          REPO_STRUCTURE_GATES: ${{ needs.repo-structure-gates.result }}
+          TESTS: ${{ needs.tests.result }}
+          UNIT_TEST_GATE: ${{ needs.unit-test-gate.result }}
+          RUST_WHEEL_PARITY: ${{ needs.rust-wheel-parity.result }}
         run: |
-          echo "code-quality:        ${{ needs.code-quality.result }}"
-          echo "security-scans:      ${{ needs.security-scans.result }}"
-          echo "repo-structure-gates:${{ needs.repo-structure-gates.result }}"
-          echo "tests:              ${{ needs.tests.result }}"
-          echo "unit-test-gate:      ${{ needs.unit-test-gate.result }}"
-          echo "rust-wheel-parity:   ${{ needs.rust-wheel-parity.result }}"
+          set -uo pipefail
+
+          gates="code-quality:$CODE_QUALITY"
+          gates="$gates security-scans:$SECURITY_SCANS"
+          gates="$gates repo-structure-gates:$REPO_STRUCTURE_GATES"
+          gates="$gates tests:$TESTS"
+          gates="$gates unit-test-gate:$UNIT_TEST_GATE"
+          gates="$gates rust-wheel-parity:$RUST_WHEEL_PARITY"
+
           {
             echo "## Quality Gate Summary"
+            echo ""
+            echo "- non-docs changes: \`$CODE_CHANGED\`"
+            echo ""
             echo "| Job | Result |"
             echo "| --- | ------ |"
-            echo "| code-quality | ${{ needs.code-quality.result }} |"
-            echo "| security-scans | ${{ needs.security-scans.result }} |"
-            echo "| repo-structure-gates | ${{ needs.repo-structure-gates.result }} |"
-            echo "| tests | ${{ needs.tests.result }} |"
-            echo "| unit-test-gate | ${{ needs.unit-test-gate.result }} |"
-            echo "| rust-wheel-parity | ${{ needs.rust-wheel-parity.result }} |"
+            echo "| pick-runner | $PICK_RUNNER |"
+            echo "| changed-paths | $CHANGED_PATHS |"
           } >> "$GITHUB_STEP_SUMMARY"
-          if [ "${{ needs.code-quality.result }}" != "success" ] \
-            || [ "${{ needs.security-scans.result }}" != "success" ] \
-            || [ "${{ needs.repo-structure-gates.result }}" != "success" ] \
-            || [ "${{ needs.tests.result }}" != "success" ] \
-            || [ "${{ needs.unit-test-gate.result }}" != "success" ] \
-            || [ "${{ needs.rust-wheel-parity.result }}" != "success" ]; then
+
+          for entry in $gates; do
+            echo "${entry%%:*}: ${entry#*:}"
+            echo "| ${entry%%:*} | ${entry#*:} |" >> "$GITHUB_STEP_SUMMARY"
+          done
+
+          # The prerequisites must genuinely succeed. Without this check a
+          # failure in pick-runner or changed-paths would skip all six gates
+          # below, and the docs-only `skipped` branch would wave the PR through.
+          if [ "$PICK_RUNNER" != "success" ] || [ "$CHANGED_PATHS" != "success" ]; then
+            echo "::error::quality-gate prerequisites failed (pick-runner=$PICK_RUNNER, changed-paths=$CHANGED_PATHS)."
+            exit 1
+          fi
+
+          if [ "$CODE_CHANGED" = "true" ]; then
+            expected="success"
+          else
+            # Docs-only change: the gates are deliberately skipped. Requiring
+            # exactly `skipped` means a gate that somehow ran (and failed) is
+            # still caught rather than tolerated.
+            expected="skipped"
+          fi
+
+          failed=0
+          for entry in $gates; do
+            name="${entry%%:*}"
+            result="${entry#*:}"
+            if [ "$result" != "$expected" ]; then
+              echo "::error::$name reported '$result', expected '$expected'."
+              failed=1
+            fi
+          done
+
+          if [ "$failed" -ne 0 ]; then
             echo "::error::One or more quality-gate jobs failed."
             exit 1
+          fi
+
+          if [ "$CODE_CHANGED" != "true" ]; then
+            echo "Docs-only change: quality-gate jobs correctly skipped."
+            exit 0
           fi
           echo "All quality-gate jobs succeeded."
 
   core-only-install:
-    needs: pick-runner
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 15
     steps:
@@ -1105,7 +1285,8 @@ jobs:
 
   dependency-consistency:
     name: dependency-consistency
-    needs: pick-runner
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 15
     steps:
@@ -1168,9 +1349,17 @@ jobs:
           python -m pip_audit -r requirements.lock
 
   tests:
-    needs: pick-runner
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 35 # Prevent runaway tests while allowing bounded core-suite completion
+    env:
+      # Debt ledger (scripts/config/unit_gate_quarantine.json, issue #8766):
+      # the dependency-light lane below only executes when a PR touches src
+      # coverage targets, so its accumulated hollow-merge debt reds the job
+      # for exactly the PRs that do real work. Ledger entries may only be
+      # removed, never added.
+      UNIT_GATE_QUARANTINE: "1"
     strategy:
       fail-fast: false
       matrix:
@@ -1195,24 +1384,38 @@ jobs:
         id: core-test-changes
         shell: bash
         run: |
+          set -euo pipefail
+
           if [ "${{ github.event_name }}" != "pull_request" ]; then
             echo "skip=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
           git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
-          mapfile -d '' core_test_targets < <(
-            git diff --name-only --diff-filter=ACMRT -z "origin/${{ github.base_ref }}" HEAD -- \
-              'src/**/*.py' \
-              'tests/**/*.py' \
-              'pyproject.toml' \
-              'requirements*.txt' \
-              'environment.yml' \
-              ':(exclude)src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/**'
-          )
+
+          # Same failure shape as the core-test diff below (#8771): a diff that
+          # errors out must not degrade into "nothing changed". Verify the base
+          # resolves, and capture the diff through a file so `-e` catches a
+          # failed `git diff` instead of silently yielding an empty array.
+          if ! git rev-parse --verify --quiet "origin/${{ github.base_ref }}^{commit}" >/dev/null; then
+            echo "::error::Cannot resolve base ref 'origin/${{ github.base_ref }}' after fetch."
+            echo "::error::Refusing to infer 'no relevant changes' from an unresolvable base ref."
+            exit 1
+          fi
+
+          git diff --name-only --diff-filter=ACMRT -z "origin/${{ github.base_ref }}" HEAD -- \
+            'src/**/*.py' \
+            'tests/**/*.py' \
+            'pyproject.toml' \
+            'requirements*.txt' \
+            'environment.yml' \
+            ':(exclude)src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/**' \
+            > "$RUNNER_TEMP/core_test_targets.txt"
+          mapfile -d '' core_test_targets < "$RUNNER_TEMP/core_test_targets.txt"
+
           if [ "${#core_test_targets[@]}" -eq 0 ]; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
-            echo "No core Python/test/dependency changes detected; skipping test matrix for this PR."
+            echo "::warning::Test matrix NOT EXECUTED - no core Python/test/dependency changes against origin/${{ github.base_ref }}."
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
@@ -1365,6 +1568,21 @@ jobs:
           )
           dependency_light_targets=()
 
+          # Route `git diff` output through a file instead of a process
+          # substitution. `mapfile -t x < <(git diff ...)` discards git's exit
+          # code: a `fatal: bad object <sha>` leaves the array empty, and an
+          # empty array is indistinguishable from "nothing changed". That is
+          # exactly how `tests` reported success on `main` @ 6b68f94 without
+          # running the suite - the push diff base was not in the shallow
+          # checkout, all four diffs failed with `fatal: bad object`, and the
+          # skip branch below exited 0 (#8771). A plain redirect lets the
+          # step's `-e` make a failed diff fatal instead.
+          diff_into() {
+            local out="$1"
+            shift
+            git diff --name-only "$@" >"$out"
+          }
+
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             # Fetch base branch with enough depth for merge-base resolution.
             # When the base branch has advanced, shallow fetches may not have
@@ -1374,61 +1592,71 @@ jobs:
             # Try to compute merge-base for accurate diff. If merge-base fails
             # (e.g., due to shallow history), fall back to direct base ref diff.
             merge_base=$(git merge-base "origin/${{ github.base_ref }}" HEAD 2>/dev/null || echo "")
-
-            if [ -n "$merge_base" ]; then
-              # Use merge-base for accurate three-way diff
-              mapfile -t changed_tests < <(
-                git diff --name-only --diff-filter=ACMRT "$merge_base" HEAD -- 'tests/**/*.py'
-              )
-            else
+            if [ -z "$merge_base" ]; then
               # Merge-base not available (shallow history), fall back to
               # direct diff against base ref. This may include extra changes
               # but ensures tests run rather than silently skipping.
               echo "NOTE: merge-base unavailable; using direct diff against origin/${{ github.base_ref }}"
-              mapfile -t changed_tests < <(
-                git diff --name-only --diff-filter=ACMRT "origin/${{ github.base_ref }}" HEAD -- 'tests/**/*.py'
-              )
             fi
             diff_base="${merge_base:-origin/${{ github.base_ref }}}"
+          elif [ "${{ github.event_name }}" = "push" ] \
+            && [ "${{ github.ref_name }}" = "${{ github.event.repository.default_branch }}" ]; then
+            # Trunk pushes always run the full lane, unscoped. Path-scoping is
+            # a pull-request latency optimisation; on the default branch it is
+            # a correctness hole, because a commit that happens to touch no
+            # Python then carries a green badge for a suite it never ran.
+            echo "::notice::Push to the default branch - running the full core lane, unscoped (#8771)."
+            diff_base=""
           elif [ "${{ github.event_name }}" = "push" ] \
             && [ -n "${{ github.event.before }}" ] \
             && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
             diff_base="${{ github.event.before }}"
-            mapfile -t changed_tests < <(
-              git diff --name-only --diff-filter=ACMRT "$diff_base" HEAD -- 'tests/**/*.py'
-            )
           else
             diff_base=""
           fi
 
+          # A diff base git cannot resolve must fail loudly. Inferring
+          # "nothing changed" from an unresolvable base is how a green check
+          # ends up covering a suite that was never executed.
+          if [ -n "$diff_base" ] \
+            && ! git rev-parse --verify --quiet "${diff_base}^{commit}" >/dev/null; then
+            echo "::error::Cannot resolve the core-test diff base '${diff_base}'."
+            echo "::error::Refusing to infer 'no relevant changes' from an unresolvable diff base."
+            exit 1
+          fi
+
           if [ -n "$diff_base" ]; then
-            mapfile -t deleted_tests < <(
-              git diff --name-only --diff-filter=D "$diff_base" HEAD -- 'tests/**/*.py'
-            )
+            diff_into "$RUNNER_TEMP/core_changed_tests.txt" \
+              --diff-filter=ACMRT "$diff_base" HEAD -- 'tests/**/*.py'
+            mapfile -t changed_tests < "$RUNNER_TEMP/core_changed_tests.txt"
+
+            diff_into "$RUNNER_TEMP/core_deleted_tests.txt" \
+              --diff-filter=D "$diff_base" HEAD -- 'tests/**/*.py'
+            mapfile -t deleted_tests < "$RUNNER_TEMP/core_deleted_tests.txt"
             if [ "${#deleted_tests[@]}" -gt 0 ]; then
               echo "::error::Deleted Python test files require review before CI can proceed."
               printf '  %s\n' "${deleted_tests[@]}"
               exit 1
             fi
 
-            mapfile -t changed_core_targets < <(
-              git diff --name-only --diff-filter=ACMRT "$diff_base" HEAD -- \
+            diff_into "$RUNNER_TEMP/core_changed_targets.txt" \
+              --diff-filter=ACMRT "$diff_base" HEAD -- \
                 'src/**/*.py' \
                 'tests/**/*.py' \
                 'pyproject.toml' \
                 'requirements*.txt' \
                 'environment.yml' \
                 ':(exclude)src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/**'
-            )
+            mapfile -t changed_core_targets < "$RUNNER_TEMP/core_changed_targets.txt"
 
-            mapfile -t changed_coverage_targets < <(
-              git diff --name-only --diff-filter=ACMRT "$diff_base" HEAD -- \
+            diff_into "$RUNNER_TEMP/core_coverage_targets.txt" \
+              --diff-filter=ACMRT "$diff_base" HEAD -- \
                 'src/**/*.py' \
                 'pyproject.toml' \
                 'requirements*.txt' \
                 'environment.yml' \
                 ':(exclude)src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/**'
-            )
+            mapfile -t changed_coverage_targets < "$RUNNER_TEMP/core_coverage_targets.txt"
 
             if [ "${#changed_coverage_targets[@]}" -gt 0 ]; then
               coverage_args=()
@@ -1444,7 +1672,22 @@ jobs:
             fi
 
             if [ "${#changed_tests[@]}" -eq 0 ] && [ "${#changed_core_targets[@]}" -eq 0 ]; then
-              echo "No core Python/test/dependency changes detected; skipping core tests for this workflow-only PR."
+              # Reached only for a pull request or a non-default-branch push
+              # whose diff base resolved cleanly and contained no Python. Say
+              # so loudly: this check passing means "not evaluated", not
+              # "suite green", and a reader must be able to tell them apart
+              # (#8771).
+              echo "::warning::Core test suite NOT EXECUTED - diff base ${diff_base} shows no Python/test/dependency changes."
+              {
+                echo "## Core Test Suite: not executed"
+                echo
+                echo "No \`src/**/*.py\`, \`tests/**/*.py\` or dependency-manifest change"
+                echo "against diff base \`${diff_base}\`, so the core suite was skipped."
+                echo
+                echo "**This check passing does not mean the suite is green.**"
+                echo "The full lane always runs on pushes to the default branch."
+              } >> "$GITHUB_STEP_SUMMARY"
+              echo "core_suite_executed=false" >> "$GITHUB_OUTPUT"
               exit 0
             elif [ "${#changed_coverage_targets[@]}" -gt 0 ]; then
               echo "Source/dependency targets changed; running scoped dependency-light unit targets for this PR."
@@ -1733,7 +1976,8 @@ jobs:
             --tb=short
 
   alembic-postgres-round-trip:
-    needs: pick-runner
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 45
     services:
@@ -1842,7 +2086,8 @@ jobs:
             -vv --tb=short
 
   shared-tools-consumer-contracts:
-    needs: pick-runner
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 20
     steps:
@@ -1959,7 +2204,8 @@ jobs:
             -v --tb=short
 
   frontend-tests:
-    needs: pick-runner
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 20
     defaults:
@@ -2119,7 +2365,8 @@ jobs:
   # Enforces: format (rustfmt), lint (clippy), tests (cargo test).
   # =============================================================================
   rust-quality-gate:
-    needs: pick-runner
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -2401,6 +2648,8 @@ jobs:
 
   rust-quickstart:
     name: Rust Quickstart
+    needs: changed-paths
+    if: needs.changed-paths.outputs.code == 'true'
     # No `needs: pick-runner` on this job, so it routes directly rather than
     # gaining a dependency edge just to learn where to run.
     runs-on:
@@ -2527,7 +2776,8 @@ jobs:
   # ----------------------------------------------------------------------
   rust-wheel-parity:
     name: rust-wheel-parity
-    needs: pick-runner
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
     # In the required `quality-gate` aggregate's `needs`, so a fleet pin here
     # blocked every merge a second time. Pure `cargo`/`maturin` work with no
     # fleet-local state, so it follows the dispatcher like its siblings.

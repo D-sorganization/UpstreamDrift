@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, memo } from 'react';
 import { URDFTreeNode } from '@/utils/frankensteinTree';
 
 interface ModelTreeProps {
@@ -13,7 +13,7 @@ interface ModelTreeProps {
   activeSwapSelection?: { side: 'source' | 'target'; nodeId: string } | null;
 }
 
-function TreeNodeComponent({
+const TreeNodeComponent = memo(function TreeNodeComponent({
   node,
   allNodes,
   selectedId,
@@ -199,7 +199,7 @@ function TreeNodeComponent({
         ))}
     </div>
   );
-}
+});
 
 export function ModelTree({
   modelName,

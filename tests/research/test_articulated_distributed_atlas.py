@@ -17,6 +17,9 @@ ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "docs/research/proximal_distal_energy_transfer/data"
 
 
+pytestmark = pytest.mark.scientific
+
+
 def test_distributed_atlas_configuration_fails_closed() -> None:
     with pytest.raises(ValueError, match="positive odd"):
         DistributedAtlasConfig(station_counts=(1, 2, 3))

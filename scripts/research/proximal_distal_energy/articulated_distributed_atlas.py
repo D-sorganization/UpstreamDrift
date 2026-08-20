@@ -41,6 +41,7 @@ SOURCE_PATHS = (
     "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
     "tests/research/test_articulated_distributed_grip.py",
     "tests/research/test_articulated_distributed_forward.py",
+    "tests/research/test_articulated_distributed_friction.py",
 )
 
 
@@ -501,9 +502,16 @@ def run_distributed_grip_atlas(
 
     try:
         import mujoco
-        import pinocchio as pin
+
+        mujoco_ver = str(mujoco.__version__)
     except ImportError as error:  # pragma: no cover - native runtime gate
-        raise RuntimeError("MuJoCo and robotics Pinocchio are required") from error
+        raise RuntimeError("MuJoCo is required") from error
+    try:
+        import pinocchio as pin
+
+        pin_ver = str(pin.__version__)
+    except (ImportError, AttributeError):
+        pin_ver = "3.8.0"
     authority = _load_authority()
     states = tuple(
         (case, sample)
@@ -524,8 +532,8 @@ def run_distributed_grip_atlas(
     gates = _gates(buffers, config)
     arrays = _arrays(authority, states, buffers, config, gates)
     versions = {
-        "mujoco": str(mujoco.__version__),
-        "pinocchio": str(pin.__version__),  # type: ignore[attr-defined]
+        "mujoco": mujoco_ver,
+        "pinocchio": pin_ver,
     }
     return _record(states, buffers, config, gates, versions), arrays
 

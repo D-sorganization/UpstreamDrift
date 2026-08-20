@@ -1,5 +1,15 @@
 # Proximal-to-Distal Energy Transfer in the Golf Swing
 
+::: {.callout-note title="Canonical Publication"}
+The canonical text, multi-chapter web publication, and compiled PDF for this research live in the **AffineDrift** repository:
+
+- 📖 **Web Monograph**: [`https://affinedrift.com/articles/proximal_distal_energy_transfer/index.html`](https://affinedrift.com/articles/proximal_distal_energy_transfer/index.html)
+- 📄 **Official PDF**: [`https://affinedrift.com/articles/proximal_distal_energy_transfer/proximal_distal_energy_transfer.pdf`](https://affinedrift.com/articles/proximal_distal_energy_transfer/proximal_distal_energy_transfer.pdf)
+- 🔬 **Interactive Workbench**: [`https://affinedrift.com/articles/proximal-distal-model-workbench.html`](https://affinedrift.com/articles/proximal-distal-model-workbench.html)
+
+This directory in UpstreamDrift houses the authoritative computational simulation engines, evidence ledgers (`data/`), claim audit registers, and release verification bundles.
+:::
+
 The latest adversarial extension separates transmission-pathway identity,
 nominal speed, lower-tail performance, dispersion, contact loading, task-null
 variability, and model-conditional perturbation rejection. Start with

@@ -1,16 +1,29 @@
 # docs-ci.yml  -  Lightweight CI for markdown/docs-only PRs
 #
-# PURPOSE: Ensures docs-only PRs receive the required "quality-gate" and
-#          "Verify SPEC.md freshness" checks so branch protection is satisfied.
-#          Closes issue #2806.
+# PURPOSE: Validates docs-only PRs. This workflow no longer satisfies branch
+#          protection on their behalf.
 #
-# TRIGGER: Runs only when a PR changes exclusively docs/markdown files
-#          that are excluded from ci-standard.yml via paths-ignore.
+#          It used to: its gate job was named "quality-gate", the same as the
+#          CI Standard aggregate, so that docs-only PRs - which ci-standard.yml
+#          skipped via paths-ignore - still produced the required context
+#          (issue #2806). The cost was that both workflows published check runs
+#          under one required name, and branch protection accepted whichever
+#          reported. On PR #8728 the CI Standard aggregate reported `failure`
+#          while this workflow reported `success`, and the PR merged.
+#
+#          ci-standard.yml now runs on every PR and skips its heavy jobs on
+#          docs-only changes, so the required `quality-gate` always comes from
+#          the real aggregate. This job is `docs-quality-gate` and is NOT a
+#          required context - it only runs on docs-touching PRs, so requiring
+#          it would block every code-only PR indefinitely.
+#
+# TRIGGER: Runs when a PR changes docs/markdown files. The `paths:` filter here
+#          is the exact complement of the classification in ci-standard.yml's
+#          `changed-paths` job; keep the two in sync.
 #
 # NOTE: If a PR includes BOTH source changes AND doc changes, ci-standard.yml
 #       handles the substantive checks. This workflow exits successfully after
-#       detecting source changes so its duplicate branch-protection check does
-#       not block mixed PRs that correctly update SPEC.md.
+#       detecting source changes.
 
 name: Docs CI
 
@@ -44,8 +57,8 @@ jobs:
           mkdir -p "$(dirname "$GITHUB_OUTPUT")"
           echo "runner=${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}" >> "$GITHUB_OUTPUT"
           echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
-  quality-gate:
-    name: quality-gate
+  docs-quality-gate:
+    name: docs-quality-gate
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 5

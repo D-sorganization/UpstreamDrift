@@ -13,6 +13,11 @@ EVIDENCE = (
 )
 
 
+import pytest
+
+pytestmark = pytest.mark.scientific
+
+
 def test_ground_diagnostic_evidence_is_complete_and_current() -> None:
     record = json.loads(EVIDENCE.read_text(encoding="utf-8"))
 

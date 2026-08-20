@@ -735,7 +735,7 @@ class TestCIEnvironmentCompatibility:
                 encoding="utf-8",
             ),
         )
-        lod_job = workflow["jobs"]["quality-gate"]
+        lod_job = workflow["jobs"]["lod-quality-gate"]
 
         assert int(lod_job["timeout-minutes"]) >= 15
 
@@ -750,7 +750,7 @@ class TestCIEnvironmentCompatibility:
         workflow_text = workflow_path.read_text(encoding="utf-8")
         workflow = yaml.safe_load(workflow_text)
 
-        assert set(workflow["jobs"]) == {"quality-gate"}
+        assert set(workflow["jobs"]) == {"lod-quality-gate"}
         assert "scripts/ci/check_lod.py" in workflow_text
         assert "src \\" in workflow_text
         assert "--baseline scripts/ci/lod_baseline.txt" in workflow_text
@@ -766,11 +766,50 @@ class TestCIEnvironmentCompatibility:
         workflow_path = REPO_ROOT / ".github" / "workflows" / "quality-gate.yml"
         workflow_text = workflow_path.read_text(encoding="utf-8")
         workflow = yaml.safe_load(workflow_text)
-        job = workflow["jobs"]["quality-gate"]
+        job = workflow["jobs"]["lod-quality-gate"]
 
-        assert job["name"] == "quality-gate"
-        assert job["runs-on"] == "d-sorg-fleet-docker"
+        assert job["name"] == "lod-quality-gate"
+        # The runner comes from the same public/private dispatcher expression as
+        # the rest of CI. This previously asserted a bare `d-sorg-fleet-docker`,
+        # which stopped being true when the expression landed.
+        assert "d-sorg-fleet-docker" in job["runs-on"]
+        # No `paths:` filter is what makes this job safe to require directly: it
+        # reports on every PR, so it can never block on a missing context.
         assert "paths:" not in workflow_text
+
+    def test_required_quality_gate_context_is_published_by_one_workflow(self) -> None:
+        """Exactly one job may be named `quality-gate`.
+
+        `quality-gate` is the required status check on `main` (org ruleset
+        `Repository_Protections`). GitHub matches required checks by context
+        name, so a second job sharing the name publishes a competing check run
+        under the required context and branch protection is satisfied by
+        whichever one reported. On PR #8728 three jobs carried this name: the
+        CI Standard aggregate reported `failure` while docs-ci.yml and
+        quality-gate.yml reported `success`, and the PR merged.
+        """
+        try:
+            import yaml
+        except ImportError:
+            pytest.skip("PyYAML is required for workflow structure checks")
+
+        publishers = []
+        for workflow_path in sorted(
+            (REPO_ROOT / ".github" / "workflows").glob("*.yml")
+        ):
+            workflow = yaml.safe_load(workflow_path.read_text(encoding="utf-8"))
+            if not isinstance(workflow, dict):
+                continue
+            for job_id, job in (workflow.get("jobs") or {}).items():
+                if not isinstance(job, dict):
+                    continue
+                if job.get("name", job_id) == "quality-gate":
+                    publishers.append(f"{workflow_path.name}:{job_id}")
+
+        assert publishers == ["ci-standard.yml:quality-gate"], (
+            "the required `quality-gate` context must be published by the CI "
+            f"Standard aggregate alone, but found: {publishers}"
+        )
 
     def test_helper_workflows_use_pr_scoped_concurrency(self) -> None:
         """Helper checks must not cancel another PR's current check status."""
@@ -812,6 +851,8 @@ class TestCIEnvironmentCompatibility:
 
         assert job["name"] == "quality-gate"
         assert set(job["needs"]) == {
+            "pick-runner",
+            "changed-paths",
             "code-quality",
             "security-scans",
             "repo-structure-gates",
@@ -820,14 +861,54 @@ class TestCIEnvironmentCompatibility:
             "rust-wheel-parity",
         }
         assert job["if"] == "always()"
-        aggregate = next(
+        aggregate_step = next(
             step
             for step in job["steps"]
             if step.get("name") == "Aggregate quality gate results"
-        )["run"]
+        )
+        aggregate = aggregate_step["run"]
 
-        assert "tests:              ${{ needs.tests.result }}" in aggregate
-        assert '${{ needs.tests.result }}" != "success"' in aggregate
+        assert aggregate_step["env"]["TESTS"] == "${{ needs.tests.result }}"
+
+        # A docs-only PR skips the six gates, so `skipped` has to be accepted -
+        # but only once the prerequisites that decide the skip have themselves
+        # succeeded, otherwise an infrastructure failure would skip everything
+        # and read as a pass.
+        assert 'expected="success"' in aggregate
+        assert 'expected="skipped"' in aggregate
+        assert (
+            '[ "$PICK_RUNNER" != "success" ] || [ "$CHANGED_PATHS" != "success" ]'
+            in aggregate
+        )
+
+    def test_ci_standard_runs_on_every_pull_request(self) -> None:
+        """CI Standard must not be path-filtered out of any PR.
+
+        `quality-gate` is a required check, and GitHub blocks a PR forever on a
+        required context that never reports. While this workflow carried a
+        `paths-ignore` for docs, docs-only PRs got the context from docs-ci.yml
+        instead - which is what created the duplicate-name bypass. Skipping is
+        now decided per job by `changed-paths`, not by the trigger.
+        """
+        try:
+            import yaml
+        except ImportError:
+            pytest.skip("PyYAML is required for workflow structure checks")
+
+        workflow = yaml.safe_load(
+            (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+                encoding="utf-8"
+            )
+        )
+        # PyYAML resolves the bare `on:` key to the boolean True.
+        triggers = workflow.get(True, workflow.get("on"))
+        pull_request = triggers["pull_request"]
+
+        assert "paths-ignore" not in pull_request
+        assert "paths" not in pull_request
+        assert workflow["jobs"]["changed-paths"]["outputs"]["code"] == (
+            "${{ steps.detect.outputs.code }}"
+        )
 
     def test_ci_standard_repo_structure_installs_workflow_parser(self) -> None:
         """Workflow YAML guards must run after their parser dependency is present."""
@@ -903,7 +984,22 @@ class TestCIEnvironmentCompatibility:
         )
 
     def test_unit_gate_sparse_checks_out_pinned_tools_for_ownership_guard(self) -> None:
-        """The guard must inspect the exact Tools pin without materializing all Tools."""
+        """The guard must inspect the exact Tools pin before the unit gate runs.
+
+        PR #8407 (epic #8390) moved the pin/checkout/verify trio from inline
+        unit-test-gate steps into the shared composite action
+        ``.github/actions/fetch-pinned-tools`` without updating this test,
+        which kept asserting the deleted step names and failed on every run
+        since. The semantics this test protects are unchanged and are now
+        asserted where they live: the composite action resolves the pin from
+        the superproject gitlink, checks Tools out at exactly that revision,
+        and verifies the result. One expectation changed deliberately: the
+        old inline step used ``sparse-checkout: src/shared/python``; the
+        composite action documents why sparse checkout is now avoided (a
+        sparse worktree left in a reused runner workspace poisons later jobs
+        that materialize the submodule normally), so this test asserts its
+        absence rather than its presence.
+        """
         try:
             import yaml
         except ImportError:
@@ -917,29 +1013,39 @@ class TestCIEnvironmentCompatibility:
         steps = workflow["jobs"]["unit-test-gate"]["steps"]
         step_names = [step.get("name", "") for step in steps]
 
-        resolve_index = step_names.index("Resolve pinned Tools ownership revision")
-        checkout_index = step_names.index("Checkout pinned Tools ownership source")
-        verify_index = step_names.index("Verify pinned Tools ownership source")
+        fetch_index = step_names.index("Fetch pinned Tools packages")
         unit_index = step_names.index("Run Green-Suite Unit Gate")
-        resolve_step = steps[resolve_index]
-        checkout_step = steps[checkout_index]
-        verify_step = steps[verify_index]
+        assert fetch_index < unit_index
+        assert steps[fetch_index]["uses"] == "./.github/actions/fetch-pinned-tools"
 
-        assert resolve_index < checkout_index < verify_index < unit_index
-        assert resolve_step["id"] == "tools-ownership-pin"
-        assert "git ls-tree HEAD vendor/ud-tools" in resolve_step["run"]
-        assert checkout_step["uses"].startswith("actions/checkout@")
-        assert checkout_step["with"]["repository"] == "D-sorganization/Tools"
-        assert (
-            checkout_step["with"]["ref"]
-            == "${{ steps.tools-ownership-pin.outputs.sha }}"
+        action = yaml.safe_load(
+            (
+                REPO_ROOT / ".github" / "actions" / "fetch-pinned-tools" / "action.yml"
+            ).read_text(encoding="utf-8")
         )
+        action_steps = action["runs"]["steps"]
+        action_names = [step.get("name", "") for step in action_steps]
+
+        resolve_index = action_names.index("Resolve pinned Tools revision")
+        checkout_index = action_names.index("Checkout pinned Tools source")
+        verify_index = action_names.index("Verify pinned Tools checkout")
+        assert resolve_index < checkout_index < verify_index
+
+        resolve_step = action_steps[resolve_index]
+        checkout_step = action_steps[checkout_index]
+        verify_step = action_steps[verify_index]
+
+        assert resolve_step["id"] == "pin"
+        assert "git ls-tree HEAD -- vendor/ud-tools" in resolve_step["run"]
+        assert checkout_step["uses"].startswith("actions/checkout@")
+        assert "/Tools" in checkout_step["with"]["repository"]
+        assert checkout_step["with"]["ref"] == "${{ steps.pin.outputs.sha }}"
         assert checkout_step["with"]["path"] == "vendor/ud-tools"
         assert checkout_step["with"]["fetch-depth"] == 1
-        assert checkout_step["with"]["sparse-checkout"].strip() == "src/shared/python"
         assert checkout_step["with"]["persist-credentials"] is False
+        assert "sparse-checkout" not in checkout_step["with"]
         assert "git -C vendor/ud-tools rev-parse HEAD" in verify_step["run"]
-        assert '"${{ steps.tools-ownership-pin.outputs.sha }}"' in verify_step["run"]
+        assert "${{ steps.pin.outputs.sha }}" in verify_step["run"]
 
     def test_release_builds_wheel_from_exact_tools_submodule(self) -> None:
         """Releases must not build an unverifiable wheel from an unpacked sdist."""
@@ -1480,7 +1586,7 @@ class TestCIEnvironmentCompatibility:
     def test_core_test_matrix_push_uses_changed_file_scope_when_before_sha_exists(
         self,
     ) -> None:
-        """Push test runs should not fall through to full-suite OOM by default."""
+        """Non-trunk push runs stay scoped so they do not fall through to OOM."""
         workflow = (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
             encoding="utf-8"
         )
@@ -1493,11 +1599,67 @@ class TestCIEnvironmentCompatibility:
         assert '"${{ github.event_name }}" = "push"' in core_test_step
         assert "${{ github.event.before }}" in core_test_step
         assert 'diff_base="${{ github.event.before }}"' in core_test_step
+        assert '--diff-filter=ACMRT "$diff_base" HEAD' in core_test_step
+        assert "Core test suite NOT EXECUTED" in core_test_step
+
+    def test_core_test_matrix_cannot_report_green_without_running(self) -> None:
+        """A `tests` pass must mean the suite ran, or say loudly that it did not.
+
+        `main` @ 6b68f94 reported `tests (3.11)` / `tests (3.12)` successful
+        while the unit suite never ran: the push diff base was absent from the
+        shallow checkout, every `git diff` failed with `fatal: bad object`, and
+        because the results were read through `mapfile < <(git diff ...)` -
+        which discards the exit code - the empty arrays were taken as "nothing
+        changed" and the step exited 0 (issue #8771).
+
+        Three invariants keep that closed, asserted here rather than left to
+        the next reader of the shell.
+        """
+        workflow = (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+            encoding="utf-8"
+        )
+        core_test_step = workflow[
+            workflow.index("- name: Run Core Test Suite") : workflow.index(
+                "- name: Stop Xvfb",
+            )
+        ]
+
+        # 1. Diffs are captured through a file, so the step's `-e` sees a
+        #    failed `git diff` instead of an indistinguishable empty array.
+        assert "mapfile -t changed_tests < <(" not in core_test_step
+        assert 'git diff --name-only "$@" >"$out"' in core_test_step
+
+        # 2. An unresolvable diff base fails loudly, never "nothing changed".
         assert (
-            'git diff --name-only --diff-filter=ACMRT "$diff_base" HEAD'
+            'git rev-parse --verify --quiet "${diff_base}^{commit}"' in core_test_step
+        )
+        assert "Cannot resolve the core-test diff base" in core_test_step
+
+        # 3. Trunk pushes always run the full lane. Path scoping on the default
+        #    branch lets a non-Python commit vouch for a suite it never ran.
+        assert (
+            '"${{ github.ref_name }}" = "${{ github.event.repository.default_branch }}"'
             in core_test_step
         )
-        assert "No core Python/test/dependency changes detected" in core_test_step
+
+    def test_core_test_change_detection_fails_on_unresolvable_base(self) -> None:
+        """The pre-step gating the whole matrix must not skip on a failed diff."""
+        workflow = (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+            encoding="utf-8"
+        )
+        start = workflow.index("- name: Check for core test relevant changes")
+        detect_step = workflow[
+            start : workflow.index("- name: Install System Dependencies", start)
+        ]
+
+        assert "set -euo pipefail" in detect_step
+        assert (
+            'git rev-parse --verify --quiet "origin/${{ github.base_ref }}^{commit}"'
+            in detect_step
+        )
+        assert "Cannot resolve base ref" in detect_step
+        assert "mapfile -d '' core_test_targets < <(" not in detect_step
+        assert "Test matrix NOT EXECUTED" in detect_step
 
     def test_mypy_baseline_push_uses_changed_source_scope_when_before_sha_exists(
         self,

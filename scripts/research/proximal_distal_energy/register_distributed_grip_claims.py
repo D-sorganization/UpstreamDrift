@@ -25,6 +25,7 @@ ARTIFACTS = [
     "tests/research/test_articulated_distributed_grip.py",
     "tests/research/test_articulated_distributed_forward.py",
     "tests/research/test_articulated_distributed_atlas.py",
+    "tests/research/test_articulated_distributed_friction.py",
 ]
 
 

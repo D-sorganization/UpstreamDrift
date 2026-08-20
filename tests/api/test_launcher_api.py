@@ -312,6 +312,7 @@ class TestNewTiles:
             "external",
             "ready",
             "gui_ready",
+            "provider_unavailable",
         }, f"Video Analyzer status '{tile['status']}' is not valid"
 
     def test_video_analyzer_has_capabilities(self, client: TestClient) -> None:

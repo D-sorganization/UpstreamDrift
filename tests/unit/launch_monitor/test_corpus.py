@@ -16,6 +16,9 @@ from src.shared.python.launch_monitor.corpus import (
 )
 
 
+pytestmark = pytest.mark.unit
+
+
 def _synthetic_checkout(tmp_path: Path) -> Path:
     checkout = tmp_path / "checkout"
     dataset = checkout / "data" / "authority" / "database" / "shot_corpus_parquet"
@@ -93,3 +96,58 @@ def test_missing_root_and_missing_dataset_fail_closed(
         corpus_dataset_path()
     with pytest.raises(FileNotFoundError, match="shot corpus dataset not found"):
         load_private_corpus(root=tmp_path / "empty")
+
+
+def test_lateral_flight_and_capture_columns_reach_canonical_schema(
+    tmp_path: Path,
+) -> None:
+    """The #18/#19 corpus columns convert into the canonical schema."""
+    checkout = tmp_path / "checkout"
+    dataset = checkout / "data" / "authority" / "database" / "shot_corpus_parquet"
+    partition = dataset / "source_id=synthetic_new"
+    partition.mkdir(parents=True)
+    rows = pd.DataFrame(
+        {
+            "monitor": ["TrackMan"],
+            "file": ["a.csv"],
+            "row_index": [0],
+            "club": ["Driver"],
+            "club_speed_mph": [100.0],
+            "ball_speed_mph": [150.0],
+            "smash_factor": [1.5],
+            "launch_angle_deg": [12.0],
+            "launch_direction_deg": [1.0],
+            "spin_rate_rpm": [2700.0],
+            "back_spin_rpm": [2600.0],
+            "side_spin_rpm": [300.0],
+            "spin_axis_deg": [4.0],
+            "attack_angle_deg": [-1.2],
+            "club_path_deg": [0.5],
+            "face_angle_deg": [0.2],
+            "carry_yd": [250.0],
+            "total_yd": [270.0],
+            "apex_native": [95.0],
+            "descent_angle_deg": [38.0],
+            "lateral_carry_yd": [-12.5],
+            "flight_time_s": [6.2],
+            "captured_at": ["2023-08-07T00:00:00"],
+            "native_json": ["{}"],
+        }
+    )
+    rows.to_parquet(partition / "part-0.parquet", index=False)
+
+    frame = load_private_corpus(root=checkout)
+
+    row = frame.iloc[0]
+    assert row["lateral_carry"] == pytest.approx(-12.5 * 0.9144)  # yards -> m
+    assert row["flight_time"] == pytest.approx(6.2)
+    assert row["captured_at"] == "2023-08-07T00:00:00"
+
+
+def test_corpus_predating_the_new_columns_still_loads(tmp_path: Path) -> None:
+    """An older pinned corpus lacks the columns; the loader must not fail."""
+    frame = load_private_corpus(root=_synthetic_checkout(tmp_path))
+
+    assert len(frame) == 2
+    assert "lateral_carry" not in frame.columns
+    assert "captured_at" not in frame.columns

@@ -11,6 +11,11 @@ ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "docs/research/proximal_distal_energy_transfer/data"
 
 
+import pytest
+
+pytestmark = pytest.mark.scientific
+
+
 def test_committed_ground_atlas_is_complete_current_and_adverse() -> None:
     record = json.loads(
         (DATA / "articulated_ground_atlas.json").read_text(encoding="utf-8")

@@ -3,8 +3,8 @@
   "study_id": "distributed-grip-contact-discretization",
   "design": {
     "engine_versions": {
-      "mujoco": "3.8.0",
-      "pinocchio": "3.8.0"
+      "mujoco": "3.3.4",
+      "pinocchio": "0.1"
     },
     "state_count": 12,
     "station_counts_per_hand": [
@@ -66,27 +66,27 @@
     "station_refinement_tolerance": 0.05
   },
   "results": {
-    "maximum_peak_station_force_n": 4.0297582179260845,
-    "maximum_peak_force_couple_nm": 0.3749602389603888,
+    "maximum_peak_station_force_n": 4.0297582179258224,
+    "maximum_peak_force_couple_nm": 0.37496023896043856,
     "maximum_open_fraction": 1.0,
     "maximum_transition_count": 0,
-    "maximum_station_load_concentration": 0.7699527320407829,
+    "maximum_station_load_concentration": 0.7699527320405432,
     "maximum_coincident_couple_residual_nm": 0.0,
     "maximum_reversed_couple_sign_residual_nm": 0.0,
-    "maximum_virtual_power_residual_w": 1.1379786002407855e-15,
+    "maximum_virtual_power_residual_w": 9.71445146547012e-16,
     "maximum_positive_dissipation_power_w": 0.0,
-    "maximum_normalized_work_energy_residual": 0.031188832197237837,
-    "maximum_trajectory_relative_error": 7.965398099764125e-14,
-    "maximum_force_relative_error": 2.8540624674205423e-12,
+    "maximum_normalized_work_energy_residual": 0.031188832197237875,
+    "maximum_trajectory_relative_error": 0.0,
+    "maximum_force_relative_error": 0.0,
     "active_set_parity_failures": 0,
     "failed_numerical_cell_count": 0,
     "failed_parity_cell_count": 0,
     "time_refinement_worst_normalized_residual": [
-      0.031188832197237837,
-      0.015597566866522802
+      0.031188832197237875,
+      0.015597566866522868
     ],
     "time_refinement_passed": true,
-    "maximum_fine_step_three_to_five_station_error": 0.003551801798156141,
+    "maximum_fine_step_three_to_five_station_error": 0.0035518017981562133,
     "station_refinement_passed": true,
     "all_registered_gates_passed": true
   },
@@ -106,14 +106,15 @@
   "source_sha256": {
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "8eed52fe4ebbc55fcf753f4703330dd6d768281b0babfbb2adca074b862fc36d",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
-    "scripts/research/proximal_distal_energy/articulated_distributed_grip.py": "1365d509011e88c1c96bf28874d43720098fd658679bfd40f46258c50b47dd78",
-    "scripts/research/proximal_distal_energy/articulated_distributed_forward.py": "f0bdb296956e51d7dda43d24f5215d67ccb6585562e2393ec0e8e5ce34d52664",
-    "scripts/research/proximal_distal_energy/articulated_distributed_atlas.py": "5a0b6eebb7041bc51ceadf633f13cde9b687601563f2faac8d0fb40f0c5dbb0f",
+    "scripts/research/proximal_distal_energy/articulated_distributed_grip.py": "006b3bc8114cbe3db61788ab3ebf1b024301723e2907fe7a145542dc5839bcd5",
+    "scripts/research/proximal_distal_energy/articulated_distributed_forward.py": "288d349a890cbe57bab1d1f3b222d2a32e332744487582794893a2c213234bae",
+    "scripts/research/proximal_distal_energy/articulated_distributed_atlas.py": "c3a1ad93c7693f4a557ff7f56b1d3598f8927a33657cb5cefc13cab3a84ffd15",
     "scripts/research/proximal_distal_energy/articulated_slack_contact.py": "79ad8644029ff8d447eae2e697a5ed7deceb173c000e5ef2b4f53be6c791ad69",
-    "scripts/research/proximal_distal_energy/articulated_forward_integration.py": "c42de070289a1a2f2fc2b7351effa28d2e2f1b2c36c2e4b9ff0ea0b20f5098b0",
+    "scripts/research/proximal_distal_energy/articulated_forward_integration.py": "3942fe624a4ed4642a61e68f2fd5029eb92df9dc0fff08617a2f62883e443b9a",
     "scripts/research/proximal_distal_energy/articulated_forward_contract.py": "c2f2a89bbb90da5e41488e4763327afe126f6be6be70da73c41c74adca52349a",
     "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py": "c2b01f1d8de0b25daa39c03ae97d3ef51512264f3a2978766a7360aed5d9cda8",
     "tests/research/test_articulated_distributed_grip.py": "f79a5a74e399352581f1e6f81a4642cd09aaed8ed21e02635ef87c7a12b18d69",
-    "tests/research/test_articulated_distributed_forward.py": "2e0c6e9749afd61ae88a297d94f5e101152ecba268ea8ce42051ee2cfcb4c008"
+    "tests/research/test_articulated_distributed_forward.py": "2e0c6e9749afd61ae88a297d94f5e101152ecba268ea8ce42051ee2cfcb4c008",
+    "tests/research/test_articulated_distributed_friction.py": "640c5bddefca596908ecb40a13eee2b5f15438cfbcc73a648bd1fba3f7e7f694"
   }
 }

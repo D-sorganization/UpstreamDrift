@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import sys
 from dataclasses import asdict
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, cast
 
@@ -19,6 +20,8 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from src.shared.python.launch_monitor import (
     CorrelationResult,
     FilterRule,
+    ImportedSession,
+    ImportManifest,
     ImportOptions,
     LaunchMonitorProject,
     TreatmentConfig,
@@ -31,6 +34,7 @@ from src.shared.python.launch_monitor import (
     compute_vif,
     fit_predictive_model,
     import_session,
+    load_private_corpus,
     numeric_metric_columns,
 )
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -153,12 +157,19 @@ class MainWidget(QtWidgets.QWidget):
         )
         self.data_table = DataFrameTable()
         self.import_button = QtWidgets.QPushButton("Import Files...")
+        self.load_corpus_button = QtWidgets.QPushButton("Load Private Corpus")
+        self.load_corpus_button.setToolTip(
+            "Load every source in the authorized private shot corpus as one "
+            "session per source. Requires LAUNCH_MONITOR_DATA_ROOT to point at "
+            "a commit-pinned Launch-Monitor-Flight-Model-Campaign checkout."
+        )
         self.open_project_button = QtWidgets.QPushButton("Open Project...")
         self.save_project_button = QtWidgets.QPushButton("Save Project...")
         self.remove_session_button = QtWidgets.QPushButton("Remove Selected Sessions")
         self.clear_project_button = QtWidgets.QPushButton("New Project")
         for button in (
             self.import_button,
+            self.load_corpus_button,
             self.open_project_button,
             self.save_project_button,
             self.remove_session_button,
@@ -167,6 +178,7 @@ class MainWidget(QtWidgets.QWidget):
             button.setMinimumHeight(30)
         buttons = QtWidgets.QHBoxLayout()
         buttons.addWidget(self.import_button)
+        buttons.addWidget(self.load_corpus_button)
         buttons.addWidget(self.open_project_button)
         buttons.addWidget(self.save_project_button)
         buttons.addWidget(self.remove_session_button)
@@ -424,6 +436,7 @@ class MainWidget(QtWidgets.QWidget):
 
     def _wire_actions(self) -> None:
         self.import_button.clicked.connect(self._on_import_files)
+        self.load_corpus_button.clicked.connect(self._on_load_private_corpus)
         self.open_project_button.clicked.connect(self._on_open_project)
         self.save_project_button.clicked.connect(self._on_save_project)
         self.remove_session_button.clicked.connect(self._remove_selected_sessions)
@@ -468,6 +481,77 @@ class MainWidget(QtWidgets.QWidget):
             f"{len(self.analysis_frame)} shots."
         )
         return session
+
+    def load_private_corpus_sessions(self, root: str | Path | None = None) -> int:
+        """Load the private shot corpus as one session per corpus source.
+
+        Returns the number of sessions added. Sources already present in the
+        project are skipped rather than raising, so the action is repeatable.
+        Raises ``FileNotFoundError`` when no authorized checkout is available
+        and ``ImportError`` when the Parquet reader is not installed; callers
+        in the UI surface those as dialogs.
+        """
+        frame = load_private_corpus(root)
+        existing = {session.session_id for session in self.project.sessions}
+        imported_at = datetime.now(UTC).isoformat()
+        added = 0
+        for session_id, group in frame.groupby("session_id", sort=True, observed=True):
+            identifier = str(session_id)
+            if identifier in existing:
+                continue
+            shots = group.reset_index(drop=True)
+            vendor = str(shots["monitor_vendor"].iloc[0])
+            manifest = ImportManifest(
+                source_path=f"corpus://{identifier}",
+                file_sha256="private-authority-parquet",
+                profile_id="private_corpus",
+                vendor=vendor,
+                imported_at=imported_at,
+                row_count=len(shots),
+                source_columns=tuple(str(column) for column in shots.columns),
+                metric_sources={},
+                source_units={},
+                unit_evidence={},
+            )
+            self.project.add_session(
+                ImportedSession(
+                    session_id=identifier,
+                    name=identifier,
+                    shots=shots,
+                    manifest=manifest,
+                )
+            )
+            added += 1
+        if added:
+            self.analysis_frame = self.project.combined_shots()
+            self._dirty = True
+            self._refresh_all()
+        return added
+
+    def _on_load_private_corpus(self) -> None:
+        previous = QtWidgets.QApplication.overrideCursor()
+        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.CursorShape.WaitCursor)
+        try:
+            added = self.load_private_corpus_sessions()
+        except (FileNotFoundError, ImportError, ValueError) as error:
+            logger.info("Private corpus load unavailable: %s", error)
+            QtWidgets.QMessageBox.warning(
+                self, "Private corpus unavailable", str(error)
+            )
+            return
+        finally:
+            QtWidgets.QApplication.restoreOverrideCursor()
+            if previous is not None:
+                QtWidgets.QApplication.setOverrideCursor(previous)
+        if not added:
+            self.status_label.setText(
+                "Private corpus already loaded; no new sources were added."
+            )
+            return
+        self.status_label.setText(
+            f"Loaded the private corpus: {added} sources, "
+            f"{len(self.analysis_frame)} shots now in the project."
+        )
 
     def save_project(self, path: str | Path) -> Path:
         saved = self.project.save(path)
@@ -1024,6 +1108,15 @@ class LaunchMonitorAnalyticsWindow(QtWidgets.QMainWindow):
         help_menu = menu_bar.addMenu("&Help")
         assert file_menu is not None
         assert help_menu is not None
+        load_corpus_action = QtGui.QAction("Load &Private Corpus", self)
+        load_corpus_action.setStatusTip(
+            "Load every source in the authorized private shot corpus."
+        )
+        load_corpus_action.triggered.connect(
+            self.main_widget._on_load_private_corpus  # noqa: SLF001 - same tool
+        )
+        file_menu.addAction(load_corpus_action)
+        file_menu.addSeparator()
         quit_action = QtGui.QAction("&Quit", self)
         quit_action.setShortcut(QtGui.QKeySequence.StandardKey.Quit)
         quit_action.triggered.connect(self.close)

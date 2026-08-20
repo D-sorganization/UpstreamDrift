@@ -19,6 +19,9 @@ ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = ROOT / "docs/research/proximal_distal_energy_transfer/data"
 
 
+pytestmark = pytest.mark.scientific
+
+
 def test_configuration_fails_closed() -> None:
     with pytest.raises(ValueError, match="mass_matrix_relative_tolerance"):
         ArticulatedInertiaConfig(mass_matrix_relative_tolerance=0.0)

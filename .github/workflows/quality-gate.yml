@@ -2,7 +2,14 @@ name: Quality Gate
 
 # Blocking repository-wide Law-of-Demeter quality gate. Existing findings are
 # ratcheted in scripts/ci/lod_baseline.txt; new production src/ occurrences
-# fail this required quality-gate status.
+# fail this required `lod-quality-gate` status.
+#
+# The job was named `quality-gate` until it was renamed here, which collided
+# with the CI Standard aggregate of the same name: both published check runs
+# under the single required `quality-gate` context, so branch protection could
+# be satisfied by whichever reported. This workflow carries no path filter and
+# so runs on every PR, which makes `lod-quality-gate` safe to require directly.
+# Keep it that way: a required check that does not report blocks the PR.
 
 on:
   pull_request:
@@ -17,8 +24,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  quality-gate:
-    name: quality-gate
+  lod-quality-gate:
+    name: lod-quality-gate
     runs-on: ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
     timeout-minutes: 15
     steps:
