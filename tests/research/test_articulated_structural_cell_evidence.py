@@ -90,6 +90,26 @@ def test_cell_evidence_rejects_gate_failure_without_classification() -> None:
         )
 
 
+def test_cell_evidence_distinguishes_corner_only_execution_from_unmatched() -> None:
+    nominal = _cells((False, False, False), (0.0, 0.0, 0.0))
+    corner = _cells((False, False, False, False), (0.0, 0.0, 0.0, 0.0))
+    comparison = compare_common_support(nominal, corner)
+
+    evidence = build_structural_cell_evidence(
+        corner,
+        gate_status=np.ones(4, dtype=bool),
+        failure_class=np.asarray(["none"] * 4),
+        comparison=comparison,
+    )
+
+    assert evidence["comparison_status"].tolist() == [
+        "common_unmatched",
+        "common_unmatched",
+        "common_unmatched",
+        "corner_only_executed",
+    ]
+
+
 @pytest.mark.parametrize(
     ("pathway", "filename"),
     [

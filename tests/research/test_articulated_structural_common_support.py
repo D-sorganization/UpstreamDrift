@@ -121,12 +121,28 @@ def test_common_support_excludes_missing_states_and_preserves_transitions() -> N
 
     assert comparison.common_executed_cell_count == 32
     assert comparison.nominal_only_executed_cell_count == 32
+    assert comparison.corner_only_executed_cell_count == 0
+    assert comparison.nominal_only_identities == nominal.identities[32:]
+    assert comparison.corner_only_identities == ()
     assert comparison.persistent_identities == (nominal.identities[0],)
     assert comparison.exited_identities == (nominal.identities[1],)
     assert comparison.entered_identities == (corner.identities[2],)
     assert comparison.persistent_speed_change_m_s.tolist() == pytest.approx([0.004])
     assert comparison.resolution_threshold_m_s.tolist() == pytest.approx([0.008])
     assert comparison.resolved_outcome_change.tolist() == [False]
+
+
+def test_common_support_preserves_corner_only_execution_identities() -> None:
+    nominal = extract_headline_cells("shaft", _arrays(((0, 0),), matched_indices=()))
+    corner = extract_headline_cells(
+        "shaft", _arrays(((0, 0), (0, 6)), matched_indices=())
+    )
+
+    comparison = compare_common_support(nominal, corner)
+
+    assert comparison.nominal_only_identities == ()
+    assert comparison.corner_only_identities == corner.identities[32:]
+    assert comparison.corner_only_executed_cell_count == 32
 
 
 def test_zero_nominal_ground_support_cannot_produce_a_paired_benefit() -> None:

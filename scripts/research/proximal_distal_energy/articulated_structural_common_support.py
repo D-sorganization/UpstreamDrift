@@ -57,6 +57,8 @@ class CommonSupportComparison:
     common_executed_cell_count: int
     nominal_only_executed_cell_count: int
     corner_only_executed_cell_count: int
+    nominal_only_identities: tuple[CellIdentity, ...]
+    corner_only_identities: tuple[CellIdentity, ...]
     persistent_identities: tuple[CellIdentity, ...]
     entered_identities: tuple[CellIdentity, ...]
     exited_identities: tuple[CellIdentity, ...]
@@ -65,6 +67,12 @@ class CommonSupportComparison:
     resolved_outcome_change: BoolArray
 
     def __post_init__(self) -> None:
+        if len(
+            self.nominal_only_identities
+        ) != self.nominal_only_executed_cell_count or (
+            len(self.corner_only_identities) != self.corner_only_executed_cell_count
+        ):
+            raise ValueError("missing-execution identities must reproduce their counts")
         size = len(self.persistent_identities)
         if self.persistent_speed_change_m_s.shape != (size,) or (
             self.resolution_threshold_m_s.shape != (size,)
@@ -248,6 +256,12 @@ def compare_common_support(
     }
     corner_index = {identity: index for index, identity in enumerate(corner.identities)}
     common = set(nominal_index).intersection(corner_index)
+    nominal_only = tuple(
+        identity for identity in nominal.identities if identity not in corner_index
+    )
+    corner_only = tuple(
+        identity for identity in corner.identities if identity not in nominal_index
+    )
 
     persistent = tuple(
         identity
@@ -302,8 +316,10 @@ def compare_common_support(
     return CommonSupportComparison(
         pathway=nominal.pathway,
         common_executed_cell_count=len(common),
-        nominal_only_executed_cell_count=len(nominal_index) - len(common),
-        corner_only_executed_cell_count=len(corner_index) - len(common),
+        nominal_only_executed_cell_count=len(nominal_only),
+        corner_only_executed_cell_count=len(corner_only),
+        nominal_only_identities=nominal_only,
+        corner_only_identities=corner_only,
         persistent_identities=persistent,
         entered_identities=entered,
         exited_identities=exited,

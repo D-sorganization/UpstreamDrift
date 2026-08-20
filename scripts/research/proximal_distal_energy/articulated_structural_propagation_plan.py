@@ -294,6 +294,7 @@ def build_structural_propagation_plan(
             "identity_encoding": "canonical JSON Unicode strings without pickle",
             "digest_rule": "bind every array name, dtype, shape, and byte payload except the stored digest",
             "nonpersistent_resolution_rule": "store NaN thresholds and false resolved status outside persistent common support",
+            "missing_execution_rule": "retain nominal-only and corner-only execution identities separately; label corner-only cells explicitly rather than as common unmatched",
             "write_policy": "validate then write compressed NPZ through an atomic temporary replacement",
             "assembly_rule": "derive cell identities, outcomes, and gate classifications from one atlas mapping",
             "corner_assembly_rule": "release only complete feasible execution with disjoint retained-failure states, passing global and per-cell gates, aligned common support, and complete authority provenance",

@@ -191,6 +191,8 @@ def test_plan_binds_restart_and_cell_level_evidence_contract(plan) -> None:
     assert (
         "outside persistent common support" in storage["nonpersistent_resolution_rule"]
     )
+    assert "nominal-only and corner-only" in storage["missing_execution_rule"]
+    assert "rather than as common unmatched" in storage["missing_execution_rule"]
     assert "atomic temporary replacement" in storage["write_policy"]
     assert "from one atlas mapping" in storage["assembly_rule"]
     assert "disjoint retained-failure states" in storage["corner_assembly_rule"]

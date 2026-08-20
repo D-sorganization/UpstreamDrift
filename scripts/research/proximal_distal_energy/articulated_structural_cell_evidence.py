@@ -101,6 +101,8 @@ def build_structural_cell_evidence(
             status[index[identity]] = "entered_support"
         for identity in comparison.exited_identities:
             status[index[identity]] = "exited_support"
+        for identity in comparison.corner_only_identities:
+            status[index[identity]] = "corner_only_executed"
         status[status == "not_compared"] = "common_unmatched"
 
     arrays: dict[str, Array] = {
