@@ -47,8 +47,8 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def _serialized(record: dict[str, Any]) -> str:
-    return json.dumps(record, indent=2) + "\n"
+def _serialized(record: dict[str, Any]) -> bytes:
+    return (json.dumps(record, indent=2) + "\n").encode("utf-8")
 
 
 def _scientific_configuration(config: Any) -> dict[str, Any]:
@@ -179,8 +179,8 @@ def validate_structural_propagation_plan(
     """Reject a committed plan that differs from current governed inputs."""
 
     expected = build_structural_propagation_plan()
-    observed_text = plan_path.read_text(encoding="utf-8")
-    if observed_text != _serialized(expected):
+    observed_bytes = plan_path.read_bytes()
+    if observed_bytes != _serialized(expected):
         raise RuntimeError("committed structural propagation plan is stale or altered")
     return expected
 
@@ -193,7 +193,7 @@ def write_structural_propagation_plan(
     record = build_structural_propagation_plan()
     temporary = plan_path.with_suffix(plan_path.suffix + ".tmp")
     plan_path.parent.mkdir(parents=True, exist_ok=True)
-    temporary.write_text(_serialized(record), encoding="utf-8")
+    temporary.write_bytes(_serialized(record))
     temporary.replace(plan_path)
     return record
 
