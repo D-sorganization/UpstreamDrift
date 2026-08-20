@@ -166,6 +166,7 @@ def test_protected_routers_get_global_auth_dependency(route_registry):
         "dataset",
         "models",
         "actuator_controls",
+        "launch_monitor_analytics",
     ):
         deps = route_registry._dependencies_for_route(module_name)
         assert deps == (route_registry._global_auth_dependency,), module_name

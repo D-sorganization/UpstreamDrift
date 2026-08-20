@@ -2,13 +2,23 @@
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+from functools import lru_cache
 from typing import Any
 
 import pandas as pd
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
 
 from src.api.middleware.error_handler import handle_api_errors
+from src.api.services.launch_monitor_dataset_jobs import (
+    DatasetJobCapacityError,
+    DatasetJobResultPageV1,
+    DatasetJobService,
+    DatasetJobStatusV1,
+    DatasetRootRegistry,
+)
 from src.shared.python.launch_monitor import (
     CONTRACT_VERSION,
     CONTRACT_VERSION_V2,
@@ -33,9 +43,10 @@ from src.shared.python.launch_monitor import (
     contract_v2_json_schema,
     strokes_gained_contract_json_schema,
 )
-
-router = APIRouter(
-    prefix="/tools/launch-monitor-analytics", tags=["launch-monitor-analytics"]
+from src.shared.python.launch_monitor.dataset_reference import (
+    MAX_PAGE_SIZE,
+    DatasetJobRequestV1,
+    dataset_job_contract_json_schema,
 )
 
 
@@ -96,6 +107,32 @@ class OutcomeProxyPayloadV1(BaseModel):
     request: OutcomeProxyRequestV1
 
 
+@lru_cache(maxsize=1)
+def get_launch_monitor_dataset_job_service() -> DatasetJobService:
+    """Return the bounded process-local service for administrator roots."""
+    return DatasetJobService(DatasetRootRegistry.from_environment())
+
+
+@asynccontextmanager
+async def launch_monitor_dataset_jobs_lifespan(
+    _app: object,
+) -> AsyncIterator[None]:
+    """Join cached private-data workers during FastAPI application shutdown."""
+    try:
+        yield
+    finally:
+        if get_launch_monitor_dataset_job_service.cache_info().currsize:
+            get_launch_monitor_dataset_job_service().close()
+            get_launch_monitor_dataset_job_service.cache_clear()
+
+
+router = APIRouter(
+    prefix="/tools/launch-monitor-analytics",
+    tags=["launch-monitor-analytics"],
+    lifespan=launch_monitor_dataset_jobs_lifespan,
+)
+
+
 @router.get("/capabilities")
 @handle_api_errors
 async def capabilities() -> dict[str, object]:
@@ -113,6 +150,9 @@ async def capabilities() -> dict[str, object]:
         "strokes_gained_contract_version": STROKES_GAINED_CONTRACT_VERSION,
         "outcome_proxy_contract_version": OUTCOME_PROXY_CONTRACT_VERSION,
         "outcome_proxy_is_strokes_gained": False,
+        "dataset_reference_jobs": True,
+        "dataset_job_maximum_page_size": MAX_PAGE_SIZE,
+        "dataset_job_inline_rows_allowed": False,
     }
 
 
@@ -130,6 +170,76 @@ async def strokes_gained_contract_v1() -> dict[str, object]:
     """Publish the canonical source-backed scoring result schema."""
 
     return strokes_gained_contract_json_schema()
+
+
+@router.get("/contracts/dataset-jobs/v1")
+@handle_api_errors
+async def dataset_jobs_contract_v1() -> dict[str, object]:
+    """Publish the immutable dataset-reference job request schema."""
+
+    return dataset_job_contract_json_schema()
+
+
+@router.post(
+    "/v2/dataset-jobs",
+    response_model=DatasetJobStatusV1,
+    status_code=status.HTTP_202_ACCEPTED,
+)
+@handle_api_errors
+async def create_dataset_job(
+    payload: DatasetJobRequestV1,
+    service: DatasetJobService = Depends(get_launch_monitor_dataset_job_service),
+) -> DatasetJobStatusV1:
+    """Queue an aggregate job by immutable reference, never inline records."""
+
+    try:
+        return service.submit(payload)
+    except DatasetJobCapacityError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail={
+                "code": "dataset_job_capacity_exhausted",
+                "message": "Dataset job capacity is temporarily exhausted.",
+                "retryable": True,
+            },
+            headers={"Retry-After": "5"},
+        ) from exc
+
+
+@router.get(
+    "/v2/dataset-jobs/{job_id}",
+    response_model=DatasetJobStatusV1,
+)
+@handle_api_errors
+async def get_dataset_job(
+    job_id: str,
+    service: DatasetJobService = Depends(get_launch_monitor_dataset_job_service),
+) -> DatasetJobStatusV1:
+    """Return a data-free job status or a structured unavailable reason."""
+
+    try:
+        return service.status(job_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Dataset job not found") from exc
+
+
+@router.get(
+    "/v2/dataset-jobs/{job_id}/results",
+    response_model=DatasetJobResultPageV1,
+)
+@handle_api_errors
+async def get_dataset_job_results(
+    job_id: str,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=MAX_PAGE_SIZE),
+    service: DatasetJobService = Depends(get_launch_monitor_dataset_job_service),
+) -> DatasetJobResultPageV1:
+    """Return one bounded page of aggregate/source-backing results."""
+
+    try:
+        return service.results(job_id, offset=offset, limit=limit)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Dataset job not found") from exc
 
 
 @router.post("/analyze")

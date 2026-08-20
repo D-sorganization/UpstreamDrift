@@ -7,6 +7,7 @@ from pathlib import Path
 
 from src.shared.python.launch_monitor import (
     contract_v2_json_schema,
+    dataset_job_contract_json_schema,
     strokes_gained_contract_json_schema,
 )
 
@@ -35,6 +36,10 @@ def main() -> None:
     _write_schema(
         contract_root / "launch-monitor-strokes-gained-v1.schema.json",
         strokes_gained_contract_json_schema(),
+    )
+    _write_schema(
+        contract_root / "launch-monitor-dataset-job-v1.schema.json",
+        dataset_job_contract_json_schema(),
     )
 
 

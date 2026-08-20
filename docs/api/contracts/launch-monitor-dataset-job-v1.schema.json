@@ -1,0 +1,112 @@
+{
+  "$defs": {
+    "DatasetOperationV1": {
+      "additionalProperties": false,
+      "description": "Allow-listed aggregate operation; arbitrary query text is forbidden.",
+      "properties": {
+        "group_by": {
+          "anyOf": [
+            {
+              "enum": ["source_id", "monitor", "club"],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Group By"
+        },
+        "kind": {
+          "enum": ["source_summary", "metric_summary", "correlation"],
+          "title": "Kind",
+          "type": "string"
+        },
+        "metrics": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 12,
+          "title": "Metrics",
+          "type": "array"
+        },
+        "minimum_group_rows": {
+          "default": 10,
+          "minimum": 10,
+          "title": "Minimum Group Rows",
+          "type": "integer"
+        }
+      },
+      "required": ["kind"],
+      "title": "DatasetOperationV1",
+      "type": "object"
+    },
+    "DatasetReferenceV1": {
+      "additionalProperties": false,
+      "description": "Content-addressed reference to one authorized authority checkout.",
+      "properties": {
+        "commit": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Commit",
+          "type": "string"
+        },
+        "content_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Content Sha256",
+          "type": "string"
+        },
+        "expected_row_count": {
+          "maximum": 10000000,
+          "minimum": 1,
+          "title": "Expected Row Count",
+          "type": "integer"
+        },
+        "manifest_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Manifest Sha256",
+          "type": "string"
+        },
+        "repository": {
+          "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$",
+          "title": "Repository",
+          "type": "string"
+        },
+        "root_id": {
+          "pattern": "^[a-z][a-z0-9-]{0,62}$",
+          "title": "Root Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "root_id",
+        "repository",
+        "commit",
+        "manifest_sha256",
+        "content_sha256",
+        "expected_row_count"
+      ],
+      "title": "DatasetReferenceV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "A private-data job request containing no inline observations.",
+  "properties": {
+    "contract_version": {
+      "const": "launch-monitor-dataset-job/1.0.0",
+      "default": "launch-monitor-dataset-job/1.0.0",
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "dataset": {
+      "$ref": "#/$defs/DatasetReferenceV1"
+    },
+    "operation": {
+      "$ref": "#/$defs/DatasetOperationV1"
+    }
+  },
+  "required": ["dataset", "operation"],
+  "title": "DatasetJobRequestV1",
+  "type": "object"
+}

@@ -42,6 +42,15 @@ from src.shared.python.launch_monitor.dispersion import (
     DispersionResult,
     analyze_dispersion,
 )
+from src.shared.python.launch_monitor.dataset_reference import (
+    DATASET_JOB_CONTRACT_VERSION,
+    DatasetJobRequestV1,
+    DatasetOperationV1,
+    DatasetReferenceV1,
+    DatasetUnavailableStateV1,
+    dataset_content_sha256,
+    dataset_job_contract_json_schema,
+)
 from src.shared.python.launch_monitor.flexible_analysis import (
     CONTRACT_VERSION,
     AnalysisMode,
@@ -144,6 +153,11 @@ __all__ = [
     "CorrelationResult",
     "CourseStateColumnsV1",
     "DatasetSummary",
+    "DATASET_JOB_CONTRACT_VERSION",
+    "DatasetJobRequestV1",
+    "DatasetOperationV1",
+    "DatasetReferenceV1",
+    "DatasetUnavailableStateV1",
     "DatasetAuthorityV2",
     "DependencyEdge",
     "DispersionResult",
@@ -207,6 +221,8 @@ __all__ = [
     "compute_vif",
     "contract_v2_json_schema",
     "detect_profile",
+    "dataset_content_sha256",
+    "dataset_job_contract_json_schema",
     "fit_predictive_model",
     "import_session",
     "load_private_corpus",
