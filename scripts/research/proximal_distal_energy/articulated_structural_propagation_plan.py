@@ -37,6 +37,7 @@ SOURCE_PATHS = tuple(
             "scripts/research/proximal_distal_energy/articulated_structural_common_support.py",
             "scripts/research/proximal_distal_energy/articulated_structural_cell_evidence.py",
             "scripts/research/proximal_distal_energy/articulated_structural_corner_evidence.py",
+            "scripts/research/proximal_distal_energy/articulated_structural_figure_data.py",
             "scripts/research/proximal_distal_energy/articulated_structural_gate_status.py",
             "scripts/research/proximal_distal_energy/articulated_structural_result.py",
             "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py",
@@ -45,6 +46,7 @@ SOURCE_PATHS = tuple(
             "tests/research/test_articulated_structural_common_support.py",
             "tests/research/test_articulated_structural_cell_evidence.py",
             "tests/research/test_articulated_structural_corner_evidence.py",
+            "tests/research/test_articulated_structural_figure_data.py",
             "tests/research/test_articulated_structural_gate_status.py",
             "tests/research/test_articulated_structural_result.py",
             "tests/research/test_articulated_structural_propagation_plan.py",
@@ -337,6 +339,8 @@ def build_structural_propagation_plan(
         "resolution_boundary": "the 0.001 m/s floor is a preregistered synthetic numerical interpretation threshold, not device accuracy or human measurement uncertainty",
     }
     figure_contract = {
+        "data_schema_version": "articulated-structural-figure-data/v1",
+        "data_rule": "derive all panels deterministically from the complete result and exactly 14 digest-bound cell packs; do not filter favorable corners or cells",
         "required_panels": [
             "planned feasible executed and matched support",
             "entered exited and persistent common matching support",

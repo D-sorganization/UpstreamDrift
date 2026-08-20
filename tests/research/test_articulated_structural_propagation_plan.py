@@ -47,6 +47,7 @@ def test_plan_binds_all_seven_authority_corners(plan) -> None:
         "scripts/research/proximal_distal_energy/articulated_structural_common_support.py",
         "scripts/research/proximal_distal_energy/articulated_structural_cell_evidence.py",
         "scripts/research/proximal_distal_energy/articulated_structural_corner_evidence.py",
+        "scripts/research/proximal_distal_energy/articulated_structural_figure_data.py",
         "scripts/research/proximal_distal_energy/articulated_structural_gate_status.py",
         "scripts/research/proximal_distal_energy/articulated_structural_result.py",
         "scripts/research/proximal_distal_energy/articulated_shaft_forward.py",
@@ -55,6 +56,7 @@ def test_plan_binds_all_seven_authority_corners(plan) -> None:
         "tests/research/test_articulated_structural_common_support.py",
         "tests/research/test_articulated_structural_cell_evidence.py",
         "tests/research/test_articulated_structural_corner_evidence.py",
+        "tests/research/test_articulated_structural_figure_data.py",
         "tests/research/test_articulated_structural_gate_status.py",
         "tests/research/test_articulated_structural_result.py",
         "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
@@ -244,6 +246,9 @@ def test_plan_binds_restart_and_cell_level_evidence_contract(plan) -> None:
 def test_plan_preregisters_nonmisleading_publication_figure(plan) -> None:
     figure = plan["figure_contract"]
 
+    assert figure["data_schema_version"] == "articulated-structural-figure-data/v1"
+    assert "exactly 14 digest-bound cell packs" in figure["data_rule"]
+    assert "do not filter favorable" in figure["data_rule"]
     assert figure["required_panels"] == [
         "planned feasible executed and matched support",
         "entered exited and persistent common matching support",
