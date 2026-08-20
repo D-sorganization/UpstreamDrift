@@ -1,0 +1,49 @@
+#### Registered Engineering-Bound Headline Uncertainty
+
+The shaft and finite-ground results above are conditional on synthetic grip,
+shaft, and support properties. A point count alone does not show whether the
+headline survives plausible engineering variation. The registered uncertainty
+campaign therefore repeats the complete production atlases at nominal and at
+low and high one-at-a-time corners. It does not replace either atlas with a
+reduced surrogate. Every affected corner retains both native engines, complete
+velocity reversal, the registered timestep refinement pair, pathway
+killswitches, the same 4--50 ms horizons, and the same 5% peak-load and
+dissipated-work matching rule.
+
+The design contains one nominal case and 18 corners over nine axes. Grip total
+stiffness is scaled to 0.6 and 1.4 of nominal, and grip total damping to 0.5 and
+1.5. First bending frequency is scaled to 0.8 and 1.2; torsional stiffness to
+0.64 and 1.44, corresponding to 0.8 and 1.2 frequency-scale endpoints when
+inertia is fixed; and shaft damping ratio spans 0.009--0.036 around 0.018.
+Ground translation stiffness, translation damping, intrinsic-free-moment
+stiffness, and intrinsic-free-moment damping each span 0.5--1.5 of nominal.
+These are transparent engineering bounds, not measured distributions of
+players, grips, shafts, footwear, or surfaces.
+
+The estimand is deliberately narrow. For each corner, the campaign reports the
+number of coupled-versus-reference cells that still satisfy the unchanged
+load--work comparability screen and its change from the nominal 126/384 shaft
+and 0/384 ground counts. A change in count means that comparability
+classification is sensitive to that parameter. It is not an effect size, a
+probability, evidence that a pathway improves clubhead speed, or permission to
+interpret unmatched speed differences. A ground corner moving above zero, for
+example, would identify cells eligible for the already registered matched
+comparison; it would not establish a ground-use benefit.
+
+![Articulated Headline Sensitivity Across Registered Engineering Bounds](figures/fig_articulated_headline_uncertainty.pdf){#fig-articulated-headline-uncertainty width=100%}
+
+Figure @fig-articulated-headline-uncertainty shows low and high count changes
+separately for the shaft and finite-ground screens. A failed corner remains in
+the machine-readable record and appears explicitly rather than being removed
+from the denominator. The governed record is available as
+[`data/articulated_headline_uncertainty.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/articulated_headline_uncertainty.json),
+and the executable design is available as
+[`articulated_headline_uncertainty.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py).
+
+This one-at-a-time design exposes first-order fragility and adverse numerical
+corners, but it does not estimate parameter interactions or a joint uncertainty
+distribution. Survival across these bounds remains qualification only for the
+declared synthetic model. Equipment calibration, participant-specific contact
+and anatomy, unilateral foot contact, impact, full-downswing delivery, and
+held-out bilateral-wrench validation remain required before any human or
+coaching interpretation.

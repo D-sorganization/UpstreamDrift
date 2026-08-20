@@ -292,6 +292,8 @@ format:
 
 {{< include chapters/_ch06ca_articulated_ground.qmd >}}
 
+{{< include chapters/_ch06cab_articulated_headline_uncertainty.qmd >}}
+
 {{< include chapters/_ch06cb_spatial_cross_tail.qmd >}}
 
 {{< include chapters/_ch06cc_spatial_forward_contact.qmd >}}
