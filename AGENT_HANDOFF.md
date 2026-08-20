@@ -97,9 +97,12 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     bilateral closure, retains collision/limit/rank failure classes, and derives
     a local closed-state velocity. Four focused closure/resolution tests pass;
     an existing broad two-profile atlas test exceeded the repository's 90-second
-    local pytest timeout and is reserved for the registered campaign. Wiring the
-    resolver into every campaign cell; reversal and killswitch branches;
-    per-corner refinement; headline
+    local pytest timeout and is reserved for the registered campaign. The
+    preliminary LHS screen now regenerates every anthropometric/limit cell,
+    perturbs equipment separately, and retains infeasible cells through an
+    explicit analysis-inclusion mask; its three focused tests pass. Extending
+    the same state authority to the full shaft/ground headline campaigns;
+    reversal and killswitch branches; per-corner refinement; headline
     126/384 shaft and 0/384 ground estimand movement; governed artifacts; paper
     integration; and protected publication remain open.
 - The release has 295 atomic claims and 40 reviewed release claims; all 40

@@ -24,8 +24,6 @@ from scripts.research.proximal_distal_energy.articulated_distributed_grip import
     DistributedGripConfig,
 )
 from scripts.research.proximal_distal_energy.spatial_full_body import (
-    BodySpec,
-    JointSpec,
     SpatialModel,
     prescribed_state,
 )
@@ -103,8 +101,9 @@ def partial_rank_correlations(
 
 
 UNCERTAINTY_PARAMETERS = (
-    "arm_length_scale",
+    "height_scale",
     "body_mass_scale",
+    "joint_limit_scale",
     "grip_stiffness_n_m",
     "grip_damping_n_s_m",
     "friction_coefficient",
@@ -132,10 +131,13 @@ class ArticulatedUncertaintyConfig:
     time_step_s: float = 0.001
     station_count_per_hand: int = 3
     station_width_m: float = 0.03
+    authority_case_index: int = 0
+    authority_sample_index: int = 6
 
     # Parameter bounds: (min, max)
-    arm_length_range: tuple[float, float] = (0.90, 1.10)
+    height_scale_range: tuple[float, float] = (0.90, 1.10)
     body_mass_range: tuple[float, float] = (0.85, 1.15)
+    joint_limit_scale_range: tuple[float, float] = (0.85, 1.15)
     grip_stiffness_range: tuple[float, float] = (1000.0, 3000.0)
     grip_damping_range: tuple[float, float] = (10.0, 35.0)
     friction_range: tuple[float, float] = (0.15, 0.65)
@@ -249,39 +251,32 @@ def resolve_uncertain_closed_state(
     )
 
 
-def _scale_model(
+def _scale_equipment_model(
     base_model: SpatialModel,
-    arm_scale: float,
-    mass_scale: float,
     club_mass: float,
     moi_scale: float,
 ) -> SpatialModel:
-    """Build parameter-perturbed SpatialModel."""
-    new_joints = []
-    for j in base_model.joints:
-        offset = j.offset_m.copy()
-        if "arm" in j.region:
-            offset *= arm_scale
-        new_joints.append(
-            JointSpec(j.name, j.parent, j.kind, j.axis.copy(), offset, j.region)
-        )
+    """Vary declared equipment mass/inertia without rescaling the subject."""
 
-    new_bodies = []
-    for b in base_model.bodies:
-        m = b.mass_kg * mass_scale if b.region != "club" else club_mass
-        r = b.radius_m * moi_scale if b.region == "club" else b.radius_m
-        new_bodies.append(
-            BodySpec(b.name, b.joint, m, r, b.com_offset_m.copy(), b.region)
+    club_bodies = [body for body in base_model.bodies if body.region == "club"]
+    reference_mass = sum(body.mass_kg for body in club_bodies)
+    bodies = tuple(
+        replace(
+            body,
+            mass_kg=(
+                body.mass_kg * club_mass / reference_mass
+                if body.region == "club"
+                else body.mass_kg
+            ),
+            radius_m=(
+                body.radius_m * moi_scale**0.5
+                if body.region == "club"
+                else body.radius_m
+            ),
         )
-
-    return SpatialModel(
-        joints=tuple(new_joints),
-        bodies=tuple(new_bodies),
-        club_dof_indices=base_model.club_dof_indices.copy(),
-        lead_hand_joint=base_model.lead_hand_joint,
-        trail_hand_joint=base_model.trail_hand_joint,
-        club_frame_joint=base_model.club_frame_joint,
+        for body in base_model.bodies
     )
+    return replace(base_model, bodies=bodies)
 
 
 def _sample_parameters(
@@ -290,8 +285,9 @@ def _sample_parameters(
     dim = len(UNCERTAINTY_PARAMETERS)
     lhs = latin_hypercube(config.sample_count, dim, seed=config.seed)
     ranges = [
-        config.arm_length_range,
+        config.height_scale_range,
         config.body_mass_range,
+        config.joint_limit_scale_range,
         config.grip_stiffness_range,
         config.grip_damping_range,
         config.friction_range,
@@ -307,17 +303,26 @@ def _sample_parameters(
 
 def _evaluate_uncertainty_trajectory(
     sample_params: FloatArray,
-    base_model: SpatialModel,
-    q_base: FloatArray,
+    profile_index: int,
+    sample_time_s: float,
     grip_span_m: float,
-    hand_contact_x: float,
     config: ArticulatedUncertaintyConfig,
     forward_cfg: DistributedForwardConfig,
 ) -> tuple[float, float, float, int, float, str]:
-    arm_scale, mass_scale, k_grip, c_grip, mu, m_club, moi_scale, v_init = (
+    height, mass, limits, k_grip, c_grip, mu, m_club, moi_scale, v_init = (
         float(x) for x in sample_params
     )
-    model_s = _scale_model(base_model, arm_scale, mass_scale, m_club, moi_scale)
+    resolved = resolve_uncertain_closed_state(
+        profile_index=profile_index,
+        grip_span_m=grip_span_m,
+        sample_time_s=sample_time_s,
+        height_scale=height,
+        mass_scale=mass,
+        joint_limit_scale=limits,
+    )
+    if not resolved.feasible:
+        return np.nan, np.nan, np.nan, 0, np.nan, resolved.failure_class
+    model_s = _scale_equipment_model(resolved.model, m_club, moi_scale)
     grip_cfg = DistributedGripConfig(
         station_count_per_hand=config.station_count_per_hand,
         station_width_m=config.station_width_m,
@@ -327,10 +332,10 @@ def _evaluate_uncertainty_trajectory(
         friction_coefficient=mu,
     )
     case = DistributedIntegrationCase(
-        q=q_base,
-        qd=np.zeros(base_model.nq),
+        q=resolved.q,
+        qd=resolved.qd,
         grip_span_m=grip_span_m,
-        hand_contact_local_x_m=hand_contact_x * arm_scale,
+        hand_contact_local_x_m=float(resolved.metadata["hand_contact_local_x_m"]),
         time_step_s=config.time_step_s,
         initial_club_displacement_m=0.001,
         initial_club_velocity_m_s=v_init,
@@ -369,10 +374,15 @@ def _build_uncertainty_study_record(
             energy_residuals,
         ]
     )
+    analysis_included = np.all(np.isfinite(response_matrix), axis=1)
     dim = param_matrix.shape[1]
     prcc_matrix = np.zeros((len(OUTPUT_METRICS), dim))
-    for m in range(len(OUTPUT_METRICS)):
-        prcc_matrix[m] = partial_rank_correlations(param_matrix, response_matrix[:, m])
+    if np.count_nonzero(analysis_included) >= 3:
+        for metric_index in range(len(OUTPUT_METRICS)):
+            prcc_matrix[metric_index] = partial_rank_correlations(
+                param_matrix[analysis_included],
+                response_matrix[analysis_included, metric_index],
+            )
 
     unique_classes, counts = np.unique(failure_classes, return_counts=True)
     failure_map = {str(k): int(v) for k, v in zip(unique_classes, counts, strict=True)}
@@ -384,6 +394,7 @@ def _build_uncertainty_study_record(
         "response_matrix": response_matrix,
         "prcc_sensitivity_matrix": prcc_matrix,
         "failure_classes": np.asarray(failure_classes),
+        "analysis_included": analysis_included,
     }
     record = {
         "schema_version": "articulated-uncertainty-study/v1",
@@ -394,10 +405,16 @@ def _build_uncertainty_study_record(
         "results": {
             "sample_count": config.sample_count,
             "failure_distribution": failure_map,
-            "mean_peak_force_n": float(np.mean(peak_forces)),
-            "mean_peak_couple_nm": float(np.mean(peak_couples)),
-            "maximum_normalized_work_energy_residual": float(np.max(energy_residuals)),
-            "all_simulations_energy_closed": bool(np.all(energy_residuals < 0.05)),
+            "analysis_included_count": int(np.count_nonzero(analysis_included)),
+            "mean_peak_force_n": float(np.nanmean(peak_forces)),
+            "mean_peak_couple_nm": float(np.nanmean(peak_couples)),
+            "maximum_normalized_work_energy_residual": float(
+                np.nanmax(energy_residuals)
+            ),
+            "all_simulations_energy_closed": bool(
+                np.all(energy_residuals[analysis_included] < 0.05)
+                and np.any(analysis_included)
+            ),
             "top_sensitivities": {
                 metric: {
                     UNCERTAINTY_PARAMETERS[
@@ -415,11 +432,10 @@ def run_articulated_uncertainty_study(
     config: ArticulatedUncertaintyConfig = ArticulatedUncertaintyConfig(),
 ) -> tuple[dict[str, Any], dict[str, NDArray[Any]]]:
     """Execute LHS parameter sweeps, PRCC sensitivity mapping, and failure classification."""
-    base_model, metadata = build_subject_scaled_model(default_synthetic_profiles()[0])
     with np.load(DATA_DIR / "subject_scaled_closed_contact.npz") as source:
-        q_base = np.asarray(source["solution_q"][0, 6], dtype=float)
-        grip_span_m = float(source["case_grip_span_m"][0])
-    hand_contact_x = float(metadata["hand_contact_local_x_m"])
+        profile_index = int(source["case_profile_index"][config.authority_case_index])
+        grip_span_m = float(source["case_grip_span_m"][config.authority_case_index])
+        sample_time_s = float(source["time_s"][config.authority_sample_index])
 
     param_matrix = _sample_parameters(config)
     peak_forces = np.zeros(config.sample_count)
@@ -437,10 +453,9 @@ def run_articulated_uncertainty_study(
     for s in range(config.sample_count):
         pf, pc, ss, tc, er, fc = _evaluate_uncertainty_trajectory(
             param_matrix[s],
-            base_model,
-            q_base,
+            profile_index,
+            sample_time_s,
             grip_span_m,
-            hand_contact_x,
             config,
             forward_cfg,
         )

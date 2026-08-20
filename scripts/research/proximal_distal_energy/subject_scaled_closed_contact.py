@@ -213,6 +213,59 @@ def _rank_and_singular_values(matrix: FloatArray) -> tuple[int, FloatArray]:
     return int(np.count_nonzero(singular_values > threshold)), singular_values
 
 
+def _finalize_solution(
+    model: SpatialModel,
+    q_reference: FloatArray,
+    active: NDArray[np.int_],
+    lower: FloatArray,
+    upper: FloatArray,
+    result: Any,
+    contact_geometry: tuple[float, float],
+    config: ClosedContactConfig,
+) -> ClosedContactSolution:
+    grip_span_m, hand_contact_local_x_m = contact_geometry
+    q = q_reference.copy()
+    q[active] = result.x
+    errors, constraint_jacobian, kinematics = _contact_kinematics(
+        model,
+        q,
+        grip_span_m=grip_span_m,
+        hand_contact_local_x_m=hand_contact_local_x_m,
+    )
+    distances = np.linalg.norm(errors, axis=1)
+    contact_closed = bool(np.max(distances) <= config.closure_tolerance_m)
+    margins = np.minimum(result.x - lower[active], upper[active] - result.x)
+    minimum_joint_margin = float(np.min(margins))
+    limits_satisfied = minimum_joint_margin >= -1.0e-10
+    collision_clearance, closest_pair = _collision_clearance(model, kinematics)
+    collision_free = collision_clearance >= 0.0
+    rank, singular_values = _rank_and_singular_values(constraint_jacobian)
+    converged = bool(result.success and np.all(np.isfinite(result.x)))
+    feasible = bool(
+        converged
+        and contact_closed
+        and limits_satisfied
+        and collision_free
+        and rank == 6
+    )
+    return ClosedContactSolution(
+        q=q,
+        hand_to_grip_distance_m=distances,
+        solver_converged=converged,
+        contact_closed=contact_closed,
+        joint_limits_satisfied=limits_satisfied,
+        collision_free=collision_free,
+        feasible=feasible,
+        minimum_joint_limit_margin_rad=minimum_joint_margin,
+        minimum_collision_clearance_m=collision_clearance,
+        closest_collision_pair=closest_pair,
+        constraint_jacobian_rank=rank,
+        constraint_jacobian_singular_values=singular_values,
+        function_evaluations=int(result.nfev),
+        cost=float(result.cost),
+    )
+
+
 def solve_closed_contact_configuration(
     model: SpatialModel,
     *,
@@ -286,57 +339,23 @@ def solve_closed_contact_configuration(
         gtol=config.solver_tolerance,
         max_nfev=config.maximum_function_evaluations,
     )
-    q = q_reference.copy()
-    q[active] = result.x
-    errors, constraint_jacobian, kin = _contact_kinematics(
+    return _finalize_solution(
         model,
-        q,
-        grip_span_m=grip_span_m,
-        hand_contact_local_x_m=hand_contact_local_x_m,
-    )
-    distances = np.linalg.norm(errors, axis=1)
-    contact_closed = bool(np.max(distances) <= config.closure_tolerance_m)
-    margins = np.minimum(result.x - lower[active], upper[active] - result.x)
-    minimum_joint_margin = float(np.min(margins))
-    limits_satisfied = bool(minimum_joint_margin >= -1.0e-10)
-    collision_clearance, closest_pair = _collision_clearance(model, kin)
-    collision_free = bool(collision_clearance >= 0.0)
-    rank, singular_values = _rank_and_singular_values(constraint_jacobian)
-    converged = bool(result.success and np.all(np.isfinite(result.x)))
-    feasible = bool(
-        converged
-        and contact_closed
-        and limits_satisfied
-        and collision_free
-        and rank == 6
-    )
-    return ClosedContactSolution(
-        q=q,
-        hand_to_grip_distance_m=distances,
-        solver_converged=converged,
-        contact_closed=contact_closed,
-        joint_limits_satisfied=limits_satisfied,
-        collision_free=collision_free,
-        feasible=feasible,
-        minimum_joint_limit_margin_rad=minimum_joint_margin,
-        minimum_collision_clearance_m=collision_clearance,
-        closest_collision_pair=closest_pair,
-        constraint_jacobian_rank=rank,
-        constraint_jacobian_singular_values=singular_values,
-        function_evaluations=int(result.nfev),
-        cost=float(result.cost),
+        q_reference,
+        active,
+        lower,
+        upper,
+        result,
+        (grip_span_m, hand_contact_local_x_m),
+        config,
     )
 
 
-def run_closed_contact_feasibility_atlas(
-    *,
+def _atlas_inputs(
     profiles: Sequence[SyntheticSubjectProfile] | None = None,
     grip_spans_m: FloatArray | None = None,
     time_s: FloatArray | None = None,
-    config: ClosedContactConfig = ClosedContactConfig(),
-) -> tuple[dict[str, Any], dict[str, NDArray[Any]]]:
-    """Run a deterministic continuation atlas across profiles, spans, and time."""
-
+) -> tuple[tuple[SyntheticSubjectProfile, ...], FloatArray, FloatArray]:
     selected_profiles = tuple(
         default_synthetic_profiles() if profiles is None else profiles
     )
@@ -366,6 +385,93 @@ def run_closed_contact_feasibility_atlas(
         or np.any(times < 0.0)
     ):
         raise ValueError("time_s must be one-dimensional, finite, and nonnegative")
+    return selected_profiles, spans, times
+
+
+def _atlas_record(
+    selected_profiles: tuple[SyntheticSubjectProfile, ...],
+    spans: FloatArray,
+    times: FloatArray,
+    profile_records: list[dict[str, Any]],
+    config: ClosedContactConfig,
+    arrays: dict[str, NDArray[Any]],
+) -> dict[str, Any]:
+    feasible = arrays["feasible"]
+    distances = arrays["hand_to_grip_distance_m"]
+    margin = arrays["minimum_joint_limit_margin_rad"]
+    clearance = arrays["minimum_collision_clearance_m"]
+    evaluations = arrays["function_evaluations"]
+    change = arrays["adjacent_configuration_change_rad"]
+    rank = arrays["constraint_jacobian_rank"]
+    return {
+        "schema_version": "subject-scaled-closed-contact/v1",
+        "study_id": "subject-scaled-bilateral-closed-contact-feasibility",
+        "model_tier": "reduced_articulated_subject_scaled_inverse_kinematics",
+        "design": {
+            "profile_count": len(selected_profiles),
+            "grip_span_count": int(spans.size),
+            "case_count": int(feasible.shape[0]),
+            "time_sample_count": int(times.size),
+            "grip_spans_m": spans.tolist(),
+            "time_s": times.tolist(),
+            "profiles": profile_records,
+            "club_coordinates": "held_at_each_prescribed_reference_state",
+            "solved_coordinates": [
+                joint.name
+                for joint in build_subject_scaled_model(selected_profiles[0])[0].joints[
+                    :ACTIVE_DOF_COUNT
+                ]
+            ],
+        },
+        "registered_gates": {
+            "solver": "bounded_trust_region_reflective_least_squares",
+            "configuration": asdict(config),
+            "joint_limits": "declared_reduced_model_engineering_bounds_not_clinical_ranges",
+            "collision": "nonadjacent_physical_body_bounding_spheres",
+            "constraint_rank_required": 6,
+        },
+        "results": {
+            "feasible_sample_count": int(np.count_nonzero(feasible)),
+            "total_sample_count": int(feasible.size),
+            "feasible_fraction": float(np.mean(feasible)),
+            "maximum_contact_error_m": float(np.max(distances)),
+            "minimum_joint_limit_margin_rad": float(np.min(margin)),
+            "minimum_collision_clearance_m": float(np.min(clearance)),
+            "maximum_function_evaluations": int(np.max(evaluations)),
+            "maximum_adjacent_configuration_change_rad": float(np.max(change)),
+            "median_adjacent_configuration_change_rad": float(np.median(change)),
+            "constraint_jacobian_rank_values": sorted(
+                int(value) for value in np.unique(rank)
+            ),
+        },
+        "claim_status": {
+            "closed_contact_feasibility": "evaluated_in_declared_reduced_tree",
+            "anatomical_feasibility": "not_established",
+            "passive_transfer": "untested",
+            "timing_or_slack_benefit": "untested",
+            "human_strategy": "untested",
+        },
+        "limitations": [
+            "Joint limits are broad engineering guards, not clinical or subject-specific ranges of motion.",
+            "Collision uses reduced spherical bounds and exempt connected or intended-contact pairs; it is not mesh-level anatomical clearance.",
+            "The scapula, forearm pronation-supination, multi-axis wrist, fingers, and distributed grip contact are absent.",
+            "Inverse kinematics establishes no force, work, passivity, timing, robustness, slack, or delivery result.",
+            "Synthetic de Leva design points are not participants or a population distribution.",
+        ],
+        "array_artifact": "subject_scaled_closed_contact.npz",
+    }
+
+
+def run_closed_contact_feasibility_atlas(
+    *,
+    profiles: Sequence[SyntheticSubjectProfile] | None = None,
+    grip_spans_m: FloatArray | None = None,
+    time_s: FloatArray | None = None,
+    config: ClosedContactConfig = ClosedContactConfig(),
+) -> tuple[dict[str, Any], dict[str, NDArray[Any]]]:
+    """Run a deterministic continuation atlas across profiles, spans, and time."""
+
+    selected_profiles, spans, times = _atlas_inputs(profiles, grip_spans_m, time_s)
 
     case_count = len(selected_profiles) * spans.size
     shape = (case_count, times.size)
@@ -420,67 +526,6 @@ def run_closed_contact_feasibility_atlas(
     adjacent_configuration_change = np.linalg.norm(
         np.diff(solution_q[:, :, :ACTIVE_DOF_COUNT], axis=1), axis=2
     )
-    record: dict[str, Any] = {
-        "schema_version": "subject-scaled-closed-contact/v1",
-        "study_id": "subject-scaled-bilateral-closed-contact-feasibility",
-        "model_tier": "reduced_articulated_subject_scaled_inverse_kinematics",
-        "design": {
-            "profile_count": len(selected_profiles),
-            "grip_span_count": int(spans.size),
-            "case_count": case_count,
-            "time_sample_count": int(times.size),
-            "grip_spans_m": spans.tolist(),
-            "time_s": times.tolist(),
-            "profiles": profile_records,
-            "club_coordinates": "held_at_each_prescribed_reference_state",
-            "solved_coordinates": [
-                joint.name
-                for joint in build_subject_scaled_model(selected_profiles[0])[0].joints[
-                    :ACTIVE_DOF_COUNT
-                ]
-            ],
-        },
-        "registered_gates": {
-            "solver": "bounded_trust_region_reflective_least_squares",
-            "configuration": asdict(config),
-            "joint_limits": "declared_reduced_model_engineering_bounds_not_clinical_ranges",
-            "collision": "nonadjacent_physical_body_bounding_spheres",
-            "constraint_rank_required": 6,
-        },
-        "results": {
-            "feasible_sample_count": int(np.count_nonzero(feasible)),
-            "total_sample_count": int(feasible.size),
-            "feasible_fraction": float(np.mean(feasible)),
-            "maximum_contact_error_m": float(np.max(distances)),
-            "minimum_joint_limit_margin_rad": float(np.min(limit_margin)),
-            "minimum_collision_clearance_m": float(np.min(collision_clearance)),
-            "maximum_function_evaluations": int(np.max(function_evaluations)),
-            "maximum_adjacent_configuration_change_rad": float(
-                np.max(adjacent_configuration_change)
-            ),
-            "median_adjacent_configuration_change_rad": float(
-                np.median(adjacent_configuration_change)
-            ),
-            "constraint_jacobian_rank_values": sorted(
-                int(value) for value in np.unique(rank)
-            ),
-        },
-        "claim_status": {
-            "closed_contact_feasibility": "evaluated_in_declared_reduced_tree",
-            "anatomical_feasibility": "not_established",
-            "passive_transfer": "untested",
-            "timing_or_slack_benefit": "untested",
-            "human_strategy": "untested",
-        },
-        "limitations": [
-            "Joint limits are broad engineering guards, not clinical or subject-specific ranges of motion.",
-            "Collision uses reduced spherical bounds and exempt connected or intended-contact pairs; it is not mesh-level anatomical clearance.",
-            "The scapula, forearm pronation-supination, multi-axis wrist, fingers, and distributed grip contact are absent.",
-            "Inverse kinematics establishes no force, work, passivity, timing, robustness, slack, or delivery result.",
-            "Synthetic de Leva design points are not participants or a population distribution.",
-        ],
-        "array_artifact": "subject_scaled_closed_contact.npz",
-    }
     arrays: dict[str, NDArray[Any]] = {
         "time_s": times,
         "grip_spans_m": spans,
@@ -498,7 +543,9 @@ def run_closed_contact_feasibility_atlas(
         "solution_q": solution_q,
         "adjacent_configuration_change_rad": adjacent_configuration_change,
     }
-    return record, arrays
+    return _atlas_record(
+        selected_profiles, spans, times, profile_records, config, arrays
+    ), arrays
 
 
 __all__ = [

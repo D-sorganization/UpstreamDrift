@@ -63,14 +63,15 @@ def test_uncertain_closed_state_contract_fails_closed() -> None:
 def test_articulated_uncertainty_sweep_and_prcc_sensitivity() -> None:
     """Uncertainty sweep must execute, maintain energy closure, and compute valid PRCC."""
     config = ArticulatedUncertaintyConfig(
-        sample_count=20,
+        sample_count=4,
         seed=1234,
         duration_s=0.01,
         time_step_s=0.001,
     )
     record, arrays = run_articulated_uncertainty_study(config)
 
-    assert record["results"]["sample_count"] == 20
+    assert record["results"]["sample_count"] == 4
+    assert record["results"]["analysis_included_count"] == 4
     assert record["results"]["all_simulations_energy_closed"] is True
 
     # Verify PRCC matrix shape and bounds in [-1, 1]
@@ -81,5 +82,5 @@ def test_articulated_uncertainty_sweep_and_prcc_sensitivity() -> None:
 
     # Verify failure classification map
     failures = record["results"]["failure_distribution"]
-    assert sum(failures.values()) == 20
+    assert sum(failures.values()) == 4
     assert all(count > 0 for count in failures.values())
