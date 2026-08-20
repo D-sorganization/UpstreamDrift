@@ -77,7 +77,7 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     retains partial opening. The 19-corner headline campaign is incomplete:
     nominal completed at shaft 126/384 and ground 0/384; every gate and all four
     source hashes match remote basis `fbff8dc53`. Exec session `64656` completed
-    grip-stiffness-low shaft at 182/384 (+56 nominal); ground has 21/72 durable,
+    grip-stiffness-low shaft at 182/384 (+56 nominal); ground has 25/72 durable,
     unique v1 branches under design digest `32ccf54bee70`; the corner and 1/19
     campaign record remain incomplete.
     All 72 nominal branch checkpoints retain exact trajectory/force/ground-force
