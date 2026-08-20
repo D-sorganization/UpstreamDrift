@@ -70,17 +70,19 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     nominal shaft recomputation completed at 126/384 with all four computation
     hashes verified against remote basis `fbff8dc53`. Nominal ground is active
     in exec session `64656` with 20 workers and 72 independently digest-bound
-    branch checkpoints; a real restart-equivalence test passes.
-    Completion-only headline/structural evidence tests stay untracked until data finish.
+    branch checkpoints; branch 1/72 is durable, digest-bound, and records exact
+    trajectory/force/ground-force parity. A real restart-equivalence test passes.
+    The completion-only headline evidence test stays untracked until data finish.
   - #8800 is **OPEN** and blocks #8752. Its governed generator regenerates all
     13 phase states for cases 0/8/9/17; nominal is 52/52 feasible and reproduces
     committed states within 1e-8 rad. JSON/NPZ evidence rejects source/content
     drift. `ArticulatedAtlasAuthority` binds exact scaled models and retains
-    infeasible phases. Session `15825` has nominal 52/52 with the exact prior
-    digest; height-low retains case 0/phase 12 `ik_nonconvergence`; height-high
-    both mass corners and joint-limit-low are 52/52 feasible. Joint-limit-low
-    retains 0.0885 rad minimum margin, 1.03e-10 m maximum closure error, and
-    0.0491 m minimum collision clearance. Joint-limit-high is running.
+    infeasible phases. The seven-corner campaign completed: nominal, height-high,
+    both mass, and both joint-limit corners are 52/52 feasible; height-low retains
+    case 0/phase 12 `ik_nonconvergence`. Joint-limit-low retains 0.0885 rad
+    minimum margin; joint-limit-high retains 0.1185 rad. Their maximum closure
+    errors are 1.03e-10 m and minimum collision clearances are 0.0491 m. The
+    completion-only evidence gate passes 2/2 and loads every retained artifact.
 - The release has 295 atomic claims and 40 reviewed release claims; all 40
   retain at least one scientifically open gate. #8724 still owns normalized
   four-way adjudication and independent review.

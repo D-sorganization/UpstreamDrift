@@ -1,0 +1,238 @@
+{
+  "schema_version": "articulated-structural-authority-campaign/v1",
+  "study_id": "articulated-structural-headline-authority-corners",
+  "status": "complete",
+  "design_sha256": "0a8d9a7ae5007363d731f7adb188d6746d34bc7a93f581e80a24bdd055f51522",
+  "design": [
+    {
+      "corner_id": "nominal",
+      "axis_name": "nominal",
+      "level": "nominal",
+      "value": 1.0,
+      "configuration": {
+        "case_indices": [0, 8, 9, 17],
+        "height_scale": 1.0,
+        "body_mass_scale": 1.0,
+        "joint_limit_scale": 1.0
+      }
+    },
+    {
+      "corner_id": "height_scale-low",
+      "axis_name": "height_scale",
+      "level": "low",
+      "value": 0.9,
+      "configuration": {
+        "case_indices": [0, 8, 9, 17],
+        "height_scale": 0.9,
+        "body_mass_scale": 1.0,
+        "joint_limit_scale": 1.0
+      }
+    },
+    {
+      "corner_id": "height_scale-high",
+      "axis_name": "height_scale",
+      "level": "high",
+      "value": 1.1,
+      "configuration": {
+        "case_indices": [0, 8, 9, 17],
+        "height_scale": 1.1,
+        "body_mass_scale": 1.0,
+        "joint_limit_scale": 1.0
+      }
+    },
+    {
+      "corner_id": "body_mass_scale-low",
+      "axis_name": "body_mass_scale",
+      "level": "low",
+      "value": 0.85,
+      "configuration": {
+        "case_indices": [0, 8, 9, 17],
+        "height_scale": 1.0,
+        "body_mass_scale": 0.85,
+        "joint_limit_scale": 1.0
+      }
+    },
+    {
+      "corner_id": "body_mass_scale-high",
+      "axis_name": "body_mass_scale",
+      "level": "high",
+      "value": 1.15,
+      "configuration": {
+        "case_indices": [0, 8, 9, 17],
+        "height_scale": 1.0,
+        "body_mass_scale": 1.15,
+        "joint_limit_scale": 1.0
+      }
+    },
+    {
+      "corner_id": "joint_limit_scale-low",
+      "axis_name": "joint_limit_scale",
+      "level": "low",
+      "value": 0.85,
+      "configuration": {
+        "case_indices": [0, 8, 9, 17],
+        "height_scale": 1.0,
+        "body_mass_scale": 1.0,
+        "joint_limit_scale": 0.85
+      }
+    },
+    {
+      "corner_id": "joint_limit_scale-high",
+      "axis_name": "joint_limit_scale",
+      "level": "high",
+      "value": 1.15,
+      "configuration": {
+        "case_indices": [0, 8, 9, 17],
+        "height_scale": 1.0,
+        "body_mass_scale": 1.0,
+        "joint_limit_scale": 1.15
+      }
+    }
+  ],
+  "corners": [
+    {
+      "corner_id": "nominal",
+      "axis_name": "nominal",
+      "level": "nominal",
+      "value": 1.0,
+      "configuration": {
+        "case_indices": [0, 8, 9, 17],
+        "height_scale": 1.0,
+        "body_mass_scale": 1.0,
+        "joint_limit_scale": 1.0
+      },
+      "status": "feasible",
+      "failure_count": 0,
+      "failure_distribution": {},
+      "authority_sha256": "2554dc6750ec03415c98761670bd6f21facb1e6213eba5909723dfbe9e77ff45",
+      "record_artifact": "articulated_structural_authority_nominal.json",
+      "array_artifact": "articulated_structural_authority_nominal.npz"
+    },
+    {
+      "corner_id": "height_scale-low",
+      "axis_name": "height_scale",
+      "level": "low",
+      "value": 0.9,
+      "configuration": {
+        "case_indices": [0, 8, 9, 17],
+        "height_scale": 0.9,
+        "body_mass_scale": 1.0,
+        "joint_limit_scale": 1.0
+      },
+      "status": "infeasible_retained",
+      "failure_count": 1,
+      "failure_distribution": {
+        "ik_nonconvergence": 1
+      },
+      "authority_sha256": "69de8badceb381d88d23a8870e2da2156e7901d55080ac57239bc3459e36d95b",
+      "record_artifact": "articulated_structural_authority_height_scale_low.json",
+      "array_artifact": "articulated_structural_authority_height_scale_low.npz"
+    },
+    {
+      "corner_id": "height_scale-high",
+      "axis_name": "height_scale",
+      "level": "high",
+      "value": 1.1,
+      "configuration": {
+        "case_indices": [0, 8, 9, 17],
+        "height_scale": 1.1,
+        "body_mass_scale": 1.0,
+        "joint_limit_scale": 1.0
+      },
+      "status": "feasible",
+      "failure_count": 0,
+      "failure_distribution": {},
+      "authority_sha256": "5215a93249e243d3d06ade163e7a247bb1fcc71c295ae30a9afff7a48991e66c",
+      "record_artifact": "articulated_structural_authority_height_scale_high.json",
+      "array_artifact": "articulated_structural_authority_height_scale_high.npz"
+    },
+    {
+      "corner_id": "body_mass_scale-low",
+      "axis_name": "body_mass_scale",
+      "level": "low",
+      "value": 0.85,
+      "configuration": {
+        "case_indices": [0, 8, 9, 17],
+        "height_scale": 1.0,
+        "body_mass_scale": 0.85,
+        "joint_limit_scale": 1.0
+      },
+      "status": "feasible",
+      "failure_count": 0,
+      "failure_distribution": {},
+      "authority_sha256": "1bf48bc3ac7d0e4981f9f6800b5b78f1482f2117c24a79529ca50e11f9c0ef6f",
+      "record_artifact": "articulated_structural_authority_body_mass_scale_low.json",
+      "array_artifact": "articulated_structural_authority_body_mass_scale_low.npz"
+    },
+    {
+      "corner_id": "body_mass_scale-high",
+      "axis_name": "body_mass_scale",
+      "level": "high",
+      "value": 1.15,
+      "configuration": {
+        "case_indices": [0, 8, 9, 17],
+        "height_scale": 1.0,
+        "body_mass_scale": 1.15,
+        "joint_limit_scale": 1.0
+      },
+      "status": "feasible",
+      "failure_count": 0,
+      "failure_distribution": {},
+      "authority_sha256": "c31a07a40b36c8046cb47f5cf55333ba9fb3ad42afe446463b7c31743535a601",
+      "record_artifact": "articulated_structural_authority_body_mass_scale_high.json",
+      "array_artifact": "articulated_structural_authority_body_mass_scale_high.npz"
+    },
+    {
+      "corner_id": "joint_limit_scale-low",
+      "axis_name": "joint_limit_scale",
+      "level": "low",
+      "value": 0.85,
+      "configuration": {
+        "case_indices": [0, 8, 9, 17],
+        "height_scale": 1.0,
+        "body_mass_scale": 1.0,
+        "joint_limit_scale": 0.85
+      },
+      "status": "feasible",
+      "failure_count": 0,
+      "failure_distribution": {},
+      "authority_sha256": "8688c2121b31fb8f36841cf3a952b37116990993b302b72218a1a69acc596d26",
+      "record_artifact": "articulated_structural_authority_joint_limit_scale_low.json",
+      "array_artifact": "articulated_structural_authority_joint_limit_scale_low.npz"
+    },
+    {
+      "corner_id": "joint_limit_scale-high",
+      "axis_name": "joint_limit_scale",
+      "level": "high",
+      "value": 1.15,
+      "configuration": {
+        "case_indices": [0, 8, 9, 17],
+        "height_scale": 1.0,
+        "body_mass_scale": 1.0,
+        "joint_limit_scale": 1.15
+      },
+      "status": "feasible",
+      "failure_count": 0,
+      "failure_distribution": {},
+      "authority_sha256": "1e8c4f2cdc558de9ef9d3b7504c072a7fa43903f27512f656dc59c55e71fcd1f",
+      "record_artifact": "articulated_structural_authority_joint_limit_scale_high.json",
+      "array_artifact": "articulated_structural_authority_joint_limit_scale_high.npz"
+    }
+  ],
+  "results": {
+    "corner_count": 7,
+    "feasible_corner_count": 6,
+    "infeasible_corner_count": 1,
+    "failed_corner_count": 0
+  },
+  "source_sha256": {
+    "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py": "166ab2ebec88a0c53abc54c6b565ba0a3f82caf800449e822164177f31289549",
+    "scripts/research/proximal_distal_energy/articulated_scaled_authority.py": "6d41ef265dd88d61bdf70f1ff78a17716c9293e6260f307c253df43f441b7d83",
+    "tests/research/test_articulated_structural_authority_campaign.py": "0a721f2403a7caa6efc4426a6e09f689810b2e99d5ac890a9431d757d984ab0f"
+  },
+  "limitations": {
+    "bounds": "engineering OAT corners, not participant distributions",
+    "dynamics": "authority regeneration is not headline atlas propagation",
+    "human_inference": "no human, physiological, or coaching inference"
+  }
+}

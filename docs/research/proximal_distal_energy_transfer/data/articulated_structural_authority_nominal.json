@@ -1,0 +1,39 @@
+{
+  "schema_version": "articulated-scaled-authority/v1",
+  "study_id": "articulated-structural-corner-authority-regeneration",
+  "configuration": {
+    "case_indices": [0, 8, 9, 17],
+    "height_scale": 1.0,
+    "body_mass_scale": 1.0,
+    "joint_limit_scale": 1.0
+  },
+  "results": {
+    "selected_case_count": 4,
+    "phase_sample_count_per_case": 13,
+    "selected_feasible_sample_count": 52,
+    "selected_total_sample_count": 52,
+    "selected_failure_distribution": {
+      "feasible": 52
+    },
+    "maximum_closure_error_m": 1.0292632631591506e-10,
+    "minimum_joint_limit_margin_rad": 0.10345184291312824,
+    "minimum_collision_clearance_m": 0.049142857200141554,
+    "maximum_nominal_state_error_rad": 0.0
+  },
+  "source_sha256": {
+    "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
+    "scripts/research/proximal_distal_energy/articulated_scaled_authority.py": "6d41ef265dd88d61bdf70f1ff78a17716c9293e6260f307c253df43f441b7d83",
+    "scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py": "c48f22da72d0b09856e3d0879dab2f48b2ce4bf57d99c2234d21b6d431386674",
+    "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py": "c2b01f1d8de0b25daa39c03ae97d3ef51512264f3a2978766a7360aed5d9cda8",
+    "tests/research/test_articulated_scaled_authority.py": "cac187334194b7e3230a837a710b3e6c82d5350fc59468e0b48936aaed3a40e2",
+    "tests/research/test_articulated_scaled_authority_evidence.py": "3efc7be9b01ea92e099431fbc15d59879d0a645bc730d0b8a1091691e51cee74"
+  },
+  "authority_sha256": "2554dc6750ec03415c98761670bd6f21facb1e6213eba5909723dfbe9e77ff45",
+  "array_artifact": "articulated_structural_authority_nominal.npz",
+  "limitations": {
+    "bounds": "engineering corners, not participant or equipment distributions",
+    "geometry": "reduced-tree closure and coarse spherical collision only",
+    "dynamics": "authority regeneration alone does not evaluate either headline atlas",
+    "human_inference": "no human, physiological, or coaching inference"
+  }
+}
