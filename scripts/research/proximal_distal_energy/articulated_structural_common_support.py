@@ -125,6 +125,7 @@ class CornerSupportSummary:
     """Explicit planned, feasible, executed, and matched support accounting."""
 
     corner_id: str
+    pathway: Pathway
     requested_state_count: int
     feasible_state_count: int
     retained_failures: tuple[dict[str, int | str], ...]
@@ -462,6 +463,7 @@ def build_corner_support_summary(
     matched = int(np.count_nonzero(cells.matched))
     return CornerSupportSummary(
         corner_id=corner_id,
+        pathway=cells.pathway,
         requested_state_count=requested_state_count,
         feasible_state_count=feasible_state_count,
         retained_failures=normalized_failures,
@@ -490,6 +492,7 @@ def corner_support_summary_record(summary: CornerSupportSummary) -> dict[str, An
     require_corner_release_evidence(summary)
     return {
         "corner_id": summary.corner_id,
+        "pathway": summary.pathway,
         "requested_state_count": summary.requested_state_count,
         "feasible_state_count": summary.feasible_state_count,
         "retained_failures": list(summary.retained_failures),

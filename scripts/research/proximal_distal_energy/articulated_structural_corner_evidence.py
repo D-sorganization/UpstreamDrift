@@ -76,10 +76,12 @@ def assemble_structural_corner_pathway_evidence(
         all_registered_gates_passed=all_registered_gates_passed,
         authority=authority,
     )
+    corner_record = corner_support_summary_record(summary)
+    corner_record["cell_evidence_sha256"] = str(cell_evidence["evidence_sha256"].item())
     return StructuralCornerPathwayEvidence(
         pathway=pathway,
         comparison=comparison,
-        corner_record=corner_support_summary_record(summary),
+        corner_record=corner_record,
         cell_evidence=cell_evidence,
     )
 

@@ -124,7 +124,7 @@ def test_plan_requires_common_support_and_rejects_count_as_benefit(plan) -> None
 def test_plan_binds_restart_and_cell_level_evidence_contract(plan) -> None:
     evidence = plan["evidence_contract"]
 
-    assert evidence["schema_version"] == "articulated-structural-propagation/v1"
+    assert evidence["schema_version"] == "articulated-structural-propagation/v2"
     assert set(evidence["checkpoint_identity_fields"]) == {
         "corner_id",
         "authority_sha256",
@@ -208,6 +208,8 @@ def test_plan_binds_restart_and_cell_level_evidence_contract(plan) -> None:
     }
     assert set(evidence["required_corner_summary_fields"]) == {
         "corner_id",
+        "pathway",
+        "cell_evidence_sha256",
         "requested_state_count",
         "feasible_state_count",
         "retained_failures",

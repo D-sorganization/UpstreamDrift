@@ -18,6 +18,9 @@ CORNER_IDS = (
     "joint_limit_scale-low",
     "joint_limit_scale-high",
 )
+CORNER_PATHWAYS = tuple(
+    (corner_id, pathway) for corner_id in CORNER_IDS for pathway in ("shaft", "ground")
+)
 AXIS_PATHWAYS = tuple(
     (axis, pathway)
     for axis in ("height_scale", "body_mass_scale", "joint_limit_scale")
@@ -38,6 +41,8 @@ def _digest(record: dict[str, Any]) -> str:
 def _validate_corner(record: dict[str, Any]) -> None:
     required = {
         "corner_id",
+        "pathway",
+        "cell_evidence_sha256",
         "requested_state_count",
         "feasible_state_count",
         "retained_failures",
@@ -76,6 +81,9 @@ def _validate_corner(record: dict[str, Any]) -> None:
     authority = record["authority"]
     if not {"authority_sha256", "scales", "model_sha256"}.issubset(authority):
         raise ValueError("corner authority record is incomplete")
+    evidence_sha256 = str(record["cell_evidence_sha256"])
+    if len(evidence_sha256) != 64:
+        raise ValueError("corner cell-evidence digest must be SHA-256")
 
 
 def _validate_axis(record: dict[str, Any]) -> None:
@@ -125,23 +133,28 @@ def assemble_structural_propagation_result(
 
     if len(plan_contract_sha256) != 64:
         raise ValueError("plan_contract_sha256 must be a SHA-256 digest")
-    corners = {str(value.get("corner_id")): value for value in corner_records}
-    if len(corners) != len(corner_records) or set(corners) != set(CORNER_IDS):
-        raise ValueError("result must contain exactly the registered corner set")
+    corners = {
+        (str(value.get("corner_id")), str(value.get("pathway"))): value
+        for value in corner_records
+    }
+    if len(corners) != len(corner_records) or set(corners) != set(CORNER_PATHWAYS):
+        raise ValueError(
+            "result must contain exactly the registered corner-pathway set"
+        )
     axes = {
         (str(value.get("axis_name")), str(value.get("pathway"))): value
         for value in axis_records
     }
     if len(axes) != len(axis_records) or set(axes) != set(AXIS_PATHWAYS):
         raise ValueError("result must contain exactly the registered axis pathways")
-    ordered_corners = [dict(corners[value]) for value in CORNER_IDS]
+    ordered_corners = [dict(corners[value]) for value in CORNER_PATHWAYS]
     ordered_axes = [dict(axes[value]) for value in AXIS_PATHWAYS]
     for record in ordered_corners:
         _validate_corner(record)
     for record in ordered_axes:
         _validate_axis(record)
     result = {
-        "schema_version": "articulated-structural-propagation/v1",
+        "schema_version": "articulated-structural-propagation/v2",
         "status": "complete",
         "plan_contract_sha256": plan_contract_sha256,
         "corners": ordered_corners,
@@ -198,6 +211,7 @@ def validate_structural_propagation_result(
 __all__ = [
     "AXIS_PATHWAYS",
     "CORNER_IDS",
+    "CORNER_PATHWAYS",
     "assemble_structural_propagation_result",
     "validate_structural_propagation_result",
     "write_structural_propagation_result",

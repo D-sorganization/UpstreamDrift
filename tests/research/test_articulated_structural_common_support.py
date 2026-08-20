@@ -420,6 +420,7 @@ def test_corner_release_record_has_registered_machine_readable_fields() -> None:
     record = corner_support_summary_record(summary)
 
     assert record["corner_id"] == "nominal"
+    assert record["pathway"] == "ground"
     assert record["planned_headline_cell_count"] == 32
     assert record["feasible_headline_cell_count"] == 32
     assert record["executed_headline_cell_count"] == 32

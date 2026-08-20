@@ -56,6 +56,10 @@ def test_nominal_corner_assembles_complete_aligned_evidence(
     )
 
     assert evidence.corner_record["executed_headline_cell_count"] == 384
+    assert evidence.corner_record["pathway"] == pathway
+    assert evidence.corner_record["cell_evidence_sha256"] == str(
+        evidence.cell_evidence["evidence_sha256"].item()
+    )
     assert evidence.corner_record["matched_cell_count"] == matched
     assert evidence.comparison.common_executed_cell_count == 384
     assert len(evidence.comparison.persistent_identities) == matched

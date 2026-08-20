@@ -8,7 +8,7 @@ import pytest
 
 from scripts.research.proximal_distal_energy.articulated_structural_result import (
     AXIS_PATHWAYS,
-    CORNER_IDS,
+    CORNER_PATHWAYS,
     assemble_structural_propagation_result,
     validate_structural_propagation_result,
     write_structural_propagation_result,
@@ -17,7 +17,7 @@ from scripts.research.proximal_distal_energy.articulated_structural_result impor
 pytestmark = pytest.mark.scientific
 
 
-def _corner(corner_id: str) -> dict[str, object]:
+def _corner(corner_id: str, pathway: str) -> dict[str, object]:
     requested = 12
     feasible = 11 if corner_id == "height_scale-low" else 12
     executed = feasible * 32
@@ -32,16 +32,19 @@ def _corner(corner_id: str) -> dict[str, object]:
         if feasible == 11
         else []
     )
+    matched = 1 if pathway == "shaft" else 0
     return {
         "corner_id": corner_id,
+        "pathway": pathway,
+        "cell_evidence_sha256": ("d" if pathway == "shaft" else "e") * 64,
         "requested_state_count": requested,
         "feasible_state_count": feasible,
         "retained_failures": failures,
         "planned_headline_cell_count": requested * 32,
         "feasible_headline_cell_count": executed,
         "executed_headline_cell_count": executed,
-        "matched_cell_count": 0,
-        "matched_fraction_of_feasible": 0.0,
+        "matched_cell_count": matched,
+        "matched_fraction_of_feasible": matched / executed,
         "all_registered_gates_passed": True,
         "authority": {
             "authority_sha256": "a" * 64,
@@ -74,7 +77,7 @@ def _axis(axis_name: str, pathway: str) -> dict[str, object]:
 def _result():
     return assemble_structural_propagation_result(
         plan_contract_sha256="c" * 64,
-        corner_records=tuple(_corner(value) for value in reversed(CORNER_IDS)),
+        corner_records=tuple(_corner(*value) for value in reversed(CORNER_PATHWAYS)),
         axis_records=tuple(_axis(*value) for value in reversed(AXIS_PATHWAYS)),
     )
 
@@ -84,10 +87,13 @@ def test_complete_result_is_deterministic_and_plan_bound() -> None:
     second = _result()
 
     assert first == second
-    assert first["schema_version"] == "articulated-structural-propagation/v1"
+    assert first["schema_version"] == "articulated-structural-propagation/v2"
     assert first["status"] == "complete"
     assert first["plan_contract_sha256"] == "c" * 64
-    assert [value["corner_id"] for value in first["corners"]] == list(CORNER_IDS)
+    assert [
+        (value["corner_id"], value["pathway"]) for value in first["corners"]
+    ] == list(CORNER_PATHWAYS)
+    assert len(first["corners"]) == 14
     assert [(value["axis_name"], value["pathway"]) for value in first["axes"]] == list(
         AXIS_PATHWAYS
     )
@@ -96,9 +102,9 @@ def test_complete_result_is_deterministic_and_plan_bound() -> None:
 
 
 def test_result_rejects_missing_duplicate_or_partial_evidence() -> None:
-    corners = tuple(_corner(value) for value in CORNER_IDS)
+    corners = tuple(_corner(*value) for value in CORNER_PATHWAYS)
     axes = tuple(_axis(*value) for value in AXIS_PATHWAYS)
-    with pytest.raises(ValueError, match="exactly the registered corner set"):
+    with pytest.raises(ValueError, match="registered corner-pathway set"):
         assemble_structural_propagation_result(
             plan_contract_sha256="c" * 64,
             corner_records=corners[:-1],
@@ -110,12 +116,20 @@ def test_result_rejects_missing_duplicate_or_partial_evidence() -> None:
             corner_records=corners,
             axis_records=axes[:-1] + (axes[0],),
         )
-    partial = _corner(CORNER_IDS[0])
+    partial = _corner(*CORNER_PATHWAYS[0])
     partial["executed_headline_cell_count"] = 352
     with pytest.raises(ValueError, match="complete feasible execution"):
         assemble_structural_propagation_result(
             plan_contract_sha256="c" * 64,
             corner_records=(partial, *corners[1:]),
+            axis_records=axes,
+        )
+    bad_digest = _corner(*CORNER_PATHWAYS[0])
+    bad_digest["cell_evidence_sha256"] = "not-a-digest"
+    with pytest.raises(ValueError, match="cell-evidence digest"):
+        assemble_structural_propagation_result(
+            plan_contract_sha256="c" * 64,
+            corner_records=(bad_digest, *corners[1:]),
             axis_records=axes,
         )
 

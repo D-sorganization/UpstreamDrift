@@ -226,7 +226,7 @@ def build_structural_propagation_plan(
         "multiplicity": "report all registered OAT corners descriptively; do not select favorable corners or assign confirmatory p-values",
     }
     evidence_contract = {
-        "schema_version": "articulated-structural-propagation/v1",
+        "schema_version": "articulated-structural-propagation/v2",
         "checkpoint_identity_fields": [
             "corner_id",
             "authority_sha256",
@@ -307,6 +307,8 @@ def build_structural_propagation_plan(
         ],
         "required_corner_summary_fields": [
             "corner_id",
+            "pathway",
+            "cell_evidence_sha256",
             "requested_state_count",
             "feasible_state_count",
             "retained_failures",
