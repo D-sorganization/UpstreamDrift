@@ -101,10 +101,15 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     preliminary LHS screen now regenerates every anthropometric/limit cell,
     perturbs equipment separately, and retains infeasible cells through an
     explicit analysis-inclusion mask; its three focused tests pass. Extending
-    the same state authority to the full shaft/ground headline campaigns;
-    reversal and killswitch branches; per-corner refinement; headline
-    126/384 shaft and 0/384 ground estimand movement; governed artifacts; paper
-    integration; and protected publication remain open.
+    the same state authority to the full shaft/ground headline campaigns remains
+    open. `articulated_headline_uncertainty.py` now registers nominal plus 18
+    low/high one-at-a-time grip, shaft, and ground constitutive corners and
+    executes the existing full atlasses, thereby retaining both engines,
+    reversal, per-corner refinement, and pathway killswitches. It records exact
+    movement from the 126/384 shaft and 0/384 ground counts and retains failed
+    corners instead of deleting them; two orchestration tests pass. Running the
+    full campaign, governed artifacts, paper integration, and protected
+    publication remain open.
 - The release has 295 atomic claims and 40 reviewed release claims; all 40
   retain at least one scientifically open gate. #8724 still owns normalized
   four-way adjudication and independent review.
