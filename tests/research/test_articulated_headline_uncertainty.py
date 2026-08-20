@@ -106,6 +106,17 @@ def test_campaign_reports_headline_movement_and_retains_failures(
     )
     assert failed["ground"]["status"] == "failed_retained"
     assert failed["ground"]["matched_cell_count"] is None
+    assert record["results"]["shaft"]["nominal_matched_cell_count"] == 126
+    assert record["results"]["shaft"]["failed_corner_count"] == 1
+    assert record["results"]["shaft"]["matched_cell_count_range"][0] < 126
+    assert (
+        "shaft_bending_frequency_scale-high"
+        in record["results"]["shaft"]["nonzero_change_corner_ids"]
+    )
+    assert record["results"]["ground"]["nominal_matched_cell_count"] == 0
+    assert record["results"]["ground"]["failed_corner_ids"] == [
+        "ground_free_moment_damping_scale-high"
+    ]
 
 
 def test_campaign_checkpoint_resumes_without_repeating_completed_cells(

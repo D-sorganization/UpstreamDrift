@@ -222,6 +222,39 @@ def _movement(rows: list[dict[str, Any]], pathway: Pathway) -> None:
         )
 
 
+def _pathway_summary(rows: list[dict[str, Any]], pathway: Pathway) -> dict[str, Any]:
+    nominal = next(row for row in rows if row["corner_id"] == "nominal")
+    evaluated = [
+        row
+        for row in rows
+        if row[pathway]["status"] in {"completed", "failed_retained"}
+    ]
+    completed = [row for row in evaluated if row[pathway]["status"] == "completed"]
+    failed = [row for row in evaluated if row[pathway]["status"] == "failed_retained"]
+    counts = [row[pathway]["matched_cell_count"] for row in completed]
+    changes = [
+        row[pathway]["matched_cell_count_change_from_nominal"] for row in completed
+    ]
+    return {
+        "nominal_matched_cell_count": nominal[pathway]["matched_cell_count"],
+        "evaluated_corner_count": len(evaluated),
+        "completed_corner_count": len(completed),
+        "failed_corner_count": len(failed),
+        "matched_cell_count_range": [min(counts), max(counts)],
+        "matched_cell_count_change_range": [min(changes), max(changes)],
+        "nonzero_change_corner_ids": [
+            row["corner_id"]
+            for row in completed
+            if row[pathway]["matched_cell_count_change_from_nominal"] != 0
+        ],
+        "failed_corner_ids": [row["corner_id"] for row in failed],
+    }
+
+
+def _campaign_results(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    return {pathway: _pathway_summary(rows, pathway) for pathway in ("shaft", "ground")}
+
+
 def _record(
     config: HeadlineUncertaintyConfig,
     rows: list[dict[str, Any]],
@@ -239,6 +272,7 @@ def _record(
         },
         "configuration": asdict(config),
         "corners": rows,
+        "results": _campaign_results(rows) if status == "complete" else None,
         "source_sha256": {
             path: hashlib.sha256((ROOT / path).read_bytes()).hexdigest()
             for path in SOURCE_PATHS
