@@ -95,6 +95,11 @@ def test_separates_pooled_within_between_and_population_effects() -> None:
     assert sum(item.fixed_weight or 0 for item in result.per_player) == pytest.approx(1)
     assert any("aggregation reversal" in warning for warning in result.warnings)
 
+    player_payload = result.per_player[0].model_dump(mode="json")
+    player_payload["random_weight"] = None
+    with pytest.raises(ValueError, match="weights must be supplied together"):
+        type(result.per_player[0]).model_validate(player_payload)
+
 
 def test_result_retains_units_vendor_provenance_and_source_joinable_rows() -> None:
     result = analyze_player_covariation_v1(
@@ -176,6 +181,11 @@ def test_missing_constant_and_small_groups_are_structurally_unavailable() -> Non
         item.result_path == "meta_analysis" and item.state == "unavailable"
         for item in result.availability
     )
+    unavailable = next(item for item in result.per_player if item.player_id == "small")
+    unavailable_payload = unavailable.model_dump(mode="json")
+    unavailable_payload.update({"fixed_weight": 0.5, "random_weight": 0.5})
+    with pytest.raises(ValueError, match="unavailable player"):
+        type(unavailable).model_validate(unavailable_payload)
 
 
 def test_pair_scan_is_deterministic_and_carries_multiplicity_boundary() -> None:

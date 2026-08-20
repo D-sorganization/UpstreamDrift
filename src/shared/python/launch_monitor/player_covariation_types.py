@@ -117,6 +117,14 @@ class PlayerAssociationV1(_CovariationModel):
     fixed_weight: float | None = Field(default=None, ge=0, le=1)
     random_weight: float | None = Field(default=None, ge=0, le=1)
 
+    @model_validator(mode="after")
+    def require_consistent_weights(self) -> PlayerAssociationV1:
+        if (self.fixed_weight is None) != (self.random_weight is None):
+            raise ValueError("fixed and random weights must be supplied together")
+        if self.estimate.state == "unavailable" and self.fixed_weight is not None:
+            raise ValueError("unavailable player estimates cannot carry weights")
+        return self
+
 
 class MetaAnalysisSummaryV1(_CovariationModel):
     """Fixed/random Fisher-z synthesis with heterogeneity diagnostics."""
