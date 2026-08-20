@@ -166,6 +166,19 @@ def validate_structural_propagation_plan(
     return observed
 
 
+def write_structural_propagation_plan(
+    plan_path: Path = DEFAULT_OUTPUT,
+) -> dict[str, Any]:
+    """Atomically replace the governed propagation plan."""
+
+    record = build_structural_propagation_plan()
+    temporary = plan_path.with_suffix(plan_path.suffix + ".tmp")
+    plan_path.parent.mkdir(parents=True, exist_ok=True)
+    temporary.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+    temporary.replace(plan_path)
+    return record
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -175,8 +188,7 @@ def main() -> None:
     if args.command == "validate":
         validate_structural_propagation_plan()
     else:
-        record = build_structural_propagation_plan()
-        DEFAULT_OUTPUT.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+        write_structural_propagation_plan()
 
 
 if __name__ == "__main__":

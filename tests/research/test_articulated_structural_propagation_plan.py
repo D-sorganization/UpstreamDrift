@@ -11,6 +11,7 @@ from scripts.research.proximal_distal_energy.articulated_structural_propagation_
     CAMPAIGN,
     build_structural_propagation_plan,
     validate_structural_propagation_plan,
+    write_structural_propagation_plan,
 )
 
 pytestmark = pytest.mark.scientific
@@ -116,3 +117,11 @@ def test_validation_rejects_tampered_committed_plan(tmp_path) -> None:
 
     with pytest.raises(RuntimeError, match="stale or altered"):
         validate_structural_propagation_plan(candidate)
+
+
+def test_plan_write_is_atomic_and_exact(tmp_path, plan) -> None:
+    candidate = tmp_path / "plan.json"
+
+    assert write_structural_propagation_plan(candidate) == plan
+    assert json.loads(candidate.read_text(encoding="utf-8")) == plan
+    assert not candidate.with_suffix(".json.tmp").exists()
