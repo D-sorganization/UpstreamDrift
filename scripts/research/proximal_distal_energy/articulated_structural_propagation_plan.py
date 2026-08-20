@@ -37,6 +37,7 @@ SOURCE_PATHS = tuple(
             "scripts/research/proximal_distal_energy/articulated_structural_common_support.py",
             "scripts/research/proximal_distal_energy/articulated_structural_cell_evidence.py",
             "scripts/research/proximal_distal_energy/articulated_structural_corner_evidence.py",
+            "scripts/research/proximal_distal_energy/articulated_structural_figure.py",
             "scripts/research/proximal_distal_energy/articulated_structural_figure_data.py",
             "scripts/research/proximal_distal_energy/articulated_structural_gate_status.py",
             "scripts/research/proximal_distal_energy/articulated_structural_result.py",
@@ -46,6 +47,7 @@ SOURCE_PATHS = tuple(
             "tests/research/test_articulated_structural_common_support.py",
             "tests/research/test_articulated_structural_cell_evidence.py",
             "tests/research/test_articulated_structural_corner_evidence.py",
+            "tests/research/test_articulated_structural_figure.py",
             "tests/research/test_articulated_structural_figure_data.py",
             "tests/research/test_articulated_structural_gate_status.py",
             "tests/research/test_articulated_structural_result.py",
@@ -365,6 +367,7 @@ def build_structural_propagation_plan(
             "color-independent status encoding",
             "units and alt text",
         ],
+        "renderer_rule": "render all five panels only from a validated figure-data record; fail before writing on any semantic or digest inconsistency",
     }
     integration_contract = {
         "required_surfaces": [
