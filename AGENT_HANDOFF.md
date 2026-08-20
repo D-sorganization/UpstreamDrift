@@ -88,7 +88,7 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     cannot be ranked as cross-parameter importance.
     Its v1 evidence contract preserves checkpoint identity and per-cell arrays. Shaft matching is coupled/rigid station-force/dissipated-work; ground matching is coupled/fixed grip-force/total-work. Planned, feasible, and executed denominators remain separate; partial records cannot qualify.
     The figure contract exposes support transitions, resolution, secants, and failures with searchable vector text and color-independent status encoding.
-    Common-support analysis keys case/phase/velocity/step/engine/horizon, excludes missing states, forbids pairing without persistent matching, and resolves changes only above the 0.001 m/s floor plus both engine/step discrepancies. The integration contract moves paper and registries together; results remain model-dependent sensitivities, not causal, population, mechanism, ranking, or coaching claims.
+    Common-support analysis keys case/phase/velocity/step/engine/horizon, excludes missing states, requires persistent matching, applies the 0.001 m/s floor plus engine/step discrepancies, and keeps low→nominal and nominal→high secants unpooled on their own support. Integration moves paper and registries together; results remain model-dependent sensitivities, not causal, population, mechanism, ranking, or coaching claims.
     The governed feasibility/margin figure has embedded CID TrueType text and
     passes its retained-failure contract. Q2/H5 and the machine-readable
     prediction registry no longer repeat the obsolete failed-closure narrative.

@@ -87,6 +87,29 @@ class CommonSupportComparison:
         return bool(self.persistent_identities)
 
 
+@dataclass(frozen=True, slots=True)
+class OneSidedEngineeringSecants:
+    """Separate engineering secants without pooling unlike support sets."""
+
+    axis_name: str
+    pathway: Pathway
+    low_scale: float
+    nominal_scale: float
+    high_scale: float
+    low_to_nominal_identities: tuple[CellIdentity, ...]
+    nominal_to_high_identities: tuple[CellIdentity, ...]
+    low_to_nominal_m_s_per_unit_scale: FloatArray
+    nominal_to_high_m_s_per_unit_scale: FloatArray
+    low_to_nominal_resolution_per_unit_scale: FloatArray
+    nominal_to_high_resolution_per_unit_scale: FloatArray
+
+    @property
+    def are_averaged(self) -> bool:
+        """Declare that the two one-sided evidence sets remain unpooled."""
+
+        return False
+
+
 def _headline_array(arrays: Mapping[str, Any], *names: str, dtype: Any) -> NDArray[Any]:
     for name in names:
         if name in arrays:
@@ -250,10 +273,55 @@ def compare_common_support(
     )
 
 
+def build_one_sided_engineering_secants(
+    axis_name: str,
+    low_vs_nominal: CommonSupportComparison,
+    high_vs_nominal: CommonSupportComparison,
+    *,
+    low_scale: float,
+    nominal_scale: float,
+    high_scale: float,
+) -> OneSidedEngineeringSecants:
+    """Scale paired changes on each side while retaining separate support."""
+
+    if not axis_name.strip():
+        raise ValueError("axis_name must be nonempty")
+    if low_vs_nominal.pathway != high_vs_nominal.pathway:
+        raise ValueError("one-sided secant pathways must agree")
+    scales = np.asarray([low_scale, nominal_scale, high_scale], dtype=float)
+    if not np.all(np.isfinite(scales)) or not low_scale < nominal_scale < high_scale:
+        raise ValueError("scales must be finite and satisfy low < nominal < high")
+    low_span = nominal_scale - low_scale
+    high_span = high_scale - nominal_scale
+    return OneSidedEngineeringSecants(
+        axis_name=axis_name,
+        pathway=low_vs_nominal.pathway,
+        low_scale=low_scale,
+        nominal_scale=nominal_scale,
+        high_scale=high_scale,
+        low_to_nominal_identities=low_vs_nominal.persistent_identities,
+        nominal_to_high_identities=high_vs_nominal.persistent_identities,
+        low_to_nominal_m_s_per_unit_scale=(
+            -low_vs_nominal.persistent_speed_change_m_s / low_span
+        ),
+        nominal_to_high_m_s_per_unit_scale=(
+            high_vs_nominal.persistent_speed_change_m_s / high_span
+        ),
+        low_to_nominal_resolution_per_unit_scale=(
+            low_vs_nominal.resolution_threshold_m_s / low_span
+        ),
+        nominal_to_high_resolution_per_unit_scale=(
+            high_vs_nominal.resolution_threshold_m_s / high_span
+        ),
+    )
+
+
 __all__ = [
     "CellIdentity",
     "CommonSupportComparison",
     "HeadlineCells",
+    "OneSidedEngineeringSecants",
+    "build_one_sided_engineering_secants",
     "compare_common_support",
     "extract_headline_cells",
 ]

@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 
 from scripts.research.proximal_distal_energy.articulated_structural_common_support import (
+    build_one_sided_engineering_secants,
     compare_common_support,
     extract_headline_cells,
 )
@@ -143,4 +144,59 @@ def test_resolution_floor_must_be_finite_and_nonnegative(floor: float) -> None:
             cells,
             cells,
             absolute_resolution_floor_m_s=floor,
+        )
+
+
+def test_one_sided_secants_preserve_direction_and_separate_support() -> None:
+    nominal_arrays = _arrays(((0, 0),), matched_indices=(0, 1, 2))
+    low_arrays = _arrays(((0, 0),), matched_indices=(0, 1))
+    high_arrays = _arrays(((0, 0),), matched_indices=(0, 2))
+    for arrays in (nominal_arrays, low_arrays, high_arrays):
+        arrays["matched_final_speed_difference_m_s"].fill(0.0)
+    low_arrays["matched_final_speed_difference_m_s"].ravel()[0:2] = -0.006
+    high_arrays["matched_final_speed_difference_m_s"].ravel()[[0, 2]] = 0.004
+
+    nominal = extract_headline_cells("shaft", nominal_arrays)
+    low = compare_common_support(nominal, extract_headline_cells("shaft", low_arrays))
+    high = compare_common_support(nominal, extract_headline_cells("shaft", high_arrays))
+    secants = build_one_sided_engineering_secants(
+        "height_scale",
+        low,
+        high,
+        low_scale=0.8,
+        nominal_scale=1.0,
+        high_scale=1.4,
+    )
+
+    assert secants.low_to_nominal_identities == low.persistent_identities
+    assert secants.nominal_to_high_identities == high.persistent_identities
+    assert secants.low_to_nominal_m_s_per_unit_scale.tolist() == pytest.approx(
+        [0.03, 0.03]
+    )
+    assert secants.nominal_to_high_m_s_per_unit_scale.tolist() == pytest.approx(
+        [0.01, 0.01]
+    )
+    assert (
+        secants.low_to_nominal_identities[1] != (secants.nominal_to_high_identities[1])
+    )
+    assert secants.are_averaged is False
+
+
+@pytest.mark.parametrize(
+    ("low", "nominal", "high"),
+    [(1.0, 1.0, 1.2), (0.8, 1.1, 1.0), (float("nan"), 1.0, 1.2)],
+)
+def test_one_sided_secants_require_ordered_finite_scales(
+    low: float, nominal: float, high: float
+) -> None:
+    cells = extract_headline_cells("shaft", _arrays(((0, 0),), matched_indices=()))
+    comparison = compare_common_support(cells, cells)
+    with pytest.raises(ValueError, match="low < nominal < high"):
+        build_one_sided_engineering_secants(
+            "height_scale",
+            comparison,
+            comparison,
+            low_scale=low,
+            nominal_scale=nominal,
+            high_scale=high,
         )
