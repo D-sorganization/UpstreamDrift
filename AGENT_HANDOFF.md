@@ -76,14 +76,13 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     The shaft atlas remains capped at 12 workers; the campaign uses 20 workers
     for the independent ground branches.
     The red full-evidence test stays uncommitted until all 19 corners finish.
-  - #8800 is **OPEN** and blocks #8752. Its governed scaled-authority generator
-    regenerates all 13 phase states for cases 0/8/9/17. The nominal baseline is
-    52/52 feasible, reproduces the committed states within 1e-8 rad, retains
-    classified failures, and rejects configuration/source/content drift. Its
-    JSON/NPZ artifacts, evidence tests, data-dictionary row, and direct module
-    regeneration command are implemented locally. Next propagate registered
-    height, body-mass, and joint-limit corners through both headline atlases;
-    do not describe the constitutive-only campaign as full #8752 coverage.
+  - #8800 is **OPEN** and blocks #8752. Its governed generator regenerates all
+    13 phase states for cases 0/8/9/17; nominal is 52/52 feasible and reproduces
+    committed states within 1e-8 rad. JSON/NPZ evidence rejects source/content
+    drift. The new `ArticulatedAtlasAuthority` builds the exact scaled model,
+    rejects nominal-model substitution, and retains infeasible phases. After
+    the live campaign, connect it to both atlases and propagate all registered
+    height, mass, and joint-limit corners; constitutive-only coverage is partial.
 - The release has 295 atomic claims and 40 reviewed release claims; all 40
   retain at least one scientifically open gate. #8724 still owns normalized
   four-way adjudication and independent review.
