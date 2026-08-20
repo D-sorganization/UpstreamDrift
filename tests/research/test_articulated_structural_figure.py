@@ -78,8 +78,10 @@ def _record() -> dict:
                 "nominal_to_high_secant_range_m_s_per_unit_scale": [0.01, 0.03]
                 if supported
                 else None,
-                "cell_classification_counts": {"sign_change": int(supported)},
-                "nonmonotonic_classification": "resolved_nonmonotonic"
+                "cell_classification_counts": {"resolved_opposing": int(supported)}
+                if supported
+                else {},
+                "nonmonotonic_classification": "resolved_opposing_on_shared_support"
                 if supported
                 else "insufficient_shared_persistent_support",
             }

@@ -349,6 +349,7 @@ def build_structural_propagation_plan(
             "require exact registered corner-pathway and axis-pathway order",
             "reconcile planned feasible executed matched and common-support counts",
             "reproduce every persistent outcome resolution label from its finite change and threshold",
+            "require finite ordered one-sided secants and reproduce nonmonotonic classifications from registered cell counts",
             "reconcile retained failures to infeasible state denominators",
             "bind the result and figure-data SHA-256 digests and canonical UTF-8 JSON bytes",
         ],

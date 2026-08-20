@@ -162,6 +162,18 @@ def _validate_axes(rows: Any) -> None:
         "low_to_nominal_secant_range_m_s_per_unit_scale",
         "nominal_to_high_secant_range_m_s_per_unit_scale",
     )
+    classification_priority = (
+        ("resolved_opposing", "resolved_opposing_on_shared_support"),
+        (
+            "resolved_materially_unequal",
+            "resolved_materially_unequal_on_shared_support",
+        ),
+        ("resolution_limited", "resolution_limited_on_shared_support"),
+        (
+            "resolved_direction_consistent",
+            "resolved_direction_consistent_on_shared_support",
+        ),
+    )
     for row in rows:
         scales = np.asarray(
             [row.get("low_scale"), row.get("nominal_scale"), row.get("high_scale")],
@@ -169,10 +181,49 @@ def _validate_axes(rows: Any) -> None:
         )
         if not np.all(np.isfinite(scales)) or not scales[0] < scales[1] < scales[2]:
             raise ValueError("axis secant scales must be finite and ordered")
-        support = int(row.get("shared_persistent_cell_count", -1))
+        raw_support = row.get("shared_persistent_cell_count", -1)
+        try:
+            support = int(raw_support)
+        except (TypeError, ValueError) as error:
+            raise ValueError("axis shared support must be an integer") from error
+        if isinstance(raw_support, bool) or raw_support != support:
+            raise ValueError("axis shared support must be an integer")
         values = [row.get(name) for name in secant_names]
         if support < 0 or (support == 0) != all(value is None for value in values):
             raise ValueError("axis secant support and nullability do not agree")
+        counts = row.get("cell_classification_counts")
+        try:
+            invalid_counts = not isinstance(counts, dict) or any(
+                name not in dict(classification_priority)
+                or isinstance(value, bool)
+                or int(value) != value
+                or value < 0
+                for name, value in counts.items()
+            )
+        except (TypeError, ValueError):
+            invalid_counts = True
+        if invalid_counts:
+            raise ValueError("axis cell classifications are not registered")
+        if sum(counts.values()) != support:
+            raise ValueError("axis classification counts do not match shared support")
+        expected_classification = "insufficient_shared_persistent_support"
+        for name, classification in classification_priority:
+            if counts.get(name, 0):
+                expected_classification = classification
+                break
+        if row.get("nonmonotonic_classification") != expected_classification:
+            raise ValueError("axis nonmonotonic classification does not reproduce")
+        if support:
+            medians = np.asarray(values[:2], dtype=float)
+            ranges = np.asarray(values[2:], dtype=float)
+            if (
+                not np.all(np.isfinite(medians))
+                or ranges.shape != (2, 2)
+                or not np.all(np.isfinite(ranges))
+                or np.any(ranges[:, 0] > medians)
+                or np.any(medians > ranges[:, 1])
+            ):
+                raise ValueError("axis secants and ranges must be finite and ordered")
 
 
 def _validate_failures(rows: Any, support: dict[PackKey, dict[str, Any]]) -> None:

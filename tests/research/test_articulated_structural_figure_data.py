@@ -158,6 +158,24 @@ def test_figure_data_rejects_missing_pack_and_writes_atomically(tmp_path) -> Non
             lambda value: value.__setitem__("nominal_ground_matched_cell_count", 1),
             "nominal ground",
         ),
+        (
+            lambda value: value["axis_secants"][0].__setitem__(
+                "low_to_nominal_secant_m_s_per_unit_scale", float("nan")
+            ),
+            "finite and ordered",
+        ),
+        (
+            lambda value: value["axis_secants"][0].__setitem__(
+                "nonmonotonic_classification", "parameter_importance"
+            ),
+            "classification does not reproduce",
+        ),
+        (
+            lambda value: value["axis_secants"][0].__setitem__(
+                "cell_classification_counts", {"resolution_limited": "one"}
+            ),
+            "classifications are not registered",
+        ),
     ],
 )
 def test_figure_data_rejects_redigested_semantic_tampering(
