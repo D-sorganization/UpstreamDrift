@@ -21,6 +21,7 @@ MANUSCRIPT = ARTICLE / "proximal_distal_energy_transfer.qmd"
 QUESTION_PROGRAM = ARTICLE / "MOMENTUM_TRANSFER_QUESTION_PROGRAM.md"
 FALSIFICATION_MATRIX = ARTICLE / "MODEL_COMPLETION_FALSIFICATION_MATRIX.md"
 CONCLUSIONS = ARTICLE / "chapters/_ch09_conclusions.qmd"
+README = ARTICLE / "README.md"
 pytestmark = pytest.mark.scientific
 
 
@@ -136,3 +137,14 @@ def test_conclusions_advance_to_structural_propagation_without_human_overreach()
     assert "issues/8557" in conclusions
     assert "closed falsification epic" in conclusions
     assert "Replace the executed\n   hand-carriage reference" not in conclusions
+
+
+def test_readme_distinguishes_canonical_open_and_completed_epics() -> None:
+    readme = README.read_text(encoding="utf-8")
+
+    assert "canonical paper-wide claim audit" in readme
+    assert "interaction-force mechanisms epic" in readme
+    assert "remains its active mechanics stream" in readme
+    assert "Completed groundwork is preserved" in readme
+    assert "remaining empirical and higher-fidelity gates are consolidated" in readme
+    assert "governed by canonical epic" in readme

@@ -132,13 +132,13 @@ Readers can also run the PyQt6 or React/Tauri
 [interactive dynamics workbench](COMPANION_WORKBENCH.md). Its guided experiments,
 hover help, glossary, hypotheses, falsifiers, and limitations share one
 canonical catalog maintained by the open-source Tools provider.
-Ongoing validation and extension work is tracked in
-[#8426](https://github.com/D-sorganization/UpstreamDrift/issues/8426) and the
-[interaction-force mechanisms epic](https://github.com/D-sorganization/UpstreamDrift/issues/8443).
-The paper-wide claim audit, biomechanics and nonlinear-control expansion, and
-comprehensive open modeling program are tracked in
-[#8557](https://github.com/D-sorganization/UpstreamDrift/issues/8557), with the
-durable execution contract in
+The canonical paper-wide claim audit, biomechanics and nonlinear-control
+expansion, and comprehensive open modeling program is
+[#8557](https://github.com/D-sorganization/UpstreamDrift/issues/8557), a child
+of the open umbrella epic
+[#8426](https://github.com/D-sorganization/UpstreamDrift/issues/8426). The
+[interaction-force mechanisms epic](https://github.com/D-sorganization/UpstreamDrift/issues/8443)
+remains its active mechanics stream. The durable execution contract is
 [`COMPREHENSIVE_RESEARCH_PROGRAM.md`](COMPREHENSIVE_RESEARCH_PROGRAM.md).
 The MT-E07 measurement program now includes both the exact bilateral-wrench
 rank audit and a trajectory-level synthetic point-force qualification under
@@ -197,18 +197,18 @@ committed availability snapshot contains 36 directly resolving links and 42
 publisher or index pages that restrict automated access; it contains no broken,
 transient, omitted, or unchecked link. Multiple mirrors never count as
 independent replication, and all prospective human gates remain open.
-The hand-path attribution, two-hand redundancy, and preactivation validation
-program is tracked in
-[#8458](https://github.com/D-sorganization/UpstreamDrift/issues/8458).
-The arm--wrist allocation, role-reversal, and preload program is tracked in
-[#8497](https://github.com/D-sorganization/UpstreamDrift/issues/8497).
-The advanced frame, biological, visual, and cross-engine expansion is tracked
-in [#8505](https://github.com/D-sorganization/UpstreamDrift/issues/8505).
-Ground-reaction drift attribution and human validation requirements are tracked
-in [#8493](https://github.com/D-sorganization/UpstreamDrift/issues/8493).
-The independent review adjudication and its numerical remediation are tracked
-in [#8499](https://github.com/D-sorganization/UpstreamDrift/issues/8499), with
-the finding-by-finding record in
+Completed groundwork is preserved in the closed hand-path and preactivation
+epic [#8458](https://github.com/D-sorganization/UpstreamDrift/issues/8458),
+arm--wrist allocation epic
+[#8497](https://github.com/D-sorganization/UpstreamDrift/issues/8497), advanced
+cross-engine epic
+[#8505](https://github.com/D-sorganization/UpstreamDrift/issues/8505),
+ground-reaction attribution epic
+[#8493](https://github.com/D-sorganization/UpstreamDrift/issues/8493), and
+independent-review epic
+[#8499](https://github.com/D-sorganization/UpstreamDrift/issues/8499). Their
+remaining empirical and higher-fidelity gates are consolidated under #8557;
+the finding-by-finding record is in
 [`ADVERSARIAL_REVIEW_ADJUDICATION.md`](ADVERSARIAL_REVIEW_ADJUDICATION.md).
 
 ## Layout
@@ -431,7 +431,8 @@ model and ABA APIs.
   deterministic model ensembles. PRCC is a screening statistic; the effort
   and face/path quantities are proxies; and held-out model performance is not
   participant validation.
-- Generalization and human-data work is tracked in
-  [#8426](https://github.com/D-sorganization/UpstreamDrift/issues/8426).
+- Generalization and human-data work is governed by canonical epic
+  [#8557](https://github.com/D-sorganization/UpstreamDrift/issues/8557), under
+  parent program [#8426](https://github.com/D-sorganization/UpstreamDrift/issues/8426).
 
 Edit the `.qmd`/chapter files, never the generated `.tex`.
