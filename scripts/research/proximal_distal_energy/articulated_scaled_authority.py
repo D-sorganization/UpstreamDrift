@@ -32,7 +32,11 @@ SOURCE_PATHS = (
     "scripts/research/proximal_distal_energy/articulated_scaled_authority.py",
     "scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py",
     "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
+    "tests/research/test_articulated_scaled_authority.py",
+    "tests/research/test_articulated_scaled_authority_evidence.py",
 )
+DEFAULT_RECORD = DATA / "articulated_scaled_authority_nominal.json"
+DEFAULT_ARRAYS = DATA / "articulated_scaled_authority_nominal.npz"
 
 
 @dataclass(frozen=True, slots=True)
@@ -270,6 +274,145 @@ def build_scaled_authority(
     )
 
 
+def _authority_record(
+    authority: ScaledAuthority,
+    array_artifact: str,
+) -> dict[str, Any]:
+    classes, counts = np.unique(authority.selected_failure_class, return_counts=True)
+    failure_distribution = {
+        str(name): int(count) for name, count in zip(classes, counts, strict=True)
+    }
+    selected_feasible = authority.feasible[authority.selected_case_indices]
+    return {
+        "schema_version": "articulated-scaled-authority/v1",
+        "study_id": "articulated-structural-corner-authority-regeneration",
+        "configuration": asdict(authority.configuration),
+        "results": {
+            "selected_case_count": int(authority.selected_case_indices.size),
+            "phase_sample_count_per_case": int(authority.time_s.size),
+            "selected_feasible_sample_count": int(np.count_nonzero(selected_feasible)),
+            "selected_total_sample_count": int(selected_feasible.size),
+            "selected_failure_distribution": failure_distribution,
+            "maximum_closure_error_m": float(
+                np.max(authority.selected_maximum_closure_error_m)
+            ),
+            "minimum_joint_limit_margin_rad": float(
+                np.min(authority.selected_minimum_joint_limit_margin_rad)
+            ),
+            "minimum_collision_clearance_m": float(
+                np.min(authority.selected_minimum_collision_clearance_m)
+            ),
+            "maximum_nominal_state_error_rad": (
+                authority.maximum_nominal_state_error_rad
+                if np.isfinite(authority.maximum_nominal_state_error_rad)
+                else None
+            ),
+        },
+        "source_sha256": authority.source_sha256,
+        "authority_sha256": authority.authority_sha256,
+        "array_artifact": array_artifact,
+        "limitations": {
+            "bounds": "engineering corners, not participant or equipment distributions",
+            "geometry": "reduced-tree closure and coarse spherical collision only",
+            "dynamics": "authority regeneration alone does not evaluate either headline atlas",
+            "human_inference": "no human, physiological, or coaching inference",
+        },
+    }
+
+
+def save_scaled_authority(
+    authority: ScaledAuthority,
+    record_path: Path,
+    arrays_path: Path,
+) -> dict[str, Any]:
+    """Persist one validated authority corner as governed JSON and NPZ evidence."""
+
+    validate_scaled_authority(authority, authority.configuration)
+    record = _authority_record(authority, arrays_path.name)
+    record_path.parent.mkdir(parents=True, exist_ok=True)
+    arrays_path.parent.mkdir(parents=True, exist_ok=True)
+    record_path.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+    np.savez_compressed(
+        arrays_path,
+        time_s=authority.time_s,
+        profile_index=authority.profile_index,
+        grip_span_m=authority.grip_span_m,
+        solution_q=authority.solution_q,
+        feasible=authority.feasible,
+        selected_case_indices=authority.selected_case_indices,
+        selected_failure_class=authority.selected_failure_class,
+        selected_maximum_closure_error_m=(authority.selected_maximum_closure_error_m),
+        selected_minimum_joint_limit_margin_rad=(
+            authority.selected_minimum_joint_limit_margin_rad
+        ),
+        selected_minimum_collision_clearance_m=(
+            authority.selected_minimum_collision_clearance_m
+        ),
+    )
+    return record
+
+
+def load_scaled_authority(
+    record_path: Path,
+    arrays_path: Path,
+) -> ScaledAuthority:
+    """Load one authority corner and reject schema, source, or content drift."""
+
+    record = json.loads(record_path.read_text(encoding="utf-8"))
+    if record.get("schema_version") != "articulated-scaled-authority/v1":
+        raise RuntimeError("scaled authority record schema is unsupported")
+    values = dict(record["configuration"])
+    values["case_indices"] = tuple(values["case_indices"])
+    configuration = ScaledAuthorityConfig(**values)
+    with np.load(arrays_path) as source:
+        arrays = {name: np.asarray(source[name]) for name in source.files}
+    required = {
+        "time_s",
+        "profile_index",
+        "grip_span_m",
+        "solution_q",
+        "feasible",
+        "selected_case_indices",
+        "selected_failure_class",
+        "selected_maximum_closure_error_m",
+        "selected_minimum_joint_limit_margin_rad",
+        "selected_minimum_collision_clearance_m",
+    }
+    if set(arrays) != required:
+        raise RuntimeError("scaled authority array fields do not match")
+    nominal_error = record["results"]["maximum_nominal_state_error_rad"]
+    authority = ScaledAuthority(
+        configuration=configuration,
+        time_s=np.asarray(arrays["time_s"], dtype=float),
+        profile_index=np.asarray(arrays["profile_index"], dtype=np.int64),
+        grip_span_m=np.asarray(arrays["grip_span_m"], dtype=float),
+        solution_q=np.asarray(arrays["solution_q"], dtype=float),
+        feasible=np.asarray(arrays["feasible"], dtype=bool),
+        selected_case_indices=np.asarray(
+            arrays["selected_case_indices"], dtype=np.int64
+        ),
+        selected_failure_class=np.asarray(
+            arrays["selected_failure_class"], dtype="U32"
+        ),
+        selected_maximum_closure_error_m=np.asarray(
+            arrays["selected_maximum_closure_error_m"], dtype=float
+        ),
+        selected_minimum_joint_limit_margin_rad=np.asarray(
+            arrays["selected_minimum_joint_limit_margin_rad"], dtype=float
+        ),
+        selected_minimum_collision_clearance_m=np.asarray(
+            arrays["selected_minimum_collision_clearance_m"], dtype=float
+        ),
+        maximum_nominal_state_error_rad=(
+            float(nominal_error) if nominal_error is not None else float("nan")
+        ),
+        source_sha256=dict(record["source_sha256"]),
+        authority_sha256=str(record["authority_sha256"]),
+    )
+    validate_scaled_authority(authority, configuration)
+    return authority
+
+
 def validate_scaled_authority(
     authority: ScaledAuthority,
     expected: ScaledAuthorityConfig,
@@ -300,9 +443,27 @@ def validate_scaled_authority(
         raise RuntimeError("scaled authority has incompatible array shapes")
 
 
+def main(
+    record_path: Path = DEFAULT_RECORD,
+    arrays_path: Path = DEFAULT_ARRAYS,
+    configuration: ScaledAuthorityConfig = ScaledAuthorityConfig(),
+) -> dict[str, Any]:
+    """Regenerate and persist the registered nominal authority baseline."""
+
+    authority = build_scaled_authority(configuration)
+    return save_scaled_authority(authority, record_path, arrays_path)
+
+
 __all__ = [
     "ScaledAuthority",
     "ScaledAuthorityConfig",
     "build_scaled_authority",
+    "load_scaled_authority",
+    "main",
+    "save_scaled_authority",
     "validate_scaled_authority",
 ]
+
+
+if __name__ == "__main__":
+    main()

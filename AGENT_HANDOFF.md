@@ -64,43 +64,25 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     subsequent stick--slip evolution, attached-state first failure, and an
     infeasible manufactured case. Do not fold those unqualified results into
     #8751 or describe the impulsive stick control as a trajectory law.
-  - #8752 is **OPEN** on `research/8752-articulated-uncertainty`. Manufactured
-    free/constrained controls now use the production stepper and both native
-    adapters; perturbed controls fail closed. Closed-state uncertainty rebuilds
-    anthropometry, scales joint limits, re-solves bilateral closure, and retains
-    infeasible cells. The preliminary LHS screen and production shaft/ground
-    configurations expose grip, shaft, and finite-ground constitutive controls.
-    The headline campaign registers nominal plus 18 low/high OAT corners, runs
-    each full two-engine/reversal/refinement/killswitch atlas, reports movement
-    from 126/384 shaft and 0/384 ground, and retains failures. Checkpoints now
-    reject scientific-design drift while allowing worker-count changes; the
-    governed figure rejects incomplete data. Publication-contract commits are
-    checkpointed locally; verify origin before takeover. Nominal shaft is 126/384.
-    first ground attempt exposed NumPy's removed `trapz`; `9f751e997` replaces
-    it with `trapezoid`. The resumed 12-worker campaign is exec session `61684`.
-    Inspect it and the checkpoint before starting anything. The red evidence
-    test is `test_articulated_headline_uncertainty_evidence.py`; paper methods,
-    artifact documentation, source hashes, and summary contract are implemented.
-    Full data, figure, claims/release integration, and publication remain. Do
-    not close #8752 from the 19-corner campaign alone: issue reconciliation on
-    2026-08-20 confirmed that its headline corners cover grip, shaft, and
-    finite-ground constitutive bounds, while height, body-mass, and joint-limit
-    perturbations enter the separate closed-state/LHS failure map. That v2
-    artifact has now been regenerated from the improved closure-regeneration
-    implementation: all 40 rows are finite and energy-closed, but all 40 retain
-    partial opening. Its governed PRCC/status figure, evidence tests, data
-    dictionary entry, commands, and paper section are implemented locally.
-    Either propagate registered anthropometric and joint-limit corners through
-    both headline atlases or record an explicit issue-level acceptance
-    amendment. #8800 now owns the full authority-regeneration and headline-
-    propagation dependency; the present evidence must not be described as full
-    headline propagation over every bound named by #8752. Its standalone
-    `articulated_scaled_authority.py` generator and focused tests are now
-    implemented: selected cases regenerate all 13 phase states, nominal
-    reproduction is bounded at 1e-8 rad, failures remain classified, and
-    configuration/source/content drift fails closed. Do not connect it to the
-    shaft or ground atlas until the live campaign checkpoints, because those
-    atlas files are part of the running record's hashed source basis.
+  - #8752 is **OPEN** on `research/8752-articulated-uncertainty`. The v2
+    40-sample closed-state/LHS study is finite and energy-closed but every row
+    retains partial opening. The 19-corner headline campaign is incomplete:
+    earlier nominal results were 126/384 shaft and 0/384 ground, but their
+    per-pathway source basis was unavailable after legacy migration. They now
+    fail closed as `provenance_unverified` and must be rerun. No process is active.
+    The ground atlas now checkpoints each of 72 independent pathway/control
+    branches and can use 20 workers; a real restart-equivalence test passes.
+    The shaft atlas remains capped at 12 workers. Commit and push the stable
+    source basis before resuming, then run the headline module with 20 workers.
+    The red full-evidence test stays uncommitted until all 19 corners finish.
+  - #8800 is **OPEN** and blocks #8752. Its governed scaled-authority generator
+    regenerates all 13 phase states for cases 0/8/9/17. The nominal baseline is
+    52/52 feasible, reproduces the committed states within 1e-8 rad, retains
+    classified failures, and rejects configuration/source/content drift. Its
+    JSON/NPZ artifacts, evidence tests, data-dictionary row, and direct module
+    regeneration command are implemented locally. Next propagate registered
+    height, body-mass, and joint-limit corners through both headline atlases;
+    do not describe the constitutive-only campaign as full #8752 coverage.
 - The release has 295 atomic claims and 40 reviewed release claims; all 40
   retain at least one scientifically open gate. #8724 still owns normalized
   four-way adjudication and independent review.
