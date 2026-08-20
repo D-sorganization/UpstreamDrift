@@ -374,8 +374,8 @@
     "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py": "166ab2ebec88a0c53abc54c6b565ba0a3f82caf800449e822164177f31289549",
     "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
     "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
-    "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": "fb9e9832b0bea41cb25af2fe528550465ec28afb21bcee54c69779e59063a543",
-    "tests/research/test_articulated_structural_propagation_plan.py": "08ef1b2e3a757ef08f097b69d470acfbd9ce853817254ee7355a00e9a6b5650e"
+    "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": "04cd6e41740da85d0173b10b9208ff672261f595fb921d28353dc4d091f53ab0",
+    "tests/research/test_articulated_structural_propagation_plan.py": "17eca26ea5bfd01e598db5805e916b885d7cbd86bd6cf27e3f72b2d4cbe5524a"
   },
   "limitations": {
     "scope": "engineering OAT corners, not a participant distribution",

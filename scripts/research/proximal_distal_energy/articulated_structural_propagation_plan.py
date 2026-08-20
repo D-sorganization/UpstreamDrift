@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 from dataclasses import asdict
 import hashlib
 import json
@@ -153,9 +154,29 @@ def build_structural_propagation_plan(
     }
 
 
+def validate_structural_propagation_plan(
+    plan_path: Path = DEFAULT_OUTPUT,
+) -> dict[str, Any]:
+    """Reject a committed plan that differs from current governed inputs."""
+
+    observed = json.loads(plan_path.read_text(encoding="utf-8"))
+    expected = build_structural_propagation_plan()
+    if observed != expected:
+        raise RuntimeError("committed structural propagation plan is stale or altered")
+    return observed
+
+
 def main() -> None:
-    record = build_structural_propagation_plan()
-    DEFAULT_OUTPUT.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "command", choices=("write", "validate"), nargs="?", default="write"
+    )
+    args = parser.parse_args()
+    if args.command == "validate":
+        validate_structural_propagation_plan()
+    else:
+        record = build_structural_propagation_plan()
+        DEFAULT_OUTPUT.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
 
 
 if __name__ == "__main__":

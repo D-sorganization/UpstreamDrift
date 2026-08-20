@@ -10,6 +10,7 @@ import pytest
 from scripts.research.proximal_distal_energy.articulated_structural_propagation_plan import (
     CAMPAIGN,
     build_structural_propagation_plan,
+    validate_structural_propagation_plan,
 )
 
 pytestmark = pytest.mark.scientific
@@ -84,6 +85,7 @@ def test_committed_plan_is_exactly_reproducible(plan) -> None:
     committed = json.loads(COMMITTED.read_text(encoding="utf-8"))
 
     assert committed == plan
+    assert validate_structural_propagation_plan() == plan
 
 
 def test_plan_rejects_incomplete_campaign(tmp_path) -> None:
@@ -104,3 +106,13 @@ def test_plan_rejects_campaign_authority_digest_mismatch(tmp_path) -> None:
 
     with pytest.raises(RuntimeError, match="digests do not match"):
         build_structural_propagation_plan(candidate)
+
+
+def test_validation_rejects_tampered_committed_plan(tmp_path) -> None:
+    plan = json.loads(COMMITTED.read_text(encoding="utf-8"))
+    plan["corners"][0]["feasible_state_count"] = 11
+    candidate = tmp_path / "plan.json"
+    candidate.write_text(json.dumps(plan), encoding="utf-8")
+
+    with pytest.raises(RuntimeError, match="stale or altered"):
+        validate_structural_propagation_plan(candidate)
