@@ -71,6 +71,17 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
 - #8556 remains open: no governed participant dataset contains synchronized
   bilateral six-axis grip wrenches. Synthetic traces cannot replace it.
 
+## Launch-Monitor Analytics Authority
+
+- Tools epic #4583 and UpstreamDrift issue #8790 govern contract v2.
+- `LaunchMonitorAnalysisResultV2` (`2.0.0`) is the canonical evidence envelope;
+  the v1 endpoint remains available for compatibility.
+- Use `/tools/launch-monitor-analytics/v2/analyze` for unit authority, lineage,
+  missingness, backing-source links, unavailable states, uncertainty, identity
+  trust, and bounded vendor/model claims.
+- Player grouping requires an explicit trusted identity declaration. Never infer
+  identity from session, club, filename, source layout, or row order.
+
 ## Qualified Baseline — And Its Limits
 
 Native MuJoCo and robotics Pinocchio independently qualify the 20-coordinate

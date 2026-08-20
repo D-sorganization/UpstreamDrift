@@ -38,6 +38,7 @@ This directory tracks architecture-impacting decisions for UpstreamDrift.
 | [0031](0031-launch-monitor-canonical-shot-schema.md)  | Canonical Launch Monitor Shot Schema                                              | Accepted | 2026-08-04 |
 | [0032](0032-bunkershot3d-club-design-architecture.md) | BunkerShot3D as a Multi-Fidelity Club-Design Tool                                 | Accepted | 2026-08-13 |
 | [0033](0033-bunkershot3d-sand-field-tier.md)          | Sand-Field Visualization Tier for BunkerShot3D                                    | Proposed | 2026-08-16 |
+| [0034](0034-launch-monitor-analysis-contract-v2.md)   | Launch Monitor Analysis Contract V2                                               | Accepted | 2026-08-19 |
 
 Note: ADR 0013 was amended on 2026-05-31 to document the CC-32
 canonical-core app-shell registry reuse of the embeddable-tool contract.

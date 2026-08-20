@@ -124,6 +124,8 @@ available to headless and web clients at:
 
 - `GET /tools/launch-monitor-analytics/capabilities`
 - `POST /tools/launch-monitor-analytics/analyze`
+- `GET /tools/launch-monitor-analytics/contracts/v2`
+- `POST /tools/launch-monitor-analytics/v2/analyze`
 
 The result includes pair-specific sample counts, Benjamini-Hochberg-adjusted
 p-values, Pearson confidence intervals, OLS coefficient uncertainty, R² and
@@ -144,6 +146,27 @@ matching header text does not establish matching measurement semantics.
 Aggregate reference observations are never permitted in regression. Explicitly
 enabled aggregate correlations are labeled descriptive and warn about
 ecological bias.
+
+Contract v1 remains available for existing clients. New clients should use v2,
+which adds canonical and display units, exact backing-record hashes,
+content-addressed sources, authority commit and transformation lineage,
+missingness and exclusion counts, explicit unavailable states, uncertainty
+methods, player-identity trust, and vendor/model provenance. These fields make
+an exported result independently auditable without copying restricted source
+values into the result.
+
+Player grouping in v2 requires an explicitly supplied trusted identifier and
+evidence. The application never infers identity from session, club, filename,
+directory structure, or row order. Vendor names remain vendor-comparable
+labels; no result claims firmware reproduction, device emulation, or device
+certification.
+
+All canonical metrics and retained numeric source fields remain available for
+selection. Canonical fields use the metric registry's units. A retained source
+field is labeled `source_declared` only when its unit is explicitly supplied in
+the v2 context; otherwise the unit and authority are `unknown`. An unknown unit
+is never silently treated as canonical. Backing rows similarly name their
+declared content-addressed source or state why no source link is available.
 
 ### Public Reference Data
 

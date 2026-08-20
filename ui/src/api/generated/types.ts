@@ -191,6 +191,25 @@ export interface ActuatorUpdateRequest {
 }
 
 /**
+ * Caller-supplied lineage and identity assertions.
+ */
+export interface AnalysisContextV2 {
+  authority?: DatasetAuthorityV2 | null;
+  player_identity?: PlayerIdentityV2;
+  transformations: TransformRecordV2[];
+  sources: SourceFileReferenceV2[];
+  source_units?: Record<string, string>;
+}
+
+export interface AnalysisLineageV2 {
+  dataset_fingerprint_sha256: string;
+  authority?: DatasetAuthorityV2 | null;
+  transformations: TransformRecordV2[];
+  sources: SourceFileReferenceV2[];
+  backing_records: BackingRecordV2[];
+}
+
+/**
  * Response model for aggregated analysis metrics. Provides statistical summary of simulation metrics over time. See issue #1203
  */
 export interface AnalysisMetricsSummary {
@@ -263,6 +282,16 @@ export interface AnalyzePayload {
 }
 
 /**
+ * V2 request with explicit dataset, transformation, and identity context.
+ */
+export interface AnalyzePayloadV2 {
+  records: Record<string, unknown>[];
+  analysis: FlexibleAnalysisPayload;
+  context?: AnalysisContextV2;
+  model_provenance: ModelProvenanceV2[];
+}
+
+/**
  * Appearance preferences for the web shell.
  */
 export interface AppearanceSettings {
@@ -270,6 +299,27 @@ export interface AppearanceSettings {
   theme_id: string;
   /** Root font scale multiplier (0.5–2.0). */
   font_scale: number;
+}
+
+export interface AvailabilityV2 {
+  result_path: string;
+  state: "available" | "unavailable";
+  reason_code?: string | null;
+  message?: string | null;
+  observed_count?: number | null;
+  required_count?: number | null;
+}
+
+/**
+ * Stable reference to exactly one input record without copying values.
+ */
+export interface BackingRecordV2 {
+  record_sha256: string;
+  shot_id?: string | null;
+  session_id?: string | null;
+  source_row?: number | string | null;
+  source_id?: string | null;
+  unlinked_reason?: "no_source_reference_declared" | "session_not_linked_to_source_reference" | null;
 }
 
 /**
@@ -583,6 +633,13 @@ export interface CharacterBuilderRequest {
   build_type: string;
 }
 
+export interface ClaimsV2 {
+  vendor_comparison: "descriptive" | "matched_agreement";
+  device_emulation: boolean;
+  device_certification: boolean;
+  causal_inference: boolean;
+}
+
 /**
  * Request body for deterministic contraction-rate estimation.
  */
@@ -698,6 +755,17 @@ export interface DataExportRequest {
   include_time_series: boolean;
   /** Optional time range [start, end] in seconds */
   time_range?: number[] | null;
+}
+
+/**
+ * Commit-addressable authority for the analyzed dataset.
+ */
+export interface DatasetAuthorityV2 {
+  dataset_id: string;
+  repository?: string | null;
+  commit?: string | null;
+  dataset_path?: string | null;
+  manifest_sha256?: string | null;
 }
 
 /**
@@ -1197,6 +1265,25 @@ export interface JointInfoResponse {
 }
 
 /**
+ * Complete OpenAPI-compatible v2 result envelope.
+ */
+export interface LaunchMonitorAnalysisResultV2 {
+  contract_version: "2.0.0";
+  status: "available" | "partial" | "unavailable";
+  analysis: Record<string, unknown> | null;
+  units: Record<string, MetricUnitsV2>;
+  lineage: AnalysisLineageV2;
+  missingness: MissingnessV2;
+  availability: AvailabilityV2[];
+  uncertainty: UncertaintyV2;
+  player_identity: PlayerIdentityV2;
+  vendor_provenance: VendorProvenanceV2[];
+  model_provenance: ModelProvenanceV2[];
+  claims?: ClaimsV2;
+  warnings: string[];
+}
+
+/**
  * Launcher manifest as serialized by ``LauncherManifest.to_dict``. ``launcher_csrf_token``/``launcher_csrf_header`` are only present when the manifest is served by the local launcher backend (``local_server.py``), which attaches the local capability token for mutating endpoints.
  */
 export interface LauncherManifestResponse {
@@ -1323,6 +1410,21 @@ export interface MeasurementToolsResponse {
   measurements?: MeasurementResult[];
 }
 
+export interface MetricUnitsV2 {
+  canonical_unit: string;
+  display_unit: string;
+  authority: "canonical_registry" | "source_declared" | "unknown";
+}
+
+export interface MissingnessV2 {
+  input_row_count: number;
+  complete_row_count: number;
+  missing_by_variable: Record<string, number>;
+  non_numeric_by_variable: Record<string, number>;
+  excluded_by_reason: Record<string, number>;
+  policy: "pairwise" | "listwise" | "fail";
+}
+
 /**
  * Request model for Frankenstein mode: comparing two models side by side. See issue #1200
  */
@@ -1385,6 +1487,14 @@ export interface ModelListResponse {
   models: Record<string, string>[];
 }
 
+export interface ModelProvenanceV2 {
+  model_id: string;
+  version: string;
+  code_commit?: string | null;
+  configuration_sha256?: string | null;
+  relationship_to_vendor: "independent_physics" | "vendor_comparable_surrogate" | "vendor_reported_output" | "unknown";
+}
+
 /**
  * Toast notification preferences.
  */
@@ -1414,6 +1524,15 @@ export interface PlaybackResponse {
   status: string;
   current_frame: number;
   total_frames: number;
+}
+
+/**
+ * Declared identity evidence; identity is never inferred from layout.
+ */
+export interface PlayerIdentityV2 {
+  trust_level: "not_provided" | "explicit_user_attested" | "pseudonymous_stable" | "verified_external" | "untrusted_inferred";
+  identifier_column?: string | null;
+  evidence?: string | null;
 }
 
 /**
@@ -1722,6 +1841,17 @@ export interface SkeletonFrame {
 }
 
 /**
+ * Content-addressed source and the sessions it backs.
+ */
+export interface SourceFileReferenceV2 {
+  source_id: string;
+  file_sha256: string;
+  session_ids: string[];
+  source_uri?: string | null;
+  rights_status: "public_redistributable" | "restricted_internal" | "permission_required" | "unknown";
+}
+
+/**
  * Request model for simulation speed control. Preconditions: - speed_factor must be in [0.1, 10.0] See issue #1202
  */
 export interface SpeedControlRequest {
@@ -1858,6 +1988,15 @@ export interface TrajectoryRecordResponse {
 }
 
 /**
+ * Versioned transformation applied before analysis.
+ */
+export interface TransformRecordV2 {
+  transform_id: string;
+  version: string;
+  parameters_sha256: string;
+}
+
+/**
  * Descriptor for a single URDF joint. See issue #1201
  */
 export interface URDFJointDescriptor {
@@ -1935,6 +2074,14 @@ export interface URDFTreeNode {
   properties?: Record<string, unknown>;
 }
 
+export interface UncertaintyV2 {
+  confidence_level: number;
+  correlation_interval: string;
+  regression_interval: string;
+  multiplicity_adjustment: string;
+  assumptions: string[];
+}
+
 /**
  * Usage quota item schema.
  */
@@ -1995,6 +2142,14 @@ export interface ValidationError {
   type: string;
   input?: unknown;
   ctx?: Record<string, unknown>;
+}
+
+export interface VendorProvenanceV2 {
+  vendor: string;
+  models: string[];
+  software_versions: string[];
+  row_count: number;
+  metric_statuses: Record<string, string[]>;
 }
 
 /**

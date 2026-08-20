@@ -89,3 +89,82 @@ where available, split counts, and the recipe seed.
 
 All public functions validate required columns and minimum sample sizes with
 descriptive `ValueError` messages.
+
+## Analysis Contract V2
+
+UpstreamDrift is the canonical Python and API authority for launch-monitor
+statistical results. Contract `2.0.0` adds an evidence-bearing envelope around
+the unchanged v1 numerical result:
+
+- canonical and display units for every selected variable;
+- dataset fingerprint, exact backing-record hashes, content-addressed source
+  references, authority repository/commit, and versioned transformations;
+- missing, non-numeric, complete, and analysis-specific exclusion counts;
+- per-result `available` or `unavailable` states and an overall
+  `available`/`partial`/`unavailable` state;
+- confidence and multiplicity methods plus their assumptions;
+- explicit player-identity trust and evidence;
+- vendor, device model, software version, measurement status, and analytical
+  model provenance; and
+- conservative claim flags that default to descriptive comparison and never
+  claim device emulation, certification, or causality.
+
+Use the Python authority directly:
+
+```python
+from src.shared.python.launch_monitor import (
+    AnalysisContextV2,
+    DatasetAuthorityV2,
+    FlexibleAnalysisRequest,
+    analyze_variables_v2,
+)
+
+result = analyze_variables_v2(
+    shots,
+    FlexibleAnalysisRequest(
+        outcome="carry_distance",
+        predictors=("ball_speed", "launch_angle", "spin_rate"),
+    ),
+    context=AnalysisContextV2(
+        authority=DatasetAuthorityV2(
+            dataset_id="qualified-corpus",
+            repository="D-sorganization/Launch-Monitor-Flight-Model-Campaign",
+            commit="0123456789abcdef0123456789abcdef01234567",
+        )
+    ),
+)
+payload = result.model_dump(mode="json", exclude_none=True)
+```
+
+The HTTP surfaces are:
+
+- `GET /tools/launch-monitor-analytics/contracts/v2` for JSON Schema;
+- `POST /tools/launch-monitor-analytics/v2/analyze` for v2 results;
+- `POST /tools/launch-monitor-analytics/analyze` for compatible v1 clients.
+
+The v2 response model is registered with FastAPI, so it is also present in the
+application OpenAPI document. The checked-in schema is generated from the same
+Pydantic authority and guarded against drift:
+
+```powershell
+python -m scripts.generate_launch_monitor_contract
+```
+
+Grouping by a player field fails closed unless `player_identity` declares a
+trusted identifier column and evidence. Session, club, source filename, file
+layout, and row order are never accepted as player identity. Insufficient or
+rank-deficient regression is returned as an explicit unavailable result rather
+than an apparently successful null result. Invalid columns, unsafe pooling, and
+other request-contract violations still fail with a descriptive error.
+
+Every canonical metric and retained numeric `source::<header>` field remains
+selectable. Registry metrics carry registry-authoritative canonical/display
+units. A retained source field carries a unit only when the caller declares it
+in `AnalysisContextV2.source_units`; that unit is labeled `source_declared`, not
+canonical. Without a declaration both units and their authority are `unknown`.
+The contract never promotes an unknown source unit into an authoritative unit.
+
+Dataset and analytical-model commits, when present, are full 40-character
+lowercase hexadecimal SHAs. Each backing record either joins to a declared
+content-addressed source by `source_id` or carries an explicit unlinked reason.
+An undeclared `source_id` is a contract error.

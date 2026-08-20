@@ -11,11 +11,17 @@ from pydantic import BaseModel, Field
 from src.api.middleware.error_handler import handle_api_errors
 from src.shared.python.launch_monitor import (
     CONTRACT_VERSION,
+    CONTRACT_VERSION_V2,
+    AnalysisContextV2,
     AnalysisMode,
     CorrelationMethod,
     FlexibleAnalysisRequest,
+    LaunchMonitorAnalysisResultV2,
+    ModelProvenanceV2,
     MissingPolicy,
     analyze_variables,
+    analyze_variables_v2,
+    contract_v2_json_schema,
 )
 
 router = APIRouter(
@@ -57,6 +63,13 @@ class AnalyzePayload(BaseModel):
     analysis: FlexibleAnalysisPayload
 
 
+class AnalyzePayloadV2(AnalyzePayload):
+    """V2 request with explicit dataset, transformation, and identity context."""
+
+    context: AnalysisContextV2 = Field(default_factory=AnalysisContextV2)
+    model_provenance: tuple[ModelProvenanceV2, ...] = ()
+
+
 @router.get("/capabilities")
 @handle_api_errors
 async def capabilities() -> dict[str, object]:
@@ -64,12 +77,21 @@ async def capabilities() -> dict[str, object]:
 
     return {
         "contract_version": CONTRACT_VERSION,
+        "supported_contract_versions": [CONTRACT_VERSION, CONTRACT_VERSION_V2],
         "analysis_modes": ["correlation", "regression", "comprehensive"],
         "correlation_methods": ["pearson", "spearman", "kendall"],
         "missing_policies": ["pairwise", "listwise", "fail"],
         "aggregate_regression_allowed": False,
         "maximum_inline_records": 20_000,
     }
+
+
+@router.get("/contracts/v2")
+@handle_api_errors
+async def contract_v2() -> dict[str, object]:
+    """Publish the canonical JSON Schema used by OpenAPI v2 clients."""
+
+    return contract_v2_json_schema()
 
 
 @router.post("/analyze")
@@ -80,6 +102,25 @@ async def analyze(payload: AnalyzePayload) -> dict[str, object]:
     frame = pd.DataFrame.from_records(payload.records)
     result = analyze_variables(frame, payload.analysis.to_domain())
     return {"contract_version": CONTRACT_VERSION, "result": result.to_dict()}
+
+
+@router.post(
+    "/v2/analyze",
+    response_model=LaunchMonitorAnalysisResultV2,
+    response_model_exclude_none=True,
+)
+@handle_api_errors
+async def analyze_v2(payload: AnalyzePayloadV2) -> LaunchMonitorAnalysisResultV2:
+    """Analyze inline records with the evidence-bearing v2 contract."""
+
+    frame = pd.DataFrame.from_records(payload.records)
+    result = analyze_variables_v2(
+        frame,
+        payload.analysis.to_domain(),
+        context=payload.context,
+        model_provenance=payload.model_provenance,
+    )
+    return result
 
 
 __all__ = ["CONTRACT_VERSION", "router"]

@@ -990,6 +990,14 @@ study,vandv,provenance,units}`, with subpackages re-exported by name and a
   coordinate and a time column; they now run over 20,099 and 8,488 shots
   respectively. Column selection is filtered against the dataset schema, so a
   corpus pinned before those columns exist still loads.
+- **2026-08-19** - Published Launch Monitor Analysis Contract v2 as the
+  canonical cross-repository evidence envelope. The v2 API carries explicit
+  unit authority, exact commit/source/transformation/backing-record lineage,
+  missingness and exclusions, uncertainty, vendor/model provenance, and typed
+  available/partial/unavailable states. Player grouping requires an explicitly
+  trusted identifier and evidence; session, club, filename, source layout, and
+  row order are never identities. Contract v1 remains available through its
+  unchanged endpoint and a bounded compatibility adapter.
 - **2026-08-18** - Connected Launch Monitor Analytics to the private shot
   corpus. `launch_monitor.corpus.load_private_corpus()` reads the data
   authority's source-partitioned Parquet corpus (261,666 shots across 27
@@ -2539,7 +2547,7 @@ UpstreamDrift/
 | Rust Physics Kernels     | `rust_core/upstream-physics/`            | High-performance compiled physics routines for critical paths, including initial flexible shaft FEM element primitives |
 | Configuration Manager    | `src/config/`                            | Centralized configuration loading, validation, and environment management                   |
 | Analysis Tool CLIs       | `src/tools/drift_control/`, `src/tools/contraction/` | Headless AffineDrift-compatible drift/control, contraction, and Floquet analysis tools |
-| Launch Monitor Analytics | `src/tools/launch_monitor_analytics/`, `src/shared/python/launch_monitor/` | PyQt6, FastAPI, and headless vendor-neutral import plus arbitrary-field association/regression, missingness, multiplicity, grouping, lineage, dependency, model, agreement, dispersion, and trend analysis |
+| Launch Monitor Analytics | `src/tools/launch_monitor_analytics/`, `src/shared/python/launch_monitor/` | PyQt6, FastAPI, and headless vendor-neutral import plus arbitrary-field analysis; contract v2 adds unit authority, exact lineage, identity trust, uncertainty, and typed unavailable states while retaining v1 compatibility |
 | Tools Ground Consumer    | `src/shared/python/ground_model/`      | Headless exact-schema gateway to Tools flight-to-ground v1 records and reference execution; UI and final dependency pins remain tracked |
 | Putting Dynamics         | `src/shared/python/putting_dynamics/`   | Headless heterogeneous-green, collision, loft, hosel-wrench, skid/roll/rest, and hole-capture physics for #8345 |
 | 3D Putting UI            | `src/api/routes/putting_green.py`, `ui/src/pages/PuttingGreen.tsx`, `ui/src/components/visualization/PuttingScene3D.tsx` | Generated-contract R3F playback of the canonical putting model with collision, spin, hosel, surface, camera, and video controls for #8345 P1 |
