@@ -70,7 +70,7 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     nominal shaft recomputation completed at 126/384 with all four computation
     hashes verified against remote basis `fbff8dc53`. Nominal ground is active
     in exec session `64656` with 20 workers and 72 independently digest-bound
-    branch checkpoints; branch 1/72 is durable, digest-bound, and records exact
+    branch checkpoints; 25/72 are durable, digest-bound, and record exact
     trajectory/force/ground-force parity. A real restart-equivalence test passes.
     The completion-only headline evidence test stays untracked until data finish.
   - #8800 is **OPEN** and blocks #8752. Its governed generator regenerates all
