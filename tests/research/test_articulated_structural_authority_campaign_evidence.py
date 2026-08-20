@@ -117,3 +117,6 @@ def test_falsification_matrix_reconciles_closed_states_and_open_sensitivity() ->
     assert "seven structural corners have not yet propagated" in matrix
     assert "structural sensitivity of the headline estimands" in matrix
     assert "human transport remain unresolved" in matrix
+    assert "original prescribed cases fail the 5 mm gate" in matrix
+    assert "Retain the prescribed-pose mismatch as a negative control" in matrix
+    assert "compare it with the solved 234-state closed atlas" in matrix
