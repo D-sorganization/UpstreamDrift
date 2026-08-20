@@ -155,6 +155,3 @@
 ## 2025-02-23 - Focus on Measurable Impact Over Micro-Optimizations
 **Learning:** Scattershot micro-optimizations (like replacing `np.sum` with `.sum()` or `np.vdot` across many unrelated files) violate the core philosophy of "avoiding micro-optimizations with no measurable impact" and pollute the codebase with noisy comments. They often trigger PR rejections and linting errors (like `E501 Line too long`).
 **Action:** When finding ONE performance improvement, focus on a single, targeted bottleneck with proven real-world impact, rather than applying sweeping, theoretical micro-optimizations across the entire codebase. Ensure that any added inline comments do not break the 88-character line limit, appending `  # noqa: E501` if necessary.
-## 2026-08-20 - [Replacing np.linalg.norm with math.sqrt(np.vdot) for 3D cross products]
-**Learning:** In geometry processing loops like STL exports (`src/bunkershot3d/geometry/clubhead.py`), calculating the normal magnitude of a 3D cross product vector using `np.linalg.norm` incurs Python/NumPy dispatch overhead. Using `math.sqrt(np.vdot(n, n))` bypasses array allocation and is noticeably faster, saving milliseconds over thousands of faces.
-**Action:** When normalizing small static 1D vectors in tight loops (like mesh processing), prefer `math.sqrt(np.vdot(vec, vec))` over `np.linalg.norm`.

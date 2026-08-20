@@ -4144,4 +4144,5 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 * (spec-exempt: micro-optimization) Replaced `np.sum` with `np.vdot` and `ndarray.sum()` across simulation files for faster execution
 
 - `spec-exempt`: Replaced `np.sum(A * B)` with `np.vdot(A.ravel(), B.ravel())` in `src/bunkershot3d/study/surrogate.py` to optimize 2D array dot product without changing logic.
-- Replaced `np.linalg.norm` with `math.sqrt(np.vdot)` in `src/bunkershot3d/geometry/clubhead.py` to optimize 3D vector magnitude calculation in STL export loop. (spec-exempt: micro-optimization)
+
+- Replaced `np.concatenate` with in-place slice assignment in `TrajectoryFunnelBenchmark._policy_action` to optimize array construction in tight simulation loops. (spec-exempt: micro-optimization)
