@@ -42,6 +42,9 @@ def test_plan_binds_all_seven_authority_corners(plan) -> None:
         "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py",
         "scripts/research/proximal_distal_energy/articulated_ground_atlas.py",
         "scripts/research/proximal_distal_energy/articulated_atlas_authority.py",
+        "scripts/research/proximal_distal_energy/articulated_shaft_forward.py",
+        "scripts/research/proximal_distal_energy/articulated_ground_forward.py",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
     } < set(plan["source_sha256"])
 
 

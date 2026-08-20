@@ -14,26 +14,32 @@ from scripts.research.proximal_distal_energy.articulated_atlas_authority import 
 )
 from scripts.research.proximal_distal_energy.articulated_ground_atlas import (
     ArticulatedGroundAtlasConfig,
+    SOURCE_PATHS as GROUND_SOURCE_PATHS,
 )
 from scripts.research.proximal_distal_energy.articulated_scaled_authority import (
     load_scaled_authority,
 )
 from scripts.research.proximal_distal_energy.articulated_shaft_atlas import (
     ArticulatedShaftAtlasConfig,
+    SOURCE_PATHS as SHAFT_SOURCE_PATHS,
 )
 
 ROOT = Path(__file__).resolve().parents[3]
 DATA = ROOT / "docs/research/proximal_distal_energy_transfer/data"
 CAMPAIGN = DATA / "articulated_structural_authority_campaign.json"
 DEFAULT_OUTPUT = DATA / "articulated_structural_propagation_plan.json"
-SOURCE_PATHS = (
-    "scripts/research/proximal_distal_energy/articulated_atlas_authority.py",
-    "scripts/research/proximal_distal_energy/articulated_scaled_authority.py",
-    "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py",
-    "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py",
-    "scripts/research/proximal_distal_energy/articulated_ground_atlas.py",
-    "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py",
-    "tests/research/test_articulated_structural_propagation_plan.py",
+SOURCE_PATHS = tuple(
+    dict.fromkeys(
+        (
+            "scripts/research/proximal_distal_energy/articulated_atlas_authority.py",
+            "scripts/research/proximal_distal_energy/articulated_scaled_authority.py",
+            "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py",
+            "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py",
+            "tests/research/test_articulated_structural_propagation_plan.py",
+            *SHAFT_SOURCE_PATHS,
+            *GROUND_SOURCE_PATHS,
+        )
+    )
 )
 
 
