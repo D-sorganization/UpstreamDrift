@@ -43,7 +43,7 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
 - Epic #8557 governs the proximal-to-distal program; #8595 retains the agenda.
 - Tools #4142 remains open; immutable ensemble/sensitivity consumption and cross-repository parity remain required before #8557 can close.
 - Tools #4430 remains open after #4450 (`8f654b3a1552`); the rotating-base provider, Python/TypeScript parity, rendered QA, and UpstreamDrift pin remain due.
-- Live issue audit confirms #8557/#8426/#8443 remain open; #8458, #8497,
+- #8557 is the single canonical epic with a dependency-ordered issue/evidence ledger. Legacy master epic #8426 was closed as superseded—not scientifically complete—on 2026-08-20; #8443 remains open. #8458, #8497,
   #8505, #8493, and #8499 are closed groundwork. README and conclusions now
   distinguish canonical/current governance from historical completed epics.
 - #8789 is the Phase 0 truth-recovery gate for #8557. It keeps repository
@@ -59,7 +59,7 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
   - #8796 is **OPEN** under #8557/#8684 for the stronger attached-to-open and
     stateful finite-static-friction extension. It owns static-cone feasibility,
     subsequent stick--slip evolution, attached-state first failure, and an
-    infeasible manufactured case. Do not fold those unqualified results into
+    infeasible manufactured case. Its incorrect closure against #8797 was reversed on 2026-08-20 because that PR explicitly closed only #8751 and retained #8796 as separate scope. Do not fold those unqualified results into
     #8751 or describe the impulsive stick control as a trajectory law.
   - #8752 is **OPEN** on `research/8752-articulated-uncertainty`. The v2
     40-sample closed-state/LHS study is finite and energy-closed but every row
