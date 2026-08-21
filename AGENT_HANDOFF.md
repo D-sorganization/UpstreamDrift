@@ -59,20 +59,19 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
 
 - Worktree: `UpstreamDrift-worktrees/goal-8752-uncertainty`.
 - Parent PID `18404` is an active checkpointed 19-corner campaign, not an
-  orphan. Eight corners and 15 of 30 pathway evaluations were recorded by the
-  2026-08-21 08:46 checkpoint; the next ground pathway was active when last
-  inspected. Completed pathway rows and atomic ground-branch checkpoints are
-  restartable. Do not infer completion from the partial campaign record.
+  orphan. Nine corners and 17 of 30 completed-or-retained pathway evaluations
+  were recorded by the 2026-08-21 11:41 checkpoint. At 12:43, 25 of 72 atomic
+  ground branches for the active torsional-stiffness-high corner were retained.
+  Completed pathway rows and ground-branch checkpoints are restartable. Do not
+  infer completion from the partial campaign record.
 - It may own up to 20 workers. Do not kill workers individually, edit campaign
   sources, or start a second campaign. Retained numerical failures are data.
 - #8910 repair worktree:
   `UpstreamDrift-worktrees/8910-real-manufactured-solution`; branch:
   `fix/8910-real-manufactured-solution`, based on verified #8960 remote main.
-- PR #8961 is open; implementation commit
-  `e47e17050c74b2dae1dd0eb3eb3058a173763be7` contains the coherent scientific
-  repair. Inspect the live PR head before review because handoff-only commits
-  may follow. Human review and protected CI remain required. Do not enable
-  auto-merge or bypass a required check.
+- PR #8961 merged through protection at
+  `3c75dfdd14404bb897779a6899d85cc21078c4d0`, verified as an ancestor of
+  current remote `main`.
 - The local repair replaces self-defined torque residuals with analytical
   Lagrange--Christoffel, MuJoCo `mj_inverse`, and robotics Pinocchio RNEA;
   replaces hardcoded conservation zeros with an unforced gravity-free rollout;
@@ -153,9 +152,16 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
   architecture exceptions before 2026-09-30. The new native discrepancy
   experiment itself has no exception and is below the 100-line function gate.
 - Full PR #8962 is open from `fix/8911-native-contact-parity` to `main`.
-  Human review and protected CI are required. Inspect its exact head and checks,
-  fix actionable failures, and verify the merge commit as an ancestor of remote
-  `main`; do not enable auto-merge or bypass protection.
+  Standard CI, publication, claim, architecture, and repository gates pass on
+  head `7188ad1cb509225ed2bbaf7f98ba6a391460c5a8`. The optional-stack lane then
+  passed all executable manufactured-solution checks but rejected the committed
+  record because the new MuJoCo 3.4/3.8 compatibility adapter changed the
+  governed `spatial_full_body.py` digest after evidence generation. The record
+  has now been regenerated canonically under Linux MuJoCo 3.8.0 and Pinocchio
+  3.8.0; all five manufactured-solution tests pass and the claim-evidence
+  manifest validates. Commit and push this evidence requalification, then
+  shepherd the new exact head through human review and protected CI. Do not
+  enable auto-merge or bypass protection.
 
 ## Scientific Boundaries
 

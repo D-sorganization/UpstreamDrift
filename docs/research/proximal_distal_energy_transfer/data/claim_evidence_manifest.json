@@ -3925,7 +3925,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json": {
-      "sha256": "efe3de69d082515e08b84150a2273acf03948d49148d43bc3788e2b734df3c13",
+      "sha256": "2b892eb8dc216cabf07d842001688bf4b25f70a0529147ac418ff5f61df6aacf",
       "bytes": 3478,
       "referenced_by": [
         "PD-CLAIM-297",
