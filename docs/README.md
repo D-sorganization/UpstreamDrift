@@ -26,7 +26,16 @@ Welcome to UpstreamDrift - a professional biomechanical analysis and physics sim
 
 ```bash
 cd /home/user/UpstreamDrift
-python launch_golf_suite.py
+python launch_upstream_drift.py
+```
+
+By default this starts the local API server and opens the React web UI.
+Other modes (also available via the `upstream-drift` console script):
+
+```bash
+python launch_upstream_drift.py --classic        # Classic PyQt6 desktop launcher
+python launch_upstream_drift.py --api-only       # API server without auto-opening a UI
+python launch_upstream_drift.py --engine <name>  # Legacy direct engine launch
 ```
 
 ### 2. Access the API
@@ -267,8 +276,8 @@ repository maintenance guidance.
 
 ## Recent Updates
 
-- **Web UI (primary)** - `python launch_golf_suite.py` opens the React-based web interface
-- **Classic PyQt6 launcher** - available via `python launch_golf_suite.py --classic`
+- **Web UI (primary)** - `python launch_upstream_drift.py` (or the `upstream-drift` console script) opens the React-based web interface
+- **Classic PyQt6 launcher** - available via `python launch_upstream_drift.py --classic`
 - **Motion Pipeline** - From video to tracked motion in 5 commands (see `docs/motion_pipeline/`)
 - **Multi-engine support** - MuJoCo (default), Drake, Pinocchio, OpenSim, MyoSuite, MATLAB Simscape
 

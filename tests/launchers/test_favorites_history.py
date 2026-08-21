@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 
 import pytest
 from src.launchers.launcher_layout_manager import LayoutManager
-from src.launchers.model_registry import ModelSpec
+from src.shared.python.config.model_registry import ModelConfig as ModelSpec
 
 
 @pytest.fixture
