@@ -3936,7 +3936,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.json": {
-      "sha256": "a05d21c91f6b4140be11f45aafcb02f565254931d86e9aa4be9616473596a11a",
+      "sha256": "2e5c94a1e3c6255731232b0d1dfcb0244f403fb59fcc4f475f9119555f3c4d3b",
       "bytes": 4524,
       "referenced_by": [
         "PD-CLAIM-302",
@@ -5354,7 +5354,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "85003a46efc58c5f6848a5974e7920269eb941dfa6c656b110c8b15de732a501",
+      "sha256": "167eeb22ab5ee50ff122f885f514f439894681cba72bd83657640e89e279648e",
       "bytes": 131364,
       "referenced_by": [
         "PD-CLAIM-241"
@@ -5503,8 +5503,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/articulated_native_constraint_discrepancy.py": {
-      "sha256": "f3e0e7645f6a08cfcdc311ff9deb88425f5632d5b93d2978843930105e37e5c7",
-      "bytes": 20397,
+      "sha256": "e1c6f0f066e4ad3f157557d003e4e12ae83842cc275ccc0965f263e1fc21220a",
+      "bytes": 22185,
       "referenced_by": [
         "PD-CLAIM-302",
         "PD-CLAIM-303",

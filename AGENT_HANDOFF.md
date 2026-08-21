@@ -114,9 +114,11 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
   `fix/8911-native-contact-parity`, based on the verified #8961 merge.
 - Commits `643ce3a12`, `933c3cf87`, and `804efd249` implement the native
   constraint experiment, evidence, MuJoCo API compatibility, terminology
-  correction, claim reconciliation, and regenerated 235-page paper. Release
-  metadata is bound to source commit
-  `804efd2490e377394274a23c104a010fb04c8d5c`.
+  correction, claim reconciliation, and regenerated 235-page paper. Commit
+  `160256fe1af2b8c8abcb55f500aa90133e924b55` then decomposes the new native
+  experiment below the architecture budget and adds time-bounded exceptions
+  for pre-existing research orchestrators. Release metadata is bound to that
+  exact source commit.
 - The same closed 20-coordinate state is advanced for 4 ms with either two
   native MuJoCo equality/connect constraints plus `mj_step`, or the existing
   projected bilateral Kelvin--Voigt law and project-authored semi-implicit
@@ -141,6 +143,9 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
   one dependency-qualified Pinocchio test skipped on Windows). The complete
   release validator passes with no mismatches. The PDF was visually inspected
   on all pages and at full resolution around the new native-control section.
+- Issue #8963 owns removal of the seven pre-existing research-orchestrator
+  architecture exceptions before 2026-09-30. The new native discrepancy
+  experiment itself has no exception and is below the 100-line function gate.
 - Full PR #8962 is open from `fix/8911-native-contact-parity` to `main`.
   Human review and protected CI are required. Inspect its exact head and checks,
   fix actionable failures, and verify the merge commit as an ancestor of remote
