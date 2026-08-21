@@ -220,13 +220,39 @@ HTTP boundary), not an unavailable statistical result.
 evidence. `order_evidence` declares an order column, whether it is a timestamp,
 ordinal, or source sequence, its unit, trust level, and evidence. Missing or
 untrusted session/order evidence does not block analyses that do not use it.
-Future longitudinal operations must report their result as unavailable when
-required evidence is absent; they must never infer a player, session, or time
-scale from club, source layout, filename, or row position. Insufficient or
-rank-deficient regression is likewise returned as an explicit unavailable
-result rather than an apparently successful null result. Invalid columns,
-unsafe pooling, and other request-contract violations fail with a descriptive
-error.
+
+## Attested Longitudinal Sessions
+
+Contract `launch-monitor-longitudinal-session/1.0.0` performs longitudinal
+analysis only when player identity, session identity, and ordering have trusted
+evidence. It never infers those fields from club, source layout, filename, row
+position, or shot ID. Every included shot is first collapsed into an
+equal-weight player/session/stratum cell. Per-player direction is then computed
+from one equal-weight value per ordered session, so repeating shots cannot
+reweight a player's trend.
+
+The pooled estimate is a descriptive player-fixed-effects OLS association with
+a finite-cluster-corrected sandwich covariance clustered by player. Declared
+strata enter as categorical design terms and declared confounders enter as
+numeric design terms. Confounder adjustment is not causal control. Fewer than
+four player clusters, too few ordered sessions, rank deficiency, degenerate
+clustered variance, nonconstant within-session order, missing fields, and a
+corpus with no complete finite shots produce typed unavailable states. The
+result always retains authority, source, transformation, and row-level backing
+hashes, including when the statistical result is unavailable.
+
+The `direction` request field records how a consumer interprets the metric; it
+does not transform the reported raw-metric slope into an improvement claim.
+Result claims explicitly set shot-level inference and causal improvement to
+false. The HTTP surfaces are:
+
+- `GET /tools/launch-monitor-analytics/contracts/longitudinal-sessions/v1`;
+- `POST /tools/launch-monitor-analytics/v2/longitudinal-sessions`.
+
+Insufficient or rank-deficient regression is returned as an explicit
+unavailable result rather than an apparently successful null result. Invalid
+columns, unsafe pooling, and other request-contract violations fail with a
+descriptive error.
 
 Every canonical metric and retained numeric `source::<header>` field remains
 selectable. Registry metrics carry registry-authoritative canonical/display

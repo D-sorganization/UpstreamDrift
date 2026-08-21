@@ -16,6 +16,7 @@ from src.shared.python.launch_monitor import (
     analyze_player_covariation_v1,
     contract_v2_json_schema,
     dataset_job_contract_json_schema,
+    longitudinal_session_contract_json_schema,
     player_covariation_contract_json_schema,
     scan_player_covariation_v1,
     strokes_gained_contract_json_schema,
@@ -119,6 +120,10 @@ def main() -> None:
     _write_schema(
         contract_root / "fixtures" / "launch-monitor-player-covariation-v1.golden.json",
         player_covariation_golden_fixture(),
+    )
+    _write_schema(
+        contract_root / "launch-monitor-longitudinal-session-v1.schema.json",
+        longitudinal_session_contract_json_schema(),
     )
 
 

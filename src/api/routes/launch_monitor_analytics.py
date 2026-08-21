@@ -22,6 +22,7 @@ from src.api.services.launch_monitor_dataset_jobs import (
 from src.shared.python.launch_monitor import (
     CONTRACT_VERSION,
     CONTRACT_VERSION_V2,
+    LONGITUDINAL_SESSION_CONTRACT_VERSION,
     OUTCOME_PROXY_CONTRACT_VERSION,
     PLAYER_COVARIATION_CONTRACT_VERSION,
     STROKES_GAINED_CONTRACT_VERSION,
@@ -31,6 +32,8 @@ from src.shared.python.launch_monitor import (
     CorrelationMethod,
     FlexibleAnalysisRequest,
     LaunchMonitorAnalysisResultV2,
+    LongitudinalSessionRequestV1,
+    LongitudinalSessionResultV1,
     ModelProvenanceV2,
     MissingPolicy,
     OutcomeProxyRequestV1,
@@ -41,12 +44,14 @@ from src.shared.python.launch_monitor import (
     PlayerCovariationScanResultV1,
     StrokesGainedAnalysisResultV1,
     StrokesGainedRequestV1,
+    analyze_longitudinal_sessions,
     analyze_outcome_proxy,
     analyze_player_covariation_v1,
     analyze_source_backed_strokes_gained,
     analyze_variables,
     analyze_variables_v2,
     contract_v2_json_schema,
+    longitudinal_session_contract_json_schema,
     player_covariation_contract_json_schema,
     scan_player_covariation_v1,
     strokes_gained_contract_json_schema,
@@ -131,6 +136,14 @@ class PlayerCovariationScanPayloadV1(BaseModel):
     context: AnalysisContextV2 = Field(default_factory=AnalysisContextV2)
 
 
+class LongitudinalSessionPayloadV1(BaseModel):
+    """Bounded rows plus attested identity, order, and session-unit design."""
+
+    records: list[dict[str, Any]] = Field(min_length=1, max_length=20_000)
+    request: LongitudinalSessionRequestV1
+    context: AnalysisContextV2
+
+
 @lru_cache(maxsize=1)
 def get_launch_monitor_dataset_job_service() -> DatasetJobService:
     """Return the bounded process-local service for administrator roots."""
@@ -179,6 +192,11 @@ async def capabilities() -> dict[str, object]:
         "dataset_job_inline_rows_allowed": False,
         "player_covariation_contract_version": (PLAYER_COVARIATION_CONTRACT_VERSION),
         "population_meta_analysis": True,
+        "longitudinal_session_contract_version": (
+            LONGITUDINAL_SESSION_CONTRACT_VERSION
+        ),
+        "longitudinal_primary_unit": "player_session_stratum",
+        "longitudinal_causal_improvement": False,
     }
 
 
@@ -204,6 +222,14 @@ async def dataset_jobs_contract_v1() -> dict[str, object]:
     """Publish the immutable dataset-reference job request schema."""
 
     return dataset_job_contract_json_schema()
+
+
+@router.get("/contracts/longitudinal-sessions/v1")
+@handle_api_errors
+async def longitudinal_sessions_contract_v1() -> dict[str, object]:
+    """Publish the attested session-unit longitudinal result schema."""
+
+    return longitudinal_session_contract_json_schema()
 
 
 @router.post(
@@ -335,6 +361,24 @@ async def scan_player_covariation(
     """Rank a bounded exploratory set of variable pairs."""
 
     return scan_player_covariation_v1(
+        pd.DataFrame.from_records(payload.records),
+        payload.request,
+        context=payload.context,
+    )
+
+
+@router.post(
+    "/v2/longitudinal-sessions",
+    response_model=LongitudinalSessionResultV1,
+    response_model_exclude_none=True,
+)
+@handle_api_errors
+async def analyze_longitudinal_sessions_v1(
+    payload: LongitudinalSessionPayloadV1,
+) -> LongitudinalSessionResultV1:
+    """Estimate descriptive direction after session-level aggregation."""
+
+    return analyze_longitudinal_sessions(
         pd.DataFrame.from_records(payload.records),
         payload.request,
         context=payload.context,

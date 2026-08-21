@@ -425,6 +425,29 @@ def _backing_records(
     return tuple(records)
 
 
+def build_analysis_lineage_v2(
+    frame: pd.DataFrame,
+    context: AnalysisContextV2,
+    *,
+    dataset_fingerprint_sha256: str | None = None,
+) -> AnalysisLineageV2:
+    """Build complete row-level backing lineage without serializing shot values."""
+    backing = _backing_records(frame, context)
+    fingerprint = (
+        dataset_fingerprint_sha256
+        or sha256(
+            "".join(record.record_sha256 for record in backing).encode("ascii")
+        ).hexdigest()
+    )
+    return AnalysisLineageV2(
+        dataset_fingerprint_sha256=fingerprint,
+        authority=context.authority,
+        transformations=context.transformations,
+        sources=context.sources,
+        backing_records=backing,
+    )
+
+
 def _missingness(
     frame: pd.DataFrame, request: FlexibleAnalysisRequest
 ) -> MissingnessV2:
@@ -707,12 +730,10 @@ def analyze_variables_v2(
         status=_overall_status(availability),
         analysis=analysis_payload,
         units=units,
-        lineage=AnalysisLineageV2(
+        lineage=build_analysis_lineage_v2(
+            frame,
+            resolved_context,
             dataset_fingerprint_sha256=result.dataset.fingerprint_sha256,
-            authority=resolved_context.authority,
-            transformations=resolved_context.transformations,
-            sources=resolved_context.sources,
-            backing_records=_backing_records(frame, resolved_context),
         ),
         missingness=missingness,
         availability=availability,
@@ -763,6 +784,7 @@ __all__ = [
     "adapt_v2_to_v1",
     "analysis_lineage_v2",
     "analyze_variables_v2",
+    "build_analysis_lineage_v2",
     "contract_v2_json_schema",
     "metric_units_v2",
     "vendor_provenance_v2",
