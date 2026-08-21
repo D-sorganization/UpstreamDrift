@@ -335,7 +335,7 @@ angular velocities are rotated without subtracting the club velocity, so the
 map changes coordinates rather than changing inertial motion. The two local
 grip offsets remain $(0,\pm s/2,-0.03)$ m.
 
-![Closed Subject States Enter Independent Forward Solvers Without Preload](figures/fig_closed_state_forward_bridge.pdf){#fig-closed-state-forward-bridge width=100%}
+![Closed Subject States Enter Paired Native Operators Without Preload](figures/fig_closed_state_forward_bridge.pdf){#fig-closed-state-forward-bridge width=100%}
 
 All 234 position mappings retain the source closure, with a maximum error of
 $1.16\times10^{-10}$ m. Velocities estimated by second-order finite
@@ -346,11 +346,12 @@ the 1 mm constitutive perturbation preserves action--reaction and produces
 nonpositive damping power.
 
 A spanning subset advances all six profiles, all three grip spans, and early,
-middle, and late phases through both native forward solvers: 54 shared initial
-states and 108 trajectories. Every engine pair reports the same initial-state
+middle, and late phases through both native inertia-and-bias operators under
+the shared projected-contact and semi-implicit-update formulation: 54 shared
+initial states and 108 trajectories. Every operator pair reports the same initial-state
 digest and passes the existing trajectory, wrench, and normalized-energy
 comparison gates over the preregistered 4 ms initialization audit. The largest
-cross-engine club-position difference is 0.083 $\mu$m, the largest relative
+transport club-position difference is 0.083 $\mu$m, the largest relative
 contact-wrench RMS difference is 0.0145%, and the largest normalized-energy
 difference is $2.19\times10^{-7}$.
 
@@ -365,7 +366,7 @@ transfer, delivery benefit, or a human strategy. The next falsifier is a
 full-horizon articulated solve with typed contact loss, calibrated grip and
 shaft compliance, refinement, adverse-load, null, and reversal controls.
 
-#### Cross-Engine Validity Horizon and Adverse-Load Map
+#### Inertia-and-Bias Transport Validity Horizon and Adverse-Load Map
 
 The 4 ms result establishes initialization transport but leaves its persistence
 unmeasured. A preregistered extension therefore advances the same six profiles,
@@ -373,11 +374,12 @@ three grip spans, and early, middle, and late closed states to 4, 10, 25, and
 50 ms. Ten branches retain the nominal model; halve or double contact
 stiffness, contact damping, represented hand mass, or timestep one factor at a
 time; or remove the grounded driver from the first integration step. Both
-native engines receive identical state and parameter records. Failed,
+native rigid-body operators receive identical state and parameter records,
+projected-contact loads, and project-authored updates. Failed,
 unstable, and non-finite cases would remain typed outcomes rather than being
 removed.
 
-![Cross-Engine Forward-Contact Validity Horizon and Adverse-Load Map](figures/fig_forward_contact_validity_horizon.pdf){#fig-forward-contact-validity-horizon width=100%}
+![Inertia-and-Bias Transport Validity Horizon and Adverse-Load Map](figures/fig_forward_contact_validity_horizon.pdf){#fig-forward-contact-validity-horizon width=100%}
 
 All 2,160 profile--span--phase--variant--horizon cases pass the existing
 trajectory, contact-wrench, and normalized-energy discrepancy gates together
@@ -396,9 +398,10 @@ That is a right-censored engineering result, not permission to extrapolate to
 the remaining downswing or impact. The carriages, rigid club, engineering
 contact law, and prescribed driver still omit articulated arms and scapulae,
 distributed grip and shaft properties, contact loss, ground coupling, and
-calibrated equipment. The study strengthens the reduced cross-engine reference.
-The articulated tier reproduces its power, energy, refinement, and engine-
-parity logic only through 5 ms, not the full 50 ms interval. Neither result
+calibrated equipment. The study strengthens the reduced inertia-and-bias
+transport reference. The articulated tier reproduces its power, energy,
+refinement, and operator-transport logic only through 5 ms, not the full 50 ms
+interval. Neither result
 establishes anatomy, passive human transfer, timing economy, slack benefit, or
 coaching strategy.
 
@@ -486,6 +489,45 @@ These controls verify the declared numerical operators and first-order
 integration behavior. They do not validate the manufactured motion as a human
 swing, identify biological torque, or support a coaching prescription.
 
+#### Native Constraint and Integrator Discrepancy Control
+
+The transport comparisons below deliberately share a project-authored contact
+law and state update. A separate control is required before language about a
+native constraint solver or integrator is justified. The control starts both
+branches from the same achieved 20-coordinate closed state, translates the
+club by 1 mm, applies no active generalized drive, and advances 4 ms at 0.5 and
+0.25 ms steps. The first branch implements two MuJoCo `equality/connect`
+constraints, advances with `mj_step`, and records `qfrc_constraint`. The second
+branch retains the projected bilateral Kelvin--Voigt point-force law, MuJoCo
+mass-and-bias transport, and the project-authored semi-implicit update. These
+operators follow the current [MuJoCo constraint](https://mujoco.readthedocs.io/en/stable/XMLreference.html#equality-connect)
+and [simulation](https://mujoco.readthedocs.io/en/stable/programming/simulation.html)
+interfaces.
+
+![Native Equality Dynamics and Projected Compliant Contact Are Distinct Formulations](figures/fig_articulated_native_constraint_discrepancy.pdf){#fig-articulated-native-constraint-discrepancy width=96%}
+
+Both native equalities contribute three scalar rows, so the active native
+branch exposes at least six constraint rows. Its equality-disabled killswitch
+returns zero generalized constraint force. At the finer step, the native and
+projected final hand--grip separations are 0.987 and 0.908 mm, respectively,
+and their maximum coordinate difference is $1.04\times10^{-4}$ rad in club
+pitch. The maximum coordinate-vector force norms are 2.045 and 3.706 in mixed
+generalized units. Those norms are numerical diagnostics only: revolute and
+prismatic coordinates carry different physical units and the two constraint
+formulations do not define interchangeable force parameters.
+
+The nonzero discrepancy is the result, not a failed parity target. Applying
+the same stiffness and damping numerals does not make MuJoCo's regularized
+equality response physically equivalent to a direct Kelvin--Voigt point-force
+law. Step refinement reduces the final coordinate discrepancy from
+$1.12\times10^{-4}$ to $1.04\times10^{-4}$, so the observed separation is not
+removed by the tested halving. Two refinement levels do not establish an
+asymptotic order or continuum limit. This control establishes that a genuine
+native constraint-and-integrator branch has been executed and that it differs
+from the projected formulation. It does not validate either contact law,
+identify anatomical grip mechanics, establish engine equivalence, or support
+a human-transfer or coaching claim.
+
 #### Articulated Contact Projection and Initial Acceleration
 
 The next gate adds finite bilateral interaction forces without yet advancing a
@@ -561,8 +603,8 @@ the common coordinates, while each engine independently evaluates its mass and
 bias operators at every step. The registered gates cover the 10 mm attachment
 threshold, action--reaction virtual power, non-positive damping, normalized
 work--energy residual below 0.02, monotone refinement with a fine-to-coarse
-ratio below 0.8, and cross-engine trajectory and force-history differences
-below $10^{-7}$ relative.
+ratio below 0.8, and inertia-and-bias transport trajectory and force-history
+differences below $10^{-7}$ relative.
 
 ![Bounded Articulated Bilateral-Attachment Forward Dynamics Across Registered States and Controls](figures/fig_articulated_forward_contact.pdf){#fig-articulated-forward-contact width=90%}
 
@@ -571,7 +613,8 @@ separation is 1.229 mm and the largest contact force is 17.761 N. The worst
 normalized work--energy residual decreases from 0.00738 to 0.00170 and then
 0.000854 as the step is halved. The largest virtual-power residual is
 $3.55\times10^{-15}$ W; damping power remains negative; and the largest
-MuJoCo--Pinocchio trajectory and force-history discrepancies are
+MuJoCo--Pinocchio inertia-and-bias transport trajectory and force-history
+discrepancies are
 $1.53\times10^{-14}$ and $1.34\times10^{-11}$ relative, respectively.
 
 This is a right-censored synthetic result: no registered failure occurs before
@@ -621,7 +664,7 @@ engines yield 1,944 five-millisecond trajectories.
 
 ![Typed Unilateral Slack and Reattachment Across Natural-State and Boundary-Crossing Controls](figures/fig_articulated_slack_atlas.pdf){#fig-articulated-slack-atlas width=94%}
 
-All numerical and cross-engine gates pass. Across the complete atlas, the
+All numerical and inertia-and-bias transport gates pass. Across the complete atlas, the
 largest force is 23.643 N, virtual-power residual is
 $2.13\times10^{-14}$ W, and positive damping-power maximum is zero. The worst
 normalized work--energy residual decreases from 0.01923 to 0.01097 and then

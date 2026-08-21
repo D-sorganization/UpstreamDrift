@@ -280,7 +280,7 @@ Child issue #8680 advances the articulated tree through a deliberately bounded
 5 ms forward interval. Eighteen profile--span--phase states, seven
 nominal/adverse branches, three time steps, and two native engines produce 756
 trajectories. All registered attachment-retention, virtual-power,
-dissipativity, work--energy, refinement, and cross-engine parity gates pass.
+dissipativity, work--energy, refinement, and inertia-and-bias transport gates pass.
 The worst normalized energy residual decreases from 0.00738 to 0.000854 under
 refinement. This is a right-censored bilateral-attachment result, not a model of
 unilateral slack, calibrated grip or shaft structure, ground coupling, late

@@ -4247,6 +4247,28 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   optional dependency or lightweight same-named check shall not substitute for
   the protected publication contract.
 
+### F-8557.28: Native Contact Formulation Discrepancy Control
+
+- A contact-solver or integrator parity claim shall require independently
+  executed contact and state-update operators. Sharing a project-authored
+  contact law or update shall be described as operator transport, even when
+  native engines independently supply kinematics, inertia, bias, gravity, and
+  continuous-time acceleration.
+- The native MuJoCo control shall start from the same achieved closed state as
+  the projected comparator, use native equality constraints and `mj_step`, and
+  retain an equality-disabled killswitch that returns zero constraint force.
+- Native equality and projected Kelvin--Voigt parameters shall not be treated
+  as physically interchangeable merely because their numerical stiffness and
+  damping values match. A nonzero trajectory discrepancy shall be retained as
+  a formulation result rather than relaxed into a parity success.
+- Generalized coordinate-vector norms that combine revolute and prismatic
+  coordinates shall be labeled mixed-unit numerical diagnostics. Physical
+  interpretation shall use typed separations, coordinate differences, wrench
+  components, and refinement behavior.
+- The discrepancy control shall remain bounded to synthetic mechanism and
+  numerical-formulation evidence. It shall not establish anatomy, tissue
+  mechanics, equipment calibration, human transfer, or coaching strategy.
+
 - Use `np.vdot` instead of `np.sum(x**2)` and `np.sqrt(np.einsum("ij,ij->i", x, x))` instead of `np.linalg.norm(x, axis=1)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
 - Use `np.einsum('ij,ij->j', x, x)` instead of `np.sum(x * x, axis=0)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
 - (spec-exempt: micro-optimization) Replaced `.iterrows()` with `.to_dict('records')` in `data_processor_widget.py`, `kaggle_validation.py`, and `launch_monitor_analytics/widgets.py` to optimize UI and validation performance.

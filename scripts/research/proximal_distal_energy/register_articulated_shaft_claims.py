@@ -61,13 +61,19 @@ def _selected(candidates: list[dict[str, Any]]) -> dict[str, Any]:
         "figure": _find(candidates, chapter, "![Passive Articulated Shaft"),
         "numerics": _find(candidates, chapter, "All fine-grid numerical"),
         "matching": _find(candidates, chapter, "The shaft comparison is intentionally"),
-        "boundary": _find(candidates, chapter, "The contact fibers remain"),
-        "summary": _find(candidates, chapter, "The bounded articulated experiments"),
+        "boundary": _find(
+            candidates, chapter, "At this shaft-only tier, the contact fibers remain"
+        ),
+        "summary": _find(
+            candidates,
+            "_ch06cb_spatial_cross_tail.qmd",
+            "The bounded articulated experiments",
+        ),
         "ladder": _find(candidates, "_ch07_model_ladder.qmd", "- the three-link"),
         "next": _find(
             candidates,
             "_ch07_model_ladder.qmd",
-            "The next decisive model test adds",
+            "The next decisive model test replaces",
         ),
         "table": _find(
             candidates,
@@ -120,7 +126,7 @@ def _claim(
             "zero elastic initial state and matched initial total energy",
             "initial-velocity reversal and load/work matching",
             "excluded 1.0 and 0.50 millisecond linear-domain probes",
-            "three-level limiting-cell refinement and native-engine parity",
+            "three-level limiting-cell refinement and native inertia-and-bias transport parity",
             "one-mode versus six-mode structural reference",
         ],
         "falsifier": falsifier,

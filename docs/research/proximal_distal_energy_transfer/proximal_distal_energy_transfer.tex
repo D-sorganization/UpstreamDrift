@@ -498,7 +498,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, toprule=.15mm, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, colback=white, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, toptitle=1mm, rightrule=.15mm, opacitybacktitle=0.6, arc=.35mm, coltitle=black, opacityback=0, left=2mm, breakable, titlerule=0mm, bottomtitle=1mm, bottomrule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, breakable, left=2mm, rightrule=.15mm, leftrule=.75mm, opacityback=0, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, colback=white, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, toptitle=1mm, titlerule=0mm, arc=.35mm, bottomrule=.15mm, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, coltitle=black]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -7406,7 +7406,7 @@ rather than changing inertial motion. The two local grip offsets remain
 }
 
 \caption{\label{fig-closed-state-forward-bridge}Closed Subject States
-Enter Independent Forward Solvers Without Preload}
+Enter Paired Native Operators Without Preload}
 
 \end{figure}%
 
@@ -7419,14 +7419,15 @@ zero Kelvin--Voigt preload; the 1 mm constitutive perturbation preserves
 action--reaction and produces nonpositive damping power.
 
 A spanning subset advances all six profiles, all three grip spans, and
-early, middle, and late phases through both native forward solvers: 54
-shared initial states and 108 trajectories. Every engine pair reports
-the same initial-state digest and passes the existing trajectory,
-wrench, and normalized-energy comparison gates over the preregistered 4
-ms initialization audit. The largest cross-engine club-position
-difference is 0.083 \(\mu\)m, the largest relative contact-wrench RMS
-difference is 0.0145\%, and the largest normalized-energy difference is
-\(2.19\times10^{-7}\).
+early, middle, and late phases through both native inertia-and-bias
+operators under the shared projected-contact and semi-implicit-update
+formulation: 54 shared initial states and 108 trajectories. Every
+operator pair reports the same initial-state digest and passes the
+existing trajectory, wrench, and normalized-energy comparison gates over
+the preregistered 4 ms initialization audit. The largest transport
+club-position difference is 0.083 \(\mu\)m, the largest relative
+contact-wrench RMS difference is 0.0145\%, and the largest
+normalized-energy difference is \(2.19\times10^{-7}\).
 
 This is an initialization and short-horizon numerical-transport result,
 not a subject-scaled forward golfer. The forward tier still replaces the
@@ -7440,8 +7441,9 @@ benefit, or a human strategy. The next falsifier is a full-horizon
 articulated solve with typed contact loss, calibrated grip and shaft
 compliance, refinement, adverse-load, null, and reversal controls.
 
-\subsubsection{Cross-Engine Validity Horizon and Adverse-Load
-Map}\label{cross-engine-validity-horizon-and-adverse-load-map}
+\subsubsection{Inertia-and-Bias Transport Validity Horizon and
+Adverse-Load
+Map}\label{inertia-and-bias-transport-validity-horizon-and-adverse-load-map}
 
 The 4 ms result establishes initialization transport but leaves its
 persistence unmeasured. A preregistered extension therefore advances the
@@ -7449,8 +7451,9 @@ same six profiles, three grip spans, and early, middle, and late closed
 states to 4, 10, 25, and 50 ms. Ten branches retain the nominal model;
 halve or double contact stiffness, contact damping, represented hand
 mass, or timestep one factor at a time; or remove the grounded driver
-from the first integration step. Both native engines receive identical
-state and parameter records. Failed, unstable, and non-finite cases
+from the first integration step. Both native rigid-body operators
+receive identical state and parameter records, projected-contact loads,
+and project-authored updates. Failed, unstable, and non-finite cases
 would remain typed outcomes rather than being removed.
 
 \begin{figure}
@@ -7461,8 +7464,8 @@ would remain typed outcomes rather than being removed.
 
 }
 
-\caption{\label{fig-forward-contact-validity-horizon}Cross-Engine
-Forward-Contact Validity Horizon and Adverse-Load Map}
+\caption{\label{fig-forward-contact-validity-horizon}Inertia-and-Bias
+Transport Validity Horizon and Adverse-Load Map}
 
 \end{figure}%
 
@@ -7485,11 +7488,11 @@ extrapolate to the remaining downswing or impact. The carriages, rigid
 club, engineering contact law, and prescribed driver still omit
 articulated arms and scapulae, distributed grip and shaft properties,
 contact loss, ground coupling, and calibrated equipment. The study
-strengthens the reduced cross-engine reference. The articulated tier
-reproduces its power, energy, refinement, and engine- parity logic only
-through 5 ms, not the full 50 ms interval. Neither result establishes
-anatomy, passive human transfer, timing economy, slack benefit, or
-coaching strategy.
+strengthens the reduced inertia-and-bias transport reference. The
+articulated tier reproduces its power, energy, refinement, and
+operator-transport logic only through 5 ms, not the full 50 ms interval.
+Neither result establishes anatomy, passive human transfer, timing
+economy, slack benefit, or coaching strategy.
 
 \subsubsection{Native Articulated Inertia
 Qualification}\label{native-articulated-inertia-qualification}
@@ -7595,6 +7598,63 @@ integration behavior. They do not validate the manufactured motion as a
 human swing, identify biological torque, or support a coaching
 prescription.
 
+\subsubsection{Native Constraint and Integrator Discrepancy
+Control}\label{native-constraint-and-integrator-discrepancy-control}
+
+The transport comparisons below deliberately share a project-authored
+contact law and state update. A separate control is required before
+language about a native constraint solver or integrator is justified.
+The control starts both branches from the same achieved 20-coordinate
+closed state, translates the club by 1 mm, applies no active generalized
+drive, and advances 4 ms at 0.5 and 0.25 ms steps. The first branch
+implements two MuJoCo \texttt{equality/connect} constraints, advances
+with \texttt{mj\_step}, and records \texttt{qfrc\_constraint}. The
+second branch retains the projected bilateral Kelvin--Voigt point-force
+law, MuJoCo mass-and-bias transport, and the project-authored
+semi-implicit update. These operators follow the current
+\href{https://mujoco.readthedocs.io/en/stable/XMLreference.html\#equality-connect}{MuJoCo
+constraint} and
+\href{https://mujoco.readthedocs.io/en/stable/programming/simulation.html}{simulation}
+interfaces.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=0.96\linewidth,height=\textheight,keepaspectratio]{figures/fig_articulated_native_constraint_discrepancy.pdf}
+
+}
+
+\caption{\label{fig-articulated-native-constraint-discrepancy}Native
+Equality Dynamics and Projected Compliant Contact Are Distinct
+Formulations}
+
+\end{figure}%
+
+Both native equalities contribute three scalar rows, so the active
+native branch exposes at least six constraint rows. Its
+equality-disabled killswitch returns zero generalized constraint force.
+At the finer step, the native and projected final hand--grip separations
+are 0.987 and 0.908 mm, respectively, and their maximum coordinate
+difference is \(1.04\times10^{-4}\) rad in club pitch. The maximum
+coordinate-vector force norms are 2.045 and 3.706 in mixed generalized
+units. Those norms are numerical diagnostics only: revolute and
+prismatic coordinates carry different physical units and the two
+constraint formulations do not define interchangeable force parameters.
+
+The nonzero discrepancy is the result, not a failed parity target.
+Applying the same stiffness and damping numerals does not make MuJoCo's
+regularized equality response physically equivalent to a direct
+Kelvin--Voigt point-force law. Step refinement reduces the final
+coordinate discrepancy from \(1.12\times10^{-4}\) to
+\(1.04\times10^{-4}\), so the observed separation is not removed by the
+tested halving. Two refinement levels do not establish an asymptotic
+order or continuum limit. This control establishes that a genuine native
+constraint-and-integrator branch has been executed and that it differs
+from the projected formulation. It does not validate either contact law,
+identify anatomical grip mechanics, establish engine equivalence, or
+support a human-transfer or coaching claim.
+
 \subsubsection{Articulated Contact Projection and Initial
 Acceleration}\label{articulated-contact-projection-and-initial-acceleration}
 
@@ -7687,8 +7747,8 @@ evaluates its mass and bias operators at every step. The registered
 gates cover the 10 mm attachment threshold, action--reaction virtual
 power, non-positive damping, normalized work--energy residual below
 0.02, monotone refinement with a fine-to-coarse ratio below 0.8, and
-cross-engine trajectory and force-history differences below \(10^{-7}\)
-relative.
+inertia-and-bias transport trajectory and force-history differences
+below \(10^{-7}\) relative.
 
 \begin{figure}
 
@@ -7709,9 +7769,10 @@ attachment separation is 1.229 mm and the largest contact force is
 17.761 N. The worst normalized work--energy residual decreases from
 0.00738 to 0.00170 and then 0.000854 as the step is halved. The largest
 virtual-power residual is \(3.55\times10^{-15}\) W; damping power
-remains negative; and the largest MuJoCo--Pinocchio trajectory and
-force-history discrepancies are \(1.53\times10^{-14}\) and
-\(1.34\times10^{-11}\) relative, respectively.
+remains negative; and the largest MuJoCo--Pinocchio inertia-and-bias
+transport trajectory and force-history discrepancies are
+\(1.53\times10^{-14}\) and \(1.34\times10^{-11}\) relative,
+respectively.
 
 This is a right-censored synthetic result: no registered failure occurs
 before 5 ms, but persistence later in the downswing or through impact is
@@ -7775,8 +7836,8 @@ Reattachment Across Natural-State and Boundary-Crossing Controls}
 
 \end{figure}%
 
-All numerical and cross-engine gates pass. Across the complete atlas,
-the largest force is 23.643 N, virtual-power residual is
+All numerical and inertia-and-bias transport gates pass. Across the
+complete atlas, the largest force is 23.643 N, virtual-power residual is
 \(2.13\times10^{-14}\) W, and positive damping-power maximum is zero.
 The worst normalized work--energy residual decreases from 0.01923 to
 0.01097 and then 0.00480 under refinement. Maximum trajectory and
@@ -8124,7 +8185,7 @@ Rigid-shaft and horizontal-restraint- removed control families add 192.
 Every cell records grip force and couple, active fibers, ground force,
 intrinsic and transported moments, support and shaft strain, damping
 work, base motion, club speed, virtual-power closure, work--energy
-closure, declared-domain status, and cross-engine parity.
+closure, declared-domain status, and inertia-and-bias transport parity.
 
 The constitutive values are transparent synthetic references: horizontal
 and vertical stiffnesses are 15 and 30 kN/m; damping values are 400 and
@@ -8318,7 +8379,7 @@ Four stronger statements remain open:
   inputs. A forward compliant two-hand solve must determine whether
   equivalent loads emerge after a distal command killswitch.
 \item
-  \textbf{Bounded Cross-Engine Attachment Dynamics Do Not Establish Full
+  \textbf{Bounded Inertia-and-Bias Transport Does Not Establish Full
   Contact.} The 5 ms articulated trajectories test divergence,
   attachment separation, typed unilateral opening and reattachment,
   power, and energy in two engines. They do not test calibrated
@@ -8344,8 +8405,8 @@ structurally inadequate model reproduce one output while assigning the
 wrong contribution to contact, base motion, passive tissue, or
 actuation.
 
-\chapter{Independently Executed Spatial Forward
-Contact}\label{sec-spatial-forward-contact}
+\chapter{Spatial Contact With Native Inertia-and-Bias
+Transport}\label{sec-spatial-forward-contact}
 
 The common-state experiment in Section~\ref{sec-spatial-full-body} asks
 whether two dynamics formulations return the same generalized action at
@@ -8356,28 +8417,30 @@ the next, stronger question:
 \begin{quote}
 Can a negative force-generated couple arise from the achieved state of a
 forward compliant two-hand system, persist after its grounded driver is
-removed, and survive independent integration by two actual multibody
-engines?
+removed, and survive propagation through two independently assembled
+multibody inertia-and-bias operators?
 \end{quote}
 
 The answer is affirmative for one declared reduced model. MuJoCo and
-Pinocchio independently integrate the same 13-coordinate contract using
-their native forward-dynamics algorithms
+Pinocchio independently evaluate the mass, bias, gravity, kinematics,
+and continuous-time acceleration of the same 13-coordinate contract
 (\citeproc{ref-todorov2012mujoco}{Todorov, Erez, and Tassa 2012};
 \citeproc{ref-carpentier2019pinocchio}{Carpentier et al. 2019}). Neither
-engine receives a prescribed contact-force history. Each contact force
-is calculated from the engine's own achieved relative hand--club
-displacement and velocity. The common contact law, reference driver,
-timestep, and output convention are held fixed so that engine
-implementation is the principal changed factor.
+operator receives a prescribed contact-force history. The
+project-authored contact law calculates each force from the achieved
+relative hand--club displacement and velocity, then the same
+project-authored semi-implicit update advances both branches. The
+comparison therefore changes the rigid-body operator while holding the
+contact solver and integrator fixed.
 
 The independence claim is component-specific. MuJoCo and Pinocchio
 independently supply mass, gravity, rigid-body kinematics, spatial-force
 mapping, and continuous-time acceleration. They intentionally share the
 Kelvin--Voigt constitutive law, grounded driver, and semi-implicit state
-update. Agreement tests transport of one declared reduced mechanism
-across two native dynamics engines; it is not independent confirmation
-of the contact law or time integrator.
+update. Agreement tests articulated inertia-and-bias transport of one
+declared reduced mechanism across two native dynamics libraries. It does
+not exercise either library's native contact or constraint solver and is
+not independent confirmation of the contact law or time integrator.
 
 This result closes the \emph{reduced forward-contact} gate, not the
 anatomical or human gate. The hand bodies are finite-mass translational
@@ -8437,7 +8500,7 @@ SHA-256 model digest.
 }
 
 \caption{\label{fig-spatial-forward-contact-geometry}Achieved Spatial
-Contact Geometry and Engine-Solved Force Vectors}
+Contact Geometry and Projected Compliant-Force Vectors}
 
 \end{figure}%
 
@@ -8513,7 +8576,7 @@ of measured ground-reaction force. It answers the bookkeeping question
 ``where does the external reference-driver action close?'' and prevents
 that pathway from being silently omitted.
 
-\section{Independent Engine
+\section{Native Dynamics-Operator
 Realizations}\label{sec-spatial-forward-engines}
 
 The common experiment executes in two native libraries, both version
@@ -8534,16 +8597,17 @@ The common experiment executes in two native libraries, both version
   computes acceleration.
 \end{itemize}
 
-Both engines use the same semi-implicit position/velocity update after
-their native acceleration evaluation. This is a controlled numerical
-choice, not an assertion that the engines have identical internal
-integrators. It removes an uninteresting integration-method difference
-while retaining independent mass, bias, gravity, kinematics,
-spatial-force mapping, and forward-dynamics implementations. The
-Pinocchio adapter uses a local-world-aligned velocity at the moving club
-origin; using a world-origin spatial velocity instead creates an
-artificial contact-velocity discrepancy. That frame distinction is now
-covered by the forward trajectory gate.
+Both branches use the same project-authored semi-implicit
+position/velocity update after their native acceleration evaluation.
+This is a controlled numerical choice, not an assertion that either
+library's native integrator has been exercised. It removes
+integration-method variation while retaining independent mass, bias,
+gravity, kinematics, spatial-force mapping, and continuous-time
+acceleration implementations. The Pinocchio adapter uses a
+local-world-aligned velocity at the moving club origin; using a
+world-origin spatial velocity instead creates an artificial
+contact-velocity discrepancy. That frame distinction is now covered by
+the forward trajectory gate.
 
 The comparison evaluates complete trajectories, not just matched states.
 The declared engineering regions are 3 mm RMS and 9 mm maximum
@@ -8562,17 +8626,17 @@ independent checks that a passing trajectory is meaningful.
 
 }
 
-\caption{\label{fig-spatial-forward-cross-engine}Independent MuJoCo and
-Pinocchio Forward Dynamics Satisfy Declared Gates}
+\caption{\label{fig-spatial-forward-cross-engine}MuJoCo and Pinocchio
+Inertia-and-Bias Transport Satisfies Declared Gates}
 
 \end{figure}%
 
-\section{Forward Cross-Engine
+\section{Inertia-and-Bias Transport
 Results}\label{sec-spatial-forward-results}
 
 Figure~\ref{fig-spatial-forward-cross-engine} shows that the two
-independently integrated trajectories remain close. In the
-continuing-driver branch:
+shared-update trajectories propagated through separate native rigid-body
+operators remain close. In the continuing-driver branch:
 
 \begin{itemize}
 \tightlist
@@ -8592,8 +8656,9 @@ In the driver-killswitch branch, the corresponding values are 16.96 µm,
 observed value is well inside its declared region. The result is
 stronger than the preceding common-state inverse-dynamics comparison
 because numerical error can now accumulate and feed back into the
-contact law. It remains narrower than a cross-engine anatomical
-comparison because the engines realize one reduced common model.
+contact law. It remains narrower than a an independently formulated
+contact-and-integration comparison because both branches share one
+reduced contact law and state update.
 
 \section{Exact Same-State Driver
 Killswitch}\label{sec-spatial-forward-killswitch}
@@ -8700,8 +8765,8 @@ The committed record fails closed if any of these conditions occurs:
 \item
   the generated adapters report different common-model digests;
 \item
-  baseline or killswitch trajectories exceed a declared cross-engine
-  region;
+  baseline or killswitch trajectories exceed a declared inertia-and-bias
+  transport-discrepancy region;
 \item
   contact action--reaction force does not close at each evaluation;
 \item
@@ -9699,14 +9764,19 @@ driver is removed at 0.180 s. The force-generated swing-normal couple
 remains negative for 37.5 ms in both engines and reaches approximately
 -0.409 N m. Coincident grips remove the couple exactly; reversed moment
 arms reverse its sign below \(9.2\times10^{-16}\) N m residual.
-Cross-engine trajectory, wrench, orientation, and energy gates pass, and
-the work--energy residual decreases monotonically as timestep is halved.
+Inertia-and-bias transport trajectory, wrench, orientation, and energy
+gates pass, and the work--energy residual decreases monotonically as
+timestep is halved.
 
-This executes independent forward spatial contact at a reduced mechanism
-tier. It does not add anatomical arms, subject-specific inertias,
-muscles, measured grip compliance, a distributed shaft, or human
-observations. The evidence boundary therefore moves from ``forward
-contact unexecuted'' to ``reduced forward contact supported.'' The later
+This executes projected forward spatial contact at a reduced mechanism
+tier while transporting the same law and update through two native
+rigid-body operators. It does not execute independent native contact
+solvers or native integrators.
+
+It does not add anatomical arms, subject-specific inertias, muscles,
+measured grip compliance, a distributed shaft, or human observations.
+The evidence boundary therefore moves from ``forward contact
+unexecuted'' to ``reduced forward contact supported.'' The later
 articulated tier adds right-censored 5 ms bilateral and typed unilateral
 attachment results, including isolated opening and reattachment probes.
 Calibrated distributed contact and human transport remain untested.
@@ -9762,8 +9832,9 @@ somewhere in the executed ladder:
   compliant-contact model; and
 \item
   that forward-contact result transports through native MuJoCo and
-  Pinocchio dynamics within declared trajectory, wrench, orientation,
-  and energy regions; and
+  Pinocchio inertia-and-bias operators within declared trajectory,
+  wrench, orientation, and energy regions while sharing its contact law
+  and state update; and
 \item
   typed dead-zone and preload choices can reverse whether the same
   articulated state is classified as open or taut, while explicit
@@ -9838,11 +9909,14 @@ transport and executes genuine out-of-plane dynamics. Its agreement is
 not anatomical validation because the model is reduced and its hand
 loads are prescribed.
 
-\textbf{Reduced Spatial Forward Contact.} This tier adds independently
-solved two-hand compliance, state divergence, a same-state driver
-killswitch, long-axis rotation, swing-plane evolution, and reduced
-ground-pathway bookkeeping. It transports the declared mechanism through
-two native engines. Its hand carriages and declared contact law prevent
+\textbf{Reduced Spatial Forward Contact.} This tier adds projected
+two-hand compliance, state divergence, a same-state driver killswitch,
+long-axis rotation, swing-plane evolution, and reduced ground-pathway
+bookkeeping. It transports the declared mechanism through two native
+inertia-and-bias operators while sharing the contact law and state
+update. A separate MuJoCo-native equality-and-integrator control
+establishes a nonzero formulation discrepancy rather than contact-solver
+parity. The tier's hand carriages and declared contact law prevent
 anatomical, tissue, muscle, or human inference.
 
 \textbf{Articulated Finite Ground and Free Moment.} This tier adds
@@ -9862,7 +9936,7 @@ alignment without changing the observable. Contact calibration,
 stabilization, actuation, and anatomical uncertainty must be registered
 before the preferred outcome is inspected.
 
-\subsection{Cross-Engine Gate
+\subsection{Operator-Transport Gate
 Definition}\label{sec-ladder-cross-engine-gate}
 
 The executed common-state comparison did not begin with visually similar
@@ -11895,9 +11969,10 @@ for a golfer. The specific gaps, each with a tracked remediation:
   The spatial common-state tier transports the geometry response across
   independent inverse-dynamics formulations. The reduced spatial forward
   tier then preserves a negative contact couple after complete driver
-  removal in both native engines. Its hand carriages and declared
-  contact law do not establish persistence in anatomical arms or human
-  dynamics.
+  removal under both native inertia-and-bias operators, with one shared
+  projected contact law and state update. Its hand carriages and
+  declared contact law do not establish persistence in anatomical arms
+  or human dynamics.
 \item
   \textbf{No Human Data Yet.} The decisive observational test --- wrist
   interface power time courses across skill levels from motion capture
@@ -12469,11 +12544,12 @@ two-hand constrained solve.
 
 The articulated finite-base extension closes the next numerical
 mechanism gate while producing an adverse primary inference result.
-Across 384 pathway and 192 independent-control trajectories, both native
-engines agree, energy residuals decrease with step refinement, and all
-declared shaft/base domains hold through 50 ms. Ground force and
-intrinsic free moment are mechanically active, but none of 384
-coupled--fixed comparisons meets the preregistered 5\% peak-load and
+Across 384 pathway and 192 independent-control trajectories, the native
+inertia-and-bias operators remain within the registered transport
+bounds, energy residuals decrease with step refinement, and all declared
+shaft/base domains hold through 50 ms. Ground force and intrinsic free
+moment are mechanically active, but none of 384 coupled--fixed
+comparisons meets the preregistered 5\% peak-load and
 total-dissipated-work match. A post-hoc non-ground-dissipation
 sensitivity admits 60 cells with both speed-difference signs. The
 experiment therefore qualifies finite-base coupling and rejects a
@@ -12515,16 +12591,22 @@ scapular geometry but also strengthens the non-identifiability boundary.
 It is not an anatomical, muscular, or human strategy result.
 
 The reduced spatial forward-contact extension resolves that narrower
-mechanism gate. Native MuJoCo and Pinocchio independently integrate two
-finite-mass hand carriages, paired compliant interfaces, and a free
-rigid club without direct club actuation. Their baseline and same-state
-killswitch trajectories satisfy the declared position, orientation,
-wrench, and energy regions. Removing the complete grounded driver leaves
-a negative force-generated swing-normal couple for 37.5 ms in both
-engines; coincident and reversed-moment-arm controls close exactly, and
-the work--energy residual decreases under timestep refinement. This
-supports reduced spatial contact persistence, not anatomical arms,
-muscles, calibrated grip tissue, equipment, or human strategy.
+mechanism gate. Native MuJoCo and Pinocchio independently supply
+rigid-body kinematics, mass, bias, gravity, and continuous-time
+acceleration for two finite-mass hand carriages and a free rigid club
+without direct club actuation. Both branches share the projected
+compliant interfaces and project-authored state update. Their baseline
+and same-state killswitch trajectories satisfy the declared position,
+orientation, wrench, and energy regions. Removing the complete grounded
+driver leaves a negative force-generated swing-normal couple for 37.5 ms
+in both engines; coincident and reversed-moment-arm controls close
+exactly, and the work--energy residual decreases under timestep
+refinement. This supports reduced spatial contact persistence and
+inertia-and-bias transport, not independent contact-solver equivalence,
+anatomical arms, muscles, calibrated grip tissue, equipment, or human
+strategy. A separate MuJoCo-native equality and \texttt{mj\_step}
+control produces a nonzero discrepancy from the projected formulation
+and is reported as a formulation difference, not a parity success.
 
 The closed-state validity-horizon extension further shows that the same
 two engines remain inside the declared trajectory, wrench,
@@ -12730,6 +12812,8 @@ From the repository root (Python 3.11+ with the project dependencies):
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_shaft\_beam\_reference}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_spatial\_full\_body\_study}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_articulated\_manufactured\_solution}
+\ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_articulated\_native\_constraint\_discrepancy}
+\ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.make\_articulated\_native\_constraint\_discrepancy\_figure}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_articulated\_ground\_diagnostic}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_articulated\_ground\_atlas}
 \ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ scripts.research.proximal\_distal\_energy.run\_articulated\_ground\_posthoc\_sensitivity}
@@ -12937,6 +13021,14 @@ Recorded outputs:
   analytical, MuJoCo, and Pinocchio inverse-dynamics residuals;
   three-level Richardson estimates; measured free-subtree conservation
   drift; and the corruption killswitch contract.
+\item
+  \texttt{data/articulated\_native\_constraint\_discrepancy.\{json,npz\}}
+  --- one same-state MuJoCo-native bilateral
+  \texttt{connect}/\texttt{mj\_step} branch and one projected
+  Kelvin--Voigt/shared-mass-and-bias branch, including the
+  equality-disabled killswitch, six-row native-constraint gate,
+  refinement, attachment separation, generalized force, and nonzero
+  state discrepancy.
 \item
   \texttt{data/uncertainty\_control\_study.\{json,npz\}} --- declared
   design, actuator contract, uncertainty intervals, PRCC screen,

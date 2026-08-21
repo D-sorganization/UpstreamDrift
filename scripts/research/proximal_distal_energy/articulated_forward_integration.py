@@ -64,6 +64,7 @@ def native_dynamics_operator(
         from scripts.research.proximal_distal_energy.spatial_full_body import (
             _compiled_mujoco_model,
             _mujoco_xml,
+            _populate_mujoco_full_mass_matrix,
         )
 
         mj_model = _compiled_mujoco_model(model.canonical_hash, _mujoco_xml(model))
@@ -76,7 +77,7 @@ def native_dynamics_operator(
             data.qpos[:] = q
             data.qvel[:] = qd
             mujoco.mj_forward(mj_model, data)
-            mujoco.mj_fullM(mj_model, matrix, data.qM)
+            _populate_mujoco_full_mass_matrix(mujoco, mj_model, data, matrix)
             return matrix.copy(), np.asarray(data.qfrc_bias, dtype=np.float64).copy()
 
         return evaluate_mujoco

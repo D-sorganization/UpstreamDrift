@@ -59,20 +59,19 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
 
 - Worktree: `UpstreamDrift-worktrees/goal-8752-uncertainty`.
 - Parent PID `18404` is an active checkpointed 19-corner campaign, not an
-  orphan. Eight corners and 15 of 30 pathway evaluations were recorded by the
-  2026-08-21 08:46 checkpoint; the next ground pathway was active when last
-  inspected. Completed pathway rows and atomic ground-branch checkpoints are
-  restartable. Do not infer completion from the partial campaign record.
+  orphan. Nine corners and 17 of 30 completed-or-retained pathway evaluations
+  were recorded by the 2026-08-21 11:41 checkpoint. At 12:43, 25 of 72 atomic
+  ground branches for the active torsional-stiffness-high corner were retained.
+  Completed pathway rows and ground-branch checkpoints are restartable. Do not
+  infer completion from the partial campaign record.
 - It may own up to 20 workers. Do not kill workers individually, edit campaign
   sources, or start a second campaign. Retained numerical failures are data.
 - #8910 repair worktree:
   `UpstreamDrift-worktrees/8910-real-manufactured-solution`; branch:
   `fix/8910-real-manufactured-solution`, based on verified #8960 remote main.
-- PR #8961 is open; implementation commit
-  `e47e17050c74b2dae1dd0eb3eb3058a173763be7` contains the coherent scientific
-  repair. Inspect the live PR head before review because handoff-only commits
-  may follow. Human review and protected CI remain required. Do not enable
-  auto-merge or bypass a required check.
+- PR #8961 merged through protection at
+  `3c75dfdd14404bb897779a6899d85cc21078c4d0`, verified as an ancestor of
+  current remote `main`.
 - The local repair replaces self-defined torque residuals with analytical
   Lagrange--Christoffel, MuJoCo `mj_inverse`, and robotics Pinocchio RNEA;
   replaces hardcoded conservation zeros with an unforced gravity-free rollout;
@@ -107,6 +106,62 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
   passes all five manufactured-solution tests, and the optional-stack workflow
   now owns those native tests. This repairs the deterministic Python 3.11/3.12
   failures without accepting the unrelated PyPI `pinocchio` package.
+
+## Native Contact Formulation Discrepancy Control (#8911)
+
+- Worktree: `UpstreamDrift-worktrees/8911-native-contact-parity`; branch:
+  `fix/8911-native-contact-parity`, based on the verified #8961 merge.
+- Commits `643ce3a12`, `933c3cf87`, and `804efd249` implement the native
+  constraint experiment, evidence, MuJoCo API compatibility, terminology
+  correction, claim reconciliation, and regenerated 235-page paper. Commit
+  `160256fe1af2b8c8abcb55f500aa90133e924b55` then decomposes the new native
+  experiment below the architecture budget and adds time-bounded exceptions
+  for pre-existing research orchestrators. Release metadata is bound to that
+  exact source commit.
+- The same closed 20-coordinate state is advanced for 4 ms with either two
+  native MuJoCo equality/connect constraints plus `mj_step`, or the existing
+  projected bilateral Kelvin--Voigt law and project-authored semi-implicit
+  update. Disabling the native equalities returns zero constraint force.
+- The native and projected formulations are measurably distinct. At 0.25 ms,
+  final hand--grip separations are 0.987 and 0.908 mm; the final coordinate
+  discrepancy is 1.04e-4 rad in club pitch. Refinement reduces the final
+  discrepancy from 1.12e-4 to 1.04e-4. Mixed-unit generalized vector norms are
+  reported only as numerical diagnostics and are not compared as physical
+  force magnitudes.
+- The former “independently integrated” language is removed from the shared
+  projected-contact experiment. MuJoCo and Pinocchio independently supply
+  kinematics, inertia, bias, gravity, and continuous-time acceleration there,
+  while contact and the state update remain shared. The new native branch is a
+  formulation-discrepancy control, not a parity claim.
+- Claim governance passes with 1,078/1,078 candidates adjudicated, 303 atomic
+  claims, 42 reviewed release claims, and 2,130 evidence references. The
+  computational release contains 581 hash-pinned artifacts and passes all 235
+  page renders, 194 URI links, and 246 outline entries. Archival tagged-PDF and
+  font findings remain explicitly open.
+- Focused numerical, claim, release, and publication tests pass (39 passed,
+  one dependency-qualified Pinocchio test skipped on Windows). The complete
+  release validator passes with no mismatches. The PDF was visually inspected
+  on all pages and at full resolution around the new native-control section.
+- PR CI subsequently exposed four missing suite classifications in the new
+  native-control tests. The module is now classified as `scientific`; the
+  exact suite-marker ratchet passes. Re-running the source-bound evidence also
+  exposed a non-idempotent native claim registrar. Its reconciliation now
+  preserves inherited claim links without duplicating native links, and a
+  regression test runs the registrar twice and checks complete reciprocity.
+- Issue #8963 owns removal of the seven pre-existing research-orchestrator
+  architecture exceptions before 2026-09-30. The new native discrepancy
+  experiment itself has no exception and is below the 100-line function gate.
+- Full PR #8962 is open from `fix/8911-native-contact-parity` to `main`.
+  Standard CI, publication, claim, architecture, and repository gates pass on
+  head `7188ad1cb509225ed2bbaf7f98ba6a391460c5a8`. The optional-stack lane then
+  passed all executable manufactured-solution checks but rejected the committed
+  record because the new MuJoCo 3.4/3.8 compatibility adapter changed the
+  governed `spatial_full_body.py` digest after evidence generation. The record
+  has now been regenerated canonically under Linux MuJoCo 3.8.0 and Pinocchio
+  3.8.0; all five manufactured-solution tests pass and the claim-evidence
+  manifest validates. Commit and push this evidence requalification, then
+  shepherd the new exact head through human review and protected CI. Do not
+  enable auto-merge or bypass protection.
 
 ## Scientific Boundaries
 

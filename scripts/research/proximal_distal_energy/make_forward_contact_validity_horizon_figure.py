@@ -1,4 +1,4 @@
-"""Render the cross-engine forward-contact validity-horizon summary."""
+"""Render the inertia-and-bias transport validity-horizon summary."""
 
 from __future__ import annotations
 
@@ -65,7 +65,7 @@ def main() -> int:
         yscale="log",
     )
     axes[1, 1].set(
-        title="Worst Work–Energy Closure Residual",
+        title="Worst Work-Energy Closure Residual",
         ylabel="Normalized Residual (%)",
         yscale="log",
     )
@@ -80,7 +80,7 @@ def main() -> int:
         fontsize=8,
     )
     fig.suptitle(
-        "No Cross-Engine Failure Was Observed Through the Registered 50 ms Horizon",
+        "No Inertia-and-Bias Transport Failure Was Observed Through 50 ms",
         fontsize=14,
     )
     STEM.parent.mkdir(parents=True, exist_ok=True)

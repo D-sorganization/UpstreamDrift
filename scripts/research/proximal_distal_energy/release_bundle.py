@@ -136,6 +136,10 @@ _RELEASE_METADATA: dict[str, Any] = {
             "command": "python -m scripts.research.proximal_distal_energy.run_articulated_inertia_cross_engine",
             "tier": "subject_scaled_closed_state_articulated_common_state_dynamics",
         },
+        "articulated_native_constraint_discrepancy": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_articulated_native_constraint_discrepancy",
+            "tier": "native_equality_integrator_versus_projected_contact_formulation_discrepancy",
+        },
         "articulated_contact_projection": {
             "command": "python -m scripts.research.proximal_distal_energy.run_articulated_contact_projection",
             "tier": "subject_scaled_articulated_contact_initial_acceleration",
@@ -289,7 +293,7 @@ _RELEASE_METADATA: dict[str, Any] = {
             "reduced_tree_closed_contact_screen_and_short_forward_initialization_passed"
         ),
         "closed_state_forward_initialization": (
-            "supported_for_234_mappings_and_54_short_cross_engine_cases"
+            "supported_for_234_mappings_and_54_short_inertia_bias_transport_cases"
         ),
         "closed_state_forward_validity_horizon": (
             "no_failure_observed_through_registered_50_ms_reduced_model_interval"
@@ -299,6 +303,9 @@ _RELEASE_METADATA: dict[str, Any] = {
         ),
         "articulated_manufactured_solution": (
             "independent_numerical_controls_qualified"
+        ),
+        "native_constraint_formulation_discrepancy": (
+            "native_branch_executed_nonzero_discrepancy_retained"
         ),
         "subject_scaled_articulated_contact_projection": (
             "same_state_bilateral_contact_projection_and_initial_acceleration_qualified"

@@ -3,6 +3,69 @@
   "max_parameters": 8,
   "exceptions": [
     {
+      "path": "scripts/research/proximal_distal_energy/register_articulated_ground_claims.py",
+      "symbol": "main",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8963,
+      "reason": "Issue #8963: pre-existing claim-registration orchestration exceeds the changed-file budget; PR #8962 only updates governed terminology and evidence anchors, while decomposition requires byte-equivalent registry regeneration.",
+      "expires_on": "2026-09-30"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/register_articulated_shaft_claims.py",
+      "symbol": "main",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8963,
+      "reason": "Issue #8963: pre-existing shaft claim-registration orchestration is two lines over budget and requires evidence-equivalent helper extraction after PR #8962.",
+      "expires_on": "2026-09-30"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/register_remaining_claim_reviews.py",
+      "symbol": "main",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8963,
+      "reason": "Issue #8963: pre-existing whole-paper review reconciliation exceeds the changed-file budget; decomposition must preserve reciprocal mappings for all 1,078 candidates.",
+      "expires_on": "2026-09-30"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/register_remaining_claim_reviews.py",
+      "symbol": "main.assign",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8963,
+      "reason": "Issue #8963: the pre-existing chapter-dispatch table requires a data-driven extraction that preserves all current claim mappings.",
+      "expires_on": "2026-09-30"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/register_subject_scaled_spatial_geometry_claims.py",
+      "symbol": "main",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8963,
+      "reason": "Issue #8963: pre-existing subject-scaled claim-registration orchestration exceeds the changed-file budget; PR #8962 updates source anchors without changing the registered estimands.",
+      "expires_on": "2026-09-30"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/run_spatial_forward_contact_study.py",
+      "symbol": "run_study",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8963,
+      "reason": "Issue #8963: pre-existing study assembly exceeds the changed-file budget; PR #8962 corrects metadata to describe shared projected contact and state update.",
+      "expires_on": "2026-09-30"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/spatial_full_body.py",
+      "symbol": "build_spatial_model",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8963,
+      "reason": "Issue #8963: pre-existing common-model construction exceeds the changed-file budget; PR #8962 adds only the MuJoCo 3.4+ full-mass-matrix compatibility adapter.",
+      "expires_on": "2026-09-30"
+    },
+    {
       "path": "src/launchers/upstream_drift_launcher.py",
       "symbol": "UpstreamDriftLauncher.select_model",
       "rule": "function-lines",

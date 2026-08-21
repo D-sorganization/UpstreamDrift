@@ -76,9 +76,9 @@ open.
 
 ## Reduced Spatial Forward-Contact Tier
 
-- Achieved geometry and engine-solved force vectors:
+- Achieved geometry and projected compliant-force vectors:
   [`fig_spatial_forward_contact_geometry.svg`](figures/fig_spatial_forward_contact_geometry.svg)
-- Native forward trajectory and wrench comparison:
+- Inertia-and-bias transport trajectory and wrench comparison:
   [`fig_spatial_forward_cross_engine.svg`](figures/fig_spatial_forward_cross_engine.svg)
 - Exact same-state driver killswitch and pathway observables:
   [`fig_spatial_forward_killswitch.svg`](figures/fig_spatial_forward_killswitch.svg)
@@ -88,8 +88,11 @@ open.
   [`spatial_forward_contact_study.json`](data/spatial_forward_contact_study.json)
 
 This tier uses two finite-mass translational hand carriages and one rigid club.
-It is forward cross-engine mechanism evidence, not anatomical, tissue,
-physiological, equipment, or human validation.
+It is shared-contact, shared-integrator inertia-and-bias transport evidence,
+not independent contact-solver evidence or anatomical, tissue, physiological,
+equipment, or human validation. The separate native-constraint discrepancy
+control is
+[`fig_articulated_native_constraint_discrepancy.pdf`](figures/fig_articulated_native_constraint_discrepancy.pdf).
 
 ## Uncertainty, Identifiability, and Control
 

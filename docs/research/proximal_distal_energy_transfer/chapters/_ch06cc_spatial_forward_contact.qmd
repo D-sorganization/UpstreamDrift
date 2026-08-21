@@ -1,4 +1,4 @@
-# Independently Executed Spatial Forward Contact {#sec-spatial-forward-contact}
+# Spatial Contact With Native Inertia-and-Bias Transport {#sec-spatial-forward-contact}
 
 The common-state experiment in @sec-spatial-full-body asks whether two
 dynamics formulations return the same generalized action at identical
@@ -8,25 +8,27 @@ question:
 
 > Can a negative force-generated couple arise from the achieved state of a
 > forward compliant two-hand system, persist after its grounded driver is
-> removed, and survive independent integration by two actual multibody
-> engines?
+> removed, and survive propagation through two independently assembled
+> multibody inertia-and-bias operators?
 
 The answer is affirmative for one declared reduced model. MuJoCo and
-Pinocchio independently integrate the same 13-coordinate contract using their
-native forward-dynamics algorithms [@todorov2012mujoco;
-@carpentier2019pinocchio]. Neither engine receives a prescribed contact-force
-history. Each contact force is calculated from the engine's own achieved
-relative hand--club displacement and velocity. The common contact law,
-reference driver, timestep, and output convention are held fixed so that
-engine implementation is the principal changed factor.
+Pinocchio independently evaluate the mass, bias, gravity, kinematics, and
+continuous-time acceleration of the same 13-coordinate contract
+[@todorov2012mujoco; @carpentier2019pinocchio]. Neither operator receives a
+prescribed contact-force history. The project-authored contact law calculates
+each force from the achieved relative hand--club displacement and velocity,
+then the same project-authored semi-implicit update advances both branches.
+The comparison therefore changes the rigid-body operator while holding the
+contact solver and integrator fixed.
 
 The independence claim is component-specific. MuJoCo and Pinocchio
 independently supply mass, gravity, rigid-body kinematics, spatial-force
 mapping, and continuous-time acceleration. They intentionally share the
 Kelvin--Voigt constitutive law, grounded driver, and semi-implicit state update.
-Agreement tests transport of one declared reduced mechanism across two native
-dynamics engines; it is not independent confirmation of the contact law or
-time integrator.
+Agreement tests articulated inertia-and-bias transport of one declared reduced
+mechanism across two native dynamics libraries. It does not exercise either
+library's native contact or constraint solver and is not independent
+confirmation of the contact law or time integrator.
 
 This result closes the *reduced forward-contact* gate, not the anatomical or
 human gate. The hand bodies are finite-mass translational carriages, not arms;
@@ -73,7 +75,7 @@ $-9.81$ m/s$^2$ on the vertical axis, a 0.240 s interval, and a 0.25 ms
 timestep. The complete JSON-serializable record is hashed before either engine
 is constructed. Both realized adapters report the same SHA-256 model digest.
 
-![Achieved Spatial Contact Geometry and Engine-Solved Force Vectors](figures/fig_spatial_forward_contact_geometry.pdf){#fig-spatial-forward-contact-geometry width=100%}
+![Achieved Spatial Contact Geometry and Projected Compliant-Force Vectors](figures/fig_spatial_forward_contact_geometry.pdf){#fig-spatial-forward-contact-geometry width=100%}
 
 @fig-spatial-forward-contact-geometry shows three achieved MuJoCo states. The
 blue and red arrows are not prescribed inputs. They are the compliant
@@ -145,7 +147,7 @@ ground-reaction force. It answers the bookkeeping question “where does the
 external reference-driver action close?” and prevents that pathway from being
 silently omitted.
 
-## Independent Engine Realizations {#sec-spatial-forward-engines}
+## Native Dynamics-Operator Realizations {#sec-spatial-forward-engines}
 
 The common experiment executes in two native libraries, both version 3.8.0 in
 the archived run:
@@ -158,12 +160,12 @@ the archived run:
   opposite forces are transformed into each joint's local spatial-force
   convention; the articulated-body algorithm computes acceleration.
 
-Both engines use the same semi-implicit position/velocity update after their
-native acceleration evaluation. This is a controlled numerical choice, not an
-assertion that the engines have identical internal integrators. It removes an
-uninteresting integration-method difference while retaining independent mass,
-bias, gravity, kinematics, spatial-force mapping, and forward-dynamics
-implementations. The Pinocchio adapter uses a local-world-aligned velocity at
+Both branches use the same project-authored semi-implicit position/velocity
+update after their native acceleration evaluation. This is a controlled
+numerical choice, not an assertion that either library's native integrator has
+been exercised. It removes integration-method variation while retaining
+independent mass, bias, gravity, kinematics, spatial-force mapping, and
+continuous-time acceleration implementations. The Pinocchio adapter uses a local-world-aligned velocity at
 the moving club origin; using a world-origin spatial velocity instead creates
 an artificial contact-velocity discrepancy. That frame distinction is now
 covered by the forward trajectory gate.
@@ -177,12 +179,13 @@ initial-state equality, action--reaction closure, analytical geometry
 controls, and timestep refinement provide independent checks that a passing
 trajectory is meaningful.
 
-![Independent MuJoCo and Pinocchio Forward Dynamics Satisfy Declared Gates](figures/fig_spatial_forward_cross_engine.pdf){#fig-spatial-forward-cross-engine width=100%}
+![MuJoCo and Pinocchio Inertia-and-Bias Transport Satisfies Declared Gates](figures/fig_spatial_forward_cross_engine.pdf){#fig-spatial-forward-cross-engine width=100%}
 
-## Forward Cross-Engine Results {#sec-spatial-forward-results}
+## Inertia-and-Bias Transport Results {#sec-spatial-forward-results}
 
-@fig-spatial-forward-cross-engine shows that the two independently integrated
-trajectories remain close. In the continuing-driver branch:
+@fig-spatial-forward-cross-engine shows that the two shared-update trajectories
+propagated through separate native rigid-body operators remain close. In the
+continuing-driver branch:
 
 - club-position RMS difference is 12.75 µm and maximum difference is
   37.95 µm;
@@ -195,8 +198,8 @@ In the driver-killswitch branch, the corresponding values are 16.96 µm,
 is well inside its declared region. The result is stronger than the preceding
 common-state inverse-dynamics comparison because numerical error can now
 accumulate and feed back into the contact law. It remains narrower than a
-cross-engine anatomical comparison because the engines realize one reduced
-common model.
+an independently formulated contact-and-integration comparison because both
+branches share one reduced contact law and state update.
 
 ## Exact Same-State Driver Killswitch {#sec-spatial-forward-killswitch}
 
@@ -261,7 +264,8 @@ The committed record fails closed if any of these conditions occurs:
 
 1. either imported library lacks its native model and forward-dynamics API;
 2. the generated adapters report different common-model digests;
-3. baseline or killswitch trajectories exceed a declared cross-engine region;
+3. baseline or killswitch trajectories exceed a declared inertia-and-bias
+   transport-discrepancy region;
 4. contact action--reaction force does not close at each evaluation;
 5. the coincident-grip couple is nonzero;
 6. reversed moment arms do not reverse couple sign;

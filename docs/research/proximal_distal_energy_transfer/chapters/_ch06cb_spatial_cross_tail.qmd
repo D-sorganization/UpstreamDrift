@@ -86,7 +86,7 @@ Four stronger statements remain open:
 - **Passive Contact Origin Is Inconclusive.** The hand forces are inputs. A
   forward compliant two-hand solve must determine whether equivalent loads
   emerge after a distal command killswitch.
-- **Bounded Cross-Engine Attachment Dynamics Do Not Establish Full Contact.**
+- **Bounded Inertia-and-Bias Transport Does Not Establish Full Contact.**
   The 5 ms articulated trajectories test divergence, attachment separation,
   typed unilateral opening and reattachment, power, and energy in two engines.
   They do not test calibrated distributed grip or shaft mechanics, tissue,
