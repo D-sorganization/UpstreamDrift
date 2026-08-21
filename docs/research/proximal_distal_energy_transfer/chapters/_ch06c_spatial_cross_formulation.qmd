@@ -442,6 +442,50 @@ human transfer, timing demand, slack benefit, or a coaching strategy. It
 provides a qualified inertial foundation for the next forward-contact
 falsifier.
 
+#### Independent Manufactured-Solution and Conservation Controls
+
+Cross-engine agreement alone can remain circular if both reported paths call
+the same operator, and an inverse-dynamics residual is vacuous if the applied
+torque is checked against the equation that defined it. The articulated
+verification tier therefore assigns three distinct authorities. The
+manufactured generalized torque is defined by the analytical
+Lagrange--Christoffel implementation; MuJoCo evaluates the same state with
+`mj_inverse`; and robotics Pinocchio evaluates it with `rnea`. An explicit
+killswitch adds 10 N·m to the MuJoCo result and must make the gate fail.
+
+For the registered closed state, the maximum relative discrepancies are
+$3.09\times10^{-11}$ for Lagrange--MuJoCo, $3.07\times10^{-11}$ for
+Lagrange--Pinocchio, and $3.54\times10^{-13}$ for MuJoCo--Pinocchio. These
+small but nonzero values replace a former self-comparison that was zero by
+definition. Semi-implicit Euler is evaluated at 2.0, 1.0, and 0.5 ms; adjacent
+three-level Richardson estimates are 1.0011 and 1.0007, inside the registered
+first-order interval of 0.9--1.1.
+
+Momentum is assessed in a separate gravity-free, zero-torque rollout. Because
+the pelvis branch is world-supported, exciting it would introduce support
+reactions and make total momentum an invalid invariant. The conservation
+control therefore excites only the genuinely free-floating club subtree. Over
+10 ms, relative drift is $1.01\times10^{-6}$ for linear momentum,
+$1.51\times10^{-6}$ for angular momentum, and $8.67\times10^{-7}$ for kinetic
+energy. These are measured integration errors rather than stored constants.
+
+The constrained control coordinates pelvis yaw with the three club
+translations so that one declared lead-hand-to-grip point constraint is
+satisfied throughout the manufactured trajectory. The imposed three-component
+multiplier is then recovered independently from each native inverse-dynamics
+result. This control does not test simultaneous two-hand closure. The maximum
+relative multiplier, cross-engine multiplier, and equilibrium residuals are
+$3.39\times10^{-13}$, $3.25\times10^{-13}$, and $5.51\times10^{-13}$,
+respectively. Position, velocity, and virtual-power residuals are exact zeros
+for this analytically coordinated trajectory; they are reported as identities,
+not treated as independent evidence.
+
+The machine-readable record is
+[`articulated_manufactured_solution.json`](../data/articulated_manufactured_solution.json).
+These controls verify the declared numerical operators and first-order
+integration behavior. They do not validate the manufactured motion as a human
+swing, identify biological torque, or support a coaching prescription.
+
 #### Articulated Contact Projection and Initial Acceleration
 
 The next gate adds finite bilateral interaction forces without yet advancing a

@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "4e3dab5480cc73fce92fc3300b9c7d247ff30d1db085cb89909e907d8c57cafc",
+    "source_digest": "7940ce1c8d9977fb527d827da2e98bfc7271023f05042fa0f33d06ff14a5628e",
     "baseline_commit": "a4b53e39b"
   },
   "audit_scope": {
@@ -239,6 +239,11 @@
       "release_claim_key": "articulated_ground_free_moment",
       "published_status": "fifty_millisecond_finite_ground_gate_qualified_primary_match_empty",
       "audit_state": "reviewed_as_synthetic_finite_base_result_with_adverse_primary_match"
+    },
+    {
+      "release_claim_key": "articulated_manufactured_solution",
+      "published_status": "independent_numerical_controls_qualified",
+      "audit_state": "reviewed_as_independent_synthetic_numerical_control"
     }
   ],
   "candidate_reviews": [
@@ -8225,14 +8230,6 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "candidate_id": "PD-CAND-01824e3a259855c8",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "This artifact inventory points to evidence but asserts no standalone scientific result.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-14"
-    },
-    {
       "candidate_id": "PD-CAND-259d909ca75d4513",
       "disposition": "material_claims_mapped",
       "claim_ids": [
@@ -10979,6 +10976,64 @@
       "rationale": "This passage states or bounds the bounded articulated forward gate.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-15"
+    },
+    {
+      "candidate_id": "PD-CAND-9c9b2bca68b383f2",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-297"
+      ],
+      "rationale": "This passage states or bounds the independent manufactured-solution control.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-21"
+    },
+    {
+      "candidate_id": "PD-CAND-4eababce66e4d2d7",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-298"
+      ],
+      "rationale": "This passage states or bounds the independent manufactured-solution control.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-21"
+    },
+    {
+      "candidate_id": "PD-CAND-bcb77de4c0ae3d00",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-299"
+      ],
+      "rationale": "This passage states or bounds the independent manufactured-solution control.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-21"
+    },
+    {
+      "candidate_id": "PD-CAND-02f649ae549c997f",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-301"
+      ],
+      "rationale": "This passage states or bounds the independent manufactured-solution control.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-21"
+    },
+    {
+      "candidate_id": "PD-CAND-f25ea5d7112b645a",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This appendix paragraph inventories governed artifacts and adds no standalone scientific result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-21"
+    },
+    {
+      "candidate_id": "PD-CAND-9738a80f08ee1d3c",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-300"
+      ],
+      "rationale": "This passage states or bounds the independent manufactured-solution control.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-21"
     }
   ],
   "claims": [
@@ -24690,6 +24745,201 @@
       "adjudication": "All registered states pass the common-state native dynamics gates. The result is restricted to articulated rigid-body operator transport.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-15"
+    },
+    {
+      "claim_id": "PD-CLAIM-297",
+      "candidate_ids": [
+        "PD-CAND-9c9b2bca68b383f2"
+      ],
+      "statement": "The manufactured torque is independently evaluated by analytical Lagrange--Christoffel, MuJoCo mj_inverse, and Pinocchio RNEA, with a corruption killswitch.",
+      "classification": "articulated_manufactured_solution_design",
+      "published_status": "complete_for_declared_numerical_control",
+      "audit_status": "independent_manufactured_solution_controls_executed",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:447"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json",
+        "scripts/research/proximal_distal_energy/articulated_manufactured_solution.py",
+        "scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py",
+        "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py",
+        "tests/research/test_articulated_manufactured_solution.py"
+      ],
+      "model_domain": "One synthetic subject-scaled closed state, a 10 ms manufactured trajectory, three inverse-dynamics formulations, and a free-club gravity-free zero-torque conservation rollout.",
+      "uncertainty_boundary": "The paths share one idealized model specification but not one dynamics operator.",
+      "competing_explanations": [
+        "common idealized rigid-body specification",
+        "finite-difference Christoffel mass gradient",
+        "short manufactured horizon",
+        "world-supported pelvis branch excluded from conservation"
+      ],
+      "negative_controls": [
+        "10 N m MuJoCo corruption killswitch",
+        "three independently named inverse-dynamics paths",
+        "adjacent three-level Richardson estimates",
+        "measured rather than hardcoded conservation drift",
+        "exact constrained identities separated from numerical evidence"
+      ],
+      "falsifier": "The 10 N m corruption does not fail the gate, an operator aliases another, or a named native API is not called.",
+      "adjudication": "The registered numerical controls pass and remain restricted to synthetic operator and integrator verification.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-21"
+    },
+    {
+      "claim_id": "PD-CLAIM-298",
+      "candidate_ids": [
+        "PD-CAND-4eababce66e4d2d7"
+      ],
+      "statement": "All three inverse-dynamics comparisons are small but nonzero and semi-implicit Euler exhibits registered first-order convergence.",
+      "classification": "articulated_manufactured_solution_result",
+      "published_status": "supported_at_declared_state_and_steps",
+      "audit_status": "independent_manufactured_solution_controls_executed",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:456"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json",
+        "scripts/research/proximal_distal_energy/articulated_manufactured_solution.py",
+        "scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py",
+        "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py",
+        "tests/research/test_articulated_manufactured_solution.py"
+      ],
+      "model_domain": "One synthetic subject-scaled closed state, a 10 ms manufactured trajectory, three inverse-dynamics formulations, and a free-club gravity-free zero-torque conservation rollout.",
+      "uncertainty_boundary": "The result is one manufactured state and a 10 ms horizon, not a population or complete downswing.",
+      "competing_explanations": [
+        "common idealized rigid-body specification",
+        "finite-difference Christoffel mass gradient",
+        "short manufactured horizon",
+        "world-supported pelvis branch excluded from conservation"
+      ],
+      "negative_controls": [
+        "10 N m MuJoCo corruption killswitch",
+        "three independently named inverse-dynamics paths",
+        "adjacent three-level Richardson estimates",
+        "measured rather than hardcoded conservation drift",
+        "exact constrained identities separated from numerical evidence"
+      ],
+      "falsifier": "Any relative dynamics residual exceeds 0.05 or either adjacent Richardson order leaves 0.9--1.1.",
+      "adjudication": "The registered numerical controls pass and remain restricted to synthetic operator and integrator verification.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-21"
+    },
+    {
+      "claim_id": "PD-CLAIM-299",
+      "candidate_ids": [
+        "PD-CAND-bcb77de4c0ae3d00"
+      ],
+      "statement": "The free-club gravity-free zero-torque rollout has measured linear-momentum, angular-momentum, and kinetic-energy drift below the registered 0.02 relative bound.",
+      "classification": "articulated_conservation_result",
+      "published_status": "supported_for_free_floating_club_subtree",
+      "audit_status": "independent_manufactured_solution_controls_executed",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:464"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json",
+        "scripts/research/proximal_distal_energy/articulated_manufactured_solution.py",
+        "scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py",
+        "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py",
+        "tests/research/test_articulated_manufactured_solution.py"
+      ],
+      "model_domain": "One synthetic subject-scaled closed state, a 10 ms manufactured trajectory, three inverse-dynamics formulations, and a free-club gravity-free zero-torque conservation rollout.",
+      "uncertainty_boundary": "The supported pelvis tree is excluded because its reactions invalidate whole-model momentum conservation.",
+      "competing_explanations": [
+        "common idealized rigid-body specification",
+        "finite-difference Christoffel mass gradient",
+        "short manufactured horizon",
+        "world-supported pelvis branch excluded from conservation"
+      ],
+      "negative_controls": [
+        "10 N m MuJoCo corruption killswitch",
+        "three independently named inverse-dynamics paths",
+        "adjacent three-level Richardson estimates",
+        "measured rather than hardcoded conservation drift",
+        "exact constrained identities separated from numerical evidence"
+      ],
+      "falsifier": "Any measured drift exceeds 0.02 or supported-body motion is silently included as a free-system invariant.",
+      "adjudication": "The registered numerical controls pass and remain restricted to synthetic operator and integrator verification.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-21"
+    },
+    {
+      "claim_id": "PD-CLAIM-300",
+      "candidate_ids": [
+        "PD-CAND-9738a80f08ee1d3c"
+      ],
+      "statement": "The coordinated constrained trajectory recovers the imposed multiplier through both native operators with nonzero cross-engine numerical residuals.",
+      "classification": "articulated_constrained_manufactured_result",
+      "published_status": "supported_for_declared_coordinated_trajectory",
+      "audit_status": "independent_manufactured_solution_controls_executed",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:472"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json",
+        "scripts/research/proximal_distal_energy/articulated_manufactured_solution.py",
+        "scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py",
+        "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py",
+        "tests/research/test_articulated_manufactured_solution.py"
+      ],
+      "model_domain": "One synthetic subject-scaled closed state, a 10 ms manufactured trajectory, three inverse-dynamics formulations, and a free-club gravity-free zero-torque conservation rollout.",
+      "uncertainty_boundary": "This is one three-component lead-hand-to-grip point constraint, not a simultaneous two-hand closure test; exact position, velocity, and virtual-power zeros are construction identities and not independent evidence.",
+      "competing_explanations": [
+        "common idealized rigid-body specification",
+        "finite-difference Christoffel mass gradient",
+        "short manufactured horizon",
+        "world-supported pelvis branch excluded from conservation"
+      ],
+      "negative_controls": [
+        "10 N m MuJoCo corruption killswitch",
+        "three independently named inverse-dynamics paths",
+        "adjacent three-level Richardson estimates",
+        "measured rather than hardcoded conservation drift",
+        "exact constrained identities separated from numerical evidence"
+      ],
+      "falsifier": "Closure is not achieved, multiplier or equilibrium error exceeds 0.05, or an exact identity is presented as an independent engine comparison.",
+      "adjudication": "The registered numerical controls pass and remain restricted to synthetic operator and integrator verification.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-21"
+    },
+    {
+      "claim_id": "PD-CLAIM-301",
+      "candidate_ids": [
+        "PD-CAND-02f649ae549c997f"
+      ],
+      "statement": "Manufactured-solution controls verify numerical operators and integration order but do not validate a human swing, biological torque, or coaching strategy.",
+      "classification": "articulated_manufactured_solution_inference_boundary",
+      "published_status": "explicitly_bounded",
+      "audit_status": "independent_manufactured_solution_controls_executed",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:483"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json",
+        "scripts/research/proximal_distal_energy/articulated_manufactured_solution.py",
+        "scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py",
+        "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py",
+        "tests/research/test_articulated_manufactured_solution.py"
+      ],
+      "model_domain": "One synthetic subject-scaled closed state, a 10 ms manufactured trajectory, three inverse-dynamics formulations, and a free-club gravity-free zero-torque conservation rollout.",
+      "uncertainty_boundary": "Human mechanics and strategy require governed empirical evidence outside this synthetic control.",
+      "competing_explanations": [
+        "common idealized rigid-body specification",
+        "finite-difference Christoffel mass gradient",
+        "short manufactured horizon",
+        "world-supported pelvis branch excluded from conservation"
+      ],
+      "negative_controls": [
+        "10 N m MuJoCo corruption killswitch",
+        "three independently named inverse-dynamics paths",
+        "adjacent three-level Richardson estimates",
+        "measured rather than hardcoded conservation drift",
+        "exact constrained identities separated from numerical evidence"
+      ],
+      "falsifier": "A human, physiological, or coaching conclusion is attributed to these manufactured trajectories alone.",
+      "adjudication": "The registered numerical controls pass and remain restricted to synthetic operator and integrator verification.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-21"
     }
   ]
 }

@@ -38,14 +38,15 @@ def test_release_review_covers_every_release_claim_and_closes_only_review() -> N
     assert updated["audit_scope"]["release_review_completion_status"] == "complete"
 
     summary = report["summary"]
-    assert summary["release_claim_count"] == 32
-    assert summary["reviewed_release_claim_count"] == 32
+    expected_release_count = len(REVIEW_SPECS)
+    assert summary["release_claim_count"] == expected_release_count
+    assert summary["reviewed_release_claim_count"] == expected_release_count
     assert summary["open_release_review_count"] == 0
-    assert summary["scientifically_open_gate_count"] == 32
-    assert summary["atomic_claim_count"] == 269
+    assert summary["scientifically_open_gate_count"] == expected_release_count
+    assert summary["atomic_claim_count"] == len(updated["claims"])
 
     rows = report["release_claim_reviews"]
-    assert len(rows) == 32
+    assert len(rows) == expected_release_count
     assert all(row["supporting_claim_ids"] for row in rows)
     assert all(row["evidence_artifacts"] for row in rows)
     assert all(row["negative_controls"] for row in rows)

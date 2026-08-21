@@ -246,6 +246,12 @@ REVIEW_SPECS: dict[str, dict[str, Any]] = {
         ("PD-CLAIM-274", "PD-CLAIM-275", "PD-CLAIM-276"),
         "Apply bilateral compliant contact to the qualified articulated tree and repeat horizon, adverse-load, contact-loss, refinement, power, and energy controls.",
     ),
+    "articulated_manufactured_solution": _spec(
+        "reviewed_as_independent_synthetic_numerical_control",
+        "operator_conservation_and_first_order_controls_qualified",
+        tuple(f"PD-CLAIM-{number}" for number in range(297, 302)),
+        "Repeat across additional states and integrators, then retain governed human-data boundaries for any biomechanical inference.",
+    ),
     "subject_scaled_articulated_contact_projection": _spec(
         "reviewed_as_same_state_articulated_contact_projection_result",
         "bilateral_contact_projection_and_native_initial_acceleration_qualified",

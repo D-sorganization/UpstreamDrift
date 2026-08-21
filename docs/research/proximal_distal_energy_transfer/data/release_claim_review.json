@@ -3,11 +3,11 @@
   "authority": "D-sorganization/UpstreamDrift#8557",
   "interpretation": "Review completion means every release claim has traceable atomic support, controls, falsifiers, boundaries, and a remaining gate. It does not mean every scientific claim is validated.",
   "summary": {
-    "release_claim_count": 40,
-    "reviewed_release_claim_count": 40,
+    "release_claim_count": 41,
+    "reviewed_release_claim_count": 41,
     "open_release_review_count": 0,
-    "scientifically_open_gate_count": 40,
-    "atomic_claim_count": 295
+    "scientifically_open_gate_count": 41,
+    "atomic_claim_count": 300
   },
   "release_claim_reviews": [
     {
@@ -2351,6 +2351,55 @@
         "The post-hoc screen cannot replace the primary estimand or support a ground-use, timing, coaching, equipment, or human benefit claim."
       ],
       "remaining_scientific_gate": "Replace bilateral linear support with calibrated unilateral three-dimensional foot contact and force-plate observations, then repeat matched delivery and governed human tests."
+    },
+    {
+      "release_claim_key": "articulated_manufactured_solution",
+      "published_status": "independent_numerical_controls_qualified",
+      "audit_state": "reviewed_as_independent_synthetic_numerical_control",
+      "scientific_disposition": "operator_conservation_and_first_order_controls_qualified",
+      "supporting_claim_ids": [
+        "PD-CLAIM-297",
+        "PD-CLAIM-298",
+        "PD-CLAIM-299",
+        "PD-CLAIM-300",
+        "PD-CLAIM-301"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json",
+        "scripts/research/proximal_distal_energy/articulated_manufactured_solution.py",
+        "scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py",
+        "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py",
+        "tests/research/test_articulated_manufactured_solution.py"
+      ],
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:447",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:456",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:464",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:472",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:483"
+      ],
+      "negative_controls": [
+        "10 N m MuJoCo corruption killswitch",
+        "three independently named inverse-dynamics paths",
+        "adjacent three-level Richardson estimates",
+        "measured rather than hardcoded conservation drift",
+        "exact constrained identities separated from numerical evidence"
+      ],
+      "falsifiers": [
+        "The 10 N m corruption does not fail the gate, an operator aliases another, or a named native API is not called.",
+        "Any relative dynamics residual exceeds 0.05 or either adjacent Richardson order leaves 0.9--1.1.",
+        "Any measured drift exceeds 0.02 or supported-body motion is silently included as a free-system invariant.",
+        "Closure is not achieved, multiplier or equilibrium error exceeds 0.05, or an exact identity is presented as an independent engine comparison.",
+        "A human, physiological, or coaching conclusion is attributed to these manufactured trajectories alone."
+      ],
+      "uncertainty_boundaries": [
+        "The paths share one idealized model specification but not one dynamics operator.",
+        "The result is one manufactured state and a 10 ms horizon, not a population or complete downswing.",
+        "The supported pelvis tree is excluded because its reactions invalidate whole-model momentum conservation.",
+        "This is one three-component lead-hand-to-grip point constraint, not a simultaneous two-hand closure test; exact position, velocity, and virtual-power zeros are construction identities and not independent evidence.",
+        "Human mechanics and strategy require governed empirical evidence outside this synthetic control."
+      ],
+      "remaining_scientific_gate": "Repeat across additional states and integrators, then retain governed human-data boundaries for any biomechanical inference."
     }
   ]
 }

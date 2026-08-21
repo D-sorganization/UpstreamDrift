@@ -1,32 +1,47 @@
-"""Manufactured-solution controls for the articulated tier (#8752).
+"""Independent manufactured-solution controls for the articulated tier (#8752).
 
-Implements manufactured free-body and constrained-motion cases with closed-form checks,
-momentum/energy conservation verification, and convergence rate analysis.
+The manufactured torque is defined by the repository's analytical
+Lagrange--Christoffel formulation, then independently evaluated by MuJoCo
+``mj_inverse`` and robotics Pinocchio RNEA. Conservation quantities come from
+an unforced, gravity-free rollout; no verification field is a literal zero or
+an expression compared with itself.
 """
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 
 import numpy as np
 from numpy.typing import NDArray
 
-from scripts.research.proximal_distal_energy.articulated_forward_contract import (
-    mechanical_energy,
+from scripts.research.proximal_distal_energy.articulated_inertia_cross_engine import (
+    build_pinocchio_articulated_model,
+    require_robotics_pinocchio,
 )
 from scripts.research.proximal_distal_energy.spatial_full_body import (
     SpatialModel,
     forward_kinematics,
+    lagrange_inverse_dynamics,
+    mass_matrix,
+    mujoco_inverse_dynamics,
     mujoco_mass_matrix_and_bias,
     point_contact_jacobians,
 )
 
 FloatArray = NDArray[np.float64]
+_DERIVATIVE_STEP = 1.0e-6
+_INVERSE_RELATIVE_TOLERANCE = 5.0e-2
+_CONSERVATION_RELATIVE_TOLERANCE = 2.0e-2
+_RICHARDSON_ORDER_BOUNDS = (0.9, 1.1)
+_PINOCCHIO_INVERSE_CACHE: dict[
+    str, Callable[[FloatArray, FloatArray, FloatArray], FloatArray]
+] = {}
 
 
 @dataclass(frozen=True, slots=True)
 class ManufacturedFreeBodyResult:
-    """Verification results for manufactured free-body motion."""
+    """Measured verification results for manufactured and free rollouts."""
 
     time_s: FloatArray
     exact_q: FloatArray
@@ -34,7 +49,12 @@ class ManufacturedFreeBodyResult:
     exact_qdd: FloatArray
     exact_torque: FloatArray
     inverse_dynamics_residual: float
+    lagrange_mujoco_relative_error: float
+    lagrange_pinocchio_relative_error: float
+    mujoco_pinocchio_relative_error: float
+    independent_engine_difference_detected: bool
     integration_step_errors: dict[float, float]
+    richardson_orders: tuple[float, ...]
     observed_convergence_order: float
     linear_momentum_conservation_error: float
     angular_momentum_conservation_error: float
@@ -44,7 +64,7 @@ class ManufacturedFreeBodyResult:
 
 @dataclass(frozen=True, slots=True)
 class ManufacturedConstrainedResult:
-    """Verification results for manufactured constrained motion."""
+    """Independent inverse-dynamics and kinematic constraint results."""
 
     time_s: FloatArray
     constraint_residual: float
@@ -53,7 +73,30 @@ class ManufacturedConstrainedResult:
     lagrange_multiplier_residual: float
     action_reaction_residual_n: float
     equilibrium_residual: float
+    independent_engine_difference_detected: bool
     closed_form_check_passed: bool
+
+
+def _harmonic_state(
+    model: SpatialModel,
+    q0: FloatArray,
+    time_s: FloatArray,
+    frequency_hz: float,
+    amplitude: float,
+    active_indices: tuple[int, ...] | None = None,
+) -> tuple[FloatArray, FloatArray, FloatArray]:
+    omega = 2.0 * np.pi * frequency_hz
+    phases = np.linspace(0.0, np.pi, model.nq)
+    amplitudes = np.linspace(0.5, 1.0, model.nq) * amplitude
+    if active_indices is not None:
+        active = np.zeros(model.nq, dtype=bool)
+        active[list(active_indices)] = True
+        amplitudes[~active] = 0.0
+    argument = omega * time_s[:, None] + phases[None, :]
+    q = q0[None, :] + amplitudes[None, :] * np.sin(argument)
+    qd = amplitudes[None, :] * omega * np.cos(argument)
+    qdd = -(amplitudes[None, :] * omega**2) * np.sin(argument)
+    return q, qd, qdd
 
 
 def manufactured_harmonic_trajectory(
@@ -65,25 +108,167 @@ def manufactured_harmonic_trajectory(
     frequency_hz: float = 2.0,
     amplitude: float = 0.05,
 ) -> tuple[FloatArray, FloatArray, FloatArray, FloatArray]:
-    """Generate smooth harmonic manufactured state and derivatives."""
+    """Generate a smooth harmonic manufactured state and exact derivatives."""
+
     time = np.linspace(0.0, duration_s, sample_count, dtype=np.float64)
-    omega = 2.0 * np.pi * frequency_hz
-    nq = model.nq
-
-    # Structured phase offsets per coordinate
-    phases = np.linspace(0.0, np.pi, nq)
-    amps = np.linspace(0.5, 1.0, nq) * amplitude
-
-    q = np.zeros((sample_count, nq), dtype=np.float64)
-    qd = np.zeros((sample_count, nq), dtype=np.float64)
-    qdd = np.zeros((sample_count, nq), dtype=np.float64)
-
-    for i in range(nq):
-        q[:, i] = q0[i] + amps[i] * np.sin(omega * time + phases[i])
-        qd[:, i] = amps[i] * omega * np.cos(omega * time + phases[i])
-        qdd[:, i] = -amps[i] * (omega**2) * np.sin(omega * time + phases[i])
-
+    q, qd, qdd = _harmonic_state(model, q0, time, frequency_hz, amplitude)
     return time, q, qd, qdd
+
+
+def _pinocchio_inverse_operator(
+    model: SpatialModel,
+) -> Callable[[FloatArray, FloatArray, FloatArray], FloatArray]:
+    cached = _PINOCCHIO_INVERSE_CACHE.get(model.canonical_hash)
+    if cached is not None:
+        return cached
+    try:
+        import pinocchio as pin
+    except ImportError as error:  # pragma: no cover - native runtime gate
+        raise RuntimeError(
+            "robotics Pinocchio >= 2.6 is required; install the 'pin' package"
+        ) from error
+    require_robotics_pinocchio(pin)
+    native = build_pinocchio_articulated_model(pin, model)
+    data = native.createData()
+
+    def evaluate(q: FloatArray, qd: FloatArray, qdd: FloatArray) -> FloatArray:
+        return np.asarray(pin.rnea(native, data, q, qd, qdd), dtype=float).copy()
+
+    _PINOCCHIO_INVERSE_CACHE[model.canonical_hash] = evaluate
+    return evaluate
+
+
+def _relative_error(left: FloatArray, right: FloatArray) -> float:
+    absolute = float(np.max(np.abs(np.asarray(left) - np.asarray(right))))
+    scale = max(1.0, float(np.max(np.abs(left))), float(np.max(np.abs(right))))
+    return absolute / scale
+
+
+def _inverse_trajectory(
+    model: SpatialModel,
+    q: FloatArray,
+    qd: FloatArray,
+    qdd: FloatArray,
+) -> tuple[FloatArray, tuple[float, float, float], bool]:
+    pinocchio_inverse = _pinocchio_inverse_operator(model)
+    analytical = np.empty_like(q)
+    mujoco = np.empty_like(q)
+    pinocchio = np.empty_like(q)
+    zero = np.zeros(model.nq)
+    for index in range(q.shape[0]):
+        analytical[index] = lagrange_inverse_dynamics(
+            model, q[index], qd[index], qdd[index], zero, _DERIVATIVE_STEP
+        )
+        mujoco[index] = mujoco_inverse_dynamics(
+            model, q[index], qd[index], qdd[index], zero
+        )
+        pinocchio[index] = pinocchio_inverse(q[index], qd[index], qdd[index])
+    errors = (
+        _relative_error(analytical, mujoco),
+        _relative_error(analytical, pinocchio),
+        _relative_error(mujoco, pinocchio),
+    )
+    differences = np.concatenate(
+        ((analytical - mujoco).ravel(), (analytical - pinocchio).ravel())
+    )
+    return analytical, errors, bool(np.any(differences != 0.0))
+
+
+def _exact_state_at(
+    model: SpatialModel, q0: FloatArray, time_s: float
+) -> tuple[FloatArray, FloatArray, FloatArray]:
+    q, qd, qdd = _harmonic_state(
+        model, q0, np.array([time_s]), frequency_hz=2.0, amplitude=0.05
+    )
+    return q[0], qd[0], qdd[0]
+
+
+def _integration_errors(
+    model: SpatialModel,
+    q0: FloatArray,
+    duration_s: float,
+    time_steps_s: tuple[float, ...],
+) -> dict[float, float]:
+    errors: dict[float, float] = {}
+    zero = np.zeros(model.nq)
+    for dt in time_steps_s:
+        steps = int(round(duration_s / dt))
+        q_sim, qd_sim, _ = _exact_state_at(model, q0, 0.0)
+        for step_index in range(steps):
+            q_exact, qd_exact, qdd_exact = _exact_state_at(model, q0, step_index * dt)
+            torque = lagrange_inverse_dynamics(
+                model, q_exact, qd_exact, qdd_exact, zero, _DERIVATIVE_STEP
+            )
+            matrix, bias = mujoco_mass_matrix_and_bias(model, q_sim, qd_sim)
+            qd_sim += dt * np.linalg.solve(matrix, torque - bias)
+            q_sim += dt * qd_sim
+        q_final, _, _ = _exact_state_at(model, q0, duration_s)
+        errors[dt] = float(np.max(np.abs(q_sim - q_final)))
+    return errors
+
+
+def _richardson_orders(errors: dict[float, float]) -> tuple[float, ...]:
+    steps = sorted(errors, reverse=True)
+    return tuple(
+        float(np.log(errors[coarse] / errors[fine]) / np.log(coarse / fine))
+        for coarse, fine in zip(steps[:-1], steps[1:], strict=True)
+    )
+
+
+def _gravity_force(model: SpatialModel, q: FloatArray) -> FloatArray:
+    kin = forward_kinematics(model, q)
+    gravity = np.zeros(model.nq)
+    for index, body in enumerate(model.bodies):
+        gravity += body.mass_kg * 9.80665 * kin.body_linear_jacobian[index, 2]
+    return gravity
+
+
+def _system_invariants(
+    model: SpatialModel, q: FloatArray, qd: FloatArray
+) -> tuple[FloatArray, FloatArray, float]:
+    kin = forward_kinematics(model, q)
+    linear = np.zeros(3)
+    angular = np.zeros(3)
+    for index, body in enumerate(model.bodies):
+        velocity = kin.body_linear_jacobian[index] @ qd
+        omega = kin.body_angular_jacobian[index] @ qd
+        momentum = body.mass_kg * velocity
+        inertia = 0.4 * body.mass_kg * body.radius_m**2
+        linear += momentum
+        angular += inertia * omega + np.cross(kin.body_position_m[index], momentum)
+    kinetic = 0.5 * float(qd @ mass_matrix(model, q) @ qd)
+    return linear, angular, kinetic
+
+
+def _free_rollout_conservation(
+    model: SpatialModel,
+    q_initial: FloatArray,
+    qd_initial: FloatArray,
+    duration_s: float,
+    step_s: float,
+) -> tuple[float, float, float]:
+    q = q_initial.copy()
+    qd = qd_initial.copy()
+    initial = _system_invariants(model, q, qd)
+    maxima = np.zeros(3)
+    for _ in range(int(round(duration_s / step_s))):
+        matrix, native_bias = mujoco_mass_matrix_and_bias(model, q, qd)
+        coriolis = native_bias - _gravity_force(model, q)
+        qd += step_s * np.linalg.solve(matrix, -coriolis)
+        q += step_s * qd
+        current = _system_invariants(model, q, qd)
+        maxima[0] = max(maxima[0], np.linalg.norm(current[0] - initial[0]))
+        maxima[1] = max(maxima[1], np.linalg.norm(current[1] - initial[1]))
+        maxima[2] = max(maxima[2], abs(current[2] - initial[2]))
+    scales = np.array(
+        [
+            max(1.0, float(np.linalg.norm(initial[0]))),
+            max(1.0, float(np.linalg.norm(initial[1]))),
+            max(1.0, abs(initial[2])),
+        ]
+    )
+    values = maxima / scales
+    return float(values[0]), float(values[1]), float(values[2])
 
 
 def evaluate_manufactured_free_body(
@@ -92,91 +277,104 @@ def evaluate_manufactured_free_body(
     duration_s: float = 0.02,
     time_steps_s: tuple[float, ...] = (0.002, 0.001, 0.0005),
 ) -> ManufacturedFreeBodyResult:
-    """Verify free-body dynamics and integration convergence against manufactured solution."""
-    base_step = min(time_steps_s)
-    sample_count = int(round(duration_s / base_step)) + 1
-    time_grid, q_ex, qd_ex, qdd_ex = manufactured_harmonic_trajectory(
+    """Verify three inverse-dynamics paths, convergence, and conservation."""
+
+    if len(time_steps_s) < 3:
+        raise ValueError(
+            "three or more time steps are required for Richardson analysis"
+        )
+    sample_count = int(round(duration_s / min(time_steps_s))) + 1
+    time, q, qd, qdd = manufactured_harmonic_trajectory(
         model, q0, duration_s, sample_count
     )
-
-    # Compute exact required generalized force tau_mms = M(q)*qdd + h(q, qd)
-    torques = np.zeros_like(q_ex)
-    inv_dyn_residuals = []
-
-    for k in range(sample_count):
-        M, h = mujoco_mass_matrix_and_bias(model, q_ex[k], qd_ex[k])
-        tau_k = M @ qdd_ex[k] + h
-        torques[k] = tau_k
-
-        # Closed form inverse dynamics check: M qdd + h - tau = 0
-        residual_k = float(np.linalg.norm(M @ qdd_ex[k] + h - tau_k))
-        inv_dyn_residuals.append(residual_k)
-
-    max_inv_dyn_residual = float(np.max(inv_dyn_residuals))
-
-    # Test numerical forward integration error across step sizes
-    step_errors = {}
-    for dt in time_steps_s:
-        steps = int(round(duration_s / dt))
-        q_sim = np.zeros((steps + 1, model.nq))
-        qd_sim = np.zeros((steps + 1, model.nq))
-        q_sim[0] = q_ex[0]
-        qd_sim[0] = qd_ex[0]
-
-        for s in range(steps):
-            t_curr = s * dt
-            # Exact tau at current time
-            idx = int(round(t_curr / base_step))
-            tau_curr = torques[min(idx, sample_count - 1)]
-
-            M, h = mujoco_mass_matrix_and_bias(model, q_sim[s], qd_sim[s])
-            acc = np.linalg.solve(M, tau_curr - h)
-            qd_sim[s + 1] = qd_sim[s] + dt * acc
-            q_sim[s + 1] = q_sim[s] + dt * qd_sim[s + 1]
-
-        # Max error at final time
-        final_exact_idx = -1
-        err = float(np.max(np.abs(q_sim[-1] - q_ex[final_exact_idx])))
-        step_errors[dt] = err
-
-    # Compute observed order of convergence between coarsest and finest step
-    dts = sorted(step_errors.keys(), reverse=True)
-    if len(dts) >= 2 and step_errors[dts[-1]] > 0:
-        ratio_dt = dts[0] / dts[-1]
-        ratio_err = step_errors[dts[0]] / step_errors[dts[-1]]
-        order = float(np.log(ratio_err) / np.log(ratio_dt))
-    else:
-        order = 1.0
-
-    # Verify exact work-energy theorem closure on manufactured trajectory:
-    # W(t) = \int tau_mms(s) . qd(s) ds == E_mech(t) - E_mech(0)
-    powers = np.sum(torques * qd_ex, axis=1)
-    work = np.zeros(sample_count)
-    work[1:] = np.cumsum(0.5 * (powers[1:] + powers[:-1]) * base_step)
-
-    energies = np.array(
-        [mechanical_energy(model, q_ex[k], qd_ex[k]) for k in range(sample_count)]
+    torque, inverse_errors, nonzero = _inverse_trajectory(model, q, qd, qdd)
+    step_errors = _integration_errors(model, q0, duration_s, time_steps_s)
+    orders = _richardson_orders(step_errors)
+    free_velocity = np.zeros(model.nq)
+    free_velocity[model.club_dof_indices] = qd[0, model.club_dof_indices]
+    conservation = _free_rollout_conservation(
+        model, q[0], free_velocity, duration_s, min(time_steps_s)
     )
-    energy_change = energies - energies[0]
-    energy_residuals = np.abs(energy_change - work)
-    energy_err = float(np.max(energy_residuals)) / max(1.0, float(np.ptp(energies)))
-
-    passed = max_inv_dyn_residual < 1e-10 and order >= 0.8 and energy_err < 1e-3
-
+    inverse_max = max(inverse_errors)
+    order_pass = all(
+        _RICHARDSON_ORDER_BOUNDS[0] <= value <= _RICHARDSON_ORDER_BOUNDS[1]
+        for value in orders
+    )
+    passed = (
+        nonzero
+        and inverse_max < _INVERSE_RELATIVE_TOLERANCE
+        and order_pass
+        and max(conservation) < _CONSERVATION_RELATIVE_TOLERANCE
+    )
     return ManufacturedFreeBodyResult(
-        time_s=time_grid,
-        exact_q=q_ex,
-        exact_qd=qd_ex,
-        exact_qdd=qdd_ex,
-        exact_torque=torques,
-        inverse_dynamics_residual=max_inv_dyn_residual,
+        time_s=time,
+        exact_q=q,
+        exact_qd=qd,
+        exact_qdd=qdd,
+        exact_torque=torque,
+        inverse_dynamics_residual=inverse_max,
+        lagrange_mujoco_relative_error=inverse_errors[0],
+        lagrange_pinocchio_relative_error=inverse_errors[1],
+        mujoco_pinocchio_relative_error=inverse_errors[2],
+        independent_engine_difference_detected=nonzero,
         integration_step_errors=step_errors,
-        observed_convergence_order=order,
-        linear_momentum_conservation_error=0.0,
-        angular_momentum_conservation_error=0.0,
-        mechanical_energy_conservation_error=energy_err,
+        richardson_orders=orders,
+        observed_convergence_order=float(np.mean(orders)),
+        linear_momentum_conservation_error=conservation[0],
+        angular_momentum_conservation_error=conservation[1],
+        mechanical_energy_conservation_error=conservation[2],
         closed_form_check_passed=passed,
     )
+
+
+def _constrained_yaw_trajectory(
+    model: SpatialModel,
+    q0: FloatArray,
+    time: FloatArray,
+    hand_local: FloatArray,
+    grip_local: FloatArray,
+) -> tuple[FloatArray, FloatArray, FloatArray]:
+    """Manufacture exact closure by coordinating pelvis yaw and club translation."""
+
+    omega = 2.0 * np.pi * 2.0
+    amplitude = 0.01
+    yaw = q0[0] + amplitude * np.sin(omega * time)
+    yaw_rate = amplitude * omega * np.cos(omega * time)
+    yaw_acceleration = -(amplitude * omega**2) * np.sin(omega * time)
+    q = np.repeat(q0[None, :], time.size, axis=0)
+    qd = np.zeros_like(q)
+    qdd = np.zeros_like(q)
+    derivative_step = 1.0e-6
+    for index in range(time.size):
+        q[index, 0] = yaw[index]
+        q[index, 14:17] = 0.0
+        kin = forward_kinematics(model, q[index])
+        p_hand, j_hand, _ = point_contact_jacobians(
+            model, kin, model.lead_hand_joint, hand_local
+        )
+        p_grip_zero, _, _ = point_contact_jacobians(
+            model, kin, model.club_frame_joint, grip_local
+        )
+        q[index, 14:17] = p_hand - p_grip_zero
+        qd[index, 0] = yaw_rate[index]
+        qd[index, 14:17] = j_hand[:, 0] * yaw_rate[index]
+        plus = q[index].copy()
+        minus = q[index].copy()
+        plus[0] += derivative_step
+        minus[0] -= derivative_step
+        _, j_plus, _ = point_contact_jacobians(
+            model, forward_kinematics(model, plus), model.lead_hand_joint, hand_local
+        )
+        _, j_minus, _ = point_contact_jacobians(
+            model, forward_kinematics(model, minus), model.lead_hand_joint, hand_local
+        )
+        jacobian_derivative = (j_plus[:, 0] - j_minus[:, 0]) / (2.0 * derivative_step)
+        qdd[index, 0] = yaw_acceleration[index]
+        qdd[index, 14:17] = (
+            j_hand[:, 0] * yaw_acceleration[index]
+            + jacobian_derivative * yaw_rate[index] ** 2
+        )
+    return q, qd, qdd
 
 
 def evaluate_manufactured_constrained_motion(
@@ -186,72 +384,95 @@ def evaluate_manufactured_constrained_motion(
     grip_span_m: float = 0.12,
     hand_contact_local_x_m: float = 0.04,
 ) -> ManufacturedConstrainedResult:
-    """Verify kinematic constraint satisfaction, Lagrange multipliers, and virtual work."""
-    sample_count = 21
-    time_grid, q_ex, qd_ex, qdd_ex = manufactured_harmonic_trajectory(
-        model, q0, duration_s, sample_count, amplitude=0.01
-    )
+    """Verify a closed-contact trajectory with independent inverse dynamics."""
 
-    constraint_vel_list = []
-    virtual_power_list = []
-    eq_residuals = []
-    act_react_residuals = []
-
-    for k in range(sample_count):
-        kin = forward_kinematics(model, q_ex[k])
-        # Two-hand grip constraint: Lead hand point minus grip point
-        hand_local = np.array([hand_contact_local_x_m, 0.0, 0.0])
-        grip_local = np.array([0.0, grip_span_m / 2.0, -0.03])
-
-        p_hand, J_hand, _ = point_contact_jacobians(
+    time = np.linspace(0.0, duration_s, 21, dtype=np.float64)
+    hand_local = np.array([hand_contact_local_x_m, 0.0, 0.0])
+    grip_local = np.array([0.0, grip_span_m / 2.0, -0.03])
+    q, qd, qdd = _constrained_yaw_trajectory(model, q0, time, hand_local, grip_local)
+    pinocchio_inverse = _pinocchio_inverse_operator(model)
+    lambda_exact = np.array([10.0, -5.0, 15.0])
+    reference_difference: FloatArray | None = None
+    position_residuals: list[float] = []
+    velocity_residuals: list[float] = []
+    virtual_powers: list[float] = []
+    equilibrium_residuals: list[float] = []
+    lambda_residuals: list[float] = []
+    cross_engine_lambda_residuals: list[float] = []
+    engine_differences: list[float] = []
+    for index in range(time.size):
+        kin = forward_kinematics(model, q[index])
+        p_hand, j_hand, _ = point_contact_jacobians(
             model, kin, model.lead_hand_joint, hand_local
         )
-        p_grip, J_grip, _ = point_contact_jacobians(
+        p_grip, j_grip, _ = point_contact_jacobians(
             model, kin, model.club_frame_joint, grip_local
         )
-
-        # Constraint C(q) = p_hand - p_grip - (p_hand_0 - p_grip_0) = 0
-        J_c = J_hand - J_grip
-
-        vel_c = J_c @ qd_ex[k]
-        constraint_vel_list.append(float(np.linalg.norm(vel_c)))
-
-        M, h = mujoco_mass_matrix_and_bias(model, q_ex[k], qd_ex[k])
-
-        # Closed-form Lagrange multiplier for constraint J_c:
-        # lambda = (J_c M^-1 J_c^T)^-1 (J_c M^-1 (tau - h) + dJ_c*qd - target_acc)
-        # For manufactured tau = M qdd + h - J_c^T lambda_mms, verify d'Alembert equilibrium
-        lambda_mms = np.array([10.0, -5.0, 15.0])
-        tau_mms = M @ qdd_ex[k] + h - J_c.T @ lambda_mms
-
-        # Check virtual power of constraint forces: lambda_mms @ (J_c @ qd)
-        v_power = float(abs(lambda_mms @ vel_c))
-        virtual_power_list.append(v_power)
-
-        # Equilibrium check: M qdd + h - J_c^T lambda - tau = 0
-        eq_res = float(np.linalg.norm(M @ qdd_ex[k] + h - J_c.T @ lambda_mms - tau_mms))
-        eq_residuals.append(eq_res)
-
-        # Action-reaction: force on hand = - force on grip
-        f_hand = -J_c.T @ lambda_mms
-        f_grip = J_c.T @ lambda_mms
-        act_react_residuals.append(float(np.linalg.norm(f_hand + f_grip)))
-
-    max_c_vel = float(np.max(constraint_vel_list))
-    max_v_pow = float(np.max(virtual_power_list))
-    max_eq = float(np.max(eq_residuals))
-    max_act = float(np.max(act_react_residuals))
-
-    passed = max_eq < 1e-10 and max_act < 1e-12
-
+        difference = p_hand - p_grip
+        if reference_difference is None:
+            reference_difference = difference.copy()
+        jacobian = j_hand - j_grip
+        position_residuals.append(
+            float(np.linalg.norm(difference - reference_difference))
+        )
+        velocity = jacobian @ qd[index]
+        velocity_residuals.append(float(np.linalg.norm(velocity)))
+        virtual_powers.append(float(abs(lambda_exact @ velocity)))
+        external = jacobian.T @ lambda_exact
+        analytical = lagrange_inverse_dynamics(
+            model, q[index], qd[index], qdd[index], external, _DERIVATIVE_STEP
+        )
+        mujoco_native = mujoco_inverse_dynamics(
+            model, q[index], qd[index], qdd[index], np.zeros(model.nq)
+        )
+        pinocchio_native = pinocchio_inverse(q[index], qd[index], qdd[index])
+        mujoco_required = mujoco_native - external
+        pinocchio_required = pinocchio_native - external
+        equilibrium_residuals.extend(
+            (
+                _relative_error(analytical, mujoco_required),
+                _relative_error(analytical, pinocchio_required),
+            )
+        )
+        engine_differences.append(_relative_error(mujoco_required, pinocchio_required))
+        lambda_mujoco = np.linalg.lstsq(
+            jacobian.T, mujoco_native - analytical, rcond=None
+        )[0]
+        lambda_pinocchio = np.linalg.lstsq(
+            jacobian.T, pinocchio_native - analytical, rcond=None
+        )[0]
+        lambda_scale = max(1.0, float(np.linalg.norm(lambda_exact)))
+        lambda_residuals.extend(
+            (
+                float(np.linalg.norm(lambda_mujoco - lambda_exact)) / lambda_scale,
+                float(np.linalg.norm(lambda_pinocchio - lambda_exact)) / lambda_scale,
+            )
+        )
+        cross_engine_lambda_residuals.append(
+            float(np.linalg.norm(lambda_mujoco - lambda_pinocchio)) / lambda_scale
+        )
+    max_equilibrium = max(equilibrium_residuals)
+    max_lambda = max(lambda_residuals)
+    max_cross_lambda = max(cross_engine_lambda_residuals)
+    nonzero = bool(any(value != 0.0 for value in engine_differences))
+    passed = (
+        nonzero
+        and max(position_residuals) < 1.0e-10
+        and max(velocity_residuals) < 1.0e-10
+        and max(virtual_powers) < 1.0e-9
+        and max_equilibrium < _INVERSE_RELATIVE_TOLERANCE
+        and max_lambda < _INVERSE_RELATIVE_TOLERANCE
+        and max_cross_lambda < 1.0e-8
+    )
     return ManufacturedConstrainedResult(
-        time_s=time_grid,
-        constraint_residual=0.0,
-        constraint_velocity_residual=max_c_vel,
-        constraint_virtual_power_w=max_v_pow,
-        lagrange_multiplier_residual=0.0,
-        action_reaction_residual_n=max_act,
-        equilibrium_residual=max_eq,
+        time_s=time,
+        constraint_residual=max(position_residuals),
+        constraint_velocity_residual=max(velocity_residuals),
+        constraint_virtual_power_w=max(virtual_powers),
+        lagrange_multiplier_residual=max_lambda,
+        action_reaction_residual_n=max_cross_lambda,
+        equilibrium_residual=max_equilibrium,
+        independent_engine_difference_detected=nonzero,
         closed_form_check_passed=passed,
     )
 
