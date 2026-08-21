@@ -1,10 +1,10 @@
 # SPEC.md — Repository Specification Document
 
-## Current Scientific Audit State (2026-08-20)
+## Current Scientific Audit State (2026-08-21)
 
 Epic #8557 has completed the current narrative-candidate adjudication contract:
-1,068 reviewed candidates and 295 atomic claims. This status is not scientific
-closure: all 40 public release claims have a traceable review disposition, and
+1,073 reviewed candidates and 300 atomic claims. This status is not scientific
+closure: all 41 public release claims have a traceable review disposition, and
 each retains its applicable open
 model, equipment, anatomy, archival, or governed-human scientific boundary. The
 trajectory-level bilateral point-force sensor qualification and subject-scaled
@@ -27,6 +27,17 @@ positive-definiteness gate passes. This common-state result qualifies the
 20-coordinate articulated rigid-body transport only. Forward bilateral
 contact, scapulothoracic anatomy, distributed grip and shaft properties,
 muscles, delivery, and human inference remain prohibited.
+Child issue #8910 repairs the articulated manufactured-solution tier. The
+manufactured generalized torque is defined by the analytical
+Lagrange--Christoffel formulation and compared with native MuJoCo
+`mj_inverse` and robotics Pinocchio RNEA. Cross-engine residuals must be small
+but nonzero, and a 10 N m corruption of one native result must fail the gate.
+A gravity-free, zero-torque rollout reports measured momentum and kinetic-
+energy drift for the genuinely free club subtree, while adjacent three-level
+Richardson estimates must remain inside 0.9--1.1 for semi-implicit Euler. The
+coordinated multiplier-recovery control contains one three-component
+lead-hand-to-grip point constraint; it is not simultaneous two-hand closure,
+an anatomical model, governed human evidence, or a coaching result.
 Child issue #8678 applies finite bilateral Kelvin--Voigt forces to those same
 234 states and verifies action--reaction, virtual power, passivity, geometry
 controls, and native MuJoCo/Pinocchio initial-acceleration parity. It advances
