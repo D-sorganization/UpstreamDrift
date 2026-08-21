@@ -25,7 +25,7 @@ before filing:
 Pre-existing open issues checked for overlap before filing: #8763, #8776,
 #8689, #8695 (duplication/shadow-package debt), #8766, #8735 (test debt).
 
-## Findings and filed issues
+## Findings and Filed Issues
 
 _(Populated as the review proceeds; each row is filed as a GitHub issue.)_
 
