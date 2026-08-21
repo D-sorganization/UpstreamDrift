@@ -99,7 +99,7 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
 - PR #8793 canonicalizes UTF-8 claim evidence before hashing; #8789 retains
   Docker/quarantine/baseline and clean-checkout truth-recovery scope.
 - #8556 remains open: no governed participant dataset contains synchronized
-  bilateral six-axis grip wrenches. Synthetic traces cannot replace it.
+  bilateral six-axis grip wrenches. Synthetic traces cannot replace it. The 2026-08-20 NotebookLM network test and same-profile refresh both failed authentication; Chrome-cookie recovery could not decrypt the local cookies, so Biomechanics/Nonlinear Control collection mining still requires an interactive Google login and cannot yet support claims.
 
 ## Qualified Baseline — And Its Limits
 

@@ -123,10 +123,12 @@ limitations, model classes, and decisive experiments. Each collection receives
 a source manifest and coverage note. Notebook output remains a lead; every
 change to the paper or bibliography is supported by an independently checked
 original source. The initial 2026-08-12 live review is explicitly pending
-because the local profile failed network token validation. The 2026-08-14
-retry again redirected to manual Google authentication; no credentials or
-authentication dialogs were automated. Repository evidence and independently
-checked original sources therefore remain the current authority.
+because the local profile failed network token validation. On 2026-08-20, the
+required live test again returned `token_fetch: false`; the permitted
+same-profile server refresh also failed, and Chrome-cookie recovery could not
+decrypt the local cookies. An interactive Google login is therefore still
+required. No credentials or authentication dialogs were automated. Repository
+evidence and independently checked original sources remain the current authority.
 
 ## Independently Checked Biomechanics Leads
 
