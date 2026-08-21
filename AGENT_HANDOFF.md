@@ -141,9 +141,10 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
   one dependency-qualified Pinocchio test skipped on Windows). The complete
   release validator passes with no mismatches. The PDF was visually inspected
   on all pages and at full resolution around the new native-control section.
-- Next owner action: commit release metadata and this handoff, push the branch,
-  open a full PR for #8911, request human review, and shepherd protected checks
-  without enabling auto-merge or bypassing protection.
+- Full PR #8962 is open from `fix/8911-native-contact-parity` to `main`.
+  Human review and protected CI are required. Inspect its exact head and checks,
+  fix actionable failures, and verify the merge commit as an ancestor of remote
+  `main`; do not enable auto-merge or bypass protection.
 
 ## Scientific Boundaries
 
