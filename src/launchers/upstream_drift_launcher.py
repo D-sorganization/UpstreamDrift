@@ -624,9 +624,34 @@ class UpstreamDriftLauncher(QMainWindow):
         self._monitor_sidekick_api_readiness()
 
     def _monitor_sidekick_api_readiness(self) -> None:
-        """Delegate API readiness monitoring to the Sidekick owner."""
+        """Probe API readiness off the GUI thread, then advance the monitor.
+
+        The blocking HTTP probe runs on a ``SidekickReadinessProbeThread``
+        (issue #8939); its result is marshalled back to the GUI thread via a
+        signal and fed to the sidebar manager's readiness state machine.
+        """
+        if not getattr(self, "_sidekick_api_monitoring", True):
+            return
+        from src.launchers.sidekick_readiness_worker import (
+            SidekickReadinessProbeThread,
+        )
+
+        runtime = self._sidekick_runtime_config
+        expected_instance_id = runtime.instance_id if runtime is not None else None
+        worker = SidekickReadinessProbeThread(
+            probe=check_sidekick_api_readiness,
+            expected_instance_id=expected_instance_id,
+        )
+        worker.readiness_ready.connect(self._on_sidekick_readiness_result)
+        worker.finished.connect(worker.deleteLater)
+        # Keep a reference so the thread is not garbage-collected mid-probe.
+        self._sidekick_readiness_worker = worker
+        worker.start()
+
+    def _on_sidekick_readiness_result(self, readiness: Any) -> None:
+        """Advance the readiness state machine with an already-probed result."""
         self.sidekick_sidebar_manager._monitor_sidekick_api_readiness(
-            readiness_check=check_sidekick_api_readiness,
+            readiness_check=lambda *, expected_instance_id=None: readiness,
             schedule_once=QTimer.singleShot,
             monotonic=time.monotonic,
         )
