@@ -4,6 +4,27 @@ Last updated: 2026-08-21
 
 This is current operational state. Historical detail belongs in git/GitHub.
 
+## UI/UX, Performance, and Modeling Review (2026-08-21, PR #8878)
+
+Wave 2 of the adversarial review filed **65 issues (#8879–#8943)**,
+indexed with a synthesis in
+`docs/audits/2026-08-21-uiux-performance-review.md`: UI/UX
+(#8879–#8908 — broken shared-theme import #8894 verified by execution;
+GUI-thread blocking suite-wide #8880; a Pose Studio construction crash
+#8879), performance (#8921–#8943 — cold start dominated by deep engine
+imports #8934; mocap/IK pipeline orders-of-magnitude slow #8921/#8922;
+built Rust gap-fill kernels uncalled #8927), and a critical technical
+review of the proximal–distal program (#8909–#8920).
+
+**Program-critical:** #8909 shows the distributed-grip atlas's
+"MuJoCo–Pinocchio parity" compared MuJoCo to itself (committed artifact
+records `pinocchio: "0.1"` — the unrelated PyPI package — with
+exact-zero parity errors), and #8910 shows the #8752
+manufactured-solution controls are tautologies. **#8751 and #8752 must
+not be closed on current evidence**; regenerate via governed
+regeneration after the fixes. #8913/#8914 bound how the shaft/ground
+sign-mixture results may be read.
+
 ## Adversarial Integration Review (2026-08-21, PR #8815)
 
 A five-axis review of organization and integration completeness filed 46
