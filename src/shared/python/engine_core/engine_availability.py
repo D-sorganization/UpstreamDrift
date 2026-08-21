@@ -31,6 +31,7 @@ from __future__ import annotations
 
 import functools
 import importlib
+import importlib.util
 import logging
 import os
 import sys
@@ -49,6 +50,58 @@ class EngineStatus(Enum):
 
 _engine_status_cache: dict[str, EngineStatus] = {}
 _engine_error_cache: dict[str, Exception] = {}
+_dependency_presence_cache: dict[str, bool] = {}
+
+# Probe names whose installed distribution exposes a different top-level
+# package than the name callers use (mirrors the special cases in
+# ``_probe_engine`` without importing anything).
+_PRESENCE_SPEC_OVERRIDES: dict[str, str] = {
+    "drake": "pydrake",
+    "tf": "tensorflow",
+    "pillow": "PIL",
+    "pyqt6": "PyQt6",
+    "pyqt5": "PyQt5",
+    "pyside6": "PySide6",
+    "openpose": "pyopenpose",
+}
+
+
+def is_dependency_present(import_name: str) -> bool:
+    """Cheap, metadata-only availability probe for a runtime dependency.
+
+    Uses :func:`importlib.util.find_spec` on the *top-level* package so that
+    no module code is executed. This is the probe the discovery/tile phase
+    must use (#8934): importing ``pydrake.all`` or ``jaxsim`` for real costs
+    seconds and hundreds of MB, and belongs only on the actual launch path
+    (see :func:`get_engine_status` / ``_probe_engine`` for the deep probe).
+
+    Args:
+        import_name: Import name as used by the deep probe (may be dotted,
+            e.g. ``"jaxsim.api"``; only the top-level package is checked so
+            the parent package is never imported).
+
+    Returns:
+        True when the package's import metadata is present.
+
+    Postcondition:
+        Never imports ``import_name`` (nor its top-level package): if the
+        module was absent from ``sys.modules`` before the call it remains
+        absent after it.
+    """
+    if not import_name:
+        raise ValueError("import_name must be a non-empty string")
+    spec_name = _PRESENCE_SPEC_OVERRIDES.get(import_name, import_name)
+    spec_name = spec_name.partition(".")[0]
+    if spec_name in _dependency_presence_cache:
+        return _dependency_presence_cache[spec_name]
+    try:
+        present = importlib.util.find_spec(spec_name) is not None
+    except (ImportError, ValueError):
+        # ValueError: a module in sys.modules with __spec__ = None
+        # (e.g. an injected test stub). Treat as not reliably present.
+        present = False
+    _dependency_presence_cache[spec_name] = present
+    return present
 
 
 def _probe_engine(  # noqa: C901
@@ -294,6 +347,7 @@ def reset_engine_status_cache() -> None:
     """
     _engine_status_cache.clear()
     _engine_error_cache.clear()
+    _dependency_presence_cache.clear()
     is_engine_available.cache_clear()
 
 

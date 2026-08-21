@@ -9,8 +9,6 @@ bug reporting, and AI settings.
 
 from __future__ import annotations
 
-import os
-import subprocess
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -18,9 +16,9 @@ from PyQt6.QtCore import QUrl
 from PyQt6.QtGui import QDesktopServices, QKeySequence, QShortcut
 from PyQt6.QtWidgets import QMessageBox, QDialog, QWidget
 
+from src.launchers import wsl_probe
 from src.launchers.launcher_constants import (
     AI_AVAILABLE,
-    CREATE_NO_WINDOW,
     HELP_SYSTEM_AVAILABLE,
     REPOS_ROOT,
     UI_COMPONENTS_AVAILABLE,
@@ -585,8 +583,13 @@ class DialogsManager:
         if hasattr(self, "btn_launch"):
             self.update_launch_button()
 
-    def _on_wsl_mode_changed(self, state: int) -> None:  # noqa: C901
+    def _on_wsl_mode_changed(self, state: int) -> None:
         """Handle WSL mode toggle change.
+
+        Never blocks the GUI thread (#8903): the WSL availability check runs
+        in a :class:`~src.launchers.wsl_probe.WslAvailabilityWorker`; the
+        checkbox is disabled while the probe is in flight and the result is
+        applied (or the toggle reverted) in :meth:`_on_wsl_probe_finished`.
 
         Args:
             state: Qt checkbox state (0=unchecked, 2=checked)
@@ -602,47 +605,29 @@ class DialogsManager:
             if hasattr(self, "chk_windows") and self.chk_windows.isChecked():
                 self.chk_windows.setChecked(False)
 
-            # Check if WSL is available
-            if getattr(self.launcher, "loading", False):
-                pass
-            else:
-                try:
-                    result = subprocess.run(
-                        ["wsl", "--list", "--quiet"],
-                        capture_output=True,
-                        timeout=5,
-                        creationflags=CREATE_NO_WINDOW if os.name == "nt" else 0,
-                    )
-
-                    try:
-                        output = result.stdout.decode("utf-16-le")
-                    except UnicodeError:
-                        output = result.stdout.decode("utf-8", errors="ignore")
-
-                    if result.returncode != 0 or "Ubuntu" not in output:
-                        self._warn_wsl_unavailable("Ubuntu not found in WSL")
-                        return
-                except (OSError, ValueError, subprocess.TimeoutExpired) as e:
-                    self._warn_wsl_unavailable(e)
+            # Check if WSL is available (async; cached for process lifetime)
+            if not getattr(self.launcher, "loading", False):
+                cached = wsl_probe.cached_wsl_result()
+                if cached is None:
+                    self._start_wsl_probe()
+                    return
+                if not cached.available:
+                    self._warn_wsl_unavailable(cached.detail)
                     return
 
-            logger.info("WSL mode enabled")
-            if hasattr(self, "toast_manager") and self.toast_manager:
-                self.show_toast(
-                    "WSL mode - full Pinocchio/Drake/Crocoddyl support", "info"
-                )
-        else:
-            logger.info("WSL mode disabled")
-            # If neither docker nor wsl is checked, fallback to Windows (Default)
-            if (
-                hasattr(self, "chk_docker")
-                and not self.chk_docker.isChecked()
-                and hasattr(self, "chk_windows")
-                and not self.chk_windows.isChecked()
-            ):
-                self.chk_windows.setChecked(True)
-            elif hasattr(self, "toast_manager") and self.toast_manager:
-                self.show_toast("Local Windows mode", "info")
+            self._complete_wsl_enable()
+            return
+        logger.info("WSL mode disabled")
+        # If neither docker nor wsl is checked, fallback to Windows (Default)
+        if (
+            hasattr(self, "chk_docker")
+            and not self.chk_docker.isChecked()
+            and hasattr(self, "chk_windows")
+            and not self.chk_windows.isChecked()
+        ):
+            self.chk_windows.setChecked(True)
+        elif hasattr(self, "toast_manager") and self.toast_manager:
+            self.show_toast("Local Windows mode", "info")
 
         # Update UI status
         self.update_execution_status()
@@ -650,6 +635,50 @@ class DialogsManager:
         # Update launch button text if a model is selected
         if hasattr(self, "btn_launch"):
             self.update_launch_button()
+
+    def _complete_wsl_enable(self) -> None:
+        """Apply the UI effects of successfully enabling WSL mode."""
+        logger.info("WSL mode enabled")
+        if hasattr(self, "toast_manager") and self.toast_manager:
+            self.show_toast("WSL mode - full Pinocchio/Drake/Crocoddyl support", "info")
+        self.update_execution_status()
+        if hasattr(self, "btn_launch"):
+            self.update_launch_button()
+
+    def _start_wsl_probe(self) -> None:
+        """Kick off the async WSL availability probe (#8903).
+
+        Disables the checkbox and shows an in-progress hint; the result is
+        applied on the GUI thread in :meth:`_on_wsl_probe_finished`. No-op if
+        a probe is already in flight.
+        """
+        if getattr(self, "_wsl_probe_worker", None) is not None:
+            return
+        self.chk_wsl.setEnabled(False)
+        if hasattr(self, "toast_manager") and self.toast_manager:
+            self.show_toast("Checking WSL availability...", "info")
+        worker = wsl_probe.WslAvailabilityWorker(parent=self.launcher)
+        worker.result_ready.connect(self._on_wsl_probe_finished)
+        self._wsl_probe_worker = worker
+        worker.start()
+
+    def _on_wsl_probe_finished(self, result: object) -> None:
+        """Apply an async WSL probe result on the GUI thread."""
+        if not isinstance(result, wsl_probe.WslProbeResult):
+            raise TypeError("result must be a WslProbeResult")
+        wsl_probe.store_wsl_result(result)
+        worker = getattr(self, "_wsl_probe_worker", None)
+        self._wsl_probe_worker = None
+        if worker is not None:
+            worker.deleteLater()
+        self.chk_wsl.setEnabled(True)
+        if not self.chk_wsl.isChecked():
+            # User already un-toggled while the probe ran; nothing to apply.
+            return
+        if result.available:
+            self._complete_wsl_enable()
+        else:
+            self._warn_wsl_unavailable(result.detail)
 
     def _warn_wsl_unavailable(self, error: object) -> None:
         """Warn the user that WSL mode cannot be enabled and revert the toggle."""
