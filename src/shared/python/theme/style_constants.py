@@ -32,6 +32,25 @@ class Styles:
     """
 
     # ══════════════════════════════════════════════════════════════════
+    # Layout Metrics (pixel ints for Qt layout APIs; issue #8972)
+    # ══════════════════════════════════════════════════════════════════
+
+    SPACING_SM = 6
+    """Small spacing between tightly related widgets (px)."""
+
+    SPACING_MD = 12
+    """Default spacing between grouped widgets (px)."""
+
+    SPACING_LG = 16
+    """Large spacing between page-level sections (px)."""
+
+    MARGIN_PAGE = 24
+    """Uniform page content margin (px)."""
+
+    SIDEBAR_MIN_WIDTH = 240
+    """Minimum width of the launcher navigation sidebar (px)."""
+
+    # ══════════════════════════════════════════════════════════════════
     # Status Label Colors
     # ══════════════════════════════════════════════════════════════════
 

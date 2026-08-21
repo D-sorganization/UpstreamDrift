@@ -290,17 +290,9 @@ class UISetupManager(LauncherNavigationUIMixin, LauncherTopBarUIMixin):
         main_layout.setHandleWidth(4)
         main_layout.setChildrenCollapsible(False)
 
-        try:
-            from src.shared.python.theme import get_current_colors
+        from src.shared.python.theme import get_current_colors
 
-            _colors = get_current_colors()
-        except (ImportError, AttributeError):
-            from src.shared.python.theme import DARK_THEME as _dt
-
-            _colors = {
-                "border": getattr(_dt, "border_default", "#555555"),
-                "accent": getattr(_dt, "accent", "#0A84FF"),
-            }
+        _colors = get_current_colors()
         _splitter_bg = _colors.get("border", "#555555")
         _splitter_hover = _colors.get("accent", "#0A84FF")
         main_layout.setStyleSheet(f"""

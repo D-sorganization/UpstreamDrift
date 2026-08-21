@@ -6,7 +6,7 @@ Provides the splash screen, async startup worker, and startup result container.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QColor, QFont, QPainter, QPixmap, QMouseEvent, QKeyEvent
@@ -14,11 +14,6 @@ from PyQt6.QtWidgets import QApplication, QSplashScreen
 
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.security.secure_subprocess import secure_run
-
-if TYPE_CHECKING:
-    from src.shared.python.theme.theme_manager import (  # type: ignore[attr-defined]
-        ThemeColors,
-    )
 
 logger = get_logger(__name__)
 
@@ -65,18 +60,16 @@ def _fallback_qfont(font_stack: str, size: int, weight: QFont.Weight) -> QFont:
     return font
 
 
-def _get_theme_colors() -> ThemeColors:
-    """Get current theme colors, with fallback to dark theme defaults."""
-    try:
-        from src.shared.python.theme import (  # type: ignore[attr-defined]
-            get_current_colors,
-        )
+def _get_theme_colors() -> dict[str, str]:
+    """Get the active theme's color mapping.
 
-        return get_current_colors()  # type: ignore[attr-defined]
-    except ImportError:
-        from src.shared.python.theme import DARK_THEME
+    Delegates to the canonical package-level accessor (issue #8972), which
+    itself falls back to the built-in Dark palette when no theme manager is
+    available. Consumers probe the mapping defensively via ``.get``.
+    """
+    from src.shared.python.theme import get_current_colors
 
-        return DARK_THEME  # type: ignore[return-value]
+    return get_current_colors()
 
 
 class StartupResults:
