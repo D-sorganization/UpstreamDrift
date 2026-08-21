@@ -1,0 +1,2998 @@
+{
+  "$defs": {
+    "AnalysisContextV2": {
+      "additionalProperties": false,
+      "description": "Caller-supplied lineage and identity assertions.",
+      "properties": {
+        "authority": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatasetAuthorityV2"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "order_evidence": {
+          "$ref": "#/$defs/OrderEvidenceV2"
+        },
+        "player_identity": {
+          "$ref": "#/$defs/PlayerIdentityV2"
+        },
+        "session_identity": {
+          "$ref": "#/$defs/SessionIdentityV2"
+        },
+        "source_units": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Source Units",
+          "type": "object"
+        },
+        "sources": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/SourceFileReferenceV2"
+          },
+          "title": "Sources",
+          "type": "array"
+        },
+        "transformations": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/TransformRecordV2"
+          },
+          "title": "Transformations",
+          "type": "array"
+        }
+      },
+      "title": "AnalysisContextV2",
+      "type": "object"
+    },
+    "AnalysisLineageV2": {
+      "additionalProperties": false,
+      "properties": {
+        "authority": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatasetAuthorityV2"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "backing_records": {
+          "items": {
+            "$ref": "#/$defs/BackingRecordV2"
+          },
+          "title": "Backing Records",
+          "type": "array"
+        },
+        "dataset_fingerprint_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Dataset Fingerprint Sha256",
+          "type": "string"
+        },
+        "sources": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/SourceFileReferenceV2"
+          },
+          "title": "Sources",
+          "type": "array"
+        },
+        "transformations": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/TransformRecordV2"
+          },
+          "title": "Transformations",
+          "type": "array"
+        }
+      },
+      "required": ["dataset_fingerprint_sha256", "backing_records"],
+      "title": "AnalysisLineageV2",
+      "type": "object"
+    },
+    "AssociationEstimateV1": {
+      "additionalProperties": false,
+      "description": "One descriptive association or a typed unavailable state.",
+      "properties": {
+        "ci_lower": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": -1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ci Lower"
+        },
+        "ci_upper": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": -1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ci Upper"
+        },
+        "group_count": {
+          "minimum": 0,
+          "title": "Group Count",
+          "type": "integer"
+        },
+        "intercept": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Intercept"
+        },
+        "pearson_r": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": -1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pearson R"
+        },
+        "r_squared": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "R Squared"
+        },
+        "reason_code": {
+          "anyOf": [
+            {
+              "enum": [
+                "insufficient_samples",
+                "insufficient_groups",
+                "constant_x",
+                "constant_y",
+                "constant_both"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason Code"
+        },
+        "sample_count": {
+          "minimum": 0,
+          "title": "Sample Count",
+          "type": "integer"
+        },
+        "slope": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Slope"
+        },
+        "spearman_r": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": -1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Spearman R"
+        },
+        "state": {
+          "enum": ["available", "unavailable"],
+          "title": "State",
+          "type": "string"
+        }
+      },
+      "required": ["state", "sample_count", "group_count"],
+      "title": "AssociationEstimateV1",
+      "type": "object"
+    },
+    "AvailabilityV1": {
+      "additionalProperties": false,
+      "properties": {
+        "message": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Message"
+        },
+        "observed_count": {
+          "minimum": 0,
+          "title": "Observed Count",
+          "type": "integer"
+        },
+        "reason_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason Code"
+        },
+        "required_count": {
+          "minimum": 0,
+          "title": "Required Count",
+          "type": "integer"
+        },
+        "state": {
+          "enum": ["available", "unavailable"],
+          "title": "State",
+          "type": "string"
+        }
+      },
+      "required": ["state", "observed_count", "required_count"],
+      "title": "AvailabilityV1",
+      "type": "object"
+    },
+    "AvailabilityV2": {
+      "additionalProperties": false,
+      "properties": {
+        "message": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Message"
+        },
+        "observed_count": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Observed Count"
+        },
+        "reason_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason Code"
+        },
+        "required_count": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Required Count"
+        },
+        "result_path": {
+          "title": "Result Path",
+          "type": "string"
+        },
+        "state": {
+          "enum": ["available", "unavailable"],
+          "title": "State",
+          "type": "string"
+        }
+      },
+      "required": ["result_path", "state"],
+      "title": "AvailabilityV2",
+      "type": "object"
+    },
+    "BackingRecordV2": {
+      "additionalProperties": false,
+      "description": "Stable reference to exactly one input record without copying values.",
+      "properties": {
+        "record_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Record Sha256",
+          "type": "string"
+        },
+        "session_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id"
+        },
+        "shot_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Shot Id"
+        },
+        "source_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Id"
+        },
+        "source_row": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Row"
+        },
+        "unlinked_reason": {
+          "anyOf": [
+            {
+              "enum": [
+                "no_source_reference_declared",
+                "session_not_linked_to_source_reference"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unlinked Reason"
+        }
+      },
+      "required": ["record_sha256"],
+      "title": "BackingRecordV2",
+      "type": "object"
+    },
+    "BaselineProvenanceV1": {
+      "additionalProperties": false,
+      "properties": {
+        "baseline_id": {
+          "title": "Baseline Id",
+          "type": "string"
+        },
+        "contract_version": {
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "license": {
+          "title": "License",
+          "type": "string"
+        },
+        "source_url": {
+          "title": "Source Url",
+          "type": "string"
+        },
+        "table_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Table Sha256",
+          "type": "string"
+        },
+        "version": {
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "baseline_id",
+        "version",
+        "source_url",
+        "license",
+        "table_sha256",
+        "contract_version"
+      ],
+      "title": "BaselineProvenanceV1",
+      "type": "object"
+    },
+    "ClaimsV2": {
+      "additionalProperties": false,
+      "properties": {
+        "causal_inference": {
+          "default": false,
+          "title": "Causal Inference",
+          "type": "boolean"
+        },
+        "device_certification": {
+          "default": false,
+          "title": "Device Certification",
+          "type": "boolean"
+        },
+        "device_emulation": {
+          "default": false,
+          "title": "Device Emulation",
+          "type": "boolean"
+        },
+        "vendor_comparison": {
+          "default": "descriptive",
+          "enum": ["descriptive", "matched_agreement"],
+          "title": "Vendor Comparison",
+          "type": "string"
+        }
+      },
+      "title": "ClaimsV2",
+      "type": "object"
+    },
+    "ConfidenceIntervalV1": {
+      "additionalProperties": false,
+      "properties": {
+        "level": {
+          "title": "Level",
+          "type": "number"
+        },
+        "lower": {
+          "title": "Lower",
+          "type": "number"
+        },
+        "method": {
+          "title": "Method",
+          "type": "string"
+        },
+        "upper": {
+          "title": "Upper",
+          "type": "number"
+        }
+      },
+      "required": ["lower", "upper", "level", "method"],
+      "title": "ConfidenceIntervalV1",
+      "type": "object"
+    },
+    "CourseStateValueV1": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "title": "Context",
+          "type": "string"
+        },
+        "distance_yards": {
+          "minimum": 0.0,
+          "title": "Distance Yards",
+          "type": "number"
+        },
+        "lie": {
+          "title": "Lie",
+          "type": "string"
+        },
+        "target": {
+          "title": "Target",
+          "type": "string"
+        }
+      },
+      "required": ["lie", "context", "target", "distance_yards"],
+      "title": "CourseStateValueV1",
+      "type": "object"
+    },
+    "CovariationMissingnessV1": {
+      "additionalProperties": false,
+      "description": "Row and player exclusions used by a selected-pair analysis.",
+      "properties": {
+        "eligible_player_count": {
+          "minimum": 0,
+          "title": "Eligible Player Count",
+          "type": "integer"
+        },
+        "excluded_by_reason": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Excluded By Reason",
+          "type": "object"
+        },
+        "excluded_player_count_by_reason": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Excluded Player Count By Reason",
+          "type": "object"
+        },
+        "input_row_count": {
+          "minimum": 0,
+          "title": "Input Row Count",
+          "type": "integer"
+        },
+        "missing_by_variable": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Missing By Variable",
+          "type": "object"
+        },
+        "non_finite_by_variable": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Non Finite By Variable",
+          "type": "object"
+        },
+        "non_numeric_by_variable": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Non Numeric By Variable",
+          "type": "object"
+        },
+        "pairwise_complete_row_count": {
+          "minimum": 0,
+          "title": "Pairwise Complete Row Count",
+          "type": "integer"
+        },
+        "policy": {
+          "const": "pairwise",
+          "default": "pairwise",
+          "title": "Policy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "input_row_count",
+        "pairwise_complete_row_count",
+        "missing_by_variable",
+        "non_numeric_by_variable",
+        "non_finite_by_variable",
+        "excluded_by_reason",
+        "eligible_player_count",
+        "excluded_player_count_by_reason"
+      ],
+      "title": "CovariationMissingnessV1",
+      "type": "object"
+    },
+    "CovariationUncertaintyV1": {
+      "additionalProperties": false,
+      "description": "Named uncertainty methods and their scientific limits.",
+      "properties": {
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "confidence_level": {
+          "exclusiveMaximum": 1.0,
+          "exclusiveMinimum": 0.5,
+          "title": "Confidence Level",
+          "type": "number"
+        },
+        "fixed_effect_method": {
+          "const": "inverse-variance-fisher-z",
+          "default": "inverse-variance-fisher-z",
+          "title": "Fixed Effect Method",
+          "type": "string"
+        },
+        "per_player_interval": {
+          "const": "fisher-z",
+          "default": "fisher-z",
+          "title": "Per Player Interval",
+          "type": "string"
+        },
+        "pooled_interval": {
+          "const": "fisher-z-unclustered",
+          "default": "fisher-z-unclustered",
+          "title": "Pooled Interval",
+          "type": "string"
+        },
+        "random_effect_method": {
+          "const": "dersimonian-laird-fisher-z",
+          "default": "dersimonian-laird-fisher-z",
+          "title": "Random Effect Method",
+          "type": "string"
+        },
+        "within_player_interval": {
+          "const": "unavailable-clustered",
+          "default": "unavailable-clustered",
+          "title": "Within Player Interval",
+          "type": "string"
+        }
+      },
+      "required": ["confidence_level", "assumptions"],
+      "title": "CovariationUncertaintyV1",
+      "type": "object"
+    },
+    "DatasetAuthorityV2": {
+      "additionalProperties": false,
+      "description": "Commit-addressable authority for the analyzed dataset.",
+      "properties": {
+        "commit": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{40}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Commit"
+        },
+        "dataset_id": {
+          "minLength": 1,
+          "title": "Dataset Id",
+          "type": "string"
+        },
+        "dataset_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dataset Path"
+        },
+        "manifest_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Manifest Sha256"
+        },
+        "repository": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Repository"
+        }
+      },
+      "required": ["dataset_id"],
+      "title": "DatasetAuthorityV2",
+      "type": "object"
+    },
+    "EstimateSummaryV1": {
+      "additionalProperties": false,
+      "properties": {
+        "confidence_interval": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ConfidenceIntervalV1"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "count": {
+          "minimum": 0,
+          "title": "Count",
+          "type": "integer"
+        },
+        "mean": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mean"
+        },
+        "standard_deviation": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Standard Deviation"
+        },
+        "standard_error": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Standard Error"
+        }
+      },
+      "required": ["count"],
+      "title": "EstimateSummaryV1",
+      "type": "object"
+    },
+    "ExcludedRowV1": {
+      "additionalProperties": false,
+      "properties": {
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "reason_code": {
+          "enum": [
+            "missing_course_state",
+            "invalid_distance",
+            "outside_baseline"
+          ],
+          "title": "Reason Code",
+          "type": "string"
+        },
+        "shot_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Shot Id"
+        },
+        "source_index": {
+          "minimum": 0,
+          "title": "Source Index",
+          "type": "integer"
+        }
+      },
+      "required": ["source_index", "reason_code", "message"],
+      "title": "ExcludedRowV1",
+      "type": "object"
+    },
+    "ExclusionSummaryV1": {
+      "additionalProperties": false,
+      "properties": {
+        "by_reason": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "By Reason",
+          "type": "object"
+        },
+        "included_row_count": {
+          "minimum": 0,
+          "title": "Included Row Count",
+          "type": "integer"
+        },
+        "input_row_count": {
+          "minimum": 0,
+          "title": "Input Row Count",
+          "type": "integer"
+        },
+        "total_excluded": {
+          "minimum": 0,
+          "title": "Total Excluded",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "input_row_count",
+        "included_row_count",
+        "total_excluded",
+        "by_reason"
+      ],
+      "title": "ExclusionSummaryV1",
+      "type": "object"
+    },
+    "GroupSummaryV1": {
+      "additionalProperties": false,
+      "properties": {
+        "dimension": {
+          "enum": ["player", "session", "club"],
+          "title": "Dimension",
+          "type": "string"
+        },
+        "estimate": {
+          "$ref": "#/$defs/EstimateSummaryV1"
+        },
+        "evidence": {
+          "title": "Evidence",
+          "type": "string"
+        },
+        "group_value": {
+          "title": "Group Value",
+          "type": "string"
+        },
+        "trust_level": {
+          "enum": [
+            "explicit_user_attested",
+            "pseudonymous_stable",
+            "verified_external"
+          ],
+          "title": "Trust Level",
+          "type": "string"
+        }
+      },
+      "required": [
+        "dimension",
+        "group_value",
+        "estimate",
+        "trust_level",
+        "evidence"
+      ],
+      "title": "GroupSummaryV1",
+      "type": "object"
+    },
+    "InterpolationV1": {
+      "additionalProperties": false,
+      "properties": {
+        "fraction": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Fraction",
+          "type": "number"
+        },
+        "lower_distance_yards": {
+          "title": "Lower Distance Yards",
+          "type": "number"
+        },
+        "upper_distance_yards": {
+          "title": "Upper Distance Yards",
+          "type": "number"
+        }
+      },
+      "required": ["lower_distance_yards", "upper_distance_yards", "fraction"],
+      "title": "InterpolationV1",
+      "type": "object"
+    },
+    "LaunchMonitorAnalysisResultV2": {
+      "additionalProperties": false,
+      "description": "Complete OpenAPI-compatible v2 result envelope.",
+      "properties": {
+        "analysis": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Analysis"
+        },
+        "availability": {
+          "items": {
+            "$ref": "#/$defs/AvailabilityV2"
+          },
+          "title": "Availability",
+          "type": "array"
+        },
+        "claims": {
+          "$ref": "#/$defs/ClaimsV2"
+        },
+        "contract_version": {
+          "const": "2.0.0",
+          "default": "2.0.0",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "lineage": {
+          "$ref": "#/$defs/AnalysisLineageV2"
+        },
+        "missingness": {
+          "$ref": "#/$defs/MissingnessV2"
+        },
+        "model_provenance": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ModelProvenanceV2"
+          },
+          "title": "Model Provenance",
+          "type": "array"
+        },
+        "order_evidence": {
+          "$ref": "#/$defs/OrderEvidenceV2"
+        },
+        "player_identity": {
+          "$ref": "#/$defs/PlayerIdentityV2"
+        },
+        "session_identity": {
+          "$ref": "#/$defs/SessionIdentityV2"
+        },
+        "status": {
+          "enum": ["available", "partial", "unavailable"],
+          "title": "Status",
+          "type": "string"
+        },
+        "uncertainty": {
+          "$ref": "#/$defs/UncertaintyV2"
+        },
+        "units": {
+          "additionalProperties": {
+            "$ref": "#/$defs/MetricUnitsV2"
+          },
+          "title": "Units",
+          "type": "object"
+        },
+        "vendor_provenance": {
+          "items": {
+            "$ref": "#/$defs/VendorProvenanceV2"
+          },
+          "title": "Vendor Provenance",
+          "type": "array"
+        },
+        "warnings": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "status",
+        "analysis",
+        "units",
+        "lineage",
+        "missingness",
+        "availability",
+        "uncertainty",
+        "player_identity",
+        "vendor_provenance"
+      ],
+      "title": "LaunchMonitorAnalysisResultV2",
+      "type": "object"
+    },
+    "LaunchMonitorConformanceScenarioV1": {
+      "additionalProperties": false,
+      "description": "One synthetic output case with uniform consumer evidence.",
+      "properties": {
+        "analysis_kind": {
+          "enum": [
+            "analysis_v2",
+            "player_covariation",
+            "attested_longitudinal",
+            "source_backed_strokes_gained",
+            "distance_target_proxy"
+          ],
+          "title": "Analysis Kind",
+          "type": "string"
+        },
+        "backing_records": {
+          "items": {
+            "$ref": "#/$defs/BackingRecordV2"
+          },
+          "minItems": 1,
+          "title": "Backing Records",
+          "type": "array"
+        },
+        "claims": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "minProperties": 1,
+          "title": "Claims",
+          "type": "object"
+        },
+        "description": {
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "exclusions": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Exclusions",
+          "type": "object"
+        },
+        "expected_status": {
+          "enum": ["available", "unavailable"],
+          "title": "Expected Status",
+          "type": "string"
+        },
+        "order_evidence": {
+          "$ref": "#/$defs/OrderEvidenceV2"
+        },
+        "payload": {
+          "discriminator": {
+            "mapping": {
+              "2.0.0": "#/$defs/LaunchMonitorAnalysisResultV2",
+              "launch-monitor-longitudinal-session/1.0.0": "#/$defs/LongitudinalSessionResultV1",
+              "launch-monitor-outcome-proxy/1.0.0": "#/$defs/OutcomeProxyResultV1",
+              "launch-monitor-player-covariation/1.0.0": "#/$defs/PlayerCovariationResultV1",
+              "launch-monitor-strokes-gained-analysis/1.0.0": "#/$defs/StrokesGainedAnalysisResultV1"
+            },
+            "propertyName": "contract_version"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/LaunchMonitorAnalysisResultV2"
+            },
+            {
+              "$ref": "#/$defs/PlayerCovariationResultV1"
+            },
+            {
+              "$ref": "#/$defs/LongitudinalSessionResultV1"
+            },
+            {
+              "$ref": "#/$defs/StrokesGainedAnalysisResultV1"
+            },
+            {
+              "$ref": "#/$defs/OutcomeProxyResultV1"
+            }
+          ],
+          "title": "Payload"
+        },
+        "player_identity": {
+          "$ref": "#/$defs/PlayerIdentityV2"
+        },
+        "scenario_id": {
+          "minLength": 1,
+          "title": "Scenario Id",
+          "type": "string"
+        },
+        "scenario_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Scenario Sha256",
+          "type": "string"
+        },
+        "session_identity": {
+          "$ref": "#/$defs/SessionIdentityV2"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceFileReferenceV2"
+          },
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        },
+        "units": {
+          "additionalProperties": {
+            "$ref": "#/$defs/MetricUnitsV2"
+          },
+          "minProperties": 1,
+          "title": "Units",
+          "type": "object"
+        }
+      },
+      "required": [
+        "scenario_id",
+        "analysis_kind",
+        "expected_status",
+        "description",
+        "units",
+        "claims",
+        "player_identity",
+        "session_identity",
+        "order_evidence",
+        "sources",
+        "backing_records",
+        "exclusions",
+        "payload",
+        "scenario_sha256"
+      ],
+      "title": "LaunchMonitorConformanceScenarioV1",
+      "type": "object"
+    },
+    "LongitudinalClaimsV1": {
+      "additionalProperties": false,
+      "properties": {
+        "association_scope": {
+          "const": "descriptive_directional",
+          "default": "descriptive_directional",
+          "title": "Association Scope",
+          "type": "string"
+        },
+        "causal_improvement": {
+          "default": false,
+          "title": "Causal Improvement",
+          "type": "boolean"
+        },
+        "confounder_control_is_causal": {
+          "default": false,
+          "title": "Confounder Control Is Causal",
+          "type": "boolean"
+        },
+        "primary_unit": {
+          "const": "player_session_stratum",
+          "default": "player_session_stratum",
+          "title": "Primary Unit",
+          "type": "string"
+        },
+        "shot_level_inference": {
+          "default": false,
+          "title": "Shot Level Inference",
+          "type": "boolean"
+        }
+      },
+      "title": "LongitudinalClaimsV1",
+      "type": "object"
+    },
+    "LongitudinalDesignV1": {
+      "additionalProperties": false,
+      "properties": {
+        "confounders": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Confounders",
+          "type": "array"
+        },
+        "pooled_terms": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Pooled Terms",
+          "type": "array"
+        },
+        "primary_unit": {
+          "const": "player_session_stratum",
+          "default": "player_session_stratum",
+          "title": "Primary Unit",
+          "type": "string"
+        },
+        "session_aggregate": {
+          "enum": ["mean", "median"],
+          "title": "Session Aggregate",
+          "type": "string"
+        },
+        "strata": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Strata",
+          "type": "array"
+        }
+      },
+      "required": [
+        "session_aggregate",
+        "strata",
+        "confounders",
+        "pooled_terms"
+      ],
+      "title": "LongitudinalDesignV1",
+      "type": "object"
+    },
+    "LongitudinalMissingnessV1": {
+      "additionalProperties": false,
+      "properties": {
+        "excluded_by_reason": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Excluded By Reason",
+          "type": "object"
+        },
+        "included_shot_count": {
+          "minimum": 0,
+          "title": "Included Shot Count",
+          "type": "integer"
+        },
+        "input_row_count": {
+          "minimum": 0,
+          "title": "Input Row Count",
+          "type": "integer"
+        },
+        "session_cell_count": {
+          "minimum": 0,
+          "title": "Session Cell Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "input_row_count",
+        "included_shot_count",
+        "session_cell_count",
+        "excluded_by_reason"
+      ],
+      "title": "LongitudinalMissingnessV1",
+      "type": "object"
+    },
+    "LongitudinalPlayerAssociationV1": {
+      "additionalProperties": false,
+      "properties": {
+        "direction": {
+          "enum": ["increasing", "decreasing", "flat", "unavailable"],
+          "title": "Direction",
+          "type": "string"
+        },
+        "estimate_per_order_unit": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Estimate Per Order Unit"
+        },
+        "player_id": {
+          "title": "Player Id",
+          "type": "string"
+        },
+        "reason_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason Code"
+        },
+        "session_count": {
+          "minimum": 0,
+          "title": "Session Count",
+          "type": "integer"
+        },
+        "state": {
+          "enum": ["available", "unavailable"],
+          "title": "State",
+          "type": "string"
+        }
+      },
+      "required": ["player_id", "session_count", "direction", "state"],
+      "title": "LongitudinalPlayerAssociationV1",
+      "type": "object"
+    },
+    "LongitudinalSessionRequestV1": {
+      "additionalProperties": false,
+      "description": "Scientific choices for session-unit directional association.",
+      "properties": {
+        "confidence_level": {
+          "default": 0.95,
+          "exclusiveMaximum": 1.0,
+          "exclusiveMinimum": 0.5,
+          "title": "Confidence Level",
+          "type": "number"
+        },
+        "confounders": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Confounders",
+          "type": "array"
+        },
+        "direction": {
+          "default": "descriptive_only",
+          "enum": ["higher_is_better", "lower_is_better", "descriptive_only"],
+          "title": "Direction",
+          "type": "string"
+        },
+        "metric": {
+          "minLength": 1,
+          "title": "Metric",
+          "type": "string"
+        },
+        "minimum_player_clusters": {
+          "default": 4,
+          "minimum": 4,
+          "title": "Minimum Player Clusters",
+          "type": "integer"
+        },
+        "minimum_sessions_per_player": {
+          "default": 3,
+          "minimum": 3,
+          "title": "Minimum Sessions Per Player",
+          "type": "integer"
+        },
+        "session_aggregate": {
+          "default": "mean",
+          "enum": ["mean", "median"],
+          "title": "Session Aggregate",
+          "type": "string"
+        },
+        "strata": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Strata",
+          "type": "array"
+        }
+      },
+      "required": ["metric"],
+      "title": "LongitudinalSessionRequestV1",
+      "type": "object"
+    },
+    "LongitudinalSessionResultV1": {
+      "additionalProperties": false,
+      "description": "Evidence-bearing result that never labels association as improvement.",
+      "properties": {
+        "availability": {
+          "items": {
+            "$ref": "#/$defs/AvailabilityV2"
+          },
+          "title": "Availability",
+          "type": "array"
+        },
+        "claims": {
+          "$ref": "#/$defs/LongitudinalClaimsV1"
+        },
+        "contract_version": {
+          "const": "launch-monitor-longitudinal-session/1.0.0",
+          "default": "launch-monitor-longitudinal-session/1.0.0",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "design": {
+          "$ref": "#/$defs/LongitudinalDesignV1"
+        },
+        "lineage": {
+          "$ref": "#/$defs/AnalysisLineageV2"
+        },
+        "missingness": {
+          "$ref": "#/$defs/LongitudinalMissingnessV1"
+        },
+        "order_evidence": {
+          "$ref": "#/$defs/OrderEvidenceV2"
+        },
+        "player_associations": {
+          "items": {
+            "$ref": "#/$defs/LongitudinalPlayerAssociationV1"
+          },
+          "title": "Player Associations",
+          "type": "array"
+        },
+        "player_identity": {
+          "$ref": "#/$defs/PlayerIdentityV2"
+        },
+        "pooled_association": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PooledAssociationV1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "request": {
+          "$ref": "#/$defs/LongitudinalSessionRequestV1"
+        },
+        "session_aggregates": {
+          "items": {
+            "$ref": "#/$defs/SessionAggregateV1"
+          },
+          "title": "Session Aggregates",
+          "type": "array"
+        },
+        "session_identity": {
+          "$ref": "#/$defs/SessionIdentityV2"
+        },
+        "status": {
+          "enum": ["available", "partial", "unavailable"],
+          "title": "Status",
+          "type": "string"
+        },
+        "warnings": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "status",
+        "request",
+        "design",
+        "session_aggregates",
+        "player_associations",
+        "pooled_association",
+        "availability",
+        "missingness",
+        "lineage",
+        "player_identity",
+        "session_identity",
+        "order_evidence"
+      ],
+      "title": "LongitudinalSessionResultV1",
+      "type": "object"
+    },
+    "LongitudinalSummaryV1": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence": {
+          "title": "Evidence",
+          "type": "string"
+        },
+        "group_dimension": {
+          "enum": ["player", "session", "club", "all"],
+          "title": "Group Dimension",
+          "type": "string"
+        },
+        "group_value": {
+          "title": "Group Value",
+          "type": "string"
+        },
+        "intercept": {
+          "title": "Intercept",
+          "type": "number"
+        },
+        "p_value": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "P Value",
+          "type": "number"
+        },
+        "r_squared": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "R Squared",
+          "type": "number"
+        },
+        "sample_count": {
+          "minimum": 3,
+          "title": "Sample Count",
+          "type": "integer"
+        },
+        "slope": {
+          "title": "Slope",
+          "type": "number"
+        },
+        "slope_unit": {
+          "title": "Slope Unit",
+          "type": "string"
+        },
+        "trust_level": {
+          "enum": [
+            "explicit_user_attested",
+            "pseudonymous_stable",
+            "verified_external"
+          ],
+          "title": "Trust Level",
+          "type": "string"
+        }
+      },
+      "required": [
+        "group_dimension",
+        "group_value",
+        "sample_count",
+        "slope",
+        "intercept",
+        "r_squared",
+        "p_value",
+        "slope_unit",
+        "trust_level",
+        "evidence"
+      ],
+      "title": "LongitudinalSummaryV1",
+      "type": "object"
+    },
+    "MetaAnalysisSummaryV1": {
+      "additionalProperties": false,
+      "description": "Fixed/random Fisher-z synthesis with heterogeneity diagnostics.",
+      "properties": {
+        "contributor_count": {
+          "minimum": 0,
+          "title": "Contributor Count",
+          "type": "integer"
+        },
+        "fixed_ci_lower": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": -1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fixed Ci Lower"
+        },
+        "fixed_ci_upper": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": -1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fixed Ci Upper"
+        },
+        "fixed_effect_r": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": -1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fixed Effect R"
+        },
+        "i_squared_pct": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "I Squared Pct"
+        },
+        "q_statistic": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Q Statistic"
+        },
+        "random_ci_lower": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": -1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Random Ci Lower"
+        },
+        "random_ci_upper": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": -1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Random Ci Upper"
+        },
+        "random_effect_r": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": -1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Random Effect R"
+        },
+        "reason_code": {
+          "anyOf": [
+            {
+              "const": "insufficient_eligible_players",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason Code"
+        },
+        "state": {
+          "enum": ["available", "unavailable"],
+          "title": "State",
+          "type": "string"
+        },
+        "tau_squared": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tau Squared"
+        },
+        "total_sample_count": {
+          "minimum": 0,
+          "title": "Total Sample Count",
+          "type": "integer"
+        }
+      },
+      "required": ["state", "contributor_count", "total_sample_count"],
+      "title": "MetaAnalysisSummaryV1",
+      "type": "object"
+    },
+    "MetricUnitsV2": {
+      "additionalProperties": false,
+      "properties": {
+        "authority": {
+          "enum": ["canonical_registry", "source_declared", "unknown"],
+          "title": "Authority",
+          "type": "string"
+        },
+        "canonical_unit": {
+          "title": "Canonical Unit",
+          "type": "string"
+        },
+        "display_unit": {
+          "title": "Display Unit",
+          "type": "string"
+        }
+      },
+      "required": ["canonical_unit", "display_unit", "authority"],
+      "title": "MetricUnitsV2",
+      "type": "object"
+    },
+    "MissingnessV2": {
+      "additionalProperties": false,
+      "properties": {
+        "complete_row_count": {
+          "minimum": 0,
+          "title": "Complete Row Count",
+          "type": "integer"
+        },
+        "excluded_by_reason": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Excluded By Reason",
+          "type": "object"
+        },
+        "input_row_count": {
+          "minimum": 0,
+          "title": "Input Row Count",
+          "type": "integer"
+        },
+        "missing_by_variable": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Missing By Variable",
+          "type": "object"
+        },
+        "non_numeric_by_variable": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Non Numeric By Variable",
+          "type": "object"
+        },
+        "policy": {
+          "enum": ["pairwise", "listwise", "fail"],
+          "title": "Policy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "input_row_count",
+        "complete_row_count",
+        "missing_by_variable",
+        "non_numeric_by_variable",
+        "excluded_by_reason",
+        "policy"
+      ],
+      "title": "MissingnessV2",
+      "type": "object"
+    },
+    "ModelProvenanceV2": {
+      "additionalProperties": false,
+      "properties": {
+        "code_commit": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{40}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Code Commit"
+        },
+        "configuration_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Configuration Sha256"
+        },
+        "model_id": {
+          "title": "Model Id",
+          "type": "string"
+        },
+        "relationship_to_vendor": {
+          "default": "unknown",
+          "enum": [
+            "independent_physics",
+            "vendor_comparable_surrogate",
+            "vendor_reported_output",
+            "unknown"
+          ],
+          "title": "Relationship To Vendor",
+          "type": "string"
+        },
+        "version": {
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": ["model_id", "version"],
+      "title": "ModelProvenanceV2",
+      "type": "object"
+    },
+    "OrderEvidenceV2": {
+      "additionalProperties": false,
+      "description": "Evidence defining chronological or ordinal order for longitudinal work.",
+      "properties": {
+        "evidence": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence"
+        },
+        "order_column": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Order Column"
+        },
+        "order_kind": {
+          "anyOf": [
+            {
+              "enum": ["timestamp", "ordinal", "source_sequence"],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Order Kind"
+        },
+        "trust_level": {
+          "default": "not_provided",
+          "enum": [
+            "not_provided",
+            "explicit_user_attested",
+            "source_reported",
+            "verified_external",
+            "untrusted_inferred"
+          ],
+          "title": "Trust Level",
+          "type": "string"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit"
+        }
+      },
+      "title": "OrderEvidenceV2",
+      "type": "object"
+    },
+    "OutcomeProxyClaimsV1": {
+      "additionalProperties": false,
+      "properties": {
+        "causal_inference": {
+          "const": false,
+          "default": false,
+          "title": "Causal Inference",
+          "type": "boolean"
+        },
+        "is_strokes_gained": {
+          "const": false,
+          "default": false,
+          "title": "Is Strokes Gained",
+          "type": "boolean"
+        },
+        "source_backed": {
+          "const": false,
+          "default": false,
+          "title": "Source Backed",
+          "type": "boolean"
+        }
+      },
+      "title": "OutcomeProxyClaimsV1",
+      "type": "object"
+    },
+    "OutcomeProxyResultV1": {
+      "additionalProperties": false,
+      "properties": {
+        "claims": {
+          "$ref": "#/$defs/OutcomeProxyClaimsV1"
+        },
+        "contract_version": {
+          "const": "launch-monitor-outcome-proxy/1.0.0",
+          "default": "launch-monitor-outcome-proxy/1.0.0",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "exclusions": {
+          "$ref": "#/$defs/ExclusionSummaryV1"
+        },
+        "formula": {
+          "title": "Formula",
+          "type": "string"
+        },
+        "limitations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Limitations",
+          "type": "array"
+        },
+        "metric_name": {
+          "const": "expected_proximity_dispersion_proxy",
+          "default": "expected_proximity_dispersion_proxy",
+          "title": "Metric Name",
+          "type": "string"
+        },
+        "row_results": {
+          "items": {
+            "$ref": "#/$defs/OutcomeProxyRowV1"
+          },
+          "title": "Row Results",
+          "type": "array"
+        },
+        "status": {
+          "enum": ["available", "partial", "unavailable"],
+          "title": "Status",
+          "type": "string"
+        },
+        "unit": {
+          "const": "yd",
+          "default": "yd",
+          "title": "Unit",
+          "type": "string"
+        },
+        "units": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Units",
+          "type": "object"
+        },
+        "value_summary": {
+          "$ref": "#/$defs/EstimateSummaryV1"
+        }
+      },
+      "required": [
+        "status",
+        "value_summary",
+        "row_results",
+        "exclusions",
+        "formula",
+        "units",
+        "limitations"
+      ],
+      "title": "OutcomeProxyResultV1",
+      "type": "object"
+    },
+    "OutcomeProxyRowV1": {
+      "additionalProperties": false,
+      "properties": {
+        "carry_yards": {
+          "title": "Carry Yards",
+          "type": "number"
+        },
+        "lateral_yards": {
+          "title": "Lateral Yards",
+          "type": "number"
+        },
+        "radial_error_yards": {
+          "minimum": 0.0,
+          "title": "Radial Error Yards",
+          "type": "number"
+        },
+        "shot_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Shot Id"
+        },
+        "source_index": {
+          "minimum": 0,
+          "title": "Source Index",
+          "type": "integer"
+        },
+        "target_distance_yards": {
+          "title": "Target Distance Yards",
+          "type": "number"
+        }
+      },
+      "required": [
+        "source_index",
+        "carry_yards",
+        "lateral_yards",
+        "target_distance_yards",
+        "radial_error_yards"
+      ],
+      "title": "OutcomeProxyRowV1",
+      "type": "object"
+    },
+    "PlayerAssociationV1": {
+      "additionalProperties": false,
+      "description": "A player-level estimate and normalized meta-analysis weights.",
+      "properties": {
+        "estimate": {
+          "$ref": "#/$defs/AssociationEstimateV1"
+        },
+        "fixed_weight": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fixed Weight"
+        },
+        "player_id": {
+          "minLength": 1,
+          "title": "Player Id",
+          "type": "string"
+        },
+        "random_weight": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Random Weight"
+        }
+      },
+      "required": ["player_id", "estimate"],
+      "title": "PlayerAssociationV1",
+      "type": "object"
+    },
+    "PlayerCovariationRequestV1": {
+      "additionalProperties": false,
+      "description": "Select one variable pair and the player-level inference rules.",
+      "properties": {
+        "confidence_level": {
+          "default": 0.95,
+          "exclusiveMaximum": 1.0,
+          "exclusiveMinimum": 0.5,
+          "title": "Confidence Level",
+          "type": "number"
+        },
+        "min_samples": {
+          "default": 4,
+          "minimum": 4,
+          "title": "Min Samples",
+          "type": "integer"
+        },
+        "player_column": {
+          "minLength": 1,
+          "title": "Player Column",
+          "type": "string"
+        },
+        "x_column": {
+          "minLength": 1,
+          "title": "X Column",
+          "type": "string"
+        },
+        "y_column": {
+          "minLength": 1,
+          "title": "Y Column",
+          "type": "string"
+        }
+      },
+      "required": ["x_column", "y_column", "player_column"],
+      "title": "PlayerCovariationRequestV1",
+      "type": "object"
+    },
+    "PlayerCovariationResultV1": {
+      "additionalProperties": false,
+      "description": "Evidence-bearing result for one selected variable pair.",
+      "properties": {
+        "analysis_kind": {
+          "const": "selected_pair",
+          "default": "selected_pair",
+          "title": "Analysis Kind",
+          "type": "string"
+        },
+        "availability": {
+          "items": {
+            "$ref": "#/$defs/AvailabilityV2"
+          },
+          "title": "Availability",
+          "type": "array"
+        },
+        "between_player": {
+          "$ref": "#/$defs/AssociationEstimateV1"
+        },
+        "claims": {
+          "$ref": "#/$defs/ClaimsV2"
+        },
+        "contract_version": {
+          "const": "launch-monitor-player-covariation/1.0.0",
+          "default": "launch-monitor-player-covariation/1.0.0",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "definitions": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Definitions",
+          "type": "object"
+        },
+        "lineage": {
+          "$ref": "#/$defs/AnalysisLineageV2"
+        },
+        "meta_analysis": {
+          "$ref": "#/$defs/MetaAnalysisSummaryV1"
+        },
+        "missingness": {
+          "$ref": "#/$defs/CovariationMissingnessV1"
+        },
+        "per_player": {
+          "items": {
+            "$ref": "#/$defs/PlayerAssociationV1"
+          },
+          "title": "Per Player",
+          "type": "array"
+        },
+        "player_identity": {
+          "$ref": "#/$defs/PlayerIdentityV2"
+        },
+        "pooled": {
+          "$ref": "#/$defs/AssociationEstimateV1"
+        },
+        "request": {
+          "$ref": "#/$defs/PlayerCovariationRequestV1"
+        },
+        "status": {
+          "enum": ["available", "partial", "unavailable"],
+          "title": "Status",
+          "type": "string"
+        },
+        "uncertainty": {
+          "$ref": "#/$defs/CovariationUncertaintyV1"
+        },
+        "units": {
+          "additionalProperties": {
+            "$ref": "#/$defs/MetricUnitsV2"
+          },
+          "title": "Units",
+          "type": "object"
+        },
+        "vendor_provenance": {
+          "items": {
+            "$ref": "#/$defs/VendorProvenanceV2"
+          },
+          "title": "Vendor Provenance",
+          "type": "array"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        },
+        "within_player": {
+          "$ref": "#/$defs/AssociationEstimateV1"
+        }
+      },
+      "required": [
+        "status",
+        "request",
+        "pooled",
+        "within_player",
+        "between_player",
+        "per_player",
+        "meta_analysis",
+        "missingness",
+        "units",
+        "lineage",
+        "availability",
+        "uncertainty",
+        "player_identity",
+        "vendor_provenance",
+        "definitions",
+        "warnings"
+      ],
+      "title": "PlayerCovariationResultV1",
+      "type": "object"
+    },
+    "PlayerIdentityV2": {
+      "additionalProperties": false,
+      "description": "Declared identity evidence; identity is never inferred from layout.",
+      "properties": {
+        "evidence": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence"
+        },
+        "identifier_column": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Explicit player identifier column; session, club, source, file, and row-position fields are forbidden.",
+          "not": {
+            "enum": [
+              "club",
+              "club_id",
+              "file",
+              "file_name",
+              "filename",
+              "row_order",
+              "session",
+              "session_id",
+              "source",
+              "source_id",
+              "source_row"
+            ]
+          },
+          "title": "Identifier Column"
+        },
+        "trust_level": {
+          "default": "not_provided",
+          "enum": [
+            "not_provided",
+            "explicit_user_attested",
+            "pseudonymous_stable",
+            "verified_external",
+            "untrusted_inferred"
+          ],
+          "title": "Trust Level",
+          "type": "string"
+        }
+      },
+      "title": "PlayerIdentityV2",
+      "type": "object"
+    },
+    "PooledAssociationV1": {
+      "additionalProperties": false,
+      "properties": {
+        "cluster_count": {
+          "minimum": 1,
+          "title": "Cluster Count",
+          "type": "integer"
+        },
+        "confidence_interval_high": {
+          "title": "Confidence Interval High",
+          "type": "number"
+        },
+        "confidence_interval_low": {
+          "title": "Confidence Interval Low",
+          "type": "number"
+        },
+        "confidence_level": {
+          "title": "Confidence Level",
+          "type": "number"
+        },
+        "estimate_per_order_unit": {
+          "title": "Estimate Per Order Unit",
+          "type": "number"
+        },
+        "method": {
+          "const": "player_fixed_effects_ols_clustered_by_player",
+          "default": "player_fixed_effects_ols_clustered_by_player",
+          "title": "Method",
+          "type": "string"
+        },
+        "p_value": {
+          "title": "P Value",
+          "type": "number"
+        },
+        "session_cell_count": {
+          "minimum": 1,
+          "title": "Session Cell Count",
+          "type": "integer"
+        },
+        "standard_error": {
+          "title": "Standard Error",
+          "type": "number"
+        },
+        "uncertainty_state": {
+          "const": "available",
+          "default": "available",
+          "title": "Uncertainty State",
+          "type": "string"
+        }
+      },
+      "required": [
+        "estimate_per_order_unit",
+        "standard_error",
+        "confidence_interval_low",
+        "confidence_interval_high",
+        "p_value",
+        "confidence_level",
+        "cluster_count",
+        "session_cell_count"
+      ],
+      "title": "PooledAssociationV1",
+      "type": "object"
+    },
+    "SessionAggregateV1": {
+      "additionalProperties": false,
+      "properties": {
+        "confounder_values": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Confounder Values",
+          "type": "object"
+        },
+        "metric_value": {
+          "title": "Metric Value",
+          "type": "number"
+        },
+        "order_unit": {
+          "title": "Order Unit",
+          "type": "string"
+        },
+        "order_value": {
+          "title": "Order Value",
+          "type": "number"
+        },
+        "player_id": {
+          "title": "Player Id",
+          "type": "string"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        },
+        "shot_count": {
+          "minimum": 1,
+          "title": "Shot Count",
+          "type": "integer"
+        },
+        "stratum": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Stratum",
+          "type": "object"
+        }
+      },
+      "required": [
+        "player_id",
+        "session_id",
+        "order_value",
+        "order_unit",
+        "stratum",
+        "shot_count",
+        "metric_value",
+        "confounder_values"
+      ],
+      "title": "SessionAggregateV1",
+      "type": "object"
+    },
+    "SessionIdentityV2": {
+      "additionalProperties": false,
+      "description": "Evidence for repeated-observation session boundaries, never a player ID.",
+      "properties": {
+        "evidence": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence"
+        },
+        "identifier_column": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Identifier Column"
+        },
+        "trust_level": {
+          "default": "not_provided",
+          "enum": [
+            "not_provided",
+            "explicit_user_attested",
+            "source_reported",
+            "verified_external",
+            "untrusted_inferred"
+          ],
+          "title": "Trust Level",
+          "type": "string"
+        }
+      },
+      "title": "SessionIdentityV2",
+      "type": "object"
+    },
+    "SourceFileReferenceV2": {
+      "additionalProperties": false,
+      "description": "Content-addressed source and the sessions it backs.",
+      "properties": {
+        "file_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "File Sha256",
+          "type": "string"
+        },
+        "rights_status": {
+          "default": "unknown",
+          "enum": [
+            "public_redistributable",
+            "restricted_internal",
+            "permission_required",
+            "unknown"
+          ],
+          "title": "Rights Status",
+          "type": "string"
+        },
+        "session_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Session Ids",
+          "type": "array"
+        },
+        "source_id": {
+          "minLength": 1,
+          "title": "Source Id",
+          "type": "string"
+        },
+        "source_uri": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Uri"
+        }
+      },
+      "required": ["source_id", "file_sha256"],
+      "title": "SourceFileReferenceV2",
+      "type": "object"
+    },
+    "StrokesGainedAnalysisResultV1": {
+      "additionalProperties": false,
+      "properties": {
+        "analysis_context": {
+          "$ref": "#/$defs/AnalysisContextV2"
+        },
+        "availability": {
+          "$ref": "#/$defs/AvailabilityV1"
+        },
+        "baseline": {
+          "$ref": "#/$defs/BaselineProvenanceV1"
+        },
+        "claims": {
+          "$ref": "#/$defs/StrokesGainedClaimsV1"
+        },
+        "contract_version": {
+          "const": "launch-monitor-strokes-gained-analysis/1.0.0",
+          "default": "launch-monitor-strokes-gained-analysis/1.0.0",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "dataset_fingerprint_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Dataset Fingerprint Sha256",
+          "type": "string"
+        },
+        "excluded_rows": {
+          "items": {
+            "$ref": "#/$defs/ExcludedRowV1"
+          },
+          "title": "Excluded Rows",
+          "type": "array"
+        },
+        "exclusions": {
+          "$ref": "#/$defs/ExclusionSummaryV1"
+        },
+        "formula": {
+          "title": "Formula",
+          "type": "string"
+        },
+        "group_summaries": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/GroupSummaryV1"
+          },
+          "title": "Group Summaries",
+          "type": "array"
+        },
+        "limitations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Limitations",
+          "type": "array"
+        },
+        "longitudinal_summaries": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/LongitudinalSummaryV1"
+          },
+          "title": "Longitudinal Summaries",
+          "type": "array"
+        },
+        "metric_name": {
+          "const": "source_backed_strokes_gained",
+          "default": "source_backed_strokes_gained",
+          "title": "Metric Name",
+          "type": "string"
+        },
+        "row_results": {
+          "items": {
+            "$ref": "#/$defs/StrokesGainedRowV1"
+          },
+          "title": "Row Results",
+          "type": "array"
+        },
+        "status": {
+          "enum": ["available", "partial", "unavailable"],
+          "title": "Status",
+          "type": "string"
+        },
+        "uncertainty": {
+          "$ref": "#/$defs/StrokesGainedUncertaintyV1"
+        },
+        "unit": {
+          "const": "strokes",
+          "default": "strokes",
+          "title": "Unit",
+          "type": "string"
+        },
+        "units": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Units",
+          "type": "object"
+        },
+        "value_summary": {
+          "$ref": "#/$defs/EstimateSummaryV1"
+        },
+        "warnings": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "status",
+        "value_summary",
+        "baseline",
+        "formula",
+        "units",
+        "availability",
+        "uncertainty",
+        "row_results",
+        "excluded_rows",
+        "exclusions",
+        "analysis_context",
+        "dataset_fingerprint_sha256",
+        "limitations"
+      ],
+      "title": "StrokesGainedAnalysisResultV1",
+      "type": "object"
+    },
+    "StrokesGainedClaimsV1": {
+      "additionalProperties": false,
+      "properties": {
+        "causal_inference": {
+          "const": false,
+          "default": false,
+          "title": "Causal Inference",
+          "type": "boolean"
+        },
+        "device_certification": {
+          "const": false,
+          "default": false,
+          "title": "Device Certification",
+          "type": "boolean"
+        },
+        "device_emulation": {
+          "const": false,
+          "default": false,
+          "title": "Device Emulation",
+          "type": "boolean"
+        },
+        "is_strokes_gained": {
+          "const": true,
+          "default": true,
+          "title": "Is Strokes Gained",
+          "type": "boolean"
+        },
+        "source_backed": {
+          "const": true,
+          "default": true,
+          "title": "Source Backed",
+          "type": "boolean"
+        }
+      },
+      "title": "StrokesGainedClaimsV1",
+      "type": "object"
+    },
+    "StrokesGainedRowV1": {
+      "additionalProperties": false,
+      "properties": {
+        "benchmark_standard_error": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Benchmark Standard Error"
+        },
+        "expected_finish": {
+          "title": "Expected Finish",
+          "type": "number"
+        },
+        "expected_start": {
+          "title": "Expected Start",
+          "type": "number"
+        },
+        "finish": {
+          "$ref": "#/$defs/CourseStateValueV1"
+        },
+        "finish_interpolation": {
+          "$ref": "#/$defs/InterpolationV1"
+        },
+        "groups": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Groups",
+          "type": "object"
+        },
+        "input_record_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Input Record Sha256",
+          "type": "string"
+        },
+        "longitudinal_order": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Longitudinal Order"
+        },
+        "shot_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Shot Id"
+        },
+        "source_index": {
+          "minimum": 0,
+          "title": "Source Index",
+          "type": "integer"
+        },
+        "start": {
+          "$ref": "#/$defs/CourseStateValueV1"
+        },
+        "start_interpolation": {
+          "$ref": "#/$defs/InterpolationV1"
+        },
+        "strokes_gained": {
+          "title": "Strokes Gained",
+          "type": "number"
+        }
+      },
+      "required": [
+        "source_index",
+        "input_record_sha256",
+        "start",
+        "finish",
+        "expected_start",
+        "expected_finish",
+        "strokes_gained",
+        "start_interpolation",
+        "finish_interpolation"
+      ],
+      "title": "StrokesGainedRowV1",
+      "type": "object"
+    },
+    "StrokesGainedUncertaintyV1": {
+      "additionalProperties": false,
+      "properties": {
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "benchmark_method": {
+          "title": "Benchmark Method",
+          "type": "string"
+        },
+        "benchmark_standard_error_mean": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Benchmark Standard Error Mean"
+        },
+        "confidence_level": {
+          "title": "Confidence Level",
+          "type": "number"
+        },
+        "sampling_method": {
+          "title": "Sampling Method",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sampling_method",
+        "confidence_level",
+        "benchmark_method",
+        "assumptions"
+      ],
+      "title": "StrokesGainedUncertaintyV1",
+      "type": "object"
+    },
+    "TransformRecordV2": {
+      "additionalProperties": false,
+      "description": "Versioned transformation applied before analysis.",
+      "properties": {
+        "parameters_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Parameters Sha256",
+          "type": "string"
+        },
+        "transform_id": {
+          "minLength": 1,
+          "title": "Transform Id",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": ["transform_id", "version", "parameters_sha256"],
+      "title": "TransformRecordV2",
+      "type": "object"
+    },
+    "UncertaintyV2": {
+      "additionalProperties": false,
+      "properties": {
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "confidence_level": {
+          "exclusiveMaximum": 1.0,
+          "exclusiveMinimum": 0.5,
+          "title": "Confidence Level",
+          "type": "number"
+        },
+        "correlation_interval": {
+          "title": "Correlation Interval",
+          "type": "string"
+        },
+        "multiplicity_adjustment": {
+          "title": "Multiplicity Adjustment",
+          "type": "string"
+        },
+        "regression_interval": {
+          "title": "Regression Interval",
+          "type": "string"
+        }
+      },
+      "required": [
+        "confidence_level",
+        "correlation_interval",
+        "regression_interval",
+        "multiplicity_adjustment",
+        "assumptions"
+      ],
+      "title": "UncertaintyV2",
+      "type": "object"
+    },
+    "VendorProvenanceV2": {
+      "additionalProperties": false,
+      "properties": {
+        "metric_statuses": {
+          "additionalProperties": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Metric Statuses",
+          "type": "object"
+        },
+        "models": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Models",
+          "type": "array"
+        },
+        "row_count": {
+          "minimum": 1,
+          "title": "Row Count",
+          "type": "integer"
+        },
+        "software_versions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Software Versions",
+          "type": "array"
+        },
+        "vendor": {
+          "title": "Vendor",
+          "type": "string"
+        }
+      },
+      "required": [
+        "vendor",
+        "models",
+        "software_versions",
+        "row_count",
+        "metric_statuses"
+      ],
+      "title": "VendorProvenanceV2",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Complete consumer bundle with canonical content-address verification.",
+  "properties": {
+    "bundle_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Bundle Sha256",
+      "type": "string"
+    },
+    "bundle_version": {
+      "const": "launch-monitor-analytics-conformance/1.0.0",
+      "default": "launch-monitor-analytics-conformance/1.0.0",
+      "title": "Bundle Version",
+      "type": "string"
+    },
+    "data_classification": {
+      "const": "synthetic_contract_fixture_no_private_rows",
+      "default": "synthetic_contract_fixture_no_private_rows",
+      "title": "Data Classification",
+      "type": "string"
+    },
+    "description": {
+      "minLength": 1,
+      "title": "Description",
+      "type": "string"
+    },
+    "input_records_embedded": {
+      "const": false,
+      "default": false,
+      "title": "Input Records Embedded",
+      "type": "boolean"
+    },
+    "scenarios": {
+      "items": {
+        "$ref": "#/$defs/LaunchMonitorConformanceScenarioV1"
+      },
+      "minItems": 10,
+      "title": "Scenarios",
+      "type": "array"
+    }
+  },
+  "required": ["description", "scenarios", "bundle_sha256"],
+  "title": "LaunchMonitorConformanceBundleV1",
+  "type": "object"
+}

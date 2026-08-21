@@ -265,3 +265,28 @@ Dataset and analytical-model commits, when present, are full 40-character
 lowercase hexadecimal SHAs. Each backing record either joins to a declared
 content-addressed source by `source_id` or carries an explicit unlinked reason.
 An undeclared `source_id` is a contract error.
+
+## Data-Free Consumer Conformance Bundle
+
+Contract `launch-monitor-analytics-conformance/1.0.0` publishes one available
+and one structured-unavailable synthetic case for analysis v2, player
+covariation, attested longitudinal sessions, source-backed strokes gained, and
+the distance/target proxy. The fixture contains no input `records` array and no
+private or observed player rows. Derived synthetic row outputs and opaque
+backing hashes remain only where an underlying result contract requires them.
+
+Every scenario includes units and their authority, conservative claim flags,
+separate player/session/order evidence, source references, source-joinable
+backing hashes, exclusions, its result contract version, and a canonical
+scenario SHA-256. The bundle SHA-256 covers every field except the hash itself;
+validation fails after any content mutation.
+
+Consumers should validate both generated artifacts:
+
+- `docs/api/contracts/launch-monitor-conformance-bundle-v1.schema.json`;
+- `docs/api/contracts/fixtures/launch-monitor-conformance-bundle-v1.golden.json`.
+
+Regenerate them with `python -m scripts.generate_launch_monitor_contract`.
+Unknown fields remain selectable, but their units are `unknown` unless the
+synthetic source explicitly declares them. Source-declared units are not
+canonical authority. See [ADR 0040](../adr/0040-data-free-launch-monitor-conformance-bundle.md).
