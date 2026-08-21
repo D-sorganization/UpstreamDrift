@@ -23,6 +23,7 @@ from scripts.research.proximal_distal_energy.articulated_structural_checkpoint i
     METADATA_FIELD,
     audit_structural_checkpoint_directory,
     load_structural_checkpoint,
+    restore_structural_checkpoint_directory,
     structural_checkpoint_array_contract,
     structural_checkpoint_path,
     write_structural_checkpoint,
@@ -342,6 +343,37 @@ def test_checkpoint_set_audit_distinguishes_partial_from_complete(tmp_path) -> N
     assert complete["checkpoint_count"] == 72
     assert complete["complete_state_slot_count"] == 12
     assert complete["release_evidence"] is False
+
+
+def test_restart_inventory_returns_exact_restored_and_pending_work(tmp_path) -> None:
+    identity = _identity()
+    contracts = _branch_contracts(identity)
+
+    empty = restore_structural_checkpoint_directory(
+        tmp_path,
+        identity,
+        expected_contracts=contracts,
+    )
+    assert empty.audit["status"] == "empty"
+    assert empty.restored == {}
+    assert len(empty.pending) == 72
+    assert empty.pending[0] == (0, (0, 0), "primary", 0)
+
+    _write_registered_set(tmp_path, identity, 7)
+    partial = restore_structural_checkpoint_directory(
+        tmp_path,
+        identity,
+        expected_contracts=contracts,
+    )
+    assert partial.audit["status"] == "partial"
+    assert len(partial.restored) == 7
+    assert len(partial.pending) == 65
+    assert partial.pending[0] == (1, (0, 6), "primary", 1)
+    assert np.array_equal(
+        partial.restored[(0, "primary", 0)]["structural_nan"],
+        _arrays()["structural_nan"],
+        equal_nan=True,
+    )
 
 
 def test_checkpoint_set_audit_rejects_unregistered_files(tmp_path) -> None:

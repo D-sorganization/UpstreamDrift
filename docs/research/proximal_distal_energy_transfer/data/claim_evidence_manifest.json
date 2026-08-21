@@ -4053,8 +4053,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_structural_propagation_plan.json": {
-      "sha256": "821329bb2bbb773138d679d7977eff4adaa6700dfd1488a86a664036ff1823eb",
-      "bytes": 39791,
+      "sha256": "713e6317da13bf00a8dd6a82dbdaace8b96305d1a292b32c7b125a3f8ef9742b",
+      "bytes": 40003,
       "referenced_by": [
         "PD-CLAIM-301",
         "PD-CLAIM-302",
@@ -5678,8 +5678,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": {
-      "sha256": "cb23a12b6eea16e91f492fad4f6f6a52aa8195f728986eb229596c1c62752130",
-      "bytes": 26300,
+      "sha256": "05af1c3ce815807cb1726b237a23055aeb7ab986ea24d72d53b828c0ffb6ac61",
+      "bytes": 26516,
       "referenced_by": [
         "PD-CLAIM-301",
         "PD-CLAIM-302",
@@ -7099,8 +7099,8 @@
       ]
     },
     "tests/research/test_articulated_structural_propagation_plan.py": {
-      "sha256": "baa7011bb5981cb185bdfa2a0c2a18a370d0797ed5e498f7aa67777e5e962e07",
-      "bytes": 19913,
+      "sha256": "5a210492ec7d35687e244931a6e9a2a057820a2a7d3f0251729bf765b77338a2",
+      "bytes": 20074,
       "referenced_by": [
         "PD-CLAIM-301",
         "PD-CLAIM-302",

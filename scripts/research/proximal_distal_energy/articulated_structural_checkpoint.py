@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from dataclasses import dataclass
 import hashlib
 import io
 import json
@@ -23,7 +24,18 @@ Array: TypeAlias = NDArray[Any]
 ArraySignature: TypeAlias = tuple[tuple[int, ...], str]
 ArrayContract: TypeAlias = dict[str, ArraySignature]
 BranchContracts: TypeAlias = Mapping[tuple[str, int], Mapping[str, ArraySignature]]
+CheckpointKey: TypeAlias = tuple[int, str, int]
+CheckpointDescriptor: TypeAlias = tuple[int, tuple[int, int], str, int]
 METADATA_FIELD = "__metadata__"
+
+
+@dataclass(slots=True)
+class StructuralCheckpointInventory:
+    """Validated restart payloads and the exact remaining registered work."""
+
+    audit: dict[str, Any]
+    restored: dict[CheckpointKey, dict[str, Array]]
+    pending: tuple[CheckpointDescriptor, ...]
 
 
 def _field_name(name: object) -> str:
@@ -229,14 +241,13 @@ def structural_checkpoint_path(
     return directory / f"state-{state_slot:02d}-{branch_kind}-{branch_slot:02d}.npz"
 
 
-def audit_structural_checkpoint_directory(
+def restore_structural_checkpoint_directory(
     directory: Path,
     identity: StructuralExecutionIdentity,
     *,
     expected_contracts: BranchContracts,
-    allow_partial: bool = False,
-) -> dict[str, Any]:
-    """Validate exact registered checkpoint coverage without promoting partial work."""
+) -> StructuralCheckpointInventory:
+    """Restore valid branches and return the exact registered pending sequence."""
 
     if not isinstance(expected_contracts, Mapping) or set(expected_contracts) != set(
         identity.registered_branches
@@ -261,12 +272,11 @@ def audit_structural_checkpoint_directory(
     unknown = observed - set(expected)
     if unknown:
         raise RuntimeError("checkpoint directory contains unregistered files")
-    if not observed or (not allow_partial and observed != set(expected)):
-        raise RuntimeError("checkpoint directory is incomplete")
 
     content = hashlib.sha256()
     observed_states: set[int] = set()
     branch_count: dict[int, int] = {}
+    restored: dict[CheckpointKey, dict[str, Array]] = {}
     for path in sorted(observed):
         state_slot, state, branch_kind, branch_slot = expected[path]
         try:
@@ -275,14 +285,16 @@ def audit_structural_checkpoint_directory(
             raise RuntimeError(
                 "structural checkpoint cannot be loaded safely"
             ) from error
-        _load_structural_checkpoint_payload(
-            payload,
-            identity,
-            state_slot=state_slot,
-            state=state,
-            branch_kind=branch_kind,
-            branch_slot=branch_slot,
-            expected_contract=contracts[(branch_kind, branch_slot)],
+        restored[(state_slot, branch_kind, branch_slot)] = (
+            _load_structural_checkpoint_payload(
+                payload,
+                identity,
+                state_slot=state_slot,
+                state=state,
+                branch_kind=branch_kind,
+                branch_slot=branch_slot,
+                expected_contract=contracts[(branch_kind, branch_slot)],
+            )
         )
         observed_states.add(state_slot)
         branch_count[state_slot] = branch_count.get(state_slot, 0) + 1
@@ -293,10 +305,13 @@ def audit_structural_checkpoint_directory(
     complete_states = sum(
         count == branches_per_state for count in branch_count.values()
     )
-    complete = observed == set(expected)
-    return {
+    pending = tuple(
+        descriptor for path, descriptor in expected.items() if path not in observed
+    )
+    status = "empty" if not observed else "complete" if not pending else "partial"
+    audit = {
         "schema_version": "articulated-structural-checkpoint-audit/v1",
-        "status": "complete" if complete else "partial",
+        "status": status,
         "checkpoint_count": len(observed),
         "expected_checkpoint_count": len(expected),
         "observed_state_slot_count": len(observed_states),
@@ -304,15 +319,45 @@ def audit_structural_checkpoint_directory(
         "checkpoint_set_sha256": content.hexdigest(),
         "release_evidence": False,
     }
+    return StructuralCheckpointInventory(
+        audit=audit,
+        restored=restored,
+        pending=pending,
+    )
+
+
+def audit_structural_checkpoint_directory(
+    directory: Path,
+    identity: StructuralExecutionIdentity,
+    *,
+    expected_contracts: BranchContracts,
+    allow_partial: bool = False,
+) -> dict[str, Any]:
+    """Validate exact registered checkpoint coverage without promoting partial work."""
+
+    inventory = restore_structural_checkpoint_directory(
+        directory,
+        identity,
+        expected_contracts=expected_contracts,
+    )
+    if inventory.audit["status"] == "empty" or (
+        not allow_partial and inventory.audit["status"] != "complete"
+    ):
+        raise RuntimeError("checkpoint directory is incomplete")
+    return inventory.audit
 
 
 __all__ = [
     "ArrayContract",
     "ArraySignature",
     "BranchContracts",
+    "CheckpointDescriptor",
+    "CheckpointKey",
     "METADATA_FIELD",
+    "StructuralCheckpointInventory",
     "audit_structural_checkpoint_directory",
     "load_structural_checkpoint",
+    "restore_structural_checkpoint_directory",
     "structural_checkpoint_array_contract",
     "structural_checkpoint_path",
     "write_structural_checkpoint",
