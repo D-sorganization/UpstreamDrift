@@ -135,23 +135,11 @@ def _attach(
     _review(reviews, candidate, claim_ids, "Repeated summary inherits claim bounds.")
 
 
-def main() -> None:
-    registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
-    inventory = json.loads(INVENTORY.read_text(encoding="utf-8"))
-    candidates = inventory["candidates"]
-    valid_ids = {candidate["candidate_id"] for candidate in candidates}
-    registry["claims"] = [
-        claim for claim in registry["claims"] if claim["claim_id"] not in CLAIM_IDS
-    ]
-    for claim in registry["claims"]:
-        claim["candidate_ids"] = [
-            candidate_id
-            for candidate_id in claim.get("candidate_ids", [])
-            if candidate_id in valid_ids
-        ]
+def _selected(candidates: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    """Resolve each finite-ground passage exactly once."""
 
     chapter = "_ch06ca_articulated_ground.qmd"
-    selected = {
+    return {
         "intro": _find(candidates, chapter, "The finite-base extension supplies"),
         "mass": _find(candidates, chapter, "Only the non-club body tree"),
         "law": _find(candidates, chapter, "The synthetic passive support law"),
@@ -175,7 +163,12 @@ def main() -> None:
         ),
         "boundary": _find(candidates, chapter, "The support is linear and bilateral"),
     }
-    new_claims = [
+
+
+def _ground_claims(selected: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
+    """Build the four registered finite-ground claims."""
+
+    return [
         _claim(
             "PD-CLAIM-293",
             [selected[key] for key in ("intro", "mass", "law", "moment", "pathways")],
@@ -213,13 +206,14 @@ def main() -> None:
             "A primary match exists under the registered rule, the post-hoc counts fail to reproduce, or unmatched differences are presented as identified effects.",
         ),
     ]
-    registry["claims"].extend(new_claims)
-    claims = {claim["claim_id"]: claim for claim in registry["claims"]}
-    reviews = {
-        review["candidate_id"]: review
-        for review in registry["candidate_reviews"]
-        if review["candidate_id"] in valid_ids
-    }
+
+
+def _map_primary_reviews(
+    reviews: dict[str, dict[str, Any]],
+    selected: dict[str, dict[str, Any]],
+) -> None:
+    """Map chapter passages and classify the figure include."""
+
     mapping = {
         "intro": ("PD-CLAIM-293",),
         "mass": ("PD-CLAIM-293",),
@@ -237,8 +231,9 @@ def main() -> None:
     }
     for name, claim_ids in mapping.items():
         _review(reviews, selected[name], claim_ids, "Finite-ground claim or boundary.")
-    reviews[selected["figure"]["candidate_id"]] = {
-        "candidate_id": selected["figure"]["candidate_id"],
+    figure = selected["figure"]
+    reviews[figure["candidate_id"]] = {
+        "candidate_id": figure["candidate_id"],
         "disposition": "editorial_or_navigation",
         "claim_ids": [],
         "rationale": "The figure include points to governed evidence.",
@@ -246,7 +241,97 @@ def main() -> None:
         "last_verified_on": DATE,
     }
 
-    repeated = [
+
+def _map_editorial_reviews(
+    reviews: dict[str, dict[str, Any]], candidates: list[dict[str, Any]]
+) -> None:
+    """Classify availability and moved-figure passages as editorial."""
+
+    passages = (
+        (
+            _find(candidates, "_ch09_conclusions.qmd", "Analysis code, tests, figures"),
+            "This passage links governed artifacts without adding a result.",
+        ),
+        (
+            _find(
+                candidates,
+                "_ch06cb_spatial_cross_tail.qmd",
+                "![Scapular Mobility and Bilateral Contact Geometry]",
+            ),
+            "The moved figure include does not add a standalone claim.",
+        ),
+    )
+    for candidate, rationale in passages:
+        reviews[candidate["candidate_id"]] = {
+            "candidate_id": candidate["candidate_id"],
+            "disposition": "editorial_or_navigation",
+            "claim_ids": [],
+            "rationale": rationale,
+            "reviewer": "Codex technical audit",
+            "last_verified_on": DATE,
+        }
+
+
+def _repair_reciprocal_links(
+    claims: dict[str, dict[str, Any]],
+    reviews: dict[str, dict[str, Any]],
+    candidates: list[dict[str, Any]],
+) -> None:
+    """Rebuild reciprocal review links and source locations deterministically."""
+
+    reciprocal: dict[str, list[str]] = {}
+    for claim in claims.values():
+        for candidate_id in claim.get("candidate_ids", []):
+            reciprocal.setdefault(candidate_id, []).append(claim["claim_id"])
+    for candidate_id, review in reviews.items():
+        review["claim_ids"] = list(
+            dict.fromkeys([*review["claim_ids"], *reciprocal.get(candidate_id, [])])
+        )
+
+    candidate_by_id = {candidate["candidate_id"]: candidate for candidate in candidates}
+    for claim in claims.values():
+        if claim.get("candidate_ids"):
+            claim["source_locations"] = [
+                f"{candidate_by_id[candidate_id]['source_path']}:"
+                f"{candidate_by_id[candidate_id]['line_start']}"
+                for candidate_id in claim["candidate_ids"]
+            ]
+
+
+def _finalize_registry(
+    registry: dict[str, Any],
+    inventory: dict[str, Any],
+    claims: dict[str, dict[str, Any]],
+    reviews: dict[str, dict[str, Any]],
+) -> None:
+    """Write the finite-ground release scope without changing list order."""
+
+    registry["candidate_reviews"] = list(reviews.values())
+    release = {
+        item["release_claim_key"]: item for item in registry["release_claim_inventory"]
+    }
+    release["articulated_ground_free_moment"] = {
+        "release_claim_key": "articulated_ground_free_moment",
+        "published_status": "fifty_millisecond_finite_ground_gate_qualified_primary_match_empty",
+        "audit_state": "reviewed_as_synthetic_finite_base_result_with_adverse_primary_match",
+    }
+    registry["release_claim_inventory"] = list(release.values())
+    registry["audit_scope"]["current_scope"] = (
+        "The complete paper inventory is adjudicated. The finite-base ground and "
+        "intrinsic-free-moment tier passes registered numerical gates, while its "
+        "primary coupled--fixed matching set is empty and no effect is identified."
+    )
+    registry["paper"]["source_digest"] = inventory["source_digest"]
+    registry["claims"] = list(claims.values())
+    REGISTRY.write_text(json.dumps(registry, indent=2) + "\n", encoding="utf-8")
+
+
+def _repeated_foundation(
+    candidates: list[dict[str, Any]],
+) -> list[tuple[dict[str, Any], tuple[str, ...]]]:
+    """Return abstract, shaft, and model-ladder repeat mappings."""
+
+    return [
         (
             _find(
                 candidates,
@@ -310,6 +395,15 @@ def main() -> None:
             ),
             ("PD-CLAIM-128", "PD-CLAIM-293", "PD-CLAIM-296"),
         ),
+    ]
+
+
+def _repeated_release(
+    candidates: list[dict[str, Any]],
+) -> list[tuple[dict[str, Any], tuple[str, ...]]]:
+    """Return transfer-question, conclusion, and release repeat mappings."""
+
+    return [
         (
             _find(
                 candidates,
@@ -383,52 +477,38 @@ def main() -> None:
             ),
             ("PD-CLAIM-128", "PD-CLAIM-296"),
         ),
+    ]
+
+
+def _repeated_spatial_context(
+    candidates: list[dict[str, Any]],
+) -> list[tuple[dict[str, Any], tuple[str, ...]]]:
+    """Return inherited spatial-tail context mappings."""
+
+    chapter = "_ch06cb_spatial_cross_tail.qmd"
+    return [
         (
-            _find(
-                candidates,
-                "_ch06cb_spatial_cross_tail.qmd",
-                "The fixed shoulder centers",
-            ),
+            _find(candidates, chapter, "The fixed shoulder centers"),
             ("PD-CLAIM-262", "PD-CLAIM-265"),
         ),
         (
-            _find(
-                candidates,
-                "_ch06cb_spatial_cross_tail.qmd",
-                "The screen uses the same six",
-            ),
+            _find(candidates, chapter, "The screen uses the same six"),
             ("PD-CLAIM-262", "PD-CLAIM-265"),
         ),
         (
-            _find(
-                candidates,
-                "_ch06cb_spatial_cross_tail.qmd",
-                "No fixed-shoulder arm-only state",
-            ),
+            _find(candidates, chapter, "No fixed-shoulder arm-only state"),
             ("PD-CLAIM-265", "PD-CLAIM-266"),
         ),
         (
-            _find(
-                candidates,
-                "_ch06cb_spatial_cross_tail.qmd",
-                "Both paired contact Jacobians",
-            ),
+            _find(candidates, chapter, "Both paired contact Jacobians"),
             ("PD-CLAIM-267",),
         ),
         (
-            _find(
-                candidates,
-                "_ch06cb_spatial_cross_tail.qmd",
-                "This result advances the model ladder",
-            ),
+            _find(candidates, chapter, "This result advances the model ladder"),
             ("PD-CLAIM-262", "PD-CLAIM-267"),
         ),
         (
-            _find(
-                candidates,
-                "_ch06cb_spatial_cross_tail.qmd",
-                "The bounded articulated experiments",
-            ),
+            _find(candidates, chapter, "The bounded articulated experiments"),
             (
                 "PD-CLAIM-128",
                 "PD-CLAIM-288",
@@ -438,6 +518,38 @@ def main() -> None:
                 "PD-CLAIM-296",
             ),
         ),
+    ]
+
+
+def main() -> None:
+    registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
+    inventory = json.loads(INVENTORY.read_text(encoding="utf-8"))
+    candidates = inventory["candidates"]
+    valid_ids = {candidate["candidate_id"] for candidate in candidates}
+    registry["claims"] = [
+        claim for claim in registry["claims"] if claim["claim_id"] not in CLAIM_IDS
+    ]
+    for claim in registry["claims"]:
+        claim["candidate_ids"] = [
+            candidate_id
+            for candidate_id in claim.get("candidate_ids", [])
+            if candidate_id in valid_ids
+        ]
+
+    selected = _selected(candidates)
+    registry["claims"].extend(_ground_claims(selected))
+    claims = {claim["claim_id"]: claim for claim in registry["claims"]}
+    reviews = {
+        review["candidate_id"]: review
+        for review in registry["candidate_reviews"]
+        if review["candidate_id"] in valid_ids
+    }
+    _map_primary_reviews(reviews, selected)
+
+    repeated = [
+        *_repeated_foundation(candidates),
+        *_repeated_release(candidates),
+        *_repeated_spatial_context(candidates),
         (
             _find(
                 candidates,
@@ -504,67 +616,9 @@ def main() -> None:
     for candidate, claim_ids in repeated:
         _attach(claims, reviews, candidate, claim_ids)
 
-    availability = _find(
-        candidates, "_ch09_conclusions.qmd", "Analysis code, tests, figures"
-    )
-    reviews[availability["candidate_id"]] = {
-        "candidate_id": availability["candidate_id"],
-        "disposition": "editorial_or_navigation",
-        "claim_ids": [],
-        "rationale": "This passage links governed artifacts without adding a result.",
-        "reviewer": "Codex technical audit",
-        "last_verified_on": DATE,
-    }
-    scapular_figure = _find(
-        candidates,
-        "_ch06cb_spatial_cross_tail.qmd",
-        "![Scapular Mobility and Bilateral Contact Geometry]",
-    )
-    reviews[scapular_figure["candidate_id"]] = {
-        "candidate_id": scapular_figure["candidate_id"],
-        "disposition": "editorial_or_navigation",
-        "claim_ids": [],
-        "rationale": "The moved figure include does not add a standalone claim.",
-        "reviewer": "Codex technical audit",
-        "last_verified_on": DATE,
-    }
-
-    reciprocal: dict[str, list[str]] = {}
-    for claim in claims.values():
-        for candidate_id in claim.get("candidate_ids", []):
-            reciprocal.setdefault(candidate_id, []).append(claim["claim_id"])
-    for candidate_id, review in reviews.items():
-        review["claim_ids"] = list(
-            dict.fromkeys([*review["claim_ids"], *reciprocal.get(candidate_id, [])])
-        )
-
-    candidate_by_id = {candidate["candidate_id"]: candidate for candidate in candidates}
-    for claim in claims.values():
-        if claim.get("candidate_ids"):
-            claim["source_locations"] = [
-                f"{candidate_by_id[candidate_id]['source_path']}:"
-                f"{candidate_by_id[candidate_id]['line_start']}"
-                for candidate_id in claim["candidate_ids"]
-            ]
-
-    registry["candidate_reviews"] = list(reviews.values())
-    release = {
-        item["release_claim_key"]: item for item in registry["release_claim_inventory"]
-    }
-    release["articulated_ground_free_moment"] = {
-        "release_claim_key": "articulated_ground_free_moment",
-        "published_status": "fifty_millisecond_finite_ground_gate_qualified_primary_match_empty",
-        "audit_state": "reviewed_as_synthetic_finite_base_result_with_adverse_primary_match",
-    }
-    registry["release_claim_inventory"] = list(release.values())
-    registry["audit_scope"]["current_scope"] = (
-        "The complete paper inventory is adjudicated. The finite-base ground and "
-        "intrinsic-free-moment tier passes registered numerical gates, while its "
-        "primary coupled--fixed matching set is empty and no effect is identified."
-    )
-    registry["paper"]["source_digest"] = inventory["source_digest"]
-    registry["claims"] = list(claims.values())
-    REGISTRY.write_text(json.dumps(registry, indent=2) + "\n", encoding="utf-8")
+    _map_editorial_reviews(reviews, candidates)
+    _repair_reciprocal_links(claims, reviews, candidates)
+    _finalize_registry(registry, inventory, claims, reviews)
 
 
 if __name__ == "__main__":
