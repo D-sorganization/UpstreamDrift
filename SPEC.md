@@ -4220,3 +4220,4 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Added canonical source-backed strokes-gained contract schema and analytics routes (`ADR-0035`, `docs/api/contracts/launch-monitor-strokes-gained-v1.schema.json`).
 - Added immutable launch-monitor dataset reference and aggregate job service routes (`ADR-0037`, contract `launch-monitor-dataset-job/1.0.0`).
 - Updated Ruff and Bandit toolchain compliance configuration in `pyproject.toml` and scripts to satisfy standard CI quality gates.
+- Replaced pandas `iterrows()` with vectorized `.to_dict("records")` in `launch_monitor/outcome_proxy.py` and `launch_monitor/strokes_gained.py` to optimize batch processing. (spec-exempt: micro-optimization)
