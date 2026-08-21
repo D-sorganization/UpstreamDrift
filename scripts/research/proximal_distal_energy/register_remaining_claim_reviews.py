@@ -17,33 +17,10 @@ INVENTORY = ARTICLE / "data/claim_candidate_inventory.json"
 DATE = "2026-08-13"
 
 
-def main() -> None:
-    registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
-    inventory = json.loads(INVENTORY.read_text(encoding="utf-8"))
-    generated_ids = {
-        review["candidate_id"]
-        for review in registry["candidate_reviews"]
-        if review.get("reviewer") == "Codex technical audit"
-        and str(review.get("rationale", "")).startswith(
-            ("This repeated", "This heading")
-        )
-    }
-    registry["candidate_reviews"] = [
-        review
-        for review in registry["candidate_reviews"]
-        if review["candidate_id"] not in generated_ids
-    ]
-    for claim in registry["claims"]:
-        claim["candidate_ids"] = [
-            candidate_id
-            for candidate_id in claim.get("candidate_ids", [])
-            if candidate_id not in generated_ids
-        ]
-    reviewed = {review["candidate_id"] for review in registry["candidate_reviews"]}
-    remaining = [
-        c for c in inventory["candidates"] if c["candidate_id"] not in reviewed
-    ]
-    new_claims = [
+def _registered_claims() -> list[dict[str, object]]:
+    """Return the seven bounded claims created by this reconciliation pass."""
+
+    return [
         {
             "claim_id": "PD-CLAIM-235",
             "statement": "The rotating-base tier is a seven-coordinate, four-constraint planar mechanism with finite torso inertia, separated hand reactions, projected position/velocity closure, and a checked bilateral contact-power identity.",
@@ -108,7 +85,12 @@ def main() -> None:
             "falsifier": "Interactive output is promoted as publication authority, provider identity drifts, or bundle validation permits artifact drift.",
         },
     ]
-    common = {
+
+
+def _common_claim_fields() -> dict[str, object]:
+    """Return shared audit metadata for newly reconciled claims."""
+
+    return {
         "candidate_ids": [],
         "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
         "source_locations": [],
@@ -127,173 +109,250 @@ def main() -> None:
         "reviewer": "Codex technical audit",
         "last_verified_on": DATE,
     }
-    registry["claims"] = [
-        claim
-        for claim in registry["claims"]
-        if claim["claim_id"] not in {c["claim_id"] for c in new_claims}
-    ] + [{**common, **claim} for claim in new_claims]
-    claims = {claim["claim_id"]: claim for claim in registry["claims"]}
 
-    def assign(candidate: dict[str, object]) -> tuple[str, ...]:
-        path = str(candidate["source_path"])
-        text = " ".join(str(candidate["text"]).split()).lower()
-        name = Path(path).name
 
-        if name == "proximal_distal_energy_transfer.qmd":
-            return ("PD-CLAIM-007", "PD-CLAIM-008", "PD-CLAIM-214")
-        if name == "_ch01_introduction.qmd":
-            if "zero-torque counterfactual" in text:
-                return ("PD-CLAIM-047", "PD-CLAIM-058")
-            if "drive early" in text:
-                return ("PD-CLAIM-022", "PD-CLAIM-214")
-            if "six contributions" in text or text.startswith("1. a synthesis"):
-                return ("PD-CLAIM-050", "PD-CLAIM-214")
-            if "rq" in text or "four questions" in text:
-                return ("PD-CLAIM-050", "PD-CLAIM-215")
-            if "empirical findings" in text:
-                return ("PD-CLAIM-004", "PD-CLAIM-223")
-            if "within a declared model" in text or "first-order question" in text:
-                return ("PD-CLAIM-214",)
-            return ()
-        if name == "_ch03c_ground_reaction_drift.qmd":
-            return ("PD-CLAIM-076",)
-        if name == "_ch03d_shoulder_velocity_transfer.qmd":
-            if "13 of the 18" in text or "matching contract changes" in text:
-                return ("PD-CLAIM-236",)
-            if "at 30 ms" in text:
-                return ("PD-CLAIM-237",)
-            if "two geometry controls" in text:
-                return ("PD-CLAIM-238",)
-            if "supported mechanism claim" in text:
-                return ("PD-CLAIM-238",)
-            if "force-power atlas" in text:
-                return ("PD-CLAIM-235", "PD-CLAIM-236")
-            if "initial torso rates" in text:
-                return ("PD-CLAIM-235", "PD-CLAIM-236")
-            if "rejects nonfinite" in text:
-                return ("PD-CLAIM-235",)
-            if "multipliers" in text or "seven generalized coordinates" in text:
-                return ("PD-CLAIM-235",)
-            return ()
-        if name == "_ch05a_interactive_workbench.qmd":
-            if "exploratory_model_output" in text:
-                return ("PD-CLAIM-223", "PD-CLAIM-241")
-            if "six bounded experiments" in text:
-                return ("PD-CLAIM-230", "PD-CLAIM-241")
-            return ("PD-CLAIM-241",)
-        if name == "_ch06bb_shaft_beam_reference.qmd":
-            if "0.0413" in text or "slow pulse" in text or "reduced model" in text:
-                return ("PD-CLAIM-240",)
-            if (
-                "structural verification" in text
-                or "equipment" in text
-                or "synthetic" in text
-            ):
-                return ("PD-CLAIM-223", "PD-CLAIM-239")
-            if "work--energy residual" in text or "damping loss" in text:
-                return ("PD-CLAIM-240",)
-            if "narrower structural coupling gap" in text:
-                return ("PD-CLAIM-224", "PD-CLAIM-239")
-            return ("PD-CLAIM-239", "PD-CLAIM-240")
-        if name == "_ch06f_open_release.qmd":
-            if "completion gates" in text:
-                return ("PD-CLAIM-130", "PD-CLAIM-206", "PD-CLAIM-234")
-            if "records planar interaction" in text:
-                return ("PD-CLAIM-128", "PD-CLAIM-229")
+def _assign_foundation_chapters(name: str, text: str) -> tuple[str, ...] | None:
+    """Map overview, rotating-base, workbench, beam, and release chapters."""
+
+    if name == "proximal_distal_energy_transfer.qmd":
+        return ("PD-CLAIM-007", "PD-CLAIM-008", "PD-CLAIM-214")
+    if name == "_ch01_introduction.qmd":
+        if "zero-torque counterfactual" in text:
+            return ("PD-CLAIM-047", "PD-CLAIM-058")
+        if "drive early" in text:
+            return ("PD-CLAIM-022", "PD-CLAIM-214")
+        if "six contributions" in text or text.startswith("1. a synthesis"):
+            return ("PD-CLAIM-050", "PD-CLAIM-214")
+        if "rq" in text or "four questions" in text:
+            return ("PD-CLAIM-050", "PD-CLAIM-215")
+        if "empirical findings" in text:
+            return ("PD-CLAIM-004", "PD-CLAIM-223")
+        if "within a declared model" in text or "first-order question" in text:
+            return ("PD-CLAIM-214",)
+        return ()
+    if name == "_ch03c_ground_reaction_drift.qmd":
+        return ("PD-CLAIM-076",)
+    if name == "_ch03d_shoulder_velocity_transfer.qmd":
+        if "13 of the 18" in text or "matching contract changes" in text:
+            return ("PD-CLAIM-236",)
+        if "at 30 ms" in text:
+            return ("PD-CLAIM-237",)
+        if "two geometry controls" in text or "supported mechanism claim" in text:
+            return ("PD-CLAIM-238",)
+        if "force-power atlas" in text or "initial torso rates" in text:
+            return ("PD-CLAIM-235", "PD-CLAIM-236")
+        if "rejects nonfinite" in text:
+            return ("PD-CLAIM-235",)
+        if "multipliers" in text or "seven generalized coordinates" in text:
+            return ("PD-CLAIM-235",)
+        return ()
+    if name == "_ch05a_interactive_workbench.qmd":
+        if "exploratory_model_output" in text:
             return ("PD-CLAIM-223", "PD-CLAIM-241")
-        if name == "_ch05_platform.qmd":
-            if "drift-plus-control" in text or "workflow separates" in text:
-                return ("PD-CLAIM-051", "PD-CLAIM-058")
-            if "mujoco" in text:
-                return ("PD-CLAIM-126",)
-            return ("PD-CLAIM-223",)
-        if name == "_ch06_methods.qmd":
-            if "torque-velocity" in text:
-                return ("PD-CLAIM-209",)
-            if "finite command-rise" in text:
-                return ("PD-CLAIM-213",)
-            if "matched-state" in text:
-                return ("PD-CLAIM-098", "PD-CLAIM-099")
-            if "robustness analyses" in text:
-                return ("PD-CLAIM-213",)
-            if "pointwise counterfactual" in text:
-                return ("PD-CLAIM-212",)
-            if "92 distinct programs" in text or "for every program" in text:
-                return ("PD-CLAIM-207", "PD-CLAIM-208")
-            if "wrist-interface power" in text or "interaction-force audit" in text:
-                return ("PD-CLAIM-211",)
-            if "phase budgets" in text or "segment energies" in text:
-                return ("PD-CLAIM-211",)
-            return ("PD-CLAIM-207", "PD-CLAIM-214")
-        if name == "_ch08_discussion.qmd":
-            if "active restraint" in text:
-                return ("PD-CLAIM-208", "PD-CLAIM-214")
-            if "energy budgets" in text:
-                return ("PD-CLAIM-211", "PD-CLAIM-212")
-            if "specific gaps" in text or "spatial body" in text:
-                return ("PD-CLAIM-132", "PD-CLAIM-214")
+        if "six bounded experiments" in text:
+            return ("PD-CLAIM-230", "PD-CLAIM-241")
+        return ("PD-CLAIM-241",)
+    if name == "_ch06bb_shaft_beam_reference.qmd":
+        if "0.0413" in text or "slow pulse" in text or "reduced model" in text:
+            return ("PD-CLAIM-240",)
+        if (
+            "structural verification" in text
+            or "equipment" in text
+            or "synthetic" in text
+        ):
+            return ("PD-CLAIM-223", "PD-CLAIM-239")
+        if "work--energy residual" in text or "damping loss" in text:
+            return ("PD-CLAIM-240",)
+        if "narrower structural coupling gap" in text:
+            return ("PD-CLAIM-224", "PD-CLAIM-239")
+        return ("PD-CLAIM-239", "PD-CLAIM-240")
+    if name == "_ch06f_open_release.qmd":
+        if "completion gates" in text:
+            return ("PD-CLAIM-130", "PD-CLAIM-206", "PD-CLAIM-234")
+        if "records planar interaction" in text:
+            return ("PD-CLAIM-128", "PD-CLAIM-229")
+        return ("PD-CLAIM-223", "PD-CLAIM-241")
+    if name == "_ch05_platform.qmd":
+        if "drift-plus-control" in text or "workflow separates" in text:
+            return ("PD-CLAIM-051", "PD-CLAIM-058")
+        if "mujoco" in text:
+            return ("PD-CLAIM-126",)
+        return ("PD-CLAIM-223",)
+    return None
+
+
+def _assign_methods_chapters(name: str, text: str) -> tuple[str, ...] | None:
+    """Map methods, discussion, and momentum-question passages."""
+
+    if name == "_ch06_methods.qmd":
+        if "torque-velocity" in text:
+            return ("PD-CLAIM-209",)
+        if "finite command-rise" in text:
+            return ("PD-CLAIM-213",)
+        if "matched-state" in text:
+            return ("PD-CLAIM-098", "PD-CLAIM-099")
+        if "robustness analyses" in text:
+            return ("PD-CLAIM-213",)
+        if "pointwise counterfactual" in text:
+            return ("PD-CLAIM-212",)
+        if "92 distinct programs" in text or "for every program" in text:
+            return ("PD-CLAIM-207", "PD-CLAIM-208")
+        if "wrist-interface power" in text or "interaction-force audit" in text:
+            return ("PD-CLAIM-211",)
+        if "phase budgets" in text or "segment energies" in text:
+            return ("PD-CLAIM-211",)
+        return ("PD-CLAIM-207", "PD-CLAIM-214")
+    if name == "_ch08_discussion.qmd":
+        if "active restraint" in text:
             return ("PD-CLAIM-208", "PD-CLAIM-214")
-        if name == "_ch08b_momentum_transfer_questions.qmd":
-            if "typed experimental program" in text:
-                return ("PD-CLAIM-253", "PD-CLAIM-285")
-            if "next articulated atlas crosses" in text:
-                return ("PD-CLAIM-286", "PD-CLAIM-287", "PD-CLAIM-288")
-            if "following articulated shaft atlas" in text:
-                return ("PD-CLAIM-290", "PD-CLAIM-291", "PD-CLAIM-292")
-            raise ValueError(f"Unhandled momentum-question candidate: {text[:120]}")
-        if name == "_ch06c_spatial_cross_formulation.qmd":
-            if "right-censored synthetic result" in text:
-                return (
-                    "PD-CLAIM-262",
-                    "PD-CLAIM-264",
-                    "PD-CLAIM-270",
-                    "PD-CLAIM-282",
-                    "PD-CLAIM-285",
-                )
-            if "loading-only damper" in text:
-                return ("PD-CLAIM-283",)
-            raise ValueError(f"Unhandled spatial-cross candidate: {text[:120]}")
-        if name == "_ch09_conclusions.qmd":
-            if "early wrist drive" in text:
-                return ("PD-CLAIM-208", "PD-CLAIM-211", "PD-CLAIM-212")
-            if "torque-velocity bounds" in text:
-                return ("PD-CLAIM-213", "PD-CLAIM-214")
-            if "50 ms after" in text:
-                return ("PD-CLAIM-003",)
-            if "moving-base/flexible" in text:
-                return ("PD-CLAIM-123",)
-            if "distributed-shaft comparison" in text:
-                return ("PD-CLAIM-227", "PD-CLAIM-229")
-            if "full-body common-state" in text:
-                return ("PD-CLAIM-126",)
-            if "spatial forward-contact" in text:
-                return ("PD-CLAIM-127",)
-            if "uncertainty/control" in text:
-                return ("PD-CLAIM-219", "PD-CLAIM-220", "PD-CLAIM-221")
-            if "experimental phase" in text:
-                return ("PD-CLAIM-206",)
-            if "open-resource layer" in text:
-                return ("PD-CLAIM-223",)
-            if "next work" in text or "articulated spatial" in text:
-                return ("PD-CLAIM-130", "PD-CLAIM-206", "PD-CLAIM-234")
-            if "literature does not support" in text:
-                return ("PD-CLAIM-007", "PD-CLAIM-008", "PD-CLAIM-214")
-            return ()
-        if name == "_appendices.qmd":
-            if "current evidence boundary" in text or "multi-phase" in text:
-                return ("PD-CLAIM-128", "PD-CLAIM-132", "PD-CLAIM-234")
-            if "tests exercise" in text:
-                return ("PD-CLAIM-211", "PD-CLAIM-223")
-            if "outputs land" in text or "implementation separates" in text:
-                return ("PD-CLAIM-223",)
-            if "arm length" in text:
-                return ("PD-CLAIM-207",)
-            return ()
-        raise ValueError(f"Unhandled remaining chapter: {name}")
+        if "energy budgets" in text:
+            return ("PD-CLAIM-211", "PD-CLAIM-212")
+        if "specific gaps" in text or "spatial body" in text:
+            return ("PD-CLAIM-132", "PD-CLAIM-214")
+        return ("PD-CLAIM-208", "PD-CLAIM-214")
+    if name == "_ch08b_momentum_transfer_questions.qmd":
+        if "typed experimental program" in text:
+            return ("PD-CLAIM-253", "PD-CLAIM-285")
+        if "next articulated atlas crosses" in text:
+            return ("PD-CLAIM-286", "PD-CLAIM-287", "PD-CLAIM-288")
+        if "following articulated shaft atlas" in text:
+            return ("PD-CLAIM-290", "PD-CLAIM-291", "PD-CLAIM-292")
+        raise ValueError(f"Unhandled momentum-question candidate: {text[:120]}")
+    return None
+
+
+def _assign_conclusion_chapters(name: str, text: str) -> tuple[str, ...] | None:
+    """Map spatial-cross, conclusion, and appendix passages."""
+
+    if name == "_ch06c_spatial_cross_formulation.qmd":
+        if "right-censored synthetic result" in text:
+            return (
+                "PD-CLAIM-262",
+                "PD-CLAIM-264",
+                "PD-CLAIM-270",
+                "PD-CLAIM-282",
+                "PD-CLAIM-285",
+            )
+        if "loading-only damper" in text:
+            return ("PD-CLAIM-283",)
+        raise ValueError(f"Unhandled spatial-cross candidate: {text[:120]}")
+    if name == "_ch09_conclusions.qmd":
+        if "early wrist drive" in text:
+            return ("PD-CLAIM-208", "PD-CLAIM-211", "PD-CLAIM-212")
+        if "torque-velocity bounds" in text:
+            return ("PD-CLAIM-213", "PD-CLAIM-214")
+        if "50 ms after" in text:
+            return ("PD-CLAIM-003",)
+        if "moving-base/flexible" in text:
+            return ("PD-CLAIM-123",)
+        if "distributed-shaft comparison" in text:
+            return ("PD-CLAIM-227", "PD-CLAIM-229")
+        if "full-body common-state" in text:
+            return ("PD-CLAIM-126",)
+        if "spatial forward-contact" in text:
+            return ("PD-CLAIM-127",)
+        if "uncertainty/control" in text:
+            return ("PD-CLAIM-219", "PD-CLAIM-220", "PD-CLAIM-221")
+        if "experimental phase" in text:
+            return ("PD-CLAIM-206",)
+        if "open-resource layer" in text:
+            return ("PD-CLAIM-223",)
+        if "next work" in text or "articulated spatial" in text:
+            return ("PD-CLAIM-130", "PD-CLAIM-206", "PD-CLAIM-234")
+        if "literature does not support" in text:
+            return ("PD-CLAIM-007", "PD-CLAIM-008", "PD-CLAIM-214")
+        return ()
+    if name == "_appendices.qmd":
+        if "current evidence boundary" in text or "multi-phase" in text:
+            return ("PD-CLAIM-128", "PD-CLAIM-132", "PD-CLAIM-234")
+        if "tests exercise" in text:
+            return ("PD-CLAIM-211", "PD-CLAIM-223")
+        if "outputs land" in text or "implementation separates" in text:
+            return ("PD-CLAIM-223",)
+        if "arm length" in text:
+            return ("PD-CLAIM-207",)
+        return ()
+    return None
+
+
+def _assign_candidate(candidate: dict[str, object]) -> tuple[str, ...]:
+    """Dispatch a candidate to its chapter-specific claim mapping."""
+
+    path = str(candidate["source_path"])
+    text = " ".join(str(candidate["text"]).split()).lower()
+    name = Path(path).name
+    for mapper in (
+        _assign_foundation_chapters,
+        _assign_methods_chapters,
+        _assign_conclusion_chapters,
+    ):
+        mapped = mapper(name, text)
+        if mapped is not None:
+            return mapped
+    raise ValueError(f"Unhandled remaining chapter: {name}")
+
+
+def _remove_generated_reviews(
+    registry: dict[str, object], inventory: dict[str, object]
+) -> list[dict[str, object]]:
+    """Remove the prior generated pass and return unreviewed candidates."""
+
+    reviews = registry["candidate_reviews"]
+    claims = registry["claims"]
+    candidates = inventory["candidates"]
+    assert isinstance(reviews, list) and isinstance(claims, list)
+    assert isinstance(candidates, list)
+    generated_ids = {
+        review["candidate_id"]
+        for review in reviews
+        if review.get("reviewer") == "Codex technical audit"
+        and str(review.get("rationale", "")).startswith(
+            ("This repeated", "This heading")
+        )
+    }
+    registry["candidate_reviews"] = [
+        review for review in reviews if review["candidate_id"] not in generated_ids
+    ]
+    for claim in claims:
+        claim["candidate_ids"] = [
+            candidate_id
+            for candidate_id in claim.get("candidate_ids", [])
+            if candidate_id not in generated_ids
+        ]
+    reviewed = {
+        review["candidate_id"]
+        for review in registry["candidate_reviews"]  # type: ignore[union-attr]
+    }
+    return [
+        candidate
+        for candidate in candidates
+        if candidate["candidate_id"] not in reviewed
+    ]
+
+
+def _merge_registered_claims(
+    registry: dict[str, object], new_claims: list[dict[str, object]]
+) -> dict[str, dict[str, object]]:
+    """Replace only claims owned by this reconciliation pass."""
+
+    common = _common_claim_fields()
+    claims = registry["claims"]
+    assert isinstance(claims, list)
+    owned = {claim["claim_id"] for claim in new_claims}
+    registry["claims"] = [
+        claim for claim in claims if claim["claim_id"] not in owned
+    ] + [{**common, **claim} for claim in new_claims]
+    return {claim["claim_id"]: claim for claim in registry["claims"]}  # type: ignore[union-attr]
+
+
+def _candidate_reviews(
+    remaining: list[dict[str, object]], claims: dict[str, dict[str, object]]
+) -> list[dict[str, object]]:
+    """Adjudicate each remaining candidate against known claim identifiers."""
 
     reviews: list[dict[str, object]] = []
     for candidate in remaining:
-        mapped = assign(candidate)
+        mapped = _assign_candidate(candidate)
         unknown = set(mapped) - claims.keys()
         if unknown:
             raise ValueError(f"{candidate['candidate_id']}: unknown claims {unknown}")
@@ -320,18 +379,31 @@ def main() -> None:
                 "last_verified_on": DATE,
             }
         )
+    return reviews
 
-    registry["candidate_reviews"].extend(reviews)
-    by_id = {
-        candidate["candidate_id"]: candidate for candidate in inventory["candidates"]
-    }
-    regenerated_claim_ids = {claim["claim_id"] for claim in new_claims}
-    for claim in registry["claims"]:
-        if claim["claim_id"] not in regenerated_claim_ids:
+
+def _link_new_review_candidates(
+    registry: dict[str, object],
+    inventory: dict[str, object],
+    new_claims: list[dict[str, object]],
+    reviews: list[dict[str, object]],
+) -> dict[str, dict[str, object]]:
+    """Attach generated review candidates to new and inherited claims."""
+
+    registry_reviews = registry["candidate_reviews"]
+    claims = registry["claims"]
+    candidates = inventory["candidates"]
+    assert isinstance(registry_reviews, list) and isinstance(claims, list)
+    assert isinstance(candidates, list)
+    registry_reviews.extend(reviews)
+    by_id = {candidate["candidate_id"]: candidate for candidate in candidates}
+    regenerated = {claim["claim_id"] for claim in new_claims}
+    for claim in claims:
+        if claim["claim_id"] not in regenerated:
             continue
         candidate_ids = [
             review["candidate_id"]
-            for review in registry["candidate_reviews"]
+            for review in registry_reviews
             if claim["claim_id"] in review.get("claim_ids", [])
             and review["candidate_id"] in by_id
         ]
@@ -340,26 +412,30 @@ def main() -> None:
             f"{by_id[candidate_id]['source_path']}:{by_id[candidate_id]['line_start']}"
             for candidate_id in claim["candidate_ids"]
         ]
-    for claim in registry["claims"]:
+    for claim in claims:
         extra = [
-            r["candidate_id"] for r in reviews if claim["claim_id"] in r["claim_ids"]
+            review["candidate_id"]
+            for review in reviews
+            if claim["claim_id"] in review["claim_ids"]
         ]
         if extra:
             claim["candidate_ids"] = list(
                 dict.fromkeys([*claim.get("candidate_ids", []), *extra])
             )
+            locations = [
+                f"{by_id[candidate_id]['source_path']}:{by_id[candidate_id]['line_start']}"
+                for candidate_id in extra
+            ]
             claim["source_locations"] = list(
-                dict.fromkeys(
-                    [
-                        *claim.get("source_locations", []),
-                        *[
-                            f"{by_id[candidate_id]['source_path']}:{by_id[candidate_id]['line_start']}"
-                            for candidate_id in extra
-                        ],
-                    ]
-                )
+                dict.fromkeys([*claim.get("source_locations", []), *locations])
             )
             claim["last_verified_on"] = DATE
+    return by_id
+
+
+def _attach_registered_evidence(registry: dict[str, object]) -> None:
+    """Attach the declared artifacts for claims created by this pass."""
+
     evidence_by_claim = {
         "PD-CLAIM-235": [
             "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json",
@@ -385,17 +461,27 @@ def main() -> None:
             "docs/research/proximal_distal_energy_transfer/release_manifest.json",
         ],
     }
-    for claim in registry["claims"]:
+    claims = registry["claims"]
+    assert isinstance(claims, list)
+    for claim in claims:
         if claim["claim_id"] in evidence_by_claim:
             claim["evidence_artifacts"] = evidence_by_claim[claim["claim_id"]]
-    claims_by_id = {claim["claim_id"]: claim for claim in registry["claims"]}
-    reviews_by_id = {
-        review["candidate_id"]: review for review in registry["candidate_reviews"]
-    }
-    for review in registry["candidate_reviews"]:
+
+
+def _reconcile_reciprocal_links(
+    registry: dict[str, object], by_id: dict[str, dict[str, object]]
+) -> None:
+    """Make claim and review mappings reciprocal and material-only."""
+
+    claims = registry["claims"]
+    reviews = registry["candidate_reviews"]
+    assert isinstance(claims, list) and isinstance(reviews, list)
+    claims_by_id = {claim["claim_id"]: claim for claim in claims}
+    reviews_by_id = {review["candidate_id"]: review for review in reviews}
+    for review in reviews:
         if review["disposition"] != "material_claims_mapped":
             review["claim_ids"] = []
-    for claim in registry["claims"]:
+    for claim in claims:
         retained_ids = [
             candidate_id
             for candidate_id in claim.get("candidate_ids", [])
@@ -406,7 +492,7 @@ def main() -> None:
             f"{by_id[candidate_id]['source_path']}:{by_id[candidate_id]['line_start']}"
             for candidate_id in claim["candidate_ids"]
         ]
-    for review in registry["candidate_reviews"]:
+    for review in reviews:
         candidate_id = review["candidate_id"]
         if candidate_id not in by_id:
             continue
@@ -418,22 +504,43 @@ def main() -> None:
             if candidate_id not in claim["candidate_ids"]:
                 claim["candidate_ids"].append(candidate_id)
                 claim["source_locations"].append(location)
-    for claim in registry["claims"]:
+    for claim in claims:
         for candidate_id in claim.get("candidate_ids", []):
             review = reviews_by_id[candidate_id]
             review["claim_ids"] = list(
                 dict.fromkeys([*review.get("claim_ids", []), claim["claim_id"]])
             )
-    for review in registry["candidate_reviews"]:
+    for review in reviews:
         review["claim_ids"] = list(dict.fromkeys(review.get("claim_ids", [])))
-    registry["paper"]["source_digest"] = inventory["source_digest"]
-    registry["audit_scope"]["current_scope"] = (
+
+
+def _write_registry(registry: dict[str, object], inventory: dict[str, object]) -> None:
+    """Write the completed whole-paper reconciliation record."""
+
+    paper = registry["paper"]
+    audit_scope = registry["audit_scope"]
+    assert isinstance(paper, dict) and isinstance(audit_scope, dict)
+    paper["source_digest"] = inventory["source_digest"]
+    audit_scope["current_scope"] = (
         f"The complete {inventory['candidate_count']}-candidate paper inventory is adjudicated. Repeated methods, "
         "summary, limitation, provenance, and model-tier passages inherit the primary "
         "claim boundaries; editorial anchors are explicitly classified as nonclaims."
     )
-    registry["audit_scope"]["completion_status"] = "complete"
+    audit_scope["completion_status"] = "complete"
     REGISTRY.write_text(json.dumps(registry, indent=2) + "\n", encoding="utf-8")
+
+
+def main() -> None:
+    registry: dict[str, object] = json.loads(REGISTRY.read_text(encoding="utf-8"))
+    inventory: dict[str, object] = json.loads(INVENTORY.read_text(encoding="utf-8"))
+    remaining = _remove_generated_reviews(registry, inventory)
+    new_claims = _registered_claims()
+    claims = _merge_registered_claims(registry, new_claims)
+    reviews = _candidate_reviews(remaining, claims)
+    by_id = _link_new_review_candidates(registry, inventory, new_claims, reviews)
+    _attach_registered_evidence(registry)
+    _reconcile_reciprocal_links(registry, by_id)
+    _write_registry(registry, inventory)
 
 
 if __name__ == "__main__":
