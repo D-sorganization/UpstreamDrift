@@ -1,6 +1,6 @@
 # Agent Handoff — UpstreamDrift
 
-Last updated: 2026-08-20
+Last updated: 2026-08-21
 
 ## Publication Quality Status (#8451 Closed; Archival Gates Open)
 
@@ -41,9 +41,17 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
 ## Program Authority & Physics Epics State
 
 - Epic #8557 governs the proximal-to-distal program; #8595 retains the agenda.
-- Tools is clean and synchronized at remote `main` `2a768aada` with no open PRs. #4142 remains open: #4473 landed its visualization/authority slice, but immutable ensemble/sensitivity consumption and cross-repository parity remain required before #8557 can close.
-- Tools #4430 remains open after #4450 (`8f654b3a1552`); no open PR carries the rotating-base provider, Python/TypeScript parity, rendered QA, or UpstreamDrift pin still due.
-- AffineDrift is clean and synchronized at remote `main` `07a2525a`; immutable projection PR #3888 (`75ffcdce0860`) and title-governance PR #3798 (`e94237389270`) remain ancestors.
+- Tools remote `main` is `4a5700919`; #4142 remains open because its full
+  ensemble, quiet-zone, sensitivity, UI-parity, and UpstreamDrift-integration
+  acceptance criteria are not yet complete.
+- Tools #4430 is **CLOSED**. PR #4618 added the qualified rotating-base reviewer
+  surfaces and PR #4619 fixed the post-merge Rust gate; #4619 merge commit
+  `1664d806df8a` remains an ancestor of Tools remote `main`. UpstreamDrift PR
+  #8954 pinned that revision at merge commit `81cc731d0dd1`, which remains an
+  ancestor of UpstreamDrift remote `main`.
+- AffineDrift remote `main` is `1996deab6`; immutable projection PR #3888
+  (`75ffcdce0860`) and title-governance PR #3798 (`e94237389270`) remain
+  ancestors.
 - #8557 is the single canonical epic with a dependency-ordered issue/evidence ledger. Legacy master epic #8426 was closed as superseded—not scientifically complete—on 2026-08-20; #8443 remains open. #8458, #8497,
   #8505, #8493, and #8499 are closed groundwork. README and conclusions now
   distinguish canonical/current governance from historical completed epics.
@@ -64,16 +72,24 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     #8751 or describe the impulsive stick control as a trajectory law.
   - #8752 is **OPEN** on `research/8752-articulated-uncertainty`. The v2
     40-sample closed-state/LHS study is finite and energy-closed but every row
-    retains partial opening. The 19-corner headline campaign is incomplete:
-    nominal completed at shaft 126/384 and ground 0/384; every gate and all four
-    source hashes match remote basis `fbff8dc53`. Exec session `64656` completed
-    grip-stiffness-low at shaft 182/384 (+56 nominal) and ground 0/384
-    with every gate passing. Its 72/72 checkpoints have exact unique identities,
-    one v1 schema/design digest `32ccf54bee70`, finite payloads, and registered
-    shapes. The campaign has 4/19 corners fully accounted; stiffness-high finished at shaft 80/384 and ground 0/384 with every gate passing and all source hashes matching. Its 72/72 checkpoints have twelve complete state slots, exact identities/schema/design/shape/dtype parity, finite no-pickle payloads, and set digest `ffc89ddf3995`. Grip-damping-low retained a shaft failure because the excluded 0.001 s probe unexpectedly remained in-domain; its ground pathway completed at 0/384 with every registered gate passing. All 72 damping-low ground checkpoints are unique and complete across twelve state slots, with design digest `6f7ee9f638d9` and set digest `5eefee6baa56`. The independent `articulated_headline_record_audit` reads one immutable snapshot and rejects torn JSON, schema/design/config/source drift, nonprefix corners, invalid pathway states, and premature completion. It validates 4/19 rows, 4 fully accounted corners, 8 terminal pathways, no active row between atomic updates, and explicitly not release evidence; all 18 record-audit tests pass.
+    retains partial opening. The 19-corner headline campaign is incomplete. At
+    2026-08-21 13:53 PDT it had retained 17/30 terminal pathway evaluations:
+    eight corners are fully accounted and the shaft-torsional-stiffness-high
+    ground pathway is active with 49/72 atomic branch checkpoints. Nominal
+    remains shaft 126/384 and ground 0/384. Three adverse pathways are retained
+    failures rather than filtered results. The independent
+    `articulated_headline_record_audit` rejects torn JSON,
+    schema/design/config/source drift, nonprefix corners, invalid pathway
+    states, and premature completion; partial data remain explicitly
+    non-release evidence.
     All 72 nominal branch checkpoints retain exact trajectory/force/ground-force
     parity and restart equivalence.
-    The completion-only headline evidence test stays untracked until data finish.
+    The completion-only headline evidence test stays untracked until data
+    finish. Branch `fix/8752-atomic-campaign-checkpoint`, forked from exact
+    campaign commit `8c537b660`, adds atomic replacement for the top-level JSON
+    and a manufactured replacement-interruption test. Integrate that commit only
+    after the live campaign finishes; changing campaign sources sooner would
+    intentionally trigger the source-drift gate.
   - #8800 is **OPEN** and blocks #8752. Its governed generator regenerates all
     13 phase states for cases 0/8/9/17; nominal is 52/52 feasible and reproduces
     committed states within 1e-8 rad. JSON/NPZ evidence rejects source/content
