@@ -24,6 +24,7 @@ from scripts.research.proximal_distal_energy.articulated_shaft_atlas import (
 from scripts.research.proximal_distal_energy.articulated_structural_execution_identity import (
     CHECKPOINT_SCHEMA_VERSION,
     resolve_structural_execution_identity,
+    scientific_configuration_sha256,
     structural_checkpoint_metadata,
     validate_structural_checkpoint_metadata,
 )
@@ -97,6 +98,9 @@ def test_worker_count_is_operational_not_scientific_identity() -> None:
     )
 
     assert first == second
+    assert scientific_configuration_sha256(
+        ArticulatedShaftAtlasConfig(worker_count=1)
+    ) == scientific_configuration_sha256(ArticulatedShaftAtlasConfig(worker_count=7))
 
 
 def test_identity_rejects_configuration_drift() -> None:

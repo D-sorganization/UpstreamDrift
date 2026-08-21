@@ -79,6 +79,7 @@ def test_plan_binds_all_seven_authority_corners(plan) -> None:
         "scripts/research/proximal_distal_energy/articulated_structural_axis_evidence.py",
         "scripts/research/proximal_distal_energy/articulated_structural_common_support.py",
         "scripts/research/proximal_distal_energy/articulated_structural_cell_evidence.py",
+        "scripts/research/proximal_distal_energy/articulated_structural_branch_contract.py",
         "scripts/research/proximal_distal_energy/articulated_structural_checkpoint.py",
         "scripts/research/proximal_distal_energy/articulated_structural_corner_evidence.py",
         "scripts/research/proximal_distal_energy/articulated_structural_figure_data.py",
@@ -89,6 +90,7 @@ def test_plan_binds_all_seven_authority_corners(plan) -> None:
         "tests/research/test_articulated_structural_axis_evidence.py",
         "tests/research/test_articulated_structural_common_support.py",
         "tests/research/test_articulated_structural_cell_evidence.py",
+        "tests/research/test_articulated_structural_branch_contract.py",
         "tests/research/test_articulated_structural_checkpoint.py",
         "tests/research/test_articulated_structural_corner_evidence.py",
         "tests/research/test_articulated_structural_figure_data.py",
@@ -115,6 +117,10 @@ def test_plan_publishes_exact_pathway_checkpoint_identities(plan) -> None:
         assert (
             "scripts/research/proximal_distal_energy/"
             "articulated_structural_checkpoint.py"
+        ) in paths
+        assert (
+            "scripts/research/proximal_distal_energy/"
+            "articulated_structural_branch_contract.py"
         ) in paths
         assert f"articulated_{pathway}_atlas.py" in "\n".join(paths)
         source_hashes = {
@@ -218,6 +224,10 @@ def test_plan_binds_restart_and_cell_level_evidence_contract(plan) -> None:
     assert "not release evidence" in evidence["checkpoint_set_rule"]
     assert "exact remaining descriptor sequence" in evidence["checkpoint_resume_rule"]
     assert "never release evidence" in evidence["checkpoint_resume_rule"]
+    assert "independently" in evidence["checkpoint_contract_generation_rule"]
+    assert (
+        "runner-local buffer schema" in evidence["checkpoint_contract_generation_rule"]
+    )
     assert set(evidence["checkpoint_identity_fields"]) == {
         "corner_id",
         "authority_sha256",

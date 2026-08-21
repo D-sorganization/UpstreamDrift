@@ -33,6 +33,7 @@ RUNTIME_AUTHORITY_PATHS = (
     "scripts/research/proximal_distal_energy/articulated_atlas_runtime_authority.py",
     "scripts/research/proximal_distal_energy/articulated_structural_execution_identity.py",
     "scripts/research/proximal_distal_energy/articulated_structural_checkpoint.py",
+    "scripts/research/proximal_distal_energy/articulated_structural_branch_contract.py",
 )
 SOURCE_PATHS = tuple(
     dict.fromkeys(
@@ -43,6 +44,7 @@ SOURCE_PATHS = tuple(
             "scripts/research/proximal_distal_energy/articulated_structural_axis_evidence.py",
             "scripts/research/proximal_distal_energy/articulated_structural_common_support.py",
             "scripts/research/proximal_distal_energy/articulated_structural_cell_evidence.py",
+            "scripts/research/proximal_distal_energy/articulated_structural_branch_contract.py",
             "scripts/research/proximal_distal_energy/articulated_structural_checkpoint.py",
             "scripts/research/proximal_distal_energy/articulated_structural_corner_evidence.py",
             "scripts/research/proximal_distal_energy/articulated_structural_execution_identity.py",
@@ -58,6 +60,7 @@ SOURCE_PATHS = tuple(
             "tests/research/test_articulated_atlas_runtime_authority.py",
             "tests/research/test_articulated_structural_common_support.py",
             "tests/research/test_articulated_structural_cell_evidence.py",
+            "tests/research/test_articulated_structural_branch_contract.py",
             "tests/research/test_articulated_structural_checkpoint.py",
             "tests/research/test_articulated_structural_corner_evidence.py",
             "tests/research/test_articulated_structural_execution_identity.py",
@@ -295,6 +298,7 @@ def build_structural_propagation_plan(
         "checkpoint_payload_rule": "atomically persist exact registered fields, shapes, and dtypes with pickle disabled; reject infinity and retain pathway-defined NaN only for downstream semantic validation",
         "checkpoint_set_rule": "audit exact registered filenames, per-branch payload contracts, coverage, and content digest; classify partial restart state as not release evidence",
         "checkpoint_resume_rule": "restore only fully validated registered branch payloads and emit the exact remaining descriptor sequence; an empty or partial inventory is execution state, never release evidence",
+        "checkpoint_contract_generation_rule": "generate every pathway branch field, shape, and dtype contract independently from the registered configuration and verify parity with the runner-local buffer schema",
         "required_cell_arrays": {
             pathway: [
                 "cell_identity",

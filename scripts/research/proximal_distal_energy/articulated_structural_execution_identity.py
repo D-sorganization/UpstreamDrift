@@ -41,6 +41,18 @@ def _configuration_record(
     return json.loads(json.dumps(record))
 
 
+def scientific_configuration_sha256(
+    configuration: ArticulatedShaftAtlasConfig | ArticulatedGroundAtlasConfig,
+) -> str:
+    """Digest scientific configuration while excluding operational parallelism."""
+
+    if not isinstance(
+        configuration, (ArticulatedShaftAtlasConfig, ArticulatedGroundAtlasConfig)
+    ):
+        raise TypeError("configuration must be a registered structural atlas config")
+    return _canonical_sha256(_configuration_record(configuration))
+
+
 @dataclass(frozen=True, slots=True)
 class StructuralExecutionIdentity:
     """Immutable scientific prefix shared by every checkpoint in one execution."""
@@ -195,7 +207,7 @@ def resolve_structural_execution_identity(
         for path in expected_identity["atlas_source_paths"]
     }
     source_digest = _canonical_sha256(source_hashes)
-    configuration_digest = _canonical_sha256(configuration_record)
+    configuration_digest = scientific_configuration_sha256(typed_configuration)
     if source_digest != expected_identity["atlas_source_sha256"]:
         raise RuntimeError("atlas source set does not reproduce the plan")
     if configuration_digest != expected_identity["scientific_configuration_sha256"]:
@@ -243,6 +255,7 @@ __all__ = [
     "CHECKPOINT_SCHEMA_VERSION",
     "StructuralExecutionIdentity",
     "resolve_structural_execution_identity",
+    "scientific_configuration_sha256",
     "structural_checkpoint_metadata",
     "validate_structural_checkpoint_metadata",
 ]
