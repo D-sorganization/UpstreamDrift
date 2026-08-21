@@ -1,8 +1,23 @@
 # Agent Handoff — UpstreamDrift
 
-Last updated: 2026-08-20
+Last updated: 2026-08-21
 
 This is current operational state. Historical detail belongs in git/GitHub.
+
+## Adversarial Integration Review (2026-08-21, PR #8815)
+
+A five-axis review of organization and integration completeness filed 46
+issues (#8816–#8876), indexed with a synthesis in
+`docs/audits/2026-08-21-adversarial-integration-review.md`. Headline: the
+platform's pieces are substantial but the connective tissue is missing —
+provenance/lineage/citation infrastructure exists with zero consumers,
+several GUI surfaces display claims the computation does not back
+(#8816–#8819), the desktop and web launchers read divergent tile
+registries (#8853), and the flagship motion pipeline is unmounted from
+the product (#8864). Start with the four critical provenance issues
+(#8816–#8819) plus registry honesty (#8852, #8855). Fixes are mostly
+wiring, not invention; each issue carries file:line evidence and a
+suggested fix.
 
 ## Active Publication-Quality Slice (#8451)
 

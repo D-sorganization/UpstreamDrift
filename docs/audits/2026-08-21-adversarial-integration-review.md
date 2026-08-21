@@ -81,7 +81,63 @@ _(Populated as the review proceeds; each row is filed as a GitHub issue.)_
 (#8817 was extended with the finding that the REST API also silently
 substitutes stub engines for known engine names.)
 
+| # | Issue | Area | Severity | Title |
+|---|-------|------|----------|-------|
+| 47 | #8864 | Pipeline | High | Motion pipeline is a second, unmounted FastAPI app — curl-only |
+| 48 | #8865 | Pipeline | High | Two independent C3D ingestion stacks; GUI upload bypasses the pipeline |
+| 49 | #8866 | Pipeline | High | starting_pose_matcher ships ~1,600 lines of unwired per-engine extractors |
+| 50 | #8867 | Pipeline | High | Two parallel canonical-pose representations maintained independently |
+| 51 | #8868 | Pipeline | High | Realtime IPC: one gated publisher, one unlaunchable subscriber, dead training pair |
+| 52 | #8869 | Pipeline | Medium | Three pub/sub implementations; ws transport a silent no-op |
+| 53 | #8870 | Pipeline | Medium | JaxSim half-integrated: no tier, no adapter, dashboard runs nothing |
+| 54 | #8871 | Pipeline | Medium | Simulation results in-memory only; export_paths always empty |
+| 55 | #8873 | Pipeline | Medium | output/README.md documents a results API/CLI/config that don't exist |
+| 56 | #8874 | Pipeline | Medium | 7 of 11 Rust crates uninstallable via extras; one crate has no caller |
+| 57 | #8875 | Pipeline | Low | Pipeline API advertises source formats it rejects |
+| 58 | #8876 | Pipeline | Low | Simscape service returns {} in live mode, blanking Pose Studio view |
+
+## Synthesis — Does It Form a Coherent Whole?
+
+Not yet. The review's cross-cutting conclusion is that UpstreamDrift's
+pieces are individually substantial but the connective tissue is missing
+or dishonest in five recurring ways:
+
+1. **Built-but-unwired infrastructure.** The exact subsystems that would
+   answer the owner's questions exist, tested, with zero production
+   consumers: UI provenance labels (#8823), the project/session lineage
+   spine (#8824), method citations with DOIs (#8847), the shared help-menu
+   builder (#8846), per-engine skeleton extractors (#8866), the ws
+   transport (#8869), and several Rust accelerators (#8874).
+2. **Dishonest surfaces.** GUIs display claims the computation does not
+   back: identical robustness bars labeled per-engine (#8816), stub
+   engines labeled mujoco/drake/pinocchio (#8817), decorative wind and
+   engine-source controls (#8818, #8819), always-"Ready" tiles (#8855),
+   stale "live" status pills (#8827, #8876).
+3. **Registry/document drift.** Two tile registries with 47 divergent IDs
+   (#8853), two feature-parity matrices in contradiction (#8833), calc
+   sheets contradicting shipped constants (#8845), help docs describing a
+   fabricated API (#8844), a stale vendored-tools SHA fail-closing six
+   tiles (#8852).
+4. **No end-to-end data spine.** The flagship C3D→tracked-motion pipeline
+   is unmounted and GUI-invisible (#8864, #8865); simulation results never
+   reach disk through a contract downstream tools can consume (#8871,
+   #8873); exports lose identity the moment they leave the app
+   (#8820–#8822, #8826, #8828).
+5. **Organizational accretion.** Duplicate vendored trees (#8830),
+   deprecated entry points still documented as primary (#8831), committed
+   scratch/output debris (#8836, #8837), and unexecuted doc consolidations
+   (#8839, #8840).
+
+The encouraging inverse: nearly every fix is wiring, not invention. The
+provenance dataclasses, the lineage store, the availability computation,
+and the citation records all exist — the work is connecting them to the
+surfaces users actually see, then adding CI gates so the wiring cannot
+silently rot again (path-resolution tests #8854, doc/code constant
+parity #8845, link checking #8851, gitlink parity #8852).
+
 ## Status
 
-Review in progress. If usage runs out before completion, the filed issues
-are the durable output; the table above is the index.
+Review complete: 46 issues filed (#8816–#8876) across five axes on
+2026-08-21. Suggested sequencing: the four critical provenance issues
+(#8816–#8819) and the two registry-honesty issues (#8852, #8855) first —
+they are where users are actively being misled today.
