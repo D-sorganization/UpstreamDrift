@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import csv
 import json
 from copy import deepcopy
+from hashlib import sha256
 from pathlib import Path
 from typing import Any
 
@@ -27,6 +29,7 @@ FIXTURE = (
     / "launch_monitor"
     / "longitudinal_attested_v1.json"
 )
+SOURCE_FIXTURE = FIXTURE.with_suffix(".csv")
 
 
 def _fixture() -> dict[str, Any]:
@@ -70,6 +73,23 @@ def test_attested_fixture_matches_golden_session_level_contract() -> None:
     assert result.pooled_association.confidence_interval_high is not None
     assert len(result.lineage.dataset_fingerprint_sha256) == 64
     assert all(item.shot_count == 3 for item in result.session_aggregates)
+
+
+def test_golden_source_reference_is_content_addressed_and_exact() -> None:
+    payload = _fixture()
+    source = payload["context"]["sources"][0]
+
+    source_rows = list(
+        csv.DictReader(SOURCE_FIXTURE.read_text(encoding="utf-8").splitlines())
+    )
+
+    assert sha256(SOURCE_FIXTURE.read_bytes()).hexdigest() == source["file_sha256"]
+    assert source["source_uri"] == (
+        "tests/fixtures/launch_monitor/longitudinal_attested_v1.csv"
+    )
+    assert source_rows == [
+        {key: str(value) for key, value in row.items()} for row in payload["records"]
+    ]
 
 
 def test_duplicate_shots_do_not_reweight_session_level_association() -> None:

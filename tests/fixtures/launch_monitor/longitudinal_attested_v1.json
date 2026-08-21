@@ -1,10 +1,7 @@
 {
   "context": {
     "authority": {
-      "dataset_id": "longitudinal-golden-v1",
-      "repository": "D-sorganization/UpstreamDrift",
-      "commit": "9cdc724e61bf7e5ebb4c741118875fcc03ca0913",
-      "manifest_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      "dataset_id": "longitudinal-golden-v1"
     },
     "player_identity": {
       "trust_level": "explicit_user_attested",
@@ -26,7 +23,8 @@
     "sources": [
       {
         "source_id": "longitudinal-golden-source",
-        "file_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "file_sha256": "727ad02dfc7c84f10f92e1ad49b9e39cfd97f749f76780868ec495699605a7db",
+        "source_uri": "tests/fixtures/launch_monitor/longitudinal_attested_v1.csv",
         "session_ids": [
           "p1-s1",
           "p1-s2",
