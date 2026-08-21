@@ -4,7 +4,7 @@
   "features": {
     "launcher.tile_grid": {
       "title": "Launcher tile grid from shared manifest",
-      "pyqt": "src/launchers/unified_launcher.py",
+      "pyqt": "src/launchers/embedded_tool_bootstrap.py",
       "api": "src/api/routes/launcher.py",
       "web": "ui/src/pages/Dashboard.tsx",
       "status": "parity",
@@ -200,7 +200,7 @@
     },
     "launcher.tile_web_reachability": {
       "title": "Manifest tile web-reachability contract (route / native-window / unavailable)",
-      "pyqt": "src/launchers/unified_launcher.py",
+      "pyqt": "src/launchers/embedded_tool_bootstrap.py",
       "api": null,
       "web": "ui/src/pages/Dashboard.tsx",
       "status": "gap",

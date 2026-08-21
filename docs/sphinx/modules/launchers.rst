@@ -1,7 +1,7 @@
 Launchers
 =========
 
-.. automodule:: launchers.unified_launcher
+.. automodule:: launchers.upstream_drift_launcher
    :members:
    :undoc-members:
    :show-inheritance:
