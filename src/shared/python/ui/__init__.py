@@ -41,26 +41,42 @@ from .window_icon import (
 # PyQt6 (mirrors theme/__init__), exposing the Qt widgets only when present.
 _AutoCompleteLineEdit: Any = None
 _HoverCopyTextBrowser: Any = None
+_LoadingButton: Any = None
+_ShortcutsOverlay: Any = None
+_ToastManager: Any = None
 try:
     from .auto_complete import AutoCompleteLineEdit as _ImportedAutoCompleteLineEdit
     from .hover_copy_browser import (
         HoverCopyTextBrowser as _ImportedHoverCopyTextBrowser,
     )
+    from .loading_button import LoadingButton as _ImportedLoadingButton
+    from .shortcuts_overlay import ShortcutsOverlay as _ImportedShortcutsOverlay
+    from .toast import ToastManager as _ImportedToastManager
 
     _PYQT6_AVAILABLE = True
     _AutoCompleteLineEdit = _ImportedAutoCompleteLineEdit
     _HoverCopyTextBrowser = _ImportedHoverCopyTextBrowser
+    _LoadingButton = _ImportedLoadingButton
+    _ShortcutsOverlay = _ImportedShortcutsOverlay
+    _ToastManager = _ImportedToastManager
 except ImportError:
     _PYQT6_AVAILABLE = False
 
 AutoCompleteLineEdit: Any = _AutoCompleteLineEdit
 HoverCopyTextBrowser: Any = _HoverCopyTextBrowser
+LoadingButton: Any = _LoadingButton
+ShortcutsOverlay: Any = _ShortcutsOverlay
+ToastManager: Any = _ToastManager
 
 __all__ = [
     # Auto Complete
     "AutoCompleteLineEdit",
     # Hover Copy Text Browser
     "HoverCopyTextBrowser",
+    # Toast notifications, shortcuts overlay, loading buttons (issue #8972)
+    "LoadingButton",
+    "ShortcutsOverlay",
+    "ToastManager",
     # Window icon / taskbar identity
     "apply_window_icon",
     "resolve_icon_path",

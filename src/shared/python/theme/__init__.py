@@ -115,6 +115,42 @@ except ImportError:
     install_application_zoom = None  # type: ignore[assignment]
     scale_px = None  # type: ignore[assignment]
 
+# ---------------------------------------------------------------------------
+# Canonical module-level color accessors (issue #8972)
+# ---------------------------------------------------------------------------
+
+from .palette import SEMANTIC_ALIASES, ThemePalette
+
+#: Documented fallback palette: the built-in "Dark" theme's color mapping.
+#: Derived from ``BUILTIN_THEMES`` — never fork palette data.  Used by
+#: launcher call sites as a last resort when no theme manager is available.
+DARK_THEME: ThemePalette = ThemePalette(BUILTIN_THEMES["Dark"])
+
+
+def get_current_colors() -> ThemePalette:
+    """Return the active theme's color mapping.
+
+    Canonical package-level accessor delegating to the singleton
+    :class:`ThemeManager` when PyQt6 is available, falling back to the
+    built-in Dark palette otherwise (e.g. headless environments).
+
+    Postcondition:
+        The returned mapping contains every key in ``THEME_COLOR_KEYS``
+        (``bg``, ``border``, ``accent``, ...) mapped to a hex color, and
+        additionally resolves the semantic attribute aliases documented in
+        :data:`SEMANTIC_ALIASES` (``bg_elevated``, ``text_primary``, ...).
+    """
+    if _PYQT6_AVAILABLE and get_theme_manager is not None:
+        colors = ThemePalette(get_theme_manager().get_current_colors())
+    else:  # pragma: no cover - exercised only without PyQt6
+        colors = ThemePalette(DARK_THEME)
+    missing = [key for key in THEME_COLOR_KEYS if key not in colors]
+    if missing:  # DbC postcondition: complete mapping for launcher consumers
+        for key in missing:
+            colors[key] = DARK_THEME[key]
+    return colors
+
+
 __all__ = [
     # Protocols (no PyQt6 dependency)
     "StylesheetGenerator",
@@ -151,6 +187,11 @@ __all__ = [
     "ThemeListItem",
     "ThemeManagerDialog",
     "ThemePreviewWidget",
+    # Module-level color accessors
+    "DARK_THEME",
+    "SEMANTIC_ALIASES",
+    "ThemePalette",
+    "get_current_colors",
     # Color utilities
     "BUILTIN_THEMES",
     "CHART_COLORS",
