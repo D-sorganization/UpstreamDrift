@@ -170,6 +170,13 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
   player-clustered uncertainty. Structured unavailable states, missingness,
   source-linked backing, and explicit non-causal/non-improvement claims are
   mandatory for every consumer.
+- The canonical data-free consumer bundle is
+  `launch-monitor-analytics-conformance/1.0.0`. Its generated schema and golden
+  JSON cover available/unavailable analysis v2, covariation, attested
+  longitudinal, source-backed SG, and distance/target proxy cases without
+  private input rows. Consumers must verify the canonical bundle SHA and retain
+  its units, claims, identity/session/order evidence, exclusions, and
+  source-joinable backing hashes.
 
 ## Qualified Baseline — And Its Limits
 

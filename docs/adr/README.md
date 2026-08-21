@@ -44,6 +44,7 @@ This directory tracks architecture-impacting decisions for UpstreamDrift.
 | [0037](0037-immutable-launch-monitor-dataset-jobs.md)         | Immutable Launch-Monitor Dataset Jobs                                             | Accepted | 2026-08-20 |
 | [0038](0038-launch-monitor-player-covariation-contract.md)    | Canonical Launch Monitor Player Covariation Contract                              | Accepted | 2026-08-20 |
 | [0039](0039-attested-launch-monitor-longitudinal-sessions.md) | Attested Launch Monitor Longitudinal Sessions                                     | Accepted | 2026-08-20 |
+| [0040](0040-data-free-launch-monitor-conformance-bundle.md)   | Data-Free Launch-Monitor Conformance Bundle                                       | Accepted | 2026-08-21 |
 
 Note: ADR 0013 was amended on 2026-05-31 to document the CC-32
 canonical-core app-shell registry reuse of the embeddable-tool contract.
