@@ -68,6 +68,9 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
 - #8910 repair worktree:
   `UpstreamDrift-worktrees/8910-real-manufactured-solution`; branch:
   `fix/8910-real-manufactured-solution`, based on verified #8960 remote main.
+- PR #8961 is open at head
+  `e47e17050c74b2dae1dd0eb3eb3058a173763be7`; human review and protected CI
+  remain required. Do not enable auto-merge or bypass a required check.
 - The local repair replaces self-defined torque residuals with analytical
   Lagrange--Christoffel, MuJoCo `mj_inverse`, and robotics Pinocchio RNEA;
   replaces hardcoded conservation zeros with an unforced gravity-free rollout;
@@ -94,8 +97,8 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
   claims, and a valid 2,128-reference evidence manifest. The computational
   release validator passes for 574 artifacts, 233 rendered pages, 192 valid URI
   links, and 246 outline entries. Archival tagging and font findings remain
-  disclosed and fail closed. Next: commit and shepherd a protected PR closing
-  #8910.
+  disclosed and fail closed. Next: shepherd PR #8961 through human review and
+  protected CI, then verify its merge commit as an ancestor of remote `main`.
 
 ## Scientific Boundaries
 
