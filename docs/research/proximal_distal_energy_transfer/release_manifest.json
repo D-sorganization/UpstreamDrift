@@ -490,7 +490,7 @@
       "bytes": 3478
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.json": {
-      "sha256": "2e5c94a1e3c6255731232b0d1dfcb0244f403fb59fcc4f475f9119555f3c4d3b",
+      "sha256": "d1e01f1e1c35a14e8a9b2250b7698aa2d3725218b2f30beb61cfcbb77d6f69cb",
       "bytes": 4524
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.npz": {
@@ -1038,7 +1038,7 @@
       "bytes": 129880
     },
     "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_native_constraint_discrepancy.pdf": {
-      "sha256": "fb9d21df11bb211e631c4936b7433e0236e58b9d5389b3a4d5051be20ad24d9f",
+      "sha256": "67d7ae77a827d82d7ab4ecd40c585dea58cf7cc4f1631cb11e530825f54af5fd",
       "bytes": 31773
     },
     "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_shaft_atlas.pdf": {
@@ -2170,8 +2170,8 @@
       "bytes": 9530
     },
     "scripts/research/proximal_distal_energy/register_articulated_native_constraint_discrepancy_claims.py": {
-      "sha256": "1370076c91bc0603a9221a035dd7c020d7d5169721e7eeb105b51f5d3ff5ff88",
-      "bytes": 20032
+      "sha256": "005e49130c338c86556b59ef0b694df829a6f4852fbb3ab81dbe0d53be4bcc2e",
+      "bytes": 20751
     },
     "scripts/research/proximal_distal_energy/register_articulated_shaft_claims.py": {
       "sha256": "337ea216d4a590ebc4ae90df501555db64fd5c70f35164ecf7d20c16e70711c7",
