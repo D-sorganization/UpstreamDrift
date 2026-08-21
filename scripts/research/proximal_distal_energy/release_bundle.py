@@ -297,6 +297,9 @@ _RELEASE_METADATA: dict[str, Any] = {
         "subject_scaled_articulated_inertia": (
             "native_common_state_mass_bias_and_inverse_dynamics_qualified"
         ),
+        "articulated_manufactured_solution": (
+            "independent_numerical_controls_qualified"
+        ),
         "subject_scaled_articulated_contact_projection": (
             "same_state_bilateral_contact_projection_and_initial_acceleration_qualified"
         ),
