@@ -218,6 +218,12 @@ def test_manifest_round_trip_and_repository_prediction_registry() -> None:
         "H3",
         "H4",
         "H5",
+        "H6",
+        "H7",
+        "H8",
+        "H9",
+        "H10",
+        "H11",
     }
     statuses = {
         prediction.hypothesis_id: prediction.status
@@ -229,6 +235,12 @@ def test_manifest_round_trip_and_repository_prediction_registry() -> None:
         "H3": "supported",
         "H4": "supported",
         "H5": "inconclusive",
+        "H6": "supported",
+        "H7": "supported",
+        "H8": "supported",
+        "H9": "contradicted",
+        "H10": "inconclusive",
+        "H11": "supported",
     }
     assert all(prediction.status_scope for prediction in registered.predictions)
     assert all(prediction.remaining_gate for prediction in registered.predictions)
@@ -247,6 +259,12 @@ def test_manifest_round_trip_and_repository_prediction_registry() -> None:
     )
     assert "calibrated human transport remains untested" in (
         by_hypothesis["H5"].remaining_gate
+    )
+    assert "neither policy has a sustained-recovery-qualified region" in (
+        by_hypothesis["H9"].status_scope
+    )
+    assert "no global benefit or necessity is supported" in (
+        by_hypothesis["H10"].status_scope
     )
 
 

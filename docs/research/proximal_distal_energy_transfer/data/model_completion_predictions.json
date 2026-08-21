@@ -148,6 +148,188 @@
       "status": "inconclusive",
       "status_scope": "Qualitative controls transport through reduced planar, spatial, and declared selected-state articulated tiers. Six of seven registered structural corners retain 52/52 feasible states; the low-height corner retains one IK nonconvergence. A deterministic preflight binds 83 feasible headline states and the retained failure, but corner-wise headline propagation remains open.",
       "remaining_gate": "Propagate every feasible exact scaled authority through both native-engine shaft and finite-ground atlases with reversal, refinement, pathway killswitches, and unchanged matching controls before claiming structural robustness; calibrated human transport remains untested."
+    },
+    {
+      "prediction_id": "PD-H6-P1",
+      "hypothesis_id": "H6",
+      "statement": "Matched net club moment can be allocated between direct wrist moment and a force-generated bilateral grip couple, but preload and transmission history can make the allocations dynamically nonequivalent.",
+      "estimand": "Matched club moment, wrist moment, grip couple, hand load, generalized effort, transmission continuity, and delivery outcome.",
+      "intervention": "Compare proximal push-pull and direct-wrist allocation extremes under the same club angular task, then exchange their preload and downswing roles under matched state, work, and load constraints.",
+      "expected_result": "The algebraic moment closes for every allocation and at least one transmission observable changes with preload or delay without violating the matched task.",
+      "falsifier": "Moment closure fails, the allocations cannot realize the same task, or all proposed transmission differences vanish under matched state, work, load, and held-out evaluation.",
+      "competing_explanations": [
+        "alternative effort objective",
+        "continuous elasticity rather than a dead zone",
+        "activation dynamics and co-contraction",
+        "contact compliance and participant variability"
+      ],
+      "negative_controls": [
+        "exact wrist-moment plus grip-couple closure",
+        "zero dead-zone width",
+        "zero actuator delay",
+        "role-reversed preload and downswing allocation"
+      ],
+      "required_model_tiers": [
+        "forward_two_hand",
+        "moving_base_flexible_club",
+        "full_body_3d",
+        "musculoskeletal_bridge"
+      ],
+      "tolerance_id": "preoutcome-primary",
+      "status": "supported",
+      "status_scope": "Allocation closure and history-sensitive transmission are supported only in the declared matched-task and phenomenological model families; no preferred human allocation is identified.",
+      "remaining_gate": "Execute bilateral grip-wrench, pressure, stiffness, delay, EMG, and participant-held-out tests with closed-chain inverse dynamics."
+    },
+    {
+      "prediction_id": "PD-H7-P1",
+      "hypothesis_id": "H7",
+      "statement": "A complete wrench and compatible twist preserve interface power under proper frame rotation and reference-point transport, and canonical pose adapters preserve their declared pose coordinates.",
+      "estimand": "Frame- and reference-transport power residual plus canonical-pose adapter round-trip error.",
+      "intervention": "Rotate and transport paired wrenches and twists, then encode and decode one registered nonzero pose through every available adapter.",
+      "expected_result": "Power closes within tolerance and every declared pose coordinate round-trips without convention-dependent sign or ordering changes.",
+      "falsifier": "Power changes under a proper paired transform, virtual work fails, or an adapter changes a registered coordinate outside tolerance.",
+      "competing_explanations": [
+        "quaternion ordering",
+        "angular-velocity frame mismatch",
+        "wrench ordering or action-direction mismatch",
+        "reference-point or model-identity mismatch"
+      ],
+      "negative_controls": [
+        "rotate wrench and twist together",
+        "transport both fields to a second point",
+        "manufactured spatial-wrench case",
+        "encode-decode-encode adapter round trip"
+      ],
+      "required_model_tiers": [
+        "double_pendulum",
+        "full_body_3d",
+        "canonical_pose_adapters"
+      ],
+      "tolerance_id": "preoutcome-primary",
+      "status": "supported",
+      "status_scope": "The executed mathematical invariants and five pose-adapter round trips pass; five-engine dynamic-state, contact, wrench, event, and trajectory parity remain untested.",
+      "remaining_gate": "Replay one model-hash-bound dynamic trajectory with common events, wrenches, moments, power, and residuals in every available backend."
+    },
+    {
+      "prediction_id": "PD-H8-P1",
+      "hypothesis_id": "H8",
+      "statement": "The same net joint moment admits multiple agonist-antagonist allocations, and activation plus series-force history can leave different internal states under the same instantaneous moment.",
+      "estimand": "Matched net moment, activation allocation, muscle-force state, stiffness proxy, series energy, and history-transition error.",
+      "intervention": "Enumerate matched-moment recruitment families and compare persistent versus reversing activation histories in the reduced Hill-type bridge.",
+      "expected_result": "Multiple allocations reproduce the task while internal activation, force, stiffness, or series-energy states remain distinct.",
+      "falsifier": "The matched-moment family collapses to one allocation or all internal history differences disappear under the registered dynamics and tolerances.",
+      "competing_explanations": [
+        "alternative recruitment objective",
+        "changing anatomical moment arms",
+        "reflex and fatigue effects",
+        "passive tissue and contact loads"
+      ],
+      "negative_controls": [
+        "exact matched net moment",
+        "persistent versus sign-reversing history",
+        "activation-dynamics removal",
+        "series-compliance removal"
+      ],
+      "required_model_tiers": [
+        "reduced_muscle_redundancy",
+        "hill_type_history",
+        "musculoskeletal_bridge"
+      ],
+      "tolerance_id": "preoutcome-primary",
+      "status": "supported",
+      "status_scope": "Reduced identifiability and state-history demonstrations pass for generic constant-moment-arm muscle surrogates; anatomy, physiology, performance, and human strategy remain untested.",
+      "remaining_gate": "Run subject-scaled OpenSim feasibility families and MyoSuite forward replay against synchronized bilateral wrench, motion, shaft, EMG, and held-out participant data."
+    },
+    {
+      "prediction_id": "PD-H9-P1",
+      "hypothesis_id": "H9",
+      "statement": "A delayed and noisy state-relative handoff provides a wider robust timing region and more sustained recovery than a clock-triggered handoff under matched task, load, and effort guards.",
+      "estimand": "Common-phase task-viable fraction, contiguous timing width, sustained recovery, delivery, load, effort, and numerical residual.",
+      "intervention": "Compare clock and delayed-noisy state triggers on common nominal phase offsets, load cohorts, and paired trajectory perturbations.",
+      "expected_result": "The state trigger retains a larger viable phase region and a recovery-qualified subset without hidden load or effort increase.",
+      "falsifier": "The clock policy has equal or larger viable width, the state-trigger advantage disappears under paired controls, or neither policy exhibits sustained recovery.",
+      "competing_explanations": [
+        "threshold overfitting",
+        "phase-estimation error",
+        "changed contact load",
+        "local manifold or terminal-proxy dependence"
+      ],
+      "negative_controls": [
+        "common random numbers",
+        "common nominal phase grid",
+        "matched task, load, and effort guards",
+        "half-step numerical check"
+      ],
+      "required_model_tiers": [
+        "coupled_planar_control",
+        "moving_base_flexible_club",
+        "full_body_3d"
+      ],
+      "tolerance_id": "preoutcome-primary",
+      "status": "contradicted",
+      "status_scope": "The registered planar common-phase screen gives the clock policy the larger viable region, and neither policy has a sustained-recovery-qualified region; this does not establish human timing demand.",
+      "remaining_gate": "Repeat over continuous phase and attraction regions in spatial and subject-scaled models with an independently identified observer, impact outcomes, and participant holdout."
+    },
+    {
+      "prediction_id": "PD-H10-P1",
+      "hypothesis_id": "H10",
+      "statement": "Distinct slack mechanisms produce separable multichannel signatures, and any claimed benefit survives matched state, stored energy, work, load, and adverse excitation.",
+      "estimand": "Engagement state, transmitted output, stored energy, dissipation, event timing, delivery outcome, local sensitivity, and cross-class separation.",
+      "intervention": "Exercise contact disengagement, transmission dead zone, structural preload, biological series compliance, and control deadband one at a time under matched constitutive and forward-delivery controls.",
+      "expected_result": "Each mechanism retains a distinguishable signature and any favorable delivery effect persists after preload-energy and task matching.",
+      "falsifier": "Signatures become observationally indistinguishable, preload matching reverses the conclusion, or a favorable effect disappears under matched work, load, state, or held-out excitation.",
+      "competing_explanations": [
+        "class confounding",
+        "preload-energy mismatch",
+        "excitation dependence",
+        "unmodeled hysteresis or stateful backlash"
+      ],
+      "negative_controls": [
+        "one-class-at-a-time intervention",
+        "common displacement and matched extension",
+        "passive power and energy closure",
+        "native-engine event parity"
+      ],
+      "required_model_tiers": [
+        "typed_scalar_constitutive",
+        "articulated_point_contact",
+        "distributed_grip_and_shaft",
+        "musculoskeletal_bridge"
+      ],
+      "tolerance_id": "preoutcome-primary",
+      "status": "inconclusive",
+      "status_scope": "Typed synthetic mechanisms close mechanically, but preload matching reverses open-taut classification, one scalar output nearly confounds two classes, and no global benefit or necessity is supported.",
+      "remaining_gate": "Extend each class through longer matched-state, work, and load distributed-grip and shaft delivery, then acquire independent contact, shaft, tendon, activation, and bilateral-wrench measurements."
+    },
+    {
+      "prediction_id": "PD-H11-P1",
+      "hypothesis_id": "H11",
+      "statement": "Adding bounded scapula-on-ellipsoid mobility increases bilateral fixed-club reachability relative to fixed shoulder centers while retaining explicit nonuniqueness and adverse-span failure.",
+      "estimand": "Closure count, residual, solver termination, active-bound count, shoulder-center excursion, constraint rank, coordinate nullity, and adverse-span residual.",
+      "intervention": "Solve the same 54 fixed-trunk and fixed-club arm states with fixed shoulder centers and with four bounded scapular coordinates per side.",
+      "expected_result": "The mobility surrogate closes more states than the fixed-center control, retains a larger coordinate null space, and fails the deliberately infeasible span.",
+      "falsifier": "Reachability does not increase, constraint rank is lost, the adverse span closes, or the apparent gain disappears under independent anatomy and solver controls.",
+      "competing_explanations": [
+        "optimizer termination",
+        "chosen coordinate bounds",
+        "omitted forearm, wrist, and hand coordinates",
+        "nonunique scapular-glenohumeral allocation"
+      ],
+      "negative_controls": [
+        "paired fixed-center solve",
+        "fixed trunk and club pose",
+        "active-bound and nullity audit",
+        "two-metre adverse grip span"
+      ],
+      "required_model_tiers": [
+        "subject_scaled_closed_contact",
+        "scapula_ellipsoid_surrogate",
+        "articulated_forward_contact"
+      ],
+      "tolerance_id": "preoutcome-primary",
+      "status": "supported",
+      "status_scope": "The reduced surrogate increases declared reachability and preserves the adverse failure, but only 16 of 54 states also pass solver termination and no anatomical, dynamic, transfer, or strategy claim follows.",
+      "remaining_gate": "Reproduce with independently validated articulated shoulders, subject-specific geometry, calibrated grip contact, and paired forward dynamics."
     }
   ],
   "tolerances": [
