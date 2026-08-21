@@ -219,6 +219,34 @@ def _attach(
     )
 
 
+def _finalize_registry(
+    registry: dict[str, Any],
+    inventory: dict[str, Any],
+    claims: dict[str, dict[str, Any]],
+    reviews: dict[str, dict[str, Any]],
+) -> None:
+    """Write the reconciled shaft release scope without changing list order."""
+
+    registry["candidate_reviews"] = list(reviews.values())
+    release = {
+        item["release_claim_key"]: item for item in registry["release_claim_inventory"]
+    }
+    release["articulated_shaft_bending_torsion"] = {
+        "release_claim_key": "articulated_shaft_bending_torsion",
+        "published_status": "fifty_millisecond_passive_shaft_gate_qualified_with_mixed_matched_outcomes",
+        "audit_state": "reviewed_as_synthetic_first_mode_result",
+    }
+    registry["release_claim_inventory"] = list(release.values())
+    registry["audit_scope"]["current_scope"] = (
+        "The complete paper inventory is adjudicated. Articulated distributed-grip "
+        "and passive first-mode shaft tiers pass registered 50 ms gates, with mixed "
+        "load/work-matched shaft outcomes and explicit calibration boundaries."
+    )
+    registry["paper"]["source_digest"] = inventory["source_digest"]
+    registry["claims"] = list(claims.values())
+    REGISTRY.write_text(json.dumps(registry, indent=2) + "\n", encoding="utf-8")
+
+
 def main() -> None:
     registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
     inventory = json.loads(INVENTORY.read_text(encoding="utf-8"))
@@ -303,24 +331,7 @@ def main() -> None:
         "passive first-mode shaft atlas establishes state-dependent elastic response; "
         "neither establishes physical grip, equipment, timing, human, or strategy benefit."
     )
-    registry["candidate_reviews"] = list(reviews.values())
-    release = {
-        item["release_claim_key"]: item for item in registry["release_claim_inventory"]
-    }
-    release["articulated_shaft_bending_torsion"] = {
-        "release_claim_key": "articulated_shaft_bending_torsion",
-        "published_status": "fifty_millisecond_passive_shaft_gate_qualified_with_mixed_matched_outcomes",
-        "audit_state": "reviewed_as_synthetic_first_mode_result",
-    }
-    registry["release_claim_inventory"] = list(release.values())
-    registry["audit_scope"]["current_scope"] = (
-        "The complete paper inventory is adjudicated. Articulated distributed-grip "
-        "and passive first-mode shaft tiers pass registered 50 ms gates, with mixed "
-        "load/work-matched shaft outcomes and explicit calibration boundaries."
-    )
-    registry["paper"]["source_digest"] = inventory["source_digest"]
-    registry["claims"] = list(claims.values())
-    REGISTRY.write_text(json.dumps(registry, indent=2) + "\n", encoding="utf-8")
+    _finalize_registry(registry, inventory, claims, reviews)
 
 
 if __name__ == "__main__":
