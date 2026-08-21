@@ -106,16 +106,30 @@ def _provider_status(
     repo_root: Path,
     *,
     check_runtime: bool = True,
-) -> str:
-    """Return an availability-aware status without exposing resolved paths."""
+) -> tuple[str, str | None]:
+    """Return an availability-aware (status, detail) without resolved paths.
+
+    Postcondition:
+        When the status is ``provider_unavailable`` because the pinned Tools
+        vendor authority failed, the detail names the concrete reason (e.g.
+        ``"unavailable: Tools pin stale (expected X, found Y)"``) so the
+        degradation is explicit to the user, never silent (issue #8852).
+    """
     if model.provider == "tools":
-        if not inspect_tools_vendor_authority(repo_root).available:
-            return "provider_unavailable"
+        authority = inspect_tools_vendor_authority(repo_root)
+        if not authority.available:
+            detail = f"unavailable: {authority.reason or 'Tools authority failed'}"
+            logger.warning(
+                "Launcher tile '%s' degraded to provider_unavailable: %s",
+                model.id,
+                detail,
+            )
+            return "provider_unavailable", detail
     elif isinstance(model.source_root, str) and not Path(model.source_root).exists():
-        return "provider_unavailable"
+        return "provider_unavailable", None
     if check_runtime and not is_engine_runtime_available(model.engine_type):
-        return "runtime_unavailable"
-    return status
+        return "runtime_unavailable", None
+    return status, None
 
 
 def _build_provider_tile(
@@ -123,7 +137,7 @@ def _build_provider_tile(
 ) -> LauncherTile:
     """Adapt a provider-backed model registry entry into a launcher tile."""
     metadata = model.launcher or _legacy_launcher_metadata(model)
-    status = _provider_status(model, metadata.status, repo_root)
+    status, status_detail = _provider_status(model, metadata.status, repo_root)
 
     return LauncherTile(
         id=model.id,
@@ -134,6 +148,7 @@ def _build_provider_tile(
         path=model.path,
         logo=metadata.logo,
         status=status,
+        status_detail=status_detail,
         capabilities=model.capabilities,
         order=model.order,
         engine_type=model.engine_type,
@@ -164,12 +179,14 @@ def _with_native_pyqt6_semantics(
     if model is None or model.launcher is None:
         return tile
 
+    status, status_detail = _provider_status(
+        model, model.launcher.status, repo_root, check_runtime=False
+    )
     return replace(
         tile,
         category=model.launcher.category,
-        status=_provider_status(
-            model, model.launcher.status, repo_root, check_runtime=False
-        ),
+        status=status,
+        status_detail=status_detail,
         type=model.type,
         path=model.path,
         engine_type=model.engine_type,
@@ -300,6 +317,7 @@ class LauncherTile:
     path: str
     logo: str
     status: str
+    status_detail: str | None = None
     capabilities: tuple[str, ...] = ()
     tags: tuple[str, ...] = ()
     order: int = 99
@@ -364,6 +382,7 @@ class LauncherTile:
             path=data["path"],
             logo=data["logo"],
             status=data.get("status", "unknown"),
+            status_detail=data.get("status_detail"),
             capabilities=tuple(data.get("capabilities", [])),
             tags=tuple(data.get("tags", [])),
             order=data.get("order", 99),
@@ -403,6 +422,8 @@ class LauncherTile:
             "capabilities": list(self.capabilities),
             "order": self.order,
         }
+        if self.status_detail:
+            result["status_detail"] = self.status_detail
         if self.engine_type:
             result["engine_type"] = self.engine_type
         if self.provider:

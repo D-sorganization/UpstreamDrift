@@ -10,8 +10,9 @@ repository or its dependencies are not available.
 
 Design by Contract
 ------------------
-Pre:  External repo paths must be resolvable via ``TOOLS_REPO_PATH`` or
-      auto-discovery from the sibling directory.
+Pre:  External repo paths must be resolvable through the canonical
+      ``tools_repo_path.resolve_tools_repo`` facade (env override, then the
+      pinned ``vendor/ud-tools`` gitlink, then dev-mode sibling discovery).
 Post: ``get_dockable_ui()`` always returns a valid QMainWindow, even if
       the external tool is unavailable (shows error state).
 """
@@ -19,6 +20,7 @@ Post: ``get_dockable_ui()`` always returns a valid QMainWindow, even if
 from __future__ import annotations
 
 import logging
+import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -32,43 +34,59 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.launchers.tools_repo_path import ToolsRepoResolution, resolve_tools_repo
+
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # External repo discovery
 # ---------------------------------------------------------------------------
 
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+
+# Cache of the last successful resolution. Setting ``_TOOLS_REPO = None``
+# (as legacy tests do) invalidates the cache; unresolved lookups are retried.
 _TOOLS_REPO: Path | None = None
+_TOOLS_RESOLUTION: ToolsRepoResolution | None = None
+
+
+def _resolve_tools_repo_cached() -> ToolsRepoResolution | None:
+    """Resolve the Tools repo once via the canonical facade (issue #8858).
+
+    Postcondition: any cached resolution came from ``resolve_tools_repo``;
+    this module never probes the filesystem for Tools itself.
+    """
+    global _TOOLS_REPO, _TOOLS_RESOLUTION
+    if _TOOLS_REPO is not None and _TOOLS_RESOLUTION is not None:
+        return _TOOLS_RESOLUTION
+    try:
+        resolution = resolve_tools_repo(_REPO_ROOT, os.environ.get("TOOLS_REPO_PATH"))
+    except RuntimeError as exc:
+        logger.warning("Invalid TOOLS_REPO_PATH override: %s", exc)
+        resolution = None
+    if resolution is None:
+        logger.warning(
+            "Tools repository not found (no TOOLS_REPO_PATH, no vendored "
+            "vendor/ud-tools, no sibling checkout)"
+        )
+        _TOOLS_REPO = None
+        _TOOLS_RESOLUTION = None
+        return None
+    logger.info(
+        "Tools repository resolved from %s source at %s (pinned=%s)",
+        resolution.source,
+        resolution.path,
+        resolution.pinned,
+    )
+    _TOOLS_REPO = resolution.path
+    _TOOLS_RESOLUTION = resolution
+    return resolution
 
 
 def _find_tools_repo() -> Path | None:
-    """Auto-discover the Tools repository as a sibling of UpstreamDrift."""
-    global _TOOLS_REPO
-    if _TOOLS_REPO is not None:
-        return _TOOLS_REPO
-
-    # Check environment variable first
-    import os
-
-    env_path = os.environ.get("TOOLS_REPO_PATH")
-    if env_path and Path(env_path).is_dir():
-        _TOOLS_REPO = Path(env_path)
-        return _TOOLS_REPO
-
-    # Walk up from this file to find the repository root, then check sibling
-    p = Path(__file__).resolve()
-    for _ in range(10):
-        p = p.parent
-        candidate = p / "Tools"
-        if (candidate / "src").is_dir():
-            _TOOLS_REPO = candidate
-            return _TOOLS_REPO
-        # Also check parent of parent (Repositories folder)
-        if p.name in {"UpstreamDrift", "src"}:
-            continue
-
-    logger.warning("Tools repository not found via sibling discovery")
-    return None
+    """Return the Tools repository root via the canonical resolution facade."""
+    resolution = _resolve_tools_repo_cached()
+    return None if resolution is None else resolution.path
 
 
 def _ensure_tools_on_path() -> bool:
@@ -117,8 +135,10 @@ class _UnavailableToolWidget(QWidget):
         layout.addWidget(msg)
 
         hint = QLabel(
-            "Ensure the Tools repository is available as a sibling directory\n"
-            "or set the TOOLS_REPO_PATH environment variable."
+            "Initialize the vendored Tools submodule "
+            "(git submodule update --init vendor/ud-tools),\n"
+            "or set TOOLS_REPO_PATH / provide a sibling Tools checkout "
+            "for development."
         )
         hint.setWordWrap(True)
         hint.setAlignment(Qt.AlignmentFlag.AlignCenter)

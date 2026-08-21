@@ -1,4 +1,11 @@
-"""Immutable Tools gitlink authority for production launcher providers."""
+"""Immutable Tools gitlink authority for production launcher providers.
+
+The single source of truth for the Tools pin is the ``vendor/ud-tools``
+gitlink recorded in the superproject index (``git ls-files --stage``).
+There is deliberately no hand-maintained SHA constant: a governed
+submodule bump is a one-line gitlink change that this module and its
+tests validate automatically (issue #8852).
+"""
 
 from __future__ import annotations
 
@@ -8,8 +15,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 _TOOLS_GITLINK_PATH = Path("vendor/ud-tools")
-TOOLS_GITLINK_SHA = "1664d806df8a2c7b184d2d3fbcea93b714caaee5"
 _GIT_TIMEOUT_SECONDS = 5.0
+_GITLINK_MODE = "160000"
 
 
 @dataclass(frozen=True)
@@ -60,27 +67,48 @@ def _is_within(path: Path, root: Path) -> bool:
     return path == root or root in path.parents
 
 
-def _tracked_gitlink_error(canonical_repo: Path) -> str | None:
-    """Return an error unless the index contains the one declared gitlink."""
+def _tracked_gitlink_sha(canonical_repo: Path) -> tuple[str | None, str | None]:
+    """Read the pinned SHA from the one declared superproject gitlink.
+
+    Precondition:
+        ``canonical_repo`` is the resolved superproject root.
+
+    Postcondition:
+        Returns ``(sha, None)`` where ``sha`` is the 40-hex gitlink object
+        recorded in the index, or ``(None, reason)`` when the index does not
+        contain exactly the declared gitlink entry.
+    """
     index_code, index_output = _run_git_command(
         ("ls-files", "--stage", "--", _TOOLS_GITLINK_PATH.as_posix()),
         cwd=canonical_repo,
     )
     if index_code != 0 or len(index_output.splitlines()) != 1:
-        return "tracked Tools gitlink entry is missing"
+        return None, "tracked Tools gitlink entry is missing"
     index_fields = index_output.split(maxsplit=3)
     if len(index_fields) != 4:
-        return "tracked Tools gitlink entry is missing"
+        return None, "tracked Tools gitlink entry is missing"
     mode, tracked_sha, stage, tracked_path = index_fields
     if (
-        mode != "160000"
+        mode != _GITLINK_MODE
         or stage != "0"
         or tracked_path != _TOOLS_GITLINK_PATH.as_posix()
     ):
-        return "tracked Tools entry is not the declared gitlink"
-    if tracked_sha != TOOLS_GITLINK_SHA:
-        return "tracked Tools gitlink SHA does not match the declared pin"
-    return None
+        return None, "tracked Tools entry is not the declared gitlink"
+    if len(tracked_sha) != 40 or any(c not in "0123456789abcdef" for c in tracked_sha):
+        return None, "tracked Tools gitlink SHA is malformed"
+    return tracked_sha, None
+
+
+def expected_tools_gitlink_sha(repo_root: Path) -> str | None:
+    """Return the pinned Tools SHA derived from the tracked gitlink.
+
+    This is the DRY authority for the pin: there is no duplicated constant
+    to go stale. Returns ``None`` when the gitlink cannot be read.
+    """
+    if not isinstance(repo_root, Path):
+        raise TypeError("repo_root must be a pathlib.Path")
+    sha, _error = _tracked_gitlink_sha(repo_root.resolve(strict=False))
+    return sha
 
 
 def _resolve_checkout(vendor_root: Path) -> tuple[Path | None, str | None]:
@@ -110,7 +138,7 @@ def _resolve_checkout(vendor_root: Path) -> tuple[Path | None, str | None]:
 
 
 def _checkout_identity_error(
-    canonical_repo: Path, canonical_vendor: Path
+    canonical_repo: Path, canonical_vendor: Path, expected_sha: str
 ) -> str | None:
     """Return an error unless checkout identity matches the superproject pin."""
 
@@ -118,7 +146,7 @@ def _checkout_identity_error(
         ("submodule", "status", "--", _TOOLS_GITLINK_PATH.as_posix()),
         cwd=canonical_repo,
     )
-    expected_status = f" {TOOLS_GITLINK_SHA} {_TOOLS_GITLINK_PATH.as_posix()}"
+    expected_status = f" {expected_sha} {_TOOLS_GITLINK_PATH.as_posix()}"
     status_matches = submodule_output == expected_status or submodule_output.startswith(
         f"{expected_status} "
     )
@@ -128,8 +156,9 @@ def _checkout_identity_error(
     head_code, checked_out_sha = _run_git_command(
         ("rev-parse", "--verify", "HEAD"), cwd=canonical_vendor
     )
-    if head_code != 0 or checked_out_sha != TOOLS_GITLINK_SHA:
-        return "Tools checkout HEAD does not match the declared pin"
+    if head_code != 0 or checked_out_sha != expected_sha:
+        found = checked_out_sha or "unknown"
+        return f"Tools pin stale (expected {expected_sha}, found {found})"
 
     top_code, top_level = _run_git_command(
         ("rev-parse", "--show-toplevel"), cwd=canonical_vendor
@@ -175,11 +204,13 @@ def _checkout_cleanliness_error(
     return None
 
 
-def _unavailable(vendor_root: Path, reason: str) -> ToolsVendorAuthority:
+def _unavailable(
+    vendor_root: Path, reason: str, expected_sha: str = ""
+) -> ToolsVendorAuthority:
     """Build one normalized fail-closed authority result."""
     return ToolsVendorAuthority(
         root=vendor_root,
-        expected_sha=TOOLS_GITLINK_SHA,
+        expected_sha=expected_sha,
         available=False,
         reason=reason,
     )
@@ -188,10 +219,17 @@ def _unavailable(vendor_root: Path, reason: str) -> ToolsVendorAuthority:
 def inspect_tools_vendor_authority(repo_root: Path) -> ToolsVendorAuthority:
     """Validate the exact clean Tools gitlink checkout used in production.
 
-    Postcondition:
+    Precondition:
+        ``repo_root`` is a ``pathlib.Path`` (the superproject checkout root).
+
+    Postconditions:
         ``available`` is true only for a normal directory backed by the exact
-        superproject gitlink and checked out at the declared SHA with no dirty
-        or untracked state.
+        superproject gitlink and checked out at the tracked gitlink SHA with
+        no dirty or untracked state. When ``available`` is false, ``reason``
+        is a non-empty human-readable explanation; a checkout whose HEAD
+        drifted from the gitlink reports
+        ``"Tools pin stale (expected X, found Y)"`` explicitly rather than
+        failing silently.
     """
     if not isinstance(repo_root, Path):
         raise TypeError("repo_root must be a pathlib.Path")
@@ -201,29 +239,35 @@ def inspect_tools_vendor_authority(repo_root: Path) -> ToolsVendorAuthority:
     if not canonical_repo.is_dir():
         return _unavailable(vendor_root, "UpstreamDrift repository root is unavailable")
 
-    error = _tracked_gitlink_error(canonical_repo)
-    if error is not None:
-        return _unavailable(vendor_root, error)
+    expected_sha, error = _tracked_gitlink_sha(canonical_repo)
+    if error is not None or expected_sha is None:
+        return _unavailable(
+            vendor_root, error or "tracked Tools gitlink entry is missing"
+        )
     canonical_vendor, error = _resolve_checkout(vendor_root)
     if error is not None or canonical_vendor is None:
-        return _unavailable(vendor_root, error or "Tools checkout cannot be resolved")
-    error = _checkout_identity_error(canonical_repo, canonical_vendor)
+        return _unavailable(
+            vendor_root,
+            error or "Tools checkout cannot be resolved",
+            expected_sha,
+        )
+    error = _checkout_identity_error(canonical_repo, canonical_vendor, expected_sha)
     if error is not None:
-        return _unavailable(vendor_root, error)
+        return _unavailable(vendor_root, error, expected_sha)
     error = _checkout_cleanliness_error(canonical_repo, canonical_vendor)
     if error is not None:
-        return _unavailable(vendor_root, error)
+        return _unavailable(vendor_root, error, expected_sha)
 
     return ToolsVendorAuthority(
         root=canonical_vendor,
-        expected_sha=TOOLS_GITLINK_SHA,
+        expected_sha=expected_sha,
         available=True,
     )
 
 
 __all__ = [
     "ProviderUnavailableError",
-    "TOOLS_GITLINK_SHA",
     "ToolsVendorAuthority",
+    "expected_tools_gitlink_sha",
     "inspect_tools_vendor_authority",
 ]
