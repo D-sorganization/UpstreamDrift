@@ -3668,6 +3668,7 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - **Performance:** Replaced `np.sum(forces, axis=0)` with `sum((s.force for s in self._sources.values()), np.zeros(3))` in `ForceAccumulator` methods (`get_total_force`, `get_total_torque`, and `get_total_generalized_force`) in `src/engines/common/state.py` to avoid intermediate list and array allocations, yielding ~30% faster execution time for accumulating forces and torques.
 
 ### Performance Improvements
+- (spec-exempt: micro-optimization) Replaced `np.sum(diff * diff)` with `np.dot(diff.ravel(), diff.ravel())` for calculating `rmse` in `src/engines/physics_engines/drake/python/motion_matching/fit_swing_autodiff.py` to optimize performance while maintaining `AutoDiffXd` compatibility.
 
 - Optimize trajectory evaluation constraints in drake optimization by replacing `np.sum(arr)` with `arr.sum()` and skipping numpy array dispatch overhead (spec-exempt: micro-optimization).
 - Replaced `np.sum(weights)` with `weights.sum()` in `keypoint_offsets.py` to bypass array conversion checks and improve execution speed. (spec-exempt: micro-optimization)
