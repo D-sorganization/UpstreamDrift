@@ -1,14 +1,21 @@
 """Tests for launcher_dialogs.py."""
 
-import subprocess
 from pathlib import Path  # noqa: E402
 from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
 from PyQt6.QtWidgets import QMainWindow  # noqa: E402
+from src.launchers import wsl_probe  # noqa: E402
 from src.launchers.launcher_dialogs import DialogsManager  # noqa: E402
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.fixture(autouse=True)
+def _clean_wsl_cache():
+    wsl_probe.reset_wsl_probe_cache()
+    yield
+    wsl_probe.reset_wsl_probe_cache()
 
 
 from typing import Any
@@ -376,15 +383,12 @@ def test_on_docker_mode_changed_unavailable(mock_question, launcher) -> None:
     launcher.chk_docker.setChecked.assert_called_with(False)
 
 
-@patch("src.launchers.launcher_dialogs.subprocess.run")
-def test_on_wsl_mode_changed(mock_run, launcher) -> None:
+def test_on_wsl_mode_changed(launcher) -> None:
     launcher.chk_docker.isChecked.return_value = True
     launcher.toast_manager = MagicMock()
 
-    mock_result = MagicMock()
-    mock_result.stdout = "Ubuntu-22.04".encode("utf-16-le")
-    mock_result.returncode = 0
-    mock_run.return_value = mock_result
+    # WSL availability already probed (async, #8903); the toggle applies it.
+    wsl_probe.store_wsl_result(wsl_probe.WslProbeResult(available=True))
 
     with patch.object(launcher, "update_execution_status") as mock_exec:
         launcher.btn_launch = MagicMock()  # trigger update_launch_button branch
@@ -395,42 +399,38 @@ def test_on_wsl_mode_changed(mock_run, launcher) -> None:
         launcher.toast_manager.show_info.assert_called()
 
 
-@patch("src.launchers.launcher_dialogs.subprocess.run")
-def test_on_wsl_mode_changed_utf8_fallback(mock_run, launcher) -> None:
+@patch("src.launchers.launcher_dialogs.wsl_probe.WslAvailabilityWorker")
+def test_on_wsl_mode_changed_uncached_starts_async_probe(
+    mock_worker_cls, launcher
+) -> None:
+    """No cached result => async worker starts, handler returns without blocking."""
     launcher.chk_docker.isChecked.return_value = True
+    worker = MagicMock()
+    mock_worker_cls.return_value = worker
 
-    mock_result = MagicMock()
-    mock_stdout = MagicMock()
-    mock_stdout.decode.side_effect = [
-        UnicodeDecodeError("utf-16", b"", 0, 1, "err"),
-        "Ubuntu",
-    ]
-    mock_result.stdout = mock_stdout
-    mock_result.returncode = 0
-    mock_run.return_value = mock_result
-
-    with patch.object(launcher, "update_execution_status"):
+    with patch.object(launcher, "update_execution_status") as mock_exec:
         launcher._on_wsl_mode_changed(2)
+        mock_exec.assert_not_called()  # deferred until the probe result lands
+
+    worker.start.assert_called_once()
+    launcher.chk_wsl.setEnabled.assert_called_with(False)
     launcher.chk_docker.setChecked.assert_called_with(False)
 
 
-@patch("src.launchers.launcher_dialogs.subprocess.run")
 @patch("src.launchers.launcher_dialogs.QMessageBox.warning")
-def test_on_wsl_mode_changed_error(mock_warning, mock_run, launcher) -> None:
-    mock_run.side_effect = OSError("err")
+def test_on_wsl_mode_changed_error(mock_warning, launcher) -> None:
+    wsl_probe.store_wsl_result(wsl_probe.WslProbeResult(available=False, detail="err"))
     launcher._on_wsl_mode_changed(2)
     mock_warning.assert_called_once()
 
 
-@patch("src.launchers.launcher_dialogs.subprocess.run")
 @patch("src.launchers.launcher_dialogs.QMessageBox.warning")
 def test_on_wsl_mode_changed_missing_ubuntu_warns_and_reverts(
-    mock_warning, mock_run, launcher
+    mock_warning, launcher
 ) -> None:
-    mock_result = MagicMock()
-    mock_result.stdout = "docker-desktop".encode("utf-16-le")
-    mock_result.returncode = 0
-    mock_run.return_value = mock_result
+    wsl_probe.store_wsl_result(
+        wsl_probe.WslProbeResult(available=False, detail="Ubuntu not found in WSL")
+    )
 
     launcher._on_wsl_mode_changed(2)
 
@@ -438,12 +438,13 @@ def test_on_wsl_mode_changed_missing_ubuntu_warns_and_reverts(
     launcher.chk_wsl.setChecked.assert_called_with(False)
 
 
-@patch("src.launchers.launcher_dialogs.subprocess.run")
 @patch("src.launchers.launcher_dialogs.QMessageBox.warning")
-def test_on_wsl_mode_changed_timeout_warns_and_reverts(
-    mock_warning, mock_run, launcher
-) -> None:
-    mock_run.side_effect = subprocess.TimeoutExpired(["wsl", "--list", "--quiet"], 5)
+def test_on_wsl_mode_changed_timeout_warns_and_reverts(mock_warning, launcher) -> None:
+    wsl_probe.store_wsl_result(
+        wsl_probe.WslProbeResult(
+            available=False, detail="Command 'wsl' timed out after 5 seconds"
+        )
+    )
 
     launcher._on_wsl_mode_changed(2)
 

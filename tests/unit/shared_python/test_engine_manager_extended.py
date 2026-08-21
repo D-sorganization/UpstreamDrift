@@ -109,13 +109,8 @@ def test_discover_engines(mock_suite_root) -> None:
     golf_swing_pendulum) remain UNAVAILABLE.
     """
     from src.shared.python.engine_core import engine_manager as em
-    from src.shared.python.engine_core.engine_availability import (
-        EngineStatus as RuntimeStatus,
-    )
 
-    with patch.object(
-        em, "get_runtime_engine_status", lambda name: RuntimeStatus.AVAILABLE
-    ):
+    with patch.object(em, "is_dependency_present", lambda name: True):
         manager = EngineManager(mock_suite_root)
 
     present_engines = (
