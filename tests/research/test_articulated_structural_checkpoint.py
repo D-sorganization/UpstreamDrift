@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+import hashlib
 import json
 from pathlib import Path
 
@@ -20,8 +21,10 @@ from scripts.research.proximal_distal_energy.articulated_scaled_authority import
 )
 from scripts.research.proximal_distal_energy.articulated_structural_checkpoint import (
     METADATA_FIELD,
+    audit_structural_checkpoint_directory,
     load_structural_checkpoint,
     structural_checkpoint_array_contract,
+    structural_checkpoint_path,
     write_structural_checkpoint,
 )
 from scripts.research.proximal_distal_energy.articulated_structural_execution_identity import (
@@ -261,4 +264,146 @@ def test_load_rejects_corrupt_archive(tmp_path) -> None:
             branch_kind="primary",
             branch_slot=0,
             expected_contract=structural_checkpoint_array_contract(_arrays()),
+        )
+
+
+def _branch_contracts(identity) -> dict:
+    contract = structural_checkpoint_array_contract(_arrays())
+    return dict.fromkeys(identity.registered_branches, contract)
+
+
+def _write_registered_set(directory: Path, identity, count: int) -> None:
+    contract = structural_checkpoint_array_contract(_arrays())
+    identities = [
+        (state_slot, state, branch_kind, branch_slot)
+        for state_slot, state in enumerate(identity.registered_states)
+        for branch_kind, branch_slot in identity.registered_branches
+    ]
+    for state_slot, state, branch_kind, branch_slot in identities[:count]:
+        write_structural_checkpoint(
+            structural_checkpoint_path(
+                directory,
+                identity,
+                state_slot=state_slot,
+                branch_kind=branch_kind,
+                branch_slot=branch_slot,
+            ),
+            identity,
+            state_slot=state_slot,
+            state=state,
+            branch_kind=branch_kind,
+            branch_slot=branch_slot,
+            arrays=_arrays(),
+            expected_contract=contract,
+        )
+
+
+def test_checkpoint_set_audit_distinguishes_partial_from_complete(tmp_path) -> None:
+    identity = _identity()
+    contracts = _branch_contracts(identity)
+    _write_registered_set(tmp_path, identity, 7)
+
+    partial = audit_structural_checkpoint_directory(
+        tmp_path,
+        identity,
+        expected_contracts=contracts,
+        allow_partial=True,
+    )
+    assert partial == {
+        "schema_version": "articulated-structural-checkpoint-audit/v1",
+        "status": "partial",
+        "checkpoint_count": 7,
+        "expected_checkpoint_count": 72,
+        "observed_state_slot_count": 2,
+        "complete_state_slot_count": 1,
+        "checkpoint_set_sha256": partial["checkpoint_set_sha256"],
+        "release_evidence": False,
+    }
+    assert len(partial["checkpoint_set_sha256"]) == 64
+    expected_digest = hashlib.sha256()
+    for path in sorted(tmp_path.iterdir()):
+        expected_digest.update(path.name.encode("utf-8"))
+        expected_digest.update(hashlib.sha256(path.read_bytes()).digest())
+    assert partial["checkpoint_set_sha256"] == expected_digest.hexdigest()
+    with pytest.raises(RuntimeError, match="incomplete"):
+        audit_structural_checkpoint_directory(
+            tmp_path,
+            identity,
+            expected_contracts=contracts,
+        )
+
+    _write_registered_set(tmp_path, identity, 72)
+    complete = audit_structural_checkpoint_directory(
+        tmp_path,
+        identity,
+        expected_contracts=contracts,
+    )
+    assert complete["status"] == "complete"
+    assert complete["checkpoint_count"] == 72
+    assert complete["complete_state_slot_count"] == 12
+    assert complete["release_evidence"] is False
+
+
+def test_checkpoint_set_audit_rejects_unregistered_files(tmp_path) -> None:
+    identity = _identity()
+    _write_registered_set(tmp_path, identity, 1)
+    (tmp_path / "interrupted.npz.tmp").write_bytes(b"torn")
+
+    with pytest.raises(RuntimeError, match="unregistered files"):
+        audit_structural_checkpoint_directory(
+            tmp_path,
+            identity,
+            expected_contracts=_branch_contracts(identity),
+            allow_partial=True,
+        )
+
+
+def test_checkpoint_set_audit_requires_every_branch_contract(tmp_path) -> None:
+    identity = _identity()
+    contracts = _branch_contracts(identity)
+    contracts.pop(next(iter(contracts)))
+
+    with pytest.raises(ValueError, match="every registered branch"):
+        audit_structural_checkpoint_directory(
+            tmp_path,
+            identity,
+            expected_contracts=contracts,
+            allow_partial=True,
+        )
+
+
+def test_checkpoint_set_audit_validates_absent_branch_contracts(tmp_path) -> None:
+    identity = _identity()
+    _write_registered_set(tmp_path, identity, 1)
+    contracts = _branch_contracts(identity)
+    absent = identity.registered_branches[-1]
+    contracts[absent] = {"unsafe": ((1,), "|O")}
+
+    with pytest.raises(ValueError, match="dtype is not registered"):
+        audit_structural_checkpoint_directory(
+            tmp_path,
+            identity,
+            expected_contracts=contracts,
+            allow_partial=True,
+        )
+
+
+def test_checkpoint_path_rejects_unregistered_identity(tmp_path) -> None:
+    identity = _identity()
+
+    with pytest.raises(ValueError, match="registered state"):
+        structural_checkpoint_path(
+            tmp_path,
+            identity,
+            state_slot=12,
+            branch_kind="primary",
+            branch_slot=0,
+        )
+    with pytest.raises(ValueError, match="registered branch"):
+        structural_checkpoint_path(
+            tmp_path,
+            identity,
+            state_slot=0,
+            branch_kind="activation",
+            branch_slot=0,
         )

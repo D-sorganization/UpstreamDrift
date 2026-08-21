@@ -214,6 +214,8 @@ def test_plan_binds_restart_and_cell_level_evidence_contract(plan) -> None:
     assert "missing, extra, or altered" in evidence["checkpoint_metadata_rule"]
     assert "fields, shapes, and dtypes" in evidence["checkpoint_payload_rule"]
     assert "pickle disabled" in evidence["checkpoint_payload_rule"]
+    assert "partial restart state" in evidence["checkpoint_set_rule"]
+    assert "not release evidence" in evidence["checkpoint_set_rule"]
     assert set(evidence["checkpoint_identity_fields"]) == {
         "corner_id",
         "authority_sha256",

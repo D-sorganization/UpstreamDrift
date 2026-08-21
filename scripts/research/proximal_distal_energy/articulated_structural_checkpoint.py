@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+import hashlib
+import io
 import json
 from pathlib import Path
 from typing import Any, TypeAlias
@@ -20,6 +22,7 @@ from scripts.research.proximal_distal_energy.articulated_structural_execution_id
 Array: TypeAlias = NDArray[Any]
 ArraySignature: TypeAlias = tuple[tuple[int, ...], str]
 ArrayContract: TypeAlias = dict[str, ArraySignature]
+BranchContracts: TypeAlias = Mapping[tuple[str, int], Mapping[str, ArraySignature]]
 METADATA_FIELD = "__metadata__"
 
 
@@ -53,11 +56,37 @@ def structural_checkpoint_array_contract(arrays: Mapping[str, Any]) -> ArrayCont
     return contract
 
 
+def _normalized_contract(
+    expected_contract: Mapping[str, ArraySignature],
+) -> ArrayContract:
+    if not isinstance(expected_contract, Mapping) or not expected_contract:
+        raise ValueError("checkpoint array contract must be a nonempty mapping")
+    normalized: ArrayContract = {}
+    for raw_name, signature in expected_contract.items():
+        name = _field_name(raw_name)
+        if (
+            not isinstance(signature, tuple)
+            or len(signature) != 2
+            or not isinstance(signature[0], tuple)
+            or not all(type(value) is int and value >= 0 for value in signature[0])
+            or not isinstance(signature[1], str)
+        ):
+            raise ValueError("checkpoint array signature is invalid")
+        try:
+            dtype = np.dtype(signature[1])
+        except (TypeError, ValueError) as error:
+            raise ValueError("checkpoint array dtype is invalid") from error
+        if dtype.hasobject or dtype.kind not in "biufc" or dtype.str != signature[1]:
+            raise ValueError("checkpoint array dtype is not registered")
+        normalized[name] = (signature[0], signature[1])
+    return normalized
+
+
 def _validated_arrays(
     arrays: Mapping[str, Any], expected_contract: Mapping[str, ArraySignature]
 ) -> dict[str, Array]:
     observed_contract = structural_checkpoint_array_contract(arrays)
-    if dict(expected_contract) != observed_contract:
+    if _normalized_contract(expected_contract) != observed_contract:
         raise RuntimeError("structural checkpoint array contract does not reproduce")
     return {name: np.asarray(arrays[name]).copy() for name in sorted(observed_contract)}
 
@@ -113,8 +142,8 @@ def write_structural_checkpoint(
         temporary.unlink(missing_ok=True)
 
 
-def load_structural_checkpoint(
-    path: Path,
+def _load_structural_checkpoint_payload(
+    payload: bytes,
     identity: StructuralExecutionIdentity,
     *,
     state_slot: int,
@@ -123,17 +152,14 @@ def load_structural_checkpoint(
     branch_slot: int,
     expected_contract: Mapping[str, ArraySignature],
 ) -> dict[str, Array]:
-    """Load one checkpoint with pickle disabled and reproduce every contract."""
-
-    expected_fields = set(expected_contract) | {METADATA_FIELD}
+    contract = _normalized_contract(expected_contract)
+    expected_fields = set(contract) | {METADATA_FIELD}
     try:
-        with np.load(path, allow_pickle=False) as source:
+        with np.load(io.BytesIO(payload), allow_pickle=False) as source:
             if set(source.files) != expected_fields:
                 raise RuntimeError("structural checkpoint fields do not reproduce")
             metadata = _read_metadata(source)
-            arrays = {
-                name: np.asarray(source[name]).copy() for name in expected_contract
-            }
+            arrays = {name: np.asarray(source[name]).copy() for name in contract}
     except (OSError, ValueError, EOFError, zipfile.BadZipFile) as error:
         raise RuntimeError("structural checkpoint cannot be loaded safely") from error
     validate_structural_checkpoint_metadata(
@@ -145,18 +171,149 @@ def load_structural_checkpoint(
         branch_slot=branch_slot,
     )
     try:
-        return _validated_arrays(arrays, expected_contract)
+        return _validated_arrays(arrays, contract)
     except (TypeError, ValueError, RuntimeError) as error:
         raise RuntimeError(
             "structural checkpoint payload does not reproduce"
         ) from error
 
 
+def load_structural_checkpoint(
+    path: Path,
+    identity: StructuralExecutionIdentity,
+    *,
+    state_slot: int,
+    state: tuple[int, int],
+    branch_kind: str,
+    branch_slot: int,
+    expected_contract: Mapping[str, ArraySignature],
+) -> dict[str, Array]:
+    """Load one immutable byte snapshot and reproduce every checkpoint contract."""
+
+    try:
+        payload = path.read_bytes()
+    except OSError as error:
+        raise RuntimeError("structural checkpoint cannot be loaded safely") from error
+    return _load_structural_checkpoint_payload(
+        payload,
+        identity,
+        state_slot=state_slot,
+        state=state,
+        branch_kind=branch_kind,
+        branch_slot=branch_slot,
+        expected_contract=expected_contract,
+    )
+
+
+def structural_checkpoint_path(
+    directory: Path,
+    identity: StructuralExecutionIdentity,
+    *,
+    state_slot: int,
+    branch_kind: str,
+    branch_slot: int,
+) -> Path:
+    """Resolve the only registered filename for one state and branch."""
+
+    if type(state_slot) is not int or not 0 <= state_slot < len(
+        identity.registered_states
+    ):
+        raise ValueError("state_slot must select a registered state")
+    structural_checkpoint_metadata(
+        identity,
+        state_slot=state_slot,
+        state=identity.registered_states[state_slot],
+        branch_kind=branch_kind,
+        branch_slot=branch_slot,
+    )
+    return directory / f"state-{state_slot:02d}-{branch_kind}-{branch_slot:02d}.npz"
+
+
+def audit_structural_checkpoint_directory(
+    directory: Path,
+    identity: StructuralExecutionIdentity,
+    *,
+    expected_contracts: BranchContracts,
+    allow_partial: bool = False,
+) -> dict[str, Any]:
+    """Validate exact registered checkpoint coverage without promoting partial work."""
+
+    if not isinstance(expected_contracts, Mapping) or set(expected_contracts) != set(
+        identity.registered_branches
+    ):
+        raise ValueError("checkpoint contracts must cover every registered branch")
+    contracts = {
+        branch: _normalized_contract(expected_contracts[branch])
+        for branch in identity.registered_branches
+    }
+    expected = {
+        structural_checkpoint_path(
+            directory,
+            identity,
+            state_slot=state_slot,
+            branch_kind=branch_kind,
+            branch_slot=branch_slot,
+        ): (state_slot, state, branch_kind, branch_slot)
+        for state_slot, state in enumerate(identity.registered_states)
+        for branch_kind, branch_slot in identity.registered_branches
+    }
+    observed = set(directory.iterdir()) if directory.exists() else set()
+    unknown = observed - set(expected)
+    if unknown:
+        raise RuntimeError("checkpoint directory contains unregistered files")
+    if not observed or (not allow_partial and observed != set(expected)):
+        raise RuntimeError("checkpoint directory is incomplete")
+
+    content = hashlib.sha256()
+    observed_states: set[int] = set()
+    branch_count: dict[int, int] = {}
+    for path in sorted(observed):
+        state_slot, state, branch_kind, branch_slot = expected[path]
+        try:
+            payload = path.read_bytes()
+        except OSError as error:
+            raise RuntimeError(
+                "structural checkpoint cannot be loaded safely"
+            ) from error
+        _load_structural_checkpoint_payload(
+            payload,
+            identity,
+            state_slot=state_slot,
+            state=state,
+            branch_kind=branch_kind,
+            branch_slot=branch_slot,
+            expected_contract=contracts[(branch_kind, branch_slot)],
+        )
+        observed_states.add(state_slot)
+        branch_count[state_slot] = branch_count.get(state_slot, 0) + 1
+        content.update(path.name.encode("utf-8"))
+        content.update(hashlib.sha256(payload).digest())
+
+    branches_per_state = len(identity.registered_branches)
+    complete_states = sum(
+        count == branches_per_state for count in branch_count.values()
+    )
+    complete = observed == set(expected)
+    return {
+        "schema_version": "articulated-structural-checkpoint-audit/v1",
+        "status": "complete" if complete else "partial",
+        "checkpoint_count": len(observed),
+        "expected_checkpoint_count": len(expected),
+        "observed_state_slot_count": len(observed_states),
+        "complete_state_slot_count": complete_states,
+        "checkpoint_set_sha256": content.hexdigest(),
+        "release_evidence": False,
+    }
+
+
 __all__ = [
     "ArrayContract",
     "ArraySignature",
+    "BranchContracts",
     "METADATA_FIELD",
+    "audit_structural_checkpoint_directory",
     "load_structural_checkpoint",
     "structural_checkpoint_array_contract",
+    "structural_checkpoint_path",
     "write_structural_checkpoint",
 ]

@@ -293,6 +293,7 @@ def build_structural_propagation_plan(
         ],
         "checkpoint_metadata_rule": "persist the exact registered prefix and local state/branch identity; reject every missing, extra, or altered field before reuse",
         "checkpoint_payload_rule": "atomically persist exact registered fields, shapes, and dtypes with pickle disabled; reject infinity and retain pathway-defined NaN only for downstream semantic validation",
+        "checkpoint_set_rule": "audit exact registered filenames, per-branch payload contracts, coverage, and content digest; classify partial restart state as not release evidence",
         "required_cell_arrays": {
             pathway: [
                 "cell_identity",
