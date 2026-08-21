@@ -57,6 +57,15 @@ _(Populated as the review proceeds; each row is filed as a GitHub issue.)_
 | 24 | #8840 | Organization | Low | Four self-admitted pending docs consolidations left unexecuted |
 | 25 | #8841 | Organization | Medium | Top-level motion_matching trees are wrong-cwd artifacts; workflows disagree on leaderboard |
 | 26 | #8842 | Organization | Low | notebooks/bunkershot3d/phase1_mvp.py cannot run (imports/paths wrong) |
+| 27 | #8843 | Calc docs | High | In-app Help broken at root: USER_MANUAL.md path missing; 10/35 components resolve no help |
+| 28 | #8844 | Calc docs | High | docs/help/analysis_tools.md documents a fabricated API |
+| 29 | #8845 | Calc docs | High | Ball-flight calc sheet drifted: wrong lift law, dead fields, 5x cd1, stale assumptions |
+| 30 | #8846 | Calc docs | Medium | 21 of 25 GUI tools have no help affordance; build_help_menu is dead code |
+| 31 | #8847 | Calc docs | Medium | MethodCitation DOI metadata produced but surfaced to no user |
+| 32 | #8848 | Calc docs | Medium | LM user guide documents API-only Strokes Gained as workbench feature; ADR 0036 missing |
+| 33 | #8849 | Calc docs | Medium | sg_optimizer coefficients uncited despite data_sources.md traceability claim |
+| 34 | #8850 | Calc docs | Medium | Key calc docs orphaned; docs/index.md has no hyperlinks |
+| 35 | #8851 | Calc docs | Low | 21 broken doc links; check_markdown_links.py always exits 0 |
 
 ## Status
 
