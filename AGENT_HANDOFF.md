@@ -127,6 +127,13 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
   unavailable states, units, vendor/model provenance, and source-linked backing.
   Its pair scan is exploratory and non-causal; consumers must not duplicate or
   relabel the Python authority in React or PyQt.
+- UpstreamDrift #8808 owns attested session-unit longitudinal analysis under
+  `launch-monitor-longitudinal-session/1.0.0`. It requires trusted, separate
+  player/session/order evidence, aggregates shots before inference, and reports
+  per-player descriptive slopes plus player-fixed-effects OLS with
+  player-clustered uncertainty. Structured unavailable states, missingness,
+  source-linked backing, and explicit non-causal/non-improvement claims are
+  mandatory for every consumer.
 
 ## Qualified Baseline — And Its Limits
 

@@ -36,6 +36,7 @@ from src.shared.python.launch_monitor.contract_v2 import (
     VendorProvenanceV2,
     adapt_v2_to_v1,
     analyze_variables_v2,
+    build_analysis_lineage_v2,
     contract_v2_json_schema,
 )
 from src.shared.python.launch_monitor.dispersion import (
@@ -67,6 +68,21 @@ from src.shared.python.launch_monitor.flexible_analysis import (
     analyze_variables,
 )
 from src.shared.python.launch_monitor.importer import import_session
+from src.shared.python.launch_monitor.longitudinal import (
+    analyze_longitudinal_sessions,
+    longitudinal_session_contract_json_schema,
+)
+from src.shared.python.launch_monitor.longitudinal_types import (
+    LONGITUDINAL_SESSION_CONTRACT_VERSION,
+    LongitudinalClaimsV1,
+    LongitudinalDesignV1,
+    LongitudinalMissingnessV1,
+    LongitudinalPlayerAssociationV1,
+    LongitudinalSessionRequestV1,
+    LongitudinalSessionResultV1,
+    PooledAssociationV1,
+    SessionAggregateV1,
+)
 from src.shared.python.launch_monitor.modeling import (
     PredictiveModelResult,
     fit_predictive_model,
@@ -195,7 +211,14 @@ __all__ = [
     "ImportProfile",
     "ImportedSession",
     "LaunchMonitorProject",
+    "LONGITUDINAL_SESSION_CONTRACT_VERSION",
     "LongitudinalDimensionV1",
+    "LongitudinalClaimsV1",
+    "LongitudinalDesignV1",
+    "LongitudinalMissingnessV1",
+    "LongitudinalPlayerAssociationV1",
+    "LongitudinalSessionRequestV1",
+    "LongitudinalSessionResultV1",
     "LaunchMonitorAnalysisResultV2",
     "MetricDefinition",
     "MetricUnitsV2",
@@ -220,6 +243,7 @@ __all__ = [
     "PlayerCovariationScanRequestV1",
     "PlayerCovariationScanResultV1",
     "PlayerIdentityV2",
+    "PooledAssociationV1",
     "SessionIdentityV2",
     "SourceFileReferenceV2",
     "RegressionEstimate",
@@ -227,6 +251,7 @@ __all__ = [
     "STROKES_GAINED_CONTRACT_VERSION",
     "StrokesGainedAnalysisResultV1",
     "StrokesGainedRequestV1",
+    "SessionAggregateV1",
     "TreatmentConfig",
     "TreatmentResult",
     "TransformRecordV2",
@@ -237,6 +262,7 @@ __all__ = [
     "VendorProvenanceV2",
     "adapt_v2_to_v1",
     "analyze_outcome_proxy",
+    "analyze_longitudinal_sessions",
     "analyze_player_covariation_v1",
     "analyze_source_backed_strokes_gained",
     "analyze_dispersion",
@@ -245,6 +271,7 @@ __all__ = [
     "analyze_trend",
     "apply_treatment",
     "baseline_table_sha256",
+    "build_analysis_lineage_v2",
     "compare_monitors",
     "CORPUS_COLUMN_MAP",
     "corpus_dataset_path",
@@ -258,6 +285,7 @@ __all__ = [
     "fit_predictive_model",
     "import_session",
     "load_private_corpus",
+    "longitudinal_session_contract_json_schema",
     "normalize_header",
     "numeric_metric_columns",
     "player_covariation_contract_json_schema",
