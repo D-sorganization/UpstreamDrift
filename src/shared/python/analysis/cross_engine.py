@@ -43,6 +43,11 @@ logger = get_logger(__name__)
 #: in the desktop dashboard but are rejected-or-real in the API study.
 ENGINE_NAMES: tuple[str, ...] = ("mujoco", "drake", "pinocchio", "pendulum_stub")
 
+#: Backend identity tags (#8817): every comparison result declares whether an
+#: engine actually ran real physics or the deterministic 2-DOF stub.
+BACKEND_REAL: str = "real"
+BACKEND_STUB: str = "stub_2dof"
+
 #: Cross-engine CV summary keys, in stable chart order.
 CV_METRIC_KEYS: tuple[str, ...] = (
     "cv_total_energy_final",
@@ -157,13 +162,47 @@ def build_engine(
     -------
     SteppableEngine instance (real or stub)
     """
+    engine, _backend = build_engine_with_backend(name, try_real=try_real)
+    return engine
+
+
+def build_engine_with_backend(
+    name: str,
+    *,
+    try_real: Callable[[str], Any | None] | None = None,
+) -> tuple[Any, str]:
+    """Build an engine and report the actual backend identity (#8817).
+
+    Design by Contract
+    ------------------
+    Post: the returned backend tag is :data:`BACKEND_REAL` iff the real
+    engine was instantiated; a stub fallback is always tagged
+    :data:`BACKEND_STUB` so callers can disclose the substitution.
+
+    Returns
+    -------
+    tuple of (engine instance, backend tag)
+    """
     if name == "pendulum_stub":
-        return StubEngine("pendulum_stub")
+        return StubEngine("pendulum_stub"), BACKEND_STUB
     builder = try_real if try_real is not None else try_build_real_engine
     real = builder(name)
     if real is not None:
-        return real
-    return StubEngine(name)
+        return real, BACKEND_REAL
+    return StubEngine(name), BACKEND_STUB
+
+
+def substituted_engines(backends: dict[str, str]) -> list[str]:
+    """Return engines that silently degraded to a stub.
+
+    ``pendulum_stub`` is requested *as* a stub, so it never counts as a
+    substitution.
+    """
+    return [
+        name
+        for name, backend in backends.items()
+        if backend == BACKEND_STUB and name != "pendulum_stub"
+    ]
 
 
 def run_comparison_with_results(
@@ -186,16 +225,42 @@ def run_comparison_with_results(
     -------
     tuple of (results dict keyed by engine name, CV summary dict)
     """
+    results, cv_summary, _backends = run_comparison_with_provenance(
+        engine_names, config
+    )
+    return results, cv_summary
+
+
+def run_comparison_with_provenance(
+    engine_names: list[str],
+    config: CrossEngineSimConfig,
+) -> tuple[dict[str, CrossEngineRunResult], dict[str, float], dict[str, str]]:
+    """Execute the comparison and additionally report backend identity (#8817).
+
+    Design by Contract
+    ------------------
+    Pre:  engine_names is non-empty
+    Post: the backends dict has exactly one entry per requested engine, each
+          :data:`BACKEND_REAL` or :data:`BACKEND_STUB`.
+
+    Returns
+    -------
+    tuple of (results dict, CV summary dict, backends dict mapping engine
+    name to backend tag)
+    """
     if not engine_names:
         raise ValueError("At least one engine name must be provided")
     runner = CrossEnginePerturbationRunner(config)
+    backends: dict[str, str] = {}
     for name in engine_names:
-        runner.register_engine(name, build_engine(name))  # type: ignore[arg-type]
+        engine, backend = build_engine_with_backend(name)
+        backends[name] = backend
+        runner.register_engine(name, engine)  # type: ignore[arg-type]
     n_steps = round(config.t_end / config.dt)
     base_profile = np.zeros(n_steps)
     results = runner.run_comparison(base_profile)
     cv_summary = runner.compute_cv_summary(results)
-    return results, cv_summary
+    return results, cv_summary, backends
 
 
 def cv_values(cv_summary: dict[str, float]) -> list[float]:
@@ -247,9 +312,26 @@ def _engine_metric_stats(result: CrossEngineRunResult) -> dict[str, dict[str, fl
     return stats
 
 
+def per_engine_robustness(
+    results: dict[str, CrossEngineRunResult],
+) -> dict[str, float]:
+    """Genuine per-engine robustness: 1 − mean per-metric CV across trials.
+
+    Post: every value is clamped to [0, 1]; one entry per engine result.
+    """
+    return {
+        name: robustness_score(
+            [stats["cv"] for stats in _engine_metric_stats(result).values()]
+        )
+        for name, result in results.items()
+    }
+
+
 def run_cross_engine_study(
     engine_names: list[str],
     config: CrossEngineSimConfig,
+    *,
+    allow_stub_substitution: bool = True,
 ) -> dict[str, Any]:
     """Run a perturbation study and return a JSON-serialisable summary.
 
@@ -260,36 +342,59 @@ def run_cross_engine_study(
         the API must not silently substitute a stub for a typo.
     config : CrossEngineSimConfig
         Simulation configuration (validated on construction).
+    allow_stub_substitution : bool, keyword-only
+        When ``False``, refuse to degrade a requested real engine to the
+        2-DOF stub — raise instead of returning stub-backed numbers
+        (#8817). Defaults to ``True`` (substitution is disclosed in the
+        payload either way).
 
     Returns
     -------
     dict with keys:
-        ``engines``  — per-engine ``{metrics: {name: {mean, std, cv,
-        robustness_score}}}``
+        ``engines``  — per-engine ``{backend, robustness_score,
+        metrics: {name: {mean, std, cv, robustness_score}}}`` where
+        ``backend`` is :data:`BACKEND_REAL` or :data:`BACKEND_STUB`
         ``cv_summary`` — cross-engine CV per metric (identical to the
         desktop ``--no-gui`` CLI output)
-        ``robustness_overall`` — 1 − mean(CV), clamped to [0, 1] (the
-        value the desktop dashboard charts per engine)
+        ``robustness_overall`` — 1 − mean(CV), clamped to [0, 1]
+        (aggregate across engines — NOT a per-engine value)
+        ``stubbed_engines`` — requested real engines that silently fell
+        back to the 2-DOF stub (empty when everything ran real)
         ``config`` — echo of the effective configuration
 
     Raises
     ------
-    ValueError : if engine_names is empty or contains an unknown engine
+    ValueError : if engine_names is empty, contains an unknown engine, or
+        a stub substitution occurred while ``allow_stub_substitution`` is
+        ``False``
     """
     unknown = [name for name in engine_names if name not in ENGINE_NAMES]
     if unknown:
         raise ValueError(
             f"Unknown engine name(s) {unknown}; supported: {list(ENGINE_NAMES)}"
         )
-    results, cv_summary = run_comparison_with_results(engine_names, config)
+    results, cv_summary, backends = run_comparison_with_provenance(engine_names, config)
+    substituted = substituted_engines(backends)
+    if substituted and not allow_stub_substitution:
+        raise ValueError(
+            f"Engine(s) {substituted} are unavailable and stub substitution "
+            "is disallowed (allow_stub_substitution=False); install the "
+            "engine(s) or drop them from the request"
+        )
+    robustness_by_engine = per_engine_robustness(results)
     overall = robustness_score(cv_values(cv_summary))
     return {
         "engines": {
-            name: {"metrics": _engine_metric_stats(result)}
+            name: {
+                "backend": backends[name],
+                "robustness_score": robustness_by_engine[name],
+                "metrics": _engine_metric_stats(result),
+            }
             for name, result in results.items()
         },
         "cv_summary": dict(cv_summary),
         "robustness_overall": overall,
+        "stubbed_engines": substituted,
         "config": {
             "t_end": config.t_end,
             "dt": config.dt,
