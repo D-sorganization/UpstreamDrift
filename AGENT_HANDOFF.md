@@ -108,6 +108,43 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
   now owns those native tests. This repairs the deterministic Python 3.11/3.12
   failures without accepting the unrelated PyPI `pinocchio` package.
 
+## Native Contact Formulation Discrepancy Control (#8911)
+
+- Worktree: `UpstreamDrift-worktrees/8911-native-contact-parity`; branch:
+  `fix/8911-native-contact-parity`, based on the verified #8961 merge.
+- Commits `643ce3a12`, `933c3cf87`, and `804efd249` implement the native
+  constraint experiment, evidence, MuJoCo API compatibility, terminology
+  correction, claim reconciliation, and regenerated 235-page paper. Release
+  metadata is bound to source commit
+  `804efd2490e377394274a23c104a010fb04c8d5c`.
+- The same closed 20-coordinate state is advanced for 4 ms with either two
+  native MuJoCo equality/connect constraints plus `mj_step`, or the existing
+  projected bilateral Kelvin--Voigt law and project-authored semi-implicit
+  update. Disabling the native equalities returns zero constraint force.
+- The native and projected formulations are measurably distinct. At 0.25 ms,
+  final hand--grip separations are 0.987 and 0.908 mm; the final coordinate
+  discrepancy is 1.04e-4 rad in club pitch. Refinement reduces the final
+  discrepancy from 1.12e-4 to 1.04e-4. Mixed-unit generalized vector norms are
+  reported only as numerical diagnostics and are not compared as physical
+  force magnitudes.
+- The former “independently integrated” language is removed from the shared
+  projected-contact experiment. MuJoCo and Pinocchio independently supply
+  kinematics, inertia, bias, gravity, and continuous-time acceleration there,
+  while contact and the state update remain shared. The new native branch is a
+  formulation-discrepancy control, not a parity claim.
+- Claim governance passes with 1,078/1,078 candidates adjudicated, 303 atomic
+  claims, 42 reviewed release claims, and 2,130 evidence references. The
+  computational release contains 581 hash-pinned artifacts and passes all 235
+  page renders, 194 URI links, and 246 outline entries. Archival tagged-PDF and
+  font findings remain explicitly open.
+- Focused numerical, claim, release, and publication tests pass (39 passed,
+  one dependency-qualified Pinocchio test skipped on Windows). The complete
+  release validator passes with no mismatches. The PDF was visually inspected
+  on all pages and at full resolution around the new native-control section.
+- Next owner action: commit release metadata and this handoff, push the branch,
+  open a full PR for #8911, request human review, and shepherd protected checks
+  without enabling auto-merge or bypassing protection.
+
 ## Scientific Boundaries
 
 - The model ladder is synthetic and model-conditional. It does not establish
