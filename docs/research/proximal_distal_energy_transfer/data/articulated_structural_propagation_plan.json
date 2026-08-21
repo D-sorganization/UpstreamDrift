@@ -2,8 +2,8 @@
   "schema_version": "articulated-structural-propagation-plan/v1",
   "status": "ready",
   "authority_campaign_sha256": "d8115073dc1b506f145196b08c96d7cb3cf00e8cf29099970e2f7b0fbe6d63f3",
-  "design_sha256": "8e5f246645e27c8f0f66a87859c63c470c43e579bccb50848124174944e11e07",
-  "contract_sha256": "10afadd4ab7908758a26762414ab24fcb141df874ffb35a72d63a7c35682961e",
+  "design_sha256": "0d6cc567ca4db9d512391847a500169793c0eca4d3d3de013173ba2e2d151dc7",
+  "contract_sha256": "b352f6b7f8d434b6133fc7b0774f0852b32b9524075d929281c7b492f2f6519b",
   "design": {
     "case_indices": [
       0,
@@ -114,6 +114,49 @@
       "match_relative_tolerance": 0.05,
       "parity_relative_tolerance": 1e-08,
       "power_residual_tolerance_w": 1e-08
+    },
+    "execution_identity": {
+      "shaft": {
+        "atlas_source_paths": [
+          "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
+          "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+          "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json",
+          "scripts/research/proximal_distal_energy/articulated_distributed_grip.py",
+          "scripts/research/proximal_distal_energy/articulated_distributed_forward.py",
+          "scripts/research/proximal_distal_energy/articulated_shaft.py",
+          "scripts/research/proximal_distal_energy/articulated_shaft_forward.py",
+          "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py",
+          "scripts/research/proximal_distal_energy/shaft_beam_reference.py",
+          "scripts/research/proximal_distal_energy/moving_base_modal_shaft.py",
+          "tests/research/test_articulated_shaft.py",
+          "tests/research/test_articulated_shaft_forward.py",
+          "tests/research/test_articulated_shaft_atlas.py",
+          "scripts/research/proximal_distal_energy/articulated_atlas_authority.py",
+          "scripts/research/proximal_distal_energy/articulated_atlas_runtime_authority.py"
+        ],
+        "atlas_source_sha256": "4427504a4db5640768dc9cd2a24f0322de5dd17578c6a5b6ac1e30934b5dae0d",
+        "scientific_configuration_sha256": "4b3a56fada938d5e508a1311567342887e1355b71d2d5676f37ae5545ceb41b4"
+      },
+      "ground": {
+        "atlas_source_paths": [
+          "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
+          "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+          "scripts/research/proximal_distal_energy/articulated_distributed_grip.py",
+          "scripts/research/proximal_distal_energy/articulated_ground.py",
+          "scripts/research/proximal_distal_energy/articulated_ground_forward.py",
+          "scripts/research/proximal_distal_energy/articulated_ground_atlas.py",
+          "scripts/research/proximal_distal_energy/articulated_shaft.py",
+          "scripts/research/proximal_distal_energy/articulated_shaft_forward.py",
+          "tests/research/test_articulated_ground.py",
+          "tests/research/test_articulated_ground_forward.py",
+          "tests/research/test_articulated_ground_atlas.py",
+          "tests/research/test_articulated_ground_checkpoint.py",
+          "scripts/research/proximal_distal_energy/articulated_atlas_authority.py",
+          "scripts/research/proximal_distal_energy/articulated_atlas_runtime_authority.py"
+        ],
+        "atlas_source_sha256": "1813f231b90b0722bcc1c0e00edf226391b34e1aec05d9b4fefa7741652504c4",
+        "scientific_configuration_sha256": "e8e04493e1681dfcc0438df8316e1ae84ebca1c0d48a1012d57174939d6c07dc"
+      }
     },
     "parallelism": "worker_count is operational and excluded from the scientific design digest"
   },
@@ -965,7 +1008,7 @@
     "scripts/research/proximal_distal_energy/articulated_structural_publication.py": "97eefd74745b22dd0321d39004086ec63926467fc777e649f4aaedb5bf7e5229",
     "scripts/research/proximal_distal_energy/articulated_structural_result.py": "9008282795796c9b77a5d55d2abb8fa99864257c185c2b0fe3a5660e4ac1ffcc",
     "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py": "166ab2ebec88a0c53abc54c6b565ba0a3f82caf800449e822164177f31289549",
-    "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": "571536b9c09a031f272701608feaae8016748bfc87b4ed65ca99680465c9a2c6",
+    "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": "72380079cc52b98507c4b40480d8eb5b98c7b97e83ca68f035469bc75f78f101",
     "tests/research/test_articulated_atlas_authority.py": "55fa82d2c56962a6982e71c38d9e9e933c374f91a825392763aad8e068a18537",
     "tests/research/test_articulated_structural_axis_evidence.py": "c4bfc99b429d65a4dcff6036b460a89b89e6b7cd3238b6771d80a021ca60db55",
     "tests/research/test_articulated_atlas_runtime_authority.py": "d866a122378265b6180637b7dfd3413b2aa4ec5dcf54056c1a7bdc4157459a3a",
@@ -977,7 +1020,7 @@
     "tests/research/test_articulated_structural_gate_status.py": "b13daca404fdb1643ebabb04d00561a36100349006623b889ba391cf283a9323",
     "tests/research/test_articulated_structural_publication.py": "0ceedaaa0a263ef17e49875f196b4bcd440bd1aaec1fd43a032e6d31a8ce9bb5",
     "tests/research/test_articulated_structural_result.py": "a95c8d4ce5f3c88088b87e62af68a912001eeadf8ed6724d4d3a1ee773d7b900",
-    "tests/research/test_articulated_structural_propagation_plan.py": "95f778d89092046ae0ae3bb84b981743d50edf007d6d31cae89de7b0c83789ea",
+    "tests/research/test_articulated_structural_propagation_plan.py": "0a4effa09984bc60f17479df9b97ca117538621a808bc15d423c26435ebd292a",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "8eed52fe4ebbc55fcf753f4703330dd6d768281b0babfbb2adca074b862fc36d",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
     "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json": "f07fc33cc76fb80f395cd10b01a30169b6440cec3854be3894024d435bc0f722",

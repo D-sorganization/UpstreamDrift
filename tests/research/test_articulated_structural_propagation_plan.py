@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 from pathlib import Path
 
 import pytest
@@ -93,6 +94,42 @@ def test_plan_binds_all_seven_authority_corners(plan) -> None:
         "tests/research/test_articulated_structural_result.py",
         "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
     } < set(plan["source_sha256"])
+
+
+def test_plan_publishes_exact_pathway_checkpoint_identities(plan) -> None:
+    identities = plan["design"]["execution_identity"]
+    for pathway in ("shaft", "ground"):
+        identity = identities[pathway]
+        paths = identity["atlas_source_paths"]
+        assert len(paths) == len(set(paths))
+        assert (
+            "scripts/research/proximal_distal_energy/"
+            "articulated_atlas_runtime_authority.py"
+        ) in paths
+        assert f"articulated_{pathway}_atlas.py" in "\n".join(paths)
+        source_hashes = {
+            path: hashlib.sha256((ROOT / path).read_bytes()).hexdigest()
+            for path in paths
+        }
+        expected_source = hashlib.sha256(
+            json.dumps(
+                source_hashes,
+                sort_keys=True,
+                separators=(",", ":"),
+            ).encode("utf-8")
+        ).hexdigest()
+        configuration = plan["design"][f"{pathway}_configuration"]
+        expected_configuration = hashlib.sha256(
+            json.dumps(
+                configuration,
+                sort_keys=True,
+                separators=(",", ":"),
+            ).encode("utf-8")
+        ).hexdigest()
+
+        assert identity["atlas_source_sha256"] == expected_source
+        assert identity["scientific_configuration_sha256"] == expected_configuration
+        assert "worker_count" not in configuration
 
 
 def test_plan_preregisters_falsification_and_interpretation_boundaries(plan) -> None:

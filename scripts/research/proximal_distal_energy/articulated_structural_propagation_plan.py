@@ -28,6 +28,10 @@ ROOT = Path(__file__).resolve().parents[3]
 DATA = ROOT / "docs/research/proximal_distal_energy_transfer/data"
 CAMPAIGN = DATA / "articulated_structural_authority_campaign.json"
 DEFAULT_OUTPUT = DATA / "articulated_structural_propagation_plan.json"
+RUNTIME_AUTHORITY_PATHS = (
+    "scripts/research/proximal_distal_energy/articulated_atlas_authority.py",
+    "scripts/research/proximal_distal_energy/articulated_atlas_runtime_authority.py",
+)
 SOURCE_PATHS = tuple(
     dict.fromkeys(
         (
@@ -70,6 +74,25 @@ def _sha256(path: Path) -> str:
 
 def _serialized(record: dict[str, Any]) -> bytes:
     return (json.dumps(record, indent=2) + "\n").encode("utf-8")
+
+
+def _canonical_sha256(value: Any) -> str:
+    return hashlib.sha256(
+        json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+
+
+def _pathway_identity(
+    configuration: dict[str, Any],
+    source_paths: tuple[str, ...],
+) -> dict[str, Any]:
+    paths = tuple(dict.fromkeys((*source_paths, *RUNTIME_AUTHORITY_PATHS)))
+    source_hashes = {path: _sha256(ROOT / path) for path in paths}
+    return {
+        "atlas_source_paths": list(paths),
+        "atlas_source_sha256": _canonical_sha256(source_hashes),
+        "scientific_configuration_sha256": _canonical_sha256(configuration),
+    }
 
 
 def _scientific_configuration(config: Any) -> dict[str, Any]:
@@ -164,20 +187,30 @@ def build_structural_propagation_plan(
     corners = [
         _corner_plan(row, shaft, ground, data_directory) for row in campaign["corners"]
     ]
+    shaft_configuration = _scientific_configuration(shaft)
+    ground_configuration = _scientific_configuration(ground)
     design = json.loads(
         json.dumps(
             {
                 "case_indices": list(shaft.case_indices),
                 "phase_indices": list(shaft.sample_indices),
-                "shaft_configuration": _scientific_configuration(shaft),
-                "ground_configuration": _scientific_configuration(ground),
+                "shaft_configuration": shaft_configuration,
+                "ground_configuration": ground_configuration,
+                "execution_identity": {
+                    "shaft": _pathway_identity(
+                        shaft_configuration,
+                        SHAFT_SOURCE_PATHS,
+                    ),
+                    "ground": _pathway_identity(
+                        ground_configuration,
+                        GROUND_SOURCE_PATHS,
+                    ),
+                },
                 "parallelism": "worker_count is operational and excluded from the scientific design digest",
             }
         )
     )
-    design_sha = hashlib.sha256(
-        json.dumps(design, sort_keys=True, separators=(",", ":")).encode("utf-8")
-    ).hexdigest()
+    design_sha = _canonical_sha256(design)
     acceptance = {
         "nominal_reproduction": {
             "shaft_matched_cell_count": 126,
