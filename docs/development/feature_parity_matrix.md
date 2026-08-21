@@ -67,7 +67,7 @@ Tiles from `src/config/launcher_manifest.json` mapped to registry entries:
 | `canonical_core_estimation` | `canonical_core.workspaces` |
 | `character_builder` | `tools.character_builder` |
 | `chat_assistant` | `chat.transport` |
-| `cross_engine` | `analysis.cross_engine_robustness` |
+| `cross_engine_dashboard` | `analysis.cross_engine_robustness` |
 | `data_explorer` | `tools.data_explorer` |
 | `data_processor` | `launcher.tile_web_reachability` |
 | `dataset_generator` | `tools.dataset_generator` |
@@ -77,7 +77,7 @@ Tiles from `src/config/launcher_manifest.json` mapped to registry entries:
 | `golf_simulation_suite` | `simulation.golf_suite_batch` |
 | `injury_analysis` | `biomech.exercise_injury_dashboards` |
 | `launch_monitor_analytics` | `tools.launch_monitor_analytics` |
-| `matlab_unified` | `tools.matlab_suite` |
+| `matlab_suite` | `tools.matlab_suite` |
 | `model_explorer` | `tools.model_explorer` |
 | `motion_capture` | `mocap.breadth` |
 | `motion_pipeline` | `mocap.breadth` |

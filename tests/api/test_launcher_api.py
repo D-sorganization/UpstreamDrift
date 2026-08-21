@@ -166,7 +166,7 @@ class TestLauncherParityRequirements:
         "opensim_golf",
         "myosim_suite",
         "putting_green",
-        "matlab_unified",
+        "matlab_suite",
         "motion_capture",
         "model_explorer",
         "video_analyzer",

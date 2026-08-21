@@ -460,6 +460,11 @@ class TestGolfSimulationSuiteHandler:
             assert handler.launch(DummyModel(), Path("/repo"), MagicMock()) is False
 
 
+# Tile types dispatched by a dedicated in-process widget path instead of
+# the subprocess handler registry (see launcher_simulation.launch_simulation).
+_SPECIAL_CASED_TYPES = frozenset({"matlab_suite"})
+
+
 class TestManifestTileHandlerRegistration:
     """Verify every manifest tile type has a handler in ModelHandlerRegistry."""
 
@@ -477,6 +482,8 @@ class TestManifestTileHandlerRegistration:
         """Every tile in the manifest must have a handler that can_handle() it."""
         missing: list[str] = []
         for tile in manifest.tiles:
+            if tile.type in _SPECIAL_CASED_TYPES:
+                continue
             handler = registry.get_handler(tile.type)
             if handler is None:
                 missing.append(f"{tile.id!r} (type={tile.type!r})")
@@ -487,6 +494,8 @@ class TestManifestTileHandlerRegistration:
     ) -> None:
         """Each handler's can_handle() must return True for the declared type."""
         for tile in manifest.tiles:
+            if tile.type in _SPECIAL_CASED_TYPES:
+                continue
             handler = registry.get_handler(tile.type)
             assert handler is not None, f"No handler for tile {tile.id!r}"
             assert handler.can_handle(tile.type) is True, (
@@ -551,7 +560,7 @@ class TestManifestTileHandlerRegistration:
             "opensim_golf",
             "myosim_suite",
             "putting_green",
-            "matlab_unified",
+            "matlab_suite",
             "motion_target_preview",
             "motion_capture",
             "video_analyzer",
