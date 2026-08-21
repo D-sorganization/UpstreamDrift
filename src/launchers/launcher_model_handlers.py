@@ -12,6 +12,7 @@ from __future__ import annotations
 import os
 import platform
 import subprocess
+import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol
 
@@ -59,6 +60,45 @@ def _package_main_module_name(
     if not module_parts or not all(part.isidentifier() for part in module_parts):
         return None
     return ".".join(module_parts)
+
+
+def _registry_dockable_ui(model: Any) -> Any | None:
+    """Resolve ``model``'s embedded UI through the ADR-0013 registry.
+
+    The ``EMBEDDABLE_TOOL_REGISTRY`` is THE embedding contract (issue
+    #8857): every handler consults it before falling back to the legacy
+    import-and-probe protocol. Returns ``None`` when the tile id is not
+    registered (or has no usable id).
+    """
+    tool_id = getattr(model, "id", "")
+    if not (isinstance(tool_id, str) and tool_id):
+        return None
+    from src.shared.python.launcher_embed.registry import get_embeddable_tool
+
+    tool = get_embeddable_tool(tool_id)
+    if tool is None:
+        return None
+    return tool.create_main_widget(None)
+
+
+def _warn_legacy_embed_fallback(model: Any, mechanism: str) -> None:
+    """Emit a DeprecationWarning for a tile embedded via the legacy path.
+
+    The legacy protocol (module-level ``get_dockable_ui`` probing and
+    ``embed_adapter`` "mod::func" strings) is deprecated in favor of the
+    ADR-0013 ``EmbeddableTool`` registry. The warning names the tile so
+    the remaining users are enumerable (ratchet test in
+    ``tests/launchers/test_embed_contract_convergence.py``).
+    """
+    tile_id = getattr(model, "id", None) or "<unknown>"
+    warnings.warn(
+        f"Tile {tile_id!r} resolved its embedded UI via the deprecated "
+        f"legacy fallback ({mechanism}). Register an EmbeddableTool "
+        "adapter per ADR-0013 and add it to embedded_tool_bootstrap "
+        "instead; the legacy path will be removed.",
+        DeprecationWarning,
+        stacklevel=3,
+    )
 
 
 class ModelHandler(Protocol):
@@ -121,6 +161,10 @@ class ModuleHandler:
 
     def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
         """Try to load the module and get its dockable UI widget."""
+        registry_ui = _registry_dockable_ui(model)
+        if registry_ui is not None:
+            return registry_ui
+
         import importlib
         import sys
 
@@ -144,6 +188,9 @@ class ModuleHandler:
                 ui = module.get_dockable_ui()
                 if ui is not None:
                     success = True
+                    _warn_legacy_embed_fallback(
+                        model, f"module-level get_dockable_ui in {self.module_name}"
+                    )
                     return ui
         except Exception as e:  # noqa: BLE001
             logger.debug("No dockable UI found in module %s: %s", self.module_name, e)
@@ -227,6 +274,10 @@ class ScriptHandler:
 
     def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
         """Try to load the script as a module and get its dockable UI widget."""
+        registry_ui = _registry_dockable_ui(model)
+        if registry_ui is not None:
+            return registry_ui
+
         if repo_path is None:
             return None
         script_path = self.resolve_script(model, repo_path)
@@ -258,6 +309,9 @@ class ScriptHandler:
                     ui = module.get_dockable_ui()
                     if ui is not None:
                         success = True
+                        _warn_legacy_embed_fallback(
+                            model, f"module-level get_dockable_ui in {script_path.name}"
+                        )
                         return ui
         except Exception as e:  # noqa: BLE001
             logger.debug("No dockable UI found in script %s: %s", self._script_path, e)
@@ -349,13 +403,9 @@ class SpecialAppHandler:
         if repo_path is None:
             return None
 
-        tool_id = getattr(model, "id", "")
-        if isinstance(tool_id, str) and tool_id:
-            from src.shared.python.launcher_embed.registry import get_embeddable_tool
-
-            tool = get_embeddable_tool(tool_id)
-            if tool is not None:
-                return tool.create_main_widget(None)
+        registry_ui = _registry_dockable_ui(model)
+        if registry_ui is not None:
+            return registry_ui
 
         embed_adapter = getattr(model, "embed_adapter", None)
         if embed_adapter and "::" in embed_adapter:
@@ -391,6 +441,10 @@ class SpecialAppHandler:
                             ui = getattr(module, func_name)()
                             if ui is not None:
                                 success = True
+                                _warn_legacy_embed_fallback(
+                                    model,
+                                    f"embed_adapter string {embed_adapter!r}",
+                                )
                                 return ui
                 except Exception as e:  # noqa: BLE001
                     logger.warning(
@@ -439,6 +493,9 @@ class SpecialAppHandler:
                     ui = module.get_dockable_ui()
                     if ui is not None:
                         success = True
+                        _warn_legacy_embed_fallback(
+                            model, f"module-level get_dockable_ui in {script_path.name}"
+                        )
                         return ui
         except Exception as e:  # noqa: BLE001
             logger.debug("No dockable UI found in special app %s: %s", script_path, e)
@@ -501,6 +558,10 @@ class PuttingGreenHandler:
 
     def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
         """Get the dockable UI widget for the putting green simulation."""
+        registry_ui = _registry_dockable_ui(model)
+        if registry_ui is not None:
+            return registry_ui
+
         if repo_path is None:
             return None
         script_path = resolve_model_artifact_path(model, repo_path)
@@ -529,6 +590,9 @@ class PuttingGreenHandler:
                     ui = module.get_dockable_ui()
                     if ui is not None:
                         success = True
+                        _warn_legacy_embed_fallback(
+                            model, "module-level get_dockable_ui (putting green)"
+                        )
                         return ui
         except Exception as e:  # noqa: BLE001
             logger.debug("Failed to get dockable UI for Putting Green: %s", e)
