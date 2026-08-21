@@ -11,6 +11,14 @@ from src.shared.python.launch_monitor.comparison import (
     PairwiseMonitorComparison,
     compare_monitors,
 )
+from src.shared.python.launch_monitor.conformance_bundle import (
+    LAUNCH_MONITOR_CONFORMANCE_BUNDLE_VERSION,
+    LaunchMonitorConformanceBundleV1,
+    LaunchMonitorConformanceScenarioV1,
+    launch_monitor_conformance_bundle_json_schema,
+    launch_monitor_conformance_bundle_sha256,
+    launch_monitor_conformance_scenario_sha256,
+)
 from src.shared.python.launch_monitor.corpus import (
     CORPUS_COLUMN_MAP,
     corpus_dataset_path,
@@ -211,6 +219,9 @@ __all__ = [
     "ImportProfile",
     "ImportedSession",
     "LaunchMonitorProject",
+    "LAUNCH_MONITOR_CONFORMANCE_BUNDLE_VERSION",
+    "LaunchMonitorConformanceBundleV1",
+    "LaunchMonitorConformanceScenarioV1",
     "LONGITUDINAL_SESSION_CONTRACT_VERSION",
     "LongitudinalDimensionV1",
     "LongitudinalClaimsV1",
@@ -285,6 +296,9 @@ __all__ = [
     "fit_predictive_model",
     "import_session",
     "load_private_corpus",
+    "launch_monitor_conformance_bundle_json_schema",
+    "launch_monitor_conformance_bundle_sha256",
+    "launch_monitor_conformance_scenario_sha256",
     "longitudinal_session_contract_json_schema",
     "normalize_header",
     "numeric_metric_columns",
