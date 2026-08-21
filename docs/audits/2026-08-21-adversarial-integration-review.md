@@ -31,6 +31,20 @@ _(Populated as the review proceeds; each row is filed as a GitHub issue.)_
 
 | # | Issue | Area | Severity | Title |
 |---|-------|------|----------|-------|
+| 1 | #8816 | Provenance | Critical | Cross-engine dashboard charts one aggregate robustness score replicated per engine |
+| 2 | #8817 | Provenance | Critical | Cross-engine desktop GUI silently substitutes a 2-DOF stub, charts stay labeled as real engines |
+| 3 | #8818 | Provenance | Critical | Ball Flight GUI wind/altitude/aero controls never read by the simulation |
+| 4 | #8819 | Provenance | Critical | Swing→Flight Pipeline engine selector is cosmetic; engine_name never used |
+| 5 | #8820 | Provenance | High | Unified dashboard exports carry no engine/model/run/timestamp identity |
+| 6 | #8821 | Provenance | High | JSON/CSV exports get no provenance sidecar (binary formats do) |
+| 7 | #8822 | Provenance | High | ProvenanceInfo has no engine field; callers omit model_path |
+| 8 | #8823 | Provenance | High | ProvenanceValue UI provenance system built+tested but unused |
+| 9 | #8824 | Provenance | High | Workspace project/session lineage subsystem has zero consumers |
+| 10 | #8825 | Provenance | High | Launch Monitor plots stay stale across project changes |
+| 11 | #8826 | Provenance | Medium | Launch Monitor data export not linked to its reproducibility manifest |
+| 12 | #8827 | Provenance | Medium | Pose Studio engine status pill stale after silent mock downgrade |
+| 13 | #8828 | Provenance | Medium | Shared plot titles/exports carry no identity; include_metadata ignored |
+| 14 | #8829 | Provenance | Medium | Engine dashboards swallow model-load failures; engine name invisible embedded |
 
 ## Status
 
