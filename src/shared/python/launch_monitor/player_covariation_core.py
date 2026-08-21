@@ -19,6 +19,14 @@ from src.shared.python.launch_monitor.player_covariation_types import (
 )
 
 _EPSILON = np.finfo(float).eps
+_REPORT_DECIMAL_PLACES = 12
+
+
+def _reported_float(value: float) -> float:
+    """Normalize public floats across supported BLAS/scientific stacks."""
+
+    rounded = round(float(value), _REPORT_DECIMAL_PLACES)
+    return 0.0 if rounded == 0 else rounded
 
 
 @dataclass(frozen=True)
@@ -138,7 +146,10 @@ def _fisher_interval(
 ) -> tuple[float, float]:
     transformed = np.arctanh(np.clip(coefficient, -0.999999, 0.999999))
     margin = stats.norm.ppf(0.5 + confidence / 2) / np.sqrt(count - 3)
-    return float(np.tanh(transformed - margin)), float(np.tanh(transformed + margin))
+    return (
+        _reported_float(np.tanh(transformed - margin)),
+        _reported_float(np.tanh(transformed + margin)),
+    )
 
 
 def _estimate(
@@ -154,8 +165,12 @@ def _estimate(
     reason = _estimate_reason(values_x, values_y, minimum, insufficient_reason)
     if reason is not None:
         return _unavailable_estimate(len(values_x), group_count, reason)
-    pearson = float(np.clip(stats.pearsonr(values_x, values_y).statistic, -1, 1))
-    spearman = float(np.clip(stats.spearmanr(values_x, values_y).statistic, -1, 1))
+    pearson = _reported_float(
+        np.clip(stats.pearsonr(values_x, values_y).statistic, -1, 1)
+    )
+    spearman = _reported_float(
+        np.clip(stats.spearmanr(values_x, values_y).statistic, -1, 1)
+    )
     slope, intercept = np.polyfit(values_x, values_y, deg=1)
     interval = (
         _fisher_interval(pearson, len(values_x), confidence)
@@ -168,9 +183,9 @@ def _estimate(
         group_count=group_count,
         pearson_r=pearson,
         spearman_r=spearman,
-        slope=float(slope),
-        intercept=float(intercept),
-        r_squared=float(min(1.0, pearson**2)),
+        slope=_reported_float(slope),
+        intercept=_reported_float(intercept),
+        r_squared=_reported_float(min(1.0, pearson**2)),
         ci_lower=interval[0],
         ci_upper=interval[1],
     )
@@ -216,9 +231,9 @@ def _weighted_effect(
     mean = float(np.average(effects, weights=weights))
     margin = float(stats.norm.ppf(0.5 + confidence / 2) / np.sqrt(weights.sum()))
     return (
-        float(np.tanh(mean)),
-        float(np.tanh(mean - margin)),
-        float(np.tanh(mean + margin)),
+        _reported_float(np.tanh(mean)),
+        _reported_float(np.tanh(mean - margin)),
+        _reported_float(np.tanh(mean + margin)),
     )
 
 
@@ -267,9 +282,9 @@ def _meta_analysis(
         random_effect_r=random_effect[0],
         random_ci_lower=random_effect[1],
         random_ci_upper=random_effect[2],
-        tau_squared=float(tau_squared),
-        q_statistic=q_statistic,
-        i_squared_pct=float(i_squared),
+        tau_squared=_reported_float(tau_squared),
+        q_statistic=_reported_float(q_statistic),
+        i_squared_pct=_reported_float(i_squared),
     )
     return summary, _attach_weights(items, eligible, fixed_weights, random_weights)
 
@@ -283,7 +298,10 @@ def _attach_weights(
     fixed = fixed_weights / fixed_weights.sum()
     random = random_weights / random_weights.sum()
     weight_by_player = {
-        item.player_id: (float(fixed[index]), float(random[index]))
+        item.player_id: (
+            _reported_float(fixed[index]),
+            _reported_float(random[index]),
+        )
         for index, item in enumerate(eligible)
     }
     return tuple(

@@ -45,6 +45,11 @@ pairs, direction consistency, and multiplicity warnings, and ranks available
 pairs by absolute random-effects correlation. The contract makes no causal,
 device-emulation, certification, or universal population claim.
 
+Public floating-point estimates are normalized to 12 decimal places. This
+preserves substantially more precision than the reported uncertainty supports
+while preventing supported BLAS/scientific-library implementations from
+producing byte-different golden contracts for numerically equivalent results.
+
 ## Alternatives Considered
 
 1. Keep the calculation only in a UI client. Rejected because PyQt, web, and

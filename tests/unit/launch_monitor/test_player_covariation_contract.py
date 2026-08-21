@@ -86,6 +86,8 @@ def test_separates_pooled_within_between_and_population_effects() -> None:
     assert result.status == "available"
     assert result.pooled.pearson_r == pytest.approx(0.8518518519)
     assert result.within_player.pearson_r == pytest.approx(-1.0)
+    assert result.within_player.slope == -1.0
+    assert result.within_player.intercept == 0.0
     assert result.within_player.ci_lower is None
     assert result.between_player.pearson_r == pytest.approx(1.0)
     assert result.meta_analysis.state == "available"
