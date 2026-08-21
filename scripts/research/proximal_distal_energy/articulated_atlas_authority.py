@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, replace
+import hashlib
+import json
 from typing import Any
 
 import numpy as np
@@ -22,6 +24,64 @@ from scripts.research.proximal_distal_energy.subject_scaled_spatial_geometry imp
 FloatArray = NDArray[np.float64]
 BoolArray = NDArray[np.bool_]
 IntArray = NDArray[np.int64]
+
+
+def _scientific_float(value: float) -> str:
+    """Canonicalize a finite model scalar above last-bit runtime noise."""
+
+    scalar = float(value)
+    if not np.isfinite(scalar):
+        raise ValueError("scientific model parameters must be finite")
+    return format(scalar, ".15g")
+
+
+def scientific_model_sha256(model: SpatialModel) -> str:
+    """Hash model semantics reproducibly across floating-point runtime state.
+
+    Fifteen significant decimal digits preserve the registered engineering
+    parameters while excluding last-bit summation changes observed after native
+    libraries alter the Windows floating-point environment. The native engine
+    cache may retain ``SpatialModel.canonical_hash``; this digest is the portable
+    scientific identity used by structural evidence and checkpoints.
+    """
+
+    if not isinstance(model, SpatialModel):
+        raise TypeError("model must be a SpatialModel")
+    payload = {
+        "schema_version": "articulated-scientific-model-identity/v1",
+        "joints": [
+            {
+                "name": joint.name,
+                "parent": joint.parent,
+                "kind": joint.kind,
+                "axis": [_scientific_float(value) for value in joint.axis],
+                "offset_m": [_scientific_float(value) for value in joint.offset_m],
+                "region": joint.region,
+            }
+            for joint in model.joints
+        ],
+        "bodies": [
+            {
+                "name": body.name,
+                "joint": body.joint,
+                "mass_kg": _scientific_float(body.mass_kg),
+                "radius_m": _scientific_float(body.radius_m),
+                "com_offset_m": [
+                    _scientific_float(value) for value in body.com_offset_m
+                ],
+                "region": body.region,
+            }
+            for body in model.bodies
+        ],
+        "interfaces": {
+            "club_dof_indices": [int(value) for value in model.club_dof_indices],
+            "lead_hand_joint": model.lead_hand_joint,
+            "trail_hand_joint": model.trail_hand_joint,
+            "club_frame_joint": model.club_frame_joint,
+        },
+    }
+    raw = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(raw).hexdigest()
 
 
 @dataclass(frozen=True, slots=True)
@@ -211,7 +271,7 @@ class ArticulatedAtlasAuthority:
             raise RuntimeError("authority/model scaling does not match")
         if metadata.get("model_sha256") != model.canonical_hash:
             raise RuntimeError("authority/model hash does not match")
-        return model.canonical_hash
+        return scientific_model_sha256(model)
 
     def _require_selected_case(self, case_index: int) -> None:
         if not isinstance(case_index, int) or case_index not in set(
@@ -220,4 +280,4 @@ class ArticulatedAtlasAuthority:
             raise ValueError("case_index must be a selected case")
 
 
-__all__ = ["ArticulatedAtlasAuthority"]
+__all__ = ["ArticulatedAtlasAuthority", "scientific_model_sha256"]

@@ -10,6 +10,7 @@ import pytest
 
 from scripts.research.proximal_distal_energy.articulated_atlas_authority import (
     ArticulatedAtlasAuthority,
+    scientific_model_sha256,
 )
 from scripts.research.proximal_distal_energy.articulated_atlas_runtime_authority import (
     build_atlas_case_model,
@@ -53,7 +54,7 @@ def test_runtime_builds_and_revalidates_exact_scaled_case_model() -> None:
     resolved = build_atlas_case_model(authority, 8)
 
     assert resolved.metadata["profile"] == asdict(authority.profile_for_case(8))
-    assert resolved.model_sha256 == resolved.model.canonical_hash
+    assert resolved.model_sha256 == scientific_model_sha256(resolved.model)
     assert resolved.model_sha256 == authority.model_hashes()["8"]
 
 

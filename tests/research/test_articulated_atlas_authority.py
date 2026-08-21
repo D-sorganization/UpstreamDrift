@@ -5,10 +5,12 @@ from __future__ import annotations
 from dataclasses import replace
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 from scripts.research.proximal_distal_energy.articulated_atlas_authority import (
     ArticulatedAtlasAuthority,
+    scientific_model_sha256,
 )
 from scripts.research.proximal_distal_energy.articulated_scaled_authority import (
     load_scaled_authority,
@@ -38,7 +40,9 @@ def test_authority_builds_the_registered_case_model(authority) -> None:
 
     assert metadata["profile"]["height_m"] == expected.height_m
     assert metadata["profile"]["mass_kg"] == expected.mass_kg
-    assert authority.validate_case_model(0, model, metadata) == model.canonical_hash
+    assert authority.validate_case_model(0, model, metadata) == scientific_model_sha256(
+        model
+    )
     assert authority.solution_q.shape == (18, 13, 20)
     assert authority.time_s.shape == (13,)
 
@@ -70,7 +74,9 @@ def test_authority_retains_and_rejects_infeasible_selected_state(authority) -> N
         failed.require_selected_feasible()
 
     model, metadata = failed.build_case_model(0)
-    assert failed.validate_case_model(0, model, metadata) == model.canonical_hash
+    assert failed.validate_case_model(0, model, metadata) == scientific_model_sha256(
+        model
+    )
     assert failed.feasible_states((0,), (3, 4, 5)) == ((0, 3), (0, 5))
     with pytest.raises(
         RuntimeError,
@@ -119,3 +125,23 @@ def test_authority_provenance_binds_scales_failures_and_models(authority) -> Non
 def test_authority_rejects_unregistered_case_access(authority) -> None:
     with pytest.raises(ValueError, match="selected case"):
         authority.build_case_model(1)
+
+
+def test_scientific_model_digest_ignores_last_bit_but_not_material_drift(
+    authority,
+) -> None:
+    model, _ = authority.build_case_model(9)
+    body = model.bodies[3]
+    last_bit = replace(body, mass_kg=np.nextafter(body.mass_kg, np.inf))
+    material = replace(body, mass_kg=body.mass_kg + 1e-10)
+    last_bit_model = replace(
+        model,
+        bodies=(*model.bodies[:3], last_bit, *model.bodies[4:]),
+    )
+    material_model = replace(
+        model,
+        bodies=(*model.bodies[:3], material, *model.bodies[4:]),
+    )
+
+    assert scientific_model_sha256(last_bit_model) == scientific_model_sha256(model)
+    assert scientific_model_sha256(material_model) != scientific_model_sha256(model)

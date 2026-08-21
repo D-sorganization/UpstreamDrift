@@ -23,6 +23,38 @@ COMMITTED = (
 )
 
 
+def _first_difference(left, right, path: str = "$") -> str | None:
+    """Return the first exact structural mismatch for reproducibility failures."""
+
+    if type(left) is not type(right):
+        return f"{path}: type {type(left).__name__} != {type(right).__name__}"
+    if isinstance(left, dict):
+        if left.keys() != right.keys():
+            return f"{path}: keys differ"
+        for key in left:
+            mismatch = _first_difference(left[key], right[key], f"{path}.{key}")
+            if mismatch is not None:
+                return mismatch
+        return None
+    if isinstance(left, list):
+        if len(left) != len(right):
+            return f"{path}: length {len(left)} != {len(right)}"
+        for index, (left_value, right_value) in enumerate(
+            zip(left, right, strict=True)
+        ):
+            mismatch = _first_difference(
+                left_value,
+                right_value,
+                f"{path}[{index}]",
+            )
+            if mismatch is not None:
+                return mismatch
+        return None
+    if left != right:
+        return f"{path}: {left!r} != {right!r}"
+    return None
+
+
 @pytest.fixture(scope="module")
 def plan():
     return build_structural_propagation_plan()
@@ -336,7 +368,7 @@ def test_committed_plan_is_exactly_reproducible(plan) -> None:
     committed_bytes = COMMITTED.read_bytes()
     committed = json.loads(committed_bytes)
 
-    assert committed == plan
+    assert committed == plan, _first_difference(committed, plan)
     assert committed_bytes == (json.dumps(plan, indent=2) + "\n").encode("utf-8")
     assert validate_structural_propagation_plan() == plan
 

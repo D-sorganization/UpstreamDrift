@@ -32,6 +32,7 @@ SOURCE_PATHS = tuple(
     dict.fromkeys(
         (
             "scripts/research/proximal_distal_energy/articulated_atlas_authority.py",
+            "scripts/research/proximal_distal_energy/articulated_atlas_runtime_authority.py",
             "scripts/research/proximal_distal_energy/articulated_scaled_authority.py",
             "scripts/research/proximal_distal_energy/articulated_structural_axis_evidence.py",
             "scripts/research/proximal_distal_energy/articulated_structural_common_support.py",
@@ -44,7 +45,9 @@ SOURCE_PATHS = tuple(
             "scripts/research/proximal_distal_energy/articulated_structural_result.py",
             "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py",
             "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py",
+            "tests/research/test_articulated_atlas_authority.py",
             "tests/research/test_articulated_structural_axis_evidence.py",
+            "tests/research/test_articulated_atlas_runtime_authority.py",
             "tests/research/test_articulated_structural_common_support.py",
             "tests/research/test_articulated_structural_cell_evidence.py",
             "tests/research/test_articulated_structural_corner_evidence.py",
