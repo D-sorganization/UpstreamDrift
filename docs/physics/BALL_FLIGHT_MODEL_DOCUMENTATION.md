@@ -88,6 +88,15 @@ Where:
 
 ## 2. Ball Flight Physics Model
 
+> **Doc/code parity.** Numeric values in this section are wrapped in
+> `calc:name` HTML-comment markers and verified against the
+> physics code by `tests/docs/test_ball_flight_calc_sheet_parity.py`.
+> The single source of truth is the code
+> (`src/shared/python/physics/ball_properties.py` and
+> `src/shared/python/core/physics_constants.py`); this sheet carries
+> validated copies. If a constant changes in code, that test fails until
+> this sheet is updated.
+
 ### 2.1 Governing Equations
 
 The ball trajectory is computed by solving Newton's second law with three forces:
@@ -106,7 +115,8 @@ Integrated using RK45 (Runge-Kutta 4th/5th order) numerical method.
 F_gravity = m * g  (downward)
 ```
 
-- m = 0.04593 kg (regulation golf ball mass)
+- m = <!-- calc:ball_mass_kg -->0.04593<!-- /calc --> kg (USGA maximum ball mass;
+  `physics_constants.py::GOLF_BALL_MASS_KG`)
 - g = 9.81 m/s² (gravitational acceleration)
 
 #### Aerodynamic Drag
@@ -117,16 +127,20 @@ F_drag = 0.5 * ρ * v² * C_D * A  (opposing velocity)
 
 Where:
 
-- ρ = air density [kg/m³] (≈1.225 at sea level, 15°C)
-- v = ball speed [m/s]
+- ρ = air density [kg/m³]
+  (<!-- calc:air_density_sea_level_kg_m3 -->1.225<!-- /calc --> at sea level,
+  15°C; `physics_constants.py::AIR_DENSITY_SEA_LEVEL_KG_M3`)
+- v = ball speed relative to the air [m/s] (wind is subtracted first)
 - A = cross-sectional area = π \* r² [m²]
-- C_D = drag coefficient (0.21-0.26 typical)
+- C_D = drag coefficient (see the quadratic law below)
 
 **Drag Coefficient Behavior**:
 
 - Varies with Reynolds number (velocity-dependent)
-- Higher at low speeds, lower at high speeds ("drag crisis")
-- Increases with spin rate by factor (1 + 0.5 \* S) where S = spin parameter
+- Higher at low speeds, lower at high speeds ("drag crisis"); the
+  enhanced simulator models this via
+  `src/shared/python/physics/atmosphere.py::cd_dimpled_sphere`
+- Increases with the spin parameter S via the quadratic law below
 - Dimple pattern causes up to 40% variation between ball models
 
 #### Magnus Force (Spin-Induced Lift)
@@ -148,62 +162,137 @@ S = (ω * r) / v
 
 - ω = angular velocity [rad/s]
 - r = ball radius [m]
-- v = linear velocity [m/s]
+- v = linear velocity relative to the air [m/s]
 
-**Drag Coefficient (Waterloo/Penner Quadratic Model)**:
+S is dimensionless (surface speed over air speed). A driver shot at
+2500 rpm (ω ≈ 262 rad/s) and 73 m/s gives S ≈ 262 × 0.0213 / 73 ≈ 0.077.
+
+**Drag Coefficient (Waterloo quadratic law)** — implemented in
+`ball_properties.py::BallProperties.calculate_cd`:
 
 ```
 C_D = cd0 + cd1 * S + cd2 * S²
 ```
 
-Default values (tuned against wind tunnel data):
+Default values (`BallProperties` dataclass fields):
 
-- cd0 = 0.21 (base drag)
-- cd1 = 0.05 (linear spin dependence)
-- cd2 = 0.02 (quadratic spin dependence)
+- cd0 = <!-- calc:cd0 -->0.21<!-- /calc --> (base drag, zero spin)
+- cd1 = <!-- calc:cd1 -->0.25<!-- /calc --> (linear spin dependence)
+- cd2 = <!-- calc:cd2 -->0.02<!-- /calc --> (quadratic spin dependence)
 
-**Lift Coefficient (Waterloo/Penner Quadratic Model)**:
+For the driver example above (S ≈ 0.077): C_D ≈ 0.21 + 0.25·0.077 +
+0.02·0.077² ≈ 0.229.
+
+**Lift Coefficient (bounded Penner power law)** — implemented in
+`ball_properties.py::calculate_spin_lift_coefficient` and used by
+`BallProperties.calculate_cl`:
 
 ```
-C_L = cl0 + cl1 * S + cl2 * S²
+C_L = min(C_L_max, a * S^b),   C_L = 0 for S ≤ 0
 ```
 
-Default values:
+with:
 
-- cl0 = 0.00 (no lift at zero spin)
-- cl1 = 0.38 (linear spin dependence)
-- cl2 = 0.08 (quadratic spin dependence)
-- Maximum cap: 0.25
+- a = <!-- calc:penner_lift_scale -->0.70<!-- /calc -->
+  (`PENNER_LIFT_SCALE`, lift scale)
+- b = <!-- calc:penner_lift_exponent -->0.645<!-- /calc -->
+  (`PENNER_LIFT_EXPONENT`, sub-linear exponent)
+- C_L_max = <!-- calc:max_lift_coefficient -->0.26<!-- /calc -->
+  (`MAX_LIFT_COEFFICIENT`, numerical cap)
 
-### 2.3 Physical Constants
+Derivation notes: Penner (2003, "The physics of golf", _Rep. Prog. Phys._ 66) fits wind-tunnel lift data for dimpled spheres with a power law in the
+spin parameter rather than a polynomial — lift rises steeply at low spin
+and saturates at high spin, which a quadratic in S cannot reproduce with
+positive coefficients. The exponent b < 1 gives that saturation; the hard
+cap C_L_max guards the integrator against unphysical lift at extreme S
+(the cap engages for S ≥ (C_L_max/a)^(1/b) ≈ 0.22). For the driver example
+(S ≈ 0.077): C_L ≈ 0.70 · 0.077^0.645 ≈ 0.135 (below the cap).
 
-| Parameter               | Value   | Units | Source                    |
-| ----------------------- | ------- | ----- | ------------------------- |
-| Ball mass               | 0.04593 | kg    | USGA Rule                 |
-| Ball diameter           | 42.67   | mm    | USGA Rule                 |
-| Drag coefficient (cd0)  | 0.21    | -     | Waterloo wind tunnel data |
-| Lift slope (cl1)        | 0.38    | -     | Waterloo wind tunnel data |
-| Air density (sea level) | 1.225   | kg/m³ | Standard atmosphere       |
+**Legacy quadratic-lift fields (unused).** The `BallProperties` dataclass
+still carries three fields from a retired quadratic lift law
+`C_L = cl0 + cl1·S + cl2·S²`:
 
-### 2.4 Model Assumptions and Limitations
+- cl0 = <!-- calc:legacy_cl0 -->0.00<!-- /calc -->
+- cl1 = <!-- calc:legacy_cl1 -->0.38<!-- /calc -->
+- cl2 = <!-- calc:legacy_cl2 -->0.08<!-- /calc -->
+
+These are **dead parameters**: `calculate_cl` never reads them, and
+changing them does not change any trajectory. They are retained only for
+serialization compatibility (e.g. `tests/parity/test_ball_flight_parity.py`
+round-trips them). Do not tune them expecting an effect.
+
+### 2.3 Spin Decay and Air Density
+
+**Spin decay** (implemented; optional in the basic model, on by default in
+the aerodynamics engine):
+
+```
+ω(t) = ω₀ * exp(-λ * t)
+```
+
+- λ = <!-- calc:spin_decay_rate_s -->0.05<!-- /calc --> 1/s
+  (`physics_constants.py::SPIN_DECAY_RATE_S`; half-life ≈ 14 s, so a 6 s
+  driver flight retains ≈ 74% of its launch spin)
+- Code: `aerodynamics/_engine.py::AerodynamicsEngine.compute_spin_decay`
+  and `flight_model_options.py::compute_spin_decay`; toggled by
+  `FlightModelOptions.enable_spin_decay`.
+
+**Air density** (implemented under issue #3504): the ISA-troposphere model
+in `src/shared/python/physics/atmosphere.py::air_density` derives ρ from
+altitude, temperature, and humidity. Entry points:
+`EnvironmentalConditions.from_altitude` (one-shot) and the
+`track_altitude_density` flag on `EnhancedBallFlightSimulator`
+(re-evaluates ρ along the trajectory as the ball climbs).
+
+### 2.4 Physical Constants
+
+| Parameter               | Value                                                        | Units | Code location                                       | Source                    |
+| ----------------------- | ------------------------------------------------------------ | ----- | --------------------------------------------------- | ------------------------- |
+| Ball mass               | <!-- calc:ball_mass_kg -->0.04593<!-- /calc -->              | kg    | `physics_constants.py::GOLF_BALL_MASS_KG`           | USGA Rule 5-1 (maximum)   |
+| Ball diameter           | <!-- calc:ball_diameter_m -->0.04267<!-- /calc -->           | m     | `physics_constants.py::GOLF_BALL_DIAMETER_M`        | USGA Rule 5-2 (minimum)   |
+| Base drag (cd0)         | <!-- calc:cd0 -->0.21<!-- /calc -->                          | -     | `ball_properties.py::BallProperties.cd0`            | Waterloo wind tunnel fits |
+| Drag spin slope (cd1)   | <!-- calc:cd1 -->0.25<!-- /calc -->                          | -     | `ball_properties.py::BallProperties.cd1`            | Model coefficient         |
+| Drag spin curv. (cd2)   | <!-- calc:cd2 -->0.02<!-- /calc -->                          | -     | `ball_properties.py::BallProperties.cd2`            | Model coefficient         |
+| Lift scale (a)          | <!-- calc:penner_lift_scale -->0.70<!-- /calc -->            | -     | `ball_properties.py::PENNER_LIFT_SCALE`             | Penner (2003) fit         |
+| Lift exponent (b)       | <!-- calc:penner_lift_exponent -->0.645<!-- /calc -->        | -     | `ball_properties.py::PENNER_LIFT_EXPONENT`          | Penner (2003) fit         |
+| Lift cap (C_L_max)      | <!-- calc:max_lift_coefficient -->0.26<!-- /calc -->         | -     | `ball_properties.py::MAX_LIFT_COEFFICIENT`          | Numerical guard           |
+| Spin decay rate (λ)     | <!-- calc:spin_decay_rate_s -->0.05<!-- /calc -->            | 1/s   | `physics_constants.py::SPIN_DECAY_RATE_S`           | TrackMan-labeled estimate |
+| Air density (sea level) | <!-- calc:air_density_sea_level_kg_m3 -->1.225<!-- /calc --> | kg/m³ | `physics_constants.py::AIR_DENSITY_SEA_LEVEL_KG_M3` | ISA standard atmosphere   |
+| Min. aero speed         | <!-- calc:min_speed_threshold_m_s -->0.1<!-- /calc -->       | m/s   | `ball_properties.py::MIN_SPEED_THRESHOLD`           | Numerical guard           |
+
+Symbols: S = spin parameter ωr/v (dimensionless); ω = ball angular
+velocity [rad/s]; r = ball radius [m]; v = airspeed [m/s]; ρ = air
+density [kg/m³]; A = cross-sectional area [m²].
+
+### 2.5 Model Assumptions and Limitations
 
 #### Assumptions
 
-1. **Constant spin rate**: Spin decay during flight is neglected (valid for most shots)
+1. **Exponential spin decay**: single decay constant λ; no spin-axis
+   migration during flight. Decay is optional in the basic simulator
+   (`enable_spin_decay`) — with it disabled, spin is held constant.
 2. **Spherical symmetry**: Asymmetric dimple wear not modeled
-3. **Constant air density**: Altitude effects approximated
-4. **No wind gusts**: Steady wind only
+3. **Air density**: constant ρ unless `track_altitude_density` (or
+   `from_altitude`) is used, which applies the ISA-troposphere gradient
+4. **No wind gusts**: Steady wind only (uniform field subtracted from
+   ball velocity)
 5. **Earth curvature neglected**: Valid for distances < 500m
 6. **Smooth trajectory**: Turbulent buffeting not modeled
 
 #### Known Limitations
 
-1. **Extreme spin rates (>12,000 rpm)**: May exhibit "reverse Magnus effect"
-2. **Very low velocities (<20 m/s)**: Drag crisis transition not fully captured
-3. **Temperature effects**: Not modeled (affects air density and ball properties)
-4. **Altitude >2000m**: Reduced air density correlation less validated
+1. **Extreme spin rates (>12,000 rpm)**: May exhibit "reverse Magnus
+   effect"; the lift cap C_L_max clamps rather than models this regime
+2. **Very low velocities (<20 m/s)**: Drag crisis transition only
+   captured when the enhanced simulator's `cd_dimpled_sphere` path is used
+3. **Coefficient provenance**: cd1/cd2 and the lift-law parameters are
+   model coefficients without a bundled fitting dataset (see
+   `GOLF_BALL_FLIGHT_IMPACT_SOURCE_MAP.md`); treat absolute carry
+   predictions as indicative, not certified
+4. **Altitude >2000m**: ISA-troposphere density is standard-atmosphere
+   only; non-standard lapse conditions are not modeled
 
-### 2.5 References: Ball Flight Aerodynamics
+### 2.6 References: Ball Flight Aerodynamics
 
 **Primary Sources (Waterloo Motion Research Group):**
 
@@ -279,7 +368,7 @@ The model is validated against typical TrackMan data for PGA Tour averages:
 For shot tracer validation and testing, use `LaunchConditions` directly:
 
 ```python
-from shared.python.ball_flight_physics import (
+from src.shared.python.physics.ball_flight_physics import (
     BallFlightSimulator,
     LaunchConditions,
     BallProperties,
@@ -312,25 +401,27 @@ print(f"Flight time: {analysis['flight_time']:.2f} s")
 ### 4.1 Custom Ball and Environment
 
 ```python
-# Custom ball (e.g., older generation)
+# Custom ball (e.g., higher base drag)
 ball = BallProperties(
     mass=0.0459,
     diameter=0.04267,
-    drag_coefficient=0.26,  # Higher drag
-    magnus_coefficient=0.25,
+    cd0=0.26,  # Higher base drag
 )
 
-# Custom environment (altitude/wind)
-env = EnvironmentalConditions(
-    air_density=1.10,  # ~1500m altitude
+# Custom environment: derive air density from altitude via the
+# ISA-troposphere model (recommended over hand-picking a density)
+env = EnvironmentalConditions.from_altitude(
+    altitude_m=1500.0,
+    temperature_c=25.0,
     wind_velocity=np.array([5.0, 0.0, 0.0]),  # Tailwind
-    gravity=9.81,
-    temperature=25.0,
-    altitude=1500.0,
 )
 
 simulator = BallFlightSimulator(ball=ball, environment=env)
 ```
+
+Note: the lift law is not per-ball tunable through `BallProperties` — the
+Penner power-law parameters are module constants in `ball_properties.py`
+(the `cl0/cl1/cl2` fields are unused legacy, see Section 2.2).
 
 ---
 
@@ -351,7 +442,7 @@ The complete analysis pipeline connects impact physics to ball flight:
 From `PostImpactState` to `LaunchConditions`:
 
 ```python
-from shared.python.impact_model import (
+from src.shared.python.physics.impact_model import (
     RigidBodyImpactModel,
     PreImpactState,
     ImpactParameters,
@@ -381,15 +472,27 @@ trajectory = simulator.simulate_trajectory(launch)
 
 ## 6. Future Enhancements
 
-### 6.1 Planned Improvements
+### 6.1 Implemented Since Version 1.0
 
-- [ ] Temperature-dependent air density
-- [ ] Spin decay model during flight
+- [x] Temperature/altitude-dependent air density (ISA troposphere,
+      issue #3504 — `atmosphere.py::air_density`)
+- [x] Spin decay model during flight (exponential,
+      `AerodynamicsEngine.compute_spin_decay`)
+- [x] Drag-crisis model for dimpled spheres
+      (`atmosphere.py::cd_dimpled_sphere`)
+
+### 6.2 Planned Improvements
+
 - [ ] Roll-out after landing (on-green dynamics)
 - [ ] Altitude-dependent coefficient calibration
 - [ ] Multi-layer ball model (core/mantle deformation)
+- [ ] Bundled wind-tunnel fitting dataset for cd1/cd2 and the lift-law
+      parameters (currently model coefficients without bundled primary
+      data — see `GOLF_BALL_FLIGHT_IMPACT_SOURCE_MAP.md`)
+- [ ] Hydrodynamic lubrication (wet ball), dimple geometry optimization,
+      mud-ball physics (issue #3504 follow-ups)
 
-### 6.2 Research Opportunities
+### 6.3 Research Opportunities
 
 - Wind tunnel validation with high-speed cameras
 - CFD simulation for dimple pattern optimization
@@ -409,6 +512,6 @@ trajectory = simulator.simulate_trajectory(launch)
 
 ---
 
-_Document Version: 1.0_
-_Last Updated: January 2026_
+_Document Version: 2.0 (issue #8845: realigned with code; parity-gated)_
+_Last Updated: August 2026_
 _Repository: Golf_Modeling_Suite_
