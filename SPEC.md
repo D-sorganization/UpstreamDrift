@@ -501,8 +501,8 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.563                                            |
-| **Last Spec Update**    | 2026-08-20                                         |
+| **Spec Version**        | 1.0.564                                            |
+| **Last Spec Update**    | 2026-08-21                                         |
 
 ## 2. Purpose & Mission
 
@@ -532,6 +532,17 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ## 4. Architecture Overview
 
 ### Recent Spec Updates
+
+- **2026-08-21** - Pinned the proximal--distal companion consumer to protected
+  Tools merge `1664d806df8a2c7b184d2d3fbcea93b714caaee5`. The launcher authority
+  and gitlink now agree on one immutable provider, and the pendulum-simulator
+  launcher is included in the Tools-source contract. Cross-repository
+  qualification verifies the complete ordered 18-run rotating-base catalog,
+  its 13 valid cases and adverse indices 6/7/8/15/16, the exact qualified-study
+  and catalog digests, and every run's nonanatomical-coordinate,
+  unavailable-human-validation, and unsupported-coaching boundaries. No solver
+  or catalog is copied into UpstreamDrift, and this transport qualification does
+  not promote the model to anatomical, empirical, or coaching evidence.
 
 - **2026-08-20** - Added attested session-unit longitudinal analysis under
   contract `launch-monitor-longitudinal-session/1.0.0`. Trusted, distinct

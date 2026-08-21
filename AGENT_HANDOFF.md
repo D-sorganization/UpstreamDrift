@@ -45,6 +45,9 @@ This is current operational state. Historical detail belongs in git and GitHub.
   `1664d806df8a2c7b184d2d3fbcea93b714caaee5`.
 - Upstream branch `feat/4430-rotating-base-consumer` pins that exact merge in
   `vendor/ud-tools` and `TOOLS_GITLINK_SHA`; no solver or catalog is copied.
+- Upstream PR [#8954](https://github.com/D-sorganization/UpstreamDrift/pull/8954)
+  is the full review-ready protected delivery. Auto-merge is disabled; human
+  approval remains required.
 - Cross-repository tests require all 18 ordered cases, 13 valid cases, adverse
   indices 6/7/8/15/16, exact study and catalog digests, and every run's
   nonanatomical/no-human-validation/noncoaching boundaries.
