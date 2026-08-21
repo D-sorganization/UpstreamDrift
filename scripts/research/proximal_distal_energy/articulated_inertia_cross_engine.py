@@ -12,6 +12,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 import hashlib
 from pathlib import Path
+import re
 from typing import Any
 
 import numpy as np
@@ -28,6 +29,15 @@ from scripts.research.proximal_distal_energy.subject_scaled_spatial_geometry imp
 )
 
 FloatArray = NDArray[np.float64]
+_MINIMUM_PINOCCHIO_VERSION = (2, 6)
+_PINOCCHIO_REQUIRED_API = (
+    "Model",
+    "SE3",
+    "Inertia",
+    "crba",
+    "nonLinearEffects",
+    "rnea",
+)
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DATA_DIR = REPO_ROOT / "docs/research/proximal_distal_energy_transfer/data"
 SOURCE_PATHS = (
@@ -38,6 +48,30 @@ SOURCE_PATHS = (
     "scripts/research/proximal_distal_energy/spatial_full_body.py",
     "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
 )
+
+
+def require_robotics_pinocchio(pin: Any) -> str:
+    """Return the qualified engine version or reject a module-name collision.
+
+    Postcondition: the returned version identifies robotics Pinocchio >= 2.6 and
+    the supplied module exposes the native dynamics API used by this program.
+    """
+
+    version = getattr(pin, "__version__", None)
+    match = re.fullmatch(r"(\d+)\.(\d+)(?:\.(\d+))?(?:[+.-].*)?", str(version))
+    if match is None or tuple(map(int, match.groups(default="0")[:2])) < (
+        _MINIMUM_PINOCCHIO_VERSION
+    ):
+        raise RuntimeError(
+            "robotics Pinocchio >= 2.6 is required; install the 'pin' package, "
+            "not the unrelated PyPI 'pinocchio' package"
+        )
+    missing = [name for name in _PINOCCHIO_REQUIRED_API if not hasattr(pin, name)]
+    if missing:
+        raise RuntimeError(
+            "robotics Pinocchio is missing required robotics API: " + ", ".join(missing)
+        )
+    return str(version)
 
 
 @dataclass(frozen=True, slots=True)
@@ -104,9 +138,7 @@ def _pinocchio_joint_model(pin: Any, kind: str, axis: FloatArray) -> Any:
 def build_pinocchio_articulated_model(pin: Any, model: SpatialModel) -> Any:
     """Build the canonical scalar-joint tree in robotics Pinocchio."""
 
-    required = ("Model", "SE3", "Inertia", "crba", "nonLinearEffects", "rnea")
-    if any(not hasattr(pin, name) for name in required):
-        raise RuntimeError("the imported pinocchio module is not the robotics engine")
+    require_robotics_pinocchio(pin)
     native = pin.Model()
     native.gravity.linear = np.array([0.0, 0.0, -9.80665])
     joint_ids: list[int] = []

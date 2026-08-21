@@ -96,7 +96,7 @@
     "maximum_inverse_dynamics_absolute_error": 1.7621459846850485e-10,
     "maximum_inverse_dynamics_relative_error": 1.788893086813151e-12,
     "maximum_symmetry_residual": 0.0,
-    "minimum_mass_matrix_eigenvalue": 0.0001386055618135832,
+    "minimum_mass_matrix_eigenvalue": 0.00013860556181360573,
     "failed_state_count": 0,
     "all_registered_gates_passed": true
   },
@@ -112,7 +112,7 @@
   "source_sha256": {
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "8eed52fe4ebbc55fcf753f4703330dd6d768281b0babfbb2adca074b862fc36d",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
-    "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py": "37f051cae4dd3ebd9c5f3d3305d50083a6a7743e4f8689883e70eff93ee2b5cd",
+    "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py": "a6b1d49b35f7fdae6df887112d51b03cfae0b845365caa031e8477cf95b08b76",
     "scripts/research/proximal_distal_energy/run_articulated_inertia_cross_engine.py": "2a4087486616a08f80c3dd4fe7ca2b412d08586464958ea52b80d210ad667650",
     "scripts/research/proximal_distal_energy/spatial_full_body.py": "8e0c3efb06747742cca30f6bc1b9e18a28779a1c187e4b98ba6cde5293d96cfc",
     "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py": "c2b01f1d8de0b25daa39c03ae97d3ef51512264f3a2978766a7360aed5d9cda8"

@@ -55,13 +55,33 @@ slice supplies full-state velocity reversal, frictionless and finite-friction
 nested-horizon outcomes, station-level event direction, cross-engine active-set
 parity, and a 144-cell mass-metric impulsive perfect-stick bound. The latter is
 checked against an analytic manufactured solution, constrains tangential
-velocity to $9.65\times10^{-11}$ m/s or less, has zero stored-precision native
-velocity discrepancy, and captures $9.84\times10^{-9}$--$0.37665$ J of kinetic
-energy across the registered states. It is an instantaneous ideal-constraint
-control, not evidence that static friction can supply the impulse or maintain a
-stick trajectory. The event probe begins disengaged, so attached-to-open first
-failure, static-friction feasibility/evolution, production release evidence,
-and protected merge verification remain required before #8751 can close.
+velocity to $4.61\times10^{-15}$ m/s or less, has a nonzero maximum
+MuJoCo--Pinocchio projected-velocity error of $3.99\times10^{-12}$ relative,
+and captures $9.84\times10^{-9}$--$0.37665$ J of kinetic energy across the
+registered states. This corrected genuine-engine run replaces the invalid
+zero-discrepancy record. It is an instantaneous
+ideal-constraint control, not evidence that static friction can supply the
+impulse or maintain a stick trajectory. The event probe begins disengaged, so
+attached-to-open first failure, static-friction feasibility/evolution,
+production release evidence, and protected merge verification remain required
+before #8751 can close.
+Issue #8909 invalidates the previously published distributed-grip
+MuJoCo--Pinocchio parity statement: the Windows run imported the unrelated
+PyPI `pinocchio` 0.1 package, and the forward operator silently substituted
+MuJoCo while retaining the Pinocchio label. Cross-engine evidence now fails
+closed unless robotics Pinocchio is version 2.6 or newer, exposes the required
+native dynamics API, and successfully builds the articulated model. No engine
+fallback is permitted, and an identically zero set of trajectory, force, and
+stick-projection discrepancies is treated as a degenerate comparison rather
+than successful parity. The first genuine rerun also falsified the original
+stick-projection numerical gate: twelve distributed constraint rows had rank
+ten, the normal-equation condition number exceeded $10^{17}$, and the
+Pinocchio projection residual reached $1.35\times10^{-10}$ m/s. The corrected
+implementation performs a mass-whitened rank-revealing SVD, reducing the full
+144-cell residual to $4.61\times10^{-15}$ m/s without relaxing the registered
+tolerance. Every committed cross-engine artifact must identify a qualified
+robotics Pinocchio version. The distributed atlas and registered claim must be
+regenerated with two genuine engines before #8751 can close.
 Issue #8752 also remains open. Its first manufactured and Latin-hypercube screen
 does not yet run through both production engine adapters, include a deliberately
 perturbed failure case, refine every uncertainty corner, or propagate uncertainty
@@ -501,8 +521,8 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.563                                            |
-| **Last Spec Update**    | 2026-08-20                                         |
+| **Spec Version**        | 1.0.564                                            |
+| **Last Spec Update**    | 2026-08-21                                         |
 
 ## 2. Purpose & Mission
 
@@ -3132,6 +3152,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-21 | 1.0.564 | Corrected #8909's false distributed-grip cross-engine authority. Robotics Pinocchio now requires version 2.6 or newer and the native Model/SE3/Inertia/CRBA/nonlinear-effects/RNEA API; the unrelated PyPI `pinocchio` 0.1 collision and every model-build failure stop the study rather than silently substituting MuJoCo. A new degeneracy gate rejects an identically zero set of trajectory, force, and stick-projection discrepancies, and a repository test audits the Pinocchio identity recorded by every committed cross-engine artifact. The perfect-stick control now uses a mass-whitened rank-revealing SVD so redundant station rows do not square the constraint-system condition number or require a relaxed no-slip gate. Governed evidence is regenerated with independent MuJoCo and Pinocchio operators before claim registration and publication qualification. |
 | 2026-08-20 | 1.0.563 | Added the canonical `launch-monitor-longitudinal-session/1.0.0` contract for #8808. Trusted and distinct player, session, and order evidence is mandatory. Shots aggregate into equal-weight player/session/stratum cells before per-player descriptive slopes and pooled player-fixed-effects OLS with player-clustered CR1 uncertainty. Missing/non-finite rows, blank identities, nonconstant session order, insufficient sessions or clusters, rank deficiency, and degenerate uncertainty are explicit unavailable states. Complete source-linked backing and missingness remain present, while shot-level inference and causal improvement are false. JSON Schema, a content-addressed golden source, FastAPI routes, generated declarations, ADR 0039, and tests share the Python authority. |
 | 2026-08-20 | 1.0.562 | Added the canonical `launch-monitor-player-covariation/1.0.0` contract for #8807. Selected-pair analysis separates pooled, player-centered, between-player, and per-player associations, then publishes fixed- and DerSimonian-Laird random-effects Fisher-z summaries with Q, tau-squared, and I-squared heterogeneity. Trusted explicit player identity is mandatory; missingness, ineligible/constant groups, unavailable states, uncertainty methods, units, vendor/model provenance, and source-joinable backing hashes remain explicit. The deterministic bounded pair scan retains unavailable pairs and warns about multiplicity, aggregation reversal, causality, and population-generalization limits. JSON Schema, golden pair/scan fixtures, FastAPI routes, generated React declarations, and compatibility tests share the Python authority while generic v1/v2 contracts remain unchanged. |
 | 2026-08-20 | 1.0.560 | Hardened the launch-monitor v2 identity boundary for #8805. `PlayerIdentityV2` rejects session, club, source, filename, row-order, and source-row pseudo-identifiers even when attested. Separate `SessionIdentityV2` and `OrderEvidenceV2` records now preserve session boundaries, order semantics, units, trust, and backing evidence without promoting those fields to player identity. Invalid identity claims fail as request-contract errors; analyses that do not require session/order evidence remain compatible, and future longitudinal operations must report missing evidence as unavailable rather than infer it. Contract v1 remains unchanged. |
