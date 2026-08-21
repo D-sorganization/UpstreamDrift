@@ -49,8 +49,8 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
   fast-web linearization, and no render errors. The archival profile remains
   fail-closed on the disclosed untagged/Type 3/unembedded-font gaps.
 - The open-release validator passes for 571 artifacts with no mismatches.
-  Remaining work: commit the regenerated release authority, push a full PR,
-  shepherd human review and protected merge, and verify remote-main ancestry
+  Full PR #8960 is open with the regenerated release authority. Remaining work:
+  shepherd human review and protected merge, then verify remote-main ancestry
   before closing #8909.
 - Unqualified repository-wide `pytest` currently fails during collection in
   the pre-existing `src/shared/python/sidekick/tests/conftest.py` because it
