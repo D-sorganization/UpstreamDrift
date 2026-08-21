@@ -38,15 +38,24 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
   contact, and distributed-grip evidence have been regenerated. Every gate
   passes with nonzero cross-engine differences. The distributed maxima are
   3.84e-13 trajectory, 1.44e-10 force, and 3.99e-12 stick velocity relative.
-- Twenty-nine focused tests pass. Claim governance reports 1,068/1,068
-  candidates adjudicated, 295 claims, zero open release claims, and a valid
-  2,103-reference evidence manifest.
+- Ninety-five focused scientific/publication tests pass. Claim governance
+  reports 1,068/1,068 candidates adjudicated, 295 claims, zero open release
+  claims, and a valid 2,103-reference evidence manifest.
 - Commit `898033064c3f2c45930bbea722a744406423af51` checkpoints the coherent
-  repair. It is being merged with current `origin/main`; resolve only current
-  handoff/SPEC chronology, then regenerate source-revision-bound release files.
-- Remaining work: rebuild and inspect the PDF; rewrite release manifests and
-  checksums; run publication/repository gates; push a full PR; shepherd human
-  review and protected merge; verify remote-main ancestry before closing #8909.
+  repair; merge commit `f86e8f8d6e8405c51c1e484d9ac1a36dcf75f732`
+  reconciles current `origin/main` without unresolved conflicts.
+- The optimized 233-page PDF was visually inspected on every page. The
+  computational profile passes with 192 valid URI links, 246 outline entries,
+  fast-web linearization, and no render errors. The archival profile remains
+  fail-closed on the disclosed untagged/Type 3/unembedded-font gaps.
+- The open-release validator passes for 571 artifacts with no mismatches.
+  Remaining work: commit the regenerated release authority, push a full PR,
+  shepherd human review and protected merge, and verify remote-main ancestry
+  before closing #8909.
+- Unqualified repository-wide `pytest` currently fails during collection in
+  the pre-existing `src/shared/python/sidekick/tests/conftest.py` because it
+  imports nonexistent `utils.path_helpers`. Do not hide that baseline defect;
+  use the dependency-scoped protected lanes and track a separate repair.
 
 ## Articulated Uncertainty Campaign (#8752)
 

@@ -228,7 +228,7 @@
     {
       "release_claim_key": "distributed_grip_discretization",
       "published_status": "fifty_millisecond_finite_friction_gate_qualified",
-      "audit_state": "reviewed_as_synthetic_friction_and_discretization_result"
+      "audit_state": "reviewed_as_right_censored_synthetic_discretization_result"
     },
     {
       "release_claim_key": "articulated_shaft_bending_torsion",

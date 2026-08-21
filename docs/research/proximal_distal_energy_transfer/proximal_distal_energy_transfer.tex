@@ -498,7 +498,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, bottomrule=.15mm, bottomtitle=1mm, left=2mm, coltitle=black, leftrule=.75mm, rightrule=.15mm, colback=white, toprule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, colframe=quarto-callout-note-color-frame, toptitle=1mm, breakable, titlerule=0mm, arc=.35mm, opacitybacktitle=0.6, opacityback=0, colbacktitle=quarto-callout-note-color!10!white]
+\begin{tcolorbox}[enhanced jigsaw, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, left=2mm, toprule=.15mm, toptitle=1mm, arc=.35mm, breakable, opacitybacktitle=0.6, titlerule=0mm, bottomrule=.15mm, bottomtitle=1mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, leftrule=.75mm, coltitle=black, opacityback=0, colback=white, colbacktitle=quarto-callout-note-color!10!white]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -7587,7 +7587,7 @@ Projection and Initial Acceleration Across All Closed States}
 
 All 234 states pass. The largest contact force is 2.708 N, the largest
 zero-preload leakage is \(2.08\times10^{-7}\) N, and the largest
-virtual-power residual is \(3.89\times10^{-16}\) W. Damping power is
+virtual-power residual is \(4.44\times10^{-16}\) W. Damping power is
 non-positive at every state. Coincident moment arms remove the force
 couple exactly, reversing both moment arms reverses it exactly, and the
 largest MuJoCo--Pinocchio generalized initial-acceleration discrepancy
@@ -7661,8 +7661,8 @@ attachment separation is 1.229 mm and the largest contact force is
 0.00738 to 0.00170 and then 0.000854 as the step is halved. The largest
 virtual-power residual is \(3.55\times10^{-15}\) W; damping power
 remains negative; and the largest MuJoCo--Pinocchio trajectory and
-force-history discrepancies are \(1.54\times10^{-14}\) and
-\(1.06\times10^{-11}\) relative, respectively.
+force-history discrepancies are \(1.53\times10^{-14}\) and
+\(1.34\times10^{-11}\) relative, respectively.
 
 This is a right-censored synthetic result: no registered failure occurs
 before 5 ms, but persistence later in the downswing or through impact is
@@ -7800,7 +7800,14 @@ energy is \(\Delta K=\tfrac12\dot q^{-\mathsf T}M\dot q^--
 \tfrac12\dot q^{+\mathsf T}M\dot q^+\geq0\). This is an impulsive,
 single-state constraint bound. It does not assert that static friction
 can supply \(\lambda\), determine subsequent contact evolution, or
-represent tissue.
+represent tissue. The numerical implementation factors
+\(M=LL^\mathsf{T}\) and applies a rank-revealing singular-value
+decomposition to \(J_tL^{-\mathsf{T}}\). This is algebraically the same
+mass-metric projection, but it does not form the normal-equation matrix
+\(J_tM^{-1}J_t^\mathsf{T}\), whose condition number is squared when
+distributed station rows are redundant. The registered residual
+therefore tests the independent constraint row space rather than
+numerical agreement obtained by relaxing the no-slip tolerance.
 
 Thus station count does not silently multiply total grip stiffness or
 damping, and finite off-axis reference length does not become hidden
@@ -7841,11 +7848,12 @@ Friction and Contact Events Across Nested Articulated Horizons}
 All registered numerical and native-engine gates pass. The largest
 station force is 4.021 N and the largest force couple is 0.434 N m.
 Coincident and reversed-moment-arm residuals are exactly zero; the
-largest virtual-power residual is \(1.22\times10^{-15}\) W and positive
+largest virtual-power residual is \(1.44\times10^{-15}\) W and positive
 damping power is zero. The worst normalized work--energy residual
-decreases from 0.03346 to 0.01673 when the step is halved. Trajectory
-and station-force discrepancies between engines are zero at the stored
-precision, with no nominal or event active-set parity failure. At the
+decreases from 0.03346 to 0.01673 when the step is halved. The largest
+genuine MuJoCo--Pinocchio trajectory and station-force discrepancies are
+\(3.84\times10^{-13}\) and \(1.44\times10^{-10}\) relative,
+respectively, with no nominal or event active-set parity failure. At the
 fine step, the largest three-to-five-fiber state discrepancy is 0.00300
 relative; the one-to-three discrepancy is 0.04188.
 
@@ -7862,13 +7870,14 @@ m/s. Mixed signs reject a universal finite-friction speed benefit in
 this unmatched synthetic matrix.
 
 The perfect-stick control removes registered active-station tangential
-velocity to at most \(9.65\times10^{-11}\) m/s. MuJoCo and Pinocchio
-return identical projected velocities at stored precision and identical
-active sets. The instantaneous captured kinetic energy ranges from
-\(9.84\times10^{-9}\) to \(0.37665\) J across the registered matrix.
-These values bound the kinetic change for an ideal sticking impulse at
-each sampled state; they are not predictions of realizable grip work or
-evidence that sticking improves delivery.
+velocity to at most \(4.61\times10^{-15}\) m/s. The largest genuine
+MuJoCo--Pinocchio projected-velocity discrepancy is
+\(3.99\times10^{-12}\) relative, with identical active sets. The
+instantaneous captured kinetic energy ranges from \(9.84\times10^{-9}\)
+to \(0.37665\) J across the registered matrix. These values bound the
+kinetic change for an ideal sticking impulse at each sampled state; they
+are not predictions of realizable grip work or evidence that sticking
+improves delivery.
 
 The fibers remain memoryless engineering lines rather than calibrated
 pressure, fingers, tissue, or measured grip mechanics. The club is rigid

@@ -40,11 +40,11 @@ equipment calibration and external archive/PID deposition.
 
 ## Current Candidate Result
 
-The 231-page candidate renders successfully on all 231 pages, exposes
-extractable text on all 231 pages, contains 246 outline entries and 192 valid
+The 233-page candidate renders successfully on all 233 pages, exposes
+extractable text on all 233 pages, contains 246 outline entries and 192 valid
 external links, and is now linearized for fast web access. Its candidate PDF
 SHA-256 is
-`a46ec01e6085eda7a80533ab59137b116b6bd3d0f548def792cabf3212137482`.
+`782621779730cd30003bc35c2d07b9999fe0e4aa6fe0025e3f08c1ec051ddd52`.
 
 The computational profile passes. The archival profile remains deliberately
 blocked because the PDF has no structure tag tree, contains 110 Type 3 font
