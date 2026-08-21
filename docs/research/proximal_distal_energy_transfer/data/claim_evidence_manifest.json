@@ -4053,8 +4053,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_structural_propagation_plan.json": {
-      "sha256": "da3044d14fec0ca9ad46e4663b96d55bf772d8340758c8b0290f86e76f6edd91",
-      "bytes": 34904,
+      "sha256": "93b634d12cf65c88c560164df6d23ce240d1e855e61a2fb0c4f29f654f8b3576",
+      "bytes": 35318,
       "referenced_by": [
         "PD-CLAIM-301",
         "PD-CLAIM-302",
@@ -5471,8 +5471,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/articulated_atlas_authority.py": {
-      "sha256": "191174f7fea921a3b52054f85d735b45ee0ca93090aaa733f59221d45de0af0d",
-      "bytes": 9408,
+      "sha256": "3b67c428846b6fe5ddb7a1263750bebb4abfd3c9a217cb977d407338785c7942",
+      "bytes": 11758,
       "referenced_by": [
         "PD-CLAIM-301",
         "PD-CLAIM-302",
@@ -5678,8 +5678,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": {
-      "sha256": "89c6c741ea366ab0f324323cfa45ca99cd5f73a18c5f3fcf7d39c8b071a862e1",
-      "bytes": 23696,
+      "sha256": "571536b9c09a031f272701608feaae8016748bfc87b4ed65ca99680465c9a2c6",
+      "bytes": 23930,
       "referenced_by": [
         "PD-CLAIM-301",
         "PD-CLAIM-302",
@@ -6872,8 +6872,8 @@
       ]
     },
     "tests/research/test_articulated_atlas_authority.py": {
-      "sha256": "212fb2d3413e06ea55fbf4ca8ba141057b020438c25efc8a17668766d083d349",
-      "bytes": 4405,
+      "sha256": "55fa82d2c56962a6982e71c38d9e9e933c374f91a825392763aad8e068a18537",
+      "bytes": 5210,
       "referenced_by": [
         "PD-CLAIM-301",
         "PD-CLAIM-302",
@@ -7099,8 +7099,8 @@
       ]
     },
     "tests/research/test_articulated_structural_propagation_plan.py": {
-      "sha256": "be1d43712d0ac4f9cae1fcc2302c4cc0d53e2f6b69c35215844bfe19964ae3cf",
-      "bytes": 16424,
+      "sha256": "95f778d89092046ae0ae3bb84b981743d50edf007d6d31cae89de7b0c83789ea",
+      "bytes": 17606,
       "referenced_by": [
         "PD-CLAIM-301",
         "PD-CLAIM-302",
