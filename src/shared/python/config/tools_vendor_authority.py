@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 _TOOLS_GITLINK_PATH = Path("vendor/ud-tools")
-TOOLS_GITLINK_SHA = "ff4240217005e1415ca409fd124e50b64ee642d2"
+TOOLS_GITLINK_SHA = "1664d806df8a2c7b184d2d3fbcea93b714caaee5"
 _GIT_TIMEOUT_SECONDS = 5.0
 
 
