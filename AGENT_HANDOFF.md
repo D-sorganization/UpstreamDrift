@@ -60,7 +60,7 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
 - Worktree: `UpstreamDrift-worktrees/goal-8752-uncertainty`.
 - Parent PID `18404` is an active checkpointed 19-corner campaign, not an
   orphan. Nine corners and 17 of 30 completed-or-retained pathway evaluations
-  were recorded by the 2026-08-21 11:41 checkpoint. At 12:43, 25 of 72 atomic
+  were recorded by the 2026-08-21 11:41 checkpoint. At 13:39, 47 of 72 atomic
   ground branches for the active torsional-stiffness-high corner were retained.
   Completed pathway rows and ground-branch checkpoints are restartable. Do not
   infer completion from the partial campaign record.
@@ -151,17 +151,19 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
 - Issue #8963 owns removal of the seven pre-existing research-orchestrator
   architecture exceptions before 2026-09-30. The new native discrepancy
   experiment itself has no exception and is below the 100-line function gate.
-- Full PR #8962 is open from `fix/8911-native-contact-parity` to `main`.
-  Standard CI, publication, claim, architecture, and repository gates pass on
-  head `7188ad1cb509225ed2bbaf7f98ba6a391460c5a8`. The optional-stack lane then
-  passed all executable manufactured-solution checks but rejected the committed
-  record because the new MuJoCo 3.4/3.8 compatibility adapter changed the
-  governed `spatial_full_body.py` digest after evidence generation. The record
-  has now been regenerated canonically under Linux MuJoCo 3.8.0 and Pinocchio
-  3.8.0; all five manufactured-solution tests pass and the claim-evidence
-  manifest validates. Commit and push this evidence requalification, then
-  shepherd the new exact head through human review and protected CI. Do not
-  enable auto-merge or bypass protection.
+- PR #8962 merged through protection at
+  `05a76a2bfcececf0a01df8311d0c4265a0e60e55`, verified as exact remote
+  `main`; issue #8911 is closed. The complete optional-stack lane passes on the
+  merged source, including 690 API tests, all Pinocchio ecosystem and
+  manufactured-solution tests, and the optional unit suite. Standard CI,
+  publication, claim, architecture, repository, documentation, PDF, and title
+  gates also pass. The merged manufactured-solution record is pinned to the
+  corrected `spatial_full_body.py` digest
+  `862fdc4b176cbcc8d4d139a00be745f3d8a37c0f81cd899e55a03707893f8e6a`.
+- Next dependency order: allow the source-pinned #8752 constitutive campaign to
+  finish. Then implement the remaining low/high height, body-mass, and
+  joint-limit propagation in #8800 before the #8752 completion audit. Do not
+  edit atlas sources or start another campaign while PID `18404` is active.
 
 ## Scientific Boundaries
 
