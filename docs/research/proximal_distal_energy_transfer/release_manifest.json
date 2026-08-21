@@ -2158,8 +2158,8 @@
       "bytes": 8485
     },
     "scripts/research/proximal_distal_energy/register_articulated_ground_claims.py": {
-      "sha256": "bfe9cfdcbdb939460041259299debfc05e2ebd21feaff27057783e30f77dbf49",
-      "bytes": 22551
+      "sha256": "d386edca5b639caab769f954c1a8f5df04251bee52caf05419485fc8ba506d42",
+      "bytes": 24111
     },
     "scripts/research/proximal_distal_energy/register_articulated_inertia_claims.py": {
       "sha256": "08a52d9c7da3461b215ab0eb2454718b8ad64b8939dd390db9bb340b4e894825",
@@ -2174,8 +2174,8 @@
       "bytes": 20751
     },
     "scripts/research/proximal_distal_energy/register_articulated_shaft_claims.py": {
-      "sha256": "337ea216d4a590ebc4ae90df501555db64fd5c70f35164ecf7d20c16e70711c7",
-      "bytes": 14899
+      "sha256": "d9f0e6a50b6e411c5f6b1f02b2fb72cd2dcc81065475cb93b9202c133c849be4",
+      "bytes": 15218
     },
     "scripts/research/proximal_distal_energy/register_articulated_slack_claims.py": {
       "sha256": "6b4918486770722effb95931b8828e17a8b3a5cc461f0aa8a01257da7d02f9af",
@@ -2218,16 +2218,16 @@
       "bytes": 10350
     },
     "scripts/research/proximal_distal_energy/register_remaining_claim_reviews.py": {
-      "sha256": "445ca0a979ffb7071f1dfe0c85ca7aa8cdc3dfd4357dac5dedf386a44356b52d",
-      "bytes": 23066
+      "sha256": "17d5679444cc0a51b08b7ab4b716458a78d771f9f0cf438ed903c27136ff06d8",
+      "bytes": 25897
     },
     "scripts/research/proximal_distal_energy/register_results_chapter_claims.py": {
       "sha256": "feaf0fdfb6aa30443a61bda171f1a3a5de1cc71141b54826347c5b5442b53582",
       "bytes": 10013
     },
     "scripts/research/proximal_distal_energy/register_subject_scaled_spatial_geometry_claims.py": {
-      "sha256": "182907ef69f8a637016ca10d72eb2f89992ee7c522fd244ffcbd7165ae4d199b",
-      "bytes": 27814
+      "sha256": "035dab9433b943bcd5e9480b416f6de2b50a8127220e3e5d3ca30ea54bf14b79",
+      "bytes": 30567
     },
     "scripts/research/proximal_distal_energy/register_torque_allocation_claims.py": {
       "sha256": "7c2d26072dec7b068fad34492fa9cca79609939078b21a850cac422aa0c155d6",
@@ -2402,8 +2402,8 @@
       "bytes": 15135
     },
     "scripts/research/proximal_distal_energy/run_spatial_forward_contact_study.py": {
-      "sha256": "aa2c8602c07cd500b9abd41d3925c6f74c8183858f90d39c42db2a4083f84e3b",
-      "bytes": 10763
+      "sha256": "3e5c8165037dc3baeb0b1152b19775d9357f440710b0612b064cac997a03bca7",
+      "bytes": 12053
     },
     "scripts/research/proximal_distal_energy/run_spatial_full_body_study.py": {
       "sha256": "4c3f4432f6625ef8bf2a976decba4e9cee384085866e66537f52a7814e2d0835",
@@ -2478,8 +2478,8 @@
       "bytes": 17127
     },
     "scripts/research/proximal_distal_energy/spatial_full_body.py": {
-      "sha256": "862fdc4b176cbcc8d4d139a00be745f3d8a37c0f81cd899e55a03707893f8e6a",
-      "bytes": 32873
+      "sha256": "a2691106748c80d318d0cfeeeabc982e17887f2f107abbd7ca81fd38067c7b27",
+      "bytes": 33203
     },
     "scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py": {
       "sha256": "b62fd2d7b90bb0593d660c362ebfc266cb905f0d808593b2c978a515275a3d0a",
