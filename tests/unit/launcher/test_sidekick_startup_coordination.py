@@ -18,7 +18,12 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from src.launchers import launcher_sidekick_sidebar as sidebar_module
-from src.launchers.launcher_sidekick_sidebar import SidekickSidebarManager
+from src.launchers import upstream_drift_launcher as upstream_launcher_module
+from src.launchers.launcher_sidekick_sidebar import (
+    SIDEKICK_API_OFFLINE_RETRY_MS,
+    SIDEKICK_API_READY_RETRY_MAX_MS,
+    SidekickSidebarManager,
+)
 from src.launchers.sidekick_extension_overlay import (
     IncompleteParentSidekickRuntimeError,
 )
@@ -108,21 +113,20 @@ def test_launcher_sidekick_delegates_use_owned_manager() -> None:
     readiness = object()
 
     with (
-        patch(
-            "src.launchers.upstream_drift_launcher.check_sidekick_api_readiness"
-        ) as readiness_check,
         patch("src.launchers.upstream_drift_launcher.QTimer.singleShot") as schedule,
         patch("src.launchers.upstream_drift_launcher.time.monotonic") as monotonic,
     ):
-        UpstreamDriftLauncher._monitor_sidekick_api_readiness(launcher)
+        UpstreamDriftLauncher._on_sidekick_readiness_result(launcher, readiness)
         UpstreamDriftLauncher._report_sidekick_api_failure(launcher, readiness)
         UpstreamDriftLauncher._seed_sidekick_workspace(launcher)
 
-    manager._monitor_sidekick_api_readiness.assert_called_once_with(
-        readiness_check=readiness_check,
-        schedule_once=schedule,
-        monotonic=monotonic,
-    )
+    manager._monitor_sidekick_api_readiness.assert_called_once()
+    kwargs = manager._monitor_sidekick_api_readiness.call_args.kwargs
+    assert kwargs["schedule_once"] is schedule
+    assert kwargs["monotonic"] is monotonic
+    # The injected readiness_check replays the already-probed result so no
+    # HTTP I/O ever happens on the GUI thread (issue #8939).
+    assert kwargs["readiness_check"](expected_instance_id="anything") is readiness
     manager._report_sidekick_api_failure.assert_called_once_with(readiness)
     manager._seed_sidekick_workspace.assert_called_once_with()
 
@@ -517,8 +521,32 @@ def test_vendored_direct_packages_precede_legacy_alias_shims(
     assert synthetic_path[:2] == [str(vendor_python), str(vendor_src)]
 
 
-def test_readiness_monitor_passes_current_instance_identity() -> None:
-    """A healthy API schedules continued liveness monitoring."""
+def test_readiness_monitor_probes_off_gui_thread_with_instance_identity() -> None:
+    """The monitor starts a worker-thread probe with the current identity."""
+    runtime = SimpleNamespace(instance_id="current-instance")
+    launcher = SimpleNamespace(
+        _sidekick_runtime_config=runtime,
+        _sidekick_api_monitoring=True,
+        _on_sidekick_readiness_result=MagicMock(),
+    )
+    worker = MagicMock()
+
+    with patch(
+        "src.launchers.sidekick_readiness_worker.SidekickReadinessProbeThread",
+        return_value=worker,
+    ) as worker_cls:
+        UpstreamDriftLauncher._monitor_sidekick_api_readiness(launcher)
+
+    worker_cls.assert_called_once_with(
+        probe=upstream_launcher_module.check_sidekick_api_readiness,
+        expected_instance_id="current-instance",
+    )
+    worker.start.assert_called_once_with()
+    assert launcher._sidekick_readiness_worker is worker
+
+
+def test_ready_probe_result_schedules_slow_healthcheck() -> None:
+    """A healthy API schedules continued liveness monitoring at 10 s."""
     runtime = SimpleNamespace(instance_id="current-instance")
     launcher = SimpleNamespace(
         _sidekick_runtime_config=runtime,
@@ -530,28 +558,23 @@ def test_readiness_monitor_passes_current_instance_identity() -> None:
     )
     launcher.sidekick_sidebar_manager = SidekickSidebarManager(launcher)
     launcher.background_api_process.poll.return_value = None
+    ready = SimpleNamespace(
+        ready=True,
+        url="http://127.0.0.1:8123/readyz",
+        status_code=200,
+        detail="ready",
+    )
 
-    with (
-        patch(
-            "src.launchers.upstream_drift_launcher.check_sidekick_api_readiness"
-        ) as readiness_check,
-        patch("src.launchers.upstream_drift_launcher.QTimer.singleShot") as schedule,
-    ):
-        readiness_check.return_value = SimpleNamespace(
-            ready=True,
-            url="http://127.0.0.1:8123/readyz",
-            status_code=200,
-            detail="ready",
-        )
-        UpstreamDriftLauncher._monitor_sidekick_api_readiness(launcher)
+    with patch("src.launchers.upstream_drift_launcher.QTimer.singleShot") as schedule:
+        UpstreamDriftLauncher._on_sidekick_readiness_result(launcher, ready)
 
-    readiness_check.assert_called_once_with(expected_instance_id="current-instance")
     assert launcher._sidekick_api_wait_started_at is None
     assert launcher._sidekick_api_restart_count == 0
     schedule.assert_called_once_with(
         SIDEKICK_API_HEALTHCHECK_MS,
         launcher._monitor_sidekick_api_readiness,
     )
+    assert SIDEKICK_API_HEALTHCHECK_MS >= 10_000
 
 
 def test_closed_launcher_stops_sidekick_liveness_monitor() -> None:
@@ -561,13 +584,13 @@ def test_closed_launcher_stops_sidekick_liveness_monitor() -> None:
 
     with (
         patch(
-            "src.launchers.upstream_drift_launcher.check_sidekick_api_readiness"
-        ) as readiness_check,
+            "src.launchers.sidekick_readiness_worker.SidekickReadinessProbeThread"
+        ) as worker_cls,
         patch("src.launchers.upstream_drift_launcher.QTimer.singleShot") as schedule,
     ):
         UpstreamDriftLauncher._monitor_sidekick_api_readiness(launcher)
 
-    readiness_check.assert_not_called()
+    worker_cls.assert_not_called()
     schedule.assert_not_called()
 
 
@@ -589,11 +612,7 @@ def test_missing_runtime_contract_cannot_accept_unrelated_api() -> None:
         status_code=200,
         detail="ready",
     )
-    with patch(
-        "src.launchers.upstream_drift_launcher.check_sidekick_api_readiness",
-        return_value=stale_readiness,
-    ):
-        UpstreamDriftLauncher._monitor_sidekick_api_readiness(launcher)
+    UpstreamDriftLauncher._on_sidekick_readiness_result(launcher, stale_readiness)
 
     launcher._report_sidekick_api_failure.assert_called_once_with(stale_readiness)
 
@@ -615,19 +634,14 @@ def test_dead_api_process_receives_bounded_restart() -> None:
     )
     launcher.sidekick_sidebar_manager = SidekickSidebarManager(launcher)
 
-    with (
-        patch(
-            "src.launchers.upstream_drift_launcher.check_sidekick_api_readiness",
-            return_value=SimpleNamespace(
-                ready=False,
-                url="http://127.0.0.1:8123/readyz",
-                status_code=None,
-                detail="connection refused",
-            ),
-        ),
-        patch("src.launchers.upstream_drift_launcher.QTimer.singleShot") as schedule,
-    ):
-        UpstreamDriftLauncher._monitor_sidekick_api_readiness(launcher)
+    refused = SimpleNamespace(
+        ready=False,
+        url="http://127.0.0.1:8123/readyz",
+        status_code=None,
+        detail="connection refused",
+    )
+    with patch("src.launchers.upstream_drift_launcher.QTimer.singleShot") as schedule:
+        UpstreamDriftLauncher._on_sidekick_readiness_result(launcher, refused)
 
     assert launcher._sidekick_api_restart_count == 1
     assert launcher.background_api_process is replacement
@@ -654,23 +668,20 @@ def test_delayed_readiness_rechecks_running_child_without_relaunch() -> None:
     )
     launcher.sidekick_sidebar_manager = SidekickSidebarManager(launcher)
 
+    refused = SimpleNamespace(
+        ready=False,
+        url="http://127.0.0.1:8123/readyz",
+        status_code=None,
+        detail="connection refused",
+    )
     with (
-        patch(
-            "src.launchers.upstream_drift_launcher.check_sidekick_api_readiness",
-            return_value=SimpleNamespace(
-                ready=False,
-                url="http://127.0.0.1:8123/readyz",
-                status_code=None,
-                detail="connection refused",
-            ),
-        ),
         patch(
             "src.launchers.upstream_drift_launcher.time.monotonic",
             return_value=10.0,
         ),
         patch("src.launchers.upstream_drift_launcher.QTimer.singleShot") as schedule,
     ):
-        UpstreamDriftLauncher._monitor_sidekick_api_readiness(launcher)
+        UpstreamDriftLauncher._on_sidekick_readiness_result(launcher, refused)
 
     assert launcher._sidekick_api_wait_started_at == 10.0
     launcher._launch_sidekick_background_api.assert_not_called()
@@ -708,23 +719,118 @@ def test_child_launch_failure_exhausts_retry_budget_observably() -> None:
 
     with (
         patch(
-            "src.launchers.upstream_drift_launcher.check_sidekick_api_readiness",
-            return_value=unavailable,
-        ),
-        patch(
             "src.launchers.upstream_drift_launcher.time.monotonic",
             return_value=10.0,
         ),
         patch("src.launchers.upstream_drift_launcher.QTimer.singleShot") as schedule,
     ):
-        UpstreamDriftLauncher._monitor_sidekick_api_readiness(launcher)
-        UpstreamDriftLauncher._monitor_sidekick_api_readiness(launcher)
+        UpstreamDriftLauncher._on_sidekick_readiness_result(launcher, unavailable)
+        UpstreamDriftLauncher._on_sidekick_readiness_result(launcher, unavailable)
 
     assert launcher._sidekick_api_restart_count == SIDEKICK_API_MAX_RESTARTS
     assert launcher.background_api_process is None
     launcher._restart_sidekick_background_api.assert_called_once_with()
-    schedule.assert_called_once_with(
+    # First failure restarts the child; the exhausted budget then enters the
+    # visible offline state with a slow retry cadence (issue #8939).
+    assert [call.args[0] for call in schedule.call_args_list] == [
         SIDEKICK_API_RESTART_DELAY_MS,
-        launcher._monitor_sidekick_api_readiness,
-    )
+        SIDEKICK_API_OFFLINE_RETRY_MS,
+    ]
     launcher._report_sidekick_api_failure.assert_called_once_with(unavailable)
+
+
+def _waiting_launcher() -> SimpleNamespace:
+    """Launcher double in the startup-wait phase with a live child process."""
+    running_process = MagicMock()
+    running_process.poll.return_value = None
+    return SimpleNamespace(
+        _sidekick_runtime_config=SimpleNamespace(instance_id="current-instance"),
+        _sidekick_api_wait_started_at=None,
+        _sidekick_api_restart_count=0,
+        _sidekick_api_monitoring=True,
+        _sidekick_api_was_ready=False,
+        _sidekick_runtime_error="",
+        background_api_process=running_process,
+        _monitor_sidekick_api_readiness=MagicMock(),
+        _report_sidekick_api_failure=MagicMock(),
+    )
+
+
+_REFUSED = SimpleNamespace(
+    ready=False,
+    url="http://127.0.0.1:8123/readyz",
+    status_code=None,
+    detail="connection refused",
+)
+
+
+def _drive_monitor(
+    launcher: SimpleNamespace,
+    delays: list[int],
+    now: float,
+    readiness: SimpleNamespace = _REFUSED,
+) -> None:
+    """Run one state-machine step with a canned probe result."""
+    SidekickSidebarManager(launcher)._monitor_sidekick_api_readiness(
+        readiness_check=lambda *, expected_instance_id=None: readiness,
+        schedule_once=lambda ms, cb: delays.append(ms),
+        monotonic=lambda: now,
+    )
+
+
+def test_startup_retry_backoff_doubles_to_ceiling() -> None:
+    """Startup retries back off 500 -> 1000 -> ... capped at the ceiling."""
+    launcher = _waiting_launcher()
+    delays: list[int] = []
+
+    for step in range(6):
+        _drive_monitor(launcher, delays, now=float(step))
+
+    assert delays == [
+        SIDEKICK_API_READY_RETRY_MS,
+        1_000,
+        2_000,
+        4_000,
+        SIDEKICK_API_READY_RETRY_MAX_MS,
+        SIDEKICK_API_READY_RETRY_MAX_MS,
+    ]
+    launcher._report_sidekick_api_failure.assert_not_called()
+
+
+def test_offline_state_reports_once_and_keeps_slow_retries() -> None:
+    """Past the startup window, the monitor reports once then retries slowly."""
+    launcher = _waiting_launcher()
+    delays: list[int] = []
+
+    _drive_monitor(launcher, delays, now=0.0)
+    _drive_monitor(launcher, delays, now=46.0)
+    _drive_monitor(launcher, delays, now=80.0)
+
+    assert delays[0] == SIDEKICK_API_READY_RETRY_MS
+    assert delays[1:] == [
+        SIDEKICK_API_OFFLINE_RETRY_MS,
+        SIDEKICK_API_OFFLINE_RETRY_MS,
+    ]
+    launcher._report_sidekick_api_failure.assert_called_once()
+    assert launcher._sidekick_api_failure_reported is True
+
+
+def test_recovery_after_offline_resets_backoff_and_failure_flag() -> None:
+    """A late API start recovers cleanly out of the offline state."""
+    launcher = _waiting_launcher()
+    delays: list[int] = []
+
+    _drive_monitor(launcher, delays, now=0.0)
+    _drive_monitor(launcher, delays, now=46.0)
+    ready = SimpleNamespace(
+        ready=True,
+        url="http://127.0.0.1:8123/readyz",
+        status_code=200,
+        detail="ready",
+    )
+    _drive_monitor(launcher, delays, now=76.0, readiness=ready)
+
+    assert delays[-1] == SIDEKICK_API_HEALTHCHECK_MS
+    assert launcher._sidekick_api_failure_reported is False
+    assert launcher._sidekick_api_retry_interval_ms == SIDEKICK_API_READY_RETRY_MS
+    assert launcher._sidekick_api_wait_started_at is None

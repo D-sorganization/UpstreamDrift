@@ -12,6 +12,7 @@ from __future__ import annotations
 import stat
 import subprocess
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 
 _TOOLS_GITLINK_PATH = Path("vendor/ud-tools")
@@ -222,6 +223,12 @@ def inspect_tools_vendor_authority(repo_root: Path) -> ToolsVendorAuthority:
     Precondition:
         ``repo_root`` is a ``pathlib.Path`` (the superproject checkout root).
 
+    Results are memoized per canonical repository root for the lifetime of
+    the process (issue #8937): the pinned gitlink availability cannot change
+    while the launcher is running, and the uncached inspection spawns up to
+    seven git subprocesses.  Use
+    :func:`clear_tools_vendor_authority_cache` to force re-inspection.
+
     Postconditions:
         ``available`` is true only for a normal directory backed by the exact
         superproject gitlink and checked out at the tracked gitlink SHA with
@@ -234,7 +241,17 @@ def inspect_tools_vendor_authority(repo_root: Path) -> ToolsVendorAuthority:
     if not isinstance(repo_root, Path):
         raise TypeError("repo_root must be a pathlib.Path")
 
-    canonical_repo = repo_root.resolve(strict=False)
+    return _inspect_canonical_repo(repo_root.resolve(strict=False))
+
+
+def clear_tools_vendor_authority_cache() -> None:
+    """Drop memoized authority results (test seam / manual re-validation)."""
+    _inspect_canonical_repo.cache_clear()
+
+
+@lru_cache(maxsize=8)
+def _inspect_canonical_repo(canonical_repo: Path) -> ToolsVendorAuthority:
+    """Uncached inspection of one canonical repository root."""
     vendor_root = canonical_repo / _TOOLS_GITLINK_PATH
     if not canonical_repo.is_dir():
         return _unavailable(vendor_root, "UpstreamDrift repository root is unavailable")
@@ -268,6 +285,7 @@ def inspect_tools_vendor_authority(repo_root: Path) -> ToolsVendorAuthority:
 __all__ = [
     "ProviderUnavailableError",
     "ToolsVendorAuthority",
+    "clear_tools_vendor_authority_cache",
     "expected_tools_gitlink_sha",
     "inspect_tools_vendor_authority",
 ]
