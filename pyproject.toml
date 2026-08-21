@@ -652,6 +652,7 @@ markers = [
     "contract: API/behaviour contract tests for a module's published surface",
     "security: security-posture tests (secret scanning, auth hardening)",
     "validates_physics: tests that check computed physics against an analytic or published ground truth",
+    "launch_qa: launch-mode functional QA gate (web/--classic/--api-only/--engine matrix; see docs/testing/launch_qa.md)",
 ]
 filterwarnings = [
     # Suppress hppfcl→coal rename noise (third-party, not actionable in this repo)
