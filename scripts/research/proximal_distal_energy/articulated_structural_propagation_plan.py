@@ -31,6 +31,8 @@ DEFAULT_OUTPUT = DATA / "articulated_structural_propagation_plan.json"
 RUNTIME_AUTHORITY_PATHS = (
     "scripts/research/proximal_distal_energy/articulated_atlas_authority.py",
     "scripts/research/proximal_distal_energy/articulated_atlas_runtime_authority.py",
+    "scripts/research/proximal_distal_energy/articulated_structural_execution_identity.py",
+    "scripts/research/proximal_distal_energy/articulated_structural_checkpoint.py",
 )
 SOURCE_PATHS = tuple(
     dict.fromkeys(
@@ -41,6 +43,7 @@ SOURCE_PATHS = tuple(
             "scripts/research/proximal_distal_energy/articulated_structural_axis_evidence.py",
             "scripts/research/proximal_distal_energy/articulated_structural_common_support.py",
             "scripts/research/proximal_distal_energy/articulated_structural_cell_evidence.py",
+            "scripts/research/proximal_distal_energy/articulated_structural_checkpoint.py",
             "scripts/research/proximal_distal_energy/articulated_structural_corner_evidence.py",
             "scripts/research/proximal_distal_energy/articulated_structural_execution_identity.py",
             "scripts/research/proximal_distal_energy/articulated_structural_figure.py",
@@ -55,6 +58,7 @@ SOURCE_PATHS = tuple(
             "tests/research/test_articulated_atlas_runtime_authority.py",
             "tests/research/test_articulated_structural_common_support.py",
             "tests/research/test_articulated_structural_cell_evidence.py",
+            "tests/research/test_articulated_structural_checkpoint.py",
             "tests/research/test_articulated_structural_corner_evidence.py",
             "tests/research/test_articulated_structural_execution_identity.py",
             "tests/research/test_articulated_structural_figure.py",
@@ -288,6 +292,7 @@ def build_structural_propagation_plan(
             "branch_slot",
         ],
         "checkpoint_metadata_rule": "persist the exact registered prefix and local state/branch identity; reject every missing, extra, or altered field before reuse",
+        "checkpoint_payload_rule": "atomically persist exact registered fields, shapes, and dtypes with pickle disabled; reject infinity and retain pathway-defined NaN only for downstream semantic validation",
         "required_cell_arrays": {
             pathway: [
                 "cell_identity",
