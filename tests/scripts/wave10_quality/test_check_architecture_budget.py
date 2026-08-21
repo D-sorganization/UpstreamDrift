@@ -146,6 +146,22 @@ def test_checked_in_architecture_budget_exceptions_are_valid() -> None:
     assert invalid == []
 
 
+@pytest.mark.unit
+def test_proximal_distal_orchestrators_need_no_issue_8963_exceptions() -> None:
+    repo_root = Path(__file__).resolve().parents[3]
+    config = mod._load_config(
+        repo_root, Path("scripts/config/architecture_budget.json")
+    )
+
+    issue_exceptions = [
+        exception
+        for exception in config["exceptions"]
+        if exception.get("issue") == 8963
+    ]
+
+    assert issue_exceptions == []
+
+
 def test_main_fails_when_changed_production_file_exceeds_budget(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
