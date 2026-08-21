@@ -39,11 +39,14 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from src.shared.python.analysis.cross_engine import (
+    BACKEND_STUB as _BACKEND_STUB,
     ENGINE_NAMES as _ENGINE_NAMES,
     build_engine,
     cv_values as _cv_values,
+    per_engine_robustness as _per_engine_robustness,
     robustness_score as _robustness_score,
-    run_comparison_with_results as _run_with_results,
+    run_comparison_with_provenance as _run_with_provenance,
+    substituted_engines as _substituted_engines,
     try_build_real_engine as _try_build_real_engine,
 )
 from src.shared.python.pendulum_simulator.cross_engine_perturbation import (
@@ -125,14 +128,28 @@ def _engine_convention(name: str) -> dict[str, str]:
     return _ENGINE_CONVENTIONS.get(name, _DEFAULT_ENGINE_CONVENTION)
 
 
-def _format_engine_result_label(name: str) -> str:
-    """Return the comparison label with velocity convention and units."""
+def _is_substituted_stub(name: str, backend: str | None) -> bool:
+    """True when a requested real engine silently ran as the 2-DOF stub."""
+    return backend == _BACKEND_STUB and name != "pendulum_stub"
+
+
+def _format_engine_result_label(name: str, backend: str | None = None) -> str:
+    """Return the comparison label with velocity convention and units.
+
+    A stub-backed series is never labeled as the real engine (#8817): when
+    ``backend`` reports a stub substitution the label says so and does not
+    claim the real engine's conventions.
+    """
+    if _is_substituted_stub(name, backend):
+        return f"{name} (unavailable — stub)\nsynthetic 2-DOF stub output"
     convention = _engine_convention(name)
     return f"{name}\nvelocity: {convention['velocity']}; units: {convention['units']}"
 
 
-def _format_engine_result_log_label(name: str) -> str:
+def _format_engine_result_log_label(name: str, backend: str | None = None) -> str:
     """Return a single-line result label for logs and status text."""
+    if _is_substituted_stub(name, backend):
+        return f"{name} [UNAVAILABLE — ran as synthetic 2-DOF stub]"
     convention = _engine_convention(name)
     return f"{name} [velocity: {convention['velocity']}; units: {convention['units']}]"
 
@@ -375,13 +392,20 @@ def _run_headless(
     Pre:  config is a valid CrossEngineSimConfig
     Post: returns a dict with the three CV keys
     """
-    results, cv_summary = _run_with_results(engine_names, config)
+    results, cv_summary, backends = _run_with_provenance(engine_names, config)
 
+    substituted = _substituted_engines(backends)
+    if substituted:
+        logger.warning(
+            "Engines %s are unavailable — results below are synthetic 2-DOF "
+            "stub output, NOT real engine physics",
+            substituted,
+        )
     logger.info("=== Cross-Engine Perturbation Comparison Results ===")
     for eng_name, result in results.items():
         logger.info(
             "  %s: mean_energy=%.4f, mean_speed=%.4f, mean_peak=%.4f",
-            _format_engine_result_log_label(eng_name),
+            _format_engine_result_log_label(eng_name, backends.get(eng_name)),
             result.mean_total_energy_final,
             result.mean_end_effector_speed_final,
             result.mean_peak_end_effector_speed,
@@ -477,35 +501,61 @@ def _draw_bar_value_labels(
         )
 
 
+_AGGREGATE_ROBUSTNESS_LABEL = "aggregate\n(all selected engines)"
+
+
+def _robustness_chart_series(
+    engine_names: list[str],
+    cv_summary: dict[str, float],
+    backends: dict[str, str] | None = None,
+    robustness_per_engine: dict[str, float] | None = None,
+) -> tuple[list[str], list[float]]:
+    """Return honest (labels, values) for the robustness chart (#8816, #8817).
+
+    Design by Contract
+    ------------------
+    Post: an aggregate score is never replicated across per-engine bars —
+    when genuine per-engine scores are unavailable the chart collapses to
+    a single clearly-labeled aggregate bar. Stub-backed engines are
+    labeled as substitutions, never as the real engine.
+    """
+    if robustness_per_engine:
+        backends = backends or {}
+        labels = [
+            _format_engine_result_label(name, backends.get(name))
+            for name in engine_names
+        ]
+        values = [robustness_per_engine.get(name, 0.0) for name in engine_names]
+        return labels, values
+    return [_AGGREGATE_ROBUSTNESS_LABEL], [_robustness_score(_cv_values(cv_summary))]
+
+
 def _draw_robustness_chart(
     ax: Any,
     canvas: Any,
     colors: Any,
-    engine_names: list[str],
-    robustness_per_engine: list[float],
+    bar_labels: list[str],
+    robustness_values: list[float],
     style_ax: Any,
 ) -> None:
     """Draw the robustness score chart on the supplied axes/canvas."""
     ax.clear()
     ax.set_facecolor("#1a1a2e")
-    x = np.arange(len(engine_names))
+    x = np.arange(len(bar_labels))
     bars = ax.bar(
         x,
-        robustness_per_engine,
+        robustness_values,
         color="#5555b0",
         edgecolor="#303070",
         width=0.5,
     )
     ax.set_xticks(x)
-    ax.set_xticklabels(
-        [_format_engine_result_label(name) for name in engine_names],
-        fontsize=8,
-    )
+    ax.set_xticklabels(bar_labels, fontsize=8)
     ax.set_ylim(0.0, 1.0)
     ax.set_ylabel("Robustness Score", fontsize=9)
     ax.axhline(0.5, color="#ff6060", linewidth=0.8, linestyle="--")
     style_ax(ax, colors)
-    _draw_bar_value_labels(ax, bars, robustness_per_engine, y_offset=0.02, fmt="{:.2f}")
+    _draw_bar_value_labels(ax, bars, robustness_values, y_offset=0.02, fmt="{:.2f}")
     canvas.draw()
 
 
@@ -540,9 +590,16 @@ def _create_comparison_worker_class(qt: Any) -> type:
     """Build the QRunnable worker class against the lazy Qt bindings."""
 
     class ComparisonWorkerSignals(qt.QObject):
-        """Signals for the ComparisonWorker."""
+        """Signals for the ComparisonWorker.
 
-        finished = qt.pyqtSignal(list, dict, dict)
+        ``finished`` carries (engine_names, cv_summary, trajectories,
+        backends, robustness_per_engine) — backends tag each engine
+        ``real`` / ``stub_2dof`` so the charts can disclose stub
+        substitution (#8817), and robustness_per_engine carries genuine
+        per-engine scores (#8816).
+        """
+
+        finished = qt.pyqtSignal(list, dict, dict, dict, dict)
         error = qt.pyqtSignal(str)
 
     class ComparisonWorker(qt.QRunnable):
@@ -559,9 +616,14 @@ def _create_comparison_worker_class(qt: Any) -> type:
         def run(self) -> None:
             """Execute comparison and emit results."""
             try:
-                results, cv_summary = _run_with_results(self.engine_names, self.config)
+                results, cv_summary, backends = _run_with_provenance(
+                    self.engine_names, self.config
+                )
                 trajectories = _trial_zero_trajectories(results)
-                self.signals.finished.emit(self.engine_names, cv_summary, trajectories)
+                robustness = _per_engine_robustness(results)
+                self.signals.finished.emit(
+                    self.engine_names, cv_summary, trajectories, backends, robustness
+                )
             except Exception as e:  # noqa: BLE001
                 self.signals.error.emit(str(e))
 
@@ -732,7 +794,7 @@ class _DashboardChartPanelMixin(_DashboardThemeMixin):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(6)
         c = self._get_theme_colors()
-        self._add_chart_group(layout, "Robustness Score (1 − CV, per engine)", "rs", c)
+        self._add_chart_group(layout, "Robustness Score (1 − CV)", "rs", c)
         self._add_chart_group(layout, "Coefficient of Variation per Metric", "cv", c)
         self._add_chart_group(
             layout, "Trajectory Overlay (per-engine, plot_style)", "tr", c
@@ -772,7 +834,11 @@ class _DashboardRunMixin:
     _thread_pool: Any
 
     def _update_charts(
-        self, engine_names: list[str], cv_summary: dict[str, float]
+        self,
+        engine_names: list[str],
+        cv_summary: dict[str, float],
+        backends: dict[str, str] | None = None,
+        robustness_per_engine: dict[str, float] | None = None,
     ) -> None: ...
     def _update_trajectory_overlay(
         self, trajectories: dict[str, np.ndarray]
@@ -809,11 +875,19 @@ class _DashboardRunMixin:
         engine_names: list[str],
         cv_summary: dict[str, float],
         trajectories: dict[str, np.ndarray] | None = None,
+        backends: dict[str, str] | None = None,
+        robustness_per_engine: dict[str, float] | None = None,
     ) -> None:
         """Handle successful comparison completion."""
-        self._update_charts(engine_names, cv_summary)
+        self._update_charts(engine_names, cv_summary, backends, robustness_per_engine)
         self._update_trajectory_overlay(trajectories or {})
-        self._status_label.setText("Done")
+        substituted = _substituted_engines(backends or {})
+        if substituted:
+            self._status_label.setText(
+                f"Done — {', '.join(substituted)} unavailable (stub used)"
+            )
+        else:
+            self._status_label.setText("Done")
         self._run_btn.setEnabled(True)
 
     def _on_comparison_error(self, error_msg: str) -> None:
@@ -842,20 +916,28 @@ class _DashboardChartUpdateMixin(_DashboardThemeMixin):
         self,
         engine_names: list[str],
         cv_summary: dict[str, float],
+        backends: dict[str, str] | None = None,
+        robustness_per_engine: dict[str, float] | None = None,
     ) -> None:
-        """Refresh Robustness Score and CV charts from the latest results."""
+        """Refresh Robustness Score and CV charts from the latest results.
+
+        Charts genuine per-engine robustness when available; otherwise a
+        single clearly-labeled aggregate bar (#8816). Stub-substituted
+        engines are labeled as such (#8817).
+        """
         if not self._mpl.has_mpl or not engine_names:
             return
         colors = self._get_theme_colors()
         values = _cv_values(cv_summary)
-        robustness = _robustness_score(values)
-        robustness_per_engine = [robustness] * len(engine_names)
+        bar_labels, bar_values = _robustness_chart_series(
+            engine_names, cv_summary, backends, robustness_per_engine
+        )
         _draw_robustness_chart(
             self._ax_rs,
             self._canvas_rs,
             colors,
-            engine_names,
-            robustness_per_engine,
+            bar_labels,
+            bar_values,
             self._style_ax,
         )
         _draw_cv_chart(self._ax_cv, self._canvas_cv, colors, values, self._style_ax)
