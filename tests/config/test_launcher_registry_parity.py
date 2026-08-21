@@ -120,13 +120,14 @@ class TestRegistryParity:
 class TestRegistryHygiene:
     def test_tiles_endpoint_excludes_hidden_aliases(self) -> None:
         """GET /launcher/tiles must not leak hidden tiles (issue #8863)."""
+        from src.api.launcher_manifest_cache import invalidate_manifest_cache
         from src.api.routes import launcher as launcher_routes
 
-        launcher_routes._launcher_state["manifest"] = None
+        invalidate_manifest_cache()
         try:
             tiles = asyncio.run(launcher_routes.get_tiles())
         finally:
-            launcher_routes._launcher_state["manifest"] = None
+            invalidate_manifest_cache()
         leaked = [t["id"] for t in tiles if t.get("hidden")]
         assert not leaked, f"hidden tiles leaked by /launcher/tiles: {leaked}"
         ids = {t["id"] for t in tiles}
