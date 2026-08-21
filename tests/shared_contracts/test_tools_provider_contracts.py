@@ -2,11 +2,14 @@ from __future__ import annotations
 
 import contextlib
 import importlib
+import json
 import sys
 from collections.abc import Iterator
+from hashlib import sha256
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 
 def _normalized_path(value: str) -> str:
@@ -123,3 +126,64 @@ def test_sidekick_imports_resolve_from_tools_provider() -> None:
         manager = state_manager.StateManager()
         manager.save_state("test_key", {"test_key": "test_value"})
         assert manager.load_state("test_key") == {"test_key": "test_value"}
+
+
+@pytest.mark.integration
+def test_rotating_base_provider_retains_complete_qualified_authority() -> None:
+    """The pinned Tools provider must retain every scientific boundary."""
+    with _fresh_provider_import("swing_sim"):
+        module = importlib.import_module("shared.python.swing_sim.rotating_base")
+        module_path = Path(module.__file__).resolve()
+        _assert_from_tools(module_path)
+
+        assert module.EXPECTED_UPSTREAM_SOURCE_REVISION == (
+            "967c40f54cc03f8cae89cde09268d62771d220fe"
+        )
+        assert module.EXPECTED_STUDY_SHA256 == (
+            "e6a55e6cf91e51f21fe3eb8bcb07b990a7798f18abcaf5ca73f5214cb6c5f9ec"
+        )
+        assert module.EXPECTED_RUN_CATALOG_SHA256 == (
+            "66493b833955c6492a00eae4a600df795df60a6f473f9a11c403084b58e51678"
+        )
+        assert module.MODEL_TIER == ("planar_rotating_base_two_hand_compliant_club")
+
+        study = module.load_embedded_qualified_study().study
+        assert study.attempted_case_count == 18
+        assert study.valid_case_count == 13
+        assert [case.case_index for case in study.cases if not case.valid] == [
+            6,
+            7,
+            8,
+            15,
+            16,
+        ]
+        assert study.human_coaching_supported is False
+
+        catalog_path = (
+            module_path.parent / "resources" / "rotating_base_registered_runs_v1.json"
+        )
+        catalog_text = catalog_path.read_text(encoding="utf-8").rstrip("\n")
+        assert sha256(catalog_text.encode("utf-8")).hexdigest() == (
+            module.EXPECTED_RUN_CATALOG_SHA256
+        )
+        catalog = json.loads(catalog_text)
+        assert catalog["attempted_run_count"] == 18
+        assert catalog["source_revision"] == module.EXPECTED_UPSTREAM_SOURCE_REVISION
+        assert catalog["study_sha256"] == module.EXPECTED_STUDY_SHA256
+        assert [run["request"]["case_index"] for run in catalog["runs"]] == list(
+            range(18)
+        )
+        assert [
+            run["case"]["case_index"]
+            for run in catalog["runs"]
+            if not run["case"]["valid"]
+        ] == [6, 7, 8, 15, 16]
+        assert all(
+            run["boundaries"]
+            == {
+                "coaching_recommendation": "unsupported",
+                "coordinate_semantics": "nonanatomical_model_coordinate",
+                "human_validation": "unavailable",
+            }
+            for run in catalog["runs"]
+        )

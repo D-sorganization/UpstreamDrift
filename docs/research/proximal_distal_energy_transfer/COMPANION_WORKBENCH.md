@@ -10,9 +10,9 @@ physiological inference.
 ## One Shared Implementation
 
 The canonical implementation is maintained in the
-[Tools pendulum simulator](https://github.com/D-sorganization/Tools/tree/main/src/pendulum_simulator).
+[Tools pendulum simulator](https://github.com/D-sorganization/Tools/tree/1664d806df8a2c7b184d2d3fbcea93b714caaee5/src/pendulum_simulator).
 Both the PyQt6 desktop interface and the React/Tauri interface consume the same
-[experiment and glossary catalog](https://github.com/D-sorganization/Tools/blob/main/src/pendulum_simulator/src/double_pendulum_golf/resources/companion_catalog.json).
+[experiment and glossary catalog](https://github.com/D-sorganization/Tools/blob/1664d806df8a2c7b184d2d3fbcea93b714caaee5/src/pendulum_simulator/src/double_pendulum_golf/resources/companion_catalog.json).
 UpstreamDrift launches that provider and pins an immutable Tools revision in
 `vendor/ud-tools`; it does not maintain another copy of the companion logic.
 
@@ -21,13 +21,36 @@ its purpose, hypothesis, observables, workflow, interpretation tips, falsifier,
 and limitations. Run manifests also record the catalog version, model,
 experiment, parameters, units, and `exploratory_model_output` evidence status.
 
-The publication bundle also exposes the qualified
-`rotating_base_torso_velocity` scripted preset. Its seven-coordinate constrained
-model and registered grid are currently article-side reproducible analyses, not
-yet a workbench physics engine. A future GUI adapter must consume the same
-machine-readable evidence and preserve matching-rule, validity, and claim-tier
-labels; it must not substitute the existing fixed-hub proximal coordinate and
-call it torso velocity.
+The publication bundle and the pinned workbench now expose the qualified
+`rotating_base_torso_velocity` tier through one source implementation. Its
+seven-coordinate constrained model drives the registered 18-run catalog used by
+the PyQt6 and React/Tauri reviewer surfaces. The catalog retains all five adverse
+rows, both matching rules, the three torso-command programs, full traces, and
+the declared scientific-promotion boundaries. The interfaces must not substitute
+the existing fixed-hub proximal coordinate and call it anatomical torso velocity.
+
+## Immutable Consumer Qualification
+
+UpstreamDrift consumes Tools merge
+`1664d806df8a2c7b184d2d3fbcea93b714caaee5`. That provider is itself pinned to
+the qualified UpstreamDrift study revision
+`967c40f54cc03f8cae89cde09268d62771d220fe`. The semantic study digest is
+`e6a55e6cf91e51f21fe3eb8bcb07b990a7798f18abcaf5ca73f5214cb6c5f9ec`; the
+complete run-catalog digest is
+`66493b833955c6492a00eae4a600df795df60a6f473f9a11c403084b58e51678`.
+
+The cross-repository contract test loads the public Tools façade from the exact
+gitlink, verifies these authorities, retains case indices 0 through 17 and the
+adverse indices 6, 7, 8, 15, and 16, and requires every exported run to declare
+nonanatomical coordinates, unavailable human validation, and unsupported
+coaching interpretation:
+
+```bash
+python3 -m pytest tests/shared_contracts/test_tools_provider_contracts.py \
+  tests/launchers/test_tools_vendor_authority.py \
+  tests/launchers/test_launcher_model_sources.py \
+  --tools-mode vendored -n 0 -q
+```
 
 ## Running the Desktop Interface
 

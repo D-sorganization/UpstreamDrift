@@ -501,8 +501,8 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.565                                            |
-| **Last Spec Update**    | 2026-08-20                                         |
+| **Spec Version**        | 1.0.566                                            |
+| **Last Spec Update**    | 2026-08-21                                         |
 
 ## 2. Purpose & Mission
 
@@ -532,6 +532,20 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ## 4. Architecture Overview
 
 ### Recent Spec Updates
+
+- **2026-08-21** - Pinned the proximal--distal companion consumer to protected
+  Tools merge `1664d806df8a2c7b184d2d3fbcea93b714caaee5`. The launcher authority
+  and gitlink now agree on one immutable provider, and the pendulum-simulator
+  launcher is included in the Tools-source contract. Cross-repository
+  qualification verifies the complete ordered 18-run rotating-base catalog,
+  its 13 valid cases and adverse indices 6/7/8/15/16, the exact qualified-study
+  and catalog digests, and every run's nonanatomical-coordinate,
+  unavailable-human-validation, and unsupported-coaching boundaries. No solver
+  or catalog is copied into UpstreamDrift, and this transport qualification does
+  not promote the model to anatomical, empirical, or coaching evidence. The
+  standalone package build now retains a 30-minute execution budget so a cold
+  pinned-Tools checkout, frontend build, wheel-content gate, and artifact upload
+  can complete without the previous 15-minute timeout canceling a valid upload.
 
 - **2026-08-20** - Added attested session-unit longitudinal analysis under
   contract `launch-monitor-longitudinal-session/1.0.0`. Trusted, distinct
@@ -3132,6 +3146,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-21 | 1.0.566 | Pinned the protected Tools #4430 rotating-base companion at `1664d806df8a2c7b184d2d3fbcea93b714caaee5` and added a fail-closed UpstreamDrift consumer contract for its ordered 18-run catalog, immutable source/study/catalog digests, 13 valid cases, five adverse cases, typed limitations, and unsupported human/coaching inference. The package workflow now reserves 30 minutes for a cold Tools checkout, frontend/Python build, verified wheel-content gate, and large artifact upload. Its unnecessary setup-node npm cache is disabled because measured `npm ci` takes seconds while post-job cache upload alone could consume the remaining job budget after the verified wheel uploaded successfully. |
 | 2026-08-21 | 1.0.565 | Quantized only the conformance golden-snapshot serialization boundary to eight significant digits so platform-specific floating-point tails cannot change the longitudinal and confidence-interval scenario or bundle hashes. The analytics computations and result contracts remain unchanged. |
 | 2026-08-21 | 1.0.564 | Added the data-free `launch-monitor-analytics-conformance/1.0.0` consumer bundle. Ten deterministic synthetic cases span available and structured-unavailable analysis v2, player covariation, attested longitudinal sessions, source-backed strokes gained, and distance/target proxy results. Uniform wrappers retain units, claims, player/session/order evidence, exclusions, source references, source-joinable backing hashes, scenario hashes, and a canonical bundle SHA without embedding private or observed input rows. Generated JSON Schema and golden JSON share the strict Python authority; analytics behavior and v1/v2 result contracts remain unchanged. |
 | 2026-08-20 | 1.0.563 | Added the canonical `launch-monitor-longitudinal-session/1.0.0` contract for #8808. Trusted and distinct player, session, and order evidence is mandatory. Shots aggregate into equal-weight player/session/stratum cells before per-player descriptive slopes and pooled player-fixed-effects OLS with player-clustered CR1 uncertainty. Missing/non-finite rows, blank identities, nonconstant session order, insufficient sessions or clusters, rank deficiency, and degenerate uncertainty are explicit unavailable states. Complete source-linked backing and missingness remain present, while shot-level inference and causal improvement are false. JSON Schema, a content-addressed golden source, FastAPI routes, generated declarations, ADR 0039, and tests share the Python authority. |

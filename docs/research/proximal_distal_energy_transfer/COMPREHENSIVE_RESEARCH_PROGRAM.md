@@ -109,11 +109,15 @@ studies such as [Choi and Park](https://mdpi-res.com/d_attachment/sensors/sensor
 and [Koike](https://ojs.ub.uni-konstanz.de/cpa/article/download/6828/6125)
 inform acquisition design but are not participant-level deposits satisfying
 the frozen contract. Synthetic traces and paper-level summary curves are
-prohibited substitutes. The companion GUI is tracked by Tools
-[#4430](https://github.com/D-sorganization/Tools/issues/4430), stacked after
-consolidated PR [#4450](https://github.com/D-sorganization/Tools/pull/4450).
-PR #4411 was intentionally closed as superseded;
-unchanged CI must not be redundantly rerun.
+prohibited substitutes. Tools
+[#4430](https://github.com/D-sorganization/Tools/issues/4430) delivered its
+qualified provider and matched PyQt6/React reviewer surfaces through protected
+PRs [#4618](https://github.com/D-sorganization/Tools/pull/4618) and
+[#4619](https://github.com/D-sorganization/Tools/pull/4619). UpstreamDrift pins
+the resulting merge `1664d806df8a2c7b184d2d3fbcea93b714caaee5` and verifies
+the complete 18-run catalog without copying its solver. The companion issue
+remains open until that consumer revision passes protected UpstreamDrift merge
+and remote-main verification.
 
 ## Research Collection Review
 

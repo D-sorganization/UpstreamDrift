@@ -94,6 +94,26 @@ def test_package_workflow_selects_one_exact_wheel() -> None:
     assert "dist/*.whl" not in PACKAGE_WORKFLOW.read_text(encoding="utf-8")
 
 
+def test_package_workflow_preserves_time_for_verified_artifact_upload() -> None:
+    """Cold provider builds must not time out after verification but before upload."""
+    workflow = _load_workflow(PACKAGE_WORKFLOW)
+
+    assert workflow["jobs"]["build-wheel"]["timeout-minutes"] >= 30
+
+
+def test_package_workflow_does_not_cache_the_fast_frontend_install() -> None:
+    """A post-job npm cache upload must not consume the artifact-upload budget."""
+    workflow = _load_workflow(PACKAGE_WORKFLOW)
+    setup_node = next(
+        step
+        for step in workflow["jobs"]["build-wheel"]["steps"]
+        if step.get("name") == "Setup Node.js"
+    )
+
+    assert "cache" not in setup_node["with"]
+    assert "cache-dependency-path" not in setup_node["with"]
+
+
 def test_release_workflow_has_queue_protection_and_timeouts() -> None:
     """Release workflow jobs must follow the repo queue-saturation guardrails."""
     content = RELEASE_WORKFLOW.read_text(encoding="utf-8")

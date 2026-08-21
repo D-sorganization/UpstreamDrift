@@ -25,6 +25,7 @@ TOOLS_MODEL_IDS = (
     "video_processor",
     "data_explorer",
     "data_processor",
+    "pendulum_simulator",
     "rate_of_closure",
 )
 
