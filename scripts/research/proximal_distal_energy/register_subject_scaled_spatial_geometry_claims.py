@@ -142,13 +142,12 @@ def _claim(
     }
 
 
-def main() -> None:
-    registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
-    inventory = json.loads(INVENTORY.read_text(encoding="utf-8"))
-    candidates = inventory["candidates"]
-    current_ids = {candidate["candidate_id"] for candidate in candidates}
+def _candidate_replacements(
+    candidates: list[dict[str, Any]],
+) -> dict[str, str]:
+    """Map stale candidate identifiers to the current paper inventory."""
 
-    replacements = {
+    return {
         "PD-CAND-1dc21a34f8948a6c": _find(
             candidates, "proximal_distal_energy_transfer.qmd", "Proximal-to-distal"
         )["candidate_id"],
@@ -178,6 +177,16 @@ def main() -> None:
             "| Drift contribution |",
         )["candidate_id"],
     }
+
+
+def _prepare_registry(
+    registry: dict[str, Any],
+    candidates: list[dict[str, Any]],
+    replacements: dict[str, str],
+) -> None:
+    """Remove stale candidate and owned-claim mappings before regeneration."""
+
+    current_ids = {candidate["candidate_id"] for candidate in candidates}
     registry["candidate_reviews"] = [
         review
         for review in registry["candidate_reviews"]
@@ -203,108 +212,103 @@ def main() -> None:
         claim for claim in registry["claims"] if claim["claim_id"] not in NEW_CLAIM_IDS
     ]
 
-    abstract = _find(
-        candidates, "proximal_distal_energy_transfer.qmd", "Proximal-to-distal"
-    )
-    premise = _find(
-        candidates,
-        "_ch06c_spatial_cross_formulation.qmd",
-        "The common-state result still leaves a more basic geometric question",
-    )
-    design = _find(
-        candidates,
-        "_ch06c_spatial_cross_formulation.qmd",
-        "A deterministic atlas scales",
-    )
-    result = _find(
-        candidates,
-        "_ch06c_spatial_cross_formulation.qmd",
-        "The adverse result is unambiguous.",
-    )
-    rank = _find(
-        candidates,
-        "_ch06c_spatial_cross_formulation.qmd",
-        "The point-force measurement map retains rank five",
-    )
-    next_gate = _find(
-        candidates,
-        "_ch06c_spatial_cross_formulation.qmd",
-        "This is a right-censored synthetic result",
-    )
-    closed_design = _find(
-        candidates,
-        "_ch06c_spatial_cross_formulation.qmd",
-        "The next registered rung solves rather than prescribes",
-    )
-    closed_result = _find(
-        candidates,
-        "_ch06c_spatial_cross_formulation.qmd",
-        "All 234 registered samples close both contacts.",
-    )
-    closed_boundary = _find(
-        candidates,
-        "_ch06c_spatial_cross_formulation.qmd",
-        "Those favorable checks remain a necessary-condition result.",
-    )
-    closed_synthesis = _find(
-        candidates,
-        "_ch08b_momentum_transfer_questions.qmd",
-        "The bounded inverse-kinematics follow-up separates",
-    )
-    bridge_design = _find(
-        candidates,
-        "_ch06c_spatial_cross_formulation.qmd",
-        "The closed configurations now enter",
-    )
-    bridge_mapping = _find(
-        candidates,
-        "_ch06c_spatial_cross_formulation.qmd",
-        "All 234 position mappings retain",
-    )
-    bridge_forward = _find(
-        candidates,
-        "_ch06c_spatial_cross_formulation.qmd",
-        "A spanning subset advances",
-    )
-    bridge_boundary = _find(
-        candidates,
-        "_ch06c_spatial_cross_formulation.qmd",
-        "This is an initialization and short-horizon",
-    )
-    conclusion = _find(
-        candidates,
-        "_ch09_conclusions.qmd",
-        "The subject-scaled contact-closure audit rejects",
-    )
-    scap_design = _find(
-        candidates,
-        "_ch06cb_spatial_cross_tail.qmd",
-        "The fixed shoulder centers are the next explicit structural intervention.",
-    )
-    scap_result = _find(
-        candidates,
-        "_ch06cb_spatial_cross_tail.qmd",
-        "No fixed-shoulder arm-only state reaches",
-    )
-    scap_rank = _find(
-        candidates,
-        "_ch06cb_spatial_cross_tail.qmd",
-        "Both paired contact Jacobians have rank six",
-    )
-    scap_boundary = _find(
-        candidates,
-        "_ch06cb_spatial_cross_tail.qmd",
-        "This result advances the model ladder without identifying a human mechanism.",
-    )
-    scap_conclusion = _find(
-        candidates,
-        "_ch09_conclusions.qmd",
-        "A paired arm-only intervention now isolates one omitted structure.",
-    )
-    claims = [
+
+def _selected_passages(
+    candidates: list[dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    """Resolve every passage owned by the subject-scaled audit."""
+
+    spatial = "_ch06c_spatial_cross_formulation.qmd"
+    tail = "_ch06cb_spatial_cross_tail.qmd"
+    return {
+        "abstract": _find(
+            candidates, "proximal_distal_energy_transfer.qmd", "Proximal-to-distal"
+        ),
+        "premise": _find(
+            candidates,
+            spatial,
+            "The common-state result still leaves a more basic geometric question",
+        ),
+        "design": _find(candidates, spatial, "A deterministic atlas scales"),
+        "result": _find(candidates, spatial, "The adverse result is unambiguous."),
+        "rank": _find(
+            candidates, spatial, "The point-force measurement map retains rank five"
+        ),
+        "next_gate": _find(
+            candidates, spatial, "This is a right-censored synthetic result"
+        ),
+        "closed_design": _find(
+            candidates,
+            spatial,
+            "The next registered rung solves rather than prescribes",
+        ),
+        "closed_result": _find(
+            candidates, spatial, "All 234 registered samples close both contacts."
+        ),
+        "closed_boundary": _find(
+            candidates,
+            spatial,
+            "Those favorable checks remain a necessary-condition result.",
+        ),
+        "closed_synthesis": _find(
+            candidates,
+            "_ch08b_momentum_transfer_questions.qmd",
+            "The bounded inverse-kinematics follow-up separates",
+        ),
+        "bridge_design": _find(
+            candidates, spatial, "The closed configurations now enter"
+        ),
+        "bridge_mapping": _find(
+            candidates, spatial, "All 234 position mappings retain"
+        ),
+        "bridge_forward": _find(candidates, spatial, "A spanning subset advances"),
+        "bridge_boundary": _find(
+            candidates, spatial, "This is an initialization and short-horizon"
+        ),
+        "conclusion": _find(
+            candidates,
+            "_ch09_conclusions.qmd",
+            "The subject-scaled contact-closure audit rejects",
+        ),
+        "scap_design": _find(
+            candidates,
+            tail,
+            "The fixed shoulder centers are the next explicit structural intervention.",
+        ),
+        "scap_result": _find(
+            candidates, tail, "No fixed-shoulder arm-only state reaches"
+        ),
+        "scap_rank": _find(
+            candidates, tail, "Both paired contact Jacobians have rank six"
+        ),
+        "scap_boundary": _find(
+            candidates,
+            tail,
+            "This result advances the model ladder without identifying a human mechanism.",
+        ),
+        "scap_conclusion": _find(
+            candidates,
+            "_ch09_conclusions.qmd",
+            "A paired arm-only intervention now isolates one omitted structure.",
+        ),
+    }
+
+
+def _prescribed_and_closed_claims(
+    selected: dict[str, dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Build prescribed-state and closed-contact geometry claims."""
+
+    return [
         _claim(
             "PD-CLAIM-260",
-            [abstract, premise, design, result, conclusion],
+            [
+                selected["abstract"],
+                selected["premise"],
+                selected["design"],
+                selected["result"],
+                selected["conclusion"],
+            ],
             statement="Across six deterministic de Leva design profiles, three grip spans, and 61 prescribed states, anatomical hand points miss the declared grips by 0.171--0.616 m even though every local bilateral contact Jacobian has rank six and condition number 5.35--6.40.",
             classification="subject_scaled_spatial_contact_closure_audit",
             status="prescribed_states_rejected_as_anatomical_contact_configurations",
@@ -313,7 +317,7 @@ def main() -> None:
         ),
         _claim(
             "PD-CLAIM-261",
-            [rank],
+            [selected["rank"]],
             statement="The two-point force map retains rank five and one axial null mode, axial augmentation restores rank six, and the prescribed force couple scales linearly with grip span; these controls do not establish anatomical contact feasibility.",
             classification="contact_geometry_and_measurement_rank_controls",
             status="supported_for_declared_prescribed_point_force_geometry",
@@ -322,7 +326,7 @@ def main() -> None:
         ),
         _claim(
             "PD-CLAIM-262",
-            [next_gate],
+            [selected["next_gate"]],
             statement="The bounded articulated attachment screen advances closed states through 5 ms with independent-engine controls, but timing, recovery, and slack claims still require longer calibrated forward contact with typed unilateral loss and distributed structure.",
             classification="articulated_spatial_completion_gate",
             status="bounded_articulated_attachment_forward_gate_complete_longer_calibrated_contact_open",
@@ -331,7 +335,13 @@ def main() -> None:
         ),
         _claim(
             "PD-CLAIM-263",
-            [abstract, closed_design, closed_result, closed_synthesis, conclusion],
+            [
+                selected["abstract"],
+                selected["closed_design"],
+                selected["closed_result"],
+                selected["closed_synthesis"],
+                selected["conclusion"],
+            ],
             statement="All 234 registered profile, grip-span, and phase configurations close both point contacts while holding the club pose fixed; every achieved constraint Jacobian has rank six, the worst closure residual is 1.16e-10 m, the minimum engineering-limit margin is 0.103 rad, and the minimum coarse collision clearance is 30.9 mm.",
             classification="subject_scaled_closed_contact_inverse_kinematics_screen",
             status="supported_in_declared_reduced_tree",
@@ -341,7 +351,12 @@ def main() -> None:
         ),
         _claim(
             "PD-CLAIM-264",
-            [closed_boundary, next_gate, closed_synthesis, conclusion],
+            [
+                selected["closed_boundary"],
+                selected["next_gate"],
+                selected["closed_synthesis"],
+                selected["conclusion"],
+            ],
             statement="Closed-contact inverse kinematics is a necessary geometric gate and does not establish anatomy, contact force, work, passivity, timing demand, self-correction, slack benefit, or human strategy.",
             classification="closed_contact_inference_boundary",
             status="explicitly_bounded",
@@ -349,9 +364,22 @@ def main() -> None:
             falsifier="A force, transfer, timing, slack, or human claim is attributed to this inverse-kinematics evidence alone.",
             model_domain="Reduced-tree inverse-kinematics and screening outputs only.",
         ),
+    ]
+
+
+def _scapular_claims(
+    selected: dict[str, dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Build scapular reachability, identifiability, and boundary claims."""
+
+    return [
         _claim(
             "PD-CLAIM-265",
-            [scap_design, scap_result, scap_conclusion],
+            [
+                selected["scap_design"],
+                selected["scap_result"],
+                selected["scap_conclusion"],
+            ],
             statement="With trunk and club pose fixed across 54 paired arm-only states, fixed shoulder centers close 0 states, while the scapula-on-ellipsoid surrogate reaches the 0.5 mm residual in 31 states and also satisfies solver termination in 16; 28 states activate a bound, maximum shoulder-center excursion is 0.101 m, and the 2.0 m adverse span fails at 0.480 m residual.",
             classification="scapulothoracic_contact_geometry_screen",
             status="partial_closure_with_numerical_and_range_boundaries",
@@ -361,7 +389,7 @@ def main() -> None:
         ),
         _claim(
             "PD-CLAIM-266",
-            [scap_rank, scap_conclusion],
+            [selected["scap_rank"], selected["scap_conclusion"]],
             statement="Both paired contact Jacobians have rank six, but adding eight scapular coordinates increases local coordinate nullity from two to ten, so bilateral contact position does not identify scapular and glenohumeral allocation.",
             classification="scapular_glenohumeral_geometric_nonidentifiability",
             status="supported_in_declared_local_linearization",
@@ -371,7 +399,11 @@ def main() -> None:
         ),
         _claim(
             "PD-CLAIM-267",
-            [scap_design, scap_boundary, scap_conclusion],
+            [
+                selected["scap_design"],
+                selected["scap_boundary"],
+                selected["scap_conclusion"],
+            ],
             statement="The scapula-on-ellipsoid intervention is informed by, but does not reproduce, an articulated scapulothoracic model and cannot establish anatomy, muscle action, contact force, power, work, passivity, tissue load, club delivery, or human strategy.",
             classification="scapulothoracic_surrogate_inference_boundary",
             status="explicitly_bounded",
@@ -379,9 +411,16 @@ def main() -> None:
             falsifier="Any anatomical, muscular, transfer, or strategy conclusion is attributed to this reduced geometry screen alone.",
             model_domain="Reduced scapula-on-ellipsoid kinematic surrogate only.",
         ),
+    ]
+
+
+def _forward_claims(selected: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
+    """Build closed-state mapping, transport, and boundary claims."""
+
+    return [
         _claim(
             "PD-CLAIM-268",
-            [bridge_design, bridge_mapping],
+            [selected["bridge_design"], selected["bridge_mapping"]],
             statement="All 234 subject-scaled closed states map into the engine-neutral forward-contact coordinates with maximum position and velocity closure errors of 1.16e-10 m and 1.29 mm/s, respectively, and exact closure creates zero contact preload.",
             classification="closed_state_forward_initialization_mapping",
             status="supported_for_declared_reduced_mapping",
@@ -391,7 +430,7 @@ def main() -> None:
         ),
         _claim(
             "PD-CLAIM-269",
-            [bridge_forward],
+            [selected["bridge_forward"]],
             statement="MuJoCo and Pinocchio receive identical digested initial states and pass the existing trajectory, contact-wrench, and normalized-energy transport gates for all 54 profile-span-phase cases in the 4 ms spanning initialization audit while sharing the projected contact law and state update.",
             classification="closed_state_short_horizon_inertia_bias_transport_audit",
             status="supported_for_declared_reduced_short_horizon_subset",
@@ -401,7 +440,7 @@ def main() -> None:
         ),
         _claim(
             "PD-CLAIM-270",
-            [bridge_boundary, next_gate],
+            [selected["bridge_boundary"], selected["next_gate"]],
             statement="The closed-state bridge removes an initialization gap but does not establish calibrated equipment, articulated anatomical dynamics, tissue loading, passive transfer, delivery benefit, slack benefit, or human strategy.",
             classification="closed_state_forward_bridge_inference_boundary",
             status="explicitly_bounded",
@@ -410,6 +449,13 @@ def main() -> None:
             model_domain="Coordinate mapping, constitutive controls, and 4 ms reduced forward initialization only.",
         ),
     ]
+
+
+def _register_claim_reviews(
+    registry: dict[str, Any], claims: list[dict[str, Any]]
+) -> None:
+    """Append owned claims and make their primary review links reciprocal."""
+
     registry["claims"].extend(claims)
     for claim in claims:
         for candidate_id in claim["candidate_ids"]:
@@ -417,7 +463,13 @@ def main() -> None:
                 registry["candidate_reviews"], str(candidate_id), claim["claim_id"]
             )
 
-    for figure_path, figure_prefix in (
+
+def _register_figure_reviews(
+    registry: dict[str, Any], candidates: list[dict[str, Any]]
+) -> None:
+    """Classify registered figure includes as editorial anchors."""
+
+    figures = (
         (
             "_ch06c_spatial_cross_formulation.qmd",
             "![Subject-Scaled Spatial Contact-Geometry Audit]",
@@ -434,12 +486,9 @@ def main() -> None:
             "_ch06cb_spatial_cross_tail.qmd",
             "![Scapular Mobility and Bilateral Contact Geometry]",
         ),
-    ):
-        figure = _find(
-            candidates,
-            figure_path,
-            figure_prefix,
-        )
+    )
+    for figure_path, figure_prefix in figures:
+        figure = _find(candidates, figure_path, figure_prefix)
         if not any(
             review["candidate_id"] == figure["candidate_id"]
             for review in registry["candidate_reviews"]
@@ -454,6 +503,14 @@ def main() -> None:
                     "last_verified_on": DATE,
                 }
             )
+
+
+def _complete_review_coverage(
+    registry: dict[str, Any],
+    candidates: list[dict[str, Any]],
+    claims: list[dict[str, Any]],
+) -> None:
+    """Map remaining synthesis passages to the explicit completion boundary."""
 
     completion_claim = next(
         claim for claim in claims if claim["claim_id"] == "PD-CLAIM-262"
@@ -494,6 +551,10 @@ def main() -> None:
             f"{candidate['source_path']}:{candidate['line_start']}"
         )
 
+
+def _write_release(registry: dict[str, Any], inventory: dict[str, Any]) -> None:
+    """Publish release states and the final subject-scaled audit scope."""
+
     release_entries = {
         item["release_claim_key"]: item for item in registry["release_claim_inventory"]
     }
@@ -531,6 +592,25 @@ def main() -> None:
         "calibrated articulated forward contact remains unexecuted."
     )
     REGISTRY.write_text(json.dumps(registry, indent=2) + "\n", encoding="utf-8")
+
+
+def main() -> None:
+    registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
+    inventory = json.loads(INVENTORY.read_text(encoding="utf-8"))
+    candidates = inventory["candidates"]
+    replacements = _candidate_replacements(candidates)
+    _prepare_registry(registry, candidates, replacements)
+
+    selected = _selected_passages(candidates)
+    claims = [
+        *_prescribed_and_closed_claims(selected),
+        *_scapular_claims(selected),
+        *_forward_claims(selected),
+    ]
+    _register_claim_reviews(registry, claims)
+    _register_figure_reviews(registry, candidates)
+    _complete_review_coverage(registry, candidates, claims)
+    _write_release(registry, inventory)
 
 
 if __name__ == "__main__":
