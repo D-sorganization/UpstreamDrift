@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 import numpy as np
@@ -10,9 +11,37 @@ from scripts.research.proximal_distal_energy.articulated_native_constraint_discr
     NativeConstraintDiscrepancyConfig,
     run_native_constraint_discrepancy,
 )
+from scripts.research.proximal_distal_energy import (
+    register_articulated_native_constraint_discrepancy_claims as claim_registration,
+)
+
+pytestmark = pytest.mark.scientific
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "docs/research/proximal_distal_energy_transfer/data"
+
+
+def test_native_claim_registration_is_idempotent() -> None:
+    registry = json.loads((DATA / "claim_audit_registry.json").read_text("utf-8"))
+    inventory = json.loads((DATA / "claim_candidate_inventory.json").read_text("utf-8"))
+
+    for _ in range(2):
+        claims, selected = claim_registration._build_claims(inventory["candidates"])
+        claim_registration._reconcile(
+            registry,
+            inventory,
+            copy.deepcopy(claims),
+            selected,
+        )
+
+    for review in registry["candidate_reviews"]:
+        assert len(review["claim_ids"]) == len(set(review["claim_ids"]))
+    reviews = {
+        review["candidate_id"]: review for review in registry["candidate_reviews"]
+    }
+    for claim in registry["claims"]:
+        for candidate_id in claim["candidate_ids"]:
+            assert claim["claim_id"] in reviews[candidate_id]["claim_ids"]
 
 
 def test_native_constraint_configuration_fails_closed() -> None:

@@ -447,7 +447,15 @@ def _reconcile(
         for review in registry["candidate_reviews"]
         if review["candidate_id"] in valid_ids
     }
+    inherited_by_candidate: dict[str, list[str]] = {}
     for candidate in selected.values():
+        inherited_claim_ids = [
+            claim["claim_id"]
+            for claim in registry["claims"]
+            if claim["claim_id"] not in CLAIM_IDS
+            and candidate["candidate_id"] in claim.get("candidate_ids", [])
+        ]
+        inherited_by_candidate[candidate["candidate_id"]] = inherited_claim_ids
         reviews[candidate["candidate_id"]] = {
             "candidate_id": candidate["candidate_id"],
             "disposition": "material_claims_mapped",
@@ -461,7 +469,14 @@ def _reconcile(
         }
     for claim in claims:
         for candidate_id in claim["candidate_ids"]:
-            reviews[candidate_id]["claim_ids"].append(claim["claim_id"])
+            claim_ids = reviews[candidate_id]["claim_ids"]
+            if claim["claim_id"] not in claim_ids:
+                claim_ids.append(claim["claim_id"])
+    for candidate_id, inherited_claim_ids in inherited_by_candidate.items():
+        claim_ids = reviews[candidate_id]["claim_ids"]
+        claim_ids.extend(
+            claim_id for claim_id in inherited_claim_ids if claim_id not in claim_ids
+        )
     reviews[selected["figure"]["candidate_id"]].update(
         disposition="editorial_or_navigation",
         rationale=(

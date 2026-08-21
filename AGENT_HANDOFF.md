@@ -143,6 +143,12 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
   one dependency-qualified Pinocchio test skipped on Windows). The complete
   release validator passes with no mismatches. The PDF was visually inspected
   on all pages and at full resolution around the new native-control section.
+- PR CI subsequently exposed four missing suite classifications in the new
+  native-control tests. The module is now classified as `scientific`; the
+  exact suite-marker ratchet passes. Re-running the source-bound evidence also
+  exposed a non-idempotent native claim registrar. Its reconciliation now
+  preserves inherited claim links without duplicating native links, and a
+  regression test runs the registrar twice and checks complete reciprocity.
 - Issue #8963 owns removal of the seven pre-existing research-orchestrator
   architecture exceptions before 2026-09-30. The new native discrepancy
   experiment itself has no exception and is below the 100-line function gate.
