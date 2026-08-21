@@ -123,7 +123,7 @@ def _claim(
             "frictionless finite-friction comparison",
             "opening and reattachment event-direction probes",
             "analytic mass-metric projection manufactured solution",
-            "time-step, station-count, and native-engine comparisons",
+            "time-step, station-count, and native inertia-and-bias transport comparisons",
         ],
         "falsifier": falsifier,
         "adjudication": (
@@ -161,7 +161,7 @@ def _claims(selected: dict[str, Any]) -> list[dict[str, Any]]:
             "distributed_grip_friction_result",
             "supported_through_declared_fifty_millisecond_synthetic_horizon",
             "Nominal transitions are right-censored, event probes begin disengaged, and delivery states are not matched for load or work.",
-            "Any reproduced cell exceeds a gate, cross-engine active sets differ, an event direction is absent, finite friction has one favorable sign across the registered matrix, or a stick projection violates its tangential-velocity or nonnegative-capture-energy contract.",
+            "Any reproduced cell exceeds a gate, inertia-and-bias transport active sets differ, an event direction is absent, finite friction has one favorable sign across the registered matrix, or a stick projection violates its tangential-velocity or nonnegative-capture-energy contract.",
         ),
         _claim(
             "PD-CLAIM-288",

@@ -54,7 +54,8 @@ beam into the two-hand constrained solve.
 
 The articulated finite-base extension closes the next numerical mechanism
 gate while producing an adverse primary inference result. Across 384 pathway
-and 192 independent-control trajectories, both native engines agree, energy
+and 192 independent-control trajectories, the native inertia-and-bias
+operators remain within the registered transport bounds, energy
 residuals decrease with step refinement, and all declared shaft/base domains
 hold through 50 ms. Ground force and intrinsic free moment are mechanically
 active, but none of 384 coupled--fixed comparisons meets the preregistered 5%
@@ -97,15 +98,21 @@ the non-identifiability boundary. It is not an anatomical, muscular, or human
 strategy result.
 
 The reduced spatial forward-contact extension resolves that narrower mechanism
-gate. Native MuJoCo and Pinocchio independently integrate two finite-mass hand
-carriages, paired compliant interfaces, and a free rigid club without direct
-club actuation. Their baseline and same-state killswitch trajectories satisfy
+gate. Native MuJoCo and Pinocchio independently supply rigid-body kinematics,
+mass, bias, gravity, and continuous-time acceleration for two finite-mass hand
+carriages and a free rigid club without direct club actuation. Both branches
+share the projected compliant interfaces and project-authored state update.
+Their baseline and same-state killswitch trajectories satisfy
 the declared position, orientation, wrench, and energy regions. Removing the
 complete grounded driver leaves a negative force-generated swing-normal couple
 for 37.5 ms in both engines; coincident and reversed-moment-arm controls close
 exactly, and the work--energy residual decreases under timestep refinement.
-This supports reduced spatial contact persistence, not anatomical arms,
-muscles, calibrated grip tissue, equipment, or human strategy.
+This supports reduced spatial contact persistence and inertia-and-bias
+transport, not independent contact-solver equivalence, anatomical arms,
+muscles, calibrated grip tissue, equipment, or human strategy. A separate
+MuJoCo-native equality and `mj_step` control produces a nonzero discrepancy
+from the projected formulation and is reported as a formulation difference,
+not a parity success.
 
 The closed-state validity-horizon extension further shows that the same two
 engines remain inside the declared trajectory, wrench, energy-discrepancy, and

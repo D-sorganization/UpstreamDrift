@@ -56,7 +56,7 @@ calibrated equipment, passive transfer, delivery benefit, slack benefit, or
 human strategy. A preregistered validity-horizon extension now advances all 54
 profile/span/phase states through 4, 10, 25, and 50 ms under nominal conditions
 and nine one-factor adverse or null branches. All 2,160 horizon cases pass the
-declared cross-engine and work--energy gates; no failure is observed through 50
+declared inertia-and-bias transport and work--energy gates; no failure is observed through 50
 ms. This is a right-censored reduced-model result, not a full delivery or
 anatomical validation. A native articulated-inertia gate now rebuilds the
 subject-scaled 20-coordinate tree independently in MuJoCo and robotics
@@ -272,6 +272,9 @@ python3 -m scripts.research.proximal_distal_energy.run_articulated_inertia_cross
 python3 -m scripts.research.proximal_distal_energy.make_articulated_inertia_cross_engine_figure
 python3 scripts/research/proximal_distal_energy/register_articulated_inertia_claims.py
 python3 -m scripts.research.proximal_distal_energy.run_articulated_manufactured_solution
+python3 -m scripts.research.proximal_distal_energy.run_articulated_native_constraint_discrepancy
+python3 -m scripts.research.proximal_distal_energy.make_articulated_native_constraint_discrepancy_figure
+python3 scripts/research/proximal_distal_energy/register_articulated_native_constraint_discrepancy_claims.py
 python3 -m scripts.research.proximal_distal_energy.run_articulated_contact_projection
 python3 -m scripts.research.proximal_distal_energy.make_articulated_contact_projection_figure
 python3 scripts/research/proximal_distal_energy/register_articulated_contact_projection_claims.py

@@ -68,8 +68,8 @@ def make_figure(output: Path = OUTPUT) -> Path:
         linestyle="--",
         label="Projected Kelvin-Voigt",
     )
-    force_axis.set_title("A. Generalized Constraint and Contact Force Norms")
-    force_axis.set_ylabel("Generalized Force Norm")
+    force_axis.set_title("A. Constraint and Contact Coordinate-Vector Norms")
+    force_axis.set_ylabel("Coordinate-Vector Norm (Mixed Units)")
     force_axis.legend(frameon=False)
 
     closure_axis.plot(time_ms, native_separation, color=NATIVE, linewidth=2.2)

@@ -159,7 +159,7 @@ def main() -> None:
         )["candidate_id"],
         "PD-CAND-3f11c9ecc895d3c4": _find(
             candidates,
-            "_ch06c_spatial_cross_formulation.qmd",
+            "_ch06cb_spatial_cross_tail.qmd",
             "- **Passive Contact Origin Is Inconclusive.**",
         )["candidate_id"],
         "PD-CAND-8530e00f5a9092c1": _find(
@@ -229,7 +229,7 @@ def main() -> None:
     next_gate = _find(
         candidates,
         "_ch06c_spatial_cross_formulation.qmd",
-        "The bounded forward experiment now retains",
+        "This is a right-censored synthetic result",
     )
     closed_design = _find(
         candidates,
@@ -278,22 +278,22 @@ def main() -> None:
     )
     scap_design = _find(
         candidates,
-        "_ch06c_spatial_cross_formulation.qmd",
+        "_ch06cb_spatial_cross_tail.qmd",
         "The fixed shoulder centers are the next explicit structural intervention.",
     )
     scap_result = _find(
         candidates,
-        "_ch06c_spatial_cross_formulation.qmd",
+        "_ch06cb_spatial_cross_tail.qmd",
         "No fixed-shoulder arm-only state reaches",
     )
     scap_rank = _find(
         candidates,
-        "_ch06c_spatial_cross_formulation.qmd",
+        "_ch06cb_spatial_cross_tail.qmd",
         "Both paired contact Jacobians have rank six",
     )
     scap_boundary = _find(
         candidates,
-        "_ch06c_spatial_cross_formulation.qmd",
+        "_ch06cb_spatial_cross_tail.qmd",
         "This result advances the model ladder without identifying a human mechanism.",
     )
     scap_conclusion = _find(
@@ -392,12 +392,12 @@ def main() -> None:
         _claim(
             "PD-CLAIM-269",
             [bridge_forward],
-            statement="MuJoCo and Pinocchio receive identical digested initial states and pass the existing trajectory, contact-wrench, and normalized-energy gates for all 54 profile-span-phase cases in the 4 ms spanning initialization audit.",
-            classification="closed_state_short_horizon_cross_engine_forward_audit",
+            statement="MuJoCo and Pinocchio receive identical digested initial states and pass the existing trajectory, contact-wrench, and normalized-energy transport gates for all 54 profile-span-phase cases in the 4 ms spanning initialization audit while sharing the projected contact law and state update.",
+            classification="closed_state_short_horizon_inertia_bias_transport_audit",
             status="supported_for_declared_reduced_short_horizon_subset",
             boundary="The forward solvers use finite-mass hand carriages after initialization and the 4 ms window is not a downswing or delivery simulation.",
             falsifier="An engine pair receives a different initial-state digest or fails any registered trajectory, wrench, or energy comparison gate.",
-            model_domain="Six synthetic profiles, three grip spans, and early, middle, and late phases in two reduced native forward solvers.",
+            model_domain="Six synthetic profiles, three grip spans, and early, middle, and late phases in two reduced native inertia-and-bias operators with shared contact and integration.",
         ),
         _claim(
             "PD-CLAIM-270",
@@ -417,15 +417,27 @@ def main() -> None:
                 registry["candidate_reviews"], str(candidate_id), claim["claim_id"]
             )
 
-    for figure_prefix in (
-        "![Subject-Scaled Spatial Contact-Geometry Audit]",
-        "![Subject-Scaled Bilateral Closed-Contact Feasibility]",
-        "![Closed Subject States Enter Independent Forward Solvers Without Preload]",
-        "![Scapular Mobility and Bilateral Contact Geometry]",
+    for figure_path, figure_prefix in (
+        (
+            "_ch06c_spatial_cross_formulation.qmd",
+            "![Subject-Scaled Spatial Contact-Geometry Audit]",
+        ),
+        (
+            "_ch06c_spatial_cross_formulation.qmd",
+            "![Subject-Scaled Bilateral Closed-Contact Feasibility]",
+        ),
+        (
+            "_ch06c_spatial_cross_formulation.qmd",
+            "![Closed Subject States Enter Paired Native Operators Without Preload]",
+        ),
+        (
+            "_ch06cb_spatial_cross_tail.qmd",
+            "![Scapular Mobility and Bilateral Contact Geometry]",
+        ),
     ):
         figure = _find(
             candidates,
-            "_ch06c_spatial_cross_formulation.qmd",
+            figure_path,
             figure_prefix,
         )
         if not any(
@@ -497,7 +509,7 @@ def main() -> None:
     }
     release_entries["closed_state_forward_initialization"] = {
         "release_claim_key": "closed_state_forward_initialization",
-        "published_status": "supported_for_234_mappings_and_54_short_cross_engine_cases",
+        "published_status": "supported_for_234_mappings_and_54_short_inertia_bias_transport_cases",
         "audit_state": "reviewed_as_short_horizon_reduced_model_result",
     }
     release_entries["scapulothoracic_contact_geometry"] = {

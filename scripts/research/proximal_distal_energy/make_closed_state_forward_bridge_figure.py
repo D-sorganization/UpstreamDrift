@@ -46,20 +46,20 @@ def main() -> int:
         fig.colorbar(image, ax=axis, label=label)
     axes[1, 0].plot(x, position_max, color="#1f77b4", linewidth=1.6)
     axes[1, 0].set(
-        title="Cross-Engine Club-Position Difference",
+        title="Inertia-and-Bias Transport Club-Position Difference",
         xlabel="Spanning Case",
         ylabel="Maximum Difference (µm)",
     )
     axes[1, 1].plot(x, wrench, color="#d95f02", linewidth=1.6)
     axes[1, 1].set(
-        title="Cross-Engine Contact-Wrench Difference",
+        title="Inertia-and-Bias Transport Contact-Wrench Difference",
         xlabel="Spanning Case",
         ylabel="Relative RMS (%)",
     )
     for axis in axes[1]:
         axis.grid(alpha=0.25)
     fig.suptitle(
-        "Closed Subject States Enter Independent Forward Solvers Without Preload",
+        "Closed Subject States Enter Paired Native Operators Without Preload",
         fontsize=15,
     )
     STEM.parent.mkdir(parents=True, exist_ok=True)
