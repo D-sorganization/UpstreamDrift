@@ -14,6 +14,11 @@ pytestmark = pytest.mark.unit
 GitResponseKey = tuple[Path, tuple[str, ...]]
 
 
+def test_tools_pin_targets_qualified_rotating_base_release() -> None:
+    """The consumer authority must pin the protected Tools #4619 merge."""
+    assert authority.TOOLS_GITLINK_SHA == ("1664d806df8a2c7b184d2d3fbcea93b714caaee5")
+
+
 def _valid_authority_responses(
     repo_root: Path,
 ) -> dict[GitResponseKey, tuple[int, str]]:

@@ -30,7 +30,12 @@ jobs:
   build-wheel:
     name: Build sdist + wheel
     runs-on: d-sorg-fleet-docker
-    timeout-minutes: 15
+    # A cold pinned-Tools checkout plus frontend and Python builds can consume
+    # most of 15 minutes on a shared fleet runner. Preserve enough time for the
+    # verified wheel-content gate and artifact upload to finish. The frontend
+    # install is deliberately uncached: its measured run is seconds, while the
+    # setup-node post-job cache upload can hold the job open until timeout.
+    timeout-minutes: 30
     outputs:
       wheel-size-kb: ${{ steps.size.outputs.kb }}
       wheel_filename: ${{ steps.build-dist.outputs.wheel_filename }}
@@ -53,8 +58,6 @@ jobs:
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: "24"
-          cache: "npm"
-          cache-dependency-path: ui/package-lock.json
 
       - name: Install frontend dependencies
         working-directory: ui
