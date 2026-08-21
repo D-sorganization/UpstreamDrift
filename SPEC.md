@@ -55,13 +55,33 @@ slice supplies full-state velocity reversal, frictionless and finite-friction
 nested-horizon outcomes, station-level event direction, cross-engine active-set
 parity, and a 144-cell mass-metric impulsive perfect-stick bound. The latter is
 checked against an analytic manufactured solution, constrains tangential
-velocity to $9.65\times10^{-11}$ m/s or less, has zero stored-precision native
-velocity discrepancy, and captures $9.84\times10^{-9}$--$0.37665$ J of kinetic
-energy across the registered states. It is an instantaneous ideal-constraint
-control, not evidence that static friction can supply the impulse or maintain a
-stick trajectory. The event probe begins disengaged, so attached-to-open first
-failure, static-friction feasibility/evolution, production release evidence,
-and protected merge verification remain required before #8751 can close.
+velocity to $4.61\times10^{-15}$ m/s or less, has a nonzero maximum
+MuJoCo--Pinocchio projected-velocity error of $3.99\times10^{-12}$ relative,
+and captures $9.84\times10^{-9}$--$0.37665$ J of kinetic energy across the
+registered states. This corrected genuine-engine run replaces the invalid
+zero-discrepancy record. It is an instantaneous
+ideal-constraint control, not evidence that static friction can supply the
+impulse or maintain a stick trajectory. The event probe begins disengaged, so
+attached-to-open first failure, static-friction feasibility/evolution,
+production release evidence, and protected merge verification remain required
+before #8751 can close.
+Issue #8909 invalidates the previously published distributed-grip
+MuJoCo--Pinocchio parity statement: the Windows run imported the unrelated
+PyPI `pinocchio` 0.1 package, and the forward operator silently substituted
+MuJoCo while retaining the Pinocchio label. Cross-engine evidence now fails
+closed unless robotics Pinocchio is version 2.6 or newer, exposes the required
+native dynamics API, and successfully builds the articulated model. No engine
+fallback is permitted, and an identically zero set of trajectory, force, and
+stick-projection discrepancies is treated as a degenerate comparison rather
+than successful parity. The first genuine rerun also falsified the original
+stick-projection numerical gate: twelve distributed constraint rows had rank
+ten, the normal-equation condition number exceeded $10^{17}$, and the
+Pinocchio projection residual reached $1.35\times10^{-10}$ m/s. The corrected
+implementation performs a mass-whitened rank-revealing SVD, reducing the full
+144-cell residual to $4.61\times10^{-15}$ m/s without relaxing the registered
+tolerance. Every committed cross-engine artifact must identify a qualified
+robotics Pinocchio version. The distributed atlas and registered claim must be
+regenerated with two genuine engines before #8751 can close.
 Issue #8752 also remains open. Its first manufactured and Latin-hypercube screen
 does not yet run through both production engine adapters, include a deliberately
 perturbed failure case, refine every uncertainty corner, or propagate uncertainty
@@ -501,7 +521,7 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.566                                            |
+| **Spec Version**        | 1.0.567                                            |
 | **Last Spec Update**    | 2026-08-21                                         |
 
 ## 2. Purpose & Mission
@@ -3146,6 +3166,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-21 | 1.0.567 | Corrected #8909's false distributed-grip cross-engine authority. Robotics Pinocchio now requires version 2.6 or newer and the native Model/SE3/Inertia/CRBA/nonlinear-effects/RNEA API; the unrelated PyPI `pinocchio` 0.1 collision and every model-build failure stop the study rather than silently substituting MuJoCo. A degeneracy gate rejects an identically zero set of trajectory, force, and stick-projection discrepancies, and a repository test audits the Pinocchio identity recorded by every committed cross-engine artifact. The perfect-stick control uses a mass-whitened rank-revealing SVD so redundant station rows do not square the constraint-system condition number or require a relaxed no-slip gate. Inertia, contact-projection, forward-contact, and distributed-grip evidence and figures were regenerated with genuine MuJoCo 3.8.0 and Pinocchio 3.8.0 operators before claim registration and publication qualification. |
 | 2026-08-21 | 1.0.566 | Pinned the protected Tools #4430 rotating-base companion at `1664d806df8a2c7b184d2d3fbcea93b714caaee5` and added a fail-closed UpstreamDrift consumer contract for its ordered 18-run catalog, immutable source/study/catalog digests, 13 valid cases, five adverse cases, typed limitations, and unsupported human/coaching inference. The package workflow now reserves 30 minutes for a cold Tools checkout, frontend/Python build, verified wheel-content gate, and large artifact upload. Its unnecessary setup-node npm cache is disabled because measured `npm ci` takes seconds while post-job cache upload alone could consume the remaining job budget after the verified wheel uploaded successfully. |
 | 2026-08-21 | 1.0.565 | Quantized only the conformance golden-snapshot serialization boundary to eight significant digits so platform-specific floating-point tails cannot change the longitudinal and confidence-interval scenario or bundle hashes. The analytics computations and result contracts remain unchanged. |
 | 2026-08-21 | 1.0.564 | Added the data-free `launch-monitor-analytics-conformance/1.0.0` consumer bundle. Ten deterministic synthetic cases span available and structured-unavailable analysis v2, player covariation, attested longitudinal sessions, source-backed strokes gained, and distance/target proxy results. Uniform wrappers retain units, claims, player/session/order evidence, exclusions, source references, source-joinable backing hashes, scenario hashes, and a canonical bundle SHA without embedding private or observed input rows. Generated JSON Schema and golden JSON share the strict Python authority; analytics behavior and v1/v2 result contracts remain unchanged. |
@@ -3668,6 +3689,7 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - **Performance:** Replaced `np.sum(forces, axis=0)` with `sum((s.force for s in self._sources.values()), np.zeros(3))` in `ForceAccumulator` methods (`get_total_force`, `get_total_torque`, and `get_total_generalized_force`) in `src/engines/common/state.py` to avoid intermediate list and array allocations, yielding ~30% faster execution time for accumulating forces and torques.
 
 ### Performance Improvements
+
 - (spec-exempt: micro-optimization) Replaced `np.sum(diff * diff)` with `np.dot(diff.ravel(), diff.ravel())` for calculating `rmse` in `src/engines/physics_engines/drake/python/motion_matching/fit_swing_autodiff.py` to optimize performance while maintaining `AutoDiffXd` compatibility.
 
 - Optimize trajectory evaluation constraints in drake optimization by replacing `np.sum(arr)` with `arr.sum()` and skipping numpy array dispatch overhead (spec-exempt: micro-optimization).

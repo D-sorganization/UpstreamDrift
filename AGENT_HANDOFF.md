@@ -2,94 +2,118 @@
 
 Last updated: 2026-08-21
 
-This file records current operational state. Git and GitHub retain history.
-Epic #8557 is the canonical proximal-to-distal completion authority.
+This file is current operational state, not a changelog. Git and GitHub retain
+history. Epic #8557 is the canonical proximal-to-distal completion authority.
 
-## Protected Delivery in Progress
+## Verified Cross-Repository Delivery
 
-### Tools Rotating-Base Consumer
-
-- Full PR #8954 targets `main`; branch `feat/4430-rotating-base-consumer`.
-- It pins Tools remote-main revision
+- UpstreamDrift PR #8954 merged through protection at
+  `81cc731d0dd19367b00cd819be5677ab157ce125`, verified on remote `main`.
+- It pins Tools revision
   `1664d806df8a2c7b184d2d3fbcea93b714caaee5` and verifies the qualified
-  18-case rotating-base provider without copying solver or catalog logic.
-- The consumer asserts exact source/study/catalog digests, run order, 13 valid
-  and five adverse cases, nonanatomical coordinates, unsupported coaching
-  inference, and unavailable governed human validation.
-- Standard CI, shared consumer contracts, documentation, SPEC freshness, and
-  optional-stack checks passed on head `2061fdaed487633d63b9eb82a1f8a71457af9be1`.
-- The package job proved its wheel build/content gate and 8m35s artifact upload.
-  It then timed out in setup-node's post-job npm cache upload. Commit
-  `6bf348dd0` removes that unnecessary cache; measured `npm ci` took seconds.
-- Current `origin/main` is merged into this branch. Resolve no further conflict
-  by dropping either the launch-monitor conformance contract or this consumer.
-- Auto-merge is off. Human approval is required. Never bypass protection or
-  create redundant reruns.
+  18-case rotating-base contract without copying its solver or catalog logic.
+- Standard CI, shared consumer contracts, docs, SPEC freshness, unit
+  aggregation, and title capitalization passed. The wheel build passed; two
+  downstream smoke jobs were cancelled after merge and received one targeted
+  failed-job rerun request. Inspect that exact run rather than duplicating it.
+- Tools PR #4619 remains an ancestor of current Tools `main`; Tools issue #4430
+  closed with the verified UpstreamDrift consumer evidence.
 
-### Critical Scientific Corrections
+## Critical Cross-Engine Evidence Repair (#8909)
 
-- #8909 is active in worktree `8909-real-pinocchio-parity`. The published
-  distributed-grip "parity" used PyPI `pinocchio` 0.1 and silently compared
-  MuJoCo with itself. The repair fails closed on engine identity/model build,
-  rejects exact-zero degeneracy, and regenerates with Pinocchio 3.8.0.
-- #8910 remains open: current manufactured inverse-dynamics, action-reaction,
-  and conservation controls are tautological or hardcoded. Do not close #8752
-  or promote those controls until independent operators and actual drift pass.
-- The #8752 checkpointed uncertainty campaign runs in worktree
-  `goal-8752-uncertainty` under parent PID `18404`. It is not orphaned. Do not
-  kill its workers, edit campaign sources, or launch a duplicate campaign.
+- Worktree: `UpstreamDrift-worktrees/8909-real-pinocchio-parity`.
+- Branch: `fix/8909-real-pinocchio-parity`; active Codex lease is renewed.
+- The distributed-grip release falsely recorded `pinocchio: 0.1` and exact-zero
+  parity because `native_dynamics_operator` silently substituted MuJoCo when
+  the unrelated PyPI `pinocchio` package was imported.
+- The repair removes that fallback, requires robotics Pinocchio version 2.6 or
+  newer plus its native API, rejects an identically zero engine comparison,
+  and audits every committed cross-engine artifact's recorded version.
+- The first genuine 576-trajectory rerun exposed a real failed numerical gate:
+  twelve stick rows had rank ten, the normal-equation condition number exceeded
+  1e17, and the Pinocchio residual reached 1.35e-10 m/s. A mass-whitened
+  rank-revealing SVD reduces the full 144-cell residual to 4.61e-15 m/s without
+  relaxing the registered tolerance.
+- Genuine MuJoCo 3.8.0 and Pinocchio 3.8.0 inertia, contact projection, forward
+  contact, and distributed-grip evidence have been regenerated. Every gate
+  passes with nonzero cross-engine differences. The distributed maxima are
+  3.84e-13 trajectory, 1.44e-10 force, and 3.99e-12 stick velocity relative.
+- Ninety-five focused scientific/publication tests pass. Claim governance
+  reports 1,068/1,068 candidates adjudicated, 295 claims, zero open release
+  claims, and a valid 2,103-reference evidence manifest.
+- Commit `898033064c3f2c45930bbea722a744406423af51` checkpoints the coherent
+  repair; merge commit `f86e8f8d6e8405c51c1e484d9ac1a36dcf75f732`
+  reconciles current `origin/main` without unresolved conflicts.
+- The optimized 233-page PDF was visually inspected on every page. The
+  computational profile passes with 192 valid URI links, 246 outline entries,
+  fast-web linearization, and no render errors. The archival profile remains
+  fail-closed on the disclosed untagged/Type 3/unembedded-font gaps.
+- The open-release validator passes for 571 artifacts with no mismatches.
+  Full PR #8960 is open with the regenerated release authority. Remaining work:
+  shepherd human review and protected merge, then verify remote-main ancestry
+  before closing #8909.
+- Unqualified repository-wide `pytest` currently fails during collection in
+  the pre-existing `src/shared/python/sidekick/tests/conftest.py` because it
+  imports nonexistent `utils.path_helpers`. Do not hide that baseline defect;
+  use the dependency-scoped protected lanes and track a separate repair.
 
-## Publication and Human-Data Boundaries
+## Articulated Uncertainty Campaign (#8752)
 
-- UpstreamDrift owns the scientific source/evidence bundle; AffineDrift is the
-  immutable pinned public projection; Tools owns reusable provider logic.
-- The computational PDF is not an archival or human-validation release.
-  Tagging, font, stable-archive/PID, equipment calibration, and governed human
-  gates remain distinct.
+- Worktree: `UpstreamDrift-worktrees/goal-8752-uncertainty`.
+- Parent PID `18404` is an active checkpointed 19-corner campaign, not an
+  orphan. Seven corners were recorded at the 2026-08-21 05:03 checkpoint.
+- It may own up to 20 workers. Do not kill workers individually, edit campaign
+  sources, or start a second campaign. Retained numerical failures are data.
+- #8910 remains critical: current manufactured inverse-dynamics,
+  action-reaction, and conservation controls are tautological or hardcoded.
+  Address #8910 after #8909 is protected.
+
+## Scientific Boundaries
+
+- The model ladder is synthetic and model-conditional. It does not establish
+  participant mechanics, anatomy, physiology, equipment calibration, injury,
+  coaching strategy, or a universal speed benefit.
 - #8556 remains externally data-gated: no governed participant dataset with
-  synchronized bilateral six-axis grip wrenches is available. Synthetic traces
-  must never substitute for human validation.
-- Do not infer anatomy, physiology, injury, coaching strategy, or universal
-  speed benefit from model-conditional synthetic results.
-
-## Launch-Monitor Contract on Current Main
-
-- Current main includes `launch-monitor-analytics-conformance/1.0.0`: ten
-  deterministic, data-free cases with typed available/unavailable outcomes,
-  evidence/provenance wrappers, schema, golden fixture, and ADR 0040.
-- Its quantized serialization boundary stabilizes hashes without changing the
-  underlying analytics. Preserve these files and SPEC entries during merges.
+  synchronized bilateral six-axis grip wrenches is available. Never substitute
+  synthetic traces for human validation.
+- #8910 invalidates manufactured-solution closure language until independent
+  operators and actual drift are qualified.
+- Exact zeros require an analytic identity or explicit degeneracy control; they
+  are not automatically evidence of unusually good cross-engine parity.
 
 ## Repository and Review Rules
 
-- PRs target `main`; use full PRs, never drafts. Auto-merge is prohibited and
-  human approval is mandatory.
-- Before issue work, run the Repository_Management claim check and post a lease.
+- PRs target `main`; use full PRs, never drafts. Codex must not enable
+  auto-merge; human approval is mandatory. Preserve explicit owner actions
+  without treating them as permission to bypass protection.
 - Use TDD, DbC, DRY, and LoD. Never force-push, admin-merge, bypass hooks or
   checks, add quarantine debt, or edit `vendor/ud-tools`.
-- Research evidence is hash-pinned. Use governed regeneration; do not hand-edit
-  source digests, claims, JSON/NPZ, figures, or release manifests.
-- Use title case in document headings/captions and run the title-case audit.
+- Research evidence is hash-pinned. Use governed generators rather than
+  hand-editing JSON, NPZ, figures, manifests, checksums, or claim records.
+- Use title case for document headings and captions.
 
-## Consumer Validation
+## Focused #8909 Validation
 
 ```bash
-python3 -m pytest \
-  tests/launchers/test_tools_vendor_authority.py::test_tools_pin_targets_qualified_rotating_base_release \
-  tests/launchers/test_launcher_model_sources.py::test_all_tools_launchers_resolve_from_pinned_vendor \
-  tests/shared_contracts/test_tools_provider_contracts.py::test_rotating_base_provider_retains_complete_qualified_authority \
-  --tools-mode vendored -n 0 -q
-python3 -m pytest \
-  tests/unit/packaging/test_standalone_sidekick_workflows.py::test_package_workflow_preserves_time_for_verified_artifact_upload \
-  tests/unit/packaging/test_standalone_sidekick_workflows.py::test_package_workflow_does_not_cache_the_fast_frontend_install \
-  -n 0 -q
+python3 -m pytest -q -n 0 \
+  tests/research/test_articulated_inertia_cross_engine.py \
+  tests/research/test_articulated_contact_projection.py \
+  tests/research/test_articulated_forward_contact.py \
+  tests/research/test_articulated_distributed_atlas.py
+python3 -m ruff check \
+  scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py \
+  scripts/research/proximal_distal_energy/articulated_forward_integration.py \
+  scripts/research/proximal_distal_energy/articulated_distributed_atlas.py \
+  scripts/research/proximal_distal_energy/register_articulated_inertia_claims.py \
+  tests/research/test_articulated_inertia_cross_engine.py \
+  tests/research/test_articulated_distributed_atlas.py
+python3 -m scripts.research.proximal_distal_energy.claim_audit validate
+python3 -m scripts.research.proximal_distal_energy.claim_evidence_integrity validate
 ```
 
 ## Release and Repository Gates
 
 ```bash
-python3 -m scripts.research.proximal_distal_energy.claim_audit validate
-python3 -m scripts.research.proximal_distal_energy.claim_evidence_integrity validate
 python3 -m scripts.research.proximal_distal_energy.momentum_question_readiness validate
 python3 -m scripts.research.proximal_distal_energy.qualify_open_release validate \
   --source-revision "$(git rev-parse HEAD)" --publication-profile computational

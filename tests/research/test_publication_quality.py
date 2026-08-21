@@ -175,8 +175,8 @@ def test_canonical_pdf_passes_the_computational_profile() -> None:
         render_zoom=0.2,
     )
 
-    assert report["publication"]["pages"] == 231
-    assert report["rendering"]["pages_rendered"] == 231
+    assert report["publication"]["pages"] == 233
+    assert report["rendering"]["pages_rendered"] == 233
     assert report["rendering"]["errors"] == []
     assert validate_publication_quality(report, profile="computational")["valid"]
     assert report["readiness"]["archival_publication"] is False

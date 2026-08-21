@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "882079a730d2383b8b3b071c8a770fceb6d97b35915bbd3eef030acd586f393f",
+    "source_digest": "4e3dab5480cc73fce92fc3300b9c7d247ff30d1db085cb89909e907d8c57cafc",
     "baseline_commit": "a4b53e39b"
   },
   "audit_scope": {
@@ -11,7 +11,7 @@
     "release_review_completion_status": "complete",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "The complete paper inventory is adjudicated. Articulated point-attachment and finite-friction distributed-fiber tiers pass their registered gates through 5 and 50 ms. Calibrated shaft, ground, tissue, and governed human validation remain open."
+    "current_scope": "The complete paper inventory is adjudicated. Native MuJoCo and Pinocchio articulated mass, bias, and inverse dynamics agree at all 234 closed states. Forward articulated contact, calibrated equipment, full delivery, and governed human validation remain open."
   },
   "dependencies": [
     {
@@ -8647,16 +8647,6 @@
       "last_verified_on": "2026-08-15"
     },
     {
-      "candidate_id": "PD-CAND-5b2520274461c1f1",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-278"
-      ],
-      "rationale": "This passage states or bounds the articulated contact-projection gate.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-15"
-    },
-    {
       "candidate_id": "PD-CAND-f54a05315d133b05",
       "disposition": "material_claims_mapped",
       "claim_ids": [
@@ -8699,16 +8689,6 @@
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "The figure include points to registered evidence without a standalone claim.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-15"
-    },
-    {
-      "candidate_id": "PD-CAND-d3ebff0b0b01df4a",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-281"
-      ],
-      "rationale": "This passage states or bounds the bounded articulated forward gate.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-15"
     },
@@ -10871,16 +10851,6 @@
       "last_verified_on": "2026-08-16"
     },
     {
-      "candidate_id": "PD-CAND-4aee1cc3e2b54c5b",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-287"
-      ],
-      "rationale": "This passage states or bounds the distributed-grip gate.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-20"
-    },
-    {
       "candidate_id": "PD-CAND-d65894f827877c37",
       "disposition": "material_claims_mapped",
       "claim_ids": [
@@ -10939,16 +10909,6 @@
       "last_verified_on": "2026-08-20"
     },
     {
-      "candidate_id": "PD-CAND-bcf7e266e79119d2",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-287"
-      ],
-      "rationale": "This passage states or bounds the distributed-grip gate.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-20"
-    },
-    {
       "candidate_id": "PD-CAND-9447cc8112faefbc",
       "disposition": "material_claims_mapped",
       "claim_ids": [
@@ -10971,7 +10931,7 @@
       "last_verified_on": "2026-08-20"
     },
     {
-      "candidate_id": "PD-CAND-043bebf7674017dd",
+      "candidate_id": "PD-CAND-cad03c125b926c56",
       "disposition": "material_claims_mapped",
       "claim_ids": [
         "PD-CLAIM-286"
@@ -10979,6 +10939,46 @@
       "rationale": "This passage states or bounds the distributed-grip gate.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-7c67493aebb3d214",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-287"
+      ],
+      "rationale": "This passage states or bounds the distributed-grip gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-3c77a7f14c1abbc5",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-287"
+      ],
+      "rationale": "This passage states or bounds the distributed-grip gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-20"
+    },
+    {
+      "candidate_id": "PD-CAND-35d8bb45577d0eb4",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-278"
+      ],
+      "rationale": "This passage states or bounds the articulated contact-projection gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "candidate_id": "PD-CAND-3c6a5316fbc2dc11",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-281"
+      ],
+      "rationale": "This passage states or bounds the bounded articulated forward gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
     }
   ],
   "claims": [
@@ -21563,264 +21563,6 @@
       "last_verified_on": "2026-08-14"
     },
     {
-      "claim_id": "PD-CLAIM-274",
-      "candidate_ids": [
-        "PD-CAND-7e070a6970d80cd1",
-        "PD-CAND-0aa4b71d948b8837"
-      ],
-      "statement": "The articulated common-state gate independently assembles the same subject-scaled 20-coordinate tree in native MuJoCo and robotics Pinocchio at all 234 closed states.",
-      "classification": "subject_scaled_articulated_inertia_design",
-      "published_status": "complete_for_declared_common_state_matrix",
-      "audit_status": "native_articulated_mass_bias_inverse_dynamics_and_positive_definiteness_checked",
-      "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:407",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:417"
-      ],
-      "evidence_artifacts": [
-        "docs/research/proximal_distal_energy_transfer/data/articulated_inertia_cross_engine.json",
-        "docs/research/proximal_distal_energy_transfer/data/articulated_inertia_cross_engine.npz",
-        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_inertia_cross_engine.pdf",
-        "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py",
-        "scripts/research/proximal_distal_energy/run_articulated_inertia_cross_engine.py",
-        "scripts/research/proximal_distal_energy/make_articulated_inertia_cross_engine_figure.py",
-        "scripts/research/proximal_distal_energy/register_articulated_inertia_claims.py",
-        "tests/research/test_articulated_inertia_cross_engine.py"
-      ],
-      "model_domain": "Six synthetic profiles, three grip spans, 13 closed states per case, 20 scalar coordinates, and two native rigid-body engines.",
-      "uncertainty_boundary": "Segment geometry and spherical inertias are engineering design values rather than participant-specific anatomy.",
-      "competing_explanations": [
-        "shared idealized spherical-body inertia specification",
-        "common-state comparison rather than trajectory integration",
-        "broad reduced-tree geometry and engineering joint bounds",
-        "finite-difference velocity and acceleration estimates"
-      ],
-      "negative_controls": [
-        "independent engine model assembly",
-        "mass-matrix symmetry gate",
-        "positive-definiteness eigenvalue gate",
-        "mass, bias, and inverse-dynamics operators checked separately",
-        "all 234 closed states retained"
-      ],
-      "falsifier": "Any closed state is omitted, model dimensions or joint order differ, or an engine does not use its named native operators.",
-      "adjudication": "All registered states pass the common-state native dynamics gates. The result is restricted to articulated rigid-body operator transport.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-15"
-    },
-    {
-      "claim_id": "PD-CLAIM-275",
-      "candidate_ids": [
-        "PD-CAND-87e213384de0e497"
-      ],
-      "statement": "All 234 states pass native mass-matrix, bias-force, inverse-dynamics, symmetry, and positive-definiteness gates.",
-      "classification": "subject_scaled_articulated_inertia_result",
-      "published_status": "supported_at_declared_common_state_rigid_body_tier",
-      "audit_status": "native_articulated_mass_bias_inverse_dynamics_and_positive_definiteness_checked",
-      "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:428"
-      ],
-      "evidence_artifacts": [
-        "docs/research/proximal_distal_energy_transfer/data/articulated_inertia_cross_engine.json",
-        "docs/research/proximal_distal_energy_transfer/data/articulated_inertia_cross_engine.npz",
-        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_inertia_cross_engine.pdf",
-        "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py",
-        "scripts/research/proximal_distal_energy/run_articulated_inertia_cross_engine.py",
-        "scripts/research/proximal_distal_energy/make_articulated_inertia_cross_engine_figure.py",
-        "scripts/research/proximal_distal_energy/register_articulated_inertia_claims.py",
-        "tests/research/test_articulated_inertia_cross_engine.py"
-      ],
-      "model_domain": "Six synthetic profiles, three grip spans, 13 closed states per case, 20 scalar coordinates, and two native rigid-body engines.",
-      "uncertainty_boundary": "The result tests rigid-body operator agreement and does not advance contact or a delivery trajectory.",
-      "competing_explanations": [
-        "shared idealized spherical-body inertia specification",
-        "common-state comparison rather than trajectory integration",
-        "broad reduced-tree geometry and engineering joint bounds",
-        "finite-difference velocity and acceleration estimates"
-      ],
-      "negative_controls": [
-        "independent engine model assembly",
-        "mass-matrix symmetry gate",
-        "positive-definiteness eigenvalue gate",
-        "mass, bias, and inverse-dynamics operators checked separately",
-        "all 234 closed states retained"
-      ],
-      "falsifier": "Any reproduced state exceeds a registered relative tolerance, loses symmetry, or has a nonpositive mass-matrix eigenvalue.",
-      "adjudication": "All registered states pass the common-state native dynamics gates. The result is restricted to articulated rigid-body operator transport.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-15"
-    },
-    {
-      "claim_id": "PD-CLAIM-276",
-      "candidate_ids": [
-        "PD-CAND-9655875f1ecca182"
-      ],
-      "statement": "Native articulated inertia parity does not establish forward contact, anatomy, grip or shaft behavior, muscles, human transfer, timing economy, slack benefit, or coaching strategy.",
-      "classification": "subject_scaled_articulated_inertia_inference_boundary",
-      "published_status": "explicitly_bounded",
-      "audit_status": "native_articulated_mass_bias_inverse_dynamics_and_positive_definiteness_checked",
-      "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:436"
-      ],
-      "evidence_artifacts": [
-        "docs/research/proximal_distal_energy_transfer/data/articulated_inertia_cross_engine.json",
-        "docs/research/proximal_distal_energy_transfer/data/articulated_inertia_cross_engine.npz",
-        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_inertia_cross_engine.pdf",
-        "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py",
-        "scripts/research/proximal_distal_energy/run_articulated_inertia_cross_engine.py",
-        "scripts/research/proximal_distal_energy/make_articulated_inertia_cross_engine_figure.py",
-        "scripts/research/proximal_distal_energy/register_articulated_inertia_claims.py",
-        "tests/research/test_articulated_inertia_cross_engine.py"
-      ],
-      "model_domain": "Six synthetic profiles, three grip spans, 13 closed states per case, 20 scalar coordinates, and two native rigid-body engines.",
-      "uncertainty_boundary": "Compliant bilateral contact, detailed anatomy, equipment, ground, delivery, and governed human evidence remain open.",
-      "competing_explanations": [
-        "shared idealized spherical-body inertia specification",
-        "common-state comparison rather than trajectory integration",
-        "broad reduced-tree geometry and engineering joint bounds",
-        "finite-difference velocity and acceleration estimates"
-      ],
-      "negative_controls": [
-        "independent engine model assembly",
-        "mass-matrix symmetry gate",
-        "positive-definiteness eigenvalue gate",
-        "mass, bias, and inverse-dynamics operators checked separately",
-        "all 234 closed states retained"
-      ],
-      "falsifier": "A contact, anatomy, equipment, muscle, delivery, or human claim is attributed to common-state inertia parity alone.",
-      "adjudication": "All registered states pass the common-state native dynamics gates. The result is restricted to articulated rigid-body operator transport.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-15"
-    },
-    {
-      "claim_id": "PD-CLAIM-277",
-      "candidate_ids": [
-        "PD-CAND-69ce6fbe0b7ad718",
-        "PD-CAND-224641a8fdb8b3b0",
-        "PD-CAND-176a798e2ec65e4d"
-      ],
-      "statement": "Finite bilateral Kelvin-Voigt forces are projected through the hand and club Jacobians at all 234 closed states without direct club actuation.",
-      "classification": "subject_scaled_articulated_contact_projection_design",
-      "published_status": "complete_for_declared_same_state_matrix",
-      "audit_status": "articulated_contact_projection_power_geometry_and_initial_acceleration_checked",
-      "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:447",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:454",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:461"
-      ],
-      "evidence_artifacts": [
-        "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.json",
-        "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.npz",
-        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_contact_projection.pdf",
-        "scripts/research/proximal_distal_energy/articulated_contact_projection.py",
-        "scripts/research/proximal_distal_energy/run_articulated_contact_projection.py",
-        "scripts/research/proximal_distal_energy/make_articulated_contact_projection_figure.py",
-        "scripts/research/proximal_distal_energy/register_articulated_contact_projection_claims.py",
-        "tests/research/test_articulated_contact_projection.py"
-      ],
-      "model_domain": "Six synthetic profiles, three grip spans, 13 closed states per case, 20 scalar coordinates, finite point contact, and two native engines.",
-      "uncertainty_boundary": "The contact law, geometry, and perturbation are engineering values rather than participant or equipment calibration.",
-      "competing_explanations": [
-        "shared idealized Kelvin-Voigt contact law",
-        "same-state acceleration rather than forward integration",
-        "engineering segment and contact parameters",
-        "common analytical contact Jacobian projection"
-      ],
-      "negative_controls": [
-        "zero-preload closed-state control",
-        "exact action-reaction and virtual-power identities",
-        "non-positive damping power",
-        "coincident and reversed moment-arm controls",
-        "all 234 closed states retained"
-      ],
-      "falsifier": "Any force is prescribed independently of achieved contact state, action-reaction or virtual power fails, or a closed state is omitted.",
-      "adjudication": "All registered states pass the same-state contact-projection gates. The result is restricted to generalized force and initial acceleration.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-15"
-    },
-    {
-      "claim_id": "PD-CLAIM-278",
-      "candidate_ids": [
-        "PD-CAND-5b2520274461c1f1"
-      ],
-      "statement": "All 234 states pass contact, passivity, geometry-control, and native MuJoCo-Pinocchio initial-acceleration gates.",
-      "classification": "subject_scaled_articulated_contact_projection_result",
-      "published_status": "supported_at_declared_same_state_initial_acceleration_tier",
-      "audit_status": "articulated_contact_projection_power_geometry_and_initial_acceleration_checked",
-      "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:471"
-      ],
-      "evidence_artifacts": [
-        "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.json",
-        "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.npz",
-        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_contact_projection.pdf",
-        "scripts/research/proximal_distal_energy/articulated_contact_projection.py",
-        "scripts/research/proximal_distal_energy/run_articulated_contact_projection.py",
-        "scripts/research/proximal_distal_energy/make_articulated_contact_projection_figure.py",
-        "scripts/research/proximal_distal_energy/register_articulated_contact_projection_claims.py",
-        "tests/research/test_articulated_contact_projection.py"
-      ],
-      "model_domain": "Six synthetic profiles, three grip spans, 13 closed states per case, 20 scalar coordinates, finite point contact, and two native engines.",
-      "uncertainty_boundary": "The result is one same-state acceleration evaluation and contains no forward trajectory or accumulated work.",
-      "competing_explanations": [
-        "shared idealized Kelvin-Voigt contact law",
-        "same-state acceleration rather than forward integration",
-        "engineering segment and contact parameters",
-        "common analytical contact Jacobian projection"
-      ],
-      "negative_controls": [
-        "zero-preload closed-state control",
-        "exact action-reaction and virtual-power identities",
-        "non-positive damping power",
-        "coincident and reversed moment-arm controls",
-        "all 234 closed states retained"
-      ],
-      "falsifier": "Any reproduced state exceeds a registered residual or native acceleration tolerance.",
-      "adjudication": "All registered states pass the same-state contact-projection gates. The result is restricted to generalized force and initial acceleration.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-15"
-    },
-    {
-      "claim_id": "PD-CLAIM-279",
-      "candidate_ids": [
-        "PD-CAND-f54a05315d133b05"
-      ],
-      "statement": "The same-state contact-projection result does not establish forward contact, contact loss, delivery, anatomy, equipment, muscle action, human transfer, slack benefit, timing economy, or coaching strategy.",
-      "classification": "subject_scaled_articulated_contact_projection_inference_boundary",
-      "published_status": "explicitly_bounded",
-      "audit_status": "articulated_contact_projection_power_geometry_and_initial_acceleration_checked",
-      "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:478"
-      ],
-      "evidence_artifacts": [
-        "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.json",
-        "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.npz",
-        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_contact_projection.pdf",
-        "scripts/research/proximal_distal_energy/articulated_contact_projection.py",
-        "scripts/research/proximal_distal_energy/run_articulated_contact_projection.py",
-        "scripts/research/proximal_distal_energy/make_articulated_contact_projection_figure.py",
-        "scripts/research/proximal_distal_energy/register_articulated_contact_projection_claims.py",
-        "tests/research/test_articulated_contact_projection.py"
-      ],
-      "model_domain": "Six synthetic profiles, three grip spans, 13 closed states per case, 20 scalar coordinates, finite point contact, and two native engines.",
-      "uncertainty_boundary": "Forward integration, calibrated structure/contact, ground, and governed human evidence remain open.",
-      "competing_explanations": [
-        "shared idealized Kelvin-Voigt contact law",
-        "same-state acceleration rather than forward integration",
-        "engineering segment and contact parameters",
-        "common analytical contact Jacobian projection"
-      ],
-      "negative_controls": [
-        "zero-preload closed-state control",
-        "exact action-reaction and virtual-power identities",
-        "non-positive damping power",
-        "coincident and reversed moment-arm controls",
-        "all 234 closed states retained"
-      ],
-      "falsifier": "A trajectory, human, equipment, or strategy claim is attributed to this initial-acceleration gate alone.",
-      "adjudication": "All registered states pass the same-state contact-projection gates. The result is restricted to generalized force and initial acceleration.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-15"
-    },
-    {
       "claim_id": "PD-CLAIM-271",
       "candidate_ids": [
         "PD-CAND-89eca8d0cabc3372"
@@ -22674,134 +22416,6 @@
       "adjudication": "The executable atlas was regenerated from canonical anthropometrics and the shared spatial model; favorable rank and couple-scaling controls are retained alongside the adverse contact-closure result.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-14"
-    },
-    {
-      "claim_id": "PD-CLAIM-280",
-      "candidate_ids": [
-        "PD-CAND-1f7a6919ec787c86",
-        "PD-CAND-8064bb0d998454db"
-      ],
-      "statement": "A preregistered cross-profile, phase, adverse-control, refinement, and native-engine matrix advances the articulated bilateral-attachment model for five milliseconds without active torque or direct club actuation.",
-      "classification": "bounded_articulated_forward_contact_design",
-      "published_status": "complete_for_declared_bounded_matrix",
-      "audit_status": "bounded_articulated_forward_contact_refinement_and_adverse_controls_checked",
-      "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:488",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:497"
-      ],
-      "evidence_artifacts": [
-        "docs/research/proximal_distal_energy_transfer/data/articulated_forward_contact.json",
-        "docs/research/proximal_distal_energy_transfer/data/articulated_forward_contact.npz",
-        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_forward_contact.pdf",
-        "scripts/research/proximal_distal_energy/articulated_forward_contact.py",
-        "scripts/research/proximal_distal_energy/run_articulated_forward_contact.py",
-        "scripts/research/proximal_distal_energy/make_articulated_forward_contact_figure.py",
-        "scripts/research/proximal_distal_energy/register_articulated_forward_contact_claims.py",
-        "tests/research/test_articulated_forward_contact.py"
-      ],
-      "model_domain": "Six synthetic profiles, three grip spans, three closed-state phases, seven registered variants, three time steps, two native engines, and a five-millisecond forward horizon.",
-      "uncertainty_boundary": "The attachments, parameters, states, and retention threshold are synthetic engineering constructs.",
-      "competing_explanations": [
-        "bilateral idealized attachment rather than unilateral contact",
-        "short right-censored horizon",
-        "engineering stiffness, damping, and retention threshold",
-        "shared analytical contact projection and semi-implicit integrator"
-      ],
-      "negative_controls": [
-        "zero-preload branch",
-        "initial-velocity reversal",
-        "one-factor stiffness and damping perturbations",
-        "three-step refinement",
-        "independent native MuJoCo and Pinocchio operators"
-      ],
-      "falsifier": "A trajectory is omitted, an unregistered active drive is applied, or force is clipped without a typed event.",
-      "adjudication": "The registered bounded trajectories are reported with explicit right-censoring and no human or coaching inference.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-15"
-    },
-    {
-      "claim_id": "PD-CLAIM-281",
-      "candidate_ids": [
-        "PD-CAND-d3ebff0b0b01df4a"
-      ],
-      "statement": "The registered five-millisecond articulated trajectories pass attachment-retention, power, work-energy, refinement, and MuJoCo-Pinocchio parity gates.",
-      "classification": "bounded_articulated_forward_contact_result",
-      "published_status": "supported_at_declared_five_millisecond_synthetic_tier",
-      "audit_status": "bounded_articulated_forward_contact_refinement_and_adverse_controls_checked",
-      "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:525"
-      ],
-      "evidence_artifacts": [
-        "docs/research/proximal_distal_energy_transfer/data/articulated_forward_contact.json",
-        "docs/research/proximal_distal_energy_transfer/data/articulated_forward_contact.npz",
-        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_forward_contact.pdf",
-        "scripts/research/proximal_distal_energy/articulated_forward_contact.py",
-        "scripts/research/proximal_distal_energy/run_articulated_forward_contact.py",
-        "scripts/research/proximal_distal_energy/make_articulated_forward_contact_figure.py",
-        "scripts/research/proximal_distal_energy/register_articulated_forward_contact_claims.py",
-        "tests/research/test_articulated_forward_contact.py"
-      ],
-      "model_domain": "Six synthetic profiles, three grip spans, three closed-state phases, seven registered variants, three time steps, two native engines, and a five-millisecond forward horizon.",
-      "uncertainty_boundary": "The result is right-censored at five milliseconds and is not calibrated to anatomy, equipment, ground reaction, or human data.",
-      "competing_explanations": [
-        "bilateral idealized attachment rather than unilateral contact",
-        "short right-censored horizon",
-        "engineering stiffness, damping, and retention threshold",
-        "shared analytical contact projection and semi-implicit integrator"
-      ],
-      "negative_controls": [
-        "zero-preload branch",
-        "initial-velocity reversal",
-        "one-factor stiffness and damping perturbations",
-        "three-step refinement",
-        "independent native MuJoCo and Pinocchio operators"
-      ],
-      "falsifier": "Any reproduced trajectory exceeds a registered gate or refinement fails to reduce the worst energy residual.",
-      "adjudication": "The registered bounded trajectories are reported with explicit right-censoring and no human or coaching inference.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-15"
-    },
-    {
-      "claim_id": "PD-CLAIM-282",
-      "candidate_ids": [
-        "PD-CAND-a86c1bb981019bc9"
-      ],
-      "statement": "The bounded bilateral-attachment result does not establish late-downswing persistence, unilateral contact or slack, distributed grip or shaft behavior, muscle action, human transfer, timing economy, or coaching strategy.",
-      "classification": "bounded_articulated_forward_contact_inference_boundary",
-      "published_status": "explicitly_bounded",
-      "audit_status": "bounded_articulated_forward_contact_refinement_and_adverse_controls_checked",
-      "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:533"
-      ],
-      "evidence_artifacts": [
-        "docs/research/proximal_distal_energy_transfer/data/articulated_forward_contact.json",
-        "docs/research/proximal_distal_energy_transfer/data/articulated_forward_contact.npz",
-        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_forward_contact.pdf",
-        "scripts/research/proximal_distal_energy/articulated_forward_contact.py",
-        "scripts/research/proximal_distal_energy/run_articulated_forward_contact.py",
-        "scripts/research/proximal_distal_energy/make_articulated_forward_contact_figure.py",
-        "scripts/research/proximal_distal_energy/register_articulated_forward_contact_claims.py",
-        "tests/research/test_articulated_forward_contact.py"
-      ],
-      "model_domain": "Six synthetic profiles, three grip spans, three closed-state phases, seven registered variants, three time steps, two native engines, and a five-millisecond forward horizon.",
-      "uncertainty_boundary": "Longer horizons, typed unilateral slack, calibrated distributed structures, ground coupling, and governed bilateral human wrenches remain open.",
-      "competing_explanations": [
-        "bilateral idealized attachment rather than unilateral contact",
-        "short right-censored horizon",
-        "engineering stiffness, damping, and retention threshold",
-        "shared analytical contact projection and semi-implicit integrator"
-      ],
-      "negative_controls": [
-        "zero-preload branch",
-        "initial-velocity reversal",
-        "one-factor stiffness and damping perturbations",
-        "three-step refinement",
-        "independent native MuJoCo and Pinocchio operators"
-      ],
-      "falsifier": "A human, equipment, slack, late-downswing, or coaching claim is attributed to this five-millisecond synthetic screen alone.",
-      "adjudication": "The registered bounded trajectories are reported with explicit right-censoring and no human or coaching inference.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-15"
     },
     {
       "candidate_ids": [
@@ -24516,6 +24130,264 @@
       "last_verified_on": "2026-08-16"
     },
     {
+      "claim_id": "PD-CLAIM-277",
+      "candidate_ids": [
+        "PD-CAND-69ce6fbe0b7ad718",
+        "PD-CAND-224641a8fdb8b3b0",
+        "PD-CAND-176a798e2ec65e4d"
+      ],
+      "statement": "Finite bilateral Kelvin-Voigt forces are projected through the hand and club Jacobians at all 234 closed states without direct club actuation.",
+      "classification": "subject_scaled_articulated_contact_projection_design",
+      "published_status": "complete_for_declared_same_state_matrix",
+      "audit_status": "articulated_contact_projection_power_geometry_and_initial_acceleration_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:447",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:454",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:461"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_contact_projection.pdf",
+        "scripts/research/proximal_distal_energy/articulated_contact_projection.py",
+        "scripts/research/proximal_distal_energy/run_articulated_contact_projection.py",
+        "scripts/research/proximal_distal_energy/make_articulated_contact_projection_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_contact_projection_claims.py",
+        "tests/research/test_articulated_contact_projection.py"
+      ],
+      "model_domain": "Six synthetic profiles, three grip spans, 13 closed states per case, 20 scalar coordinates, finite point contact, and two native engines.",
+      "uncertainty_boundary": "The contact law, geometry, and perturbation are engineering values rather than participant or equipment calibration.",
+      "competing_explanations": [
+        "shared idealized Kelvin-Voigt contact law",
+        "same-state acceleration rather than forward integration",
+        "engineering segment and contact parameters",
+        "common analytical contact Jacobian projection"
+      ],
+      "negative_controls": [
+        "zero-preload closed-state control",
+        "exact action-reaction and virtual-power identities",
+        "non-positive damping power",
+        "coincident and reversed moment-arm controls",
+        "all 234 closed states retained"
+      ],
+      "falsifier": "Any force is prescribed independently of achieved contact state, action-reaction or virtual power fails, or a closed state is omitted.",
+      "adjudication": "All registered states pass the same-state contact-projection gates. The result is restricted to generalized force and initial acceleration.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "claim_id": "PD-CLAIM-278",
+      "candidate_ids": [
+        "PD-CAND-35d8bb45577d0eb4"
+      ],
+      "statement": "All 234 states pass contact, passivity, geometry-control, and native MuJoCo-Pinocchio initial-acceleration gates.",
+      "classification": "subject_scaled_articulated_contact_projection_result",
+      "published_status": "supported_at_declared_same_state_initial_acceleration_tier",
+      "audit_status": "articulated_contact_projection_power_geometry_and_initial_acceleration_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:471"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_contact_projection.pdf",
+        "scripts/research/proximal_distal_energy/articulated_contact_projection.py",
+        "scripts/research/proximal_distal_energy/run_articulated_contact_projection.py",
+        "scripts/research/proximal_distal_energy/make_articulated_contact_projection_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_contact_projection_claims.py",
+        "tests/research/test_articulated_contact_projection.py"
+      ],
+      "model_domain": "Six synthetic profiles, three grip spans, 13 closed states per case, 20 scalar coordinates, finite point contact, and two native engines.",
+      "uncertainty_boundary": "The result is one same-state acceleration evaluation and contains no forward trajectory or accumulated work.",
+      "competing_explanations": [
+        "shared idealized Kelvin-Voigt contact law",
+        "same-state acceleration rather than forward integration",
+        "engineering segment and contact parameters",
+        "common analytical contact Jacobian projection"
+      ],
+      "negative_controls": [
+        "zero-preload closed-state control",
+        "exact action-reaction and virtual-power identities",
+        "non-positive damping power",
+        "coincident and reversed moment-arm controls",
+        "all 234 closed states retained"
+      ],
+      "falsifier": "Any reproduced state exceeds a registered residual or native acceleration tolerance.",
+      "adjudication": "All registered states pass the same-state contact-projection gates. The result is restricted to generalized force and initial acceleration.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "claim_id": "PD-CLAIM-279",
+      "candidate_ids": [
+        "PD-CAND-f54a05315d133b05"
+      ],
+      "statement": "The same-state contact-projection result does not establish forward contact, contact loss, delivery, anatomy, equipment, muscle action, human transfer, slack benefit, timing economy, or coaching strategy.",
+      "classification": "subject_scaled_articulated_contact_projection_inference_boundary",
+      "published_status": "explicitly_bounded",
+      "audit_status": "articulated_contact_projection_power_geometry_and_initial_acceleration_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:478"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_contact_projection.pdf",
+        "scripts/research/proximal_distal_energy/articulated_contact_projection.py",
+        "scripts/research/proximal_distal_energy/run_articulated_contact_projection.py",
+        "scripts/research/proximal_distal_energy/make_articulated_contact_projection_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_contact_projection_claims.py",
+        "tests/research/test_articulated_contact_projection.py"
+      ],
+      "model_domain": "Six synthetic profiles, three grip spans, 13 closed states per case, 20 scalar coordinates, finite point contact, and two native engines.",
+      "uncertainty_boundary": "Forward integration, calibrated structure/contact, ground, and governed human evidence remain open.",
+      "competing_explanations": [
+        "shared idealized Kelvin-Voigt contact law",
+        "same-state acceleration rather than forward integration",
+        "engineering segment and contact parameters",
+        "common analytical contact Jacobian projection"
+      ],
+      "negative_controls": [
+        "zero-preload closed-state control",
+        "exact action-reaction and virtual-power identities",
+        "non-positive damping power",
+        "coincident and reversed moment-arm controls",
+        "all 234 closed states retained"
+      ],
+      "falsifier": "A trajectory, human, equipment, or strategy claim is attributed to this initial-acceleration gate alone.",
+      "adjudication": "All registered states pass the same-state contact-projection gates. The result is restricted to generalized force and initial acceleration.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "claim_id": "PD-CLAIM-280",
+      "candidate_ids": [
+        "PD-CAND-1f7a6919ec787c86",
+        "PD-CAND-8064bb0d998454db"
+      ],
+      "statement": "A preregistered cross-profile, phase, adverse-control, refinement, and native-engine matrix advances the articulated bilateral-attachment model for five milliseconds without active torque or direct club actuation.",
+      "classification": "bounded_articulated_forward_contact_design",
+      "published_status": "complete_for_declared_bounded_matrix",
+      "audit_status": "bounded_articulated_forward_contact_refinement_and_adverse_controls_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:488",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:497"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_forward_contact.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_forward_contact.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_forward_contact.pdf",
+        "scripts/research/proximal_distal_energy/articulated_forward_contact.py",
+        "scripts/research/proximal_distal_energy/run_articulated_forward_contact.py",
+        "scripts/research/proximal_distal_energy/make_articulated_forward_contact_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_forward_contact_claims.py",
+        "tests/research/test_articulated_forward_contact.py"
+      ],
+      "model_domain": "Six synthetic profiles, three grip spans, three closed-state phases, seven registered variants, three time steps, two native engines, and a five-millisecond forward horizon.",
+      "uncertainty_boundary": "The attachments, parameters, states, and retention threshold are synthetic engineering constructs.",
+      "competing_explanations": [
+        "bilateral idealized attachment rather than unilateral contact",
+        "short right-censored horizon",
+        "engineering stiffness, damping, and retention threshold",
+        "shared analytical contact projection and semi-implicit integrator"
+      ],
+      "negative_controls": [
+        "zero-preload branch",
+        "initial-velocity reversal",
+        "one-factor stiffness and damping perturbations",
+        "three-step refinement",
+        "independent native MuJoCo and Pinocchio operators"
+      ],
+      "falsifier": "A trajectory is omitted, an unregistered active drive is applied, or force is clipped without a typed event.",
+      "adjudication": "The registered bounded trajectories are reported with explicit right-censoring and no human or coaching inference.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "claim_id": "PD-CLAIM-281",
+      "candidate_ids": [
+        "PD-CAND-3c6a5316fbc2dc11"
+      ],
+      "statement": "The registered five-millisecond articulated trajectories pass attachment-retention, power, work-energy, refinement, and MuJoCo-Pinocchio parity gates.",
+      "classification": "bounded_articulated_forward_contact_result",
+      "published_status": "supported_at_declared_five_millisecond_synthetic_tier",
+      "audit_status": "bounded_articulated_forward_contact_refinement_and_adverse_controls_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:525"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_forward_contact.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_forward_contact.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_forward_contact.pdf",
+        "scripts/research/proximal_distal_energy/articulated_forward_contact.py",
+        "scripts/research/proximal_distal_energy/run_articulated_forward_contact.py",
+        "scripts/research/proximal_distal_energy/make_articulated_forward_contact_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_forward_contact_claims.py",
+        "tests/research/test_articulated_forward_contact.py"
+      ],
+      "model_domain": "Six synthetic profiles, three grip spans, three closed-state phases, seven registered variants, three time steps, two native engines, and a five-millisecond forward horizon.",
+      "uncertainty_boundary": "The result is right-censored at five milliseconds and is not calibrated to anatomy, equipment, ground reaction, or human data.",
+      "competing_explanations": [
+        "bilateral idealized attachment rather than unilateral contact",
+        "short right-censored horizon",
+        "engineering stiffness, damping, and retention threshold",
+        "shared analytical contact projection and semi-implicit integrator"
+      ],
+      "negative_controls": [
+        "zero-preload branch",
+        "initial-velocity reversal",
+        "one-factor stiffness and damping perturbations",
+        "three-step refinement",
+        "independent native MuJoCo and Pinocchio operators"
+      ],
+      "falsifier": "Any reproduced trajectory exceeds a registered gate or refinement fails to reduce the worst energy residual.",
+      "adjudication": "The registered bounded trajectories are reported with explicit right-censoring and no human or coaching inference.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "claim_id": "PD-CLAIM-282",
+      "candidate_ids": [
+        "PD-CAND-a86c1bb981019bc9"
+      ],
+      "statement": "The bounded bilateral-attachment result does not establish late-downswing persistence, unilateral contact or slack, distributed grip or shaft behavior, muscle action, human transfer, timing economy, or coaching strategy.",
+      "classification": "bounded_articulated_forward_contact_inference_boundary",
+      "published_status": "explicitly_bounded",
+      "audit_status": "bounded_articulated_forward_contact_refinement_and_adverse_controls_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:533"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_forward_contact.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_forward_contact.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_forward_contact.pdf",
+        "scripts/research/proximal_distal_energy/articulated_forward_contact.py",
+        "scripts/research/proximal_distal_energy/run_articulated_forward_contact.py",
+        "scripts/research/proximal_distal_energy/make_articulated_forward_contact_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_forward_contact_claims.py",
+        "tests/research/test_articulated_forward_contact.py"
+      ],
+      "model_domain": "Six synthetic profiles, three grip spans, three closed-state phases, seven registered variants, three time steps, two native engines, and a five-millisecond forward horizon.",
+      "uncertainty_boundary": "Longer horizons, typed unilateral slack, calibrated distributed structures, ground coupling, and governed bilateral human wrenches remain open.",
+      "competing_explanations": [
+        "bilateral idealized attachment rather than unilateral contact",
+        "short right-censored horizon",
+        "engineering stiffness, damping, and retention threshold",
+        "shared analytical contact projection and semi-implicit integrator"
+      ],
+      "negative_controls": [
+        "zero-preload branch",
+        "initial-velocity reversal",
+        "one-factor stiffness and damping perturbations",
+        "three-step refinement",
+        "independent native MuJoCo and Pinocchio operators"
+      ],
+      "falsifier": "A human, equipment, slack, late-downswing, or coaching claim is attributed to this five-millisecond synthetic screen alone.",
+      "adjudication": "The registered bounded trajectories are reported with explicit right-censoring and no human or coaching inference.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
       "claim_id": "PD-CLAIM-286",
       "candidate_ids": [
         "PD-CAND-76ea04ded2d830ea",
@@ -24523,7 +24395,7 @@
         "PD-CAND-1109890d6fa7a70a",
         "PD-CAND-f5a95edc89ff9322",
         "PD-CAND-42f3114a01bd2942",
-        "PD-CAND-043bebf7674017dd",
+        "PD-CAND-cad03c125b926c56",
         "PD-CAND-b48121dd9ea5996b"
       ],
       "statement": "A registered articulated atlas compares frictionless and equipment-provisional finite-friction one-, three-, and five-fiber tension grips with equal total stiffness/damping, complete velocity reversal, state-registered free lengths, and nested 4--50 ms horizons.",
@@ -24532,12 +24404,12 @@
       "audit_status": "distributed_grip_friction_horizon_and_events_checked",
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:606",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:648",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:655",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:617",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:626",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:630",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:642",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:657"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:664"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_grip_atlas.json",
@@ -24582,9 +24454,9 @@
     {
       "claim_id": "PD-CLAIM-287",
       "candidate_ids": [
-        "PD-CAND-4aee1cc3e2b54c5b",
+        "PD-CAND-7c67493aebb3d214",
         "PD-CAND-d65894f827877c37",
-        "PD-CAND-bcf7e266e79119d2",
+        "PD-CAND-3c77a7f14c1abbc5",
         "PD-CAND-b7b46260431e11bb"
       ],
       "statement": "All 576 nominal trajectories pass registered power, passivity, work-energy, geometry, refinement, and MuJoCo--Pinocchio gates through 50 ms; 24 disengaged-start probes contain opening and reattachment with exact active-set parity, finite-friction speed effects have mixed signs, and 144 ideal stick projections satisfy their velocity constraint with nonnegative kinetic-energy capture.",
@@ -24592,9 +24464,9 @@
       "published_status": "supported_through_declared_fifty_millisecond_synthetic_horizon",
       "audit_status": "distributed_grip_friction_horizon_and_events_checked",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:672",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:682",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:693",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:679",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:691",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:702",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:195"
       ],
       "evidence_artifacts": [
@@ -24648,7 +24520,7 @@
       "published_status": "explicitly_bounded",
       "audit_status": "distributed_grip_friction_horizon_and_events_checked",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:701",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:711",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:195"
       ],
       "evidence_artifacts": [
@@ -24690,6 +24562,134 @@
       "adjudication": "Discretization and active-set results are reported without assigning measured pressure, benefit, human intent, or coaching meaning.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-20"
+    },
+    {
+      "claim_id": "PD-CLAIM-274",
+      "candidate_ids": [
+        "PD-CAND-7e070a6970d80cd1",
+        "PD-CAND-0aa4b71d948b8837"
+      ],
+      "statement": "The articulated common-state gate independently assembles the same subject-scaled 20-coordinate tree in native MuJoCo and robotics Pinocchio at all 234 closed states.",
+      "classification": "subject_scaled_articulated_inertia_design",
+      "published_status": "complete_for_declared_common_state_matrix",
+      "audit_status": "native_articulated_mass_bias_inverse_dynamics_and_positive_definiteness_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:407",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:417"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_inertia_cross_engine.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_inertia_cross_engine.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_inertia_cross_engine.pdf",
+        "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py",
+        "scripts/research/proximal_distal_energy/run_articulated_inertia_cross_engine.py",
+        "scripts/research/proximal_distal_energy/make_articulated_inertia_cross_engine_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_inertia_claims.py",
+        "tests/research/test_articulated_inertia_cross_engine.py"
+      ],
+      "model_domain": "Six synthetic profiles, three grip spans, 13 closed states per case, 20 scalar coordinates, and two native rigid-body engines.",
+      "uncertainty_boundary": "Segment geometry and spherical inertias are engineering design values rather than participant-specific anatomy.",
+      "competing_explanations": [
+        "shared idealized spherical-body inertia specification",
+        "common-state comparison rather than trajectory integration",
+        "broad reduced-tree geometry and engineering joint bounds",
+        "finite-difference velocity and acceleration estimates"
+      ],
+      "negative_controls": [
+        "independent engine model assembly",
+        "mass-matrix symmetry gate",
+        "positive-definiteness eigenvalue gate",
+        "mass, bias, and inverse-dynamics operators checked separately",
+        "all 234 closed states retained"
+      ],
+      "falsifier": "Any closed state is omitted, model dimensions or joint order differ, or an engine does not use its named native operators.",
+      "adjudication": "All registered states pass the common-state native dynamics gates. The result is restricted to articulated rigid-body operator transport.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "claim_id": "PD-CLAIM-275",
+      "candidate_ids": [
+        "PD-CAND-87e213384de0e497"
+      ],
+      "statement": "All 234 states pass native mass-matrix, bias-force, inverse-dynamics, symmetry, and positive-definiteness gates.",
+      "classification": "subject_scaled_articulated_inertia_result",
+      "published_status": "supported_at_declared_common_state_rigid_body_tier",
+      "audit_status": "native_articulated_mass_bias_inverse_dynamics_and_positive_definiteness_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:428"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_inertia_cross_engine.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_inertia_cross_engine.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_inertia_cross_engine.pdf",
+        "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py",
+        "scripts/research/proximal_distal_energy/run_articulated_inertia_cross_engine.py",
+        "scripts/research/proximal_distal_energy/make_articulated_inertia_cross_engine_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_inertia_claims.py",
+        "tests/research/test_articulated_inertia_cross_engine.py"
+      ],
+      "model_domain": "Six synthetic profiles, three grip spans, 13 closed states per case, 20 scalar coordinates, and two native rigid-body engines.",
+      "uncertainty_boundary": "The result tests rigid-body operator agreement and does not advance contact or a delivery trajectory.",
+      "competing_explanations": [
+        "shared idealized spherical-body inertia specification",
+        "common-state comparison rather than trajectory integration",
+        "broad reduced-tree geometry and engineering joint bounds",
+        "finite-difference velocity and acceleration estimates"
+      ],
+      "negative_controls": [
+        "independent engine model assembly",
+        "mass-matrix symmetry gate",
+        "positive-definiteness eigenvalue gate",
+        "mass, bias, and inverse-dynamics operators checked separately",
+        "all 234 closed states retained"
+      ],
+      "falsifier": "Any reproduced state exceeds a registered relative tolerance, loses symmetry, or has a nonpositive mass-matrix eigenvalue.",
+      "adjudication": "All registered states pass the common-state native dynamics gates. The result is restricted to articulated rigid-body operator transport.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
+    },
+    {
+      "claim_id": "PD-CLAIM-276",
+      "candidate_ids": [
+        "PD-CAND-9655875f1ecca182"
+      ],
+      "statement": "Native articulated inertia parity does not establish forward contact, anatomy, grip or shaft behavior, muscles, human transfer, timing economy, slack benefit, or coaching strategy.",
+      "classification": "subject_scaled_articulated_inertia_inference_boundary",
+      "published_status": "explicitly_bounded",
+      "audit_status": "native_articulated_mass_bias_inverse_dynamics_and_positive_definiteness_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:436"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_inertia_cross_engine.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_inertia_cross_engine.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_inertia_cross_engine.pdf",
+        "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py",
+        "scripts/research/proximal_distal_energy/run_articulated_inertia_cross_engine.py",
+        "scripts/research/proximal_distal_energy/make_articulated_inertia_cross_engine_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_inertia_claims.py",
+        "tests/research/test_articulated_inertia_cross_engine.py"
+      ],
+      "model_domain": "Six synthetic profiles, three grip spans, 13 closed states per case, 20 scalar coordinates, and two native rigid-body engines.",
+      "uncertainty_boundary": "Compliant bilateral contact, detailed anatomy, equipment, ground, delivery, and governed human evidence remain open.",
+      "competing_explanations": [
+        "shared idealized spherical-body inertia specification",
+        "common-state comparison rather than trajectory integration",
+        "broad reduced-tree geometry and engineering joint bounds",
+        "finite-difference velocity and acceleration estimates"
+      ],
+      "negative_controls": [
+        "independent engine model assembly",
+        "mass-matrix symmetry gate",
+        "positive-definiteness eigenvalue gate",
+        "mass, bias, and inverse-dynamics operators checked separately",
+        "all 234 closed states retained"
+      ],
+      "falsifier": "A contact, anatomy, equipment, muscle, delivery, or human claim is attributed to common-state inertia parity alone.",
+      "adjudication": "All registered states pass the common-state native dynamics gates. The result is restricted to articulated rigid-body operator transport.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-15"
     }
   ]
 }
