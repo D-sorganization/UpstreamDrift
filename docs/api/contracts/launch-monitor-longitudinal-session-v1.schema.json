@@ -373,6 +373,57 @@
       "title": "LongitudinalMissingnessV1",
       "type": "object"
     },
+    "LongitudinalPlayerAssociationV1": {
+      "additionalProperties": false,
+      "properties": {
+        "direction": {
+          "enum": ["increasing", "decreasing", "flat", "unavailable"],
+          "title": "Direction",
+          "type": "string"
+        },
+        "estimate_per_order_unit": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Estimate Per Order Unit"
+        },
+        "player_id": {
+          "title": "Player Id",
+          "type": "string"
+        },
+        "reason_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason Code"
+        },
+        "session_count": {
+          "minimum": 0,
+          "title": "Session Count",
+          "type": "integer"
+        },
+        "state": {
+          "enum": ["available", "unavailable"],
+          "title": "State",
+          "type": "string"
+        }
+      },
+      "required": ["player_id", "session_count", "direction", "state"],
+      "title": "LongitudinalPlayerAssociationV1",
+      "type": "object"
+    },
     "LongitudinalSessionRequestV1": {
       "additionalProperties": false,
       "description": "Scientific choices for session-unit directional association.",
@@ -501,57 +552,6 @@
         }
       },
       "title": "OrderEvidenceV2",
-      "type": "object"
-    },
-    "PlayerAssociationV1": {
-      "additionalProperties": false,
-      "properties": {
-        "direction": {
-          "enum": ["increasing", "decreasing", "flat", "unavailable"],
-          "title": "Direction",
-          "type": "string"
-        },
-        "estimate_per_order_unit": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Estimate Per Order Unit"
-        },
-        "player_id": {
-          "title": "Player Id",
-          "type": "string"
-        },
-        "reason_code": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Reason Code"
-        },
-        "session_count": {
-          "minimum": 0,
-          "title": "Session Count",
-          "type": "integer"
-        },
-        "state": {
-          "enum": ["available", "unavailable"],
-          "title": "State",
-          "type": "string"
-        }
-      },
-      "required": ["player_id", "session_count", "direction", "state"],
-      "title": "PlayerAssociationV1",
       "type": "object"
     },
     "PlayerIdentityV2": {
@@ -885,7 +885,7 @@
     },
     "player_associations": {
       "items": {
-        "$ref": "#/$defs/PlayerAssociationV1"
+        "$ref": "#/$defs/LongitudinalPlayerAssociationV1"
       },
       "title": "Player Associations",
       "type": "array"

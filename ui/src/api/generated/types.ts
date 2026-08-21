@@ -1619,6 +1619,22 @@ export interface LoginResponse {
   user: UserResponse;
 }
 
+export interface LongitudinalClaimsV1 {
+  association_scope: "descriptive_directional";
+  primary_unit: "player_session_stratum";
+  shot_level_inference: boolean;
+  causal_improvement: boolean;
+  confounder_control_is_causal: boolean;
+}
+
+export interface LongitudinalDesignV1 {
+  primary_unit: "player_session_stratum";
+  session_aggregate: "mean" | "median";
+  strata: string[];
+  confounders: string[];
+  pooled_terms: string[];
+}
+
 export interface LongitudinalDimensionV1 {
   order_column: string;
   order_unit: string;
@@ -1627,6 +1643,66 @@ export interface LongitudinalDimensionV1 {
   trust_level: "explicit_user_attested" | "pseudonymous_stable" | "verified_external";
   evidence: string;
   min_samples: number;
+}
+
+export interface LongitudinalMissingnessV1 {
+  input_row_count: number;
+  included_shot_count: number;
+  session_cell_count: number;
+  excluded_by_reason: Record<string, number>;
+}
+
+export interface LongitudinalPlayerAssociationV1 {
+  player_id: string;
+  session_count: number;
+  estimate_per_order_unit?: number | null;
+  direction: "increasing" | "decreasing" | "flat" | "unavailable";
+  state: "available" | "unavailable";
+  reason_code?: string | null;
+}
+
+/**
+ * Bounded rows plus attested identity, order, and session-unit design.
+ */
+export interface LongitudinalSessionPayloadV1 {
+  records: Record<string, unknown>[];
+  request: LongitudinalSessionRequestV1;
+  context: AnalysisContextV2;
+}
+
+/**
+ * Scientific choices for session-unit directional association.
+ */
+export interface LongitudinalSessionRequestV1 {
+  metric: string;
+  direction: "higher_is_better" | "lower_is_better" | "descriptive_only";
+  session_aggregate: "mean" | "median";
+  strata: string[];
+  confounders: string[];
+  minimum_sessions_per_player: number;
+  minimum_player_clusters: number;
+  confidence_level: number;
+}
+
+/**
+ * Evidence-bearing result that never labels association as improvement.
+ */
+export interface LongitudinalSessionResultV1 {
+  contract_version: "launch-monitor-longitudinal-session/1.0.0";
+  status: "available" | "partial" | "unavailable";
+  request: LongitudinalSessionRequestV1;
+  design: LongitudinalDesignV1;
+  session_aggregates: SessionAggregateV1[];
+  player_associations: LongitudinalPlayerAssociationV1[];
+  pooled_association: PooledAssociationV1 | null;
+  availability: AvailabilityV2[];
+  missingness: LongitudinalMissingnessV1;
+  lineage: AnalysisLineageV2;
+  player_identity: PlayerIdentityV2;
+  session_identity: SessionIdentityV2;
+  order_evidence: OrderEvidenceV2;
+  claims?: LongitudinalClaimsV1;
+  warnings: string[];
 }
 
 export interface LongitudinalSummaryV1 {
@@ -1995,6 +2071,19 @@ export interface PlotTypesResponse {
   plot_types: PlotTypeInfo[];
 }
 
+export interface PooledAssociationV1 {
+  method: "player_fixed_effects_ols_clustered_by_player";
+  estimate_per_order_unit: number;
+  standard_error: number;
+  confidence_interval_low: number;
+  confidence_interval_high: number;
+  p_value: number;
+  confidence_level: number;
+  cluster_count: number;
+  session_cell_count: number;
+  uncertainty_state: "available";
+}
+
 /**
  * Request body for ``POST /realtime/publish``.
  */
@@ -2194,6 +2283,17 @@ export interface ScatterAnalysisResponse {
   total_simulations: number;
   average_distance_from_hole: number;
   make_percentage: number;
+}
+
+export interface SessionAggregateV1 {
+  player_id: string;
+  session_id: string;
+  order_value: number;
+  order_unit: string;
+  stratum: Record<string, string>;
+  shot_count: number;
+  metric_value: number;
+  confounder_values: Record<string, number>;
 }
 
 /**

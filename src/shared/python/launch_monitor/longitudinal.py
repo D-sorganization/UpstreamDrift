@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Literal
 
 import numpy as np
 import pandas as pd
@@ -259,7 +259,9 @@ def analyze_longitudinal_sessions(
         )
     )
     unavailable_count = sum(item.state == "unavailable" for item in availability)
-    status = "available" if unavailable_count == 0 else "partial"
+    status: Literal["available", "partial"] = (
+        "available" if unavailable_count == 0 else "partial"
+    )
     included_count = len(prepared)
     return LongitudinalSessionResultV1(
         status=status,

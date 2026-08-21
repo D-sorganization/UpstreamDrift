@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from math import sqrt
+from typing import Literal
 
 import numpy as np
 import pandas as pd
@@ -15,7 +16,7 @@ from src.shared.python.launch_monitor.longitudinal_types import (
 )
 
 
-def _direction(estimate: float) -> str:
+def _direction(estimate: float) -> Literal["increasing", "decreasing", "flat"]:
     if estimate > 1e-12:
         return "increasing"
     if estimate < -1e-12:
