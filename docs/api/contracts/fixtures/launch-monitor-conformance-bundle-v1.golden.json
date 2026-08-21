@@ -1,0 +1,3764 @@
+{
+  "bundle_sha256": "11010e9b5e01ec5b6f3b1ba39f95ba1ec387f20516d9961b16fe9c4f9e934370",
+  "bundle_version": "launch-monitor-analytics-conformance/1.0.0",
+  "data_classification": "synthetic_contract_fixture_no_private_rows",
+  "description": "Synthetic, data-free consumer outputs for canonical launch-monitor analytics; no observed or private shot rows are embedded.",
+  "input_records_embedded": false,
+  "scenarios": [
+    {
+      "analysis_kind": "analysis_v2",
+      "backing_records": [
+        {
+          "record_sha256": "a549d499d4da8cb11be8fa23362df184d7b2ef84916f3d60a7f43900e76f0665",
+          "session_id": null,
+          "shot_id": "analysis-0",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 0,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "9535b6cbc023bf9ee2166ed36658ed17ead5fa8d9ae01eb7196ed913cc1114f8",
+          "session_id": null,
+          "shot_id": "analysis-1",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 1,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "1a33c77d3083ca5a3600c203dccf35e33bdae22cb7bcb496ded7ee4b56b600d8",
+          "session_id": null,
+          "shot_id": "analysis-2",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 2,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "45738a96ab44d0629bbe8f31bad2172ab600a1f34491acc1c318930814d50440",
+          "session_id": null,
+          "shot_id": "analysis-3",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 3,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "99a73aa5389a59aba6db9e993218c002be5cf697dccaac3e0b7a9437b458f009",
+          "session_id": null,
+          "shot_id": "analysis-4",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 4,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "d4b6c6070cb8fad579e690203f88afba4481e2275f60a58c925822b716484faf",
+          "session_id": null,
+          "shot_id": "analysis-5",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 5,
+          "unlinked_reason": null
+        }
+      ],
+      "claims": {
+        "causal_inference": false,
+        "device_certification": false,
+        "device_emulation": false,
+        "vendor_comparison": "descriptive"
+      },
+      "description": "Synthetic analysis-v2 available result.",
+      "exclusions": {
+        "correlation_incomplete::club_speed": 0,
+        "regression_incomplete": 0
+      },
+      "expected_status": "available",
+      "order_evidence": {
+        "evidence": null,
+        "order_column": null,
+        "order_kind": null,
+        "trust_level": "not_provided",
+        "unit": null
+      },
+      "payload": {
+        "analysis": {
+          "contract_version": "1.0.0",
+          "correlations": [
+            {
+              "adjusted_p_value": 2.50579e-5,
+              "ci_lower": 0.9613613,
+              "ci_upper": 0.99957378,
+              "coefficient": 0.99591,
+              "method": "pearson",
+              "p_value": 2.50579e-5,
+              "predictor": "club_speed",
+              "sample_count": 6
+            }
+          ],
+          "dataset": {
+            "complete_row_count": 6,
+            "fingerprint_sha256": "a4a655908e84c03f36a43407f91541fb8699307ed071e6016bc54c9d37768d46",
+            "monitor_vendors": ["TrackMan"],
+            "observation_kinds": ["shot"],
+            "row_count": 6,
+            "selected_columns": ["ball_speed", "club_speed"],
+            "session_ids": []
+          },
+          "groups": [],
+          "regression": null,
+          "request": {
+            "allow_aggregate": false,
+            "analysis_mode": "correlation",
+            "confidence_level": 0.95,
+            "correlation_method": "pearson",
+            "group_by": null,
+            "min_samples": 4,
+            "missing_policy": "pairwise",
+            "outcome": "ball_speed",
+            "predictors": ["club_speed"]
+          },
+          "units": {
+            "ball_speed": "m/s",
+            "club_speed": "m/s"
+          },
+          "warnings": []
+        },
+        "availability": [
+          {
+            "message": null,
+            "observed_count": null,
+            "reason_code": null,
+            "required_count": null,
+            "result_path": "correlations.club_speed",
+            "state": "available"
+          }
+        ],
+        "claims": {
+          "causal_inference": false,
+          "device_certification": false,
+          "device_emulation": false,
+          "vendor_comparison": "descriptive"
+        },
+        "contract_version": "2.0.0",
+        "lineage": {
+          "authority": null,
+          "backing_records": [
+            {
+              "record_sha256": "a549d499d4da8cb11be8fa23362df184d7b2ef84916f3d60a7f43900e76f0665",
+              "session_id": null,
+              "shot_id": "analysis-0",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 0,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "9535b6cbc023bf9ee2166ed36658ed17ead5fa8d9ae01eb7196ed913cc1114f8",
+              "session_id": null,
+              "shot_id": "analysis-1",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 1,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "1a33c77d3083ca5a3600c203dccf35e33bdae22cb7bcb496ded7ee4b56b600d8",
+              "session_id": null,
+              "shot_id": "analysis-2",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 2,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "45738a96ab44d0629bbe8f31bad2172ab600a1f34491acc1c318930814d50440",
+              "session_id": null,
+              "shot_id": "analysis-3",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 3,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "99a73aa5389a59aba6db9e993218c002be5cf697dccaac3e0b7a9437b458f009",
+              "session_id": null,
+              "shot_id": "analysis-4",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 4,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "d4b6c6070cb8fad579e690203f88afba4481e2275f60a58c925822b716484faf",
+              "session_id": null,
+              "shot_id": "analysis-5",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 5,
+              "unlinked_reason": null
+            }
+          ],
+          "dataset_fingerprint_sha256": "a4a655908e84c03f36a43407f91541fb8699307ed071e6016bc54c9d37768d46",
+          "sources": [
+            {
+              "file_sha256": "8bd19219e6aff5e160a3fac62aea57aa766abbbdc3b8323db20f7ffb0bb308bf",
+              "rights_status": "public_redistributable",
+              "session_ids": [],
+              "source_id": "synthetic-conformance-source",
+              "source_uri": null
+            }
+          ],
+          "transformations": []
+        },
+        "missingness": {
+          "complete_row_count": 6,
+          "excluded_by_reason": {
+            "correlation_incomplete::club_speed": 0,
+            "regression_incomplete": 0
+          },
+          "input_row_count": 6,
+          "missing_by_variable": {
+            "ball_speed": 0,
+            "club_speed": 0
+          },
+          "non_numeric_by_variable": {
+            "ball_speed": 0,
+            "club_speed": 0
+          },
+          "policy": "pairwise"
+        },
+        "model_provenance": [],
+        "order_evidence": {
+          "evidence": null,
+          "order_column": null,
+          "order_kind": null,
+          "trust_level": "not_provided",
+          "unit": null
+        },
+        "player_identity": {
+          "evidence": null,
+          "identifier_column": null,
+          "trust_level": "not_provided"
+        },
+        "session_identity": {
+          "evidence": null,
+          "identifier_column": null,
+          "trust_level": "not_provided"
+        },
+        "status": "available",
+        "uncertainty": {
+          "assumptions": [
+            "Correlation does not establish causality.",
+            "OLS intervals assume an adequate linear model and independent errors.",
+            "Unmatched vendor samples are descriptive, not calibration evidence."
+          ],
+          "confidence_level": 0.95,
+          "correlation_interval": "fisher-z",
+          "multiplicity_adjustment": "benjamini-hochberg",
+          "regression_interval": "not_requested"
+        },
+        "units": {
+          "ball_speed": {
+            "authority": "canonical_registry",
+            "canonical_unit": "m/s",
+            "display_unit": "mph"
+          },
+          "club_speed": {
+            "authority": "canonical_registry",
+            "canonical_unit": "m/s",
+            "display_unit": "mph"
+          }
+        },
+        "vendor_provenance": [
+          {
+            "metric_statuses": {},
+            "models": ["synthetic-comparable"],
+            "row_count": 6,
+            "software_versions": ["fixture-1"],
+            "vendor": "TrackMan"
+          }
+        ],
+        "warnings": []
+      },
+      "player_identity": {
+        "evidence": null,
+        "identifier_column": null,
+        "trust_level": "not_provided"
+      },
+      "scenario_id": "analysis-v2-available",
+      "scenario_sha256": "99db507c2626708708fbd391b2205395b3dfb1e42922911fd1a3fdb4843db6bb",
+      "session_identity": {
+        "evidence": null,
+        "identifier_column": null,
+        "trust_level": "not_provided"
+      },
+      "sources": [
+        {
+          "file_sha256": "8bd19219e6aff5e160a3fac62aea57aa766abbbdc3b8323db20f7ffb0bb308bf",
+          "rights_status": "public_redistributable",
+          "session_ids": [],
+          "source_id": "synthetic-conformance-source",
+          "source_uri": null
+        }
+      ],
+      "units": {
+        "ball_speed": {
+          "authority": "canonical_registry",
+          "canonical_unit": "m/s",
+          "display_unit": "mph"
+        },
+        "club_speed": {
+          "authority": "canonical_registry",
+          "canonical_unit": "m/s",
+          "display_unit": "mph"
+        }
+      }
+    },
+    {
+      "analysis_kind": "analysis_v2",
+      "backing_records": [
+        {
+          "record_sha256": "a549d499d4da8cb11be8fa23362df184d7b2ef84916f3d60a7f43900e76f0665",
+          "session_id": null,
+          "shot_id": "analysis-0",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 0,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "9535b6cbc023bf9ee2166ed36658ed17ead5fa8d9ae01eb7196ed913cc1114f8",
+          "session_id": null,
+          "shot_id": "analysis-1",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 1,
+          "unlinked_reason": null
+        }
+      ],
+      "claims": {
+        "causal_inference": false,
+        "device_certification": false,
+        "device_emulation": false,
+        "vendor_comparison": "descriptive"
+      },
+      "description": "Synthetic analysis-v2 unavailable result.",
+      "exclusions": {
+        "correlation_incomplete::club_speed": 0,
+        "regression_incomplete": 0
+      },
+      "expected_status": "unavailable",
+      "order_evidence": {
+        "evidence": null,
+        "order_column": null,
+        "order_kind": null,
+        "trust_level": "not_provided",
+        "unit": null
+      },
+      "payload": {
+        "analysis": {
+          "contract_version": "1.0.0",
+          "correlations": [
+            {
+              "adjusted_p_value": null,
+              "ci_lower": null,
+              "ci_upper": null,
+              "coefficient": null,
+              "method": "pearson",
+              "p_value": null,
+              "predictor": "club_speed",
+              "sample_count": 2
+            }
+          ],
+          "dataset": {
+            "complete_row_count": 2,
+            "fingerprint_sha256": "461ce455fde995f1a420f0c769d2a118d87c44a6d8cde4845d0e138d9299582e",
+            "monitor_vendors": ["TrackMan"],
+            "observation_kinds": ["shot"],
+            "row_count": 2,
+            "selected_columns": ["ball_speed", "club_speed"],
+            "session_ids": []
+          },
+          "groups": [],
+          "regression": null,
+          "request": {
+            "allow_aggregate": false,
+            "analysis_mode": "correlation",
+            "confidence_level": 0.95,
+            "correlation_method": "pearson",
+            "group_by": null,
+            "min_samples": 4,
+            "missing_policy": "pairwise",
+            "outcome": "ball_speed",
+            "predictors": ["club_speed"]
+          },
+          "units": {
+            "ball_speed": "m/s",
+            "club_speed": "m/s"
+          },
+          "warnings": []
+        },
+        "availability": [
+          {
+            "message": "The complete pair count is below min_samples.",
+            "observed_count": 2,
+            "reason_code": "insufficient_samples",
+            "required_count": 4,
+            "result_path": "correlations.club_speed",
+            "state": "unavailable"
+          }
+        ],
+        "claims": {
+          "causal_inference": false,
+          "device_certification": false,
+          "device_emulation": false,
+          "vendor_comparison": "descriptive"
+        },
+        "contract_version": "2.0.0",
+        "lineage": {
+          "authority": null,
+          "backing_records": [
+            {
+              "record_sha256": "a549d499d4da8cb11be8fa23362df184d7b2ef84916f3d60a7f43900e76f0665",
+              "session_id": null,
+              "shot_id": "analysis-0",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 0,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "9535b6cbc023bf9ee2166ed36658ed17ead5fa8d9ae01eb7196ed913cc1114f8",
+              "session_id": null,
+              "shot_id": "analysis-1",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 1,
+              "unlinked_reason": null
+            }
+          ],
+          "dataset_fingerprint_sha256": "461ce455fde995f1a420f0c769d2a118d87c44a6d8cde4845d0e138d9299582e",
+          "sources": [
+            {
+              "file_sha256": "8bd19219e6aff5e160a3fac62aea57aa766abbbdc3b8323db20f7ffb0bb308bf",
+              "rights_status": "public_redistributable",
+              "session_ids": [],
+              "source_id": "synthetic-conformance-source",
+              "source_uri": null
+            }
+          ],
+          "transformations": []
+        },
+        "missingness": {
+          "complete_row_count": 2,
+          "excluded_by_reason": {
+            "correlation_incomplete::club_speed": 0,
+            "regression_incomplete": 0
+          },
+          "input_row_count": 2,
+          "missing_by_variable": {
+            "ball_speed": 0,
+            "club_speed": 0
+          },
+          "non_numeric_by_variable": {
+            "ball_speed": 0,
+            "club_speed": 0
+          },
+          "policy": "pairwise"
+        },
+        "model_provenance": [],
+        "order_evidence": {
+          "evidence": null,
+          "order_column": null,
+          "order_kind": null,
+          "trust_level": "not_provided",
+          "unit": null
+        },
+        "player_identity": {
+          "evidence": null,
+          "identifier_column": null,
+          "trust_level": "not_provided"
+        },
+        "session_identity": {
+          "evidence": null,
+          "identifier_column": null,
+          "trust_level": "not_provided"
+        },
+        "status": "unavailable",
+        "uncertainty": {
+          "assumptions": [
+            "Correlation does not establish causality.",
+            "OLS intervals assume an adequate linear model and independent errors.",
+            "Unmatched vendor samples are descriptive, not calibration evidence."
+          ],
+          "confidence_level": 0.95,
+          "correlation_interval": "fisher-z",
+          "multiplicity_adjustment": "benjamini-hochberg",
+          "regression_interval": "not_requested"
+        },
+        "units": {
+          "ball_speed": {
+            "authority": "canonical_registry",
+            "canonical_unit": "m/s",
+            "display_unit": "mph"
+          },
+          "club_speed": {
+            "authority": "canonical_registry",
+            "canonical_unit": "m/s",
+            "display_unit": "mph"
+          }
+        },
+        "vendor_provenance": [
+          {
+            "metric_statuses": {},
+            "models": ["synthetic-comparable"],
+            "row_count": 2,
+            "software_versions": ["fixture-1"],
+            "vendor": "TrackMan"
+          }
+        ],
+        "warnings": []
+      },
+      "player_identity": {
+        "evidence": null,
+        "identifier_column": null,
+        "trust_level": "not_provided"
+      },
+      "scenario_id": "analysis-v2-unavailable",
+      "scenario_sha256": "705e13547a0401a62eabff1ef71aaba814d7764a89c3a82f41b67bdfb66a0dd9",
+      "session_identity": {
+        "evidence": null,
+        "identifier_column": null,
+        "trust_level": "not_provided"
+      },
+      "sources": [
+        {
+          "file_sha256": "8bd19219e6aff5e160a3fac62aea57aa766abbbdc3b8323db20f7ffb0bb308bf",
+          "rights_status": "public_redistributable",
+          "session_ids": [],
+          "source_id": "synthetic-conformance-source",
+          "source_uri": null
+        }
+      ],
+      "units": {
+        "ball_speed": {
+          "authority": "canonical_registry",
+          "canonical_unit": "m/s",
+          "display_unit": "mph"
+        },
+        "club_speed": {
+          "authority": "canonical_registry",
+          "canonical_unit": "m/s",
+          "display_unit": "mph"
+        }
+      }
+    },
+    {
+      "analysis_kind": "player_covariation",
+      "backing_records": [
+        {
+          "record_sha256": "1e7e9ae8b5953b3855ea2e52dc8663cf5fca985a0219729da2d95fbac68396ed",
+          "session_id": null,
+          "shot_id": "covariation-0",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 0,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "572f2477fd8f9fd74aeaa2719ff8a859b97447a35cf7a5bb96e8e7daba138f08",
+          "session_id": null,
+          "shot_id": "covariation-1",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 1,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "5bd20bc3942c79c1f17a2b583b5568aaa4746f2c9ad27c243592c49fea040a66",
+          "session_id": null,
+          "shot_id": "covariation-2",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 2,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "d2e2901860f6807baf77ea728302358415e1754a78ab7c392d2d6fb5cc357c9f",
+          "session_id": null,
+          "shot_id": "covariation-3",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 3,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "0ab2dad3b29f886e63f8b790095858b435b6c3e7f553035857017e430ad8c8a3",
+          "session_id": null,
+          "shot_id": "covariation-4",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 4,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "bcb23163d958ec8a3dac6f50cb0f37bba142cdf409dbf4307cff7f8f9b0d9a30",
+          "session_id": null,
+          "shot_id": "covariation-5",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 5,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "31acc2fccef8e50e0047fd23ffd94e61803b41fdb1777c591331f829733b7f19",
+          "session_id": null,
+          "shot_id": "covariation-6",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 6,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "57d74759c2b0ecf90d99bb52b1530b871c3a72b89ff289bf78bfd600e8560f90",
+          "session_id": null,
+          "shot_id": "covariation-7",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 7,
+          "unlinked_reason": null
+        }
+      ],
+      "claims": {
+        "causal_inference": false,
+        "device_certification": false,
+        "device_emulation": false,
+        "vendor_comparison": "descriptive"
+      },
+      "description": "Synthetic player-covariation available result.",
+      "exclusions": {
+        "blank_player_identity": 0,
+        "pairwise_incomplete": 0
+      },
+      "expected_status": "available",
+      "order_evidence": {
+        "evidence": null,
+        "order_column": null,
+        "order_kind": null,
+        "trust_level": "not_provided",
+        "unit": null
+      },
+      "payload": {
+        "analysis_kind": "selected_pair",
+        "availability": [
+          {
+            "message": null,
+            "observed_count": null,
+            "reason_code": null,
+            "required_count": null,
+            "result_path": "pooled",
+            "state": "available"
+          },
+          {
+            "message": null,
+            "observed_count": null,
+            "reason_code": null,
+            "required_count": null,
+            "result_path": "within_player",
+            "state": "available"
+          },
+          {
+            "message": null,
+            "observed_count": null,
+            "reason_code": null,
+            "required_count": null,
+            "result_path": "between_player",
+            "state": "available"
+          },
+          {
+            "message": null,
+            "observed_count": null,
+            "reason_code": null,
+            "required_count": null,
+            "result_path": "per_player.0",
+            "state": "available"
+          },
+          {
+            "message": null,
+            "observed_count": null,
+            "reason_code": null,
+            "required_count": null,
+            "result_path": "per_player.1",
+            "state": "available"
+          },
+          {
+            "message": null,
+            "observed_count": null,
+            "reason_code": null,
+            "required_count": null,
+            "result_path": "meta_analysis",
+            "state": "available"
+          }
+        ],
+        "between_player": {
+          "ci_lower": null,
+          "ci_upper": null,
+          "group_count": 2,
+          "intercept": 0.0,
+          "pearson_r": 1.0,
+          "r_squared": 1.0,
+          "reason_code": null,
+          "sample_count": 2,
+          "slope": 1.0,
+          "spearman_r": 1.0,
+          "state": "available"
+        },
+        "claims": {
+          "causal_inference": false,
+          "device_certification": false,
+          "device_emulation": false,
+          "vendor_comparison": "descriptive"
+        },
+        "contract_version": "launch-monitor-player-covariation/1.0.0",
+        "definitions": {
+          "between_player": "Association between unweighted player means.",
+          "meta_analysis": "Fixed and DerSimonian-Laird random effects in Fisher-z space.",
+          "pooled": "Association across all pairwise-complete shots.",
+          "within_player": "Association after centering x and y by player."
+        },
+        "lineage": {
+          "authority": null,
+          "backing_records": [
+            {
+              "record_sha256": "1e7e9ae8b5953b3855ea2e52dc8663cf5fca985a0219729da2d95fbac68396ed",
+              "session_id": null,
+              "shot_id": "covariation-0",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 0,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "572f2477fd8f9fd74aeaa2719ff8a859b97447a35cf7a5bb96e8e7daba138f08",
+              "session_id": null,
+              "shot_id": "covariation-1",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 1,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "5bd20bc3942c79c1f17a2b583b5568aaa4746f2c9ad27c243592c49fea040a66",
+              "session_id": null,
+              "shot_id": "covariation-2",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 2,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "d2e2901860f6807baf77ea728302358415e1754a78ab7c392d2d6fb5cc357c9f",
+              "session_id": null,
+              "shot_id": "covariation-3",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 3,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "0ab2dad3b29f886e63f8b790095858b435b6c3e7f553035857017e430ad8c8a3",
+              "session_id": null,
+              "shot_id": "covariation-4",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 4,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "bcb23163d958ec8a3dac6f50cb0f37bba142cdf409dbf4307cff7f8f9b0d9a30",
+              "session_id": null,
+              "shot_id": "covariation-5",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 5,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "31acc2fccef8e50e0047fd23ffd94e61803b41fdb1777c591331f829733b7f19",
+              "session_id": null,
+              "shot_id": "covariation-6",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 6,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "57d74759c2b0ecf90d99bb52b1530b871c3a72b89ff289bf78bfd600e8560f90",
+              "session_id": null,
+              "shot_id": "covariation-7",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 7,
+              "unlinked_reason": null
+            }
+          ],
+          "dataset_fingerprint_sha256": "a12d605c5a62a708a11d350b3fc7d6ceda75b203d2807a62319e7d0baeb93fba",
+          "sources": [
+            {
+              "file_sha256": "563b7008368e9be1059904d6a617ab3304e56ccd5656e3b173e10d25c90655b9",
+              "rights_status": "public_redistributable",
+              "session_ids": [],
+              "source_id": "synthetic-conformance-source",
+              "source_uri": null
+            }
+          ],
+          "transformations": []
+        },
+        "meta_analysis": {
+          "contributor_count": 2,
+          "fixed_ci_lower": -0.99999994,
+          "fixed_ci_upper": -0.99998401,
+          "fixed_effect_r": -0.999999,
+          "i_squared_pct": 0.0,
+          "q_statistic": 0.0,
+          "random_ci_lower": -0.99999994,
+          "random_ci_upper": -0.99998401,
+          "random_effect_r": -0.999999,
+          "reason_code": null,
+          "state": "available",
+          "tau_squared": 0.0,
+          "total_sample_count": 8
+        },
+        "missingness": {
+          "eligible_player_count": 2,
+          "excluded_by_reason": {
+            "blank_player_identity": 0,
+            "pairwise_incomplete": 0
+          },
+          "excluded_player_count_by_reason": {},
+          "input_row_count": 8,
+          "missing_by_variable": {
+            "club_path": 0,
+            "face_angle": 0
+          },
+          "non_finite_by_variable": {
+            "club_path": 0,
+            "face_angle": 0
+          },
+          "non_numeric_by_variable": {
+            "club_path": 0,
+            "face_angle": 0
+          },
+          "pairwise_complete_row_count": 8,
+          "policy": "pairwise"
+        },
+        "per_player": [
+          {
+            "estimate": {
+              "ci_lower": -0.99999998,
+              "ci_upper": -0.9999496,
+              "group_count": 1,
+              "intercept": 3.0,
+              "pearson_r": -1.0,
+              "r_squared": 1.0,
+              "reason_code": null,
+              "sample_count": 4,
+              "slope": -1.0,
+              "spearman_r": -1.0,
+              "state": "available"
+            },
+            "fixed_weight": 0.5,
+            "player_id": "player-a",
+            "random_weight": 0.5
+          },
+          {
+            "estimate": {
+              "ci_lower": -0.99999998,
+              "ci_upper": -0.9999496,
+              "group_count": 1,
+              "intercept": 23.0,
+              "pearson_r": -1.0,
+              "r_squared": 1.0,
+              "reason_code": null,
+              "sample_count": 4,
+              "slope": -1.0,
+              "spearman_r": -1.0,
+              "state": "available"
+            },
+            "fixed_weight": 0.5,
+            "player_id": "player-b",
+            "random_weight": 0.5
+          }
+        ],
+        "player_identity": {
+          "evidence": "Synthetic fixture identities are attested by construction.",
+          "identifier_column": "player_id",
+          "trust_level": "explicit_user_attested"
+        },
+        "pooled": {
+          "ci_lower": 0.55206283,
+          "ci_upper": 0.98282422,
+          "group_count": 2,
+          "intercept": 0.61904762,
+          "pearson_r": 0.9047619,
+          "r_squared": 0.8185941,
+          "reason_code": null,
+          "sample_count": 8,
+          "slope": 0.9047619,
+          "spearman_r": 0.52380952,
+          "state": "available"
+        },
+        "request": {
+          "confidence_level": 0.95,
+          "min_samples": 4,
+          "player_column": "player_id",
+          "x_column": "face_angle",
+          "y_column": "club_path"
+        },
+        "status": "available",
+        "uncertainty": {
+          "assumptions": [
+            "Player effects are descriptive and do not establish causality.",
+            "Fisher-z intervals assume approximately independent observations.",
+            "The pooled interval is not adjusted for repeated shots by player.",
+            "DerSimonian-Laird estimates between-player effect heterogeneity.",
+            "Population generalization requires a representative player sample."
+          ],
+          "confidence_level": 0.95,
+          "fixed_effect_method": "inverse-variance-fisher-z",
+          "per_player_interval": "fisher-z",
+          "pooled_interval": "fisher-z-unclustered",
+          "random_effect_method": "dersimonian-laird-fisher-z",
+          "within_player_interval": "unavailable-clustered"
+        },
+        "units": {
+          "club_path": {
+            "authority": "canonical_registry",
+            "canonical_unit": "rad",
+            "display_unit": "deg"
+          },
+          "face_angle": {
+            "authority": "canonical_registry",
+            "canonical_unit": "rad",
+            "display_unit": "deg"
+          }
+        },
+        "vendor_provenance": [
+          {
+            "metric_statuses": {},
+            "models": ["synthetic-comparable"],
+            "row_count": 8,
+            "software_versions": ["fixture-1"],
+            "vendor": "Foresight"
+          }
+        ],
+        "warnings": [
+          "Associations are observational and do not establish causality.",
+          "Pooled and between-player estimates do not substitute for within-player effects.",
+          "Possible aggregation reversal: pooled and within-player Pearson correlations have opposite signs; inspect group structure."
+        ],
+        "within_player": {
+          "ci_lower": null,
+          "ci_upper": null,
+          "group_count": 2,
+          "intercept": 0.0,
+          "pearson_r": -1.0,
+          "r_squared": 1.0,
+          "reason_code": null,
+          "sample_count": 8,
+          "slope": -1.0,
+          "spearman_r": -1.0,
+          "state": "available"
+        }
+      },
+      "player_identity": {
+        "evidence": "Synthetic fixture identities are attested by construction.",
+        "identifier_column": "player_id",
+        "trust_level": "explicit_user_attested"
+      },
+      "scenario_id": "player-covariation-available",
+      "scenario_sha256": "5f668191279b736e5ab3e7f5b335c7ba73fcf59764c475c8aaa94f254b1e342c",
+      "session_identity": {
+        "evidence": null,
+        "identifier_column": null,
+        "trust_level": "not_provided"
+      },
+      "sources": [
+        {
+          "file_sha256": "563b7008368e9be1059904d6a617ab3304e56ccd5656e3b173e10d25c90655b9",
+          "rights_status": "public_redistributable",
+          "session_ids": [],
+          "source_id": "synthetic-conformance-source",
+          "source_uri": null
+        }
+      ],
+      "units": {
+        "club_path": {
+          "authority": "canonical_registry",
+          "canonical_unit": "rad",
+          "display_unit": "deg"
+        },
+        "face_angle": {
+          "authority": "canonical_registry",
+          "canonical_unit": "rad",
+          "display_unit": "deg"
+        }
+      }
+    },
+    {
+      "analysis_kind": "player_covariation",
+      "backing_records": [
+        {
+          "record_sha256": "1e7e9ae8b5953b3855ea2e52dc8663cf5fca985a0219729da2d95fbac68396ed",
+          "session_id": null,
+          "shot_id": "covariation-0",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 0,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "572f2477fd8f9fd74aeaa2719ff8a859b97447a35cf7a5bb96e8e7daba138f08",
+          "session_id": null,
+          "shot_id": "covariation-1",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 1,
+          "unlinked_reason": null
+        }
+      ],
+      "claims": {
+        "causal_inference": false,
+        "device_certification": false,
+        "device_emulation": false,
+        "vendor_comparison": "descriptive"
+      },
+      "description": "Synthetic player-covariation unavailable result.",
+      "exclusions": {
+        "blank_player_identity": 0,
+        "pairwise_incomplete": 0
+      },
+      "expected_status": "unavailable",
+      "order_evidence": {
+        "evidence": null,
+        "order_column": null,
+        "order_kind": null,
+        "trust_level": "not_provided",
+        "unit": null
+      },
+      "payload": {
+        "analysis_kind": "selected_pair",
+        "availability": [
+          {
+            "message": "pooled is unavailable: insufficient_samples.",
+            "observed_count": 2,
+            "reason_code": "insufficient_samples",
+            "required_count": 4,
+            "result_path": "pooled",
+            "state": "unavailable"
+          },
+          {
+            "message": "within_player is unavailable: insufficient_samples.",
+            "observed_count": 2,
+            "reason_code": "insufficient_samples",
+            "required_count": 4,
+            "result_path": "within_player",
+            "state": "unavailable"
+          },
+          {
+            "message": "between_player is unavailable: insufficient_groups.",
+            "observed_count": 1,
+            "reason_code": "insufficient_groups",
+            "required_count": 2,
+            "result_path": "between_player",
+            "state": "unavailable"
+          },
+          {
+            "message": "per_player.0 is unavailable: insufficient_samples.",
+            "observed_count": 2,
+            "reason_code": "insufficient_samples",
+            "required_count": 4,
+            "result_path": "per_player.0",
+            "state": "unavailable"
+          },
+          {
+            "message": "meta_analysis is unavailable: insufficient_eligible_players.",
+            "observed_count": 0,
+            "reason_code": "insufficient_eligible_players",
+            "required_count": 2,
+            "result_path": "meta_analysis",
+            "state": "unavailable"
+          }
+        ],
+        "between_player": {
+          "ci_lower": null,
+          "ci_upper": null,
+          "group_count": 1,
+          "intercept": null,
+          "pearson_r": null,
+          "r_squared": null,
+          "reason_code": "insufficient_groups",
+          "sample_count": 1,
+          "slope": null,
+          "spearman_r": null,
+          "state": "unavailable"
+        },
+        "claims": {
+          "causal_inference": false,
+          "device_certification": false,
+          "device_emulation": false,
+          "vendor_comparison": "descriptive"
+        },
+        "contract_version": "launch-monitor-player-covariation/1.0.0",
+        "definitions": {
+          "between_player": "Association between unweighted player means.",
+          "meta_analysis": "Fixed and DerSimonian-Laird random effects in Fisher-z space.",
+          "pooled": "Association across all pairwise-complete shots.",
+          "within_player": "Association after centering x and y by player."
+        },
+        "lineage": {
+          "authority": null,
+          "backing_records": [
+            {
+              "record_sha256": "1e7e9ae8b5953b3855ea2e52dc8663cf5fca985a0219729da2d95fbac68396ed",
+              "session_id": null,
+              "shot_id": "covariation-0",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 0,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "572f2477fd8f9fd74aeaa2719ff8a859b97447a35cf7a5bb96e8e7daba138f08",
+              "session_id": null,
+              "shot_id": "covariation-1",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 1,
+              "unlinked_reason": null
+            }
+          ],
+          "dataset_fingerprint_sha256": "d2dd3367b3263393ef8fde3bd0c4e28c8c6f6e549ec42b5f4b377347c1114286",
+          "sources": [
+            {
+              "file_sha256": "563b7008368e9be1059904d6a617ab3304e56ccd5656e3b173e10d25c90655b9",
+              "rights_status": "public_redistributable",
+              "session_ids": [],
+              "source_id": "synthetic-conformance-source",
+              "source_uri": null
+            }
+          ],
+          "transformations": []
+        },
+        "meta_analysis": {
+          "contributor_count": 0,
+          "fixed_ci_lower": null,
+          "fixed_ci_upper": null,
+          "fixed_effect_r": null,
+          "i_squared_pct": null,
+          "q_statistic": null,
+          "random_ci_lower": null,
+          "random_ci_upper": null,
+          "random_effect_r": null,
+          "reason_code": "insufficient_eligible_players",
+          "state": "unavailable",
+          "tau_squared": null,
+          "total_sample_count": 0
+        },
+        "missingness": {
+          "eligible_player_count": 0,
+          "excluded_by_reason": {
+            "blank_player_identity": 0,
+            "pairwise_incomplete": 0
+          },
+          "excluded_player_count_by_reason": {
+            "insufficient_samples": 1
+          },
+          "input_row_count": 2,
+          "missing_by_variable": {
+            "club_path": 0,
+            "face_angle": 0
+          },
+          "non_finite_by_variable": {
+            "club_path": 0,
+            "face_angle": 0
+          },
+          "non_numeric_by_variable": {
+            "club_path": 0,
+            "face_angle": 0
+          },
+          "pairwise_complete_row_count": 2,
+          "policy": "pairwise"
+        },
+        "per_player": [
+          {
+            "estimate": {
+              "ci_lower": null,
+              "ci_upper": null,
+              "group_count": 1,
+              "intercept": null,
+              "pearson_r": null,
+              "r_squared": null,
+              "reason_code": "insufficient_samples",
+              "sample_count": 2,
+              "slope": null,
+              "spearman_r": null,
+              "state": "unavailable"
+            },
+            "fixed_weight": null,
+            "player_id": "player-a",
+            "random_weight": null
+          }
+        ],
+        "player_identity": {
+          "evidence": "Synthetic fixture identities are attested by construction.",
+          "identifier_column": "player_id",
+          "trust_level": "explicit_user_attested"
+        },
+        "pooled": {
+          "ci_lower": null,
+          "ci_upper": null,
+          "group_count": 1,
+          "intercept": null,
+          "pearson_r": null,
+          "r_squared": null,
+          "reason_code": "insufficient_samples",
+          "sample_count": 2,
+          "slope": null,
+          "spearman_r": null,
+          "state": "unavailable"
+        },
+        "request": {
+          "confidence_level": 0.95,
+          "min_samples": 4,
+          "player_column": "player_id",
+          "x_column": "face_angle",
+          "y_column": "club_path"
+        },
+        "status": "unavailable",
+        "uncertainty": {
+          "assumptions": [
+            "Player effects are descriptive and do not establish causality.",
+            "Fisher-z intervals assume approximately independent observations.",
+            "The pooled interval is not adjusted for repeated shots by player.",
+            "DerSimonian-Laird estimates between-player effect heterogeneity.",
+            "Population generalization requires a representative player sample."
+          ],
+          "confidence_level": 0.95,
+          "fixed_effect_method": "inverse-variance-fisher-z",
+          "per_player_interval": "fisher-z",
+          "pooled_interval": "fisher-z-unclustered",
+          "random_effect_method": "dersimonian-laird-fisher-z",
+          "within_player_interval": "unavailable-clustered"
+        },
+        "units": {
+          "club_path": {
+            "authority": "canonical_registry",
+            "canonical_unit": "rad",
+            "display_unit": "deg"
+          },
+          "face_angle": {
+            "authority": "canonical_registry",
+            "canonical_unit": "rad",
+            "display_unit": "deg"
+          }
+        },
+        "vendor_provenance": [
+          {
+            "metric_statuses": {},
+            "models": ["synthetic-comparable"],
+            "row_count": 2,
+            "software_versions": ["fixture-1"],
+            "vendor": "Foresight"
+          }
+        ],
+        "warnings": [
+          "Associations are observational and do not establish causality.",
+          "Pooled and between-player estimates do not substitute for within-player effects.",
+          "1 players were excluded from Fisher-z synthesis.",
+          "Meta-analysis requires at least two eligible players."
+        ],
+        "within_player": {
+          "ci_lower": null,
+          "ci_upper": null,
+          "group_count": 1,
+          "intercept": null,
+          "pearson_r": null,
+          "r_squared": null,
+          "reason_code": "insufficient_samples",
+          "sample_count": 2,
+          "slope": null,
+          "spearman_r": null,
+          "state": "unavailable"
+        }
+      },
+      "player_identity": {
+        "evidence": "Synthetic fixture identities are attested by construction.",
+        "identifier_column": "player_id",
+        "trust_level": "explicit_user_attested"
+      },
+      "scenario_id": "player-covariation-unavailable",
+      "scenario_sha256": "b2c17cf33dfd4859a053c3b62eb25c7ef556129298a6d4a45012c64bf5a02f39",
+      "session_identity": {
+        "evidence": null,
+        "identifier_column": null,
+        "trust_level": "not_provided"
+      },
+      "sources": [
+        {
+          "file_sha256": "563b7008368e9be1059904d6a617ab3304e56ccd5656e3b173e10d25c90655b9",
+          "rights_status": "public_redistributable",
+          "session_ids": [],
+          "source_id": "synthetic-conformance-source",
+          "source_uri": null
+        }
+      ],
+      "units": {
+        "club_path": {
+          "authority": "canonical_registry",
+          "canonical_unit": "rad",
+          "display_unit": "deg"
+        },
+        "face_angle": {
+          "authority": "canonical_registry",
+          "canonical_unit": "rad",
+          "display_unit": "deg"
+        }
+      }
+    },
+    {
+      "analysis_kind": "attested_longitudinal",
+      "backing_records": [
+        {
+          "record_sha256": "ce27034b3c539abe7d4c3a3165966f7cf987895babc7d6590f681e2581876647",
+          "session_id": "p1-s1",
+          "shot_id": "p1-s1-1",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 1,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "6eb43cc0a09de8dda9d615aebb3bd7e8b34c686e9d5f26edf6f973dc68ba7c9d",
+          "session_id": "p1-s1",
+          "shot_id": "p1-s1-2",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 2,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "154441f143946c4d83770c0c4b7e5fc96307201ad0eb185c3e3309dd9284f186",
+          "session_id": "p1-s1",
+          "shot_id": "p1-s1-3",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 3,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "ff028d41aebf46efd7eefa7f24ff8591a73f30eed53917a39f7147355dc7232a",
+          "session_id": "p1-s2",
+          "shot_id": "p1-s2-1",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 4,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "39b3fc6676dd027c8d923809e4d7464e09d7f41c36b64ba307a656b59c58c392",
+          "session_id": "p1-s2",
+          "shot_id": "p1-s2-2",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 5,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "ac3b33a211dcf9d332964629220eceddda9e364faf545001b9db7e77c95e3c40",
+          "session_id": "p1-s2",
+          "shot_id": "p1-s2-3",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 6,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "40ed71408e44af3487a96d1983b24388b2ce3d5f41aea2d11b4998d023434c28",
+          "session_id": "p1-s3",
+          "shot_id": "p1-s3-1",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 7,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "5570b91dd275b7ff2e670f9485e0bde1464e541888691635ff7a26d5d49668b6",
+          "session_id": "p1-s3",
+          "shot_id": "p1-s3-2",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 8,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "80b7270f765a08085a994f5ba0285fb2f45ad29545e91a8e7f48481516fa347b",
+          "session_id": "p1-s3",
+          "shot_id": "p1-s3-3",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 9,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "1b030d2a4eebaac09be66cade7d250c43f916c3dd9de80b6b20f7a4d609754c9",
+          "session_id": "p2-s1",
+          "shot_id": "p2-s1-1",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 10,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "65b639c497b40e4214c8cace2fabac555d7109b0449c9ea335aa6572a193f6d6",
+          "session_id": "p2-s1",
+          "shot_id": "p2-s1-2",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 11,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "b6afc264947a40e3fd7ccf5150ac32cc5a1983554cff9610956e130b0eea87fa",
+          "session_id": "p2-s1",
+          "shot_id": "p2-s1-3",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 12,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "b61a7f21d48f1ac6380eabee85a41faab1d9fb94af71fa1aa6c1e2854fe34902",
+          "session_id": "p2-s2",
+          "shot_id": "p2-s2-1",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 13,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "f0a90892f82d82bf6158d92f8e84f06568b8f153ef6f021bc2b5aa50f0319f51",
+          "session_id": "p2-s2",
+          "shot_id": "p2-s2-2",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 14,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "9337a05c07921ad0a20d51f6ef6e2ea8969039a5b5d0ba14141c0579cf6125d2",
+          "session_id": "p2-s2",
+          "shot_id": "p2-s2-3",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 15,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "60333f0a6daa9685cef67aeb6a08564781148f43a558c5ddb9f5668695878600",
+          "session_id": "p2-s3",
+          "shot_id": "p2-s3-1",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 16,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "8445a0bca4545b11c43b45699bcff91d4cd8599c59ef6c3777eae6cb691b217f",
+          "session_id": "p2-s3",
+          "shot_id": "p2-s3-2",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 17,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "dbb775c5eb2c12db47d6e57eeb033834e54b0205fcff427c166b7ec32f90ca65",
+          "session_id": "p2-s3",
+          "shot_id": "p2-s3-3",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 18,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "59da719915821d0f6945e9b794fe937006932c73ba632d4e0bddee7f788deb6a",
+          "session_id": "p3-s1",
+          "shot_id": "p3-s1-1",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 19,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "d6f815bd6c70fa1b4c0b7db6e621c5175d44515604120dd1e57acad4ecff8c88",
+          "session_id": "p3-s1",
+          "shot_id": "p3-s1-2",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 20,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "5c120640c49d7d4683a56be51f6a29624f551b2a5c8cb93f052c913bb85b33dd",
+          "session_id": "p3-s1",
+          "shot_id": "p3-s1-3",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 21,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "a292d3d1a98b82b807503a2857d56db8fcf6283aa83a954805ab2358a9a7970d",
+          "session_id": "p3-s2",
+          "shot_id": "p3-s2-1",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 22,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "87a1efb041f046abbeb84fd25edb1dd73d77a1bc7cacfe0fc21959d5ce7074ae",
+          "session_id": "p3-s2",
+          "shot_id": "p3-s2-2",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 23,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "4e8551c292423760b2ba510bdd88c20fac42b3ca35412bd5b3f1af42a292490f",
+          "session_id": "p3-s2",
+          "shot_id": "p3-s2-3",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 24,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "04a6c1deb799cbcb94b0ae93edd994f1de0e0f141886711602ec8e384a868397",
+          "session_id": "p3-s3",
+          "shot_id": "p3-s3-1",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 25,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "cd499c9c9f0f7adce0d7e8a4632bff2c5d2f35927ed2f369823a069af39395b1",
+          "session_id": "p3-s3",
+          "shot_id": "p3-s3-2",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 26,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "dccca172c0eabc25ac94e1554900b070eaae2def7df9eb81a5f3e1157716e3d5",
+          "session_id": "p3-s3",
+          "shot_id": "p3-s3-3",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 27,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "6d04a3cb1e455e2d088757231cb04902eda586143b3351b8ba7d51da7b4e17a8",
+          "session_id": "p4-s1",
+          "shot_id": "p4-s1-1",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 28,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "4d29a58bbbb7847a3deed6902d532dab40982eb84d948bd36a01068011c4e7a2",
+          "session_id": "p4-s1",
+          "shot_id": "p4-s1-2",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 29,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "dc69722fdd72ca6df32f9e6811f2ca587cbdf0c86d752624006b2594326cb77b",
+          "session_id": "p4-s1",
+          "shot_id": "p4-s1-3",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 30,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "e0445f7c7b44eff3a2391014f5ab8dade1897600dfac8951ec4e95083f50383b",
+          "session_id": "p4-s2",
+          "shot_id": "p4-s2-1",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 31,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "57bb4639af4e7fe82b9fedbeff93c70e4e4470ca4314189996c5b3424699da62",
+          "session_id": "p4-s2",
+          "shot_id": "p4-s2-2",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 32,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "e106bc0f9d7a258d04ecd5184f28309753e35d4192fc4740931891ea91dbf9d0",
+          "session_id": "p4-s2",
+          "shot_id": "p4-s2-3",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 33,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "59486aa998cf8bfb8e194cc82c6cecd3f1dd9d0f17c0f819e2dce6b35213118b",
+          "session_id": "p4-s3",
+          "shot_id": "p4-s3-1",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 34,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "824b5728edf9469d3bf381e5232dc607f151b8e21bb5ad09703b4bd9bb9f77bb",
+          "session_id": "p4-s3",
+          "shot_id": "p4-s3-2",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 35,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "6658aba2e2c1855b54c9992e9c8b519993dc329e5d5b2794d0c4a34c3a21f66e",
+          "session_id": "p4-s3",
+          "shot_id": "p4-s3-3",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 36,
+          "unlinked_reason": null
+        }
+      ],
+      "claims": {
+        "association_scope": "descriptive_directional",
+        "causal_improvement": false,
+        "causal_inference": false,
+        "confounder_control_is_causal": false,
+        "primary_unit": "player_session_stratum",
+        "shot_level_inference": false
+      },
+      "description": "Synthetic attested-longitudinal available result.",
+      "exclusions": {
+        "incomplete_or_nonfinite_selected_fields": 0
+      },
+      "expected_status": "available",
+      "order_evidence": {
+        "evidence": "The fixture owner attests that session_number is chronological session order.",
+        "order_column": "session_number",
+        "order_kind": "ordinal",
+        "trust_level": "explicit_user_attested",
+        "unit": "session"
+      },
+      "payload": {
+        "availability": [
+          {
+            "message": null,
+            "observed_count": 3,
+            "reason_code": null,
+            "required_count": 3,
+            "result_path": "player_associations.player-1",
+            "state": "available"
+          },
+          {
+            "message": null,
+            "observed_count": 3,
+            "reason_code": null,
+            "required_count": 3,
+            "result_path": "player_associations.player-2",
+            "state": "available"
+          },
+          {
+            "message": null,
+            "observed_count": 3,
+            "reason_code": null,
+            "required_count": 3,
+            "result_path": "player_associations.player-3",
+            "state": "available"
+          },
+          {
+            "message": null,
+            "observed_count": 3,
+            "reason_code": null,
+            "required_count": 3,
+            "result_path": "player_associations.player-4",
+            "state": "available"
+          },
+          {
+            "message": null,
+            "observed_count": 4,
+            "reason_code": null,
+            "required_count": 4,
+            "result_path": "pooled_association",
+            "state": "available"
+          }
+        ],
+        "claims": {
+          "association_scope": "descriptive_directional",
+          "causal_improvement": false,
+          "confounder_control_is_causal": false,
+          "primary_unit": "player_session_stratum",
+          "shot_level_inference": false
+        },
+        "contract_version": "launch-monitor-longitudinal-session/1.0.0",
+        "design": {
+          "confounders": [],
+          "pooled_terms": [
+            "intercept",
+            "order_value",
+            "player_id_player-2",
+            "player_id_player-3",
+            "player_id_player-4"
+          ],
+          "primary_unit": "player_session_stratum",
+          "session_aggregate": "mean",
+          "strata": []
+        },
+        "lineage": {
+          "authority": {
+            "commit": null,
+            "dataset_id": "longitudinal-golden-v1",
+            "dataset_path": null,
+            "manifest_sha256": null,
+            "repository": null
+          },
+          "backing_records": [
+            {
+              "record_sha256": "ce27034b3c539abe7d4c3a3165966f7cf987895babc7d6590f681e2581876647",
+              "session_id": "p1-s1",
+              "shot_id": "p1-s1-1",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 1,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "6eb43cc0a09de8dda9d615aebb3bd7e8b34c686e9d5f26edf6f973dc68ba7c9d",
+              "session_id": "p1-s1",
+              "shot_id": "p1-s1-2",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 2,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "154441f143946c4d83770c0c4b7e5fc96307201ad0eb185c3e3309dd9284f186",
+              "session_id": "p1-s1",
+              "shot_id": "p1-s1-3",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 3,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "ff028d41aebf46efd7eefa7f24ff8591a73f30eed53917a39f7147355dc7232a",
+              "session_id": "p1-s2",
+              "shot_id": "p1-s2-1",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 4,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "39b3fc6676dd027c8d923809e4d7464e09d7f41c36b64ba307a656b59c58c392",
+              "session_id": "p1-s2",
+              "shot_id": "p1-s2-2",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 5,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "ac3b33a211dcf9d332964629220eceddda9e364faf545001b9db7e77c95e3c40",
+              "session_id": "p1-s2",
+              "shot_id": "p1-s2-3",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 6,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "40ed71408e44af3487a96d1983b24388b2ce3d5f41aea2d11b4998d023434c28",
+              "session_id": "p1-s3",
+              "shot_id": "p1-s3-1",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 7,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "5570b91dd275b7ff2e670f9485e0bde1464e541888691635ff7a26d5d49668b6",
+              "session_id": "p1-s3",
+              "shot_id": "p1-s3-2",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 8,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "80b7270f765a08085a994f5ba0285fb2f45ad29545e91a8e7f48481516fa347b",
+              "session_id": "p1-s3",
+              "shot_id": "p1-s3-3",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 9,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "1b030d2a4eebaac09be66cade7d250c43f916c3dd9de80b6b20f7a4d609754c9",
+              "session_id": "p2-s1",
+              "shot_id": "p2-s1-1",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 10,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "65b639c497b40e4214c8cace2fabac555d7109b0449c9ea335aa6572a193f6d6",
+              "session_id": "p2-s1",
+              "shot_id": "p2-s1-2",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 11,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "b6afc264947a40e3fd7ccf5150ac32cc5a1983554cff9610956e130b0eea87fa",
+              "session_id": "p2-s1",
+              "shot_id": "p2-s1-3",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 12,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "b61a7f21d48f1ac6380eabee85a41faab1d9fb94af71fa1aa6c1e2854fe34902",
+              "session_id": "p2-s2",
+              "shot_id": "p2-s2-1",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 13,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "f0a90892f82d82bf6158d92f8e84f06568b8f153ef6f021bc2b5aa50f0319f51",
+              "session_id": "p2-s2",
+              "shot_id": "p2-s2-2",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 14,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "9337a05c07921ad0a20d51f6ef6e2ea8969039a5b5d0ba14141c0579cf6125d2",
+              "session_id": "p2-s2",
+              "shot_id": "p2-s2-3",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 15,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "60333f0a6daa9685cef67aeb6a08564781148f43a558c5ddb9f5668695878600",
+              "session_id": "p2-s3",
+              "shot_id": "p2-s3-1",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 16,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "8445a0bca4545b11c43b45699bcff91d4cd8599c59ef6c3777eae6cb691b217f",
+              "session_id": "p2-s3",
+              "shot_id": "p2-s3-2",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 17,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "dbb775c5eb2c12db47d6e57eeb033834e54b0205fcff427c166b7ec32f90ca65",
+              "session_id": "p2-s3",
+              "shot_id": "p2-s3-3",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 18,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "59da719915821d0f6945e9b794fe937006932c73ba632d4e0bddee7f788deb6a",
+              "session_id": "p3-s1",
+              "shot_id": "p3-s1-1",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 19,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "d6f815bd6c70fa1b4c0b7db6e621c5175d44515604120dd1e57acad4ecff8c88",
+              "session_id": "p3-s1",
+              "shot_id": "p3-s1-2",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 20,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "5c120640c49d7d4683a56be51f6a29624f551b2a5c8cb93f052c913bb85b33dd",
+              "session_id": "p3-s1",
+              "shot_id": "p3-s1-3",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 21,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "a292d3d1a98b82b807503a2857d56db8fcf6283aa83a954805ab2358a9a7970d",
+              "session_id": "p3-s2",
+              "shot_id": "p3-s2-1",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 22,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "87a1efb041f046abbeb84fd25edb1dd73d77a1bc7cacfe0fc21959d5ce7074ae",
+              "session_id": "p3-s2",
+              "shot_id": "p3-s2-2",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 23,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "4e8551c292423760b2ba510bdd88c20fac42b3ca35412bd5b3f1af42a292490f",
+              "session_id": "p3-s2",
+              "shot_id": "p3-s2-3",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 24,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "04a6c1deb799cbcb94b0ae93edd994f1de0e0f141886711602ec8e384a868397",
+              "session_id": "p3-s3",
+              "shot_id": "p3-s3-1",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 25,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "cd499c9c9f0f7adce0d7e8a4632bff2c5d2f35927ed2f369823a069af39395b1",
+              "session_id": "p3-s3",
+              "shot_id": "p3-s3-2",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 26,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "dccca172c0eabc25ac94e1554900b070eaae2def7df9eb81a5f3e1157716e3d5",
+              "session_id": "p3-s3",
+              "shot_id": "p3-s3-3",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 27,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "6d04a3cb1e455e2d088757231cb04902eda586143b3351b8ba7d51da7b4e17a8",
+              "session_id": "p4-s1",
+              "shot_id": "p4-s1-1",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 28,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "4d29a58bbbb7847a3deed6902d532dab40982eb84d948bd36a01068011c4e7a2",
+              "session_id": "p4-s1",
+              "shot_id": "p4-s1-2",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 29,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "dc69722fdd72ca6df32f9e6811f2ca587cbdf0c86d752624006b2594326cb77b",
+              "session_id": "p4-s1",
+              "shot_id": "p4-s1-3",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 30,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "e0445f7c7b44eff3a2391014f5ab8dade1897600dfac8951ec4e95083f50383b",
+              "session_id": "p4-s2",
+              "shot_id": "p4-s2-1",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 31,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "57bb4639af4e7fe82b9fedbeff93c70e4e4470ca4314189996c5b3424699da62",
+              "session_id": "p4-s2",
+              "shot_id": "p4-s2-2",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 32,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "e106bc0f9d7a258d04ecd5184f28309753e35d4192fc4740931891ea91dbf9d0",
+              "session_id": "p4-s2",
+              "shot_id": "p4-s2-3",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 33,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "59486aa998cf8bfb8e194cc82c6cecd3f1dd9d0f17c0f819e2dce6b35213118b",
+              "session_id": "p4-s3",
+              "shot_id": "p4-s3-1",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 34,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "824b5728edf9469d3bf381e5232dc607f151b8e21bb5ad09703b4bd9bb9f77bb",
+              "session_id": "p4-s3",
+              "shot_id": "p4-s3-2",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 35,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "6658aba2e2c1855b54c9992e9c8b519993dc329e5d5b2794d0c4a34c3a21f66e",
+              "session_id": "p4-s3",
+              "shot_id": "p4-s3-3",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 36,
+              "unlinked_reason": null
+            }
+          ],
+          "dataset_fingerprint_sha256": "2a321fc7e9d20e3c56a07e650ebd7a85f28275e0d34394dfd314a1a58b807a11",
+          "sources": [
+            {
+              "file_sha256": "1a6f54bb3430eb152f9b8f2b5d508e2159fb4464d8981f2959ba5925d9b76096",
+              "rights_status": "public_redistributable",
+              "session_ids": [],
+              "source_id": "synthetic-conformance-source",
+              "source_uri": null
+            }
+          ],
+          "transformations": []
+        },
+        "missingness": {
+          "excluded_by_reason": {
+            "incomplete_or_nonfinite_selected_fields": 0
+          },
+          "included_shot_count": 36,
+          "input_row_count": 36,
+          "session_cell_count": 12
+        },
+        "order_evidence": {
+          "evidence": "The fixture owner attests that session_number is chronological session order.",
+          "order_column": "session_number",
+          "order_kind": "ordinal",
+          "trust_level": "explicit_user_attested",
+          "unit": "session"
+        },
+        "player_associations": [
+          {
+            "direction": "increasing",
+            "estimate_per_order_unit": 1.2,
+            "player_id": "player-1",
+            "reason_code": null,
+            "session_count": 3,
+            "state": "available"
+          },
+          {
+            "direction": "increasing",
+            "estimate_per_order_unit": 1.4,
+            "player_id": "player-2",
+            "reason_code": null,
+            "session_count": 3,
+            "state": "available"
+          },
+          {
+            "direction": "increasing",
+            "estimate_per_order_unit": 1.6,
+            "player_id": "player-3",
+            "reason_code": null,
+            "session_count": 3,
+            "state": "available"
+          },
+          {
+            "direction": "increasing",
+            "estimate_per_order_unit": 1.8,
+            "player_id": "player-4",
+            "reason_code": null,
+            "session_count": 3,
+            "state": "available"
+          }
+        ],
+        "player_identity": {
+          "evidence": "The fixture owner attests the stable pseudonymous player identifiers.",
+          "identifier_column": "player_id",
+          "trust_level": "explicit_user_attested"
+        },
+        "pooled_association": {
+          "cluster_count": 4,
+          "confidence_interval_high": 2.0150303,
+          "confidence_interval_low": 0.9849697,
+          "confidence_level": 0.95,
+          "estimate_per_order_unit": 1.5,
+          "method": "player_fixed_effects_ols_clustered_by_player",
+          "p_value": 0.0026577006,
+          "session_cell_count": 12,
+          "standard_error": 0.16183472,
+          "uncertainty_state": "available"
+        },
+        "request": {
+          "confidence_level": 0.95,
+          "confounders": [],
+          "direction": "higher_is_better",
+          "metric": "carry_distance",
+          "minimum_player_clusters": 4,
+          "minimum_sessions_per_player": 3,
+          "session_aggregate": "mean",
+          "strata": []
+        },
+        "session_aggregates": [
+          {
+            "confounder_values": {},
+            "metric_value": 11.2,
+            "order_unit": "session",
+            "order_value": 1.0,
+            "player_id": "player-1",
+            "session_id": "p1-s1",
+            "shot_count": 3,
+            "stratum": {}
+          },
+          {
+            "confounder_values": {},
+            "metric_value": 12.4,
+            "order_unit": "session",
+            "order_value": 2.0,
+            "player_id": "player-1",
+            "session_id": "p1-s2",
+            "shot_count": 3,
+            "stratum": {}
+          },
+          {
+            "confounder_values": {},
+            "metric_value": 13.6,
+            "order_unit": "session",
+            "order_value": 3.0,
+            "player_id": "player-1",
+            "session_id": "p1-s3",
+            "shot_count": 3,
+            "stratum": {}
+          },
+          {
+            "confounder_values": {},
+            "metric_value": 21.4,
+            "order_unit": "session",
+            "order_value": 1.0,
+            "player_id": "player-2",
+            "session_id": "p2-s1",
+            "shot_count": 3,
+            "stratum": {}
+          },
+          {
+            "confounder_values": {},
+            "metric_value": 22.8,
+            "order_unit": "session",
+            "order_value": 2.0,
+            "player_id": "player-2",
+            "session_id": "p2-s2",
+            "shot_count": 3,
+            "stratum": {}
+          },
+          {
+            "confounder_values": {},
+            "metric_value": 24.2,
+            "order_unit": "session",
+            "order_value": 3.0,
+            "player_id": "player-2",
+            "session_id": "p2-s3",
+            "shot_count": 3,
+            "stratum": {}
+          },
+          {
+            "confounder_values": {},
+            "metric_value": 31.6,
+            "order_unit": "session",
+            "order_value": 1.0,
+            "player_id": "player-3",
+            "session_id": "p3-s1",
+            "shot_count": 3,
+            "stratum": {}
+          },
+          {
+            "confounder_values": {},
+            "metric_value": 33.2,
+            "order_unit": "session",
+            "order_value": 2.0,
+            "player_id": "player-3",
+            "session_id": "p3-s2",
+            "shot_count": 3,
+            "stratum": {}
+          },
+          {
+            "confounder_values": {},
+            "metric_value": 34.8,
+            "order_unit": "session",
+            "order_value": 3.0,
+            "player_id": "player-3",
+            "session_id": "p3-s3",
+            "shot_count": 3,
+            "stratum": {}
+          },
+          {
+            "confounder_values": {},
+            "metric_value": 41.8,
+            "order_unit": "session",
+            "order_value": 1.0,
+            "player_id": "player-4",
+            "session_id": "p4-s1",
+            "shot_count": 3,
+            "stratum": {}
+          },
+          {
+            "confounder_values": {},
+            "metric_value": 43.6,
+            "order_unit": "session",
+            "order_value": 2.0,
+            "player_id": "player-4",
+            "session_id": "p4-s2",
+            "shot_count": 3,
+            "stratum": {}
+          },
+          {
+            "confounder_values": {},
+            "metric_value": 45.4,
+            "order_unit": "session",
+            "order_value": 3.0,
+            "player_id": "player-4",
+            "session_id": "p4-s3",
+            "shot_count": 3,
+            "stratum": {}
+          }
+        ],
+        "session_identity": {
+          "evidence": "The source export reports session boundaries.",
+          "identifier_column": "session_id",
+          "trust_level": "source_reported"
+        },
+        "status": "available",
+        "warnings": [
+          "Associations are descriptive and do not establish player improvement.",
+          "Shot rows were aggregated before inference to avoid pseudo-replication."
+        ]
+      },
+      "player_identity": {
+        "evidence": "The fixture owner attests the stable pseudonymous player identifiers.",
+        "identifier_column": "player_id",
+        "trust_level": "explicit_user_attested"
+      },
+      "scenario_id": "attested-longitudinal-available",
+      "scenario_sha256": "308db50efe345e76362adfe980eb34de3b3177e2fe2bbf1b3f42006e83d3eacd",
+      "session_identity": {
+        "evidence": "The source export reports session boundaries.",
+        "identifier_column": "session_id",
+        "trust_level": "source_reported"
+      },
+      "sources": [
+        {
+          "file_sha256": "1a6f54bb3430eb152f9b8f2b5d508e2159fb4464d8981f2959ba5925d9b76096",
+          "rights_status": "public_redistributable",
+          "session_ids": [],
+          "source_id": "synthetic-conformance-source",
+          "source_uri": null
+        }
+      ],
+      "units": {
+        "carry_distance": {
+          "authority": "source_declared",
+          "canonical_unit": "m",
+          "display_unit": "m"
+        }
+      }
+    },
+    {
+      "analysis_kind": "attested_longitudinal",
+      "backing_records": [
+        {
+          "record_sha256": "ce27034b3c539abe7d4c3a3165966f7cf987895babc7d6590f681e2581876647",
+          "session_id": "p1-s1",
+          "shot_id": "p1-s1-1",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 1,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "6eb43cc0a09de8dda9d615aebb3bd7e8b34c686e9d5f26edf6f973dc68ba7c9d",
+          "session_id": "p1-s1",
+          "shot_id": "p1-s1-2",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 2,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "154441f143946c4d83770c0c4b7e5fc96307201ad0eb185c3e3309dd9284f186",
+          "session_id": "p1-s1",
+          "shot_id": "p1-s1-3",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 3,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "ff028d41aebf46efd7eefa7f24ff8591a73f30eed53917a39f7147355dc7232a",
+          "session_id": "p1-s2",
+          "shot_id": "p1-s2-1",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 4,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "39b3fc6676dd027c8d923809e4d7464e09d7f41c36b64ba307a656b59c58c392",
+          "session_id": "p1-s2",
+          "shot_id": "p1-s2-2",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 5,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "ac3b33a211dcf9d332964629220eceddda9e364faf545001b9db7e77c95e3c40",
+          "session_id": "p1-s2",
+          "shot_id": "p1-s2-3",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 6,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "40ed71408e44af3487a96d1983b24388b2ce3d5f41aea2d11b4998d023434c28",
+          "session_id": "p1-s3",
+          "shot_id": "p1-s3-1",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 7,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "5570b91dd275b7ff2e670f9485e0bde1464e541888691635ff7a26d5d49668b6",
+          "session_id": "p1-s3",
+          "shot_id": "p1-s3-2",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 8,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "80b7270f765a08085a994f5ba0285fb2f45ad29545e91a8e7f48481516fa347b",
+          "session_id": "p1-s3",
+          "shot_id": "p1-s3-3",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 9,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "1b030d2a4eebaac09be66cade7d250c43f916c3dd9de80b6b20f7a4d609754c9",
+          "session_id": "p2-s1",
+          "shot_id": "p2-s1-1",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 10,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "65b639c497b40e4214c8cace2fabac555d7109b0449c9ea335aa6572a193f6d6",
+          "session_id": "p2-s1",
+          "shot_id": "p2-s1-2",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 11,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "b6afc264947a40e3fd7ccf5150ac32cc5a1983554cff9610956e130b0eea87fa",
+          "session_id": "p2-s1",
+          "shot_id": "p2-s1-3",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 12,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "b61a7f21d48f1ac6380eabee85a41faab1d9fb94af71fa1aa6c1e2854fe34902",
+          "session_id": "p2-s2",
+          "shot_id": "p2-s2-1",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 13,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "f0a90892f82d82bf6158d92f8e84f06568b8f153ef6f021bc2b5aa50f0319f51",
+          "session_id": "p2-s2",
+          "shot_id": "p2-s2-2",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 14,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "9337a05c07921ad0a20d51f6ef6e2ea8969039a5b5d0ba14141c0579cf6125d2",
+          "session_id": "p2-s2",
+          "shot_id": "p2-s2-3",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 15,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "60333f0a6daa9685cef67aeb6a08564781148f43a558c5ddb9f5668695878600",
+          "session_id": "p2-s3",
+          "shot_id": "p2-s3-1",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 16,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "8445a0bca4545b11c43b45699bcff91d4cd8599c59ef6c3777eae6cb691b217f",
+          "session_id": "p2-s3",
+          "shot_id": "p2-s3-2",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 17,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "dbb775c5eb2c12db47d6e57eeb033834e54b0205fcff427c166b7ec32f90ca65",
+          "session_id": "p2-s3",
+          "shot_id": "p2-s3-3",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 18,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "59da719915821d0f6945e9b794fe937006932c73ba632d4e0bddee7f788deb6a",
+          "session_id": "p3-s1",
+          "shot_id": "p3-s1-1",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 19,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "d6f815bd6c70fa1b4c0b7db6e621c5175d44515604120dd1e57acad4ecff8c88",
+          "session_id": "p3-s1",
+          "shot_id": "p3-s1-2",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 20,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "5c120640c49d7d4683a56be51f6a29624f551b2a5c8cb93f052c913bb85b33dd",
+          "session_id": "p3-s1",
+          "shot_id": "p3-s1-3",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 21,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "a292d3d1a98b82b807503a2857d56db8fcf6283aa83a954805ab2358a9a7970d",
+          "session_id": "p3-s2",
+          "shot_id": "p3-s2-1",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 22,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "87a1efb041f046abbeb84fd25edb1dd73d77a1bc7cacfe0fc21959d5ce7074ae",
+          "session_id": "p3-s2",
+          "shot_id": "p3-s2-2",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 23,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "4e8551c292423760b2ba510bdd88c20fac42b3ca35412bd5b3f1af42a292490f",
+          "session_id": "p3-s2",
+          "shot_id": "p3-s2-3",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 24,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "04a6c1deb799cbcb94b0ae93edd994f1de0e0f141886711602ec8e384a868397",
+          "session_id": "p3-s3",
+          "shot_id": "p3-s3-1",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 25,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "cd499c9c9f0f7adce0d7e8a4632bff2c5d2f35927ed2f369823a069af39395b1",
+          "session_id": "p3-s3",
+          "shot_id": "p3-s3-2",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 26,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "dccca172c0eabc25ac94e1554900b070eaae2def7df9eb81a5f3e1157716e3d5",
+          "session_id": "p3-s3",
+          "shot_id": "p3-s3-3",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 27,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "6d04a3cb1e455e2d088757231cb04902eda586143b3351b8ba7d51da7b4e17a8",
+          "session_id": "p4-s1",
+          "shot_id": "p4-s1-1",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 28,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "4d29a58bbbb7847a3deed6902d532dab40982eb84d948bd36a01068011c4e7a2",
+          "session_id": "p4-s1",
+          "shot_id": "p4-s1-2",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 29,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "dc69722fdd72ca6df32f9e6811f2ca587cbdf0c86d752624006b2594326cb77b",
+          "session_id": "p4-s1",
+          "shot_id": "p4-s1-3",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 30,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "e0445f7c7b44eff3a2391014f5ab8dade1897600dfac8951ec4e95083f50383b",
+          "session_id": "p4-s2",
+          "shot_id": "p4-s2-1",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 31,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "57bb4639af4e7fe82b9fedbeff93c70e4e4470ca4314189996c5b3424699da62",
+          "session_id": "p4-s2",
+          "shot_id": "p4-s2-2",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 32,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "e106bc0f9d7a258d04ecd5184f28309753e35d4192fc4740931891ea91dbf9d0",
+          "session_id": "p4-s2",
+          "shot_id": "p4-s2-3",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 33,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "59486aa998cf8bfb8e194cc82c6cecd3f1dd9d0f17c0f819e2dce6b35213118b",
+          "session_id": "p4-s3",
+          "shot_id": "p4-s3-1",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 34,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "824b5728edf9469d3bf381e5232dc607f151b8e21bb5ad09703b4bd9bb9f77bb",
+          "session_id": "p4-s3",
+          "shot_id": "p4-s3-2",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 35,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "6658aba2e2c1855b54c9992e9c8b519993dc329e5d5b2794d0c4a34c3a21f66e",
+          "session_id": "p4-s3",
+          "shot_id": "p4-s3-3",
+          "source_id": "synthetic-conformance-source",
+          "source_row": 36,
+          "unlinked_reason": null
+        }
+      ],
+      "claims": {
+        "association_scope": "descriptive_directional",
+        "causal_improvement": false,
+        "causal_inference": false,
+        "confounder_control_is_causal": false,
+        "primary_unit": "player_session_stratum",
+        "shot_level_inference": false
+      },
+      "description": "Synthetic attested-longitudinal unavailable result.",
+      "exclusions": {},
+      "expected_status": "unavailable",
+      "order_evidence": {
+        "evidence": "The fixture owner attests that session_number is chronological session order.",
+        "order_column": "session_number",
+        "order_kind": "ordinal",
+        "trust_level": "untrusted_inferred",
+        "unit": "session"
+      },
+      "payload": {
+        "availability": [
+          {
+            "message": "The attested longitudinal design could not be qualified.",
+            "observed_count": null,
+            "reason_code": "untrusted_order_evidence",
+            "required_count": null,
+            "result_path": "analysis",
+            "state": "unavailable"
+          }
+        ],
+        "claims": {
+          "association_scope": "descriptive_directional",
+          "causal_improvement": false,
+          "confounder_control_is_causal": false,
+          "primary_unit": "player_session_stratum",
+          "shot_level_inference": false
+        },
+        "contract_version": "launch-monitor-longitudinal-session/1.0.0",
+        "design": {
+          "confounders": [],
+          "pooled_terms": [],
+          "primary_unit": "player_session_stratum",
+          "session_aggregate": "mean",
+          "strata": []
+        },
+        "lineage": {
+          "authority": {
+            "commit": null,
+            "dataset_id": "longitudinal-golden-v1",
+            "dataset_path": null,
+            "manifest_sha256": null,
+            "repository": null
+          },
+          "backing_records": [
+            {
+              "record_sha256": "ce27034b3c539abe7d4c3a3165966f7cf987895babc7d6590f681e2581876647",
+              "session_id": "p1-s1",
+              "shot_id": "p1-s1-1",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 1,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "6eb43cc0a09de8dda9d615aebb3bd7e8b34c686e9d5f26edf6f973dc68ba7c9d",
+              "session_id": "p1-s1",
+              "shot_id": "p1-s1-2",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 2,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "154441f143946c4d83770c0c4b7e5fc96307201ad0eb185c3e3309dd9284f186",
+              "session_id": "p1-s1",
+              "shot_id": "p1-s1-3",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 3,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "ff028d41aebf46efd7eefa7f24ff8591a73f30eed53917a39f7147355dc7232a",
+              "session_id": "p1-s2",
+              "shot_id": "p1-s2-1",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 4,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "39b3fc6676dd027c8d923809e4d7464e09d7f41c36b64ba307a656b59c58c392",
+              "session_id": "p1-s2",
+              "shot_id": "p1-s2-2",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 5,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "ac3b33a211dcf9d332964629220eceddda9e364faf545001b9db7e77c95e3c40",
+              "session_id": "p1-s2",
+              "shot_id": "p1-s2-3",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 6,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "40ed71408e44af3487a96d1983b24388b2ce3d5f41aea2d11b4998d023434c28",
+              "session_id": "p1-s3",
+              "shot_id": "p1-s3-1",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 7,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "5570b91dd275b7ff2e670f9485e0bde1464e541888691635ff7a26d5d49668b6",
+              "session_id": "p1-s3",
+              "shot_id": "p1-s3-2",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 8,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "80b7270f765a08085a994f5ba0285fb2f45ad29545e91a8e7f48481516fa347b",
+              "session_id": "p1-s3",
+              "shot_id": "p1-s3-3",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 9,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "1b030d2a4eebaac09be66cade7d250c43f916c3dd9de80b6b20f7a4d609754c9",
+              "session_id": "p2-s1",
+              "shot_id": "p2-s1-1",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 10,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "65b639c497b40e4214c8cace2fabac555d7109b0449c9ea335aa6572a193f6d6",
+              "session_id": "p2-s1",
+              "shot_id": "p2-s1-2",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 11,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "b6afc264947a40e3fd7ccf5150ac32cc5a1983554cff9610956e130b0eea87fa",
+              "session_id": "p2-s1",
+              "shot_id": "p2-s1-3",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 12,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "b61a7f21d48f1ac6380eabee85a41faab1d9fb94af71fa1aa6c1e2854fe34902",
+              "session_id": "p2-s2",
+              "shot_id": "p2-s2-1",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 13,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "f0a90892f82d82bf6158d92f8e84f06568b8f153ef6f021bc2b5aa50f0319f51",
+              "session_id": "p2-s2",
+              "shot_id": "p2-s2-2",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 14,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "9337a05c07921ad0a20d51f6ef6e2ea8969039a5b5d0ba14141c0579cf6125d2",
+              "session_id": "p2-s2",
+              "shot_id": "p2-s2-3",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 15,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "60333f0a6daa9685cef67aeb6a08564781148f43a558c5ddb9f5668695878600",
+              "session_id": "p2-s3",
+              "shot_id": "p2-s3-1",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 16,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "8445a0bca4545b11c43b45699bcff91d4cd8599c59ef6c3777eae6cb691b217f",
+              "session_id": "p2-s3",
+              "shot_id": "p2-s3-2",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 17,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "dbb775c5eb2c12db47d6e57eeb033834e54b0205fcff427c166b7ec32f90ca65",
+              "session_id": "p2-s3",
+              "shot_id": "p2-s3-3",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 18,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "59da719915821d0f6945e9b794fe937006932c73ba632d4e0bddee7f788deb6a",
+              "session_id": "p3-s1",
+              "shot_id": "p3-s1-1",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 19,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "d6f815bd6c70fa1b4c0b7db6e621c5175d44515604120dd1e57acad4ecff8c88",
+              "session_id": "p3-s1",
+              "shot_id": "p3-s1-2",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 20,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "5c120640c49d7d4683a56be51f6a29624f551b2a5c8cb93f052c913bb85b33dd",
+              "session_id": "p3-s1",
+              "shot_id": "p3-s1-3",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 21,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "a292d3d1a98b82b807503a2857d56db8fcf6283aa83a954805ab2358a9a7970d",
+              "session_id": "p3-s2",
+              "shot_id": "p3-s2-1",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 22,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "87a1efb041f046abbeb84fd25edb1dd73d77a1bc7cacfe0fc21959d5ce7074ae",
+              "session_id": "p3-s2",
+              "shot_id": "p3-s2-2",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 23,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "4e8551c292423760b2ba510bdd88c20fac42b3ca35412bd5b3f1af42a292490f",
+              "session_id": "p3-s2",
+              "shot_id": "p3-s2-3",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 24,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "04a6c1deb799cbcb94b0ae93edd994f1de0e0f141886711602ec8e384a868397",
+              "session_id": "p3-s3",
+              "shot_id": "p3-s3-1",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 25,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "cd499c9c9f0f7adce0d7e8a4632bff2c5d2f35927ed2f369823a069af39395b1",
+              "session_id": "p3-s3",
+              "shot_id": "p3-s3-2",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 26,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "dccca172c0eabc25ac94e1554900b070eaae2def7df9eb81a5f3e1157716e3d5",
+              "session_id": "p3-s3",
+              "shot_id": "p3-s3-3",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 27,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "6d04a3cb1e455e2d088757231cb04902eda586143b3351b8ba7d51da7b4e17a8",
+              "session_id": "p4-s1",
+              "shot_id": "p4-s1-1",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 28,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "4d29a58bbbb7847a3deed6902d532dab40982eb84d948bd36a01068011c4e7a2",
+              "session_id": "p4-s1",
+              "shot_id": "p4-s1-2",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 29,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "dc69722fdd72ca6df32f9e6811f2ca587cbdf0c86d752624006b2594326cb77b",
+              "session_id": "p4-s1",
+              "shot_id": "p4-s1-3",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 30,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "e0445f7c7b44eff3a2391014f5ab8dade1897600dfac8951ec4e95083f50383b",
+              "session_id": "p4-s2",
+              "shot_id": "p4-s2-1",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 31,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "57bb4639af4e7fe82b9fedbeff93c70e4e4470ca4314189996c5b3424699da62",
+              "session_id": "p4-s2",
+              "shot_id": "p4-s2-2",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 32,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "e106bc0f9d7a258d04ecd5184f28309753e35d4192fc4740931891ea91dbf9d0",
+              "session_id": "p4-s2",
+              "shot_id": "p4-s2-3",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 33,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "59486aa998cf8bfb8e194cc82c6cecd3f1dd9d0f17c0f819e2dce6b35213118b",
+              "session_id": "p4-s3",
+              "shot_id": "p4-s3-1",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 34,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "824b5728edf9469d3bf381e5232dc607f151b8e21bb5ad09703b4bd9bb9f77bb",
+              "session_id": "p4-s3",
+              "shot_id": "p4-s3-2",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 35,
+              "unlinked_reason": null
+            },
+            {
+              "record_sha256": "6658aba2e2c1855b54c9992e9c8b519993dc329e5d5b2794d0c4a34c3a21f66e",
+              "session_id": "p4-s3",
+              "shot_id": "p4-s3-3",
+              "source_id": "synthetic-conformance-source",
+              "source_row": 36,
+              "unlinked_reason": null
+            }
+          ],
+          "dataset_fingerprint_sha256": "2a321fc7e9d20e3c56a07e650ebd7a85f28275e0d34394dfd314a1a58b807a11",
+          "sources": [
+            {
+              "file_sha256": "1a6f54bb3430eb152f9b8f2b5d508e2159fb4464d8981f2959ba5925d9b76096",
+              "rights_status": "public_redistributable",
+              "session_ids": [],
+              "source_id": "synthetic-conformance-source",
+              "source_uri": null
+            }
+          ],
+          "transformations": []
+        },
+        "missingness": {
+          "excluded_by_reason": {},
+          "included_shot_count": 0,
+          "input_row_count": 36,
+          "session_cell_count": 0
+        },
+        "order_evidence": {
+          "evidence": "The fixture owner attests that session_number is chronological session order.",
+          "order_column": "session_number",
+          "order_kind": "ordinal",
+          "trust_level": "untrusted_inferred",
+          "unit": "session"
+        },
+        "player_associations": [],
+        "player_identity": {
+          "evidence": "The fixture owner attests the stable pseudonymous player identifiers.",
+          "identifier_column": "player_id",
+          "trust_level": "explicit_user_attested"
+        },
+        "pooled_association": null,
+        "request": {
+          "confidence_level": 0.95,
+          "confounders": [],
+          "direction": "higher_is_better",
+          "metric": "carry_distance",
+          "minimum_player_clusters": 4,
+          "minimum_sessions_per_player": 3,
+          "session_aggregate": "mean",
+          "strata": []
+        },
+        "session_aggregates": [],
+        "session_identity": {
+          "evidence": "The source export reports session boundaries.",
+          "identifier_column": "session_id",
+          "trust_level": "source_reported"
+        },
+        "status": "unavailable",
+        "warnings": ["No causal improvement claim is available."]
+      },
+      "player_identity": {
+        "evidence": "The fixture owner attests the stable pseudonymous player identifiers.",
+        "identifier_column": "player_id",
+        "trust_level": "explicit_user_attested"
+      },
+      "scenario_id": "attested-longitudinal-unavailable",
+      "scenario_sha256": "5b644aa87dac0bef64adc32adf4a4df9dc9df06825d2e9442cdf53f2d647b1e5",
+      "session_identity": {
+        "evidence": "The source export reports session boundaries.",
+        "identifier_column": "session_id",
+        "trust_level": "source_reported"
+      },
+      "sources": [
+        {
+          "file_sha256": "1a6f54bb3430eb152f9b8f2b5d508e2159fb4464d8981f2959ba5925d9b76096",
+          "rights_status": "public_redistributable",
+          "session_ids": [],
+          "source_id": "synthetic-conformance-source",
+          "source_uri": null
+        }
+      ],
+      "units": {
+        "carry_distance": {
+          "authority": "source_declared",
+          "canonical_unit": "m",
+          "display_unit": "m"
+        }
+      }
+    },
+    {
+      "analysis_kind": "source_backed_strokes_gained",
+      "backing_records": [
+        {
+          "record_sha256": "ad3da6479e5432c04661f4ece7c3c9a67e0c2c238f81e27fbe6fb1c3db02fccf",
+          "session_id": null,
+          "shot_id": "sg-0",
+          "source_id": "synthetic-conformance-source",
+          "source_row": null,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "1276c2a90662259b6291ef3e17acc74d10006560cc61f73e7020a6ed923cd2d2",
+          "session_id": null,
+          "shot_id": "sg-1",
+          "source_id": "synthetic-conformance-source",
+          "source_row": null,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "92fb5c2df5e43a3b52bb15d7974fdabeb54c2ec68b4b72d031aa51b2284b1e0b",
+          "session_id": null,
+          "shot_id": "sg-2",
+          "source_id": "synthetic-conformance-source",
+          "source_row": null,
+          "unlinked_reason": null
+        }
+      ],
+      "claims": {
+        "causal_inference": false,
+        "device_certification": false,
+        "device_emulation": false,
+        "is_strokes_gained": true,
+        "source_backed": true
+      },
+      "description": "Synthetic source-backed strokes-gained available result.",
+      "exclusions": {},
+      "expected_status": "available",
+      "order_evidence": {
+        "evidence": null,
+        "order_column": null,
+        "order_kind": null,
+        "trust_level": "not_provided",
+        "unit": null
+      },
+      "payload": {
+        "analysis_context": {
+          "authority": null,
+          "order_evidence": {
+            "evidence": null,
+            "order_column": null,
+            "order_kind": null,
+            "trust_level": "not_provided",
+            "unit": null
+          },
+          "player_identity": {
+            "evidence": null,
+            "identifier_column": null,
+            "trust_level": "not_provided"
+          },
+          "session_identity": {
+            "evidence": null,
+            "identifier_column": null,
+            "trust_level": "not_provided"
+          },
+          "source_units": {
+            "ball_speed": "mph",
+            "carry_distance": "yd",
+            "club_path": "deg",
+            "club_speed": "mph",
+            "face_angle": "deg"
+          },
+          "sources": [
+            {
+              "file_sha256": "0bb5ffc308eeb3ccdfd0bedad6e06fe92df89a1b4dbfaf97c4af9853f59e223f",
+              "rights_status": "public_redistributable",
+              "session_ids": [],
+              "source_id": "synthetic-conformance-source",
+              "source_uri": null
+            }
+          ],
+          "transformations": []
+        },
+        "availability": {
+          "message": null,
+          "observed_count": 3,
+          "reason_code": null,
+          "required_count": 3,
+          "state": "available"
+        },
+        "baseline": {
+          "baseline_id": "synthetic-published-method",
+          "contract_version": "launch-monitor-strokes-gained-baseline/2.0.0",
+          "license": "CC0-1.0 synthetic fixture",
+          "source_url": "https://example.org/synthetic-expected-strokes-method",
+          "table_sha256": "5250552cc6ec58da60dfe8ebf50f7238534d28016b0725bf42d8098054404428",
+          "version": "fixture-1"
+        },
+        "claims": {
+          "causal_inference": false,
+          "device_certification": false,
+          "device_emulation": false,
+          "is_strokes_gained": true,
+          "source_backed": true
+        },
+        "contract_version": "launch-monitor-strokes-gained-analysis/1.0.0",
+        "dataset_fingerprint_sha256": "83c86e9506e9613a4cf0cf741ec81e364aaf786c08bf27e99047e05270c4d8be",
+        "excluded_rows": [],
+        "exclusions": {
+          "by_reason": {},
+          "included_row_count": 3,
+          "input_row_count": 3,
+          "total_excluded": 0
+        },
+        "formula": "SG = verified E(start lie/context/target/distance) - 1 - verified E(finish lie/context/target/distance)",
+        "group_summaries": [],
+        "limitations": [
+          "This is descriptive scoring bookkeeping, not causal inference.",
+          "Target/hole, lie, and context labels must be supplied and valid.",
+          "The baseline declaration is not an independent license audit.",
+          "Results outside benchmark support fail closed rather than extrapolate."
+        ],
+        "longitudinal_summaries": [],
+        "metric_name": "source_backed_strokes_gained",
+        "row_results": [
+          {
+            "benchmark_standard_error": 0.14091132,
+            "expected_finish": 1.5,
+            "expected_start": 3.2,
+            "finish": {
+              "context": "standard",
+              "distance_yards": 20.0,
+              "lie": "green",
+              "target": "hole-1"
+            },
+            "finish_interpolation": {
+              "fraction": 1.0,
+              "lower_distance_yards": 0.0,
+              "upper_distance_yards": 20.0
+            },
+            "groups": {},
+            "input_record_sha256": "ad3da6479e5432c04661f4ece7c3c9a67e0c2c238f81e27fbe6fb1c3db02fccf",
+            "longitudinal_order": null,
+            "shot_id": "sg-0",
+            "source_index": 0,
+            "start": {
+              "context": "standard",
+              "distance_yards": 140.0,
+              "lie": "fairway",
+              "target": "hole-1"
+            },
+            "start_interpolation": {
+              "fraction": 0.4,
+              "lower_distance_yards": 100.0,
+              "upper_distance_yards": 200.0
+            },
+            "strokes_gained": 0.7
+          },
+          {
+            "benchmark_standard_error": 0.13416408,
+            "expected_finish": 1.125,
+            "expected_start": 3.3,
+            "finish": {
+              "context": "standard",
+              "distance_yards": 15.0,
+              "lie": "green",
+              "target": "hole-1"
+            },
+            "finish_interpolation": {
+              "fraction": 0.75,
+              "lower_distance_yards": 0.0,
+              "upper_distance_yards": 20.0
+            },
+            "groups": {},
+            "input_record_sha256": "1276c2a90662259b6291ef3e17acc74d10006560cc61f73e7020a6ed923cd2d2",
+            "longitudinal_order": null,
+            "shot_id": "sg-1",
+            "source_index": 1,
+            "start": {
+              "context": "standard",
+              "distance_yards": 150.0,
+              "lie": "fairway",
+              "target": "hole-1"
+            },
+            "start_interpolation": {
+              "fraction": 0.5,
+              "lower_distance_yards": 100.0,
+              "upper_distance_yards": 200.0
+            },
+            "strokes_gained": 1.175
+          },
+          {
+            "benchmark_standard_error": 0.13029198,
+            "expected_finish": 0.75,
+            "expected_start": 3.4,
+            "finish": {
+              "context": "standard",
+              "distance_yards": 10.0,
+              "lie": "green",
+              "target": "hole-1"
+            },
+            "finish_interpolation": {
+              "fraction": 0.5,
+              "lower_distance_yards": 0.0,
+              "upper_distance_yards": 20.0
+            },
+            "groups": {},
+            "input_record_sha256": "92fb5c2df5e43a3b52bb15d7974fdabeb54c2ec68b4b72d031aa51b2284b1e0b",
+            "longitudinal_order": null,
+            "shot_id": "sg-2",
+            "source_index": 2,
+            "start": {
+              "context": "standard",
+              "distance_yards": 160.0,
+              "lie": "fairway",
+              "target": "hole-1"
+            },
+            "start_interpolation": {
+              "fraction": 0.6,
+              "lower_distance_yards": 100.0,
+              "upper_distance_yards": 200.0
+            },
+            "strokes_gained": 1.65
+          }
+        ],
+        "status": "available",
+        "uncertainty": {
+          "assumptions": [
+            "The sampling interval treats included shots as independent.",
+            "Benchmark state errors are combined as independent when supplied.",
+            "Interpolation stays within an exact lie/context/target stratum."
+          ],
+          "benchmark_method": "interpolated-state-standard-errors",
+          "benchmark_standard_error_mean": 0.078054112,
+          "confidence_level": 0.95,
+          "sampling_method": "student-t-descriptive-mean"
+        },
+        "unit": "strokes",
+        "units": {
+          "distance": "yd",
+          "strokes_gained": "strokes"
+        },
+        "value_summary": {
+          "confidence_interval": {
+            "level": 0.95,
+            "lower": -0.0049654131,
+            "method": "student-t",
+            "upper": 2.3549654
+          },
+          "count": 3,
+          "mean": 1.175,
+          "standard_deviation": 0.475,
+          "standard_error": 0.27424138
+        },
+        "warnings": []
+      },
+      "player_identity": {
+        "evidence": null,
+        "identifier_column": null,
+        "trust_level": "not_provided"
+      },
+      "scenario_id": "source-backed-strokes-gained-available",
+      "scenario_sha256": "e69a251f55a700c4a5c0a23b68336a07ac88e4eef1b5623093a5110ef5e4be2e",
+      "session_identity": {
+        "evidence": null,
+        "identifier_column": null,
+        "trust_level": "not_provided"
+      },
+      "sources": [
+        {
+          "file_sha256": "0bb5ffc308eeb3ccdfd0bedad6e06fe92df89a1b4dbfaf97c4af9853f59e223f",
+          "rights_status": "public_redistributable",
+          "session_ids": [],
+          "source_id": "synthetic-conformance-source",
+          "source_uri": null
+        }
+      ],
+      "units": {
+        "distance": {
+          "authority": "source_declared",
+          "canonical_unit": "yd",
+          "display_unit": "yd"
+        },
+        "strokes_gained": {
+          "authority": "source_declared",
+          "canonical_unit": "strokes",
+          "display_unit": "strokes"
+        }
+      }
+    },
+    {
+      "analysis_kind": "source_backed_strokes_gained",
+      "backing_records": [
+        {
+          "record_sha256": "ad3da6479e5432c04661f4ece7c3c9a67e0c2c238f81e27fbe6fb1c3db02fccf",
+          "session_id": null,
+          "shot_id": "sg-0",
+          "source_id": "synthetic-conformance-source",
+          "source_row": null,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "1276c2a90662259b6291ef3e17acc74d10006560cc61f73e7020a6ed923cd2d2",
+          "session_id": null,
+          "shot_id": "sg-1",
+          "source_id": "synthetic-conformance-source",
+          "source_row": null,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "92fb5c2df5e43a3b52bb15d7974fdabeb54c2ec68b4b72d031aa51b2284b1e0b",
+          "session_id": null,
+          "shot_id": "sg-2",
+          "source_id": "synthetic-conformance-source",
+          "source_row": null,
+          "unlinked_reason": null
+        }
+      ],
+      "claims": {
+        "causal_inference": false,
+        "device_certification": false,
+        "device_emulation": false,
+        "is_strokes_gained": true,
+        "source_backed": true
+      },
+      "description": "Synthetic source-backed strokes-gained unavailable result.",
+      "exclusions": {},
+      "expected_status": "unavailable",
+      "order_evidence": {
+        "evidence": null,
+        "order_column": null,
+        "order_kind": null,
+        "trust_level": "not_provided",
+        "unit": null
+      },
+      "payload": {
+        "analysis_context": {
+          "authority": null,
+          "order_evidence": {
+            "evidence": null,
+            "order_column": null,
+            "order_kind": null,
+            "trust_level": "not_provided",
+            "unit": null
+          },
+          "player_identity": {
+            "evidence": null,
+            "identifier_column": null,
+            "trust_level": "not_provided"
+          },
+          "session_identity": {
+            "evidence": null,
+            "identifier_column": null,
+            "trust_level": "not_provided"
+          },
+          "source_units": {
+            "ball_speed": "mph",
+            "carry_distance": "yd",
+            "club_path": "deg",
+            "club_speed": "mph",
+            "face_angle": "deg"
+          },
+          "sources": [
+            {
+              "file_sha256": "0bb5ffc308eeb3ccdfd0bedad6e06fe92df89a1b4dbfaf97c4af9853f59e223f",
+              "rights_status": "public_redistributable",
+              "session_ids": [],
+              "source_id": "synthetic-conformance-source",
+              "source_uri": null
+            }
+          ],
+          "transformations": []
+        },
+        "availability": {
+          "message": "Too few complete, benchmark-covered course-state rows.",
+          "observed_count": 3,
+          "reason_code": "insufficient_complete_rows",
+          "required_count": 4,
+          "state": "unavailable"
+        },
+        "baseline": {
+          "baseline_id": "synthetic-published-method",
+          "contract_version": "launch-monitor-strokes-gained-baseline/2.0.0",
+          "license": "CC0-1.0 synthetic fixture",
+          "source_url": "https://example.org/synthetic-expected-strokes-method",
+          "table_sha256": "5250552cc6ec58da60dfe8ebf50f7238534d28016b0725bf42d8098054404428",
+          "version": "fixture-1"
+        },
+        "claims": {
+          "causal_inference": false,
+          "device_certification": false,
+          "device_emulation": false,
+          "is_strokes_gained": true,
+          "source_backed": true
+        },
+        "contract_version": "launch-monitor-strokes-gained-analysis/1.0.0",
+        "dataset_fingerprint_sha256": "83c86e9506e9613a4cf0cf741ec81e364aaf786c08bf27e99047e05270c4d8be",
+        "excluded_rows": [],
+        "exclusions": {
+          "by_reason": {},
+          "included_row_count": 3,
+          "input_row_count": 3,
+          "total_excluded": 0
+        },
+        "formula": "SG = verified E(start lie/context/target/distance) - 1 - verified E(finish lie/context/target/distance)",
+        "group_summaries": [],
+        "limitations": [
+          "This is descriptive scoring bookkeeping, not causal inference.",
+          "Target/hole, lie, and context labels must be supplied and valid.",
+          "The baseline declaration is not an independent license audit.",
+          "Results outside benchmark support fail closed rather than extrapolate."
+        ],
+        "longitudinal_summaries": [],
+        "metric_name": "source_backed_strokes_gained",
+        "row_results": [
+          {
+            "benchmark_standard_error": 0.14091132,
+            "expected_finish": 1.5,
+            "expected_start": 3.2,
+            "finish": {
+              "context": "standard",
+              "distance_yards": 20.0,
+              "lie": "green",
+              "target": "hole-1"
+            },
+            "finish_interpolation": {
+              "fraction": 1.0,
+              "lower_distance_yards": 0.0,
+              "upper_distance_yards": 20.0
+            },
+            "groups": {},
+            "input_record_sha256": "ad3da6479e5432c04661f4ece7c3c9a67e0c2c238f81e27fbe6fb1c3db02fccf",
+            "longitudinal_order": null,
+            "shot_id": "sg-0",
+            "source_index": 0,
+            "start": {
+              "context": "standard",
+              "distance_yards": 140.0,
+              "lie": "fairway",
+              "target": "hole-1"
+            },
+            "start_interpolation": {
+              "fraction": 0.4,
+              "lower_distance_yards": 100.0,
+              "upper_distance_yards": 200.0
+            },
+            "strokes_gained": 0.7
+          },
+          {
+            "benchmark_standard_error": 0.13416408,
+            "expected_finish": 1.125,
+            "expected_start": 3.3,
+            "finish": {
+              "context": "standard",
+              "distance_yards": 15.0,
+              "lie": "green",
+              "target": "hole-1"
+            },
+            "finish_interpolation": {
+              "fraction": 0.75,
+              "lower_distance_yards": 0.0,
+              "upper_distance_yards": 20.0
+            },
+            "groups": {},
+            "input_record_sha256": "1276c2a90662259b6291ef3e17acc74d10006560cc61f73e7020a6ed923cd2d2",
+            "longitudinal_order": null,
+            "shot_id": "sg-1",
+            "source_index": 1,
+            "start": {
+              "context": "standard",
+              "distance_yards": 150.0,
+              "lie": "fairway",
+              "target": "hole-1"
+            },
+            "start_interpolation": {
+              "fraction": 0.5,
+              "lower_distance_yards": 100.0,
+              "upper_distance_yards": 200.0
+            },
+            "strokes_gained": 1.175
+          },
+          {
+            "benchmark_standard_error": 0.13029198,
+            "expected_finish": 0.75,
+            "expected_start": 3.4,
+            "finish": {
+              "context": "standard",
+              "distance_yards": 10.0,
+              "lie": "green",
+              "target": "hole-1"
+            },
+            "finish_interpolation": {
+              "fraction": 0.5,
+              "lower_distance_yards": 0.0,
+              "upper_distance_yards": 20.0
+            },
+            "groups": {},
+            "input_record_sha256": "92fb5c2df5e43a3b52bb15d7974fdabeb54c2ec68b4b72d031aa51b2284b1e0b",
+            "longitudinal_order": null,
+            "shot_id": "sg-2",
+            "source_index": 2,
+            "start": {
+              "context": "standard",
+              "distance_yards": 160.0,
+              "lie": "fairway",
+              "target": "hole-1"
+            },
+            "start_interpolation": {
+              "fraction": 0.6,
+              "lower_distance_yards": 100.0,
+              "upper_distance_yards": 200.0
+            },
+            "strokes_gained": 1.65
+          }
+        ],
+        "status": "unavailable",
+        "uncertainty": {
+          "assumptions": [
+            "The sampling interval treats included shots as independent.",
+            "Benchmark state errors are combined as independent when supplied.",
+            "Interpolation stays within an exact lie/context/target stratum."
+          ],
+          "benchmark_method": "interpolated-state-standard-errors",
+          "benchmark_standard_error_mean": 0.078054112,
+          "confidence_level": 0.95,
+          "sampling_method": "student-t-descriptive-mean"
+        },
+        "unit": "strokes",
+        "units": {
+          "distance": "yd",
+          "strokes_gained": "strokes"
+        },
+        "value_summary": {
+          "confidence_interval": null,
+          "count": 3,
+          "mean": null,
+          "standard_deviation": null,
+          "standard_error": null
+        },
+        "warnings": []
+      },
+      "player_identity": {
+        "evidence": null,
+        "identifier_column": null,
+        "trust_level": "not_provided"
+      },
+      "scenario_id": "source-backed-strokes-gained-unavailable",
+      "scenario_sha256": "f42c2b8770eed1fa0705e2d55c682dae2d2fc2f23d207d9f4e285865d253f1c3",
+      "session_identity": {
+        "evidence": null,
+        "identifier_column": null,
+        "trust_level": "not_provided"
+      },
+      "sources": [
+        {
+          "file_sha256": "0bb5ffc308eeb3ccdfd0bedad6e06fe92df89a1b4dbfaf97c4af9853f59e223f",
+          "rights_status": "public_redistributable",
+          "session_ids": [],
+          "source_id": "synthetic-conformance-source",
+          "source_uri": null
+        }
+      ],
+      "units": {
+        "distance": {
+          "authority": "source_declared",
+          "canonical_unit": "yd",
+          "display_unit": "yd"
+        },
+        "strokes_gained": {
+          "authority": "source_declared",
+          "canonical_unit": "strokes",
+          "display_unit": "strokes"
+        }
+      }
+    },
+    {
+      "analysis_kind": "distance_target_proxy",
+      "backing_records": [
+        {
+          "record_sha256": "a319be5efb4f827f1b711aa390336b36c34c2145f25182d6540d498389ec5a73",
+          "session_id": null,
+          "shot_id": "proxy-0",
+          "source_id": "synthetic-conformance-source",
+          "source_row": null,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "cf7032ba1ceea73f26594bf6775ab1847315202327dbd6a6d2e908327469602f",
+          "session_id": null,
+          "shot_id": "proxy-1",
+          "source_id": "synthetic-conformance-source",
+          "source_row": null,
+          "unlinked_reason": null
+        }
+      ],
+      "claims": {
+        "causal_inference": false,
+        "is_strokes_gained": false,
+        "source_backed": false
+      },
+      "description": "Synthetic distance/target proxy available result.",
+      "exclusions": {},
+      "expected_status": "available",
+      "order_evidence": {
+        "evidence": null,
+        "order_column": null,
+        "order_kind": null,
+        "trust_level": "not_provided",
+        "unit": null
+      },
+      "payload": {
+        "claims": {
+          "causal_inference": false,
+          "is_strokes_gained": false,
+          "source_backed": false
+        },
+        "contract_version": "launch-monitor-outcome-proxy/1.0.0",
+        "exclusions": {
+          "by_reason": {},
+          "included_row_count": 2,
+          "input_row_count": 2,
+          "total_excluded": 0
+        },
+        "formula": "radial error = sqrt((carry yd - target yd)^2 + lateral yd^2)",
+        "limitations": [
+          "This target-relative dispersion proxy is not strokes gained.",
+          "It does not use a source-backed expected-strokes benchmark.",
+          "It is descriptive and does not support causal inference."
+        ],
+        "metric_name": "expected_proximity_dispersion_proxy",
+        "row_results": [
+          {
+            "carry_yards": 150.0,
+            "lateral_yards": -5.0,
+            "radial_error_yards": 5.0,
+            "shot_id": "proxy-0",
+            "source_index": 0,
+            "target_distance_yards": 150.0
+          },
+          {
+            "carry_yards": 155.0,
+            "lateral_yards": 2.0,
+            "radial_error_yards": 5.3851648,
+            "shot_id": "proxy-1",
+            "source_index": 1,
+            "target_distance_yards": 150.0
+          }
+        ],
+        "status": "available",
+        "unit": "yd",
+        "units": {
+          "carry": "yd",
+          "lateral": "yd",
+          "radial_error": "yd"
+        },
+        "value_summary": {
+          "confidence_interval": {
+            "level": 0.95,
+            "lower": 2.745591,
+            "method": "student-t",
+            "upper": 7.6395739
+          },
+          "count": 2,
+          "mean": 5.1925824,
+          "standard_deviation": 0.27235265,
+          "standard_error": 0.1925824
+        }
+      },
+      "player_identity": {
+        "evidence": null,
+        "identifier_column": null,
+        "trust_level": "not_provided"
+      },
+      "scenario_id": "distance-target-proxy-available",
+      "scenario_sha256": "1bc9f0ee002402e366ab7b919f0f90f5681ce94f11e82c58456ab4f4a73c07c4",
+      "session_identity": {
+        "evidence": null,
+        "identifier_column": null,
+        "trust_level": "not_provided"
+      },
+      "sources": [
+        {
+          "file_sha256": "ee54aa3c273ff0fb635d305f8c28d0ad42c4fcf065e9606898447885d39d7edf",
+          "rights_status": "public_redistributable",
+          "session_ids": [],
+          "source_id": "synthetic-conformance-source",
+          "source_uri": null
+        }
+      ],
+      "units": {
+        "carry": {
+          "authority": "source_declared",
+          "canonical_unit": "yd",
+          "display_unit": "yd"
+        },
+        "lateral": {
+          "authority": "source_declared",
+          "canonical_unit": "yd",
+          "display_unit": "yd"
+        },
+        "radial_error": {
+          "authority": "source_declared",
+          "canonical_unit": "yd",
+          "display_unit": "yd"
+        }
+      }
+    },
+    {
+      "analysis_kind": "distance_target_proxy",
+      "backing_records": [
+        {
+          "record_sha256": "a319be5efb4f827f1b711aa390336b36c34c2145f25182d6540d498389ec5a73",
+          "session_id": null,
+          "shot_id": "proxy-0",
+          "source_id": "synthetic-conformance-source",
+          "source_row": null,
+          "unlinked_reason": null
+        },
+        {
+          "record_sha256": "e7aa6434c49b404aa9922507f8b7b052dc09fdc9c129e94cf624022f0e2ac541",
+          "session_id": null,
+          "shot_id": "proxy-1",
+          "source_id": "synthetic-conformance-source",
+          "source_row": null,
+          "unlinked_reason": null
+        }
+      ],
+      "claims": {
+        "causal_inference": false,
+        "is_strokes_gained": false,
+        "source_backed": false
+      },
+      "description": "Synthetic distance/target proxy unavailable result.",
+      "exclusions": {
+        "missing_or_non_numeric_outcome": 1
+      },
+      "expected_status": "unavailable",
+      "order_evidence": {
+        "evidence": null,
+        "order_column": null,
+        "order_kind": null,
+        "trust_level": "not_provided",
+        "unit": null
+      },
+      "payload": {
+        "claims": {
+          "causal_inference": false,
+          "is_strokes_gained": false,
+          "source_backed": false
+        },
+        "contract_version": "launch-monitor-outcome-proxy/1.0.0",
+        "exclusions": {
+          "by_reason": {
+            "missing_or_non_numeric_outcome": 1
+          },
+          "included_row_count": 1,
+          "input_row_count": 2,
+          "total_excluded": 1
+        },
+        "formula": "radial error = sqrt((carry yd - target yd)^2 + lateral yd^2)",
+        "limitations": [
+          "This target-relative dispersion proxy is not strokes gained.",
+          "It does not use a source-backed expected-strokes benchmark.",
+          "It is descriptive and does not support causal inference."
+        ],
+        "metric_name": "expected_proximity_dispersion_proxy",
+        "row_results": [
+          {
+            "carry_yards": 150.0,
+            "lateral_yards": -5.0,
+            "radial_error_yards": 5.0,
+            "shot_id": "proxy-0",
+            "source_index": 0,
+            "target_distance_yards": 150.0
+          }
+        ],
+        "status": "unavailable",
+        "unit": "yd",
+        "units": {
+          "carry": "yd",
+          "lateral": "yd",
+          "radial_error": "yd"
+        },
+        "value_summary": {
+          "confidence_interval": null,
+          "count": 1,
+          "mean": 5.0,
+          "standard_deviation": null,
+          "standard_error": null
+        }
+      },
+      "player_identity": {
+        "evidence": null,
+        "identifier_column": null,
+        "trust_level": "not_provided"
+      },
+      "scenario_id": "distance-target-proxy-unavailable",
+      "scenario_sha256": "2e92e3fb562d877f69dc72ec021a1ed2fc6b5713b0535ff23f68ccdf4621791a",
+      "session_identity": {
+        "evidence": null,
+        "identifier_column": null,
+        "trust_level": "not_provided"
+      },
+      "sources": [
+        {
+          "file_sha256": "fffa3b0f2f966ce86d59406418083bab8fb19e6161804245acc4f8896c6041f5",
+          "rights_status": "public_redistributable",
+          "session_ids": [],
+          "source_id": "synthetic-conformance-source",
+          "source_uri": null
+        }
+      ],
+      "units": {
+        "carry": {
+          "authority": "source_declared",
+          "canonical_unit": "yd",
+          "display_unit": "yd"
+        },
+        "lateral": {
+          "authority": "source_declared",
+          "canonical_unit": "yd",
+          "display_unit": "yd"
+        },
+        "radial_error": {
+          "authority": "source_declared",
+          "canonical_unit": "yd",
+          "display_unit": "yd"
+        }
+      }
+    }
+  ]
+}

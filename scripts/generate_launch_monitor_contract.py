@@ -3,10 +3,18 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 import pandas as pd
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.launch_monitor_conformance_fixture import (  # noqa: E402
+    launch_monitor_conformance_bundle as _build_conformance_bundle,
+)
 from src.shared.python.launch_monitor import (
     AnalysisContextV2,
     PlayerCovariationRequestV1,
@@ -17,10 +25,17 @@ from src.shared.python.launch_monitor import (
     contract_v2_json_schema,
     dataset_job_contract_json_schema,
     longitudinal_session_contract_json_schema,
+    launch_monitor_conformance_bundle_json_schema,
     player_covariation_contract_json_schema,
     scan_player_covariation_v1,
     strokes_gained_contract_json_schema,
 )
+
+
+def launch_monitor_conformance_bundle():
+    """Return the deterministic aggregate-only consumer conformance bundle."""
+
+    return _build_conformance_bundle(Path(__file__).resolve().parents[1])
 
 
 def _write_schema(destination: Path, schema: dict[str, object]) -> None:
@@ -124,6 +139,14 @@ def main() -> None:
     _write_schema(
         contract_root / "launch-monitor-longitudinal-session-v1.schema.json",
         longitudinal_session_contract_json_schema(),
+    )
+    _write_schema(
+        contract_root / "launch-monitor-conformance-bundle-v1.schema.json",
+        launch_monitor_conformance_bundle_json_schema(),
+    )
+    _write_schema(
+        contract_root / "fixtures" / "launch-monitor-conformance-bundle-v1.golden.json",
+        launch_monitor_conformance_bundle().model_dump(mode="json"),
     )
 
 

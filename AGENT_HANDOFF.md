@@ -2,135 +2,104 @@
 
 Last updated: 2026-08-21
 
-This is current operational state. Historical detail belongs in git and GitHub.
+This file records current operational state. Git and GitHub retain history.
+Epic #8557 is the canonical proximal-to-distal completion authority.
 
-## Program Authority and Critical Findings
+## Protected Delivery in Progress
 
-- Epic [#8557](https://github.com/D-sorganization/UpstreamDrift/issues/8557)
-  is the canonical proximal-to-distal completion authority; #8595 retains the
-  photographed agenda and #8789 owns release/CI truth recovery.
-- The 2026-08-21 adversarial reviews are indexed in
-  `docs/audits/2026-08-21-uiux-performance-review.md` and
-  `docs/audits/2026-08-21-adversarial-integration-review.md`.
-- #8909 found that the distributed-grip atlas's claimed MuJoCo–Pinocchio parity
-  compared MuJoCo to itself. #8910 found tautological manufactured controls in
-  the current #8752 evidence. Do not close #8751/#8752 or promote their claims
-  until independently regenerated evidence passes the corrected gates.
-- #8913/#8914 bound interpretation of the mixed-sign shaft and ground results.
-  A moving base, compliant shaft, or higher proximal rate is not a universal
-  benefit.
-- #8556 remains externally blocked: no governed participant dataset contains
-  synchronized bilateral six-axis grip wrenches. Synthetic traces cannot
-  replace human validation.
+### Tools Rotating-Base Consumer
 
-## Active #8752 Uncertainty Campaign — Preserve It
+- Full PR #8954 targets `main`; branch `feat/4430-rotating-base-consumer`.
+- It pins Tools remote-main revision
+  `1664d806df8a2c7b184d2d3fbcea93b714caaee5` and verifies the qualified
+  18-case rotating-base provider without copying solver or catalog logic.
+- The consumer asserts exact source/study/catalog digests, run order, 13 valid
+  and five adverse cases, nonanatomical coordinates, unsupported coaching
+  inference, and unavailable governed human validation.
+- Standard CI, shared consumer contracts, documentation, SPEC freshness, and
+  optional-stack checks passed on head `2061fdaed487633d63b9eb82a1f8a71457af9be1`.
+- The package job proved its wheel build/content gate and 8m35s artifact upload.
+  It then timed out in setup-node's post-job npm cache upload. Commit
+  `6bf348dd0` removes that unnecessary cache; measured `npm ci` took seconds.
+- Current `origin/main` is merged into this branch. Resolve no further conflict
+  by dropping either the launch-monitor conformance contract or this consumer.
+- Auto-merge is off. Human approval is required. Never bypass protection or
+  create redundant reruns.
 
-- Worktree: `UpstreamDrift-worktrees/goal-8752-uncertainty`.
-- The checkpointed 20-worker campaign was live on 2026-08-21 under parent PID 18404. It advanced during inspection and was processing the 72-branch ground
-  atlas. Inspect the terminal/checkpoint before acting; do not infer completion
-  from elapsed time.
-- Do not edit, terminate, or redundantly rerun these frozen campaign sources:
-  - `scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py`
-  - `scripts/research/proximal_distal_energy/articulated_shaft_atlas.py`
-  - `scripts/research/proximal_distal_energy/articulated_ground_atlas.py`
-  - `tests/research/test_articulated_headline_uncertainty.py`
-- The campaign is computational evidence only. It does not repair #8909/#8910
-  unless its independent-engine and manufactured-solution gates actually do so.
+### Critical Scientific Corrections
 
-## Tools #4430 Rotating-Base Consumer
+- #8909 is active in worktree `8909-real-pinocchio-parity`. The published
+  distributed-grip "parity" used PyPI `pinocchio` 0.1 and silently compared
+  MuJoCo with itself. The repair fails closed on engine identity/model build,
+  rejects exact-zero degeneracy, and regenerates with Pinocchio 3.8.0.
+- #8910 remains open: current manufactured inverse-dynamics, action-reaction,
+  and conservation controls are tautological or hardcoded. Do not close #8752
+  or promote those controls until independent operators and actual drift pass.
+- The #8752 checkpointed uncertainty campaign runs in worktree
+  `goal-8752-uncertainty` under parent PID `18404`. It is not orphaned. Do not
+  kill its workers, edit campaign sources, or launch a duplicate campaign.
 
-- Tools PR #4618 merged the canonical rotating-base provider, complete 18-run
-  catalog, and matched PyQt6/React reviewer surfaces at `87ff0ea8c`.
-- Tools PR #4619 merged its Rust 1.98 gate and handoff correction at
-  `1664d806df8a2c7b184d2d3fbcea93b714caaee5`.
-- Upstream branch `feat/4430-rotating-base-consumer` pins that exact merge in
-  `vendor/ud-tools` and `TOOLS_GITLINK_SHA`; no solver or catalog is copied.
-- Upstream PR [#8954](https://github.com/D-sorganization/UpstreamDrift/pull/8954)
-  is the full review-ready protected delivery. Auto-merge is disabled; human
-  approval remains required.
-- Its first package run built and inspected the wheel successfully but hit the
-  former 15-minute job timeout while uploading the artifact. The branch gives
-  that existing build job 30 minutes; verify the replacement run rather than
-  rerunning the superseded head.
-- Cross-repository tests require all 18 ordered cases, 13 valid cases, adverse
-  indices 6/7/8/15/16, exact study and catalog digests, and every run's
-  nonanatomical/no-human-validation/noncoaching boundaries.
-- Upstream study authority remains
-  `967c40f54cc03f8cae89cde09268d62771d220fe`; semantic study digest is
-  `e6a55e6cf91e51f21fe3eb8bcb07b990a7798f18abcaf5ca73f5214cb6c5f9ec`; full
-  run-catalog digest is
-  `66493b833955c6492a00eae4a600df795df60a6f473f9a11c403084b58e51678`.
-- Before opening the protected PR, run the focused vendored-provider tests,
-  document/title/size/architecture gates, and inspect the exact diff. Repository
-  policy prohibits auto-merge; human approval is required.
+## Publication and Human-Data Boundaries
 
-## Scientific Baseline and Boundaries
+- UpstreamDrift owns the scientific source/evidence bundle; AffineDrift is the
+  immutable pinned public projection; Tools owns reusable provider logic.
+- The computational PDF is not an archival or human-validation release.
+  Tagging, font, stable-archive/PID, equipment calibration, and governed human
+  gates remain distinct.
+- #8556 remains externally data-gated: no governed participant dataset with
+  synchronized bilateral six-axis grip wrenches is available. Synthetic traces
+  must never substitute for human validation.
+- Do not infer anatomy, physiology, injury, coaching strategy, or universal
+  speed benefit from model-conditional synthetic results.
 
-- Native MuJoCo and robotics Pinocchio independently qualify the rigid
-  20-coordinate tree over 234 closed states. All evidence is synthetic and
-  structural—not anatomy, physiology, equipment calibration, or coaching.
-- Of 384 coupled-versus-rigid shaft cells, 126 match load/work; speed changes
-  span `-0.0285` to `+0.0212 m/s`, including 82 negative outcomes.
-- The preregistered ground comparison admits 0/384 cells; a post-hoc screen
-  admits 60 with mixed signs. Unmatched positive differences are not evidence
-  of a ground-pathway benefit.
-- The release ledger has 295 atomic claims and 40 reviewed release claims; all
-  40 retain at least one open scientific gate. #8724 owns normalized four-way
-  adjudication and independent review.
+## Launch-Monitor Contract on Current Main
 
-## Publication and AffineDrift
+- Current main includes `launch-monitor-analytics-conformance/1.0.0`: ten
+  deterministic, data-free cases with typed available/unavailable outcomes,
+  evidence/provenance wrappers, schema, golden fixture, and ADR 0040.
+- Its quantized serialization boundary stabilizes hashes without changing the
+  underlying analytics. Preserve these files and SPEC entries during merges.
 
-- #8451/#8793 own the publication-quality contract. UpstreamDrift is the source
-  authority; AffineDrift is a pinned independent projection; Tools only links.
-- The current 232-page candidate renders cleanly and passes the computational
-  profile, but it is not fast-web-access linearized; missing tags, 110 Type 3
-  resources, and two unembedded resources also block archival qualification.
-- After a protected Upstream merge, AffineDrift must pin the exact revision and
-  verify the PDF, manifest, removed-artifact behavior, and anonymous public links.
-- Archival DOI/PID deposit, equipment calibration, and governed human validation
-  remain open; do not describe the program as scientifically complete.
+## Repository and Review Rules
 
-## Vendored Tools Boundary
+- PRs target `main`; use full PRs, never drafts. Auto-merge is prohibited and
+  human approval is mandatory.
+- Before issue work, run the Repository_Management claim check and post a lease.
+- Use TDD, DbC, DRY, and LoD. Never force-push, admin-merge, bypass hooks or
+  checks, add quarantine debt, or edit `vendor/ud-tools`.
+- Research evidence is hash-pinned. Use governed regeneration; do not hand-edit
+  source digests, claims, JSON/NPZ, figures, or release manifests.
+- Use title case in document headings/captions and run the title-case audit.
 
-- Tools is a leaf dependency at `vendor/ud-tools`. Never edit inside the
-  submodule or create a shadow under `src/shared/python/`.
-- Production launchers resolve only the exact clean gitlink. Missing, dirty,
-  escaped, mismatched, or mutable sibling checkouts fail closed.
-- User-facing Tools additions require launcher and PyQt/React parity evidence;
-  preserve adverse rows and provenance rather than filtering favorable runs.
-
-## Immediate Next Steps
-
-1. Finish local gates and protected delivery of the Tools #4430 consumer pin.
-2. Verify the merge commit on Upstream remote `main`, then update Tools #4430
-   with exact cross-repository evidence; close it only if every criterion passes.
-3. Let the #8752 campaign reach a checkpoint, then adjudicate its failure map
-   against #8909/#8910 before any governed regeneration or claim update.
-4. Continue #8789 truth recovery and #8451 archival remediation without
-   weakening the human/equipment/data boundaries.
-
-## Gate Commands
+## Consumer Validation
 
 ```bash
-python3 -m pytest tests/shared_contracts/test_tools_provider_contracts.py \
-  tests/launchers/test_tools_vendor_authority.py \
-  tests/launchers/test_launcher_model_sources.py \
+python3 -m pytest \
+  tests/launchers/test_tools_vendor_authority.py::test_tools_pin_targets_qualified_rotating_base_release \
+  tests/launchers/test_launcher_model_sources.py::test_all_tools_launchers_resolve_from_pinned_vendor \
+  tests/shared_contracts/test_tools_provider_contracts.py::test_rotating_base_provider_retains_complete_qualified_authority \
   --tools-mode vendored -n 0 -q
-python3 scripts/check_spec_paths.py
-python3 scripts/check_root_clutter.py
-python3 scripts/check_test_layout.py
-python3 scripts/check_pytest_intree_testpaths.py
-python3 scripts/ci/check_suite_marker_ratchet.py
-python3 scripts/ci/check_dry_duplication_gate.py
-python3 scripts/ci/check_architecture_budget.py
-python3 scripts/check_module_size_budget.py --max-lines 1500 --include src
-python3 scripts/check_doc_size_budget.py
-python3 scripts/check_document_title_case.py --changed-from origin/main
-python3 -m ruff check <changed-python-files>
-python3 -m ruff format --check <changed-python-files>
+python3 -m pytest \
+  tests/unit/packaging/test_standalone_sidekick_workflows.py::test_package_workflow_preserves_time_for_verified_artifact_upload \
+  tests/unit/packaging/test_standalone_sidekick_workflows.py::test_package_workflow_does_not_cache_the_fast_frontend_install \
+  -n 0 -q
 ```
 
-Do not infer human technique, physiology, injury, timing demand, or coaching;
-close #8556/#8557 without evidence; bypass protection; force-push/admin-merge;
-add debt-ledger entries; or edit hash-pinned/Tools-owned evidence without its
-governed regeneration path.
+## Release and Repository Gates
+
+```bash
+python3 -m scripts.research.proximal_distal_energy.claim_audit validate
+python3 -m scripts.research.proximal_distal_energy.claim_evidence_integrity validate
+python3 -m scripts.research.proximal_distal_energy.momentum_question_readiness validate
+python3 -m scripts.research.proximal_distal_energy.qualify_open_release validate \
+  --source-revision "$(git rev-parse HEAD)" --publication-profile computational
+python3 scripts/check_document_title_case.py --changed-from origin/main
+python3 scripts/check_doc_size_budget.py
+python3 scripts/ci/check_architecture_budget.py
+python3 -m ruff check .
+python3 -m ruff format --check .
+```
+
+Passing common gates does not close a child issue whose scientific criteria
+remain unmet. Verify exact PR head, review decision, checks, merge SHA, and
+remote-main ancestry before reporting protected completion.
