@@ -4053,8 +4053,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_structural_propagation_plan.json": {
-      "sha256": "8281a6afd538c3f09a0c2bbc6d92e95f098fe3845b81ab60ff0462042d6009df",
-      "bytes": 38210,
+      "sha256": "37a9e12615d695d5ee0aa8ca340e26bce325d3031fb683a67cf7cfe26cd53109",
+      "bytes": 38510,
       "referenced_by": [
         "PD-CLAIM-301",
         "PD-CLAIM-302",
@@ -5678,8 +5678,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": {
-      "sha256": "72380079cc52b98507c4b40480d8eb5b98c7b97e83ca68f035469bc75f78f101",
-      "bytes": 25143,
+      "sha256": "aef6e40f0c239902172a3767ea8a1f18a673eeca7daa9ac647682aac13e08cd2",
+      "bytes": 25323,
       "referenced_by": [
         "PD-CLAIM-301",
         "PD-CLAIM-302",
