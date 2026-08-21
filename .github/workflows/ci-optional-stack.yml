@@ -307,6 +307,7 @@ jobs:
           pytest --collect-only -q \
             tests/engines/test_pinocchio_ecosystem.py \
             tests/engines/test_pinocchio_recorder.py \
+            tests/research/test_articulated_manufactured_solution.py \
             > /tmp/pinocchio-collect.txt
           set +e
           set -o pipefail
@@ -314,6 +315,7 @@ jobs:
             -p no:xvfb \
             tests/engines/test_pinocchio_ecosystem.py \
             tests/engines/test_pinocchio_recorder.py \
+            tests/research/test_articulated_manufactured_solution.py \
             --timeout=60 \
             --timeout-method=thread \
             -v --tb=short \

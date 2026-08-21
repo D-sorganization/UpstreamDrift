@@ -20,6 +20,9 @@ from scripts.research.proximal_distal_energy.articulated_manufactured_solution i
     evaluate_manufactured_free_body,
     manufactured_harmonic_trajectory,
 )
+from scripts.research.proximal_distal_energy.articulated_inertia_cross_engine import (
+    require_robotics_pinocchio,
+)
 from scripts.research.proximal_distal_energy.subject_scaled_spatial_geometry import (
     build_subject_scaled_model,
     default_synthetic_profiles,
@@ -27,6 +30,22 @@ from scripts.research.proximal_distal_energy.subject_scaled_spatial_geometry imp
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "docs/research/proximal_distal_energy_transfer/data"
+
+
+def _robotics_pinocchio_available() -> bool:
+    try:
+        import pinocchio as pin
+
+        require_robotics_pinocchio(pin)
+    except (ImportError, RuntimeError):
+        return False
+    return True
+
+
+requires_native_pinocchio = pytest.mark.skipif(
+    not _robotics_pinocchio_available(),
+    reason="robotics Pinocchio is exercised in the optional-stack CI lane",
+)
 
 
 def _closed_state() -> tuple[object, dict[str, object], np.ndarray, float]:
@@ -53,6 +72,8 @@ def test_manufactured_harmonic_trajectory_derivatives() -> None:
     assert np.max(np.abs(qdd_num - qdd_ex[1:-1])) < 1e-3
 
 
+@pytest.mark.requires_pinocchio
+@requires_native_pinocchio
 def test_manufactured_free_body_closed_form_checks() -> None:
     """Three independent dynamics paths and measured conservation must pass."""
     model, _, q, _ = _closed_state()
@@ -82,6 +103,8 @@ def test_manufactured_free_body_closed_form_checks() -> None:
     )
 
 
+@pytest.mark.requires_pinocchio
+@requires_native_pinocchio
 def test_manufactured_solution_killswitch_detects_corrupt_native_inverse(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -103,6 +126,8 @@ def test_manufactured_solution_killswitch_detects_corrupt_native_inverse(
     assert result.inverse_dynamics_residual > 0.05
 
 
+@pytest.mark.requires_pinocchio
+@requires_native_pinocchio
 def test_manufactured_constrained_motion_checks() -> None:
     """Constrained motion must recover loads through independent engines."""
     model, metadata, q, grip_span_m = _closed_state()

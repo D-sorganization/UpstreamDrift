@@ -101,6 +101,12 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
   links, and 246 outline entries. Archival tagging and font findings remain
   disclosed and fail closed. Next: shepherd PR #8961 through human review and
   protected CI, then verify its merge commit as an ancestor of remote `main`.
+- Core CI does not install the robotics Pinocchio extra. Its exact PR-scoped
+  suite now passes six dependency-free tests and explicitly skips the three
+  native recomputation tests. The qualified robotics-Pinocchio environment
+  passes all five manufactured-solution tests, and the optional-stack workflow
+  now owns those native tests. This repairs the deterministic Python 3.11/3.12
+  failures without accepting the unrelated PyPI `pinocchio` package.
 
 ## Scientific Boundaries
 
