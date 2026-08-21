@@ -116,6 +116,10 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
   finish lie, context, target, and distance. The separate outcome-proxy result
   has typed `is_strokes_gained=false` claims. Tools #4584 consumes this seam;
   do not duplicate the scoring authority in React or PyQt.
+- UpstreamDrift #8806 owns immutable full-corpus dataset jobs. Branch
+  `feat/8806-dataset-reference-jobs` adds aggregate-only, hash-pinned jobs for
+  server-authorized private roots; it remains independent of #8805 and must not
+  expose shot rows or relax the 20,000-row inline limit.
 
 ## Qualified Baseline — And Its Limits
 

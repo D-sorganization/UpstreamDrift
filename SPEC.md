@@ -501,7 +501,7 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.560                                            |
+| **Spec Version**        | 1.0.561                                            |
 | **Last Spec Update**    | 2026-08-20                                         |
 
 ## 2. Purpose & Mission
@@ -533,6 +533,17 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-08-20** - Added immutable, aggregate-only launch-monitor dataset jobs
+  under contract `launch-monitor-dataset-job/1.0.0`. A request identifies a
+  server-authorized opaque root and exact repository, commit, corpus-manifest
+  SHA-256, deterministic Parquet-content SHA-256, and expected row count; it
+  cannot carry rows, paths, URLs, SQL, or arbitrary query text. Verification
+  fails closed on checkout, lineage, content, or count mismatch. The initial
+  source-summary, metric-summary, and correlation allowlist suppresses groups
+  below ten rows and bounds result/page sizes. Production route registration
+  requires the existing bearer authentication dependency; source outputs omit
+  filenames, raw URLs, server paths, and observations. FastAPI lifespan joins
+  bounded worker threads, and capacity exhaustion is a retryable HTTP 429.
 - **2026-08-20** - Added the canonical source-backed strokes-gained authority
   under `src/shared/python/launch_monitor/`. The contract requires complete
   start and finish course states and a versioned, licensed, HTTP(S)-sourced,
@@ -2568,7 +2579,7 @@ UpstreamDrift/
 | Rust Physics Kernels     | `rust_core/upstream-physics/`            | High-performance compiled physics routines for critical paths, including initial flexible shaft FEM element primitives |
 | Configuration Manager    | `src/config/`                            | Centralized configuration loading, validation, and environment management                   |
 | Analysis Tool CLIs       | `src/tools/drift_control/`, `src/tools/contraction/` | Headless AffineDrift-compatible drift/control, contraction, and Floquet analysis tools |
-| Launch Monitor Analytics | `src/tools/launch_monitor_analytics/`, `src/shared/python/launch_monitor/` | PyQt6, FastAPI, and headless vendor-neutral analysis; contract v2 adds traceable arbitrary-field analysis, while the source-backed SG contract verifies benchmark provenance, fails closed outside exact strata, and keeps directional outcome proxies explicitly separate from strokes gained |
+| Launch Monitor Analytics | `src/tools/launch_monitor_analytics/`, `src/shared/python/launch_monitor/`, `src/api/services/launch_monitor_dataset_jobs.py` | PyQt6, FastAPI, and headless vendor-neutral analysis; contract v2 adds traceable arbitrary-field analysis, source-backed SG verifies benchmark provenance, and immutable aggregate-only dataset jobs analyze hash-pinned private authorities without transferring rows or client paths |
 | Tools Ground Consumer    | `src/shared/python/ground_model/`      | Headless exact-schema gateway to Tools flight-to-ground v1 records and reference execution; UI and final dependency pins remain tracked |
 | Putting Dynamics         | `src/shared/python/putting_dynamics/`   | Headless heterogeneous-green, collision, loft, hosel-wrench, skid/roll/rest, and hole-capture physics for #8345 |
 | 3D Putting UI            | `src/api/routes/putting_green.py`, `ui/src/pages/PuttingGreen.tsx`, `ui/src/components/visualization/PuttingScene3D.tsx` | Generated-contract R3F playback of the canonical putting model with collision, spin, hosel, surface, camera, and video controls for #8345 P1 |
@@ -2613,6 +2624,7 @@ Engine tier metadata is declared in each in-scope engine package with
 | F16 | Model-training controller          | 🔄     | In-launcher training dashboard (PR3) with scheduler, dataset library, resource monitor, engine-compat gate, and ML/RL-aware stats. Backend contracts + scheduler land in `src/shared/python/training/` (PRs 1–2); GUI tab, tab-backgrounding refactor, and CVAE wiring in PRs 3–5. |
 | F17 | Tools ground-model integration     | 🔄     | Headless v1 consumer gateway validates the canonical Tools façade and degrades safely when absent; exact dependency pins, FastAPI, PyQt, React, parity, and protected release remain open under Tools #4276. |
 | F18 | Source-backed strokes gained       | ✅     | Canonical Python and FastAPI contracts score complete course-state transitions against a versioned, hash-verified expected-strokes source; provenance, backing values, exclusions, uncertainty, and identity trust remain explicit, while outcome proxies cannot claim SG. |
+| F19 | Immutable launch-monitor dataset jobs | ✅  | Authenticated, aggregate-only FastAPI jobs bind an administrator-authorized private authority to exact repository/commit/manifest/content/count identity; fixed allowlisted operations, disclosure floors, bounded pages, structured unavailable states, and deterministic worker shutdown prevent inline row or path leakage. |
 
 ### API / Interface Contract
 
@@ -2630,6 +2642,10 @@ Engine tier metadata is declared in each in-scope engine package with
 - `GET /tools/launch-monitor-analytics/contracts/strokes-gained/v1` — Publish the canonical source-backed SG result schema
 - `POST /tools/launch-monitor-analytics/v2/strokes-gained` — Score explicit start/finish states against a supplied, source-verified expected-strokes baseline
 - `POST /tools/launch-monitor-analytics/v2/outcome-proxy` — Compute target-relative radial error under a contract that forbids an SG claim
+- `GET /tools/launch-monitor-analytics/contracts/dataset-jobs/v1` — Publish the immutable aggregate-job request schema
+- `POST /tools/launch-monitor-analytics/v2/dataset-jobs` — Queue an authenticated aggregate job against an exact server-authorized dataset reference
+- `GET /tools/launch-monitor-analytics/v2/dataset-jobs/{job_id}` — Return data-free job status and structured unavailable reasons
+- `GET /tools/launch-monitor-analytics/v2/dataset-jobs/{job_id}/results` — Page bounded aggregate/source-provenance results without observations or private paths
 
 **API Production-Readiness Contracts**:
 
@@ -4175,3 +4191,4 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Replaced `np.concatenate` with in-place slice assignment in `TrajectoryFunnelBenchmark._policy_action` to optimize array construction in tight simulation loops. (spec-exempt: micro-optimization)
 - Security: Added `X-Launcher-CSRF-Token` to CORS `allow_headers` in `src/api/server.py` and `src/api/local_server.py` to fix CORS preflight rejections for the local launcher UI.
 - Added canonical source-backed strokes-gained contract schema and analytics routes (`ADR-0035`, `docs/api/contracts/launch-monitor-strokes-gained-v1.schema.json`).
+- Added immutable launch-monitor dataset reference and aggregate job service routes (`ADR-0037`, contract `launch-monitor-dataset-job/1.0.0`).

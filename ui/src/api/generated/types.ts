@@ -903,6 +903,42 @@ export interface DatasetInfo {
 }
 
 /**
+ * A private-data job request containing no inline observations.
+ */
+export interface DatasetJobRequestV1 {
+  contract_version: "launch-monitor-dataset-job/1.0.0";
+  dataset: DatasetReferenceV1;
+  operation: DatasetOperationV1;
+}
+
+/**
+ * Bounded page of aggregate or source-backing records, never shot rows.
+ */
+export interface DatasetJobResultPageV1 {
+  contract_version: "launch-monitor-dataset-job/1.0.0";
+  job_id: string;
+  offset: number;
+  limit: number;
+  total_items: number;
+  next_offset?: number | null;
+  items: Record<string, unknown>[];
+}
+
+/**
+ * Data-free state and aggregate counts for one server-side job.
+ */
+export interface DatasetJobStatusV1 {
+  contract_version: "launch-monitor-dataset-job/1.0.0";
+  job_id: string;
+  status: "queued" | "running" | "completed" | "unavailable" | "failed";
+  submitted_at_utc: string;
+  completed_at_utc?: string | null;
+  input_row_count: number;
+  result_item_count: number;
+  unavailable?: DatasetUnavailableStateV1 | null;
+}
+
+/**
  * Response listing available datasets. ``total`` reports the number of entries returned in this (paginated) page, preserving the historical field semantics. ``offset``/``limit`` echo the pagination window and ``truncated`` flags when the on-disk scan hit the hard cap and more files may exist beyond the returned page (#7740 H).
  */
 export interface DatasetListResponse {
@@ -915,6 +951,16 @@ export interface DatasetListResponse {
 }
 
 /**
+ * Allow-listed aggregate operation; arbitrary query text is forbidden.
+ */
+export interface DatasetOperationV1 {
+  kind: "source_summary" | "metric_summary" | "correlation";
+  metrics: string[];
+  group_by?: "source_id" | "monitor" | "club" | null;
+  minimum_group_rows: number;
+}
+
+/**
  * Response with a preview of dataset contents.
  */
 export interface DatasetPreviewResponse {
@@ -923,6 +969,18 @@ export interface DatasetPreviewResponse {
   rows: Record<string, unknown>[];
   total_rows: number;
   format: string;
+}
+
+/**
+ * Content-addressed reference to one authorized authority checkout.
+ */
+export interface DatasetReferenceV1 {
+  root_id: string;
+  repository: string;
+  commit: string;
+  manifest_sha256: string;
+  content_sha256: string;
+  expected_row_count: number;
 }
 
 /**
@@ -945,6 +1003,15 @@ export interface DatasetStatsResponse {
   columns: string[];
   row_count: number;
   stats: Record<string, Record<string, number | null>>;
+}
+
+/**
+ * Data-free reason that an immutable reference cannot be used.
+ */
+export interface DatasetUnavailableStateV1 {
+  code: "root_not_authorized" | "authority_unavailable" | "repository_mismatch" | "commit_mismatch" | "manifest_mismatch" | "content_mismatch" | "row_count_mismatch" | "backing_manifest_mismatch" | "dependency_unavailable" | "operation_unavailable" | "internal_execution_error";
+  message: string;
+  retryable: boolean;
 }
 
 /**

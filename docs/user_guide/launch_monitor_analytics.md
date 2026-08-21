@@ -54,6 +54,43 @@ infer monitor identity from headers, filename, or directory layout. Missing
 access or a missing pinned file fails closed; there is no public download
 fallback.
 
+### Full-Corpus Dataset Jobs
+
+Authorized web clients can analyze a corpus larger than the 20,000-record
+inline limit without transferring its rows. A server administrator configures
+opaque aliases with `UPSTREAMDRIFT_LAUNCH_MONITOR_DATASET_ROOTS`, a JSON object
+whose values are absolute authorized checkout roots. The existing
+`LAUNCH_MONITOR_DATA_ROOT` is also available as alias `default`. These are
+server settings; clients cannot submit a filesystem path.
+
+Each request supplies the alias and exact repository, 40-character commit,
+corpus-manifest SHA-256, deterministic Parquet-content SHA-256, and expected row
+count. Generate the content digest with
+`dataset_content_sha256(corpus_dataset_path(authority_root))`. A job fails
+closed if any identity differs, if a symlink enters the fixed authority layout,
+or if committed qualification metadata does not bind the backing manifests.
+
+The API surface is:
+
+- `GET /tools/launch-monitor-analytics/contracts/dataset-jobs/v1`;
+- `POST /tools/launch-monitor-analytics/v2/dataset-jobs`;
+- `GET /tools/launch-monitor-analytics/v2/dataset-jobs/{job_id}`; and
+- `GET /tools/launch-monitor-analytics/v2/dataset-jobs/{job_id}/results`.
+
+Operations are restricted to source summaries, metric summaries, and
+correlations. Pages contain at most 200 aggregate or source-backing records.
+They never contain shot rows, server paths, arbitrary SQL results, or inline
+input records. Numeric groups below ten complete observations are suppressed.
+Source summaries join observed counts to the authority's hash-verified source
+repository, source commit, file path, and file SHA-256 metadata.
+
+Jobs are process-local and bounded. A server restart clears their status and
+results; resubmit the same immutable reference. A structured `unavailable`
+state distinguishes missing authorization or data, repository/commit/hash/row
+count mismatches, and unavailable dependencies without leaking a private path.
+See [ADR 0036](../adr/0036-immutable-launch-monitor-dataset-jobs.md) for the
+security and retention rationale.
+
 ## Workflow
 
 ### 1. Import and Review
