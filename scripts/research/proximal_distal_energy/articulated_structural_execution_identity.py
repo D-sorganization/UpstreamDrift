@@ -24,6 +24,7 @@ from scripts.research.proximal_distal_energy.articulated_structural_propagation_
 
 Pathway = Literal["shaft", "ground"]
 ROOT = Path(__file__).resolve().parents[3]
+CHECKPOINT_SCHEMA_VERSION = "articulated-structural-checkpoint/v1"
 
 
 def _canonical_sha256(value: Any) -> str:
@@ -53,6 +54,8 @@ class StructuralExecutionIdentity:
     scientific_configuration_sha256: str
     plan_design_sha256: str
     plan_contract_sha256: str
+    registered_states: tuple[tuple[int, int], ...]
+    registered_branches: tuple[tuple[str, int], ...]
 
     def checkpoint_prefix(self) -> dict[str, Any]:
         """Return a detached JSON-compatible checkpoint identity prefix."""
@@ -68,6 +71,77 @@ class StructuralExecutionIdentity:
             "plan_design_sha256": self.plan_design_sha256,
             "plan_contract_sha256": self.plan_contract_sha256,
         }
+
+
+def structural_checkpoint_metadata(
+    identity: StructuralExecutionIdentity,
+    *,
+    state_slot: int,
+    state: tuple[int, int],
+    branch_kind: str,
+    branch_slot: int,
+) -> dict[str, Any]:
+    """Build the exact JSON-compatible identity for one persisted checkpoint."""
+
+    if not isinstance(identity, StructuralExecutionIdentity):
+        raise TypeError("identity must be a StructuralExecutionIdentity")
+    if type(state_slot) is not int or not 0 <= state_slot < len(
+        identity.registered_states
+    ):
+        raise ValueError("state_slot must select a registered state")
+    if (
+        not isinstance(state, tuple)
+        or len(state) != 2
+        or not all(type(value) is int for value in state)
+        or state != identity.registered_states[state_slot]
+    ):
+        raise ValueError("state must reproduce the registered state at state_slot")
+    if (
+        not isinstance(branch_kind, str)
+        or type(branch_slot) is not int
+        or (branch_kind, branch_slot) not in identity.registered_branches
+    ):
+        raise ValueError("branch kind and slot must select a registered branch")
+    return {
+        "schema_version": CHECKPOINT_SCHEMA_VERSION,
+        **identity.checkpoint_prefix(),
+        "state_slot": state_slot,
+        "state": list(state),
+        "branch_kind": branch_kind,
+        "branch_slot": branch_slot,
+    }
+
+
+def validate_structural_checkpoint_metadata(
+    metadata: dict[str, Any],
+    identity: StructuralExecutionIdentity,
+    *,
+    state_slot: int,
+    state: tuple[int, int],
+    branch_kind: str,
+    branch_slot: int,
+) -> dict[str, Any]:
+    """Reject any missing, extra, or altered persisted checkpoint identity."""
+
+    if not isinstance(metadata, dict):
+        raise TypeError("metadata must be a dictionary")
+    expected = structural_checkpoint_metadata(
+        identity,
+        state_slot=state_slot,
+        state=state,
+        branch_kind=branch_kind,
+        branch_slot=branch_slot,
+    )
+    if metadata != expected:
+        differing = sorted(
+            key
+            for key in set(metadata) | set(expected)
+            if metadata.get(key) != expected.get(key)
+        )
+        raise RuntimeError(
+            "structural checkpoint identity does not reproduce: " + ", ".join(differing)
+        )
+    return expected
 
 
 def _require_configuration(
@@ -129,6 +203,27 @@ def resolve_structural_execution_identity(
             "scientific configuration digest does not reproduce the plan"
         )
 
+    registered_states = tuple(
+        (case, sample)
+        for case in typed_configuration.case_indices
+        for sample in typed_configuration.sample_indices
+    )
+    if typed_pathway == "shaft":
+        registered_branches = tuple(
+            ("activation", slot) for slot in range(len(typed_configuration.activations))
+        )
+    else:
+        registered_branches = tuple(
+            [
+                ("primary", slot)
+                for slot in range(len(typed_configuration.ground_activations))
+            ]
+            + [
+                ("control", slot)
+                for slot in range(len(typed_configuration.control_names))
+            ]
+        )
+
     return StructuralExecutionIdentity(
         corner_id=corner_id,
         pathway=typed_pathway,
@@ -139,10 +234,15 @@ def resolve_structural_execution_identity(
         scientific_configuration_sha256=configuration_digest,
         plan_design_sha256=plan["design_sha256"],
         plan_contract_sha256=plan["contract_sha256"],
+        registered_states=registered_states,
+        registered_branches=registered_branches,
     )
 
 
 __all__ = [
+    "CHECKPOINT_SCHEMA_VERSION",
     "StructuralExecutionIdentity",
     "resolve_structural_execution_identity",
+    "structural_checkpoint_metadata",
+    "validate_structural_checkpoint_metadata",
 ]

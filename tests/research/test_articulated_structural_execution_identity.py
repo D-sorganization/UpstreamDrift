@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from copy import deepcopy
+import json
 from pathlib import Path
 
 import pytest
@@ -20,7 +22,10 @@ from scripts.research.proximal_distal_energy.articulated_shaft_atlas import (
     ArticulatedShaftAtlasConfig,
 )
 from scripts.research.proximal_distal_energy.articulated_structural_execution_identity import (
+    CHECKPOINT_SCHEMA_VERSION,
     resolve_structural_execution_identity,
+    structural_checkpoint_metadata,
+    validate_structural_checkpoint_metadata,
 )
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -136,3 +141,163 @@ def test_identity_rejects_pathway_and_configuration_type_mismatch() -> None:
             pathway="unknown",
             configuration=ArticulatedGroundAtlasConfig(),
         )
+
+
+def test_checkpoint_metadata_is_exact_and_json_round_trip_safe() -> None:
+    identity = resolve_structural_execution_identity(
+        _load("nominal"),
+        corner_id="nominal",
+        pathway="ground",
+        configuration=ArticulatedGroundAtlasConfig(),
+    )
+
+    metadata = structural_checkpoint_metadata(
+        identity,
+        state_slot=4,
+        state=(8, 6),
+        branch_kind="primary",
+        branch_slot=2,
+    )
+    round_trip = json.loads(json.dumps(metadata, sort_keys=True))
+
+    assert round_trip == metadata
+    assert metadata["schema_version"] == CHECKPOINT_SCHEMA_VERSION
+    assert metadata["state"] == [8, 6]
+    assert (
+        validate_structural_checkpoint_metadata(
+            round_trip,
+            identity,
+            state_slot=4,
+            state=(8, 6),
+            branch_kind="primary",
+            branch_slot=2,
+        )
+        == metadata
+    )
+
+
+@pytest.mark.parametrize(
+    "field",
+    [
+        "schema_version",
+        "corner_id",
+        "authority_sha256",
+        "scales",
+        "model_sha256",
+        "atlas_source_sha256",
+        "scientific_configuration_sha256",
+        "plan_design_sha256",
+        "plan_contract_sha256",
+        "state_slot",
+        "state",
+        "pathway",
+        "branch_kind",
+        "branch_slot",
+    ],
+)
+def test_checkpoint_metadata_rejects_every_tampered_identity_field(field: str) -> None:
+    identity = resolve_structural_execution_identity(
+        _load("nominal"),
+        corner_id="nominal",
+        pathway="shaft",
+        configuration=ArticulatedShaftAtlasConfig(),
+    )
+    metadata = structural_checkpoint_metadata(
+        identity,
+        state_slot=0,
+        state=(0, 0),
+        branch_kind="activation",
+        branch_slot=0,
+    )
+    tampered = deepcopy(metadata)
+    tampered[field] = "tampered"
+
+    with pytest.raises(RuntimeError, match=field):
+        validate_structural_checkpoint_metadata(
+            tampered,
+            identity,
+            state_slot=0,
+            state=(0, 0),
+            branch_kind="activation",
+            branch_slot=0,
+        )
+
+
+@pytest.mark.parametrize("mutation", ["missing", "extra"])
+def test_checkpoint_metadata_rejects_missing_or_extra_fields(mutation: str) -> None:
+    identity = resolve_structural_execution_identity(
+        _load("nominal"),
+        corner_id="nominal",
+        pathway="shaft",
+        configuration=ArticulatedShaftAtlasConfig(),
+    )
+    metadata = structural_checkpoint_metadata(
+        identity,
+        state_slot=0,
+        state=(0, 0),
+        branch_kind="activation",
+        branch_slot=0,
+    )
+    if mutation == "missing":
+        metadata.pop("authority_sha256")
+    else:
+        metadata["unregistered"] = True
+
+    with pytest.raises(RuntimeError, match="structural checkpoint identity"):
+        validate_structural_checkpoint_metadata(
+            metadata,
+            identity,
+            state_slot=0,
+            state=(0, 0),
+            branch_kind="activation",
+            branch_slot=0,
+        )
+
+
+@pytest.mark.parametrize(
+    "arguments",
+    [
+        {"state_slot": -1, "state": (0, 0), "branch_kind": "state", "branch_slot": 0},
+        {
+            "state_slot": 0,
+            "state": (0, 6),
+            "branch_kind": "activation",
+            "branch_slot": 0,
+        },
+        {
+            "state_slot": True,
+            "state": (0, 0),
+            "branch_kind": "activation",
+            "branch_slot": 0,
+        },
+        {
+            "state_slot": 0,
+            "state": (False, 0),
+            "branch_kind": "activation",
+            "branch_slot": 0,
+        },
+        {"state_slot": 0, "state": (0, 0), "branch_kind": "primary", "branch_slot": 0},
+        {
+            "state_slot": 0,
+            "state": (0, 0),
+            "branch_kind": "activation",
+            "branch_slot": 4,
+        },
+        {
+            "state_slot": 0,
+            "state": (0, 0),
+            "branch_kind": "activation",
+            "branch_slot": True,
+        },
+    ],
+)
+def test_checkpoint_metadata_rejects_invalid_local_identity(arguments) -> None:
+    identity = resolve_structural_execution_identity(
+        _load("nominal"),
+        corner_id="nominal",
+        pathway="shaft",
+        configuration=ArticulatedShaftAtlasConfig(),
+    )
+
+    with pytest.raises(ValueError):
+        structural_checkpoint_metadata(identity, **arguments)

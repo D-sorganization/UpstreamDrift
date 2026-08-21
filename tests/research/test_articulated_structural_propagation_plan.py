@@ -198,6 +198,10 @@ def test_plan_binds_restart_and_cell_level_evidence_contract(plan) -> None:
     evidence = plan["evidence_contract"]
 
     assert evidence["schema_version"] == "articulated-structural-propagation/v2"
+    assert evidence["checkpoint_schema_version"] == (
+        "articulated-structural-checkpoint/v1"
+    )
+    assert "missing, extra, or altered" in evidence["checkpoint_metadata_rule"]
     assert set(evidence["checkpoint_identity_fields"]) == {
         "corner_id",
         "authority_sha256",

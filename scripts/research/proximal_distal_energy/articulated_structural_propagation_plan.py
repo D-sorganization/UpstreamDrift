@@ -273,6 +273,7 @@ def build_structural_propagation_plan(
     }
     evidence_contract = {
         "schema_version": "articulated-structural-propagation/v2",
+        "checkpoint_schema_version": "articulated-structural-checkpoint/v1",
         "checkpoint_identity_fields": [
             "corner_id",
             "authority_sha256",
@@ -286,6 +287,7 @@ def build_structural_propagation_plan(
             "branch_kind",
             "branch_slot",
         ],
+        "checkpoint_metadata_rule": "persist the exact registered prefix and local state/branch identity; reject every missing, extra, or altered field before reuse",
         "required_cell_arrays": {
             pathway: [
                 "cell_identity",
