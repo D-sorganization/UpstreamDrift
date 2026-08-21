@@ -45,6 +45,18 @@ _(Populated as the review proceeds; each row is filed as a GitHub issue.)_
 | 12 | #8827 | Provenance | Medium | Pose Studio engine status pill stale after silent mock downgrade |
 | 13 | #8828 | Provenance | Medium | Shared plot titles/exports carry no identity; include_metadata ignored |
 | 14 | #8829 | Provenance | Medium | Engine dashboards swallow model-load failures; engine name invisible embedded |
+| 15 | #8830 | Organization | High | Third-party model repos vendored twice (submodules + ~467 MB committed copies) |
+| 16 | #8831 | Organization | High | Six launcher entry points; docs/README.md points to the deprecated one as primary |
+| 17 | #8832 | Organization | Medium | feature_parity.json attributes tile grid to deprecated unified_launcher.py |
+| 18 | #8833 | Organization | High | Orphaned docs/ui/FEATURE_PARITY_MATRIX.md contradicts generated matrix and README |
+| 19 | #8834 | Organization | Medium | scripts/validate_suite.py validates a pre-migration layout, can never pass |
+| 20 | #8835 | Organization | Medium | Environment drift: four Python versions, two base-image digests |
+| 21 | #8836 | Organization | Medium | Generated artifacts committed in output/ and reports/ with no ignore rules |
+| 22 | #8837 | Organization | Medium | .scratch/ holds 98 committed agent issue drafts with no policy |
+| 23 | #8839 | Organization | Medium | docs/README.md describes a nonexistent tree; exempt from catalog checker |
+| 24 | #8840 | Organization | Low | Four self-admitted pending docs consolidations left unexecuted |
+| 25 | #8841 | Organization | Medium | Top-level motion_matching trees are wrong-cwd artifacts; workflows disagree on leaderboard |
+| 26 | #8842 | Organization | Low | notebooks/bunkershot3d/phase1_mvp.py cannot run (imports/paths wrong) |
 
 ## Status
 
