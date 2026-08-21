@@ -501,7 +501,7 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.561                                            |
+| **Spec Version**        | 1.0.562                                            |
 | **Last Spec Update**    | 2026-08-20                                         |
 
 ## 2. Purpose & Mission
@@ -533,6 +533,17 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-08-20** - Added canonical player covariation and population synthesis
+  under contract `launch-monitor-player-covariation/1.0.0`. Selected-pair
+  results distinguish pooled, player-centered, between-player, and per-player
+  associations; fixed- and DerSimonian-Laird random-effects Fisher-z summaries
+  report Q, tau-squared, and I-squared heterogeneity. Trusted explicit player
+  identity is mandatory and remains separate from session/order evidence.
+  Missing rows, ineligible groups, constant variables, insufficient population
+  evidence, units, vendor/model provenance, and source-joinable backing hashes
+  remain explicit. The bounded deterministic pair scan is exploratory, retains
+  unavailable pairs, and warns about multiplicity, aggregation reversal,
+  causality, and population-generalization limits.
 - **2026-08-20** - Added immutable, aggregate-only launch-monitor dataset jobs
   under contract `launch-monitor-dataset-job/1.0.0`. A request identifies a
   server-authorized opaque root and exact repository, commit, corpus-manifest
@@ -2579,7 +2590,7 @@ UpstreamDrift/
 | Rust Physics Kernels     | `rust_core/upstream-physics/`            | High-performance compiled physics routines for critical paths, including initial flexible shaft FEM element primitives |
 | Configuration Manager    | `src/config/`                            | Centralized configuration loading, validation, and environment management                   |
 | Analysis Tool CLIs       | `src/tools/drift_control/`, `src/tools/contraction/` | Headless AffineDrift-compatible drift/control, contraction, and Floquet analysis tools |
-| Launch Monitor Analytics | `src/tools/launch_monitor_analytics/`, `src/shared/python/launch_monitor/`, `src/api/services/launch_monitor_dataset_jobs.py` | PyQt6, FastAPI, and headless vendor-neutral analysis; contract v2 adds traceable arbitrary-field analysis, source-backed SG verifies benchmark provenance, and immutable aggregate-only dataset jobs analyze hash-pinned private authorities without transferring rows or client paths |
+| Launch Monitor Analytics | `src/tools/launch_monitor_analytics/`, `src/shared/python/launch_monitor/`, `src/api/services/launch_monitor_dataset_jobs.py` | PyQt6, FastAPI, and headless vendor-neutral analysis; contract v2 adds traceable arbitrary-field analysis, source-backed SG verifies benchmark provenance, immutable aggregate-only dataset jobs analyze hash-pinned private authorities without transferring rows or client paths, and canonical player covariation separates pooled/within/between effects with fixed/random population synthesis |
 | Tools Ground Consumer    | `src/shared/python/ground_model/`      | Headless exact-schema gateway to Tools flight-to-ground v1 records and reference execution; UI and final dependency pins remain tracked |
 | Putting Dynamics         | `src/shared/python/putting_dynamics/`   | Headless heterogeneous-green, collision, loft, hosel-wrench, skid/roll/rest, and hole-capture physics for #8345 |
 | 3D Putting UI            | `src/api/routes/putting_green.py`, `ui/src/pages/PuttingGreen.tsx`, `ui/src/components/visualization/PuttingScene3D.tsx` | Generated-contract R3F playback of the canonical putting model with collision, spin, hosel, surface, camera, and video controls for #8345 P1 |
@@ -2625,6 +2636,7 @@ Engine tier metadata is declared in each in-scope engine package with
 | F17 | Tools ground-model integration     | 🔄     | Headless v1 consumer gateway validates the canonical Tools façade and degrades safely when absent; exact dependency pins, FastAPI, PyQt, React, parity, and protected release remain open under Tools #4276. |
 | F18 | Source-backed strokes gained       | ✅     | Canonical Python and FastAPI contracts score complete course-state transitions against a versioned, hash-verified expected-strokes source; provenance, backing values, exclusions, uncertainty, and identity trust remain explicit, while outcome proxies cannot claim SG. |
 | F19 | Immutable launch-monitor dataset jobs | ✅  | Authenticated, aggregate-only FastAPI jobs bind an administrator-authorized private authority to exact repository/commit/manifest/content/count identity; fixed allowlisted operations, disclosure floors, bounded pages, structured unavailable states, and deterministic worker shutdown prevent inline row or path leakage. |
+| F20 | Player covariation and population synthesis | ✅ | A versioned evidence-bearing contract separates pooled, within-player, between-player, and per-player associations; fixed/random Fisher-z synthesis reports heterogeneity, exclusions, unavailable states, explicit units, trusted player identity, vendor/model provenance, and source-linked backing rows. |
 
 ### API / Interface Contract
 
@@ -2646,6 +2658,9 @@ Engine tier metadata is declared in each in-scope engine package with
 - `POST /tools/launch-monitor-analytics/v2/dataset-jobs` — Queue an authenticated aggregate job against an exact server-authorized dataset reference
 - `GET /tools/launch-monitor-analytics/v2/dataset-jobs/{job_id}` — Return data-free job status and structured unavailable reasons
 - `GET /tools/launch-monitor-analytics/v2/dataset-jobs/{job_id}/results` — Page bounded aggregate/source-provenance results without observations or private paths
+- `GET /tools/launch-monitor-analytics/contracts/player-covariation/v1` — Publish the canonical selected-pair and exploratory-scan result schema
+- `POST /tools/launch-monitor-analytics/v2/player-covariation` — Compare pooled, within-player, between-player, per-player, and population effects for an explicitly identified player variable pair
+- `POST /tools/launch-monitor-analytics/v2/player-covariation/scan` — Rank a bounded exploratory variable-pair set with structured unavailable states and multiplicity warnings
 
 **API Production-Readiness Contracts**:
 
@@ -3109,6 +3124,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-20 | 1.0.562 | Added the canonical `launch-monitor-player-covariation/1.0.0` contract for #8807. Selected-pair analysis separates pooled, player-centered, between-player, and per-player associations, then publishes fixed- and DerSimonian-Laird random-effects Fisher-z summaries with Q, tau-squared, and I-squared heterogeneity. Trusted explicit player identity is mandatory; missingness, ineligible/constant groups, unavailable states, uncertainty methods, units, vendor/model provenance, and source-joinable backing hashes remain explicit. The deterministic bounded pair scan retains unavailable pairs and warns about multiplicity, aggregation reversal, causality, and population-generalization limits. JSON Schema, golden pair/scan fixtures, FastAPI routes, generated React declarations, and compatibility tests share the Python authority while generic v1/v2 contracts remain unchanged. |
 | 2026-08-20 | 1.0.560 | Hardened the launch-monitor v2 identity boundary for #8805. `PlayerIdentityV2` rejects session, club, source, filename, row-order, and source-row pseudo-identifiers even when attested. Separate `SessionIdentityV2` and `OrderEvidenceV2` records now preserve session boundaries, order semantics, units, trust, and backing evidence without promoting those fields to player identity. Invalid identity claims fail as request-contract errors; analyses that do not require session/order evidence remain compatible, and future longitudinal operations must report missing evidence as unavailable rather than infer it. Contract v1 remains unchanged. |
 | 2026-08-20 | 1.0.559 | Added the canonical source-backed strokes-gained and separate outcome-proxy contracts for #8803. SG requires complete start/finish course state and a versioned expected-strokes baseline with HTTP(S) source, license declaration, canonical SHA-256, and unique stratum/distance points. Exact-stratum interpolation is allowed; extrapolation fails closed. Results preserve formula, units, row and dataset hashes, backing benchmark values, exclusions, uncertainty availability, conservative claims, and identity evidence for grouped or longitudinal analysis. FastAPI publishes the schema and analysis endpoints, and generated React declarations remain locked to OpenAPI. The radial-error outcome proxy is structurally prohibited from claiming strokes gained. |
 | 2026-08-20 | 1.0.558 | Closed PR #8793's first protected publication run failures without weakening either gate. Claim-evidence schema v2 hashes valid UTF-8 evidence after canonical CRLF-to-LF normalization while preserving byte-exact binary hashes, so identical committed evidence validates across Windows and Linux checkouts. A focused regression pins both newline forms to one digest and canonical byte count. The PDF finding helper now owns expected metadata as one parameter object, bringing the changed production function back within the repository's eight-parameter architecture budget. |
