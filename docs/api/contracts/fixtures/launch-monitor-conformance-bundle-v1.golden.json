@@ -1,5 +1,5 @@
 {
-  "bundle_sha256": "ce037c1a7e869d009839412c049a0fb8a9e3fdec1acb5b3866d1abfaf2bc995c",
+  "bundle_sha256": "11010e9b5e01ec5b6f3b1ba39f95ba1ec387f20516d9961b16fe9c4f9e934370",
   "bundle_version": "launch-monitor-analytics-conformance/1.0.0",
   "data_classification": "synthetic_contract_fixture_no_private_rows",
   "description": "Synthetic, data-free consumer outputs for canonical launch-monitor analytics; no observed or private shot rows are embedded.",
@@ -81,12 +81,12 @@
           "contract_version": "1.0.0",
           "correlations": [
             {
-              "adjusted_p_value": 2.5057900499010595e-5,
-              "ci_lower": 0.9613613019499836,
-              "ci_upper": 0.9995737773213075,
-              "coefficient": 0.9959100033104786,
+              "adjusted_p_value": 2.50579e-5,
+              "ci_lower": 0.9613613,
+              "ci_upper": 0.99957378,
+              "coefficient": 0.99591,
               "method": "pearson",
-              "p_value": 2.5057900499010595e-5,
+              "p_value": 2.50579e-5,
               "predictor": "club_speed",
               "sample_count": 6
             }
@@ -276,7 +276,7 @@
         "trust_level": "not_provided"
       },
       "scenario_id": "analysis-v2-available",
-      "scenario_sha256": "9bf4cd5f0bc0bfe68fe3ac00b9e7088456bc2c0b5bd91d940856e51cc73d144a",
+      "scenario_sha256": "99db507c2626708708fbd391b2205395b3dfb1e42922911fd1a3fdb4843db6bb",
       "session_identity": {
         "evidence": null,
         "identifier_column": null,
@@ -786,13 +786,13 @@
         },
         "meta_analysis": {
           "contributor_count": 2,
-          "fixed_ci_lower": -0.999999937451,
-          "fixed_ci_upper": -0.999984012612,
+          "fixed_ci_lower": -0.99999994,
+          "fixed_ci_upper": -0.99998401,
           "fixed_effect_r": -0.999999,
           "i_squared_pct": 0.0,
           "q_statistic": 0.0,
-          "random_ci_lower": -0.999999937451,
-          "random_ci_upper": -0.999984012612,
+          "random_ci_lower": -0.99999994,
+          "random_ci_upper": -0.99998401,
           "random_effect_r": -0.999999,
           "reason_code": null,
           "state": "available",
@@ -825,8 +825,8 @@
         "per_player": [
           {
             "estimate": {
-              "ci_lower": -0.999999980157,
-              "ci_upper": -0.99994960443,
+              "ci_lower": -0.99999998,
+              "ci_upper": -0.9999496,
               "group_count": 1,
               "intercept": 3.0,
               "pearson_r": -1.0,
@@ -843,8 +843,8 @@
           },
           {
             "estimate": {
-              "ci_lower": -0.999999980157,
-              "ci_upper": -0.99994960443,
+              "ci_lower": -0.99999998,
+              "ci_upper": -0.9999496,
               "group_count": 1,
               "intercept": 23.0,
               "pearson_r": -1.0,
@@ -866,16 +866,16 @@
           "trust_level": "explicit_user_attested"
         },
         "pooled": {
-          "ci_lower": 0.552062825229,
-          "ci_upper": 0.982824222137,
+          "ci_lower": 0.55206283,
+          "ci_upper": 0.98282422,
           "group_count": 2,
-          "intercept": 0.619047619048,
-          "pearson_r": 0.904761904762,
-          "r_squared": 0.818594104309,
+          "intercept": 0.61904762,
+          "pearson_r": 0.9047619,
+          "r_squared": 0.8185941,
           "reason_code": null,
           "sample_count": 8,
-          "slope": 0.904761904762,
-          "spearman_r": 0.52380952381,
+          "slope": 0.9047619,
+          "spearman_r": 0.52380952,
           "state": "available"
         },
         "request": {
@@ -947,7 +947,7 @@
         "trust_level": "explicit_user_attested"
       },
       "scenario_id": "player-covariation-available",
-      "scenario_sha256": "745838741d5063ede97ead8a85b36b29887d199325f0b949d66703e282cf6689",
+      "scenario_sha256": "5f668191279b736e5ab3e7f5b335c7ba73fcf59764c475c8aaa94f254b1e342c",
       "session_identity": {
         "evidence": null,
         "identifier_column": null,
@@ -1996,7 +1996,7 @@
         "player_associations": [
           {
             "direction": "increasing",
-            "estimate_per_order_unit": 1.1999999999999993,
+            "estimate_per_order_unit": 1.2,
             "player_id": "player-1",
             "reason_code": null,
             "session_count": 3,
@@ -2004,7 +2004,7 @@
           },
           {
             "direction": "increasing",
-            "estimate_per_order_unit": 1.3999999999999986,
+            "estimate_per_order_unit": 1.4,
             "player_id": "player-2",
             "reason_code": null,
             "session_count": 3,
@@ -2012,7 +2012,7 @@
           },
           {
             "direction": "increasing",
-            "estimate_per_order_unit": 1.600000000000003,
+            "estimate_per_order_unit": 1.6,
             "player_id": "player-3",
             "reason_code": null,
             "session_count": 3,
@@ -2020,7 +2020,7 @@
           },
           {
             "direction": "increasing",
-            "estimate_per_order_unit": 1.799999999999997,
+            "estimate_per_order_unit": 1.8,
             "player_id": "player-4",
             "reason_code": null,
             "session_count": 3,
@@ -2034,14 +2034,14 @@
         },
         "pooled_association": {
           "cluster_count": 4,
-          "confidence_interval_high": 2.015030302728905,
-          "confidence_interval_low": 0.9849696972710932,
+          "confidence_interval_high": 2.0150303,
+          "confidence_interval_low": 0.9849697,
           "confidence_level": 0.95,
-          "estimate_per_order_unit": 1.4999999999999991,
+          "estimate_per_order_unit": 1.5,
           "method": "player_fixed_effects_ols_clustered_by_player",
-          "p_value": 0.0026577005664792483,
+          "p_value": 0.0026577006,
           "session_cell_count": 12,
-          "standard_error": 0.16183471874253738,
+          "standard_error": 0.16183472,
           "uncertainty_state": "available"
         },
         "request": {
@@ -2057,7 +2057,7 @@
         "session_aggregates": [
           {
             "confounder_values": {},
-            "metric_value": 11.200000000000001,
+            "metric_value": 11.2,
             "order_unit": "session",
             "order_value": 1.0,
             "player_id": "player-1",
@@ -2087,7 +2087,7 @@
           },
           {
             "confounder_values": {},
-            "metric_value": 21.400000000000002,
+            "metric_value": 21.4,
             "order_unit": "session",
             "order_value": 1.0,
             "player_id": "player-2",
@@ -2117,7 +2117,7 @@
           },
           {
             "confounder_values": {},
-            "metric_value": 31.599999999999998,
+            "metric_value": 31.6,
             "order_unit": "session",
             "order_value": 1.0,
             "player_id": "player-3",
@@ -2127,7 +2127,7 @@
           },
           {
             "confounder_values": {},
-            "metric_value": 33.199999999999996,
+            "metric_value": 33.2,
             "order_unit": "session",
             "order_value": 2.0,
             "player_id": "player-3",
@@ -2137,7 +2137,7 @@
           },
           {
             "confounder_values": {},
-            "metric_value": 34.800000000000004,
+            "metric_value": 34.8,
             "order_unit": "session",
             "order_value": 3.0,
             "player_id": "player-3",
@@ -2147,7 +2147,7 @@
           },
           {
             "confounder_values": {},
-            "metric_value": 41.800000000000004,
+            "metric_value": 41.8,
             "order_unit": "session",
             "order_value": 1.0,
             "player_id": "player-4",
@@ -2193,7 +2193,7 @@
         "trust_level": "explicit_user_attested"
       },
       "scenario_id": "attested-longitudinal-available",
-      "scenario_sha256": "f6bea9653fa6d3078c45af4ddc369e1d0f9030a18f3159fda9dff77be5a6dfd3",
+      "scenario_sha256": "308db50efe345e76362adfe980eb34de3b3177e2fe2bbf1b3f42006e83d3eacd",
       "session_identity": {
         "evidence": "The source export reports session boundaries.",
         "identifier_column": "session_id",
@@ -3056,9 +3056,9 @@
         "metric_name": "source_backed_strokes_gained",
         "row_results": [
           {
-            "benchmark_standard_error": 0.1409113196304683,
+            "benchmark_standard_error": 0.14091132,
             "expected_finish": 1.5,
-            "expected_start": 3.1999999999999997,
+            "expected_start": 3.2,
             "finish": {
               "context": "standard",
               "distance_yards": 20.0,
@@ -3086,10 +3086,10 @@
               "lower_distance_yards": 100.0,
               "upper_distance_yards": 200.0
             },
-            "strokes_gained": 0.6999999999999997
+            "strokes_gained": 0.7
           },
           {
-            "benchmark_standard_error": 0.1341640786499874,
+            "benchmark_standard_error": 0.13416408,
             "expected_finish": 1.125,
             "expected_start": 3.3,
             "finish": {
@@ -3119,10 +3119,10 @@
               "lower_distance_yards": 100.0,
               "upper_distance_yards": 200.0
             },
-            "strokes_gained": 1.1749999999999998
+            "strokes_gained": 1.175
           },
           {
-            "benchmark_standard_error": 0.13029197979921867,
+            "benchmark_standard_error": 0.13029198,
             "expected_finish": 0.75,
             "expected_start": 3.4,
             "finish": {
@@ -3163,7 +3163,7 @@
             "Interpolation stays within an exact lie/context/target stratum."
           ],
           "benchmark_method": "interpolated-state-standard-errors",
-          "benchmark_standard_error_mean": 0.07805411228400747,
+          "benchmark_standard_error_mean": 0.078054112,
           "confidence_level": 0.95,
           "sampling_method": "student-t-descriptive-mean"
         },
@@ -3175,14 +3175,14 @@
         "value_summary": {
           "confidence_interval": {
             "level": 0.95,
-            "lower": -0.004965413066784663,
+            "lower": -0.0049654131,
             "method": "student-t",
-            "upper": 2.3549654130667843
+            "upper": 2.3549654
           },
           "count": 3,
-          "mean": 1.1749999999999998,
-          "standard_deviation": 0.4750000000000001,
-          "standard_error": 0.2742413778650723
+          "mean": 1.175,
+          "standard_deviation": 0.475,
+          "standard_error": 0.27424138
         },
         "warnings": []
       },
@@ -3192,7 +3192,7 @@
         "trust_level": "not_provided"
       },
       "scenario_id": "source-backed-strokes-gained-available",
-      "scenario_sha256": "522a3fa41219b1ceed31ad118c1b119502bf381f1f665162372e5b164e16028d",
+      "scenario_sha256": "e69a251f55a700c4a5c0a23b68336a07ac88e4eef1b5623093a5110ef5e4be2e",
       "session_identity": {
         "evidence": null,
         "identifier_column": null,
@@ -3346,9 +3346,9 @@
         "metric_name": "source_backed_strokes_gained",
         "row_results": [
           {
-            "benchmark_standard_error": 0.1409113196304683,
+            "benchmark_standard_error": 0.14091132,
             "expected_finish": 1.5,
-            "expected_start": 3.1999999999999997,
+            "expected_start": 3.2,
             "finish": {
               "context": "standard",
               "distance_yards": 20.0,
@@ -3376,10 +3376,10 @@
               "lower_distance_yards": 100.0,
               "upper_distance_yards": 200.0
             },
-            "strokes_gained": 0.6999999999999997
+            "strokes_gained": 0.7
           },
           {
-            "benchmark_standard_error": 0.1341640786499874,
+            "benchmark_standard_error": 0.13416408,
             "expected_finish": 1.125,
             "expected_start": 3.3,
             "finish": {
@@ -3409,10 +3409,10 @@
               "lower_distance_yards": 100.0,
               "upper_distance_yards": 200.0
             },
-            "strokes_gained": 1.1749999999999998
+            "strokes_gained": 1.175
           },
           {
-            "benchmark_standard_error": 0.13029197979921867,
+            "benchmark_standard_error": 0.13029198,
             "expected_finish": 0.75,
             "expected_start": 3.4,
             "finish": {
@@ -3453,7 +3453,7 @@
             "Interpolation stays within an exact lie/context/target stratum."
           ],
           "benchmark_method": "interpolated-state-standard-errors",
-          "benchmark_standard_error_mean": 0.07805411228400747,
+          "benchmark_standard_error_mean": 0.078054112,
           "confidence_level": 0.95,
           "sampling_method": "student-t-descriptive-mean"
         },
@@ -3477,7 +3477,7 @@
         "trust_level": "not_provided"
       },
       "scenario_id": "source-backed-strokes-gained-unavailable",
-      "scenario_sha256": "30d52d4524a704919519a6364874919cbc9db9d308ccdd5bb8b83d42b544671c",
+      "scenario_sha256": "f42c2b8770eed1fa0705e2d55c682dae2d2fc2f23d207d9f4e285865d253f1c3",
       "session_identity": {
         "evidence": null,
         "identifier_column": null,
@@ -3572,7 +3572,7 @@
           {
             "carry_yards": 155.0,
             "lateral_yards": 2.0,
-            "radial_error_yards": 5.385164807134504,
+            "radial_error_yards": 5.3851648,
             "shot_id": "proxy-1",
             "source_index": 1,
             "target_distance_yards": 150.0
@@ -3588,14 +3588,14 @@
         "value_summary": {
           "confidence_interval": {
             "level": 0.95,
-            "lower": 2.7455909552075597,
+            "lower": 2.745591,
             "method": "student-t",
-            "upper": 7.639573851926945
+            "upper": 7.6395739
           },
           "count": 2,
-          "mean": 5.192582403567252,
-          "standard_deviation": 0.2723526469992163,
-          "standard_error": 0.19258240356725184
+          "mean": 5.1925824,
+          "standard_deviation": 0.27235265,
+          "standard_error": 0.1925824
         }
       },
       "player_identity": {
@@ -3604,7 +3604,7 @@
         "trust_level": "not_provided"
       },
       "scenario_id": "distance-target-proxy-available",
-      "scenario_sha256": "ae1fb56cf10a6ac78d55c0b5a6aaa1a1db6a9b85748daf580b8643f572b576fd",
+      "scenario_sha256": "1bc9f0ee002402e366ab7b919f0f90f5681ce94f11e82c58456ab4f4a73c07c4",
       "session_identity": {
         "evidence": null,
         "identifier_column": null,

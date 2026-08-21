@@ -9,6 +9,7 @@ import pytest
 from pydantic import ValidationError
 
 from scripts.generate_launch_monitor_contract import launch_monitor_conformance_bundle
+from scripts.launch_monitor_conformance_fixture import _portable_snapshot_value
 from src.shared.python.launch_monitor import (
     LAUNCH_MONITOR_CONFORMANCE_BUNDLE_VERSION,
     LaunchMonitorConformanceBundleV1,
@@ -129,3 +130,35 @@ def test_canonical_bundle_hash_and_published_artifacts_match_authority() -> None
         "launch-monitor-analytics-conformance/1.0.0"
     )
     assert published_schema["additionalProperties"] is False
+
+
+def test_numeric_snapshot_is_quantized_for_cross_platform_invariance() -> None:
+    bundle = launch_monitor_conformance_bundle()
+    longitudinal = next(
+        scenario
+        for scenario in bundle.scenarios
+        if scenario.scenario_id == "attested-longitudinal-available"
+    )
+    pooled = longitudinal.payload.pooled_association
+
+    assert pooled is not None
+    assert pooled.standard_error == 0.16183472
+    assert pooled.confidence_interval_low == 0.9849697
+    assert pooled.confidence_interval_high == 2.0150303
+    assert pooled.p_value == 0.0026577006
+
+    windows_tail = {
+        "standard_error": 0.16183471874253738,
+        "confidence_interval_low": 0.984969697271183,
+        "confidence_interval_high": 2.0150303027288152,
+        "p_value": 0.0026577005664792496,
+    }
+    linux_tail = {
+        "standard_error": 0.1618347187425374,
+        "confidence_interval_low": 0.9849696972710931,
+        "confidence_interval_high": 2.0150303027289054,
+        "p_value": 0.0026577005664792513,
+    }
+    assert _portable_snapshot_value(windows_tail) == _portable_snapshot_value(
+        linux_tail
+    )

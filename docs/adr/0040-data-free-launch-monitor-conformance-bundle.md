@@ -37,6 +37,13 @@ that self-referential hash field. Validation fails closed after any mutation.
 Generation is deterministic and the checked-in schema and golden JSON must
 equal the Python authority.
 
+Golden snapshot serialization quantizes finite floating-point values to eight
+significant digits before validation and hashing. This boundary removes
+platform- and dependency-specific least-significant tails from linear-algebra
+results while retaining substantially more precision than any source-declared
+launch-monitor measurement. The analytics result contracts and computations
+are not quantized or otherwise changed.
+
 ## Data Boundary
 
 The bundle is classified

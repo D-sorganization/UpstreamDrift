@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
+from pydantic import BaseModel
 
 from src.shared.python.launch_monitor import (
     AnalysisContextV2,
@@ -39,6 +40,22 @@ from src.shared.python.launch_monitor import (
 )
 
 _SOURCE_ID = "synthetic-conformance-source"
+_PORTABLE_FLOAT_SIGNIFICANT_DIGITS = 8
+
+
+def _portable_snapshot_value(value: object) -> object:
+    """Return JSON-compatible fixture content with portable float precision."""
+
+    if isinstance(value, BaseModel):
+        return _portable_snapshot_value(value.model_dump(mode="json"))
+    if isinstance(value, Mapping):
+        return {key: _portable_snapshot_value(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_portable_snapshot_value(item) for item in value]
+    if isinstance(value, float):
+        rounded = float(f"{value:.{_PORTABLE_FLOAT_SIGNIFICANT_DIGITS}g}")
+        return 0.0 if rounded == 0.0 else rounded
+    return value
 
 
 def _source(frame: pd.DataFrame) -> SourceFileReferenceV2:
@@ -229,6 +246,10 @@ def _unit_map(values: Mapping[str, object]) -> dict[str, MetricUnitsV2]:
 
 
 def _scenario(**values: object) -> LaunchMonitorConformanceScenarioV1:
+    portable_values = _portable_snapshot_value(values)
+    if not isinstance(portable_values, dict):
+        raise TypeError("scenario snapshot must remain a mapping")
+    values = {str(key): item for key, item in portable_values.items()}
     values["scenario_sha256"] = launch_monitor_conformance_scenario_sha256(values)
     return LaunchMonitorConformanceScenarioV1.model_validate(values)
 
