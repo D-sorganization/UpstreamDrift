@@ -43,12 +43,12 @@ try:  # pragma: no cover - pipeline imports engine adapters
 except ModuleNotFoundError:  # pragma: no cover
     run_pipeline = None  # type: ignore[assignment]
 from .readers import (
-    C3DSubjectMetadata,
-    read_c3d_subject_metadata,
-    read_mjcf_body,
-)  # noqa: F401
-from .segment_properties import SegmentProperties  # noqa: F401
-from .writers import write_mjcf_body  # noqa: F401
+    C3DSubjectMetadata as C3DSubjectMetadata,
+    read_c3d_subject_metadata as read_c3d_subject_metadata,
+    read_mjcf_body as read_mjcf_body,
+)
+from .segment_properties import SegmentProperties as SegmentProperties
+from .writers import write_mjcf_body as write_mjcf_body
 
 # Optional Qt UI surface — only re-exported when PyQt6 is installed.
 # Resolved as a UNION: importing the package never fails even on

@@ -32,9 +32,7 @@ def main():
     )
 
     # "presets list"
-    presets_list_parser = presets_subparsers.add_parser(
-        "list", help="List available presets"
-    )
+    presets_subparsers.add_parser("list", help="List available presets")
 
     args = parser.parse_args()
 

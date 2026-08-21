@@ -83,7 +83,8 @@ def compute_cost_drake(
     j, breakdown = _shared_compute_cost(theta, target, _shared_sim_fn, cost_opts)
     if constraint_residuals:
         penalty = float(
-            # ⚡ Bolt: np.vdot is ~3x faster than np.sum(arr * arr) for 1D arrays by avoiding intermediate allocations
+            # ⚡ Bolt: np.vdot is ~3x faster than np.sum(arr * arr)
+            # for 1D arrays by avoiding intermediate allocations
             sum(np.vdot(arr := np.asarray(r), arr) for r in constraint_residuals)
         )
         j = j + penalty
