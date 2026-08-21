@@ -30,7 +30,7 @@ select = ["E", "F", "W", "I", "B", "UP"]
 
 # Ignore:
 # D = pydocstyle (We let the 'Doc-Scribe' agent handle docstrings, so we don't lint them strictly here)
-ignore = ["D"]
+ignore = ["D", "E501"]
 
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"

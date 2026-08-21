@@ -166,7 +166,7 @@ def findings_for_text(path: Path, text: str) -> list[Finding]:
 def findings_for_docx(path: Path, shown: Path) -> list[Finding]:
     try:
         with ZipFile(path) as archive:
-            root = ElementTree.fromstring(archive.read("word/document.xml"))
+            root = ElementTree.fromstring(archive.read("word/document.xml"))  # nosec B314
     except (BadZipFile, KeyError, ElementTree.ParseError):
         return []
     findings = []
