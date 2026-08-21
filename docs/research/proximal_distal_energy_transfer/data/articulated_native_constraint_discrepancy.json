@@ -73,7 +73,7 @@
     "scripts/research/proximal_distal_energy/articulated_contact_projection.py": "a5914695739fd3f2137c3be0905f707b8de11f4dea3edc1d0c04897853149fd3",
     "scripts/research/proximal_distal_energy/articulated_forward_contract.py": "c2f2a89bbb90da5e41488e4763327afe126f6be6be70da73c41c74adca52349a",
     "scripts/research/proximal_distal_energy/articulated_forward_integration.py": "c21da21dc11b56abd4199e10bed5d96cf2320c00492399ababe78c89d8aeb9cf",
-    "scripts/research/proximal_distal_energy/articulated_native_constraint_discrepancy.py": "f3e0e7645f6a08cfcdc311ff9deb88425f5632d5b93d2978843930105e37e5c7",
+    "scripts/research/proximal_distal_energy/articulated_native_constraint_discrepancy.py": "e1c6f0f066e4ad3f157557d003e4e12ae83842cc275ccc0965f263e1fc21220a",
     "scripts/research/proximal_distal_energy/make_articulated_native_constraint_discrepancy_figure.py": "612603f379e28a0491a3fda92937cce041e0057570dc99a5cff3afd92f90d2dd",
     "scripts/research/proximal_distal_energy/run_articulated_native_constraint_discrepancy.py": "6a3d450ac009efd777b0051ab988171952b975ed7c6e61628f2d009bccd04f49",
     "scripts/research/proximal_distal_energy/spatial_full_body.py": "862fdc4b176cbcc8d4d139a00be745f3d8a37c0f81cd899e55a03707893f8e6a",

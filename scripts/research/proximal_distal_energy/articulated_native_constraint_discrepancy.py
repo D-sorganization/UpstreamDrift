@@ -359,59 +359,46 @@ def _load_initial_state(
     )
 
 
-def run_native_constraint_discrepancy(
-    config: NativeConstraintDiscrepancyConfig = NativeConstraintDiscrepancyConfig(),
-) -> tuple[dict[str, Any], dict[str, NDArray[Any]]]:
-    """Execute native and projected branches and retain their discrepancy.
-
-    Postcondition: every returned numeric array is finite, both active branches
-    produce nonzero generalized force, and the equality-disabled branch remains
-    force-free.  No small-disagreement or anatomical-validity claim is implied.
-    """
-
-    if not isinstance(config, NativeConstraintDiscrepancyConfig):
-        raise TypeError("config must be NativeConstraintDiscrepancyConfig")
-    model, initial_q, grip_span_m, hand_contact_local_x_m = _load_initial_state(config)
-    initial_qd = np.zeros(model.nq, dtype=float)
+def _execute_resolutions(
+    model: SpatialModel,
+    initial_q: FloatArray,
+    initial_qd: FloatArray,
+    grip_span_m: float,
+    hand_contact_local_x_m: float,
+    config: NativeConstraintDiscrepancyConfig,
+) -> tuple[list[tuple[_Trace, _Trace, _Trace]], FloatArray, FloatArray]:
     resolutions: list[tuple[_Trace, _Trace, _Trace]] = []
     final_discrepancy = np.empty(len(config.time_steps_s), dtype=float)
     maximum_discrepancy = np.empty_like(final_discrepancy)
     for index, time_step_s in enumerate(config.time_steps_s):
+        common = {
+            "grip_span_m": grip_span_m,
+            "hand_contact_local_x_m": hand_contact_local_x_m,
+            "time_step_s": time_step_s,
+            "config": config,
+        }
         native = _native_trace(
-            model,
-            initial_q,
-            initial_qd,
-            grip_span_m=grip_span_m,
-            hand_contact_local_x_m=hand_contact_local_x_m,
-            time_step_s=time_step_s,
-            config=config,
-            equality_active=True,
+            model, initial_q, initial_qd, equality_active=True, **common
         )
-        projected = _projected_trace(
-            model,
-            initial_q,
-            initial_qd,
-            grip_span_m=grip_span_m,
-            hand_contact_local_x_m=hand_contact_local_x_m,
-            time_step_s=time_step_s,
-            config=config,
-        )
+        projected = _projected_trace(model, initial_q, initial_qd, **common)
         killswitch = _native_trace(
-            model,
-            initial_q,
-            initial_qd,
-            grip_span_m=grip_span_m,
-            hand_contact_local_x_m=hand_contact_local_x_m,
-            time_step_s=time_step_s,
-            config=config,
-            equality_active=False,
+            model, initial_q, initial_qd, equality_active=False, **common
         )
         discrepancy = np.max(np.abs(native.q - projected.q), axis=1)
         final_discrepancy[index] = discrepancy[-1]
         maximum_discrepancy[index] = np.max(discrepancy)
         resolutions.append((native, projected, killswitch))
-    native, projected, killswitch = resolutions[-1]
-    arrays: dict[str, NDArray[Any]] = {
+    return resolutions, final_discrepancy, maximum_discrepancy
+
+
+def _assemble_arrays(
+    config: NativeConstraintDiscrepancyConfig,
+    resolution: tuple[_Trace, _Trace, _Trace],
+    final_discrepancy: FloatArray,
+    maximum_discrepancy: FloatArray,
+) -> dict[str, NDArray[Any]]:
+    native, projected, killswitch = resolution
+    return {
         "time_step_s": np.asarray(config.time_steps_s, dtype=float),
         "final_trajectory_absolute_discrepancy": final_discrepancy,
         "maximum_trajectory_absolute_discrepancy": maximum_discrepancy,
@@ -427,30 +414,59 @@ def run_native_constraint_discrepancy(
         "projected_attachment_separation_m": projected.attachment_separation_m,
         "native_constraint_rows": native.constraint_rows,
     }
+
+
+def _evaluate_gates(
+    config: NativeConstraintDiscrepancyConfig,
+    arrays: dict[str, NDArray[Any]],
+    resolution: tuple[_Trace, _Trace, _Trace],
+    maximum_discrepancy: FloatArray,
+) -> tuple[dict[str, bool], dict[str, float]]:
+    native, projected, killswitch = resolution
+    diagnostics = {
+        "native_force": float(np.max(np.linalg.norm(native.generalized_force, axis=1))),
+        "projected_force": float(
+            np.max(np.linalg.norm(projected.generalized_force, axis=1))
+        ),
+        "killswitch_force": float(
+            np.max(np.linalg.norm(killswitch.generalized_force, axis=1))
+        ),
+        "initial_discrepancy": float(np.max(np.abs(native.q[0] - projected.q[0]))),
+        "maximum_discrepancy": float(np.max(maximum_discrepancy)),
+    }
     finite = all(
         values.dtype.kind not in "fc" or np.all(np.isfinite(values))
         for values in arrays.values()
     )
-    native_force = float(np.max(np.linalg.norm(native.generalized_force, axis=1)))
-    projected_force = float(np.max(np.linalg.norm(projected.generalized_force, axis=1)))
-    killswitch_force = float(
-        np.max(np.linalg.norm(killswitch.generalized_force, axis=1))
-    )
-    initial_discrepancy = float(np.max(np.abs(native.q[0] - projected.q[0])))
-    maximum_trajectory_discrepancy = float(np.max(maximum_discrepancy))
     gates = {
         "finite": finite,
-        "native_constraint_force_nonzero": native_force > config.minimum_active_force,
-        "projected_contact_force_nonzero": projected_force
+        "native_constraint_force_nonzero": diagnostics["native_force"]
         > config.minimum_active_force,
-        "killswitch_force_zero": killswitch_force <= config.killswitch_force_tolerance,
-        "identical_initial_state": initial_discrepancy
+        "projected_contact_force_nonzero": diagnostics["projected_force"]
+        > config.minimum_active_force,
+        "killswitch_force_zero": diagnostics["killswitch_force"]
+        <= config.killswitch_force_tolerance,
+        "identical_initial_state": diagnostics["initial_discrepancy"]
         <= config.initial_state_tolerance,
-        "formulations_distinct": maximum_trajectory_discrepancy
+        "formulations_distinct": diagnostics["maximum_discrepancy"]
         > config.minimum_nonzero_discrepancy,
         "six_native_constraint_rows": int(np.min(native.constraint_rows)) >= 6,
     }
-    record = {
+    return gates, diagnostics
+
+
+def _build_record(
+    config: NativeConstraintDiscrepancyConfig,
+    model: SpatialModel,
+    grip_span_m: float,
+    hand_contact_local_x_m: float,
+    resolution: tuple[_Trace, _Trace, _Trace],
+    final_discrepancy: FloatArray,
+    gates: dict[str, bool],
+    diagnostics: dict[str, float],
+) -> dict[str, Any]:
+    native, projected, _ = resolution
+    return {
         "schema_version": "articulated-native-constraint-discrepancy/v1",
         "study_id": "bilateral-native-connect-versus-projected-compliant-contact",
         "configuration": asdict(config),
@@ -477,11 +493,17 @@ def run_native_constraint_discrepancy(
             "integrator": "project-authored semi-implicit Euler",
         },
         "results": {
-            "maximum_native_generalized_constraint_force": native_force,
-            "maximum_projected_generalized_contact_force": projected_force,
-            "maximum_killswitch_generalized_constraint_force": killswitch_force,
-            "initial_state_absolute_discrepancy": initial_discrepancy,
-            "maximum_trajectory_absolute_discrepancy": maximum_trajectory_discrepancy,
+            "maximum_native_generalized_constraint_force": diagnostics["native_force"],
+            "maximum_projected_generalized_contact_force": diagnostics[
+                "projected_force"
+            ],
+            "maximum_killswitch_generalized_constraint_force": diagnostics[
+                "killswitch_force"
+            ],
+            "initial_state_absolute_discrepancy": diagnostics["initial_discrepancy"],
+            "maximum_trajectory_absolute_discrepancy": diagnostics[
+                "maximum_discrepancy"
+            ],
             "finest_final_trajectory_absolute_discrepancy": float(
                 final_discrepancy[-1]
             ),
@@ -510,7 +532,47 @@ def run_native_constraint_discrepancy(
             "human_transfer_or_strategy": "untested",
         },
     }
-    if not finite:
+
+
+def run_native_constraint_discrepancy(
+    config: NativeConstraintDiscrepancyConfig = NativeConstraintDiscrepancyConfig(),
+) -> tuple[dict[str, Any], dict[str, NDArray[Any]]]:
+    """Execute native and projected branches and retain their discrepancy.
+
+    Postcondition: every returned numeric array is finite, both active branches
+    produce nonzero generalized force, and the equality-disabled branch remains
+    force-free.  No small-disagreement or anatomical-validity claim is implied.
+    """
+
+    if not isinstance(config, NativeConstraintDiscrepancyConfig):
+        raise TypeError("config must be NativeConstraintDiscrepancyConfig")
+    model, initial_q, grip_span_m, hand_contact_local_x_m = _load_initial_state(config)
+    initial_qd = np.zeros(model.nq, dtype=float)
+    resolutions, final_discrepancy, maximum_discrepancy = _execute_resolutions(
+        model,
+        initial_q,
+        initial_qd,
+        grip_span_m,
+        hand_contact_local_x_m,
+        config,
+    )
+    arrays = _assemble_arrays(
+        config, resolutions[-1], final_discrepancy, maximum_discrepancy
+    )
+    gates, diagnostics = _evaluate_gates(
+        config, arrays, resolutions[-1], maximum_discrepancy
+    )
+    record = _build_record(
+        config,
+        model,
+        grip_span_m,
+        hand_contact_local_x_m,
+        resolutions[-1],
+        final_discrepancy,
+        gates,
+        diagnostics,
+    )
+    if not gates["finite"]:
         raise RuntimeError("native constraint discrepancy produced nonfinite output")
     return record, arrays
 
