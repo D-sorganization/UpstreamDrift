@@ -66,6 +66,20 @@ _(Populated as the review proceeds; each row is filed as a GitHub issue.)_
 | 33 | #8849 | Calc docs | Medium | sg_optimizer coefficients uncited despite data_sources.md traceability claim |
 | 34 | #8850 | Calc docs | Medium | Key calc docs orphaned; docs/index.md has no hyperlinks |
 | 35 | #8851 | Calc docs | Low | 21 broken doc links; check_markdown_links.py always exits 0 |
+| 36 | #8852 | Launcher | High | Stale TOOLS_GITLINK_SHA fail-closes all six provider:tools tiles |
+| 37 | #8853 | Launcher | High | PyQt and web launchers read two different tile registries (47 divergent IDs) |
+| 38 | #8854 | Launcher | High | 12+ registered tiles point at nonexistent directories; no path-resolution test |
+| 39 | #8855 | Launcher | High | Tile status chip derived purely from YAML — broken tiles always render Ready |
+| 40 | #8856 | Launcher | Medium | Simscape embed adapter path unimportable (3D_Golf_Model identifier); silent failure |
+| 41 | #8857 | Launcher | Medium | Two incompatible embedding contracts; five engine EmbeddableTool adapters unreachable |
+| 42 | #8858 | Launcher | Medium | external_tools_adapter ignores vendor/ud-tools, breaks on correct clones |
+| 43 | #8859 | Launcher | Medium | src/launchers/model_registry.py dead code shadowing real registry, can't parse models.yaml |
+| 44 | #8860 | Launcher | Medium | Dotted module strings in path field; simulation_backends tile unlaunchable |
+| 45 | #8861 | Launcher | Medium | feature_parity.json marks six unreachable shell tiles as parity |
+| 46 | #8863 | Launcher | Low | Registry hygiene: unregistered tools, __all__ overwrite, hidden-tile leak |
+
+(#8817 was extended with the finding that the REST API also silently
+substitutes stub engines for known engine names.)
 
 ## Status
 
