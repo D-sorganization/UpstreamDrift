@@ -8,13 +8,13 @@ with full aerodynamic force decomposition.
 from __future__ import annotations
 
 import logging
+import math
 from typing import Any
 
 import numpy as np
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QApplication,
-    QCheckBox,
     QDoubleSpinBox,
     QFormLayout,
     QGroupBox,
@@ -31,6 +31,53 @@ from PyQt6.QtWidgets import (
 from src.shared.python.ui import HoverCopyTextBrowser
 
 logger = logging.getLogger(__name__)
+
+_MPH_TO_MS = 0.44704
+_FT_TO_M = 0.3048
+
+
+def build_wind_vector(speed_mph: float, direction_deg: float) -> np.ndarray:
+    """Return the wind velocity vector [m/s] for the simulator frame.
+
+    Convention (documented in the GUI): ``direction_deg`` is the direction
+    the wind blows TOWARD, measured from downrange (+x) toward the left
+    (+y).  0° is a pure tailwind, 180° a pure headwind.
+
+    Args:
+        speed_mph: Wind speed in mph (>= 0).
+        direction_deg: Wind bearing in degrees as described above.
+
+    Returns:
+        (3,) float array; z-component is always 0.
+    """
+    if speed_mph < 0.0:
+        raise ValueError(f"wind speed must be >= 0 mph, got {speed_mph!r}")
+    speed_ms = speed_mph * _MPH_TO_MS
+    theta = math.radians(direction_deg)
+    return np.array([speed_ms * math.cos(theta), speed_ms * math.sin(theta), 0.0])
+
+
+def combine_spins(backspin_rpm: float, sidespin_rpm: float) -> tuple[float, np.ndarray]:
+    """Combine backspin and sidespin into total spin rate + unit axis.
+
+    Backspin acts about -y; positive sidespin curves the ball to the
+    right of the target line (fade/slice), i.e. about -z in the simulator
+    frame [x=forward, y=left, z=up].
+
+    Args:
+        backspin_rpm: Backspin magnitude [rpm], >= 0.
+        sidespin_rpm: Sidespin [rpm]; positive = rightward curve.
+
+    Returns:
+        Tuple of (total spin rate [rpm], unit spin-axis vector).
+    """
+    if backspin_rpm < 0.0:
+        raise ValueError(f"backspin must be >= 0 rpm, got {backspin_rpm!r}")
+    total = math.hypot(backspin_rpm, sidespin_rpm)
+    if total < 1e-12:
+        return 0.0, np.array([0.0, -1.0, 0.0])
+    axis = np.array([0.0, -backspin_rpm, -sidespin_rpm]) / total
+    return total, axis
 
 
 class BallFlightWidget(QWidget):
@@ -99,6 +146,11 @@ class BallFlightWidget(QWidget):
         self._wind_dir.setRange(0.0, 360.0)
         self._wind_dir.setValue(0.0)
         self._wind_dir.setSuffix("°")
+        self._wind_dir.setToolTip(
+            "Direction the wind blows toward, from downrange (+x) toward "
+            "the left: 0° = tailwind, 90° = left-to-right carry, "
+            "180° = headwind."
+        )
         env_form.addRow("Wind Direction:", self._wind_dir)
 
         self._altitude = QDoubleSpinBox()
@@ -109,17 +161,19 @@ class BallFlightWidget(QWidget):
 
         left_layout.addWidget(env_group)
 
-        # Aerodynamic options
-        aero_group = QGroupBox("Aerodynamic Model")
+        # Aerodynamic model description. The old checkboxes (dimple geometry,
+        # Magnus toggle, seam orientation) were decorative — the simulator has
+        # no backing parameter for any of them, so they were removed rather
+        # than left silently ignored (issue #8818).
+        aero_group = QGroupBox("Aerodynamic Model (fixed)")
         aero_layout = QVBoxLayout(aero_group)
-        self._chk_dimples = QCheckBox("Dimple geometry effects")
-        self._chk_dimples.setChecked(True)
-        aero_layout.addWidget(self._chk_dimples)
-        self._chk_magnus = QCheckBox("Magnus force (spin-induced lift)")
-        self._chk_magnus.setChecked(True)
-        aero_layout.addWidget(self._chk_magnus)
-        self._chk_seam = QCheckBox("Seam orientation effects")
-        aero_layout.addWidget(self._chk_seam)
+        aero_label = QLabel(
+            "Modeled: Reynolds-dependent drag, Magnus lift, gravity,\n"
+            "wind, altitude air density.\n"
+            "Not modeled: dimple geometry, seam orientation."
+        )
+        aero_label.setWordWrap(True)
+        aero_layout.addWidget(aero_label)
         left_layout.addWidget(aero_group)
 
         # Presets
@@ -186,9 +240,9 @@ class BallFlightWidget(QWidget):
             "  - Drag (Reynolds-dependent Cd)\n"
             "  - Magnus lift (spin-induced)\n"
             "  - Gravity\n"
-            "  - Wind effects\n"
-            "  - Dimple geometry\n"
-            "  - Altitude/air density\n"
+            "  - Wind (speed + direction)\n"
+            "  - Altitude/air density (ISA)\n\n"
+            "Not modeled: dimple geometry, seam orientation.\n"
         )
         results_layout.addWidget(self._results_text)
         right_layout.addWidget(results_group)
@@ -202,23 +256,54 @@ class BallFlightWidget(QWidget):
         self._angle_spin.setValue(angle)
         self._spin_spin.setValue(spin)
 
+    def _build_environment(self) -> Any:
+        """Build ``EnvironmentalConditions`` from the environment widgets.
+
+        Wind speed/direction become the wind vector; altitude derives the
+        air density via the ISA model (issue #8818 — these controls were
+        previously never read by the simulation).
+        """
+        from src.shared.python.physics.ball_launch_conditions import (
+            EnvironmentalConditions,
+        )
+
+        wind = build_wind_vector(self._wind_speed.value(), self._wind_dir.value())
+        altitude_m = self._altitude.value() * _FT_TO_M
+        return EnvironmentalConditions.from_altitude(
+            altitude_m=altitude_m,
+            wind_velocity=wind,
+        )
+
+    def _build_launch(self) -> Any:
+        """Build ``LaunchConditions`` from the launch widgets.
+
+        Sidespin is combined with backspin into a total spin rate and a
+        tilted spin axis (issue #8818 — sidespin was previously ignored).
+        """
+        from src.shared.python.physics.ball_launch_conditions import (
+            LaunchConditions,
+        )
+
+        speed_ms = self._speed_spin.value() * _MPH_TO_MS
+        spin_rpm, spin_axis = combine_spins(
+            self._spin_spin.value(), self._sidespin_spin.value()
+        )
+        return LaunchConditions.from_user_units(
+            velocity=speed_ms,
+            launch_angle_deg=self._angle_spin.value(),
+            spin_rate_rpm=spin_rpm,
+            spin_axis=spin_axis,
+        )
+
     def _run_simulation(self) -> None:
         """Execute the ball flight simulation."""
         try:
             from src.shared.python.physics.ball_simulator import BallFlightSimulator
-            from src.shared.python.physics.ball_launch_conditions import (
-                LaunchConditions,
-            )
 
-            speed_ms = self._speed_spin.value() * 0.44704  # mph to m/s
+            launch = self._build_launch()
+            env = self._build_environment()
 
-            launch = LaunchConditions.from_user_units(
-                velocity=speed_ms,
-                launch_angle_deg=self._angle_spin.value(),
-                spin_rate_rpm=self._spin_spin.value(),
-            )
-
-            sim = BallFlightSimulator()
+            sim = BallFlightSimulator(env=env)
             trajectory = sim.simulate_trajectory(launch, max_time=10.0, dt=0.01)
 
             if trajectory:
@@ -231,7 +316,12 @@ class BallFlightWidget(QWidget):
                     f"{'=' * 40}\n"
                     f"Launch: {self._speed_spin.value():.0f} mph, "
                     f"{self._angle_spin.value():.1f}°, "
-                    f"{self._spin_spin.value():.0f} rpm\n\n"
+                    f"{self._spin_spin.value():.0f} rpm backspin, "
+                    f"{self._sidespin_spin.value():.0f} rpm sidespin\n"
+                    f"Environment: wind {self._wind_speed.value():.0f} mph @ "
+                    f"{self._wind_dir.value():.0f}°, altitude "
+                    f"{self._altitude.value():.0f} ft "
+                    f"(air density {env.air_density:.3f} kg/m³)\n\n"
                     f"Carry:       {carry:.1f} m ({carry * 1.09361:.1f} yd)\n"
                     f"Max Height:  {max_h:.1f} m ({max_h * 3.28084:.1f} ft)\n"
                     f"Flight Time: {last.time:.2f} s\n"

@@ -224,13 +224,15 @@ def test_run_pipeline_passes_ui_parameters_to_swing_state(widget):
         widget._speed_spin.setValue(50.0)
         widget._loft_spin.setValue(34.0)
         widget._mass_spin.setValue(0.300)
-        widget._engine_combo.setCurrentText("drake")
+        widget._engine_combo.setCurrentText("manual")
         widget._run_pipeline()
 
     swing = _MockPipeline.last_swing
     assert swing.clubhead_mass == pytest.approx(0.300)
     assert swing.clubhead_loft_deg == pytest.approx(34.0)
-    assert swing.engine_name == "drake"
+    # engine_name reflects the provider that actually produced the state
+    # (#8819) — "drake" can no longer be stamped onto manual numbers.
+    assert swing.engine_name == "manual"
     np.testing.assert_array_equal(swing.clubhead_velocity, np.array([50.0, 0.0, 0.0]))
     np.testing.assert_array_equal(swing.clubhead_angular_velocity, np.zeros(3))
     np.testing.assert_array_equal(swing.clubhead_orientation, np.array([0.0, 0.0, 1.0]))
