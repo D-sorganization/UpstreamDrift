@@ -183,8 +183,7 @@ def differential_ik(
         pin.updateFramePlacement(model, data, frame_id)
         current = data.oMf[frame_id]
         err = se3_log6(target_se3, current)
-        # ⚡ Bolt: math.sqrt(np.vdot) avoids array allocation overhead
-        # and is ~1.8x faster
+        # ⚡ Bolt: math.sqrt(np.vdot) avoids array allocation overhead and is ~1.8x faster
         if math.sqrt(np.vdot(err, err)) < tol:
             converged = True
             break
@@ -265,8 +264,7 @@ def solve_dual_frame_ik(
         err_a = weight_a * se3_log6(target_a, data.oMf[fid_a])
         err_b = weight_b * se3_log6(target_b, data.oMf[fid_b])
         err = np.concatenate([err_a, err_b])
-        # ⚡ Bolt: math.sqrt(np.vdot) avoids array allocation overhead
-        # and is ~1.8x faster
+        # ⚡ Bolt: math.sqrt(np.vdot) avoids array allocation overhead and is ~1.8x faster
         if math.sqrt(np.vdot(err, err)) < tol:
             converged = True
             break

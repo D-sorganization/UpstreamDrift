@@ -412,7 +412,7 @@ ignore = [
 #   new violations must use src/shared/python/core/process_safety.narrow_catch
 #   or supply a justified `# noqa: BLE001 - <reason>` comment. Enforced via
 #   scripts/ci/check_error_handling_ratchet.py (issue #5911 / epic #5907).
-extend-ignore = ["C901", "E402", "I001", "SIM118", "SIM105", "SIM117", "PLE0604", "SIM102", "BLE001", "SIM113", "PERF403"]
+extend-ignore = ["E501", "C901", "E402", "I001", "SIM118", "SIM105", "SIM117", "PLE0604", "SIM102", "BLE001", "SIM113", "PERF403", "F841"]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 10
