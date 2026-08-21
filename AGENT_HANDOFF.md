@@ -41,8 +41,9 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
 ## Program Authority & Physics Epics State
 
 - Epic #8557 governs the proximal-to-distal program; #8595 retains the agenda.
-- Tools #4142 remains open; immutable ensemble/sensitivity consumption and cross-repository parity remain required before #8557 can close.
-- Tools #4430 remains open after #4450 (`8f654b3a1552`); the rotating-base provider, Python/TypeScript parity, rendered QA, and UpstreamDrift pin remain due.
+- Tools is clean and synchronized at remote `main` `2a768aada` with no open PRs. #4142 remains open: #4473 landed its visualization/authority slice, but immutable ensemble/sensitivity consumption and cross-repository parity remain required before #8557 can close.
+- Tools #4430 remains open after #4450 (`8f654b3a1552`); no open PR carries the rotating-base provider, Python/TypeScript parity, rendered QA, or UpstreamDrift pin still due.
+- AffineDrift is clean and synchronized at remote `main` `07a2525a`; immutable projection PR #3888 (`75ffcdce0860`) and title-governance PR #3798 (`e94237389270`) remain ancestors.
 - #8557 is the single canonical epic with a dependency-ordered issue/evidence ledger. Legacy master epic #8426 was closed as superseded—not scientifically complete—on 2026-08-20; #8443 remains open. #8458, #8497,
   #8505, #8493, and #8499 are closed groundwork. README and conclusions now
   distinguish canonical/current governance from historical completed epics.
