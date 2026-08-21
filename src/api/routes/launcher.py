@@ -72,13 +72,16 @@ async def get_manifest() -> dict[str, Any]:
 
 @router.get("/tiles")
 async def get_tiles() -> list[dict[str, Any]]:
-    """Get all launcher tiles in display order.
+    """Get all visible launcher tiles in display order.
+
+    Hidden tiles (legacy aliases) are excluded, matching the manifest
+    invariant documented on ``LauncherManifest.to_dict`` (issue #8863).
 
     Returns:
         List of tile dictionaries.
     """
     manifest = _get_manifest()
-    return [t.to_dict() for t in manifest.tiles]
+    return [t.to_dict() for t in manifest.visible_tiles]
 
 
 @router.get("/tiles/{tile_id}")

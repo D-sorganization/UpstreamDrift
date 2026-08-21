@@ -49,7 +49,12 @@ def test_skips_models_with_existing_ids(tmp_path):
     assert out == []
 
 
-def test_skips_models_without_provider_metadata(tmp_path):
+def test_includes_models_without_provider_metadata(tmp_path):
+    """Repo-local registry models surface as tiles too (issue #8853).
+
+    The old provider-metadata gate structurally excluded local tools
+    (sidekick, pose_subscriber_demo, ...) from the web tile surface.
+    """
     registry_path = tmp_path / "reg.yaml"
     registry_path.write_text("models: []\n", encoding="utf-8")
     mock_registry = MagicMock()
@@ -63,7 +68,7 @@ def test_skips_models_without_provider_metadata(tmp_path):
         out = LauncherManifest._load_provider_tiles(
             registry_path=registry_path, existing_ids=set()
         )
-    assert out == []
+    assert [tile.id for tile in out] == ["plain"]
 
 
 def test_builds_tiles_for_provider_models(tmp_path):
