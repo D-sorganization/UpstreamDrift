@@ -1,12 +1,18 @@
 from __future__ import annotations
 
+import hashlib
+import json
 import numpy as np
 import pytest
+from pathlib import Path
 
 from scripts.research.proximal_distal_energy.articulated_native_constraint_discrepancy import (
     NativeConstraintDiscrepancyConfig,
     run_native_constraint_discrepancy,
 )
+
+ROOT = Path(__file__).resolve().parents[2]
+DATA = ROOT / "docs/research/proximal_distal_energy_transfer/data"
 
 
 def test_native_constraint_configuration_fails_closed() -> None:
@@ -73,3 +79,30 @@ def test_native_and_projected_branches_are_nontrivial_and_distinct() -> None:
     for key, values in arrays.items():
         if values.dtype.kind in "fc":
             assert np.all(np.isfinite(values)), key
+
+
+def test_committed_native_constraint_evidence_is_current_and_bounded() -> None:
+    record = json.loads(
+        (DATA / "articulated_native_constraint_discrepancy.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert record["schema_version"] == ("articulated-native-constraint-discrepancy/v1")
+    assert record["classification"] == (
+        "synthetic_formulation_discrepancy_not_human_or_engine_equivalence_evidence"
+    )
+    assert record["native_branch"]["constraint_count"] == 2
+    assert record["native_branch"]["minimum_constraint_row_count"] >= 6
+    assert record["results"]["all_registered_gates_passed"] is True
+    assert record["results"]["maximum_trajectory_absolute_discrepancy"] > 0.0
+    for relative_path, expected in record["source_sha256"].items():
+        actual = hashlib.sha256((ROOT / relative_path).read_bytes()).hexdigest()
+        assert actual == expected
+
+    with np.load(DATA / "articulated_native_constraint_discrepancy.npz") as arrays:
+        assert arrays["native_q"].shape == arrays["projected_q"].shape
+        assert arrays["native_generalized_constraint_force_n"].shape[1] == 20
+        assert np.max(np.abs(arrays["native_q"] - arrays["projected_q"])) > 0.0
+        for key in arrays.files:
+            if arrays[key].dtype.kind in "fc":
+                assert np.all(np.isfinite(arrays[key])), key

@@ -1,0 +1,83 @@
+{
+  "schema_version": "articulated-native-constraint-discrepancy/v1",
+  "study_id": "bilateral-native-connect-versus-projected-compliant-contact",
+  "configuration": {
+    "duration_s": 0.004,
+    "time_steps_s": [0.0005, 0.00025],
+    "case_index": 0,
+    "sample_index": 6,
+    "initial_club_displacement_m": 0.001,
+    "contact_stiffness": 1800.0,
+    "contact_damping": 20.0,
+    "minimum_active_force": 1e-8,
+    "killswitch_force_tolerance": 1e-12,
+    "initial_state_tolerance": 1e-15,
+    "minimum_nonzero_discrepancy": 1e-12
+  },
+  "model": {
+    "coordinate_count": 20,
+    "canonical_hash": "672f983841884df9d41c0eb814a1fda4da65bb960029620169c84b00dffca1d9",
+    "case_index": 0,
+    "sample_index": 6,
+    "grip_span_m": 0.12,
+    "hand_contact_local_x_m": 0.07750000000000001
+  },
+  "native_branch": {
+    "engine": "mujoco",
+    "constraint_type": "connect",
+    "constraint_count": 2,
+    "minimum_constraint_row_count": 6,
+    "integrator": "Euler",
+    "integrator_operator": "mj_step",
+    "generalized_force_source": "qfrc_constraint",
+    "engine_version": "3.3.4"
+  },
+  "projected_branch": {
+    "contact_law": "bilateral Kelvin--Voigt point-force projection",
+    "dynamics_operator": "MuJoCo mass and bias transport",
+    "integrator": "project-authored semi-implicit Euler"
+  },
+  "results": {
+    "maximum_native_generalized_constraint_force": 2.0445016473909523,
+    "maximum_projected_generalized_contact_force": 3.7059401846317677,
+    "maximum_killswitch_generalized_constraint_force": 0.0,
+    "initial_state_absolute_discrepancy": 0.0,
+    "maximum_trajectory_absolute_discrepancy": 0.00011204794104813232,
+    "finest_final_trajectory_absolute_discrepancy": 0.00010429966173408634,
+    "native_initial_attachment_separation_m": 0.0010000000000000009,
+    "native_final_attachment_separation_m": 0.0009870034042796275,
+    "projected_final_attachment_separation_m": 0.0009076192400806923,
+    "registered_gates": {
+      "finite": true,
+      "native_constraint_force_nonzero": true,
+      "projected_contact_force_nonzero": true,
+      "killswitch_force_zero": true,
+      "identical_initial_state": true,
+      "formulations_distinct": true,
+      "six_native_constraint_rows": true
+    },
+    "all_registered_gates_passed": true
+  },
+  "claim_boundary": {
+    "supported": "MuJoCo independently solves two native connect equalities and advances its own integrator from the same state used by the projected compliant-contact branch",
+    "engine_equivalence": "not_claimed",
+    "constraint_formulation_equivalence": "not_claimed",
+    "calibrated_grip_contact": "not_established",
+    "anatomical_contact": "not_established",
+    "human_transfer_or_strategy": "untested"
+  },
+  "classification": "synthetic_formulation_discrepancy_not_human_or_engine_equivalence_evidence",
+  "source_sha256": {
+    "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "8eed52fe4ebbc55fcf753f4703330dd6d768281b0babfbb2adca074b862fc36d",
+    "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
+    "scripts/research/proximal_distal_energy/articulated_contact_projection.py": "a5914695739fd3f2137c3be0905f707b8de11f4dea3edc1d0c04897853149fd3",
+    "scripts/research/proximal_distal_energy/articulated_forward_contract.py": "c2f2a89bbb90da5e41488e4763327afe126f6be6be70da73c41c74adca52349a",
+    "scripts/research/proximal_distal_energy/articulated_forward_integration.py": "c21da21dc11b56abd4199e10bed5d96cf2320c00492399ababe78c89d8aeb9cf",
+    "scripts/research/proximal_distal_energy/articulated_native_constraint_discrepancy.py": "f3e0e7645f6a08cfcdc311ff9deb88425f5632d5b93d2978843930105e37e5c7",
+    "scripts/research/proximal_distal_energy/make_articulated_native_constraint_discrepancy_figure.py": "f3ff43dc571f889de748c9b02d6633c7c1754a27123d0b370a0f2afaddcc29d6",
+    "scripts/research/proximal_distal_energy/run_articulated_native_constraint_discrepancy.py": "6a3d450ac009efd777b0051ab988171952b975ed7c6e61628f2d009bccd04f49",
+    "scripts/research/proximal_distal_energy/spatial_full_body.py": "862fdc4b176cbcc8d4d139a00be745f3d8a37c0f81cd899e55a03707893f8e6a",
+    "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py": "c2b01f1d8de0b25daa39c03ae97d3ef51512264f3a2978766a7360aed5d9cda8",
+    "tests/research/test_articulated_native_constraint_discrepancy.py": "4ba56f4f323edc45ea7587f5fa9ebf80318015fd9b08334cf2936730c943e0af"
+  }
+}

@@ -7,12 +7,42 @@ import pytest
 
 from scripts.research.proximal_distal_energy.spatial_full_body import (
     SpatialExperimentConfig,
+    _populate_mujoco_full_mass_matrix,
     build_spatial_model,
     evaluate_hand_wrenches,
     run_cross_formulation_experiment,
 )
 
 pytestmark = pytest.mark.scientific
+
+
+def test_mujoco_mass_matrix_adapter_supports_legacy_and_csr_apis() -> None:
+    class LegacyData:
+        qM = object()
+
+    class CsrData:
+        pass
+
+    class FakeMujoco:
+        def __init__(self) -> None:
+            self.calls: list[tuple[object, ...]] = []
+
+        def mj_fullM(self, *args: object) -> None:
+            self.calls.append(args)
+
+    module = FakeMujoco()
+    model = object()
+    matrix = np.empty((2, 2))
+    legacy = LegacyData()
+    modern = CsrData()
+
+    _populate_mujoco_full_mass_matrix(module, model, legacy, matrix)
+    _populate_mujoco_full_mass_matrix(module, model, modern, matrix)
+
+    assert module.calls == [
+        (model, matrix, legacy.qM),
+        (model, modern, matrix),
+    ]
 
 
 def test_spatial_model_is_nonplanar_and_contains_body_and_free_club() -> None:
