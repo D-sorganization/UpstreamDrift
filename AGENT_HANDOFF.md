@@ -4,6 +4,18 @@ Last updated: 2026-08-21
 
 This is current operational state. Historical detail belongs in git/GitHub.
 
+## Active: UI/UX, Performance, and Modeling Review (2026-08-21, PR #8878)
+
+Wave 2 of the adversarial review is **in progress** on PR #8878: deep
+UI/UX review (desktop launcher, tool GUIs, React/Tauri web app),
+performance audit (vectorization, startup cost, caching, Rust
+acceleration), and a critical technical review of the proximal–distal
+energy-transfer modeling program. Findings are filed as GitHub issues
+with detailed fix instructions and indexed in
+`docs/audits/2026-08-21-uiux-performance-review.md` — see that file for
+issue numbers and current status. Dedup: `.scratch/uiux-issues/` drafts
+(some filed as #7415–#7417) are excluded.
+
 ## Adversarial Integration Review (2026-08-21, PR #8815)
 
 A five-axis review of organization and integration completeness filed 46
