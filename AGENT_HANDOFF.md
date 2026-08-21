@@ -48,6 +48,10 @@ This is current operational state. Historical detail belongs in git and GitHub.
 - Upstream PR [#8954](https://github.com/D-sorganization/UpstreamDrift/pull/8954)
   is the full review-ready protected delivery. Auto-merge is disabled; human
   approval remains required.
+- Its first package run built and inspected the wheel successfully but hit the
+  former 15-minute job timeout while uploading the artifact. The branch gives
+  that existing build job 30 minutes; verify the replacement run rather than
+  rerunning the superseded head.
 - Cross-repository tests require all 18 ordered cases, 13 valid cases, adverse
   indices 6/7/8/15/16, exact study and catalog digests, and every run's
   nonanatomical/no-human-validation/noncoaching boundaries.

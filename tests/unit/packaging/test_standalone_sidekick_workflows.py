@@ -94,6 +94,13 @@ def test_package_workflow_selects_one_exact_wheel() -> None:
     assert "dist/*.whl" not in PACKAGE_WORKFLOW.read_text(encoding="utf-8")
 
 
+def test_package_workflow_preserves_time_for_verified_artifact_upload() -> None:
+    """Cold provider builds must not time out after verification but before upload."""
+    workflow = _load_workflow(PACKAGE_WORKFLOW)
+
+    assert workflow["jobs"]["build-wheel"]["timeout-minutes"] >= 30
+
+
 def test_release_workflow_has_queue_protection_and_timeouts() -> None:
     """Release workflow jobs must follow the repo queue-saturation guardrails."""
     content = RELEASE_WORKFLOW.read_text(encoding="utf-8")

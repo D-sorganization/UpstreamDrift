@@ -542,7 +542,10 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   and catalog digests, and every run's nonanatomical-coordinate,
   unavailable-human-validation, and unsupported-coaching boundaries. No solver
   or catalog is copied into UpstreamDrift, and this transport qualification does
-  not promote the model to anatomical, empirical, or coaching evidence.
+  not promote the model to anatomical, empirical, or coaching evidence. The
+  standalone package build now retains a 30-minute execution budget so a cold
+  pinned-Tools checkout, frontend build, wheel-content gate, and artifact upload
+  can complete without the previous 15-minute timeout canceling a valid upload.
 
 - **2026-08-20** - Added attested session-unit longitudinal analysis under
   contract `launch-monitor-longitudinal-session/1.0.0`. Trusted, distinct

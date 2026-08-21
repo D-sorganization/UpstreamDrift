@@ -30,7 +30,10 @@ jobs:
   build-wheel:
     name: Build sdist + wheel
     runs-on: d-sorg-fleet-docker
-    timeout-minutes: 15
+    # A cold pinned-Tools checkout plus frontend and Python builds can consume
+    # most of 15 minutes on a shared fleet runner. Preserve enough time for the
+    # verified wheel-content gate and artifact upload to finish.
+    timeout-minutes: 30
     outputs:
       wheel-size-kb: ${{ steps.size.outputs.kb }}
       wheel_filename: ${{ steps.build-dist.outputs.wheel_filename }}
