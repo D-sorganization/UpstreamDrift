@@ -264,6 +264,40 @@ Symbols: S = spin parameter ωr/v (dimensionless); ω = ball angular
 velocity [rad/s]; r = ball radius [m]; v = airspeed [m/s]; ρ = air
 density [kg/m³]; A = cross-sectional area [m²].
 
+#### 2.4.1 Two Live Model Families (Issue #8978)
+
+The constants above govern the **core simulator**
+(`ball_properties.py` + `ball_simulator.py::BallFlightSimulator` and the
+enhanced/Rust engines) — the canonical trajectory authority pinned by this
+sheet.
+
+A second, deliberately distinct family lives in
+`src/shared/python/physics/flight_models.py` (the Multi-Model Ball Flight
+Physics Framework: Waterloo/Penner, MacDonald-Hanzely, Nathan, ...). It
+powers the REST route `/tools/ball-flight/simulate`
+(`src/api/routes/ball_flight.py`) and the Shot Tracer launcher
+(`src/launchers/_shot_tracer_gui.py`), whose purpose is side-by-side model
+comparison — it is **not** a copy of the core simulator.
+
+`WaterlooPennerModel` shares the Penner lift shape with the core set (it
+imports `PENNER_LIFT_SCALE` / `PENNER_LIFT_EXPONENT` from
+`ball_properties.py`) but holds spin **constant** during flight (no spin
+decay), so two of its coefficients are calibrated differently
+(`flight_models.py::WATERLOO_PENNER_COEFFICIENTS`):
+
+- drag spin slope cd1 = <!-- calc:wp_cd1 -->0.05<!-- /calc -->
+  (vs the core cd1 value above)
+- lift cap = <!-- calc:wp_max_lift_coefficient -->0.155<!-- /calc -->
+  (`MAX_GOLF_BALL_LIFT_COEFFICIENT`, vs the core C_L_max above)
+
+With constant spin the spin parameter S stays elevated for the whole
+flight, so the lower cd1 and lift cap were fitted (PR #7530) to keep the
+framework inside the TrackMan driver/7-iron carry bands. Every
+`FlightResult` (and the REST response) carries the model name plus its
+coefficient dictionary, so trajectories are always attributable to their
+coefficient set; the regression gate is
+`tests/unit/physics/test_aero_coefficient_authority.py`.
+
 ### 2.5 Model Assumptions and Limitations
 
 #### Assumptions

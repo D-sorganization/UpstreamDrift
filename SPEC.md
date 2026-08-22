@@ -532,7 +532,7 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.567                                            |
+| **Spec Version**        | 1.0.568                                            |
 | **Last Spec Update**    | 2026-08-21                                         |
 
 ## 2. Purpose & Mission
@@ -563,6 +563,19 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ## 4. Architecture Overview
 
 ### Recent Spec Updates
+
+- **2026-08-21** - Resolved the dual aero-coefficient-set discrepancy (issue
+  #8978, epic #8965 WS2): the multi-model ball-flight framework's
+  Waterloo/Penner set is now a named, provenance-documented
+  `AeroCoefficientSet` (`WATERLOO_PENNER_COEFFICIENTS`) that shares the Penner
+  lift shape with `ball_properties.py` (single source) while keeping its
+  deliberate constant-spin calibration (cd1 = 0.05, lift cap 0.155) distinct
+  from the core simulator authority (cd1 = 0.25, cap 0.26). Every
+  `FlightResult` and REST `/tools/ball-flight/simulate` response now carries
+  the model's coefficient dictionary for attribution, the calc sheet documents
+  both families with parity-gated markers, and
+  `tests/unit/physics/test_aero_coefficient_authority.py` pins each public
+  entry path to its declared set.
 
 - **2026-08-21** - Pinned the proximal--distal companion consumer to protected
   Tools merge `1664d806df8a2c7b184d2d3fbcea93b714caaee5`. The launcher authority
