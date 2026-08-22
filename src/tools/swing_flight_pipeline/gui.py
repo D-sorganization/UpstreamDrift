@@ -79,8 +79,13 @@ class SwingFlightWidget(QWidget):
     def _build_ui(self) -> None:
         layout = QHBoxLayout(self)
         splitter = QSplitter(Qt.Orientation.Horizontal)
+        splitter.addWidget(self._build_controls_panel())
+        splitter.addWidget(self._build_results_panel())
+        splitter.setSizes([350, 650])
+        layout.addWidget(splitter)
 
-        # Left: controls
+    def _build_controls_panel(self) -> QWidget:
+        """Left pane: title, swing parameters, engine source, presets, run."""
         left = QWidget()
         left_layout = QVBoxLayout(left)
 
@@ -91,7 +96,23 @@ class SwingFlightWidget(QWidget):
         title.setFont(title_font)
         left_layout.addWidget(title)
 
-        # Swing parameters
+        left_layout.addWidget(self._build_swing_group())
+        left_layout.addWidget(self._build_engine_group())
+        left_layout.addWidget(self._build_preset_group())
+
+        # Run button
+        self._run_btn = QPushButton("Run Full Pipeline")
+        self._run_btn.setStyleSheet(
+            "background-color: #4CAF50; color: white; font-weight: bold; padding: 12px;"
+        )
+        self._run_btn.clicked.connect(self._run_pipeline)
+        left_layout.addWidget(self._run_btn)
+
+        left_layout.addStretch()
+        return left
+
+    def _build_swing_group(self) -> QGroupBox:
+        """Swing-parameter spin boxes (speed, loft, clubhead mass)."""
         swing_group = QGroupBox("Swing Parameters")
         swing_form = QFormLayout(swing_group)
 
@@ -114,10 +135,11 @@ class SwingFlightWidget(QWidget):
         self._mass_spin.setSuffix(" kg")
         swing_form.addRow("Clubhead Mass:", self._mass_spin)
 
-        left_layout.addWidget(swing_group)
+        return swing_group
 
-        # Engine selector — entries are real SwingStateProviders; the ones
-        # without an implemented sourcing path are disabled (issue #8819).
+    def _build_engine_group(self) -> QGroupBox:
+        """Engine selector — entries are real SwingStateProviders; the ones
+        without an implemented sourcing path are disabled (issue #8819)."""
         engine_group = QGroupBox("Physics Engine Source")
         engine_layout = QVBoxLayout(engine_group)
         self._engine_combo = QComboBox()
@@ -125,9 +147,10 @@ class SwingFlightWidget(QWidget):
         _populate_engine_combo(self._engine_combo, list(self._providers.values()))
         self._engine_combo.setCurrentText("manual")
         engine_layout.addWidget(self._engine_combo)
-        left_layout.addWidget(engine_group)
+        return engine_group
 
-        # Presets
+    def _build_preset_group(self) -> QGroupBox:
+        """Club preset buttons that stamp speed/loft pairs."""
         preset_group = QGroupBox("Club Presets")
         preset_layout = QHBoxLayout(preset_group)
         for name, speed, loft in [
@@ -140,20 +163,10 @@ class SwingFlightWidget(QWidget):
                 lambda checked, s=speed, loft_val=loft: self._apply_preset(s, loft_val)
             )
             preset_layout.addWidget(btn)
-        left_layout.addWidget(preset_group)
+        return preset_group
 
-        # Run button
-        self._run_btn = QPushButton("Run Full Pipeline")
-        self._run_btn.setStyleSheet(
-            "background-color: #4CAF50; color: white; font-weight: bold; padding: 12px;"
-        )
-        self._run_btn.clicked.connect(self._run_pipeline)
-        left_layout.addWidget(self._run_btn)
-
-        left_layout.addStretch()
-        splitter.addWidget(left)
-
-        # Right: results
+    def _build_results_panel(self) -> QWidget:
+        """Right pane: 3D trajectory view (when available) and results text."""
         right = QWidget()
         right_layout = QVBoxLayout(right)
 
@@ -197,10 +210,7 @@ class SwingFlightWidget(QWidget):
         )
         results_layout.addWidget(self._results_text)
         right_layout.addWidget(results_group)
-        splitter.addWidget(right)
-
-        splitter.setSizes([350, 650])
-        layout.addWidget(splitter)
+        return right
 
     def _apply_preset(self, speed: float, loft: float) -> None:
         self._speed_spin.setValue(speed)

@@ -104,7 +104,78 @@ def is_dependency_present(import_name: str) -> bool:
     return present
 
 
-def _probe_engine(  # noqa: C901
+def _import_probe_target(import_name: str) -> None:  # noqa: C901
+    """Import the probe target for an engine, raising ImportError when unusable.
+
+    Split out of :func:`_probe_engine` (function-lines budget): the per-engine
+    import dispatch, including the mocked-module guards that stop a
+    unit-test MagicMock injected into ``sys.modules`` from being cached as a
+    real, available engine.
+    """
+    if import_name == "drake":
+        pydrake_module = importlib.import_module("pydrake")
+        drake_all_module = importlib.import_module("pydrake.all")
+        if (
+            type(pydrake_module).__module__ == "unittest.mock"
+            or type(drake_all_module).__module__ == "unittest.mock"
+        ):
+            raise ImportError("mocked pydrake module detected")
+    elif import_name == "torch":
+        importlib.import_module("torch")
+    elif import_name == "tf":
+        importlib.import_module("tensorflow")
+    elif import_name == "pyopenpose":
+        importlib.import_module("pyopenpose")  # import pyopenpose (dynamic)
+    elif import_name == "h5py":
+        importlib.import_module("h5py")
+    elif import_name == "yaml":
+        importlib.import_module("yaml")
+    elif import_name == "pillow":
+        importlib.import_module("PIL.Image")
+    elif import_name == "pyqt6":
+        importlib.import_module("PyQt6.QtWidgets")
+    elif import_name == "pyqt5":
+        importlib.import_module("PyQt5.QtWidgets")
+    elif import_name == "pyside6":
+        if sys.platform == "win32":
+            raise ImportError(
+                "pyside6 probe disabled on Windows to prevent DLL crashes"
+            )
+        importlib.import_module("PySide6.QtWidgets")
+    elif import_name == "pinocchio":
+        pin = importlib.import_module("pinocchio")
+        if type(pin).__module__ == "unittest.mock":
+            # A unit-test conftest may inject a MagicMock into
+            # sys.modules["pinocchio"] so that import-only tests collect
+            # without the heavy C-extension. MagicMock answers hasattr()
+            # truthy for everything, so without this guard the probe would
+            # cache the engine as AVAILABLE and poison every later test
+            # that genuinely requires the real bindings.
+            raise ImportError("mocked pinocchio module detected")
+        if not hasattr(pin, "buildModelFromUrdf"):
+            raise ImportError(
+                "Incorrect pinocchio package (likely nose plugin). Please install pinocchio from conda-forge."
+            )
+    elif import_name == "mediapipe":
+        # mediapipe>=0.10 removed the legacy mp.solutions API.
+        # We probe for mp.solutions.pose to accurately report whether
+        # the version installed is compatible with our estimator code.
+        mp = importlib.import_module("mediapipe")
+        if not hasattr(mp, "solutions") or not hasattr(mp.solutions, "pose"):
+            raise ImportError(
+                "mediapipe is installed but mp.solutions.pose is not available. "
+                "mediapipe>=0.10 removed the legacy solutions API. "
+                "Pin mediapipe<0.10 or update MediaPipeEstimator to use the new Tasks API."
+            )
+    else:
+        module = importlib.import_module(import_name)
+        if type(module).__module__ == "unittest.mock":
+            # See the pinocchio branch above: a mocked module injected for
+            # collection must not be reported as a real, available engine.
+            raise ImportError(f"mocked {import_name} module detected")
+
+
+def _probe_engine(
     engine_name: str,
     import_name: str | None = None,
     is_broken_check: Callable[[Exception], bool] | None = None,
@@ -132,67 +203,7 @@ def _probe_engine(  # noqa: C901
             os.environ["MUJOCO_PLUGIN_PATH"] = ""
 
     try:
-        if import_name == "drake":
-            pydrake_module = importlib.import_module("pydrake")
-            drake_all_module = importlib.import_module("pydrake.all")
-            if (
-                type(pydrake_module).__module__ == "unittest.mock"
-                or type(drake_all_module).__module__ == "unittest.mock"
-            ):
-                raise ImportError("mocked pydrake module detected")
-        elif import_name == "torch":
-            importlib.import_module("torch")
-        elif import_name == "tf":
-            importlib.import_module("tensorflow")
-        elif import_name == "pyopenpose":
-            importlib.import_module("pyopenpose")  # import pyopenpose (dynamic)
-        elif import_name == "h5py":
-            importlib.import_module("h5py")
-        elif import_name == "yaml":
-            importlib.import_module("yaml")
-        elif import_name == "pillow":
-            importlib.import_module("PIL.Image")
-        elif import_name == "pyqt6":
-            importlib.import_module("PyQt6.QtWidgets")
-        elif import_name == "pyqt5":
-            importlib.import_module("PyQt5.QtWidgets")
-        elif import_name == "pyside6":
-            if sys.platform == "win32":
-                raise ImportError(
-                    "pyside6 probe disabled on Windows to prevent DLL crashes"
-                )
-            importlib.import_module("PySide6.QtWidgets")
-        elif import_name == "pinocchio":
-            pin = importlib.import_module("pinocchio")
-            if type(pin).__module__ == "unittest.mock":
-                # A unit-test conftest may inject a MagicMock into
-                # sys.modules["pinocchio"] so that import-only tests collect
-                # without the heavy C-extension. MagicMock answers hasattr()
-                # truthy for everything, so without this guard the probe would
-                # cache the engine as AVAILABLE and poison every later test
-                # that genuinely requires the real bindings.
-                raise ImportError("mocked pinocchio module detected")
-            if not hasattr(pin, "buildModelFromUrdf"):
-                raise ImportError(
-                    "Incorrect pinocchio package (likely nose plugin). Please install pinocchio from conda-forge."
-                )
-        elif import_name == "mediapipe":
-            # mediapipe>=0.10 removed the legacy mp.solutions API.
-            # We probe for mp.solutions.pose to accurately report whether
-            # the version installed is compatible with our estimator code.
-            mp = importlib.import_module("mediapipe")
-            if not hasattr(mp, "solutions") or not hasattr(mp.solutions, "pose"):
-                raise ImportError(
-                    "mediapipe is installed but mp.solutions.pose is not available. "
-                    "mediapipe>=0.10 removed the legacy solutions API. "
-                    "Pin mediapipe<0.10 or update MediaPipeEstimator to use the new Tasks API."
-                )
-        else:
-            module = importlib.import_module(import_name)
-            if type(module).__module__ == "unittest.mock":
-                # See the pinocchio branch above: a mocked module injected for
-                # collection must not be reported as a real, available engine.
-                raise ImportError(f"mocked {import_name} module detected")
+        _import_probe_target(import_name)
 
         _engine_status_cache[name] = EngineStatus.AVAILABLE
     except ImportError as e:

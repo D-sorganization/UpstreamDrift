@@ -371,52 +371,9 @@ class SpecialAppHandler:
         if registry_ui is not None:
             return registry_ui
 
-        embed_adapter = getattr(model, "embed_adapter", None)
-        if embed_adapter and "::" in embed_adapter:
-            mod_path, func_name = embed_adapter.split("::")
-            source_root = get_model_source_root(model, repo_path)
-            provider_adapter = source_root / mod_path
-            local_adapter = repo_path / mod_path
-            adapter_script = (
-                provider_adapter if provider_adapter.exists() else local_adapter
-            )
-            if adapter_script.exists():
-                import importlib.util
-                import sys
-
-                original_sys_path = sys.path.copy()
-                success = False
-                try:
-                    # Inject paths
-                    paths = get_model_python_paths(model, repo_path)
-                    if str(repo_path) not in sys.path:
-                        sys.path.insert(0, str(repo_path))
-                    for p in paths:
-                        if str(p) not in sys.path:
-                            sys.path.insert(0, str(p))
-
-                    spec = importlib.util.spec_from_file_location(
-                        "embed_adapter", str(adapter_script)
-                    )
-                    if spec and spec.loader:
-                        module = importlib.util.module_from_spec(spec)
-                        spec.loader.exec_module(module)
-                        if hasattr(module, func_name):
-                            ui = getattr(module, func_name)()
-                            if ui is not None:
-                                success = True
-                                _warn_legacy_embed_fallback(
-                                    model,
-                                    f"embed_adapter string {embed_adapter!r}",
-                                )
-                                return ui
-                except Exception as e:  # noqa: BLE001
-                    logger.warning(
-                        "Failed to load embed_adapter %s: %s", embed_adapter, e
-                    )
-                finally:
-                    if not success:
-                        sys.path = original_sys_path
+        adapter_ui = self._embed_adapter_dockable_ui(model, repo_path)
+        if adapter_ui is not None:
+            return adapter_ui
 
         model_path = getattr(model, "path", None) or ""
         if not model_path:
@@ -463,6 +420,58 @@ class SpecialAppHandler:
                         return ui
         except Exception as e:  # noqa: BLE001
             logger.debug("No dockable UI found in special app %s: %s", script_path, e)
+        finally:
+            if not success:
+                sys.path = original_sys_path
+        return None
+
+    @staticmethod
+    def _embed_adapter_dockable_ui(model: Any, repo_path: Path) -> Any | None:
+        """Resolve the legacy ``embed_adapter`` "mod::func" string, if any."""
+        embed_adapter = getattr(model, "embed_adapter", None)
+        if not (embed_adapter and "::" in embed_adapter):
+            return None
+        mod_path, func_name = embed_adapter.split("::")
+        source_root = get_model_source_root(model, repo_path)
+        provider_adapter = source_root / mod_path
+        local_adapter = repo_path / mod_path
+        adapter_script = (
+            provider_adapter if provider_adapter.exists() else local_adapter
+        )
+        if not adapter_script.exists():
+            return None
+
+        import importlib.util
+        import sys
+
+        original_sys_path = sys.path.copy()
+        success = False
+        try:
+            # Inject paths
+            paths = get_model_python_paths(model, repo_path)
+            if str(repo_path) not in sys.path:
+                sys.path.insert(0, str(repo_path))
+            for p in paths:
+                if str(p) not in sys.path:
+                    sys.path.insert(0, str(p))
+
+            spec = importlib.util.spec_from_file_location(
+                "embed_adapter", str(adapter_script)
+            )
+            if spec and spec.loader:
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
+                if hasattr(module, func_name):
+                    ui = getattr(module, func_name)()
+                    if ui is not None:
+                        success = True
+                        _warn_legacy_embed_fallback(
+                            model,
+                            f"embed_adapter string {embed_adapter!r}",
+                        )
+                        return ui
+        except Exception as e:  # noqa: BLE001
+            logger.warning("Failed to load embed_adapter %s: %s", embed_adapter, e)
         finally:
             if not success:
                 sys.path = original_sys_path

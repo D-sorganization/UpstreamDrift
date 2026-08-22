@@ -90,8 +90,13 @@ class BallFlightWidget(QWidget):
     def _build_ui(self) -> None:
         layout = QHBoxLayout(self)
         splitter = QSplitter(Qt.Orientation.Horizontal)
+        splitter.addWidget(self._build_controls_panel())
+        splitter.addWidget(self._build_results_panel())
+        splitter.setSizes([350, 650])
+        layout.addWidget(splitter)
 
-        # Left: controls
+    def _build_controls_panel(self) -> QWidget:
+        """Left pane: title, launch conditions, environment, presets, run."""
         left = QWidget()
         left_layout = QVBoxLayout(left)
 
@@ -102,7 +107,24 @@ class BallFlightWidget(QWidget):
         title.setFont(title_font)
         left_layout.addWidget(title)
 
-        # Launch conditions
+        left_layout.addWidget(self._build_launch_group())
+        left_layout.addWidget(self._build_env_group())
+        left_layout.addWidget(self._build_aero_group())
+        left_layout.addWidget(self._build_preset_group())
+
+        # Run
+        self._run_btn = QPushButton("Simulate Flight")
+        self._run_btn.setStyleSheet(
+            "background-color: #1565C0; color: white; font-weight: bold; padding: 12px;"
+        )
+        self._run_btn.clicked.connect(self._run_simulation)
+        left_layout.addWidget(self._run_btn)
+
+        left_layout.addStretch()
+        return left
+
+    def _build_launch_group(self) -> QGroupBox:
+        """Launch-condition spin boxes (speed, angle, backspin, sidespin)."""
         launch_group = QGroupBox("Launch Conditions")
         launch_form = QFormLayout(launch_group)
 
@@ -130,9 +152,10 @@ class BallFlightWidget(QWidget):
         self._sidespin_spin.setSuffix(" rpm")
         launch_form.addRow("Sidespin:", self._sidespin_spin)
 
-        left_layout.addWidget(launch_group)
+        return launch_group
 
-        # Environment
+    def _build_env_group(self) -> QGroupBox:
+        """Environment spin boxes (wind speed/direction, altitude)."""
         env_group = QGroupBox("Environment")
         env_form = QFormLayout(env_group)
 
@@ -159,12 +182,13 @@ class BallFlightWidget(QWidget):
         self._altitude.setSuffix(" ft")
         env_form.addRow("Altitude:", self._altitude)
 
-        left_layout.addWidget(env_group)
+        return env_group
 
-        # Aerodynamic model description. The old checkboxes (dimple geometry,
-        # Magnus toggle, seam orientation) were decorative — the simulator has
-        # no backing parameter for any of them, so they were removed rather
-        # than left silently ignored (issue #8818).
+    def _build_aero_group(self) -> QGroupBox:
+        """Aerodynamic model description. The old checkboxes (dimple geometry,
+        Magnus toggle, seam orientation) were decorative — the simulator has
+        no backing parameter for any of them, so they were removed rather
+        than left silently ignored (issue #8818)."""
         aero_group = QGroupBox("Aerodynamic Model (fixed)")
         aero_layout = QVBoxLayout(aero_group)
         aero_label = QLabel(
@@ -174,9 +198,10 @@ class BallFlightWidget(QWidget):
         )
         aero_label.setWordWrap(True)
         aero_layout.addWidget(aero_label)
-        left_layout.addWidget(aero_group)
+        return aero_group
 
-        # Presets
+    def _build_preset_group(self) -> QGroupBox:
+        """Club preset buttons that stamp speed/angle/backspin triples."""
         preset_group = QGroupBox("Club Presets")
         preset_layout = QHBoxLayout(preset_group)
         for name, speed, angle, spin in [
@@ -189,20 +214,10 @@ class BallFlightWidget(QWidget):
                 lambda checked, s=speed, a=angle, sp=spin: self._apply_preset(s, a, sp)
             )
             preset_layout.addWidget(btn)
-        left_layout.addWidget(preset_group)
+        return preset_group
 
-        # Run
-        self._run_btn = QPushButton("Simulate Flight")
-        self._run_btn.setStyleSheet(
-            "background-color: #1565C0; color: white; font-weight: bold; padding: 12px;"
-        )
-        self._run_btn.clicked.connect(self._run_simulation)
-        left_layout.addWidget(self._run_btn)
-
-        left_layout.addStretch()
-        splitter.addWidget(left)
-
-        # Right: results
+    def _build_results_panel(self) -> QWidget:
+        """Right pane: 3D trajectory view (when available) and results text."""
         right = QWidget()
         right_layout = QVBoxLayout(right)
         results_group = QGroupBox("Flight Results")
@@ -246,10 +261,7 @@ class BallFlightWidget(QWidget):
         )
         results_layout.addWidget(self._results_text)
         right_layout.addWidget(results_group)
-        splitter.addWidget(right)
-
-        splitter.setSizes([350, 650])
-        layout.addWidget(splitter)
+        return right
 
     def _apply_preset(self, speed: float, angle: float, spin: float) -> None:
         self._speed_spin.setValue(speed)
