@@ -27,15 +27,16 @@ _LAUNCHER_CONSUMED_KEYS = ("border", "accent")
 
 
 def test_theme_package_exports_get_current_colors() -> None:
-    """The theme package exports a callable ``get_current_colors``."""
-    from src.shared.python.theme import get_current_colors
+    """The UD-owned palette module exports a callable ``get_current_colors``."""
+    from src.shared.python.theme.palette import get_current_colors
 
     assert callable(get_current_colors)
 
 
 def test_get_current_colors_returns_complete_mapping() -> None:
     """Postcondition: mapping covers every canonical theme color key."""
-    from src.shared.python.theme import THEME_COLOR_KEYS, get_current_colors
+    from src.shared.python.theme import THEME_COLOR_KEYS
+    from src.shared.python.theme.palette import get_current_colors
 
     colors = get_current_colors()
     assert isinstance(colors, dict)
@@ -50,14 +51,15 @@ def test_get_current_colors_returns_complete_mapping() -> None:
 
 def test_dark_theme_fallback_constant_exported() -> None:
     """``DARK_THEME`` is exported and derives from the built-in Dark palette."""
-    from src.shared.python.theme import BUILTIN_THEMES, DARK_THEME
+    from src.shared.python.theme import BUILTIN_THEMES
+    from src.shared.python.theme.palette import DARK_THEME
 
     assert dict(DARK_THEME) == dict(BUILTIN_THEMES["Dark"])
 
 
 def test_palette_resolves_semantic_attribute_aliases() -> None:
     """Sidebar-consumed semantic names resolve via attribute access."""
-    from src.shared.python.theme import get_current_colors
+    from src.shared.python.theme.palette import get_current_colors
 
     colors = get_current_colors()
     # Names consumed attribute-style by _launcher_navigation_ui.py.

@@ -57,3 +57,49 @@ class ThemePalette(dict):
 
 
 __all__ = ["SEMANTIC_ALIASES", "ThemePalette"]
+
+
+def _builtin_dark_palette() -> ThemePalette:
+    """Build the fallback palette from the built-in "Dark" theme."""
+    from src.shared.python.theme.colors import BUILTIN_THEMES
+
+    return ThemePalette(BUILTIN_THEMES["Dark"])
+
+
+#: Documented fallback palette: the built-in "Dark" theme's color mapping.
+#: Derived from ``BUILTIN_THEMES`` — never fork palette data.  Used by
+#: launcher call sites as a last resort when no theme manager is available.
+DARK_THEME: ThemePalette = _builtin_dark_palette()
+
+
+def get_current_colors() -> ThemePalette:
+    """Return the active theme's color mapping.
+
+    Canonical UD-owned accessor (issue #8972) delegating to the singleton
+    ``ThemeManager`` when PyQt6 is available, falling back to the built-in
+    Dark palette otherwise (e.g. headless environments).
+
+    Lives here rather than in ``theme/__init__`` because that module is a
+    Tools-owned child copy which UpstreamDrift must not edit directly
+    (tests/unit/repo_hygiene/test_tools_child_copy_contract.py).
+
+    Postcondition:
+        The returned mapping contains every key in ``THEME_COLOR_KEYS``
+        (``bg``, ``border``, ``accent``, ...) mapped to a hex color, and
+        additionally resolves the semantic attribute aliases documented in
+        :data:`SEMANTIC_ALIASES` (``bg_elevated``, ``text_primary``, ...).
+    """
+    from src.shared.python.theme.colors import THEME_COLOR_KEYS
+
+    try:
+        from src.shared.python.theme import get_theme_manager
+
+        colors = ThemePalette(get_theme_manager().get_current_colors())
+    except (ImportError, AttributeError, TypeError, RuntimeError):
+        # No PyQt6 / no manager singleton available (headless, early startup).
+        colors = ThemePalette(DARK_THEME)
+    missing = [key for key in THEME_COLOR_KEYS if key not in colors]
+    if missing:  # DbC postcondition: complete mapping for launcher consumers
+        for key in missing:
+            colors[key] = DARK_THEME[key]
+    return colors

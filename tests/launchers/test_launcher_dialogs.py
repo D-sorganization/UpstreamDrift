@@ -76,7 +76,7 @@ def launcher(qapp) -> DummyLauncher:
 
 
 @patch("src.launchers.launcher_dialogs.UI_COMPONENTS_AVAILABLE", True)
-@patch("src.shared.python.ui.ToastManager")
+@patch("src.shared.python.ui.toast.ToastManager")
 def test_init_ui_components_true(mock_toast, launcher) -> None:
     with patch.object(launcher, "_setup_keyboard_shortcuts") as mock_setup:
         launcher._init_ui_components()
@@ -139,7 +139,9 @@ def test_show_about_dialog(mock_about, launcher) -> None:
 
 @patch("src.launchers.launcher_dialogs.UI_COMPONENTS_AVAILABLE", True)
 def test_show_shortcuts_overlay(launcher) -> None:
-    with patch("src.shared.python.ui.ShortcutsOverlay") as mock_overlay:
+    with patch(
+        "src.shared.python.ui.shortcuts_overlay.ShortcutsOverlay"
+    ) as mock_overlay:
         instance = MagicMock()
         mock_overlay.return_value = instance
         launcher._show_shortcuts_overlay()
@@ -149,7 +151,9 @@ def test_show_shortcuts_overlay(launcher) -> None:
 
 @patch("src.launchers.launcher_dialogs.UI_COMPONENTS_AVAILABLE", False)
 def test_show_shortcuts_overlay_false(launcher) -> None:
-    with patch("src.shared.python.ui.ShortcutsOverlay") as mock_overlay:
+    with patch(
+        "src.shared.python.ui.shortcuts_overlay.ShortcutsOverlay"
+    ) as mock_overlay:
         launcher._show_shortcuts_overlay()
         mock_overlay.assert_not_called()
 

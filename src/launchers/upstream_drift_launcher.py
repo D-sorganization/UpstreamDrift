@@ -475,7 +475,9 @@ class UpstreamDriftLauncher(QMainWindow):
 
             c = _theme.get_current_colors()  # type: ignore[attr-defined]
         except (ImportError, AttributeError):
-            from src.shared.python.theme import DARK_THEME as c  # type: ignore[assignment,no-redef]
+            from src.shared.python.theme.palette import (  # type: ignore[assignment,no-redef]
+                DARK_THEME as c,
+            )
 
         lbl = QLabel(title)
         lbl.setFont(get_display_font(size=14, weight=Weights.BOLD))
@@ -769,7 +771,7 @@ class UpstreamDriftLauncher(QMainWindow):
 
             return _theme.get_current_colors()  # type: ignore[attr-defined]
         except (ImportError, AttributeError):
-            from src.shared.python.theme import DARK_THEME
+            from src.shared.python.theme.palette import DARK_THEME
 
             return DARK_THEME
 
@@ -874,7 +876,9 @@ class UpstreamDriftLauncher(QMainWindow):
 
             c = _theme.get_current_colors()  # type: ignore[attr-defined]
         except (ImportError, AttributeError):
-            from src.shared.python.theme import DARK_THEME as c  # type: ignore[assignment,no-redef]
+            from src.shared.python.theme.palette import (  # type: ignore[assignment,no-redef]
+                DARK_THEME as c,
+            )
 
         if not self.selected_model:
             self.btn_launch.setText("Select a Model")

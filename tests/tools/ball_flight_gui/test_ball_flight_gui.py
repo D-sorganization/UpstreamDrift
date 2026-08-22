@@ -27,6 +27,8 @@ from src.tools.ball_flight_gui.gui import (
     get_dockable_ui,
 )
 
+pytestmark = pytest.mark.unit
+
 _APP: QApplication | None = None
 
 

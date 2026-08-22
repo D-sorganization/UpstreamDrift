@@ -116,8 +116,23 @@ def test_sibling_fallback_logs_unpinned_warning_naming_path(
     assert str(sibling) in warnings
 
 
-def test_no_source_returns_none(tmp_path: Path) -> None:
+def test_no_source_returns_none(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     repo_root = _make_workspace(tmp_path, vendor=False, sibling=False)
+
+    # The sibling scan deliberately walks every ancestor; bound it to this
+    # test's workspace so a stray Tools/ checkout higher up the real tmp tree
+    # (e.g. another xdist worker's fixture) cannot leak in.
+    real_find = resolver._find_sibling_tools_root
+
+    def _bounded(repo_root_arg: Path) -> Path | None:
+        found = real_find(repo_root_arg)
+        if found is not None and not found.is_relative_to(tmp_path):
+            return None
+        return found
+
+    monkeypatch.setattr(resolver, "_find_sibling_tools_root", _bounded)
 
     assert resolver.resolve_tools_repo(repo_root, None) is None
 

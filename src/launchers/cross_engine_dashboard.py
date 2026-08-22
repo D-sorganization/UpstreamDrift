@@ -745,7 +745,8 @@ class _DashboardThemeMixin:
     def _get_theme_colors(self) -> Any:
         """Retrieve the current theme colors mapped as a SimpleNamespace."""
         try:
-            from src.shared.python.theme import DARK_THEME, get_theme_manager
+            from src.shared.python.theme import get_theme_manager
+            from src.shared.python.theme.palette import DARK_THEME
 
             tm = get_theme_manager()
             raw_c = tm.get_current_colors() if tm else None

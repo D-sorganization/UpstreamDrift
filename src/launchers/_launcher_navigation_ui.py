@@ -22,7 +22,7 @@ from PyQt6.QtWidgets import (
 
 from src.launchers.custom_title_bar import create_window_control_button
 from src.launchers.launcher_constants import ViewMode
-from src.shared.python.theme.style_constants import Styles
+from src.shared.python.theme.layout_metrics import LayoutMetrics
 
 
 def _build_menu_bar_close_widget(
@@ -137,17 +137,17 @@ class LauncherNavigationUIMixin:
     def _create_sidebar_shell(self) -> tuple[QWidget, QVBoxLayout, Any]:
         """Create and style the sidebar content widget."""
         sidebar = QWidget()
-        sidebar.setMinimumWidth(Styles.SIDEBAR_MIN_WIDTH)
+        sidebar.setMinimumWidth(LayoutMetrics.SIDEBAR_MIN_WIDTH)
         sidebar.setSizePolicy(
             QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding
         )
 
         try:
-            from src.shared.python.theme import get_current_colors
+            from src.shared.python.theme.palette import get_current_colors
 
             colors = get_current_colors()
         except ImportError:
-            from src.shared.python.theme import DARK_THEME
+            from src.shared.python.theme.palette import DARK_THEME
 
             colors = DARK_THEME
 
@@ -301,7 +301,7 @@ class LauncherNavigationUIMixin:
         scroll_area.setWidget(sidebar)
         scroll_area.setWidgetResizable(True)
         scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        scroll_area.setMinimumWidth(Styles.SIDEBAR_MIN_WIDTH)
+        scroll_area.setMinimumWidth(LayoutMetrics.SIDEBAR_MIN_WIDTH)
         scroll_area.setFrameShape(QFrame.Shape.NoFrame)
         scroll_area.setStyleSheet(f"""
             QScrollArea {{

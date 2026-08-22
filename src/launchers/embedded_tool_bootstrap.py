@@ -9,6 +9,7 @@ Part of EPIC #4993 (Subtask 5) - addresses review feedback from #5049.
 
 from __future__ import annotations
 
+import importlib
 import importlib.metadata
 import os
 import sys
@@ -170,6 +171,23 @@ def bootstrap_embeddable_tools() -> list[str]:
             _bootstrap_failures.append((module_path, repr(e)))
             continue
         new_ids = sorted(set(EMBEDDABLE_TOOL_REGISTRY) - before)
+        if not new_ids and module_path in sys.modules:
+            # Adapters self-register at module import, so a cached import is
+            # a no-op. If the registry was cleared after the first import
+            # (test isolation resets it between sessions), the tool would
+            # otherwise stay unregistered forever; re-executing the module
+            # restores its registrations idempotently.
+            try:
+                importlib.reload(sys.modules[module_path])
+            except Exception as e:  # noqa: BLE001
+                logger.warning(
+                    "Failed to re-register embeddable-tool adapter %r: %s",
+                    module_path,
+                    e,
+                )
+                _bootstrap_failures.append((module_path, repr(e)))
+                continue
+            new_ids = sorted(set(EMBEDDABLE_TOOL_REGISTRY) - before)
         if new_ids:
             registered.extend(new_ids)
             logger.debug(f"Bootstrapped embeddable tools: {new_ids}")

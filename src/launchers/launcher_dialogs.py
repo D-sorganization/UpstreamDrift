@@ -60,7 +60,7 @@ class DialogsManager:
         """Initialize optional UI components (toast, shortcuts, etc.)."""
         # Toast notification manager
         if UI_COMPONENTS_AVAILABLE:
-            from src.shared.python.ui import ToastManager
+            from src.shared.python.ui.toast import ToastManager
 
             self.toast_manager: ToastManager | None = ToastManager(self)
 
@@ -187,7 +187,7 @@ class DialogsManager:
     def _show_shortcuts_overlay(self) -> None:
         """Show the keyboard shortcuts overlay."""
         if UI_COMPONENTS_AVAILABLE:
-            from src.shared.python.ui import ShortcutsOverlay
+            from src.shared.python.ui.shortcuts_overlay import ShortcutsOverlay
 
             overlay = ShortcutsOverlay(self)
             overlay.show()

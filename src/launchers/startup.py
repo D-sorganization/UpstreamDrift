@@ -67,8 +67,14 @@ def _get_theme_colors() -> dict[str, str]:
     itself falls back to the built-in Dark palette when no theme manager is
     available. Consumers probe the mapping defensively via ``.get``.
     """
-    from src.shared.python.theme import get_current_colors
+    try:
+        from src.shared.python.theme.palette import get_current_colors
+    except ImportError:
+        # Accessor unavailable (partial install); fall back to the built-in
+        # Dark palette so startup styling still has a complete mapping.
+        from src.shared.python.theme.palette import DARK_THEME
 
+        return DARK_THEME
     return get_current_colors()
 
 

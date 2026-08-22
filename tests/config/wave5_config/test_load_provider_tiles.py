@@ -4,9 +4,13 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from src.config.launcher_manifest_loader import LauncherManifest
 from src.shared.python.config.model_pack_manifest import LauncherPresentationMetadata
 from src.shared.python.config.model_registry import ModelConfig
+
+pytestmark = pytest.mark.unit
 
 
 def _make_model(**overrides) -> ModelConfig:
