@@ -417,16 +417,17 @@ def test_on_wsl_mode_changed_uncached_starts_async_probe(
     launcher.chk_docker.setChecked.assert_called_with(False)
 
 
-@patch("src.launchers.launcher_dialogs.QMessageBox.warning")
-def test_on_wsl_mode_changed_error(mock_warning, launcher) -> None:
+@patch("src.launchers.launcher_dialogs.QMessageBox")
+def test_on_wsl_mode_changed_error(mock_box, launcher) -> None:
     wsl_probe.store_wsl_result(wsl_probe.WslProbeResult(available=False, detail="err"))
     launcher._on_wsl_mode_changed(2)
-    mock_warning.assert_called_once()
+    # Non-blocking dialog (open, not the modal .warning): see PR #8976.
+    mock_box.return_value.open.assert_called_once()
 
 
-@patch("src.launchers.launcher_dialogs.QMessageBox.warning")
+@patch("src.launchers.launcher_dialogs.QMessageBox")
 def test_on_wsl_mode_changed_missing_ubuntu_warns_and_reverts(
-    mock_warning, launcher
+    mock_box, launcher
 ) -> None:
     wsl_probe.store_wsl_result(
         wsl_probe.WslProbeResult(available=False, detail="Ubuntu not found in WSL")
@@ -434,12 +435,12 @@ def test_on_wsl_mode_changed_missing_ubuntu_warns_and_reverts(
 
     launcher._on_wsl_mode_changed(2)
 
-    mock_warning.assert_called_once()
+    mock_box.return_value.open.assert_called_once()
     launcher.chk_wsl.setChecked.assert_called_with(False)
 
 
-@patch("src.launchers.launcher_dialogs.QMessageBox.warning")
-def test_on_wsl_mode_changed_timeout_warns_and_reverts(mock_warning, launcher) -> None:
+@patch("src.launchers.launcher_dialogs.QMessageBox")
+def test_on_wsl_mode_changed_timeout_warns_and_reverts(mock_box, launcher) -> None:
     wsl_probe.store_wsl_result(
         wsl_probe.WslProbeResult(
             available=False, detail="Command 'wsl' timed out after 5 seconds"
@@ -448,7 +449,7 @@ def test_on_wsl_mode_changed_timeout_warns_and_reverts(mock_warning, launcher) -
 
     launcher._on_wsl_mode_changed(2)
 
-    mock_warning.assert_called_once()
+    mock_box.return_value.open.assert_called_once()
     launcher.chk_wsl.setChecked.assert_called_with(False)
 
 

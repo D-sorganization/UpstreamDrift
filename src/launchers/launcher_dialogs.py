@@ -12,7 +12,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from PyQt6.QtCore import QUrl
+from PyQt6.QtCore import Qt, QUrl
 from PyQt6.QtGui import QDesktopServices, QKeySequence, QShortcut
 from PyQt6.QtWidgets import QMessageBox, QDialog, QWidget
 
@@ -681,16 +681,29 @@ class DialogsManager:
             self._warn_wsl_unavailable(result.detail)
 
     def _warn_wsl_unavailable(self, error: object) -> None:
-        """Warn the user that WSL mode cannot be enabled and revert the toggle."""
-        QMessageBox.warning(
-            self.launcher,
-            "WSL Not Available",
+        """Warn the user that WSL mode cannot be enabled and revert the toggle.
+
+        The dialog is shown with :meth:`QMessageBox.open` (window-modal, no
+        nested event loop) rather than the blocking ``QMessageBox.warning``.
+        The probe result arrives via a queued signal, which can be delivered
+        while the event loop is being drained outside normal interaction —
+        pytest-qt's teardown drain being the proven case (PR #8976: a nested
+        ``exec`` there wedged the whole CI worker with no user to dismiss
+        it). Reverting the toggle first keeps the UI state correct even if
+        the dialog is never dismissed.
+        """
+        self.chk_wsl.setChecked(False)
+        box = QMessageBox(self.launcher)
+        box.setIcon(QMessageBox.Icon.Warning)
+        box.setWindowTitle("WSL Not Available")
+        box.setText(
             f"WSL2 with Ubuntu is not available.\n\n"
             f"Error: {error}\n\n"
             "Please install WSL2 and Ubuntu:\n"
-            "  wsl --install -d Ubuntu-22.04",
+            "  wsl --install -d Ubuntu-22.04"
         )
-        self.chk_wsl.setChecked(False)
+        box.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
+        box.open()
 
     def update_execution_status(self) -> None:
         """Update the runtime indicator label based on current selection.
