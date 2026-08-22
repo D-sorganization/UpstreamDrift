@@ -13,8 +13,13 @@ pytestmark = pytest.mark.unit
 
 @pytest.fixture(autouse=True)
 def _clean_wsl_cache():
+    import importlib
+
+    _ld = importlib.import_module("src.launchers.launcher_dialogs")
+    _ld.wsl_probe.reset_wsl_probe_cache()
     wsl_probe.reset_wsl_probe_cache()
     yield
+    _ld.wsl_probe.reset_wsl_probe_cache()
     wsl_probe.reset_wsl_probe_cache()
 
 
@@ -48,7 +53,14 @@ class DummyLauncher(QMainWindow):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.manager = DialogsManager(self)
+        # Resolve the module at construction time: earlier tests in the same
+        # xdist worker can leave sys.modules holding a different instance of
+        # launcher_dialogs than the file-level import captured, and patches
+        # in the tests below target the live module.
+        import importlib
+
+        _ld = importlib.import_module("src.launchers.launcher_dialogs")
+        self.manager = _ld.DialogsManager(self)
 
         self.available_models = {"m1": "model1"}
         self.model_order = ["m1"]
@@ -73,6 +85,25 @@ class DummyLauncher(QMainWindow):
 @pytest.fixture
 def launcher(qapp) -> DummyLauncher:
     return DummyLauncher()
+
+
+@pytest.fixture(autouse=True)
+def _clean_wsl_probe_cache():
+    """Isolate the process-lifetime WSL probe cache from other test files.
+
+    Launcher-construction tests elsewhere in the suite exercise the real
+    checkbox handler and store a probe result; without this reset the
+    "uncached" path here is unreachable and the cached-path assertions see
+    someone else's result (CI-only, worker-order dependent).
+    """
+    import importlib
+
+    _ld = importlib.import_module("src.launchers.launcher_dialogs")
+    _ld.wsl_probe.reset_wsl_probe_cache()
+    wsl_probe.reset_wsl_probe_cache()
+    yield
+    _ld.wsl_probe.reset_wsl_probe_cache()
+    wsl_probe.reset_wsl_probe_cache()
 
 
 @patch("src.launchers.launcher_dialogs.UI_COMPONENTS_AVAILABLE", True)
@@ -392,7 +423,11 @@ def test_on_wsl_mode_changed(launcher) -> None:
     launcher.toast_manager = MagicMock()
 
     # WSL availability already probed (async, #8903); the toggle applies it.
-    wsl_probe.store_wsl_result(wsl_probe.WslProbeResult(available=True))
+    # Store via the live module: the handler reads its own wsl_probe binding.
+    import importlib
+
+    _ld = importlib.import_module("src.launchers.launcher_dialogs")
+    _ld.wsl_probe.store_wsl_result(_ld.wsl_probe.WslProbeResult(available=True))
 
     with patch.object(launcher, "update_execution_status") as mock_exec:
         launcher.btn_launch = MagicMock()  # trigger update_launch_button branch
@@ -403,16 +438,19 @@ def test_on_wsl_mode_changed(launcher) -> None:
         launcher.toast_manager.show_info.assert_called()
 
 
-@patch("src.launchers.launcher_dialogs.wsl_probe.WslAvailabilityWorker")
-def test_on_wsl_mode_changed_uncached_starts_async_probe(
-    mock_worker_cls, launcher
-) -> None:
+def test_on_wsl_mode_changed_uncached_starts_async_probe(launcher) -> None:
     """No cached result => async worker starts, handler returns without blocking."""
+    import importlib
+
+    _ld = importlib.import_module("src.launchers.launcher_dialogs")
+    _ld.wsl_probe.reset_wsl_probe_cache()
     launcher.chk_docker.isChecked.return_value = True
     worker = MagicMock()
-    mock_worker_cls.return_value = worker
 
-    with patch.object(launcher, "update_execution_status") as mock_exec:
+    with (
+        patch.object(_ld.wsl_probe, "WslAvailabilityWorker", return_value=worker),
+        patch.object(launcher, "update_execution_status") as mock_exec,
+    ):
         launcher._on_wsl_mode_changed(2)
         mock_exec.assert_not_called()  # deferred until the probe result lands
 
@@ -421,37 +459,46 @@ def test_on_wsl_mode_changed_uncached_starts_async_probe(
     launcher.chk_docker.setChecked.assert_called_with(False)
 
 
-@patch("src.launchers.launcher_dialogs.QMessageBox")
-def test_on_wsl_mode_changed_error(mock_box, launcher) -> None:
-    wsl_probe.store_wsl_result(wsl_probe.WslProbeResult(available=False, detail="err"))
-    launcher._on_wsl_mode_changed(2)
+def test_on_wsl_mode_changed_error(launcher) -> None:
+    import importlib
+
+    _ld = importlib.import_module("src.launchers.launcher_dialogs")
+    _ld.wsl_probe.store_wsl_result(
+        _ld.wsl_probe.WslProbeResult(available=False, detail="err")
+    )
+    with patch.object(_ld, "QMessageBox") as mock_box:
+        launcher._on_wsl_mode_changed(2)
     # Non-blocking dialog (open, not the modal .warning): see PR #8976.
     mock_box.return_value.open.assert_called_once()
 
 
-@patch("src.launchers.launcher_dialogs.QMessageBox")
-def test_on_wsl_mode_changed_missing_ubuntu_warns_and_reverts(
-    mock_box, launcher
-) -> None:
-    wsl_probe.store_wsl_result(
-        wsl_probe.WslProbeResult(available=False, detail="Ubuntu not found in WSL")
+def test_on_wsl_mode_changed_missing_ubuntu_warns_and_reverts(launcher) -> None:
+    import importlib
+
+    _ld = importlib.import_module("src.launchers.launcher_dialogs")
+    _ld.wsl_probe.store_wsl_result(
+        _ld.wsl_probe.WslProbeResult(available=False, detail="Ubuntu not found in WSL")
     )
 
-    launcher._on_wsl_mode_changed(2)
+    with patch.object(_ld, "QMessageBox") as mock_box:
+        launcher._on_wsl_mode_changed(2)
 
     mock_box.return_value.open.assert_called_once()
     launcher.chk_wsl.setChecked.assert_called_with(False)
 
 
-@patch("src.launchers.launcher_dialogs.QMessageBox")
-def test_on_wsl_mode_changed_timeout_warns_and_reverts(mock_box, launcher) -> None:
-    wsl_probe.store_wsl_result(
-        wsl_probe.WslProbeResult(
+def test_on_wsl_mode_changed_timeout_warns_and_reverts(launcher) -> None:
+    import importlib
+
+    _ld = importlib.import_module("src.launchers.launcher_dialogs")
+    _ld.wsl_probe.store_wsl_result(
+        _ld.wsl_probe.WslProbeResult(
             available=False, detail="Command 'wsl' timed out after 5 seconds"
         )
     )
 
-    launcher._on_wsl_mode_changed(2)
+    with patch.object(_ld, "QMessageBox") as mock_box:
+        launcher._on_wsl_mode_changed(2)
 
     mock_box.return_value.open.assert_called_once()
     launcher.chk_wsl.setChecked.assert_called_with(False)

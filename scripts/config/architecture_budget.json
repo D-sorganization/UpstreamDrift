@@ -359,6 +359,42 @@
       "owner": "@dieterolson",
       "reason": "Issue #8959 Bolt micro-optimization caused budget validation to fail. Requires decomposition later.",
       "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/launchers/custom_title_bar.py",
+      "symbol": "create_window_control_button",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8965,
+      "reason": "Pre-existing on origin/main: this function is byte-identical to the origin/main version; PR #8976 (EPIC #8965) only re-pointed a theme/metrics import in the same file after relocating UD-owned symbols out of the Tools child-copy tree, and the architecture budget inspects whole changed files rather than changed functions, so the pre-existing violation surfaced as if it were new. It was surfaced, not introduced, by #8976; decomposition is follow-up work.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/launchers/custom_title_bar.py",
+      "symbol": "CustomTitleBar.__init__",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8965,
+      "reason": "Pre-existing on origin/main: this function is byte-identical to the origin/main version; PR #8976 (EPIC #8965) only re-pointed a theme/metrics import in the same file after relocating UD-owned symbols out of the Tools child-copy tree, and the architecture budget inspects whole changed files rather than changed functions, so the pre-existing violation surfaced as if it were new. It was surfaced, not introduced, by #8976; decomposition is follow-up work.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/launchers/library_widget.py",
+      "symbol": "LibraryWidget._setup_ui",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8965,
+      "reason": "Pre-existing on origin/main: this function is byte-identical to the origin/main version; PR #8976 (EPIC #8965) only re-pointed a theme/metrics import in the same file after relocating UD-owned symbols out of the Tools child-copy tree, and the architecture budget inspects whole changed files rather than changed functions, so the pre-existing violation surfaced as if it were new. It was surfaced, not introduced, by #8976; decomposition is follow-up work.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/tools/terrain_engine/gui.py",
+      "symbol": "TerrainExplorerWidget._build_ui",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8965,
+      "reason": "Pre-existing on origin/main: this function is byte-identical to the origin/main version; PR #8976 (EPIC #8965) only re-pointed a theme/metrics import in the same file after relocating UD-owned symbols out of the Tools child-copy tree, and the architecture budget inspects whole changed files rather than changed functions, so the pre-existing violation surfaced as if it were new. It was surfaced, not introduced, by #8976; decomposition is follow-up work.",
+      "expires_on": "2026-10-31"
     }
   ]
 }

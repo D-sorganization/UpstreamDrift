@@ -171,12 +171,19 @@ def bootstrap_embeddable_tools() -> list[str]:
             _bootstrap_failures.append((module_path, repr(e)))
             continue
         new_ids = sorted(set(EMBEDDABLE_TOOL_REGISTRY) - before)
-        if not new_ids and module_path in sys.modules:
+        reloadable = (
+            module_path.rsplit(".", 1)[-1] == "_embed_adapter"
+            or module_path == "src.launchers.adapters.simscape_embed"
+        )
+        if not new_ids and reloadable and module_path in sys.modules:
             # Adapters self-register at module import, so a cached import is
             # a no-op. If the registry was cleared after the first import
             # (test isolation resets it between sessions), the tool would
             # otherwise stay unregistered forever; re-executing the module
-            # restores its registrations idempotently.
+            # restores its registrations idempotently. Only thin adapter
+            # shims are re-executed: reloading a full tool GUI module (e.g.
+            # pose_studio.gui) would swap class identities under live
+            # objects.
             try:
                 importlib.reload(sys.modules[module_path])
             except Exception as e:  # noqa: BLE001

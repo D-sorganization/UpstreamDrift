@@ -6,7 +6,21 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.config.launcher_manifest_loader import LauncherManifest
+import importlib
+
+
+def _loader_mod():
+    """Resolve the loader module at call time.
+
+    The suite runs with xdist workers whose earlier tests can leave
+    ``sys.modules`` holding a different instance of this module than the
+    one a file-level import captured; resolving at test time guarantees
+    the class under test and the monkeypatched attributes share one
+    module object.
+    """
+    return importlib.import_module("src.config.launcher_manifest_loader")
+
+
 from src.shared.python.config.model_pack_manifest import LauncherPresentationMetadata
 from src.shared.python.config.model_registry import ModelConfig
 
@@ -27,7 +41,7 @@ def _make_model(**overrides) -> ModelConfig:
 
 def test_returns_empty_when_registry_missing(tmp_path):
     missing = tmp_path / "no-registry.yaml"
-    out = LauncherManifest._load_provider_tiles(
+    out = _loader_mod().LauncherManifest._load_provider_tiles(
         registry_path=missing, existing_ids=set()
     )
     assert out == []
@@ -43,11 +57,9 @@ def test_skips_models_with_existing_ids(tmp_path):
     mock_registry.get_all_models.return_value = [
         _make_model(id="dup", launcher=meta, provider="acme"),
     ]
-    with patch(
-        "src.config.launcher_manifest_loader.ModelRegistry",
-        return_value=mock_registry,
-    ):
-        out = LauncherManifest._load_provider_tiles(
+    loader = _loader_mod()
+    with patch.object(loader, "ModelRegistry", return_value=mock_registry):
+        out = loader.LauncherManifest._load_provider_tiles(
             registry_path=registry_path, existing_ids={"dup"}
         )
     assert out == []
@@ -65,11 +77,9 @@ def test_includes_models_without_provider_metadata(tmp_path):
     mock_registry.get_all_models.return_value = [
         _make_model(id="plain", provider="local"),
     ]
-    with patch(
-        "src.config.launcher_manifest_loader.ModelRegistry",
-        return_value=mock_registry,
-    ):
-        out = LauncherManifest._load_provider_tiles(
+    loader = _loader_mod()
+    with patch.object(loader, "ModelRegistry", return_value=mock_registry):
+        out = loader.LauncherManifest._load_provider_tiles(
             registry_path=registry_path, existing_ids=set()
         )
     assert [tile.id for tile in out] == ["plain"]
@@ -86,17 +96,12 @@ def test_builds_tiles_for_provider_models(tmp_path):
         _make_model(id="new1", launcher=meta, provider="acme"),
         _make_model(id="new2", launcher=meta, provider="acme"),
     ]
+    loader = _loader_mod()
     with (
-        patch(
-            "src.config.launcher_manifest_loader.ModelRegistry",
-            return_value=mock_registry,
-        ),
-        patch(
-            "src.config.launcher_manifest_loader.is_engine_runtime_available",
-            return_value=True,
-        ),
+        patch.object(loader, "ModelRegistry", return_value=mock_registry),
+        patch.object(loader, "is_engine_runtime_available", return_value=True),
     ):
-        out = LauncherManifest._load_provider_tiles(
+        out = loader.LauncherManifest._load_provider_tiles(
             registry_path=registry_path, existing_ids=set()
         )
     assert {t.id for t in out} == {"new1", "new2"}
@@ -113,17 +118,12 @@ def test_full_load_with_provider_tiles(tmp_path, write_manifest, make_tile):
     mock_registry.get_all_models.return_value = [
         _make_model(id="dynamic", launcher=meta, provider="acme"),
     ]
+    loader = _loader_mod()
     with (
-        patch(
-            "src.config.launcher_manifest_loader.ModelRegistry",
-            return_value=mock_registry,
-        ),
-        patch(
-            "src.config.launcher_manifest_loader.is_engine_runtime_available",
-            return_value=True,
-        ),
+        patch.object(loader, "ModelRegistry", return_value=mock_registry),
+        patch.object(loader, "is_engine_runtime_available", return_value=True),
     ):
-        manifest = LauncherManifest.load(
+        manifest = loader.LauncherManifest.load(
             manifest_path,
             include_provider_tiles=True,
             registry_path=registry_path,
