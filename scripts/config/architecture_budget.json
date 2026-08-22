@@ -3,6 +3,15 @@
   "max_parameters": 8,
   "exceptions": [
     {
+      "path": "src/shared/python/optimization/batch_swing_optimizer.py",
+      "symbol": "BatchSwingOptimizer.__init__",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8958,
+      "reason": "Issue #8958: pre-existing optimizer initializer takes explicit hyperparameter configurations; PR #8958 only optimizes vector math in score_batch.",
+      "expires_on": "2026-10-31"
+    },
+    {
       "path": "scripts/research/proximal_distal_energy/register_articulated_ground_claims.py",
       "symbol": "main",
       "rule": "function-lines",
