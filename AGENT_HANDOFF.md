@@ -53,9 +53,10 @@ history. Epic #8557 is the canonical proximal--distal completion authority.
 - The full document-size gate retains an unrelated baseline failure:
   `_ch06c_spatial_cross_formulation.qmd` is 51,523 bytes against 51,200. This
   branch does not touch that source; do not edit it during the campaign freeze.
-- Next: run final scoped gates, inspect the diff, commit, push, open a full PR
-  against `main`, and request human review. Do not close #8789: its broader
-  quarantine burn-down remains open.
+- Commit `956678ea28ccf36c405a4e236d607a0293f98e46` passed commit and push
+  hooks and is published in full PR #8993; human review is requested. Shepherd
+  its exact head through protected Docker builds and scans. Do not close #8789:
+  its broader quarantine burn-down remains open.
 
 ## Review-Bound Pull Requests
 
