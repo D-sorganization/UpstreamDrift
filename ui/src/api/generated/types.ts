@@ -355,6 +355,7 @@ export interface BackingRecordV2 {
 export interface BallFlightModelResult {
   model_name: string;
   model_key: FlightModelType;
+  coefficients: Record<string, number>;
   trajectory: BallFlightTrajectorySample[];
   summary: BallFlightSummary;
 }
@@ -393,6 +394,7 @@ export interface BallFlightSimulationRequest {
 export interface BallFlightSimulationResponse {
   model_name: string;
   model_key: FlightModelType;
+  coefficients: Record<string, number>;
   trajectory: BallFlightTrajectorySample[];
   summary: BallFlightSummary;
   results: BallFlightModelResult[];

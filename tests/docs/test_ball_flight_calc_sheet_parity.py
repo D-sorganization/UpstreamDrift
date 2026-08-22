@@ -36,6 +36,7 @@ from src.shared.python.physics.ball_properties import (
     BallProperties,
     calculate_spin_lift_coefficient,
 )
+from src.shared.python.physics.flight_models import WATERLOO_PENNER_COEFFICIENTS
 
 pytestmark = pytest.mark.unit
 
@@ -69,6 +70,11 @@ CALC_SHEET_EXPECTED: dict[str, float] = {
     "legacy_cl0": _BALL.cl0,
     "legacy_cl1": _BALL.cl1,
     "legacy_cl2": _BALL.cl2,
+    # Second live model family (issue #8978): the constant-spin multi-model
+    # framework's Waterloo/Penner set is deliberately different from the
+    # core set above; the sheet documents both and this gate pins both.
+    "wp_cd1": WATERLOO_PENNER_COEFFICIENTS.cd1,
+    "wp_max_lift_coefficient": WATERLOO_PENNER_COEFFICIENTS.cl_max,
 }
 
 SOURCE_MAP_EXPECTED: dict[str, float] = {
