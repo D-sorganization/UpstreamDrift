@@ -532,7 +532,7 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.572                                            |
+| **Spec Version**        | 1.0.573                                            |
 | **Last Spec Update**    | 2026-08-22                                         |
 
 ## 2. Purpose & Mission
@@ -563,6 +563,22 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ## 4. Architecture Overview
 
 ### Recent Spec Updates
+
+- **2026-08-22** - Made the modular Docker build boundary independently
+  verifiable for issue #8789. The reusable pinned-Tools action can emit both
+  the exact `vendor/ud-tools` gitlink and a deterministic SHA-256 over the
+  minimal Tools-owned source roots required by the wheel build. The modular
+  size and smoke workflows pass both identities into the isolated Docker
+  context; `Dockerfile.modular` copies exactly those roots, and the Hatch build
+  hook recomputes the content digest when Git metadata is intentionally absent.
+  Missing, incomplete, malformed, symlinked, or mismatched provenance fails
+  closed. Normal repository builds retain the existing gitlink validation.
+  Contract tests cover action opt-in, workflow propagation, Docker copy and
+  ignore rules, source-distribution inclusion, and tamper rejection. Both
+  Dockerfiles also pin pip 26.2.1, the first patched release after
+  PYSEC-2026-3721; CI remains the authority for actual image construction and
+  vulnerability scanning because Docker is not installed in every developer
+  environment.
 
 - **2026-08-21** - Resolved the dual aero-coefficient-set discrepancy (issue
   #8978, epic #8965 WS2): the multi-model ball-flight framework's

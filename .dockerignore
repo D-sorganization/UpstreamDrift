@@ -64,3 +64,12 @@ logs/
 .env
 .env.*
 !.env.example
+
+# Dockerfile.modular verifies and packages these exact pinned Tools roots.
+# Keep them inside the context even when broad documentation, test, or data
+# exclusions above would otherwise remove a nested source artifact.
+!vendor/ud-tools/src/shared/**
+!vendor/ud-tools/src/sidekick/**
+!vendor/ud-tools/src/chat/**
+!vendor/ud-tools/src/python/src/utils/**
+!vendor/ud-tools/src/contracts.py

@@ -22,6 +22,9 @@ import subprocess  # noqa: E402
 
 import build_hooks  # noqa: E402
 import pytest  # noqa: E402
+from scripts.packaging.pinned_tools_provenance import (  # noqa: E402
+    compute_tools_source_sha256,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -398,6 +401,47 @@ def test_release_or_ci_missing_tools_git_metadata_fails_closed(
         hook._register_tools_packages(version, {})
 
     assert "secret subprocess detail" not in str(error.value)
+
+
+def test_release_build_accepts_content_bound_container_provenance(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    """An isolated Docker context may replace Git metadata, not verification."""
+    tools_root = tmp_path / "vendor" / "ud-tools"
+    monkeypatch.setenv("UPSTREAMDRIFT_TOOLS_GITLINK_SHA", _PINNED_TOOLS_SHA)
+    monkeypatch.setenv(
+        "UPSTREAMDRIFT_TOOLS_SOURCE_SHA256",
+        compute_tools_source_sha256(tools_root),
+    )
+    hook = build_hooks.UIBuildHook(str(tmp_path), {})
+    build_data: dict = {}
+
+    with patch(
+        "build_hooks.subprocess.run",
+        side_effect=FileNotFoundError("Git metadata excluded from Docker context"),
+    ):
+        hook._register_tools_packages("1.0.0", build_data)
+
+    assert build_data["force_include"]
+
+
+def test_release_build_rejects_mismatched_container_source_digest(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv("UPSTREAMDRIFT_TOOLS_GITLINK_SHA", _PINNED_TOOLS_SHA)
+    monkeypatch.setenv("UPSTREAMDRIFT_TOOLS_SOURCE_SHA256", "b" * 64)
+    hook = build_hooks.UIBuildHook(str(tmp_path), {})
+
+    with (
+        patch(
+            "build_hooks.subprocess.run",
+            side_effect=FileNotFoundError("Git metadata excluded from Docker context"),
+        ),
+        pytest.raises(RuntimeError, match="source digest does not match"),
+    ):
+        hook._register_tools_packages("1.0.0", {})
 
 
 def test_editable_non_ci_missing_git_metadata_warns_and_skips(
