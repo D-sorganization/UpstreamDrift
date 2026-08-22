@@ -41,10 +41,12 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
 - Parent PID `18404` is the intentional source-locked coordinator with 20
   workers. Do not kill workers individually, edit source-hashed files, or start
   a duplicate campaign.
-- At 2026-08-22 12:50 PDT, 15 of 19 corners and 26 of 29 pathway evaluations
-  were terminal. `ground_translation_damping_scale-high` retained 25 of 72
-  atomic ground branch checkpoints; two ground-only evaluations remain after
-  it. The 21-process group was healthy at about 9.7 CPU cores.
+- At 2026-08-22 14:23 PDT, 14 of 19 corners were fully accounted and the
+  fifteenth row had 29 terminal pathway dispositions overall.
+  `ground_translation_damping_scale-high` retained 71 of 72 atomic ground
+  branch checkpoints. Four registered ground-only corners remain after it.
+  The 21-process group remains healthy; do not trade scientific identity for
+  a faster restart.
 - Completed rows and digest-bound branch checkpoints are restartable. Partial
   checkpoints are execution evidence, not release evidence.
 - After completion, independently audit the record, then integrate
@@ -53,9 +55,9 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
 
 ## Pinned Tools Docker Boundary (#8996)
 
-- PR #8993 is open from `fix/8789-docker-tools-boundary`; its pre-refresh head
-  was `81867ef2ea13191c3fba0d86be1c6682375fcbf3`. Current work merges repaired
-  remote `main`; refresh the exact head after commit and push.
+- PR #8993 is open from `fix/8789-docker-tools-boundary`. Head
+  `db7c01e0583e920b345634df37b361ce09eb210f` contains the repaired-main merge,
+  collection-order correction, and suite-marker repair.
 - It binds modular images to the exact Tools gitlink and content digest, fixes
   isolated PEP 517 hook loading, and advances pip to 26.2.1.
 - The workflows attest only `src/shared`, `src/sidekick`, `src/chat`,
@@ -68,9 +70,14 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
 - Head `17b2bca63` then correctly failed the suite-marker ratchet on its new
   regression. The test is now explicitly unit-marked; the full ratchet passes
   with no drift.
-- That head's wheel job failed before build during checkout because the selected
-  runner's cached `human-gazebo` submodule had no current revision. Re-evaluate
-  on the consolidated correction push; do not change shared runners.
+- That head's canonical-conformance job reached a runner whose NumPy install
+  has no package metadata/RECORD and cannot be repaired by the job. Re-evaluate
+  once on the consolidated correction head; do not change shared runners.
+- Trivy correctly rejected that image for `msgpack` 1.1.2
+  (GHSA-6v7p-g79w-8964) and `setuptools` 70.3.0 (CVE-2025-47273). The pending
+  correction reasserts fixed `msgpack==1.2.1` and `setuptools==78.1.1` after
+  every supported image's final dependency layer and adds a unit-marked
+  repository contract. The 116-test focused Docker/packaging/spec set passes.
 - Docker is unavailable locally, so protected image builds and scans remain
   authoritative. Human review is required; do not create redundant runs.
 
