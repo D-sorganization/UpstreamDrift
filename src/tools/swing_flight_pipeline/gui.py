@@ -15,6 +15,7 @@ from typing import Any
 
 import numpy as np
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QStandardItemModel
 from PyQt6.QtWidgets import (
     QApplication,
     QComboBox,
@@ -51,10 +52,13 @@ def _populate_engine_combo(
     combo silently stamped manual numbers with engine names).
     """
     combo.clear()
+    model = combo.model()
     for index, provider in enumerate(providers):
         combo.addItem(provider.provider_id)
         if not provider.is_available():
-            item = combo.model().item(index)  # QStandardItemModel by default
+            # QComboBox uses a QStandardItemModel by default; guard anyway so
+            # a custom model degrades to tooltip-only rather than crashing.
+            item = model.item(index) if isinstance(model, QStandardItemModel) else None
             if item is not None:
                 item.setEnabled(False)
             combo.setItemData(

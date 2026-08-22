@@ -24,7 +24,7 @@ from datetime import datetime
 from typing import Any
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from src.shared.python.analysis.cross_engine import ENGINE_NAMES
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -60,8 +60,6 @@ class CrossEnginePerturbationConfig(BaseModel):
         default=10, ge=1, le=200, description="Number of perturbation trials"
     )
     seed: int = Field(default=42, description="Random seed for reproducibility")
-
-    from pydantic import model_validator
 
     @model_validator(mode="after")
     def validate_dt_lt_t_end(self) -> CrossEnginePerturbationConfig:

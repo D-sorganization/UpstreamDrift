@@ -201,7 +201,7 @@ class UnimplementedEngineProvider(_BaseSwingStateProvider):
         return REASON_NOT_IMPLEMENTED if installed else REASON_NOT_INSTALLED
 
     def _build_swing_state(self, config: SwingStateConfig) -> SwingState:
-        raise NotImplementedError(
+        raise NotImplementedError(  # tracked: #8975
             f"engine '{self.provider_id}' swing-state sourcing is not implemented"
         )
 

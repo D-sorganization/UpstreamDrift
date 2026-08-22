@@ -46,6 +46,10 @@ from src.launchers.launcher_layout_manager import (
     LayoutManager,
     compute_centered_geometry,
 )
+from src.launchers.launcher_layout_persistence import (
+    load_layout_state,
+    save_layout_state,
+)
 from src.launchers.launcher_model_handlers import ModelHandlerRegistry
 from src.launchers.launcher_orchestrator import LauncherOrchestrator
 from src.launchers.launcher_process_cleanup_worker import ProcessCleanupWorker
@@ -509,22 +513,7 @@ class UpstreamDriftLauncher(QMainWindow):
 
     def _save_layout(self) -> None:
         """Save the current model layout to configuration file."""
-        window_state = {
-            "selected_model": self.selected_model,
-            "geometry": {
-                "x": self.x(),
-                "y": self.y(),
-                "width": self.width(),
-                "height": self.height(),
-            },
-            "options": {
-                "live_visualization": (self.chk_live.isChecked() if True else True),
-                "gpu_acceleration": (self.chk_gpu.isChecked() if True else False),
-                "docker_mode": (self.chk_docker.isChecked() if True else False),
-                "wsl_mode": (self.chk_wsl.isChecked() if True else False),
-            },
-        }
-        self.layout_manager.save_layout(window_state)
+        save_layout_state(self)
 
     def _sync_model_cards(self) -> None:
         """Ensure widgets match the current model order."""
@@ -745,70 +734,7 @@ class UpstreamDriftLauncher(QMainWindow):
 
     def _load_layout(self) -> None:
         """Load the saved model layout from configuration file."""
-        layout_data = self.layout_manager.load_layout()
-
-        if layout_data is None:
-            self._rebuild_grid()
-            return
-
-        # Restore view mode checkmark
-        if True:
-            act = self._viewmode_actions.get(self.layout_manager.current_view_mode)
-            if act:
-                act.setChecked(True)
-
-        self.model_order = self.layout_manager.model_order
-        self._sync_model_cards()
-
-        # Restore window geometry, clamped to screen bounds
-        geo = layout_data.get("window_geometry", {})
-        if geo:
-            x = geo.get("x", 100)
-            y = geo.get("y", 100)
-            w = geo.get("width", 1280)
-            h = geo.get("height", 800)
-            # Clamp to screen size
-            screen = QApplication.primaryScreen()
-            if screen:
-                avail = screen.availableGeometry()
-                w = min(w, avail.width() - 40)
-                h = min(h, avail.height() - 40)
-                x = max(avail.x(), min(x, avail.x() + avail.width() - w))
-                y = max(avail.y() + 30, min(y, avail.y() + avail.height() - h))
-            elif y < 30:
-                y = 50
-            self.setGeometry(x, y, w, h)
-        else:
-            self._center_window()
-
-        # Restore options
-        options = layout_data.get("options", {})
-        if True:
-            self.chk_live.setChecked(options.get("live_visualization", True))
-        if True:
-            self.chk_gpu.setChecked(options.get("gpu_acceleration", False))
-        if True:
-            saved_docker = options.get("docker_mode", None)
-            if saved_docker is None:
-                saved_docker = self.orchestrator.docker_available
-            if saved_docker:
-                self.chk_docker.setChecked(True)
-            else:
-                self.chk_docker.setChecked(False)
-        if True:
-            saved_wsl = options.get("wsl_mode", False)
-            if saved_wsl:
-                self.chk_wsl.setChecked(True)
-            else:
-                self.chk_wsl.setChecked(False)
-
-        # Restore selected model
-        saved_selection = layout_data.get("selected_model")
-        if saved_selection and saved_selection in self.model_cards:
-            self.select_model(saved_selection)
-
-        self._rebuild_grid()
-        logger.info("Layout loaded successfully")
+        load_layout_state(self)
 
     def _safe_int(self, value: Any, default: int) -> int:
         """Safely convert a value to int, handling Mock objects from tests."""
