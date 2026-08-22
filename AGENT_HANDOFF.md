@@ -58,10 +58,9 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
 - The local fix reuses `QApplication.instance()` and constructs an application
   only when none exists. Regression tests enforce both lifecycle branches.
 - Local evidence: 24 launcher-base tests pass under native PyQt6/Qt on Windows.
-- Before publication of this fix: run focused Ruff/format/type gates, update
-  this handoff, commit, push, open a full PR referencing #8789, obtain human
-  review, and require both protected Python lanes to pass the former crash
-  boundary.
+- PR #8990 is open as a full PR and requests human review. Commit and pre-push
+  hooks pass. Require both protected Python lanes to pass the former crash
+  boundary, then verify the protected merge and post-merge `main` run.
 - Do not close #8789 with this PR. Docker profile boundaries and the
   removal-only quarantine burn-down remain separate unchecked exit criteria.
 
