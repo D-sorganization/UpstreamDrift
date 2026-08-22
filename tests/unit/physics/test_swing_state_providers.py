@@ -15,6 +15,7 @@ from src.shared.python.physics.swing_state_providers import (
     REASON_NOT_IMPLEMENTED,
     REASON_NOT_INSTALLED,
     ManualSwingStateProvider,
+    MuJoCoSwingStateProvider,
     SwingStateConfig,
     SwingStateProvider,
     UnimplementedEngineProvider,
@@ -23,6 +24,8 @@ from src.shared.python.physics.swing_state_providers import (
 )
 
 pytestmark = pytest.mark.unit
+
+_MUJOCO_INSTALLED = MuJoCoSwingStateProvider().is_available()
 
 
 # ---------------------------------------------------------------------------
@@ -39,12 +42,12 @@ class TestRegistry:
         for provider in available_swing_state_providers():
             assert isinstance(provider, SwingStateProvider)
 
-    def test_manual_is_the_only_available_provider(self):
+    def test_provider_availability(self):
         availability = {
             p.provider_id: p.is_available() for p in available_swing_state_providers()
         }
         assert availability == {
-            "mujoco": False,
+            "mujoco": _MUJOCO_INSTALLED,  # implemented (#8975); env-gated
             "drake": False,
             "pinocchio": False,
             "manual": True,
@@ -140,6 +143,59 @@ class TestUnimplementedEngineProvider:
 
 
 # ---------------------------------------------------------------------------
+# MuJoCoSwingStateProvider (#8975)
+# ---------------------------------------------------------------------------
+
+
+class TestMuJoCoProvider:
+    def test_unavailable_without_mujoco_package(self, monkeypatch):
+        import importlib.util as ilu
+
+        monkeypatch.setattr(ilu, "find_spec", lambda name: None)
+        provider = MuJoCoSwingStateProvider()
+        assert provider.is_available() is False
+        assert provider.availability_reason() == REASON_NOT_INSTALLED
+        with pytest.raises(ValueError, match="not available"):
+            provider.get_swing_state(SwingStateConfig())
+
+    @pytest.mark.skipif(not _MUJOCO_INSTALLED, reason="mujoco not installed")
+    def test_available_with_empty_reason(self):
+        provider = MuJoCoSwingStateProvider()
+        assert provider.is_available() is True
+        assert provider.availability_reason() == ""
+
+    @pytest.mark.skipif(not _MUJOCO_INSTALLED, reason="mujoco not installed")
+    def test_produces_real_engine_sourced_swing_state(self):
+        config = SwingStateConfig(clubhead_speed_ms=45.0, loft_deg=10.5)
+        state = MuJoCoSwingStateProvider().get_swing_state(config)
+
+        assert state.engine_name == "mujoco"  # honest attribution
+        speed = float(np.linalg.norm(state.clubhead_velocity))
+        assert speed == pytest.approx(45.0, rel=0.10)
+        # Real dynamics: the clubhead rotates through impact.
+        assert float(np.linalg.norm(state.clubhead_angular_velocity)) > 0.1
+        assert np.linalg.norm(state.clubhead_orientation) == pytest.approx(
+            1.0, abs=1e-6
+        )
+        # Mass/MOI come from the MJCF model, not the config.
+        assert state.clubhead_mass > 0.0
+        assert state.clubhead_mass != config.clubhead_mass_kg
+        assert state.clubhead_moi > 0.0
+
+    @pytest.mark.skipif(not _MUJOCO_INSTALLED, reason="mujoco not installed")
+    def test_metadata_records_model_method_and_residual(self):
+        state = MuJoCoSwingStateProvider().get_swing_state(
+            SwingStateConfig(clubhead_speed_ms=40.0)
+        )
+        metadata = state.metadata
+        assert metadata["method"] == "mujoco_forward_dynamics"
+        assert metadata["model_asset"].startswith("src.engines.physics_engines.mujoco.")
+        assert metadata["timestep_s"] > 0.0
+        assert "achieved_speed_ms" in metadata
+        assert "speed_residual_rel" in metadata
+
+
+# ---------------------------------------------------------------------------
 # Contract: false attribution is a hard error
 # ---------------------------------------------------------------------------
 
@@ -161,3 +217,22 @@ class _LyingProvider(_BaseSwingStateProvider):
 def test_false_engine_attribution_raises_contract_error():
     with pytest.raises(ValueError, match="false engine attribution"):
         _LyingProvider().get_swing_state(SwingStateConfig())
+
+
+class _NaNProvider(_BaseSwingStateProvider):
+    """Produces a non-finite clubhead velocity (must violate postcondition)."""
+
+    provider_id = "manual"
+
+    def _build_swing_state(self, config: SwingStateConfig) -> SwingState:
+        return SwingState(
+            clubhead_velocity=np.array([float("nan"), 0.0, 0.0]),
+            clubhead_angular_velocity=np.zeros(3),
+            clubhead_orientation=np.array([0.0, 0.0, 1.0]),
+            engine_name="manual",
+        )
+
+
+def test_non_finite_swing_state_raises_contract_error():
+    with pytest.raises(ValueError, match="non-finite"):
+        _NaNProvider().get_swing_state(SwingStateConfig())

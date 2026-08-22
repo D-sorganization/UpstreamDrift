@@ -11,10 +11,13 @@ from" and "what the pipeline does with it":
 * :class:`SwingStateProvider` — protocol for anything that can produce a
   ``SwingState`` from a :class:`SwingStateConfig`.
 * :class:`ManualSwingStateProvider` — builds the state directly from the
-  user-entered parameters (the only implemented source today).
+  user-entered parameters.
+* :class:`MuJoCoSwingStateProvider` — sources the state from a real MuJoCo
+  forward-dynamics swing (issue #8975); available whenever ``mujoco`` and
+  the in-repo golf MJCF asset are importable.
 * :class:`UnimplementedEngineProvider` — placeholder for engine-backed
-  sourcing (mujoco / drake / pinocchio).  Always unavailable, with an honest
-  human-readable reason.  GUIs list it but must disable it.
+  sourcing that does not exist yet (drake / pinocchio).  Always unavailable,
+  with an honest human-readable reason.  GUIs list it but must disable it.
 
 Design-by-Contract
 ------------------
@@ -50,6 +53,12 @@ REASON_NOT_IMPLEMENTED = "engine sourcing not yet implemented"
 
 #: Reason string for an engine whose Python package is not installed.
 REASON_NOT_INSTALLED = "engine not installed"
+
+#: MJCF asset module the MuJoCo provider needs (checked without importing
+#: the heavyweight engine at registry-construction time).
+_MUJOCO_MODEL_ASSET_MODULE = (
+    "src.engines.physics_engines.mujoco._golf_swing_upper_body_xml"
+)
 
 
 @dataclass(frozen=True)
@@ -142,6 +151,18 @@ class _BaseSwingStateProvider(ABC):
             f"engine_name={state.engine_name!r} — false engine attribution",
             state.engine_name,
         )
+        for name in (
+            "clubhead_velocity",
+            "clubhead_angular_velocity",
+            "clubhead_orientation",
+        ):
+            vector = np.asarray(getattr(state, name), dtype=float)
+            ensure(
+                vector.shape == (3,) and bool(np.isfinite(vector).all()),
+                f"provider '{self.provider_id}' produced a non-finite or "
+                f"mis-shaped {name} (expected finite shape (3,))",
+                vector,
+            )
         return state
 
     @abstractmethod
@@ -171,6 +192,59 @@ class ManualSwingStateProvider(_BaseSwingStateProvider):
             clubhead_mass=config.clubhead_mass_kg,
             clubhead_loft_deg=config.loft_deg,
             engine_name=self.provider_id,
+        )
+
+
+class MuJoCoSwingStateProvider(_BaseSwingStateProvider):
+    """Sources a ``SwingState`` from a real MuJoCo forward-dynamics swing.
+
+    A narrow facade (LoD) over :mod:`mujoco_swing_source`: the in-repo
+    upper-body golf-swing MJCF is driven by a scripted torque pulse under
+    full ``mj_step`` dynamics, with the torque scale calibrated so peak
+    clubhead speed approaches ``config.clubhead_speed_ms``.  Clubhead
+    velocity, angular velocity, face orientation, mass, and MOI are read
+    from the simulation/model — never fabricated.  The achieved speed and
+    calibration residual are reported in ``SwingState.metadata``.
+
+    Honest limitations (also recorded in metadata): the control is an
+    open-loop script, not a biomechanical controller, and the loft in the
+    returned state remains the user-configured value (the MJCF clubface
+    geometry does not encode per-club loft).
+    """
+
+    provider_id = "mujoco"
+
+    def is_available(self) -> bool:
+        """True when the ``mujoco`` package and the MJCF asset are present."""
+        return self.availability_reason() == ""
+
+    def availability_reason(self) -> str:
+        """Return '' when available, else an honest reason."""
+        for module in ("mujoco", _MUJOCO_MODEL_ASSET_MODULE):
+            try:
+                if importlib.util.find_spec(module) is None:
+                    return REASON_NOT_INSTALLED
+            except (ImportError, ValueError):
+                return REASON_NOT_INSTALLED
+        return ""
+
+    def _build_swing_state(self, config: SwingStateConfig) -> SwingState:
+        from src.shared.python.physics.mujoco_swing_source import (
+            run_reference_swing,
+        )
+        from src.shared.python.physics.swing_ball_flight_pipeline import SwingState
+
+        kinematics, metadata = run_reference_swing(config.clubhead_speed_ms)
+        metadata["loft_source"] = "user config (MJCF clubface encodes no loft)"
+        return SwingState(
+            clubhead_velocity=kinematics.velocity,
+            clubhead_angular_velocity=kinematics.angular_velocity,
+            clubhead_orientation=kinematics.face_normal,
+            clubhead_mass=kinematics.mass,
+            clubhead_loft_deg=config.loft_deg,
+            clubhead_moi=float(np.max(kinematics.inertia_diagonal)),
+            engine_name=self.provider_id,
+            metadata=metadata,
         )
 
 
@@ -217,7 +291,7 @@ def available_swing_state_providers() -> list[SwingStateProvider]:
     and available.
     """
     providers: list[SwingStateProvider] = [
-        UnimplementedEngineProvider("mujoco", "mujoco"),
+        MuJoCoSwingStateProvider(),
         UnimplementedEngineProvider("drake", "pydrake"),
         UnimplementedEngineProvider("pinocchio", "pinocchio"),
         ManualSwingStateProvider(),
