@@ -382,6 +382,8 @@ class BallFlightModel(ABC):
         )
 
         t_eval = np.arange(0, sol.t[-1], dt)
+        # dense_output=True guarantees a dense interpolant; narrow for mypy.
+        assert sol.sol is not None
         points = [
             TrajectoryPoint(float(t), sol.sol(t)[:3], sol.sol(t)[3:]) for t in t_eval
         ]
