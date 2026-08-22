@@ -12,7 +12,8 @@ Loads the full launcher surface via the real shared loader
   this checkout — never faked as success);
 - ``source_root`` / ``shared_repo`` targets live in sibling checkouts and
   are skipped with a reason when the sibling is absent locally;
-- ``virtual/*`` pseudo-paths must be registered in ``VIRTUAL_TARGETS``;
+- ``virtual/*`` pseudo-paths must be registered in ``VIRTUAL_TARGETS`` /
+  ``VIRTUAL_PREFIXES`` *and* their backing handler artifact must exist;
 - path-less tiles must declare an honest web contract instead of a dead
   native target.
 """
@@ -72,6 +73,52 @@ def test_tile_launch_target_resolves(tile: LauncherTile) -> None:
         f"Tile '{tile.id}' declares an unresolvable launch target "
         f"(kind={resolution.kind}): {resolution.reason}"
     )
+
+
+class TestVirtualTargetValidation:
+    """Virtual targets are genuinely validated, not allowlist-blessed (#8854)."""
+
+    @staticmethod
+    def _tile(path: str) -> LauncherTile:
+        return LauncherTile.from_dict(
+            {
+                "id": "virt",
+                "name": "V",
+                "description": "v",
+                "category": "tool",
+                "type": "special_app",
+                "path": path,
+                "logo": "golf_logo.svg",
+            }
+        )
+
+    def test_registered_virtual_targets_resolve_to_their_backing(self) -> None:
+        from src.shared.python.config.tile_target_resolution import VIRTUAL_TARGETS
+
+        for target, backing in VIRTUAL_TARGETS.items():
+            resolution = resolve_tile_target(self._tile(target), REPO_ROOT)
+            assert resolution.resolvable, f"{target} unresolvable: {resolution.reason}"
+            assert resolution.target == REPO_ROOT / backing
+
+    def test_virtual_prefix_targets_resolve_to_their_backing(self) -> None:
+        resolution = resolve_tile_target(
+            self._tile("virtual/biomech_exercise/gait"), REPO_ROOT
+        )
+        assert resolution.resolvable
+        assert resolution.target is not None and resolution.target.exists()
+
+    def test_unknown_virtual_target_is_a_registry_error(self) -> None:
+        resolution = resolve_tile_target(
+            self._tile("virtual/engine_dashboard"), REPO_ROOT
+        )
+        assert not resolution.resolvable
+        assert "unknown virtual target" in (resolution.reason or "")
+
+    def test_virtual_target_with_missing_backing_fails(self, tmp_path: Path) -> None:
+        """A registered virtual target whose handler artifact vanished fails."""
+        resolution = resolve_tile_target(self._tile("virtual/matlab_suite"), tmp_path)
+        assert not resolution.resolvable
+        assert "lost its backing handler artifact" in (resolution.reason or "")
 
 
 class TestDottedModulePaths:

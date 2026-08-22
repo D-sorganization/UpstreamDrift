@@ -12,8 +12,9 @@ by ``launch_upstream_drift.py``:
   the direct-launch module resolves (skip-with-reason when the runtime
   is not installed — never fake success). MuJoCo (installed in CI) gets
   a real construct-without-exec window test.
-* Registry parity and ready-tile target resolution are regression gates
-  for #8853 / #8854 and are xfail (strict=False) until those land.
+* Registry parity and ready-tile target resolution are real regression
+  gates for #8853 / #8854, asserting against the settled contracts
+  (``WEB_CATALOG_ONLY_TILES`` allowlist, shared ``resolve_tile_target``).
 
 Run with: ``pytest tests/launch_modes -m launch_qa``.
 See docs/testing/launch_qa.md.
@@ -276,16 +277,20 @@ def test_engine_mujoco_constructs_headless(qapp: Any) -> None:
 # ── 5/6. Cross-mode contracts (regression gates) ─────────────────────
 
 
-@pytest.mark.xfail(
-    reason="#8853: web manifest and PyQt registry are two tile registries",
-    strict=False,
-)
 def test_web_and_pyqt_tile_registries_agree(web_client: Any) -> None:
-    """Regression gate for #8853: both launch surfaces serve one tile set."""
+    """Regression gate for #8853: both launch surfaces serve one tile set.
+
+    The settled contract (tests/config/test_launcher_registry_parity.py):
+    every visible desktop tile reaches the web surface, and the only web
+    extras are the justified ``WEB_CATALOG_ONLY_TILES``. Hidden desktop
+    alias tiles are deliberately absent from the web manifest (#8863).
+    """
+    from src.config.launcher_manifest_loader import LauncherManifest
     from src.launchers.launcher_constants import (
         REPOS_ROOT,
         _lazy_load_model_registry,
     )
+    from tests.config.test_launcher_registry_parity import WEB_CATALOG_ONLY_TILES
 
     response = web_client.get("/api/launcher/manifest")
     assert response.status_code == 200
@@ -295,24 +300,34 @@ def test_web_and_pyqt_tile_registries_agree(web_client: Any) -> None:
     registry = registry_cls(REPOS_ROOT / "src/config/models.yaml")
     pyqt_ids = {model.id for model in registry.get_all_models()}
 
-    assert web_ids == pyqt_ids, (
-        f"web-only tiles: {sorted(web_ids - pyqt_ids)}; "
-        f"pyqt-only tiles: {sorted(pyqt_ids - web_ids)}"
+    hidden_ids = {tile.id for tile in LauncherManifest.load().tiles if tile.hidden}
+    structurally_excluded = pyqt_ids - web_ids - hidden_ids
+    assert not structurally_excluded, (
+        f"desktop tiles structurally excluded from the web surface: "
+        f"{sorted(structurally_excluded)}"
+    )
+    undeclared_extras = web_ids - pyqt_ids - set(WEB_CATALOG_ONLY_TILES)
+    assert not undeclared_extras, (
+        f"web-only tiles missing a WEB_CATALOG_ONLY_TILES justification: "
+        f"{sorted(undeclared_extras)}"
     )
 
 
-@pytest.mark.xfail(
-    reason="#8854: ready-status tiles with unresolvable target paths",
-    strict=False,
-)
 def test_ready_tiles_resolve_launch_targets() -> None:
     """Postcondition (#8966 DbC): every ready tile resolves a real target.
 
-    "Ready" implies launchable — a ready-family status whose ``path``
-    does not exist on disk must be demoted (ties to #8855).
+    "Ready" implies launchable — resolution goes through the shared
+    ``resolve_tile_target`` policy (#8854), so virtual targets, provider
+    gitlinks, and sibling checkouts are judged exactly as the launch
+    handlers and the desktop status chip judge them. External targets
+    absent on this machine are an environment gap, not a registry bug.
     """
     from src.config.launcher_manifest_loader import LauncherManifest
     from src.launchers.launcher_constants import REPOS_ROOT
+    from src.shared.python.config.tile_target_resolution import (
+        EXTERNAL_KINDS,
+        resolve_tile_target,
+    )
 
     manifest = LauncherManifest.load()
     ready_statuses = {"ready", "gui_ready", "engine_ready"}
@@ -322,6 +337,8 @@ def test_ready_tiles_resolve_launch_targets() -> None:
             continue
         if tile.path.startswith(("http://", "https://")):
             continue
-        if not (REPOS_ROOT / tile.path).exists():
-            broken.append(f"{tile.id} -> {tile.path}")
+        resolution = resolve_tile_target(tile, REPOS_ROOT)
+        if resolution.resolvable or resolution.kind in EXTERNAL_KINDS:
+            continue
+        broken.append(f"{tile.id} -> {tile.path} ({resolution.reason})")
     assert not broken, f"ready tiles with unresolvable targets: {broken}"
