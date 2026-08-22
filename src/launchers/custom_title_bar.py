@@ -17,7 +17,7 @@ def _get_title_bar_colors() -> dict[str, str]:
     duplicated here.
     """
     try:
-        from src.shared.python.theme import DARK_THEME, get_current_colors
+        from src.shared.python.theme.palette import DARK_THEME, get_current_colors
 
         colors = get_current_colors()
         # Derive fallbacks from DARK_THEME instead of repeating literal hex.

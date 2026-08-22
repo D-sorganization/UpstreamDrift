@@ -29,7 +29,7 @@ from PyQt6.QtWidgets import (
 
 from src.launchers.startup import _get_theme_colors
 from src.shared.python.logging_pkg.logging_config import get_logger
-from src.shared.python.theme.style_constants import Styles
+from src.shared.python.theme.layout_metrics import LayoutMetrics
 
 if TYPE_CHECKING:
     pass
@@ -171,12 +171,12 @@ class LibraryWidget(QWidget):
     def _setup_ui(self) -> None:
         layout = QVBoxLayout(self)
         layout.setContentsMargins(
-            Styles.MARGIN_PAGE,
-            Styles.MARGIN_PAGE,
-            Styles.MARGIN_PAGE,
-            Styles.MARGIN_PAGE,
+            LayoutMetrics.MARGIN_PAGE,
+            LayoutMetrics.MARGIN_PAGE,
+            LayoutMetrics.MARGIN_PAGE,
+            LayoutMetrics.MARGIN_PAGE,
         )
-        layout.setSpacing(Styles.SPACING_MD)
+        layout.setSpacing(LayoutMetrics.SPACING_MD)
         self.setObjectName("LibraryWidget")
 
         # Toolbar
@@ -184,7 +184,7 @@ class LibraryWidget(QWidget):
         toolbar.setObjectName("LibraryToolbar")
         toolbar_layout = QHBoxLayout(toolbar)
         toolbar_layout.setContentsMargins(0, 0, 0, 0)
-        toolbar_layout.setSpacing(Styles.SPACING_MD)
+        toolbar_layout.setSpacing(LayoutMetrics.SPACING_MD)
 
         lbl_title = QLabel("Research Library")
         lbl_title.setObjectName("LibraryTitle")
@@ -217,7 +217,7 @@ class LibraryWidget(QWidget):
         list_container.setObjectName("LibraryListPane")
         list_layout = QVBoxLayout(list_container)
         list_layout.setContentsMargins(0, 0, 0, 0)
-        list_layout.setSpacing(Styles.SPACING_SM)
+        list_layout.setSpacing(LayoutMetrics.SPACING_SM)
 
         self.table = QTableWidget()
         self.table.setObjectName("LibraryTable")
@@ -239,7 +239,7 @@ class LibraryWidget(QWidget):
         preview_container.setObjectName("LibraryPreviewPane")
         preview_layout = QVBoxLayout(preview_container)
         preview_layout.setContentsMargins(0, 0, 0, 0)
-        preview_layout.setSpacing(Styles.SPACING_MD)
+        preview_layout.setSpacing(LayoutMetrics.SPACING_MD)
 
         self.preview_browser = QTextBrowser()
         self.preview_browser.setObjectName("LibraryPreview")
@@ -252,12 +252,12 @@ class LibraryWidget(QWidget):
         ai_panel.setObjectName("LibraryChatPanel")
         ai_layout = QVBoxLayout(ai_panel)
         ai_layout.setContentsMargins(
-            Styles.SPACING_MD,
-            Styles.SPACING_MD,
-            Styles.SPACING_MD,
-            Styles.SPACING_MD,
+            LayoutMetrics.SPACING_MD,
+            LayoutMetrics.SPACING_MD,
+            LayoutMetrics.SPACING_MD,
+            LayoutMetrics.SPACING_MD,
         )
-        ai_layout.setSpacing(Styles.SPACING_SM)
+        ai_layout.setSpacing(LayoutMetrics.SPACING_SM)
         lbl_ai = QLabel("Document Chat")
         lbl_ai.setObjectName("LibraryChatTitle")
         ai_layout.addWidget(lbl_ai)

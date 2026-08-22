@@ -851,6 +851,8 @@ export interface CrossEngineStudyRequest {
   /** Engine names to compare; each must be a recognised engine. */
   engines?: string[];
   config: CrossEnginePerturbationConfig;
+  /** When false, the study fails instead of silently running a 2-DOF stub for a requested engine whose real backend is unavailable (#8817). Either way the result declares each engine's backend ('real' or 'stub_2dof') and lists 'stubbed_engines'. */
+  allow_stub_substitution: boolean;
 }
 
 /**

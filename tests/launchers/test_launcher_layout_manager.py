@@ -12,7 +12,7 @@ from src.launchers.launcher_layout_manager import (  # noqa: E402
     LayoutManager,
     compute_centered_geometry,
 )
-from src.launchers.model_registry import ModelSpec  # noqa: E402
+from src.shared.python.config.model_registry import ModelConfig as ModelSpec  # noqa: E402
 from src.shared.python.config.model_registry import ModelRegistry  # noqa: E402
 
 pytestmark = pytest.mark.unit

@@ -301,7 +301,15 @@ golf_environment = "src.tools.golf_environment._embed_adapter"
 terrain_engine = "src.tools.terrain_engine._embed_adapter"
 golf_simulation_suite = "src.tools.golf_simulation_suite._embed_adapter"
 simulation_backends_launcher = "src.tools.simulation_backends_launcher._embed_adapter"
-simscape_3d_golf_model = "engines.Simscape_Multibody_Models.3D_Golf_Model.python.src.apps._embed_adapter"
+swing_flight_pipeline = "src.tools.swing_flight_pipeline._embed_adapter"
+mujoco_unified = "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf._embed_adapter"
+drake_golf = "src.engines.physics_engines.drake.python.src._embed_adapter"
+pinocchio_golf = "src.engines.physics_engines.pinocchio.python.pinocchio_golf._embed_adapter"
+opensim_golf = "src.engines.physics_engines.opensim.python._embed_adapter"
+myosim_suite = "src.engines.physics_engines.myosuite.python._embed_adapter"
+# The Simscape adapter's real path contains "3D_Golf_Model" (not a valid
+# dotted-import segment), so it is reached via an importable shim (#8856).
+simscape_3d_golf_model = "src.launchers.adapters.simscape_embed"
 
 [project.urls]
 Homepage = "https://github.com/D-sorganization/UpstreamDrift"

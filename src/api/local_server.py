@@ -254,15 +254,18 @@ def _register_api_routers(app: FastAPI) -> None:
 
 
 def _load_launcher_manifest() -> dict[str, Any]:
-    """Load the launcher manifest JSON from the config directory.
+    """Load the launcher manifest via the shared process-level cache.
+
+    Delegates to ``src.api.launcher_manifest_cache`` so this server and
+    ``src/api/routes/launcher.py`` share one loader code path (issue #8937).
 
     Returns:
         Parsed manifest dict, or a default empty manifest if not found.
     """
-    from src.config.launcher_manifest_loader import LauncherManifest
+    from src.api.launcher_manifest_cache import get_cached_manifest
 
     try:
-        return LauncherManifest.load().to_dict()
+        return get_cached_manifest().to_dict()
     except (FileNotFoundError, ValueError, OSError) as exc:
         logger.error("[launch] Failed to load launcher manifest: %s", exc)
         return {"version": "1.0.0", "tiles": []}
@@ -419,10 +422,10 @@ def _find_tile_in_manifest(
     Returns:
         Tuple of (manifest dict, tile dict) or (None, None) if not found.
     """
-    from src.config.launcher_manifest_loader import LauncherManifest
+    from src.api.launcher_manifest_cache import get_cached_manifest
 
     try:
-        manifest_obj = LauncherManifest.load()
+        manifest_obj = get_cached_manifest()
     except (FileNotFoundError, ValueError, OSError) as exc:
         logger.error("[launch] Failed to load launcher manifest: %s", exc)
         return None, None
@@ -508,8 +511,13 @@ def _register_launcher_endpoints(app: FastAPI) -> None:
     @app.get("/api/launcher/manifest")
     async def get_launcher_manifest() -> dict[str, Any]:
         """Return the launcher manifest (tile configuration) for the web UI."""
+        import anyio.to_thread
+
+        # Cache misses re-run provider probes; keep them off the event loop
+        # (issue #8937).
+        manifest = await anyio.to_thread.run_sync(_load_launcher_manifest)
         return _with_launcher_csrf_token(
-            _load_launcher_manifest(),
+            manifest,
             app.state.launcher_csrf_token,
         )
 
@@ -537,7 +545,9 @@ def _register_launcher_endpoints(app: FastAPI) -> None:
         _enforce_launcher_mutation_guard(request)
         logger.info("[launch] Received launch request for tile_id=%s", tile_id)
 
-        manifest, tile = _find_tile_in_manifest(tile_id)
+        import anyio.to_thread
+
+        manifest, tile = await anyio.to_thread.run_sync(_find_tile_in_manifest, tile_id)
         if manifest is None:
             return JSONResponse(
                 status_code=404,

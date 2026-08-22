@@ -13,7 +13,16 @@ from src.shared.python.motion_pipeline.sources.pose2sim_adapter import (
     load_pose2sim_observations,
 )
 
-FIXTURE_ROOT = Path("tests/data/motion_pipeline/pose2sim/sample_session")
+# Anchored to this file: the autouse _prevent_repo_root_io fixture (#7935)
+# chdirs every test to tmp_path, so a CWD-relative fixture path never resolves.
+FIXTURE_ROOT = (
+    Path(__file__).resolve().parents[4]
+    / "tests"
+    / "data"
+    / "motion_pipeline"
+    / "pose2sim"
+    / "sample_session"
+)
 
 
 def test_pose2sim_ingests_multicamera_fixture() -> None:

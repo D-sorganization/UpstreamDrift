@@ -567,7 +567,7 @@ culminating in the unified platform released as version 1.0.0.
 Throughout this manual, the following conventions are used:
 
 - **`monospace text`** indicates code, file names, command-line input, or
-  identifiers (e.g., `launch_golf_suite.py`, `src/api/server.py`).
+  identifiers (e.g., `launch_upstream_drift.py`, `src/api/server.py`).
 
 - **Bold text** denotes key terms, UI elements, or emphasis.
 
@@ -583,7 +583,7 @@ Throughout this manual, the following conventions are used:
 
   ```bash
   # Shell command example
-  python launch_golf_suite.py --engine mujoco
+  python launch_upstream_drift.py --engine mujoco
   ```
 
 - Mathematical notation uses LaTeX syntax. Inline: $E = \frac{1}{2}mv^2$.
@@ -597,7 +597,7 @@ Throughout this manual, the following conventions are used:
 
 - File paths are given relative to the repository root unless otherwise stated.
   The repository root is the directory containing `pyproject.toml` and
-  `launch_golf_suite.py`.
+  `launch_upstream_drift.py`.
 
 ## 1.6 How to Read This Manual
 
@@ -639,7 +639,7 @@ the physics engine backends:
 +===========================================================================+
 |                        LAUNCHER & ORCHESTRATION                            |
 |  +--------------------+  +------------------+  +----------------------+   |
-|  | unified_launcher   |  | upstream_drift_launcher    |  | engine dashboards    |   |
+|  | upstream_drift_launcher    |  | launcher services  |  | engine dashboards    |   |
 |  +--------------------+  +------------------+  +----------------------+   |
 +===========================================================================+
                                     |
@@ -692,9 +692,9 @@ The FastAPI REST API enables programmatic access, automation, and integration
 with external systems.
 
 **Launcher and Orchestration Layer**: Manages application startup, engine selection,
-model loading, and inter-process communication. The `unified_launcher.py` module
-serves as the primary orchestrator for the PyQt6 interface, while
-`launch_golf_suite.py` provides the CLI entry point supporting all launch modes.
+model loading, and inter-process communication. The `upstream_drift_launcher.py`
+module serves as the primary orchestrator for the PyQt6 interface, while
+`launch_upstream_drift.py` provides the CLI entry point supporting all launch modes.
 
 **Shared Services Layer**: Houses reusable libraries consumed by all engines and
 modules, including biomechanical analysis routines, plotting utilities, optimization
@@ -890,7 +890,7 @@ UpstreamDrift/
 ├── assets/                       # Branding and static assets
 ├── installer/                    # OS-specific installers
 ├── vendor/                       # Vendored third-party code
-├── launch_golf_suite.py          # Main CLI entry point
+├── launch_upstream_drift.py          # Main CLI entry point
 ├── start_api_server.py           # API server entry point
 ├── pyproject.toml                # Project metadata and dependencies
 ├── environment.yml               # Conda environment specification
@@ -1008,7 +1008,7 @@ The following simplified dependency graph shows the major inter-module
 relationships. Arrows indicate "depends on" relationships:
 
 ```
-launch_golf_suite.py
+launch_upstream_drift.py
     ├── src/api/local_server
     │     └── src/api/server (FastAPI app)
     │           ├── src/api/routes/* (endpoints)
@@ -1017,9 +1017,8 @@ launch_golf_suite.py
     │           ├── src/api/middleware/* (security, upload)
     │           └── src/shared/python/engine_manager
     ├── src/launchers/upstream_drift_launcher (PyQt6)
-    │     ├── src/launchers/unified_launcher
     │     ├── src/launchers/ui_components
-    │     ├── src/launchers/model_registry
+    │     ├── src/shared/python/config/model_registry
     │     └── src/shared/python/engine_availability
     └── src/engines/physics_engines/*/
           └── (engine-specific modules)
@@ -1584,7 +1583,7 @@ python scripts/check_system_health.py
   ```
 - **Headless servers**: Use Xvfb for rendering on servers without a display:
   ```bash
-  xvfb-run python launch_golf_suite.py
+  xvfb-run python launch_upstream_drift.py
   xvfb-run pytest tests/ -v
   ```
 - **WSL (Windows Subsystem for Linux)**: Refer to `docs/wsl_setup.md` for
@@ -1837,7 +1836,7 @@ selection, model browsing, visualization, and analysis tools.
 
 ```bash
 # Via the main entry point
-python launch_golf_suite.py --classic
+python launch_upstream_drift.py --classic
 
 # Or equivalently
 upstream-drift --classic
@@ -1890,7 +1889,7 @@ The modern web-based desktop application uses Tauri (Rust backend) and React
 
 ```bash
 # Default launch mode (recommended)
-python launch_golf_suite.py
+python launch_upstream_drift.py
 
 # Or equivalently
 golf-suite
@@ -1941,7 +1940,7 @@ capabilities.
 
 ```bash
 # Via the main entry point
-python launch_golf_suite.py --api-only
+python launch_upstream_drift.py --api-only
 
 # Or directly
 python start_api_server.py
