@@ -111,7 +111,7 @@ RUN set -eux; \
 # Reassert scanner-fixed transitives after profile-specific dependency installs.
 RUN pip install --upgrade --no-cache-dir \
     "msgpack==1.2.1" \
-    "setuptools==78.1.1"
+    "setuptools==83.0.0"
 
 # ---- Stage 2: runtime ------------------------------------------------------
 FROM python:3.12-slim@sha256:4386a385d81dba9f72ed72a6fe4237755d7f5440c84b417650f38336bbc43117 AS runtime
@@ -125,7 +125,7 @@ ARG GROUP_ID=1000
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN python -m pip install --upgrade --no-cache-dir pip==26.2.1 && \
-    python -m pip install --upgrade --no-cache-dir setuptools==78.1.1
+    python -m pip install --upgrade --no-cache-dir setuptools==83.0.0
 
 # Runtime apt deps — kept identical to legacy Dockerfile so the
 # rendering paths (osmesa, egl, ffmpeg) work for every profile.

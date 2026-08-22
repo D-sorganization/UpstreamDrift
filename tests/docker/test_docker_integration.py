@@ -257,7 +257,7 @@ class TestContainerEnvironment(unittest.TestCase):
                 f"{dockerfile_name} must pin the Trivy-fixed msgpack release",
             )
             self.assertIn(
-                "setuptools==78.1.1",
+                "setuptools==83.0.0",
                 dockerfile,
                 f"{dockerfile_name} must pin the Trivy-fixed setuptools release",
             )
