@@ -6,7 +6,23 @@ and adherence to the DRY principle.
 
 from __future__ import annotations
 
+import faulthandler
 import os
+import sys
+
+# ---------------------------------------------------------------------------
+# Hang forensics for the Green-Suite unit gate (PR #8976): the gate has hung
+# at ~95% with pytest-timeout (thread method) and per-test faulthandler
+# timeouts both silent, which means the stall is OUTSIDE any test phase
+# (xdist orchestration, session finish, or a C-level wait between items).
+# faulthandler's watchdog is a C thread that needs no GIL and this repeating
+# session-level timer is never cancelled by per-item plugins, so a wedged
+# process still writes an all-thread traceback to stderr every 7 minutes.
+# Scoped to the unit gate via its UNIT_GATE_QUARANTINE env var; remove once
+# the hang is diagnosed.
+# ---------------------------------------------------------------------------
+if os.environ.get("UNIT_GATE_QUARANTINE") == "1":
+    faulthandler.dump_traceback_later(timeout=420, repeat=True, file=sys.stderr)
 
 # ---------------------------------------------------------------------------
 # Fleet Testing Standards §5: thread-safety + headless env vars.
