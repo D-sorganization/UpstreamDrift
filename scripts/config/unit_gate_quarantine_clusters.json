@@ -1,0 +1,177 @@
+{
+  "schema_version": "unit-gate-quarantine-clusters/v1",
+  "issue": "#8766",
+  "description": "Executable ownership and reproduction map for every node ID in the removal-only unit-gate quarantine.",
+  "clusters": [
+    {
+      "cluster_id": "launcher_lifecycle_and_sources",
+      "owner": "Launcher and desktop-shell maintainers",
+      "rationale": "Launcher lifecycle, source resolution, process ownership, and Qt setup contracts drifted together during the hollow-merge period.",
+      "test_path_prefixes": ["tests/launchers/"],
+      "reproduction_command": "python3 scripts/ci/check_unit_gate_quarantine.py --cluster launcher_lifecycle_and_sources --run",
+      "exit_criteria": "Every selected launcher test passes in the Green-Suite Unit Gate without UNIT_GATE_QUARANTINE and no replacement node ID is added.",
+      "blocking_status": "Requires contract-by-contract launcher repair; do not broadly rewrite Qt lifecycle behavior."
+    },
+    {
+      "cluster_id": "sidekick_and_ai_boundaries",
+      "owner": "Sidekick and AI integration maintainers",
+      "rationale": "Canonical Tools ownership, adapter contracts, workspace registration, and AI service boundaries must be reconciled without recreating vendored implementations.",
+      "test_path_prefixes": [
+        "tests/unit/ai/",
+        "tests/unit/sidekick/",
+        "tests/unit/shared_python/ai/",
+        "tests/unit/shared_python/test_ai_education.py",
+        "tests/unit/shared_python/test_ai_sample_tools.py",
+        "tests/unit/shared_python/test_ai_tool_registry.py",
+        "tests/unit/launcher/test_sidekick_extension_overlay.py",
+        "tests/unit/test_launch_upstream_drift_bootstrap.py",
+        "tests/tools/sidekick_tool/"
+      ],
+      "reproduction_command": "python3 scripts/ci/check_unit_gate_quarantine.py --cluster sidekick_and_ai_boundaries --run",
+      "exit_criteria": "The selected tests pass against the pinned Tools boundary with no shadow implementation or synthetic backend response.",
+      "blocking_status": "Coordinate canonical shared-code changes in Tools before repinning UpstreamDrift."
+    },
+    {
+      "cluster_id": "api_routes_and_security",
+      "owner": "API and application-security maintainers",
+      "rationale": "Route uniqueness, WebSocket lifecycle, quota, authentication, diagnostics, and CORS failures share the server contract boundary.",
+      "test_path_prefixes": [
+        "tests/unit/api/",
+        "tests/unit/api_security/",
+        "tests/unit/test_cors.py",
+        "tests/unit/test_start_api_server.py"
+      ],
+      "reproduction_command": "python3 scripts/ci/check_unit_gate_quarantine.py --cluster api_routes_and_security --run",
+      "exit_criteria": "Every selected API test passes with fail-closed security behavior and stable route/WebSocket contracts.",
+      "blocking_status": "Repair in focused API tranches because several tests exercise shared security invariants."
+    },
+    {
+      "cluster_id": "bunker_shot_model_and_workbench",
+      "owner": "Bunker-shot model and workbench maintainers",
+      "rationale": "Solver envelopes, result schemas, ranking, rendering, and GUI presentation drifted across one vertical feature.",
+      "test_path_prefixes": [
+        "tests/bunkershot3d/",
+        "tests/tools/bunker_shot_gui/",
+        "tests/unit/tools/bunker_shot_gui/"
+      ],
+      "reproduction_command": "python3 scripts/ci/check_unit_gate_quarantine.py --cluster bunker_shot_model_and_workbench --run",
+      "exit_criteria": "Solver and workbench tests pass using real model outputs, explicit calibration limits, and no fabricated ranking or carry claim.",
+      "blocking_status": "Requires coordinated headless-model and presenter repair while preserving scientific limitations."
+    },
+    {
+      "cluster_id": "motion_modeling_and_scientific_ui",
+      "owner": "Motion pipeline, model-explorer, and scientific-UI maintainers",
+      "rationale": "Pose, motion-source, model composition, visualization, and embed-adapter failures cross the canonical motion and UI boundaries.",
+      "test_path_prefixes": [
+        "tests/ui/",
+        "tests/tools/model_explorer/",
+        "tests/unit/tools/model_generation/",
+        "tests/unit/tools/starting_pose_matcher/",
+        "tests/unit/motion_matching/",
+        "tests/unit/motion_pipeline/",
+        "tests/unit/config/",
+        "tests/unit/ui/",
+        "tests/unit/test_sim_gui_honest_messaging_6641.py",
+        "tests/test_model_source_providers.py",
+        "tests/test_setup_biomech_workspace.py"
+      ],
+      "reproduction_command": "python3 scripts/ci/check_unit_gate_quarantine.py --cluster motion_modeling_and_scientific_ui --run",
+      "exit_criteria": "Selected tests pass with canonical pose/source contracts, deterministic persistence, and headless-safe UI imports.",
+      "blocking_status": "Split repairs by canonical data contract before changing presenters or optional GUI behavior."
+    },
+    {
+      "cluster_id": "physics_engines_and_model_validation",
+      "owner": "Physics-engine and scientific-validation maintainers",
+      "rationale": "Engine adapters, pendulum mechanics, impact, inertia, reinforcement learning, and simulation validation require common physical contracts and explicit tolerances.",
+      "test_path_prefixes": [
+        "tests/unit/engines/",
+        "tests/unit/shared_python/model_generation/",
+        "tests/unit/reinforcement_learning/",
+        "tests/reinforcement_learning/",
+        "tests/unreal_integration/",
+        "tests/unit/test_unreal_integration/",
+        "tests/unit/shared_python/test_golf_physics_source_backed_validation.py",
+        "tests/unit/shared_python/test_engine_loaders_coverage.py",
+        "tests/unit/shared_python/test_impact_model.py",
+        "tests/unit/test_aerodynamics.py",
+        "tests/unit/test_pendulum_simulator_physics.py",
+        "tests/unit/test_physics_validation_extended.py",
+        "tests/test_build_humanoid_models.py",
+        "tests/test_pinocchio_viz_leaderboard.py"
+      ],
+      "reproduction_command": "python3 scripts/ci/check_unit_gate_quarantine.py --cluster physics_engines_and_model_validation --run",
+      "exit_criteria": "Selected tests pass with source-backed constants, cross-engine tolerances, and no weakened scientific gate.",
+      "blocking_status": "Requires focused engine/model tranches; do not convert missing governed evidence into passing synthetic claims."
+    },
+    {
+      "cluster_id": "data_processing_and_signal_toolkit",
+      "owner": "Data-processing and signal-toolkit maintainers",
+      "rationale": "Processing results, transformations, signal calculus, filtering, noise, limits, and output orchestration share typed numerical data contracts.",
+      "test_path_prefixes": [
+        "tests/unit/test_data_processing_core_extended.py",
+        "tests/unit/shared_python/test_signal_toolkit_calculus.py",
+        "tests/unit/shared_python/test_signal_toolkit_core.py",
+        "tests/unit/shared_python/test_signal_toolkit_filters.py",
+        "tests/unit/shared_python/test_signal_toolkit_limits.py",
+        "tests/unit/shared_python/test_signal_toolkit_noise.py",
+        "tests/unit/shared_python/test_output_manager.py",
+        "tests/unit/shared_python/test_analysis_orchestrator.py"
+      ],
+      "reproduction_command": "python3 scripts/ci/check_unit_gate_quarantine.py --cluster data_processing_and_signal_toolkit --run",
+      "exit_criteria": "Selected tests pass with typed results, deterministic numerics, and explicit invalid-input contracts.",
+      "blocking_status": "Repair shared result schemas before updating downstream callers."
+    },
+    {
+      "cluster_id": "packaging_ci_and_repository_governance",
+      "owner": "Packaging, CI, and repository-governance maintainers",
+      "rationale": "Build hooks, packaging, vendoring, workflow, release, and repository-hygiene tests protect the same provenance and delivery boundary.",
+      "test_path_prefixes": [
+        "tests/unit/packaging/",
+        "tests/unit/repo_hygiene/",
+        "tests/unit/scripts/",
+        "tests/scripts/",
+        "tests/ci/",
+        "tests/docker/",
+        "tests/research/",
+        "tests/unit/research/",
+        "tests/unit/test_build_hooks.py",
+        "tests/unit/test_data_fitting_split_2456.py",
+        "tests/unit/test_mujoco_viewer_split_2456.py",
+        "tests/unit/test_pressure_drop_split_2486.py",
+        "tests/unit/test_script_size_contracts_2515.py"
+      ],
+      "reproduction_command": "python3 scripts/ci/check_unit_gate_quarantine.py --cluster packaging_ci_and_repository_governance --run",
+      "exit_criteria": "Selected tests pass with pinned provenance, truthful release artifacts, and unchanged protected-CI guarantees.",
+      "blocking_status": "Coordinate cross-repository ownership before changing build or vendor contracts."
+    },
+    {
+      "cluster_id": "security_and_core_contracts",
+      "owner": "Core-contract and secure-execution maintainers",
+      "rationale": "Security ratchets, optimized-Python guards, safe evaluation, subprocess handling, type stubs, and invariant behavior form the fail-closed core contract.",
+      "test_path_prefixes": [
+        "tests/shared/wave10_contracts/",
+        "tests/unit/test_contracts_module.py",
+        "tests/unit/test_safe_eval.py",
+        "tests/unit/test_secure_subprocess.py",
+        "tests/unit/test_security_and_module_fixes.py",
+        "tests/unit/test_type_stubs.py"
+      ],
+      "reproduction_command": "python3 scripts/ci/check_unit_gate_quarantine.py --cluster security_and_core_contracts --run",
+      "exit_criteria": "Selected tests pass under normal and optimized Python without weakening validation, security, or type contracts.",
+      "blocking_status": "Treat guard and security failures as implementation defects, not candidates for broader suppression."
+    },
+    {
+      "cluster_id": "deployment_devices_and_configuration",
+      "owner": "Deployment, device, and configuration maintainers",
+      "rationale": "Teleoperation, device state, provider availability, and deployment configuration share environment and runtime-availability contracts.",
+      "test_path_prefixes": [
+        "tests/deployment/",
+        "tests/unit/deployment/",
+        "tests/config/"
+      ],
+      "reproduction_command": "python3 scripts/ci/check_unit_gate_quarantine.py --cluster deployment_devices_and_configuration --run",
+      "exit_criteria": "Selected tests pass with explicit runtime availability and deterministic device/teleoperation state transitions.",
+      "blocking_status": "Requires environment-contract repair; unavailable external runtimes must continue to fail or skip honestly."
+    }
+  ]
+}
