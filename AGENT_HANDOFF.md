@@ -65,6 +65,9 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
   Hatchling test stubs. The local correction gives both stubs the constructor
   contract and isolates UI-build tests from the independently covered Tools
   registration boundary; the combined 70-test ordering regression passes.
+- Head `17b2bca63` then correctly failed the suite-marker ratchet on its new
+  regression. The test is now explicitly unit-marked; the full ratchet passes
+  with no drift.
 - That head's wheel job failed before build during checkout because the selected
   runner's cached `human-gazebo` submodule had no current revision. Re-evaluate
   on the consolidated correction push; do not change shared runners.

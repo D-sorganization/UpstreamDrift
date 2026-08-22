@@ -84,6 +84,7 @@ class TestEnvFlag:
 
 
 class TestUIBuildHookProperties:
+    @pytest.mark.unit
     def test_stubbed_interface_accepts_hatchling_constructor(
         self,
         tmp_path: Path,
