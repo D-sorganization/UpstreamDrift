@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol
 
 from src.launchers._dockable_resolution import (
+    _probe_script_dockable_ui,
     _registry_dockable_ui,
     _warn_legacy_embed_fallback,
 )
@@ -248,41 +249,16 @@ class ScriptHandler:
         if not script_path.exists():
             return None
 
-        import importlib.util
-        import sys
-
-        # Add repo_path to sys.path temporarily to resolve imports
-        original_sys_path = sys.path.copy()
-        success = False
-        try:
-            if str(repo_path) not in sys.path:
-                sys.path.insert(0, str(repo_path))
-            paths = get_model_python_paths(model, repo_path)
-            for p in paths:
-                if str(p) not in sys.path:
-                    sys.path.insert(0, str(p))
-
-            module_name = (
-                str(script_path).replace("/", "_").replace("\\", "_").replace(".py", "")
-            )
-            spec = importlib.util.spec_from_file_location(module_name, str(script_path))
-            if spec and spec.loader:
-                module = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(module)
-                if hasattr(module, "get_dockable_ui"):
-                    ui = module.get_dockable_ui()
-                    if ui is not None:
-                        success = True
-                        _warn_legacy_embed_fallback(
-                            model, f"module-level get_dockable_ui in {script_path.name}"
-                        )
-                        return ui
-        except Exception as e:  # noqa: BLE001
-            logger.debug("No dockable UI found in script %s: %s", self._script_path, e)
-        finally:
-            if not success:
-                sys.path = original_sys_path
-        return None
+        module_name = (
+            str(script_path).replace("/", "_").replace("\\", "_").replace(".py", "")
+        )
+        return _probe_script_dockable_ui(
+            model,
+            repo_path,
+            script_path,
+            module_name=module_name,
+            log_context=f"script {self._script_path}",
+        )
 
 
 class SpecialAppHandler:
@@ -391,39 +367,13 @@ class SpecialAppHandler:
         if not script_path.exists():
             return None
 
-        import importlib.util
-        import sys
-
-        original_sys_path = sys.path.copy()
-        success = False
-        try:
-            # Inject paths
-            paths = get_model_python_paths(model, repo_path)
-            if str(repo_path) not in sys.path:
-                sys.path.insert(0, str(repo_path))
-            for p in paths:
-                if str(p) not in sys.path:
-                    sys.path.insert(0, str(p))
-
-            module_name = str(script_path.name).replace(".py", "")
-            spec = importlib.util.spec_from_file_location(module_name, str(script_path))
-            if spec and spec.loader:
-                module = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(module)
-                if hasattr(module, "get_dockable_ui"):
-                    ui = module.get_dockable_ui()
-                    if ui is not None:
-                        success = True
-                        _warn_legacy_embed_fallback(
-                            model, f"module-level get_dockable_ui in {script_path.name}"
-                        )
-                        return ui
-        except Exception as e:  # noqa: BLE001
-            logger.debug("No dockable UI found in special app %s: %s", script_path, e)
-        finally:
-            if not success:
-                sys.path = original_sys_path
-        return None
+        return _probe_script_dockable_ui(
+            model,
+            repo_path,
+            script_path,
+            module_name=str(script_path.name).replace(".py", ""),
+            log_context=f"special app {script_path}",
+        )
 
     @staticmethod
     def _embed_adapter_dockable_ui(model: Any, repo_path: Path) -> Any | None:

@@ -8,7 +8,12 @@ legacy import-and-probe protocol.
 from __future__ import annotations
 
 import warnings
+from pathlib import Path
 from typing import Any
+
+from src.shared.python.logging_pkg.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 
 def _registry_dockable_ui(model: Any) -> Any | None:
@@ -48,3 +53,54 @@ def _warn_legacy_embed_fallback(model: Any, mechanism: str) -> None:
         DeprecationWarning,
         stacklevel=3,
     )
+
+
+def _probe_script_dockable_ui(
+    model: Any,
+    repo_path: Path,
+    script_path: Path,
+    *,
+    module_name: str,
+    log_context: str,
+) -> Any | None:
+    """Import ``script_path`` and probe its module-level ``get_dockable_ui``.
+
+    The deprecated import-and-probe embedding path shared by
+    ``ScriptHandler`` and ``SpecialAppHandler``: temporarily extend
+    ``sys.path`` with the model's python paths, import the script as a
+    module, and call its ``get_dockable_ui`` if present. ``sys.path`` is
+    restored unless a widget was successfully produced (the loaded module
+    may need those paths for lazy imports while embedded).
+    """
+    import importlib.util
+    import sys
+
+    from src.launchers.launcher_model_sources import get_model_python_paths
+
+    original_sys_path = sys.path.copy()
+    success = False
+    try:
+        if str(repo_path) not in sys.path:
+            sys.path.insert(0, str(repo_path))
+        for p in get_model_python_paths(model, repo_path):
+            if str(p) not in sys.path:
+                sys.path.insert(0, str(p))
+
+        spec = importlib.util.spec_from_file_location(module_name, str(script_path))
+        if spec and spec.loader:
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            if hasattr(module, "get_dockable_ui"):
+                ui = module.get_dockable_ui()
+                if ui is not None:
+                    success = True
+                    _warn_legacy_embed_fallback(
+                        model, f"module-level get_dockable_ui in {script_path.name}"
+                    )
+                    return ui
+    except Exception as e:  # noqa: BLE001
+        logger.debug("No dockable UI found in %s: %s", log_context, e)
+    finally:
+        if not success:
+            sys.path = original_sys_path
+    return None
