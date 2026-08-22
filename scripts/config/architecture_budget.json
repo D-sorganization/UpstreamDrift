@@ -395,6 +395,15 @@
       "issue": 8965,
       "reason": "Pre-existing on origin/main: this function is byte-identical to the origin/main version; PR #8976 (EPIC #8965) only re-pointed a theme/metrics import in the same file after relocating UD-owned symbols out of the Tools child-copy tree, and the architecture budget inspects whole changed files rather than changed functions, so the pre-existing violation surfaced as if it were new. It was surfaced, not introduced, by #8976; decomposition is follow-up work.",
       "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/shared/python/analysis/nonlinear_dynamics.py",
+      "symbol": "NonlinearDynamicsMixin.estimate_lyapunov_exponent",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9000,
+      "reason": "Bolt micro-optimization touched file causing pre-existing function-lines budget to trigger. Decomposition needed later.",
+      "expires_on": "2026-12-31"
     }
   ]
 }
