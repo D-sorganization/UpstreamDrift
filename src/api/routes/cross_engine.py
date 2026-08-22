@@ -24,7 +24,7 @@ from datetime import datetime
 from typing import Any
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from src.shared.python.analysis.cross_engine import ENGINE_NAMES
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -61,8 +61,6 @@ class CrossEnginePerturbationConfig(BaseModel):
     )
     seed: int = Field(default=42, description="Random seed for reproducibility")
 
-    from pydantic import model_validator
-
     @model_validator(mode="after")
     def validate_dt_lt_t_end(self) -> CrossEnginePerturbationConfig:
         if self.dt >= self.t_end:
@@ -81,6 +79,16 @@ class CrossEngineStudyRequest(BaseModel):
         description="Engine names to compare; each must be a recognised engine.",
     )
     config: CrossEnginePerturbationConfig = CrossEnginePerturbationConfig()
+    allow_stub_substitution: bool = Field(
+        default=True,
+        description=(
+            "When false, the study fails instead of silently running a "
+            "2-DOF stub for a requested engine whose real backend is "
+            "unavailable (#8817). Either way the result declares each "
+            "engine's backend ('real' or 'stub_2dof') and lists "
+            "'stubbed_engines'."
+        ),
+    )
 
     @field_validator("engines")
     @classmethod
@@ -120,7 +128,11 @@ def _run_study_background(
             n_trials=cfg.n_trials,
             seed=cfg.seed,
         )
-        result = run_cross_engine_study(request.engines, sim_config)
+        result = run_cross_engine_study(
+            request.engines,
+            sim_config,
+            allow_stub_substitution=request.allow_stub_substitution,
+        )
         task_manager.mark_completed(task_id, result)
         logger.info("Cross-engine study %s completed", task_id)
     except (ValueError, RuntimeError, ImportError) as exc:

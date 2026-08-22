@@ -39,8 +39,8 @@ def test_runtime_backed_engine_not_available_without_package(
     """#6884: a present adapter dir must not be AVAILABLE when runtime missing."""
     monkeypatch.setattr(
         engine_manager,
-        "get_runtime_engine_status",
-        lambda name: AvailabilityStatus.NOT_INSTALLED,
+        "is_dependency_present",
+        lambda name: False,
     )
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
@@ -54,11 +54,11 @@ def test_runtime_backed_engine_not_available_without_package(
 def test_runtime_backed_engine_available_when_package_present(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """#6884: adapter dir + importable runtime => AVAILABLE."""
+    """#6884: adapter dir + installed runtime => AVAILABLE (presence probe, #8934)."""
     monkeypatch.setattr(
         engine_manager,
-        "get_runtime_engine_status",
-        lambda name: AvailabilityStatus.AVAILABLE,
+        "is_dependency_present",
+        lambda name: True,
     )
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
@@ -73,12 +73,10 @@ def test_jaxsim_not_available_when_package_absent(
 ) -> None:
     """#6880: JaxSim adapter dir present but jaxsim package absent => not available."""
 
-    def _status(name: str) -> AvailabilityStatus:
-        if name == "jaxsim.api":
-            return AvailabilityStatus.NOT_INSTALLED
-        return AvailabilityStatus.AVAILABLE
+    def _present(name: str) -> bool:
+        return name != "jaxsim.api"
 
-    monkeypatch.setattr(engine_manager, "get_runtime_engine_status", _status)
+    monkeypatch.setattr(engine_manager, "is_dependency_present", _present)
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         _make_engine_dirs(root, "jaxsim")
@@ -90,7 +88,12 @@ def test_jaxsim_not_available_when_package_absent(
 def test_switch_to_jaxsim_fails_when_package_absent(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """#6880: switch_engine(JAXSIM) returns False and leaves no active engine."""
+    """#6880: switch_engine(JAXSIM) returns False and leaves no active engine.
+
+    Presence metadata reports installed (so discovery lists the engine), but
+    the deep import on the launch path fails => switch_engine returns False.
+    """
+    monkeypatch.setattr(engine_manager, "is_dependency_present", lambda name: True)
     monkeypatch.setattr(
         engine_manager,
         "get_runtime_engine_status",
@@ -111,13 +114,9 @@ def test_path_only_engines_unaffected_by_runtime_layer(
 
     Pendulum-family engines have no importable runtime package, so their
     availability must depend on source presence alone even when the runtime
-    layer reports NOT_INSTALLED for everything.
+    layer reports nothing installed.
     """
-    monkeypatch.setattr(
-        engine_manager,
-        "get_runtime_engine_status",
-        lambda name: AvailabilityStatus.NOT_INSTALLED,
-    )
+    monkeypatch.setattr(engine_manager, "is_dependency_present", lambda name: False)
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         (root / "src" / "engines" / "pendulum_models").mkdir(parents=True)
@@ -139,10 +138,12 @@ def test_runtime_status_helper_maps_engine_types() -> None:
 def test_jaxsim_not_available_when_api_submodule_absent(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """#6887: partial jaxsim install (jaxsim ok, jaxsim.api missing) => not available.
+    """#6887/#8934: partial jaxsim install (jaxsim ok, jaxsim.api missing).
 
-    Discovery must probe the same surface the loader requires (jaxsim.api),
-    so an incomplete install is caught before switch_engine, not during.
+    Discovery is a metadata-only presence probe (#8934), so it cannot see a
+    broken ``jaxsim.api`` submodule without importing the package — the tile
+    is listed. The deep probe on the launch path still catches the partial
+    install: switch_engine fails and no engine is activated.
     """
 
     def _status(name: str) -> AvailabilityStatus:
@@ -151,10 +152,12 @@ def test_jaxsim_not_available_when_api_submodule_absent(
             return AvailabilityStatus.NOT_INSTALLED
         return AvailabilityStatus.AVAILABLE
 
+    monkeypatch.setattr(engine_manager, "is_dependency_present", lambda name: True)
     monkeypatch.setattr(engine_manager, "get_runtime_engine_status", _status)
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         _make_engine_dirs(root, "jaxsim")
         manager = EngineManager(suite_root=root)
-        assert EngineType.JAXSIM not in manager.get_available_engines()
-        assert manager.get_engine_status(EngineType.JAXSIM) == EngineStatus.UNAVAILABLE
+        assert EngineType.JAXSIM in manager.get_available_engines()
+        assert manager.switch_engine(EngineType.JAXSIM) is False
+        assert manager.active_physics_engine is None

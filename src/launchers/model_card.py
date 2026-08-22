@@ -170,6 +170,8 @@ class DraggableModelCard(QFrame):
         super().__init__(None)
         self.model = model
         self.parent_launcher = parent_launcher
+        # Lazily computed launch-target availability (issue #8855).
+        self._target_resolvable: bool | None = None
         self.tile_scale: float = validate_tile_scale(tile_scale)
         self._show_description: bool = bool(show_description)
         self._list_mode: bool = bool(list_mode)
@@ -947,9 +949,46 @@ class DraggableModelCard(QFrame):
         "broken": ("Broken", "error"),
         "deprecated": ("Deprecated", "warning"),
         "external": ("Ready", "success"),
+        "unavailable": ("Unavailable", "error"),
+        "provider_unavailable": ("Unavailable", "error"),
+        "runtime_unavailable": ("Unavailable", "error"),
     }
 
+    def _target_is_resolvable(self) -> bool:
+        """Whether the tile's declared launch target resolves on this machine.
+
+        Single source of truth shared with the registry resolution test
+        (issue #8855): a tile whose target would fail
+        ``resolve_tile_target`` must not render a green "Ready" chip.
+        """
+        if self._target_resolvable is None:
+            try:
+                from src.shared.python.config.tile_target_resolution import (
+                    resolve_tile_target,
+                )
+
+                repos_root = Path(__file__).resolve().parents[2]
+                self._target_resolvable = resolve_tile_target(
+                    self.model, repos_root
+                ).resolvable
+            except (ValueError, TypeError, OSError) as exc:
+                # Never let an availability probe break card rendering;
+                # fall back to the declared status.
+                logger.debug(
+                    "Tile availability probe failed for %s: %s",
+                    getattr(self.model, "id", "?"),
+                    exc,
+                )
+                self._target_resolvable = True
+        return self._target_resolvable
+
     def _get_status_info(self) -> tuple[str, str]:
+        # 0. Honest availability first (issue #8855): a tile whose launch
+        #    target does not resolve renders "Unavailable" regardless of the
+        #    optimistic status declared in YAML.
+        if not self._target_is_resolvable():
+            return self._STATUS_STRINGS["unavailable"]
+
         # 1. Prefer an explicit launcher.status from the YAML — that is the
         #    canonical declaration. Most tiles already set it.
         launcher = getattr(self.model, "launcher", None)

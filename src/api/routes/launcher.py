@@ -12,6 +12,10 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 
+from src.api.launcher_manifest_cache import (
+    get_cached_manifest,
+    get_cached_manifest_async,
+)
 from src.config.launcher_manifest_loader import ASSETS_DIR, LauncherManifest
 from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -22,12 +26,11 @@ logger = get_logger(__name__)
 router = APIRouter(prefix="/launcher", tags=["launcher"])
 
 
-# Cache the manifest in memory (singleton holder avoids 'global')
-_launcher_state: dict[str, LauncherManifest | None] = {"manifest": None}
-
-
 def _get_manifest() -> LauncherManifest:
-    """Get or load the launcher manifest (singleton).
+    """Get the launcher manifest via the shared process-level cache.
+
+    The cache (``src.api.launcher_manifest_cache``) is invalidated when the
+    manifest or model registry files change on disk (issue #8937).
 
     Returns:
         The loaded LauncherManifest
@@ -35,19 +38,26 @@ def _get_manifest() -> LauncherManifest:
     Raises:
         HTTPException: If manifest cannot be loaded
     """
-    if _launcher_state["manifest"] is None:
-        try:
-            _launcher_state["manifest"] = LauncherManifest.load()
-        except (FileNotFoundError, ValueError) as e:
-            logger.exception("Failed to load launcher manifest")
-            raise HTTPException(
-                status_code=500,
-                detail=f"Launcher manifest error: {e}",
-            ) from e
-    # Guaranteed non-None after the check above
-    manifest = _launcher_state["manifest"]
-    assert manifest is not None  # for mypy
-    return manifest
+    try:
+        return get_cached_manifest()
+    except (FileNotFoundError, ValueError) as e:
+        logger.exception("Failed to load launcher manifest")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Launcher manifest error: {e}",
+        ) from e
+
+
+async def _get_manifest_async() -> LauncherManifest:
+    """Async variant of :func:`_get_manifest` that never blocks the loop."""
+    try:
+        return await get_cached_manifest_async()
+    except (FileNotFoundError, ValueError) as e:
+        logger.exception("Failed to load launcher manifest")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Launcher manifest error: {e}",
+        ) from e
 
 
 @router.get(
@@ -66,19 +76,22 @@ async def get_manifest() -> dict[str, Any]:
     Returns:
         Full manifest with all tiles, ordered by display order.
     """
-    manifest = _get_manifest()
+    manifest = await _get_manifest_async()
     return manifest.to_dict()
 
 
 @router.get("/tiles")
 async def get_tiles() -> list[dict[str, Any]]:
-    """Get all launcher tiles in display order.
+    """Get all visible launcher tiles in display order.
+
+    Hidden tiles (legacy aliases) are excluded, matching the manifest
+    invariant documented on ``LauncherManifest.to_dict`` (issue #8863).
 
     Returns:
         List of tile dictionaries.
     """
-    manifest = _get_manifest()
-    return [t.to_dict() for t in manifest.tiles]
+    manifest = await _get_manifest_async()
+    return [t.to_dict() for t in manifest.visible_tiles]
 
 
 @router.get("/tiles/{tile_id}")
@@ -98,7 +111,7 @@ async def get_tile(tile_id: str) -> dict[str, Any]:
     Raises:
         HTTPException: If tile not found.
     """
-    manifest = _get_manifest()
+    manifest = await _get_manifest_async()
     tile = manifest.get_tile(tile_id)
     if tile is None:
         raise HTTPException(status_code=404, detail=f"Tile not found: {tile_id}")
@@ -112,7 +125,7 @@ async def get_engines() -> list[dict[str, Any]]:
     Returns:
         List of physics engine tile dictionaries.
     """
-    manifest = _get_manifest()
+    manifest = await _get_manifest_async()
     return [t.to_dict() for t in manifest.physics_engines]
 
 
@@ -123,7 +136,7 @@ async def get_tools() -> list[dict[str, Any]]:
     Returns:
         List of tool tile dictionaries.
     """
-    manifest = _get_manifest()
+    manifest = await _get_manifest_async()
     return [t.to_dict() for t in manifest.tools]
 
 
@@ -134,7 +147,7 @@ async def validate_logos() -> dict[str, Any]:
     Returns:
         Validation report with missing and present logo lists.
     """
-    manifest = _get_manifest()
+    manifest = await _get_manifest_async()
     missing = manifest.validate_logos()
     total = len(manifest.tiles)
     present = total - len(missing)
@@ -171,7 +184,7 @@ async def get_logo(filename: str) -> FileResponse:
 
     logo_path = ASSETS_DIR / filename
     if not logo_path.exists():
-        manifest = _get_manifest()
+        manifest = await _get_manifest_async()
         for tile in manifest.tiles:
             if (
                 tile.logo == filename
