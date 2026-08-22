@@ -39,7 +39,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # ── Python tooling ────────────────────────────────────────────────────────────
-RUN pip install --upgrade pip setuptools wheel
+RUN pip install --upgrade pip==26.2.1 setuptools==78.1.1 wheel
 
 # ── Testing infrastructure (mirrors reusable-heavy-tests.yml) ────────────────
 RUN pip install \
@@ -105,6 +105,11 @@ RUN if [ -f "pyproject.toml" ]; then \
     elif [ -f "requirements.txt" ]; then \
       pip install -r requirements.txt; \
     fi
+
+# Keep late transitive installs from restoring scanner-known vulnerable tools.
+RUN pip install --upgrade --no-cache-dir \
+    msgpack==1.2.1 \
+    setuptools==78.1.1
 
 # ── Default: surface optional-dep status (issue #7161 D2) then run the heavy
 #    suite with Xvfb. The entrypoint prints the build-time optional-dependency

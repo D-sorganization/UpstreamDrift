@@ -110,6 +110,12 @@ RUN pip install \
 RUN pip install --no-deps /wheels/*.whl && \
     python -c "import upstream_physics, ai_backend; print('Rust wheels installed:', upstream_physics.__name__, ai_backend.__name__)"
 
+# Reassert scanner-fixed transitive tooling after every dependency layer.
+# Trivy gates GHSA-6v7p-g79w-8964 and CVE-2025-47273 at the final image.
+RUN pip install --upgrade --no-cache-dir \
+    "msgpack==1.2.1" \
+    "setuptools==78.1.1"
+
 # Audit the *resolved* environment inside the image (issue #7159 D2). The
 # Dockerfile pins ~36 lines that can drift from requirements.lock, so a manual
 # edit could otherwise bake a CVE into the runtime image without the CI lane
@@ -142,7 +148,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Keep the base interpreter's bundled pip aligned with the venv so image
 # scanners do not report the runtime layer's global site-packages as stale.
-RUN python -m pip install --upgrade --no-cache-dir pip==26.2.1
+RUN python -m pip install --upgrade --no-cache-dir pip==26.2.1 && \
+    python -m pip install --upgrade --no-cache-dir setuptools==78.1.1
 
 # MuJoCo headless rendering + health check
 # X11/XCB/PyQt6 libs removed — not needed in a headless API server
