@@ -33,8 +33,8 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
 - Worktree: `UpstreamDrift-worktrees/goal-8752-uncertainty`.
 - Parent PID `18404` is the intentional source-locked coordinator. It may own
   20 workers; do not kill workers individually or start a second campaign.
-- At 2026-08-22 02:46 PDT, 23 of 30 computed pathways were terminal. The
-  `ground_translation_stiffness_scale-high` pathway was active with one of 72
+- At 2026-08-22 03:35 PDT, 23 of 30 computed pathways were terminal. The
+  `ground_translation_stiffness_scale-high` pathway was active with 25 of 72
   atomic branch checkpoints retained. Seven ground pathways remain.
 - Completed rows and digest-bound branch checkpoints are restartable. Partial
   checkpoints are execution evidence, not release evidence.
@@ -57,10 +57,14 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
   application object per process.
 - The local fix reuses `QApplication.instance()` and constructs an application
   only when none exists. Regression tests enforce both lifecycle branches.
-- Local evidence: 24 launcher-base tests pass under native PyQt6/Qt on Windows.
-- PR #8990 is open as a full PR and requests human review. Commit and pre-push
-  hooks pass. Require both protected Python lanes to pass the former crash
-  boundary, then verify the protected merge and post-merge `main` run.
+- Local evidence: 24 launcher-base tests pass under native PyQt6/Qt on Windows;
+  the suite-marker ratchet and focused Ruff gates pass.
+- PR #8990 is open as a full PR and requests human review. Both protected
+  Python 3.11 and 3.12 lanes pass the former crash boundary. The first CI run
+  exposed only missing `unit` classification on the two new regressions; that
+  actionable ratchet failure is fixed locally. Push once hooks pass, then
+  require green protected checks, human review, protected merge, and a verified
+  post-merge `main` run.
 - Do not close #8789 with this PR. Docker profile boundaries and the
   removal-only quarantine burn-down remain separate unchecked exit criteria.
 

@@ -196,6 +196,7 @@ def test_base_launcher_init_ui(launcher) -> None:
     assert len(launcher._items) == 3
 
 
+@pytest.mark.unit
 def test_run_launcher_reuses_existing_application() -> None:
     with patch("src.launchers.base.QApplication") as application_class:
         existing_application = MagicMock()
@@ -212,6 +213,7 @@ def test_run_launcher_reuses_existing_application() -> None:
         launcher_class.assert_called_once_with()
 
 
+@pytest.mark.unit
 def test_run_launcher_creates_application_when_absent() -> None:
     with patch("src.launchers.base.QApplication") as application_class:
         application_class.instance.return_value = None
