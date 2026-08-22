@@ -10,59 +10,76 @@ with contextlib.suppress(ImportError):
 
 
 # ---------------------------------------------------------------------------
-# Hang forensics for the Green-Suite unit gate (PR #8976, issue: gate hangs at
-# ~95% and times out at 25 min). pytest-timeout (thread method), a per-test
-# faulthandler_timeout, and a session-level faulthandler.dump_traceback_later
-# were all silent across three hung runs, so the stall sits outside any test
-# phase and in-process timers are being cancelled (pytest-timeout resets the
-# shared faulthandler timer around every item).
+# Hang forensics for the Green-Suite unit gate (PR #8976): the gate hangs at
+# ~95% and is cancelled at 25 min. Four hung runs produced no diagnostics:
+# pytest-timeout (thread method) and per-test/session faulthandler timers are
+# either starved, cancelled around every item, or - the round-5 lesson -
+# their output lands in pytest's fd-level global capture instead of the job
+# log (os.dup(2) at conftest import copies the capture file, not the real
+# stderr).
 #
-# This variant cannot be cancelled from inside the process:
-#   * faulthandler.register(SIGUSR1) installs a C-level handler that writes
-#     every thread's stack straight to a dup of the REAL stderr fd (the job
-#     log), needing neither the GIL nor Python signal dispatch;
+# This variant is immune to both problems:
+#   * the REAL stderr fd is dup'd inside CaptureManager.global_and_fixture_
+#     disabled(), so dumps bypass capture and reach the job log;
+#   * faulthandler.register(SIGUSR1) installs a C-level handler needing
+#     neither the GIL nor Python signal dispatch, and nothing in-process
+#     cancels it;
 #   * a detached watchdog subprocess signals its parent pytest process if it
-#     lives past 8 minutes (then every 4, max 4 shots), and exits within 10 s
+#     lives past 8 minutes (then every 4, max 4 shots) and exits within 10 s
 #     of the parent exiting, so healthy runs are unaffected.
 # Armed only when UNIT_GATE_QUARANTINE=1 (the unit gate) on POSIX. Remove
 # once the hang is diagnosed.
 # ---------------------------------------------------------------------------
 import os as _os
 
-if _os.environ.get("UNIT_GATE_QUARANTINE") == "1":
+_WATCHDOG_SRC = "\n".join(
+    [
+        "import os,sys,time,signal",
+        "pid=int(sys.argv[1])",
+        "deadline=time.monotonic()+480",
+        "shots=0",
+        "while shots<4:",
+        "    time.sleep(10)",
+        "    try: os.kill(pid,0)",
+        "    except OSError: sys.exit(0)",
+        "    if time.monotonic()>=deadline:",
+        "        sys.stderr.write('[hang-watchdog] dumping stacks of pid %d'%pid+chr(10))",
+        "        sys.stderr.flush()",
+        "        try: os.kill(pid,signal.SIGUSR1)",
+        "        except OSError: sys.exit(0)",
+        "        shots+=1",
+        "        deadline=time.monotonic()+240",
+    ]
+)
+
+
+def _arm_hang_forensics(config) -> None:
     import signal as _signal
 
-    if hasattr(_signal, "SIGUSR1"):
-        with contextlib.suppress(Exception):
-            import faulthandler as _faulthandler
-            import subprocess as _subprocess
-            import sys as _sys
+    if not hasattr(_signal, "SIGUSR1"):
+        return
+    with contextlib.suppress(Exception):
+        import faulthandler as _faulthandler
+        import subprocess as _subprocess
+        import sys as _sys
 
-            _hang_dump_file = _os.fdopen(_os.dup(2), "w")
-            _faulthandler.register(
-                _signal.SIGUSR1, file=_hang_dump_file, all_threads=True
-            )
-            _WATCHDOG_SRC = (
-                "import os,sys,time,signal\n"
-                "pid=int(sys.argv[1])\n"
-                "deadline=time.monotonic()+480\n"
-                "shots=0\n"
-                "while shots<4:\n"
-                "    time.sleep(10)\n"
-                "    try: os.kill(pid,0)\n"
-                "    except OSError: sys.exit(0)\n"
-                "    if time.monotonic()>=deadline:\n"
-                "        sys.stderr.write('[hang-watchdog] dumping stacks of pid %d'%pid+chr(10))\n"
-                "        sys.stderr.flush()\n"
-                "        try: os.kill(pid,signal.SIGUSR1)\n"
-                "        except OSError: sys.exit(0)\n"
-                "        shots+=1\n"
-                "        deadline=time.monotonic()+240\n"
-            )
-            _subprocess.Popen(
-                [_sys.executable, "-c", _WATCHDOG_SRC, str(_os.getpid())],
-                stdin=_subprocess.DEVNULL,
-                stdout=_subprocess.DEVNULL,
-                stderr=_hang_dump_file,
-                close_fds=True,
-            )
+        capman = config.pluginmanager.getplugin("capturemanager")
+        if capman is not None:
+            with capman.global_and_fixture_disabled():
+                real_fd = _os.dup(2)
+        else:
+            real_fd = _os.dup(2)
+        dump_file = _os.fdopen(real_fd, "w")
+        _faulthandler.register(_signal.SIGUSR1, file=dump_file, all_threads=True)
+        _subprocess.Popen(
+            [_sys.executable, "-c", _WATCHDOG_SRC, str(_os.getpid())],
+            stdin=_subprocess.DEVNULL,
+            stdout=_subprocess.DEVNULL,
+            stderr=dump_file,
+            close_fds=True,
+        )
+
+
+def pytest_configure(config) -> None:
+    if _os.environ.get("UNIT_GATE_QUARANTINE") == "1":
+        _arm_hang_forensics(config)
