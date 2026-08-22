@@ -9,7 +9,12 @@ from pathlib import Path  # noqa: E402
 from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
-from src.launchers.base import BaseLauncher, LaunchItem, run_launcher  # noqa: E402
+from src.launchers.base import (  # noqa: E402
+    BaseLauncher,
+    LaunchItem,
+    _resolve_application,
+    run_launcher,
+)
 
 
 class DummyLauncher(BaseLauncher):
@@ -197,33 +202,62 @@ def test_base_launcher_init_ui(launcher) -> None:
 
 
 @pytest.mark.unit
-def test_run_launcher_reuses_existing_application() -> None:
-    with patch("src.launchers.base.QApplication") as application_class:
-        existing_application = MagicMock()
-        existing_application.exec.return_value = 0
-        application_class.instance.return_value = existing_application
+def test_resolve_application_reuses_existing_application() -> None:
+    application_class = MagicMock()
+    existing_application = MagicMock()
+    application_class.instance.return_value = existing_application
+
+    application, owns_event_loop = _resolve_application(application_class, ["launcher"])
+
+    assert application is existing_application
+    assert owns_event_loop is False
+    application_class.instance.assert_called_once_with()
+    application_class.assert_not_called()
+
+
+@pytest.mark.unit
+def test_resolve_application_creates_application_when_absent() -> None:
+    application_class = MagicMock()
+    application_class.instance.return_value = None
+
+    application, owns_event_loop = _resolve_application(application_class, ["launcher"])
+
+    assert application is application_class.return_value
+    assert owns_event_loop is True
+    application_class.assert_called_once_with(["launcher"])
+
+
+@pytest.mark.unit
+def test_run_launcher_does_not_execute_reused_application() -> None:
+    existing_application = MagicMock()
+    with patch(
+        "src.launchers.base._resolve_application",
+        return_value=(existing_application, False),
+    ):
         launcher_class = MagicMock()
 
         res = run_launcher(launcher_class)
 
         assert res == 0
-        application_class.instance.assert_called_once_with()
-        application_class.assert_not_called()
         existing_application.setStyle.assert_called_once_with("Fusion")
+        existing_application.exec.assert_not_called()
         launcher_class.assert_called_once_with()
 
 
 @pytest.mark.unit
-def test_run_launcher_creates_application_when_absent() -> None:
-    with patch("src.launchers.base.QApplication") as application_class:
-        application_class.instance.return_value = None
-        application_class.return_value.exec.return_value = 17
+def test_run_launcher_executes_owned_application() -> None:
+    owned_application = MagicMock()
+    owned_application.exec.return_value = 17
+    with patch(
+        "src.launchers.base._resolve_application",
+        return_value=(owned_application, True),
+    ):
         launcher_class = MagicMock()
 
         assert run_launcher(launcher_class) == 17
 
-        application_class.assert_called_once()
-        application_class.return_value.setStyle.assert_called_once_with("Fusion")
+        owned_application.setStyle.assert_called_once_with("Fusion")
+        owned_application.exec.assert_called_once_with()
         launcher_class.assert_called_once_with()
 
 

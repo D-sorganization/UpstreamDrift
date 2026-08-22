@@ -48,22 +48,24 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
 
 ## Full-Suite Truth Gate (#8789)
 
-- Current worktree: `UpstreamDrift-worktrees/8977-publication-record`; branch:
-  `fix/8789-qapplication-lifecycle`, based on current remote `main`.
+- Current worktree: `UpstreamDrift-worktrees/8977-publication-record`; branch
+  `fix/8789-qapplication-lifecycle`, merged through remote `main` `46469edeb`.
 - Both Python 3.11 and 3.12 post-merge lanes reached
   `tests/launchers/test_base.py` and exited 139 at `test_run_launcher`.
 - Root cause: `run_launcher` unconditionally constructed a second
   `QApplication` while pytest already owned one. Qt permits only one
   application object per process.
-- The local fix reuses `QApplication.instance()` and constructs an application
-  only when none exists. Regression tests enforce both lifecycle branches.
-- Local evidence: 24 launcher-base tests pass under native PyQt6/Qt on Windows;
-  the suite-marker ratchet and focused Ruff gates pass.
-- PR #8990 is open as a full PR and requests human review. Both protected
-  Python 3.11 and 3.12 lanes pass the former crash boundary. The first CI run
-  exposed only missing `unit` classification on the two new regressions; that
-  actionable ratchet failure is fixed locally. Push once hooks pass, then
-  require green protected checks, human review, protected merge, and a verified
+- Reusing an application now also preserves event-loop ownership: only a newly
+  constructed application receives `exec()`. A typed resolution seam lets tests
+  avoid replacing the SIP-backed Qt class, which crashed Linux xdist teardown.
+- Exact head `6c702a5f2` passed both protected Python lanes but its unit gate
+  reported 11,727 passed and four failures: both mock-based lifecycle tests
+  crashed workers, while two containment tests leaked the global embed registry.
+- Local repair evidence: 26 launcher-base tests pass serially and under xdist;
+  the exact four-worker CI-marked three-file slice passes 6/2 quarantined. Ruff,
+  formatting, suite-marker ratchet, and registry-isolation regressions pass.
+- PR #8990 remains a full PR with human review requested. Push the repair after
+  hooks, then require exact-head protected checks, review, merge, and a verified
   post-merge `main` run.
 - Do not close #8789 with this PR. Docker profile boundaries and the
   removal-only quarantine burn-down remain separate unchecked exit criteria.
