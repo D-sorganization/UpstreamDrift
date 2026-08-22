@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -44,7 +44,11 @@ def test_pose_studio_missing_marker_dependency_cannot_terminate_launcher(
         encoding="utf-8",
     )
 
-    assert SpecialAppHandler().get_dockable_ui(_PoseStudioModel(), tmp_path) is None
+    with patch(
+        "src.launchers.launcher_model_handlers._registry_dockable_ui",
+        return_value=None,
+    ):
+        assert SpecialAppHandler().get_dockable_ui(_PoseStudioModel(), tmp_path) is None
 
 
 def test_pose_studio_uses_a_child_package_module(
@@ -64,5 +68,6 @@ def test_pose_studio_uses_a_child_package_module(
         module_name="src.tools.pose_studio",
         cwd=tmp_path.resolve(),
         extra_python_paths=(),
+        keep_terminal_open=True,
     )
     process_manager.launch_script.assert_not_called()
