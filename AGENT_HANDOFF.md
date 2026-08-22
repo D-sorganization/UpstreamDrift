@@ -2,246 +2,109 @@
 
 Last updated: 2026-08-22
 
-This file is current operational state, not a changelog. Git and GitHub retain
+This file records current operational state, not history. Git and GitHub retain
 history. Epic #8557 is the canonical proximal-to-distal completion authority.
 
-## Publication Record Reconciliation (#8977)
+## Remote-Main Specification Repair (#8998)
 
-- Worktree: `UpstreamDrift-worktrees/8977-publication-record`; branch:
-  `docs/8977-publication-record`, based on remote `main`
-  `75fe999c2b2f41831da7c93986ace727b6efe6e9`.
-- The exact current PDF is 235 pages and 1,863,127 bytes with SHA-256
+- Remote `main` is `93cc564b3e6bfd30e498fe2066d8c9f280c9f056` from PR
+  #8995. Its intended MediaPipe mean optimization and tests remain valid.
+- That merge corrupted `SPEC.md`: 5,457 additions inserted the same changelog
+  row throughout unrelated prose and tables, expanding the file from 4,317 to
+  9,749 lines.
+- Worktree: `UpstreamDrift-worktrees/8998-spec-corruption`; branch:
+  `fix/8998-spec-corruption`.
+- The repair restores only `SPEC.md` from #8995's exact first parent and adds
+  one truthful 1.0.574 changelog row. Production and test changes are untouched.
+- Next: validate, commit, push a full issue-closing PR, obtain human review,
+  shepherd protected CI, and verify the merge on remote `main`.
+
+## Cross-Repository Authority
+
+- Tools `main` is `9d1efb8b4162503badd63dcd95b5e1f06b09c404`; #4635 is
+  merged and supplies the provenance-aware ground workspace used by consumers.
+- AffineDrift `main` is `60b95283a43c9ebc14462327d988ca5b0bd3c6a6`.
+  Its immutable publication projection still pins an earlier UpstreamDrift
+  release and must be refreshed only after the scientific campaign is merged.
+- UpstreamDrift is the scientific source authority. AffineDrift is a generated,
+  revision-pinned publisher; Tools exposes typed consumers, not a second paper.
+
+## Publication Authority
+
+- The current computational candidate is the 235-page proximal-to-distal PDF.
+- PDF SHA-256:
   `ce51e6fe4f3d9033bf730c0fe2538c72bf88b1b9707f77a7b6385923a1b5fdcf`.
-  Independent inspection found 246 outline entries, 194 valid URI links, text
-  on every page, 235/235 successful renders, and fast-web linearization.
-- The complete ordered render set was visually inspected in contact-sheet
-  form. PDF pages 152--160, covering the new native-contact section and its
-  surroundings, were additionally inspected at full resolution; no blank,
-  clipped, missing, or grossly unreadable page was observed.
-- Computational publication qualification passes. Archival qualification
-  remains fail-closed: the PDF is untagged and contains 112 Type 3 resources
-  plus two unembedded resources. The stale 233-page, 192-link, 110-Type-3, and
-  old-digest records have been corrected without making an accessibility claim.
-- The regenerated release manifest, checksums, and claim-evidence manifest
-  validate. Fourteen focused release/publication tests pass; changed-file Ruff,
-  formatting, title-case, diff, and full file-size-budget checks pass. The
-  repository-wide title audit still exposes unrelated pre-existing skill/agent
-  headings and a Windows console-encoding crash; the three changed documents
-  pass an explicit UTF-8 title audit.
-- Next: commit the coherent authority update, push, open the issue-closing PR,
-  obtain human review, shepherd protected CI, and verify the merge on remote
-  `main` before closing #8977.
+- It has 194 valid URI links and 246 outline entries; all pages render and were
+  inspected. Archival qualification remains fail-closed because the PDF is
+  untagged and retains Type 3 and unembedded font resources.
 
-## Verified Cross-Repository Delivery
-
-- UpstreamDrift PR #8954 merged through protection at
-  `81cc731d0dd19367b00cd819be5677ab157ce125`, verified on remote `main`.
-- It pins Tools revision
-  `1664d806df8a2c7b184d2d3fbcea93b714caaee5` and verifies the qualified
-  18-case rotating-base contract without copying its solver or catalog logic.
-- Standard CI, shared consumer contracts, docs, SPEC freshness, unit
-  aggregation, and title capitalization passed. The wheel build passed; two
-  downstream smoke jobs were cancelled after merge and received one targeted
-  failed-job rerun request. Inspect that exact run rather than duplicating it.
-- Tools PR #4619 remains an ancestor of current Tools `main`; Tools issue #4430
-  closed with the verified UpstreamDrift consumer evidence.
-
-## Verified Cross-Engine Evidence Repair (#8909)
-
-- PR #8960 merged through protection at
-  `fdf2eb0d1e37db8f5b58109dbbf224a519538170`, verified as current remote
-  `main`; issue #8909 is closed.
-- The distributed-grip release falsely recorded `pinocchio: 0.1` and exact-zero
-  parity because `native_dynamics_operator` silently substituted MuJoCo when
-  the unrelated PyPI `pinocchio` package was imported.
-- The repair removes that fallback, requires robotics Pinocchio version 2.6 or
-  newer plus its native API, rejects an identically zero engine comparison,
-  and audits every committed cross-engine artifact's recorded version.
-- The first genuine 576-trajectory rerun exposed a real failed numerical gate:
-  twelve stick rows had rank ten, the normal-equation condition number exceeded
-  1e17, and the Pinocchio residual reached 1.35e-10 m/s. A mass-whitened
-  rank-revealing SVD reduces the full 144-cell residual to 4.61e-15 m/s without
-  relaxing the registered tolerance.
-- Genuine MuJoCo 3.8.0 and Pinocchio 3.8.0 inertia, contact projection, forward
-  contact, and distributed-grip evidence have been regenerated. Every gate
-  passes with nonzero cross-engine differences. The distributed maxima are
-  3.84e-13 trajectory, 1.44e-10 force, and 3.99e-12 stick velocity relative.
-- Ninety-five focused scientific/publication tests pass. Claim governance
-  reports 1,068/1,068 candidates adjudicated, 295 claims, zero open release
-  claims, and a valid 2,103-reference evidence manifest.
-- Commit `898033064c3f2c45930bbea722a744406423af51` checkpoints the coherent
-  repair; merge commit `f86e8f8d6e8405c51c1e484d9ac1a36dcf75f732`
-  reconciles current `origin/main` without unresolved conflicts.
-- The optimized 233-page PDF was visually inspected on every page. The
-  computational profile passes with 192 valid URI links, 246 outline entries,
-  fast-web linearization, and no render errors. The archival profile remains
-  fail-closed on the disclosed untagged/Type 3/unembedded-font gaps.
-- The open-release validator passes for 571 artifacts with no mismatches.
-- Unqualified repository-wide `pytest` currently fails during collection in
-  the pre-existing `src/shared/python/sidekick/tests/conftest.py` because it
-  imports nonexistent `utils.path_helpers`. Do not hide that baseline defect;
-  use the dependency-scoped protected lanes and track a separate repair.
-
-## Articulated Uncertainty Campaign (#8752)
+## Active Articulated Uncertainty Campaign (#8752)
 
 - Worktree: `UpstreamDrift-worktrees/goal-8752-uncertainty`.
-- Parent PID `18404` is an active checkpointed 19-corner campaign, not an
-  orphan. At 2026-08-22 01:12 PDT, 22 of 30 computed pathways were terminal,
-  one unaffected pathway was recorded, and 47 of 72 atomic branches for the
-  active `ground_translation_stiffness_scale-low` ground pathway were retained.
-  Completed pathway rows and ground-branch checkpoints are restartable. Do not
-  infer completion from the partial campaign record.
-- It may own up to 20 workers. Do not kill workers individually, edit campaign
-  sources, or start a second campaign. Retained numerical failures are data.
-- #8910 repair worktree:
-  `UpstreamDrift-worktrees/8910-real-manufactured-solution`; branch:
-  `fix/8910-real-manufactured-solution`, based on verified #8960 remote main.
-- PR #8961 merged through protection at
-  `3c75dfdd14404bb897779a6899d85cc21078c4d0`, verified as an ancestor of
-  current remote `main`.
-- The local repair replaces self-defined torque residuals with analytical
-  Lagrange--Christoffel, MuJoCo `mj_inverse`, and robotics Pinocchio RNEA;
-  replaces hardcoded conservation zeros with an unforced gravity-free rollout;
-  uses adjacent three-level Richardson estimates; and manufactures exact
-  constrained closure by coordinating pelvis yaw with club translation.
-- Five focused tests pass, including a corruption killswitch that adds 10 Nm
-  to the MuJoCo result and requires the release gate to fail. Twenty-nine
-  claim/release-governance tests also pass. A prior 24-test neighboring
-  articulated run passed; the current combined rerun completed nine tests and
-  then reached the inherited 180-second finite-difference timeout while the
-  separate 20-worker uncertainty campaign was active, with no assertion
-  failure. Ruff format and lint, architecture and document-size budgets,
-  explicit title-case checks, and scoped mypy pass. Genuine relative residuals are
-  3.09e-11 Lagrange/MuJoCo,
-  3.07e-11 Lagrange/Pinocchio, and 3.54e-13 MuJoCo/Pinocchio. Richardson orders
-  are 1.0011 and 1.0007. The conservation control excites only the genuinely
-  free-floating club subtree; measured gravity-free drift is 1.01e-6 linear
-  momentum, 1.51e-6 angular momentum, and 8.67e-7 kinetic energy. Recovered
-  constrained-load residuals are 3.39e-13 multiplier, 3.25e-13 cross-engine,
-  and 5.51e-13 equilibrium relative. The governed record, five new atomic
-  claims, release review, evidence manifest, article source, and 233-page PDF
-  are regenerated. Claim governance reports 1,073/1,073 candidates
-  adjudicated, 300 claims, 41 reviewed release claims, zero open release
-  claims, and a valid 2,128-reference evidence manifest. The computational
-  release validator passes for 574 artifacts, 233 rendered pages, 192 valid URI
-  links, and 246 outline entries. Archival tagging and font findings remain
-  disclosed and fail closed. Next: shepherd PR #8961 through human review and
-  protected CI, then verify its merge commit as an ancestor of remote `main`.
-- Core CI does not install the robotics Pinocchio extra. Its exact PR-scoped
-  suite now passes six dependency-free tests and explicitly skips the three
-  native recomputation tests. The qualified robotics-Pinocchio environment
-  passes all five manufactured-solution tests, and the optional-stack workflow
-  now owns those native tests. This repairs the deterministic Python 3.11/3.12
-  failures without accepting the unrelated PyPI `pinocchio` package.
+- Parent PID `18404` is the intentional source-locked coordinator with 20
+  workers. Do not kill workers individually, edit source-hashed files, or start
+  a duplicate campaign.
+- At 2026-08-22 08:30 PDT, 13 of 19 corners were terminal. Corner 14,
+  `ground_translation_damping_scale-low`, retained 63 of 72 atomic ground
+  branch checkpoints. Five further ground-only corners remain after it.
+- Completed rows and digest-bound branch checkpoints are restartable. Partial
+  checkpoints are execution evidence, not release evidence.
+- After completion, independently audit the record, then integrate
+  `fix/8752-atomic-campaign-checkpoint` (`9f850a67f...`). Execute #8800 next,
+  then regenerate claims, figures, the paper, and the AffineDrift projection.
 
-## Native Contact Formulation Discrepancy Control (#8911)
+## Pinned Tools Docker Boundary (#8996)
 
-- Worktree: `UpstreamDrift-worktrees/8911-native-contact-parity`; branch:
-  `fix/8911-native-contact-parity`, based on the verified #8961 merge.
-- Commits `643ce3a12`, `933c3cf87`, and `804efd249` implement the native
-  constraint experiment, evidence, MuJoCo API compatibility, terminology
-  correction, claim reconciliation, and regenerated 235-page paper. Commit
-  `160256fe1af2b8c8abcb55f500aa90133e924b55` then decomposes the new native
-  experiment below the architecture budget and adds time-bounded exceptions
-  for pre-existing research orchestrators. Release metadata is bound to that
-  exact source commit.
-- The same closed 20-coordinate state is advanced for 4 ms with either two
-  native MuJoCo equality/connect constraints plus `mj_step`, or the existing
-  projected bilateral Kelvin--Voigt law and project-authored semi-implicit
-  update. Disabling the native equalities returns zero constraint force.
-- The native and projected formulations are measurably distinct. At 0.25 ms,
-  final hand--grip separations are 0.987 and 0.908 mm; the final coordinate
-  discrepancy is 1.04e-4 rad in club pitch. Refinement reduces the final
-  discrepancy from 1.12e-4 to 1.04e-4. Mixed-unit generalized vector norms are
-  reported only as numerical diagnostics and are not compared as physical
-  force magnitudes.
-- The former “independently integrated” language is removed from the shared
-  projected-contact experiment. MuJoCo and Pinocchio independently supply
-  kinematics, inertia, bias, gravity, and continuous-time acceleration there,
-  while contact and the state update remain shared. The new native branch is a
-  formulation-discrepancy control, not a parity claim.
-- Claim governance passes with 1,078/1,078 candidates adjudicated, 303 atomic
-  claims, 42 reviewed release claims, and 2,130 evidence references. The
-  computational release contains 581 hash-pinned artifacts and passes all 235
-  page renders, 194 URI links, and 246 outline entries. Archival tagged-PDF and
-  font findings remain explicitly open.
-- Focused numerical, claim, release, and publication tests pass (39 passed,
-  one dependency-qualified Pinocchio test skipped on Windows). The complete
-  release validator passes with no mismatches. The PDF was visually inspected
-  on all pages and at full resolution around the new native-control section.
-- PR CI subsequently exposed four missing suite classifications in the new
-  native-control tests. The module is now classified as `scientific`; the
-  exact suite-marker ratchet passes. Re-running the source-bound evidence also
-  exposed a non-idempotent native claim registrar. Its reconciliation now
-  preserves inherited claim links without duplicating native links, and a
-  regression test runs the registrar twice and checks complete reciprocity.
-- Issue #8963 owns removal of the seven pre-existing research-orchestrator
-  architecture exceptions before 2026-09-30. The new native discrepancy
-  experiment itself has no exception and is below the 100-line function gate.
-- PR #8962 merged through protection at
-  `05a76a2bfcececf0a01df8311d0c4265a0e60e55`, verified as exact remote
-  `main`; issue #8911 is closed. The complete optional-stack lane passes on the
-  merged source, including 690 API tests, all Pinocchio ecosystem and
-  manufactured-solution tests, and the optional unit suite. Standard CI,
-  publication, claim, architecture, repository, documentation, PDF, and title
-  gates also pass. The merged manufactured-solution record is pinned to the
-  corrected `spatial_full_body.py` digest
-  `862fdc4b176cbcc8d4d139a00be745f3d8a37c0f81cd899e55a03707893f8e6a`.
-- Next dependency order: allow the source-pinned #8752 constitutive campaign to
-  finish. Then implement the remaining low/high height, body-mass, and
-  joint-limit propagation in #8800 before the #8752 completion audit. Do not
-  edit atlas sources or start another campaign while PID `18404` is active.
+- PR #8993 is open from `fix/8789-docker-tools-boundary`; exact head
+  `81867ef2ea13191c3fba0d86be1c6682375fcbf3`.
+- It binds modular images to the exact Tools gitlink and content digest, fixes
+  isolated PEP 517 hook loading, and advances pip to 26.2.1.
+- Docker is unavailable locally, so protected image builds and scans remain
+  authoritative. Human review is required; do not create redundant runs.
+
+## Executable Quarantine Ledger (#8766)
+
+- PR #8997 is open from `fix/8766-executable-cluster-ledger`; head before base
+  repair is `c2d33b13d718fe94216313c58d515b201baea5b6`.
+- The 520-node ledger has an executable 10-cluster ownership map. The checker
+  rejects duplicate, unassigned, ambiguous, replacement, or new node IDs and
+  CI compares PR state with the fetched base branch.
+- #8997 intentionally remains open and conflicted until #8998 repairs `main`.
+  Then merge current main normally, resolve handoff/SPEC metadata, and rerun
+  protected checks. This tranche organizes debt; it fixes no quarantined test.
 
 ## Scientific Boundaries
 
-- The model ladder is synthetic and model-conditional. It does not establish
-  participant mechanics, anatomy, physiology, equipment calibration, injury,
-  coaching strategy, or a universal speed benefit.
 - #8556 remains externally data-gated: no governed participant dataset with
   synchronized bilateral six-axis grip wrenches is available. Never substitute
   synthetic traces for human validation.
-- #8910 continues to invalidate release-level manufactured-solution closure
-  language until the independent controls and regenerated evidence merge to
-  remote `main` through protection.
-- Exact zeros require an analytic identity or explicit degeneracy control; they
-  are not automatically evidence of unusually good cross-engine parity.
+- The model ladder is synthetic and model-conditional. It does not establish
+  participant mechanics, anatomy, physiology, equipment calibration, injury,
+  coaching strategy, or a universal speed benefit.
+- #8724, #8443, #8448, #8449, #8450, #8595, #8668, #8684, and #8796 remain
+  open. Verify exact acceptance evidence before changing issue state.
 
 ## Repository and Review Rules
 
-- PRs target `main`; use full PRs, never drafts. Codex must not enable
-  auto-merge; human approval is mandatory. Preserve explicit owner actions
-  without treating them as permission to bypass protection.
-- Use TDD, DbC, DRY, and LoD. Never force-push, admin-merge, bypass hooks or
-  checks, add quarantine debt, or edit `vendor/ud-tools`.
-- Research evidence is hash-pinned. Use governed generators rather than
-  hand-editing JSON, NPZ, figures, manifests, checksums, or claim records.
+- PRs target `main`; use full PRs, never drafts. Human review is required.
+- Never force-push, admin-merge, bypass hooks/checks, add quarantine debt, or
+  edit `vendor/ud-tools`.
+- Use TDD, DbC, DRY, and LoD. Keep scientific evidence hash-pinned and use
+  governed generators rather than hand-editing generated artifacts.
 - Use title case for document headings and captions.
+- Verify exact PR head, review, checks, merge SHA, remote-main ancestry, and a
+  clean worktree before reporting protected completion.
 
-## Focused #8910 Validation
+## Focused Validation
 
-```bash
-python3 -m pytest -q -n 0 \
-  tests/research/test_articulated_manufactured_solution.py
-python3 -m ruff check \
-  scripts/research/proximal_distal_energy/articulated_manufactured_solution.py \
-  tests/research/test_articulated_manufactured_solution.py
-python3 -m scripts.research.proximal_distal_energy.claim_audit validate
-python3 -m scripts.research.proximal_distal_energy.claim_evidence_integrity validate
-```
-
-## Release and Repository Gates
-
-```bash
-python3 -m scripts.research.proximal_distal_energy.momentum_question_readiness validate
-python3 -m scripts.research.proximal_distal_energy.qualify_open_release validate \
-  --source-revision "$(git rev-parse HEAD)" --publication-profile computational
+```powershell
+python3 scripts/check_spec_paths.py
 python3 scripts/check_document_title_case.py --changed-from origin/main
-python3 scripts/check_doc_size_budget.py
-python3 scripts/ci/check_architecture_budget.py
-python3 -m ruff check .
-python3 -m ruff format --check .
+python3 -m pytest -q tests/unit/test_spec_freshness.py
+python3 -m pytest -q tests/unit/pose_estimation/test_mediapipe_estimator.py
+python3 scripts/ci/check_file_size_budget.py
+git diff --check
 ```
 
-Passing common gates does not close a child issue whose scientific criteria
-remain unmet. Verify exact PR head, review decision, checks, merge SHA, and
-remote-main ancestry before reporting protected completion.
+Passing common gates does not close a child issue whose acceptance evidence
+remains incomplete.
