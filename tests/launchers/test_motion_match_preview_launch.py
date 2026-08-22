@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -46,7 +46,13 @@ def test_motion_match_preview_never_executes_package_main_in_launcher(
         encoding="utf-8",
     )
 
-    widget = SpecialAppHandler().get_dockable_ui(_MotionMatchPreviewModel(), tmp_path)
+    with patch(
+        "src.launchers.launcher_model_handlers._registry_dockable_ui",
+        return_value=None,
+    ):
+        widget = SpecialAppHandler().get_dockable_ui(
+            _MotionMatchPreviewModel(), tmp_path
+        )
 
     assert widget is None
     assert not sentinel.exists()
@@ -72,5 +78,6 @@ def test_motion_match_preview_uses_local_source_package_module(
         module_name="src.tools.starting_pose_matcher",
         cwd=tmp_path.resolve(),
         extra_python_paths=(),
+        keep_terminal_open=True,
     )
     process_manager.launch_script.assert_not_called()
