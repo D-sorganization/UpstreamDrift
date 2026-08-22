@@ -43,10 +43,13 @@ proximal--distal completion authority.
   `fix/8752-atomic-campaign-checkpoint` commit `9f850a67f...`. Then implement
   #8800 height, mass, and joint-limit propagation before closing #8752/#8668.
 
-## Docker Build Boundary (#8789, PR #8993)
+## Docker Build Boundary (#8996, PR #8993)
 
 - Worktree: `UpstreamDrift-worktrees/8789-docker-tools-boundary`; branch
   `fix/8789-docker-tools-boundary`; full PR #8993 has human review requested.
+- Owner-closed phase issue #8789 remains closed. Its unfinished Docker criterion
+  is extracted to #8996; PR #8993 closes #8996 only after protected merge. The
+  520-node removal-only quarantine burn-down remains owned by #8766.
 - The modular workflows fetch exact Tools gitlink
   `aec16af5a1e69c0d5542da5e04a1db1023cceff2` and attest only
   `src/shared`, `src/sidekick`, `src/chat`, `src/python/src/utils`, and
@@ -64,7 +67,7 @@ proximal--distal completion authority.
   Docker is unavailable locally, so protected CI owns image and Trivy evidence.
 - Current `main` was merged normally into the branch after #8990. Resolve only
   this handoff conflict, validate, commit the merge, and push once. Do not rerun
-  the obsolete failing head or close #8789; quarantine burn-down remains open.
+  the obsolete failing head.
 - The full document-size gate retains an unrelated baseline failure:
   `_ch06c_spatial_cross_formulation.qmd` is 51,523 bytes against 51,200. Do not
   edit that campaign-adjacent source during the freeze.
