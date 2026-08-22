@@ -32,10 +32,14 @@ FROM python:3.12-slim@sha256:4386a385d81dba9f72ed72a6fe4237755d7f5440c84b417650f
 ARG PROFILE=
 ARG FEATURES=
 ARG DEFAULT_PROFILE=standard
+ARG TOOLS_GITLINK_SHA
+ARG TOOLS_SOURCE_SHA256
 
 ENV DEBIAN_FRONTEND=noninteractive \
     PIP_NO_CACHE_DIR=1 \
-    SKIP_UI_BUILD=1
+    SKIP_UI_BUILD=1 \
+    UPSTREAMDRIFT_TOOLS_GITLINK_SHA=${TOOLS_GITLINK_SHA} \
+    UPSTREAMDRIFT_TOOLS_SOURCE_SHA256=${TOOLS_SOURCE_SHA256}
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
@@ -71,7 +75,7 @@ RUN set -eux; \
 # Always install the lockfile baseline first so layer cache hits the
 # common case. Feature stages append additional packages on top.
 COPY requirements.lock /tmp/requirements.lock
-RUN pip install --upgrade pip==26.1.2 && \
+RUN pip install --upgrade pip==26.2.1 && \
     pip install -r /tmp/requirements.lock
 
 # Copy the *minimum* surface needed for `pip install .` to resolve.
@@ -82,6 +86,13 @@ COPY README.md ./
 COPY build_hooks.py ./
 COPY launch_golf_suite.py ./
 COPY src/ ./src/
+COPY vendor/ud-tools/src/shared/ ./vendor/ud-tools/src/shared/
+COPY vendor/ud-tools/src/sidekick/ ./vendor/ud-tools/src/sidekick/
+COPY vendor/ud-tools/src/chat/ ./vendor/ud-tools/src/chat/
+COPY vendor/ud-tools/src/python/src/utils/ ./vendor/ud-tools/src/python/src/utils/
+COPY vendor/ud-tools/src/contracts.py ./vendor/ud-tools/src/contracts.py
+COPY scripts/config/shared_python_ownership_exceptions.yaml ./scripts/config/shared_python_ownership_exceptions.yaml
+COPY scripts/packaging/pinned_tools_provenance.py ./scripts/packaging/pinned_tools_provenance.py
 COPY docker/profiles.yaml ./docker/profiles.yaml
 COPY scripts/docker/install_features.py ./scripts/docker/install_features.py
 
@@ -109,7 +120,7 @@ ARG GROUP_ID=1000
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN python -m pip install --upgrade --no-cache-dir pip==26.1.2
+RUN python -m pip install --upgrade --no-cache-dir pip==26.2.1
 
 # Runtime apt deps — kept identical to legacy Dockerfile so the
 # rendering paths (osmesa, egl, ffmpeg) work for every profile.

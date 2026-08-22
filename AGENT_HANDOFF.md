@@ -7,22 +7,19 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
 
 ## Remote-Main Specification Repair (#8998)
 
-- Remote `main` is `93cc564b3e6bfd30e498fe2066d8c9f280c9f056` from PR
-  #8995. Its intended MediaPipe mean optimization and tests remain valid.
-- That merge corrupted `SPEC.md`: 5,457 additions inserted the same changelog
-  row throughout unrelated prose and tables, expanding the file from 4,317 to
-  9,749 lines.
-- Worktree: `UpstreamDrift-worktrees/8998-spec-corruption`; branch:
-  `fix/8998-spec-corruption`.
-- The repair restores only `SPEC.md` from #8995's exact first parent and adds
-  one truthful 1.0.574 changelog row. Production and test changes are untouched.
-- Next: validate, commit, push a full issue-closing PR, obtain human review,
-  shepherd protected CI, and verify the merge on remote `main`.
+- PR #8999 is protected-merged at remote-main commit
+  `345f4c8cd58bbe368be9225527571b42754f983b`. It retained PR #8995's intended
+  MediaPipe optimization while restoring the canonical 4,318-line `SPEC.md`.
+- The repair commit is verified as an ancestor of remote `main`; the repeated
+  misplaced changelog corruption is no longer present.
 
 ## Cross-Repository Authority
 
-- Tools `main` is `9d1efb8b4162503badd63dcd95b5e1f06b09c404`; #4635 is
-  merged and supplies the provenance-aware ground workspace used by consumers.
+- Tools `main` is `81a4a617a64c8d35880416f3b769dad06525afbd`; #4635 is
+  merged and supplies the
+  provenance-aware ground workspace used by consumers. PR #4646 repairs the
+  registered visual-evidence timeout without weakening its assertions and is
+  awaiting a clean protected run after the uncertainty campaign releases CPU.
 - AffineDrift `main` is `60b95283a43c9ebc14462327d988ca5b0bd3c6a6`.
   Its immutable publication projection still pins an earlier UpstreamDrift
   release and must be refreshed only after the scientific campaign is merged.
@@ -44,9 +41,10 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
 - Parent PID `18404` is the intentional source-locked coordinator with 20
   workers. Do not kill workers individually, edit source-hashed files, or start
   a duplicate campaign.
-- At 2026-08-22 08:30 PDT, 13 of 19 corners were terminal. Corner 14,
-  `ground_translation_damping_scale-low`, retained 63 of 72 atomic ground
-  branch checkpoints. Five further ground-only corners remain after it.
+- At 2026-08-22 12:50 PDT, 15 of 19 corners and 26 of 29 pathway evaluations
+  were terminal. `ground_translation_damping_scale-high` retained 25 of 72
+  atomic ground branch checkpoints; two ground-only evaluations remain after
+  it. The 21-process group was healthy at about 9.7 CPU cores.
 - Completed rows and digest-bound branch checkpoints are restartable. Partial
   checkpoints are execution evidence, not release evidence.
 - After completion, independently audit the record, then integrate
@@ -55,10 +53,24 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
 
 ## Pinned Tools Docker Boundary (#8996)
 
-- PR #8993 is open from `fix/8789-docker-tools-boundary`; exact head
-  `81867ef2ea13191c3fba0d86be1c6682375fcbf3`.
+- PR #8993 is open from `fix/8789-docker-tools-boundary`; its pre-refresh head
+  was `81867ef2ea13191c3fba0d86be1c6682375fcbf3`. Current work merges repaired
+  remote `main`; refresh the exact head after commit and push.
 - It binds modular images to the exact Tools gitlink and content digest, fixes
   isolated PEP 517 hook loading, and advances pip to 26.2.1.
+- The workflows attest only `src/shared`, `src/sidekick`, `src/chat`,
+  `src/python/src/utils`, and `src/contracts.py`; the registered digest is
+  `30dc761a34ec30eb3bf41d11d2dca1aff90448e71defbe82c32fcd657525fcc3`.
+- Protected head `37774ebdd` exposed a collection-order defect between two
+  Hatchling test stubs. The local correction gives both stubs the constructor
+  contract and isolates UI-build tests from the independently covered Tools
+  registration boundary; the combined 70-test ordering regression passes.
+- Head `17b2bca63` then correctly failed the suite-marker ratchet on its new
+  regression. The test is now explicitly unit-marked; the full ratchet passes
+  with no drift.
+- That head's wheel job failed before build during checkout because the selected
+  runner's cached `human-gazebo` submodule had no current revision. Re-evaluate
+  on the consolidated correction push; do not change shared runners.
 - Docker is unavailable locally, so protected image builds and scans remain
   authoritative. Human review is required; do not create redundant runs.
 
@@ -69,9 +81,9 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
 - The 520-node ledger has an executable 10-cluster ownership map. The checker
   rejects duplicate, unassigned, ambiguous, replacement, or new node IDs and
   CI compares PR state with the fetched base branch.
-- #8997 intentionally remains open and conflicted until #8998 repairs `main`.
-  Then merge current main normally, resolve handoff/SPEC metadata, and rerun
-  protected checks. This tranche organizes debt; it fixes no quarantined test.
+- #8997 remains open and conflicted. After #8993, merge repaired current main,
+  resolve handoff/SPEC metadata, and rerun protected checks. This tranche
+  organizes debt; it fixes no quarantined test.
 
 ## Scientific Boundaries
 
@@ -100,8 +112,12 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
 ```powershell
 python3 scripts/check_spec_paths.py
 python3 scripts/check_document_title_case.py --changed-from origin/main
-python3 -m pytest -q tests/unit/test_spec_freshness.py
-python3 -m pytest -q tests/unit/pose_estimation/test_mediapipe_estimator.py
+python3 -m pytest -q -n 0 tests/unit/test_pinned_tools_provenance.py \
+  tests/unit/test_build_hooks.py tests/docker/test_pinned_tools_build_boundary.py \
+  tests/docker/test_docker_hardening_7159_7161.py \
+  tests/docker/test_docker_integration.py \
+  tests/unit/scripts/test_dockerfile_contracts.py
+python3 scripts/ci/check_dockerfile_contracts.py
 python3 scripts/ci/check_file_size_budget.py
 git diff --check
 ```

@@ -332,6 +332,8 @@ include = [
     "launch_golf_suite.py",
     "launch_upstream_drift.py",
     "build_hooks.py",
+    "scripts/__init__.py",
+    "scripts/packaging/pinned_tools_provenance.py",
 ]
 exclude = [
     "src/**/__pycache__/**",

@@ -41,7 +41,7 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
     | sh -s -- -y --profile minimal --default-toolchain 1.94.0 && \
     rustc --version && cargo --version
 
-RUN pip install --upgrade pip==26.1.2 && pip install maturin==1.13.3
+RUN pip install --upgrade pip==26.2.1 && pip install maturin==1.13.3
 
 # Cargo needs the git CLI to fetch the tools-core git dependency reliably.
 ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
@@ -66,7 +66,7 @@ RUN mkdir -p /wheels && \
 
 # Core API + physics stack from lockfile
 COPY requirements.lock /tmp/requirements.lock
-RUN pip install --upgrade pip==26.1.2 && \
+RUN pip install --upgrade pip==26.2.1 && \
     pip install -r /tmp/requirements.lock
 
 # Auth and server extensions - pinned versions (to be added to requirements.lock)
@@ -142,7 +142,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Keep the base interpreter's bundled pip aligned with the venv so image
 # scanners do not report the runtime layer's global site-packages as stale.
-RUN python -m pip install --upgrade --no-cache-dir pip==26.1.2
+RUN python -m pip install --upgrade --no-cache-dir pip==26.2.1
 
 # MuJoCo headless rendering + health check
 # X11/XCB/PyQt6 libs removed — not needed in a headless API server
