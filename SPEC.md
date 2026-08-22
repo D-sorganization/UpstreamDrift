@@ -570,7 +570,9 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
   minimal Tools-owned source roots required by the wheel build. The modular
   size and smoke workflows pass both identities into the isolated Docker
   context; `Dockerfile.modular` copies exactly those roots, and the Hatch build
-  hook recomputes the content digest when Git metadata is intentionally absent.
+  hook loads its adjacent digest helper by file path before recomputing content
+  when Git metadata is intentionally absent. This remains valid when PEP 517
+  loads the custom hook without adding the source root to `sys.path`.
   Missing, incomplete, malformed, symlinked, or mismatched provenance fails
   closed. Normal repository builds retain the existing gitlink validation.
   Contract tests cover action opt-in, workflow propagation, Docker copy and

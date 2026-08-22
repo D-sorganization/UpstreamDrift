@@ -31,6 +31,43 @@ pytestmark = pytest.mark.unit
 _PINNED_TOOLS_SHA = "a" * 40
 
 
+def test_build_hook_import_does_not_require_repo_root_on_python_path(
+    tmp_path,
+) -> None:
+    """PEP 517 loads the custom hook by path without a source-root import."""
+    hook_path = build_hooks.__file__
+    code = f"""
+import importlib.util
+import sys
+import types
+
+module_names = (
+    "hatchling",
+    "hatchling.builders",
+    "hatchling.builders.hooks",
+    "hatchling.builders.hooks.plugin",
+    "hatchling.builders.hooks.plugin.interface",
+)
+for name in module_names:
+    sys.modules[name] = types.ModuleType(name)
+sys.modules[module_names[-1]].BuildHookInterface = type("BuildHookInterface", (), {{}})
+spec = importlib.util.spec_from_file_location("isolated_build_hooks", {hook_path!r})
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+print(module.UIBuildHook.__name__)
+"""
+
+    result = subprocess.run(
+        [sys.executable, "-P", "-c", code],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.stdout.strip() == "UIBuildHook"
+
+
 class DummyConfig:
     def __init__(self, root, config=None):
         self.root = root

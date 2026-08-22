@@ -46,7 +46,7 @@ history. Epic #8557 is the canonical proximal--distal completion authority.
 - `.dockerignore` retains exactly those roots, and `pyproject.toml` includes the
   provenance helper in source builds. Both Dockerfiles now pin pip 26.2.1 to
   clear PYSEC-2026-3721.
-- Seventy-seven focused provenance, build-hook, Docker-boundary, hardening,
+- Seventy-eight focused provenance, build-hook, Docker-boundary, hardening,
   integration, and contract tests pass. Ruff and changed-file architecture,
   title, and diff gates pass. Docker is not installed locally, so actual image
   construction and Trivy evidence must come from protected CI.
@@ -57,6 +57,14 @@ history. Epic #8557 is the canonical proximal--distal completion authority.
   hooks and is published in full PR #8993; human review is requested. Shepherd
   its exact head through protected Docker builds and scans. Do not close #8789:
   its broader quarantine burn-down remains open.
+- Protected head `f5858ce2e` exposed one common install failure across fourteen
+  lanes: PEP 517 loaded `build_hooks.py` without the repository root on
+  `sys.path`, so its package-style helper import failed. The local repair loads
+  the adjacent canonical helper by file path. A new isolated-import regression
+  and 43 focused tests pass; a real isolated source build passed the formerly
+  failing hook stage before optional archive compression was stopped to return
+  CPU to the uncertainty campaign. Push one corrected head; do not rerun the
+  obsolete failing head.
 
 ## Review-Bound Pull Requests
 
