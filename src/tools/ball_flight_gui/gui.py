@@ -29,6 +29,7 @@ from PyQt6.QtWidgets import (
 )
 
 from src.shared.python.ui import HoverCopyTextBrowser
+from src.shared.python.ui.pane_layout import install_two_pane_splitter
 
 logger = logging.getLogger(__name__)
 
@@ -88,12 +89,9 @@ class BallFlightWidget(QWidget):
         self._build_ui()
 
     def _build_ui(self) -> None:
-        layout = QHBoxLayout(self)
-        splitter = QSplitter(Qt.Orientation.Horizontal)
-        splitter.addWidget(self._build_controls_panel())
-        splitter.addWidget(self._build_results_panel())
-        splitter.setSizes([350, 650])
-        layout.addWidget(splitter)
+        install_two_pane_splitter(
+            self, self._build_controls_panel(), self._build_results_panel()
+        )
 
     def _build_controls_panel(self) -> QWidget:
         """Left pane: title, launch conditions, environment, presets, run."""

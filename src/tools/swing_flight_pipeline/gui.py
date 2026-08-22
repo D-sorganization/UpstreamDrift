@@ -38,6 +38,7 @@ from src.shared.python.physics.swing_state_providers import (
     available_swing_state_providers,
 )
 from src.shared.python.ui import HoverCopyTextBrowser
+from src.shared.python.ui.pane_layout import install_two_pane_splitter
 
 logger = logging.getLogger(__name__)
 
@@ -77,12 +78,9 @@ class SwingFlightWidget(QWidget):
         self._build_ui()
 
     def _build_ui(self) -> None:
-        layout = QHBoxLayout(self)
-        splitter = QSplitter(Qt.Orientation.Horizontal)
-        splitter.addWidget(self._build_controls_panel())
-        splitter.addWidget(self._build_results_panel())
-        splitter.setSizes([350, 650])
-        layout.addWidget(splitter)
+        install_two_pane_splitter(
+            self, self._build_controls_panel(), self._build_results_panel()
+        )
 
     def _build_controls_panel(self) -> QWidget:
         """Left pane: title, swing parameters, engine source, presets, run."""
