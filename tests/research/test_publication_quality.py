@@ -4,11 +4,15 @@ from __future__ import annotations
 
 from copy import deepcopy
 import hashlib
+import json
 from pathlib import Path
 
 import pytest
 
-fitz = pytest.importorskip("fitz")
+try:
+    import fitz
+except ImportError:  # pragma: no cover - exercised by the dependency-light CI lane
+    fitz = None
 
 from scripts.research.proximal_distal_energy.publication_quality import (
     inspect_publication_pdf,
@@ -22,9 +26,14 @@ MANIFEST = ARTICLE / "release_manifest.json"
 SOURCE_REPOSITORY = "https://github.com/D-sorganization/UpstreamDrift"
 SOURCE_REVISION = "a" * 40
 pytestmark = pytest.mark.unit
+requires_fitz = pytest.mark.skipif(
+    fitz is None,
+    reason="PyMuPDF is installed only by the publication-quality profile",
+)
 
 
 def _write_pdf(path: Path, *, title: str = "Release Paper") -> None:
+    assert fitz is not None
     document = fitz.open()
     page = document.new_page()
     page.insert_text((72, 72), "Computational evidence")
@@ -53,6 +62,7 @@ def _inspect(path: Path, *, title: str = "Release Paper") -> dict[str, object]:
     )
 
 
+@requires_fitz
 def test_computational_profile_requires_identity_metadata_and_every_page_render(
     tmp_path: Path,
 ) -> None:
@@ -78,6 +88,7 @@ def test_computational_profile_requires_identity_metadata_and_every_page_render(
     assert validate_publication_quality(report, profile="computational")["valid"]
 
 
+@requires_fitz
 def test_archive_profile_discloses_untagged_and_nonoptimized_pdf(
     tmp_path: Path,
 ) -> None:
@@ -99,6 +110,7 @@ def test_archive_profile_discloses_untagged_and_nonoptimized_pdf(
     ("revision", "manifest_sha"),
     [("main", "b" * 64), ("a" * 40, "not-a-digest")],
 )
+@requires_fitz
 def test_source_identity_rejects_unpinned_values(
     tmp_path: Path, revision: str, manifest_sha: str
 ) -> None:
@@ -116,6 +128,7 @@ def test_source_identity_rejects_unpinned_values(
         )
 
 
+@requires_fitz
 def test_metadata_mismatch_fails_the_computational_profile(tmp_path: Path) -> None:
     path = tmp_path / "paper.pdf"
     _write_pdf(path, title="Wrong Paper")
@@ -138,6 +151,7 @@ def test_validator_rejects_a_forged_ready_flag() -> None:
         )
 
 
+@requires_fitz
 def test_validator_rejects_findings_not_derived_from_the_pdf(tmp_path: Path) -> None:
     path = tmp_path / "paper.pdf"
     _write_pdf(path)
@@ -154,6 +168,7 @@ def test_validator_rejects_findings_not_derived_from_the_pdf(tmp_path: Path) -> 
         validate_publication_quality(report, profile="computational")
 
 
+@requires_fitz
 def test_validator_rejects_malformed_finding_metadata(tmp_path: Path) -> None:
     path = tmp_path / "paper.pdf"
     _write_pdf(path)
@@ -164,6 +179,22 @@ def test_validator_rejects_malformed_finding_metadata(tmp_path: Path) -> None:
         validate_publication_quality(report, profile="computational")
 
 
+def test_canonical_pdf_byte_identity_is_dependency_free() -> None:
+    digest = hashlib.sha256(PDF.read_bytes()).hexdigest()
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    artifact = manifest["artifacts"][
+        "docs/research/proximal_distal_energy_transfer/"
+        "proximal_distal_energy_transfer.pdf"
+    ]
+
+    assert digest == (
+        "ce51e6fe4f3d9033bf730c0fe2538c72bf88b1b9707f77a7b6385923a1b5fdcf"
+    )
+    assert PDF.stat().st_size == 1_863_127
+    assert artifact == {"sha256": digest, "bytes": 1_863_127}
+
+
+@requires_fitz
 def test_canonical_pdf_passes_the_computational_profile() -> None:
     report = inspect_publication_pdf(
         PDF,
@@ -175,8 +206,30 @@ def test_canonical_pdf_passes_the_computational_profile() -> None:
         render_zoom=0.2,
     )
 
-    assert report["publication"]["pages"] == 233
-    assert report["rendering"]["pages_rendered"] == 233
+    assert report["publication"]["sha256"] == (
+        "ce51e6fe4f3d9033bf730c0fe2538c72bf88b1b9707f77a7b6385923a1b5fdcf"
+    )
+    assert report["publication"]["bytes"] == 1_863_127
+    assert report["publication"]["pages"] == 235
+    assert report["publication"]["fast_web_access"] is True
+    assert report["navigation"] == {
+        "outline_entries": 246,
+        "uri_links": 194,
+        "internal_links": 0,
+        "invalid_uri_links": [],
+        "invalid_internal_links": [],
+    }
+    assert report["rendering"]["pages_rendered"] == 235
     assert report["rendering"]["errors"] == []
+    assert report["accessibility"] == {
+        "tagged": False,
+        "pages_with_extractable_text": 235,
+        "font_inventory": {
+            "resources": 131,
+            "types": {"Type0": 17, "Type1": 2, "Type3": 112},
+            "type3_resources": 112,
+            "unembedded_resources": 2,
+        },
+    }
     assert validate_publication_quality(report, profile="computational")["valid"]
     assert report["readiness"]["archival_publication"] is False
