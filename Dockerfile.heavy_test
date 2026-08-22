@@ -111,6 +111,10 @@ RUN pip install --upgrade --no-cache-dir \
     msgpack==1.2.1 \
     setuptools==83.0.0
 
+# The finished test image executes pytest but never installs packages at run
+# time. Remove pip and its embedded third-party SBOM from the final filesystem.
+RUN /usr/local/bin/python -m pip uninstall -y pip
+
 # ── Default: surface optional-dep status (issue #7161 D2) then run the heavy
 #    suite with Xvfb. The entrypoint prints the build-time optional-dependency
 #    marker so skips are attributable; pass args to `docker run` to override

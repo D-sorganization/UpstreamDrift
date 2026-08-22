@@ -145,6 +145,11 @@ RUN groupadd -g ${GROUP_ID} ${USER_NAME} && \
 
 COPY --from=builder /opt/venv /opt/venv
 
+# Final profile images are immutable runtime artifacts, not package-build
+# environments. Strip pip and its embedded third-party SBOM after the copy.
+RUN /opt/venv/bin/python -m pip uninstall -y pip && \
+    /usr/local/bin/python -m pip uninstall -y pip
+
 ENV PATH="/opt/venv/bin:$PATH" \
     PYTHONPATH="/workspace" \
     UPSTREAM_DRIFT_PROFILE=${PROFILE} \

@@ -261,6 +261,26 @@ class TestContainerEnvironment(unittest.TestCase):
                 dockerfile,
                 f"{dockerfile_name} must pin the Trivy-fixed setuptools release",
             )
+        runtime_strip = (
+            "RUN /opt/venv/bin/python -m pip uninstall -y pip && \\\n"
+            "    /usr/local/bin/python -m pip uninstall -y pip"
+        )
+        for dockerfile_name in ("Dockerfile", "Dockerfile.modular"):
+            dockerfile = (get_repo_root() / dockerfile_name).read_text()
+            copy_index = dockerfile.index("COPY --from=builder /opt/venv /opt/venv")
+            strip_index = dockerfile.index(runtime_strip)
+            runtime_user_index = dockerfile.index("USER ${USER_NAME}", strip_index)
+            self.assertLess(copy_index, strip_index)
+            self.assertLess(strip_index, runtime_user_index)
+        self.assertIn(
+            "RUN /usr/local/bin/python -m pip uninstall -y pip",
+            (get_repo_root() / "Dockerfile.heavy_test").read_text(),
+        )
+        training_index = content.index("FROM runtime AS training")
+        self.assertIn(
+            "COPY --from=builder /opt/venv /opt/venv",
+            content[training_index:],
+        )
         locked_versions = dict(
             re.findall(r"(?m)^([a-z0-9-]+)==([^\s]+)", requirements_lock.lower())
         )

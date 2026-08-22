@@ -79,8 +79,12 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
   every supported image's final dependency layer and adds a unit-marked
   repository contract. The higher setuptools floor also resolves
   PYSEC-2026-3447, which the first protected follow-up build surfaced after
-  the older finding was cleared. The 116-test focused Docker/packaging/spec
-  set passes.
+  the older finding was cleared. PR #9001 then proved the resolved environment
+  clean but found pip's embedded third-party SBOM still describing its
+  superseded vendored versions. The current correction removes pip from final
+  runtime/test images after dependency installation and restores the audited
+  builder venv only in the explicit training stage. No scanner waiver or
+  skip-file rule is used. The focused Docker/packaging/spec set passes.
 - Docker is unavailable locally, so protected image builds and scans remain
   authoritative. Human review is required; do not create redundant runs.
 

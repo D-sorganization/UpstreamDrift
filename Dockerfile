@@ -181,6 +181,12 @@ RUN groupadd -g ${GROUP_ID} ${USER_NAME} && \
 # Copy only the venv — no conda overhead
 COPY --from=builder /opt/venv /opt/venv
 
+# The production runtime does not install packages. Remove both pip copies so
+# pip's embedded third-party SBOM and vendored build code cannot survive into
+# the deployed image; installed runtime packages and setuptools remain intact.
+RUN /opt/venv/bin/python -m pip uninstall -y pip && \
+    /usr/local/bin/python -m pip uninstall -y pip
+
 # /workspace is the project root; "from src.xxx" imports resolve here
 ENV PATH="/opt/venv/bin:$PATH" \
     PYTHONPATH="/workspace" \
@@ -238,6 +244,10 @@ ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 FROM runtime AS training
 
 USER root
+
+# Training is an explicit build workbench, so restore the audited builder venv
+# rather than shipping an installer in the production runtime target.
+COPY --from=builder /opt/venv /opt/venv
 
 # PyTorch cu124 wheels bundle CUDA runtime libs; host driver provides libcuda via nvidia-container-toolkit
 # Pinned versions for reproducible builds
