@@ -1,9 +1,36 @@
 # Agent Handoff — UpstreamDrift
 
-Last updated: 2026-08-21
+Last updated: 2026-08-22
 
 This file is current operational state, not a changelog. Git and GitHub retain
 history. Epic #8557 is the canonical proximal-to-distal completion authority.
+
+## Publication Record Reconciliation (#8977)
+
+- Worktree: `UpstreamDrift-worktrees/8977-publication-record`; branch:
+  `docs/8977-publication-record`, based on remote `main`
+  `75fe999c2b2f41831da7c93986ace727b6efe6e9`.
+- The exact current PDF is 235 pages and 1,863,127 bytes with SHA-256
+  `ce51e6fe4f3d9033bf730c0fe2538c72bf88b1b9707f77a7b6385923a1b5fdcf`.
+  Independent inspection found 246 outline entries, 194 valid URI links, text
+  on every page, 235/235 successful renders, and fast-web linearization.
+- The complete ordered render set was visually inspected in contact-sheet
+  form. PDF pages 152--160, covering the new native-contact section and its
+  surroundings, were additionally inspected at full resolution; no blank,
+  clipped, missing, or grossly unreadable page was observed.
+- Computational publication qualification passes. Archival qualification
+  remains fail-closed: the PDF is untagged and contains 112 Type 3 resources
+  plus two unembedded resources. The stale 233-page, 192-link, 110-Type-3, and
+  old-digest records have been corrected without making an accessibility claim.
+- The regenerated release manifest, checksums, and claim-evidence manifest
+  validate. Fourteen focused release/publication tests pass; changed-file Ruff,
+  formatting, title-case, diff, and full file-size-budget checks pass. The
+  repository-wide title audit still exposes unrelated pre-existing skill/agent
+  headings and a Windows console-encoding crash; the three changed documents
+  pass an explicit UTF-8 title audit.
+- Next: commit the coherent authority update, push, open the issue-closing PR,
+  obtain human review, shepherd protected CI, and verify the merge on remote
+  `main` before closing #8977.
 
 ## Verified Cross-Repository Delivery
 
@@ -59,9 +86,9 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
 
 - Worktree: `UpstreamDrift-worktrees/goal-8752-uncertainty`.
 - Parent PID `18404` is an active checkpointed 19-corner campaign, not an
-  orphan. Nine corners and 17 of 30 completed-or-retained pathway evaluations
-  were recorded by the 2026-08-21 11:41 checkpoint. At 13:39, 47 of 72 atomic
-  ground branches for the active torsional-stiffness-high corner were retained.
+  orphan. At 2026-08-22 01:12 PDT, 22 of 30 computed pathways were terminal,
+  one unaffected pathway was recorded, and 47 of 72 atomic branches for the
+  active `ground_translation_stiffness_scale-low` ground pathway were retained.
   Completed pathway rows and ground-branch checkpoints are restartable. Do not
   infer completion from the partial campaign record.
 - It may own up to 20 workers. Do not kill workers individually, edit campaign

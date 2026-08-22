@@ -175,8 +175,30 @@ def test_canonical_pdf_passes_the_computational_profile() -> None:
         render_zoom=0.2,
     )
 
-    assert report["publication"]["pages"] == 233
-    assert report["rendering"]["pages_rendered"] == 233
+    assert report["publication"]["sha256"] == (
+        "ce51e6fe4f3d9033bf730c0fe2538c72bf88b1b9707f77a7b6385923a1b5fdcf"
+    )
+    assert report["publication"]["bytes"] == 1_863_127
+    assert report["publication"]["pages"] == 235
+    assert report["publication"]["fast_web_access"] is True
+    assert report["navigation"] == {
+        "outline_entries": 246,
+        "uri_links": 194,
+        "internal_links": 0,
+        "invalid_uri_links": [],
+        "invalid_internal_links": [],
+    }
+    assert report["rendering"]["pages_rendered"] == 235
     assert report["rendering"]["errors"] == []
+    assert report["accessibility"] == {
+        "tagged": False,
+        "pages_with_extractable_text": 235,
+        "font_inventory": {
+            "resources": 131,
+            "types": {"Type0": 17, "Type1": 2, "Type3": 112},
+            "type3_resources": 112,
+            "unembedded_resources": 2,
+        },
+    }
     assert validate_publication_quality(report, profile="computational")["valid"]
     assert report["readiness"]["archival_publication"] is False

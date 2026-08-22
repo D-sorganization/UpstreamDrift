@@ -51,13 +51,17 @@ checks PDF identity and GitHub's 100,000,000-byte hard file boundary. See
 [`PUBLICATION_QUALITY.md`](PUBLICATION_QUALITY.md) for the normative profile and
 cross-repository publication contract.
 
-The current 233-page candidate passes the computational publication profile,
-renders without page errors, and is linearized for fast web access. All 233
-pages have also passed the required visual inspection. It does not pass the
-archival profile: the PDF remains untagged and retains 110 Type 3 and two
-unembedded font resources. No archival-accessibility claim is made until those
-findings are closed and the full document is visually reinspected after the
-remediation.
+The current 235-page candidate passes the computational publication profile,
+renders without page errors, exposes extractable text on every page, contains
+246 outline entries and 194 valid external links, and is linearized for fast
+web access. Its 1,863,127 bytes have SHA-256
+`ce51e6fe4f3d9033bf730c0fe2538c72bf88b1b9707f77a7b6385923a1b5fdcf`.
+All 235 rendered pages were inspected in the complete ordered contact-sheet
+set, with PDF pages 152--160 additionally inspected at full resolution. It does
+not pass the archival profile: the PDF remains untagged and retains 112 Type 3
+and two unembedded font resources. No archival-accessibility claim is made
+until those findings are closed and the full document is visually reinspected
+after the remediation.
 
 ## Claim Status
 
