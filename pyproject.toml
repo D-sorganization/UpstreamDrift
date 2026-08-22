@@ -606,6 +606,11 @@ addopts = "-ra -q --strict-markers --strict-config --durations=20 -m \"not slow 
 asyncio_mode = "auto"
 timeout = 60
 timeout_method = "thread"
+# Backstop for hangs pytest-timeout's thread method cannot interrupt (a C
+# extension deadlocking while holding the GIL starves the timeout thread):
+# faulthandler's watchdog dumps all-thread tracebacks from C without needing
+# the GIL, so a wedged worker still leaves a diagnostic in the CI log.
+faulthandler_timeout = 120
 # Prevent ImportPathMismatchError from conftest.py files in engine subdirectories
 norecursedirs = [
     "archive",
