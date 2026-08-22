@@ -196,18 +196,33 @@ def test_base_launcher_init_ui(launcher) -> None:
     assert len(launcher._items) == 3
 
 
-def test_run_launcher(qapp) -> None:
-    from PyQt6.QtCore import QTimer
-    from PyQt6.QtWidgets import QApplication
+def test_run_launcher_reuses_existing_application() -> None:
+    with patch("src.launchers.base.QApplication") as application_class:
+        existing_application = MagicMock()
+        existing_application.exec.return_value = 0
+        application_class.instance.return_value = existing_application
+        launcher_class = MagicMock()
 
-    with (
-        patch.object(DummyLauncher, "init_ui"),
-        patch.object(DummyLauncher, "center_window"),
-        patch.object(DummyLauncher, "show"),
-    ):
-        QTimer.singleShot(0, QApplication.instance().quit)
-        res = run_launcher(DummyLauncher)
+        res = run_launcher(launcher_class)
+
         assert res == 0
+        application_class.instance.assert_called_once_with()
+        application_class.assert_not_called()
+        existing_application.setStyle.assert_called_once_with("Fusion")
+        launcher_class.assert_called_once_with()
+
+
+def test_run_launcher_creates_application_when_absent() -> None:
+    with patch("src.launchers.base.QApplication") as application_class:
+        application_class.instance.return_value = None
+        application_class.return_value.exec.return_value = 17
+        launcher_class = MagicMock()
+
+        assert run_launcher(launcher_class) == 17
+
+        application_class.assert_called_once()
+        application_class.return_value.setStyle.assert_called_once_with("Fusion")
+        launcher_class.assert_called_once_with()
 
 
 def test_base_launcher_abstract_method(launcher) -> None:
