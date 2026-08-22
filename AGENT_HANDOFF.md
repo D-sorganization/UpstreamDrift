@@ -1,6 +1,6 @@
 # Agent Handoff — UpstreamDrift
 
-Last updated: 2026-08-21
+Last updated: 2026-08-22
 
 ## Publication Quality Status (#8451 Closed; Archival Gates Open)
 
@@ -41,9 +41,14 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
 ## Program Authority & Physics Epics State
 
 - Epic #8557 governs the proximal-to-distal program; #8595 retains the agenda.
-- Tools remote `main` is `4a5700919`; #4142 remains open because its full
+- Tools remote `main` is `428f832f9`; #4142 remains open because its full
   ensemble, quiet-zone, sensitivity, UI-parity, and UpstreamDrift-integration
-  acceptance criteria are not yet complete.
+  acceptance criteria are not yet complete. PR #4631 head `5c9ff05fa` has 18
+  successful checks, one expected skip, and a fresh 20-view zero-drift hosted
+  artifact. Its remaining
+  ground/tee job passed 68/70 but exceeded two protected timing budgets while
+  sharing this workstation with the 20-worker campaign; do not weaken the
+  budgets or rerun under unchanged contention.
 - Tools #4430 is **CLOSED**. PR #4618 added the qualified rotating-base reviewer
   surfaces and PR #4619 fixed the post-merge Rust gate; #4619 merge commit
   `1664d806df8a` remains an ancestor of Tools remote `main`. UpstreamDrift PR
@@ -73,15 +78,18 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
   - #8752 is **OPEN** on `research/8752-articulated-uncertainty`. The v2
     40-sample closed-state/LHS study is finite and energy-closed but every row
     retains partial opening. The 19-corner headline campaign is incomplete. At
-    2026-08-21 13:53 PDT it had retained 17/30 terminal pathway evaluations:
-    eight corners are fully accounted and the shaft-torsional-stiffness-high
-    ground pathway is active with 49/72 atomic branch checkpoints. Nominal
+    2026-08-22 00:23 PDT it retained 23 terminal pathway evaluations across 11
+    fully accounted corners; `ground_translation_stiffness_scale-low` was active
+    with 25/72 atomic branch checkpoints (776 checkpoint files overall). Nominal
     remains shaft 126/384 and ground 0/384. Three adverse pathways are retained
     failures rather than filtered results. The independent
     `articulated_headline_record_audit` rejects torn JSON,
     schema/design/config/source drift, nonprefix corners, invalid pathway
-    states, and premature completion; partial data remain explicitly
-    non-release evidence.
+    states, and premature completion. It validates the current snapshot as
+    `partial` with `release_evidence: false`, source-set digest
+    `a64f02a92a300afe9e1f8070dd4ddca9e48add2b2fee22a337a4df5c37b25e57`,
+    and record digest
+    `069d942a2a04ba1a7960e628d44d49e88b12ca1780722fb977ace03d538181ba`.
     All 72 nominal branch checkpoints retain exact trajectory/force/ground-force
     parity and restart equivalence.
     The completion-only headline evidence test stays untracked until data
