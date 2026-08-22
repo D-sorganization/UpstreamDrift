@@ -128,7 +128,9 @@ def _cached_tools_authority(repo_root: str) -> ToolsVendorAuthority:
     return inspect_tools_vendor_authority(Path(repo_root))
 
 
-def _resolve_tools_vendor(path: str, repo_root: Path) -> TileTargetResolution:
+def _resolve_tools_vendor(
+    path: str, repo_root: Path, source_root: str = ""
+) -> TileTargetResolution:
     authority = _cached_tools_authority(str(repo_root))
     if not authority.available:
         return TileTargetResolution(
@@ -136,7 +138,15 @@ def _resolve_tools_vendor(path: str, repo_root: Path) -> TileTargetResolution:
             kind=KIND_TOOLS_VENDOR,
             reason=authority.reason or "vendor/ud-tools authority unavailable",
         )
-    target = authority.root / path
+    base = authority.root
+    # A source_root like "../Tools/src/pendulum_simulator" nests the tile's
+    # path under a subproject of the Tools checkout; mirror that nesting
+    # inside the vendored gitlink so resolution matches the launch handler.
+    normalized = source_root.replace("\\", "/")
+    marker = "Tools/"
+    if marker in normalized:
+        base = base / normalized.split(marker, 1)[1]
+    target = base / path
     if target.exists():
         return TileTargetResolution(True, KIND_TOOLS_VENDOR, target)
     return TileTargetResolution(
@@ -265,7 +275,7 @@ def resolve_tile_target(model: Any, repo_root: Path) -> TileTargetResolution:
     if path.startswith("virtual/"):
         return _resolve_virtual(path, repo_root)
     if _get(model, "provider") == "tools":
-        return _resolve_tools_vendor(path, repo_root)
+        return _resolve_tools_vendor(path, repo_root, _get(model, "source_root"))
     source_root = _get(model, "source_root")
     if source_root:
         return _resolve_sibling(path, source_root, repo_root)
