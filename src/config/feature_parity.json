@@ -4,12 +4,12 @@
   "features": {
     "launcher.tile_grid": {
       "title": "Launcher tile grid from shared manifest",
-      "pyqt": "src/launchers/unified_launcher.py",
+      "pyqt": "src/launchers/embedded_tool_bootstrap.py",
       "api": "src/api/routes/launcher.py",
       "web": "ui/src/pages/Dashboard.tsx",
       "status": "parity",
       "tiles": [],
-      "notes": "Both shells render tiles from src/config/launcher_manifest.json via the shared loader."
+      "notes": "src/config/models.yaml is the canonical registry for both shells: the PyQt launcher reads it via ModelRegistry, and the web/API surface reads the same registry through LauncherManifest.load(), which overlays web metadata from launcher_manifest.json. tests/config/test_launcher_registry_parity.py enforces the ID parity."
     },
     "engines.load_and_simulate": {
       "title": "Engine load/probe + basic simulation loop",
@@ -150,7 +150,7 @@
       "api": "src/api/routes/cross_engine.py",
       "web": "ui/src/pages/CrossEngineDashboard.tsx",
       "status": "parity",
-      "tiles": ["cross_engine", "perturbation_analysis"]
+      "tiles": ["cross_engine_dashboard", "perturbation_analysis"]
     },
     "simulation.shot_tracer": {
       "title": "Shot Tracer / ball-flight visualization",
@@ -200,7 +200,7 @@
     },
     "launcher.tile_web_reachability": {
       "title": "Manifest tile web-reachability contract (route / native-window / unavailable)",
-      "pyqt": "src/launchers/unified_launcher.py",
+      "pyqt": "src/launchers/embedded_tool_bootstrap.py",
       "api": null,
       "web": "ui/src/pages/Dashboard.tsx",
       "status": "gap",
@@ -332,7 +332,7 @@
       "status": "exempt",
       "reason": "Requires a local MATLAB installation; desktop-only candidate pending #7460.",
       "pending_decision": true,
-      "tiles": ["matlab_unified"]
+      "tiles": ["matlab_suite"]
     },
     "tools.pose_editing": {
       "title": "Pose Studio interactive pose editing",

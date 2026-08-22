@@ -330,17 +330,18 @@ def test_cli_no_shape_per_engine_disables_toggle() -> None:
 
 
 def test_run_with_results_returns_trajectories_and_cv() -> None:
-    """``_run_with_results`` returns one CrossEngineRunResult per engine."""
+    """``_run_with_provenance`` returns one CrossEngineRunResult per engine."""
     config = dashboard.CrossEngineSimConfig(
         t_end=0.05, dt=0.01, noise_amplitude=0.0, n_trials=2
     )
-    results, cv = dashboard._run_with_results(["pendulum_stub"], config)
+    results, cv, backends = dashboard._run_with_provenance(["pendulum_stub"], config)
     assert "pendulum_stub" in results
     run = results["pendulum_stub"]
     assert run.metrics_per_trial
     traj = run.metrics_per_trial[0].trajectory_q
     assert traj.ndim == 2
     assert isinstance(cv, dict)
+    assert set(backends) == {"pendulum_stub"}
 
 
 def test_run_with_results_rejects_empty_engine_list() -> None:
@@ -348,7 +349,7 @@ def test_run_with_results_rejects_empty_engine_list() -> None:
         t_end=0.05, dt=0.01, noise_amplitude=0.0, n_trials=1
     )
     with pytest.raises(ValueError, match="At least one"):
-        dashboard._run_with_results([], config)
+        dashboard._run_with_provenance([], config)
 
 
 def test_run_headless_logs_and_returns_summary(

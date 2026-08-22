@@ -205,20 +205,6 @@ class TestLauncherIntegration(unittest.TestCase):
         # launch_engine_directly should now be imported from launcher_factory
         self.assertIn("from src.shared.python.launcher_factory", content)
 
-    @patch("src.launchers.upstream_drift_launcher.UpstreamDriftLauncher")
-    def test_unified_launcher_import(self, mock_upstream_drift_launcher: Mock) -> None:
-        """Test that unified launcher can be imported."""
-        try:
-            from src.launchers.unified_launcher import UnifiedLauncher
-
-            # Test that we can instantiate it
-            launcher = UnifiedLauncher()
-            self.assertIsNotNone(launcher)
-        except ImportError as e:
-            # This might fail if PyQt6 is not available, which is acceptable
-            if "PyQt6" not in str(e):
-                self.fail(f"Unexpected import error: {e}")
-
 
 class TestLauncherUISearchAndRuntimeSettings(unittest.TestCase):
     """Test cases for the new launcher features: global search, clear search, console access and runtime settings."""

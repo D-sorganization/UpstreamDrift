@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import subprocess
 from collections.abc import Callable
 from pathlib import Path
 
@@ -13,17 +14,52 @@ pytestmark = pytest.mark.unit
 
 GitResponseKey = tuple[Path, tuple[str, ...]]
 
+# Deliberately fake pin used by the fixture repo: the authority derives the
+# expected SHA from the tracked gitlink, so tests pin whatever the fixture
+# index declares (no duplicated hand-maintained constant to go stale, #8852).
+_PIN = "aa" * 20
+_OTHER_SHA = "bb" * 20
 
-def test_tools_pin_targets_qualified_rotating_base_release() -> None:
-    """The consumer authority must pin the protected Tools #4619 merge."""
-    assert authority.TOOLS_GITLINK_SHA == ("1664d806df8a2c7b184d2d3fbcea93b714caaee5")
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
+
+def test_expected_sha_is_derived_from_the_real_tracked_gitlink() -> None:
+    """The pin authority must equal the actual vendor/ud-tools gitlink.
+
+    This is the guard issue #8852 asked for: it compares the module's
+    expected SHA against ``git ls-tree HEAD vendor/ud-tools`` in this very
+    repository, so a governed submodule bump is validated automatically and
+    a drifting duplicate constant cannot exist.
+    """
+    completed = subprocess.run(  # noqa: S603  # nosec B603
+        ["git", "ls-tree", "HEAD", "--", "vendor/ud-tools"],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    if completed.returncode != 0 or not completed.stdout.strip():
+        pytest.skip("git or the vendor/ud-tools gitlink is unavailable")
+    mode, _obj_type, rest = completed.stdout.split(maxsplit=2)
+    tree_sha = rest.split()[0]
+    assert mode == "160000"
+
+    derived = authority.expected_tools_gitlink_sha(REPO_ROOT)
+
+    assert derived == tree_sha
+
+
+def test_expected_sha_requires_a_path() -> None:
+    with pytest.raises(TypeError):
+        authority.expected_tools_gitlink_sha("not-a-path")  # type: ignore[arg-type]
 
 
 def _valid_authority_responses(
     repo_root: Path,
 ) -> dict[GitResponseKey, tuple[int, str]]:
     vendor_root = repo_root / "vendor" / "ud-tools"
-    pin = authority.TOOLS_GITLINK_SHA
+    pin = _PIN
     return {
         (
             repo_root,
@@ -85,7 +121,7 @@ def test_exact_clean_tracked_gitlink_is_available(
 
     assert result.available is True
     assert result.root == vendor_root
-    assert result.expected_sha == authority.TOOLS_GITLINK_SHA
+    assert result.expected_sha == _PIN
     assert result.reason is None
 
 
@@ -94,18 +130,18 @@ def test_exact_clean_tracked_gitlink_is_available(
     [
         ("", "gitlink entry is missing"),
         (
-            "100644 " + authority.TOOLS_GITLINK_SHA + " 0\tvendor/ud-tools",
+            "100644 " + _PIN + " 0\tvendor/ud-tools",
             "not the declared gitlink",
         ),
         (
-            "160000 0000000000000000000000000000000000000000 0\tvendor/ud-tools",
-            "does not match the declared pin",
+            "160000 not-forty-hex-characters 0\tvendor/ud-tools",
+            "gitlink SHA is malformed",
         ),
         (
             "160000 "
-            + authority.TOOLS_GITLINK_SHA
+            + _PIN
             + " 0\tvendor/ud-tools\n160000 "
-            + authority.TOOLS_GITLINK_SHA
+            + _PIN
             + " 0\tvendor/ud-tools-copy",
             "gitlink entry is missing",
         ),
@@ -128,19 +164,34 @@ def test_tracked_entry_must_be_one_exact_declared_gitlink(
     assert reason in (result.reason or "")
 
 
-def test_checkout_head_must_match_declared_pin(
+def test_bumped_gitlink_without_synced_checkout_is_not_silently_available(
     authority_checkout: tuple[Path, Path, dict[GitResponseKey, tuple[int, str]]],
 ) -> None:
-    repo_root, vendor_root, responses = authority_checkout
-    responses[(vendor_root, ("rev-parse", "--verify", "HEAD"))] = (
+    """A one-line gitlink bump re-pins everything; an unsynced checkout fails."""
+    repo_root, _vendor_root, responses = authority_checkout
+    responses[(repo_root, ("ls-files", "--stage", "--", "vendor/ud-tools"))] = (
         0,
-        "0000000000000000000000000000000000000000",
+        f"160000 {_OTHER_SHA} 0\tvendor/ud-tools",
     )
 
     result = authority.inspect_tools_vendor_authority(repo_root)
 
     assert result.available is False
-    assert "HEAD does not match" in (result.reason or "")
+    assert result.expected_sha == _OTHER_SHA
+    assert "not synchronized to the tracked gitlink" in (result.reason or "")
+
+
+def test_stale_checkout_head_reports_expected_and_found_shas(
+    authority_checkout: tuple[Path, Path, dict[GitResponseKey, tuple[int, str]]],
+) -> None:
+    """A stale pin must be explicit — never a silent fail-closed (#8852)."""
+    repo_root, vendor_root, responses = authority_checkout
+    responses[(vendor_root, ("rev-parse", "--verify", "HEAD"))] = (0, _OTHER_SHA)
+
+    result = authority.inspect_tools_vendor_authority(repo_root)
+
+    assert result.available is False
+    assert result.reason == (f"Tools pin stale (expected {_PIN}, found {_OTHER_SHA})")
 
 
 @pytest.mark.parametrize(

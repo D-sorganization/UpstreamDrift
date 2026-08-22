@@ -9,6 +9,7 @@ Part of EPIC #4993 (Subtask 5) - addresses review feedback from #5049.
 
 from __future__ import annotations
 
+import importlib
 import importlib.metadata
 import os
 import sys
@@ -47,12 +48,25 @@ FALLBACK_ADAPTER_MODULES = (
     "src.tools.golf_simulation_suite._embed_adapter",
     "src.tools.simulation_backends_launcher._embed_adapter",
     "src.tools.launch_monitor_analytics._embed_adapter",
-    "engines.Simscape_Multibody_Models.3D_Golf_Model.python.src.apps._embed_adapter",
+    "src.tools.swing_flight_pipeline._embed_adapter",
+    # Physics-engine adapters (issue #8857): these self-register the
+    # mujoco_unified / drake_golf / pinocchio_golf / opensim_golf /
+    # myosim_suite tool ids used by the launcher tiles.
+    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf._embed_adapter",
+    "src.engines.physics_engines.drake.python.src._embed_adapter",
+    "src.engines.physics_engines.pinocchio.python.pinocchio_golf._embed_adapter",
+    "src.engines.physics_engines.opensim.python._embed_adapter",
+    "src.engines.physics_engines.myosuite.python._embed_adapter",
+    # Simscape C3D viewer: the real adapter lives under a path segment
+    # ("3D_Golf_Model") that is not a valid dotted-import identifier, so
+    # it is reached through an importable shim (issue #8856).
+    "src.launchers.adapters.simscape_embed",
 )
 
 # Registry state tracking
 _bootstrap_complete = False
 _registered_tools: list[str] = []
+_bootstrap_failures: list[tuple[str, str]] = []
 
 
 def _iter_entry_point_adapter_modules() -> list[str]:
@@ -141,14 +155,46 @@ def bootstrap_embeddable_tools() -> list[str]:
             __import__(module_path)
         except ImportError as e:
             # Tools may have optional dependencies (PyQt6, etc.)
-            # Log but don't fail - the tool just won't be embeddable
-            logger.warning(f"Failed to bootstrap {module_path}: {e}")
+            # Log but don't fail - the tool just won't be embeddable.
+            # Record the failure so callers (health panels, tests) can
+            # surface it instead of it vanishing into the log (#8856).
+            logger.warning(
+                "Failed to bootstrap embeddable-tool adapter %r: %s", module_path, e
+            )
+            _bootstrap_failures.append((module_path, repr(e)))
             continue
         except Exception as e:  # noqa: BLE001
             # Catch any other unexpected errors during registration
-            logger.warning(f"Error bootstrapping {module_path}: {e}")
+            logger.warning(
+                "Error bootstrapping embeddable-tool adapter %r: %s", module_path, e
+            )
+            _bootstrap_failures.append((module_path, repr(e)))
             continue
         new_ids = sorted(set(EMBEDDABLE_TOOL_REGISTRY) - before)
+        reloadable = (
+            module_path.rsplit(".", 1)[-1] == "_embed_adapter"
+            or module_path == "src.launchers.adapters.simscape_embed"
+        )
+        if not new_ids and reloadable and module_path in sys.modules:
+            # Adapters self-register at module import, so a cached import is
+            # a no-op. If the registry was cleared after the first import
+            # (test isolation resets it between sessions), the tool would
+            # otherwise stay unregistered forever; re-executing the module
+            # restores its registrations idempotently. Only thin adapter
+            # shims are re-executed: reloading a full tool GUI module (e.g.
+            # pose_studio.gui) would swap class identities under live
+            # objects.
+            try:
+                importlib.reload(sys.modules[module_path])
+            except Exception as e:  # noqa: BLE001
+                logger.warning(
+                    "Failed to re-register embeddable-tool adapter %r: %s",
+                    module_path,
+                    e,
+                )
+                _bootstrap_failures.append((module_path, repr(e)))
+                continue
+            new_ids = sorted(set(EMBEDDABLE_TOOL_REGISTRY) - before)
         if new_ids:
             registered.extend(new_ids)
             logger.debug(f"Bootstrapped embeddable tools: {new_ids}")
@@ -220,6 +266,16 @@ def get_bootstrapped_tools() -> list[str]:
     return _registered_tools.copy()
 
 
+def get_bootstrap_failures() -> list[tuple[str, str]]:
+    """Return ``(module_path, error_repr)`` for each adapter that failed.
+
+    Empty until :func:`bootstrap_embeddable_tools` runs. Lets callers
+    (integrations-health panels, tests) surface bootstrap failures
+    instead of relying on someone reading the warning log (#8856).
+    """
+    return _bootstrap_failures.copy()
+
+
 def reset_bootstrap_state() -> None:
     """Reset bootstrap state (for testing only).
 
@@ -227,6 +283,7 @@ def reset_bootstrap_state() -> None:
         This function is intended for test fixtures only. Calling this
         during normal operation will break embedded tool functionality.
     """
-    global _bootstrap_complete, _registered_tools
+    global _bootstrap_complete, _registered_tools, _bootstrap_failures
     _bootstrap_complete = False
     _registered_tools = []
+    _bootstrap_failures = []

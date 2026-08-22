@@ -319,7 +319,7 @@ def test_update_launch_button_tolerates_theme_without_success_hover() -> None:
     colors = SimpleNamespace(success="#30d158")
 
     with patch(
-        "src.shared.python.theme.get_current_colors",
+        "src.shared.python.theme.palette.get_current_colors",
         return_value=colors,
     ):
         UpstreamDriftLauncher.update_launch_button(launcher, "Sidekick")

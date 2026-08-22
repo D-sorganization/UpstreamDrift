@@ -120,11 +120,6 @@ src/engines/simscape/adapter.py	self._lifecycle.state.value	4
 src/launchers/chat_history/chat_history_service.py	self._memory_path.parent.mkdir	1
 src/launchers/cross_engine_dashboard.py	ax.xaxis.label.set_color	1
 src/launchers/cross_engine_dashboard.py	ax.yaxis.label.set_color	1
-src/launchers/golf_suite_launcher.py	self.drake_path.parent.parent	1
-src/launchers/golf_suite_launcher.py	self.mujoco_path.parent.parent	1
-src/launchers/golf_suite_launcher.py	self.myosim_path.parent.parent	1
-src/launchers/golf_suite_launcher.py	self.opensim_path.parent.parent	1
-src/launchers/golf_suite_launcher.py	self.pinocchio_path.parent.parent	1
 src/launchers/launcher_dialogs.py	self.workspace_tabs.detached_tabs.items	1
 src/launchers/launcher_layout_manager.py	self.current_view_mode.name.lower	1
 src/launchers/launcher_ui_setup.py	self.runtime_button._hide_timer.start	1
