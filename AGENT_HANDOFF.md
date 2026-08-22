@@ -2,119 +2,115 @@
 
 Last updated: 2026-08-22
 
-This is current operational state, not history. Epic #8557 is the canonical
-proximal--distal completion authority.
+This file records current operational state, not history. Git and GitHub retain
+history. Epic #8557 is the canonical proximal-to-distal completion authority.
 
-## Verified Remote State
+## Remote-Main Specification Repair (#8998)
 
-- UpstreamDrift `main` is
-  `c7904b530fe8921ecdb17362f2100e5c85400af4`, the protected merge of PR
-  #8990. The lifecycle head passed 35 checks; the optional-stack job was
-  cancelled after merge rather than failing.
-- Tools `main` is `9d1efb8b4162503badd63dcd95b5e1f06b09c404`, the protected
-  merge of PR #4635, with 25 successful and one skipped check.
-- Last verified AffineDrift `main` was
-  `60b95283a43c9ebc14462327d988ca5b0bd3c6a6`. Its immutable projection still
-  pins an earlier paper and must be refreshed after the scientific campaign.
+- PR #8999 is protected-merged at remote-main commit
+  `345f4c8cd58bbe368be9225527571b42754f983b`. It retained PR #8995's intended
+  MediaPipe optimization while restoring the canonical 4,318-line `SPEC.md`.
+- The repair commit is verified as an ancestor of remote `main`; the repeated
+  misplaced changelog corruption is no longer present.
+
+## Cross-Repository Authority
+
+- Tools `main` is `81a4a617a64c8d35880416f3b769dad06525afbd`; #4635 is
+  merged and supplies the
+  provenance-aware ground workspace used by consumers. PR #4646 repairs the
+  registered visual-evidence timeout without weakening its assertions and is
+  awaiting a clean protected run after the uncertainty campaign releases CPU.
+- AffineDrift `main` is `60b95283a43c9ebc14462327d988ca5b0bd3c6a6`.
+  Its immutable publication projection still pins an earlier UpstreamDrift
+  release and must be refreshed only after the scientific campaign is merged.
+- UpstreamDrift is the scientific source authority. AffineDrift is a generated,
+  revision-pinned publisher; Tools exposes typed consumers, not a second paper.
 
 ## Publication Authority
 
-- PR #8987 reconciled the current 235-page computational PDF, SHA-256
+- The current computational candidate is the 235-page proximal-to-distal PDF.
+- PDF SHA-256:
   `ce51e6fe4f3d9033bf730c0fe2538c72bf88b1b9707f77a7b6385923a1b5fdcf`.
-- The PDF is 1,863,127 bytes, has 194 valid URI links and 246 outline entries,
-  renders all 235 pages, and is fast-web linearized. Every page was visually
-  inspected; pages 152--160 received full-resolution review.
-- Computational qualification passes. Archival qualification remains
-  fail-closed because the PDF is untagged and contains 112 Type 3 resources
-  plus two unembedded resources.
+- It has 194 valid URI links and 246 outline entries; all pages render and were
+  inspected. Archival qualification remains fail-closed because the PDF is
+  untagged and retains Type 3 and unembedded font resources.
 
-## Active Source Freeze: Uncertainty Campaign (#8752)
+## Active Articulated Uncertainty Campaign (#8752)
 
 - Worktree: `UpstreamDrift-worktrees/goal-8752-uncertainty`.
-- PID `18404` is the intentional checkpointed 19-corner coordinator and may own
-  up to 20 workers. Do not kill workers, edit source, or start another campaign.
-- At 2026-08-22 07:48 PDT, 13 corners were complete; corner 14,
-  `ground_translation_damping_scale-low`, had 47 of 72 ground checkpoints.
-  The progress tree held 942 checkpoint files. Completed pathways and
-  digest-bound ground branches are restartable.
-- Retained numerical failures are evidence. Partial checkpoints are execution
-  evidence, not release evidence.
-- After completion, independently audit the record and integrate
-  `fix/8752-atomic-campaign-checkpoint` commit `9f850a67f...`. Then implement
-  #8800 height, mass, and joint-limit propagation before closing #8752/#8668.
+- Parent PID `18404` is the intentional source-locked coordinator with 20
+  workers. Do not kill workers individually, edit source-hashed files, or start
+  a duplicate campaign.
+- At 2026-08-22 12:50 PDT, 15 of 19 corners and 26 of 29 pathway evaluations
+  were terminal. `ground_translation_damping_scale-high` retained 25 of 72
+  atomic ground branch checkpoints; two ground-only evaluations remain after
+  it. The 21-process group was healthy at about 9.7 CPU cores.
+- Completed rows and digest-bound branch checkpoints are restartable. Partial
+  checkpoints are execution evidence, not release evidence.
+- After completion, independently audit the record, then integrate
+  `fix/8752-atomic-campaign-checkpoint` (`9f850a67f...`). Execute #8800 next,
+  then regenerate claims, figures, the paper, and the AffineDrift projection.
 
-## Docker Build Boundary (#8996, PR #8993)
+## Pinned Tools Docker Boundary (#8996)
 
-- Worktree: `UpstreamDrift-worktrees/8789-docker-tools-boundary`; branch
-  `fix/8789-docker-tools-boundary`; full PR #8993 has human review requested.
-- Owner-closed phase issue #8789 remains closed. Its unfinished Docker criterion
-  is extracted to #8996; PR #8993 closes #8996 only after protected merge. The
-  520-node removal-only quarantine burn-down remains owned by #8766.
-- The modular workflows fetch exact Tools gitlink
-  `aec16af5a1e69c0d5542da5e04a1db1023cceff2` and attest only
-  `src/shared`, `src/sidekick`, `src/chat`, `src/python/src/utils`, and
-  `src/contracts.py`. Current digest:
+- PR #8993 is open from `fix/8789-docker-tools-boundary`; its pre-refresh head
+  was `81867ef2ea13191c3fba0d86be1c6682375fcbf3`. Current work merges repaired
+  remote `main`; refresh the exact head after commit and push.
+- It binds modular images to the exact Tools gitlink and content digest, fixes
+  isolated PEP 517 hook loading, and advances pip to 26.2.1.
+- The workflows attest only `src/shared`, `src/sidekick`, `src/chat`,
+  `src/python/src/utils`, and `src/contracts.py`; the registered digest is
   `30dc761a34ec30eb3bf41d11d2dca1aff90448e71defbe82c32fcd657525fcc3`.
-- `Dockerfile.modular` copies exactly those roots. The Hatch hook verifies the
-  digest when Git metadata is absent and fails closed on incomplete, malformed,
-  symlinked, or mismatched provenance. Both Dockerfiles pin pip 26.2.1.
-- Protected head `f5858ce2e` exposed one shared installation failure across
-  fourteen lanes: PEP 517 does not guarantee the source root on `sys.path`.
-  Commit `6d72fec71` loads the adjacent canonical helper by file path. The new
-  isolated-import regression and 78 focused Docker/packaging tests pass.
-- A real isolated source build passed the formerly failing hook stage; optional
-  archive compression was stopped to return CPU to the uncertainty campaign.
-  Docker is unavailable locally, so protected CI owns image and Trivy evidence.
-- Current `main` was merged normally into the branch after #8990. Resolve only
-  this handoff conflict, validate, commit the merge, and push once. Do not rerun
-  the obsolete failing head.
-- The full document-size gate retains an unrelated baseline failure:
-  `_ch06c_spatial_cross_formulation.qmd` is 51,523 bytes against 51,200. Do not
-  edit that campaign-adjacent source during the freeze.
+- Docker is unavailable locally, so protected image builds and scans remain
+  authoritative. Human review is required; do not create redundant runs.
 
-## Full-Suite QApplication Repair (#8990)
+## Executable Quarantine Ledger (#8766)
 
-- `run_launcher` reuses an existing Qt application and calls `exec()` only when
-  it owns the newly constructed application.
-- Full-suite module replacement had invalidated string-based mocks. The merged
-  tests patch the retained function globals and preserve the existing
-  `keep_terminal_open=True` child-launch contract.
-- PR #8990 merged as `c7904b530fe8921ecdb17362f2100e5c85400af4`; do not reopen or
-  duplicate its CI.
+- PR #8997 is open from `fix/8766-executable-cluster-ledger`; head before base
+  repair is `c2d33b13d718fe94216313c58d515b201baea5b6`.
+- The 520-node ledger has an executable 10-cluster ownership map. The checker
+  rejects duplicate, unassigned, ambiguous, replacement, or new node IDs and
+  CI compares PR state with the fetched base branch.
+- #8997 remains open and conflicted. After #8993, merge repaired current main,
+  resolve handoff/SPEC metadata, and rerun protected checks. This tranche
+  organizes debt; it fixes no quarantined test.
 
-## Scientific and Repository Boundaries
+## Scientific Boundaries
 
+- #8556 remains externally data-gated: no governed participant dataset with
+  synchronized bilateral six-axis grip wrenches is available. Never substitute
+  synthetic traces for human validation.
 - The model ladder is synthetic and model-conditional. It does not establish
-  participant mechanics, anatomy, physiology, calibration, injury, coaching
-  strategy, or a universal speed benefit.
-- #8556 remains externally data-gated because no governed participant dataset
-  with synchronized bilateral six-axis grip wrenches is available. Never
-  substitute synthetic traces for human validation.
-- Other canonical gates include #8724, #8443, #8448, #8449, #8450, #8595,
-  #8668, #8684, and #8796. Verify acceptance evidence before changing state.
-- Use TDD, DbC, DRY, and LoD. Never force-push, admin-merge, bypass hooks or
-  checks, add quarantine debt, hand-edit governed artifacts, or edit the pinned
-  Tools submodule.
-- PRs target `main`; use full PRs and require human review. Verify exact head,
-  checks, review, merge SHA, remote-main ancestry, and clean trees.
+  participant mechanics, anatomy, physiology, equipment calibration, injury,
+  coaching strategy, or a universal speed benefit.
+- #8724, #8443, #8448, #8449, #8450, #8595, #8668, #8684, and #8796 remain
+  open. Verify exact acceptance evidence before changing issue state.
 
-## Current Docker Validation
+## Repository and Review Rules
 
-```bash
-python3 -m pytest -q -n 0 \
-  tests/unit/test_pinned_tools_provenance.py tests/unit/test_build_hooks.py \
-  tests/docker/test_pinned_tools_build_boundary.py \
+- PRs target `main`; use full PRs, never drafts. Human review is required.
+- Never force-push, admin-merge, bypass hooks/checks, add quarantine debt, or
+  edit `vendor/ud-tools`.
+- Use TDD, DbC, DRY, and LoD. Keep scientific evidence hash-pinned and use
+  governed generators rather than hand-editing generated artifacts.
+- Use title case for document headings and captions.
+- Verify exact PR head, review, checks, merge SHA, remote-main ancestry, and a
+  clean worktree before reporting protected completion.
+
+## Focused Validation
+
+```powershell
+python3 scripts/check_spec_paths.py
+python3 scripts/check_document_title_case.py --changed-from origin/main
+python3 -m pytest -q -n 0 tests/unit/test_pinned_tools_provenance.py \
+  tests/unit/test_build_hooks.py tests/docker/test_pinned_tools_build_boundary.py \
   tests/docker/test_docker_hardening_7159_7161.py \
   tests/docker/test_docker_integration.py \
   tests/unit/scripts/test_dockerfile_contracts.py
 python3 scripts/ci/check_dockerfile_contracts.py
-python3 scripts/check_document_title_case.py --changed-from origin/main
-python3 -m ruff check build_hooks.py \
-  scripts/packaging/pinned_tools_provenance.py tests/unit/test_build_hooks.py
-python3 -m ruff format --check build_hooks.py \
-  scripts/packaging/pinned_tools_provenance.py tests/unit/test_build_hooks.py
+python3 scripts/ci/check_file_size_budget.py
 git diff --check
 ```
 
-Passing common gates does not close a child issue whose acceptance remains
-unmet.
+Passing common gates does not close a child issue whose acceptance evidence
+remains incomplete.

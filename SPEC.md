@@ -532,7 +532,7 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.574                                            |
+| **Spec Version**        | 1.0.575                                            |
 | **Last Spec Update**    | 2026-08-22                                         |
 
 ## 2. Purpose & Mission
@@ -565,22 +565,14 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ### Recent Spec Updates
 
 - **2026-08-22** - Made the modular Docker build boundary independently
-  verifiable for issue #8789. The reusable pinned-Tools action can emit both
-  the exact `vendor/ud-tools` gitlink and a deterministic SHA-256 over the
-  minimal Tools-owned source roots required by the wheel build. The modular
-  size and smoke workflows pass both identities into the isolated Docker
-  context; `Dockerfile.modular` copies exactly those roots, and the Hatch build
-  hook loads its adjacent digest helper by file path before recomputing content
-  when Git metadata is intentionally absent. This remains valid when PEP 517
-  loads the custom hook without adding the source root to `sys.path`.
-  Missing, incomplete, malformed, symlinked, or mismatched provenance fails
-  closed. Normal repository builds retain the existing gitlink validation.
-  Contract tests cover action opt-in, workflow propagation, Docker copy and
-  ignore rules, source-distribution inclusion, and tamper rejection. Both
-  Dockerfiles also pin pip 26.2.1, the first patched release after
-  PYSEC-2026-3721; CI remains the authority for actual image construction and
-  vulnerability scanning because Docker is not installed in every developer
-  environment.
+  verifiable for issue #8996. Reusable pinned-Tools setup emits the exact
+  `vendor/ud-tools` gitlink plus a deterministic SHA-256 over the minimal
+  Tools-owned package roots. The modular build copies only those roots and
+  verifies the digest without relying on Git metadata. Missing roots,
+  symlinks, malformed attestations, incomplete source sets, and content drift
+  fail closed. The Hatch hook loads its adjacent canonical helper by file path
+  so isolated PEP 517 builds do not depend on the repository root being on
+  `sys.path`; both runtime Dockerfiles pin pip 26.2.1.
 
 - **2026-08-21** - Resolved the dual aero-coefficient-set discrepancy (issue
   #8978, epic #8965 WS2): the multi-model ball-flight framework's
@@ -3211,7 +3203,8 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-08-22 | 1.0.574 | Bound modular Docker builds to the exact pinned Tools package roots. CI emits the superproject gitlink and deterministic path-and-content digest; the isolated build copies only the registered roots and recomputes the digest without Git metadata. Missing roots, symlinks, incomplete attestations, malformed identities, and content mismatches fail closed. The custom Hatch hook loads its adjacent helper by file path so PEP 517 source and editable builds do not depend on the repository root being present on `sys.path`. Both runtime Dockerfiles pin pip 26.2.1 after PYSEC-2026-3721, and focused action, workflow, Docker-context, isolated-import, packaging, and tamper tests enforce the boundary. |
+| 2026-08-22 | 1.0.575 | Bound modular Docker builds to the exact pinned Tools package roots. CI emits the superproject gitlink and deterministic path-and-content digest; the isolated build copies only the registered roots and recomputes the digest without Git metadata. Missing roots, symlinks, incomplete attestations, malformed identities, and content mismatches fail closed. The custom Hatch hook loads its adjacent helper by file path so PEP 517 source and editable builds do not depend on the repository root being present on `sys.path`. Both runtime Dockerfiles pin pip 26.2.1 after PYSEC-2026-3721, and focused action, workflow, Docker-context, isolated-import, packaging, and tamper tests enforce the boundary. |
+| 2026-08-22 | 1.0.574 | Retained PR #8995's MediaPipe landmark-mean optimization while repairing its generated specification projection: restored the complete first-parent specification, removed thousands of repeated misplaced changelog rows, and recorded the optimization exactly once in this Change Log. |
 | 2026-08-22 | 1.0.573 | Made the classic launcher application and event-loop lifecycle explicitly single-owner. A typed resolution seam reuses `QApplication.instance()` without starting a nested event loop and constructs and executes an application only when the launcher owns it. Tests use an ordinary mock at that seam instead of replacing the SIP-backed Qt class, preventing Linux worker teardown crashes; launcher-containment tests also isolate the mutable embeddable-tool registry so their package-entrypoint guard is independent of suite order. |
 | 2026-08-22 | 1.0.571 | Reconciled the release-bound proximal-to-distal publication record with the exact current candidate for #8977. The computational profile now pins the 235-page, 1,863,127-byte PDF digest, 246 outline entries, 194 valid external links, complete rendering and text extraction, and the exact font inventory in executable tests. The complete ordered page set was visually inspected, with the newly added native-contact section and surrounding pages checked at full resolution. The archival profile remains fail-closed and explicitly records the untagged structure, 112 Type 3 resources, and two unembedded resources rather than promoting computational readiness to an accessibility claim. |
 | 2026-08-21 | 1.0.570 | EPIC #8965 registry residuals + Tools vendor pin bump. `WEB_CATALOG_ONLY_TILES` allowlist entries now require a substantive justification string enforced by the parity suite (#8853); `virtual/*` launch targets are genuinely validated against the handler artifacts they dispatch to (`VIRTUAL_TARGETS`/`VIRTUAL_PREFIXES` map to backing files that must exist) instead of being allowlist-blessed (#8854); and `src/config/registry_exclusions.yaml` is the new documented convention for launcher-less `src/tools` packages — every package must either be reachable from a launcher tile or carry a justified exclusion entry, enforced by `tests/config/test_registry_exclusions.py` (#8863: contraction, drift_control, sg_optimizer, hmr2_sidecar, matlab_utilities, offline_validation, video_analyzer). The `vendor/ud-tools` gitlink advances from `1664d806df8a` to `aec16af5a1e69d`-era Tools main (`aec16af5a1e69c0d5542da5e04a1db1023cceff2`), revalidated by the vendor-authority, manifest, sidekick-import, and launch-QA suites. |
