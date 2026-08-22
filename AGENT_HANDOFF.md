@@ -58,15 +58,18 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
 - Reusing an application now also preserves event-loop ownership: only a newly
   constructed application receives `exec()`. A typed resolution seam lets tests
   avoid replacing the SIP-backed Qt class, which crashed Linux xdist teardown.
-- Exact head `6c702a5f2` passed both protected Python lanes but its unit gate
-  reported 11,727 passed and four failures: both mock-based lifecycle tests
-  crashed workers, while two containment tests leaked the global embed registry.
-- Local repair evidence: 26 launcher-base tests pass serially and under xdist;
-  the exact four-worker CI-marked three-file slice passes 6/2 quarantined. Ruff,
-  formatting, suite-marker ratchet, and registry-isolation regressions pass.
-- PR #8990 remains a full PR with human review requested. Push the repair after
-  hooks, then require exact-head protected checks, review, merge, and a verified
-  post-merge `main` run.
+- Protected head `b3a9ea8ec` passed 32 checks but its unit gate reported 11,731
+  passed and two lifecycle-test failures. Full-suite module replacement made
+  string-based patch targets diverge from the retained `run_launcher` function.
+- The local repair patches the exact function globals, so event-loop ownership
+  branches remain testable under module-identity drift. Two neighboring child
+  launch tests now assert the existing `keep_terminal_open=True` contract.
+  Thirty focused launcher and containment tests pass; Ruff passes.
+- PR #8990 remains a full PR with human review requested. Push the focused
+  repair after hooks, then require exact-head protected checks, review, merge,
+  and a verified post-merge `main` run.
+- Docker boundary PR #8993 separately provides the pinned Tools roots and
+  content attestation for modular images; do not duplicate its CI runs.
 - Do not close #8789 with this PR. Docker profile boundaries and the
   removal-only quarantine burn-down remain separate unchecked exit criteria.
 

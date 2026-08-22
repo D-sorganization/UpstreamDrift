@@ -78,5 +78,6 @@ def test_motion_match_preview_uses_local_source_package_module(
         module_name="src.tools.starting_pose_matcher",
         cwd=tmp_path.resolve(),
         extra_python_paths=(),
+        keep_terminal_open=True,
     )
     process_manager.launch_script.assert_not_called()

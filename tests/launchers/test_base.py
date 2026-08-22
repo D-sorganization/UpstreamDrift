@@ -230,9 +230,9 @@ def test_resolve_application_creates_application_when_absent() -> None:
 @pytest.mark.unit
 def test_run_launcher_does_not_execute_reused_application() -> None:
     existing_application = MagicMock()
-    with patch(
-        "src.launchers.base._resolve_application",
-        return_value=(existing_application, False),
+    with patch.dict(
+        run_launcher.__globals__,
+        {"_resolve_application": MagicMock(return_value=(existing_application, False))},
     ):
         launcher_class = MagicMock()
 
@@ -248,9 +248,9 @@ def test_run_launcher_does_not_execute_reused_application() -> None:
 def test_run_launcher_executes_owned_application() -> None:
     owned_application = MagicMock()
     owned_application.exec.return_value = 17
-    with patch(
-        "src.launchers.base._resolve_application",
-        return_value=(owned_application, True),
+    with patch.dict(
+        run_launcher.__globals__,
+        {"_resolve_application": MagicMock(return_value=(owned_application, True))},
     ):
         launcher_class = MagicMock()
 
