@@ -61,6 +61,13 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
 - The workflows attest only `src/shared`, `src/sidekick`, `src/chat`,
   `src/python/src/utils`, and `src/contracts.py`; the registered digest is
   `30dc761a34ec30eb3bf41d11d2dca1aff90448e71defbe82c32fcd657525fcc3`.
+- Protected head `37774ebdd` exposed a collection-order defect between two
+  Hatchling test stubs. The local correction gives both stubs the constructor
+  contract and isolates UI-build tests from the independently covered Tools
+  registration boundary; the combined 70-test ordering regression passes.
+- That head's wheel job failed before build during checkout because the selected
+  runner's cached `human-gazebo` submodule had no current revision. Re-evaluate
+  on the consolidated correction push; do not change shared runners.
 - Docker is unavailable locally, so protected image builds and scans remain
   authoritative. Human review is required; do not create redundant runs.
 
