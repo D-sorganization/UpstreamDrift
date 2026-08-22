@@ -5,6 +5,8 @@ Last updated: 2026-08-22
 This file records current operational state, not history. Git and GitHub retain
 history. Epic #8557 is the canonical proximal-to-distal completion authority.
 
+<<<<<<< HEAD
+
 ## Remote-Main Specification Repair (#8998)
 
 - PR #8999 is protected-merged at remote-main commit
@@ -25,6 +27,18 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
   release and must be refreshed only after the scientific campaign is merged.
 - UpstreamDrift is the scientific source authority. AffineDrift is a generated,
   revision-pinned publisher; Tools exposes typed consumers, not a second paper.
+  =======
+
+## Verified Repository State
+
+- UpstreamDrift `origin/main` is
+  `c7904b530fe8921ecdb17362f2100e5c85400af4` from protected PR #8990.
+- Tools `main` is `9d1efb8b4162503badd63dcd95b5e1f06b09c404`; #4635 is
+  merged and supplies the provenance-aware ground workspace used by consumers.
+- AffineDrift `main` is `60b95283a43c9ebc14462327d988ca5b0bd3c6a6`.
+  Its immutable publication projection still pins an earlier UpstreamDrift
+  release and must be refreshed only after the scientific campaign is merged.
+  > > > > > > > c2d33b13d (docs: map quarantine burn-down handoff)
 
 ## Publication Authority
 
@@ -34,6 +48,8 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
 - It has 194 valid URI links and 246 outline entries; all pages render and were
   inspected. Archival qualification remains fail-closed because the PDF is
   untagged and retains Type 3 and unembedded font resources.
+- UpstreamDrift is the scientific source authority. AffineDrift is a generated,
+  revision-pinned publisher; Tools exposes typed consumers, not a second paper.
 
 ## Active Articulated Uncertainty Campaign (#8752)
 
@@ -90,14 +106,16 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
 
 ## Executable Quarantine Ledger (#8766)
 
-- PR #8997 is open from `fix/8766-executable-cluster-ledger`; head before base
-  repair is `c2d33b13d718fe94216313c58d515b201baea5b6`.
+- PR #8997 is open from `fix/8766-executable-cluster-ledger`.
 - The 520-node ledger has an executable 10-cluster ownership map. The checker
   rejects duplicate, unassigned, ambiguous, replacement, or new node IDs and
   CI compares PR state with the fetched base branch.
-- #8997 remains open and conflicted. After #8993, merge repaired current main,
-  resolve handoff/SPEC metadata, and rerun protected checks. This tranche
-  organizes debt; it fixes no quarantined test.
+- CI Standard validates exact coverage and compares PR node IDs with the fetched
+  base branch. The existing skip behavior remains unchanged and scoped to
+  `UNIT_GATE_QUARANTINE=1`.
+- Ten contract tests, Ruff, YAML parsing, the checker, and file-size validation
+  pass. Finish docs/SPEC, push a full PR, obtain human review, and use protected
+  CI. This tranche organizes debt; it does not claim any quarantined test fixed.
 
 ## Scientific Boundaries
 
@@ -124,16 +142,12 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
 ## Focused Validation
 
 ```powershell
-python3 scripts/check_spec_paths.py
+python3 scripts/ci/check_unit_gate_quarantine.py --baseline-ref origin/main
+python3 -m pytest tests/ci/test_unit_gate_quarantine_contract.py -q
+python3 -m ruff check scripts/ci/check_unit_gate_quarantine.py tests/ci/test_unit_gate_quarantine_contract.py
+python3 -m ruff format --check scripts/ci/check_unit_gate_quarantine.py tests/ci/test_unit_gate_quarantine_contract.py
 python3 scripts/check_document_title_case.py --changed-from origin/main
-python3 -m pytest -q -n 0 tests/unit/test_pinned_tools_provenance.py \
-  tests/unit/test_build_hooks.py tests/docker/test_pinned_tools_build_boundary.py \
-  tests/docker/test_docker_hardening_7159_7161.py \
-  tests/docker/test_docker_integration.py \
-  tests/unit/scripts/test_dockerfile_contracts.py
-python3 scripts/ci/check_dockerfile_contracts.py
 python3 scripts/ci/check_file_size_budget.py
-git diff --check
 ```
 
 Passing common gates does not close a child issue whose acceptance evidence
