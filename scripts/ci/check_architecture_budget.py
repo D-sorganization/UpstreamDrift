@@ -73,12 +73,17 @@ def _run_git(args: list[str], repo_root: Path) -> str:
 
 
 def _changed_python_files(repo_root: Path, base_ref: str) -> list[Path]:
-    output = _run_git(["diff", "--name-only", f"{base_ref}...HEAD", "--"], repo_root)
-    return [
-        repo_root / rel
-        for rel in output.splitlines()
-        if rel.endswith(".py") and (repo_root / rel).is_file()
-    ]
+    for ref in (base_ref, "origin/main", "main", "HEAD~1"):
+        try:
+            output = _run_git(["diff", "--name-only", f"{ref}...HEAD", "--"], repo_root)
+            return [
+                repo_root / rel
+                for rel in output.splitlines()
+                if rel.endswith(".py") and (repo_root / rel).is_file()
+            ]
+        except RuntimeError:
+            continue
+    return []
 
 
 def _tracked_python_files(repo_root: Path) -> list[Path]:
