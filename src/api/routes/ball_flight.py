@@ -17,6 +17,7 @@ from src.api.middleware.error_handler import handle_api_errors
 from src.shared.python.physics.flight_models import (
     FlightModelRegistry,
     FlightModelType,
+    TrajectoryPoint,
     UnifiedLaunchConditions,
 )
 
@@ -149,7 +150,9 @@ class BallFlightSimulationResponse(BallFlightModelResult):
     results: list[BallFlightModelResult]
 
 
-def _trajectory_samples(result_trajectory: list) -> list[BallFlightTrajectorySample]:
+def _trajectory_samples(
+    result_trajectory: list[TrajectoryPoint],
+) -> list[BallFlightTrajectorySample]:
     """Serialize existing trajectory points without changing physics behavior."""
     return [
         BallFlightTrajectorySample(
