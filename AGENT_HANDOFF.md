@@ -75,9 +75,12 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
   once on the consolidated correction head; do not change shared runners.
 - Trivy correctly rejected that image for `msgpack` 1.1.2
   (GHSA-6v7p-g79w-8964) and `setuptools` 70.3.0 (CVE-2025-47273). The pending
-  correction reasserts fixed `msgpack==1.2.1` and `setuptools==78.1.1` after
+  correction reasserts fixed `msgpack==1.2.1` and `setuptools==83.0.0` after
   every supported image's final dependency layer and adds a unit-marked
-  repository contract. The 116-test focused Docker/packaging/spec set passes.
+  repository contract. The higher setuptools floor also resolves
+  PYSEC-2026-3447, which the first protected follow-up build surfaced after
+  the older finding was cleared. The 116-test focused Docker/packaging/spec
+  set passes.
 - Docker is unavailable locally, so protected image builds and scans remain
   authoritative. Human review is required; do not create redundant runs.
 
