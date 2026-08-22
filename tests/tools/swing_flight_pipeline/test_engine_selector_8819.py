@@ -25,7 +25,10 @@ from PyQt6.QtWidgets import QApplication  # noqa: E402
 from src.shared.python.physics.swing_state_providers import (  # noqa: E402
     REASON_NOT_IMPLEMENTED,
     REASON_NOT_INSTALLED,
+    MuJoCoSwingStateProvider,
 )
+
+_MUJOCO_AVAILABLE = MuJoCoSwingStateProvider().is_available()
 from src.tools.swing_flight_pipeline.gui import SwingFlightWidget  # noqa: E402
 
 
@@ -54,11 +57,19 @@ def _item(widget: SwingFlightWidget, name: str):
     return index, combo.model().item(index)
 
 
-@pytest.mark.parametrize("engine", ["mujoco", "drake", "pinocchio"])
+@pytest.mark.parametrize("engine", ["drake", "pinocchio"])
 def test_unimplemented_engines_are_disabled(widget, engine):
     _, item = _item(widget, engine)
     assert item is not None
     assert not item.isEnabled(), f"{engine} must be disabled until implemented"
+
+
+def test_mujoco_entry_enabled_when_engine_available(widget):
+    """#8975: MuJoCo sourcing is implemented — the entry enables whenever
+    the mujoco package (and its MJCF asset) is importable."""
+    _, item = _item(widget, "mujoco")
+    assert item is not None
+    assert item.isEnabled() == _MUJOCO_AVAILABLE
 
 
 def test_manual_entry_is_enabled_and_default(widget):
@@ -67,11 +78,22 @@ def test_manual_entry_is_enabled_and_default(widget):
     assert widget._engine_combo.currentText() == "manual"
 
 
-@pytest.mark.parametrize("engine", ["mujoco", "drake", "pinocchio"])
+@pytest.mark.parametrize("engine", ["drake", "pinocchio"])
 def test_disabled_entries_carry_reason_tooltip(widget, engine):
     index, _ = _item(widget, engine)
     tooltip = widget._engine_combo.itemData(index, Qt.ItemDataRole.ToolTipRole)
     assert tooltip in (REASON_NOT_IMPLEMENTED, REASON_NOT_INSTALLED)
+
+
+def test_mujoco_tooltip_honest(widget):
+    """Enabled mujoco carries no misleading 'unavailable' tooltip; when the
+    package is missing the tooltip says exactly that."""
+    index, _ = _item(widget, "mujoco")
+    tooltip = widget._engine_combo.itemData(index, Qt.ItemDataRole.ToolTipRole)
+    if _MUJOCO_AVAILABLE:
+        assert tooltip not in (REASON_NOT_IMPLEMENTED, REASON_NOT_INSTALLED)
+    else:
+        assert tooltip == REASON_NOT_INSTALLED
 
 
 def test_result_engine_name_matches_selected_provider(widget):
