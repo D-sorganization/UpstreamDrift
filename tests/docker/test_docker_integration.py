@@ -237,6 +237,7 @@ class TestContainerEnvironment(unittest.TestCase):
         # matplotlib is installed directly in the image for shared-code imports.
         self.assertIn('"matplotlib==3.10.8"', content)
 
+    @pytest.mark.unit
     def test_container_security_pins_clear_trivy_findings(self) -> None:
         """Docker runtime pins must stay at or above the Trivy fixed versions."""
         dockerfile_path = get_repo_root() / "Dockerfile"
@@ -244,6 +245,22 @@ class TestContainerEnvironment(unittest.TestCase):
         requirements_lock = (get_repo_root() / "requirements.lock").read_text()
 
         self.assertIn("pip install --upgrade pip==26.2.1", content)
+        for dockerfile_name in (
+            "Dockerfile",
+            "Dockerfile.modular",
+            "Dockerfile.heavy_test",
+        ):
+            dockerfile = (get_repo_root() / dockerfile_name).read_text()
+            self.assertIn(
+                "msgpack==1.2.1",
+                dockerfile,
+                f"{dockerfile_name} must pin the Trivy-fixed msgpack release",
+            )
+            self.assertIn(
+                "setuptools==78.1.1",
+                dockerfile,
+                f"{dockerfile_name} must pin the Trivy-fixed setuptools release",
+            )
         locked_versions = dict(
             re.findall(r"(?m)^([a-z0-9-]+)==([^\s]+)", requirements_lock.lower())
         )
