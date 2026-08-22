@@ -107,6 +107,16 @@ class TestRegistryParity:
                 f"honestly back ({tile.web.mode})"
             )
 
+    def test_every_web_only_allowlist_entry_carries_a_justification(self) -> None:
+        """Allowlisting requires a substantive, nonempty justification (#8853)."""
+        for tile_id, justification in WEB_CATALOG_ONLY_TILES.items():
+            assert (
+                isinstance(justification, str) and len(justification.strip()) >= 15
+            ), (
+                f"WEB_CATALOG_ONLY_TILES[{tile_id!r}] must explain why the tile "
+                f"has no desktop counterpart; got: {justification!r}"
+            )
+
     def test_retired_duplicate_aliases_stay_retired(
         self, manifest: LauncherManifest
     ) -> None:

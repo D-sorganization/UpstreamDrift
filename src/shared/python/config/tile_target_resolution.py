@@ -32,11 +32,26 @@ from src.shared.python.core.contracts import ensure, require
 # Pseudo-paths that are dispatched to dedicated launcher handlers rather
 # than resolved on disk. Machine-checkable registry of "virtual" targets
 # (issue #8854): anything else under ``virtual/`` is a registry error.
-VIRTUAL_TARGETS = frozenset({"virtual/matlab_suite", "virtual/library"})
+# Each virtual target maps to the repo-relative *backing* artifact its
+# launcher handler actually dispatches to; a virtual target is genuinely
+# resolvable only when that backing exists, so a renamed or deleted
+# handler surface fails the registry test instead of launching dead.
+VIRTUAL_TARGETS: dict[str, str] = {
+    # MatlabSuiteHandler → MatlabSuiteWidget (launcher_simulation.py)
+    "virtual/matlab_suite": "src/launchers/matlab_suite_dialog.py",
+    # Library tile → LibraryWidget (launcher_layout_manager.py)
+    "virtual/library": "src/launchers/library_widget.py",
+}
 
 # Virtual namespaces synthesized by the model registry for pathless model
 # types (exercise presets, PINN modes); dispatched by dedicated handlers.
-VIRTUAL_PREFIXES = ("virtual/biomech_exercise/", "virtual/physics_informed/")
+# Prefix → repo-relative backing artifact the handler launches/imports.
+VIRTUAL_PREFIXES: dict[str, str] = {
+    # BiomechExerciseHandler launches the exercise dashboard script.
+    "virtual/biomech_exercise/": "src/launchers/exercise_dashboard.py",
+    # PINN modes are a library-only surface (launcher_model_handlers.py).
+    "virtual/physics_informed/": "src/shared/python/physics_informed",
+}
 
 # Tile/model types that legitimately declare no filesystem path because a
 # dedicated handler synthesizes the launch (exercise presets, PINN modes)
@@ -113,7 +128,9 @@ def _cached_tools_authority(repo_root: str) -> ToolsVendorAuthority:
     return inspect_tools_vendor_authority(Path(repo_root))
 
 
-def _resolve_tools_vendor(path: str, repo_root: Path) -> TileTargetResolution:
+def _resolve_tools_vendor(
+    path: str, repo_root: Path, source_root: str = ""
+) -> TileTargetResolution:
     authority = _cached_tools_authority(str(repo_root))
     if not authority.available:
         return TileTargetResolution(
@@ -121,7 +138,15 @@ def _resolve_tools_vendor(path: str, repo_root: Path) -> TileTargetResolution:
             kind=KIND_TOOLS_VENDOR,
             reason=authority.reason or "vendor/ud-tools authority unavailable",
         )
-    target = authority.root / path
+    base = authority.root
+    # A source_root like "../Tools/src/pendulum_simulator" nests the tile's
+    # path under a subproject of the Tools checkout; mirror that nesting
+    # inside the vendored gitlink so resolution matches the launch handler.
+    normalized = source_root.replace("\\", "/")
+    marker = "Tools/"
+    if marker in normalized:
+        base = base / normalized.split(marker, 1)[1]
+    target = base / path
     if target.exists():
         return TileTargetResolution(True, KIND_TOOLS_VENDOR, target)
     return TileTargetResolution(
@@ -187,6 +212,39 @@ def _resolve_local_file(path: str, repo_root: Path) -> TileTargetResolution:
     )
 
 
+def _resolve_virtual(path: str, repo_root: Path) -> TileTargetResolution:
+    """Genuinely validate a ``virtual/*`` pseudo-path (issue #8854).
+
+    A virtual target is resolvable only when it is registered in
+    ``VIRTUAL_TARGETS`` (or matches a ``VIRTUAL_PREFIXES`` namespace) *and*
+    the backing artifact its handler dispatches to exists in this checkout.
+    """
+    backing_rel = VIRTUAL_TARGETS.get(path)
+    if backing_rel is None:
+        for prefix, prefix_backing in VIRTUAL_PREFIXES.items():
+            if path.startswith(prefix):
+                backing_rel = prefix_backing
+                break
+    if backing_rel is None:
+        return TileTargetResolution(
+            resolvable=False,
+            kind=KIND_VIRTUAL,
+            reason=f"unknown virtual target (not in VIRTUAL_TARGETS): {path}",
+        )
+    backing = repo_root / backing_rel
+    if backing.exists():
+        return TileTargetResolution(True, KIND_VIRTUAL, backing)
+    return TileTargetResolution(
+        resolvable=False,
+        kind=KIND_VIRTUAL,
+        target=backing,
+        reason=(
+            f"virtual target {path} lost its backing handler artifact: "
+            f"{backing_rel} does not exist"
+        ),
+    )
+
+
 def resolve_tile_target(model: Any, repo_root: Path) -> TileTargetResolution:
     """Resolve a tile/model's declared launch target against this checkout.
 
@@ -215,15 +273,9 @@ def resolve_tile_target(model: Any, repo_root: Path) -> TileTargetResolution:
             reason=f"tile type {tile_type!r} declares no launch path",
         )
     if path.startswith("virtual/"):
-        if path in VIRTUAL_TARGETS or path.startswith(VIRTUAL_PREFIXES):
-            return TileTargetResolution(True, KIND_VIRTUAL)
-        return TileTargetResolution(
-            resolvable=False,
-            kind=KIND_VIRTUAL,
-            reason=f"unknown virtual target (not in VIRTUAL_TARGETS): {path}",
-        )
+        return _resolve_virtual(path, repo_root)
     if _get(model, "provider") == "tools":
-        return _resolve_tools_vendor(path, repo_root)
+        return _resolve_tools_vendor(path, repo_root, _get(model, "source_root"))
     source_root = _get(model, "source_root")
     if source_root:
         return _resolve_sibling(path, source_root, repo_root)
