@@ -1,0 +1,35 @@
+{
+  "description": "Golden reference extraction for the MuJoCo scripted swing (issue #8975). Regenerate with scripts in tests/unit/physics/test_mujoco_swing_source.py docstring.",
+  "model_name": "upper_body_golf_swing",
+  "torque_scale": 0.15,
+  "speed": 47.884506109413884,
+  "velocity": [
+    -23.834232586354435,
+    -40.76894892603187,
+    -7.921368936532443
+  ],
+  "angular_velocity": [
+    -2.2410526344946513,
+    -6.028219107209927,
+    35.60672430693443
+  ],
+  "orientation_quat": [
+    0.6505680912404053,
+    0.34441035097892847,
+    0.645517631249253,
+    0.203591887227218
+  ],
+  "face_normal": [
+    0.1797451369523974,
+    0.6798637071876621,
+    0.7109690748485566
+  ],
+  "mass": 0.29184000000000004,
+  "inertia_diagonal": [
+    0.0005615975407017545,
+    0.0003584354133333334,
+    0.0003246927940350877
+  ],
+  "sim_time": 0.1500000000000001,
+  "mujoco_version_recorded": "3.8.1"
+}
