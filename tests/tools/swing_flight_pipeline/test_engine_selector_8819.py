@@ -29,6 +29,9 @@ from src.shared.python.physics.swing_state_providers import (  # noqa: E402
 from src.tools.swing_flight_pipeline.gui import SwingFlightWidget  # noqa: E402
 
 
+pytestmark = pytest.mark.unit
+
+
 @pytest.fixture(scope="module", autouse=True)
 def _qapp():
     app = QApplication.instance()
