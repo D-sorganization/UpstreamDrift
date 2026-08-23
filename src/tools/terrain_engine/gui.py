@@ -15,6 +15,7 @@ from PyQt6.QtWidgets import (
     QFrame,
     QGroupBox,
     QLabel,
+    QMessageBox,
     QPushButton,
     QSplitter,
     QTableWidget,
@@ -143,15 +144,17 @@ class TerrainExplorerWidget(QWidget):
         self.query_y_spin = self._make_spin(0.0, 2000.0, " m")
         query_form.addRow("X", self.query_x_spin)
         query_form.addRow("Y", self.query_y_spin)
-        query_btn = QPushButton("Query Surface")
-        query_btn.clicked.connect(self._query_surface)
-        query_form.addRow(query_btn)
+        self.query_btn = QPushButton("Query Surface")
+        self.query_btn.clicked.connect(self._query_surface)
+        query_form.addRow(self.query_btn)
         self.query_result = QLabel("")
         self.query_result.setWordWrap(True)
         query_form.addRow(self.query_result)
         controls_layout.addWidget(query_group)
         controls_layout.addStretch()
         splitter.addWidget(controls)
+
+        self._set_query_controls_enabled(False)
 
         preview = QFrame()
         preview_layout = QVBoxLayout(preview)
@@ -173,6 +176,25 @@ class TerrainExplorerWidget(QWidget):
         splitter.addWidget(preview)
         splitter.setSizes([360, 760])
 
+    def _set_query_controls_enabled(self, enabled: bool) -> None:
+        """Enable or disable query surface controls based on terrain loaded state."""
+        if hasattr(self, "query_btn"):
+            self.query_btn.setEnabled(enabled)
+        if hasattr(self, "query_x_spin"):
+            self.query_x_spin.setEnabled(enabled)
+        if hasattr(self, "query_y_spin"):
+            self.query_y_spin.setEnabled(enabled)
+
+    def _show_error(self, title: str, exc: Exception) -> None:
+        """Log exception and display a user-friendly message/dialog instead of aborting."""
+        logger.exception("Terrain Engine error: %s", exc)
+        msg = f"{title}: {exc}"
+        if hasattr(self, "query_result"):
+            self.query_result.setText(msg)
+        if hasattr(self, "summary") and not self.summary.text():
+            self.summary.setText(msg)
+        QMessageBox.warning(self, title, f"{title}:\n\n{exc}")
+
     @staticmethod
     def _make_spin(minimum: float, maximum: float, suffix: str) -> QDoubleSpinBox:
         spin = QDoubleSpinBox()
@@ -182,13 +204,16 @@ class TerrainExplorerWidget(QWidget):
         return spin
 
     def _on_preset_changed(self) -> None:
-        info = ENVIRONMENT_PRESETS[self._selected_preset()]
-        self.width_spin.setValue(float(info["width"]))
-        self.length_spin.setValue(float(info["length"]))
-        self.query_x_spin.setMaximum(float(info["width"]))
-        self.query_y_spin.setMaximum(float(info["length"]))
-        self.query_x_spin.setValue(float(info["width"]) / 2)
-        self.query_y_spin.setValue(float(info["length"]) / 2)
+        try:
+            info = ENVIRONMENT_PRESETS[self._selected_preset()]
+            self.width_spin.setValue(float(info["width"]))
+            self.length_spin.setValue(float(info["length"]))
+            self.query_x_spin.setMaximum(float(info["width"]))
+            self.query_y_spin.setMaximum(float(info["length"]))
+            self.query_x_spin.setValue(float(info["width"]) / 2)
+            self.query_y_spin.setValue(float(info["length"]) / 2)
+        except (KeyError, ValueError) as exc:
+            self._show_error("Preset Error", exc)
 
     def _selected_preset(self) -> str:
         preset = self.preset_combo.currentData()
@@ -197,18 +222,27 @@ class TerrainExplorerWidget(QWidget):
         return preset
 
     def _load_selected_preset(self) -> None:
-        preset = self._selected_preset()
-        self._terrain = build_environment_preset(
-            preset,
-            width=self.width_spin.value(),
-            length=self.length_spin.value(),
-            slope=self.slope_spin.value(),
-            direction=self.direction_spin.value(),
-        )
-        assert self._terrain is not None and self._terrain.name
-        self._refresh_summary()
-        self._populate_samples()
-        self._query_surface()
+        try:
+            preset = self._selected_preset()
+            terrain = build_environment_preset(
+                preset,
+                width=self.width_spin.value(),
+                length=self.length_spin.value(),
+                slope=self.slope_spin.value(),
+                direction=self.direction_spin.value(),
+            )
+            if terrain is None or not terrain.name:
+                raise ValueError(
+                    f"Preset '{preset}' produced an invalid terrain instance"
+                )
+            self._terrain = terrain
+            self._set_query_controls_enabled(True)
+            self._refresh_summary()
+            self._populate_samples()
+            self._query_surface()
+        except (ValueError, RuntimeError, KeyError, TypeError) as exc:
+            self._set_query_controls_enabled(False)
+            self._show_error("Failed to Load Terrain", exc)
 
     def _refresh_summary(self) -> None:
         terrain = self._require_terrain()
@@ -241,18 +275,21 @@ class TerrainExplorerWidget(QWidget):
         self.sample_table.resizeColumnsToContents()
 
     def _query_surface(self) -> None:
-        terrain = self._require_terrain()
-        x = self.query_x_spin.value()
-        y = self.query_y_spin.value()
-        elevation = terrain.elevation.get_elevation(x, y)
-        slope = terrain.elevation.get_slope_angle(x, y)
-        terrain_type = terrain.get_terrain_type(x, y).name.lower()
-        material = terrain.get_material(x, y)
-        self.query_result.setText(
-            f"{terrain_type} at {elevation:.3f} m, "
-            f"{slope:.2f} deg slope, friction {material.friction_coefficient:.2f}, "
-            f"rolling resistance {material.rolling_resistance:.3f}."
-        )
+        try:
+            terrain = self._require_terrain()
+            x = self.query_x_spin.value()
+            y = self.query_y_spin.value()
+            elevation = terrain.elevation.get_elevation(x, y)
+            slope = terrain.elevation.get_slope_angle(x, y)
+            terrain_type = terrain.get_terrain_type(x, y).name.lower()
+            material = terrain.get_material(x, y)
+            self.query_result.setText(
+                f"{terrain_type} at {elevation:.3f} m, "
+                f"{slope:.2f} deg slope, friction {material.friction_coefficient:.2f}, "
+                f"rolling resistance {material.rolling_resistance:.3f}."
+            )
+        except (RuntimeError, ValueError, KeyError, TypeError) as exc:
+            self._show_error("Terrain Query Error", exc)
 
     def _require_terrain(self) -> Terrain:
         if self._terrain is None:

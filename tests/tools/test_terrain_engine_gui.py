@@ -59,3 +59,55 @@ def test_get_dockable_ui_returns_launcher_hosted_widget() -> None:
 
     assert isinstance(widget, TerrainExplorerWidget)
     assert widget.objectName() == "TerrainExplorerWidget"
+
+
+def test_terrain_engine_widget_builder_failure_shows_error_without_abort(
+    monkeypatch,
+) -> None:
+    """Issue #8890: exceptions raised during preset building must be caught and show dialog."""
+    _ensure_qapp()
+    widget = TerrainExplorerWidget()
+
+    import src.tools.terrain_engine.gui as gui_mod
+
+    warning_called = []
+    monkeypatch.setattr(
+        gui_mod.QMessageBox,
+        "warning",
+        lambda *args, **kwargs: warning_called.append(args),
+    )
+
+    def failing_builder(*args, **kwargs):
+        raise ValueError("Invalid slope/direction combination for preset")
+
+    monkeypatch.setattr(gui_mod, "build_environment_preset", failing_builder)
+
+    # Click load terrain / invoke slot
+    widget._load_selected_preset()
+
+    assert len(warning_called) == 1
+    assert "Failed to Load Terrain" in widget.query_result.text()
+    assert widget.query_btn.isEnabled() is False
+
+
+def test_terrain_engine_widget_query_without_terrain_shows_error_without_abort(
+    monkeypatch,
+) -> None:
+    """Issue #8890: query without loaded terrain must be caught and show error dialog."""
+    _ensure_qapp()
+    widget = TerrainExplorerWidget()
+    widget._terrain = None
+
+    import src.tools.terrain_engine.gui as gui_mod
+
+    warning_called = []
+    monkeypatch.setattr(
+        gui_mod.QMessageBox,
+        "warning",
+        lambda *args, **kwargs: warning_called.append(args),
+    )
+
+    widget._query_surface()
+
+    assert len(warning_called) == 1
+    assert "Terrain Query Error" in widget.query_result.text()
