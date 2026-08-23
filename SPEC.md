@@ -532,7 +532,7 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.576                                            |
+| **Spec Version**        | 1.0.577                                            |
 | **Last Spec Update**    | 2026-08-22                                         |
 
 ## 2. Purpose & Mission
@@ -3732,6 +3732,9 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   `src/shared/python/spatial_algebra/pose6dof/rotations.py` by replacing
   `np.linalg.norm` with `math.hypot` and `math.sqrt(np.dot)` in fixed-size hot
   paths.
+
+## Change 2026-08-23
+- Optimized `q_statistic` calculation in `player_covariation_core.py` using `np.vdot` to avoid intermediate array allocations.
 
 ## Change 2026-06-18
 
