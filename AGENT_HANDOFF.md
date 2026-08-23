@@ -11,12 +11,15 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   release bundle. AffineDrift is a generated, immutable, revision-pinned public
   projection. Tools owns typed reusable consumers; do not copy its solver or UI
   implementations into this repository or `vendor/ud-tools`.
-- UpstreamDrift PR #9005 is protected-squash-merged at remote-main commit
-  `46683586ea37fb742d80f0fbe47d25f2acea2cb4`. It supplies the fail-closed
-  measured-trajectory source registry for issue #9004.
-- The current computational candidate is a 235-page PDF with SHA-256
-  `ce51e6fe4f3d9033bf730c0fe2538c72bf88b1b9707f77a7b6385923a1b5fdcf`.
-  All pages render, with 194 URI links and 246 outline entries. Archival
+- UpstreamDrift PR #9017 is protected-squash-merged at remote-main commit
+  `ce6fce1c2b8a6e50e410d16d31e219fabcb154e1`. It completes the current
+  fail-closed measured-trajectory ingestion boundary for issue #9004,
+  including immutable participant split, processing, frame-transform, and
+  event-detector authorities. Issue #9004 remains open because no qualifying
+  governed participant trajectory dataset or held-out human outcome exists.
+- The current computational candidate is a 239-page PDF with SHA-256
+  `be85b7b62bba060a26ce3fea8355aa8b01dcf8c1b1ccf09304450898a4e5e78b`.
+  All pages render, with 194 URI links and 247 outline entries. Archival
   publication remains false because the PDF is untagged and retains Type 3 and
   unembedded font resources.
 
@@ -30,10 +33,16 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   reduced from eight cores to four over Tailscale, without a restart or source
   change, to coexist with protected CI. The running container then used about
   four cores and 589 MiB. Do not start a duplicate.
-- At 2026-08-23 11:22 PDT its live log had atomically completed branch 57/72 of
-  the current registered ground corner; `status.json` still reported `running`
-  with eight workers, and 1,240 checkpoint files remained present. Do not infer
-  total-campaign completion from one corner's branch counter.
+- At 2026-08-23 12:53 PDT one registered ground corner had completed all 72
+  branches and the next corner had atomically completed branch 21/72;
+  `status.json` still reported `running`. The container remained within its
+  four-core cap at about 394% CPU and 585 MiB. The container reports an
+  `on-failure` restart policy, and its writable workspace and campaign outputs
+  are bind-mounted from the ControlTower C: drive. Remote control is available
+  through the pinned Tailscale SSH route into the `ControlTower-SSD` WSL
+  distribution; a separate Codex session on ControlTower is not required. Do
+  not infer total-campaign
+  completion from one corner's branch counter.
 - Runtime: Ubuntu 22.04, Python 3.10.12, NumPy 2.2.4, SciPy 1.15.2, MuJoCo
   3.8.0, and Pinocchio 3.8.0. The cross-CPU canary preserves every discrete
   decision and registered gate at `rtol=2e-8`, `atol=1e-9`.
@@ -44,6 +53,43 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 - At terminal completion: audit every expected branch and digest, integrate
   `fix/8752-atomic-campaign-checkpoint`, execute #8800, regenerate claims,
   figures, paper, and release bundle, then refresh the AffineDrift projection.
+
+## Normalized Claim Adjudication (#8724)
+
+- Worktree:
+  `C:\Users\diete\Repositories\UpstreamDrift-worktrees\claim-adjudication-8724`;
+  branch `research/8557-claim-adjudication-8724`.
+- A normal, non-rebased merge of current remote `main`
+  (`ce6fce1c2b8a6e50e410d16d31e219fabcb154e1`) is in progress with all merge
+  conflicts resolved and staged. Do not abort, rebase, force-push, or replace
+  the staged current-main changes.
+- The current paper authority contains 1,100 fully reviewed narrative
+  candidates and 303 material claims: 283 supported only at their declared
+  estimands and boundaries, five inconclusive, 15 untested, and zero
+  contradicted. A zero contradicted count does not erase supported claims that
+  accurately report null, mixed, or adverse findings.
+- `migrate_claim_adjudication_v2.py` is locked to paper digest
+  `7407e8f00842ecdf95769d65ac7d2fe3f8d495cb0d11d405640e7582e6b8560a`
+  and contains an exhaustive explicit outcome set for all 303 claim IDs. Any
+  unfamiliar claim fails rather than defaulting to supported. The 22 generated
+  reviewer-table candidates are explicitly enumerated as editorial projections
+  of existing claims.
+- The generated JSON, CSV, and paper chapter separate normalized outcome,
+  evidence tier, source independence, model tier, unresolved replication, and
+  claim-family source concentration. No axis promotes model evidence to human
+  validation. The registry validator also rejects a supported outcome whose
+  detailed state leaves human validation, reimplementation, or a hypothesis
+  open without an explicitly narrower adjudication reason.
+- Current focused evidence: the claim registry, reviewer summary, release
+  review, 2,130-reference evidence manifest, and 592-artifact release bundle
+  validate deterministically. All 63 focused claim, migration, evidence,
+  publication, PDF, release, and document-governance tests pass. Ruff, title
+  capitalization, file-size, and changed-source architecture gates pass with
+  no exception or quarantine. The 239-page PDF was inspected in full and
+  passes the computational publication profile; the documented archival gaps
+  remain fail-closed. Protected full PR #9018 is open for #8724; preserve its
+  review and required-check gates, fix only actionable failures, and verify the
+  squash commit on remote `main` before closing the issue.
 
 ## Measured-Trajectory Qualification (#9004)
 
@@ -72,29 +118,12 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   has a registered local digest plus verified reuse and required calibration,
   club, participant, and event fields. Never infer authority from a filename,
   screenshot, or visual resemblance.
-- PR #9017 (`research/9004-governed-ingestion`) adds the typed acquisition
-  manifest and no-pickle governance gateway. Implementation commit `c9da9b9ca`
-  additionally binds each trial to a digest-frozen, source-specific participant
-  split and verifies disjoint training, held-out, and adverse cohorts,
-  participant membership, and intended use before parsing. Follow-up commit
-  `1b7e87c42` also requires the split freeze time to precede artifact creation.
-  Source-package and trajectory digests, SI units, processing, four frames, two
-  events, channel coverage, and six uncertainty records remain required. The
-  current follow-up also binds the acquisition-processing authority, all four
-  frame transforms, and both event-detector configurations by contained path
-  and SHA-256, verifies them before payload parsing, and returns their immutable
-  provenance. The first protected exact-head run then correctly rejected the
-  132-line loader; source-readiness, mapping-authority, and artifact-digest
-  phases are now separate owned helpers, and the changed-file architecture gate
-  passes without an exception. Forty-one focused tests and the 587-artifact
-  release gate pass.
-- Merge commit `feb9478f7` reconciles the branch with the protected #9016 squash
-  without rewriting history; reviewed PR head `a34d24a53` passed every pre-push
-  hook and opened full PR #9017. The governed manifests and 235-page release
-  validate. Protected CI and human review remain. The boundary must remain
-  unusable for human inference until the source registry qualifies an actual
-  dataset. The subsequent #9004 slice is the deterministic coordinate/event
-  mapping and replay runner.
+- PR #9017 protected-squash-merged at
+  `ce6fce1c2b8a6e50e410d16d31e219fabcb154e1`; all required exact-head checks
+  and human review passed. The boundary must remain unusable for human
+  inference until the source registry qualifies an actual dataset. The
+  subsequent #9004 slice is the deterministic coordinate/event mapping and
+  replay runner.
 
 ## Other Active Dependencies
 

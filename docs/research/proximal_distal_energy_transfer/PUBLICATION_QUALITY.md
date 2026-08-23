@@ -40,15 +40,15 @@ equipment calibration and external archive/PID deposition.
 
 ## Current Candidate Result
 
-The 235-page candidate renders successfully on all 235 pages, exposes
-extractable text on all 235 pages, contains 246 outline entries and 194 valid
+The 239-page candidate renders successfully on all 239 pages, exposes
+extractable text on all 239 pages, contains 247 outline entries and 194 valid
 external links, and is linearized for fast web access. Its candidate PDF has
-1,863,127 bytes and SHA-256
-`ce51e6fe4f3d9033bf730c0fe2538c72bf88b1b9707f77a7b6385923a1b5fdcf`.
-The complete ordered 235-page render set was inspected in contact-sheet form,
-with full-resolution inspection of the newly added native-contact section and
-its surrounding pages (PDF pages 152--160). No blank, clipped, missing, or
-grossly unreadable page was observed. This visual record qualifies the current
+1,870,344 bytes and SHA-256
+`be85b7b62bba060a26ce3fea8355aa8b01dcf8c1b1ccf09304450898a4e5e78b`.
+The complete ordered 239-page render set is inspected in contact-sheet form,
+with full-resolution inspection of the newly added claim-adjudication reviewer
+section and its surrounding pages. No blank, clipped, missing, or grossly
+unreadable page may be accepted. This visual record qualifies the current
 candidate only; any regenerated PDF requires a new complete inspection.
 
 The computational profile passes. The archival profile remains deliberately

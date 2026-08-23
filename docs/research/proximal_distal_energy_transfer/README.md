@@ -140,6 +140,15 @@ comprehensive open modeling program are tracked in
 [#8557](https://github.com/D-sorganization/UpstreamDrift/issues/8557), with the
 durable execution contract in
 [`COMPREHENSIVE_RESEARCH_PROGRAM.md`](COMPREHENSIVE_RESEARCH_PROGRAM.md).
+The current normalized authority covers 303 material claims: 283 are supported
+only at their declared estimands and boundaries, five are inconclusive, 15 are
+untested, and none is classified as contradicted. That zero does not imply that
+all mechanisms survived adverse tests: accurately reported null, mixed, and
+adverse results can themselves be supported claims. The complete row-level
+[reviewer JSON](data/claim_adjudication_summary.json) and
+[reviewer CSV](data/claim_adjudication_summary.csv) expose evidence tier,
+source independence, model tier, unresolved replication, falsifier, and
+claim-family concentration without promoting model evidence to human evidence.
 The MT-E07 measurement program now includes both the exact bilateral-wrench
 rank audit and a trajectory-level synthetic point-force qualification under
 noise, normalized cross-talk, calibration residual, and contact-center
@@ -222,6 +231,8 @@ the finding-by-finding record in
 | [`ADVANCED_EXPANSION_REVIEW.md`](ADVANCED_EXPANSION_REVIEW.md)                                       | Completed review, implemented expansion, and falsifiable next-model roadmap                    |
 | [`EVIDENCE_SCHEMA_V2.md`](EVIDENCE_SCHEMA_V2.md)                                                     | Falsifiable prediction and named spatial-interface evidence contract                           |
 | [`CLAIM_AUDIT_SCHEMA.md`](CLAIM_AUDIT_SCHEMA.md)                                                     | Atomic claim, candidate-inventory, source, alternative, and adjudication contract              |
+| [`data/claim_adjudication_summary.json`](data/claim_adjudication_summary.json)                       | Complete normalized outcomes, qualification axes, and claim-family concentration               |
+| [`data/claim_adjudication_summary.csv`](data/claim_adjudication_summary.csv)                         | Accessible one-row-per-claim reviewer export                                                   |
 | [`data/claim_evidence_manifest.json`](data/claim_evidence_manifest.json)                             | Claim-complete local hashes and external-support URL inventory                                 |
 | [`data/external_source_review.json`](data/external_source_review.json)                               | Work-deduplicated source, correction, claim-fit, and link-availability review                  |
 | [`COMPREHENSIVE_RESEARCH_PROGRAM.md`](COMPREHENSIVE_RESEARCH_PROGRAM.md)                             | Biomechanics, nonlinear-control, model-ladder, data, and validation roadmap                    |
