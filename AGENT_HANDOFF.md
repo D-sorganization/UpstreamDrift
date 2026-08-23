@@ -43,11 +43,11 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 
 ## Measured-Trajectory Qualification (#9004)
 
-- Branch `research/9004-golf-likeness-contract` is based on merged #9005 and
+- PR #9016 at exact head `294cf0d680df13779bc9e10ba95435200acc2c31`
   preregisters eleven primary metrics, four coordinate-frame authorities, two
   events, participant-level holdout, training-only threshold freezing, four
   negative controls, six uncertainty analyses, and missing-as-unavailable
-  semantics.
+  semantics. It is a full PR against `main`; do not create redundant CI runs.
 - The metric contract is deliberately fail-closed: `execution_ready=false`,
   `human_inference=false`, `bilateral_wrench=false`, and
   `results_status=not_run_no_authority` until a governed participant dataset is
@@ -60,9 +60,16 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   has a registered local digest plus verified reuse and required calibration,
   club, participant, and event fields. Never infer authority from a filename,
   screenshot, or visual resemblance.
-- After protected merge, the next #9004 slice is a typed, no-pickle ingestion
-  and coordinate/event qualification boundary. It must remain unusable for
-  human inference until the source registry qualifies an actual dataset.
+- Stacked branch `research/9004-governed-ingestion` adds the typed acquisition
+  manifest and no-pickle governance gateway at commit `08ea53573`. It validates
+  source-package and trajectory digests, participant grouping, SI units,
+  processing, four frames, two events, channel coverage, and six uncertainty
+  records before delegating to the canonical motion-source adapter. Thirty-two
+  focused tests and the 587-artifact release gate pass.
+- Keep this branch stacked until #9016 protected-merges. Then merge remote
+  `main` without rewriting history, refresh the handoff and release manifests,
+  push through all hooks, and open a full PR. The subsequent #9004 slice is the
+  deterministic coordinate/event mapping and participant-split runner.
 
 ## Other Active Dependencies
 
