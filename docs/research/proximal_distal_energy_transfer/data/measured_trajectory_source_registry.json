@@ -1,0 +1,186 @@
+{
+  "schema_version": "measured-trajectory-source-registry/v1",
+  "registry_id": "articulated-golf-trajectory-sources-v1",
+  "registered_at_utc": "2026-08-23T05:20:50Z",
+  "search_scope": {
+    "local_repositories": [
+      "D-sorganization/UpstreamDrift",
+      "D-sorganization/AffineDrift",
+      "D-sorganization/Tools"
+    ],
+    "local_formats": [
+      "C3D",
+      "TRC",
+      "MOT",
+      "STO",
+      "BVH",
+      "MAT",
+      "CSV",
+      "JSON",
+      "NPZ"
+    ],
+    "public_indexes": [
+      "Dryad",
+      "Figshare",
+      "GitHub",
+      "KIT Whole-Body Human Motion Database",
+      "OSF",
+      "Zenodo"
+    ],
+    "query_families": [
+      "golf swing biomechanics motion capture dataset",
+      "golf swing Vicon C3D dataset",
+      "golf swing 3D keypoints club dataset",
+      "open golf swing kinematics"
+    ],
+    "searched_at_utc": "2026-08-23T05:35:00Z"
+  },
+  "sources": [
+    {
+      "source_id": "golfdb",
+      "title": "GolfDB: A Video Database for Golf Swing Sequencing",
+      "landing_url": "https://github.com/wmcnally/golfdb",
+      "authority": "McNally et al. and the official GolfDB repository",
+      "measurement_class": "video_event_annotations",
+      "human_observed": true,
+      "access_status": "public_download",
+      "license_status": "citation_guidance_no_explicit_reuse_license",
+      "participant_count": null,
+      "trial_count": 1400,
+      "body_kinematics": false,
+      "club_kinematics": false,
+      "raw_trajectory_available": false,
+      "participant_grouping_available": false,
+      "calibration_metadata_available": false,
+      "synchronization_metadata_available": false,
+      "content_digest_sha256": null,
+      "decision": "negative_control",
+      "blockers": [
+        "No measured three-dimensional body trajectory is provided.",
+        "No measured three-dimensional club trajectory is provided.",
+        "Participant-grouped held-out biomechanical evaluation is unavailable.",
+        "No downloaded content digest is registered."
+      ],
+      "notes": "Useful for event-label and video-only adverse controls, not articulated-state qualification."
+    },
+    {
+      "source_id": "golfpose",
+      "title": "GolfPose: From Regular Posture to Golf Swing Posture",
+      "landing_url": "https://github.com/MingHanLee/GolfPose",
+      "authority": "Lee et al. official implementation and dataset-access instructions",
+      "measurement_class": "pose_keypoints",
+      "human_observed": true,
+      "access_status": "authorization_required",
+      "license_status": "authorization_required",
+      "participant_count": 6,
+      "trial_count": null,
+      "body_kinematics": true,
+      "club_kinematics": true,
+      "raw_trajectory_available": true,
+      "participant_grouping_available": true,
+      "calibration_metadata_available": true,
+      "synchronization_metadata_available": true,
+      "content_digest_sha256": null,
+      "decision": "qualification_candidate",
+      "blockers": [
+        "Dataset download requires author authorization.",
+        "Reuse terms must be recorded from the authorization response.",
+        "Trial count and participant-group mapping must be verified from delivered files.",
+        "No authorized content digest is registered."
+      ],
+      "notes": "Best identified multisubject body-and-club trajectory candidate; it is not yet governed local evidence."
+    },
+    {
+      "source_id": "kit-golf-drive-1319",
+      "title": "KIT Whole-Body Human Motion Database Motion 1319: Golf Drive",
+      "landing_url": "https://motion-database.humanoids.kit.edu/details/motions/1319/",
+      "authority": "Karlsruhe Institute of Technology H2T motion database",
+      "measurement_class": "marker_based_motion_capture",
+      "human_observed": true,
+      "access_status": "public_download",
+      "license_status": "citation_guidance_no_explicit_reuse_license",
+      "participant_count": 1,
+      "trial_count": 5,
+      "body_kinematics": true,
+      "club_kinematics": null,
+      "raw_trajectory_available": true,
+      "participant_grouping_available": true,
+      "calibration_metadata_available": null,
+      "synchronization_metadata_available": null,
+      "content_digest_sha256": null,
+      "decision": "qualification_candidate",
+      "blockers": [
+        "The public page gives citation guidance but no explicit file-reuse license.",
+        "Club marker availability and club rigid-body calibration are unverified.",
+        "Capture calibration and synchronization metadata are unverified.",
+        "One participant cannot support participant-held-out qualification.",
+        "No downloaded content digest is registered."
+      ],
+      "notes": "Five public Vicon C3D golf-drive trials can become a pipeline probe only after reuse and content qualification."
+    },
+    {
+      "source_id": "local-motion-fixtures",
+      "title": "UpstreamDrift Motion-Pipeline Golden Fixtures",
+      "landing_url": "https://github.com/D-sorganization/UpstreamDrift/tree/main/tests/data/motion_pipeline",
+      "authority": "D-sorganization/UpstreamDrift test fixtures",
+      "measurement_class": "software_test_fixture",
+      "human_observed": false,
+      "access_status": "local_repository",
+      "license_status": "repository_internal_only",
+      "participant_count": null,
+      "trial_count": null,
+      "body_kinematics": false,
+      "club_kinematics": false,
+      "raw_trajectory_available": true,
+      "participant_grouping_available": false,
+      "calibration_metadata_available": false,
+      "synchronization_metadata_available": false,
+      "content_digest_sha256": null,
+      "decision": "negative_control",
+      "blockers": [
+        "Software format fixtures are not participant golf observations.",
+        "No body-and-club biomechanical measurement contract is present.",
+        "No participant grouping or measurement uncertainty exists."
+      ],
+      "notes": "Appropriate for parser and malformed-input controls only."
+    },
+    {
+      "source_id": "local-simscape-trials",
+      "title": "UpstreamDrift 3-D Golf Model Generated Trial Exports",
+      "landing_url": "https://github.com/D-sorganization/UpstreamDrift/tree/main/src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Scripts/Dataset%20Generator",
+      "authority": "D-sorganization/UpstreamDrift Simscape model output",
+      "measurement_class": "simulation_output",
+      "human_observed": false,
+      "access_status": "local_repository",
+      "license_status": "not_applicable_simulation",
+      "participant_count": null,
+      "trial_count": null,
+      "body_kinematics": true,
+      "club_kinematics": true,
+      "raw_trajectory_available": true,
+      "participant_grouping_available": false,
+      "calibration_metadata_available": false,
+      "synchronization_metadata_available": false,
+      "content_digest_sha256": null,
+      "decision": "inadmissible",
+      "blockers": [
+        "The files are simulation output rather than human measurements.",
+        "No participant, consent, capture-calibration, or measurement-uncertainty authority exists.",
+        "Model-generated force and kinematic channels cannot validate the generating model."
+      ],
+      "notes": "May test adapters, but using it for human trajectory qualification would be circular."
+    }
+  ],
+  "readiness": {
+    "status": "blocked_no_qualified_measured_trajectory_authority",
+    "source_count": 5,
+    "qualification_candidate_source_ids": ["golfpose", "kit-golf-drive-1319"],
+    "negative_control_source_ids": ["golfdb", "local-motion-fixtures"],
+    "inadmissible_source_ids": ["local-simscape-trials"],
+    "pipeline_probe_ready_source_ids": [],
+    "held_out_qualification_ready_source_ids": [],
+    "human_inference_ready": false,
+    "bilateral_wrench_gate_satisfied": false
+  },
+  "inference_boundary": "This source registry can identify and qualify trajectory inputs; it cannot establish that the current analytic motion is golf-like, validate passive transfer in humans, satisfy bilateral-wrench issue #8556, or support coaching inference."
+}
