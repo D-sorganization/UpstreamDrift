@@ -30,12 +30,23 @@ interpret unmatched speed differences. A ground corner moving above zero, for
 example, would identify cells eligible for the already registered matched
 comparison; it would not establish a ground-use benefit.
 
+The completed campaign shows that the shaft comparability set is sensitive to
+the registered constitutive bounds. Across the nine completed nonnominal shaft
+corners, the matched count spans 80--182 cells, or -46 to +56 relative to the
+nominal 126/384. Both grip-damping corners are retained failures. All 18
+completed ground corners remain at 0/384 matched cells, while the high
+grip-damping ground corner is retained as a failure. The shaft result rejects
+invariance of the matching set over these one-at-a-time bounds. The ground
+result shows that no eligible matched set emerged in the completed corners; it
+does not show that support compliance has no dynamical effect.
+
 ![Articulated Headline Sensitivity Across Registered Engineering Bounds](figures/fig_articulated_headline_uncertainty.pdf){#fig-articulated-headline-uncertainty width=100%}
 
 Figure @fig-articulated-headline-uncertainty shows low and high count changes
-separately for the shaft and finite-ground screens. A failed corner remains in
-the machine-readable record and appears explicitly rather than being removed
-from the denominator. The governed record is available as
+separately for the shaft and finite-ground screens, with small vertical offsets
+so coincident zero-change points and retained failures remain visible. A failed
+corner remains in the machine-readable record and appears explicitly rather
+than being removed from the denominator. The governed record is available as
 [`data/articulated_headline_uncertainty.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/articulated_headline_uncertainty.json),
 and the executable design is available as
 [`articulated_headline_uncertainty.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py).

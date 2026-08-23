@@ -10,8 +10,8 @@ ROOT = Path(__file__).resolve().parents[3]
 ARTICLE = ROOT / "docs/research/proximal_distal_energy_transfer"
 REGISTRY = ARTICLE / "data/claim_audit_registry.json"
 INVENTORY = ARTICLE / "data/claim_candidate_inventory.json"
-DATE = "2026-08-20"
-CLAIM_IDS = {f"PD-CLAIM-{value}" for value in range(297, 306)}
+DATE = "2026-08-23"
+CLAIM_IDS = {f"PD-CLAIM-{value}" for value in range(305, 315)}
 REGISTRATION_ARTIFACT = (
     "scripts/research/proximal_distal_energy/register_articulated_uncertainty_claims.py"
 )
@@ -41,6 +41,17 @@ HEADLINE_DESIGN_ARTIFACTS = [
     "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py",
     REGISTRATION_ARTIFACT,
     "tests/research/test_articulated_headline_uncertainty.py",
+]
+HEADLINE_RESULT_ARTIFACTS = [
+    "docs/research/proximal_distal_energy_transfer/data/articulated_headline_uncertainty.json",
+    "docs/research/proximal_distal_energy_transfer/data/articulated_headline_execution_provenance.json",
+    "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_headline_uncertainty.pdf",
+    "scripts/research/proximal_distal_energy/articulated_headline_record_audit.py",
+    "scripts/research/proximal_distal_energy/make_articulated_headline_uncertainty_figure.py",
+    *HEADLINE_DESIGN_ARTIFACTS,
+    "tests/research/test_articulated_headline_record_audit.py",
+    "tests/research/test_articulated_headline_uncertainty_evidence.py",
+    "tests/research/test_articulated_headline_uncertainty_figure.py",
 ]
 
 
@@ -79,6 +90,9 @@ def _claim(
         "classification": classification,
         "published_status": status,
         "audit_status": audit_status,
+        "adjudication_outcome": (
+            "untested" if status == "registered_but_not_yet_executed" else "supported"
+        ),
         "source_locations": [
             f"{candidate['source_path']}:{candidate['line_start']}"
             for candidate in candidates
@@ -192,6 +206,7 @@ def main() -> None:
         "method": _find(candidates, headline_chapter, "The shaft and finite-ground"),
         "bounds": _find(candidates, headline_chapter, "The design contains"),
         "estimand": _find(candidates, headline_chapter, "The estimand is"),
+        "result": _find(candidates, headline_chapter, "The completed campaign"),
         "figure": _find(candidates, headline_chapter, "![Articulated Headline"),
         "provenance": _find(candidates, headline_chapter, "Figure @fig-articulated"),
         "boundary": _find(candidates, headline_chapter, "This one-at-a-time design"),
@@ -235,7 +250,7 @@ def main() -> None:
     ]
     new_claims = [
         _claim(
-            "PD-CLAIM-297",
+            "PD-CLAIM-305",
             [screen["bounds"], screen["method"]],
             statement=(
                 "A deterministic 40-row articulated screen perturbs nine declared "
@@ -267,7 +282,7 @@ def main() -> None:
             ),
         ),
         _claim(
-            "PD-CLAIM-298",
+            "PD-CLAIM-306",
             [screen["result"]],
             statement=(
                 "All 40 registered rows have finite response vectors and remain "
@@ -295,7 +310,7 @@ def main() -> None:
             ),
         ),
         _claim(
-            "PD-CLAIM-299",
+            "PD-CLAIM-307",
             [screen["prcc"], screen["interpretation"]],
             statement=(
                 "The largest absolute conditional PRCCs are +0.936 for initial "
@@ -321,7 +336,7 @@ def main() -> None:
             ),
         ),
         _claim(
-            "PD-CLAIM-300",
+            "PD-CLAIM-308",
             [screen["boundary"]],
             statement=(
                 "The local articulated screen does not propagate structural variation "
@@ -343,7 +358,7 @@ def main() -> None:
             adjudication="The missing propagation is recorded as an acceptance boundary.",
         ),
         _claim(
-            "PD-CLAIM-301",
+            "PD-CLAIM-309",
             [authority["method"]],
             statement=(
                 "A seven-corner structural campaign regenerates all 13 phase states for "
@@ -371,7 +386,7 @@ def main() -> None:
             ),
         ),
         _claim(
-            "PD-CLAIM-302",
+            "PD-CLAIM-310",
             [authority["table"], authority["caption"], authority["result"]],
             statement=(
                 "Six structural corners retain 52/52 feasible selected states; the "
@@ -399,7 +414,7 @@ def main() -> None:
             ),
         ),
         _claim(
-            "PD-CLAIM-303",
+            "PD-CLAIM-311",
             [authority["boundary"]],
             statement=(
                 "Structural authority regeneration does not establish sensitivity of "
@@ -421,7 +436,7 @@ def main() -> None:
             adjudication="The unexecuted dynamic propagation remains an explicit gate.",
         ),
         _claim(
-            "PD-CLAIM-304",
+            "PD-CLAIM-312",
             [headline["method"], headline["bounds"], headline["provenance"]],
             statement=(
                 "A registered 19-corner one-at-a-time campaign repeats affected full "
@@ -430,9 +445,9 @@ def main() -> None:
                 "and failures."
             ),
             classification="articulated_headline_uncertainty_design",
-            status="registered_execution_in_progress",
-            audit_status="design_bounds_controls_and_partial_record_boundary_checked",
-            artifacts=HEADLINE_DESIGN_ARTIFACTS,
+            status="completed_with_retained_failures",
+            audit_status="design_execution_completion_and_retained_failures_checked",
+            artifacts=HEADLINE_RESULT_ARTIFACTS,
             domain=(
                 "Nominal plus low/high grip, shaft, and ground constitutive engineering "
                 "corners over the complete production atlases."
@@ -445,15 +460,15 @@ def main() -> None:
             controls=headline_controls,
             falsifier=(
                 "A corner uses a reduced surrogate, changes the matching rule, loses a "
-                "control, or a partial record is promoted as completion."
+                "control, or the completed record fails its independent audit."
             ),
             adjudication=(
-                "Only the preregistered design and current in-progress status are "
-                "supported; no completed sensitivity result is asserted."
+                "The completed execution is accepted with every adverse corner retained; "
+                "the design remains an engineering-bound model screen."
             ),
         ),
         _claim(
-            "PD-CLAIM-305",
+            "PD-CLAIM-313",
             [headline["estimand"], headline["boundary"]],
             statement=(
                 "Headline matched-count movement diagnoses sensitivity of the "
@@ -463,7 +478,7 @@ def main() -> None:
             classification="articulated_headline_estimand_and_inference_boundary",
             status="explicitly_bounded",
             audit_status="estimand_matching_and_nonpromotion_rules_checked",
-            artifacts=HEADLINE_DESIGN_ARTIFACTS,
+            artifacts=HEADLINE_RESULT_ARTIFACTS,
             domain="Interpretation contract for the registered headline campaign.",
             boundary=(
                 "Equipment calibration, participant anatomy/contact, unilateral ground, "
@@ -480,17 +495,51 @@ def main() -> None:
                 "separately from eventual outcome analysis."
             ),
         ),
+        _claim(
+            "PD-CLAIM-314",
+            [headline["result"], headline["provenance"]],
+            statement=(
+                "Across nine completed nonnominal shaft corners, the matched set spans "
+                "80--182 cells (-46 to +56 from nominal 126/384), with both "
+                "grip-damping corners retained as failures; all 18 completed ground "
+                "corners remain at 0/384, with the high grip-damping corner retained "
+                "as a failure."
+            ),
+            classification="articulated_headline_constitutive_sensitivity_result",
+            status="completed_model_sensitivity_result",
+            audit_status="counts_ranges_statuses_and_failure_identities_reconciled",
+            artifacts=HEADLINE_RESULT_ARTIFACTS,
+            domain=(
+                "The registered nominal plus low/high one-at-a-time constitutive "
+                "engineering corners over the complete shaft and ground atlases."
+            ),
+            boundary=(
+                "Count movement is not a speed effect or human/population result; "
+                "failed corners and absent ground support prohibit robustness claims."
+            ),
+            explanations=headline_explanations,
+            controls=headline_controls,
+            falsifier=(
+                "The committed record does not reproduce the count ranges, nominal "
+                "counts, completed-corner counts, or retained failure identities."
+            ),
+            adjudication=(
+                "The shaft matching set is constitutively sensitive and the ground "
+                "matching set remains empty on completed corners; neither result is "
+                "promoted to a pathway benefit."
+            ),
+        ),
     ]
     registry["claims"].extend(new_claims)
     claims = {claim["claim_id"]: claim for claim in registry["claims"]}
 
     mapping = {
-        "bounds": ("PD-CLAIM-297",),
-        "method": ("PD-CLAIM-297",),
-        "result": ("PD-CLAIM-298",),
-        "prcc": ("PD-CLAIM-299",),
-        "interpretation": ("PD-CLAIM-299",),
-        "boundary": ("PD-CLAIM-300",),
+        "bounds": ("PD-CLAIM-305",),
+        "method": ("PD-CLAIM-305",),
+        "result": ("PD-CLAIM-306",),
+        "prcc": ("PD-CLAIM-307",),
+        "interpretation": ("PD-CLAIM-307",),
+        "boundary": ("PD-CLAIM-308",),
     }
     for name, claim_ids in mapping.items():
         _review(
@@ -500,13 +549,13 @@ def main() -> None:
         _review(reviews, screen[name], (), "Figure or governed-artifact pointer.")
 
     mapping = {
-        "method": ("PD-CLAIM-301",),
+        "method": ("PD-CLAIM-309",),
         "header": (),
-        "table": ("PD-CLAIM-302",),
+        "table": ("PD-CLAIM-310",),
         "figure": (),
-        "caption": ("PD-CLAIM-302",),
-        "result": ("PD-CLAIM-302",),
-        "boundary": ("PD-CLAIM-303",),
+        "caption": ("PD-CLAIM-310",),
+        "result": ("PD-CLAIM-310",),
+        "boundary": ("PD-CLAIM-311",),
         "availability": (),
     }
     for name, claim_ids in mapping.items():
@@ -518,12 +567,13 @@ def main() -> None:
         )
 
     mapping = {
-        "method": ("PD-CLAIM-304",),
-        "bounds": ("PD-CLAIM-304",),
-        "estimand": ("PD-CLAIM-305",),
+        "method": ("PD-CLAIM-312",),
+        "bounds": ("PD-CLAIM-312",),
+        "estimand": ("PD-CLAIM-313",),
+        "result": ("PD-CLAIM-314",),
         "figure": (),
-        "provenance": ("PD-CLAIM-304",),
-        "boundary": ("PD-CLAIM-305",),
+        "provenance": ("PD-CLAIM-312", "PD-CLAIM-314"),
+        "boundary": ("PD-CLAIM-313",),
     }
     for name, claim_ids in mapping.items():
         _review(
@@ -546,12 +596,12 @@ def main() -> None:
                 "PD-CLAIM-253",
                 "PD-CLAIM-273",
                 "PD-CLAIM-296",
-                "PD-CLAIM-297",
-                "PD-CLAIM-298",
-                "PD-CLAIM-300",
-                "PD-CLAIM-301",
-                "PD-CLAIM-302",
-                "PD-CLAIM-303",
+                "PD-CLAIM-305",
+                "PD-CLAIM-306",
+                "PD-CLAIM-308",
+                "PD-CLAIM-309",
+                "PD-CLAIM-310",
+                "PD-CLAIM-311",
             ),
         ),
         (
@@ -566,11 +616,15 @@ def main() -> None:
         ),
         (
             _find(candidates, "_ch09_conclusions.qmd", "A seven-corner structural"),
-            ("PD-CLAIM-301", "PD-CLAIM-302", "PD-CLAIM-303"),
+            ("PD-CLAIM-309", "PD-CLAIM-310", "PD-CLAIM-311"),
+        ),
+        (
+            _find(candidates, "_ch09_conclusions.qmd", "The completed 19-corner"),
+            ("PD-CLAIM-312", "PD-CLAIM-313", "PD-CLAIM-314"),
         ),
         (
             _find(candidates, "_ch09_conclusions.qmd", "The open-resource layer"),
-            ("PD-CLAIM-223", "PD-CLAIM-241", "PD-CLAIM-303"),
+            ("PD-CLAIM-223", "PD-CLAIM-241", "PD-CLAIM-311"),
         ),
         (
             _find(
@@ -578,7 +632,7 @@ def main() -> None:
                 "_ch09_conclusions.qmd",
                 "1. **Complete Structural-Corner",
             ),
-            ("PD-CLAIM-128", "PD-CLAIM-206", "PD-CLAIM-234", "PD-CLAIM-303"),
+            ("PD-CLAIM-128", "PD-CLAIM-206", "PD-CLAIM-234", "PD-CLAIM-311"),
         ),
     ]
     for candidate, claim_ids in repeated:
@@ -587,6 +641,17 @@ def main() -> None:
         candidates, "_ch09_conclusions.qmd", "The canonical implementation roadmap"
     )
     _review(reviews, navigation, (), "This is an issue-tracker navigation statement.")
+    for candidate in candidates:
+        if str(candidate["source_path"]).endswith(
+            "chapters/_claim_adjudication_summary.qmd"
+        ):
+            _review(
+                reviews,
+                candidate,
+                (),
+                "Generated reviewer projection of existing claim outcomes and "
+                "qualification axes; it introduces no new scientific estimand.",
+            )
 
     claim_273 = claims["PD-CLAIM-273"]
     claim_273["statement"] = (
@@ -614,10 +679,12 @@ def main() -> None:
     registry["claims"] = list(claims.values())
     registry["paper"]["source_digest"] = inventory["source_digest"]
     registry["audit_scope"]["current_scope"] = (
-        "The complete 1,092-candidate paper inventory is adjudicated. The local "
-        "articulated screen is conditional on partial opening, structural authorities "
-        "retain one low-height failure, and both structural propagation and the "
-        "19-corner headline campaign remain open without human or coaching promotion."
+        f"The complete {inventory['candidate_count']:,}-candidate paper inventory is "
+        "adjudicated. The local articulated screen is conditional on partial opening, "
+        "the completed constitutive headline campaign retains adverse failures and no "
+        "ground matched set, and structural authorities retain one low-height failure. "
+        "Structural propagation and governed human validation remain open without "
+        "human or coaching promotion."
     )
     registry["audit_scope"]["completion_status"] = "complete"
     _write_registry(registry)

@@ -1,0 +1,41 @@
+{
+  "schema_version": "articulated-headline-execution-provenance/v1",
+  "study_id": "articulated-shaft-ground-headline-uncertainty",
+  "source_revision": "13146cdcece879e7156e06e2dca6626c1a54e045",
+  "source_sha256": {
+    "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py": "ff47449935ac54feee1d631ddb59dd98657d1af0f4454210e5721243f7874ab1",
+    "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
+    "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
+    "tests/research/test_articulated_headline_uncertainty.py": "72204c041461619284dccea2c8202f75b4b21d2d35766c570ed366ac12db49ef"
+  },
+  "record_sha256": "e8a7e53701217e4de875a370f7483172f3cfbfb167416b5133ba269b8fef689b",
+  "terminal_state": {
+    "state": "complete",
+    "exit_code": 0
+  },
+  "started_at": "2026-08-23T16:28:52Z",
+  "finished_at": "2026-08-23T21:59:22Z",
+  "execution": {
+    "host": "ControlTower",
+    "container": "upstreamdrift-8752-campaign",
+    "container_image_manifest_sha256": "4be08c2d04e94b827137429167a2d78c027d93a2718b699dea90b34b29b003f6",
+    "worker_count": 8,
+    "cpu_cap": 4,
+    "memory_cap_gb": 96,
+    "operating_system": "Ubuntu 22.04",
+    "python": "3.10.12",
+    "numpy": "2.2.4",
+    "scipy": "1.15.2",
+    "mujoco": "3.8.0",
+    "pinocchio": "3.8.0"
+  },
+  "checkpoint_file_count": 1327,
+  "transfer_file_count": 1329,
+  "final_archive_sha256": "c54e021eb5ad1e8270ee2a6b473c2cb6d9799583fd41c190b19df9581a6f6d1a",
+  "final_manifest_sha256": "0465ee3e91a96b7724d8def0f0f415cfdd8ee7d5cf0b16f89dcbea696b9d144a",
+  "stale_snapshot_promoted": false,
+  "limitations": [
+    "The execution provenance authenticates the synthetic campaign; it is not participant or equipment calibration.",
+    "The recovery checkpoints are operational state and are not reviewer evidence."
+  ]
+}

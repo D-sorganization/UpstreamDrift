@@ -20,32 +20,34 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   Archival qualification remains false because the PDF is untagged and retains
   Type 3 and unembedded font resources.
 
-## Active Articulated Uncertainty Campaign (#8752)
+## Completed Constitutive Uncertainty Campaign (#8752)
 
-- ControlTower worktree:
-  `C:\Users\diete\Repositories\UpstreamDrift-worktrees\goal-8752-uncertainty`,
-  running the exact scientific launch revision
+- The single ControlTower campaign completed at
+  `2026-08-23T21:59:22Z` with exit code 0. It used eight workers under a
+  four-core/96 GB cap at exact source revision
   `13146cdcece879e7156e06e2dca6626c1a54e045`.
-- Container `upstreamdrift-8752-campaign` uses eight workers within a reversible
-  four-core CPU cap. Its workspace and campaign records are bind-mounted from
-  the ControlTower C: drive, and restart policy is `on-failure`. Do not start a
-  duplicate or modify its frozen source.
-- The latest non-mutating probe still reports `running`. Its log completed one
-  72/72 ground-atlas pass and reached branch 65/72 of the next atomic pass.
-  Treat checkpoint counts as progress only, not as a terminal scientific result.
-- Status and logs:
-  `C:\Users\diete\Campaigns\UpstreamDrift-8752`. Remote inspection uses the
-  pinned Tailscale SSH route into `ControlTower-SSD`; a separate Codex session
-  on ControlTower is unnecessary. Loss of this task or Tailscale connectivity
-  does not stop the container.
-- Runtime: Ubuntu 22.04, Python 3.10.12, NumPy 2.2.4, SciPy 1.15.2, MuJoCo
-  3.8.0, and Pinocchio 3.8.0. The cross-CPU canary preserves registered
-  discrete decisions and gates at `rtol=2e-8`, `atol=1e-9`.
-- At terminal status, audit every expected branch, retained failure, and
-  digest. Then integrate `fix/8752-atomic-campaign-checkpoint`. The constitutive
-  subcampaign precedes execution of #8800; #8800 still blocks final closure of
-  #8752 and #8668. Regenerate claims, figures, paper, and release only after
-  both authorities pass.
+- The final 1,329-file transfer manifest verifies 1,327 atomic checkpoints,
+  the terminal record, and its evidence test. Record SHA-256 is
+  `e8a7e53701217e4de875a370f7483172f3cfbfb167416b5133ba269b8fef689b`;
+  archive SHA-256 is
+  `c54e021eb5ad1e8270ee2a6b473c2cb6d9799583fd41c190b19df9581a6f6d1a`.
+  The earlier in-progress snapshot was verified but not promoted.
+- Nine completed nonnominal shaft corners span 80--182 matched cells, or
+  -46 to +56 from nominal 126/384. Both grip-damping corners are retained
+  failures. All 18 completed ground corners remain 0/384; high grip damping is
+  a retained ground failure.
+- This rejects invariance of the shaft comparability set over the registered
+  one-at-a-time constitutive bounds. It is not a speed effect, joint parameter
+  distribution, participant/equipment calibration, or coaching result. The
+  empty ground matching set does not mean support compliance has no dynamics.
+- `articulated_headline_execution_provenance.json` binds the exact Git blobs,
+  runtime, resource caps, terminal state, and transfer hashes. The auditor can
+  validate that archived source set after behavior-preserving refactors without
+  relabeling the historical computation.
+- The corrected PDF/SVG offsets coincident low/high markers so both retained
+  failures and every zero-change ground pair remain visible. Claim
+  `PD-CLAIM-314` records the bounded result. #8800 still blocks final closure of
+  #8752/#8668 and the full publication/release regeneration.
 
 ## Headline Structural Propagation (#8800)
 

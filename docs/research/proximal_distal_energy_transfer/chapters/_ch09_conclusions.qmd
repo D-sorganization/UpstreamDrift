@@ -133,6 +133,14 @@ negative speed differences; none of 384 finite-ground coupled--fixed cells
 satisfies its primary match. These results reject universal elastic or ground
 pathway benefits rather than establishing human transfer strategies.
 
+The completed 19-corner constitutive screen further shows that the shaft
+matching set is not invariant to the registered one-at-a-time engineering
+bounds: its nine completed nonnominal corners span 80--182 matched cells, with
+two grip-damping failures retained. All 18 completed ground corners remain at
+0/384 and one ground corner retains a failure. These are matching-set
+sensitivity results, not speed effects, population uncertainty, or equipment
+calibration.
+
 A seven-corner structural authority campaign now regenerates four headline
 cases over all 13 phase samples. Nominal, both body-mass, both joint-limit, and
 high-height corners retain 52/52 feasible states. The low-height corner retains
