@@ -79,17 +79,17 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
   every supported image's final dependency layer and adds a unit-marked
   repository contract. The higher setuptools floor also resolves
   PYSEC-2026-3447, which the first protected follow-up build surfaced after
-  the older finding was cleared. PR #9001 then proved the resolved environment
-  clean but found pip's embedded third-party SBOM still describing its
-  superseded vendored versions. The current correction removes pip from final
-  runtime/test images after dependency installation and restores the audited
-  builder venv only in the explicit training stage. No scanner waiver or
-  skip-file rule is used. The next protected slim-profile build exposed a
+  the older finding was cleared. PR #9001 merged the correction that removes
+  pip and its embedded third-party SBOM from final runtime/test images after
+  dependency installation and restores the audited builder venv only in the
+  explicit training stage. No scanner waiver or skip-file rule is used. Its
+  protected slim-profile build exposed a
   separate builder-context omission: `pyproject.toml` force-includes
   `launch_upstream_drift.py`, but the isolated Docker context copied only the
-  legacy launcher. The current correction copies both launcher modules before
-  feature installation and guards their order. The focused
-  Docker/packaging/spec set passes.
+  legacy launcher. Follow-up PR #9003 copies both launcher modules before
+  feature installation and guards their order. Its focused
+  Docker/packaging/spec set and mandatory local push gates pass; protected
+  image builds and scans remain pending.
 - Docker is unavailable locally, so protected image builds and scans remain
   authoritative. Human review is required; do not create redundant runs.
 
