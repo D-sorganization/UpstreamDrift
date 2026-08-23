@@ -532,7 +532,7 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.576                                            |
+| **Spec Version**        | 1.0.577                                            |
 | **Last Spec Update**    | 2026-08-22                                         |
 
 ## 2. Purpose & Mission
@@ -4345,3 +4345,5 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Updated Ruff and Bandit toolchain compliance configuration in `pyproject.toml` and scripts to satisfy standard CI quality gates.
 - Replaced pandas `iterrows()` with vectorized `.to_dict("records")` in `launch_monitor/outcome_proxy.py` and `launch_monitor/strokes_gained.py` to optimize batch processing. (spec-exempt: micro-optimization)
 - Vectorized batch swing optimizer effort sum-of-squares computation across environments via `np.einsum("nij,nij->n", controls, controls)` in `src/shared/python/optimization/batch_swing_optimizer.py` (#8958). (spec-exempt: micro-optimization)
+
+- (spec-exempt: micro-optimization) Replaced `np.sum(condition)` and `np.sum(np.isnan(arr))` with `np.count_nonzero` in python analytics and motion matching codebase for faster array evaluation.
