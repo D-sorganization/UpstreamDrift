@@ -90,6 +90,11 @@ PR #8793 merged the PDF quality contract at `6e28baef54a0`: UpstreamDrift is aut
     perturbation before 50 ms of unactuated forward dynamics. Treat the output as
     local passive-mechanism falsification conditional on the registered model,
     never as validation of a human swing, timing strategy, or coaching rule.
+    #9004 now owns the missing measured-trajectory qualification: registered
+    golf-likeness metrics, governed participant-grouped data, analytic versus
+    replay/tracking comparisons, participant holdout, adverse controls, and
+    measured-state 4--50 ms probes. The canonical #8557 dependency ledger puts
+    #9004 before #8450 while retaining the separate bilateral-wrench gate #8556.
   - #8800 is **OPEN** and blocks #8752. Its governed generator regenerates all
     13 phase states for cases 0/8/9/17; nominal is 52/52 feasible and reproduces
     committed states within 1e-8 rad. JSON/NPZ evidence rejects source/content
