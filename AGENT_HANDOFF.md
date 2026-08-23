@@ -66,10 +66,11 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   manifest and no-pickle governance gateway. Implementation commit `c9da9b9ca`
   additionally binds each trial to a digest-frozen, source-specific participant
   split and verifies disjoint training, held-out, and adverse cohorts,
-  participant membership, and intended use before parsing. Source-package and
-  trajectory digests, SI units, processing, four frames, two events, channel
-  coverage, and six uncertainty records remain required. Thirty-seven focused
-  tests and the 587-artifact release gate pass.
+  participant membership, and intended use before parsing. Follow-up commit
+  `1b7e87c42` also requires the split freeze time to precede artifact creation.
+  Source-package and trajectory digests, SI units, processing, four frames, two
+  events, channel coverage, and six uncertainty records remain required.
+  Thirty-eight focused tests and the 587-artifact release gate pass.
 - Keep this branch stacked until #9016 protected-merges. Then merge remote
   `main` without rewriting history, refresh the handoff and release manifests,
   push through all hooks, and open a full PR. The subsequent #9004 slice is the
