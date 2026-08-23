@@ -309,6 +309,16 @@ jobs:
           cache-dependency-path: |
             pyproject.toml
             requirements*.lock
+      - name: Validate Unit-Gate Quarantine Contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            python scripts/ci/check_unit_gate_quarantine.py \
+              --baseline-ref "origin/${{ github.base_ref }}"
+          else
+            python scripts/ci/check_unit_gate_quarantine.py
+          fi
       - name: Purge pip cache
         run: python -m pip cache purge || true
       - name: Create Quality Virtual Environment
