@@ -77,12 +77,15 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     #8751 or describe the impulsive stick control as a trajectory law.
   - #8752 is **OPEN** on `research/8752-articulated-uncertainty`. The v2
     40-sample closed-state/LHS study is finite and energy-closed but every row
-    retains partial opening. The 19-corner headline campaign is incomplete. At
-    2026-08-22 00:23 PDT it retained 23 terminal pathway evaluations across 11
-    fully accounted corners; `ground_translation_stiffness_scale-low` was active
-    with 25/72 atomic branch checkpoints (776 checkpoint files overall). Nominal
-    remains shaft 126/384 and ground 0/384. Three adverse pathways are retained
-    failures rather than filtered results. The independent
+    retains partial opening. The 19-corner headline campaign is incomplete. Its
+    20-worker process ended after 2026-08-22 22:53 PDT without writing a terminal
+    record; do not describe it as complete. The JSON remains `in_progress` with
+    17 corner records and 16 fully accounted corners. The active
+    `ground_free_moment_stiffness_scale-high` corner retained 49/72 branches;
+    1,160 atomic checkpoint files (12,343,744 bytes) exist overall, with no torn
+    `.tmp` file. PID `18404` and all campaign workers are absent. No restart has
+    been authorized yet. Nominal remains shaft 126/384 and ground 0/384. Three
+    adverse pathways are retained failures rather than filtered results. The independent
     `articulated_headline_record_audit` rejects torn JSON,
     schema/design/config/source drift, nonprefix corners, invalid pathway
     states, and premature completion. It validates the current snapshot as
@@ -90,8 +93,25 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     `a64f02a92a300afe9e1f8070dd4ddca9e48add2b2fee22a337a4df5c37b25e57`,
     and record digest
     `069d942a2a04ba1a7960e628d44d49e88b12ca1780722fb977ace03d538181ba`.
+    All embedded campaign source hashes still match the unchanged worktree at
+    commit `602b7bdf7b31127af24074e1725731845ed62d18`. Worker count is an
+    execution control: both the top-level resume contract and branch execution
+    digest intentionally exclude it, and a regression test permits worker-count
+    changes while rejecting scientific-design drift. Therefore a lower-worker
+    restart can reuse the checkpoints without changing the registered study.
     All 72 nominal branch checkpoints retain exact trajectory/force/ground-force
     parity and restart equivalence.
+    ControlTower is reachable and has a Ryzen 9 5950X (16 cores/32 threads),
+    approximately 128 GB RAM, and ample free memory, but it is not ready to run
+    this campaign yet: its existing UpstreamDrift checkout is dirty and stale,
+    the campaign commit is not fetched, and the inspected Windows Python
+    environments lack Pinocchio. The RTX 3090 does not accelerate this
+    CPU/NumPy/MuJoCo/Pinocchio workload. A safe migration requires a dedicated
+    clean worktree, exact environment/source/data hashes, a SHA-256 checkpoint
+    transfer manifest, and a one-branch cross-machine replay canary before any
+    resumed production branch. Start with eight workers and monitor host/runner
+    load before considering twelve. Do not mutate the dirty primary checkout or
+    launch a campaign until that qualification plan is approved.
     The completion-only headline evidence test stays untracked until data
     finish. Branch `fix/8752-atomic-campaign-checkpoint`, forked from exact
     campaign commit `8c537b660`, adds atomic replacement for the top-level JSON
@@ -141,7 +161,9 @@ Native MuJoCo and robotics Pinocchio independently qualify the 20-coordinate rig
 
 ## Immediate Next Steps
 
-1. Complete #8752 and its blocking structural propagation issue #8800.
+1. Obtain restart-location approval for #8752, qualify the selected host as
+   described above, then resume from the 1,160 validated atomic checkpoints.
+   Complete #8752 and its blocking structural propagation issue #8800.
 2. Continue #8789's remaining Docker/quarantine/baseline work without overlap.
 3. Burn down #8766 without widening its registered contract.
 
