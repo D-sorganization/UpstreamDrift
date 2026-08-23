@@ -56,7 +56,61 @@ class ThemePalette(dict):
         )
 
 
-__all__ = ["SEMANTIC_ALIASES", "ThemePalette"]
+class _ColorsMeta(type):
+    """Metaclass allowing Colors.TOKEN access to resolve dynamically from active theme."""
+
+    def __getattr__(cls, name: str) -> str:
+        colors = get_current_colors()
+        lower_name = name.lower()
+        if hasattr(colors, lower_name):
+            val = getattr(colors, lower_name)
+            if isinstance(val, str):
+                return val
+        if lower_name in colors:
+            return str(colors[lower_name])
+        fallbacks: dict[str, str] = {
+            "success": "#30D158",
+            "error": "#FF375F",
+            "warning": "#FF9F0A",
+            "info": "#0A84FF",
+            "primary": colors.get("accent", "#0A84FF"),
+            "primary_hover": colors.get("button_hover", "#409CFF"),
+            "bg_elevated": colors.get("group_bg", "#252526"),
+            "bg_base": colors.get("bg", "#1e1e1e"),
+            "border_default": colors.get("border", "#333333"),
+            "text_primary": colors.get("text", "#ffffff"),
+            "text_secondary": colors.get("text_secondary", "#aaaaaa"),
+            "text_tertiary": colors.get("label", "#888888"),
+        }
+        if lower_name in fallbacks:
+            return fallbacks[lower_name]
+        raise AttributeError(f"Colors has no color attribute {name!r}")
+
+
+class Colors(metaclass=_ColorsMeta):
+    """Semantic color token accessor resolving dynamically from active theme."""
+
+    SUCCESS: str = "#30D158"
+    ERROR: str = "#FF375F"
+    WARNING: str = "#FF9F0A"
+    INFO: str = "#0A84FF"
+    PRIMARY: str = "#0A84FF"
+    PRIMARY_HOVER: str = "#409CFF"
+    BG_ELEVATED: str = "#252526"
+    BG_BASE: str = "#1e1e1e"
+    BORDER_DEFAULT: str = "#333333"
+    TEXT_PRIMARY: str = "#ffffff"
+    TEXT_SECONDARY: str = "#aaaaaa"
+    TEXT_TERTIARY: str = "#888888"
+
+
+__all__ = [
+    "Colors",
+    "DARK_THEME",
+    "SEMANTIC_ALIASES",
+    "ThemePalette",
+    "get_current_colors",
+]
 
 
 def _builtin_dark_palette() -> ThemePalette:

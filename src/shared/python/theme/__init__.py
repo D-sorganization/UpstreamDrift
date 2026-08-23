@@ -67,6 +67,7 @@ try:
         create_theme_menu,
         setup_themed_app,
     )
+    from .palette import Colors, ThemePalette, get_current_colors
     from .responsive import (
         TextWidthSpec,
         configure_form_layout_for_readability,
@@ -76,6 +77,13 @@ try:
         wrap_in_scroll_area,
     )
     from .theme_manager import ThemeManager, get_theme_manager
+    from .typography import (
+        Sizes,
+        Weights,
+        get_display_font,
+        get_mono_font,
+        get_qfont,
+    )
     from .zoom import (
         ApplicationZoomController,
         ZoomConfig,
@@ -114,6 +122,14 @@ except ImportError:
     ZoomTokenSet = None  # type: ignore[assignment, misc]
     install_application_zoom = None  # type: ignore[assignment]
     scale_px = None  # type: ignore[assignment]
+    Colors = None  # type: ignore[assignment, misc]
+    Sizes = None  # type: ignore[assignment, misc]
+    Weights = None  # type: ignore[assignment, misc]
+    get_qfont = None  # type: ignore[assignment]
+    get_display_font = None  # type: ignore[assignment]
+    get_mono_font = None  # type: ignore[assignment]
+    ThemePalette = None  # type: ignore[assignment, misc]
+    get_current_colors = None  # type: ignore[assignment]
 
 __all__ = [
     # Protocols (no PyQt6 dependency)
@@ -151,13 +167,21 @@ __all__ = [
     "ThemeListItem",
     "ThemeManagerDialog",
     "ThemePreviewWidget",
-    # Color utilities
+    # Color utilities & tokens
     "BUILTIN_THEMES",
     "CHART_COLORS",
+    "Colors",
     "SEMANTIC_COLOR_KEYS",
+    "Sizes",
     "THEME_COLOR_KEYS",
+    "ThemePalette",
+    "Weights",
+    "get_current_colors",
+    "get_display_font",
     "get_matplotlib_colors",
+    "get_mono_font",
     "get_qcolor",
+    "get_qfont",
     "get_rgba",
     "is_dark_theme",
     "is_valid_hex_color",
