@@ -69,7 +69,7 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   has a registered local digest plus verified reuse and required calibration,
   club, participant, and event fields. Never infer authority from a filename,
   screenshot, or visual resemblance.
-- Branch `research/9004-governed-ingestion` adds the typed acquisition
+- PR #9017 (`research/9004-governed-ingestion`) adds the typed acquisition
   manifest and no-pickle governance gateway. Implementation commit `c9da9b9ca`
   additionally binds each trial to a digest-frozen, source-specific participant
   split and verifies disjoint training, held-out, and adverse cohorts,
@@ -79,8 +79,9 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   events, channel coverage, and six uncertainty records remain required.
   Thirty-eight focused tests and the 587-artifact release gate pass.
 - Merge commit `feb9478f7` reconciles the branch with the protected #9016 squash
-  without rewriting history. The governed manifests and 235-page release
-  validate. Push through every hook and open a full PR. The boundary must remain
+  without rewriting history; reviewed PR head `a34d24a53` passed every pre-push
+  hook and opened full PR #9017. The governed manifests and 235-page release
+  validate. Protected CI and human review remain. The boundary must remain
   unusable for human inference until the source registry qualifies an actual
   dataset. The subsequent #9004 slice is the deterministic coordinate/event
   mapping and replay runner.
