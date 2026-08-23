@@ -43,16 +43,43 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
 - Parent PID `18404` is the intentional source-locked coordinator with 20
   workers. Do not kill workers individually, edit source-hashed files, or start
   a duplicate campaign.
-- At 2026-08-22 19:24 PDT, 16 of 19 corners were fully accounted.
+- At 2026-08-22 22:25 PDT, 16 of 19 corners were fully accounted.
   `ground_free_moment_stiffness_scale-high` is the active seventeenth corner;
-  its first ordered branch checkpoint had not yet been promoted. Two registered
-  ground-only damping corners follow it. The 21-process group remains healthy;
-  do not trade scientific identity for a faster restart.
+  the restart tree held 1,155 atomic branch checkpoints and was still advancing.
+  Two registered ground-only damping corners follow it. The 21-process group
+  remains healthy; do not trade scientific identity for a faster restart.
 - Completed rows and digest-bound branch checkpoints are restartable. Partial
   checkpoints are execution evidence, not release evidence.
 - After completion, independently audit the record, then integrate
   `fix/8752-atomic-campaign-checkpoint` (`9f850a67f...`). Execute #8800 next,
   then regenerate claims, figures, the paper, and the AffineDrift projection.
+
+## Measured-Trajectory Qualification (#9004)
+
+- #9004 is open under canonical epic #8557 and precedes #8450 without weakening
+  the separate bilateral-wrench gate #8556. It asks whether the analytic
+  articulated states are quantitatively golf-like and creates the governed
+  measured-state authority required to test that question.
+- Worktree `UpstreamDrift-worktrees/9004-trajectory-qualification`, branch
+  `research/9004-trajectory-qualification`, starts from remote `main`
+  `3ef3337b12e6`. The initial typed source registry and validator are under test.
+- The local repository census found no governed participant golf motion capture.
+  Simscape exports are circular simulation evidence; motion-pipeline fixtures,
+  OpenSim tutorials, GolfDB video labels, and launch-monitor records cannot
+  substitute for body-and-club trajectories.
+- Two external candidates remain unqualified: KIT motion 1319 offers five public
+  C3D golf drives from one participant but has unverified club/calibration fields
+  and no explicit reuse license; GolfPose describes six participants and body plus
+  club keypoints but requires author authorization and verified reuse terms.
+  Neither has a registered local digest, and neither currently supports held-out
+  qualification.
+- The fail-closed registry distinguishes pipeline probes, participant-held-out
+  motion qualification, human inference, and bilateral-wrench readiness. Ten
+  focused scientific tests currently pass. Continue with a governed download only
+  after reuse authority is explicit; never promote filenames or visual resemblance.
+- The independent #8752 reviewer-table branch is clean and remote-verified at
+  `f73c0ad87f140ea12873d0256e81c198e132cd52`; integrate it only after the live
+  headline record is complete.
 
 ## Pinned Tools Docker Boundary and Security Follow-Up (#8996)
 
@@ -116,6 +143,8 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
 - #8556 remains externally data-gated: no governed participant dataset with
   synchronized bilateral six-axis grip wrenches is available. Never substitute
   synthetic traces for human validation.
+- #9004 likewise remains open: no governed measured-trajectory authority yet
+  qualifies the analytic articulated states as representative golf motion.
 - The model ladder is synthetic and model-conditional. It does not establish
   participant mechanics, anatomy, physiology, equipment calibration, injury,
   coaching strategy, or a universal speed benefit.
