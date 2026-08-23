@@ -43,11 +43,13 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 
 ## Measured-Trajectory Qualification (#9004)
 
-- PR #9016 at exact head `294cf0d680df13779bc9e10ba95435200acc2c31`
+- PR #9016 at exact head `767b1f0687cd1f0ef0ca7d6b030d170304662250`
   preregisters eleven primary metrics, four coordinate-frame authorities, two
   events, participant-level holdout, training-only threshold freezing, four
   negative controls, six uncertainty analyses, and missing-as-unavailable
-  semantics. It is a full PR against `main`; do not create redundant CI runs.
+  semantics. Its head also forces `MPLBACKEND=Agg` in the headless optional
+  stack after the first run exposed an ambient Qt backend; protected CI is
+  running on that correction. Do not create redundant runs.
 - The metric contract is deliberately fail-closed: `execution_ready=false`,
   `human_inference=false`, `bilateral_wrench=false`, and
   `results_status=not_run_no_authority` until a governed participant dataset is
@@ -61,15 +63,17 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   club, participant, and event fields. Never infer authority from a filename,
   screenshot, or visual resemblance.
 - Stacked branch `research/9004-governed-ingestion` adds the typed acquisition
-  manifest and no-pickle governance gateway at commit `08ea53573`. It validates
-  source-package and trajectory digests, participant grouping, SI units,
-  processing, four frames, two events, channel coverage, and six uncertainty
-  records before delegating to the canonical motion-source adapter. Thirty-two
-  focused tests and the 587-artifact release gate pass.
+  manifest and no-pickle governance gateway. Implementation commit `c9da9b9ca`
+  additionally binds each trial to a digest-frozen, source-specific participant
+  split and verifies disjoint training, held-out, and adverse cohorts,
+  participant membership, and intended use before parsing. Source-package and
+  trajectory digests, SI units, processing, four frames, two events, channel
+  coverage, and six uncertainty records remain required. Thirty-seven focused
+  tests and the 587-artifact release gate pass.
 - Keep this branch stacked until #9016 protected-merges. Then merge remote
   `main` without rewriting history, refresh the handoff and release manifests,
   push through all hooks, and open a full PR. The subsequent #9004 slice is the
-  deterministic coordinate/event mapping and participant-split runner.
+  deterministic coordinate/event mapping and replay runner.
 
 ## Other Active Dependencies
 
