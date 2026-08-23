@@ -246,7 +246,7 @@
       "bytes": 2789
     },
     "docs/research/proximal_distal_energy_transfer/DATA_DICTIONARY.md": {
-      "sha256": "d3a7f932b282034885684fbeaf1439b424e940960dc4785140fc0456fd5cac5f",
+      "sha256": "edf79749b64f422d35dcdd95ad2bb41cb22818018a2ddf021a5c680c3b80a0bf",
       "bytes": 36663
     },
     "docs/research/proximal_distal_energy_transfer/EVIDENCE_SCHEMA_V2.md": {
@@ -262,8 +262,8 @@
       "bytes": 10805
     },
     "docs/research/proximal_distal_energy_transfer/MEASURED_TRAJECTORY_ACQUISITION.md": {
-      "sha256": "887900f30ca938af125707efd05845b444c485e9f82296dad4208109102f22e3",
-      "bytes": 10021
+      "sha256": "ec4376d09b3e0bff2f4d8c765d5c1b965dd2ea1cbf0f05a016059495ddf00377",
+      "bytes": 10802
     },
     "docs/research/proximal_distal_energy_transfer/MODEL_COMPLETION_FALSIFICATION_MATRIX.md": {
       "sha256": "4f5dbaf6f9ef3e9000d965f2f195a0b554b3a4fa91524a267580bef3413b047b",
@@ -2114,8 +2114,8 @@
       "bytes": 10764
     },
     "scripts/research/proximal_distal_energy/measured_trajectory_ingestion.py": {
-      "sha256": "fd7ee402dd094e6b8dbf5b63a9c657812637f0af6d1374fc65a72e696cb3adde",
-      "bytes": 22085
+      "sha256": "ce46b222d360ef3129183ebb9d8b1d11f5db95c39265f0a30da93b258659e13e",
+      "bytes": 24594
     },
     "scripts/research/proximal_distal_energy/measured_trajectory_metric_registration.py": {
       "sha256": "a076b9a9d156a5ceaeafa51eafe35606c8a9dc6ecadca1c953461d3cf697cbba",
