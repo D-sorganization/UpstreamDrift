@@ -43,11 +43,16 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 
 ## Measured-Trajectory Qualification (#9004)
 
-- Branch `research/9004-golf-likeness-contract` is based on merged #9005 and
+- PR #9016 (`research/9004-golf-likeness-contract`) is based on merged #9005 and
   preregisters eleven primary metrics, four coordinate-frame authorities, two
   events, participant-level holdout, training-only threshold freezing, four
   negative controls, six uncertainty analyses, and missing-as-unavailable
   semantics.
+- Its initial optional-stack run exposed an ambient interactive Matplotlib
+  backend on the headless runner. The branch now forces `MPLBACKEND=Agg` at the
+  optional-stack job boundary and enforces that contract in
+  `tests/ci/test_ci_infrastructure.py`; do not replace this with a blind rerun
+  or an application-wide backend override.
 - The metric contract is deliberately fail-closed: `execution_ready=false`,
   `human_inference=false`, `bilateral_wrench=false`, and
   `results_status=not_run_no_authority` until a governed participant dataset is
@@ -60,9 +65,11 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   has a registered local digest plus verified reuse and required calibration,
   club, participant, and event fields. Never infer authority from a filename,
   screenshot, or visual resemblance.
-- After protected merge, the next #9004 slice is a typed, no-pickle ingestion
-  and coordinate/event qualification boundary. It must remain unusable for
-  human inference until the source registry qualifies an actual dataset.
+- The next stacked slice is branch `research/9004-governed-ingestion` at remote
+  commit `bce42f1ea34e072b42f8c410e207628cd0367065`. It supplies a typed,
+  no-pickle ingestion and coordinate/event qualification boundary. Reconcile it
+  with the protected #9016 squash before opening its PR; it must remain unusable
+  for human inference until the source registry qualifies an actual dataset.
 
 ## Other Active Dependencies
 
