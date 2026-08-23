@@ -139,6 +139,38 @@ def _shaft_jobs(
     return tuple(jobs)
 
 
+def _shaft_execution_result(
+    authority: ArticulatedAtlasAuthority,
+    config: shaft.ArticulatedShaftAtlasConfig,
+    states: tuple[tuple[int, int], ...],
+    buffers: Any,
+    audit: dict[str, Any],
+) -> StructuralAtlasExecution:
+    selection = resolve_atlas_states(
+        authority, config.case_indices, config.sample_indices
+    )
+    properties = _shaft_properties(authority, config, states[-1])
+    beam_record = json.loads(
+        (DATA / "shaft_beam_reference.json").read_text(encoding="utf-8")
+    )
+    coarse_probes = shaft._excluded_step_probes(authority, config)
+    gates = shaft._gates(buffers, config, properties, beam_record)
+    arrays = shaft._arrays(authority, states, buffers, config, gates)
+    record = shaft._record(
+        authority,
+        selection,
+        buffers,
+        config,
+        properties,
+        beam_record,
+        gates,
+        _versions(),
+        coarse_probes,
+    )
+    record["checkpoint_audit"] = audit
+    return StructuralAtlasExecution(record, arrays, audit)
+
+
 def execute_structural_shaft_atlas(
     authority: ArticulatedAtlasAuthority,
     *,
@@ -219,29 +251,7 @@ def execute_structural_shaft_atlas(
         identity,
         expected_contracts=contracts,
     )
-    selection = resolve_atlas_states(
-        authority, config.case_indices, config.sample_indices
-    )
-    properties = _shaft_properties(authority, config, states[-1])
-    beam_record = json.loads(
-        (DATA / "shaft_beam_reference.json").read_text(encoding="utf-8")
-    )
-    coarse_probes = shaft._excluded_step_probes(authority, config)
-    gates = shaft._gates(buffers, config, properties, beam_record)
-    arrays = shaft._arrays(authority, states, buffers, config, gates)
-    record = shaft._record(
-        authority,
-        selection,
-        buffers,
-        config,
-        properties,
-        beam_record,
-        gates,
-        _versions(),
-        coarse_probes,
-    )
-    record["checkpoint_audit"] = audit
-    return StructuralAtlasExecution(record, arrays, audit)
+    return _shaft_execution_result(authority, config, states, buffers, audit)
 
 
 def _ground_jobs(

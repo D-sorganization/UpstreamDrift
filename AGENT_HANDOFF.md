@@ -31,7 +31,7 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   the ControlTower C: drive, and restart policy is `on-failure`. Do not start a
   duplicate or modify its frozen source.
 - The latest non-mutating probe still reports `running`. Its log completed one
-  72/72 ground-atlas pass and reached branch 56/72 of the next atomic pass.
+  72/72 ground-atlas pass and reached branch 65/72 of the next atomic pass.
   Treat checkpoint counts as progress only, not as a terminal scientific result.
 - Status and logs:
   `C:\Users\diete\Campaigns\UpstreamDrift-8752`. Remote inspection uses the
@@ -57,6 +57,9 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 - The seven-corner plan retains 84 planned states as 83 feasible states plus
   the declared low-height infeasible state. Shaft and ground checkpoints cover
   48 and 72 atomic branch packs respectively and restore without recomputation.
+- Typed campaign dependencies, immutable corner-evidence requests, and focused
+  shaft result assembly removed three temporary #8800 architecture exceptions;
+  the byte-identical preflight-builder decomposition remains due before execution.
 - This is execution infrastructure, not a scientific result. No #8800 campaign
   has run, no headline estimate has propagated, and no paper or release claim
   may be promoted until all 14 atlas paths and common-support controls pass.

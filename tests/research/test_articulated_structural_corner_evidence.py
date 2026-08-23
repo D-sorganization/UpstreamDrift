@@ -9,6 +9,7 @@ import numpy as np
 import pytest
 
 from scripts.research.proximal_distal_energy.articulated_structural_corner_evidence import (
+    StructuralCornerEvidenceRequest,
     assemble_structural_corner_pathway_evidence,
 )
 
@@ -30,6 +31,19 @@ def _authority() -> dict:
     return nominal["authority"]
 
 
+def _request(corner_id: str, pathway: str, *, gates_passed: bool = True):
+    return StructuralCornerEvidenceRequest(
+        corner_id=corner_id,
+        cell_evidence_artifact=f"cells/{corner_id}-{pathway}.npz",
+        requested_state_count=12,
+        feasible_state_count=12,
+        retained_failures=(),
+        planned_headline_cell_count=384,
+        all_registered_gates_passed=gates_passed,
+        authority=_authority(),
+    )
+
+
 @pytest.mark.parametrize(
     ("pathway", "filename", "matched"),
     [
@@ -46,14 +60,7 @@ def test_nominal_corner_assembles_complete_aligned_evidence(
         pathway,
         arrays,
         arrays,
-        corner_id="nominal",
-        cell_evidence_artifact=f"cells/nominal-{pathway}.npz",
-        requested_state_count=12,
-        feasible_state_count=12,
-        retained_failures=(),
-        planned_headline_cell_count=384,
-        all_registered_gates_passed=True,
-        authority=_authority(),
+        request=_request("nominal", pathway),
     )
 
     assert evidence.corner_record["executed_headline_cell_count"] == 384
@@ -80,28 +87,14 @@ def test_corner_assembler_rejects_partial_execution_and_global_gate_failure() ->
             "shaft",
             arrays,
             partial,
-            corner_id="partial",
-            cell_evidence_artifact="cells/partial-shaft.npz",
-            requested_state_count=12,
-            feasible_state_count=12,
-            retained_failures=(),
-            planned_headline_cell_count=384,
-            all_registered_gates_passed=True,
-            authority=_authority(),
+            request=_request("partial", "shaft"),
         )
     with pytest.raises(RuntimeError, match="does not qualify"):
         assemble_structural_corner_pathway_evidence(
             "shaft",
             arrays,
             arrays,
-            corner_id="failed-global-gate",
-            cell_evidence_artifact="cells/failed-global-gate-shaft.npz",
-            requested_state_count=12,
-            feasible_state_count=12,
-            retained_failures=(),
-            planned_headline_cell_count=384,
-            all_registered_gates_passed=False,
-            authority=_authority(),
+            request=_request("failed-global-gate", "shaft", gates_passed=False),
         )
 
 
@@ -115,12 +108,5 @@ def test_corner_assembler_rejects_per_cell_gate_failure() -> None:
             "shaft",
             arrays,
             corner,
-            corner_id="failed-cell-gate",
-            cell_evidence_artifact="cells/failed-cell-gate-shaft.npz",
-            requested_state_count=12,
-            feasible_state_count=12,
-            retained_failures=(),
-            planned_headline_cell_count=384,
-            all_registered_gates_passed=True,
-            authority=_authority(),
+            request=_request("failed-cell-gate", "shaft"),
         )

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import argparse
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import replace
+from dataclasses import dataclass, replace
 import json
 from pathlib import Path
 from typing import Any
@@ -36,6 +36,7 @@ from scripts.research.proximal_distal_energy.articulated_structural_cell_evidenc
     write_structural_cell_evidence,
 )
 from scripts.research.proximal_distal_energy.articulated_structural_corner_evidence import (
+    StructuralCornerEvidenceRequest,
     StructuralCornerPathwayEvidence,
     assemble_structural_corner_pathway_evidence,
 )
@@ -66,6 +67,15 @@ AXIS_SCALE_KEYS = {
     "body_mass_scale": "body_mass",
     "joint_limit_scale": "joint_limit",
 }
+
+
+@dataclass(frozen=True, slots=True)
+class StructuralCampaignDependencies:
+    """Injectable pathway and release implementations for one campaign."""
+
+    shaft_executor: PathwayExecutor = execute_structural_shaft_atlas
+    ground_executor: PathwayExecutor = execute_structural_ground_atlas
+    release_builder: ReleaseBuilder | None = None
 
 
 def _json_bytes(record: Mapping[str, Any]) -> bytes:
@@ -166,16 +176,20 @@ def _assemble_release(
                 pathway,  # type: ignore[arg-type]
                 nominal[pathway],
                 arrays,
-                corner_id=corner_id,
-                cell_evidence_artifact=pack_name,
-                requested_state_count=int(corner["requested_state_count"]),
-                feasible_state_count=int(corner["feasible_state_count"]),
-                retained_failures=tuple(corner["retained_failures"]),
-                planned_headline_cell_count=(int(corner["requested_state_count"]) * 32),
-                all_registered_gates_passed=bool(
-                    record["results"]["all_registered_gates_passed"]
+                request=StructuralCornerEvidenceRequest(
+                    corner_id=corner_id,
+                    cell_evidence_artifact=pack_name,
+                    requested_state_count=int(corner["requested_state_count"]),
+                    feasible_state_count=int(corner["feasible_state_count"]),
+                    retained_failures=tuple(corner["retained_failures"]),
+                    planned_headline_cell_count=(
+                        int(corner["requested_state_count"]) * 32
+                    ),
+                    all_registered_gates_passed=bool(
+                        record["results"]["all_registered_gates_passed"]
+                    ),
+                    authority=corner["authority"],
                 ),
-                authority=corner["authority"],
             )
             write_structural_cell_evidence(
                 item.cell_evidence,
@@ -224,14 +238,13 @@ def run_structural_propagation_campaign(
     worker_count: int,
     plan_path: Path = DEFAULT_PLAN,
     data_directory: Path = DATA,
-    shaft_executor: PathwayExecutor = execute_structural_shaft_atlas,
-    ground_executor: PathwayExecutor = execute_structural_ground_atlas,
-    release_builder: ReleaseBuilder = _assemble_release,
+    dependencies: StructuralCampaignDependencies | None = None,
 ) -> dict[str, Any]:
     """Run all registered corners sequentially and promote only complete evidence."""
 
     if type(worker_count) is not int or worker_count <= 0:
         raise ValueError("worker_count must be a positive integer")
+    dependencies = dependencies or StructuralCampaignDependencies()
     plan = validate_structural_propagation_plan(plan_path)
     shaft_config = replace(ArticulatedShaftAtlasConfig(), worker_count=worker_count)
     ground_config = replace(ArticulatedGroundAtlasConfig(), worker_count=worker_count)
@@ -247,7 +260,10 @@ def run_structural_propagation_campaign(
         "release_evidence": False,
     }
     _write_json(status, status_path)
-    executors = {"shaft": shaft_executor, "ground": ground_executor}
+    executors = {
+        "shaft": dependencies.shaft_executor,
+        "ground": dependencies.ground_executor,
+    }
     configurations = {"shaft": shaft_config, "ground": ground_config}
     for corner in plan["corners"]:
         corner_id = str(corner["corner_id"])
@@ -284,6 +300,7 @@ def run_structural_propagation_campaign(
                 raise RuntimeError(
                     f"structural campaign failed: corner={corner_id}, pathway={pathway}"
                 ) from error
+    release_builder = dependencies.release_builder or _assemble_release
     result = release_builder(
         completed=tuple(status["completed"]),
         plan=plan,
@@ -325,4 +342,8 @@ if __name__ == "__main__":
     main()
 
 
-__all__ = ["main", "run_structural_propagation_campaign"]
+__all__ = [
+    "StructuralCampaignDependencies",
+    "main",
+    "run_structural_propagation_campaign",
+]

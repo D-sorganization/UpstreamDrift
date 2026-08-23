@@ -36,19 +36,26 @@ class StructuralCornerPathwayEvidence:
             raise ValueError("corner cell-evidence pathway does not agree")
 
 
+@dataclass(frozen=True, slots=True)
+class StructuralCornerEvidenceRequest:
+    """Governed denominators, authority, and output identity for one corner."""
+
+    corner_id: str
+    cell_evidence_artifact: str
+    requested_state_count: int
+    feasible_state_count: int
+    retained_failures: tuple[Mapping[str, Any], ...]
+    planned_headline_cell_count: int
+    all_registered_gates_passed: bool
+    authority: Mapping[str, Any]
+
+
 def assemble_structural_corner_pathway_evidence(
     pathway: Pathway,
     nominal_atlas_arrays: Mapping[str, Any],
     corner_atlas_arrays: Mapping[str, Any],
     *,
-    corner_id: str,
-    cell_evidence_artifact: str,
-    requested_state_count: int,
-    feasible_state_count: int,
-    retained_failures: tuple[Mapping[str, Any], ...],
-    planned_headline_cell_count: int,
-    all_registered_gates_passed: bool,
-    authority: Mapping[str, Any],
+    request: StructuralCornerEvidenceRequest,
     absolute_resolution_floor_m_s: float = 0.001,
 ) -> StructuralCornerPathwayEvidence:
     """Join common support, denominators, gates, and authority fail closed."""
@@ -68,17 +75,17 @@ def assemble_structural_corner_pathway_evidence(
     if not bool(cell_evidence["gate_status"].all()):
         raise RuntimeError("corner contains failed per-cell comparison gates")
     summary = build_corner_support_summary(
-        corner_id,
+        request.corner_id,
         corner,
-        requested_state_count=requested_state_count,
-        feasible_state_count=feasible_state_count,
-        retained_failures=retained_failures,
-        planned_headline_cell_count=planned_headline_cell_count,
-        all_registered_gates_passed=all_registered_gates_passed,
-        authority=authority,
+        requested_state_count=request.requested_state_count,
+        feasible_state_count=request.feasible_state_count,
+        retained_failures=request.retained_failures,
+        planned_headline_cell_count=request.planned_headline_cell_count,
+        all_registered_gates_passed=request.all_registered_gates_passed,
+        authority=request.authority,
     )
     corner_record = corner_support_summary_record(summary)
-    corner_record["cell_evidence_artifact"] = cell_evidence_artifact
+    corner_record["cell_evidence_artifact"] = request.cell_evidence_artifact
     corner_record["cell_evidence_sha256"] = str(cell_evidence["evidence_sha256"].item())
     return StructuralCornerPathwayEvidence(
         pathway=pathway,
@@ -89,6 +96,7 @@ def assemble_structural_corner_pathway_evidence(
 
 
 __all__ = [
+    "StructuralCornerEvidenceRequest",
     "StructuralCornerPathwayEvidence",
     "assemble_structural_corner_pathway_evidence",
 ]

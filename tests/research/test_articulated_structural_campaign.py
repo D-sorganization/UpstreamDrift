@@ -12,6 +12,7 @@ from scripts.research.proximal_distal_energy.articulated_structural_atlas_execut
     StructuralAtlasExecution,
 )
 from scripts.research.proximal_distal_energy.articulated_structural_campaign import (
+    StructuralCampaignDependencies,
     run_structural_propagation_campaign,
 )
 
@@ -62,9 +63,11 @@ def test_campaign_runs_all_fourteen_paths_before_release_promotion(
         worker_count=2,
         plan_path=PLAN,
         data_directory=DATA,
-        shaft_executor=executor("shaft"),
-        ground_executor=executor("ground"),
-        release_builder=release_builder,
+        dependencies=StructuralCampaignDependencies(
+            shaft_executor=executor("shaft"),
+            ground_executor=executor("ground"),
+            release_builder=release_builder,
+        ),
     )
 
     assert len(calls) == 14
@@ -96,8 +99,10 @@ def test_campaign_persists_dynamic_failure_without_release_promotion(tmp_path) -
             worker_count=1,
             plan_path=PLAN,
             data_directory=DATA,
-            shaft_executor=fail_on_second,
-            ground_executor=fail_on_second,
+            dependencies=StructuralCampaignDependencies(
+                shaft_executor=fail_on_second,
+                ground_executor=fail_on_second,
+            ),
         )
 
     persisted = json.loads(

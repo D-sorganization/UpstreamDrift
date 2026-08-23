@@ -13,6 +13,7 @@ from scripts.research.proximal_distal_energy.articulated_structural_axis_evidenc
     assemble_structural_axis_pathway_evidence,
 )
 from scripts.research.proximal_distal_energy.articulated_structural_corner_evidence import (
+    StructuralCornerEvidenceRequest,
     assemble_structural_corner_pathway_evidence,
 )
 from scripts.research.proximal_distal_energy.articulated_structural_figure_data import (
@@ -54,14 +55,16 @@ def _result_and_packs():
                 pathway,
                 atlases[pathway],
                 atlases[pathway],
-                corner_id=corner_id,
-                cell_evidence_artifact=f"cells/{corner_id}-{pathway}.npz",
-                requested_state_count=12,
-                feasible_state_count=12,
-                retained_failures=(),
-                planned_headline_cell_count=384,
-                all_registered_gates_passed=True,
-                authority=_authority(),
+                request=StructuralCornerEvidenceRequest(
+                    corner_id=corner_id,
+                    cell_evidence_artifact=f"cells/{corner_id}-{pathway}.npz",
+                    requested_state_count=12,
+                    feasible_state_count=12,
+                    retained_failures=(),
+                    planned_headline_cell_count=384,
+                    all_registered_gates_passed=True,
+                    authority=_authority(),
+                ),
             )
             corners[(corner_id, pathway)] = evidence
             records.append(evidence.corner_record)

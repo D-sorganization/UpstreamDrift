@@ -57,33 +57,6 @@
       "expires_on": "2026-09-30"
     },
     {
-      "path": "scripts/research/proximal_distal_energy/articulated_structural_atlas_execution.py",
-      "symbol": "execute_structural_shaft_atlas",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 8800,
-      "reason": "Issue #8800: the new fail-closed checkpoint orchestration is three lines over budget; extract branch restoration after the first full campaign dry-run preserves exact resume behavior.",
-      "expires_on": "2026-09-15"
-    },
-    {
-      "path": "scripts/research/proximal_distal_energy/articulated_structural_campaign.py",
-      "symbol": "run_structural_propagation_campaign",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 8800,
-      "reason": "Issue #8800: dependency injection keeps the fourteen-path campaign testable; replace executor and release-builder parameters with a typed dependency context before campaign execution.",
-      "expires_on": "2026-09-15"
-    },
-    {
-      "path": "scripts/research/proximal_distal_energy/articulated_structural_corner_evidence.py",
-      "symbol": "assemble_structural_corner_pathway_evidence",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 8800,
-      "reason": "Issue #8800: explicit evidence inputs preserve provenance during initial qualification; introduce a typed immutable evidence context before campaign execution.",
-      "expires_on": "2026-09-15"
-    },
-    {
       "path": "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py",
       "symbol": "build_structural_propagation_plan",
       "rule": "function-lines",
