@@ -25,11 +25,15 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 - ControlTower worktree:
   `C:\Users\diete\Repositories\UpstreamDrift-worktrees\goal-8752-uncertainty`,
   detached at exact scientific launch HEAD `13146cdcece879e7156e06e2dca6626c1a54e045`.
-- Container `upstreamdrift-8752-campaign` runs eight CPU-active workers with a
-  CPU cap of eight and atomic branch checkpoints. Do not start a duplicate.
-- At 2026-08-23 10:08 PDT the container was healthy at approximately 792% CPU
-  and 582 MiB RAM. It completed the active 72-branch ground corner and began
-  branch 1/72 of the next registered corner.
+- Container `upstreamdrift-8752-campaign` retains eight worker processes and
+  atomic branch checkpoints. At 11:21 PDT its reversible container CPU cap was
+  reduced from eight cores to four over Tailscale, without a restart or source
+  change, to coexist with protected CI. The running container then used about
+  four cores and 589 MiB. Do not start a duplicate.
+- At 2026-08-23 11:22 PDT its live log had atomically completed branch 57/72 of
+  the current registered ground corner; `status.json` still reported `running`
+  with eight workers, and 1,240 checkpoint files remained present. Do not infer
+  total-campaign completion from one corner's branch counter.
 - Runtime: Ubuntu 22.04, Python 3.10.12, NumPy 2.2.4, SciPy 1.15.2, MuJoCo
   3.8.0, and Pinocchio 3.8.0. The cross-CPU canary preserves every discrete
   decision and registered gate at `rtol=2e-8`, `atol=1e-9`.
@@ -43,16 +47,19 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 
 ## Measured-Trajectory Qualification (#9004)
 
-- PR #9016 (`research/9004-golf-likeness-contract`) is based on merged #9005 and
+- PR #9016 is protected-squash-merged at remote-main commit
+  `a2c093aa1478961db20483a4ee89805a132f4ef1`. It
   preregisters eleven primary metrics, four coordinate-frame authorities, two
   events, participant-level holdout, training-only threshold freezing, four
   negative controls, six uncertainty analyses, and missing-as-unavailable
   semantics.
 - Its initial optional-stack run exposed an ambient interactive Matplotlib
-  backend on the headless runner. The branch now forces `MPLBACKEND=Agg` at the
-  optional-stack job boundary and enforces that contract in
-  `tests/ci/test_ci_infrastructure.py`; do not replace this with a blind rerun
-  or an application-wide backend override.
+  backend on the headless runner. The merged correction forces
+  `MPLBACKEND=Agg` at the optional-stack job boundary and enforces that contract
+  in `tests/ci/test_ci_infrastructure.py`. All API, Pinocchio, and unit steps
+  passed on the corrected run; its large post-job cache upload was still
+  finalizing at 11:11 PDT. Do not replace this with a blind rerun or an
+  application-wide backend override.
 - The metric contract is deliberately fail-closed: `execution_ready=false`,
   `human_inference=false`, `bilateral_wrench=false`, and
   `results_status=not_run_no_authority` until a governed participant dataset is
@@ -65,11 +72,29 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   has a registered local digest plus verified reuse and required calibration,
   club, participant, and event fields. Never infer authority from a filename,
   screenshot, or visual resemblance.
-- The next stacked slice is branch `research/9004-governed-ingestion` at remote
-  commit `bce42f1ea34e072b42f8c410e207628cd0367065`. It supplies a typed,
-  no-pickle ingestion and coordinate/event qualification boundary. Reconcile it
-  with the protected #9016 squash before opening its PR; it must remain unusable
-  for human inference until the source registry qualifies an actual dataset.
+- PR #9017 (`research/9004-governed-ingestion`) adds the typed acquisition
+  manifest and no-pickle governance gateway. Implementation commit `c9da9b9ca`
+  additionally binds each trial to a digest-frozen, source-specific participant
+  split and verifies disjoint training, held-out, and adverse cohorts,
+  participant membership, and intended use before parsing. Follow-up commit
+  `1b7e87c42` also requires the split freeze time to precede artifact creation.
+  Source-package and trajectory digests, SI units, processing, four frames, two
+  events, channel coverage, and six uncertainty records remain required. The
+  current follow-up also binds the acquisition-processing authority, all four
+  frame transforms, and both event-detector configurations by contained path
+  and SHA-256, verifies them before payload parsing, and returns their immutable
+  provenance. The first protected exact-head run then correctly rejected the
+  132-line loader; source-readiness, mapping-authority, and artifact-digest
+  phases are now separate owned helpers, and the changed-file architecture gate
+  passes without an exception. Forty-one focused tests and the 587-artifact
+  release gate pass.
+- Merge commit `feb9478f7` reconciles the branch with the protected #9016 squash
+  without rewriting history; reviewed PR head `a34d24a53` passed every pre-push
+  hook and opened full PR #9017. The governed manifests and 235-page release
+  validate. Protected CI and human review remain. The boundary must remain
+  unusable for human inference until the source registry qualifies an actual
+  dataset. The subsequent #9004 slice is the deterministic coordinate/event
+  mapping and replay runner.
 
 ## Other Active Dependencies
 
@@ -111,7 +136,8 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 
 ```powershell
 python -m pytest tests/research/test_measured_trajectory_source_registry.py `
-  tests/research/test_measured_trajectory_metric_registration.py -q
+  tests/research/test_measured_trajectory_metric_registration.py `
+  tests/research/test_measured_trajectory_ingestion.py -q
 python -m scripts.research.proximal_distal_energy.qualify_open_release validate
 python scripts/check_document_title_case.py --changed-from origin/main
 python scripts/ci/check_file_size_budget.py
