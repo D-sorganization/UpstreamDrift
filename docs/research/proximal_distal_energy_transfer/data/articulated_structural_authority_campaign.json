@@ -10,7 +10,12 @@
       "level": "nominal",
       "value": 1.0,
       "configuration": {
-        "case_indices": [0, 8, 9, 17],
+        "case_indices": [
+          0,
+          8,
+          9,
+          17
+        ],
         "height_scale": 1.0,
         "body_mass_scale": 1.0,
         "joint_limit_scale": 1.0
@@ -22,7 +27,12 @@
       "level": "low",
       "value": 0.9,
       "configuration": {
-        "case_indices": [0, 8, 9, 17],
+        "case_indices": [
+          0,
+          8,
+          9,
+          17
+        ],
         "height_scale": 0.9,
         "body_mass_scale": 1.0,
         "joint_limit_scale": 1.0
@@ -34,7 +44,12 @@
       "level": "high",
       "value": 1.1,
       "configuration": {
-        "case_indices": [0, 8, 9, 17],
+        "case_indices": [
+          0,
+          8,
+          9,
+          17
+        ],
         "height_scale": 1.1,
         "body_mass_scale": 1.0,
         "joint_limit_scale": 1.0
@@ -46,7 +61,12 @@
       "level": "low",
       "value": 0.85,
       "configuration": {
-        "case_indices": [0, 8, 9, 17],
+        "case_indices": [
+          0,
+          8,
+          9,
+          17
+        ],
         "height_scale": 1.0,
         "body_mass_scale": 0.85,
         "joint_limit_scale": 1.0
@@ -58,7 +78,12 @@
       "level": "high",
       "value": 1.15,
       "configuration": {
-        "case_indices": [0, 8, 9, 17],
+        "case_indices": [
+          0,
+          8,
+          9,
+          17
+        ],
         "height_scale": 1.0,
         "body_mass_scale": 1.15,
         "joint_limit_scale": 1.0
@@ -70,7 +95,12 @@
       "level": "low",
       "value": 0.85,
       "configuration": {
-        "case_indices": [0, 8, 9, 17],
+        "case_indices": [
+          0,
+          8,
+          9,
+          17
+        ],
         "height_scale": 1.0,
         "body_mass_scale": 1.0,
         "joint_limit_scale": 0.85
@@ -82,7 +112,12 @@
       "level": "high",
       "value": 1.15,
       "configuration": {
-        "case_indices": [0, 8, 9, 17],
+        "case_indices": [
+          0,
+          8,
+          9,
+          17
+        ],
         "height_scale": 1.0,
         "body_mass_scale": 1.0,
         "joint_limit_scale": 1.15
@@ -96,7 +131,12 @@
       "level": "nominal",
       "value": 1.0,
       "configuration": {
-        "case_indices": [0, 8, 9, 17],
+        "case_indices": [
+          0,
+          8,
+          9,
+          17
+        ],
         "height_scale": 1.0,
         "body_mass_scale": 1.0,
         "joint_limit_scale": 1.0
@@ -104,7 +144,7 @@
       "status": "feasible",
       "failure_count": 0,
       "failure_distribution": {},
-      "authority_sha256": "2554dc6750ec03415c98761670bd6f21facb1e6213eba5909723dfbe9e77ff45",
+      "authority_sha256": "1e4a6528984174535caac2b34f567e674fda75df740896a6cda2b95f8be5d3c5",
       "record_artifact": "articulated_structural_authority_nominal.json",
       "array_artifact": "articulated_structural_authority_nominal.npz"
     },
@@ -114,7 +154,12 @@
       "level": "low",
       "value": 0.9,
       "configuration": {
-        "case_indices": [0, 8, 9, 17],
+        "case_indices": [
+          0,
+          8,
+          9,
+          17
+        ],
         "height_scale": 0.9,
         "body_mass_scale": 1.0,
         "joint_limit_scale": 1.0
@@ -124,7 +169,7 @@
       "failure_distribution": {
         "ik_nonconvergence": 1
       },
-      "authority_sha256": "69de8badceb381d88d23a8870e2da2156e7901d55080ac57239bc3459e36d95b",
+      "authority_sha256": "58711112d66e2d17f5bf53f90035354900218c8d0c30a9f99db28f5e8748377a",
       "record_artifact": "articulated_structural_authority_height_scale_low.json",
       "array_artifact": "articulated_structural_authority_height_scale_low.npz"
     },
@@ -134,7 +179,12 @@
       "level": "high",
       "value": 1.1,
       "configuration": {
-        "case_indices": [0, 8, 9, 17],
+        "case_indices": [
+          0,
+          8,
+          9,
+          17
+        ],
         "height_scale": 1.1,
         "body_mass_scale": 1.0,
         "joint_limit_scale": 1.0
@@ -142,7 +192,7 @@
       "status": "feasible",
       "failure_count": 0,
       "failure_distribution": {},
-      "authority_sha256": "5215a93249e243d3d06ade163e7a247bb1fcc71c295ae30a9afff7a48991e66c",
+      "authority_sha256": "b3fb03e814f7e04c1626ca05c0d7f11e7e8cee009b806123affbd738bdc543c4",
       "record_artifact": "articulated_structural_authority_height_scale_high.json",
       "array_artifact": "articulated_structural_authority_height_scale_high.npz"
     },
@@ -152,7 +202,12 @@
       "level": "low",
       "value": 0.85,
       "configuration": {
-        "case_indices": [0, 8, 9, 17],
+        "case_indices": [
+          0,
+          8,
+          9,
+          17
+        ],
         "height_scale": 1.0,
         "body_mass_scale": 0.85,
         "joint_limit_scale": 1.0
@@ -160,7 +215,7 @@
       "status": "feasible",
       "failure_count": 0,
       "failure_distribution": {},
-      "authority_sha256": "1bf48bc3ac7d0e4981f9f6800b5b78f1482f2117c24a79529ca50e11f9c0ef6f",
+      "authority_sha256": "60cd826065611bcc20859f8e9ebad0b94754f5682461dcbdd1243e315a03e47f",
       "record_artifact": "articulated_structural_authority_body_mass_scale_low.json",
       "array_artifact": "articulated_structural_authority_body_mass_scale_low.npz"
     },
@@ -170,7 +225,12 @@
       "level": "high",
       "value": 1.15,
       "configuration": {
-        "case_indices": [0, 8, 9, 17],
+        "case_indices": [
+          0,
+          8,
+          9,
+          17
+        ],
         "height_scale": 1.0,
         "body_mass_scale": 1.15,
         "joint_limit_scale": 1.0
@@ -178,7 +238,7 @@
       "status": "feasible",
       "failure_count": 0,
       "failure_distribution": {},
-      "authority_sha256": "c31a07a40b36c8046cb47f5cf55333ba9fb3ad42afe446463b7c31743535a601",
+      "authority_sha256": "bb55d0e7ef93518e523bb4962989d2cad9c82fafdddafa661523228e8b7af663",
       "record_artifact": "articulated_structural_authority_body_mass_scale_high.json",
       "array_artifact": "articulated_structural_authority_body_mass_scale_high.npz"
     },
@@ -188,7 +248,12 @@
       "level": "low",
       "value": 0.85,
       "configuration": {
-        "case_indices": [0, 8, 9, 17],
+        "case_indices": [
+          0,
+          8,
+          9,
+          17
+        ],
         "height_scale": 1.0,
         "body_mass_scale": 1.0,
         "joint_limit_scale": 0.85
@@ -196,7 +261,7 @@
       "status": "feasible",
       "failure_count": 0,
       "failure_distribution": {},
-      "authority_sha256": "8688c2121b31fb8f36841cf3a952b37116990993b302b72218a1a69acc596d26",
+      "authority_sha256": "362617d723b9db6af09b85ec82073addaa1d4a94f6a1e3a6f19e01e48265185d",
       "record_artifact": "articulated_structural_authority_joint_limit_scale_low.json",
       "array_artifact": "articulated_structural_authority_joint_limit_scale_low.npz"
     },
@@ -206,7 +271,12 @@
       "level": "high",
       "value": 1.15,
       "configuration": {
-        "case_indices": [0, 8, 9, 17],
+        "case_indices": [
+          0,
+          8,
+          9,
+          17
+        ],
         "height_scale": 1.0,
         "body_mass_scale": 1.0,
         "joint_limit_scale": 1.15
@@ -214,7 +284,7 @@
       "status": "feasible",
       "failure_count": 0,
       "failure_distribution": {},
-      "authority_sha256": "1e8c4f2cdc558de9ef9d3b7504c072a7fa43903f27512f656dc59c55e71fcd1f",
+      "authority_sha256": "b6db4ca70e617006de567f0df38ad06adfe7d126ad8727b8e580948e9ad874b2",
       "record_artifact": "articulated_structural_authority_joint_limit_scale_high.json",
       "array_artifact": "articulated_structural_authority_joint_limit_scale_high.npz"
     }
@@ -226,9 +296,9 @@
     "failed_corner_count": 0
   },
   "source_sha256": {
-    "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py": "166ab2ebec88a0c53abc54c6b565ba0a3f82caf800449e822164177f31289549",
-    "scripts/research/proximal_distal_energy/articulated_scaled_authority.py": "6d41ef265dd88d61bdf70f1ff78a17716c9293e6260f307c253df43f441b7d83",
-    "tests/research/test_articulated_structural_authority_campaign.py": "0a721f2403a7caa6efc4426a6e09f689810b2e99d5ac890a9431d757d984ab0f"
+    "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py": "46e8897b04360ddaf9805809e8903fa4746a782ecd698eaf0b876f0aff023533",
+    "scripts/research/proximal_distal_energy/articulated_scaled_authority.py": "433e967e69df92742bd07f74817afaf40323e42f2877576708721f18f83116cb",
+    "tests/research/test_articulated_structural_authority_campaign.py": "b259f3135f9823ff85455d4c60c6859f663d590a121034ad0171ffcfd65f113c"
   },
   "limitations": {
     "bounds": "engineering OAT corners, not participant distributions",

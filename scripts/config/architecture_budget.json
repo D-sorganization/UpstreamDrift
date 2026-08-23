@@ -3,69 +3,6 @@
   "max_parameters": 8,
   "exceptions": [
     {
-      "path": "scripts/research/proximal_distal_energy/articulated_ground_atlas.py",
-      "symbol": "run_articulated_ground_atlas",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 8752,
-      "reason": "Issue #8752: the exact source is frozen while the checkpointed ControlTower campaign is running; decompose orchestration only after terminal artifact integration so the source-bound campaign identity remains valid.",
-      "expires_on": "2026-09-30"
-    },
-    {
-      "path": "scripts/research/proximal_distal_energy/articulated_scaled_authority.py",
-      "symbol": "_digest_payload",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 8752,
-      "reason": "Issue #8752: the source-bound authority generator is frozen during the active campaign; replace the explicit provenance signature with a typed context after terminal integration.",
-      "expires_on": "2026-09-30"
-    },
-    {
-      "path": "scripts/research/proximal_distal_energy/articulated_scaled_authority.py",
-      "symbol": "build_scaled_authority",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 8752,
-      "reason": "Issue #8752: the source-bound authority generator is frozen during the active campaign; split construction, validation, and serialization after terminal integration.",
-      "expires_on": "2026-09-30"
-    },
-    {
-      "path": "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py",
-      "symbol": "_record",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 8752,
-      "reason": "Issue #8752: the exact shaft-atlas source is frozen during the active campaign; introduce a typed record context only after terminal artifact integration.",
-      "expires_on": "2026-09-30"
-    },
-    {
-      "path": "scripts/research/proximal_distal_energy/register_articulated_uncertainty_claims.py",
-      "symbol": "_claim",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 8752,
-      "reason": "Issue #8752: claim regeneration is intentionally deferred until the source-frozen campaign terminates; replace the explicit claim fields with a typed claim specification during integration.",
-      "expires_on": "2026-09-30"
-    },
-    {
-      "path": "scripts/research/proximal_distal_energy/register_articulated_uncertainty_claims.py",
-      "symbol": "main",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 8752,
-      "reason": "Issue #8752: claim regeneration is intentionally deferred until the campaign terminates; decompose registry assembly while integrating the terminal qualified result.",
-      "expires_on": "2026-09-30"
-    },
-    {
-      "path": "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py",
-      "symbol": "build_structural_propagation_plan",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 8800,
-      "reason": "Issue #8800: the byte-reproducible preflight currently assembles one governed object; split authority, design, source, and output contract builders before campaign execution while preserving exact serialized bytes.",
-      "expires_on": "2026-09-15"
-    },
-    {
       "path": "src/shared/python/optimization/batch_swing_optimizer.py",
       "symbol": "BatchSwingOptimizer.__init__",
       "rule": "parameters",

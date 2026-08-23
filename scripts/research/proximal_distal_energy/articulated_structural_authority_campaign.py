@@ -15,6 +15,7 @@ from scripts.research.proximal_distal_energy.articulated_scaled_authority import
     ScaledAuthority,
     ScaledAuthorityConfig,
     build_scaled_authority,
+    load_scaled_authority,
     save_scaled_authority,
 )
 
@@ -163,7 +164,9 @@ def _write_checkpoint(path: Path, record: dict[str, Any]) -> None:
     temporary.replace(path)
 
 
-def _existing_rows(path: Path) -> dict[str, dict[str, Any]]:
+def _existing_rows(
+    path: Path, expected_sources: dict[str, str]
+) -> dict[str, dict[str, Any]]:
     if not path.exists():
         return {}
     record = json.loads(path.read_text(encoding="utf-8"))
@@ -173,7 +176,36 @@ def _existing_rows(path: Path) -> dict[str, dict[str, Any]]:
         raise RuntimeError(
             "structural authority checkpoint design digest does not match"
         )
+    if record.get("source_sha256") != expected_sources:
+        return {}
     return {row["corner_id"]: row for row in record.get("corners", [])}
+
+
+def _reusable_row(
+    previous: dict[str, Any],
+    corner: StructuralAuthorityCorner,
+    artifact_directory: Path,
+) -> dict[str, Any] | None:
+    if previous.get("status") not in TERMINAL_STATUSES:
+        return None
+    if previous["status"] == "failed_retained":
+        return previous
+    record_name = previous.get("record_artifact")
+    array_name = previous.get("array_artifact")
+    if not isinstance(record_name, str) or not isinstance(array_name, str):
+        return None
+    try:
+        authority = load_scaled_authority(
+            artifact_directory / record_name,
+            artifact_directory / array_name,
+        )
+    except (OSError, RuntimeError, ValueError):
+        return None
+    if authority.configuration != corner.configuration:
+        return None
+    if authority.authority_sha256 != previous.get("authority_sha256"):
+        return None
+    return previous
 
 
 def run_campaign(
@@ -184,19 +216,18 @@ def run_campaign(
     """Regenerate every registered corner and retain failures with checkpoints."""
 
     execution_sources = _source_hashes()
-    existing = _existing_rows(checkpoint_path)
+    existing = _existing_rows(checkpoint_path, execution_sources)
     rows: list[dict[str, Any]] = []
     for corner in registered_corners():
         previous = existing.get(corner.corner_id)
-        if previous is not None and previous.get("status") in TERMINAL_STATUSES:
-            if previous["status"] == "failed_retained":
-                rows.append(previous)
-                continue
-            record_artifact = artifact_directory / previous["record_artifact"]
-            array_artifact = artifact_directory / previous["array_artifact"]
-            if record_artifact.is_file() and array_artifact.is_file():
-                rows.append(previous)
-                continue
+        reusable = (
+            _reusable_row(previous, corner, artifact_directory)
+            if previous is not None
+            else None
+        )
+        if reusable is not None:
+            rows.append(reusable)
+            continue
         stem = _artifact_stem(corner)
         record_path = artifact_directory / f"{stem}.json"
         arrays_path = artifact_directory / f"{stem}.npz"

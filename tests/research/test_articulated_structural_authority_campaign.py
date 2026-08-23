@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+import json
 from pathlib import Path
 
 import pytest
@@ -49,6 +50,7 @@ def test_campaign_checkpoints_every_corner_and_retains_failures(
         DATA / "articulated_scaled_authority_nominal.npz",
     )
     calls: list[str] = []
+    saved = {}
 
     def fake_build(config):
         corner = next(
@@ -72,10 +74,15 @@ def test_campaign_checkpoints_every_corner_and_retains_failures(
     def fake_save(authority, record_path, arrays_path):
         record_path.write_text("{}", encoding="utf-8")
         arrays_path.write_bytes(b"npz")
+        saved[(record_path.name, arrays_path.name)] = authority
         return {"authority_sha256": authority.authority_sha256}
+
+    def fake_load(record_path, arrays_path):
+        return saved[(record_path.name, arrays_path.name)]
 
     monkeypatch.setattr(campaign, "build_scaled_authority", fake_build)
     monkeypatch.setattr(campaign, "save_scaled_authority", fake_save)
+    monkeypatch.setattr(campaign, "load_scaled_authority", fake_load)
     checkpoint = tmp_path / "campaign.json"
 
     first = campaign.run_campaign(checkpoint, artifact_directory=tmp_path)
@@ -104,3 +111,43 @@ def test_campaign_rejects_checkpoint_design_drift(tmp_path: Path) -> None:
 
     with pytest.raises(RuntimeError, match="design digest"):
         campaign.run_campaign(checkpoint, artifact_directory=tmp_path)
+
+
+def test_campaign_does_not_resume_terminal_rows_after_source_drift(
+    tmp_path: Path,
+) -> None:
+    checkpoint = tmp_path / "campaign.json"
+    record = {
+        "schema_version": "articulated-structural-authority-campaign/v1",
+        "design_sha256": campaign._design_digest(),
+        "source_sha256": {"source.py": "old"},
+        "corners": [{"corner_id": "nominal", "status": "complete"}],
+    }
+    checkpoint.write_text(json.dumps(record), encoding="utf-8")
+
+    assert campaign._existing_rows(checkpoint, {"source.py": "new"}) == {}
+    assert campaign._existing_rows(checkpoint, {"source.py": "old"}) == {
+        "nominal": record["corners"][0]
+    }
+
+
+def test_campaign_does_not_resume_an_invalid_authority_artifact(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    previous = {
+        "corner_id": "nominal",
+        "status": "feasible",
+        "record_artifact": "authority.json",
+        "array_artifact": "authority.npz",
+        "authority_sha256": "expected",
+    }
+
+    def reject_artifact(*_args):
+        raise RuntimeError("content digest does not match")
+
+    monkeypatch.setattr(campaign, "load_scaled_authority", reject_artifact)
+
+    assert (
+        campaign._reusable_row(previous, campaign.registered_corners()[0], tmp_path)
+        is None
+    )

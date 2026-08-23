@@ -789,17 +789,31 @@ def _result_record(
     }
 
 
+@dataclass(frozen=True, slots=True)
+class _RecordContext:
+    authority: ArticulatedAtlasAuthority
+    selection: AtlasStateSelection
+    buffers: _Buffers
+    config: ArticulatedShaftAtlasConfig
+    properties: ArticulatedShaftProperties
+    beam_record: dict[str, Any]
+    gates: dict[str, Any]
+    versions: dict[str, str]
+    coarse_probes: list[dict[str, Any]]
+
+
 def _record(
-    authority: ArticulatedAtlasAuthority,
-    selection: AtlasStateSelection,
-    buffers: _Buffers,
-    config: ArticulatedShaftAtlasConfig,
-    properties: ArticulatedShaftProperties,
-    beam_record: dict[str, Any],
-    gates: dict[str, Any],
-    versions: dict[str, str],
-    coarse_probes: list[dict[str, Any]],
+    context: _RecordContext,
 ) -> dict[str, Any]:
+    authority = context.authority
+    selection = context.selection
+    buffers = context.buffers
+    config = context.config
+    properties = context.properties
+    beam_record = context.beam_record
+    gates = context.gates
+    versions = context.versions
+    coarse_probes = context.coarse_probes
     states = selection.feasible_states
     all_passed = bool(
         np.all(gates["numerical"])
@@ -922,15 +936,17 @@ def run_articulated_shaft_atlas(
     }
     return (
         _record(
-            authority,
-            selection,
-            buffers,
-            config,
-            properties,
-            beam_record,
-            gates,
-            versions,
-            coarse_probes,
+            _RecordContext(
+                authority=authority,
+                selection=selection,
+                buffers=buffers,
+                config=config,
+                properties=properties,
+                beam_record=beam_record,
+                gates=gates,
+                versions=versions,
+                coarse_probes=coarse_probes,
+            )
         ),
         arrays,
     )

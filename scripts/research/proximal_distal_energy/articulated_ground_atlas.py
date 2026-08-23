@@ -63,6 +63,15 @@ SOURCE_PATHS = (
     "tests/research/test_articulated_ground_checkpoint.py",
 )
 BranchKind = Literal["primary", "control"]
+BranchDescriptor = tuple[int, tuple[int, int], BranchKind, int]
+BranchJob = tuple[
+    ArticulatedAtlasAuthority,
+    "ArticulatedGroundAtlasConfig",
+    int,
+    tuple[int, int],
+    BranchKind,
+    int,
+]
 
 
 @dataclass(frozen=True, slots=True)
@@ -180,6 +189,19 @@ class _Buffers:
     force_parity: FloatArray
     ground_force_parity: FloatArray
     active_set_parity: NDArray[np.bool_]
+
+
+@dataclass(slots=True)
+class _GroundExecution:
+    authority: ArticulatedAtlasAuthority
+    config: ArticulatedGroundAtlasConfig
+    checkpoint_dir: Path | None
+    primary: _Buffers
+    controls: _Buffers
+    descriptors: list[BranchDescriptor]
+    digest: str
+    jobs: list[BranchJob]
+    completed: int = 0
 
 
 def _load_authority() -> ArticulatedAtlasAuthority:
@@ -619,14 +641,7 @@ def _run_branch(
 
 
 def _branch_job(
-    payload: tuple[
-        ArticulatedAtlasAuthority,
-        ArticulatedGroundAtlasConfig,
-        int,
-        tuple[int, int],
-        BranchKind,
-        int,
-    ],
+    payload: BranchJob,
 ) -> tuple[int, tuple[int, int], BranchKind, int, _Buffers]:
     authority, config, state_slot, state, kind, branch_slot = payload
     return (
@@ -867,26 +882,17 @@ def _record(
     }
 
 
-def run_articulated_ground_atlas(
-    config: ArticulatedGroundAtlasConfig = ArticulatedGroundAtlasConfig(),
-    *,
-    authority: ArticulatedAtlasAuthority | None = None,
-    state_checkpoint_dir: Path | None = None,
-) -> tuple[dict[str, Any], dict[str, NDArray[Any]]]:
-    """Run the registered primary and falsification-control trajectories."""
-
-    authority = authority if authority is not None else _load_authority()
-    selection = _resolve_states(authority, config)
-    try:
-        import mujoco
-        import pinocchio as pin
-    except ImportError as error:  # pragma: no cover
-        raise RuntimeError("MuJoCo and robotics Pinocchio are required") from error
+def _ground_execution(
+    authority: ArticulatedAtlasAuthority,
+    selection: AtlasStateSelection,
+    config: ArticulatedGroundAtlasConfig,
+    checkpoint_dir: Path | None,
+) -> _GroundExecution:
     states = selection.feasible_states
     tail = (2, len(config.forward.time_steps_s), 2, len(config.horizons_s))
     primary = _buffers((len(states), len(config.ground_activations), *tail), 20)
     controls = _buffers((len(states), len(config.control_names), *tail), 20)
-    descriptors: list[tuple[int, tuple[int, int], BranchKind, int]] = []
+    descriptors: list[BranchDescriptor] = []
     for state_slot, state in enumerate(states):
         descriptors.extend(
             (state_slot, state, "primary", branch_slot)
@@ -896,95 +902,156 @@ def run_articulated_ground_atlas(
             (state_slot, state, "control", branch_slot)
             for branch_slot in range(len(config.control_names))
         )
-    digest = _execution_digest(authority, config)
-    jobs = []
-    completed = 0
-    for state_slot, state, kind, branch_slot in descriptors:
+    return _GroundExecution(
+        authority=authority,
+        config=config,
+        checkpoint_dir=checkpoint_dir,
+        primary=primary,
+        controls=controls,
+        descriptors=descriptors,
+        digest=_execution_digest(authority, config),
+        jobs=[],
+    )
+
+
+def _restore_or_queue(execution: _GroundExecution) -> None:
+    for state_slot, state, kind, branch_slot in execution.descriptors:
         checkpoint = (
             _branch_checkpoint_path(
-                state_checkpoint_dir,
-                state_slot,
-                kind,
-                branch_slot,
+                execution.checkpoint_dir, state_slot, kind, branch_slot
             )
-            if state_checkpoint_dir is not None
+            if execution.checkpoint_dir is not None
             else None
         )
-        if checkpoint is not None and checkpoint.exists():
-            local = _load_branch_checkpoint(
-                checkpoint,
-                digest=digest,
-                state_slot=state_slot,
-                state=state,
-                kind=kind,
-                branch_slot=branch_slot,
+        if checkpoint is None or not checkpoint.exists():
+            execution.jobs.append(
+                (
+                    execution.authority,
+                    execution.config,
+                    state_slot,
+                    state,
+                    kind,
+                    branch_slot,
+                )
             )
-            _merge_branch(
-                primary if kind == "primary" else controls,
-                state_slot,
-                branch_slot,
-                local,
-            )
-            completed += 1
-            print(
-                f"ground atlas branch {completed}/{len(descriptors)} restored: "
-                f"{state} {kind} {branch_slot}",
-                flush=True,
-            )
-        else:
-            jobs.append((authority, config, state_slot, state, kind, branch_slot))
-    executor = None
-    results: Iterator[tuple[int, tuple[int, int], BranchKind, int, _Buffers]]
-    if not jobs:
-        results = iter(())
-    elif config.worker_count == 1:
-        results = map(_branch_job, jobs)
-    else:
-        executor = ProcessPoolExecutor(
-            max_workers=min(config.worker_count, len(jobs)),
-            mp_context=multiprocessing.get_context("spawn"),
+            continue
+        local = _load_branch_checkpoint(
+            checkpoint,
+            digest=execution.digest,
+            state_slot=state_slot,
+            state=state,
+            kind=kind,
+            branch_slot=branch_slot,
         )
-        results = executor.map(_branch_job, jobs)
+        _merge_branch(
+            execution.primary if kind == "primary" else execution.controls,
+            state_slot,
+            branch_slot,
+            local,
+        )
+        execution.completed += 1
+        print(
+            f"ground atlas branch {execution.completed}/"
+            f"{len(execution.descriptors)} restored: {state} {kind} {branch_slot}",
+            flush=True,
+        )
+
+
+def _branch_results(
+    execution: _GroundExecution,
+) -> tuple[
+    Iterator[tuple[int, tuple[int, int], BranchKind, int, _Buffers]],
+    ProcessPoolExecutor | None,
+]:
+    if not execution.jobs:
+        return iter(()), None
+    if execution.config.worker_count == 1:
+        return map(_branch_job, execution.jobs), None
+    executor = ProcessPoolExecutor(
+        max_workers=min(execution.config.worker_count, len(execution.jobs)),
+        mp_context=multiprocessing.get_context("spawn"),
+    )
+    return executor.map(_branch_job, execution.jobs), executor
+
+
+def _execute_pending(execution: _GroundExecution) -> None:
+    results, executor = _branch_results(execution)
     try:
         for state_slot, state, kind, branch_slot, local in results:
             _merge_branch(
-                primary if kind == "primary" else controls,
+                execution.primary if kind == "primary" else execution.controls,
                 state_slot,
                 branch_slot,
                 local,
             )
-            if state_checkpoint_dir is not None:
+            if execution.checkpoint_dir is not None:
                 _save_branch_checkpoint(
                     _branch_checkpoint_path(
-                        state_checkpoint_dir,
-                        state_slot,
-                        kind,
-                        branch_slot,
+                        execution.checkpoint_dir, state_slot, kind, branch_slot
                     ),
-                    digest=digest,
+                    digest=execution.digest,
                     state_slot=state_slot,
                     state=state,
                     kind=kind,
                     branch_slot=branch_slot,
                     buffer=local,
                 )
-            completed += 1
+            execution.completed += 1
             print(
-                f"ground atlas branch {completed}/{len(descriptors)} complete: "
-                f"{state} {kind} {branch_slot}",
+                f"ground atlas branch {execution.completed}/"
+                f"{len(execution.descriptors)} complete: {state} {kind} {branch_slot}",
                 flush=True,
             )
     finally:
         if executor is not None:
             executor.shutdown(wait=True, cancel_futures=True)
-    gates = _gates(primary, controls, config)
-    arrays = _arrays(authority, states, primary, controls, config, gates)
-    versions = {
+
+
+def _engine_versions() -> dict[str, str]:
+    try:
+        import mujoco
+        import pinocchio as pin
+    except ImportError as error:  # pragma: no cover
+        raise RuntimeError("MuJoCo and robotics Pinocchio are required") from error
+    return {
         "mujoco": str(mujoco.__version__),
         "pinocchio": str(pin.__version__),  # type: ignore[attr-defined]
     }
+
+
+def run_articulated_ground_atlas(
+    config: ArticulatedGroundAtlasConfig = ArticulatedGroundAtlasConfig(),
+    *,
+    authority: ArticulatedAtlasAuthority | None = None,
+    state_checkpoint_dir: Path | None = None,
+) -> tuple[dict[str, Any], dict[str, NDArray[Any]]]:
+    """Run the registered primary and falsification-control trajectories."""
+
+    authority = authority or _load_authority()
+    selection = _resolve_states(authority, config)
+    versions = _engine_versions()
+    execution = _ground_execution(authority, selection, config, state_checkpoint_dir)
+    _restore_or_queue(execution)
+    _execute_pending(execution)
+    gates = _gates(execution.primary, execution.controls, config)
+    arrays = _arrays(
+        authority,
+        selection.feasible_states,
+        execution.primary,
+        execution.controls,
+        config,
+        gates,
+    )
     return (
-        _record(authority, selection, primary, controls, config, gates, versions),
+        _record(
+            authority,
+            selection,
+            execution.primary,
+            execution.controls,
+            config,
+            gates,
+            versions,
+        ),
         arrays,
     )
 

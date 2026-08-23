@@ -59,9 +59,37 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 - The seven-corner plan retains 84 planned states as 83 feasible states plus
   the declared low-height infeasible state. Shaft and ground checkpoints cover
   48 and 72 atomic branch packs respectively and restore without recomputation.
-- Typed campaign dependencies, immutable corner-evidence requests, and focused
-  shaft result assembly removed three temporary #8800 architecture exceptions;
-  the byte-identical preflight-builder decomposition remains due before execution.
+- Terminal #8752 integration is complete. Ground execution, scaled-authority
+  regeneration, shaft record assembly, claim registration, and the #8800
+  preflight builder are decomposed under the repository budgets. All seven
+  temporary #8752/#8800 architecture exceptions are removed and the changed-file
+  architecture gate passes without an exception.
+- All seven structural authorities and the standalone nominal authority were
+  regenerated from the refactored source. Their numerical arrays are unchanged;
+  the JSON authority/source digests and the governed propagation plan now bind
+  the current implementation. A stale-resume regression prevents a terminal
+  authority row from being reused when its source map differs. Fifty-two focused
+  authority, campaign, plan, checkpoint-contract, and shaft tests pass locally;
+  the broader 192-test structural/headline suite also passes.
+  The one real short native-engine checkpoint restart still requires the
+  qualified robotics-Pinocchio environment: DeskComputer currently resolves the
+  unrelated PyPI `pinocchio` package. Run that test on ControlTower before the
+  campaign and do not skip or weaken it.
+- ControlTower is the approved execution host and is reachable noninteractively
+  from DeskComputer over direct Tailscale SSH. On 2026-08-23 it reported an
+  Alienware Aurora Ryzen Edition R14 with a 16-core/32-thread Ryzen 9 5950X,
+  128 GB RAM, an idle 24 GB RTX 3090, and adequate disk space. Codex does not
+  need to run interactively on ControlTower: orchestration, monitoring, and
+  evidence retrieval can occur from DeskComputer over SSH.
+- Do not execute in ControlTower's primary `UpstreamDrift` checkout: it is old,
+  on an unrelated branch, and dirty. Preserve the detached #8752 worktree and
+  its untracked terminal evidence. After the #8800 implementation is committed,
+  pushed, and passes preflight, create a new uniquely named worktree pinned to
+  that exact remote commit. Run it detached with atomic checkpoints, separate
+  stdout/stderr and exit-code files, a conservative initial CPU-worker cap, and
+  periodic SSH status collection. The current model path is CPU-bound unless a
+  separately verified GPU backend is introduced; the RTX 3090 alone does not
+  make the existing solver GPU-accelerated.
 - This is execution infrastructure, not a scientific result. No #8800 campaign
   has run, no headline estimate has propagated, and no paper or release claim
   may be promoted until all 14 atlas paths and common-support controls pass.

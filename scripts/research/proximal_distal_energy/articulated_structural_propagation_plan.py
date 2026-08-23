@@ -189,24 +189,13 @@ def _corner_plan(
     }
 
 
-def build_structural_propagation_plan(
-    campaign_path: Path = CAMPAIGN,
-    *,
-    data_directory: Path = DATA,
+def _design_contract(
+    shaft: ArticulatedShaftAtlasConfig,
+    ground: ArticulatedGroundAtlasConfig,
 ) -> dict[str, Any]:
-    """Bind every registered structural authority to both headline designs."""
-
-    campaign = json.loads(campaign_path.read_text(encoding="utf-8"))
-    if campaign.get("status") != "complete" or len(campaign.get("corners", [])) != 7:
-        raise RuntimeError("the seven-corner authority campaign must be complete")
-    shaft = ArticulatedShaftAtlasConfig()
-    ground = ArticulatedGroundAtlasConfig()
-    corners = [
-        _corner_plan(row, shaft, ground, data_directory) for row in campaign["corners"]
-    ]
     shaft_configuration = _scientific_configuration(shaft)
     ground_configuration = _scientific_configuration(ground)
-    design = json.loads(
+    return json.loads(
         json.dumps(
             {
                 "case_indices": list(shaft.case_indices),
@@ -214,21 +203,19 @@ def build_structural_propagation_plan(
                 "shaft_configuration": shaft_configuration,
                 "ground_configuration": ground_configuration,
                 "execution_identity": {
-                    "shaft": _pathway_identity(
-                        shaft_configuration,
-                        SHAFT_SOURCE_PATHS,
-                    ),
+                    "shaft": _pathway_identity(shaft_configuration, SHAFT_SOURCE_PATHS),
                     "ground": _pathway_identity(
-                        ground_configuration,
-                        GROUND_SOURCE_PATHS,
+                        ground_configuration, GROUND_SOURCE_PATHS
                     ),
                 },
                 "parallelism": "worker_count is operational and excluded from the scientific design digest",
             }
         )
     )
-    design_sha = _canonical_sha256(design)
-    acceptance = {
+
+
+def _acceptance_contract() -> dict[str, Any]:
+    return {
         "nominal_reproduction": {
             "shaft_matched_cell_count": 126,
             "shaft_total_cell_count": 384,
@@ -254,7 +241,10 @@ def build_structural_propagation_plan(
         ],
         "interpretation": "engineering OAT sensitivity only; no population, human, causal coaching, or universal performance inference",
     }
-    analysis = {
+
+
+def _analysis_contract() -> dict[str, Any]:
+    return {
         "cell_identity_fields": [
             "case_index",
             "phase_index",
@@ -286,7 +276,10 @@ def build_structural_propagation_plan(
         "interaction_rule": "one-at-a-time corners do not estimate higher-order parameter interactions",
         "multiplicity": "report all registered OAT corners descriptively; do not select favorable corners or assign confirmatory p-values",
     }
-    evidence_contract = {
+
+
+def _checkpoint_evidence_contract() -> dict[str, Any]:
+    return {
         "schema_version": "articulated-structural-propagation/v2",
         "checkpoint_schema_version": "articulated-structural-checkpoint/v1",
         "checkpoint_identity_fields": [
@@ -339,6 +332,11 @@ def build_structural_propagation_plan(
                 "work": "terminal total dissipated work",
             },
         },
+    }
+
+
+def _cell_evidence_contract() -> dict[str, Any]:
+    return {
         "gate_derivation": {
             "shaft": {
                 "compared_branches": ["rigid", "coupled"],
@@ -403,7 +401,14 @@ def build_structural_propagation_plan(
         "partial_record_policy": "an in-progress or partial record must not qualify as release evidence",
         "resolution_boundary": "the 0.001 m/s floor is a preregistered synthetic numerical interpretation threshold, not device accuracy or human measurement uncertainty",
     }
-    figure_contract = {
+
+
+def _evidence_contract() -> dict[str, Any]:
+    return {**_checkpoint_evidence_contract(), **_cell_evidence_contract()}
+
+
+def _figure_contract() -> dict[str, Any]:
+    return {
         "data_schema_version": "articulated-structural-figure-data/v1",
         "data_rule": "derive all panels deterministically from the complete result and exactly 14 digest-bound cell packs; do not filter favorable corners or cells",
         "data_validation": [
@@ -436,7 +441,10 @@ def build_structural_propagation_plan(
         "publication_rule": "revalidate the exact governed plan, complete result, and all 14 referenced no-pickle cell packs before writing figure data or a vector figure",
         "publication_command": "python -m scripts.research.proximal_distal_energy.articulated_structural_publication",
     }
-    integration_contract = {
+
+
+def _integration_contract() -> dict[str, Any]:
+    return {
         "required_surfaces": [
             "proximal_distal_energy_transfer.qmd",
             "MODEL_COMPLETION_FALSIFICATION_MATRIX.md",
@@ -459,20 +467,58 @@ def build_structural_propagation_plan(
             "coaching recommendation",
         ],
     }
-    contract_sha = hashlib.sha256(
-        json.dumps(
-            {
-                "design_sha256": design_sha,
-                "acceptance": acceptance,
-                "analysis": analysis,
-                "evidence_contract": evidence_contract,
-                "figure_contract": figure_contract,
-                "integration_contract": integration_contract,
-            },
-            sort_keys=True,
-            separators=(",", ":"),
-        ).encode("utf-8")
-    ).hexdigest()
+
+
+def _contract_sha256(
+    design_sha256: str,
+    acceptance: dict[str, Any],
+    analysis: dict[str, Any],
+    evidence: dict[str, Any],
+    figure: dict[str, Any],
+    integration: dict[str, Any],
+) -> str:
+    return _canonical_sha256(
+        {
+            "design_sha256": design_sha256,
+            "acceptance": acceptance,
+            "analysis": analysis,
+            "evidence_contract": evidence,
+            "figure_contract": figure,
+            "integration_contract": integration,
+        }
+    )
+
+
+def build_structural_propagation_plan(
+    campaign_path: Path = CAMPAIGN,
+    *,
+    data_directory: Path = DATA,
+) -> dict[str, Any]:
+    """Bind every registered structural authority to both headline designs."""
+
+    campaign = json.loads(campaign_path.read_text(encoding="utf-8"))
+    if campaign.get("status") != "complete" or len(campaign.get("corners", [])) != 7:
+        raise RuntimeError("the seven-corner authority campaign must be complete")
+    shaft = ArticulatedShaftAtlasConfig()
+    ground = ArticulatedGroundAtlasConfig()
+    corners = [
+        _corner_plan(row, shaft, ground, data_directory) for row in campaign["corners"]
+    ]
+    design = _design_contract(shaft, ground)
+    design_sha = _canonical_sha256(design)
+    acceptance = _acceptance_contract()
+    analysis = _analysis_contract()
+    evidence_contract = _evidence_contract()
+    figure_contract = _figure_contract()
+    integration_contract = _integration_contract()
+    contract_sha = _contract_sha256(
+        design_sha,
+        acceptance,
+        analysis,
+        evidence_contract,
+        figure_contract,
+        integration_contract,
+    )
     return {
         "schema_version": "articulated-structural-propagation-plan/v1",
         "status": "ready",

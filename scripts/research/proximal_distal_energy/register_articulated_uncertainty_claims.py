@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -53,6 +54,57 @@ HEADLINE_RESULT_ARTIFACTS = [
     "tests/research/test_articulated_headline_uncertainty_evidence.py",
     "tests/research/test_articulated_headline_uncertainty_figure.py",
 ]
+SCREEN_EXPLANATIONS = [
+    "finite deterministic design rather than a sampled population",
+    "excitation and contact-law dependence",
+    "monotone association rather than causal parameter effect",
+    "partial opening rather than robust maintained contact",
+]
+SCREEN_CONTROLS = [
+    "deterministic registered Latin-hypercube rows",
+    "fresh model and bilateral-closure solve for each row",
+    "retained feasibility and contact statuses",
+    "finite-response and five-percent energy-closure gates",
+]
+STRUCTURAL_EXPLANATIONS = [
+    "engineering scaling rather than calibrated participant anatomy",
+    "inverse-kinematics conditioning near a joint-limit boundary",
+    "coarse collision surrogates rather than mesh contact",
+    "authority regeneration without dynamic propagation",
+]
+STRUCTURAL_CONTROLS = [
+    "all thirteen phase states regenerated at every corner",
+    "configuration source and array digest validation",
+    "nominal-model substitution rejection",
+    "retained infeasible state and denominator",
+]
+HEADLINE_EXPLANATIONS = [
+    "one-at-a-time engineering corners rather than a joint distribution",
+    "matching-set movement rather than an outcome effect",
+    "short synthetic trajectory and constitutive parameter dependence",
+    "unpropagated structural authority variation",
+]
+HEADLINE_CONTROLS = [
+    "complete production atlases rather than reduced surrogates",
+    "both native engines and velocity reversal",
+    "time-step refinement and pathway killswitches",
+    "unchanged load-work matching and retained failures",
+]
+
+
+@dataclass(frozen=True, slots=True)
+class _ClaimSpec:
+    statement: str
+    classification: str
+    status: str
+    audit_status: str
+    artifacts: list[str]
+    domain: str
+    boundary: str
+    explanations: list[str]
+    controls: list[str]
+    falsifier: str
+    adjudication: str
 
 
 def _find(candidates: list[dict[str, Any]], suffix: str, prefix: str) -> dict[str, Any]:
@@ -70,40 +122,32 @@ def _find(candidates: list[dict[str, Any]], suffix: str, prefix: str) -> dict[st
 def _claim(
     claim_id: str,
     candidates: list[dict[str, Any]],
-    *,
-    statement: str,
-    classification: str,
-    status: str,
-    audit_status: str,
-    artifacts: list[str],
-    domain: str,
-    boundary: str,
-    explanations: list[str],
-    controls: list[str],
-    falsifier: str,
-    adjudication: str,
+    **values: Any,
 ) -> dict[str, Any]:
+    spec = _ClaimSpec(**values)
     return {
         "claim_id": claim_id,
         "candidate_ids": [candidate["candidate_id"] for candidate in candidates],
-        "statement": statement,
-        "classification": classification,
-        "published_status": status,
-        "audit_status": audit_status,
+        "statement": spec.statement,
+        "classification": spec.classification,
+        "published_status": spec.status,
+        "audit_status": spec.audit_status,
         "adjudication_outcome": (
-            "untested" if status == "registered_but_not_yet_executed" else "supported"
+            "untested"
+            if spec.status == "registered_but_not_yet_executed"
+            else "supported"
         ),
         "source_locations": [
             f"{candidate['source_path']}:{candidate['line_start']}"
             for candidate in candidates
         ],
-        "evidence_artifacts": artifacts,
-        "model_domain": domain,
-        "uncertainty_boundary": boundary,
-        "competing_explanations": explanations,
-        "negative_controls": controls,
-        "falsifier": falsifier,
-        "adjudication": adjudication,
+        "evidence_artifacts": spec.artifacts,
+        "model_domain": spec.domain,
+        "uncertainty_boundary": spec.boundary,
+        "competing_explanations": spec.explanations,
+        "negative_controls": spec.controls,
+        "falsifier": spec.falsifier,
+        "adjudication": spec.adjudication,
         "reviewer": "Codex technical audit",
         "last_verified_on": DATE,
     }
@@ -157,7 +201,15 @@ def _write_registry(record: dict[str, Any]) -> None:
     temporary.replace(REGISTRY)
 
 
-def main() -> None:
+@dataclass(slots=True)
+class _AuditContext:
+    registry: dict[str, Any]
+    inventory: dict[str, Any]
+    candidates: list[dict[str, Any]]
+    reviews: dict[str, dict[str, Any]]
+
+
+def _load_context() -> _AuditContext:
     registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
     inventory = json.loads(INVENTORY.read_text(encoding="utf-8"))
     candidates = inventory["candidates"]
@@ -176,6 +228,12 @@ def main() -> None:
         for review in registry["candidate_reviews"]
         if review["candidate_id"] in valid_ids
     }
+    return _AuditContext(registry, inventory, candidates, reviews)
+
+
+def _candidate_sections(
+    candidates: list[dict[str, Any]],
+) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
 
     screen_chapter = "_ch06caa_articulated_uncertainty_screen.qmd"
     screen = {
@@ -211,329 +269,16 @@ def main() -> None:
         "provenance": _find(candidates, headline_chapter, "Figure @fig-articulated"),
         "boundary": _find(candidates, headline_chapter, "This one-at-a-time design"),
     }
+    return screen, authority, headline
 
-    screen_explanations = [
-        "finite deterministic design rather than a sampled population",
-        "excitation and contact-law dependence",
-        "monotone association rather than causal parameter effect",
-        "partial opening rather than robust maintained contact",
-    ]
-    screen_controls = [
-        "deterministic registered Latin-hypercube rows",
-        "fresh model and bilateral-closure solve for each row",
-        "retained feasibility and contact statuses",
-        "finite-response and five-percent energy-closure gates",
-    ]
-    structural_explanations = [
-        "engineering scaling rather than calibrated participant anatomy",
-        "inverse-kinematics conditioning near a joint-limit boundary",
-        "coarse collision surrogates rather than mesh contact",
-        "authority regeneration without dynamic propagation",
-    ]
-    structural_controls = [
-        "all thirteen phase states regenerated at every corner",
-        "configuration source and array digest validation",
-        "nominal-model substitution rejection",
-        "retained infeasible state and denominator",
-    ]
-    headline_explanations = [
-        "one-at-a-time engineering corners rather than a joint distribution",
-        "matching-set movement rather than an outcome effect",
-        "short synthetic trajectory and constitutive parameter dependence",
-        "unpropagated structural authority variation",
-    ]
-    headline_controls = [
-        "complete production atlases rather than reduced surrogates",
-        "both native engines and velocity reversal",
-        "time-step refinement and pathway killswitches",
-        "unchanged load-work matching and retained failures",
-    ]
-    new_claims = [
-        _claim(
-            "PD-CLAIM-305",
-            [screen["bounds"], screen["method"]],
-            statement=(
-                "A deterministic 40-row articulated screen perturbs nine declared "
-                "engineering inputs, rebuilds and recloses each model, retains every "
-                "failure state, and computes PRCCs only on finite response rows."
-            ),
-            classification="articulated_engineering_uncertainty_design",
-            status="registered_and_executed_for_declared_synthetic_screen",
-            audit_status="design_rows_closure_status_and_response_contract_checked",
-            artifacts=UNCERTAINTY_ARTIFACTS,
-            domain=(
-                "Forty deterministic rows over height, mass, joint limits, grip, "
-                "friction, club properties, and initial velocity in a local "
-                "distributed-contact trajectory."
-            ),
-            boundary=(
-                "The ranges are engineering bounds, not participant or equipment "
-                "distributions, and the screen does not estimate interactions."
-            ),
-            explanations=screen_explanations,
-            controls=screen_controls,
-            falsifier=(
-                "A registered row is omitted, does not rebuild and reclose its model, "
-                "or a nonfinite response enters the PRCC calculation."
-            ),
-            adjudication=(
-                "The design is treated as a deterministic model screen, not as "
-                "population uncertainty or causal identification."
-            ),
-        ),
-        _claim(
-            "PD-CLAIM-306",
-            [screen["result"]],
-            statement=(
-                "All 40 registered rows have finite response vectors and remain "
-                "within the 5% work-energy gate, but every local trajectory partially "
-                "opens, rejecting robust full-contact interpretation for this screen."
-            ),
-            classification="articulated_uncertainty_adverse_contact_result",
-            status="finite_energy_closed_but_contact_domain_adverse",
-            audit_status="all_rows_statuses_and_energy_gate_reconciled",
-            artifacts=UNCERTAINTY_ARTIFACTS,
-            domain="The registered 40-row local articulated uncertainty screen.",
-            boundary=(
-                "Finite integration after partial opening does not establish maintained "
-                "physical grip contact, human strategy, or delivery benefit."
-            ),
-            explanations=screen_explanations,
-            controls=screen_controls,
-            falsifier=(
-                "Any row is nonfinite, exceeds the declared energy gate, or lacks the "
-                "reported partial-opening status."
-            ),
-            adjudication=(
-                "The adverse contact-domain result is retained and conditions every "
-                "downstream association."
-            ),
-        ),
-        _claim(
-            "PD-CLAIM-307",
-            [screen["prcc"], screen["interpretation"]],
-            statement=(
-                "The largest absolute conditional PRCCs are +0.936 for initial "
-                "velocity versus peak force, -0.500 for height versus force couple, "
-                "-0.940 for friction versus sliding speed, -0.760 for height versus "
-                "transitions, and +0.931 for mass versus the bounded numerical residual."
-            ),
-            classification="conditional_articulated_prcc_screen",
-            status="descriptive_associations_for_registered_finite_rows",
-            audit_status="prcc_values_status_conditioning_and_boundaries_checked",
-            artifacts=UNCERTAINTY_ARTIFACTS,
-            domain="Finite rows of the declared deterministic local screen.",
-            boundary=(
-                "PRCC magnitudes are neither causal effects nor cross-parameter "
-                "importance rankings and have no population interval."
-            ),
-            explanations=screen_explanations,
-            controls=screen_controls,
-            falsifier="The committed rows do not reproduce the stated PRCC values.",
-            adjudication=(
-                "Associations are reported with status conditioning and without causal, "
-                "population, performance, or coaching promotion."
-            ),
-        ),
-        _claim(
-            "PD-CLAIM-308",
-            [screen["boundary"]],
-            statement=(
-                "The local articulated screen does not propagate structural variation "
-                "through the 126/384 shaft or 0/384 ground headline estimands and "
-                "therefore cannot establish their structural robustness."
-            ),
-            classification="articulated_uncertainty_inference_boundary",
-            status="explicitly_open_headline_propagation_gate",
-            audit_status="local_screen_and_headline_estimands_separated",
-            artifacts=[*UNCERTAINTY_ARTIFACTS, *HEADLINE_DESIGN_ARTIFACTS],
-            domain="Relationship between the local screen and full headline atlases.",
-            boundary="No dynamic structural-corner robustness is claimed.",
-            explanations=screen_explanations,
-            controls=screen_controls,
-            falsifier=(
-                "The paper promotes local PRCC or contact-status results as completed "
-                "headline uncertainty propagation."
-            ),
-            adjudication="The missing propagation is recorded as an acceptance boundary.",
-        ),
-        _claim(
-            "PD-CLAIM-309",
-            [authority["method"]],
-            statement=(
-                "A seven-corner structural campaign regenerates all 13 phase states for "
-                "four headline cases and digest-binds configuration, sources, states, "
-                "failures, arrays, and corner-consistent model identity."
-            ),
-            classification="structural_corner_authority_contract",
-            status="qualified_as_digest_bound_execution_authority",
-            audit_status="authority_generation_identity_and_failure_contract_checked",
-            artifacts=STRUCTURAL_ARTIFACTS,
-            domain=(
-                "Nominal and low/high height, body-mass, and joint-limit engineering "
-                "corners for cases 0, 8, 9, and 17 over 13 phases."
-            ),
-            boundary="Authority qualification alone is not a dynamic transfer result.",
-            explanations=structural_explanations,
-            controls=structural_controls,
-            falsifier=(
-                "A digest drifts, a selected state disappears, or an atlas substitutes "
-                "the nominal model for a scaled authority."
-            ),
-            adjudication=(
-                "The authority is accepted only as model/state provenance for later "
-                "dynamic execution."
-            ),
-        ),
-        _claim(
-            "PD-CLAIM-310",
-            [authority["table"], authority["caption"], authority["result"]],
-            statement=(
-                "Six structural corners retain 52/52 feasible selected states; the "
-                "low-height corner retains 51/52 and one case-0 phase-12 "
-                "IK nonconvergence at an effectively zero joint-limit margin."
-            ),
-            classification="structural_corner_feasibility_result",
-            status="qualified_with_one_retained_boundary_failure",
-            audit_status="corner_counts_margins_clearances_and_failure_reconciled",
-            artifacts=STRUCTURAL_ARTIFACTS,
-            domain="The seven registered structural authority corners.",
-            boundary=(
-                "Engineering feasibility and coarse clearance do not establish human "
-                "anatomy, attainable technique, or injury risk."
-            ),
-            explanations=structural_explanations,
-            controls=structural_controls,
-            falsifier=(
-                "Feasible counts, the retained failure identity, joint-limit margin, or "
-                "authority digests fail reproduction."
-            ),
-            adjudication=(
-                "The low-height failure remains in the denominator and is not treated "
-                "as a participant classification."
-            ),
-        ),
-        _claim(
-            "PD-CLAIM-311",
-            [authority["boundary"]],
-            statement=(
-                "Structural authority regeneration does not establish sensitivity of "
-                "either headline; completion requires each feasible scaled authority in "
-                "both full atlases with the retained failure and all original controls."
-            ),
-            classification="structural_headline_propagation_boundary",
-            status="registered_but_not_yet_executed",
-            audit_status="propagation_acceptance_and_invalidation_contract_checked",
-            artifacts=STRUCTURAL_ARTIFACTS,
-            domain="Planned propagation from structural authorities to both atlases.",
-            boundary="No structural robustness, human mechanism, or strategy is claimed.",
-            explanations=structural_explanations,
-            controls=structural_controls,
-            falsifier=(
-                "Nominal anatomy is reused, a retained failure is dropped, or any "
-                "registered dynamic or provenance gate fails."
-            ),
-            adjudication="The unexecuted dynamic propagation remains an explicit gate.",
-        ),
-        _claim(
-            "PD-CLAIM-312",
-            [headline["method"], headline["bounds"], headline["provenance"]],
-            statement=(
-                "A registered 19-corner one-at-a-time campaign repeats affected full "
-                "shaft and ground atlases across nine engineering axes while retaining "
-                "both engines, reversal, refinement, killswitches, horizons, matching, "
-                "and failures."
-            ),
-            classification="articulated_headline_uncertainty_design",
-            status="completed_with_retained_failures",
-            audit_status="design_execution_completion_and_retained_failures_checked",
-            artifacts=HEADLINE_RESULT_ARTIFACTS,
-            domain=(
-                "Nominal plus low/high grip, shaft, and ground constitutive engineering "
-                "corners over the complete production atlases."
-            ),
-            boundary=(
-                "One-at-a-time bounds are not a joint distribution, calibration, or "
-                "population uncertainty analysis."
-            ),
-            explanations=headline_explanations,
-            controls=headline_controls,
-            falsifier=(
-                "A corner uses a reduced surrogate, changes the matching rule, loses a "
-                "control, or the completed record fails its independent audit."
-            ),
-            adjudication=(
-                "The completed execution is accepted with every adverse corner retained; "
-                "the design remains an engineering-bound model screen."
-            ),
-        ),
-        _claim(
-            "PD-CLAIM-313",
-            [headline["estimand"], headline["boundary"]],
-            statement=(
-                "Headline matched-count movement diagnoses sensitivity of the "
-                "comparability set; it is not an outcome effect, probability, pathway "
-                "benefit, parameter interaction, or human/coaching result."
-            ),
-            classification="articulated_headline_estimand_and_inference_boundary",
-            status="explicitly_bounded",
-            audit_status="estimand_matching_and_nonpromotion_rules_checked",
-            artifacts=HEADLINE_RESULT_ARTIFACTS,
-            domain="Interpretation contract for the registered headline campaign.",
-            boundary=(
-                "Equipment calibration, participant anatomy/contact, unilateral ground, "
-                "impact, delivery, and held-out bilateral-wrench evidence remain open."
-            ),
-            explanations=headline_explanations,
-            controls=headline_controls,
-            falsifier=(
-                "Matched-count change or emerged ground support is described as a speed, "
-                "causal, human, or coaching benefit."
-            ),
-            adjudication=(
-                "The count estimand and every prohibited promotion are stated "
-                "separately from eventual outcome analysis."
-            ),
-        ),
-        _claim(
-            "PD-CLAIM-314",
-            [headline["result"], headline["provenance"]],
-            statement=(
-                "Across nine completed nonnominal shaft corners, the matched set spans "
-                "80--182 cells (-46 to +56 from nominal 126/384), with both "
-                "grip-damping corners retained as failures; all 18 completed ground "
-                "corners remain at 0/384, with the high grip-damping corner retained "
-                "as a failure."
-            ),
-            classification="articulated_headline_constitutive_sensitivity_result",
-            status="completed_model_sensitivity_result",
-            audit_status="counts_ranges_statuses_and_failure_identities_reconciled",
-            artifacts=HEADLINE_RESULT_ARTIFACTS,
-            domain=(
-                "The registered nominal plus low/high one-at-a-time constitutive "
-                "engineering corners over the complete shaft and ground atlases."
-            ),
-            boundary=(
-                "Count movement is not a speed effect or human/population result; "
-                "failed corners and absent ground support prohibit robustness claims."
-            ),
-            explanations=headline_explanations,
-            controls=headline_controls,
-            falsifier=(
-                "The committed record does not reproduce the count ranges, nominal "
-                "counts, completed-corner counts, or retained failure identities."
-            ),
-            adjudication=(
-                "The shaft matching set is constitutively sensitive and the ground "
-                "matching set remains empty on completed corners; neither result is "
-                "promoted to a pathway benefit."
-            ),
-        ),
-    ]
-    registry["claims"].extend(new_claims)
-    claims = {claim["claim_id"]: claim for claim in registry["claims"]}
 
-    mapping = {
+def _map_primary_reviews(
+    reviews: dict[str, dict[str, Any]],
+    screen: dict[str, Any],
+    authority: dict[str, Any],
+    headline: dict[str, Any],
+) -> None:
+    screen_mapping = {
         "bounds": ("PD-CLAIM-305",),
         "method": ("PD-CLAIM-305",),
         "result": ("PD-CLAIM-306",),
@@ -541,49 +286,50 @@ def main() -> None:
         "interpretation": ("PD-CLAIM-307",),
         "boundary": ("PD-CLAIM-308",),
     }
-    for name, claim_ids in mapping.items():
+    for name, claim_ids in screen_mapping.items():
         _review(
             reviews, screen[name], claim_ids, "Articulated screen claim or boundary."
         )
     for name in ("figure", "availability"):
         _review(reviews, screen[name], (), "Figure or governed-artifact pointer.")
-
-    mapping = {
-        "method": ("PD-CLAIM-309",),
-        "header": (),
-        "table": ("PD-CLAIM-310",),
-        "figure": (),
-        "caption": ("PD-CLAIM-310",),
-        "result": ("PD-CLAIM-310",),
-        "boundary": ("PD-CLAIM-311",),
-        "availability": (),
-    }
-    for name, claim_ids in mapping.items():
-        _review(
-            reviews,
-            authority[name],
-            claim_ids,
+    mappings = (
+        (
+            authority,
+            {
+                "method": ("PD-CLAIM-309",),
+                "header": (),
+                "table": ("PD-CLAIM-310",),
+                "figure": (),
+                "caption": ("PD-CLAIM-310",),
+                "result": ("PD-CLAIM-310",),
+                "boundary": ("PD-CLAIM-311",),
+                "availability": (),
+            },
             "Structural authority claim, boundary, or evidence pointer.",
-        )
-
-    mapping = {
-        "method": ("PD-CLAIM-312",),
-        "bounds": ("PD-CLAIM-312",),
-        "estimand": ("PD-CLAIM-313",),
-        "result": ("PD-CLAIM-314",),
-        "figure": (),
-        "provenance": ("PD-CLAIM-312", "PD-CLAIM-314"),
-        "boundary": ("PD-CLAIM-313",),
-    }
-    for name, claim_ids in mapping.items():
-        _review(
-            reviews,
-            headline[name],
-            claim_ids,
+        ),
+        (
+            headline,
+            {
+                "method": ("PD-CLAIM-312",),
+                "bounds": ("PD-CLAIM-312",),
+                "estimand": ("PD-CLAIM-313",),
+                "result": ("PD-CLAIM-314",),
+                "figure": (),
+                "provenance": ("PD-CLAIM-312", "PD-CLAIM-314"),
+                "boundary": ("PD-CLAIM-313",),
+            },
             "Headline uncertainty design, boundary, or figure pointer.",
-        )
+        ),
+    )
+    for section, mapping, rationale in mappings:
+        for name, claim_ids in mapping.items():
+            _review(reviews, section[name], claim_ids, rationale)
 
-    repeated = [
+
+def _repeated_claim_mappings(
+    candidates: list[dict[str, Any]],
+) -> list[tuple[dict[str, Any], tuple[str, ...]]]:
+    return [
         (
             _find(
                 candidates,
@@ -635,7 +381,14 @@ def main() -> None:
             ("PD-CLAIM-128", "PD-CLAIM-206", "PD-CLAIM-234", "PD-CLAIM-311"),
         ),
     ]
-    for candidate, claim_ids in repeated:
+
+
+def _attach_repeated_claims(
+    candidates: list[dict[str, Any]],
+    claims: dict[str, dict[str, Any]],
+    reviews: dict[str, dict[str, Any]],
+) -> None:
+    for candidate, claim_ids in _repeated_claim_mappings(candidates):
         _attach(claims, reviews, candidate, claim_ids)
     navigation = _find(
         candidates, "_ch09_conclusions.qmd", "The canonical implementation roadmap"
@@ -653,41 +406,371 @@ def main() -> None:
                 "qualification axes; it introduces no new scientific estimand.",
             )
 
-    claim_273 = claims["PD-CLAIM-273"]
-    claim_273["statement"] = (
+
+def _update_horizon_claim(claims: dict[str, dict[str, Any]]) -> None:
+    claim = claims["PD-CLAIM-273"]
+    claim["statement"] = (
         "The 50 ms validity-horizon result strengthens the reduced hand-carriage "
         "reference; the articulated point-contact tier remains qualified only through "
         "5 ms, while later distributed-grip, shaft, and ground tiers separately reach "
         "50 ms. None establishes calibrated anatomy/equipment or human strategy."
     )
-    claim_273["uncertainty_boundary"] = (
+    claim["uncertainty_boundary"] = (
         "The tiers use different contact, shaft, support, and state contracts; their "
         "horizon results cannot be pooled into a calibrated human persistence claim."
     )
-    claim_273["last_verified_on"] = DATE
+    claim["last_verified_on"] = DATE
 
+
+def _finalize_registry(
+    context: _AuditContext,
+    claims: dict[str, dict[str, Any]],
+) -> None:
     reciprocal: dict[str, list[str]] = {}
     for claim in claims.values():
         for candidate_id in claim.get("candidate_ids", []):
             reciprocal.setdefault(candidate_id, []).append(claim["claim_id"])
-    for candidate_id, review in reviews.items():
+    for candidate_id, review in context.reviews.items():
         review["claim_ids"] = list(
             dict.fromkeys([*review["claim_ids"], *reciprocal.get(candidate_id, [])])
         )
-
-    registry["candidate_reviews"] = list(reviews.values())
+    registry = context.registry
+    registry["candidate_reviews"] = list(context.reviews.values())
     registry["claims"] = list(claims.values())
-    registry["paper"]["source_digest"] = inventory["source_digest"]
+    registry["paper"]["source_digest"] = context.inventory["source_digest"]
     registry["audit_scope"]["current_scope"] = (
-        f"The complete {inventory['candidate_count']:,}-candidate paper inventory is "
-        "adjudicated. The local articulated screen is conditional on partial opening, "
-        "the completed constitutive headline campaign retains adverse failures and no "
-        "ground matched set, and structural authorities retain one low-height failure. "
-        "Structural propagation and governed human validation remain open without "
-        "human or coaching promotion."
+        f"The complete {context.inventory['candidate_count']:,}-candidate paper "
+        "inventory is adjudicated. The local articulated screen is conditional on "
+        "partial opening, the completed constitutive headline campaign retains "
+        "adverse failures and no ground matched set, and structural authorities "
+        "retain one low-height failure. Structural propagation and governed human "
+        "validation remain open without human or coaching promotion."
     )
     registry["audit_scope"]["completion_status"] = "complete"
     _write_registry(registry)
+
+
+def _screen_claims_first(screen: dict[str, Any]) -> list[dict[str, Any]]:
+    return [
+        _claim(
+            "PD-CLAIM-305",
+            [screen["bounds"], screen["method"]],
+            statement=(
+                "A deterministic 40-row articulated screen perturbs nine declared "
+                "engineering inputs, rebuilds and recloses each model, retains every "
+                "failure state, and computes PRCCs only on finite response rows."
+            ),
+            classification="articulated_engineering_uncertainty_design",
+            status="registered_and_executed_for_declared_synthetic_screen",
+            audit_status="design_rows_closure_status_and_response_contract_checked",
+            artifacts=UNCERTAINTY_ARTIFACTS,
+            domain=(
+                "Forty deterministic rows over height, mass, joint limits, grip, "
+                "friction, club properties, and initial velocity in a local "
+                "distributed-contact trajectory."
+            ),
+            boundary=(
+                "The ranges are engineering bounds, not participant or equipment "
+                "distributions, and the screen does not estimate interactions."
+            ),
+            explanations=SCREEN_EXPLANATIONS,
+            controls=SCREEN_CONTROLS,
+            falsifier=(
+                "A registered row is omitted, does not rebuild and reclose its model, "
+                "or a nonfinite response enters the PRCC calculation."
+            ),
+            adjudication=(
+                "The design is treated as a deterministic model screen, not as "
+                "population uncertainty or causal identification."
+            ),
+        ),
+        _claim(
+            "PD-CLAIM-306",
+            [screen["result"]],
+            statement=(
+                "All 40 registered rows have finite response vectors and remain "
+                "within the 5% work-energy gate, but every local trajectory partially "
+                "opens, rejecting robust full-contact interpretation for this screen."
+            ),
+            classification="articulated_uncertainty_adverse_contact_result",
+            status="finite_energy_closed_but_contact_domain_adverse",
+            audit_status="all_rows_statuses_and_energy_gate_reconciled",
+            artifacts=UNCERTAINTY_ARTIFACTS,
+            domain="The registered 40-row local articulated uncertainty screen.",
+            boundary=(
+                "Finite integration after partial opening does not establish maintained "
+                "physical grip contact, human strategy, or delivery benefit."
+            ),
+            explanations=SCREEN_EXPLANATIONS,
+            controls=SCREEN_CONTROLS,
+            falsifier=(
+                "Any row is nonfinite, exceeds the declared energy gate, or lacks the "
+                "reported partial-opening status."
+            ),
+            adjudication=(
+                "The adverse contact-domain result is retained and conditions every "
+                "downstream association."
+            ),
+        ),
+    ]
+
+
+def _screen_claims_second(screen: dict[str, Any]) -> list[dict[str, Any]]:
+    return [
+        _claim(
+            "PD-CLAIM-307",
+            [screen["prcc"], screen["interpretation"]],
+            statement=(
+                "The largest absolute conditional PRCCs are +0.936 for initial "
+                "velocity versus peak force, -0.500 for height versus force couple, "
+                "-0.940 for friction versus sliding speed, -0.760 for height versus "
+                "transitions, and +0.931 for mass versus the bounded numerical residual."
+            ),
+            classification="conditional_articulated_prcc_screen",
+            status="descriptive_associations_for_registered_finite_rows",
+            audit_status="prcc_values_status_conditioning_and_boundaries_checked",
+            artifacts=UNCERTAINTY_ARTIFACTS,
+            domain="Finite rows of the declared deterministic local screen.",
+            boundary=(
+                "PRCC magnitudes are neither causal effects nor cross-parameter "
+                "importance rankings and have no population interval."
+            ),
+            explanations=SCREEN_EXPLANATIONS,
+            controls=SCREEN_CONTROLS,
+            falsifier="The committed rows do not reproduce the stated PRCC values.",
+            adjudication=(
+                "Associations are reported with status conditioning and without causal, "
+                "population, performance, or coaching promotion."
+            ),
+        ),
+        _claim(
+            "PD-CLAIM-308",
+            [screen["boundary"]],
+            statement=(
+                "The local articulated screen does not propagate structural variation "
+                "through the 126/384 shaft or 0/384 ground headline estimands and "
+                "therefore cannot establish their structural robustness."
+            ),
+            classification="articulated_uncertainty_inference_boundary",
+            status="explicitly_open_headline_propagation_gate",
+            audit_status="local_screen_and_headline_estimands_separated",
+            artifacts=[*UNCERTAINTY_ARTIFACTS, *HEADLINE_DESIGN_ARTIFACTS],
+            domain="Relationship between the local screen and full headline atlases.",
+            boundary="No dynamic structural-corner robustness is claimed.",
+            explanations=SCREEN_EXPLANATIONS,
+            controls=SCREEN_CONTROLS,
+            falsifier=(
+                "The paper promotes local PRCC or contact-status results as completed "
+                "headline uncertainty propagation."
+            ),
+            adjudication="The missing propagation is recorded as an acceptance boundary.",
+        ),
+    ]
+
+
+def _structural_claims(authority: dict[str, Any]) -> list[dict[str, Any]]:
+    return [
+        _claim(
+            "PD-CLAIM-309",
+            [authority["method"]],
+            statement=(
+                "A seven-corner structural campaign regenerates all 13 phase states for "
+                "four headline cases and digest-binds configuration, sources, states, "
+                "failures, arrays, and corner-consistent model identity."
+            ),
+            classification="structural_corner_authority_contract",
+            status="qualified_as_digest_bound_execution_authority",
+            audit_status="authority_generation_identity_and_failure_contract_checked",
+            artifacts=STRUCTURAL_ARTIFACTS,
+            domain=(
+                "Nominal and low/high height, body-mass, and joint-limit engineering "
+                "corners for cases 0, 8, 9, and 17 over 13 phases."
+            ),
+            boundary="Authority qualification alone is not a dynamic transfer result.",
+            explanations=STRUCTURAL_EXPLANATIONS,
+            controls=STRUCTURAL_CONTROLS,
+            falsifier=(
+                "A digest drifts, a selected state disappears, or an atlas substitutes "
+                "the nominal model for a scaled authority."
+            ),
+            adjudication=(
+                "The authority is accepted only as model/state provenance for later "
+                "dynamic execution."
+            ),
+        ),
+        _claim(
+            "PD-CLAIM-310",
+            [authority["table"], authority["caption"], authority["result"]],
+            statement=(
+                "Six structural corners retain 52/52 feasible selected states; the "
+                "low-height corner retains 51/52 and one case-0 phase-12 "
+                "IK nonconvergence at an effectively zero joint-limit margin."
+            ),
+            classification="structural_corner_feasibility_result",
+            status="qualified_with_one_retained_boundary_failure",
+            audit_status="corner_counts_margins_clearances_and_failure_reconciled",
+            artifacts=STRUCTURAL_ARTIFACTS,
+            domain="The seven registered structural authority corners.",
+            boundary=(
+                "Engineering feasibility and coarse clearance do not establish human "
+                "anatomy, attainable technique, or injury risk."
+            ),
+            explanations=STRUCTURAL_EXPLANATIONS,
+            controls=STRUCTURAL_CONTROLS,
+            falsifier=(
+                "Feasible counts, the retained failure identity, joint-limit margin, or "
+                "authority digests fail reproduction."
+            ),
+            adjudication=(
+                "The low-height failure remains in the denominator and is not treated "
+                "as a participant classification."
+            ),
+        ),
+        _claim(
+            "PD-CLAIM-311",
+            [authority["boundary"]],
+            statement=(
+                "Structural authority regeneration does not establish sensitivity of "
+                "either headline; completion requires each feasible scaled authority in "
+                "both full atlases with the retained failure and all original controls."
+            ),
+            classification="structural_headline_propagation_boundary",
+            status="registered_but_not_yet_executed",
+            audit_status="propagation_acceptance_and_invalidation_contract_checked",
+            artifacts=STRUCTURAL_ARTIFACTS,
+            domain="Planned propagation from structural authorities to both atlases.",
+            boundary="No structural robustness, human mechanism, or strategy is claimed.",
+            explanations=STRUCTURAL_EXPLANATIONS,
+            controls=STRUCTURAL_CONTROLS,
+            falsifier=(
+                "Nominal anatomy is reused, a retained failure is dropped, or any "
+                "registered dynamic or provenance gate fails."
+            ),
+            adjudication="The unexecuted dynamic propagation remains an explicit gate.",
+        ),
+    ]
+
+
+def _headline_claims(headline: dict[str, Any]) -> list[dict[str, Any]]:
+    return [
+        _claim(
+            "PD-CLAIM-312",
+            [headline["method"], headline["bounds"], headline["provenance"]],
+            statement=(
+                "A registered 19-corner one-at-a-time campaign repeats affected full "
+                "shaft and ground atlases across nine engineering axes while retaining "
+                "both engines, reversal, refinement, killswitches, horizons, matching, "
+                "and failures."
+            ),
+            classification="articulated_headline_uncertainty_design",
+            status="completed_with_retained_failures",
+            audit_status="design_execution_completion_and_retained_failures_checked",
+            artifacts=HEADLINE_RESULT_ARTIFACTS,
+            domain=(
+                "Nominal plus low/high grip, shaft, and ground constitutive engineering "
+                "corners over the complete production atlases."
+            ),
+            boundary=(
+                "One-at-a-time bounds are not a joint distribution, calibration, or "
+                "population uncertainty analysis."
+            ),
+            explanations=HEADLINE_EXPLANATIONS,
+            controls=HEADLINE_CONTROLS,
+            falsifier=(
+                "A corner uses a reduced surrogate, changes the matching rule, loses a "
+                "control, or the completed record fails its independent audit."
+            ),
+            adjudication=(
+                "The completed execution is accepted with every adverse corner retained; "
+                "the design remains an engineering-bound model screen."
+            ),
+        ),
+        _claim(
+            "PD-CLAIM-313",
+            [headline["estimand"], headline["boundary"]],
+            statement=(
+                "Headline matched-count movement diagnoses sensitivity of the "
+                "comparability set; it is not an outcome effect, probability, pathway "
+                "benefit, parameter interaction, or human/coaching result."
+            ),
+            classification="articulated_headline_estimand_and_inference_boundary",
+            status="explicitly_bounded",
+            audit_status="estimand_matching_and_nonpromotion_rules_checked",
+            artifacts=HEADLINE_RESULT_ARTIFACTS,
+            domain="Interpretation contract for the registered headline campaign.",
+            boundary=(
+                "Equipment calibration, participant anatomy/contact, unilateral ground, "
+                "impact, delivery, and held-out bilateral-wrench evidence remain open."
+            ),
+            explanations=HEADLINE_EXPLANATIONS,
+            controls=HEADLINE_CONTROLS,
+            falsifier=(
+                "Matched-count change or emerged ground support is described as a speed, "
+                "causal, human, or coaching benefit."
+            ),
+            adjudication=(
+                "The count estimand and every prohibited promotion are stated "
+                "separately from eventual outcome analysis."
+            ),
+        ),
+        _claim(
+            "PD-CLAIM-314",
+            [headline["result"], headline["provenance"]],
+            statement=(
+                "Across nine completed nonnominal shaft corners, the matched set spans "
+                "80--182 cells (-46 to +56 from nominal 126/384), with both "
+                "grip-damping corners retained as failures; all 18 completed ground "
+                "corners remain at 0/384, with the high grip-damping corner retained "
+                "as a failure."
+            ),
+            classification="articulated_headline_constitutive_sensitivity_result",
+            status="completed_model_sensitivity_result",
+            audit_status="counts_ranges_statuses_and_failure_identities_reconciled",
+            artifacts=HEADLINE_RESULT_ARTIFACTS,
+            domain=(
+                "The registered nominal plus low/high one-at-a-time constitutive "
+                "engineering corners over the complete shaft and ground atlases."
+            ),
+            boundary=(
+                "Count movement is not a speed effect or human/population result; "
+                "failed corners and absent ground support prohibit robustness claims."
+            ),
+            explanations=HEADLINE_EXPLANATIONS,
+            controls=HEADLINE_CONTROLS,
+            falsifier=(
+                "The committed record does not reproduce the count ranges, nominal "
+                "counts, completed-corner counts, or retained failure identities."
+            ),
+            adjudication=(
+                "The shaft matching set is constitutively sensitive and the ground "
+                "matching set remains empty on completed corners; neither result is "
+                "promoted to a pathway benefit."
+            ),
+        ),
+    ]
+
+
+def main() -> None:
+    context = _load_context()
+    registry = context.registry
+    inventory = context.inventory
+    candidates = context.candidates
+    reviews = context.reviews
+    screen, authority, headline = _candidate_sections(candidates)
+
+    new_claims = [
+        *_screen_claims_first(screen),
+        *_screen_claims_second(screen),
+        *_structural_claims(authority),
+        *_headline_claims(headline),
+    ]
+    registry["claims"].extend(new_claims)
+    claims = {claim["claim_id"]: claim for claim in registry["claims"]}
+
+    _map_primary_reviews(reviews, screen, authority, headline)
+    _attach_repeated_claims(candidates, claims, reviews)
+    _update_horizon_claim(claims)
+    _finalize_registry(context, claims)
 
 
 if __name__ == "__main__":

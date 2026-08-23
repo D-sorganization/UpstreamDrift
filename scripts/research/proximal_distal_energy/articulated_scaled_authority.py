@@ -90,6 +90,33 @@ class ScaledAuthority:
     authority_sha256: str
 
 
+@dataclass(frozen=True, slots=True)
+class _AuthorityDigestPayload:
+    configuration: ScaledAuthorityConfig
+    time_s: FloatArray
+    profile_index: IntArray
+    grip_span_m: FloatArray
+    solution_q: FloatArray
+    feasible: BoolArray
+    selected_case_indices: IntArray
+    selected_failure_class: NDArray[np.str_]
+    source_sha256: dict[str, str]
+
+
+@dataclass(slots=True)
+class _RegenerationWorkspace:
+    time_s: FloatArray
+    profile_index: IntArray
+    grip_span_m: FloatArray
+    solution_q: FloatArray
+    feasible: BoolArray
+    selected_case_indices: IntArray
+    selected_failure_class: NDArray[np.str_]
+    maximum_closure_error_m: FloatArray
+    minimum_joint_limit_margin_rad: FloatArray
+    minimum_collision_clearance_m: FloatArray
+
+
 def _failure_class(solution: ClosedContactSolution) -> str:
     if not solution.solver_converged:
         return "ik_nonconvergence"
@@ -111,33 +138,26 @@ def _source_hashes() -> dict[str, str]:
     }
 
 
-def _digest_payload(
-    configuration: ScaledAuthorityConfig,
-    time_s: FloatArray,
-    profile_index: IntArray,
-    grip_span_m: FloatArray,
-    solution_q: FloatArray,
-    feasible: BoolArray,
-    selected_case_indices: IntArray,
-    selected_failure_class: NDArray[np.str_],
-    source_sha256: dict[str, str],
-) -> str:
+def _digest_payload(payload: _AuthorityDigestPayload) -> str:
     digest = hashlib.sha256()
     digest.update(
         json.dumps(
-            {"configuration": asdict(configuration), "source_sha256": source_sha256},
+            {
+                "configuration": asdict(payload.configuration),
+                "source_sha256": payload.source_sha256,
+            },
             sort_keys=True,
             separators=(",", ":"),
         ).encode("utf-8")
     )
     for array in (
-        time_s,
-        profile_index,
-        grip_span_m,
-        solution_q,
-        feasible,
-        selected_case_indices,
-        selected_failure_class,
+        payload.time_s,
+        payload.profile_index,
+        payload.grip_span_m,
+        payload.solution_q,
+        payload.feasible,
+        payload.selected_case_indices,
+        payload.selected_failure_class,
     ):
         contiguous = np.ascontiguousarray(array)
         digest.update(str(contiguous.dtype).encode("ascii"))
@@ -167,30 +187,35 @@ def _nominal_authority() -> dict[str, NDArray[Any]]:
     return result
 
 
-def build_scaled_authority(
-    configuration: ScaledAuthorityConfig = ScaledAuthorityConfig(),
-) -> ScaledAuthority:
-    """Regenerate all phase samples for selected structural headline cases."""
-
-    nominal = _nominal_authority()
-    times = np.asarray(nominal["time_s"], dtype=float)
-    profile_index = np.asarray(nominal["profile_index"], dtype=np.int64)
-    grip_span = np.asarray(nominal["grip_span_m"], dtype=float)
-    solution_q = np.asarray(nominal["solution_q"], dtype=float).copy()
-    feasible = np.asarray(nominal["feasible"], dtype=bool).copy()
+def _prepare_regeneration(
+    nominal: dict[str, NDArray[Any]], configuration: ScaledAuthorityConfig
+) -> _RegenerationWorkspace:
+    time_s = np.asarray(nominal["time_s"], dtype=float)
     selected = np.asarray(configuration.case_indices, dtype=np.int64)
-    shape = (selected.size, times.size)
-    failure_class = np.empty(shape, dtype="U32")
-    closure_error = np.empty(shape)
-    joint_margin = np.empty(shape)
-    collision_clearance = np.empty(shape)
+    selected_shape = (selected.size, time_s.size)
+    return _RegenerationWorkspace(
+        time_s=time_s,
+        profile_index=np.asarray(nominal["profile_index"], dtype=np.int64),
+        grip_span_m=np.asarray(nominal["grip_span_m"], dtype=float),
+        solution_q=np.asarray(nominal["solution_q"], dtype=float).copy(),
+        feasible=np.asarray(nominal["feasible"], dtype=bool).copy(),
+        selected_case_indices=selected,
+        selected_failure_class=np.empty(selected_shape, dtype="U32"),
+        maximum_closure_error_m=np.empty(selected_shape),
+        minimum_joint_limit_margin_rad=np.empty(selected_shape),
+        minimum_collision_clearance_m=np.empty(selected_shape),
+    )
+
+
+def _regenerate_selected_states(
+    workspace: _RegenerationWorkspace, configuration: ScaledAuthorityConfig
+) -> None:
     profiles = default_synthetic_profiles()
     contact_config = ClosedContactConfig(
         joint_limit_scale=configuration.joint_limit_scale
     )
-
-    for selected_slot, case_index in enumerate(selected):
-        base = profiles[int(profile_index[case_index])]
+    for selected_slot, case_index in enumerate(workspace.selected_case_indices):
+        base = profiles[int(workspace.profile_index[case_index])]
         profile = replace(
             base,
             profile_id=(
@@ -203,71 +228,95 @@ def build_scaled_authority(
         model, metadata = build_subject_scaled_model(profile)
         hand_contact = float(metadata["hand_contact_local_x_m"])
         previous: FloatArray | None = None
-        for time_slot, sample_time_s in enumerate(times):
+        for time_slot, sample_time_s in enumerate(workspace.time_s):
             reference, _, _ = prescribed_state(model, float(sample_time_s))
             result = solve_closed_contact_configuration(
                 model,
                 q_reference=reference,
-                grip_span_m=float(grip_span[case_index]),
+                grip_span_m=float(workspace.grip_span_m[case_index]),
                 hand_contact_local_x_m=hand_contact,
                 q_seed=previous,
                 config=contact_config,
             )
             previous = result.q if result.contact_closed else None
-            solution_q[case_index, time_slot] = result.q
-            feasible[case_index, time_slot] = result.feasible
-            failure_class[selected_slot, time_slot] = _failure_class(result)
-            closure_error[selected_slot, time_slot] = float(
+            workspace.solution_q[case_index, time_slot] = result.q
+            workspace.feasible[case_index, time_slot] = result.feasible
+            workspace.selected_failure_class[selected_slot, time_slot] = _failure_class(
+                result
+            )
+            workspace.maximum_closure_error_m[selected_slot, time_slot] = float(
                 np.max(result.hand_to_grip_distance_m)
             )
-            joint_margin[selected_slot, time_slot] = (
+            workspace.minimum_joint_limit_margin_rad[selected_slot, time_slot] = (
                 result.minimum_joint_limit_margin_rad
             )
-            collision_clearance[selected_slot, time_slot] = (
+            workspace.minimum_collision_clearance_m[selected_slot, time_slot] = (
                 result.minimum_collision_clearance_m
             )
 
+
+def _maximum_nominal_error(
+    workspace: _RegenerationWorkspace,
+    nominal: dict[str, NDArray[Any]],
+    configuration: ScaledAuthorityConfig,
+) -> float:
     nominal_corner = (
         configuration.height_scale == 1.0
         and configuration.body_mass_scale == 1.0
         and configuration.joint_limit_scale == 1.0
     )
-    nominal_error = (
-        float(
-            np.max(
-                np.abs(
-                    solution_q[selected]
-                    - np.asarray(nominal["solution_q"], dtype=float)[selected]
-                )
+    if not nominal_corner:
+        return float("nan")
+    selected = workspace.selected_case_indices
+    return float(
+        np.max(
+            np.abs(
+                workspace.solution_q[selected]
+                - np.asarray(nominal["solution_q"], dtype=float)[selected]
             )
         )
-        if nominal_corner
-        else float("nan")
     )
+
+
+def build_scaled_authority(
+    configuration: ScaledAuthorityConfig = ScaledAuthorityConfig(),
+) -> ScaledAuthority:
+    """Regenerate all phase samples for selected structural headline cases."""
+
+    nominal = _nominal_authority()
+    workspace = _prepare_regeneration(nominal, configuration)
+    _regenerate_selected_states(workspace, configuration)
+    nominal_error = _maximum_nominal_error(workspace, nominal, configuration)
     sources = _source_hashes()
     digest = _digest_payload(
-        configuration,
-        times,
-        profile_index,
-        grip_span,
-        solution_q,
-        feasible,
-        selected,
-        failure_class,
-        sources,
+        _AuthorityDigestPayload(
+            configuration=configuration,
+            time_s=workspace.time_s,
+            profile_index=workspace.profile_index,
+            grip_span_m=workspace.grip_span_m,
+            solution_q=workspace.solution_q,
+            feasible=workspace.feasible,
+            selected_case_indices=workspace.selected_case_indices,
+            selected_failure_class=workspace.selected_failure_class,
+            source_sha256=sources,
+        )
     )
     return ScaledAuthority(
         configuration=configuration,
-        time_s=times,
-        profile_index=profile_index,
-        grip_span_m=grip_span,
-        solution_q=solution_q,
-        feasible=feasible,
-        selected_case_indices=selected,
-        selected_failure_class=failure_class,
-        selected_maximum_closure_error_m=closure_error,
-        selected_minimum_joint_limit_margin_rad=joint_margin,
-        selected_minimum_collision_clearance_m=collision_clearance,
+        time_s=workspace.time_s,
+        profile_index=workspace.profile_index,
+        grip_span_m=workspace.grip_span_m,
+        solution_q=workspace.solution_q,
+        feasible=workspace.feasible,
+        selected_case_indices=workspace.selected_case_indices,
+        selected_failure_class=workspace.selected_failure_class,
+        selected_maximum_closure_error_m=workspace.maximum_closure_error_m,
+        selected_minimum_joint_limit_margin_rad=(
+            workspace.minimum_joint_limit_margin_rad
+        ),
+        selected_minimum_collision_clearance_m=(
+            workspace.minimum_collision_clearance_m
+        ),
         maximum_nominal_state_error_rad=nominal_error,
         source_sha256=sources,
         authority_sha256=digest,
@@ -424,15 +473,17 @@ def validate_scaled_authority(
     if authority.source_sha256 != _source_hashes():
         raise RuntimeError("scaled authority source digest does not match")
     observed = _digest_payload(
-        authority.configuration,
-        authority.time_s,
-        authority.profile_index,
-        authority.grip_span_m,
-        authority.solution_q,
-        authority.feasible,
-        authority.selected_case_indices,
-        authority.selected_failure_class,
-        authority.source_sha256,
+        _AuthorityDigestPayload(
+            configuration=authority.configuration,
+            time_s=authority.time_s,
+            profile_index=authority.profile_index,
+            grip_span_m=authority.grip_span_m,
+            solution_q=authority.solution_q,
+            feasible=authority.feasible,
+            selected_case_indices=authority.selected_case_indices,
+            selected_failure_class=authority.selected_failure_class,
+            source_sha256=authority.source_sha256,
+        )
     )
     if observed != authority.authority_sha256:
         raise RuntimeError("scaled authority content digest does not match")

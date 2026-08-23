@@ -12,13 +12,8 @@ from scripts.research.proximal_distal_energy import articulated_ground_atlas as 
 pytestmark = pytest.mark.scientific
 
 
-def _authority() -> atlas._Authority:
-    return atlas._Authority(
-        time_s=np.linspace(0.0, 0.24, 13),
-        profile_index=np.repeat(np.arange(6), 3),
-        grip_span_m=np.tile(np.asarray((0.12, 0.18, 0.24)), 6),
-        solution_q=np.zeros((18, 13, 20)),
-    )
+def _authority() -> atlas.ArticulatedAtlasAuthority:
+    return atlas._load_authority()
 
 
 def test_ground_atlas_accepts_twenty_branch_workers() -> None:
