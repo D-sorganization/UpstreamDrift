@@ -12,9 +12,8 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   projection. Tools owns reusable consumers; do not copy its solver or UI
   implementations into this repository or `vendor/ud-tools`.
 - UpstreamDrift remote `main` is
-  `9e220712025564caf0ac5201a0ddcf69dd98299e`, the protected squash merge of
-  PR #9018. Issue #8724 is closed with exact-head CI, optional-stack CI, and
-  remote-main ancestry verified.
+  `3ecd8c2be0ad25da1548a4b948a93fbfa2268179`, the protected squash merge of
+  PR #9019. It includes PR #9018 and the post-adjudication handoff correction.
 - The current computational publication is 239 pages with SHA-256
   `be85b7b62bba060a26ce3fea8355aa8b01dcf8c1b1ccf09304450898a4e5e78b`,
   194 URI links, and 247 outline entries. All pages render and were inspected.
@@ -31,10 +30,9 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   four-core CPU cap. Its workspace and campaign records are bind-mounted from
   the ControlTower C: drive, and restart policy is `on-failure`. Do not start a
   duplicate or modify its frozen source.
-- At 13:34 PDT, 18 of 19 registered corners were terminal and retained,
-  including declared failed-retained outcomes. The final
-  `ground_free_moment_damping_scale-high` corner had atomically completed
-  branch 38/72 of its ground atlas. `status.json` remained `running`.
+- The latest non-mutating probe still reports `running`. Its log completed one
+  72/72 ground-atlas pass and reached branch 56/72 of the next atomic pass.
+  Treat checkpoint counts as progress only, not as a terminal scientific result.
 - Status and logs:
   `C:\Users\diete\Campaigns\UpstreamDrift-8752`. Remote inspection uses the
   pinned Tailscale SSH route into `ControlTower-SSD`; a separate Codex session
@@ -54,7 +52,8 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 - Worktree `UpstreamDrift-worktrees\8800-headline-structural-propagation`
   wires height, body-mass, and joint-limit authorities into both headline
   atlases. Commits `d972db8ea` and `4bccef56c` contain the governed authority,
-  atomic branch executors, campaign CLI, preflight, and focused tests.
+  atomic branch executors, campaign CLI, preflight, and focused tests; merge
+  `c36bcd223` reconciles the branch with remote main without weakening controls.
 - The seven-corner plan retains 84 planned states as 83 feasible states plus
   the declared low-height infeasible state. Shaft and ground checkpoints cover
   48 and 72 atomic branch packs respectively and restore without recomputation.

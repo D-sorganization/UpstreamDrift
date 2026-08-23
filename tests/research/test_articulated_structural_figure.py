@@ -66,24 +66,26 @@ def _record() -> dict:
                 "high_scale": 1.2,
                 "shared_persistent_cell_count": int(supported),
                 "summary_statistic": "unweighted median",
-                "low_to_nominal_secant_m_s_per_unit_scale": -0.01
-                if supported
-                else None,
-                "nominal_to_high_secant_m_s_per_unit_scale": 0.02
-                if supported
-                else None,
-                "low_to_nominal_secant_range_m_s_per_unit_scale": [-0.02, 0.0]
-                if supported
-                else None,
-                "nominal_to_high_secant_range_m_s_per_unit_scale": [0.01, 0.03]
-                if supported
-                else None,
-                "cell_classification_counts": {"resolved_opposing": int(supported)}
-                if supported
-                else {},
-                "nonmonotonic_classification": "resolved_opposing_on_shared_support"
-                if supported
-                else "insufficient_shared_persistent_support",
+                "low_to_nominal_secant_m_s_per_unit_scale": (
+                    -0.01 if supported else None
+                ),
+                "nominal_to_high_secant_m_s_per_unit_scale": (
+                    0.02 if supported else None
+                ),
+                "low_to_nominal_secant_range_m_s_per_unit_scale": (
+                    [-0.02, 0.0] if supported else None
+                ),
+                "nominal_to_high_secant_range_m_s_per_unit_scale": (
+                    [0.01, 0.03] if supported else None
+                ),
+                "cell_classification_counts": (
+                    {"resolved_opposing": int(supported)} if supported else {}
+                ),
+                "nonmonotonic_classification": (
+                    "resolved_opposing_on_shared_support"
+                    if supported
+                    else "insufficient_shared_persistent_support"
+                ),
             }
         )
     payload = {

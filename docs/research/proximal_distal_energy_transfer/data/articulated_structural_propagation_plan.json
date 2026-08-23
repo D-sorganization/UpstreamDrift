@@ -1061,7 +1061,7 @@
     "tests/research/test_articulated_structural_checkpoint.py": "162b978babc4d41c0dda0bd643946324d8f888a5a86c970bb2016d8547b9a47b",
     "tests/research/test_articulated_structural_corner_evidence.py": "3dce92ee6c7f582021a04a1a016a765e1b5aa209d74841208084d42f0bb300a6",
     "tests/research/test_articulated_structural_execution_identity.py": "7a8fea7246b38ef8e8c0d50f6040507fa302b68e52aa7a2e0376ea9399c6bd80",
-    "tests/research/test_articulated_structural_figure.py": "eec342b6711785db5a2e14a063a84a3421dacb77b850c86d28206c8793449367",
+    "tests/research/test_articulated_structural_figure.py": "f43b12103f187db0ca00a477fe30a0b432c3c343848389d24c3bfc5ce17f95da",
     "tests/research/test_articulated_structural_figure_data.py": "26482db147d4f84acf2074793cd4a01076cd7989acc92aa3c28e0482753540ab",
     "tests/research/test_articulated_structural_gate_status.py": "b13daca404fdb1643ebabb04d00561a36100349006623b889ba391cf283a9323",
     "tests/research/test_articulated_structural_publication.py": "0ceedaaa0a263ef17e49875f196b4bcd440bd1aaec1fd43a032e6d31a8ce9bb5",
