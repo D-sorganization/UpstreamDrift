@@ -31,6 +31,8 @@ DEFAULT_OUTPUT = DATA / "articulated_structural_propagation_plan.json"
 RUNTIME_AUTHORITY_PATHS = (
     "scripts/research/proximal_distal_energy/articulated_atlas_authority.py",
     "scripts/research/proximal_distal_energy/articulated_atlas_runtime_authority.py",
+    "scripts/research/proximal_distal_energy/articulated_structural_atlas_execution.py",
+    "scripts/research/proximal_distal_energy/articulated_structural_campaign.py",
     "scripts/research/proximal_distal_energy/articulated_structural_execution_identity.py",
     "scripts/research/proximal_distal_energy/articulated_structural_checkpoint.py",
     "scripts/research/proximal_distal_energy/articulated_structural_branch_contract.py",
@@ -40,6 +42,8 @@ SOURCE_PATHS = tuple(
         (
             "scripts/research/proximal_distal_energy/articulated_atlas_authority.py",
             "scripts/research/proximal_distal_energy/articulated_atlas_runtime_authority.py",
+            "scripts/research/proximal_distal_energy/articulated_structural_atlas_execution.py",
+            "scripts/research/proximal_distal_energy/articulated_structural_campaign.py",
             "scripts/research/proximal_distal_energy/articulated_scaled_authority.py",
             "scripts/research/proximal_distal_energy/articulated_structural_axis_evidence.py",
             "scripts/research/proximal_distal_energy/articulated_structural_common_support.py",
@@ -58,6 +62,8 @@ SOURCE_PATHS = tuple(
             "tests/research/test_articulated_atlas_authority.py",
             "tests/research/test_articulated_structural_axis_evidence.py",
             "tests/research/test_articulated_atlas_runtime_authority.py",
+            "tests/research/test_articulated_structural_atlas_execution.py",
+            "tests/research/test_articulated_structural_campaign.py",
             "tests/research/test_articulated_structural_common_support.py",
             "tests/research/test_articulated_structural_cell_evidence.py",
             "tests/research/test_articulated_structural_branch_contract.py",
@@ -160,6 +166,8 @@ def _corner_plan(
     )
     return {
         "corner_id": row["corner_id"],
+        "record_artifact": row["record_artifact"],
+        "array_artifact": row["array_artifact"],
         "status": "ready_with_retained_failure" if failures else "ready",
         "requested_state_count": len(states),
         "feasible_state_count": len(feasible),
@@ -288,6 +296,8 @@ def build_structural_propagation_plan(
             "model_sha256",
             "atlas_source_sha256",
             "scientific_configuration_sha256",
+            "planned_states",
+            "retained_failures",
             "state_slot",
             "state",
             "pathway",

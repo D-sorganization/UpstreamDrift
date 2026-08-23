@@ -11,6 +11,9 @@ from typing import Any, Literal
 from scripts.research.proximal_distal_energy.articulated_atlas_authority import (
     ArticulatedAtlasAuthority,
 )
+from scripts.research.proximal_distal_energy.articulated_atlas_runtime_authority import (
+    resolve_atlas_states,
+)
 from scripts.research.proximal_distal_energy.articulated_ground_atlas import (
     ArticulatedGroundAtlasConfig,
 )
@@ -66,7 +69,9 @@ class StructuralExecutionIdentity:
     scientific_configuration_sha256: str
     plan_design_sha256: str
     plan_contract_sha256: str
+    planned_states: tuple[tuple[int, int], ...]
     registered_states: tuple[tuple[int, int], ...]
+    retained_failures: tuple[tuple[int, int, str], ...]
     registered_branches: tuple[tuple[str, int], ...]
 
     def checkpoint_prefix(self) -> dict[str, Any]:
@@ -82,6 +87,15 @@ class StructuralExecutionIdentity:
             "scientific_configuration_sha256": (self.scientific_configuration_sha256),
             "plan_design_sha256": self.plan_design_sha256,
             "plan_contract_sha256": self.plan_contract_sha256,
+            "planned_states": [list(state) for state in self.planned_states],
+            "retained_failures": [
+                {
+                    "case_index": case_index,
+                    "phase_index": phase_index,
+                    "failure_class": failure_class,
+                }
+                for case_index, phase_index, failure_class in self.retained_failures
+            ],
         }
 
 
@@ -215,11 +229,12 @@ def resolve_structural_execution_identity(
             "scientific configuration digest does not reproduce the plan"
         )
 
-    registered_states = tuple(
-        (case, sample)
-        for case in typed_configuration.case_indices
-        for sample in typed_configuration.sample_indices
+    selection = resolve_atlas_states(
+        authority,
+        typed_configuration.case_indices,
+        typed_configuration.sample_indices,
     )
+    registered_states = selection.feasible_states
     if typed_pathway == "shaft":
         registered_branches = tuple(
             ("activation", slot) for slot in range(len(typed_configuration.activations))
@@ -246,7 +261,16 @@ def resolve_structural_execution_identity(
         scientific_configuration_sha256=configuration_digest,
         plan_design_sha256=plan["design_sha256"],
         plan_contract_sha256=plan["contract_sha256"],
+        planned_states=selection.planned_states,
         registered_states=registered_states,
+        retained_failures=tuple(
+            (
+                int(row["case_index"]),
+                int(row["phase_index"]),
+                str(row["failure_class"]),
+            )
+            for row in selection.retained_failures
+        ),
         registered_branches=registered_branches,
     )
 

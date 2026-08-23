@@ -69,6 +69,8 @@ def test_plan_binds_all_seven_authority_corners(plan) -> None:
     assert len(plan["contract_sha256"]) == 64
     assert plan["design"]["case_indices"] == [0, 8, 9, 17]
     assert plan["design"]["phase_indices"] == [0, 6, 12]
+    assert all(row["record_artifact"].endswith(".json") for row in plan["corners"])
+    assert all(row["array_artifact"].endswith(".npz") for row in plan["corners"])
     assert "worker_count" not in plan["design"]["shaft_configuration"]
     assert "worker_count" not in plan["design"]["ground_configuration"]
     assert plan["design"]["parallelism"].startswith("worker_count is operational")
@@ -76,6 +78,8 @@ def test_plan_binds_all_seven_authority_corners(plan) -> None:
         "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py",
         "scripts/research/proximal_distal_energy/articulated_ground_atlas.py",
         "scripts/research/proximal_distal_energy/articulated_atlas_authority.py",
+        "scripts/research/proximal_distal_energy/articulated_structural_atlas_execution.py",
+        "scripts/research/proximal_distal_energy/articulated_structural_campaign.py",
         "scripts/research/proximal_distal_energy/articulated_structural_axis_evidence.py",
         "scripts/research/proximal_distal_energy/articulated_structural_common_support.py",
         "scripts/research/proximal_distal_energy/articulated_structural_cell_evidence.py",
@@ -88,6 +92,8 @@ def test_plan_binds_all_seven_authority_corners(plan) -> None:
         "scripts/research/proximal_distal_energy/articulated_shaft_forward.py",
         "scripts/research/proximal_distal_energy/articulated_ground_forward.py",
         "tests/research/test_articulated_structural_axis_evidence.py",
+        "tests/research/test_articulated_structural_atlas_execution.py",
+        "tests/research/test_articulated_structural_campaign.py",
         "tests/research/test_articulated_structural_common_support.py",
         "tests/research/test_articulated_structural_cell_evidence.py",
         "tests/research/test_articulated_structural_branch_contract.py",
@@ -235,6 +241,8 @@ def test_plan_binds_restart_and_cell_level_evidence_contract(plan) -> None:
         "model_sha256",
         "atlas_source_sha256",
         "scientific_configuration_sha256",
+        "planned_states",
+        "retained_failures",
         "state_slot",
         "state",
         "pathway",

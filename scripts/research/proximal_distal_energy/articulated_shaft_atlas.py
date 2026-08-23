@@ -47,6 +47,7 @@ SOURCE_PATHS = (
     "docs/research/proximal_distal_energy_transfer/data/articulated_structural_authority_nominal.npz",
     "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json",
     "scripts/research/proximal_distal_energy/articulated_atlas_authority.py",
+    "scripts/research/proximal_distal_energy/articulated_structural_atlas_execution.py",
     "scripts/research/proximal_distal_energy/articulated_distributed_grip.py",
     "scripts/research/proximal_distal_energy/articulated_distributed_forward.py",
     "scripts/research/proximal_distal_energy/articulated_shaft.py",
@@ -335,13 +336,23 @@ def _record_pair(
         )
 
 
-def _run_state(
+def _run_activation(
     authority: ArticulatedAtlasAuthority,
     buffers: _Buffers,
     config: ArticulatedShaftAtlasConfig,
     state_slot: int,
     state: tuple[int, int],
+    activation_slot: int,
+    *,
+    buffer_activation_slot: int | None = None,
 ) -> ArticulatedShaftProperties:
+    if not 0 <= activation_slot < len(config.activations):
+        raise ValueError("activation_slot is outside the registered design")
+    output_slot = (
+        activation_slot if buffer_activation_slot is None else buffer_activation_slot
+    )
+    if not 0 <= output_slot < buffers.peak_force.shape[1]:
+        raise ValueError("buffer_activation_slot is outside the output buffer")
     case_index, sample = state
     resolved = authority.resolve_state(case_index, sample)
     model, metadata = resolved.model, resolved.model_metadata
@@ -351,33 +362,33 @@ def _run_state(
         total_stiffness_n_m=config.total_stiffness_n_m,
         total_damping_n_s_m=config.total_damping_n_s_m,
     )
-    for activation_slot, activation in enumerate(config.activations):
-        for velocity_slot, factor in enumerate((1.0, -1.0)):
-            for step_slot, step in enumerate(config.forward.time_steps_s):
-                base = {
-                    "q": resolved.q,
-                    "qd": resolved.qd,
-                    "grip_span_m": resolved.grip_span_m,
-                    "hand_contact_local_x_m": float(metadata["hand_contact_local_x_m"]),
-                    "time_step_s": step,
-                    "initial_club_displacement_m": config.initial_displacement_m,
-                    "initial_club_velocity_m_s": factor * config.initial_velocity_m_s,
-                    "grip": grip,
-                }
-                try:
-                    traces = _run_pair(model, base, activation, config.forward, config)
-                except Exception as error:
-                    raise RuntimeError(
-                        "shaft atlas cell failed: "
-                        f"state={state}, activation={activation}, "
-                        f"velocity_factor={factor}, step_s={step}"
-                    ) from error
-                _record_pair(
-                    buffers,
-                    (state_slot, activation_slot, velocity_slot, step_slot),
-                    traces,
-                    config,
-                )
+    activation = config.activations[activation_slot]
+    for velocity_slot, factor in enumerate((1.0, -1.0)):
+        for step_slot, step in enumerate(config.forward.time_steps_s):
+            base = {
+                "q": resolved.q,
+                "qd": resolved.qd,
+                "grip_span_m": resolved.grip_span_m,
+                "hand_contact_local_x_m": float(metadata["hand_contact_local_x_m"]),
+                "time_step_s": step,
+                "initial_club_displacement_m": config.initial_displacement_m,
+                "initial_club_velocity_m_s": factor * config.initial_velocity_m_s,
+                "grip": grip,
+            }
+            try:
+                traces = _run_pair(model, base, activation, config.forward, config)
+            except Exception as error:
+                raise RuntimeError(
+                    "shaft atlas cell failed: "
+                    f"state={state}, activation={activation}, "
+                    f"velocity_factor={factor}, step_s={step}"
+                ) from error
+            _record_pair(
+                buffers,
+                (state_slot, output_slot, velocity_slot, step_slot),
+                traces,
+                config,
+            )
     return build_articulated_shaft(
         model,
         ArticulatedShaftConfig(
@@ -386,6 +397,28 @@ def _run_state(
             torsional_stiffness_scale=config.torsional_stiffness_scale,
         ),
     )
+
+
+def _run_state(
+    authority: ArticulatedAtlasAuthority,
+    buffers: _Buffers,
+    config: ArticulatedShaftAtlasConfig,
+    state_slot: int,
+    state: tuple[int, int],
+) -> ArticulatedShaftProperties:
+    properties = None
+    for activation_slot in range(len(config.activations)):
+        properties = _run_activation(
+            authority,
+            buffers,
+            config,
+            state_slot,
+            state,
+            activation_slot,
+        )
+    if properties is None:
+        raise RuntimeError("registered shaft atlas contains no activations")
+    return properties
 
 
 def _run_state_job(
@@ -408,6 +441,37 @@ def _run_state_job(
     local = _buffers(shape, authority.solution_q.shape[-1])
     properties = _run_state(authority, local, config, 0, state)
     return state_slot, local, properties
+
+
+def _run_activation_job(
+    payload: tuple[
+        ArticulatedAtlasAuthority,
+        ArticulatedShaftAtlasConfig,
+        int,
+        tuple[int, int],
+        int,
+    ],
+) -> tuple[int, tuple[int, int], int, _Buffers, ArticulatedShaftProperties]:
+    authority, config, state_slot, state, activation_slot = payload
+    shape = (
+        1,
+        1,
+        2,
+        len(config.forward.time_steps_s),
+        2,
+        len(config.horizons_s),
+    )
+    local = _buffers(shape, authority.solution_q.shape[-1])
+    properties = _run_activation(
+        authority,
+        local,
+        config,
+        0,
+        state,
+        activation_slot,
+        buffer_activation_slot=0,
+    )
+    return state_slot, state, activation_slot, local, properties
 
 
 def _merge_state(target: _Buffers, state_slot: int, source: _Buffers) -> None:

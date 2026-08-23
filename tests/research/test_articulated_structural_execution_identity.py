@@ -73,6 +73,8 @@ def test_identity_resolves_every_registered_checkpoint_prefix_field(
         "joint_limit": 1.0,
     }
     assert set(prefix["model_sha256"]) == {"0", "8", "9", "17"}
+    assert len(prefix["planned_states"]) == 12
+    assert prefix["retained_failures"] == []
     for key in (
         "atlas_source_sha256",
         "scientific_configuration_sha256",
@@ -101,6 +103,28 @@ def test_worker_count_is_operational_not_scientific_identity() -> None:
     assert scientific_configuration_sha256(
         ArticulatedShaftAtlasConfig(worker_count=1)
     ) == scientific_configuration_sha256(ArticulatedShaftAtlasConfig(worker_count=7))
+
+
+def test_identity_checkpoints_only_feasible_states_and_retains_plan_denominator() -> (
+    None
+):
+    authority = _load("height_scale_low")
+
+    identity = resolve_structural_execution_identity(
+        authority,
+        corner_id="height_scale-low",
+        pathway="shaft",
+        configuration=ArticulatedShaftAtlasConfig(),
+    )
+
+    assert len(identity.registered_states) == 11
+    assert len(identity.planned_states) == 12
+    assert (0, 12) not in identity.registered_states
+    assert identity.retained_failures == ((0, 12, "ik_nonconvergence"),)
+    assert identity.registered_states == authority.feasible_states(
+        (0, 8, 9, 17),
+        (0, 6, 12),
+    )
 
 
 def test_identity_rejects_configuration_drift() -> None:
@@ -190,6 +214,8 @@ def test_checkpoint_metadata_is_exact_and_json_round_trip_safe() -> None:
         "model_sha256",
         "atlas_source_sha256",
         "scientific_configuration_sha256",
+        "planned_states",
+        "retained_failures",
         "plan_design_sha256",
         "plan_contract_sha256",
         "state_slot",

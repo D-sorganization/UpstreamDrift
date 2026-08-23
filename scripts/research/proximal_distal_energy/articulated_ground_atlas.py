@@ -50,6 +50,7 @@ SOURCE_PATHS = (
     "docs/research/proximal_distal_energy_transfer/data/articulated_structural_authority_nominal.json",
     "docs/research/proximal_distal_energy_transfer/data/articulated_structural_authority_nominal.npz",
     "scripts/research/proximal_distal_energy/articulated_atlas_authority.py",
+    "scripts/research/proximal_distal_energy/articulated_structural_atlas_execution.py",
     "scripts/research/proximal_distal_energy/articulated_distributed_grip.py",
     "scripts/research/proximal_distal_energy/articulated_ground.py",
     "scripts/research/proximal_distal_energy/articulated_ground_forward.py",

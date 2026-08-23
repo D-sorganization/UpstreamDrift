@@ -149,12 +149,23 @@ def structural_branch_contracts(
         != identity.scientific_configuration_sha256
     ):
         raise RuntimeError("configuration digest does not reproduce the identity")
-    expected_states = tuple(
+    planned_states = tuple(
         (case, sample)
         for case in configuration.case_indices
         for sample in configuration.sample_indices
     )
-    if identity.registered_states != expected_states:
+    failed_states = {
+        (case_index, phase_index)
+        for case_index, phase_index, _ in identity.retained_failures
+    }
+    expected_states = tuple(
+        state for state in planned_states if state not in failed_states
+    )
+    if (
+        identity.planned_states != planned_states
+        or identity.registered_states != expected_states
+        or len(expected_states) + len(failed_states) != len(planned_states)
+    ):
         raise RuntimeError("identity states do not reproduce the configuration")
     if identity.registered_branches != expected_branches:
         raise RuntimeError("identity branches do not reproduce the configuration")
