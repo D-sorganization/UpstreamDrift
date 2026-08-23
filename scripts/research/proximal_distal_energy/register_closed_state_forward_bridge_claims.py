@@ -55,7 +55,7 @@ def _claim(
         "statement": statement,
         "classification": classification,
         "published_status": status,
-        "audit_status": "deterministic_mapping_constitutive_and_cross_engine_controls_checked",
+        "audit_status": "deterministic_mapping_constitutive_and_inertia_bias_transport_controls_checked",
         "source_locations": [
             f"{candidate['source_path']}:{candidate['line_start']}"
             for candidate in candidates
@@ -73,7 +73,7 @@ def _claim(
             "position and velocity closure",
             "exact zero-preload contact",
             "action-reaction and damping passivity",
-            "independent-engine state-digest and trajectory comparison",
+            "paired inertia-and-bias operator state-digest and trajectory comparison",
         ],
         "falsifier": falsifier,
         "adjudication": "The deterministic artifacts were regenerated in native MuJoCo and Pinocchio and retain the short-horizon reduced-model boundary.",
@@ -87,7 +87,6 @@ def _build_claims(candidates: list[dict[str, Any]]) -> tuple[list[dict[str, Any]
     mapping = _find(candidates, "All 234 position mappings retain")
     forward = _find(candidates, "A spanning subset advances")
     boundary = _find(candidates, "This is an initialization and short-horizon")
-    next_gate = _find(candidates, "The bounded forward experiment now retains")
     claims = [
         _claim(
             "PD-CLAIM-268",
@@ -102,8 +101,8 @@ def _build_claims(candidates: list[dict[str, Any]]) -> tuple[list[dict[str, Any]
         _claim(
             "PD-CLAIM-269",
             [forward],
-            statement="MuJoCo and Pinocchio receive identical digested states and pass trajectory, contact-wrench, and normalized-energy gates for all 54 cases in the 4 ms initialization audit.",
-            classification="closed_state_short_horizon_cross_engine_forward_audit",
+            statement="MuJoCo and Pinocchio receive identical digested states and pass trajectory, contact-wrench, and normalized-energy transport gates for all 54 cases in the 4 ms initialization audit while sharing the projected contact law and state update.",
+            classification="closed_state_short_horizon_inertia_bias_transport_audit",
             status="supported_for_declared_reduced_short_horizon_subset",
             boundary="Finite-mass hand carriages replace articulated arms after initialization, and 4 ms is not a downswing or delivery simulation.",
             falsifier="An engine pair receives a different digest or fails any registered comparison gate.",
@@ -111,7 +110,7 @@ def _build_claims(candidates: list[dict[str, Any]]) -> tuple[list[dict[str, Any]
         ),
         _claim(
             "PD-CLAIM-270",
-            [boundary, next_gate],
+            [boundary],
             statement="The bridge removes an initialization gap but does not establish calibrated equipment, articulated anatomy, tissue loading, passive transfer, delivery benefit, slack benefit, or human strategy.",
             classification="closed_state_forward_bridge_inference_boundary",
             status="explicitly_bounded",
@@ -122,7 +121,7 @@ def _build_claims(candidates: list[dict[str, Any]]) -> tuple[list[dict[str, Any]
     ]
     figure = _find(
         candidates,
-        "![Closed Subject States Enter Independent Forward Solvers Without Preload]",
+        "![Closed Subject States Enter Paired Native Operators Without Preload]",
     )
     return claims, str(figure["candidate_id"])
 
@@ -161,7 +160,7 @@ def _reconcile_reviews(
             review["disposition"] = "material_claims_mapped"
             review["claim_ids"] = sorted(set(review["claim_ids"]) | {claim["claim_id"]})
             review["last_verified_on"] = DATE
-    reviews[figure_id].update(
+    reviews.setdefault(figure_id, {"candidate_id": figure_id}).update(
         disposition="editorial_or_navigation",
         claim_ids=[],
         rationale="The figure include points to registered evidence but asserts no standalone result.",
@@ -180,7 +179,7 @@ def _update_release(registry: dict[str, Any]) -> None:
     )
     entries["closed_state_forward_initialization"] = {
         "release_claim_key": "closed_state_forward_initialization",
-        "published_status": "supported_for_234_mappings_and_54_short_cross_engine_cases",
+        "published_status": "supported_for_234_mappings_and_54_short_inertia_bias_transport_cases",
         "audit_state": "reviewed_as_short_horizon_reduced_model_result",
     }
     registry["release_claim_inventory"] = list(entries.values())

@@ -279,11 +279,15 @@ In the exact same-state driver-killswitch branch, the complete grounded driver
 is removed at 0.180 s. The force-generated swing-normal couple remains negative
 for 37.5 ms in both engines and reaches approximately -0.409 N m. Coincident
 grips remove the couple exactly; reversed moment arms reverse its sign below
-$9.2\times10^{-16}$ N m residual. Cross-engine trajectory, wrench,
+$9.2\times10^{-16}$ N m residual. Inertia-and-bias transport trajectory, wrench,
 orientation, and energy gates pass, and the work--energy residual decreases
 monotonically as timestep is halved.
 
-This executes independent forward spatial contact at a reduced mechanism tier.
+This executes projected forward spatial contact at a reduced mechanism tier
+while transporting the same law and update through two native rigid-body
+operators. It does not execute independent native contact solvers or native
+integrators.
+
 It does not add anatomical arms, subject-specific inertias, muscles, measured
 grip compliance, a distributed shaft, or human observations. The evidence
 boundary therefore moves from “forward contact unexecuted” to “reduced forward
@@ -316,8 +320,8 @@ ladder:
 8. the negative force-generated couple persists after complete grounded-driver
    removal in the declared reduced spatial compliant-contact model; and
 9. that forward-contact result transports through native MuJoCo and Pinocchio
-   dynamics within declared trajectory, wrench, orientation, and energy
-   regions; and
+   inertia-and-bias operators within declared trajectory, wrench, orientation,
+   and energy regions while sharing its contact law and state update; and
 10. typed dead-zone and preload choices can reverse whether the same
     articulated state is classified as open or taut, while explicit boundary
     probes reproduce opening and reattachment in both native engines; and
@@ -380,12 +384,15 @@ therefore isolates implementation transport and executes genuine out-of-plane
 dynamics. Its agreement is not anatomical validation because the model is
 reduced and its hand loads are prescribed.
 
-**Reduced Spatial Forward Contact.** This tier adds independently solved
-two-hand compliance, state divergence, a same-state driver killswitch,
+**Reduced Spatial Forward Contact.** This tier adds projected two-hand
+compliance, state divergence, a same-state driver killswitch,
 long-axis rotation, swing-plane evolution, and reduced ground-pathway
-bookkeeping. It transports the declared mechanism through two native engines.
-Its hand carriages and declared contact law prevent anatomical, tissue, muscle,
-or human inference.
+bookkeeping. It transports the declared mechanism through two native
+inertia-and-bias operators while sharing the contact law and state update. A
+separate MuJoCo-native equality-and-integrator control establishes a nonzero
+formulation discrepancy rather than contact-solver parity. The tier's hand
+carriages and declared contact law prevent anatomical, tissue, muscle, or
+human inference.
 
 **Articulated Finite Ground and Free Moment.** This tier adds planar base
 translation and pitch to the closed-state articulated body, distributed grip,
@@ -403,7 +410,7 @@ changing the observable. Contact calibration, stabilization, actuation, and
 anatomical uncertainty must be registered before the preferred outcome is
 inspected.
 
-### Cross-Engine Gate Definition {#sec-ladder-cross-engine-gate}
+### Operator-Transport Gate Definition {#sec-ladder-cross-engine-gate}
 
 The executed common-state comparison did not begin with visually similar
 motion. It required identical model hashes and checked generalized action,

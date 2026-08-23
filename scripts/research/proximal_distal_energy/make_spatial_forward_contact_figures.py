@@ -122,7 +122,7 @@ def make_geometry_montage() -> tuple[Path, Path]:
         _equalize_3d(ax)
     axes[0].legend(frameon=False, fontsize=7, loc="upper left")
     fig.suptitle(
-        "Achieved Spatial Contact Geometry and Engine-Solved Force Vectors",
+        "Achieved Spatial Contact Geometry and Projected Compliant-Force Vectors",
         fontweight="bold",
     )
     fig.text(
@@ -138,7 +138,7 @@ def make_geometry_montage() -> tuple[Path, Path]:
 
 
 def make_cross_engine_figure() -> tuple[Path, Path]:
-    """Show forward trajectory, wrench, orientation, and numerical parity."""
+    """Show trajectory, wrench, orientation, and operator-transport agreement."""
 
     _style()
     record, data = _load()
@@ -213,7 +213,7 @@ def make_cross_engine_figure() -> tuple[Path, Path]:
         ax.set_xlabel("Time (s)")
         ax.grid(alpha=0.2)
     fig.suptitle(
-        "Independent MuJoCo and Pinocchio Forward Dynamics Satisfy Declared Gates",
+        "MuJoCo and Pinocchio Inertia-and-Bias Transport Satisfies Declared Gates",
         fontweight="bold",
     )
     return _save(fig, "fig_spatial_forward_cross_engine")

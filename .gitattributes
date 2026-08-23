@@ -6,6 +6,7 @@
 *.css text eol=lf
 *.md text eol=lf
 *.json text eol=lf
+tests/fixtures/launch_monitor/longitudinal_attested_v1.csv text eol=lf
 *.yml text eol=lf
 *.yaml text eol=lf
 *.cff text eol=lf

@@ -96,7 +96,10 @@ def _selected_candidates(candidates: list[dict[str, Any]]) -> dict[str, Any]:
         "law": _find(candidates, "The next gate replaces the ambiguous word"),
         "design": _find(candidates, "The atlas evaluates eighteen"),
         "figure": _find(candidates, "![Typed Unilateral Slack and Reattachment"),
-        "numerics": _find(candidates, "All numerical and cross-engine gates pass"),
+        "numerics": _find(
+            candidates,
+            "All numerical and inertia-and-bias transport gates pass",
+        ),
         "events": _find(candidates, "The natural-state branches produce no opening"),
         "boundary": _find(candidates, "The result therefore falsifies any claim"),
     }
@@ -105,14 +108,23 @@ def _selected_candidates(candidates: list[dict[str, Any]]) -> dict[str, Any]:
 def _repeated_candidates(candidates: list[dict[str, Any]]) -> dict[str, Any]:
     return {
         "law_power": _find(candidates, "The loading-only damper is a declared"),
-        "chapter_boundary": _find(candidates, "The bounded forward experiments now"),
-        "open_claims": _find(candidates, "- **Passive Contact Origin Is Inconclusive"),
+        "chapter_boundary": _find(
+            candidates, "This is a right-censored synthetic result"
+        ),
+        "open_claims": next(
+            candidate
+            for candidate in candidates
+            if str(candidate["source_path"]).endswith("_ch06cb_spatial_cross_tail.qmd")
+            and str(candidate["text"]).startswith(
+                "- **Passive Contact Origin Is Inconclusive"
+            )
+        ),
         "ladder_boundary": next(
             candidate
             for candidate in candidates
             if str(candidate["source_path"]).endswith("_ch07_model_ladder.qmd")
             and str(candidate["text"]).startswith(
-                "This executes independent forward spatial contact"
+                "This executes projected forward spatial contact"
             )
         ),
         "ladder_summary": next(
@@ -158,7 +170,7 @@ def _claims(
         _claim(
             "PD-CLAIM-284",
             [selected["numerics"], selected["events"]],
-            "The 1,944-trajectory atlas passes power, passivity, work-energy, refinement, native-engine trajectory/force, and active-set parity gates; natural states show no transition before five milliseconds while isolated probes reproduce opening and reattachment.",
+            "The 1,944-trajectory atlas passes power, passivity, work-energy, refinement, inertia-and-bias transport trajectory/force, and active-set gates under a shared contact law and update; natural states show no transition before five milliseconds while isolated probes reproduce opening and reattachment.",
             "typed_articulated_slack_result",
             "supported_at_declared_five_millisecond_synthetic_tier",
             "Natural event absence is right-censored; probe events qualify implementation and are not natural-state predictions.",

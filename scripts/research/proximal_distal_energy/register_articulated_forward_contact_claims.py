@@ -103,7 +103,7 @@ def main() -> None:
         _claim(
             "PD-CLAIM-280",
             [selected["design"], selected["methods"]],
-            "A preregistered cross-profile, phase, adverse-control, refinement, and native-engine matrix advances the articulated bilateral-attachment model for five milliseconds without active torque or direct club actuation.",
+            "A preregistered cross-profile, phase, adverse-control, refinement, and inertia-and-bias transport matrix advances the articulated bilateral-attachment model for five milliseconds without active torque or direct club actuation.",
             "bounded_articulated_forward_contact_design",
             "complete_for_declared_bounded_matrix",
             "The attachments, parameters, states, and retention threshold are synthetic engineering constructs.",
@@ -112,7 +112,7 @@ def main() -> None:
         _claim(
             "PD-CLAIM-281",
             [selected["result"]],
-            "The registered five-millisecond articulated trajectories pass attachment-retention, power, work-energy, refinement, and MuJoCo-Pinocchio parity gates.",
+            "The registered five-millisecond articulated trajectories pass attachment-retention, power, work-energy, refinement, and MuJoCo-Pinocchio inertia-and-bias transport gates while sharing their contact law and state update.",
             "bounded_articulated_forward_contact_result",
             "supported_at_declared_five_millisecond_synthetic_tier",
             "The result is right-censored at five milliseconds and is not calibrated to anatomy, equipment, ground reaction, or human data.",

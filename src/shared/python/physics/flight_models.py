@@ -12,7 +12,7 @@ from __future__ import annotations
 import math
 from abc import ABC, abstractmethod
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass, field
 from enum import Enum
 from typing import cast
 
@@ -29,6 +29,7 @@ from ..core.physics_constants import (
     MIN_SPEED_THRESHOLD_M_S,
     NUMERICAL_EPSILON,
 )
+from .ball_properties import PENNER_LIFT_EXPONENT, PENNER_LIFT_SCALE
 
 logger = get_logger(__name__)
 
@@ -38,7 +39,71 @@ GOLF_BALL_RADIUS = float(GOLF_BALL_RADIUS_M)
 STD_AIR_DENSITY = float(AIR_DENSITY_SEA_LEVEL_KG_M3)
 STD_GRAVITY = float(GRAVITY_M_S2)
 MIN_SPEED_THRESHOLD = float(MIN_SPEED_THRESHOLD_M_S)
+
+# Lift cap for the constant-spin multi-model framework in this module.
+# Deliberately LOWER than ``ball_properties.MAX_LIFT_COEFFICIENT`` (0.26):
+# these models hold spin constant over the whole flight (no spin decay), so
+# the cap was calibrated down (PR #7530) to keep the registered models inside
+# the TrackMan driver/7-iron carry bands. See issue #8978 for the full
+# determination of why the two live coefficient sets differ by design.
 MAX_GOLF_BALL_LIFT_COEFFICIENT = 0.155
+
+
+@dataclass(frozen=True)
+class AeroCoefficientSet:
+    """Named aerodynamic coefficient set with provenance (issue #8978).
+
+    Every trajectory produced by this module is attributable to one of these
+    sets via ``FlightResult.coefficients``, so results from the REST route or
+    the Shot Tracer can never be silently confused with the core simulator's
+    ``ball_properties.BallProperties`` authority.
+    """
+
+    name: str
+    cd0: float
+    cd1: float
+    cd2: float
+    cl0: float
+    lift_scale: float
+    lift_exponent: float
+    cl_max: float
+    provenance: str
+
+    def as_dict(self) -> dict[str, float]:
+        """Return only the numeric coefficients, keyed by symbol."""
+        data = asdict(self)
+        del data["name"]
+        del data["provenance"]
+        return data
+
+
+WATERLOO_PENNER_COEFFICIENTS = AeroCoefficientSet(
+    name="waterloo_penner_constant_spin",
+    cd0=0.21,  # Waterloo tunnel base drag; same value as BallProperties.cd0.
+    cd1=0.05,  # Constant-spin calibration; NOT BallProperties.cd1 (0.25).
+    cd2=0.02,  # Quadratic spin drag; same value as BallProperties.cd2.
+    cl0=0.00,
+    lift_scale=PENNER_LIFT_SCALE,  # Penner (2003) power-law fit (one source).
+    lift_exponent=PENNER_LIFT_EXPONENT,
+    cl_max=MAX_GOLF_BALL_LIFT_COEFFICIENT,
+    provenance=(
+        "Penner (2003); McPhee et al. (Waterloo). cd1 and cl_max are a "
+        "constant-spin TrackMan calibration (PRs #5845/#7530): distinct by "
+        "design from the core-simulator set in ball_properties.py, which "
+        "decays spin in flight. Lift shape is shared with ball_properties "
+        "(PENNER_LIFT_SCALE/PENNER_LIFT_EXPONENT). See issue #8978."
+    ),
+)
+
+_WATERLOO_PENNER_COEFFICIENT_KEYS = (
+    "cd0",
+    "cd1",
+    "cd2",
+    "cl0",
+    "lift_scale",
+    "lift_exponent",
+    "cl_max",
+)
 
 
 def _capped_lift_coefficient(value: float) -> float:
@@ -200,6 +265,8 @@ class FlightResult:
     flight_time: float = 0.0
     landing_angle: float = 0.0
     lateral_deviation: float = 0.0
+    #: Coefficient set the producing model integrated with (issue #8978).
+    coefficients: dict[str, float] = field(default_factory=dict)
 
     def to_position_array(self) -> np.ndarray:
         """Convert trajectory to Nx3 position array."""
@@ -236,12 +303,21 @@ class BallFlightModel(ABC):
         """Simulate ball flight and return the trajectory result."""
         ...
 
+    @property
+    def coefficients(self) -> dict[str, float]:
+        """Return the named coefficient values this model integrates with.
+
+        Attached to every :class:`FlightResult` so trajectories are
+        attributable to their coefficient set (issue #8978).
+        """
+        return {}
+
     def _compute_metrics(self, trajectory: list[TrajectoryPoint]) -> FlightResult:
         """Standardized metrics computation (Consolidated for DRY)."""
         if trajectory is None:
             raise ValueError("trajectory must be provided")
         if not trajectory:
-            return FlightResult([], self.name)
+            return FlightResult([], self.name, coefficients=dict(self.coefficients))
 
         pos = np.array([p.position for p in trajectory])
         carry = math.hypot(
@@ -263,7 +339,16 @@ class BallFlightModel(ABC):
                 else 90.0
             )
 
-        return FlightResult(trajectory, self.name, carry, max_h, time, angle, lateral)
+        return FlightResult(
+            trajectory,
+            self.name,
+            carry,
+            max_h,
+            time,
+            angle,
+            lateral,
+            coefficients=dict(self.coefficients),
+        )
 
     def _run_ode_simulation(
         self,
@@ -297,6 +382,8 @@ class BallFlightModel(ABC):
         )
 
         t_eval = np.arange(0, sol.t[-1], dt)
+        # dense_output=True guarantees a dense interpolant; narrow for mypy.
+        assert sol.sol is not None
         points = [
             TrajectoryPoint(float(t), sol.sol(t)[:3], sol.sol(t)[3:]) for t in t_eval
         ]
@@ -313,15 +400,20 @@ class WaterlooPennerModel(BallFlightModel):
 
     def __init__(
         self,
-        cd0: float = 0.21,
-        cd1: float = 0.05,
-        cd2: float = 0.02,
-        cl0: float = 0.00,
-        cl1: float = 0.70,
-        cl2: float = 0.645,
-        cl_max: float = MAX_GOLF_BALL_LIFT_COEFFICIENT,
+        cd0: float = WATERLOO_PENNER_COEFFICIENTS.cd0,
+        cd1: float = WATERLOO_PENNER_COEFFICIENTS.cd1,
+        cd2: float = WATERLOO_PENNER_COEFFICIENTS.cd2,
+        cl0: float = WATERLOO_PENNER_COEFFICIENTS.cl0,
+        cl1: float = WATERLOO_PENNER_COEFFICIENTS.lift_scale,
+        cl2: float = WATERLOO_PENNER_COEFFICIENTS.lift_exponent,
+        cl_max: float = WATERLOO_PENNER_COEFFICIENTS.cl_max,
     ) -> None:
         self.params = (cd0, cd1, cd2, cl0, cl1, cl2, cl_max)
+
+    @property
+    def coefficients(self) -> dict[str, float]:
+        """Return the declared coefficient set (issue #8978)."""
+        return dict(zip(_WATERLOO_PENNER_COEFFICIENT_KEYS, self.params, strict=True))
 
     @property
     def name(self) -> str:
@@ -402,6 +494,11 @@ class MacDonaldHanzelyModel(BallFlightModel):
         self, cd: float = 0.225, cl: float = 0.20, decay: float = 0.05
     ) -> None:
         self.cd, self.cl, self.decay = cd, cl, decay
+
+    @property
+    def coefficients(self) -> dict[str, float]:
+        """Return the declared coefficient set (issue #8978)."""
+        return {"cd": self.cd, "cl": self.cl, "spin_decay": self.decay}
 
     @property
     def name(self) -> str:
@@ -500,6 +597,12 @@ class ConstantCoefficientModel(BallFlightModel):
 
     def __init__(self, spec: ConstantCoefficientSpec) -> None:
         self._spec = spec
+
+    @property
+    def coefficients(self) -> dict[str, float]:
+        """Return the declared coefficient set (issue #8978)."""
+        spec = self._spec
+        return {"cd": spec.cd, "cl": spec.cl, "spin_decay": spec.spin_decay}
 
     @property
     def name(self) -> str:

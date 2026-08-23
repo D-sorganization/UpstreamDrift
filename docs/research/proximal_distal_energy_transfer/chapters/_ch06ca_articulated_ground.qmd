@@ -67,7 +67,8 @@ pathways produce 384 trajectories. Rigid-shaft and horizontal-restraint-
 removed control families add 192. Every cell records grip force and couple,
 active fibers, ground force, intrinsic and transported moments, support and
 shaft strain, damping work, base motion, club speed, virtual-power closure,
-work--energy closure, declared-domain status, and cross-engine parity.
+work--energy closure, declared-domain status, and inertia-and-bias transport
+parity.
 
 The constitutive values are transparent synthetic references: horizontal and
 vertical stiffnesses are 15 and 30 kN/m; damping values are 400 and 800 N s/m;

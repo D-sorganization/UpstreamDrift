@@ -85,7 +85,8 @@ Each material claim receives a stable `PD-CLAIM-*` identifier and records:
 | `statement`                       | One atomic proposition, narrowed to its declared domain                                                                    |
 | `classification`                  | Definition, identity, numerical verification, model result, empirical synthesis, hypothesis, limitation, or interpretation |
 | `published_status`                | The status currently exposed by the release                                                                                |
-| `audit_status`                    | Current independent-review state; never inferred from the published status                                                 |
+| `audit_status`                    | Current review state and provenance; never inferred from the published status                                              |
+| `adjudication_outcome`            | Required normalized finding outcome: `supported`, `contradicted`, `inconclusive`, or `untested`                            |
 | `candidate_ids`                   | Source candidates covered by this adjudication                                                                             |
 | `source_locations`                | Human-readable canonical source locators                                                                                   |
 | `evidence_artifacts`              | Exact data, code, tests, figures, or original sources used                                                                 |
@@ -96,6 +97,19 @@ Each material claim receives a stable `PD-CLAIM-*` identifier and records:
 | `falsifier`                       | A result that changes the status to contradicted or inconclusive                                                           |
 | `adjudication`                    | Finding-by-finding reasoning and remaining gaps                                                                            |
 | `reviewer` and `last_verified_on` | Review provenance                                                                                                          |
+
+The normalized outcome applies to the claim's declared estimand, not merely to
+the grammar of the sentence. A sentence reporting that an effect remains
+unidentified is therefore `inconclusive`; a prospective human mechanism with no
+qualifying data is `untested`. The detailed `published_status`, `audit_status`,
+scope, and adjudication reasoning remain authoritative context. Validators must
+never infer or promote the normalized outcome from those strings.
+
+Evidence locators are mechanically typed during validation as bibliography
+keys, local anchors, generated artifacts, local files, DOI records, or external
+URLs. Bibliography keys and local anchors must resolve inside their named file;
+removing a key or Quarto label therefore fails closed instead of appearing as a
+missing filesystem path.
 
 One paragraph may contain several material claims and therefore map to several
 claim records. One claim may also recur in the abstract, results, discussion,
@@ -119,15 +133,43 @@ The audit keeps these classes separate:
 6. **Hypothesis or interpretation:** retained only with a measurable prediction,
    alternative explanation, and prospective falsifier.
 
+## Reviewer-Facing Qualification Axes
+
+The generated adjudication summary reports four axes independently of the
+normalized finding outcome:
+
+- `evidence_tiers` distinguishes project derivations and executable artifacts
+  from externally reviewed empirical, methodological, modeling, and synthesis
+  works. A claim can occupy more than one tier.
+- `source_independence` is an exact one-category partition computed from the
+  canonical-work review: project only, one independent supporting work,
+  multiple independent supporting works, author-overlap support, unclear
+  independence, or external context only. Mirrors of one work remain one
+  source.
+- `model_tiers` identifies the declared analytical, planar, two-hand,
+  compliant-shaft, finite-base, spatial, articulated, uncertainty/control,
+  human/external, or cross-tier surfaces. These labels are nonexclusive.
+- `unresolved_replication_classes` preserves open reimplementation,
+  reanalysis, external-validation, systematic-review, prospective-experiment,
+  and governed-human-data boundaries. These labels are also nonexclusive.
+
+The generated claim-family table flags families supported only by
+project-authored material or concentrated in one independent work. None of
+these axes promotes a claim's outcome. Full row-level records are committed as
+`data/claim_adjudication_summary.json` and
+`data/claim_adjudication_summary.csv`; the compact generated Quarto table is
+included in the paper.
+
 ## Completion Rule
 
 Run
 `python -m scripts.research.proximal_distal_energy.claim_audit validate`.
-Validation fails on stale paper bytes, duplicate identifiers, missing required
-adjudication fields, missing bibliography keys, non-reciprocal claim mappings,
-unresolvable or out-of-range `path:line` source locators, drift from the public
-release-claim inventory, or a `complete` status while any candidate remains
-unadjudicated or still requires splitting.
+Validation fails on stale paper bytes, duplicate identifiers, missing or invalid
+normalized outcomes, missing required adjudication fields, missing bibliography
+keys, broken local evidence anchors, non-reciprocal claim mappings, unresolvable
+or out-of-range `path:line` source locators, drift from the public release-claim
+inventory, or a `complete` status while any candidate remains unadjudicated or
+still requires splitting.
 
 Run
 `python -m scripts.research.proximal_distal_energy.claim_evidence_integrity validate`

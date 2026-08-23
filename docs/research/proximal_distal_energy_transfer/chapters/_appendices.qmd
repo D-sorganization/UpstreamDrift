@@ -56,6 +56,9 @@ python3 -m scripts.research.proximal_distal_energy.run_forward_two_arm_study
 python3 -m scripts.research.proximal_distal_energy.run_moving_base_flexible_study
 python3 -m scripts.research.proximal_distal_energy.run_shaft_beam_reference
 python3 -m scripts.research.proximal_distal_energy.run_spatial_full_body_study
+python3 -m scripts.research.proximal_distal_energy.run_articulated_manufactured_solution
+python3 -m scripts.research.proximal_distal_energy.run_articulated_native_constraint_discrepancy
+python3 -m scripts.research.proximal_distal_energy.make_articulated_native_constraint_discrepancy_figure
 python3 -m scripts.research.proximal_distal_energy.run_articulated_ground_diagnostic
 python3 -m scripts.research.proximal_distal_energy.run_articulated_ground_atlas
 python3 -m scripts.research.proximal_distal_energy.run_articulated_ground_posthoc_sensitivity
@@ -181,6 +184,15 @@ Recorded outputs:
   closure; not equipment calibration.
 - `data/spatial_full_body_study.{json,npz}` — common-model hashes, prescribed
   wrench interventions, two-formulation inverse dynamics, and spatial states.
+- `data/articulated_manufactured_solution.json` — independent analytical,
+  MuJoCo, and Pinocchio inverse-dynamics residuals; three-level Richardson
+  estimates; measured free-subtree conservation drift; and the corruption
+  killswitch contract.
+- `data/articulated_native_constraint_discrepancy.{json,npz}` — one
+  same-state MuJoCo-native bilateral `connect`/`mj_step` branch and one
+  projected Kelvin--Voigt/shared-mass-and-bias branch, including the
+  equality-disabled killswitch, six-row native-constraint gate, refinement,
+  attachment separation, generalized force, and nonzero state discrepancy.
 - `data/uncertainty_control_study.{json,npz}` — declared design, actuator
   contract, uncertainty intervals, PRCC screen, identifiability audit,
   training/held-out program comparison, closure, and rollout arrays.

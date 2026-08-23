@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 from dataclasses import asdict, replace
 from hashlib import sha256
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 import numpy as np
 import pandas as pd
@@ -33,11 +33,48 @@ PlayerIdentityTrust = Literal[
     "verified_external",
     "untrusted_inferred",
 ]
+SessionIdentityTrust = Literal[
+    "not_provided",
+    "explicit_user_attested",
+    "source_reported",
+    "verified_external",
+    "untrusted_inferred",
+]
+OrderEvidenceTrust = Literal[
+    "not_provided",
+    "explicit_user_attested",
+    "source_reported",
+    "verified_external",
+    "untrusted_inferred",
+]
+OrderKind = Literal["timestamp", "ordinal", "source_sequence"]
 AvailabilityState = Literal["available", "partial", "unavailable"]
 UnlinkedReason = Literal[
     "no_source_reference_declared",
     "session_not_linked_to_source_reference",
 ]
+
+_FORBIDDEN_PLAYER_IDENTIFIERS = frozenset(
+    {
+        "session",
+        "session_id",
+        "club",
+        "club_id",
+        "source",
+        "source_id",
+        "file",
+        "filename",
+        "file_name",
+        "row_order",
+        "source_row",
+    }
+)
+
+
+def _normalized_identifier(value: str) -> str:
+    normalized = value.strip().lower()
+    normalized = normalized.replace("-", "_")
+    return normalized.replace(" ", "_")
 
 
 class _ContractModel(BaseModel):
@@ -60,11 +97,30 @@ class PlayerIdentityV2(_ContractModel):
     """Declared identity evidence; identity is never inferred from layout."""
 
     trust_level: PlayerIdentityTrust = "not_provided"
-    identifier_column: str | None = None
+    identifier_column: str | None = Field(
+        default=None,
+        description=(
+            "Explicit player identifier column; session, club, source, file, and "
+            "row-position fields are forbidden."
+        ),
+        json_schema_extra={
+            "not": {"enum": cast(list[Any], sorted(_FORBIDDEN_PLAYER_IDENTIFIERS))}
+        },
+    )
     evidence: str | None = None
 
     @model_validator(mode="after")
     def require_explicit_evidence(self) -> PlayerIdentityV2:
+        normalized_column = (
+            _normalized_identifier(self.identifier_column)
+            if self.identifier_column is not None
+            else None
+        )
+        if normalized_column in _FORBIDDEN_PLAYER_IDENTIFIERS:
+            raise ValueError(
+                f"{self.identifier_column!r} cannot be used as player identity; "
+                "declare session and order evidence separately"
+            )
         if self.trust_level in {
             "explicit_user_attested",
             "pseudonymous_stable",
@@ -73,6 +129,59 @@ class PlayerIdentityV2(_ContractModel):
             raise ValueError(
                 "trusted player identity requires identifier_column and evidence"
             )
+        return self
+
+
+class SessionIdentityV2(_ContractModel):
+    """Evidence for repeated-observation session boundaries, never a player ID."""
+
+    trust_level: SessionIdentityTrust = "not_provided"
+    identifier_column: str | None = None
+    evidence: str | None = None
+
+    @model_validator(mode="after")
+    def require_complete_evidence(self) -> SessionIdentityV2:
+        if self.trust_level != "not_provided" and (
+            not self.identifier_column or not self.evidence
+        ):
+            raise ValueError(
+                "declared session identity requires identifier_column and evidence"
+            )
+        if self.trust_level == "not_provided" and (
+            self.identifier_column is not None or self.evidence is not None
+        ):
+            raise ValueError(
+                "session identity fields require a non-default trust_level"
+            )
+        return self
+
+
+class OrderEvidenceV2(_ContractModel):
+    """Evidence defining chronological or ordinal order for longitudinal work."""
+
+    trust_level: OrderEvidenceTrust = "not_provided"
+    order_column: str | None = None
+    order_kind: OrderKind | None = None
+    unit: str | None = None
+    evidence: str | None = None
+
+    @model_validator(mode="after")
+    def require_complete_evidence(self) -> OrderEvidenceV2:
+        evidence_fields = (
+            self.order_column,
+            self.order_kind,
+            self.unit,
+            self.evidence,
+        )
+        if self.trust_level != "not_provided" and not all(evidence_fields):
+            raise ValueError(
+                "declared order evidence requires order_column, order_kind, unit, "
+                "and evidence"
+            )
+        if self.trust_level == "not_provided" and any(
+            field is not None for field in evidence_fields
+        ):
+            raise ValueError("order evidence fields require a non-default trust_level")
         return self
 
 
@@ -104,6 +213,8 @@ class AnalysisContextV2(_ContractModel):
 
     authority: DatasetAuthorityV2 | None = None
     player_identity: PlayerIdentityV2 = Field(default_factory=PlayerIdentityV2)
+    session_identity: SessionIdentityV2 = Field(default_factory=SessionIdentityV2)
+    order_evidence: OrderEvidenceV2 = Field(default_factory=OrderEvidenceV2)
     transformations: tuple[TransformRecordV2, ...] = ()
     sources: tuple[SourceFileReferenceV2, ...] = ()
     source_units: dict[str, str] = Field(default_factory=dict)
@@ -227,6 +338,8 @@ class LaunchMonitorAnalysisResultV2(_ContractModel):
     availability: tuple[AvailabilityV2, ...]
     uncertainty: UncertaintyV2
     player_identity: PlayerIdentityV2
+    session_identity: SessionIdentityV2 = Field(default_factory=SessionIdentityV2)
+    order_evidence: OrderEvidenceV2 = Field(default_factory=OrderEvidenceV2)
     vendor_provenance: tuple[VendorProvenanceV2, ...]
     model_provenance: tuple[ModelProvenanceV2, ...] = ()
     claims: ClaimsV2 = Field(default_factory=ClaimsV2)
@@ -310,6 +423,29 @@ def _backing_records(
             )
         )
     return tuple(records)
+
+
+def build_analysis_lineage_v2(
+    frame: pd.DataFrame,
+    context: AnalysisContextV2,
+    *,
+    dataset_fingerprint_sha256: str | None = None,
+) -> AnalysisLineageV2:
+    """Build complete row-level backing lineage without serializing shot values."""
+    backing = _backing_records(frame, context)
+    fingerprint = (
+        dataset_fingerprint_sha256
+        or sha256(
+            "".join(record.record_sha256 for record in backing).encode("ascii")
+        ).hexdigest()
+    )
+    return AnalysisLineageV2(
+        dataset_fingerprint_sha256=fingerprint,
+        authority=context.authority,
+        transformations=context.transformations,
+        sources=context.sources,
+        backing_records=backing,
+    )
 
 
 def _missingness(
@@ -455,6 +591,52 @@ def _metric_units(metric: str, context: AnalysisContextV2) -> MetricUnitsV2:
     )
 
 
+def analysis_lineage_v2(
+    frame: pd.DataFrame,
+    context: AnalysisContextV2,
+    selected_columns: tuple[str, ...],
+) -> AnalysisLineageV2:
+    """Build reusable v2 lineage from selected columns and exact input rows.
+
+    The dataset fingerprint binds the ordered backing-record hashes and selected
+    columns. Every backing row either joins a declared source or carries the
+    existing explicit unlinked reason.
+    """
+
+    if not selected_columns or any(not column for column in selected_columns):
+        raise ValueError("selected_columns must contain non-empty names")
+    missing = sorted(set(selected_columns).difference(frame.columns))
+    if missing:
+        raise ValueError(f"Columns not present in dataset: {', '.join(missing)}")
+    records = _backing_records(frame, context)
+    fingerprint_payload = {
+        "selected_columns": selected_columns,
+        "record_sha256": [record.record_sha256 for record in records],
+    }
+    serialized = json.dumps(fingerprint_payload, separators=(",", ":"))
+    return AnalysisLineageV2(
+        dataset_fingerprint_sha256=sha256(serialized.encode("utf-8")).hexdigest(),
+        authority=context.authority,
+        transformations=context.transformations,
+        sources=context.sources,
+        backing_records=records,
+    )
+
+
+def metric_units_v2(metric: str, context: AnalysisContextV2) -> MetricUnitsV2:
+    """Resolve canonical or explicitly source-declared units for one metric."""
+
+    return _metric_units(metric, context)
+
+
+def vendor_provenance_v2(
+    frame: pd.DataFrame, selected: tuple[str, ...]
+) -> tuple[VendorProvenanceV2, ...]:
+    """Collect bounded vendor/model provenance for reusable v2 analyses."""
+
+    return _vendor_provenance(frame, selected)
+
+
 def _uncertainty(request: FlexibleAnalysisRequest) -> UncertaintyV2:
     """Describe the uncertainty methods requested by the analysis contract."""
 
@@ -548,17 +730,17 @@ def analyze_variables_v2(
         status=_overall_status(availability),
         analysis=analysis_payload,
         units=units,
-        lineage=AnalysisLineageV2(
+        lineage=build_analysis_lineage_v2(
+            frame,
+            resolved_context,
             dataset_fingerprint_sha256=result.dataset.fingerprint_sha256,
-            authority=resolved_context.authority,
-            transformations=resolved_context.transformations,
-            sources=resolved_context.sources,
-            backing_records=_backing_records(frame, resolved_context),
         ),
         missingness=missingness,
         availability=availability,
         uncertainty=_uncertainty(request),
         player_identity=resolved_context.player_identity,
+        session_identity=resolved_context.session_identity,
+        order_evidence=resolved_context.order_evidence,
         vendor_provenance=_vendor_provenance(frame, selected),
         model_provenance=model_provenance,
         warnings=result.warnings,
@@ -592,12 +774,18 @@ __all__ = [
     "LaunchMonitorAnalysisResultV2",
     "MetricUnitsV2",
     "ModelProvenanceV2",
+    "OrderEvidenceV2",
     "PlayerIdentityV2",
+    "SessionIdentityV2",
     "SourceFileReferenceV2",
     "TransformRecordV2",
     "UncertaintyV2",
     "VendorProvenanceV2",
     "adapt_v2_to_v1",
+    "analysis_lineage_v2",
     "analyze_variables_v2",
+    "build_analysis_lineage_v2",
     "contract_v2_json_schema",
+    "metric_units_v2",
+    "vendor_provenance_v2",
 ]

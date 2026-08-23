@@ -1,218 +1,144 @@
 # Agent Handoff — UpstreamDrift
 
-Last updated: 2026-08-22
+Last updated: 2026-08-23
 
-## Publication Quality Status (#8451 Closed; Archival Gates Open)
+This file records current operational state, not history. Git and GitHub retain
+history. Epic #8557 is the single proximal-to-distal completion authority.
 
-PR #8793 merged the PDF quality contract at `6e28baef54a0`: UpstreamDrift is authoritative, AffineDrift is its pinned publisher, and Tools/Sidekick only link. The web-linearized 231-page candidate passes full-page inspection; missing tags, 110 Type 3 resources, and two unembedded resources block archival release. Phase 0 landed in UpstreamDrift #8791, AffineDrift #3884, and Tools #4586. AffineDrift #3880/#3887/#3888 provide the immutable monograph projection, release pin, and verifier. #8789 owns Docker/quarantine/baseline; #8556, equipment calibration, and archival/PID release remain open. Details: `docs/research/proximal_distal_energy_transfer/PUBLICATION_QUALITY.md`.
+## Repository Authority
 
-## Read This First — How Merging Works Now
+- UpstreamDrift owns scientific sources, models, evidence registers, and the
+  release bundle. AffineDrift is a generated, immutable, revision-pinned public
+  projection. Tools owns reusable consumers; do not copy its solver or UI
+  implementations into this repository or `vendor/ud-tools`.
+- UpstreamDrift remote `main` is
+  `9e220712025564caf0ac5201a0ddcf69dd98299e`, the protected squash merge of
+  PR #9018. Issue #8724 is closed with exact-head CI, optional-stack CI, and
+  remote-main ancestry verified.
+- The current computational publication is 239 pages with SHA-256
+  `be85b7b62bba060a26ce3fea8355aa8b01dcf8c1b1ccf09304450898a4e5e78b`,
+  194 URI links, and 247 outline entries. All pages render and were inspected.
+  Archival qualification remains false because the PDF is untagged and retains
+  Type 3 and unembedded font resources.
 
-Three workflows used to publish `quality-gate`; the first could satisfy
-protection while the real aggregate failed. #8747 fixed this; #8754 is closed.
+## Active Articulated Uncertainty Campaign (#8752)
 
-- The **only** required check is `quality-gate`, published by the aggregate in
-  `ci-standard.yml`; LoD/docs publish `lod-quality-gate`/`docs-quality-gate`.
-  **Never rename another job to `quality-gate`** — that recreates the collision.
-- If your run sits in `action_required`, wait: `approve-same-repo-runs.yml`
-  approves same-repository runs every five minutes (fork PRs keep the manual
-  gate). Do not disable it — branch updates come from a bot GitHub treats as a
-  first-time contributor forever.
-- `repo-structure-gates` is **sequential/fail-fast**. Run the battery below;
-  `check_architecture_budget.py` limits changed production functions to 100 lines.
+- ControlTower worktree:
+  `C:\Users\diete\Repositories\UpstreamDrift-worktrees\goal-8752-uncertainty`,
+  running the exact scientific launch revision
+  `13146cdcece879e7156e06e2dca6626c1a54e045`.
+- Container `upstreamdrift-8752-campaign` uses eight workers within a reversible
+  four-core CPU cap. Its workspace and campaign records are bind-mounted from
+  the ControlTower C: drive, and restart policy is `on-failure`. Do not start a
+  duplicate or modify its frozen source.
+- At 13:34 PDT, 18 of 19 registered corners were terminal and retained,
+  including declared failed-retained outcomes. The final
+  `ground_free_moment_damping_scale-high` corner had atomically completed
+  branch 38/72 of its ground atlas. `status.json` remained `running`.
+- Status and logs:
+  `C:\Users\diete\Campaigns\UpstreamDrift-8752`. Remote inspection uses the
+  pinned Tailscale SSH route into `ControlTower-SSD`; a separate Codex session
+  on ControlTower is unnecessary. Loss of this task or Tailscale connectivity
+  does not stop the container.
+- Runtime: Ubuntu 22.04, Python 3.10.12, NumPy 2.2.4, SciPy 1.15.2, MuJoCo
+  3.8.0, and Pinocchio 3.8.0. The cross-CPU canary preserves registered
+  discrete decisions and gates at `rtol=2e-8`, `atol=1e-9`.
+- At terminal status, audit every expected branch, retained failure, and
+  digest. Then integrate `fix/8752-atomic-campaign-checkpoint`. The constitutive
+  subcampaign precedes execution of #8800; #8800 still blocks final closure of
+  #8752 and #8668. Regenerate claims, figures, paper, and release only after
+  both authorities pass.
 
-### Two Debt Ledgers — Remove-Only Ratchets
+## Headline Structural Propagation (#8800)
 
-`unit_gate_quarantine.json` (520 node IDs, #8766) applies through
-`_apply_unit_gate_quarantine` only when CI sets `UNIT_GATE_QUARANTINE=1`.
-`dry_duplication_quarantine.json` (#8763) tracks duplicate fingerprints.
-**Entries may only be removed, never added**.
-PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
+- Worktree `UpstreamDrift-worktrees\8800-headline-structural-propagation`
+  wires height, body-mass, and joint-limit authorities into both headline
+  atlases. Commits `d972db8ea` and `4bccef56c` contain the governed authority,
+  atomic branch executors, campaign CLI, preflight, and focused tests.
+- The seven-corner plan retains 84 planned states as 83 feasible states plus
+  the declared low-height infeasible state. Shaft and ground checkpoints cover
+  48 and 72 atomic branch packs respectively and restore without recomputation.
+- This is execution infrastructure, not a scientific result. No #8800 campaign
+  has run, no headline estimate has propagated, and no paper or release claim
+  may be promoted until all 14 atlas paths and common-support controls pass.
 
-### Traps That Cost Real Time
+## Normalized Claim Adjudication (#8724)
 
-- **Committed evidence hash-pins its sources.** Fourteen `tests/research/` files
-  are frozen by `source_sha256` maps; edit only with `qualify_open_release write`.
-- **Phantom Guard Scope Rules:** Conventional commit prefix for PR titles
-  touching only `scripts/research/`, `docs/research/`, and `tests/research/`
-  must use `test:`, `docs:`, or `chore:` rather than `feat:` (which requires
-  diffs touching `src/`, `rust_core/`, or `api/`).
+- Protected PR #9018 is merged on remote `main` as
+  `9e220712025564caf0ac5201a0ddcf69dd98299e`; #8724 is closed.
+- The authority contains 1,100 reviewed narrative candidates and 303 material
+  claims: 283 supported only within declared estimands and boundaries, five
+  inconclusive, 15 untested, and zero contradicted. Supported claims may report
+  null, mixed, or adverse findings; the count does not imply theory survival.
+- The schema and snapshot-locked migration require explicit normalized
+  outcomes, typed locators, reciprocal mappings, falsifiers, source digests,
+  reasons, reviewer identity, dates, and supported-scope contradiction checks.
+  Unfamiliar claims fail closed.
+- Reviewer JSON, CSV, and paper tables separately report normalized outcome,
+  evidence tier, source independence, model tier, unresolved replication, and
+  claim-family source concentration. Model evidence is never promoted to human
+  validation.
+- Deterministic release evidence covers 2,130 evidence references, 319 local
+  artifacts, 78 external URLs, and a 592-artifact release bundle. The merged
+  head passed 63 focused tests plus standard, optional-stack, publication,
+  security, title-case, file-size, architecture, Ruff, MyPy, and Bandit gates.
 
-## Program Authority & Physics Epics State
+## Measured-Trajectory and Human-Evidence Boundaries
 
-- Epic #8557 governs the proximal-to-distal program; #8595 retains the agenda.
-- Tools remote `main` is `428f832f9`; #4142 remains open because its full
-  ensemble, quiet-zone, sensitivity, UI-parity, and UpstreamDrift-integration
-  acceptance criteria are not yet complete. PR #4631 head `5c9ff05fa` has 18
-  successful checks, one expected skip, and a fresh 20-view zero-drift hosted
-  artifact. Its remaining
-  ground/tee job passed 68/70 but exceeded two protected timing budgets while
-  sharing this workstation with the 20-worker campaign; do not weaken the
-  budgets or rerun under unchanged contention.
-- Tools #4430 is **CLOSED**. PR #4618 added the qualified rotating-base reviewer
-  surfaces and PR #4619 fixed the post-merge Rust gate; #4619 merge commit
-  `1664d806df8a` remains an ancestor of Tools remote `main`. UpstreamDrift PR
-  #8954 pinned that revision at merge commit `81cc731d0dd1`, which remains an
-  ancestor of UpstreamDrift remote `main`.
-- AffineDrift remote `main` is `1996deab6`; immutable projection PR #3888
-  (`75ffcdce0860`) and title-governance PR #3798 (`e94237389270`) remain
-  ancestors.
-- #8557 is the single canonical epic with a dependency-ordered issue/evidence ledger. Legacy master epic #8426 was closed as superseded—not scientifically complete—on 2026-08-20; #8443 remains open. #8458, #8497,
-  #8505, #8493, and #8499 are closed groundwork. README and conclusions now
-  distinguish canonical/current governance from historical completed epics.
-- #8789 is the Phase 0 truth-recovery gate for #8557. It keeps repository
-  handoffs, GitHub issue states, release evidence, publication metadata, and CI
-  from disagreeing.
-- #8668 governs subject-scaled articulated contact; its qualification program
-  remains open because #8751 and #8752 have unmet acceptance criteria.
-- #8684 governs distributed grip, shaft, and ground:
-  - #8751 is **CLOSED** by protected squash merge PR #8797 at remote-main
-    commit `7c8f1547d39a5c182b52d44aeddd3330c3074b75`. Its distributed-grip
-    atlas, event probes, and impulsive perfect-stick bound pass all registered
-    gates. It is not a static-friction trajectory; #8796 owns that extension.
-  - #8796 is **OPEN** under #8557/#8684 for the stronger attached-to-open and
-    stateful finite-static-friction extension. It owns static-cone feasibility,
-    subsequent stick--slip evolution, attached-state first failure, and an
-    infeasible manufactured case. Its incorrect closure against #8797 was reversed on 2026-08-20 because that PR explicitly closed only #8751 and retained #8796 as separate scope. Do not fold those unqualified results into
-    #8751 or describe the impulsive stick control as a trajectory law.
-  - #8752 is **OPEN** on `research/8752-articulated-uncertainty`. The v2
-    40-sample closed-state/LHS study is finite and energy-closed but every row
-    retains partial opening. The 19-corner headline campaign is incomplete. Its
-    20-worker process ended after 2026-08-22 22:53 PDT without writing a terminal
-    record; do not describe it as complete. The JSON remains `in_progress` with
-    17 corner records and 16 fully accounted corners. The active
-    `ground_free_moment_stiffness_scale-high` corner retained 49/72 branches;
-    1,160 atomic checkpoint files (12,343,744 bytes) exist overall, with no torn
-    `.tmp` file. PID `18404` and its workstation workers are absent. A qualified
-    eight-worker continuation started on ControlTower at 2026-08-23 09:28 PDT.
-    Nominal remains shaft 126/384 and ground 0/384. Three
-    adverse pathways are retained failures rather than filtered results. The independent
-    `articulated_headline_record_audit` rejects torn JSON,
-    schema/design/config/source drift, nonprefix corners, invalid pathway
-    states, and premature completion. It validates the current snapshot as
-    `partial` with `release_evidence: false`, source-set digest
-    `a64f02a92a300afe9e1f8070dd4ddca9e48add2b2fee22a337a4df5c37b25e57`,
-    and record digest
-    `069d942a2a04ba1a7960e628d44d49e88b12ca1780722fb977ace03d538181ba`.
-    All embedded campaign source hashes still match the unchanged worktree at
-    commit `602b7bdf7b31127af24074e1725731845ed62d18`. Worker count is an
-    execution control: both the top-level resume contract and branch execution
-    digest intentionally exclude it, and a regression test permits worker-count
-    changes while rejecting scientific-design drift. Therefore a lower-worker
-    restart can reuse the checkpoints without changing the registered study.
-    All 72 nominal branch checkpoints retain exact trajectory/force/ground-force
-    parity and restart equivalence.
-    ControlTower has a Ryzen 9 5950X (16 cores/32 threads), approximately 128 GB
-    RAM, and ample free memory. Its dirty/stale primary checkout was not mutated.
-    The continuation uses detached exact HEAD
-    `13146cdcece879e7156e06e2dca6626c1a54e045` at
-    `C:\Users\diete\Repositories\UpstreamDrift-worktrees\goal-8752-uncertainty`.
-    Transfer manifest SHA-256
-    `af88d9a25fb7a13033d729b73fe0da8cbf4eedced376e8acfc2feee939fcf2d5`
-    verified all 1,162 transferred files; archive SHA-256 is
-    `685393a555cc2dde6033e7d7a16a9d96153693fc055d2097e853eabcfdc55ab2`.
-    A one-branch replay of completed corner
-    `ground_free_moment_stiffness_scale-low` deliberately omitted and
-    regenerated `state-00-control-00.npz`. It passed every registered model gate,
-    exact metadata/dtype/shape and discrete-field comparisons, and the documented
-    cross-CPU numerical criterion (`rtol=2e-8`, `atol=1e-9`). The exact original
-    Ubuntu 22.04/Python 3.10.12 GCC, NumPy 2.2.4, SciPy 1.15.2, MuJoCo 3.8.0,
-    and Pinocchio 3.8.0 runtime is containerized as
-    `upstreamdrift-8752:ubuntu22`; the image manifest is
-    `sha256:4be08c2d04e94b827137429167a2d78c027d93a2718b699dea90b34b29b003f6`.
-    CPU-dependent differences were bounded by `1.38e-8` absolute and preserved
-    all decision classifications. Production container
-    `upstreamdrift-8752-campaign` (`7a348593a10e...`) is capped at eight CPUs and
-    96 GB RAM with `on-failure:3`; runtime status and logs are in
-    `C:\Users\diete\Campaigns\UpstreamDrift-8752\status.json` and `logs\campaign.log`.
-    The canary record is
-    `/home/dieterolson/campaigns/UpstreamDrift-8752/canary-docker/canary-result.json`
-    inside ControlTower WSL. Recovery is fail-closed: inspect the named container
-    and the status/log files first; take no action while it is running, never
-    restart a zero-exit completed container, and only
-    use `docker start upstreamdrift-8752-campaign` after a nonzero exit if the
-    source/data hashes and atomic checkpoint audit still pass. The checkpointed
-    runner will then resume rather than discard completed branches.
-    The RTX 3090 does not accelerate this CPU/NumPy/MuJoCo/Pinocchio workload.
-    Do not start a duplicate container or mutate the dirty primary checkout.
-    The completion-only headline evidence test stays untracked until data
-    finish. Branch `fix/8752-atomic-campaign-checkpoint`, forked from exact
-    campaign commit `8c537b660`, adds atomic replacement for the top-level JSON
-    and a manufactured replacement-interruption test. Integrate that commit only
-    after the live campaign finishes; changing campaign sources sooner would
-    intentionally trigger the source-drift gate.
-  - #8800 is **OPEN** and blocks #8752. Its governed generator regenerates all
-    13 phase states for cases 0/8/9/17; nominal is 52/52 feasible and reproduces
-    committed states within 1e-8 rad. JSON/NPZ evidence rejects source/content
-    drift. `ArticulatedAtlasAuthority` binds exact scaled models, builds per case,
-    gates per phase, and retains failures. Seven corners completed: nominal,
-    height-high, both mass, and both joint-limit are 52/52; height-low retains
-    case 0/phase 12 `ik_nonconvergence`. Joint-limit-low retains 0.0885 rad
-    minimum margin; joint-limit-high retains 0.1185 rad. Their maximum closure
-    errors are 1.03e-10 m and minimum collision clearances are 0.0491 m. The
-    evidence passes 3/3. Write/validate preflight excludes workers, requires common
-    support, binds 83/1 states, full hashes, invalidators, scaling-mismatch and
-    infeasible-limit controls, a preoutcome 0.001 m/s numerical resolution floor,
-    engine/step discrepancy thresholds, and span-normalized one-sided secants that
-    cannot be ranked as cross-parameter importance.
-    Its v1 evidence contract preserves checkpoint identity and per-cell arrays. A shared runtime authority boundary now resolves planned/feasible states without deleting the retained low-height failure, rebuilds and revalidates exact scaled case models, emits detached digest-bound provenance, and rejects untyped authorities and invalid designs; the frozen runners are not yet wired to consume it. A separate v1 scientific-model digest canonicalizes finite parameters to 15 significant digits, eliminating observed native-runtime last-bit hash drift while detecting 1e-10 kg perturbations. The regenerated plan publishes independently reproducible shaft/ground source-set and scientific-configuration checkpoint digests, excludes worker count, and is byte-reproducible under pytest and standalone runtimes. A fail-closed resolver converts these into immutable corner/pathway checkpoint prefixes and rejects authority, source, configuration, or pathway drift. It also constructs and validates an exact JSON-safe v1 persisted-checkpoint envelope binding every immutable prefix field plus the registered state-slot mapping and pathway-specific branch design; missing, extra, malformed, out-of-design, or tampered fields fail closed. Atomic no-pickle persistence now enforces exact numeric/Boolean field, shape, and dtype contracts, rejects infinity and corrupt archives, retains pathway-defined NaN for downstream semantic gates, and preserves prior checkpoints on interrupted writes. Its directory auditor validates every branch contract before reuse, rejects unregistered/torn files, classifies exact partial versus complete coverage, and hashes the same immutable bytes it validated; checkpoints remain explicitly non-release evidence. A restart inventory returns detached validated branch payloads plus the exact remaining registered descriptor sequence, including a distinct empty fresh-start state. Independent shaft/ground contract generation reproduces every actual runner-local field, shape, and dtype, binds the scientific configuration digest, and keeps worker count operational. Both pathway identities bind all resolver, persistence, and contract-generator sources. All 88 focused authority/runtime/contract/checkpoint/plan/identity tests pass. Shaft matching is coupled/rigid station-force/dissipated-work; ground matching is coupled/fixed grip-force/total-work. Planned, feasible, and executed denominators remain separate; partial records cannot qualify.
-    The figure contract exposes support transitions, resolution, secants, and failures with searchable vector text and color-independent status encoding. Its v1 deterministic data layer consumes all 14 digest-bound packs without favorable filtering, preserves nominal ground 0/384, and rejects redigested semantic tampering through ordered support/outcome/axis/failure reconciliation, result binding, exact JSON bytes, finite ordered secants, and reproduced nonmonotonic classifications. The five-panel SVG/PDF renderer uses searchable text, pattern/shape status encoding, explicit units, the 0/384 boundary, no-human/coaching language, and embedded result/data digests; PDF raster/font QA is clean. The end-to-end publisher revalidates the governed plan, complete result, and every cell pack before emitting assets; its module CLI is the reproducible publication command and 85 focused tests pass.
-    Common-support analysis reproduces nominal 126/384 shaft and 0/384 ground while preserving identities, denominators, failures, resolution, and unpooled secants. Nominal-only/corner-only identities remain distinct. Cell-evidence v2 stores finite paired change/resolution only on persistent support and NaN/false elsewhere; matching/status and resolved/threshold relationships reproduce. Packs own detached input copies, derive identity/outcome/gates from one atlas, and use atomic no-pickle NPZ. Fail-closed gates combine both compared branches, broadcast parity across engines, and retain simultaneous failures. Corner assembly rejects partial execution, gate failures, missing authority, and executed/failed-state overlap. Axis assembly requires registered low/high pairs, keeps one-sided support separate, and emits null for empty shared support. The v2 result requires 14 corner/pathway records, safe cell-pack paths/digests, and six axis/pathway summaries. Bundle/plan validation reconcile NPZ contents, authorities, denominators, failures, and scales. All reject partial/tampered evidence and remain model-dependent, not causal, population, mechanism, ranking, or coaching claims.
-    The governed feasibility/margin figure has embedded CID TrueType text and
-    passes its retained-failure contract. Q2/H5 and the machine-readable
-    prediction registry no longer repeat the obsolete failed-closure narrative.
-    Release-manifest/checksum regeneration and full-paper rendering must wait
-    until the live headline record is complete, or they could admit partial data.
-- The refreshed 1,092-candidate census has no unadjudicated passages and 304 atomic claims. Deterministic claim and evidence validators pass over 2,172 references, 321 hash-pinned local artifacts, and 78 external URLs. PD-CLAIM-297--305 govern the local uncertainty screen, adverse partial opening, conditional PRCCs, structural authority, retained low-height failure, open propagation, and in-progress headline design without promoting any partial result; five focused contracts pass. The typed model-completion registry now covers every narrative hypothesis H1--H11 exactly once, retaining H9 as contradicted and H5/H10 as inconclusive; three alignment/loader tests pass. The 40 reviewed release claims retain scientifically open gates; #8724 still owns normalized four-way adjudication and independent review.
-- PR #8793 canonicalizes UTF-8 claim evidence before hashing; #8789 retains
-  Docker/quarantine/baseline and clean-checkout truth-recovery scope.
-- #8556 remains open: no governed participant dataset contains synchronized
-  bilateral six-axis grip wrenches. Synthetic traces cannot replace it. The 2026-08-20 NotebookLM network test and same-profile refresh both failed authentication; Chrome-cookie recovery could not decrypt the local cookies, so Biomechanics/Nonlinear Control collection mining still requires an interactive Google login and cannot yet support claims.
+- PR #9017 is merged at
+  `ce6fce1c2b8a6e50e410d16d31e219fabcb154e1`. It provides fail-closed
+  participant split, processing, frame-transform, and event-detector
+  authorities for #9004.
+- #9004 remains open because no qualifying governed participant trajectory
+  dataset or held-out human outcome is registered. Simscape exports, fixtures,
+  tutorials, GolfDB labels, and launch-monitor records are not substitutes.
+- #8556 remains externally blocked by the absence of governed synchronized
+  bilateral six-axis grip-wrench participant data. Synthetic traces and
+  paper-level curves must never substitute for human validation.
 
-## Qualified Baseline — And Its Limits
+## Other Active Dependencies
 
-Native MuJoCo and robotics Pinocchio independently qualify the 20-coordinate rigid tree over 234 closed states, with power, passivity, energy, refinement, geometry, and engine-parity controls. All of it is a synthetic structural reference — not equipment calibration, anatomy, physiology, or coaching guidance.
+- The current constitutive subcampaign is the active #8752 slice. #8800 then
+  propagates height, body-mass, and joint-limit bounds through both headline
+  atlases and blocks the final #8752/#8668 audit.
+- #8443, #8448, #8449, #8450, #8595, #8668, #8684, and #8796 remain open.
+  Verify each issue's exact acceptance evidence before changing state.
+- Tools #4142 remains open for requirement-level R10–R15 qualification and
+  immutable UpstreamDrift consumption. Tools #4430 is complete.
+- AffineDrift #3930 remains downstream of the qualified UpstreamDrift release;
+  do not project a moving or partial campaign.
+- #8963 architecture debt remains separate from the frozen campaign source.
+  Do not merge or regenerate source-bound spatial evidence until campaign
+  integration removes the source-lock conflict.
 
-- Of 384 coupled-versus-rigid shaft cells, 126 match on load and work; speed
-  differences span `-0.0285` to `+0.0212 m/s` (82 negative), **rejecting a
-  universal passive-shaft speed benefit**.
-- The preregistered ground screen admits **0/384** coupled--fixed cells (ground
-  damping asymmetry). A post-hoc screen admits 60 cells with mixed signs.
-  **Do not read unmatched positive differences as a ground-pathway benefit.**
-- Initialization: natural-zero, gravity-only, and conditional starts gave peak
-  ground forces of 32.8, 565.5, and 510.3 N.
+## Scientific Boundaries
 
-## Immediate Next Steps
+- The model ladder is synthetic and model-conditional. It does not establish
+  participant mechanics, anatomy, physiology, equipment calibration, injury,
+  coaching strategy, or a universal speed benefit.
+- Distinguish energy transfer, momentum redistribution, joint work, constraint
+  forces, and clubhead speed. Preserve falsifiers, adverse cases,
+  identifiability limits, uncertainty, countermodels, and unavailable states.
 
-1. Monitor the single qualified ControlTower continuation for checkpoint growth,
-   host load, terminal status, and complete JSON. Do not create a duplicate run.
-   Then complete #8752 and its blocking structural propagation issue #8800.
-2. Continue #8789's remaining Docker/quarantine/baseline work without overlap.
-3. Burn down #8766 without widening its registered contract.
+## Repository and Review Rules
 
-## Gate Commands
+- PRs target `main`; use full PRs, never drafts. Human review is required.
+- Never force-push, admin-merge, bypass hooks/checks, add quarantine debt, or
+  edit `vendor/ud-tools`.
+- Use TDD, DbC, DRY, and LoD. Edit canonical sources and regenerate governed
+  artifacts. Use title case for document headings and captions.
+- Verify exact PR head, reviews, checks, merge SHA, remote-main ancestry, and a
+  clean worktree before reporting completion.
 
-```bash
-python scripts/check_spec_paths.py && python scripts/check_root_clutter.py
-python scripts/check_test_layout.py && python scripts/check_pytest_intree_testpaths.py
-python scripts/ci/check_suite_marker_ratchet.py && python scripts/ci/check_dry_duplication_gate.py
-python scripts/ci/check_architecture_budget.py
-python scripts/check_module_size_budget.py --max-lines 1500 --include src
-python scripts/check_doc_size_budget.py
-python -m ruff check . && python -m ruff format --check .
-```
+## Focused Validation
 
-```bash
+```powershell
 python -m scripts.research.proximal_distal_energy.claim_audit validate
 python -m scripts.research.proximal_distal_energy.claim_evidence_integrity validate
-python -m scripts.research.proximal_distal_energy.momentum_question_readiness validate
-python -m scripts.research.proximal_distal_energy.qualify_open_release validate \
-  --source-revision "$(git rev-parse HEAD)" \
-  --publication-profile computational
-pytest tests/research -q
+python -m scripts.research.proximal_distal_energy.qualify_open_release validate
+python scripts/check_document_title_case.py --changed-from origin/main
+python scripts/ci/check_file_size_budget.py
 ```
 
-Do not infer human technique/physiology/injury/coaching; close #8556/#8557
-without evidence; bypass protection; force-push/admin-merge; add ledger entries;
-edit hash-pinned or Tools-owned files without regeneration; or rerun unchanged
-capacity failures.
+Passing shared gates does not close a scientific child whose narrower evidence
+or governed external-data requirement remains incomplete.

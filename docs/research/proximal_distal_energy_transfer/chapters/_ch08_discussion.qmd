@@ -97,8 +97,10 @@ for a golfer. The specific gaps, each with a tracked remediation:
   and club flex. The spatial common-state tier transports the geometry response
   across independent inverse-dynamics formulations. The reduced spatial
   forward tier then preserves a negative contact couple after complete driver
-  removal in both native engines. Its hand carriages and declared contact law
-  do not establish persistence in anatomical arms or human dynamics.
+  removal under both native inertia-and-bias operators, with one shared
+  projected contact law and state update. Its hand carriages and declared
+  contact law do not establish persistence in anatomical arms or human
+  dynamics.
 - **No Human Data Yet.** The decisive observational test — wrist
   interface power time courses across skill levels from motion capture
   (@sec-falsify) — awaits an appropriately governed motion-capture study.

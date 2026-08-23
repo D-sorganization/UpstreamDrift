@@ -109,11 +109,15 @@ studies such as [Choi and Park](https://mdpi-res.com/d_attachment/sensors/sensor
 and [Koike](https://ojs.ub.uni-konstanz.de/cpa/article/download/6828/6125)
 inform acquisition design but are not participant-level deposits satisfying
 the frozen contract. Synthetic traces and paper-level summary curves are
-prohibited substitutes. The companion GUI is tracked by Tools
-[#4430](https://github.com/D-sorganization/Tools/issues/4430), stacked after
-consolidated PR [#4450](https://github.com/D-sorganization/Tools/pull/4450).
-PR #4411 was intentionally closed as superseded;
-unchanged CI must not be redundantly rerun.
+prohibited substitutes. Tools
+[#4430](https://github.com/D-sorganization/Tools/issues/4430) delivered its
+qualified provider and matched PyQt6/React reviewer surfaces through protected
+PRs [#4618](https://github.com/D-sorganization/Tools/pull/4618) and
+[#4619](https://github.com/D-sorganization/Tools/pull/4619). UpstreamDrift pins
+the resulting merge `1664d806df8a2c7b184d2d3fbcea93b714caaee5` and verifies
+the complete 18-run catalog without copying its solver. The companion issue
+remains open until that consumer revision passes protected UpstreamDrift merge
+and remote-main verification.
 
 ## Research Collection Review
 
@@ -214,13 +218,23 @@ scientific contract.
 
 ## Completed Candidate Census and Ongoing Release Review
 
-The narrative census adjudicates all 1,022 paper candidates against 281 atomic
+The narrative census adjudicates all 1,100 paper candidates against 303 atomic
 claim contracts; no candidate remains unreviewed. That completion status
 applies to candidate coverage, not to scientific closure of every release
-claim. All 33 public release claims now have deterministic review dispositions
+claim. All 42 public release claims now have deterministic review dispositions
 and explicit remaining scientific gates. Repeated methods,
 summary, limitation, and release passages point back to their primary claim
 instead of acquiring stronger authority through repetition.
+
+The machine-readable reviewer summary preserves each explicit adjudication and
+reports evidence tier, independent-work count, model tier, unresolved
+replication class, and claim-family source concentration. Of the 303 atomic
+claims, 283 are supported only at their declared estimands, five are
+inconclusive, and 15 are untested. The zero contradicted count does not imply
+that every proposed mechanism survived: supported claims may accurately report
+null, adverse, or contradictory model results. Likewise, externally cited
+human observations remain literature evidence rather than governed local
+participant validation.
 
 The bilateral-wrench extension adds a sensor-level falsifiability result. Two
 separated three-axis point forces map to net club wrench with rank five and one
@@ -278,7 +292,7 @@ Child issue #8680 advances the articulated tree through a deliberately bounded
 5 ms forward interval. Eighteen profile--span--phase states, seven
 nominal/adverse branches, three time steps, and two native engines produce 756
 trajectories. All registered attachment-retention, virtual-power,
-dissipativity, work--energy, refinement, and cross-engine parity gates pass.
+dissipativity, work--energy, refinement, and inertia-and-bias transport gates pass.
 The worst normalized energy residual decreases from 0.00738 to 0.000854 under
 refinement. This is a right-censored bilateral-attachment result, not a model of
 unilateral slack, calibrated grip or shaft structure, ground coupling, late
@@ -315,8 +329,8 @@ map, and preserves #8556 as an external human-data acquisition gate. Future
 milestones must create new claim records and falsifiers before new conclusions
 enter summaries or conclusions.
 
-The separate claim-evidence integrity manifest covers all 1,875 evidence
-references. It hash-pins 239 distinct repository artifacts and inventories 78
+The separate claim-evidence integrity manifest covers all 2,130 evidence
+references. It hash-pins 319 distinct repository artifacts and inventories 78
 external URLs. Hash agreement establishes content identity, not independence
 or correctness; URL inventory establishes traceability, not availability or
 scientific validity.

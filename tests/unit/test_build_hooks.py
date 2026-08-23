@@ -22,10 +22,50 @@ import subprocess  # noqa: E402
 
 import build_hooks  # noqa: E402
 import pytest  # noqa: E402
+from scripts.packaging.pinned_tools_provenance import (  # noqa: E402
+    compute_tools_source_sha256,
+)
 
 pytestmark = pytest.mark.unit
 
 _PINNED_TOOLS_SHA = "a" * 40
+
+
+def test_build_hook_import_does_not_require_repo_root_on_python_path(
+    tmp_path,
+) -> None:
+    """PEP 517 loads the custom hook by path without a source-root import."""
+    hook_path = build_hooks.__file__
+    code = f"""
+import importlib.util
+import sys
+import types
+
+module_names = (
+    "hatchling",
+    "hatchling.builders",
+    "hatchling.builders.hooks",
+    "hatchling.builders.hooks.plugin",
+    "hatchling.builders.hooks.plugin.interface",
+)
+for name in module_names:
+    sys.modules[name] = types.ModuleType(name)
+sys.modules[module_names[-1]].BuildHookInterface = type("BuildHookInterface", (), {{}})
+spec = importlib.util.spec_from_file_location("isolated_build_hooks", {hook_path!r})
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+print(module.UIBuildHook.__name__)
+"""
+
+    result = subprocess.run(
+        [sys.executable, "-P", "-c", code],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.stdout.strip() == "UIBuildHook"
 
 
 class DummyConfig:
@@ -398,6 +438,47 @@ def test_release_or_ci_missing_tools_git_metadata_fails_closed(
         hook._register_tools_packages(version, {})
 
     assert "secret subprocess detail" not in str(error.value)
+
+
+def test_release_build_accepts_content_bound_container_provenance(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    """An isolated Docker context may replace Git metadata, not verification."""
+    tools_root = tmp_path / "vendor" / "ud-tools"
+    monkeypatch.setenv("UPSTREAMDRIFT_TOOLS_GITLINK_SHA", _PINNED_TOOLS_SHA)
+    monkeypatch.setenv(
+        "UPSTREAMDRIFT_TOOLS_SOURCE_SHA256",
+        compute_tools_source_sha256(tools_root),
+    )
+    hook = build_hooks.UIBuildHook(str(tmp_path), {})
+    build_data: dict = {}
+
+    with patch(
+        "build_hooks.subprocess.run",
+        side_effect=FileNotFoundError("Git metadata excluded from Docker context"),
+    ):
+        hook._register_tools_packages("1.0.0", build_data)
+
+    assert build_data["force_include"]
+
+
+def test_release_build_rejects_mismatched_container_source_digest(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv("UPSTREAMDRIFT_TOOLS_GITLINK_SHA", _PINNED_TOOLS_SHA)
+    monkeypatch.setenv("UPSTREAMDRIFT_TOOLS_SOURCE_SHA256", "b" * 64)
+    hook = build_hooks.UIBuildHook(str(tmp_path), {})
+
+    with (
+        patch(
+            "build_hooks.subprocess.run",
+            side_effect=FileNotFoundError("Git metadata excluded from Docker context"),
+        ),
+        pytest.raises(RuntimeError, match="source digest does not match"),
+    ):
+        hook._register_tools_packages("1.0.0", {})
 
 
 def test_editable_non_ci_missing_git_metadata_warns_and_skips(

@@ -20,7 +20,11 @@ if "hatchling" not in sys.modules:
     _iface = types.ModuleType("hatchling.builders.hooks.plugin.interface")
 
     class _BuildHookInterface:
-        pass
+        """Match the constructor contract used by Hatchling custom hooks."""
+
+        def __init__(self, root: str, config: dict | None = None) -> None:
+            self.root = root
+            self.config = config or {}
 
     _iface.BuildHookInterface = _BuildHookInterface
     sys.modules.update(
@@ -35,6 +39,21 @@ if "hatchling" not in sys.modules:
 
 import build_hooks  # noqa: E402
 from build_hooks import UIBuildHook, _env_flag  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def _isolate_tools_package_registration(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Keep this UI-hook suite independent of the package-boundary suite.
+
+    Canonical Tools registration has its own exhaustive tests in
+    ``tests/unit/test_build_hooks.py``. These tests exercise frontend build
+    decisions with deliberately minimal temporary roots.
+    """
+    monkeypatch.setattr(
+        UIBuildHook,
+        "_register_tools_packages",
+        lambda self, version, build_data: None,
+    )
 
 
 def _make_hook(
@@ -65,6 +84,16 @@ class TestEnvFlag:
 
 
 class TestUIBuildHookProperties:
+    @pytest.mark.unit
+    def test_stubbed_interface_accepts_hatchling_constructor(
+        self,
+        tmp_path: Path,
+    ) -> None:
+        hook = UIBuildHook(str(tmp_path), {"force_ui_build": True})
+
+        assert hook.root == str(tmp_path)
+        assert hook.config == {"force_ui_build": True}
+
     def test_ui_dir(self, tmp_path: Path) -> None:
         hook = _make_hook(tmp_path)
         assert hook._ui_dir == tmp_path / "ui"
@@ -137,7 +166,7 @@ class TestInitializeReuse:
         with patch.object(subprocess, "run") as run:
             hook.initialize("editable", {})
         run.assert_not_called()
-        assert any("editable" in r.message for r in caplog.records)
+        assert any("SKIP_UI_BUILD" in r.message for r in caplog.records)
 
     def test_skip_requested_wheel_no_dist_raises(
         self, tmp_path: Path, monkeypatch

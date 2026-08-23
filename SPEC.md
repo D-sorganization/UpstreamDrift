@@ -1,10 +1,14 @@
 # SPEC.md — Repository Specification Document
 
-## Current Scientific Audit State (2026-08-20)
+## Current Scientific Audit State (2026-08-23)
 
 Epic #8557 has completed the current narrative-candidate adjudication contract:
-1,068 reviewed candidates and 295 atomic claims. This status is not scientific
-closure: all 40 public release claims have a traceable review disposition, and
+1,100 reviewed candidates and 303 atomic claims. Issue #8724 adds an exhaustive,
+snapshot-locked four-way outcome authority: 283 supported at their declared
+estimands and boundaries, five inconclusive, 15 untested, and none contradicted.
+The absence of a contradicted row does not erase adverse or null results that
+the paper reports accurately. This status is not scientific closure: all 42
+public release claims have a traceable review disposition, and
 each retains its applicable open
 model, equipment, anatomy, archival, or governed-human scientific boundary. The
 trajectory-level bilateral point-force sensor qualification and subject-scaled
@@ -27,6 +31,17 @@ positive-definiteness gate passes. This common-state result qualifies the
 20-coordinate articulated rigid-body transport only. Forward bilateral
 contact, scapulothoracic anatomy, distributed grip and shaft properties,
 muscles, delivery, and human inference remain prohibited.
+Child issue #8910 repairs the articulated manufactured-solution tier. The
+manufactured generalized torque is defined by the analytical
+Lagrange--Christoffel formulation and compared with native MuJoCo
+`mj_inverse` and robotics Pinocchio RNEA. Cross-engine residuals must be small
+but nonzero, and a 10 N m corruption of one native result must fail the gate.
+A gravity-free, zero-torque rollout reports measured momentum and kinetic-
+energy drift for the genuinely free club subtree, while adjacent three-level
+Richardson estimates must remain inside 0.9--1.1 for semi-implicit Euler. The
+coordinated multiplier-recovery control contains one three-component
+lead-hand-to-grip point constraint; it is not simultaneous two-hand closure,
+an anatomical model, governed human evidence, or a coaching result.
 Child issue #8678 applies finite bilateral Kelvin--Voigt forces to those same
 234 states and verifies action--reaction, virtual power, passivity, geometry
 controls, and native MuJoCo/Pinocchio initial-acceleration parity. It advances
@@ -55,13 +70,33 @@ slice supplies full-state velocity reversal, frictionless and finite-friction
 nested-horizon outcomes, station-level event direction, cross-engine active-set
 parity, and a 144-cell mass-metric impulsive perfect-stick bound. The latter is
 checked against an analytic manufactured solution, constrains tangential
-velocity to $9.65\times10^{-11}$ m/s or less, has zero stored-precision native
-velocity discrepancy, and captures $9.84\times10^{-9}$--$0.37665$ J of kinetic
-energy across the registered states. It is an instantaneous ideal-constraint
-control, not evidence that static friction can supply the impulse or maintain a
-stick trajectory. The event probe begins disengaged, so attached-to-open first
-failure, static-friction feasibility/evolution, production release evidence,
-and protected merge verification remain required before #8751 can close.
+velocity to $4.61\times10^{-15}$ m/s or less, has a nonzero maximum
+MuJoCo--Pinocchio projected-velocity error of $3.99\times10^{-12}$ relative,
+and captures $9.84\times10^{-9}$--$0.37665$ J of kinetic energy across the
+registered states. This corrected genuine-engine run replaces the invalid
+zero-discrepancy record. It is an instantaneous
+ideal-constraint control, not evidence that static friction can supply the
+impulse or maintain a stick trajectory. The event probe begins disengaged, so
+attached-to-open first failure, static-friction feasibility/evolution,
+production release evidence, and protected merge verification remain required
+before #8751 can close.
+Issue #8909 invalidates the previously published distributed-grip
+MuJoCo--Pinocchio parity statement: the Windows run imported the unrelated
+PyPI `pinocchio` 0.1 package, and the forward operator silently substituted
+MuJoCo while retaining the Pinocchio label. Cross-engine evidence now fails
+closed unless robotics Pinocchio is version 2.6 or newer, exposes the required
+native dynamics API, and successfully builds the articulated model. No engine
+fallback is permitted, and an identically zero set of trajectory, force, and
+stick-projection discrepancies is treated as a degenerate comparison rather
+than successful parity. The first genuine rerun also falsified the original
+stick-projection numerical gate: twelve distributed constraint rows had rank
+ten, the normal-equation condition number exceeded $10^{17}$, and the
+Pinocchio projection residual reached $1.35\times10^{-10}$ m/s. The corrected
+implementation performs a mass-whitened rank-revealing SVD, reducing the full
+144-cell residual to $4.61\times10^{-15}$ m/s without relaxing the registered
+tolerance. Every committed cross-engine artifact must identify a qualified
+robotics Pinocchio version. The distributed atlas and registered claim must be
+regenerated with two genuine engines before #8751 can close.
 Issue #8752 also remains open. Its first manufactured and Latin-hypercube screen
 does not yet run through both production engine adapters, include a deliberately
 perturbed failure case, refine every uncertainty corner, or propagate uncertainty
@@ -501,8 +536,8 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.558                                            |
-| **Last Spec Update**    | 2026-08-20                                         |
+| **Spec Version**        | 1.0.581                                            |
+| **Last Spec Update**    | 2026-08-22                                         |
 
 ## 2. Purpose & Mission
 
@@ -533,6 +568,98 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-08-22** - Made the modular Docker build boundary independently
+  verifiable for issue #8996. Reusable pinned-Tools setup emits the exact
+  `vendor/ud-tools` gitlink plus a deterministic SHA-256 over the minimal
+  Tools-owned package roots. The modular build copies only those roots and
+  verifies the digest without relying on Git metadata. Missing roots,
+  symlinks, malformed attestations, incomplete source sets, and content drift
+  fail closed. The Hatch hook loads its adjacent canonical helper by file path
+  so isolated PEP 517 builds do not depend on the repository root being on
+  `sys.path`. Constructor-compatible Hatchling test doubles and explicit suite
+  isolation make package-boundary tests independent of collection order. All
+  supported image definitions reassert scanner-fixed `msgpack` 1.2.1 and
+  `setuptools` 83.0.0 after their final dependency layer, while both runtime
+  Dockerfiles retain pip 26.2.1. This closes GHSA-6v7p-g79w-8964,
+  CVE-2025-47273, and PYSEC-2026-3447 in the resolved container rather than
+  suppressing Trivy or pip-audit. Production runtime targets then remove pip
+  after their dependency environments are finalized, eliminating pip's
+  embedded third-party SBOM and vendored build surface. The training stage
+  explicitly restores the audited builder environment because it is the only
+  downstream stage authorized to install packages. The modular builder also
+  copies both force-included launcher modules before feature installation, so
+  isolated package metadata generation matches the declared wheel surface.
+
+- **2026-08-21** - Resolved the dual aero-coefficient-set discrepancy (issue
+  #8978, epic #8965 WS2): the multi-model ball-flight framework's
+  Waterloo/Penner set is now a named, provenance-documented
+  `AeroCoefficientSet` (`WATERLOO_PENNER_COEFFICIENTS`) that shares the Penner
+  lift shape with `ball_properties.py` (single source) while keeping its
+  deliberate constant-spin calibration (cd1 = 0.05, lift cap 0.155) distinct
+  from the core simulator authority (cd1 = 0.25, cap 0.26). Every
+  `FlightResult` and REST `/tools/ball-flight/simulate` response now carries
+  the model's coefficient dictionary for attribution, the calc sheet documents
+  both families with parity-gated markers, and
+  `tests/unit/physics/test_aero_coefficient_authority.py` pins each public
+  entry path to its declared set.
+
+- **2026-08-21** - Pinned the proximal--distal companion consumer to protected
+  Tools merge `1664d806df8a2c7b184d2d3fbcea93b714caaee5`. The launcher authority
+  and gitlink now agree on one immutable provider, and the pendulum-simulator
+  launcher is included in the Tools-source contract. Cross-repository
+  qualification verifies the complete ordered 18-run rotating-base catalog,
+  its 13 valid cases and adverse indices 6/7/8/15/16, the exact qualified-study
+  and catalog digests, and every run's nonanatomical-coordinate,
+  unavailable-human-validation, and unsupported-coaching boundaries. No solver
+  or catalog is copied into UpstreamDrift, and this transport qualification does
+  not promote the model to anatomical, empirical, or coaching evidence. The
+  standalone package build now retains a 30-minute execution budget so a cold
+  pinned-Tools checkout, frontend build, wheel-content gate, and artifact upload
+  can complete without the previous 15-minute timeout canceling a valid upload.
+
+- **2026-08-20** - Added attested session-unit longitudinal analysis under
+  contract `launch-monitor-longitudinal-session/1.0.0`. Trusted, distinct
+  player/session/order evidence is mandatory. Shots collapse into equal-weight
+  player/session/stratum cells before per-player descriptive slopes and pooled
+  player-fixed-effects OLS with player-clustered finite-sample uncertainty.
+  Strata, confounders, missingness, unavailable states, units, lineage, and
+  source-linked backing remain explicit; shot-level inference, causal
+  improvement, and automatic interpretation of metric direction are false.
+- **2026-08-20** - Added canonical player covariation and population synthesis
+  under contract `launch-monitor-player-covariation/1.0.0`. Selected-pair
+  results distinguish pooled, player-centered, between-player, and per-player
+  associations; fixed- and DerSimonian-Laird random-effects Fisher-z summaries
+  report Q, tau-squared, and I-squared heterogeneity. Trusted explicit player
+  identity is mandatory and remains separate from session/order evidence.
+  Missing rows, ineligible groups, constant variables, insufficient population
+  evidence, units, vendor/model provenance, and source-joinable backing hashes
+  remain explicit. The bounded deterministic pair scan is exploratory, retains
+  unavailable pairs, and warns about multiplicity, aggregation reversal,
+  causality, and population-generalization limits.
+- **2026-08-20** - Added immutable, aggregate-only launch-monitor dataset jobs
+  under contract `launch-monitor-dataset-job/1.0.0`. A request identifies a
+  server-authorized opaque root and exact repository, commit, corpus-manifest
+  SHA-256, deterministic Parquet-content SHA-256, and expected row count; it
+  cannot carry rows, paths, URLs, SQL, or arbitrary query text. Verification
+  fails closed on checkout, lineage, content, or count mismatch. The initial
+  source-summary, metric-summary, and correlation allowlist suppresses groups
+  below ten rows and bounds result/page sizes. Production route registration
+  requires the existing bearer authentication dependency; source outputs omit
+  filenames, raw URLs, server paths, and observations. FastAPI lifespan joins
+  bounded worker threads, and capacity exhaustion is a retryable HTTP 429.
+- **2026-08-20** - Added the canonical source-backed strokes-gained authority
+  under `src/shared/python/launch_monitor/`. The contract requires complete
+  start and finish course states and a versioned, licensed, HTTP(S)-sourced,
+  SHA-256-verified expected-strokes baseline. It interpolates only within an
+  exact lie/context/target stratum, fails closed on extrapolation, retains row
+  and dataset hashes plus backing benchmark values and exclusions, and reports
+  uncertainty as unavailable when the source supplies no standard errors.
+  Trusted identifiers and numeric ordering are required for grouped or
+  longitudinal summaries. A separate outcome-proxy contract reports
+  target-relative radial error but is structurally forbidden from claiming
+  strokes gained. FastAPI publishes both contracts and their generated OpenAPI
+  types for React consumers; these descriptive results make no causal,
+  device-emulation, device-certification, or independent endorsement claim.
 - **2026-08-20** - Recovered BunkerShot3D cross-tier plumbing and MPM code verification
   inside CI architecture and file budgets (issue #8743, #8741). Brings `solvers/mpm/verification.py`
   and `bunker_shot_gui/bridge.py` inside budget gates, verifying 177 tests across conservation,
@@ -2555,7 +2682,7 @@ UpstreamDrift/
 | Rust Physics Kernels     | `rust_core/upstream-physics/`            | High-performance compiled physics routines for critical paths, including initial flexible shaft FEM element primitives |
 | Configuration Manager    | `src/config/`                            | Centralized configuration loading, validation, and environment management                   |
 | Analysis Tool CLIs       | `src/tools/drift_control/`, `src/tools/contraction/` | Headless AffineDrift-compatible drift/control, contraction, and Floquet analysis tools |
-| Launch Monitor Analytics | `src/tools/launch_monitor_analytics/`, `src/shared/python/launch_monitor/` | PyQt6, FastAPI, and headless vendor-neutral import plus arbitrary-field analysis; contract v2 adds unit authority, exact lineage, identity trust, uncertainty, and typed unavailable states while retaining v1 compatibility |
+| Launch Monitor Analytics | `src/tools/launch_monitor_analytics/`, `src/shared/python/launch_monitor/`, `src/api/services/launch_monitor_dataset_jobs.py` | PyQt6, FastAPI, and headless vendor-neutral analysis; contract v2 adds traceable arbitrary-field analysis, source-backed SG verifies benchmark provenance, immutable aggregate-only dataset jobs analyze hash-pinned private authorities without transferring rows or client paths, canonical player covariation separates pooled/within/between effects with fixed/random population synthesis, and attested longitudinal analysis aggregates by session before descriptive clustered inference |
 | Tools Ground Consumer    | `src/shared/python/ground_model/`      | Headless exact-schema gateway to Tools flight-to-ground v1 records and reference execution; UI and final dependency pins remain tracked |
 | Putting Dynamics         | `src/shared/python/putting_dynamics/`   | Headless heterogeneous-green, collision, loft, hosel-wrench, skid/roll/rest, and hole-capture physics for #8345 |
 | 3D Putting UI            | `src/api/routes/putting_green.py`, `ui/src/pages/PuttingGreen.tsx`, `ui/src/components/visualization/PuttingScene3D.tsx` | Generated-contract R3F playback of the canonical putting model with collision, spin, hosel, surface, camera, and video controls for #8345 P1 |
@@ -2599,6 +2726,9 @@ Engine tier metadata is declared in each in-scope engine package with
 | F15 | Sidekick AI assistant              | 🔄     | In-app and standalone AI assistant surface (PyQt + React/Tauri + `sidekick.standalone.*`) with streaming, RAG, session history, persisted standalone preferences, onboarding, and agentic tool dispatch. See `docs/sidekick/README.md` and ADR-0018. |
 | F16 | Model-training controller          | 🔄     | In-launcher training dashboard (PR3) with scheduler, dataset library, resource monitor, engine-compat gate, and ML/RL-aware stats. Backend contracts + scheduler land in `src/shared/python/training/` (PRs 1–2); GUI tab, tab-backgrounding refactor, and CVAE wiring in PRs 3–5. |
 | F17 | Tools ground-model integration     | 🔄     | Headless v1 consumer gateway validates the canonical Tools façade and degrades safely when absent; exact dependency pins, FastAPI, PyQt, React, parity, and protected release remain open under Tools #4276. |
+| F18 | Source-backed strokes gained       | ✅     | Canonical Python and FastAPI contracts score complete course-state transitions against a versioned, hash-verified expected-strokes source; provenance, backing values, exclusions, uncertainty, and identity trust remain explicit, while outcome proxies cannot claim SG. |
+| F19 | Immutable launch-monitor dataset jobs | ✅  | Authenticated, aggregate-only FastAPI jobs bind an administrator-authorized private authority to exact repository/commit/manifest/content/count identity; fixed allowlisted operations, disclosure floors, bounded pages, structured unavailable states, and deterministic worker shutdown prevent inline row or path leakage. |
+| F20 | Player covariation and population synthesis | ✅ | A versioned evidence-bearing contract separates pooled, within-player, between-player, and per-player associations; fixed/random Fisher-z synthesis reports heterogeneity, exclusions, unavailable states, explicit units, trusted player identity, vendor/model provenance, and source-linked backing rows. |
 
 ### API / Interface Contract
 
@@ -2613,6 +2743,16 @@ Engine tier metadata is declared in each in-scope engine package with
 - `GET /engines` — List available physics engines and their status
 - `POST /export` — Export simulation model to URDF, MATLAB, or other formats
 - `POST /api/v1/motion-pipeline/run` — Run motion-pipeline preprocessing, scaling, IK, and motion-matching for uploaded capture files
+- `GET /tools/launch-monitor-analytics/contracts/strokes-gained/v1` — Publish the canonical source-backed SG result schema
+- `POST /tools/launch-monitor-analytics/v2/strokes-gained` — Score explicit start/finish states against a supplied, source-verified expected-strokes baseline
+- `POST /tools/launch-monitor-analytics/v2/outcome-proxy` — Compute target-relative radial error under a contract that forbids an SG claim
+- `GET /tools/launch-monitor-analytics/contracts/dataset-jobs/v1` — Publish the immutable aggregate-job request schema
+- `POST /tools/launch-monitor-analytics/v2/dataset-jobs` — Queue an authenticated aggregate job against an exact server-authorized dataset reference
+- `GET /tools/launch-monitor-analytics/v2/dataset-jobs/{job_id}` — Return data-free job status and structured unavailable reasons
+- `GET /tools/launch-monitor-analytics/v2/dataset-jobs/{job_id}/results` — Page bounded aggregate/source-provenance results without observations or private paths
+- `GET /tools/launch-monitor-analytics/contracts/player-covariation/v1` — Publish the canonical selected-pair and exploratory-scan result schema
+- `POST /tools/launch-monitor-analytics/v2/player-covariation` — Compare pooled, within-player, between-player, per-player, and population effects for an explicitly identified player variable pair
+- `POST /tools/launch-monitor-analytics/v2/player-covariation/scan` — Rank a bounded exploratory variable-pair set with structured unavailable states and multiplicity warnings
 
 **API Production-Readiness Contracts**:
 
@@ -2651,6 +2791,9 @@ Engine tier metadata is declared in each in-scope engine package with
 
 **GUI Interface (PyQt6)**:
 
+- The classic launcher entry point reuses an active `QApplication` and creates
+  one only when the process has none; it must never construct a second Qt
+  application object in an embedded or test-hosted process.
 - Model loader and parameter editor
 - Real-time 3D simulation viewer with playback controls
 - Cross-engine comparison visualizer
@@ -2684,6 +2827,7 @@ Engine tier metadata is declared in each in-scope engine package with
 | Biomechanical Models     | URDF          | `shared/models/`                | URDF 1.0 standard with custom muscle actuator extensions |
 | Motion Capture Data      | C3D, BVH, TRC | External mocap systems or files | Standard formats with marker sets and frame data         |
 | Launch Monitor Sessions  | CSV, TSV, TXT, XLS, XLSX, JSON | Common launch-monitor exports or user-mapped files | Canonical shot schema with source columns, unit/status metadata, and import manifest |
+| Expected-Strokes Baseline | JSON | Declared HTTP(S) source with license and SHA-256 | Versioned lie/context/target/distance states with unique points and optional standard errors |
 | Optimization Constraints | JSON          | User input or configuration     | Custom constraint schema in `src/config/`                |
 | Control Parameters       | YAML/JSON     | Configuration files or API      | Engine-specific parameter maps validated against schemas |
 
@@ -2696,7 +2840,7 @@ Engine tier metadata is declared in each in-scope engine package with
 | IK/ID Solutions          | JSON/MATLAB            | API response or file        | Joint angles (IK) and joint torques (ID) with confidence metrics   |
 | Optimized Trajectories   | URDF/MATLAB            | File export                 | Trajectory-optimized model definitions with optimal control inputs |
 | Visualization Data       | JSON (Three.js format) | GUI or web client           | 3D geometry, animation keyframes, and rendering parameters         |
-| Launch Monitor Analytics | CSV/JSON/project bundle | GUI or file export | Treated observations, provenance manifests, association/model results, dispersion, and trend summaries |
+| Launch Monitor Analytics | CSV/JSON/project bundle | GUI, API, or file export | Treated observations, provenance manifests, association/model results, dispersion, trends, source-backed SG with backing benchmark values, and non-SG outcome proxies |
 
 ### Configuration
 
@@ -2741,6 +2885,10 @@ UpstreamDrift employs a comprehensive test pyramid with multiple specialized cat
 - **Cross-Engine Tests**: Validate physics consistency across multiple engines with tolerance thresholds
 - **Physics Validation Tests**: Verify results against known ground truth (analytical solutions, published benchmarks)
 - **Golf Ball-Flight Source Contracts**: Validate documented aerodynamic, impact, and atmosphere assumptions against `docs/physics/GOLF_BALL_FLIGHT_IMPACT_SOURCE_MAP.md`
+- **Launch-Monitor Scoring Contracts**: Verify baseline hashing and provenance,
+  exact-stratum interpolation, fail-closed extrapolation, identity-safe grouping,
+  uncertainty availability, API schemas, and the prohibition on relabeling an
+  outcome proxy as strokes gained.
 - **Dependency Source Contracts**: Validate generated dependency artifacts against `pyproject.toml` and fail CI when lockfiles or `environment.yml` drift
 - **Documentation Governance Contracts**: Validate the canonical `docs/index.md` directory catalog, rendered documentation hub link, Markdown/Quarto size budget, and significant-word title capitalization for changed Markdown, Quarto, LaTeX, Word, and PDF documents.
 - **Benchmark Tests**: Performance regression detection and optimization validation
@@ -2756,6 +2904,7 @@ UpstreamDrift employs a comprehensive test pyramid with multiple specialized cat
 | Cross-Engine                | `tests/cross_engine/`       | pytest              | `@pytest.mark.gate` + `requires_<engine>` |
 | Physics Validation          | `tests/analytical/`, `tests/integration/conservation_laws/` | pytest              | `@pytest.mark.unit` / `@pytest.mark.integration` |
 | Golf Source Contracts       | `tests/unit/shared_python/` | pytest              | source-map contract tests           |
+| Launch-Monitor Scoring      | `tests/unit/launch_monitor/`, `tests/api/` | pytest | source-backed SG domain and API contract tests |
 | Dependency Source Contracts | `tests/unit/scripts/`       | pytest              | generated dependency contract tests |
 | Benchmarks                  | `tests/benchmarks/`         | pytest-benchmark    | `@pytest.mark.benchmark`            |
 | Property-Based              | `tests/unit/`               | hypothesis + pytest | `@hypothesis.given` (no dedicated marker) |
@@ -2786,6 +2935,8 @@ overlapping fixture names in nested conftests.
 - [ ] IK solver converges within 10 iterations for standard human poses
 - [ ] ID computation returns physically plausible torques (within 2-sigma of analytical)
 - [ ] Ball-flight atmosphere utilities reject non-finite or out-of-troposphere altitudes and stay traceable to documented golf source contracts
+- [ ] Source-backed SG rejects unverifiable baselines, incomplete course states, extrapolation, and untrusted grouped identity while preserving row-level backing evidence
+- [ ] Outcome-proxy responses remain explicitly non-SG in both domain and OpenAPI contracts
 - [ ] FastAPI endpoints return 200 for valid requests and 400 for invalid schema
 - [ ] GUI loads model and renders 3D visualization without crashing
 - [ ] Trajectory optimization improves cost function by >20% over initial guess
@@ -2879,7 +3030,12 @@ Beyond standard tools, CI enforces custom checks:
 - **Blocking SAST and Secret Scans**: `ci-standard.yml` runs blocking Bandit, Semgrep, pip-audit, and Trivy filesystem scans for pull requests and pushes
 - **Error-Handling Ratchet**: `scripts/ci/check_error_handling_ratchet.py` blocks increases in grandfathered broad catches, unused `noqa` debt, raw `subprocess.Popen(...)`, and `asyncio.gather(...)` calls that omit `return_exceptions=`, including multiline gather calls whose arguments span multiple lines.
 - **Type and Coverage Ratchets**: `scripts/check_mypy_exclusion_budget.py` blocks unowned mypy exclusions, non-monotonic exclusion schedules, and missing production package coverage-ratchet metadata. Pull requests and ordinary pushes with a concrete diff base run baseline mypy only on changed `src/` Python files so legacy type drift does not block unrelated work; scheduled/manual full-src mypy still runs through `scripts/ci/run_full_mypy_baseline.py`, which compares `mypy src --config-file pyproject.toml` against `scripts/config/full_src_mypy_baseline.json` and fails on new or stale type diagnostics during explicit full-audit lanes.
-- **Docker Size Gate**: Built images must not exceed 800 MB
+- **Docker Size Gates**: The canonical runtime and every modular profile must
+  remain within the explicit budget registered for that image. Modular workflow
+  budgets must match `docker/profiles.yaml`; slim is currently 900 MB and
+  standard is 2200 MB after the governed core runtime added pandas-backed API
+  routes.
+- **Unit-Gate Quarantine Ratchet**: `scripts/ci/check_unit_gate_quarantine.py` requires every ledgered node ID to resolve to exactly one owned, executable failure cluster. Pull requests compare the current node-ID set with the fetched base branch and reject additions or replacements while allowing removals; duplicate, unassigned, ambiguous, or malformed entries fail closed. The checker can list or run one cluster in bounded batches without changing the Green-Suite-only skip boundary.
 
 ### CI/CD Pipeline
 
@@ -2892,7 +3048,7 @@ Beyond standard tools, CI enforces custom checks:
 | `nightly-cross-validation.yml` | Daily 2:00 UTC                         | Full multi-engine validation suite against all model variations                       | No (informational) |
 | `tauri-build.yml`              | Tag release                            | Build desktop apps for Windows/macOS/Linux                                            | Yes (for releases) |
 | `vendor-freshness.yml`         | Weekly                                 | Check for stale dependencies and security updates                                     | No (warning-only)  |
-| `docker-size-gates.yml`        | Push                                   | Ensure Docker image size stays <800 MB                                                | Yes                |
+| `docker-size-gates.yml`        | Push                                   | Enforce the canonical runtime and per-profile image budgets                           | Yes                |
 
 ### Required Status Checks
 
@@ -3068,6 +3224,28 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-23 | 1.0.581 | Reconciled issue #8724's normalized adjudication checkpoint with the current 303-claim paper. The migration is locked to the exact paper digest and contains an exhaustive explicit claim-ID authority, so an unfamiliar claim cannot inherit `supported`. The reviewer JSON/CSV and generated paper tables now separate outcome, evidence tier, source independence, model tier, unresolved replication, and claim-family concentration. Typed evidence locators, local anchors, bibliography keys, deterministic source digest, exact candidate reciprocity, falsifiers, adjudication reasons, and human-data boundaries remain fail-closed. Source and evidence-file caches remove repeated validation I/O without weakening resolution. |
+| 2026-08-23 | 1.0.580 | Closed participant-holdout and executable-mapping authority gaps in #9004's governed ingestion boundary. Each trial now binds an immutable `measured-trajectory-participant-split/v1` manifest that freezes sorted, disjoint training, held-out, and adverse cohorts before outcomes. The loader verifies the split digest, source, registered deterministic assignment method, UTC freeze-before-artifact ordering, minimum cohort counts, adverse cohort, unique participant membership, cohort label, and intended-use eligibility before invoking a parser. It also contains and verifies the exact acquisition-processing authority, four frame-transform records, and two event-detector configurations by relative path and SHA-256 before payload parsing. Returned artifacts expose the split, cohort, processing, transform, and detector provenance while retaining false human-inference and bilateral-wrench gates. UTC timestamps, format hints, and channel identifiers are also validated structurally. |
+| 2026-08-23 | 1.0.579 | Added the fail-closed #9004 measured-trajectory acquisition and ingestion boundary. A per-trial typed manifest now binds an authorized source package and decoded trajectory to immutable digests, participant grouping, canonical units, acquisition processing, four frame authorities, two event records, declared channels, six uncertainty analyses, and intended use. The gateway recomputes source and preregistration readiness, rejects duplicate keys, path traversal and pickle formats before parsing, verifies both digest layers, delegates only to the canonical motion-pipeline adapter, and reports missing channels as unavailable rather than zero. It always denies human-inference and bilateral-wrench authority; no current dataset is admitted. |
+| 2026-08-23 | 1.0.579 | Made the headless optional-stack contract deterministic by forcing Matplotlib's noninteractive `Agg` backend at the job boundary. This prevents an ambient interactive runner backend from producing `Invalid DISPLAY variable` failures while leaving application and library backend selection unchanged outside CI. A workflow-structure regression test now enforces the boundary. |
+| 2026-08-23 | 1.0.578 | Preregistered #9004's motion-only golf-likeness evaluation before any governed trajectory outcome exists. The fail-closed contract freezes participant-level holdout, four frame authorities, downswing-start and impact events, eleven primary club/body/hand/geometry/feasibility/discrepancy metrics, four manufactured negative controls, six processing and mapping sensitivities, training-only threshold selection, and missing-as-unavailable behavior. It cross-checks the measured-source registry, prohibits frame-wise splits and force/coaching promotion, and remains blocked because no qualifying measured trajectory authority is available. |
+| 2026-08-23 | 1.0.577 | Added the fail-closed measured golf-trajectory source registry for #9004. Exact schemas, source classes, authority/access/license states, participant and trial counts, body/club/calibration/synchronization availability, content digests, decisions, and blockers are validated before readiness is derived. Simulation output cannot qualify human measurement; pipeline and participant-held-out readiness require governed body-and-club trajectories, calibration, synchronization, grouping, explicit reuse authority, and a registered digest. The initial census retains GolfPose and KIT Motion 1319 as blocked candidates, GolfDB and local fixtures as negative controls, local Simscape output as inadmissible validation evidence, and all human/coaching and bilateral-wrench inferences as unavailable. |
+| 2026-08-22 | 1.0.576 | Made issue #8766's unit-gate debt executable rather than descriptive. All 520 quarantined node IDs resolve exactly once into ten owned clusters with rationales, reproduction commands, exit criteria, and blocking status. A fail-closed checker rejects malformed, duplicate, unassigned, or ambiguous entries and can list or execute each cluster in bounded batches. CI Standard compares pull-request node IDs with the fetched base branch, so the removal-only rule now rejects additions and replacements while allowing verified burn-down; existing `UNIT_GATE_QUARANTINE=1` skip behavior is unchanged. |
+| 2026-08-22 | 1.0.575 | Bound modular Docker builds to the exact pinned Tools package roots. CI emits the superproject gitlink and deterministic path-and-content digest; the isolated build copies only the registered roots and recomputes the digest without Git metadata. Missing roots, symlinks, incomplete attestations, malformed identities, and content mismatches fail closed. The custom Hatch hook loads its adjacent helper by file path so PEP 517 source and editable builds do not depend on the repository root being present on `sys.path`. Constructor-compatible Hatchling test doubles and explicit suite isolation prevent collection order from changing that contract. Both runtime Dockerfiles pin pip 26.2.1 after PYSEC-2026-3721. All supported images reassert `msgpack` 1.2.1 and `setuptools` 83.0.0 after their final dependency layer to resolve GHSA-6v7p-g79w-8964, CVE-2025-47273, and PYSEC-2026-3447 without a scanner waiver. Production runtime targets then remove pip and its embedded third-party SBOM after finalizing dependencies; only the explicit training stage restores the audited builder environment for package installation. The modular builder copies both force-included launchers before feature installation so isolated metadata generation matches the wheel contract. The protected slim build then exposed stale workflow budgets (800/2000 MB) that contradicted the canonical profile catalog (900/2200 MB); the workflow is resynchronized and a regression test now makes `docker/profiles.yaml` authoritative. Focused action, workflow, Docker-context, isolated-import, packaging, security-pin, runtime-surface, size-budget, and tamper tests enforce the boundary. |
+| 2026-08-22 | 1.0.574 | Retained PR #8995's MediaPipe landmark-mean optimization while repairing its generated specification projection: restored the complete first-parent specification, removed thousands of repeated misplaced changelog rows, and recorded the optimization exactly once in this Change Log. |
+| 2026-08-22 | 1.0.573 | Made the classic launcher application and event-loop lifecycle explicitly single-owner. A typed resolution seam reuses `QApplication.instance()` without starting a nested event loop and constructs and executes an application only when the launcher owns it. Tests use an ordinary mock at that seam instead of replacing the SIP-backed Qt class, preventing Linux worker teardown crashes; launcher-containment tests also isolate the mutable embeddable-tool registry so their package-entrypoint guard is independent of suite order. |
+| 2026-08-22 | 1.0.571 | Reconciled the release-bound proximal-to-distal publication record with the exact current candidate for #8977. The computational profile now pins the 235-page, 1,863,127-byte PDF digest, 246 outline entries, 194 valid external links, complete rendering and text extraction, and the exact font inventory in executable tests. The complete ordered page set was visually inspected, with the newly added native-contact section and surrounding pages checked at full resolution. The archival profile remains fail-closed and explicitly records the untagged structure, 112 Type 3 resources, and two unembedded resources rather than promoting computational readiness to an accessibility claim. |
+| 2026-08-21 | 1.0.570 | EPIC #8965 registry residuals + Tools vendor pin bump. `WEB_CATALOG_ONLY_TILES` allowlist entries now require a substantive justification string enforced by the parity suite (#8853); `virtual/*` launch targets are genuinely validated against the handler artifacts they dispatch to (`VIRTUAL_TARGETS`/`VIRTUAL_PREFIXES` map to backing files that must exist) instead of being allowlist-blessed (#8854); and `src/config/registry_exclusions.yaml` is the new documented convention for launcher-less `src/tools` packages — every package must either be reachable from a launcher tile or carry a justified exclusion entry, enforced by `tests/config/test_registry_exclusions.py` (#8863: contraction, drift_control, sg_optimizer, hmr2_sidecar, matlab_utilities, offline_validation, video_analyzer). The `vendor/ud-tools` gitlink advances from `1664d806df8a` to `aec16af5a1e69d`-era Tools main (`aec16af5a1e69c0d5542da5e04a1db1023cceff2`), revalidated by the vendor-authority, manifest, sidekick-import, and launch-QA suites. |
+| 2026-08-21 | 1.0.569 | Implemented `MuJoCoSwingStateProvider` (#8975, EPIC #8965/WS2): the swing→flight pipeline's mujoco entry now sources a real engine-backed `SwingState` instead of sitting disabled. A narrow facade (`src/shared/python/physics/mujoco_swing_source.py`) runs the in-repo upper-body golf-swing MJCF under full MuJoCo forward dynamics — a scripted open-loop half-sine torque pulse whose scale is bisection-calibrated toward the requested clubhead speed — and extracts world-frame clubhead velocity, angular velocity, face orientation, mass, and MOI from `mjData`/`mjModel` at peak clubhead speed. Metadata records the model asset, `mujoco_forward_dynamics` method, timestep, torque scale, and the achieved-speed residual honestly (never fabricated to match the request). The provider registry replaces the mujoco `UnimplementedEngineProvider` with the real one (availability gated on `mujoco` + MJCF asset importability, so the GUI combo enables automatically), the shared provider postcondition now also enforces finite shape-(3,) kinematic vectors, and a golden-fixture JSON replay plus contract tests keep CI honest without a slow simulation. |
+| 2026-08-21 | 1.0.568 | Landed the EPIC #8965 wave-1 consolidation (PR #8976). Quarantined dead launcher shells (`unified_launcher.py`, `golf_suite_launcher.py`, `model_registry.py`) are deleted for good (#8831/#8859) with tombstone test modules preserving the audit trail; the ADR-0013 `EmbeddableTool` registry is now the single embedding contract consulted by every model handler before the deprecated legacy import-and-probe fallback (#8857), with registry/dockable resolution split into `src/launchers/_dockable_resolution.py` and window-layout persistence into `src/launchers/launcher_layout_persistence.py` to respect the 1200-line file budget. Sidekick API readiness probing moved off the GUI thread onto `SidekickReadinessProbeThread` (#8939), the WSL-mode probe became a non-blocking worker (#8903), launcher manifests gained a shared async cache seam, and the swing-flight pipeline GUI now sources pre-impact state from typed `SwingStateProvider`s that disable unimplemented engines honestly instead of stamping manual numbers with engine names (#8819). |
+| 2026-08-21 | 1.0.567 | Corrected #8909's false distributed-grip cross-engine authority. Robotics Pinocchio now requires version 2.6 or newer and the native Model/SE3/Inertia/CRBA/nonlinear-effects/RNEA API; the unrelated PyPI `pinocchio` 0.1 collision and every model-build failure stop the study rather than silently substituting MuJoCo. A degeneracy gate rejects an identically zero set of trajectory, force, and stick-projection discrepancies, and a repository test audits the Pinocchio identity recorded by every committed cross-engine artifact. The perfect-stick control uses a mass-whitened rank-revealing SVD so redundant station rows do not square the constraint-system condition number or require a relaxed no-slip gate. Inertia, contact-projection, forward-contact, and distributed-grip evidence and figures were regenerated with genuine MuJoCo 3.8.0 and Pinocchio 3.8.0 operators before claim registration and publication qualification. |
+| 2026-08-21 | 1.0.566 | Pinned the protected Tools #4430 rotating-base companion at `1664d806df8a2c7b184d2d3fbcea93b714caaee5` and added a fail-closed UpstreamDrift consumer contract for its ordered 18-run catalog, immutable source/study/catalog digests, 13 valid cases, five adverse cases, typed limitations, and unsupported human/coaching inference. The package workflow now reserves 30 minutes for a cold Tools checkout, frontend/Python build, verified wheel-content gate, and large artifact upload. Its unnecessary setup-node npm cache is disabled because measured `npm ci` takes seconds while post-job cache upload alone could consume the remaining job budget after the verified wheel uploaded successfully. |
+| 2026-08-21 | 1.0.565 | Quantized only the conformance golden-snapshot serialization boundary to eight significant digits so platform-specific floating-point tails cannot change the longitudinal and confidence-interval scenario or bundle hashes. The analytics computations and result contracts remain unchanged. |
+| 2026-08-21 | 1.0.564 | Added the data-free `launch-monitor-analytics-conformance/1.0.0` consumer bundle. Ten deterministic synthetic cases span available and structured-unavailable analysis v2, player covariation, attested longitudinal sessions, source-backed strokes gained, and distance/target proxy results. Uniform wrappers retain units, claims, player/session/order evidence, exclusions, source references, source-joinable backing hashes, scenario hashes, and a canonical bundle SHA without embedding private or observed input rows. Generated JSON Schema and golden JSON share the strict Python authority; analytics behavior and v1/v2 result contracts remain unchanged. |
+| 2026-08-20 | 1.0.563 | Added the canonical `launch-monitor-longitudinal-session/1.0.0` contract for #8808. Trusted and distinct player, session, and order evidence is mandatory. Shots aggregate into equal-weight player/session/stratum cells before per-player descriptive slopes and pooled player-fixed-effects OLS with player-clustered CR1 uncertainty. Missing/non-finite rows, blank identities, nonconstant session order, insufficient sessions or clusters, rank deficiency, and degenerate uncertainty are explicit unavailable states. Complete source-linked backing and missingness remain present, while shot-level inference and causal improvement are false. JSON Schema, a content-addressed golden source, FastAPI routes, generated declarations, ADR 0039, and tests share the Python authority. |
+| 2026-08-20 | 1.0.562 | Added the canonical `launch-monitor-player-covariation/1.0.0` contract for #8807. Selected-pair analysis separates pooled, player-centered, between-player, and per-player associations, then publishes fixed- and DerSimonian-Laird random-effects Fisher-z summaries with Q, tau-squared, and I-squared heterogeneity. Trusted explicit player identity is mandatory; missingness, ineligible/constant groups, unavailable states, uncertainty methods, units, vendor/model provenance, and source-joinable backing hashes remain explicit. The deterministic bounded pair scan retains unavailable pairs and warns about multiplicity, aggregation reversal, causality, and population-generalization limits. JSON Schema, golden pair/scan fixtures, FastAPI routes, generated React declarations, and compatibility tests share the Python authority while generic v1/v2 contracts remain unchanged. |
+| 2026-08-20 | 1.0.560 | Hardened the launch-monitor v2 identity boundary for #8805. `PlayerIdentityV2` rejects session, club, source, filename, row-order, and source-row pseudo-identifiers even when attested. Separate `SessionIdentityV2` and `OrderEvidenceV2` records now preserve session boundaries, order semantics, units, trust, and backing evidence without promoting those fields to player identity. Invalid identity claims fail as request-contract errors; analyses that do not require session/order evidence remain compatible, and future longitudinal operations must report missing evidence as unavailable rather than infer it. Contract v1 remains unchanged. |
+| 2026-08-20 | 1.0.559 | Added the canonical source-backed strokes-gained and separate outcome-proxy contracts for #8803. SG requires complete start/finish course state and a versioned expected-strokes baseline with HTTP(S) source, license declaration, canonical SHA-256, and unique stratum/distance points. Exact-stratum interpolation is allowed; extrapolation fails closed. Results preserve formula, units, row and dataset hashes, backing benchmark values, exclusions, uncertainty availability, conservative claims, and identity evidence for grouped or longitudinal analysis. FastAPI publishes the schema and analysis endpoints, and generated React declarations remain locked to OpenAPI. The radial-error outcome proxy is structurally prohibited from claiming strokes gained. |
 | 2026-08-20 | 1.0.558 | Closed PR #8793's first protected publication run failures without weakening either gate. Claim-evidence schema v2 hashes valid UTF-8 evidence after canonical CRLF-to-LF normalization while preserving byte-exact binary hashes, so identical committed evidence validates across Windows and Linux checkouts. A focused regression pins both newline forms to one digest and canonical byte count. The PDF finding helper now owns expected metadata as one parameter object, bringing the changed production function back within the repository's eight-parameter architecture budget. |
 | 2026-08-20 | 1.0.557 | Added the release-bound proximal-to-distal publication-quality contract for #8451. The exact UpstreamDrift revision and release-manifest digest now bind a full-PDF inspection covering metadata, outline and link validity, per-page rendering, extractable text, tagging, font resources, and web optimization. CI Standard runs the validator in a dedicated path-scoped job aggregated into the sole required `quality-gate`, so missing optional tooling cannot silently skip protected inspection. The current 231-page candidate passes the computational profile and is losslessly linearized, while the stricter archival profile remains fail-closed on the disclosed untagged, Type 3, and unembedded-font gaps. The contract preserves UpstreamDrift as scientific source authority, AffineDrift as a revision-pinned generated publisher, and human qualification as a separate governed gate. |
 | 2026-08-20 | 1.0.556 | ⚡ Bolt: Fast NumPy reductions and norm computations across motion matching, physics engines, and visualization modules (issue #8782). |
@@ -3239,6 +3417,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 | 2026-06-11 | 1.0.339 | Suite-marker ratchet follow-up for the #7382 import-boundary consolidation repair and the #7380 simulator-facade merge. The launcher dependency-probe, settings Docker dependency worker, architecture-budget metadata, C3D viewer export worker, body-target-video cancellation, shared ball constants, MuJoCo torque dimension mismatch, Pinocchio inverse-dynamics readiness, and generated-rig orchestrator regression tests now carry explicit `unit` suite markers so CI can enforce no-growth test metadata without weakening the marker baseline. |
 | 2026-06-11 | 1.0.338 | Import-boundary facade consolidation for #7361, #7362, and #7363. The C3D viewer entrypoint now imports the repo-qualified viewer module directly, MCP config I/O moved into `src/shared/python/ai/mcp/config_io.py` with launcher compatibility facades, shared MCP chat integration reads shared config, and shared/engine datetime compatibility imports route through shared helpers. The changed-file architecture budget now records owned expiring exceptions for the five pre-existing oversized functions surfaced by the consolidation so decomposition debt remains visible without leaving `main` red. |
 | 2026-06-11 | 1.0.337 | MuJoCo motion-matching placeholder failure routing for #7333. The orchestrator now carries solver metadata through the motion-matching stage, maps unavailable or zero-torque MuJoCo matching results to `InvalidInputError` so REST callers receive 400-class configuration feedback instead of HTTP 500, and the motion-pipeline README recommends a non-placeholder matching backend until real MuJoCo rig-model integration lands. |
+| 2026-08-22 | 1.0.572 | Optimize List and Array Reductions in Nonlinear Dynamics Analysis for performance. |
 | 2026-06-11 | 1.0.336 | Suite-marker ratchet enforcement for #7272. CI Standard now runs `scripts/ci/check_suite_marker_ratchet.py` against `scripts/config/suite_marker_baseline.json`, failing net-new tests that lack a recognized suite marker while allowing legacy unmarked-test debt to shrink. The shared `tests.support.suite_markers` helpers now normalize nodeids, load the baseline, and support report-only, strict, and baseline-ratchet collection behavior from `tests/conftest.py`; contributor guidance lives in `docs/development/test-marker-conventions.md` with focused unit coverage for the static scanner and runtime helpers. |
 | 2026-06-11 | 1.0.335 | Restored the #7246/#7247 regression-guard cluster for #7325, #7326, and #7327 after PR #7248 reverted part of the launch-condition unit fix. `LaunchConditions.from_user_units(...)` is again the canonical GUI/user-input boundary for degree-to-radian conversion and RPM spin, the ball-flight GUI routes through that seam, and the current main gap-fill keypoint bounds guard remains covered by focused regression tests. |
 | 2026-06-11 | 1.0.334 | Collision distance helper optimization for #7324. Primitive-shape distance helpers now use explicit component access instead of `math.hypot(*tuple)` unpacking, preserving robotics collision behavior while avoiding tuple unpacking overhead on hot paths. |
@@ -3583,6 +3762,8 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - **Performance:** Replaced `np.sum(forces, axis=0)` with `sum((s.force for s in self._sources.values()), np.zeros(3))` in `ForceAccumulator` methods (`get_total_force`, `get_total_torque`, and `get_total_generalized_force`) in `src/engines/common/state.py` to avoid intermediate list and array allocations, yielding ~30% faster execution time for accumulating forces and torques.
 
 ### Performance Improvements
+
+- (spec-exempt: micro-optimization) Replaced `np.sum(diff * diff)` with `np.dot(diff.ravel(), diff.ravel())` for calculating `rmse` in `src/engines/physics_engines/drake/python/motion_matching/fit_swing_autodiff.py` to optimize performance while maintaining `AutoDiffXd` compatibility.
 
 - Optimize trajectory evaluation constraints in drake optimization by replacing `np.sum(arr)` with `arr.sum()` and skipping numpy array dispatch overhead (spec-exempt: micro-optimization).
 - Replaced `np.sum(weights)` with `weights.sum()` in `keypoint_offsets.py` to bypass array conversion checks and improve execution speed. (spec-exempt: micro-optimization)
@@ -4128,6 +4309,28 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   optional dependency or lightweight same-named check shall not substitute for
   the protected publication contract.
 
+### F-8557.28: Native Contact Formulation Discrepancy Control
+
+- A contact-solver or integrator parity claim shall require independently
+  executed contact and state-update operators. Sharing a project-authored
+  contact law or update shall be described as operator transport, even when
+  native engines independently supply kinematics, inertia, bias, gravity, and
+  continuous-time acceleration.
+- The native MuJoCo control shall start from the same achieved closed state as
+  the projected comparator, use native equality constraints and `mj_step`, and
+  retain an equality-disabled killswitch that returns zero constraint force.
+- Native equality and projected Kelvin--Voigt parameters shall not be treated
+  as physically interchangeable merely because their numerical stiffness and
+  damping values match. A nonzero trajectory discrepancy shall be retained as
+  a formulation result rather than relaxed into a parity success.
+- Generalized coordinate-vector norms that combine revolute and prismatic
+  coordinates shall be labeled mixed-unit numerical diagnostics. Physical
+  interpretation shall use typed separations, coordinate differences, wrench
+  components, and refinement behavior.
+- The discrepancy control shall remain bounded to synthetic mechanism and
+  numerical-formulation evidence. It shall not establish anatomy, tissue
+  mechanics, equipment calibration, human transfer, or coaching strategy.
+
 - Use `np.vdot` instead of `np.sum(x**2)` and `np.sqrt(np.einsum("ij,ij->i", x, x))` instead of `np.linalg.norm(x, axis=1)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
 - Use `np.einsum('ij,ij->j', x, x)` instead of `np.sum(x * x, axis=0)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
 - (spec-exempt: micro-optimization) Replaced `.iterrows()` with `.to_dict('records')` in `data_processor_widget.py`, `kaggle_validation.py`, and `launch_monitor_analytics/widgets.py` to optimize UI and validation performance.
@@ -4144,3 +4347,11 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 * (spec-exempt: micro-optimization) Replaced `np.sum` with `np.vdot` and `ndarray.sum()` across simulation files for faster execution
 
 - `spec-exempt`: Replaced `np.sum(A * B)` with `np.vdot(A.ravel(), B.ravel())` in `src/bunkershot3d/study/surrogate.py` to optimize 2D array dot product without changing logic.
+
+- Replaced `np.concatenate` with in-place slice assignment in `TrajectoryFunnelBenchmark._policy_action` to optimize array construction in tight simulation loops. (spec-exempt: micro-optimization)
+- Security: Added `X-Launcher-CSRF-Token` to CORS `allow_headers` in `src/api/server.py` and `src/api/local_server.py` to fix CORS preflight rejections for the local launcher UI.
+- Added canonical source-backed strokes-gained contract schema and analytics routes (`ADR-0035`, `docs/api/contracts/launch-monitor-strokes-gained-v1.schema.json`).
+- Added immutable launch-monitor dataset reference and aggregate job service routes (`ADR-0037`, contract `launch-monitor-dataset-job/1.0.0`).
+- Updated Ruff and Bandit toolchain compliance configuration in `pyproject.toml` and scripts to satisfy standard CI quality gates.
+- Replaced pandas `iterrows()` with vectorized `.to_dict("records")` in `launch_monitor/outcome_proxy.py` and `launch_monitor/strokes_gained.py` to optimize batch processing. (spec-exempt: micro-optimization)
+- Vectorized batch swing optimizer effort sum-of-squares computation across environments via `np.einsum("nij,nij->n", controls, controls)` in `src/shared/python/optimization/batch_swing_optimizer.py` (#8958). (spec-exempt: micro-optimization)

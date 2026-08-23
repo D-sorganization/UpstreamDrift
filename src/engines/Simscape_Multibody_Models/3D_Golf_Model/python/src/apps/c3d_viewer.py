@@ -215,7 +215,7 @@ class MainWidget(QtWidgets.QWidget):
     def _apply_theme_colors(self, *args, **kwargs) -> None:
         """Apply active theme colors dynamically to the local menu bar."""
         try:
-            from src.shared.python.theme import get_current_colors
+            from src.shared.python.theme.palette import get_current_colors
 
             colors = get_current_colors()
             bg_color = colors.get("bg_elevated", colors.get("group_bg", "#1e1e1e"))

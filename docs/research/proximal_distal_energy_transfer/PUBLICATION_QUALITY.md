@@ -40,14 +40,19 @@ equipment calibration and external archive/PID deposition.
 
 ## Current Candidate Result
 
-The 231-page candidate renders successfully on all 231 pages, exposes
-extractable text on all 231 pages, contains 246 outline entries and 192 valid
-external links, and is now linearized for fast web access. Its candidate PDF
-SHA-256 is
-`a46ec01e6085eda7a80533ab59137b116b6bd3d0f548def792cabf3212137482`.
+The 239-page candidate renders successfully on all 239 pages, exposes
+extractable text on all 239 pages, contains 247 outline entries and 194 valid
+external links, and is linearized for fast web access. Its candidate PDF has
+1,870,344 bytes and SHA-256
+`be85b7b62bba060a26ce3fea8355aa8b01dcf8c1b1ccf09304450898a4e5e78b`.
+The complete ordered 239-page render set is inspected in contact-sheet form,
+with full-resolution inspection of the newly added claim-adjudication reviewer
+section and its surrounding pages. No blank, clipped, missing, or grossly
+unreadable page may be accepted. This visual record qualifies the current
+candidate only; any regenerated PDF requires a new complete inspection.
 
 The computational profile passes. The archival profile remains deliberately
-blocked because the PDF has no structure tag tree, contains 110 Type 3 font
+blocked because the PDF has no structure tag tree, contains 112 Type 3 font
 resources from embedded figures, and uses two unembedded base-font resources.
 Those facts are release findings, not waived successes. An archival release or
 accessibility claim must wait for a regenerated, tagged document with accessible

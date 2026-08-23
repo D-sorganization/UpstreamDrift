@@ -1,4 +1,4 @@
-"""Register the cross-engine forward-contact validity-horizon claims."""
+"""Register the inertia-and-bias transport validity-horizon claims."""
 
 from __future__ import annotations
 
@@ -52,7 +52,7 @@ def _claim(
         "statement": statement,
         "classification": classification,
         "published_status": status,
-        "audit_status": "paired_cross_engine_horizon_adverse_load_and_energy_controls_checked",
+        "audit_status": "paired_inertia_bias_transport_horizon_adverse_load_and_energy_controls_checked",
         "source_locations": [
             f"{candidate['source_path']}:{candidate['line_start']}"
             for candidate in candidates
@@ -95,7 +95,7 @@ def _build_claims(
         "figure": _find(
             candidates,
             "_ch06c_spatial_cross_formulation.qmd",
-            "![Cross-Engine Forward-Contact",
+            "![Inertia-and-Bias Transport Validity Horizon",
         ),
         "result": _find(
             candidates,
@@ -118,7 +118,7 @@ def _build_claims(
         _claim(
             "PD-CLAIM-271",
             [selected["design"]],
-            statement="The registered horizon matrix advances every profile--span--phase state through four horizons under nominal conditions and nine one-factor adverse or null branches in paired MuJoCo and Pinocchio runs.",
+            statement="The registered horizon matrix advances every profile--span--phase state through four horizons under nominal conditions and nine one-factor adverse or null branches using paired MuJoCo and Pinocchio inertia-and-bias operators with a shared projected contact law and state update.",
             classification="closed_state_forward_horizon_design",
             status="complete_for_declared_reduced_matrix",
             boundary="The design varies engineering factors one at a time and does not sample a calibrated joint parameter distribution.",
@@ -128,7 +128,7 @@ def _build_claims(
             "PD-CLAIM-272",
             [selected["abstract"], selected["result"], selected["conclusion"]],
             statement="All 2,160 registered horizon cases pass the declared trajectory, wrench, normalized-energy, and work--energy closure gates; no first failure is observed through 50 ms.",
-            classification="closed_state_cross_engine_validity_horizon_result",
+            classification="closed_state_inertia_bias_transport_validity_horizon_result",
             status="supported_and_right_censored_at_50_ms",
             boundary="Passing through 50 ms supplies no evidence beyond 50 ms and does not constitute a full delivery or impact simulation.",
             falsifier="Any committed case fails a gate, loses finite closure, or a reproduced result finds an earlier incomplete-pass horizon.",
@@ -228,7 +228,7 @@ def _update_release(registry: dict[str, Any]) -> None:
     registry["release_claim_inventory"] = list(entries.values())
     registry["audit_scope"]["current_scope"] = (
         "The complete paper inventory is adjudicated. Closed subject-scaled states "
-        "pass a 2,160-case reduced cross-engine horizon and adverse-load map through "
+        "pass a 2,160-case reduced inertia-and-bias transport horizon and adverse-load map through "
         "50 ms. The no-failure result is right-censored; articulated contact, "
         "calibrated equipment, full delivery, and governed human validation remain open."
     )

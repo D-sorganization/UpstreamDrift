@@ -75,14 +75,11 @@ class TestEngineManager:
             drake_dir.mkdir(parents=True)
 
             from src.shared.python.engine_core import engine_manager as em
-            from src.shared.python.engine_core.engine_availability import (
-                EngineStatus as RuntimeStatus,
-            )
 
             with patch.object(
                 em,
-                "get_runtime_engine_status",
-                lambda name: RuntimeStatus.AVAILABLE,
+                "is_dependency_present",
+                lambda name: True,
             ):
                 manager = EngineManager(suite_root=temp_path)
             available_engines = manager.get_available_engines()

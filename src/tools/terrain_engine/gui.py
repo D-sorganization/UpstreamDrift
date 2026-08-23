@@ -29,7 +29,7 @@ from src.shared.python.physics.terrain_presets import (
     ENVIRONMENT_PRESETS,
     build_environment_preset,
 )
-from src.shared.python.theme.style_constants import Styles
+from src.shared.python.theme.layout_metrics import LayoutMetrics
 
 
 def _color(colors: Any, attr: str, fallback: str) -> str:
@@ -93,12 +93,12 @@ class TerrainExplorerWidget(QWidget):
 
         root = QVBoxLayout(self)
         root.setContentsMargins(
-            Styles.MARGIN_PAGE,
-            Styles.MARGIN_PAGE,
-            Styles.MARGIN_PAGE,
-            Styles.MARGIN_PAGE,
+            LayoutMetrics.MARGIN_PAGE,
+            LayoutMetrics.MARGIN_PAGE,
+            LayoutMetrics.MARGIN_PAGE,
+            LayoutMetrics.MARGIN_PAGE,
         )
-        root.setSpacing(Styles.SPACING_MD)
+        root.setSpacing(LayoutMetrics.SPACING_MD)
 
         title = QLabel("Terrain Engine")
         title.setObjectName("TerrainTitle")
@@ -113,7 +113,7 @@ class TerrainExplorerWidget(QWidget):
         controls = QWidget()
         controls_layout = QVBoxLayout(controls)
         controls_layout.setContentsMargins(0, 0, 0, 0)
-        controls_layout.setSpacing(Styles.SPACING_MD)
+        controls_layout.setSpacing(LayoutMetrics.SPACING_MD)
 
         preset_group = QGroupBox("Preset")
         preset_form = QFormLayout(preset_group)
@@ -156,7 +156,7 @@ class TerrainExplorerWidget(QWidget):
         preview = QFrame()
         preview_layout = QVBoxLayout(preview)
         preview_layout.setContentsMargins(0, 0, 0, 0)
-        preview_layout.setSpacing(Styles.SPACING_MD)
+        preview_layout.setSpacing(LayoutMetrics.SPACING_MD)
 
         self.summary = QLabel("")
         self.summary.setWordWrap(True)

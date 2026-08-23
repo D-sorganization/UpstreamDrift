@@ -169,6 +169,15 @@ def test_real_engine_adapters_execute_same_initial_contract() -> None:
 def test_committed_spatial_forward_evidence_is_falsifiable() -> None:
     record = json.loads((DATA_DIR / "spatial_forward_contact_study.json").read_text())
     assert record["schema_version"] == "spatial-forward-contact-evidence-v1"
+    assert record["trajectory_kind"] == (
+        "shared_projected_contact_and_integrator_with_native_inertia_bias_transport"
+    )
+    assert "native_inertia_bias_transport" in record["claim_status"]
+    assert "cross_engine_forward_contact_transport" not in record["claim_status"]
+    assert any(
+        "Neither native contact solver nor native integrator" in limitation
+        for limitation in record["limitations"]
+    )
     assert set(record["engine_identities"]) == {"mujoco", "pinocchio"}
     assert all(
         item["native_forward_dynamics"] for item in record["engine_identities"].values()
