@@ -43,13 +43,23 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
 - Parent PID `18404` is the intentional source-locked coordinator with 20
   workers. Do not kill workers individually, edit source-hashed files, or start
   a duplicate campaign.
-- At 2026-08-22 22:25 PDT, 16 of 19 corners were fully accounted.
+- At 2026-08-22 22:52 PDT, 16 of 19 corners were fully accounted.
   `ground_free_moment_stiffness_scale-high` is the active seventeenth corner;
-  the restart tree held 1,155 atomic branch checkpoints and was still advancing.
+  the restart tree held 1,158 atomic branch checkpoints. The coordinator remained
+  alive; the most recent checkpoint was written at 22:30 while the current
+  branch solve continued.
   Two registered ground-only damping corners follow it. The 21-process group
   remains healthy; do not trade scientific identity for a faster restart.
 - Completed rows and digest-bound branch checkpoints are restartable. Partial
   checkpoints are execution evidence, not release evidence.
+- Codex usage exhaustion does not itself stop this operating-system process, so
+  it may continue unattended while this task is inactive. Closing or updating
+  the Codex app, rebooting Windows, or terminating its parent process can stop
+  it. On takeover, first verify PID `18404` and its descendants. If they are
+  alive, monitor only. If they are absent, audit the JSON and checkpoint tree,
+  then relaunch the exact recorded command once from this unchanged worktree;
+  the digest-bound atomic checkpoints resume completed branches. Never start a
+  second coordinator while PID `18404` or any replacement coordinator is alive.
 - After completion, independently audit the record, then integrate
   `fix/8752-atomic-campaign-checkpoint` (`9f850a67f...`). Execute #8800 next,
   then regenerate claims, figures, the paper, and the AffineDrift projection.
