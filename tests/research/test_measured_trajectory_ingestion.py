@@ -104,6 +104,12 @@ def _split_manifest(tmp_path: Path, intended_use: str) -> Path:
     return path
 
 
+def _authority_file(tmp_path: Path, name: str) -> Path:
+    path = tmp_path / name
+    path.write_text(json.dumps({"authority_id": name}), encoding="utf-8")
+    return path
+
+
 def _manifest(
     package: Path,
     trajectory: Path,
@@ -112,6 +118,7 @@ def _manifest(
     intended_use: str = "held_out_qualification",
 ) -> dict[str, Any]:
     split = _split_manifest(package.parent, intended_use)
+    processing = _authority_file(package.parent, "processing-authority.json")
     cohort = "training" if intended_use == "pipeline_probe" else "held_out"
     return {
         "schema_version": "measured-trajectory-artifact/v1",
@@ -145,17 +152,23 @@ def _manifest(
             "filtering_method": "unfiltered_raw_then_registered_pipeline",
             "marker_reconstruction_method": "dataset_authority_rigid_body",
             "anthropometric_source": "participant_calibration",
+            "processing_authority_relative_path": processing.name,
+            "processing_authority_sha256": _digest(processing),
         },
         "frames": [
             {
                 "frame_id": frame_id,
                 "definition": f"governed {frame_id} definition",
                 "transform_authority": f"governed {frame_id} transform",
-                "transform_sha256": "1" * 64,
+                "transform_relative_path": transform.name,
+                "transform_sha256": _digest(transform),
                 "translation_uncertainty_m": 0.002,
                 "rotation_uncertainty_rad": 0.01,
             }
             for frame_id in ("lab", "anatomical", "model", "club")
+            for transform in [
+                _authority_file(package.parent, f"{frame_id}-transform.json")
+            ]
         ],
         "events": [
             {
@@ -163,10 +176,15 @@ def _manifest(
                 "time_s": time_s,
                 "detector_id": f"{event_id}-detector",
                 "detector_version": "1.0.0",
+                "detector_config_relative_path": detector.name,
+                "detector_config_sha256": _digest(detector),
                 "uncertainty_s": 0.002,
                 "missing_policy": "unavailable_not_zero",
             }
             for event_id, time_s in (("downswing_start", 0.0), ("impact", 0.25))
+            for detector in [
+                _authority_file(package.parent, f"{event_id}-detector.json")
+            ]
         ],
         "channels": channels if channels is not None else _all_required_channels(),
         "uncertainties": [
@@ -231,6 +249,15 @@ def test_governed_loader_checks_authority_and_digests_before_loading(
     assert result.cohort == "held_out"
     assert result.split_id == "golfpose-primary-split"
     assert result.split_manifest_sha256 == _digest(tmp_path / "participant_split.json")
+    assert result.processing_authority_sha256 == _digest(
+        tmp_path / "processing-authority.json"
+    )
+    assert dict(result.frame_transform_sha256s)["club"] == _digest(
+        tmp_path / "club-transform.json"
+    )
+    assert dict(result.event_detector_sha256s)["impact"] == _digest(
+        tmp_path / "impact-detector.json"
+    )
     assert result.human_inference_ready is False
     assert result.bilateral_wrench_gate_satisfied is False
 
@@ -416,6 +443,45 @@ def test_split_must_be_frozen_before_artifact_creation(tmp_path: Path) -> None:
             registration,
             payload_loader=lambda *_args, **_kwargs: object(),
         )
+
+
+@pytest.mark.parametrize(
+    ("relative_path", "match"),
+    [
+        ("processing-authority.json", "processing authority digest"),
+        ("lab-transform.json", "lab frame transform digest"),
+        ("impact-detector.json", "impact event detector digest"),
+    ],
+)
+def test_mapping_authority_digests_block_before_payload_loader(
+    tmp_path: Path,
+    relative_path: str,
+    match: str,
+) -> None:
+    package = tmp_path / "source.zip"
+    trajectory = tmp_path / "trial.c3d"
+    package.write_bytes(b"source")
+    trajectory.write_bytes(b"trajectory")
+    registry = _qualified_registry(tmp_path, _digest(package))
+    registration = _qualified_registration(tmp_path)
+    record = _manifest(package, trajectory)
+    manifest = _write_manifest(tmp_path, record)
+    (tmp_path / relative_path).write_bytes(b"tampered authority")
+    called = False
+
+    def loader(*_args: Any, **_kwargs: Any) -> object:
+        nonlocal called
+        called = True
+        return object()
+
+    with pytest.raises(ValueError, match=match):
+        load_governed_trajectory(
+            manifest,
+            registry,
+            registration,
+            payload_loader=loader,
+        )
+    assert called is False
 
 
 def test_duplicate_json_keys_are_rejected(tmp_path: Path) -> None:

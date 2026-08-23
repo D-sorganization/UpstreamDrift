@@ -32,7 +32,9 @@ Every admitted trajectory requires four independently validated records:
    method must agree with the preregistration.
 4. A per-trial `measured-trajectory-artifact/v1` manifest must bind the source
    package, decoded trajectory, participant, trial, acquisition processing,
-   split manifest, frames, events, channels, and uncertainties.
+   split manifest, frames, events, channels, and uncertainties. The processing
+   pipeline, every coordinate transform, and every event-detector
+   configuration are contained immutable files, not descriptive labels alone.
 
 The gateway recomputes registry and metric readiness. Stored summaries are not
 trusted.
@@ -94,7 +96,11 @@ The canonical ingestion boundary uses metres, radians, and seconds. Conversion
 from source units must remain reproducible from the acquisition and adapter
 records. Sampling rate must be positive. Synchronization, filtering, marker or
 keypoint reconstruction, and anthropometric sources must be named rather than
-left implicit.
+left implicit. The acquisition record also binds the exact processing-authority
+file by contained relative path and SHA-256. This file is where a source-specific
+implementation must retain executable configuration, coefficients, software
+versions, and any ordered processing stages needed to reproduce the decoded
+trajectory.
 
 ## Coordinate and Event Records
 
@@ -106,21 +112,23 @@ The four frame records occur in this fixed order:
 3. `model` — articulated generalized-coordinate and body frames; and
 4. `club` — declared club origin, face, shaft, and swing-normal axes.
 
-Each record requires a nonempty definition and transform authority, a SHA-256
-for the transform record, and finite nonnegative translation and rotation
-uncertainties. A future mapping runner must verify the referenced transform
-content before using it; the digest is not a claim that a transform is
-biomechanically correct.
+Each record requires a nonempty definition and transform authority, a contained
+transform-record path and SHA-256, and finite nonnegative translation and
+rotation uncertainties. The ingestion gateway verifies every referenced
+transform before invoking the trajectory parser. The digest proves which
+mapping was admitted; it is not a claim that the transform is biomechanically
+correct.
 
 The two event records occur in this fixed order:
 
 1. `downswing_start`; and
 2. `impact`.
 
-Each requires a time, detector identifier and version, finite nonnegative timing
-uncertainty, and `missing_policy=unavailable_not_zero`. Impact must occur after
-downswing start. A kinematic proxy must remain labeled as a proxy and retain its
-full uncertainty interval.
+Each requires a time, detector identifier and version, a contained detector
+configuration path and SHA-256, finite nonnegative timing uncertainty, and
+`missing_policy=unavailable_not_zero`. The detector configuration is verified
+before parsing. Impact must occur after downswing start. A kinematic proxy must
+remain labeled as a proxy and retain its full uncertainty interval.
 
 ## Channel Coverage
 
@@ -155,11 +163,13 @@ examining held-out outcomes.
 4. require the source to qualify for the declared intended use;
 5. contain, hash, and validate the frozen participant-split manifest;
 6. enforce disjoint cohort membership and intended-use assignment;
-7. contain and hash the source package and trajectory;
-8. compare the package digest with both manifest and source registry;
-9. compare the trajectory digest with the artifact manifest;
-10. delegate to the canonical contract-checked motion-source adapter; and
-11. report split provenance, available metrics, unavailable metrics, and
+7. contain and hash the acquisition processing authority, all four frame
+   transforms, and both event-detector configurations;
+8. contain and hash the source package and trajectory;
+9. compare the package digest with both manifest and source registry;
+10. compare the trajectory digest with the artifact manifest;
+11. delegate to the canonical contract-checked motion-source adapter; and
+12. report split and mapping provenance, available metrics, unavailable metrics, and
     missing channels.
 
 The returned envelope always retains

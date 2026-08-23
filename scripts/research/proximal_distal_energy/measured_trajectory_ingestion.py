@@ -73,11 +73,14 @@ _ACQUISITION_KEYS = {
     "filtering_method",
     "marker_reconstruction_method",
     "anthropometric_source",
+    "processing_authority_relative_path",
+    "processing_authority_sha256",
 }
 _FRAME_KEYS = {
     "frame_id",
     "definition",
     "transform_authority",
+    "transform_relative_path",
     "transform_sha256",
     "translation_uncertainty_m",
     "rotation_uncertainty_rad",
@@ -87,6 +90,8 @@ _EVENT_KEYS = {
     "time_s",
     "detector_id",
     "detector_version",
+    "detector_config_relative_path",
+    "detector_config_sha256",
     "uncertainty_s",
     "missing_policy",
 }
@@ -118,6 +123,9 @@ class GovernedTrajectoryArtifact:
     cohort: str
     split_id: str
     split_manifest_sha256: str
+    processing_authority_sha256: str
+    frame_transform_sha256s: tuple[tuple[str, str], ...]
+    event_detector_sha256s: tuple[tuple[str, str], ...]
     trial_id: str
     intended_use: IntendedUse
     source_package_sha256: str
@@ -254,6 +262,14 @@ def _validate_acquisition(record: object) -> None:
         "anthropometric_source",
     ):
         _text(acquisition[field], field)
+    _relative_safe_path(
+        acquisition["processing_authority_relative_path"],
+        "processing_authority_relative_path",
+    )
+    _digest_text(
+        acquisition["processing_authority_sha256"],
+        "processing_authority_sha256",
+    )
 
 
 def _validate_frames(rows: object) -> None:
@@ -266,6 +282,7 @@ def _validate_frames(rows: object) -> None:
         ids.append(frame_id)
         _text(frame["definition"], "definition")
         _text(frame["transform_authority"], "transform_authority")
+        _relative_safe_path(frame["transform_relative_path"], "transform_relative_path")
         _digest_text(frame["transform_sha256"], "transform_sha256")
         _finite_nonnegative(
             frame["translation_uncertainty_m"], "translation_uncertainty_m"
@@ -288,6 +305,11 @@ def _validate_events(rows: object) -> None:
         times.append(_finite_nonnegative(event["time_s"], "time_s"))
         _text(event["detector_id"], "detector_id")
         _text(event["detector_version"], "detector_version")
+        _relative_safe_path(
+            event["detector_config_relative_path"],
+            "detector_config_relative_path",
+        )
+        _digest_text(event["detector_config_sha256"], "detector_config_sha256")
         _finite_nonnegative(event["uncertainty_s"], "uncertainty_s")
         if event["missing_policy"] != "unavailable_not_zero":
             raise ValueError("event missing_policy must be unavailable_not_zero")
@@ -388,6 +410,21 @@ def _contained_file(manifest_path: Path, relative: str, field: str) -> Path:
     if not candidate.is_file():
         raise FileNotFoundError(f"{field} does not identify a file: {candidate}")
     return candidate
+
+
+def _verified_authority_digest(
+    manifest_path: Path,
+    relative_path: str,
+    expected_digest: str,
+    label: str,
+) -> str:
+    """Verify one immutable processing authority contained by the manifest."""
+
+    authority_path = _contained_file(manifest_path, relative_path, f"{label} path")
+    actual_digest = _sha256(authority_path)
+    if actual_digest != expected_digest:
+        raise ValueError(f"{label} digest does not match")
+    return actual_digest
 
 
 def _load_validated_registration(path: Path) -> dict[str, Any]:
@@ -543,6 +580,38 @@ def load_governed_trajectory(
         raise ValueError("participant split must be frozen before artifact creation")
     cohort = _require_participant_assignment(manifest, split)
 
+    acquisition = manifest["acquisition"]
+    processing_authority_digest = _verified_authority_digest(
+        manifest_path,
+        acquisition["processing_authority_relative_path"],
+        acquisition["processing_authority_sha256"],
+        "processing authority",
+    )
+    frame_transform_digests = tuple(
+        (
+            frame["frame_id"],
+            _verified_authority_digest(
+                manifest_path,
+                frame["transform_relative_path"],
+                frame["transform_sha256"],
+                f"{frame['frame_id']} frame transform",
+            ),
+        )
+        for frame in manifest["frames"]
+    )
+    event_detector_digests = tuple(
+        (
+            event["event_id"],
+            _verified_authority_digest(
+                manifest_path,
+                event["detector_config_relative_path"],
+                event["detector_config_sha256"],
+                f"{event['event_id']} event detector",
+            ),
+        )
+        for event in manifest["events"]
+    )
+
     artifact = manifest["artifact"]
     package_path = _contained_file(
         manifest_path,
@@ -572,7 +641,6 @@ def load_governed_trajectory(
         registration, set(manifest["channels"])
     )
     participant = manifest["participant"]
-    acquisition = manifest["acquisition"]
     return GovernedTrajectoryArtifact(
         manifest_id=manifest["manifest_id"],
         source_id=source_id,
@@ -581,6 +649,9 @@ def load_governed_trajectory(
         cohort=cohort,
         split_id=split["split_id"],
         split_manifest_sha256=split_digest,
+        processing_authority_sha256=processing_authority_digest,
+        frame_transform_sha256s=frame_transform_digests,
+        event_detector_sha256s=event_detector_digests,
         trial_id=acquisition["trial_id"],
         intended_use=intended_use,
         source_package_sha256=package_digest,

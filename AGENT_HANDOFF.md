@@ -25,12 +25,15 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 - ControlTower worktree:
   `C:\Users\diete\Repositories\UpstreamDrift-worktrees\goal-8752-uncertainty`,
   detached at exact scientific launch HEAD `13146cdcece879e7156e06e2dca6626c1a54e045`.
-- Container `upstreamdrift-8752-campaign` runs eight CPU-active workers with a
-  CPU cap of eight and atomic branch checkpoints. Do not start a duplicate.
-- At 2026-08-23 11:00 PDT its live log had atomically completed branch 41/72 of
+- Container `upstreamdrift-8752-campaign` retains eight worker processes and
+  atomic branch checkpoints. At 11:21 PDT its reversible container CPU cap was
+  reduced from eight cores to four over Tailscale, without a restart or source
+  change, to coexist with protected CI. The running container then used about
+  four cores and 589 MiB. Do not start a duplicate.
+- At 2026-08-23 11:22 PDT its live log had atomically completed branch 57/72 of
   the current registered ground corner; `status.json` still reported `running`
-  with eight workers. Do not infer total-campaign completion from one corner's
-  branch counter.
+  with eight workers, and 1,240 checkpoint files remained present. Do not infer
+  total-campaign completion from one corner's branch counter.
 - Runtime: Ubuntu 22.04, Python 3.10.12, NumPy 2.2.4, SciPy 1.15.2, MuJoCo
   3.8.0, and Pinocchio 3.8.0. The cross-CPU canary preserves every discrete
   decision and registered gate at `rtol=2e-8`, `atol=1e-9`.
@@ -76,8 +79,11 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   participant membership, and intended use before parsing. Follow-up commit
   `1b7e87c42` also requires the split freeze time to precede artifact creation.
   Source-package and trajectory digests, SI units, processing, four frames, two
-  events, channel coverage, and six uncertainty records remain required.
-  Thirty-eight focused tests and the 587-artifact release gate pass.
+  events, channel coverage, and six uncertainty records remain required. The
+  current follow-up also binds the acquisition-processing authority, all four
+  frame transforms, and both event-detector configurations by contained path
+  and SHA-256, verifies them before payload parsing, and returns their immutable
+  provenance. Forty-one focused tests and the 587-artifact release gate pass.
 - Merge commit `feb9478f7` reconciles the branch with the protected #9016 squash
   without rewriting history; reviewed PR head `a34d24a53` passed every pre-push
   hook and opened full PR #9017. The governed manifests and 235-page release
@@ -126,7 +132,8 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 
 ```powershell
 python -m pytest tests/research/test_measured_trajectory_source_registry.py `
-  tests/research/test_measured_trajectory_metric_registration.py -q
+  tests/research/test_measured_trajectory_metric_registration.py `
+  tests/research/test_measured_trajectory_ingestion.py -q
 python -m scripts.research.proximal_distal_energy.qualify_open_release validate
 python scripts/check_document_title_case.py --changed-from origin/main
 python scripts/ci/check_file_size_budget.py
