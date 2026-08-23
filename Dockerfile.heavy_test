@@ -39,7 +39,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # ── Python tooling ────────────────────────────────────────────────────────────
-RUN pip install --upgrade pip==26.2.1 setuptools==78.1.1 wheel
+RUN pip install --upgrade pip==26.2.1 setuptools==83.0.0 wheel
 
 # ── Testing infrastructure (mirrors reusable-heavy-tests.yml) ────────────────
 RUN pip install \
@@ -109,7 +109,11 @@ RUN if [ -f "pyproject.toml" ]; then \
 # Keep late transitive installs from restoring scanner-known vulnerable tools.
 RUN pip install --upgrade --no-cache-dir \
     msgpack==1.2.1 \
-    setuptools==78.1.1
+    setuptools==83.0.0
+
+# The finished test image executes pytest but never installs packages at run
+# time. Remove pip and its embedded third-party SBOM from the final filesystem.
+RUN /usr/local/bin/python -m pip uninstall -y pip
 
 # ── Default: surface optional-dep status (issue #7161 D2) then run the heavy
 #    suite with Xvfb. The entrypoint prints the build-time optional-dependency
