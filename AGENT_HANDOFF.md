@@ -127,9 +127,9 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     `C:\Users\diete\Campaigns\UpstreamDrift-8752\status.json` and `logs\campaign.log`.
     The canary record is
     `/home/dieterolson/campaigns/UpstreamDrift-8752/canary-docker/canary-result.json`
-    inside ControlTower WSL. Recovery is fail-closed: query `docker inspect
-upstreamdrift-8752-campaign` and the status/log files first; take no action
-    while it is running, never restart a zero-exit completed container, and only
+    inside ControlTower WSL. Recovery is fail-closed: inspect the named container
+    and the status/log files first; take no action while it is running, never
+    restart a zero-exit completed container, and only
     use `docker start upstreamdrift-8752-campaign` after a nonzero exit if the
     source/data hashes and atomic checkpoint audit still pass. The checkpointed
     runner will then resume rather than discard completed branches.
