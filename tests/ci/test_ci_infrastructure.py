@@ -1280,6 +1280,16 @@ class TestCIEnvironmentCompatibility:
         assert " -n " not in unit_step
         assert "-n auto" not in unit_step
 
+    def test_ci_optional_stack_forces_noninteractive_matplotlib(self) -> None:
+        """The headless optional-stack job must ignore ambient GUI backends."""
+        workflow = (
+            REPO_ROOT / ".github" / "workflows" / "ci-optional-stack.yml"
+        ).read_text(encoding="utf-8")
+        job_start = workflow.index("optional-stack-check:")
+        job_header = workflow[job_start : workflow.index("    steps:", job_start)]
+
+        assert "MPLBACKEND: Agg" in job_header
+
     def test_ci_optional_stack_pytest_exit_codes_are_gating(self) -> None:
         """The optional-stack lane must fail on pytest exit codes, not grep text."""
         workflow = (
