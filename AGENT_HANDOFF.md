@@ -34,6 +34,8 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
 - It has 194 valid URI links and 246 outline entries; all pages render and were
   inspected. Archival qualification remains fail-closed because the PDF is
   untagged and retains Type 3 and unembedded font resources.
+- UpstreamDrift is the scientific source authority. AffineDrift is a generated,
+  revision-pinned publisher; Tools exposes typed consumers, not a second paper.
 
 ## Active Articulated Uncertainty Campaign (#8752)
 
@@ -41,25 +43,23 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
 - Parent PID `18404` is the intentional source-locked coordinator with 20
   workers. Do not kill workers individually, edit source-hashed files, or start
   a duplicate campaign.
-- At 2026-08-22 14:23 PDT, 14 of 19 corners were fully accounted and the
-  fifteenth row had 29 terminal pathway dispositions overall.
-  `ground_translation_damping_scale-high` retained 71 of 72 atomic ground
-  branch checkpoints. Four registered ground-only corners remain after it.
-  The 21-process group remains healthy; do not trade scientific identity for
-  a faster restart.
+- At 2026-08-22 19:24 PDT, 16 of 19 corners were fully accounted.
+  `ground_free_moment_stiffness_scale-high` is the active seventeenth corner;
+  its first ordered branch checkpoint had not yet been promoted. Two registered
+  ground-only damping corners follow it. The 21-process group remains healthy;
+  do not trade scientific identity for a faster restart.
 - Completed rows and digest-bound branch checkpoints are restartable. Partial
   checkpoints are execution evidence, not release evidence.
 - After completion, independently audit the record, then integrate
   `fix/8752-atomic-campaign-checkpoint` (`9f850a67f...`). Execute #8800 next,
   then regenerate claims, figures, the paper, and the AffineDrift projection.
 
-## Pinned Tools Docker Boundary (#8996)
+## Pinned Tools Docker Boundary and Security Follow-Up (#8996)
 
-- PR #8993 is open from `fix/8789-docker-tools-boundary`. Head
-  `db7c01e0583e920b345634df37b361ce09eb210f` contains the repaired-main merge,
-  collection-order correction, and suite-marker repair.
-- It binds modular images to the exact Tools gitlink and content digest, fixes
-  isolated PEP 517 hook loading, and advances pip to 26.2.1.
+- PR #8993 is protected-merged at remote-main commit
+  `4e672c5b051a8859743f622872f63b86a0cfbb9d`. It binds
+  modular images to the exact Tools gitlink and content digest, fixes isolated
+  PEP 517 hook loading, and advances pip to 26.2.1.
 - The workflows attest only `src/shared`, `src/sidekick`, `src/chat`,
   `src/python/src/utils`, and `src/contracts.py`; the registered digest is
   `30dc761a34ec30eb3bf41d11d2dca1aff90448e71defbe82c32fcd657525fcc3`.
@@ -99,14 +99,17 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
 
 ## Executable Quarantine Ledger (#8766)
 
-- PR #8997 is open from `fix/8766-executable-cluster-ledger`; head before base
-  repair is `c2d33b13d718fe94216313c58d515b201baea5b6`.
+- PR #8997 is protected-merged at remote-main commit
+  `fe411260cab577dd197b54ad3eab4d9d9ffa4213`.
 - The 520-node ledger has an executable 10-cluster ownership map. The checker
   rejects duplicate, unassigned, ambiguous, replacement, or new node IDs and
   CI compares PR state with the fetched base branch.
-- #8997 remains open and conflicted. After #8993, merge repaired current main,
-  resolve handoff/SPEC metadata, and rerun protected checks. This tranche
-  organizes debt; it fixes no quarantined test.
+- CI Standard validates exact coverage and compares PR node IDs with the fetched
+  base branch. The existing skip behavior remains unchanged and scoped to
+  `UNIT_GATE_QUARANTINE=1`.
+- Ten contract tests, Ruff, YAML parsing, the checker, file-size validation, and
+  protected CI passed. This tranche organizes debt; it does not claim any
+  quarantined test fixed.
 
 ## Scientific Boundaries
 
@@ -133,16 +136,12 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
 ## Focused Validation
 
 ```powershell
-python3 scripts/check_spec_paths.py
+python3 scripts/ci/check_unit_gate_quarantine.py --baseline-ref origin/main
+python3 -m pytest tests/ci/test_unit_gate_quarantine_contract.py -q
+python3 -m ruff check scripts/ci/check_unit_gate_quarantine.py tests/ci/test_unit_gate_quarantine_contract.py
+python3 -m ruff format --check scripts/ci/check_unit_gate_quarantine.py tests/ci/test_unit_gate_quarantine_contract.py
 python3 scripts/check_document_title_case.py --changed-from origin/main
-python3 -m pytest -q -n 0 tests/unit/test_pinned_tools_provenance.py \
-  tests/unit/test_build_hooks.py tests/docker/test_pinned_tools_build_boundary.py \
-  tests/docker/test_docker_hardening_7159_7161.py \
-  tests/docker/test_docker_integration.py \
-  tests/unit/scripts/test_dockerfile_contracts.py
-python3 scripts/ci/check_dockerfile_contracts.py
 python3 scripts/ci/check_file_size_budget.py
-git diff --check
 ```
 
 Passing common gates does not close a child issue whose acceptance evidence
