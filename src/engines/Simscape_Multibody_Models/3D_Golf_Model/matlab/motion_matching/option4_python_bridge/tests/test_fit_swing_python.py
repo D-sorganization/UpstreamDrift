@@ -72,7 +72,7 @@ def test_recover_theta_from_synthetic_target(
     bound_range = ub - lb
     err = np.abs(result.theta - theta_truth)
     tolerance = 0.10 * bound_range
-    n_within = int(np.sum(err <= tolerance))
+    n_within = int(np.count_nonzero(err <= tolerance))
     fraction = n_within / err.size
     # The cost surface is locally flat in many directions (the cost is
     # under-determined — many thetas produce the same trajectory), so we
