@@ -13,12 +13,21 @@ The machine-readable prediction definitions are stored in
 evidence bundle generated after its tolerance and intervention were registered.
 
 The complementary
-[`data/release_claim_review.json`](data/release_claim_review.json) covers all 40
+[`data/release_claim_review.json`](data/release_claim_review.json) covers all 42
 claims exposed by the qualified release. It records the supporting atomic
 claims, controls, falsifiers, uncertainty boundaries, and the next scientific
 gate for each one. Its completed review state means that no release claim is
 awaiting adjudication; it does not mean that model, equipment, anatomical,
 archival, or human-validation gates have been completed.
+
+The normalized reviewer projections in
+[`data/claim_adjudication_summary.json`](data/claim_adjudication_summary.json)
+and [`data/claim_adjudication_summary.csv`](data/claim_adjudication_summary.csv)
+cover all 303 atomic claims without inferring an outcome from prose or evidence
+count. They expose outcome, evidence tier, independent-work count, model tier,
+unresolved replication class, and claim-family source concentration. These
+axes describe the support boundary; they do not promote project-only model
+evidence into independent or human validation.
 
 The complementary
 [`data/external_source_review.json`](data/external_source_review.json)

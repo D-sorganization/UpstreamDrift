@@ -1,10 +1,14 @@
 # SPEC.md — Repository Specification Document
 
-## Current Scientific Audit State (2026-08-21)
+## Current Scientific Audit State (2026-08-23)
 
 Epic #8557 has completed the current narrative-candidate adjudication contract:
-1,073 reviewed candidates and 300 atomic claims. This status is not scientific
-closure: all 41 public release claims have a traceable review disposition, and
+1,100 reviewed candidates and 303 atomic claims. Issue #8724 adds an exhaustive,
+snapshot-locked four-way outcome authority: 283 supported at their declared
+estimands and boundaries, five inconclusive, 15 untested, and none contradicted.
+The absence of a contradicted row does not erase adverse or null results that
+the paper reports accurately. This status is not scientific closure: all 42
+public release claims have a traceable review disposition, and
 each retains its applicable open
 model, equipment, anatomy, archival, or governed-human scientific boundary. The
 trajectory-level bilateral point-force sensor qualification and subject-scaled
@@ -532,7 +536,7 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.580                                            |
+| **Spec Version**        | 1.0.581                                            |
 | **Last Spec Update**    | 2026-08-22                                         |
 
 ## 2. Purpose & Mission
@@ -3220,6 +3224,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-23 | 1.0.581 | Reconciled issue #8724's normalized adjudication checkpoint with the current 303-claim paper. The migration is locked to the exact paper digest and contains an exhaustive explicit claim-ID authority, so an unfamiliar claim cannot inherit `supported`. The reviewer JSON/CSV and generated paper tables now separate outcome, evidence tier, source independence, model tier, unresolved replication, and claim-family concentration. Typed evidence locators, local anchors, bibliography keys, deterministic source digest, exact candidate reciprocity, falsifiers, adjudication reasons, and human-data boundaries remain fail-closed. Source and evidence-file caches remove repeated validation I/O without weakening resolution. |
 | 2026-08-23 | 1.0.580 | Closed participant-holdout and executable-mapping authority gaps in #9004's governed ingestion boundary. Each trial now binds an immutable `measured-trajectory-participant-split/v1` manifest that freezes sorted, disjoint training, held-out, and adverse cohorts before outcomes. The loader verifies the split digest, source, registered deterministic assignment method, UTC freeze-before-artifact ordering, minimum cohort counts, adverse cohort, unique participant membership, cohort label, and intended-use eligibility before invoking a parser. It also contains and verifies the exact acquisition-processing authority, four frame-transform records, and two event-detector configurations by relative path and SHA-256 before payload parsing. Returned artifacts expose the split, cohort, processing, transform, and detector provenance while retaining false human-inference and bilateral-wrench gates. UTC timestamps, format hints, and channel identifiers are also validated structurally. |
 | 2026-08-23 | 1.0.579 | Added the fail-closed #9004 measured-trajectory acquisition and ingestion boundary. A per-trial typed manifest now binds an authorized source package and decoded trajectory to immutable digests, participant grouping, canonical units, acquisition processing, four frame authorities, two event records, declared channels, six uncertainty analyses, and intended use. The gateway recomputes source and preregistration readiness, rejects duplicate keys, path traversal and pickle formats before parsing, verifies both digest layers, delegates only to the canonical motion-pipeline adapter, and reports missing channels as unavailable rather than zero. It always denies human-inference and bilateral-wrench authority; no current dataset is admitted. |
 | 2026-08-23 | 1.0.579 | Made the headless optional-stack contract deterministic by forcing Matplotlib's noninteractive `Agg` backend at the job boundary. This prevents an ambient interactive runner backend from producing `Invalid DISPLAY variable` failures while leaving application and library backend selection unchanged outside CI. A workflow-structure regression test now enforces the boundary. |

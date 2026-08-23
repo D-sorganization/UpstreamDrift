@@ -498,7 +498,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, left=2mm, rightrule=.15mm, leftrule=.75mm, opacityback=0, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, colback=white, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, toptitle=1mm, titlerule=0mm, arc=.35mm, bottomrule=.15mm, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, coltitle=black]
+\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, breakable, rightrule=.15mm, bottomrule=.15mm, colback=white, leftrule=.75mm, opacityback=0, arc=.35mm, opacitybacktitle=0.6, coltitle=black, toptitle=1mm, titlerule=0mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, left=2mm, toprule=.15mm, bottomtitle=1mm]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -12734,6 +12734,226 @@ post-hoc matching sensitivity are recorded in
 \href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/articulated_ground_atlas.json}{\texttt{data/articulated\_ground\_atlas.json}},
 and
 \href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/articulated_ground_posthoc_sensitivity.json}{\texttt{data/articulated\_ground\_posthoc\_sensitivity.json}}.
+
+\section{Normalized Claim
+Adjudication}\label{normalized-claim-adjudication}
+
+The current census contains 303 material claims. The normalized outcome
+applies only to each claim's declared estimand, model domain, and
+uncertainty boundary. A \texttt{supported} model-conditional claim is
+not thereby independently replicated, empirically validated, or
+converted into a human strategy recommendation.
+
+The absence of a \texttt{contradicted} row does not mean that every
+mechanism survived every adverse test. Claims that accurately report
+null, mixed, or adverse model results can themselves be supported. The
+complete finding-level reasons, falsifiers, locators, and boundaries are
+available in the \href{data/claim_adjudication_summary.json}{reviewer
+JSON} and \href{data/claim_adjudication_summary.csv}{reviewer CSV}.
+
+\subsection{Outcome Counts}\label{outcome-counts}
+
+\begin{longtable}[]{@{}lr@{}}
+\caption{Outcome Counts for the Current Claim
+Census.}\label{tbl-claim-outcomes}\tabularnewline
+\toprule\noalign{}
+Normalized Outcome & Claim Count \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+Normalized Outcome & Claim Count \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{inconclusive} & 5 \\
+\texttt{supported} & 283 \\
+\texttt{untested} & 15 \\
+\end{longtable}
+
+\newpage
+
+\subsection{Evidence Tier Counts}\label{evidence-tier-counts}
+
+\begin{longtable}[]{@{}lr@{}}
+\caption{Evidence Tier Counts for the Current Claim
+Census.}\label{tbl-claim-evidence-tiers}\tabularnewline
+\toprule\noalign{}
+Evidence Tier & Claim Count \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+Evidence Tier & Claim Count \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{bibliographic\_record} & 3 \\
+\texttt{external\_empirical\_human} & 34 \\
+\texttt{external\_methods\_or\_measurement} & 10 \\
+\texttt{external\_modeling\_or\_simulation} & 15 \\
+\texttt{external\_review\_or\_synthesis} & 10 \\
+\texttt{project\_derivation\_or\_document} & 88 \\
+\texttt{project\_executable\_or\_generated} & 253 \\
+\texttt{prospective\_or\_unexecuted} & 15 \\
+\end{longtable}
+
+\subsection{Source Independence
+Counts}\label{source-independence-counts}
+
+\begin{longtable}[]{@{}lr@{}}
+\caption{Source Independence Counts for the Current Claim
+Census.}\label{tbl-claim-source-independence}\tabularnewline
+\toprule\noalign{}
+Source Independence & Claim Count \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+Source Independence & Claim Count \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{multiple\_independent\_external\_support} & 20 \\
+\texttt{project\_only} & 249 \\
+\texttt{single\_independent\_external\_support} & 34 \\
+\end{longtable}
+
+\subsection{Model Tier Counts}\label{model-tier-counts}
+
+\begin{longtable}[]{@{}lr@{}}
+\caption{Model Tier Counts for the Current Claim
+Census.}\label{tbl-claim-model-tiers}\tabularnewline
+\toprule\noalign{}
+Model Tier & Claim Count \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+Model Tier & Claim Count \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{articulated\_spatial} & 32 \\
+\texttt{compliant\_shaft} & 66 \\
+\texttt{cross\_tier\_synthesis} & 63 \\
+\texttt{declared\_model\_tier\_unclassified} & 12 \\
+\texttt{finite\_ground\_or\_base} & 16 \\
+\texttt{human\_or\_external\_evidence} & 46 \\
+\texttt{planar\_reduced} & 128 \\
+\texttt{spatial\_reduced} & 76 \\
+\texttt{two\_hand\_or\_bilateral} & 92 \\
+\texttt{uncertainty\_or\_control} & 8 \\
+\end{longtable}
+
+\subsection{Unresolved Replication
+Counts}\label{unresolved-replication-counts}
+
+\begin{longtable}[]{@{}lr@{}}
+\caption{Unresolved Replication Counts for the Current Claim
+Census.}\label{tbl-claim-replication}\tabularnewline
+\toprule\noalign{}
+Replication Class & Claim Count \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+Replication Class & Claim Count \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{external\_validation\_open} & 1 \\
+\texttt{full\_text\_or\_original\_source\_open} & 5 \\
+\texttt{governed\_human\_data\_unavailable} & 11 \\
+\texttt{independent\_reimplementation\_open} & 12 \\
+\texttt{mixed\_or\_insufficient\_evidence} & 5 \\
+\texttt{none\_declared} & 259 \\
+\texttt{prospective\_experiment\_open} & 15 \\
+\texttt{statistical\_reanalysis\_or\_replication\_open} & 9 \\
+\texttt{systematic\_review\_open} & 2 \\
+\end{longtable}
+
+\newpage
+
+\subsection{Claim-Family Source
+Concentration}\label{claim-family-source-concentration}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2143}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2857}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2857}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2143}}@{}}
+\caption{Claim-Family Source Concentration Flags; the tuple is project
+only / one independent work / two or more independent
+works.}\label{tbl-claim-family-concentration}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Claim Family
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Claims
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Source-Category Tuple
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Flag
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Claim Family
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Claims
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Source-Category Tuple
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Flag
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+ch01 introduction & 3 & 0 / 2 / 1 & mixed independence \\
+ch02 mechanics & 30 & 2 / 17 / 11 & mixed independence \\
+ch03 evidence & 13 & 1 / 10 / 2 & mixed independence \\
+ch03 interaction forces & 10 & 8 / 1 / 1 & mixed independence \\
+ch03b hand path attribution & 11 & 7 / 2 / 2 & mixed independence \\
+ch03c ground reaction drift & 8 & 4 / 2 / 2 & mixed independence \\
+ch03d shoulder velocity transfer & 18 & 18 / 0 / 0 & project authored
+only \\
+ch04 counterfactual ensemble & 6 & 6 / 0 / 0 & project authored only \\
+ch04 counterfactuals & 5 & 4 / 0 / 1 & mixed independence \\
+ch05 two hand wrench & 21 & 21 / 0 / 0 & project authored only \\
+ch05a interactive workbench & 1 & 1 / 0 / 0 & project authored only \\
+ch05b forward two hand & 15 & 15 / 0 / 0 & project authored only \\
+ch06 shaft contributions & 15 & 15 / 0 / 0 & project authored only \\
+ch06b coupled base flex & 14 & 14 / 0 / 0 & project authored only \\
+ch06bb shaft beam reference & 2 & 2 / 0 / 0 & project authored only \\
+ch06bbb forward modal shaft & 7 & 7 / 0 / 0 & project authored only \\
+ch06bc torque allocation preload & 7 & 7 / 0 / 0 & project authored
+only \\
+ch06c spatial cross formulation & 43 & 43 / 0 / 0 & project authored
+only \\
+ch06ca articulated ground & 4 & 4 / 0 / 0 & project authored only \\
+ch06cb spatial cross tail & 5 & 5 / 0 / 0 & project authored only \\
+ch06cc spatial forward contact & 8 & 8 / 0 / 0 & project authored
+only \\
+ch06d uncertainty control & 8 & 8 / 0 / 0 & project authored only \\
+ch06e experimental protocol & 1 & 1 / 0 / 0 & project authored only \\
+ch07 model ladder & 17 & 17 / 0 / 0 & project authored only \\
+ch07 results & 8 & 8 / 0 / 0 & project authored only \\
+ch07b frames biology engines & 5 & 5 / 0 / 0 & project authored only \\
+ch07c transmission robustness & 5 & 5 / 0 / 0 & project authored only \\
+ch08b momentum transfer questions & 10 & 10 / 0 / 0 & project authored
+only \\
+proximal distal energy transfer & 3 & 3 / 0 / 0 & project authored
+only \\
+\end{longtable}
+
+Evidence-tier, model-tier, and unresolved-replication labels are
+nonexclusive, so those totals can exceed the claim count. Source
+independence is an exact one-category partition derived from the
+canonical-work review. No governed participant outcome is present; human
+validation remains an external-data boundary.
 
 \chapter{Software and Data Availability}\label{sec-appendix-inventory}
 
