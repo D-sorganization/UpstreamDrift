@@ -167,7 +167,7 @@ def _digest_text(value: object, field: str) -> str:
     return text
 
 
-def _utc_timestamp(value: object, field: str) -> str:
+def _utc_datetime(value: object, field: str) -> datetime:
     text = _text(value, field)
     try:
         parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
@@ -175,6 +175,12 @@ def _utc_timestamp(value: object, field: str) -> str:
         raise ValueError(f"{field} must be an ISO-8601 timestamp") from exc
     if parsed.tzinfo is None or parsed.utcoffset() != timezone.utc.utcoffset(parsed):
         raise ValueError(f"{field} must identify UTC")
+    return parsed
+
+
+def _utc_timestamp(value: object, field: str) -> str:
+    text = _text(value, field)
+    _utc_datetime(text, field)
     return text
 
 
@@ -531,6 +537,10 @@ def load_governed_trajectory(
         source_id=source_id,
         registration=registration,
     )
+    if _utc_datetime(
+        split["frozen_at_utc"], "participant split frozen_at_utc"
+    ) > _utc_datetime(manifest["created_at_utc"], "created_at_utc"):
+        raise ValueError("participant split must be frozen before artifact creation")
     cohort = _require_participant_assignment(manifest, split)
 
     artifact = manifest["artifact"]

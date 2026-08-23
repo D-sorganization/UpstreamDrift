@@ -83,10 +83,12 @@ The separate participant-split manifest is part of the authority chain rather
 than a per-trial assertion. It records the source, split identifier,
 `deterministic_digest` assignment method, UTC freeze time, and sorted disjoint
 training, held-out, and adverse participant identifiers. The gateway verifies
-its digest, registered minimum cohort counts, adverse-cohort requirement, and
+its digest, requires its freeze time to precede artifact creation, checks the
+registered minimum cohort counts and adverse-cohort requirement, and verifies
 the trial participant's unique membership. `pipeline_probe` accepts only a
-training participant; `held_out_qualification` accepts only held-out or adverse
-participants. The artifact's cohort label must agree with the split manifest.
+training participant; `held_out_qualification` accepts only held-out or
+adverse participants. The artifact's cohort label must agree with the split
+manifest.
 
 The canonical ingestion boundary uses metres, radians, and seconds. Conversion
 from source units must remain reproducible from the acquisition and adapter

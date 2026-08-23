@@ -394,6 +394,30 @@ def test_split_digest_mismatch_blocks_before_payload_loader(tmp_path: Path) -> N
     assert called is False
 
 
+def test_split_must_be_frozen_before_artifact_creation(tmp_path: Path) -> None:
+    package = tmp_path / "source.zip"
+    trajectory = tmp_path / "trial.c3d"
+    package.write_bytes(b"source")
+    trajectory.write_bytes(b"trajectory")
+    registry = _qualified_registry(tmp_path, _digest(package))
+    registration = _qualified_registration(tmp_path)
+    record = _manifest(package, trajectory)
+    split_path = tmp_path / record["participant_split"]["relative_path"]
+    split = json.loads(split_path.read_text(encoding="utf-8"))
+    split["frozen_at_utc"] = "2026-08-24T18:00:00Z"
+    split_path.write_text(json.dumps(split), encoding="utf-8")
+    record["participant_split"]["sha256"] = _digest(split_path)
+    manifest = _write_manifest(tmp_path, record)
+
+    with pytest.raises(ValueError, match="frozen before artifact creation"):
+        load_governed_trajectory(
+            manifest,
+            registry,
+            registration,
+            payload_loader=lambda *_args, **_kwargs: object(),
+        )
+
+
 def test_duplicate_json_keys_are_rejected(tmp_path: Path) -> None:
     manifest = tmp_path / "duplicate.json"
     manifest.write_text(
