@@ -27,9 +27,10 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   detached at exact scientific launch HEAD `13146cdcece879e7156e06e2dca6626c1a54e045`.
 - Container `upstreamdrift-8752-campaign` runs eight CPU-active workers with a
   CPU cap of eight and atomic branch checkpoints. Do not start a duplicate.
-- At 2026-08-23 10:08 PDT the container was healthy at approximately 792% CPU
-  and 582 MiB RAM. It completed the active 72-branch ground corner and began
-  branch 1/72 of the next registered corner.
+- At 2026-08-23 11:00 PDT its live log had atomically completed branch 41/72 of
+  the current registered ground corner; `status.json` still reported `running`
+  with eight workers. Do not infer total-campaign completion from one corner's
+  branch counter.
 - Runtime: Ubuntu 22.04, Python 3.10.12, NumPy 2.2.4, SciPy 1.15.2, MuJoCo
   3.8.0, and Pinocchio 3.8.0. The cross-CPU canary preserves every discrete
   decision and registered gate at `rtol=2e-8`, `atol=1e-9`.
@@ -50,10 +51,12 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   negative controls, six uncertainty analyses, and missing-as-unavailable
   semantics.
 - Its initial optional-stack run exposed an ambient interactive Matplotlib
-  backend on the headless runner. The merged correction forces `MPLBACKEND=Agg` at the
-  optional-stack job boundary and enforces that contract in
-  `tests/ci/test_ci_infrastructure.py`; do not replace this with a blind rerun
-  or an application-wide backend override.
+  backend on the headless runner. The merged correction forces
+  `MPLBACKEND=Agg` at the optional-stack job boundary and enforces that contract
+  in `tests/ci/test_ci_infrastructure.py`. All API, Pinocchio, and unit steps
+  passed on the corrected run; its large post-job cache upload was still
+  finalizing at 11:11 PDT. Do not replace this with a blind rerun or an
+  application-wide backend override.
 - The metric contract is deliberately fail-closed: `execution_ready=false`,
   `human_inference=false`, `bilateral_wrench=false`, and
   `results_status=not_run_no_authority` until a governed participant dataset is
@@ -75,11 +78,12 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   Source-package and trajectory digests, SI units, processing, four frames, two
   events, channel coverage, and six uncertainty records remain required.
   Thirty-eight focused tests and the 587-artifact release gate pass.
-- It is being reconciled with the protected #9016 squash without rewriting
-  history. Regenerate the governed manifests, validate, push through every
-  hook, and open a full PR. It must remain unusable for human inference until
-  the source registry qualifies an actual dataset. The subsequent #9004 slice
-  is the deterministic coordinate/event mapping and replay runner.
+- Merge commit `feb9478f7` reconciles the branch with the protected #9016 squash
+  without rewriting history. The governed manifests and 235-page release
+  validate. Push through every hook and open a full PR. The boundary must remain
+  unusable for human inference until the source registry qualifies an actual
+  dataset. The subsequent #9004 slice is the deterministic coordinate/event
+  mapping and replay runner.
 
 ## Other Active Dependencies
 
