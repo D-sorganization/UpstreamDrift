@@ -39,27 +39,23 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
 
 ## Active Articulated Uncertainty Campaign (#8752)
 
-- Worktree: `UpstreamDrift-worktrees/goal-8752-uncertainty`.
-- Parent PID `18404` is the intentional source-locked coordinator with 20
-  workers. Do not kill workers individually, edit source-hashed files, or start
-  a duplicate campaign.
-- At 2026-08-22 22:52 PDT, 16 of 19 corners were fully accounted.
-  `ground_free_moment_stiffness_scale-high` is the active seventeenth corner;
-  the restart tree held 1,158 atomic branch checkpoints. The coordinator remained
-  alive; the most recent checkpoint was written at 22:30 while the current
-  branch solve continued.
-  Two registered ground-only damping corners follow it. The 21-process group
-  remains healthy; do not trade scientific identity for a faster restart.
+- Worktree: `C:\Users\diete\Repositories\UpstreamDrift-worktrees\goal-8752-uncertainty`
+  on ControlTower at detached exact campaign HEAD `13146cdce`.
+- The original workstation process ended. A qualified eight-worker continuation
+  is running in ControlTower container `upstreamdrift-8752-campaign`, capped at
+  eight CPUs with zero restarts. Do not start a duplicate campaign.
+- At 2026-08-23 09:44 PDT, 16 of 19 corners were fully accounted and the active
+  `ground_free_moment_stiffness_scale-high` corner had advanced from 49 to 58 of
+  72 branches. The tree held 1,169 atomic checkpoints with no torn `.tmp` file.
+  Two registered ground-only damping corners follow it.
 - Completed rows and digest-bound branch checkpoints are restartable. Partial
   checkpoints are execution evidence, not release evidence.
-- Codex usage exhaustion does not itself stop this operating-system process, so
-  it may continue unattended while this task is inactive. Closing or updating
-  the Codex app, rebooting Windows, or terminating its parent process can stop
-  it. On takeover, first verify PID `18404` and its descendants. If they are
-  alive, monitor only. If they are absent, audit the JSON and checkpoint tree,
-  then relaunch the exact recorded command once from this unchanged worktree;
-  the digest-bound atomic checkpoints resume completed branches. Never start a
-  second coordinator while PID `18404` or any replacement coordinator is alive.
+- The exact Ubuntu 22.04/Python 3.10.12, NumPy 2.2.4, SciPy 1.15.2, MuJoCo 3.8.0,
+  and Pinocchio 3.8.0 runtime passed a one-branch cross-CPU canary with every
+  registered gate and discrete decision preserved (`rtol=2e-8`, `atol=1e-9`).
+  Status and logs are in `C:\Users\diete\Campaigns\UpstreamDrift-8752`.
+  Inspect the named container and those files before any recovery action; never
+  restart a zero-exit completed container.
 - After completion, independently audit the record, then integrate
   `fix/8752-atomic-campaign-checkpoint` (`9f850a67f...`). Execute #8800 next,
   then regenerate claims, figures, the paper, and the AffineDrift projection.
@@ -70,9 +66,15 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
   the separate bilateral-wrench gate #8556. It asks whether the analytic
   articulated states are quantitatively golf-like and creates the governed
   measured-state authority required to test that question.
-- Worktree `UpstreamDrift-worktrees/9004-trajectory-qualification`, branch
-  `research/9004-trajectory-qualification`, starts from remote `main`
-  `3ef3337b12e6`. The initial typed source registry and validator are under test.
+- PR #9005 publishes the initial typed source registry at exact head
+  `109e3fb207ffc8d2b6c79fc43b02819d4cc03e4b`. Its 20 focused checks and complete
+  583-artifact/235-page computational release validation pass; protected CI and
+  human review remain authoritative.
+- Worktree `UpstreamDrift-worktrees/9004-golf-likeness-contract`, branch
+  `research/9004-golf-likeness-contract`, is stacked locally after #9005. It
+  preregisters eleven issue-#9004 metrics, participant-level holdout, four
+  frame authorities, two events, four negative controls, six uncertainty
+  analyses, training-only threshold freezing, and missing-as-unavailable rules.
 - The local repository census found no governed participant golf motion capture.
   Simscape exports are circular simulation evidence; motion-pipeline fixtures,
   OpenSim tutorials, GolfDB video labels, and launch-monitor records cannot
@@ -83,10 +85,11 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
   club keypoints but requires author authorization and verified reuse terms.
   Neither has a registered local digest, and neither currently supports held-out
   qualification.
-- The fail-closed registry distinguishes pipeline probes, participant-held-out
-  motion qualification, human inference, and bilateral-wrench readiness. Ten
-  focused scientific tests currently pass. Continue with a governed download only
-  after reuse authority is explicit; never promote filenames or visual resemblance.
+- The fail-closed registry and metric contract distinguish pipeline probes,
+  participant-held-out motion qualification, software discrimination, human
+  inference, and bilateral-wrench readiness. Twenty focused scientific tests
+  pass. Continue with a governed download only after reuse authority is explicit;
+  never promote filenames, manufactured controls, or visual resemblance.
 - The independent #8752 reviewer-table branch is clean and remote-verified at
   `f73c0ad87f140ea12873d0256e81c198e132cd52`; integrate it only after the live
   headline record is complete.
