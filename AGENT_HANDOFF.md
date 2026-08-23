@@ -74,6 +74,22 @@ PR #8793 merged the PDF quality contract at `6e28baef54a0`: UpstreamDrift is aut
     explicit summary-not-trajectory scope label. Twenty focused tests, Ruff,
     and scoped mypy pass; partial input writes nothing. Integrate both follow-ups
     only after campaign completion, then generate the CSV from governed JSON.
+    At 2026-08-22 22:01 PDT the live ground restart tree contained 1,146 atomic
+    checkpoint files and was still advancing. PID 18404 had 20 Python worker
+    children and remained a child of the Codex app server. Exhausting model usage
+    should not itself stop that OS process while the service remains alive, but an
+    app close/update, reboot, process termination, or service teardown can. Do not
+    start a duplicate. After an interruption, first verify PID 18404 is absent,
+    audit the partial record and checkpoint identities, preserve the frozen source
+    set, and restart the exact committed command; validated complete branches are
+    reused and only unfinished branch work should repeat.
+    The campaign states are golf-shaped synthetic fixtures, not measured swings:
+    an analytic 20-coordinate sinusoidal prescription seeds subject-scaled
+    bilateral closed-contact IK, finite differences supply state velocity, and
+    each atlas applies a 1 mm club displacement plus signed 0.05 m/s velocity
+    perturbation before 50 ms of unactuated forward dynamics. Treat the output as
+    local passive-mechanism falsification conditional on the registered model,
+    never as validation of a human swing, timing strategy, or coaching rule.
   - #8800 is **OPEN** and blocks #8752. Its governed generator regenerates all
     13 phase states for cases 0/8/9/17; nominal is 52/52 feasible and reproduces
     committed states within 1e-8 rad. JSON/NPZ evidence rejects source/content
