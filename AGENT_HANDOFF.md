@@ -87,8 +87,9 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   capitalization, file-size, and changed-source architecture gates pass with
   no exception or quarantine. The 239-page PDF was inspected in full and
   passes the computational publication profile; the documented archival gaps
-  remain fail-closed. Next complete the merge commit and open the protected
-  full PR for #8724.
+  remain fail-closed. Protected full PR #9018 is open for #8724; preserve its
+  review and required-check gates, fix only actionable failures, and verify the
+  squash commit on remote `main` before closing the issue.
 
 ## Measured-Trajectory Qualification (#9004)
 
