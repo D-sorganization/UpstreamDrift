@@ -16,7 +16,7 @@ guidance.
 
 ## Authority Chain
 
-Every admitted trajectory requires three independently validated records:
+Every admitted trajectory requires four independently validated records:
 
 1. `measured_trajectory_source_registry.json` must identify the source as a
    human-observed qualification candidate with explicit reuse authority,
@@ -26,9 +26,13 @@ Every admitted trajectory requires three independently validated records:
 2. `measured_trajectory_metric_registration.json` must retain the registered
    participant split, metrics, frames, events, controls, uncertainties, and
    inference boundary. Its authority state must agree with the source registry.
-3. A per-trial `measured-trajectory-artifact/v1` manifest must bind the source
+3. A digest-bound `measured-trajectory-participant-split/v1` manifest must
+   freeze disjoint, sorted training, held-out, and adverse participant cohorts
+   before outcomes are inspected. Its source and deterministic assignment
+   method must agree with the preregistration.
+4. A per-trial `measured-trajectory-artifact/v1` manifest must bind the source
    package, decoded trajectory, participant, trial, acquisition processing,
-   frames, events, channels, and uncertainties.
+   split manifest, frames, events, channels, and uncertainties.
 
 The gateway recomputes registry and metric readiness. Stored summaries are not
 trusted.
@@ -44,6 +48,7 @@ The manifest is duplicate-key-rejecting JSON with these top-level fields:
 | `created_at_utc`     | Immutable creation timestamp                                                                       |
 | `source_registry_id` | Exactly `articulated-golf-trajectory-sources-v1`                                                   |
 | `source_id`          | Exact source-registry identifier                                                                   |
+| `participant_split`  | Contained split-manifest path and immutable SHA-256                                                |
 | `artifact`           | Package path/digest, trajectory path/digest, and canonical adapter hint                            |
 | `participant`        | Participant identifier, grouping identifier, and cohort                                            |
 | `acquisition`        | Trial, sampling, units, synchronization, filtering, reconstruction, and anthropometric authorities |
@@ -73,6 +78,15 @@ verifiable.
 `grouping_id` is the indivisible split unit. Trials from one grouping identifier
 must never cross training and held-out partitions. Frame-wise random splitting
 is prohibited.
+
+The separate participant-split manifest is part of the authority chain rather
+than a per-trial assertion. It records the source, split identifier,
+`deterministic_digest` assignment method, UTC freeze time, and sorted disjoint
+training, held-out, and adverse participant identifiers. The gateway verifies
+its digest, registered minimum cohort counts, adverse-cohort requirement, and
+the trial participant's unique membership. `pipeline_probe` accepts only a
+training participant; `held_out_qualification` accepts only held-out or adverse
+participants. The artifact's cohort label must agree with the split manifest.
 
 The canonical ingestion boundary uses metres, radians, and seconds. Conversion
 from source units must remain reproducible from the acquisition and adapter
@@ -137,11 +151,14 @@ examining held-out outcomes.
 2. recompute source-registry and metric-registration readiness;
 3. require registry and preregistration authority states to agree;
 4. require the source to qualify for the declared intended use;
-5. contain and hash the source package and trajectory;
-6. compare the package digest with both manifest and source registry;
-7. compare the trajectory digest with the artifact manifest;
-8. delegate to the canonical contract-checked motion-source adapter; and
-9. report available metrics, unavailable metrics, and missing channels.
+5. contain, hash, and validate the frozen participant-split manifest;
+6. enforce disjoint cohort membership and intended-use assignment;
+7. contain and hash the source package and trajectory;
+8. compare the package digest with both manifest and source registry;
+9. compare the trajectory digest with the artifact manifest;
+10. delegate to the canonical contract-checked motion-source adapter; and
+11. report split provenance, available metrics, unavailable metrics, and
+    missing channels.
 
 The returned envelope always retains
 `human_inference_ready=false` and

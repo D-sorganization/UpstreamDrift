@@ -78,6 +78,32 @@ def _all_required_channels() -> list[str]:
     )
 
 
+def _split_manifest(tmp_path: Path, intended_use: str) -> Path:
+    if intended_use == "pipeline_probe":
+        training = ["p01", "p03"]
+        held_out = ["p02"]
+    else:
+        training = ["p02", "p03"]
+        held_out = ["p01"]
+    path = tmp_path / "participant_split.json"
+    path.write_text(
+        json.dumps(
+            {
+                "schema_version": "measured-trajectory-participant-split/v1",
+                "split_id": "golfpose-primary-split",
+                "source_id": "golfpose",
+                "assignment_method": "deterministic_digest",
+                "frozen_at_utc": "2026-08-23T18:00:00Z",
+                "training_participant_ids": training,
+                "held_out_participant_ids": held_out,
+                "adverse_participant_ids": ["p04"],
+            }
+        ),
+        encoding="utf-8",
+    )
+    return path
+
+
 def _manifest(
     package: Path,
     trajectory: Path,
@@ -85,12 +111,18 @@ def _manifest(
     channels: list[str] | None = None,
     intended_use: str = "held_out_qualification",
 ) -> dict[str, Any]:
+    split = _split_manifest(package.parent, intended_use)
+    cohort = "training" if intended_use == "pipeline_probe" else "held_out"
     return {
         "schema_version": "measured-trajectory-artifact/v1",
         "manifest_id": "golfpose-p01-trial-01",
         "created_at_utc": "2026-08-23T18:00:00Z",
         "source_registry_id": "articulated-golf-trajectory-sources-v1",
         "source_id": "golfpose",
+        "participant_split": {
+            "relative_path": split.name,
+            "sha256": _digest(split),
+        },
         "artifact": {
             "source_package_relative_path": package.name,
             "source_package_sha256": _digest(package),
@@ -101,7 +133,7 @@ def _manifest(
         "participant": {
             "participant_id": "p01",
             "grouping_id": "participant-p01",
-            "cohort": "qualification",
+            "cohort": cohort,
         },
         "acquisition": {
             "trial_id": "trial-01",
@@ -196,6 +228,9 @@ def test_governed_loader_checks_authority_and_digests_before_loading(
     assert calls == [(trajectory.resolve(), "c3d")]
     assert result.available_metric_ids
     assert result.unavailable_metric_ids == ()
+    assert result.cohort == "held_out"
+    assert result.split_id == "golfpose-primary-split"
+    assert result.split_manifest_sha256 == _digest(tmp_path / "participant_split.json")
     assert result.human_inference_ready is False
     assert result.bilateral_wrench_gate_satisfied is False
 
@@ -241,6 +276,9 @@ def test_committed_registry_blocks_before_payload_loader(tmp_path: Path) -> None
         (lambda row: row["events"].pop(), "event"),
         (lambda row: row["uncertainties"].pop(), "uncertainty"),
         (lambda row: row.update(channels=["club_position_lab_m"] * 2), "unique"),
+        (lambda row: row.update(created_at_utc="not-a-time"), "ISO-8601"),
+        (lambda row: row["artifact"].update(format_hint="C3D file"), "lowercase"),
+        (lambda row: row.update(channels=["Club_Position"]), "lowercase"),
     ],
 )
 def test_manifest_and_loader_fail_closed(
@@ -292,6 +330,68 @@ def test_missing_channels_are_unavailable_not_zero(tmp_path: Path) -> None:
     assert result.available_metric_ids == ("club_pose",)
     assert "club_speed" in result.unavailable_metric_ids
     assert "club_linear_velocity_lab_m_s" in result.missing_channel_ids
+
+
+def test_split_digest_and_participant_assignment_are_authoritative(
+    tmp_path: Path,
+) -> None:
+    package = tmp_path / "source.zip"
+    trajectory = tmp_path / "trial.c3d"
+    package.write_bytes(b"source")
+    trajectory.write_bytes(b"trajectory")
+    registry = _qualified_registry(tmp_path, _digest(package))
+    registration = _qualified_registration(tmp_path)
+    record = _manifest(package, trajectory)
+    split_path = tmp_path / record["participant_split"]["relative_path"]
+    split = json.loads(split_path.read_text(encoding="utf-8"))
+    split["training_participant_ids"] = ["p01", "p03"]
+    split["held_out_participant_ids"] = ["p02"]
+    split_path.write_text(json.dumps(split), encoding="utf-8")
+    record["participant_split"]["sha256"] = _digest(split_path)
+    record["participant"]["cohort"] = "training"
+    manifest = _write_manifest(tmp_path, record)
+    called = False
+
+    def loader(*_args: Any, **_kwargs: Any) -> object:
+        nonlocal called
+        called = True
+        return object()
+
+    with pytest.raises(ValueError, match="held-out participant"):
+        load_governed_trajectory(
+            manifest,
+            registry,
+            registration,
+            payload_loader=loader,
+        )
+    assert called is False
+
+
+def test_split_digest_mismatch_blocks_before_payload_loader(tmp_path: Path) -> None:
+    package = tmp_path / "source.zip"
+    trajectory = tmp_path / "trial.c3d"
+    package.write_bytes(b"source")
+    trajectory.write_bytes(b"trajectory")
+    registry = _qualified_registry(tmp_path, _digest(package))
+    registration = _qualified_registration(tmp_path)
+    record = _manifest(package, trajectory)
+    record["participant_split"]["sha256"] = "0" * 64
+    manifest = _write_manifest(tmp_path, record)
+    called = False
+
+    def loader(*_args: Any, **_kwargs: Any) -> object:
+        nonlocal called
+        called = True
+        return object()
+
+    with pytest.raises(ValueError, match="split manifest digest"):
+        load_governed_trajectory(
+            manifest,
+            registry,
+            registration,
+            payload_loader=loader,
+        )
+    assert called is False
 
 
 def test_duplicate_json_keys_are_rejected(tmp_path: Path) -> None:

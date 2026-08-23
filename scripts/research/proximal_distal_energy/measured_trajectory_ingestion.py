@@ -13,10 +13,14 @@ import math
 import re
 from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Literal
 
-from .measured_trajectory_metric_registration import validate_registration
+from .measured_trajectory_metric_registration import (
+    validate_participant_split,
+    validate_registration,
+)
 from .measured_trajectory_source_registry import validate_registry
 
 
@@ -29,6 +33,7 @@ _TOP_KEYS = {
     "created_at_utc",
     "source_registry_id",
     "source_id",
+    "participant_split",
     "artifact",
     "participant",
     "acquisition",
@@ -38,6 +43,17 @@ _TOP_KEYS = {
     "uncertainties",
     "intended_use",
     "inference_boundary",
+}
+_PARTICIPANT_SPLIT_REFERENCE_KEYS = {"relative_path", "sha256"}
+_PARTICIPANT_SPLIT_KEYS = {
+    "schema_version",
+    "split_id",
+    "source_id",
+    "assignment_method",
+    "frozen_at_utc",
+    "training_participant_ids",
+    "held_out_participant_ids",
+    "adverse_participant_ids",
 }
 _ARTIFACT_KEYS = {
     "source_package_relative_path",
@@ -99,6 +115,9 @@ class GovernedTrajectoryArtifact:
     source_id: str
     participant_id: str
     grouping_id: str
+    cohort: str
+    split_id: str
+    split_manifest_sha256: str
     trial_id: str
     intended_use: IntendedUse
     source_package_sha256: str
@@ -148,6 +167,17 @@ def _digest_text(value: object, field: str) -> str:
     return text
 
 
+def _utc_timestamp(value: object, field: str) -> str:
+    text = _text(value, field)
+    try:
+        parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise ValueError(f"{field} must be an ISO-8601 timestamp") from exc
+    if parsed.tzinfo is None or parsed.utcoffset() != timezone.utc.utcoffset(parsed):
+        raise ValueError(f"{field} must identify UTC")
+    return text
+
+
 def _finite_nonnegative(value: object, field: str) -> float:
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         raise ValueError(f"{field} must be a finite nonnegative number")
@@ -178,7 +208,19 @@ def _validate_artifact(record: object) -> None:
     )
     _digest_text(artifact["source_package_sha256"], "source_package_sha256")
     _digest_text(artifact["trajectory_sha256"], "trajectory_sha256")
-    _text(artifact["format_hint"], "format_hint")
+    format_hint = _text(artifact["format_hint"], "format_hint")
+    if re.fullmatch(r"[a-z0-9]+", format_hint) is None:
+        raise ValueError("format_hint must be a lowercase format identifier")
+
+
+def _validate_split_reference(record: object) -> None:
+    reference = _exact_keys(
+        record,
+        _PARTICIPANT_SPLIT_REFERENCE_KEYS,
+        "participant_split",
+    )
+    _relative_safe_path(reference["relative_path"], "participant split relative_path")
+    _digest_text(reference["sha256"], "participant split sha256")
 
 
 def _validate_participant(record: object) -> None:
@@ -259,6 +301,11 @@ def _validate_channels(channels: object) -> None:
         raise ValueError("channels must be a unique nonempty list of identifiers")
     if channels != sorted(channels):
         raise ValueError("channels must be sorted for deterministic comparison")
+    if any(
+        re.fullmatch(r"[a-z][a-z0-9]*(?:_[a-z0-9]+)*", item) is None
+        for item in channels
+    ):
+        raise ValueError("channels must use lowercase underscore identifiers")
 
 
 def _validate_uncertainties(rows: object) -> None:
@@ -296,12 +343,13 @@ def validate_artifact_manifest(path: Path) -> dict[str, Any]:
     manifest_id = _text(record["manifest_id"], "manifest_id")
     if _ID.fullmatch(manifest_id) is None:
         raise ValueError("manifest_id must be a lowercase hyphenated identifier")
-    _text(record["created_at_utc"], "created_at_utc")
+    _utc_timestamp(record["created_at_utc"], "created_at_utc")
     if record["source_registry_id"] != "articulated-golf-trajectory-sources-v1":
         raise ValueError("source_registry_id is not registered")
     source_id = _text(record["source_id"], "source_id")
     if _ID.fullmatch(source_id) is None:
         raise ValueError("source_id must be a lowercase hyphenated identifier")
+    _validate_split_reference(record["participant_split"])
     _validate_artifact(record["artifact"])
     _validate_participant(record["participant"])
     _validate_acquisition(record["acquisition"])
@@ -340,6 +388,86 @@ def _load_validated_registration(path: Path) -> dict[str, Any]:
     record = _load_json(path)
     validate_registration(record)
     return record
+
+
+def _load_participant_split(
+    manifest_path: Path,
+    reference: dict[str, Any],
+    *,
+    source_id: str,
+    registration: dict[str, Any],
+) -> tuple[dict[str, Any], str]:
+    split_path = _contained_file(
+        manifest_path,
+        reference["relative_path"],
+        "participant split relative_path",
+    )
+    split_digest = _sha256(split_path)
+    if split_digest != reference["sha256"]:
+        raise ValueError("participant split manifest digest does not match")
+    split = _load_json(split_path)
+    _exact_keys(split, _PARTICIPANT_SPLIT_KEYS, "participant split manifest")
+    if split["schema_version"] != "measured-trajectory-participant-split/v1":
+        raise ValueError("participant split schema_version is unsupported")
+    split_id = _text(split["split_id"], "split_id")
+    if _ID.fullmatch(split_id) is None:
+        raise ValueError("split_id must be a lowercase hyphenated identifier")
+    if split["source_id"] != source_id:
+        raise ValueError(
+            "participant split source_id does not match artifact source_id"
+        )
+    split_contract = registration["participant_split"]
+    if split["assignment_method"] != split_contract["assignment"]:
+        raise ValueError("participant split assignment method is not registered")
+    _utc_timestamp(split["frozen_at_utc"], "participant split frozen_at_utc")
+    cohorts = {
+        "training": split["training_participant_ids"],
+        "held_out": split["held_out_participant_ids"],
+        "adverse": split["adverse_participant_ids"],
+    }
+    for name, participant_ids in cohorts.items():
+        if not isinstance(participant_ids, list) or participant_ids != sorted(
+            participant_ids
+        ):
+            raise ValueError(f"{name} participant identifiers must be a sorted list")
+    counts = validate_participant_split(
+        cohorts["training"],
+        cohorts["held_out"],
+        adverse=cohorts["adverse"],
+    )
+    if counts["training"] < split_contract["minimum_training_participants"]:
+        raise ValueError("participant split has too few training participants")
+    if counts["held_out"] < split_contract["minimum_held_out_participants"]:
+        raise ValueError("participant split has too few held-out participants")
+    if split_contract["adverse_cohort_required"] and counts["adverse"] == 0:
+        raise ValueError("participant split requires an adverse cohort")
+    return split, split_digest
+
+
+def _require_participant_assignment(
+    manifest: dict[str, Any], split: dict[str, Any]
+) -> str:
+    participant_id = manifest["participant"]["participant_id"]
+    membership = {
+        "training": participant_id in split["training_participant_ids"],
+        "held_out": participant_id in split["held_out_participant_ids"],
+        "adverse": participant_id in split["adverse_participant_ids"],
+    }
+    cohorts = [name for name, included in membership.items() if included]
+    if len(cohorts) != 1:
+        raise ValueError("participant must have exactly one split assignment")
+    cohort = cohorts[0]
+    if manifest["participant"]["cohort"] != cohort:
+        raise ValueError("artifact cohort does not match participant split assignment")
+    intended_use = manifest["intended_use"]
+    if intended_use == "pipeline_probe" and cohort != "training":
+        raise ValueError("pipeline probes require a training participant")
+    if intended_use == "held_out_qualification" and cohort not in {
+        "held_out",
+        "adverse",
+    }:
+        raise ValueError("held-out qualification requires a held-out participant")
+    return cohort
 
 
 def _metric_coverage(
@@ -397,6 +525,14 @@ def load_governed_trajectory(
         )
         raise ValueError(f"source {source_id!r} is not ready for {label}")
 
+    split, split_digest = _load_participant_split(
+        manifest_path,
+        manifest["participant_split"],
+        source_id=source_id,
+        registration=registration,
+    )
+    cohort = _require_participant_assignment(manifest, split)
+
     artifact = manifest["artifact"]
     package_path = _contained_file(
         manifest_path,
@@ -432,6 +568,9 @@ def load_governed_trajectory(
         source_id=source_id,
         participant_id=participant["participant_id"],
         grouping_id=participant["grouping_id"],
+        cohort=cohort,
+        split_id=split["split_id"],
+        split_manifest_sha256=split_digest,
         trial_id=acquisition["trial_id"],
         intended_use=intended_use,
         source_package_sha256=package_digest,
