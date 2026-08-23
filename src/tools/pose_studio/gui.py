@@ -106,6 +106,17 @@ class MainWidget(QtWidgets.QWidget):
         self.btn_redo.setToolTip("Redo the last undone edit (Ctrl+Shift+Z).")
         self.btn_redo.clicked.connect(self._on_redo)
 
+        # Actions for keyboard shortcuts and menu bar (created on MainWidget so embedded mode has working shortcuts)
+        self.act_undo = QtGui.QAction("&Undo", self)
+        self.act_undo.setShortcut(QtGui.QKeySequence("Ctrl+Z"))
+        self.act_undo.triggered.connect(self._on_undo)
+        self.addAction(self.act_undo)
+
+        self.act_redo = QtGui.QAction("&Redo", self)
+        self.act_redo.setShortcut(QtGui.QKeySequence("Ctrl+Shift+Z"))
+        self.act_redo.triggered.connect(self._on_redo)
+        self.addAction(self.act_redo)
+
     def _build_layout(self) -> None:
         outer = QtWidgets.QVBoxLayout(self)
         outer.setContentsMargins(8, 8, 8, 8)
@@ -212,8 +223,10 @@ class MainWidget(QtWidgets.QWidget):
     def _refresh_undo_redo_actions(self) -> None:
         self.btn_undo.setEnabled(self._history.can_undo)
         self.btn_redo.setEnabled(self._history.can_redo)
-        self.act_undo.setEnabled(self._history.can_undo)
-        self.act_redo.setEnabled(self._history.can_redo)
+        if hasattr(self, "act_undo") and self.act_undo is not None:
+            self.act_undo.setEnabled(self._history.can_undo)
+        if hasattr(self, "act_redo") and self.act_redo is not None:
+            self.act_redo.setEnabled(self._history.can_redo)
 
     def create_menu_bar(self, parent: QtWidgets.QMainWindow) -> QtGui.QMenuBar:
         """Create and return a menu bar for the given parent window.
@@ -252,13 +265,7 @@ class MainWidget(QtWidgets.QWidget):
         file_menu.addAction(act_quit)
 
         # Edit menu.
-        self.act_undo = QtGui.QAction("&Undo", parent)
-        self.act_undo.setShortcut(QtGui.QKeySequence("Ctrl+Z"))
-        self.act_undo.triggered.connect(self._on_undo)
         edit_menu.addAction(self.act_undo)
-        self.act_redo = QtGui.QAction("&Redo", parent)
-        self.act_redo.setShortcut(QtGui.QKeySequence("Ctrl+Shift+Z"))
-        self.act_redo.triggered.connect(self._on_redo)
         edit_menu.addAction(self.act_redo)
 
         # Pose Library menu.
@@ -310,6 +317,14 @@ class PoseStudioWindow(QtWidgets.QMainWindow):
     def main_widget(self) -> MainWidget:
         """Return the embedded MainWidget."""
         return self._main_widget
+
+    def __getattr__(self, name: str) -> Any:
+        """Delegate attribute lookups to the inner MainWidget for backwards compatibility."""
+        if "_main_widget" in self.__dict__:
+            return getattr(self._main_widget, name)
+        raise AttributeError(
+            f"'{type(self).__name__}' object has no attribute '{name}'"
+        )
 
 
 class _EmbedAdapter:
