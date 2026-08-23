@@ -187,8 +187,30 @@ def _validate_complete_record(record: Mapping[str, Any], rows: list[dict]) -> No
         raise RuntimeError("complete record results do not match its corner evidence")
 
 
-def audit_headline_record(path: Path) -> dict[str, Any]:
-    """Validate one immutable read of a live or completed campaign record."""
+def _validated_source_set(
+    expected_sources: Mapping[str, str] | None,
+) -> dict[str, str]:
+    source_set = (
+        _source_hashes() if expected_sources is None else dict(expected_sources)
+    )
+    if set(source_set) != set(SOURCE_PATHS):
+        raise RuntimeError("headline archived source set is incomplete or excessive")
+    if any(
+        not isinstance(digest, str)
+        or len(digest) != 64
+        or any(character not in "0123456789abcdef" for character in digest)
+        for digest in source_set.values()
+    ):
+        raise RuntimeError("headline archived source digest is invalid")
+    return source_set
+
+
+def audit_headline_record(
+    path: Path,
+    *,
+    expected_sources: Mapping[str, str] | None = None,
+) -> dict[str, Any]:
+    """Validate one immutable read against current or archived source hashes."""
 
     try:
         raw = path.read_bytes()
@@ -207,8 +229,8 @@ def audit_headline_record(path: Path) -> dict[str, Any]:
     config = _config(record)
     if record.get("design") != _expected_design(config):
         raise RuntimeError("headline record design drifted from registration")
-    expected_sources = _source_hashes()
-    if record.get("source_sha256") != expected_sources:
+    source_set = _validated_source_set(expected_sources)
+    if record.get("source_sha256") != source_set:
         raise RuntimeError("headline record source hashes drifted")
     if record.get("limitations") != LIMITATIONS:
         raise RuntimeError("headline record limitations drifted")
@@ -232,7 +254,7 @@ def audit_headline_record(path: Path) -> dict[str, Any]:
                 row[pathway],
                 pathway=pathway,
                 corner=corner,
-                expected_sources=expected_sources,
+                expected_sources=source_set,
             )
             terminal_pathways += 1
         if len(present) == len(PATHWAYS):
@@ -268,7 +290,7 @@ def audit_headline_record(path: Path) -> dict[str, Any]:
         "terminal_pathway_count": terminal_pathways,
         "active_corner_id": active_corner,
         "release_evidence": status == "complete",
-        "source_set_sha256": _digest_mapping(expected_sources),
+        "source_set_sha256": _digest_mapping(source_set),
         "record_sha256": hashlib.sha256(raw).hexdigest(),
     }
 

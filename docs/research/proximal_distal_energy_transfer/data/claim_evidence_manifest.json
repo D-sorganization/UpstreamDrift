@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-evidence-integrity-v2",
   "registry": {
     "path": "docs/research/proximal_distal_energy_transfer/data/claim_audit_registry.json",
-    "sha256": "afb6b4b63567518dc79f163280571e6bc59963c943a4aa5784b7683f7bedee81"
+    "sha256": "0ed6bcd27a723730c85534bab38ccd8b5bdd7fd5effd873a7711c74a47ad214e"
   },
   "scope": {
     "local_artifact_semantics": "content_integrity_not_independent_validation",
@@ -11,9 +11,9 @@
     "network_access_required": false
   },
   "summary": {
-    "claim_count": 304,
-    "evidence_reference_count": 2172,
-    "local_artifact_count": 321,
+    "claim_count": 305,
+    "evidence_reference_count": 2199,
+    "local_artifact_count": 329,
     "external_url_count": 78
   },
   "claims": {
@@ -3705,17 +3705,49 @@
     },
     "PD-CLAIM-304": {
       "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_headline_uncertainty.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_headline_execution_provenance.json",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_headline_uncertainty.pdf",
+        "scripts/research/proximal_distal_energy/articulated_headline_record_audit.py",
+        "scripts/research/proximal_distal_energy/make_articulated_headline_uncertainty_figure.py",
         "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py",
         "scripts/research/proximal_distal_energy/register_articulated_uncertainty_claims.py",
-        "tests/research/test_articulated_headline_uncertainty.py"
+        "tests/research/test_articulated_headline_uncertainty.py",
+        "tests/research/test_articulated_headline_record_audit.py",
+        "tests/research/test_articulated_headline_uncertainty_evidence.py",
+        "tests/research/test_articulated_headline_uncertainty_figure.py"
       ],
       "external_references": []
     },
     "PD-CLAIM-305": {
       "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_headline_uncertainty.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_headline_execution_provenance.json",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_headline_uncertainty.pdf",
+        "scripts/research/proximal_distal_energy/articulated_headline_record_audit.py",
+        "scripts/research/proximal_distal_energy/make_articulated_headline_uncertainty_figure.py",
         "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py",
         "scripts/research/proximal_distal_energy/register_articulated_uncertainty_claims.py",
-        "tests/research/test_articulated_headline_uncertainty.py"
+        "tests/research/test_articulated_headline_uncertainty.py",
+        "tests/research/test_articulated_headline_record_audit.py",
+        "tests/research/test_articulated_headline_uncertainty_evidence.py",
+        "tests/research/test_articulated_headline_uncertainty_figure.py"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-306": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_headline_uncertainty.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_headline_execution_provenance.json",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_headline_uncertainty.pdf",
+        "scripts/research/proximal_distal_energy/articulated_headline_record_audit.py",
+        "scripts/research/proximal_distal_energy/make_articulated_headline_uncertainty_figure.py",
+        "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py",
+        "scripts/research/proximal_distal_energy/register_articulated_uncertainty_claims.py",
+        "tests/research/test_articulated_headline_uncertainty.py",
+        "tests/research/test_articulated_headline_record_audit.py",
+        "tests/research/test_articulated_headline_uncertainty_evidence.py",
+        "tests/research/test_articulated_headline_uncertainty_figure.py"
       ],
       "external_references": []
     }
@@ -3955,6 +3987,24 @@
         "PD-CLAIM-294",
         "PD-CLAIM-295",
         "PD-CLAIM-296"
+      ]
+    },
+    "docs/research/proximal_distal_energy_transfer/data/articulated_headline_execution_provenance.json": {
+      "sha256": "f8ade3b53a5cb4a46a7ee63eb6f41e6574b2ea787920fdea084d7cb3bbf01643",
+      "bytes": 1974,
+      "referenced_by": [
+        "PD-CLAIM-304",
+        "PD-CLAIM-305",
+        "PD-CLAIM-306"
+      ]
+    },
+    "docs/research/proximal_distal_energy_transfer/data/articulated_headline_uncertainty.json": {
+      "sha256": "e8a7e53701217e4de875a370f7483172f3cfbfb167416b5133ba269b8fef689b",
+      "bytes": 39966,
+      "referenced_by": [
+        "PD-CLAIM-304",
+        "PD-CLAIM-305",
+        "PD-CLAIM-306"
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_inertia_cross_engine.json": {
@@ -5234,6 +5284,15 @@
         "PD-CLAIM-296"
       ]
     },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_headline_uncertainty.pdf": {
+      "sha256": "5a68b74d6a63b1ed74a644104888b1838a3d67469adc0dc3c8758a3492d62e56",
+      "bytes": 22602,
+      "referenced_by": [
+        "PD-CLAIM-304",
+        "PD-CLAIM-305",
+        "PD-CLAIM-306"
+      ]
+    },
     "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_inertia_cross_engine.pdf": {
       "sha256": "26c2c88192c434707beaffbdbe5d3c43a1b55b0f0fd3f5d26404e3cd434bd5e2",
       "bytes": 33478,
@@ -5574,13 +5633,23 @@
         "PD-CLAIM-296"
       ]
     },
+    "scripts/research/proximal_distal_energy/articulated_headline_record_audit.py": {
+      "sha256": "5e3b092b52d38174e4ccaf550b32a0c62f55001765ac134adbbee095e4f24cc8",
+      "bytes": 12291,
+      "referenced_by": [
+        "PD-CLAIM-304",
+        "PD-CLAIM-305",
+        "PD-CLAIM-306"
+      ]
+    },
     "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py": {
       "sha256": "ff47449935ac54feee1d631ddb59dd98657d1af0f4454210e5721243f7874ab1",
       "bytes": 16631,
       "referenced_by": [
         "PD-CLAIM-300",
         "PD-CLAIM-304",
-        "PD-CLAIM-305"
+        "PD-CLAIM-305",
+        "PD-CLAIM-306"
       ]
     },
     "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py": {
@@ -5890,6 +5959,15 @@
         "PD-CLAIM-296"
       ]
     },
+    "scripts/research/proximal_distal_energy/make_articulated_headline_uncertainty_figure.py": {
+      "sha256": "c57e82b29148e699b167219b090fdfa3b7a66ee5112abbb132fed00af8bd60a8",
+      "bytes": 4298,
+      "referenced_by": [
+        "PD-CLAIM-304",
+        "PD-CLAIM-305",
+        "PD-CLAIM-306"
+      ]
+    },
     "scripts/research/proximal_distal_energy/make_articulated_inertia_cross_engine_figure.py": {
       "sha256": "969a3c94645164cabc48e2dec3f5d39bbe2b819c89333a991c210c5a7936d5ad",
       "bytes": 3043,
@@ -6101,8 +6179,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/register_articulated_uncertainty_claims.py": {
-      "sha256": "3248702154c95a2e2aa49cfc61e042555006f603620b8d06e50ae470757fa48d",
-      "bytes": 27579,
+      "sha256": "8e7c680aba72aad39522c8166182784143f3597990c6d5e9d9237bd40002a9d8",
+      "bytes": 30541,
       "referenced_by": [
         "PD-CLAIM-297",
         "PD-CLAIM-298",
@@ -6112,7 +6190,8 @@
         "PD-CLAIM-302",
         "PD-CLAIM-303",
         "PD-CLAIM-304",
-        "PD-CLAIM-305"
+        "PD-CLAIM-305",
+        "PD-CLAIM-306"
       ]
     },
     "scripts/research/proximal_distal_energy/register_distributed_grip_claims.py": {
@@ -7014,13 +7093,41 @@
         "PD-CLAIM-296"
       ]
     },
+    "tests/research/test_articulated_headline_record_audit.py": {
+      "sha256": "1dfe235a53af7751538211fb9a1e5b4b6f0ca254dc8e064bbe18a0def60ad336",
+      "bytes": 11241,
+      "referenced_by": [
+        "PD-CLAIM-304",
+        "PD-CLAIM-305",
+        "PD-CLAIM-306"
+      ]
+    },
     "tests/research/test_articulated_headline_uncertainty.py": {
       "sha256": "72204c041461619284dccea2c8202f75b4b21d2d35766c570ed366ac12db49ef",
       "bytes": 8081,
       "referenced_by": [
         "PD-CLAIM-300",
         "PD-CLAIM-304",
-        "PD-CLAIM-305"
+        "PD-CLAIM-305",
+        "PD-CLAIM-306"
+      ]
+    },
+    "tests/research/test_articulated_headline_uncertainty_evidence.py": {
+      "sha256": "e9bd5a89bc9e918199af0d7f5954825417bff432ea852aec451fa178abc24a1c",
+      "bytes": 5578,
+      "referenced_by": [
+        "PD-CLAIM-304",
+        "PD-CLAIM-305",
+        "PD-CLAIM-306"
+      ]
+    },
+    "tests/research/test_articulated_headline_uncertainty_figure.py": {
+      "sha256": "60257aba7581f7e80d9fe2da6db14bf510f052c9cbb76bc86ed2e58b80ccddaf",
+      "bytes": 3945,
+      "referenced_by": [
+        "PD-CLAIM-304",
+        "PD-CLAIM-305",
+        "PD-CLAIM-306"
       ]
     },
     "tests/research/test_articulated_inertia_cross_engine.py": {

@@ -1,9 +1,9 @@
 {
   "schema_version": "proximal-distal-claim-audit-v1",
   "paper_source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-  "source_digest": "6982464c766df93e45a172a65bfd0e7c0dab5d1c7602334fc726aee6fb985fdd",
+  "source_digest": "704096f754c574561922e790edfca8407f18ee3915b1825dff3487f8e15853fe",
   "source_count": 38,
-  "candidate_count": 1092,
+  "candidate_count": 1094,
   "candidates": [
     {
       "candidate_id": "PD-CAND-f9b891e62e1d24de",
@@ -11576,10 +11576,27 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-f86dae8e82392c96",
+      "candidate_id": "PD-CAND-785aa794f7b0baf1",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06cab_articulated_headline_uncertainty.qmd",
       "line_start": 33,
-      "line_end": 33,
+      "line_end": 41,
+      "text": "The completed campaign shows that the shaft comparability set is sensitive to the registered constitutive bounds. Across the nine completed nonnominal shaft corners, the matched count spans 80--182 cells, or -46 to +56 relative to the nominal 126/384. Both grip-damping corners are retained failures. All 18 completed ground corners remain at 0/384 matched cells, while the high grip-damping ground corner is retained as a failure. The shaft result rejects invariance of the matching set over these one-at-a-time bounds. The ground result shows that no eligible matched set emerged in the completed corners; it does not show that support compliance has no dynamical effect.",
+      "text_sha256": "facb211ab7d14c47656acc259bec58064b523b52a9b8d73a98043d8edc679722",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": true,
+      "priority_score": 4,
+      "triage_flags": [
+        "numeric",
+        "assertive_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-f86dae8e82392c96",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06cab_articulated_headline_uncertainty.qmd",
+      "line_start": 43,
+      "line_end": 43,
       "text": "![Articulated Headline Sensitivity Across Registered Engineering Bounds](figures/fig_articulated_headline_uncertainty.pdf){#fig-articulated-headline-uncertainty width=100%}",
       "text_sha256": "b2fa05324a2cc0d6ea9856e89fd9bb55ec59cd16f91779f59f1c99858ba8ebdd",
       "citation_keys": [],
@@ -11592,12 +11609,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-d4b7109ffccb30d4",
+      "candidate_id": "PD-CAND-4278f5659cd5af05",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06cab_articulated_headline_uncertainty.qmd",
-      "line_start": 35,
-      "line_end": 41,
-      "text": "Figure @fig-articulated-headline-uncertainty shows low and high count changes separately for the shaft and finite-ground screens. A failed corner remains in the machine-readable record and appears explicitly rather than being removed from the denominator. The governed record is available as [`data/articulated_headline_uncertainty.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/articulated_headline_uncertainty.json), and the executable design is available as [`articulated_headline_uncertainty.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py).",
-      "text_sha256": "42dbf13a26f1014ca8cbdf47fb2694de41dcc59d22f05a92637b2d396329dbc6",
+      "line_start": 45,
+      "line_end": 52,
+      "text": "Figure @fig-articulated-headline-uncertainty shows low and high count changes separately for the shaft and finite-ground screens, with small vertical offsets so coincident zero-change points and retained failures remain visible. A failed corner remains in the machine-readable record and appears explicitly rather than being removed from the denominator. The governed record is available as [`data/articulated_headline_uncertainty.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/articulated_headline_uncertainty.json), and the executable design is available as [`articulated_headline_uncertainty.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py).",
+      "text_sha256": "f7c37cc5832d72e1a86889cc24d8ff3478e5890e509b92d30d081c0b40b85ef6",
       "citation_keys": [],
       "has_numeric_content": false,
       "has_assertive_language": true,
@@ -11610,8 +11627,8 @@
     {
       "candidate_id": "PD-CAND-c98873ad285d455a",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06cab_articulated_headline_uncertainty.qmd",
-      "line_start": 43,
-      "line_end": 49,
+      "line_start": 54,
+      "line_end": 60,
       "text": "This one-at-a-time design exposes first-order fragility and adverse numerical corners, but it does not estimate parameter interactions or a joint uncertainty distribution. Survival across these bounds remains qualification only for the declared synthetic model. Equipment calibration, participant-specific contact and anatomy, unilateral foot contact, impact, full-downswing delivery, and held-out bilateral-wrench validation remain required before any human or coaching interpretation.",
       "text_sha256": "6faff42bc894c54afd8ae46be2771703b65ec6aaae1432e561b5be0b1fa6859d",
       "citation_keys": [],
@@ -17572,10 +17589,27 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-a6cbaeac4e561b78",
+      "candidate_id": "PD-CAND-d4b3a37c58774f25",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd",
       "line_start": 129,
-      "line_end": 136,
+      "line_end": 135,
+      "text": "The completed 19-corner constitutive screen further shows that the shaft matching set is not invariant to the registered one-at-a-time engineering bounds: its nine completed nonnominal corners span 80--182 matched cells, with two grip-damping failures retained. All 18 completed ground corners remain at 0/384 and one ground corner retains a failure. These are matching-set sensitivity results, not speed effects, population uncertainty, or equipment calibration.",
+      "text_sha256": "3a44ff1e03f0c8e03c4027f55cf21e04e0369578586801dd3f82fcd545074003",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": true,
+      "priority_score": 4,
+      "triage_flags": [
+        "numeric",
+        "assertive_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-a6cbaeac4e561b78",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd",
+      "line_start": 137,
+      "line_end": 144,
       "text": "A seven-corner structural authority campaign now regenerates four headline cases over all 13 phase samples. Nominal, both body-mass, both joint-limit, and high-height corners retain 52/52 feasible states. The low-height corner retains 51/52 and one case-0/phase-12 IK nonconvergence at an effectively zero joint-limit margin. This failure is part of the result, not a participant classification. The scaled authorities still must propagate through both native-engine headline atlases before the shaft and ground conclusions can be called structurally robust.",
       "text_sha256": "d7b7dce083abd0408fbb1ac1a9b029bc01cc24c985d6651dc21d460353ab3649",
       "citation_keys": [],
@@ -17591,8 +17625,8 @@
     {
       "candidate_id": "PD-CAND-58e2fdab32244d00",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd",
-      "line_start": 138,
-      "line_end": 145,
+      "line_start": 146,
+      "line_end": 153,
       "text": "The coupled uncertainty/control phase rejects two additional shortcuts. A net planar wrench cannot uniquely identify both hand forces, and six summary observables cannot identify the complete 12-parameter vector. Separate training and held-out ensembles leave objective-dependent tradeoffs among all eight command programs. Early restraint improves held-out lower-tail speed relative to late drive but increases the planar face/path error, so the result supports a conditional model mechanism rather than a universal or physiological strategy.",
       "text_sha256": "0623392842a8b8d93bfdb1b8298273ba9bc0680f274d5974db7cbee5890a18f5",
       "citation_keys": [],
@@ -17609,8 +17643,8 @@
     {
       "candidate_id": "PD-CAND-8fadc01cf2fdc629",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd",
-      "line_start": 147,
-      "line_end": 152,
+      "line_start": 155,
+      "line_end": 160,
       "text": "The experimental phase is preregistered but not empirically executed. Its machine-readable protocol fixes six synchronized modalities, participant-level holdout, identity-safe provenance, filtering and residual sensitivities, and four prediction-specific falsifiers. The synthetic dry run passes all intake and fail-closed controls, but it cannot advance H1--H4. Governed human data are still required.",
       "text_sha256": "652ee026810a3536d63d37736f4a84dab0a9a2dec0e3f173594aee27b53dcc9c",
       "citation_keys": [],
@@ -17623,8 +17657,8 @@
     {
       "candidate_id": "PD-CAND-5a645df3aad4e211",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd",
-      "line_start": 154,
-      "line_end": 160,
+      "line_start": 162,
+      "line_end": 168,
       "text": "The open-resource layer now supplies model-tier presets, a hash-pinned release manifest, standard checksums, a data dictionary, citation metadata, and a claim-first reviewer workbench. Validation fails closed on artifact drift. The bundle remains a qualified local release candidate rather than a persistent archive: calibrated articulated anatomy and contact, equipment-calibrated beam coupling, completed structural-corner headline propagation, governed human evaluation, and external identifier deposit remain open.",
       "text_sha256": "5821cb1dae65e96febe6335c8e25657d0a09bafd68313ede92bdb197c64974f9",
       "citation_keys": [],
@@ -17640,8 +17674,8 @@
     {
       "candidate_id": "PD-CAND-efee29754ee09df2",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd",
-      "line_start": 164,
-      "line_end": 165,
+      "line_start": 172,
+      "line_end": 173,
       "text": "The next work should reduce the largest inferential risks in dependency order:",
       "text_sha256": "07513d405d6a2dec80de362e100344a58900b15d92e7c1b05bd76a35d1357608",
       "citation_keys": [],
@@ -17654,8 +17688,8 @@
     {
       "candidate_id": "PD-CAND-a49b9e81333cef61",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd",
-      "line_start": 167,
-      "line_end": 195,
+      "line_start": 175,
+      "line_end": 203,
       "text": "1. **Complete Structural-Corner Headline Propagation.** Pass every feasible digest-bound scaled authority through the exact native-engine shaft and finite-ground atlases. Retain the low-height failure in the denominator and preserve reversal, refinement, pathway killswitch, force, couple, power, work, domain, and unchanged matching controls. Do not substitute nominal anatomy or treat regeneration alone as dynamic robustness. 2. **Calibrated Uncertainty and Constrained Control.** Extend the executed multivariable screen with population-informed distributions, measurement error, profile-likelihood or Bayesian calibration, larger held-out ensembles, and a constrained optimal-control comparator. 3. **Spatial Model-Fidelity Ladder.** Extend the executed planar base rotation, intrinsic free moment, distributed grip, and passive shaft into a three- dimensional club/body solve with calibrated unilateral foot contact and force-plate comparison without changing the registered interface observables. Each rung should carry conservation checks and cross-engine tolerance gates. 4. **Execute the Frozen Human-Data Protocol.** Acquire governed synchronized measurements that pass the fixed inclusion, residual, missingness, participant-holdout, and provenance gates. Sequence order alone must not be treated as evidence of energy transfer. 5. **Arm--Wrist Allocation and Preload Falsification.** Execute the bilateral grip-wrench, pressure, activation, stiffness, and participant-holdout tests registered in @sec-torque-allocation-preload. Treat the dead-zone mechanism as rejected if its predicted gap is absent under documented low tangent stiffness or if any performance difference disappears on holdout. 6. **Open-Resource Release.** Maintain deterministic commands, machine-readable results, data dictionaries, checksums, citation metadata, and explicit license boundaries. Archive validated releases with a persistent identifier.",
       "text_sha256": "5fce794bf00d6056912a329bba111798441037b9c992cf77ded328aa1498d771",
       "citation_keys": [],
@@ -17672,8 +17706,8 @@
     {
       "candidate_id": "PD-CAND-1efe7a3110de4a16",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd",
-      "line_start": 197,
-      "line_end": 202,
+      "line_start": 205,
+      "line_end": 210,
       "text": "The canonical implementation roadmap and dependency-ordered acceptance criteria are tracked in [the open research epic](https://github.com/D-sorganization/UpstreamDrift/issues/8557). The completed matched-task allocation groundwork is archived in [its closed falsification epic](https://github.com/D-sorganization/UpstreamDrift/issues/8497); remaining empirical allocation tests stay governed by the open research epic.",
       "text_sha256": "a3c305311d5f4dadc1e0fc37d50e13fc34f9f5ad78cf99bbd95e1cbf9a5d43d0",
       "citation_keys": [],
@@ -17688,8 +17722,8 @@
     {
       "candidate_id": "PD-CAND-6a984b208c9fd567",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd",
-      "line_start": 206,
-      "line_end": 236,
+      "line_start": 214,
+      "line_end": 244,
       "text": "Analysis code, tests, figures, machine-readable outputs, and parameter records are available in the [open-source repository](https://github.com/D-sorganization/UpstreamDrift/tree/main/docs/research/proximal_distal_energy_transfer). The repository name identifies provenance only; none of the scientific claims depend on adoption of the broader software project. The principal summary is recorded in [`data/results_summary.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/results_summary.json), and the parameter-sensitivity results are recorded in [`data/e1d_parameter_sensitivity.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/e1d_parameter_sensitivity.json). The spatial common-state evidence is recorded in [`data/spatial_full_body_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json). The two-engine spatial forward-contact evidence is recorded in [`data/spatial_forward_contact_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json). The uncertainty, identifiability, and control evidence is recorded in [`data/uncertainty_control_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.json). The distributed-shaft structural evidence is recorded in [`data/shaft_beam_reference.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json). The forward distributed-modal shaft and arm--wrist allocation evidence are recorded in [`data/moving_base_modal_shaft_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/moving_base_modal_shaft_study.json) and [`data/torque_allocation_preload_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/torque_allocation_preload_study.json). The frozen experimental protocol and synthetic readiness classification are recorded in [`data/experimental_protocol_v1.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/experimental_protocol_v1.json) and [`data/experimental_protocol_readiness.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/experimental_protocol_readiness.json). The finite-ground initialization, preregistered atlas, and labeled post-hoc matching sensitivity are recorded in [`data/articulated_ground_diagnostic.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/articulated_ground_diagnostic.json), [`data/articulated_ground_atlas.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/articulated_ground_atlas.json), and [`data/articulated_ground_posthoc_sensitivity.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/articulated_ground_posthoc_sensitivity.json).",
       "text_sha256": "118b77c7117e431f1f3857ee049e7323abb90acc09b269e6df550e9805665c6f",
       "citation_keys": [],

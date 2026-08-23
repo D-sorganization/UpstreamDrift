@@ -110,6 +110,26 @@ def _write(path: Path, record: dict) -> None:
     path.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
 
 
+def test_audit_can_bind_an_archived_source_set(tmp_path: Path) -> None:
+    record = _record()
+    archived = dict(record["source_sha256"])
+    first = next(iter(archived))
+    archived[first] = "0" * 64
+    record["source_sha256"] = archived
+    for row in record["corners"]:
+        for pathway in ("shaft", "ground"):
+            result = row.get(pathway)
+            if result is not None and result["status"] != "not_affected":
+                result["computed_source_sha256"] = archived
+    path = tmp_path / "archived.json"
+    _write(path, record)
+
+    with pytest.raises(RuntimeError, match="source hashes drifted"):
+        audit_headline_record(path)
+    report = audit_headline_record(path, expected_sources=archived)
+    assert report["source_set_sha256"]
+
+
 def _complete(record: dict) -> None:
     record["results"] = {}
     for pathway in ("shaft", "ground"):

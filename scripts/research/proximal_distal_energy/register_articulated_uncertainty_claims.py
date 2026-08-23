@@ -10,8 +10,8 @@ ROOT = Path(__file__).resolve().parents[3]
 ARTICLE = ROOT / "docs/research/proximal_distal_energy_transfer"
 REGISTRY = ARTICLE / "data/claim_audit_registry.json"
 INVENTORY = ARTICLE / "data/claim_candidate_inventory.json"
-DATE = "2026-08-20"
-CLAIM_IDS = {f"PD-CLAIM-{value}" for value in range(297, 306)}
+DATE = "2026-08-23"
+CLAIM_IDS = {f"PD-CLAIM-{value}" for value in range(297, 307)}
 REGISTRATION_ARTIFACT = (
     "scripts/research/proximal_distal_energy/register_articulated_uncertainty_claims.py"
 )
@@ -41,6 +41,17 @@ HEADLINE_DESIGN_ARTIFACTS = [
     "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py",
     REGISTRATION_ARTIFACT,
     "tests/research/test_articulated_headline_uncertainty.py",
+]
+HEADLINE_RESULT_ARTIFACTS = [
+    "docs/research/proximal_distal_energy_transfer/data/articulated_headline_uncertainty.json",
+    "docs/research/proximal_distal_energy_transfer/data/articulated_headline_execution_provenance.json",
+    "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_headline_uncertainty.pdf",
+    "scripts/research/proximal_distal_energy/articulated_headline_record_audit.py",
+    "scripts/research/proximal_distal_energy/make_articulated_headline_uncertainty_figure.py",
+    *HEADLINE_DESIGN_ARTIFACTS,
+    "tests/research/test_articulated_headline_record_audit.py",
+    "tests/research/test_articulated_headline_uncertainty_evidence.py",
+    "tests/research/test_articulated_headline_uncertainty_figure.py",
 ]
 
 
@@ -192,6 +203,7 @@ def main() -> None:
         "method": _find(candidates, headline_chapter, "The shaft and finite-ground"),
         "bounds": _find(candidates, headline_chapter, "The design contains"),
         "estimand": _find(candidates, headline_chapter, "The estimand is"),
+        "result": _find(candidates, headline_chapter, "The completed campaign"),
         "figure": _find(candidates, headline_chapter, "![Articulated Headline"),
         "provenance": _find(candidates, headline_chapter, "Figure @fig-articulated"),
         "boundary": _find(candidates, headline_chapter, "This one-at-a-time design"),
@@ -430,9 +442,9 @@ def main() -> None:
                 "and failures."
             ),
             classification="articulated_headline_uncertainty_design",
-            status="registered_execution_in_progress",
-            audit_status="design_bounds_controls_and_partial_record_boundary_checked",
-            artifacts=HEADLINE_DESIGN_ARTIFACTS,
+            status="completed_with_retained_failures",
+            audit_status="design_execution_completion_and_retained_failures_checked",
+            artifacts=HEADLINE_RESULT_ARTIFACTS,
             domain=(
                 "Nominal plus low/high grip, shaft, and ground constitutive engineering "
                 "corners over the complete production atlases."
@@ -445,11 +457,11 @@ def main() -> None:
             controls=headline_controls,
             falsifier=(
                 "A corner uses a reduced surrogate, changes the matching rule, loses a "
-                "control, or a partial record is promoted as completion."
+                "control, or the completed record fails its independent audit."
             ),
             adjudication=(
-                "Only the preregistered design and current in-progress status are "
-                "supported; no completed sensitivity result is asserted."
+                "The completed execution is accepted with every adverse corner retained; "
+                "the design remains an engineering-bound model screen."
             ),
         ),
         _claim(
@@ -463,7 +475,7 @@ def main() -> None:
             classification="articulated_headline_estimand_and_inference_boundary",
             status="explicitly_bounded",
             audit_status="estimand_matching_and_nonpromotion_rules_checked",
-            artifacts=HEADLINE_DESIGN_ARTIFACTS,
+            artifacts=HEADLINE_RESULT_ARTIFACTS,
             domain="Interpretation contract for the registered headline campaign.",
             boundary=(
                 "Equipment calibration, participant anatomy/contact, unilateral ground, "
@@ -478,6 +490,40 @@ def main() -> None:
             adjudication=(
                 "The count estimand and every prohibited promotion are stated "
                 "separately from eventual outcome analysis."
+            ),
+        ),
+        _claim(
+            "PD-CLAIM-306",
+            [headline["result"], headline["provenance"]],
+            statement=(
+                "Across nine completed nonnominal shaft corners, the matched set spans "
+                "80--182 cells (-46 to +56 from nominal 126/384), with both "
+                "grip-damping corners retained as failures; all 18 completed ground "
+                "corners remain at 0/384, with the high grip-damping corner retained "
+                "as a failure."
+            ),
+            classification="articulated_headline_constitutive_sensitivity_result",
+            status="completed_model_sensitivity_result",
+            audit_status="counts_ranges_statuses_and_failure_identities_reconciled",
+            artifacts=HEADLINE_RESULT_ARTIFACTS,
+            domain=(
+                "The registered nominal plus low/high one-at-a-time constitutive "
+                "engineering corners over the complete shaft and ground atlases."
+            ),
+            boundary=(
+                "Count movement is not a speed effect or human/population result; "
+                "failed corners and absent ground support prohibit robustness claims."
+            ),
+            explanations=headline_explanations,
+            controls=headline_controls,
+            falsifier=(
+                "The committed record does not reproduce the count ranges, nominal "
+                "counts, completed-corner counts, or retained failure identities."
+            ),
+            adjudication=(
+                "The shaft matching set is constitutively sensitive and the ground "
+                "matching set remains empty on completed corners; neither result is "
+                "promoted to a pathway benefit."
             ),
         ),
     ]
@@ -521,8 +567,9 @@ def main() -> None:
         "method": ("PD-CLAIM-304",),
         "bounds": ("PD-CLAIM-304",),
         "estimand": ("PD-CLAIM-305",),
+        "result": ("PD-CLAIM-306",),
         "figure": (),
-        "provenance": ("PD-CLAIM-304",),
+        "provenance": ("PD-CLAIM-304", "PD-CLAIM-306"),
         "boundary": ("PD-CLAIM-305",),
     }
     for name, claim_ids in mapping.items():
@@ -567,6 +614,10 @@ def main() -> None:
         (
             _find(candidates, "_ch09_conclusions.qmd", "A seven-corner structural"),
             ("PD-CLAIM-301", "PD-CLAIM-302", "PD-CLAIM-303"),
+        ),
+        (
+            _find(candidates, "_ch09_conclusions.qmd", "The completed 19-corner"),
+            ("PD-CLAIM-304", "PD-CLAIM-305", "PD-CLAIM-306"),
         ),
         (
             _find(candidates, "_ch09_conclusions.qmd", "The open-resource layer"),
@@ -614,10 +665,12 @@ def main() -> None:
     registry["claims"] = list(claims.values())
     registry["paper"]["source_digest"] = inventory["source_digest"]
     registry["audit_scope"]["current_scope"] = (
-        "The complete 1,092-candidate paper inventory is adjudicated. The local "
-        "articulated screen is conditional on partial opening, structural authorities "
-        "retain one low-height failure, and both structural propagation and the "
-        "19-corner headline campaign remain open without human or coaching promotion."
+        f"The complete {inventory['candidate_count']:,}-candidate paper inventory is "
+        "adjudicated. The local articulated screen is conditional on partial opening, "
+        "the completed constitutive headline campaign retains adverse failures and no "
+        "ground matched set, and structural authorities retain one low-height failure. "
+        "Structural propagation and governed human validation remain open without "
+        "human or coaching promotion."
     )
     registry["audit_scope"]["completion_status"] = "complete"
     _write_registry(registry)

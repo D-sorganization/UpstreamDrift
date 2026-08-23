@@ -16,6 +16,7 @@ LEVEL_STYLE = {
     "low": ("#1f77b4", "o"),
     "high": ("#d62728", "s"),
 }
+LEVEL_OFFSET = {"low": -0.10, "high": 0.10}
 
 
 def _label(name: str) -> str:
@@ -37,7 +38,7 @@ def _pathway_panel(
     ]
     for row in rows:
         result = row[pathway]
-        y = positions[row["axis_name"]]
+        y = positions[row["axis_name"]] + LEVEL_OFFSET[row["level"]]
         color, marker = LEVEL_STYLE[row["level"]]
         change = result.get("matched_cell_count_change_from_nominal")
         if result["status"] == "completed" and change is not None:
@@ -52,7 +53,7 @@ def _pathway_panel(
         elif result["status"] == "failed_retained":
             axis.scatter(0.0, y, color="#7f3c8d", marker="X", s=68, zorder=4)
             axis.annotate(
-                "Failed Corner Retained",
+                f"{row['level'].title()} Failed Corner Retained",
                 (0.0, y),
                 xytext=(6, 5),
                 textcoords="offset points",

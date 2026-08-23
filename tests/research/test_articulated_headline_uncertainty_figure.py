@@ -54,9 +54,9 @@ def _record() -> dict[str, object]:
                 "level": "low",
                 "value": 0.6,
                 "shaft": {
-                    "status": "completed",
-                    "matched_cell_count": 119,
-                    "matched_cell_count_change_from_nominal": -7,
+                    "status": "failed_retained",
+                    "matched_cell_count": None,
+                    "matched_cell_count_change_from_nominal": None,
                 },
                 "ground": {
                     "status": "completed",
@@ -99,7 +99,8 @@ def test_render_headline_uncertainty_figure(tmp_path: Path) -> None:
     assert output.with_suffix(".pdf").stat().st_size > 1_000
     svg = output.with_suffix(".svg").read_text(encoding="utf-8")
     assert "Articulated Headline Sensitivity" in svg
-    assert "Failed Corner Retained" in svg
+    assert "Low Failed Corner Retained" in svg
+    assert "High Failed Corner Retained" in svg
 
 
 def test_figure_rejects_incomplete_campaign(tmp_path: Path) -> None:

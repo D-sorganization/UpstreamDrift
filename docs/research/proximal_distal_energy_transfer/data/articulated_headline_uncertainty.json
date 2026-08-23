@@ -1,0 +1,938 @@
+{
+  "schema_version": "articulated-headline-uncertainty/v1",
+  "study_id": "articulated-shaft-ground-headline-uncertainty",
+  "status": "complete",
+  "design": {
+    "method": "registered_nominal_plus_one_at_a_time_low_high_corners",
+    "corner_count": 19,
+    "axes": [
+      {
+        "name": "grip_stiffness_scale",
+        "low": 0.6,
+        "nominal": 1.0,
+        "high": 1.4,
+        "pathways": [
+          "shaft",
+          "ground"
+        ]
+      },
+      {
+        "name": "grip_damping_scale",
+        "low": 0.5,
+        "nominal": 1.0,
+        "high": 1.5,
+        "pathways": [
+          "shaft",
+          "ground"
+        ]
+      },
+      {
+        "name": "shaft_bending_frequency_scale",
+        "low": 0.8,
+        "nominal": 1.0,
+        "high": 1.2,
+        "pathways": [
+          "shaft",
+          "ground"
+        ]
+      },
+      {
+        "name": "shaft_torsional_stiffness_scale",
+        "low": 0.64,
+        "nominal": 1.0,
+        "high": 1.44,
+        "pathways": [
+          "shaft",
+          "ground"
+        ]
+      },
+      {
+        "name": "shaft_damping_ratio",
+        "low": 0.009,
+        "nominal": 0.018,
+        "high": 0.036,
+        "pathways": [
+          "shaft",
+          "ground"
+        ]
+      },
+      {
+        "name": "ground_translation_stiffness_scale",
+        "low": 0.5,
+        "nominal": 1.0,
+        "high": 1.5,
+        "pathways": [
+          "ground"
+        ]
+      },
+      {
+        "name": "ground_translation_damping_scale",
+        "low": 0.5,
+        "nominal": 1.0,
+        "high": 1.5,
+        "pathways": [
+          "ground"
+        ]
+      },
+      {
+        "name": "ground_free_moment_stiffness_scale",
+        "low": 0.5,
+        "nominal": 1.0,
+        "high": 1.5,
+        "pathways": [
+          "ground"
+        ]
+      },
+      {
+        "name": "ground_free_moment_damping_scale",
+        "low": 0.5,
+        "nominal": 1.0,
+        "high": 1.5,
+        "pathways": [
+          "ground"
+        ]
+      }
+    ],
+    "controls": "each full atlas retains both engines, velocity reversal, timestep refinement, and pathway killswitches"
+  },
+  "configuration": {
+    "worker_count": 8,
+    "axes": [
+      {
+        "name": "grip_stiffness_scale",
+        "low": 0.6,
+        "nominal": 1.0,
+        "high": 1.4,
+        "pathways": [
+          "shaft",
+          "ground"
+        ]
+      },
+      {
+        "name": "grip_damping_scale",
+        "low": 0.5,
+        "nominal": 1.0,
+        "high": 1.5,
+        "pathways": [
+          "shaft",
+          "ground"
+        ]
+      },
+      {
+        "name": "shaft_bending_frequency_scale",
+        "low": 0.8,
+        "nominal": 1.0,
+        "high": 1.2,
+        "pathways": [
+          "shaft",
+          "ground"
+        ]
+      },
+      {
+        "name": "shaft_torsional_stiffness_scale",
+        "low": 0.64,
+        "nominal": 1.0,
+        "high": 1.44,
+        "pathways": [
+          "shaft",
+          "ground"
+        ]
+      },
+      {
+        "name": "shaft_damping_ratio",
+        "low": 0.009,
+        "nominal": 0.018,
+        "high": 0.036,
+        "pathways": [
+          "shaft",
+          "ground"
+        ]
+      },
+      {
+        "name": "ground_translation_stiffness_scale",
+        "low": 0.5,
+        "nominal": 1.0,
+        "high": 1.5,
+        "pathways": [
+          "ground"
+        ]
+      },
+      {
+        "name": "ground_translation_damping_scale",
+        "low": 0.5,
+        "nominal": 1.0,
+        "high": 1.5,
+        "pathways": [
+          "ground"
+        ]
+      },
+      {
+        "name": "ground_free_moment_stiffness_scale",
+        "low": 0.5,
+        "nominal": 1.0,
+        "high": 1.5,
+        "pathways": [
+          "ground"
+        ]
+      },
+      {
+        "name": "ground_free_moment_damping_scale",
+        "low": 0.5,
+        "nominal": 1.0,
+        "high": 1.5,
+        "pathways": [
+          "ground"
+        ]
+      }
+    ]
+  },
+  "corners": [
+    {
+      "corner_id": "nominal",
+      "axis_name": "nominal",
+      "level": "nominal",
+      "value": 1.0,
+      "pathways": [
+        "shaft",
+        "ground"
+      ],
+      "shaft": {
+        "status": "completed",
+        "failure_class": null,
+        "failure_message": null,
+        "matched_cell_count": 126,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": true,
+        "computed_source_sha256": {
+          "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py": "ff47449935ac54feee1d631ddb59dd98657d1af0f4454210e5721243f7874ab1",
+          "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
+          "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
+          "tests/research/test_articulated_headline_uncertainty.py": "72204c041461619284dccea2c8202f75b4b21d2d35766c570ed366ac12db49ef"
+        },
+        "matched_cell_count_change_from_nominal": 0
+      },
+      "ground": {
+        "status": "completed",
+        "failure_class": null,
+        "failure_message": null,
+        "matched_cell_count": 0,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": true,
+        "computed_source_sha256": {
+          "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py": "ff47449935ac54feee1d631ddb59dd98657d1af0f4454210e5721243f7874ab1",
+          "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
+          "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
+          "tests/research/test_articulated_headline_uncertainty.py": "72204c041461619284dccea2c8202f75b4b21d2d35766c570ed366ac12db49ef"
+        },
+        "matched_cell_count_change_from_nominal": 0
+      }
+    },
+    {
+      "corner_id": "grip_stiffness_scale-low",
+      "axis_name": "grip_stiffness_scale",
+      "level": "low",
+      "value": 0.6,
+      "pathways": [
+        "shaft",
+        "ground"
+      ],
+      "shaft": {
+        "status": "completed",
+        "failure_class": null,
+        "failure_message": null,
+        "matched_cell_count": 182,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": true,
+        "computed_source_sha256": {
+          "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py": "ff47449935ac54feee1d631ddb59dd98657d1af0f4454210e5721243f7874ab1",
+          "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
+          "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
+          "tests/research/test_articulated_headline_uncertainty.py": "72204c041461619284dccea2c8202f75b4b21d2d35766c570ed366ac12db49ef"
+        },
+        "matched_cell_count_change_from_nominal": 56
+      },
+      "ground": {
+        "status": "completed",
+        "failure_class": null,
+        "failure_message": null,
+        "matched_cell_count": 0,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": true,
+        "computed_source_sha256": {
+          "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py": "ff47449935ac54feee1d631ddb59dd98657d1af0f4454210e5721243f7874ab1",
+          "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
+          "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
+          "tests/research/test_articulated_headline_uncertainty.py": "72204c041461619284dccea2c8202f75b4b21d2d35766c570ed366ac12db49ef"
+        },
+        "matched_cell_count_change_from_nominal": 0
+      }
+    },
+    {
+      "corner_id": "grip_stiffness_scale-high",
+      "axis_name": "grip_stiffness_scale",
+      "level": "high",
+      "value": 1.4,
+      "pathways": [
+        "shaft",
+        "ground"
+      ],
+      "shaft": {
+        "status": "completed",
+        "failure_class": null,
+        "failure_message": null,
+        "matched_cell_count": 80,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": true,
+        "computed_source_sha256": {
+          "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py": "ff47449935ac54feee1d631ddb59dd98657d1af0f4454210e5721243f7874ab1",
+          "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
+          "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
+          "tests/research/test_articulated_headline_uncertainty.py": "72204c041461619284dccea2c8202f75b4b21d2d35766c570ed366ac12db49ef"
+        },
+        "matched_cell_count_change_from_nominal": -46
+      },
+      "ground": {
+        "status": "completed",
+        "failure_class": null,
+        "failure_message": null,
+        "matched_cell_count": 0,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": true,
+        "computed_source_sha256": {
+          "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py": "ff47449935ac54feee1d631ddb59dd98657d1af0f4454210e5721243f7874ab1",
+          "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
+          "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
+          "tests/research/test_articulated_headline_uncertainty.py": "72204c041461619284dccea2c8202f75b4b21d2d35766c570ed366ac12db49ef"
+        },
+        "matched_cell_count_change_from_nominal": 0
+      }
+    },
+    {
+      "corner_id": "grip_damping_scale-low",
+      "axis_name": "grip_damping_scale",
+      "level": "low",
+      "value": 0.5,
+      "pathways": [
+        "shaft",
+        "ground"
+      ],
+      "shaft": {
+        "status": "failed_retained",
+        "failure_class": "RuntimeError",
+        "failure_message": "excluded 0.001 s shaft probe unexpectedly remained in-domain",
+        "matched_cell_count": null,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": false,
+        "computed_source_sha256": {
+          "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py": "ff47449935ac54feee1d631ddb59dd98657d1af0f4454210e5721243f7874ab1",
+          "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
+          "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
+          "tests/research/test_articulated_headline_uncertainty.py": "72204c041461619284dccea2c8202f75b4b21d2d35766c570ed366ac12db49ef"
+        },
+        "matched_cell_count_change_from_nominal": null
+      },
+      "ground": {
+        "status": "completed",
+        "failure_class": null,
+        "failure_message": null,
+        "matched_cell_count": 0,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": true,
+        "computed_source_sha256": {
+          "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py": "ff47449935ac54feee1d631ddb59dd98657d1af0f4454210e5721243f7874ab1",
+          "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
+          "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
+          "tests/research/test_articulated_headline_uncertainty.py": "72204c041461619284dccea2c8202f75b4b21d2d35766c570ed366ac12db49ef"
+        },
+        "matched_cell_count_change_from_nominal": 0
+      }
+    },
+    {
+      "corner_id": "grip_damping_scale-high",
+      "axis_name": "grip_damping_scale",
+      "level": "high",
+      "value": 1.5,
+      "pathways": [
+        "shaft",
+        "ground"
+      ],
+      "shaft": {
+        "status": "failed_retained",
+        "failure_class": "RuntimeError",
+        "failure_message": "shaft atlas cell failed: state=(8, 12), activation=torsion, velocity_factor=-1.0, step_s=0.00025",
+        "matched_cell_count": null,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": false,
+        "computed_source_sha256": {
+          "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py": "ff47449935ac54feee1d631ddb59dd98657d1af0f4454210e5721243f7874ab1",
+          "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
+          "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
+          "tests/research/test_articulated_headline_uncertainty.py": "72204c041461619284dccea2c8202f75b4b21d2d35766c570ed366ac12db49ef"
+        },
+        "matched_cell_count_change_from_nominal": null
+      },
+      "ground": {
+        "status": "failed_retained",
+        "failure_class": "RuntimeError",
+        "failure_message": "native ground integration failed: engine=mujoco, ground=translation, shaft=coupled",
+        "matched_cell_count": null,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": false,
+        "computed_source_sha256": {
+          "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py": "ff47449935ac54feee1d631ddb59dd98657d1af0f4454210e5721243f7874ab1",
+          "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
+          "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
+          "tests/research/test_articulated_headline_uncertainty.py": "72204c041461619284dccea2c8202f75b4b21d2d35766c570ed366ac12db49ef"
+        },
+        "matched_cell_count_change_from_nominal": null
+      }
+    },
+    {
+      "corner_id": "shaft_bending_frequency_scale-low",
+      "axis_name": "shaft_bending_frequency_scale",
+      "level": "low",
+      "value": 0.8,
+      "pathways": [
+        "shaft",
+        "ground"
+      ],
+      "shaft": {
+        "status": "completed",
+        "failure_class": null,
+        "failure_message": null,
+        "matched_cell_count": 100,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": true,
+        "computed_source_sha256": {
+          "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py": "ff47449935ac54feee1d631ddb59dd98657d1af0f4454210e5721243f7874ab1",
+          "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
+          "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
+          "tests/research/test_articulated_headline_uncertainty.py": "72204c041461619284dccea2c8202f75b4b21d2d35766c570ed366ac12db49ef"
+        },
+        "matched_cell_count_change_from_nominal": -26
+      },
+      "ground": {
+        "status": "completed",
+        "failure_class": null,
+        "failure_message": null,
+        "matched_cell_count": 0,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": true,
+        "computed_source_sha256": {
+          "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py": "ff47449935ac54feee1d631ddb59dd98657d1af0f4454210e5721243f7874ab1",
+          "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
+          "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
+          "tests/research/test_articulated_headline_uncertainty.py": "72204c041461619284dccea2c8202f75b4b21d2d35766c570ed366ac12db49ef"
+        },
+        "matched_cell_count_change_from_nominal": 0
+      }
+    },
+    {
+      "corner_id": "shaft_bending_frequency_scale-high",
+      "axis_name": "shaft_bending_frequency_scale",
+      "level": "high",
+      "value": 1.2,
+      "pathways": [
+        "shaft",
+        "ground"
+      ],
+      "shaft": {
+        "status": "completed",
+        "failure_class": null,
+        "failure_message": null,
+        "matched_cell_count": 142,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": true,
+        "computed_source_sha256": {
+          "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py": "ff47449935ac54feee1d631ddb59dd98657d1af0f4454210e5721243f7874ab1",
+          "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
+          "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
+          "tests/research/test_articulated_headline_uncertainty.py": "72204c041461619284dccea2c8202f75b4b21d2d35766c570ed366ac12db49ef"
+        },
+        "matched_cell_count_change_from_nominal": 16
+      },
+      "ground": {
+        "status": "completed",
+        "failure_class": null,
+        "failure_message": null,
+        "matched_cell_count": 0,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": true,
+        "computed_source_sha256": {
+          "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py": "ff47449935ac54feee1d631ddb59dd98657d1af0f4454210e5721243f7874ab1",
+          "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
+          "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
+          "tests/research/test_articulated_headline_uncertainty.py": "72204c041461619284dccea2c8202f75b4b21d2d35766c570ed366ac12db49ef"
+        },
+        "matched_cell_count_change_from_nominal": 0
+      }
+    },
+    {
+      "corner_id": "shaft_torsional_stiffness_scale-low",
+      "axis_name": "shaft_torsional_stiffness_scale",
+      "level": "low",
+      "value": 0.64,
+      "pathways": [
+        "shaft",
+        "ground"
+      ],
+      "shaft": {
+        "status": "completed",
+        "failure_class": null,
+        "failure_message": null,
+        "matched_cell_count": 130,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": true,
+        "computed_source_sha256": {
+          "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py": "ff47449935ac54feee1d631ddb59dd98657d1af0f4454210e5721243f7874ab1",
+          "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
+          "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
+          "tests/research/test_articulated_headline_uncertainty.py": "72204c041461619284dccea2c8202f75b4b21d2d35766c570ed366ac12db49ef"
+        },
+        "matched_cell_count_change_from_nominal": 4
+      },
+      "ground": {
+        "status": "completed",
+        "failure_class": null,
+        "failure_message": null,
+        "matched_cell_count": 0,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": true,
+        "computed_source_sha256": {
+          "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py": "ff47449935ac54feee1d631ddb59dd98657d1af0f4454210e5721243f7874ab1",
+          "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
+          "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
+          "tests/research/test_articulated_headline_uncertainty.py": "72204c041461619284dccea2c8202f75b4b21d2d35766c570ed366ac12db49ef"
+        },
+        "matched_cell_count_change_from_nominal": 0
+      }
+    },
+    {
+      "corner_id": "shaft_torsional_stiffness_scale-high",
+      "axis_name": "shaft_torsional_stiffness_scale",
+      "level": "high",
+      "value": 1.44,
+      "pathways": [
+        "shaft",
+        "ground"
+      ],
+      "shaft": {
+        "status": "completed",
+        "failure_class": null,
+        "failure_message": null,
+        "matched_cell_count": 124,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": true,
+        "computed_source_sha256": {
+          "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py": "ff47449935ac54feee1d631ddb59dd98657d1af0f4454210e5721243f7874ab1",
+          "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
+          "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
+          "tests/research/test_articulated_headline_uncertainty.py": "72204c041461619284dccea2c8202f75b4b21d2d35766c570ed366ac12db49ef"
+        },
+        "matched_cell_count_change_from_nominal": -2
+      },
+      "ground": {
+        "status": "completed",
+        "failure_class": null,
+        "failure_message": null,
+        "matched_cell_count": 0,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": true,
+        "computed_source_sha256": {
+          "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py": "ff47449935ac54feee1d631ddb59dd98657d1af0f4454210e5721243f7874ab1",
+          "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
+          "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
+          "tests/research/test_articulated_headline_uncertainty.py": "72204c041461619284dccea2c8202f75b4b21d2d35766c570ed366ac12db49ef"
+        },
+        "matched_cell_count_change_from_nominal": 0
+      }
+    },
+    {
+      "corner_id": "shaft_damping_ratio-low",
+      "axis_name": "shaft_damping_ratio",
+      "level": "low",
+      "value": 0.009,
+      "pathways": [
+        "shaft",
+        "ground"
+      ],
+      "shaft": {
+        "status": "completed",
+        "failure_class": null,
+        "failure_message": null,
+        "matched_cell_count": 114,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": true,
+        "computed_source_sha256": {
+          "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py": "ff47449935ac54feee1d631ddb59dd98657d1af0f4454210e5721243f7874ab1",
+          "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
+          "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
+          "tests/research/test_articulated_headline_uncertainty.py": "72204c041461619284dccea2c8202f75b4b21d2d35766c570ed366ac12db49ef"
+        },
+        "matched_cell_count_change_from_nominal": -12
+      },
+      "ground": {
+        "status": "completed",
+        "failure_class": null,
+        "failure_message": null,
+        "matched_cell_count": 0,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": true,
+        "computed_source_sha256": {
+          "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py": "ff47449935ac54feee1d631ddb59dd98657d1af0f4454210e5721243f7874ab1",
+          "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
+          "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
+          "tests/research/test_articulated_headline_uncertainty.py": "72204c041461619284dccea2c8202f75b4b21d2d35766c570ed366ac12db49ef"
+        },
+        "matched_cell_count_change_from_nominal": 0
+      }
+    },
+    {
+      "corner_id": "shaft_damping_ratio-high",
+      "axis_name": "shaft_damping_ratio",
+      "level": "high",
+      "value": 0.036,
+      "pathways": [
+        "shaft",
+        "ground"
+      ],
+      "shaft": {
+        "status": "completed",
+        "failure_class": null,
+        "failure_message": null,
+        "matched_cell_count": 98,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": true,
+        "computed_source_sha256": {
+          "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py": "ff47449935ac54feee1d631ddb59dd98657d1af0f4454210e5721243f7874ab1",
+          "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
+          "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
+          "tests/research/test_articulated_headline_uncertainty.py": "72204c041461619284dccea2c8202f75b4b21d2d35766c570ed366ac12db49ef"
+        },
+        "matched_cell_count_change_from_nominal": -28
+      },
+      "ground": {
+        "status": "completed",
+        "failure_class": null,
+        "failure_message": null,
+        "matched_cell_count": 0,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": true,
+        "computed_source_sha256": {
+          "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py": "ff47449935ac54feee1d631ddb59dd98657d1af0f4454210e5721243f7874ab1",
+          "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
+          "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
+          "tests/research/test_articulated_headline_uncertainty.py": "72204c041461619284dccea2c8202f75b4b21d2d35766c570ed366ac12db49ef"
+        },
+        "matched_cell_count_change_from_nominal": 0
+      }
+    },
+    {
+      "corner_id": "ground_translation_stiffness_scale-low",
+      "axis_name": "ground_translation_stiffness_scale",
+      "level": "low",
+      "value": 0.5,
+      "pathways": [
+        "ground"
+      ],
+      "shaft": {
+        "status": "not_affected",
+        "matched_cell_count": null,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": null,
+        "matched_cell_count_change_from_nominal": null
+      },
+      "ground": {
+        "status": "completed",
+        "failure_class": null,
+        "failure_message": null,
+        "matched_cell_count": 0,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": true,
+        "computed_source_sha256": {
+          "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py": "ff47449935ac54feee1d631ddb59dd98657d1af0f4454210e5721243f7874ab1",
+          "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
+          "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
+          "tests/research/test_articulated_headline_uncertainty.py": "72204c041461619284dccea2c8202f75b4b21d2d35766c570ed366ac12db49ef"
+        },
+        "matched_cell_count_change_from_nominal": 0
+      }
+    },
+    {
+      "corner_id": "ground_translation_stiffness_scale-high",
+      "axis_name": "ground_translation_stiffness_scale",
+      "level": "high",
+      "value": 1.5,
+      "pathways": [
+        "ground"
+      ],
+      "shaft": {
+        "status": "not_affected",
+        "matched_cell_count": null,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": null,
+        "matched_cell_count_change_from_nominal": null
+      },
+      "ground": {
+        "status": "completed",
+        "failure_class": null,
+        "failure_message": null,
+        "matched_cell_count": 0,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": true,
+        "computed_source_sha256": {
+          "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py": "ff47449935ac54feee1d631ddb59dd98657d1af0f4454210e5721243f7874ab1",
+          "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
+          "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
+          "tests/research/test_articulated_headline_uncertainty.py": "72204c041461619284dccea2c8202f75b4b21d2d35766c570ed366ac12db49ef"
+        },
+        "matched_cell_count_change_from_nominal": 0
+      }
+    },
+    {
+      "corner_id": "ground_translation_damping_scale-low",
+      "axis_name": "ground_translation_damping_scale",
+      "level": "low",
+      "value": 0.5,
+      "pathways": [
+        "ground"
+      ],
+      "shaft": {
+        "status": "not_affected",
+        "matched_cell_count": null,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": null,
+        "matched_cell_count_change_from_nominal": null
+      },
+      "ground": {
+        "status": "completed",
+        "failure_class": null,
+        "failure_message": null,
+        "matched_cell_count": 0,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": true,
+        "computed_source_sha256": {
+          "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py": "ff47449935ac54feee1d631ddb59dd98657d1af0f4454210e5721243f7874ab1",
+          "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
+          "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
+          "tests/research/test_articulated_headline_uncertainty.py": "72204c041461619284dccea2c8202f75b4b21d2d35766c570ed366ac12db49ef"
+        },
+        "matched_cell_count_change_from_nominal": 0
+      }
+    },
+    {
+      "corner_id": "ground_translation_damping_scale-high",
+      "axis_name": "ground_translation_damping_scale",
+      "level": "high",
+      "value": 1.5,
+      "pathways": [
+        "ground"
+      ],
+      "shaft": {
+        "status": "not_affected",
+        "matched_cell_count": null,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": null,
+        "matched_cell_count_change_from_nominal": null
+      },
+      "ground": {
+        "status": "completed",
+        "failure_class": null,
+        "failure_message": null,
+        "matched_cell_count": 0,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": true,
+        "computed_source_sha256": {
+          "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py": "ff47449935ac54feee1d631ddb59dd98657d1af0f4454210e5721243f7874ab1",
+          "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
+          "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
+          "tests/research/test_articulated_headline_uncertainty.py": "72204c041461619284dccea2c8202f75b4b21d2d35766c570ed366ac12db49ef"
+        },
+        "matched_cell_count_change_from_nominal": 0
+      }
+    },
+    {
+      "corner_id": "ground_free_moment_stiffness_scale-low",
+      "axis_name": "ground_free_moment_stiffness_scale",
+      "level": "low",
+      "value": 0.5,
+      "pathways": [
+        "ground"
+      ],
+      "shaft": {
+        "status": "not_affected",
+        "matched_cell_count": null,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": null,
+        "matched_cell_count_change_from_nominal": null
+      },
+      "ground": {
+        "status": "completed",
+        "failure_class": null,
+        "failure_message": null,
+        "matched_cell_count": 0,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": true,
+        "computed_source_sha256": {
+          "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py": "ff47449935ac54feee1d631ddb59dd98657d1af0f4454210e5721243f7874ab1",
+          "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
+          "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
+          "tests/research/test_articulated_headline_uncertainty.py": "72204c041461619284dccea2c8202f75b4b21d2d35766c570ed366ac12db49ef"
+        },
+        "matched_cell_count_change_from_nominal": 0
+      }
+    },
+    {
+      "corner_id": "ground_free_moment_stiffness_scale-high",
+      "axis_name": "ground_free_moment_stiffness_scale",
+      "level": "high",
+      "value": 1.5,
+      "pathways": [
+        "ground"
+      ],
+      "shaft": {
+        "status": "not_affected",
+        "matched_cell_count": null,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": null,
+        "matched_cell_count_change_from_nominal": null
+      },
+      "ground": {
+        "status": "completed",
+        "failure_class": null,
+        "failure_message": null,
+        "matched_cell_count": 0,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": true,
+        "computed_source_sha256": {
+          "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py": "ff47449935ac54feee1d631ddb59dd98657d1af0f4454210e5721243f7874ab1",
+          "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
+          "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
+          "tests/research/test_articulated_headline_uncertainty.py": "72204c041461619284dccea2c8202f75b4b21d2d35766c570ed366ac12db49ef"
+        },
+        "matched_cell_count_change_from_nominal": 0
+      }
+    },
+    {
+      "corner_id": "ground_free_moment_damping_scale-low",
+      "axis_name": "ground_free_moment_damping_scale",
+      "level": "low",
+      "value": 0.5,
+      "pathways": [
+        "ground"
+      ],
+      "shaft": {
+        "status": "not_affected",
+        "matched_cell_count": null,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": null,
+        "matched_cell_count_change_from_nominal": null
+      },
+      "ground": {
+        "status": "completed",
+        "failure_class": null,
+        "failure_message": null,
+        "matched_cell_count": 0,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": true,
+        "computed_source_sha256": {
+          "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py": "ff47449935ac54feee1d631ddb59dd98657d1af0f4454210e5721243f7874ab1",
+          "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
+          "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
+          "tests/research/test_articulated_headline_uncertainty.py": "72204c041461619284dccea2c8202f75b4b21d2d35766c570ed366ac12db49ef"
+        },
+        "matched_cell_count_change_from_nominal": 0
+      }
+    },
+    {
+      "corner_id": "ground_free_moment_damping_scale-high",
+      "axis_name": "ground_free_moment_damping_scale",
+      "level": "high",
+      "value": 1.5,
+      "pathways": [
+        "ground"
+      ],
+      "shaft": {
+        "status": "not_affected",
+        "matched_cell_count": null,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": null,
+        "matched_cell_count_change_from_nominal": null
+      },
+      "ground": {
+        "status": "completed",
+        "failure_class": null,
+        "failure_message": null,
+        "matched_cell_count": 0,
+        "total_cell_count": 384,
+        "all_registered_gates_passed": true,
+        "computed_source_sha256": {
+          "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py": "ff47449935ac54feee1d631ddb59dd98657d1af0f4454210e5721243f7874ab1",
+          "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
+          "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
+          "tests/research/test_articulated_headline_uncertainty.py": "72204c041461619284dccea2c8202f75b4b21d2d35766c570ed366ac12db49ef"
+        },
+        "matched_cell_count_change_from_nominal": 0
+      }
+    }
+  ],
+  "results": {
+    "shaft": {
+      "nominal_matched_cell_count": 126,
+      "evaluated_corner_count": 11,
+      "completed_corner_count": 9,
+      "failed_corner_count": 2,
+      "matched_cell_count_range": [
+        80,
+        182
+      ],
+      "matched_cell_count_change_range": [
+        -46,
+        56
+      ],
+      "nonzero_change_corner_ids": [
+        "grip_stiffness_scale-low",
+        "grip_stiffness_scale-high",
+        "shaft_bending_frequency_scale-low",
+        "shaft_bending_frequency_scale-high",
+        "shaft_torsional_stiffness_scale-low",
+        "shaft_torsional_stiffness_scale-high",
+        "shaft_damping_ratio-low",
+        "shaft_damping_ratio-high"
+      ],
+      "failed_corner_ids": [
+        "grip_damping_scale-low",
+        "grip_damping_scale-high"
+      ]
+    },
+    "ground": {
+      "nominal_matched_cell_count": 0,
+      "evaluated_corner_count": 19,
+      "completed_corner_count": 18,
+      "failed_corner_count": 1,
+      "matched_cell_count_range": [
+        0,
+        0
+      ],
+      "matched_cell_count_change_range": [
+        0,
+        0
+      ],
+      "nonzero_change_corner_ids": [],
+      "failed_corner_ids": [
+        "grip_damping_scale-high"
+      ]
+    }
+  },
+  "source_sha256": {
+    "scripts/research/proximal_distal_energy/articulated_headline_uncertainty.py": "ff47449935ac54feee1d631ddb59dd98657d1af0f4454210e5721243f7874ab1",
+    "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "d5838696ff313783bad62e96c48255c6cf077dca4919df484557d942a762d14a",
+    "scripts/research/proximal_distal_energy/articulated_ground_atlas.py": "525b1d6c057ab95b4656d710933bdef0f6237a2e7d0a86322edf8fffd3cebdc4",
+    "tests/research/test_articulated_headline_uncertainty.py": "72204c041461619284dccea2c8202f75b4b21d2d35766c570ed366ac12db49ef"
+  },
+  "limitations": {
+    "interaction_order": "one-at-a-time corners do not estimate higher-order parameter interactions",
+    "calibration": "bounds are engineering ranges, not measured participant or equipment properties",
+    "human_inference": "survival does not promote any result to a human or coaching claim"
+  }
+}

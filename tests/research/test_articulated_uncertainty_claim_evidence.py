@@ -10,7 +10,7 @@ import pytest
 pytestmark = pytest.mark.scientific
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "docs/research/proximal_distal_energy_transfer/data"
-CLAIM_IDS = {f"PD-CLAIM-{value}" for value in range(297, 306)}
+CLAIM_IDS = {f"PD-CLAIM-{value}" for value in range(297, 307)}
 
 
 @pytest.fixture(scope="module")
@@ -22,7 +22,7 @@ def test_current_candidate_census_is_fully_adjudicated(registry) -> None:
     inventory = json.loads(
         (DATA / "claim_candidate_inventory.json").read_text(encoding="utf-8")
     )
-    assert inventory["candidate_count"] == 1092
+    assert inventory["candidate_count"] == 1094
     assert registry["paper"]["source_digest"] == inventory["source_digest"]
     assert len(registry["candidate_reviews"]) == inventory["candidate_count"]
     assert {row["candidate_id"] for row in registry["candidate_reviews"]} == {
@@ -47,21 +47,32 @@ def test_uncertainty_and_structural_claim_set_is_complete(registry) -> None:
         "registered_but_not_yet_executed"
     )
     assert claims["PD-CLAIM-304"]["published_status"] == (
-        "registered_execution_in_progress"
+        "completed_with_retained_failures"
+    )
+    assert claims["PD-CLAIM-306"]["published_status"] == (
+        "completed_model_sensitivity_result"
     )
 
 
-def test_in_progress_headline_claims_do_not_cite_partial_result(registry) -> None:
+def test_completed_headline_claims_cite_the_qualified_result(registry) -> None:
     claims = {row["claim_id"]: row for row in registry["claims"]}
-    partial = (
+    result = (
         "docs/research/proximal_distal_energy_transfer/data/"
         "articulated_headline_uncertainty.json"
     )
-    for claim_id in ("PD-CLAIM-304", "PD-CLAIM-305"):
+    for claim_id in ("PD-CLAIM-304", "PD-CLAIM-305", "PD-CLAIM-306"):
         claim = claims[claim_id]
-        assert partial not in claim["evidence_artifacts"]
+        assert result in claim["evidence_artifacts"]
         boundary = claim["uncertainty_boundary"].lower()
         assert any(word in boundary for word in ("human", "population", "participant"))
+
+
+def test_completed_headline_result_preserves_counts_and_failures(registry) -> None:
+    claim = next(row for row in registry["claims"] if row["claim_id"] == "PD-CLAIM-306")
+    assert "80--182" in claim["statement"]
+    assert "-46 to +56" in claim["statement"]
+    assert "0/384" in claim["statement"]
+    assert "grip-damping" in claim["statement"]
 
 
 def test_structural_failure_and_dynamic_boundary_remain_distinct(registry) -> None:
