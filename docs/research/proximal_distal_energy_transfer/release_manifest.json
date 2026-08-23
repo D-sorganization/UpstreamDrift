@@ -246,8 +246,8 @@
       "bytes": 2789
     },
     "docs/research/proximal_distal_energy_transfer/DATA_DICTIONARY.md": {
-      "sha256": "8626f2f2d95618b8b9a35b6b577baca757474943ddd49b39363652f8278a14aa",
-      "bytes": 34551
+      "sha256": "813d66cc38aa9bfbb03561b689e6e9b25aab2bc77ef34a8fcdbd46c7bf56d67f",
+      "bytes": 35255
     },
     "docs/research/proximal_distal_energy_transfer/EVIDENCE_SCHEMA_V2.md": {
       "sha256": "43e5e9728e63f6c22bed3874c5149976df7b50ffbf20d1e28104033b8a3adc7e",
@@ -278,8 +278,8 @@
       "bytes": 6964
     },
     "docs/research/proximal_distal_energy_transfer/README.md": {
-      "sha256": "f12fe1c9859add035495bd4e74c89d777278bbdf57c0748566dc66185af4f99d",
-      "bytes": 34218
+      "sha256": "f0bee817f6534b7edc04b99d4b3c4c039cd128bbd9c2a826b07ebced718e6abe",
+      "bytes": 34318
     },
     "docs/research/proximal_distal_energy_transfer/REVIEWER_WORKBENCH.md": {
       "sha256": "8091696aa1af553da7448ff1d48d8717c837cc1d5738a36a75f82f51790ff02a",
@@ -688,6 +688,10 @@
     "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate_study.json": {
       "sha256": "b2c857410f701f50f223903deeff16e3473f1819193893b0f7acdb430ce339ed",
       "bytes": 278819
+    },
+    "docs/research/proximal_distal_energy_transfer/data/measured_trajectory_metric_registration.json": {
+      "sha256": "dcd19bdcdd32df78649275babcb1f0e547022571e3fb8e36068139932ee79a00",
+      "bytes": 16657
     },
     "docs/research/proximal_distal_energy_transfer/data/measured_trajectory_source_registry.json": {
       "sha256": "cf305a43e48a735df48f92ec030a693bc8c99873068637ad2cf8156f1db2e15d",
@@ -2104,6 +2108,10 @@
     "scripts/research/proximal_distal_energy/make_uncertainty_control_figures.py": {
       "sha256": "fc83e5ee62b8c0d54cfb68cd226c2a9b7ae6fb7f835e1cf4c11d72165ca76f96",
       "bytes": 10764
+    },
+    "scripts/research/proximal_distal_energy/measured_trajectory_metric_registration.py": {
+      "sha256": "a076b9a9d156a5ceaeafa51eafe35606c8a9dc6ecadca1c953461d3cf697cbba",
+      "bytes": 14599
     },
     "scripts/research/proximal_distal_energy/measured_trajectory_source_registry.py": {
       "sha256": "953080bfc6d1a48cf0aacdd3ecf62b21699d889ada83a8d792acbc3710d6e1c0",
