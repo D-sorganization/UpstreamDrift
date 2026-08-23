@@ -137,10 +137,10 @@ jobs:
       matrix:
         include:
           - profile: slim
-            max_size_mb: 800
+            max_size_mb: 900
             advisory: false
           - profile: standard
-            max_size_mb: 2000
+            max_size_mb: 2200
             advisory: false
           - profile: research
             max_size_mb: 3500

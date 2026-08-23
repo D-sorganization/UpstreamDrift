@@ -88,8 +88,12 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
   `launch_upstream_drift.py`, but the isolated Docker context copied only the
   legacy launcher. Follow-up PR #9003 copies both launcher modules before
   feature installation and guards their order. Its focused
-  Docker/packaging/spec set and mandatory local push gates pass; protected
-  image builds and scans remain pending.
+  Docker/packaging/spec set and mandatory local push gates pass. The protected
+  slim image now builds, proving the missing launcher is resolved, and measures
+  848 MB. Its size step exposed stale workflow budgets (800/2000 MB) that
+  contradicted the canonical `docker/profiles.yaml` values (900/2200 MB). The
+  current correction synchronizes those values and adds a regression contract;
+  protected image and scanner validation must run again on the new head.
 - Docker is unavailable locally, so protected image builds and scans remain
   authoritative. Human review is required; do not create redundant runs.
 
