@@ -440,7 +440,7 @@ class TestPSAModelEdgeCases:
         ]:
             comp = getattr(results.compositions, stream_name)
             assert_allclose(
-                np.sum(comp),
+                comp.sum(),
                 100.0,
                 rtol=1e-10,
                 err_msg=f"{stream_name} composition does not sum to 100%",
