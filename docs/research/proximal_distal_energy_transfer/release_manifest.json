@@ -2114,8 +2114,8 @@
       "bytes": 10764
     },
     "scripts/research/proximal_distal_energy/measured_trajectory_ingestion.py": {
-      "sha256": "ce46b222d360ef3129183ebb9d8b1d11f5db95c39265f0a30da93b258659e13e",
-      "bytes": 24594
+      "sha256": "d0eb5983c8f9d1e4cf58891591ac47bd0d6b4fc1d92ceb3791d1f4a5df4d0c56",
+      "bytes": 25710
     },
     "scripts/research/proximal_distal_energy/measured_trajectory_metric_registration.py": {
       "sha256": "a076b9a9d156a5ceaeafa51eafe35606c8a9dc6ecadca1c953461d3cf697cbba",
