@@ -584,3 +584,27 @@ def test_settings_dialog_tier_details(parent_launcher, qapp) -> None:
     # Verify tier details text gets updated
     html = dialog.tier_details.toHtml()
     assert html != ""
+
+
+def test_layout_lock_button_toggle_caption_and_tooltip(parent_launcher, qapp) -> None:
+    """Issue #8897: Layout lock button caption must reflect locked/unlocked state and update tooltips."""
+    dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_LAYOUT)
+
+    # Initial state when action is checked (unlocked)
+    assert dialog._btn_layout_lock.isChecked() is True
+    assert dialog._btn_layout_lock.text() == "Layout: Unlocked"
+    assert "unlocked" in dialog._btn_layout_lock.toolTip().lower()
+    assert dialog._btn_edit_tiles.isEnabled() is True
+    assert "show or hide" in dialog._btn_edit_tiles.toolTip().lower()
+
+    # Toggle to locked
+    dialog._btn_layout_lock.setChecked(False)
+    assert dialog._btn_layout_lock.text() == "Layout: Locked"
+    assert "locked" in dialog._btn_layout_lock.toolTip().lower()
+    assert dialog._btn_edit_tiles.isEnabled() is False
+    assert "unlock the layout" in dialog._btn_edit_tiles.toolTip().lower()
+
+    # Toggle back to unlocked
+    dialog._btn_layout_lock.setChecked(True)
+    assert dialog._btn_layout_lock.text() == "Layout: Unlocked"
+    assert dialog._btn_edit_tiles.isEnabled() is True
