@@ -83,7 +83,11 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   current follow-up also binds the acquisition-processing authority, all four
   frame transforms, and both event-detector configurations by contained path
   and SHA-256, verifies them before payload parsing, and returns their immutable
-  provenance. Forty-one focused tests and the 587-artifact release gate pass.
+  provenance. The first protected exact-head run then correctly rejected the
+  132-line loader; source-readiness, mapping-authority, and artifact-digest
+  phases are now separate owned helpers, and the changed-file architecture gate
+  passes without an exception. Forty-one focused tests and the 587-artifact
+  release gate pass.
 - Merge commit `feb9478f7` reconciles the branch with the protected #9016 squash
   without rewriting history; reviewed PR head `a34d24a53` passed every pre-push
   hook and opened full PR #9017. The governed manifests and 235-page release

@@ -529,23 +529,11 @@ def _metric_coverage(
     return tuple(available), tuple(unavailable), tuple(sorted(missing))
 
 
-def load_governed_trajectory(
-    manifest_path: Path,
-    source_registry_path: Path,
-    metric_registration_path: Path,
-    *,
-    payload_loader: PayloadLoader | None = None,
-) -> GovernedTrajectoryArtifact:
-    """Admit and load one measured trajectory after all authority checks pass."""
-
-    manifest_path = Path(manifest_path)
-    manifest = validate_artifact_manifest(manifest_path)
-    source_registry = _load_json(Path(source_registry_path))
-    source_readiness = validate_registry(source_registry)
-    registration = _load_validated_registration(Path(metric_registration_path))
-    if registration["authority_status"] != source_readiness["status"]:
-        raise ValueError("metric registration and source authority status disagree")
-
+def _require_ready_source(
+    manifest: dict[str, Any],
+    source_registry: dict[str, Any],
+    source_readiness: dict[str, Any],
+) -> tuple[dict[str, Any], IntendedUse]:
     source_id = manifest["source_id"]
     source_record = next(
         (row for row in source_registry["sources"] if row["source_id"] == source_id),
@@ -553,7 +541,6 @@ def load_governed_trajectory(
     )
     if source_record is None:
         raise ValueError(f"source_id {source_id!r} is not registered")
-
     intended_use: IntendedUse = manifest["intended_use"]
     ready_key = (
         "pipeline_probe_ready_source_ids"
@@ -567,27 +554,21 @@ def load_governed_trajectory(
             else "held-out qualification"
         )
         raise ValueError(f"source {source_id!r} is not ready for {label}")
+    return source_record, intended_use
 
-    split, split_digest = _load_participant_split(
-        manifest_path,
-        manifest["participant_split"],
-        source_id=source_id,
-        registration=registration,
-    )
-    if _utc_datetime(
-        split["frozen_at_utc"], "participant split frozen_at_utc"
-    ) > _utc_datetime(manifest["created_at_utc"], "created_at_utc"):
-        raise ValueError("participant split must be frozen before artifact creation")
-    cohort = _require_participant_assignment(manifest, split)
 
+def _verify_mapping_authorities(
+    manifest_path: Path,
+    manifest: dict[str, Any],
+) -> tuple[str, tuple[tuple[str, str], ...], tuple[tuple[str, str], ...]]:
     acquisition = manifest["acquisition"]
-    processing_authority_digest = _verified_authority_digest(
+    processing_digest = _verified_authority_digest(
         manifest_path,
         acquisition["processing_authority_relative_path"],
         acquisition["processing_authority_sha256"],
         "processing authority",
     )
-    frame_transform_digests = tuple(
+    frame_digests = tuple(
         (
             frame["frame_id"],
             _verified_authority_digest(
@@ -599,7 +580,7 @@ def load_governed_trajectory(
         )
         for frame in manifest["frames"]
     )
-    event_detector_digests = tuple(
+    event_digests = tuple(
         (
             event["event_id"],
             _verified_authority_digest(
@@ -611,8 +592,14 @@ def load_governed_trajectory(
         )
         for event in manifest["events"]
     )
+    return processing_digest, frame_digests, event_digests
 
-    artifact = manifest["artifact"]
+
+def _verify_artifact_files(
+    manifest_path: Path,
+    artifact: dict[str, Any],
+    source_record: dict[str, Any],
+) -> tuple[Path, str, str]:
     package_path = _contained_file(
         manifest_path,
         artifact["source_package_relative_path"],
@@ -631,6 +618,53 @@ def load_governed_trajectory(
         raise ValueError("source package digest does not match source registry")
     if trajectory_digest != artifact["trajectory_sha256"]:
         raise ValueError("trajectory digest does not match artifact manifest")
+    return trajectory_path, package_digest, trajectory_digest
+
+
+def load_governed_trajectory(
+    manifest_path: Path,
+    source_registry_path: Path,
+    metric_registration_path: Path,
+    *,
+    payload_loader: PayloadLoader | None = None,
+) -> GovernedTrajectoryArtifact:
+    """Admit and load one measured trajectory after all authority checks pass."""
+
+    manifest_path = Path(manifest_path)
+    manifest = validate_artifact_manifest(manifest_path)
+    source_registry = _load_json(Path(source_registry_path))
+    source_readiness = validate_registry(source_registry)
+    registration = _load_validated_registration(Path(metric_registration_path))
+    if registration["authority_status"] != source_readiness["status"]:
+        raise ValueError("metric registration and source authority status disagree")
+
+    source_id = manifest["source_id"]
+    source_record, intended_use = _require_ready_source(
+        manifest, source_registry, source_readiness
+    )
+
+    split, split_digest = _load_participant_split(
+        manifest_path,
+        manifest["participant_split"],
+        source_id=source_id,
+        registration=registration,
+    )
+    if _utc_datetime(
+        split["frozen_at_utc"], "participant split frozen_at_utc"
+    ) > _utc_datetime(manifest["created_at_utc"], "created_at_utc"):
+        raise ValueError("participant split must be frozen before artifact creation")
+    cohort = _require_participant_assignment(manifest, split)
+
+    (
+        processing_authority_digest,
+        frame_transform_digests,
+        event_detector_digests,
+    ) = _verify_mapping_authorities(manifest_path, manifest)
+
+    artifact = manifest["artifact"]
+    trajectory_path, package_digest, trajectory_digest = _verify_artifact_files(
+        manifest_path, artifact, source_record
+    )
 
     if payload_loader is None:
         from src.shared.python.motion_pipeline.sources.loader import load_source
@@ -641,6 +675,7 @@ def load_governed_trajectory(
         registration, set(manifest["channels"])
     )
     participant = manifest["participant"]
+    acquisition = manifest["acquisition"]
     return GovernedTrajectoryArtifact(
         manifest_id=manifest["manifest_id"],
         source_id=source_id,
