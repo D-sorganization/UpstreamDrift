@@ -84,7 +84,8 @@ RUN pip install --upgrade pip==26.2.1 && \
 COPY pyproject.toml ./
 COPY README.md ./
 COPY build_hooks.py ./
-COPY launch_golf_suite.py ./
+COPY launch_golf_suite.py ./launch_golf_suite.py
+COPY launch_upstream_drift.py ./launch_upstream_drift.py
 COPY src/ ./src/
 COPY vendor/ud-tools/src/shared/ ./vendor/ud-tools/src/shared/
 COPY vendor/ud-tools/src/sidekick/ ./vendor/ud-tools/src/sidekick/

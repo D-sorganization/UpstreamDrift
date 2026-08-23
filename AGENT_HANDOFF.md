@@ -84,7 +84,12 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
   superseded vendored versions. The current correction removes pip from final
   runtime/test images after dependency installation and restores the audited
   builder venv only in the explicit training stage. No scanner waiver or
-  skip-file rule is used. The focused Docker/packaging/spec set passes.
+  skip-file rule is used. The next protected slim-profile build exposed a
+  separate builder-context omission: `pyproject.toml` force-includes
+  `launch_upstream_drift.py`, but the isolated Docker context copied only the
+  legacy launcher. The current correction copies both launcher modules before
+  feature installation and guards their order. The focused
+  Docker/packaging/spec set passes.
 - Docker is unavailable locally, so protected image builds and scans remain
   authoritative. Human review is required; do not create redundant runs.
 
