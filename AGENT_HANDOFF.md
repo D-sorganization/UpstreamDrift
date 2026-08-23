@@ -43,13 +43,17 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 
 ## Measured-Trajectory Qualification (#9004)
 
-- PR #9016 at exact head `767b1f0687cd1f0ef0ca7d6b030d170304662250`
+- PR #9016 is protected-squash-merged at remote-main commit
+  `a2c093aa1478961db20483a4ee89805a132f4ef1`. It
   preregisters eleven primary metrics, four coordinate-frame authorities, two
   events, participant-level holdout, training-only threshold freezing, four
   negative controls, six uncertainty analyses, and missing-as-unavailable
-  semantics. Its head also forces `MPLBACKEND=Agg` in the headless optional
-  stack after the first run exposed an ambient Qt backend; protected CI is
-  running on that correction. Do not create redundant runs.
+  semantics.
+- Its initial optional-stack run exposed an ambient interactive Matplotlib
+  backend on the headless runner. The merged correction forces `MPLBACKEND=Agg` at the
+  optional-stack job boundary and enforces that contract in
+  `tests/ci/test_ci_infrastructure.py`; do not replace this with a blind rerun
+  or an application-wide backend override.
 - The metric contract is deliberately fail-closed: `execution_ready=false`,
   `human_inference=false`, `bilateral_wrench=false`, and
   `results_status=not_run_no_authority` until a governed participant dataset is
@@ -62,7 +66,7 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   has a registered local digest plus verified reuse and required calibration,
   club, participant, and event fields. Never infer authority from a filename,
   screenshot, or visual resemblance.
-- Stacked branch `research/9004-governed-ingestion` adds the typed acquisition
+- Branch `research/9004-governed-ingestion` adds the typed acquisition
   manifest and no-pickle governance gateway. Implementation commit `c9da9b9ca`
   additionally binds each trial to a digest-frozen, source-specific participant
   split and verifies disjoint training, held-out, and adverse cohorts,
@@ -71,10 +75,11 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   Source-package and trajectory digests, SI units, processing, four frames, two
   events, channel coverage, and six uncertainty records remain required.
   Thirty-eight focused tests and the 587-artifact release gate pass.
-- Keep this branch stacked until #9016 protected-merges. Then merge remote
-  `main` without rewriting history, refresh the handoff and release manifests,
-  push through all hooks, and open a full PR. The subsequent #9004 slice is the
-  deterministic coordinate/event mapping and replay runner.
+- It is being reconciled with the protected #9016 squash without rewriting
+  history. Regenerate the governed manifests, validate, push through every
+  hook, and open a full PR. It must remain unusable for human inference until
+  the source registry qualifies an actual dataset. The subsequent #9004 slice
+  is the deterministic coordinate/event mapping and replay runner.
 
 ## Other Active Dependencies
 
