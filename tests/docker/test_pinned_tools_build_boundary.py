@@ -120,3 +120,12 @@ def test_runtime_dockerfiles_pin_pip_after_audited_security_floor() -> None:
     assert len(pins) == 1
     version = tuple(int(part) for part in next(iter(pins)).split("."))
     assert version >= (26, 2)
+
+
+def test_modular_builder_copies_every_forced_launcher_before_install() -> None:
+    source = (REPO_ROOT / "Dockerfile.modular").read_text(encoding="utf-8")
+    install_index = source.rindex('install_features.py --profile "$PROFILE"')
+
+    for launcher in ("launch_golf_suite.py", "launch_upstream_drift.py"):
+        copy_index = source.index(f"COPY {launcher} ./{launcher}")
+        assert copy_index < install_index

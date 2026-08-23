@@ -5,8 +5,6 @@ Last updated: 2026-08-22
 This file records current operational state, not history. Git and GitHub retain
 history. Epic #8557 is the canonical proximal-to-distal completion authority.
 
-<<<<<<< HEAD
-
 ## Remote-Main Specification Repair (#8998)
 
 - PR #8999 is protected-merged at remote-main commit
@@ -27,18 +25,6 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
   release and must be refreshed only after the scientific campaign is merged.
 - UpstreamDrift is the scientific source authority. AffineDrift is a generated,
   revision-pinned publisher; Tools exposes typed consumers, not a second paper.
-  =======
-
-## Verified Repository State
-
-- UpstreamDrift `origin/main` is
-  `c7904b530fe8921ecdb17362f2100e5c85400af4` from protected PR #8990.
-- Tools `main` is `9d1efb8b4162503badd63dcd95b5e1f06b09c404`; #4635 is
-  merged and supplies the provenance-aware ground workspace used by consumers.
-- AffineDrift `main` is `60b95283a43c9ebc14462327d988ca5b0bd3c6a6`.
-  Its immutable publication projection still pins an earlier UpstreamDrift
-  release and must be refreshed only after the scientific campaign is merged.
-  > > > > > > > c2d33b13d (docs: map quarantine burn-down handoff)
 
 ## Publication Authority
 
@@ -57,25 +43,23 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
 - Parent PID `18404` is the intentional source-locked coordinator with 20
   workers. Do not kill workers individually, edit source-hashed files, or start
   a duplicate campaign.
-- At 2026-08-22 14:23 PDT, 14 of 19 corners were fully accounted and the
-  fifteenth row had 29 terminal pathway dispositions overall.
-  `ground_translation_damping_scale-high` retained 71 of 72 atomic ground
-  branch checkpoints. Four registered ground-only corners remain after it.
-  The 21-process group remains healthy; do not trade scientific identity for
-  a faster restart.
+- At 2026-08-22 19:24 PDT, 16 of 19 corners were fully accounted.
+  `ground_free_moment_stiffness_scale-high` is the active seventeenth corner;
+  its first ordered branch checkpoint had not yet been promoted. Two registered
+  ground-only damping corners follow it. The 21-process group remains healthy;
+  do not trade scientific identity for a faster restart.
 - Completed rows and digest-bound branch checkpoints are restartable. Partial
   checkpoints are execution evidence, not release evidence.
 - After completion, independently audit the record, then integrate
   `fix/8752-atomic-campaign-checkpoint` (`9f850a67f...`). Execute #8800 next,
   then regenerate claims, figures, the paper, and the AffineDrift projection.
 
-## Pinned Tools Docker Boundary (#8996)
+## Pinned Tools Docker Boundary and Security Follow-Up (#8996)
 
-- PR #8993 is open from `fix/8789-docker-tools-boundary`. Head
-  `db7c01e0583e920b345634df37b361ce09eb210f` contains the repaired-main merge,
-  collection-order correction, and suite-marker repair.
-- It binds modular images to the exact Tools gitlink and content digest, fixes
-  isolated PEP 517 hook loading, and advances pip to 26.2.1.
+- PR #8993 is protected-merged at remote-main commit
+  `4e672c5b051a8859743f622872f63b86a0cfbb9d`. It binds
+  modular images to the exact Tools gitlink and content digest, fixes isolated
+  PEP 517 hook loading, and advances pip to 26.2.1.
 - The workflows attest only `src/shared`, `src/sidekick`, `src/chat`,
   `src/python/src/utils`, and `src/contracts.py`; the registered digest is
   `30dc761a34ec30eb3bf41d11d2dca1aff90448e71defbe82c32fcd657525fcc3`.
@@ -95,27 +79,37 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
   every supported image's final dependency layer and adds a unit-marked
   repository contract. The higher setuptools floor also resolves
   PYSEC-2026-3447, which the first protected follow-up build surfaced after
-  the older finding was cleared. PR #9001 then proved the resolved environment
-  clean but found pip's embedded third-party SBOM still describing its
-  superseded vendored versions. The current correction removes pip from final
-  runtime/test images after dependency installation and restores the audited
-  builder venv only in the explicit training stage. No scanner waiver or
-  skip-file rule is used. The focused Docker/packaging/spec set passes.
+  the older finding was cleared. PR #9001 merged the correction that removes
+  pip and its embedded third-party SBOM from final runtime/test images after
+  dependency installation and restores the audited builder venv only in the
+  explicit training stage. No scanner waiver or skip-file rule is used. Its
+  protected slim-profile build exposed a
+  separate builder-context omission: `pyproject.toml` force-includes
+  `launch_upstream_drift.py`, but the isolated Docker context copied only the
+  legacy launcher. Follow-up PR #9003 copies both launcher modules before
+  feature installation and guards their order. Its focused
+  Docker/packaging/spec set and mandatory local push gates pass. The protected
+  slim image now builds, proving the missing launcher is resolved, and measures
+  848 MB. Its size step exposed stale workflow budgets (800/2000 MB) that
+  contradicted the canonical `docker/profiles.yaml` values (900/2200 MB). The
+  current correction synchronizes those values and adds a regression contract;
+  protected image and scanner validation must run again on the new head.
 - Docker is unavailable locally, so protected image builds and scans remain
   authoritative. Human review is required; do not create redundant runs.
 
 ## Executable Quarantine Ledger (#8766)
 
-- PR #8997 is open from `fix/8766-executable-cluster-ledger`.
+- PR #8997 is protected-merged at remote-main commit
+  `fe411260cab577dd197b54ad3eab4d9d9ffa4213`.
 - The 520-node ledger has an executable 10-cluster ownership map. The checker
   rejects duplicate, unassigned, ambiguous, replacement, or new node IDs and
   CI compares PR state with the fetched base branch.
 - CI Standard validates exact coverage and compares PR node IDs with the fetched
   base branch. The existing skip behavior remains unchanged and scoped to
   `UNIT_GATE_QUARANTINE=1`.
-- Ten contract tests, Ruff, YAML parsing, the checker, and file-size validation
-  pass. Finish docs/SPEC, push a full PR, obtain human review, and use protected
-  CI. This tranche organizes debt; it does not claim any quarantined test fixed.
+- Ten contract tests, Ruff, YAML parsing, the checker, file-size validation, and
+  protected CI passed. This tranche organizes debt; it does not claim any
+  quarantined test fixed.
 
 ## Scientific Boundaries
 
