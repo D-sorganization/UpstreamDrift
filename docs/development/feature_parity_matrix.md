@@ -27,8 +27,8 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `launcher.docker_management`<br>Docker engine management dialog | ⚪ exempt | `src/launchers/docker_manager.py` | — | — | Manages the local Docker daemon from the desktop; desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `launcher.embedded_tabs_docks`<br>Embedded tool host (tabs + docks) | ⚪ exempt | `src/launchers/embedded_host.py` | — | — | Desktop windowing composition is explicitly desktop-only per ADR-0028 (React shell uses routes, not embedded Qt docks). |
 | `launcher.mcp_config`<br>MCP server configuration writer/preferences | ⚪ exempt | `src/launchers/mcp_config_writer.py` | — | — | Writes local MCP configuration files for desktop AI integrations; desktop-only candidate pending #7460. — **pending decision (#7460)** |
-| `launcher.tile_grid`<br>Launcher tile grid from shared manifest | ✅ parity | `src/launchers/unified_launcher.py` | `src/api/routes/launcher.py` | `ui/src/pages/Dashboard.tsx` | — |
-| `launcher.tile_web_reachability`<br>Manifest tile web-reachability contract (route / native-window / unavailable) | 🔴 gap | `src/launchers/unified_launcher.py` | — | `ui/src/pages/Dashboard.tsx` | #7461 |
+| `launcher.tile_grid`<br>Launcher tile grid from shared manifest | ✅ parity | `src/launchers/embedded_tool_bootstrap.py` | `src/api/routes/launcher.py` | `ui/src/pages/Dashboard.tsx` | — |
+| `launcher.tile_web_reachability`<br>Manifest tile web-reachability contract (route / native-window / unavailable) | 🔴 gap | `src/launchers/embedded_tool_bootstrap.py` | — | `ui/src/pages/Dashboard.tsx` | #7461 |
 | `mocap.breadth`<br>Motion-capture breadth (C3D upload/playback, OpenPose source) | ✅ parity | `src/tools/freemocap_sidecar/run_freemocap.py` | `src/api/routes/motion_capture.py` | `ui/src/pages/MotionCapture.tsx` | — |
 | `onboarding.about_version`<br>About/version info + onboarding | 🔴 gap | `src/launchers/about_dialog.py` | — | — | #7459 |
 | `optimization.swing_optimizer`<br>Swing Optimizer (trajectory optimization GUI) | ⚪ exempt | `src/shared/python/optimization/swing_optimizer.py` | — | — | Desktop optimization GUI; desktop-only candidate pending #7460. — **pending decision (#7460)** |
@@ -40,7 +40,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `simulation.golf_suite_batch`<br>Golf Simulation Suite (parameter sweeps, batch runs) | ⚪ exempt | `src/tools/golf_simulation_suite/__main__.py` | — | — | Desktop batch-simulation GUI; desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `simulation.realtime_ws_stream`<br>Live simulation data over WebSocket pub-sub | ✅ parity | `src/launchers/launcher_simulation.py` | `src/api/routes/simulation_ws.py` | `ui/src/pages/Simulation.tsx` | — |
 | `simulation.shot_tracer`<br>Shot Tracer / ball-flight visualization | ✅ parity | `src/launchers/_shot_tracer_gui.py` | `src/api/routes/ball_flight.py` | `ui/src/pages/BallFlight.tsx` | — |
-| `tools.bunkershot3d_workbench`<br>BunkerShot3D designer workbench (W2 sole parameters, W3 sand condition, F0 dynamic-RFT shot, W7 metrics, playability window, bounce utilisation, A/B comparison, validity verdict) | 🔴 gap | `src/tools/bunker_shot_gui/gui.py` | — | — | #8607 |
+| `tools.bunkershot3d_workbench`<br>BunkerShot3D designer workbench (W2 sole parameters, W3 sand condition, F0 dynamic-RFT shot, W7 metrics, playability window, bounce utilisation, animated sole load field, 3-D shot animation through the ADR-0027 viewport, linked scalar traces with a validity band, F1 sand-field cross-sections, A/B comparison, validity verdict) | 🔴 gap | `src/tools/bunker_shot_gui/gui.py` | — | — | #8607 |
 | `tools.character_builder`<br>Character Builder (humanoid URDF generation) | 🔴 gap | `src/shared/python/model_generation/cli/main.py` | `src/api/routes/character_builder.py` | `ui/src/pages/CharacterBuilder.tsx` | #7448 |
 | `tools.data_explorer`<br>Data Explorer (import/filter/visualize datasets) | 🔴 gap | — | `src/api/routes/data_explorer.py` | `ui/src/pages/DataExplorer.tsx` | #7448 |
 | `tools.dataset_generator`<br>Swing dataset generation and import | ✅ parity | — | `src/api/routes/dataset.py` | `ui/src/pages/DatasetGenerator.tsx` | — |
@@ -67,7 +67,7 @@ Tiles from `src/config/launcher_manifest.json` mapped to registry entries:
 | `canonical_core_estimation` | `canonical_core.workspaces` |
 | `character_builder` | `tools.character_builder` |
 | `chat_assistant` | `chat.transport` |
-| `cross_engine` | `analysis.cross_engine_robustness` |
+| `cross_engine_dashboard` | `analysis.cross_engine_robustness` |
 | `data_explorer` | `tools.data_explorer` |
 | `data_processor` | `launcher.tile_web_reachability` |
 | `dataset_generator` | `tools.dataset_generator` |
@@ -77,7 +77,7 @@ Tiles from `src/config/launcher_manifest.json` mapped to registry entries:
 | `golf_simulation_suite` | `simulation.golf_suite_batch` |
 | `injury_analysis` | `biomech.exercise_injury_dashboards` |
 | `launch_monitor_analytics` | `tools.launch_monitor_analytics` |
-| `matlab_unified` | `tools.matlab_suite` |
+| `matlab_suite` | `tools.matlab_suite` |
 | `model_explorer` | `tools.model_explorer` |
 | `motion_capture` | `mocap.breadth` |
 | `motion_pipeline` | `mocap.breadth` |

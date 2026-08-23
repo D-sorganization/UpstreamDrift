@@ -1,4 +1,4 @@
-"""Generate the independently executed spatial forward-contact evidence."""
+"""Generate spatial contact with paired native inertia-and-bias transport."""
 
 from __future__ import annotations
 
@@ -185,7 +185,9 @@ def run_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
         "schema_version": SCHEMA_VERSION,
         "study_id": STUDY_ID,
         "model_tier": "reduced_spatial_two_hand_forward_compliant_contact",
-        "trajectory_kind": "independently_integrated_native_forward_dynamics",
+        "trajectory_kind": (
+            "shared_projected_contact_and_integrator_with_native_inertia_bias_transport"
+        ),
         "engine_identities": identities,
         "model_contract": {
             "canonical_record": params.canonical_record(),
@@ -218,8 +220,8 @@ def run_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
             "passive_post_killswitch_negative_force_couple": (
                 "supported_in_declared_reduced_spatial_contact_model"
             ),
-            "cross_engine_forward_contact_transport": (
-                "supported_for_mujoco_and_pinocchio_declared_model"
+            "native_inertia_bias_transport": (
+                "supported_for_mujoco_and_pinocchio_under_shared_contact_and_update"
             ),
             "long_axis_rotation_and_swing_plane_evolution": (
                 "executed_in_both_engines"
@@ -239,7 +241,8 @@ def run_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
             "The two hand bodies are finite-mass translational carriages, not anatomical arms.",
             "The grounded driver is a declared reference-force pathway, not muscle activation.",
             "The Kelvin-Voigt interface is a reduced grip law, not measured tissue calibration.",
-            "The two engines share one contact law while independently solving kinematics and forward dynamics.",
+            "The branches share one contact law and state update while native libraries independently supply kinematics, mass, bias, gravity, spatial-force mapping, and continuous-time acceleration.",
+            "Neither native contact solver nor native integrator is exercised in this transport study.",
             "The experiment does not use participant data and cannot support a coaching prescription.",
         ],
         "source_sha256": _source_hashes(),

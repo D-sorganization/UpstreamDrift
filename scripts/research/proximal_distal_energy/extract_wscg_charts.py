@@ -7,7 +7,8 @@ import hashlib
 import json
 import zipfile
 from pathlib import Path
-from xml.etree import ElementTree
+
+from defusedxml import ElementTree
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 SOURCE_DIR = (

@@ -12,15 +12,11 @@ from urllib.parse import urlsplit
 ARTICLE_REL = Path("docs/research/proximal_distal_energy_transfer")
 REGISTRY_REL = ARTICLE_REL / "data/claim_audit_registry.json"
 MANIFEST_REL = ARTICLE_REL / "data/claim_evidence_manifest.json"
-SCHEMA_VERSION = "proximal-distal-claim-evidence-integrity-v1"
+SCHEMA_VERSION = "proximal-distal-claim-evidence-integrity-v2"
 
 
 def _repository_root() -> Path:
     return Path(__file__).resolve().parents[3]
-
-
-def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def _local_path(reference: str, root: Path) -> tuple[str, Path]:
@@ -36,6 +32,21 @@ def _local_path(reference: str, root: Path) -> tuple[str, Path]:
     if not resolved.is_file():
         raise ValueError(f"Missing local evidence artifact: {reference}")
     return relative.as_posix(), resolved
+
+
+def _canonical_artifact_bytes(path: Path) -> bytes:
+    """Return checkout-portable text bytes or exact binary bytes."""
+    payload = path.read_bytes()
+    try:
+        payload.decode("utf-8")
+    except UnicodeDecodeError:
+        return payload
+    return payload.replace(b"\r\n", b"\n")
+
+
+def _artifact_integrity(path: Path) -> tuple[str, int]:
+    payload = _canonical_artifact_bytes(path)
+    return hashlib.sha256(payload).hexdigest(), len(payload)
 
 
 def build_claim_evidence_manifest(
@@ -71,9 +82,10 @@ def build_claim_evidence_manifest(
     local_artifacts = {}
     for relative in sorted(local_claims):
         path = root_path / relative
+        digest, size = _artifact_integrity(path)
         local_artifacts[relative] = {
-            "sha256": _sha256(path),
-            "bytes": path.stat().st_size,
+            "sha256": digest,
+            "bytes": size,
             "referenced_by": sorted(local_claims[relative]),
         }
     external_urls = {}
@@ -85,14 +97,16 @@ def build_claim_evidence_manifest(
             "referenced_by": sorted(external_claims[url]),
         }
 
+    registry_digest, _ = _artifact_integrity(registry_file)
     return {
         "schema_version": SCHEMA_VERSION,
         "registry": {
             "path": registry_file.relative_to(root_path).as_posix(),
-            "sha256": _sha256(registry_file),
+            "sha256": registry_digest,
         },
         "scope": {
             "local_artifact_semantics": "content_integrity_not_independent_validation",
+            "artifact_canonicalization": "utf8_crlf_to_lf;binary_raw",
             "external_url_semantics": "inventory_only_not_scientific_validation",
             "network_access_required": False,
         },

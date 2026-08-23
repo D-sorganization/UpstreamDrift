@@ -335,7 +335,7 @@ angular velocities are rotated without subtracting the club velocity, so the
 map changes coordinates rather than changing inertial motion. The two local
 grip offsets remain $(0,\pm s/2,-0.03)$ m.
 
-![Closed Subject States Enter Independent Forward Solvers Without Preload](figures/fig_closed_state_forward_bridge.pdf){#fig-closed-state-forward-bridge width=100%}
+![Closed Subject States Enter Paired Native Operators Without Preload](figures/fig_closed_state_forward_bridge.pdf){#fig-closed-state-forward-bridge width=100%}
 
 All 234 position mappings retain the source closure, with a maximum error of
 $1.16\times10^{-10}$ m. Velocities estimated by second-order finite
@@ -346,11 +346,12 @@ the 1 mm constitutive perturbation preserves action--reaction and produces
 nonpositive damping power.
 
 A spanning subset advances all six profiles, all three grip spans, and early,
-middle, and late phases through both native forward solvers: 54 shared initial
-states and 108 trajectories. Every engine pair reports the same initial-state
+middle, and late phases through both native inertia-and-bias operators under
+the shared projected-contact and semi-implicit-update formulation: 54 shared
+initial states and 108 trajectories. Every operator pair reports the same initial-state
 digest and passes the existing trajectory, wrench, and normalized-energy
 comparison gates over the preregistered 4 ms initialization audit. The largest
-cross-engine club-position difference is 0.083 $\mu$m, the largest relative
+transport club-position difference is 0.083 $\mu$m, the largest relative
 contact-wrench RMS difference is 0.0145%, and the largest normalized-energy
 difference is $2.19\times10^{-7}$.
 
@@ -365,7 +366,7 @@ transfer, delivery benefit, or a human strategy. The next falsifier is a
 full-horizon articulated solve with typed contact loss, calibrated grip and
 shaft compliance, refinement, adverse-load, null, and reversal controls.
 
-#### Cross-Engine Validity Horizon and Adverse-Load Map
+#### Inertia-and-Bias Transport Validity Horizon and Adverse-Load Map
 
 The 4 ms result establishes initialization transport but leaves its persistence
 unmeasured. A preregistered extension therefore advances the same six profiles,
@@ -373,11 +374,12 @@ three grip spans, and early, middle, and late closed states to 4, 10, 25, and
 50 ms. Ten branches retain the nominal model; halve or double contact
 stiffness, contact damping, represented hand mass, or timestep one factor at a
 time; or remove the grounded driver from the first integration step. Both
-native engines receive identical state and parameter records. Failed,
+native rigid-body operators receive identical state and parameter records,
+projected-contact loads, and project-authored updates. Failed,
 unstable, and non-finite cases would remain typed outcomes rather than being
 removed.
 
-![Cross-Engine Forward-Contact Validity Horizon and Adverse-Load Map](figures/fig_forward_contact_validity_horizon.pdf){#fig-forward-contact-validity-horizon width=100%}
+![Inertia-and-Bias Transport Validity Horizon and Adverse-Load Map](figures/fig_forward_contact_validity_horizon.pdf){#fig-forward-contact-validity-horizon width=100%}
 
 All 2,160 profile--span--phase--variant--horizon cases pass the existing
 trajectory, contact-wrench, and normalized-energy discrepancy gates together
@@ -396,9 +398,10 @@ That is a right-censored engineering result, not permission to extrapolate to
 the remaining downswing or impact. The carriages, rigid club, engineering
 contact law, and prescribed driver still omit articulated arms and scapulae,
 distributed grip and shaft properties, contact loss, ground coupling, and
-calibrated equipment. The study strengthens the reduced cross-engine reference.
-The articulated tier reproduces its power, energy, refinement, and engine-
-parity logic only through 5 ms, not the full 50 ms interval. Neither result
+calibrated equipment. The study strengthens the reduced inertia-and-bias
+transport reference. The articulated tier reproduces its power, energy,
+refinement, and operator-transport logic only through 5 ms, not the full 50 ms
+interval. Neither result
 establishes anatomy, passive human transfer, timing economy, slack benefit, or
 coaching strategy.
 
@@ -442,6 +445,89 @@ human transfer, timing demand, slack benefit, or a coaching strategy. It
 provides a qualified inertial foundation for the next forward-contact
 falsifier.
 
+#### Independent Manufactured-Solution and Conservation Controls
+
+Cross-engine agreement alone can remain circular if both reported paths call
+the same operator, and an inverse-dynamics residual is vacuous if the applied
+torque is checked against the equation that defined it. The articulated
+verification tier therefore assigns three distinct authorities. The
+manufactured generalized torque is defined by the analytical
+Lagrange--Christoffel implementation; MuJoCo evaluates the same state with
+`mj_inverse`; and robotics Pinocchio evaluates it with `rnea`. An explicit
+killswitch adds 10 N·m to the MuJoCo result and must make the gate fail.
+
+For the registered closed state, the maximum relative discrepancies are
+$3.09\times10^{-11}$ for Lagrange--MuJoCo, $3.07\times10^{-11}$ for
+Lagrange--Pinocchio, and $3.54\times10^{-13}$ for MuJoCo--Pinocchio. These
+small but nonzero values replace a former self-comparison that was zero by
+definition. Semi-implicit Euler is evaluated at 2.0, 1.0, and 0.5 ms; adjacent
+three-level Richardson estimates are 1.0011 and 1.0007, inside the registered
+first-order interval of 0.9--1.1.
+
+Momentum is assessed in a separate gravity-free, zero-torque rollout. Because
+the pelvis branch is world-supported, exciting it would introduce support
+reactions and make total momentum an invalid invariant. The conservation
+control therefore excites only the genuinely free-floating club subtree. Over
+10 ms, relative drift is $1.01\times10^{-6}$ for linear momentum,
+$1.51\times10^{-6}$ for angular momentum, and $8.67\times10^{-7}$ for kinetic
+energy. These are measured integration errors rather than stored constants.
+
+The constrained control coordinates pelvis yaw with the three club
+translations so that one declared lead-hand-to-grip point constraint is
+satisfied throughout the manufactured trajectory. The imposed three-component
+multiplier is then recovered independently from each native inverse-dynamics
+result. This control does not test simultaneous two-hand closure. The maximum
+relative multiplier, cross-engine multiplier, and equilibrium residuals are
+$3.39\times10^{-13}$, $3.25\times10^{-13}$, and $5.51\times10^{-13}$,
+respectively. Position, velocity, and virtual-power residuals are exact zeros
+for this analytically coordinated trajectory; they are reported as identities,
+not treated as independent evidence.
+
+The machine-readable record is
+[`articulated_manufactured_solution.json`](../data/articulated_manufactured_solution.json).
+These controls verify the declared numerical operators and first-order
+integration behavior. They do not validate the manufactured motion as a human
+swing, identify biological torque, or support a coaching prescription.
+
+#### Native Constraint and Integrator Discrepancy Control
+
+The transport comparisons below deliberately share a project-authored contact
+law and state update. A separate control is required before language about a
+native constraint solver or integrator is justified. The control starts both
+branches from the same achieved 20-coordinate closed state, translates the
+club by 1 mm, applies no active generalized drive, and advances 4 ms at 0.5 and
+0.25 ms steps. The first branch implements two MuJoCo `equality/connect`
+constraints, advances with `mj_step`, and records `qfrc_constraint`. The second
+branch retains the projected bilateral Kelvin--Voigt point-force law, MuJoCo
+mass-and-bias transport, and the project-authored semi-implicit update. These
+operators follow the current [MuJoCo constraint](https://mujoco.readthedocs.io/en/stable/XMLreference.html#equality-connect)
+and [simulation](https://mujoco.readthedocs.io/en/stable/programming/simulation.html)
+interfaces.
+
+![Native Equality Dynamics and Projected Compliant Contact Are Distinct Formulations](figures/fig_articulated_native_constraint_discrepancy.pdf){#fig-articulated-native-constraint-discrepancy width=96%}
+
+Both native equalities contribute three scalar rows, so the active native
+branch exposes at least six constraint rows. Its equality-disabled killswitch
+returns zero generalized constraint force. At the finer step, the native and
+projected final hand--grip separations are 0.987 and 0.908 mm, respectively,
+and their maximum coordinate difference is $1.04\times10^{-4}$ rad in club
+pitch. The maximum coordinate-vector force norms are 2.045 and 3.706 in mixed
+generalized units. Those norms are numerical diagnostics only: revolute and
+prismatic coordinates carry different physical units and the two constraint
+formulations do not define interchangeable force parameters.
+
+The nonzero discrepancy is the result, not a failed parity target. Applying
+the same stiffness and damping numerals does not make MuJoCo's regularized
+equality response physically equivalent to a direct Kelvin--Voigt point-force
+law. Step refinement reduces the final coordinate discrepancy from
+$1.12\times10^{-4}$ to $1.04\times10^{-4}$, so the observed separation is not
+removed by the tested halving. Two refinement levels do not establish an
+asymptotic order or continuum limit. This control establishes that a genuine
+native constraint-and-integrator branch has been executed and that it differs
+from the projected formulation. It does not validate either contact law,
+identify anatomical grip mechanics, establish engine equivalence, or support
+a human-transfer or coaching claim.
+
 #### Articulated Contact Projection and Initial Acceleration
 
 The next gate adds finite bilateral interaction forces without yet advancing a
@@ -470,7 +556,7 @@ contact simulation.
 
 All 234 states pass. The largest contact force is 2.708 N, the largest
 zero-preload leakage is $2.08\times10^{-7}$ N, and the largest virtual-power
-residual is $3.89\times10^{-16}$ W. Damping power is non-positive at every
+residual is $4.44\times10^{-16}$ W. Damping power is non-positive at every
 state. Coincident moment arms remove the force couple exactly, reversing both
 moment arms reverses it exactly, and the largest MuJoCo--Pinocchio generalized
 initial-acceleration discrepancy is $4.85\times10^{-13}$ relative.
@@ -517,8 +603,8 @@ the common coordinates, while each engine independently evaluates its mass and
 bias operators at every step. The registered gates cover the 10 mm attachment
 threshold, action--reaction virtual power, non-positive damping, normalized
 work--energy residual below 0.02, monotone refinement with a fine-to-coarse
-ratio below 0.8, and cross-engine trajectory and force-history differences
-below $10^{-7}$ relative.
+ratio below 0.8, and inertia-and-bias transport trajectory and force-history
+differences below $10^{-7}$ relative.
 
 ![Bounded Articulated Bilateral-Attachment Forward Dynamics Across Registered States and Controls](figures/fig_articulated_forward_contact.pdf){#fig-articulated-forward-contact width=90%}
 
@@ -527,8 +613,9 @@ separation is 1.229 mm and the largest contact force is 17.761 N. The worst
 normalized work--energy residual decreases from 0.00738 to 0.00170 and then
 0.000854 as the step is halved. The largest virtual-power residual is
 $3.55\times10^{-15}$ W; damping power remains negative; and the largest
-MuJoCo--Pinocchio trajectory and force-history discrepancies are
-$1.54\times10^{-14}$ and $1.06\times10^{-11}$ relative, respectively.
+MuJoCo--Pinocchio inertia-and-bias transport trajectory and force-history
+discrepancies are
+$1.53\times10^{-14}$ and $1.34\times10^{-11}$ relative, respectively.
 
 This is a right-censored synthetic result: no registered failure occurs before
 5 ms, but persistence later in the downswing or through impact is not tested.
@@ -577,7 +664,7 @@ engines yield 1,944 five-millisecond trajectories.
 
 ![Typed Unilateral Slack and Reattachment Across Natural-State and Boundary-Crossing Controls](figures/fig_articulated_slack_atlas.pdf){#fig-articulated-slack-atlas width=94%}
 
-All numerical and cross-engine gates pass. Across the complete atlas, the
+All numerical and inertia-and-bias transport gates pass. Across the complete atlas, the
 largest force is 23.643 N, virtual-power residual is
 $2.13\times10^{-14}$ W, and positive damping-power maximum is zero. The worst
 normalized work--energy residual decreases from 0.01923 to 0.01097 and then
@@ -601,7 +688,7 @@ friction, distributed grip pressure, shaft compliance, ground coupling, or
 human wrench data. Longer distributed-contact trajectories and the governed
 participant protocol remain necessary before a delivery or coaching inference.
 
-#### Distributed Grip Contact Discretization Across Nested Horizons
+#### Distributed Grip Friction and Contact Events Across Nested Horizons
 
 The next gate isolates contact discretization before admitting shaft or ground
 degrees of freedom. Each hand receives $N\in\{1,3,5\}$ tension fibers across a
@@ -614,6 +701,44 @@ k_j=\frac{k_{\mathrm{grip}}}{N},\qquad
 c_j=\frac{c_{\mathrm{grip}}}{N}.
 $$ {#eq-distributed-grip-fibers}
 
+The frictionless comparator sets $\mu=0$.  The finite comparator uses the
+equipment-provisional bound $\mu=0.35$ and a memoryless tangential damper,
+
+$$
+v_{tj}=v_j-(\hat d_j^\mathsf{T}v_j)\hat d_j,\qquad
+F_{tj}=\min\!\left(\frac{c_t}{N}\|v_{tj}\|,
+\mu\|F_{nj}\|\right)\frac{v_{tj}}{\|v_{tj}\|}.
+$$ {#eq-distributed-grip-friction}
+
+The force on the club follows the relative sliding velocity so that interface
+power is nonpositive. This is a bounded regularized Coulomb comparator, not a
+static-friction, bristle, hysteresis, measured-tissue, or perfect-stick law.
+
+An instantaneous perfect-stick control supplies a deliberately different upper
+bound. For the active fibers, let $J_t$ stack two orthonormal tangential
+velocity rows per station and let $M$ be the native engine mass matrix. The
+minimum kinetic-energy change that removes the registered tangential velocity
+is the mass-metric projection
+
+$$
+\dot q^+=\dot q^- - M^{-1}J_t^\mathsf{T}\lambda,
+\qquad
+\lambda=(J_tM^{-1}J_t^\mathsf{T})^+J_t\dot q^-,
+$$ {#eq-distributed-grip-stick-projection}
+
+where $(\cdot)^+$ is the Moore--Penrose inverse. The captured kinetic energy is
+$\Delta K=\tfrac12\dot q^{-\mathsf T}M\dot q^--
+\tfrac12\dot q^{+\mathsf T}M\dot q^+\geq0$. This is an impulsive, single-state
+constraint bound. It does not assert that static friction can supply
+$\lambda$, determine subsequent contact evolution, or represent tissue.
+The numerical implementation factors $M=LL^\mathsf{T}$ and applies a
+rank-revealing singular-value decomposition to $J_tL^{-\mathsf{T}}$. This is
+algebraically the same mass-metric projection, but it does not form the
+normal-equation matrix $J_tM^{-1}J_t^\mathsf{T}$, whose condition number is
+squared when distributed station rows are redundant. The registered residual
+therefore tests the independent constraint row space rather than numerical
+agreement obtained by relaxing the no-slip tolerance.
+
 Thus station count does not silently multiply total grip stiffness or damping,
 and finite off-axis reference length does not become hidden preload. Closure
 residuals below $10^{-8}$ m are treated as zero; the one-fiber configuration
@@ -624,41 +749,58 @@ by their midpoint removes the force couple exactly, while reversing all moment
 arms reverses it exactly without changing the realized forces.
 
 The atlas selects twelve states spanning four profile--grip cases and three
-phase samples. Forward and reversed initial club-velocity perturbations, one-,
-three-, and five-fiber grips, 1.0 and 0.5 ms steps, and native MuJoCo and
-Pinocchio produce 288 trajectories. Each trajectory is advanced once to 50 ms
-and summarized at nested 4, 10, 25, and 50 ms horizons, yielding 1,152
-engine--horizon summaries without resetting the state at each horizon. No
-active joint torque, hand driver, or direct club actuation is applied.
+phase samples. The complete registered generalized velocity and the added
+club perturbation are reversed together. Crossing that control with one-,
+three-, and five-fiber grips, $\mu\in\{0,0.35\}$, 1.0 and 0.5 ms steps, and
+native MuJoCo and Pinocchio produces 576 trajectories. Each trajectory is
+advanced once to 50 ms and summarized at nested 4, 10, 25, and 50 ms horizons,
+yielding 2,304 engine--horizon summaries without resetting the state. A
+separate 24-trajectory dead-zone probe crosses station count, friction bound,
+step, and engine. No active joint torque, hand driver, or direct club actuation
+is applied. A separate 144-cell stick projection crosses the twelve states,
+three station counts, complete velocity reversal, and both native mass
+matrices.
 
-![Distributed Grip Discretization Across Nested Articulated Horizons](figures/fig_articulated_distributed_grip_atlas.pdf){#fig-articulated-distributed-grip-atlas width=96%}
+![Distributed Grip Friction and Contact Events Across Nested Articulated Horizons](figures/fig_articulated_distributed_grip_atlas.pdf){#fig-articulated-distributed-grip-atlas width=96%}
 
 All registered numerical and native-engine gates pass. The largest station
-force is 4.030 N and the largest force couple is 0.375 N m. Coincident and
+force is 4.021 N and the largest force couple is 0.434 N m. Coincident and
 reversed-moment-arm residuals are exactly zero; the largest virtual-power
-residual is $1.14\times10^{-15}$ W and positive damping power is zero. The
-worst normalized work--energy residual decreases from 0.03119 to 0.01560 when
-the step is halved. Maximum trajectory and station-force discrepancies between
-engines are $7.97\times10^{-14}$ and $2.85\times10^{-12}$ relative, with no
+residual is $1.44\times10^{-15}$ W and positive damping power is zero. The
+worst normalized work--energy residual decreases from 0.03346 to 0.01673 when
+the step is halved. The largest genuine MuJoCo--Pinocchio trajectory and
+station-force discrepancies are $3.84\times10^{-13}$ and
+$1.44\times10^{-10}$ relative, respectively, with no nominal or event
 active-set parity failure. At the fine step, the largest three-to-five-fiber
-state discrepancy is 0.00355 relative; the one-to-three discrepancy is 0.0419.
+state discrepancy is 0.00300 relative; the one-to-three discrepancy is
+0.04188.
 
-The active-set result is structural rather than a benefit result. The
-one-fiber comparator remains fully taut, whereas the off-axis multi-fiber
-grips retain at least one open fiber over 66.7--100% of samples in the
-registered cells. No active-set transition occurs, so opening or reattachment
-is right-censored through 50 ms. At 50 ms, the engine-averaged ensemble mean
-club translation speeds are 0.2444, 0.2379, and 0.2314 m/s for one, three, and
-five fibers. These unmatched-load values show discretization dependence; they
-do not rank physical grips or establish that partial opening helps or harms
-delivery.
+The active-set and friction results are structural rather than benefit results.
+No nominal active-set transition occurs, so natural opening or reattachment
+remains right-censored through 50 ms. The dead-zone probes record 80 opening
+and 186 reattachment station events, with at most 21 transitions in one
+trajectory and exact engine agreement. Those probes begin fully disengaged;
+they qualify event direction and repeated active-set handling, but not an
+attached-to-open first-failure experiment. At 50 ms, finite-friction minus
+frictionless speed differences range from -0.0483 to +0.0462 m/s, with a
+median of +0.00056 m/s. Mixed signs reject a universal finite-friction speed
+benefit in this unmatched synthetic matrix.
 
-The fibers remain memoryless, frictionless engineering lines rather than
-calibrated pressure, fingers, tissue, or measured grip mechanics. The club is
-rigid and the support pathway is unchanged. Consequently this gate establishes
-contact-discretization sensitivity and a 50 ms numerical horizon only. Shaft
-bending/torsion, ground/free-moment work, matched delivery, and governed human
-measurements remain required before equipment, timing, or strategy inference.
+The perfect-stick control removes registered active-station tangential velocity
+to at most $4.61\times10^{-15}$ m/s. The largest genuine
+MuJoCo--Pinocchio projected-velocity discrepancy is
+$3.99\times10^{-12}$ relative, with identical active sets. The instantaneous
+captured kinetic energy ranges from $9.84\times10^{-9}$ to $0.37665$ J across
+the registered matrix. These values bound the kinetic change for an ideal
+sticking impulse at each sampled state; they are not predictions of realizable
+grip work or evidence that sticking improves delivery.
+
+The fibers remain memoryless engineering lines rather than calibrated pressure,
+fingers, tissue, or measured grip mechanics. The club is rigid and the support
+pathway is unchanged. An attached-to-open event probe, static-friction
+feasibility and subsequent stick--slip evolution, matched delivery,
+shaft/ground coupling, and governed human measurements remain required before
+equipment, timing, or strategy inference.
 
 #### Passive Shaft Bending and Torsion Under Distributed Grip Loading
 

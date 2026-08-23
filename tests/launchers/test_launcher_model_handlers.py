@@ -45,6 +45,7 @@ def test_module_handler() -> None:
         module_name="my_module",
         cwd=Path("/repo"),
         extra_python_paths=(),
+        keep_terminal_open=True,
     )
 
 
@@ -71,6 +72,7 @@ def test_script_handler() -> None:
         script_path=Path("/repo") / "script.py",
         cwd=Path("/repo") / "dir",
         extra_python_paths=(),
+        keep_terminal_open=True,
     )
 
 
@@ -370,7 +372,7 @@ class TestProviderExerciseHandler:
         ],
     )
     def test_launch_routes_provider_directory_to_matching_engine_dashboard(
-        self, model_type: str, engine: str
+        self, model_type: str, engine: str, tmp_path: Path
     ) -> None:
         """Provider directories launch a contained exercise dashboard, never a directory."""
 
@@ -380,24 +382,31 @@ class TestProviderExerciseHandler:
             path = "src/provider_models/exercises/bench_press"
             type = model_type
 
+        # The handler validates that the exercise path resolves to a real
+        # directory before launching, so the test repo must actually contain
+        # it - a bare fake path exercises only the rejection branch.
+        exercise_dir = (
+            tmp_path / "src" / "provider_models" / "exercises" / "bench_press"
+        )
+        exercise_dir.mkdir(parents=True)
+
         manager = MagicMock()
         manager.get_subprocess_env.return_value = {}
         manager.launch_script.return_value = "process"
 
-        result = ProviderExerciseHandler().launch(
-            ProviderModel(), Path("/repo"), manager
-        )
+        result = ProviderExerciseHandler().launch(ProviderModel(), tmp_path, manager)
 
         assert result is True
         manager.launch_script.assert_called_once_with(
             name="Bench Press",
-            script_path=Path("/repo") / "src" / "launchers" / "exercise_dashboard.py",
-            cwd=Path("/repo"),
+            script_path=tmp_path / "src" / "launchers" / "exercise_dashboard.py",
+            cwd=tmp_path,
             env={
                 "BIOMECH_EXERCISE": "bench_press",
                 "BIOMECH_ENGINE": engine,
             },
             extra_python_paths=(),
+            keep_terminal_open=True,
         )
         manager.launch_module.assert_not_called()
 
@@ -451,6 +460,11 @@ class TestGolfSimulationSuiteHandler:
             assert handler.launch(DummyModel(), Path("/repo"), MagicMock()) is False
 
 
+# Tile types dispatched by a dedicated in-process widget path instead of
+# the subprocess handler registry (see launcher_simulation.launch_simulation).
+_SPECIAL_CASED_TYPES = frozenset({"matlab_suite"})
+
+
 class TestManifestTileHandlerRegistration:
     """Verify every manifest tile type has a handler in ModelHandlerRegistry."""
 
@@ -468,6 +482,8 @@ class TestManifestTileHandlerRegistration:
         """Every tile in the manifest must have a handler that can_handle() it."""
         missing: list[str] = []
         for tile in manifest.tiles:
+            if tile.type in _SPECIAL_CASED_TYPES:
+                continue
             handler = registry.get_handler(tile.type)
             if handler is None:
                 missing.append(f"{tile.id!r} (type={tile.type!r})")
@@ -478,6 +494,8 @@ class TestManifestTileHandlerRegistration:
     ) -> None:
         """Each handler's can_handle() must return True for the declared type."""
         for tile in manifest.tiles:
+            if tile.type in _SPECIAL_CASED_TYPES:
+                continue
             handler = registry.get_handler(tile.type)
             assert handler is not None, f"No handler for tile {tile.id!r}"
             assert handler.can_handle(tile.type) is True, (
@@ -542,7 +560,7 @@ class TestManifestTileHandlerRegistration:
             "opensim_golf",
             "myosim_suite",
             "putting_green",
-            "matlab_unified",
+            "matlab_suite",
             "motion_target_preview",
             "motion_capture",
             "video_analyzer",

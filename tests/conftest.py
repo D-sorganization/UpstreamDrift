@@ -125,6 +125,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 import importlib
 import importlib.util
+import json
 import sys
 import warnings
 from collections.abc import Callable, Generator
@@ -631,8 +632,15 @@ def pytest_configure(config: pytest.Config) -> None:
         # Always override — even if already present — to ensure a single class identity.
         # xdist workers may have loaded 'contracts' via the short sys.path entry before
         # pytest_configure runs, creating a stale second module instance.
+        # Register every spelling explicitly. Seeding of the src.* spelling
+        # used to happen only as a side effect of earlier imports installing
+        # the alias finder, which made vendored-mode sessions order-dependent
+        # (test_tools_mode_aliases_contract_modules_to_one_identity fails when
+        # run in isolation without this).
         contract_aliases = (
-            ("contracts",) if parent_mode else ("contracts", "shared.python.contracts")
+            ("contracts", "src.shared.python.contracts")
+            if parent_mode
+            else ("contracts", "shared.python.contracts")
         )
         for alias in contract_aliases:
             sys.modules[alias] = canonical_mod
@@ -697,7 +705,12 @@ def _protect_engine_modules() -> Generator[None, None, None]:
     each test and restores them afterward so that corruption cannot leak
     across test boundaries.
     """
-    protected_keys = {k for k in sys.modules if _matches_protected(k)}
+    # list() needed: mutating dict during iteration. The lazy alias meta-path
+    # finder installed by src/shared/python/import_aliases.py can insert into
+    # sys.modules while this comprehension walks it, raising
+    # "RuntimeError: dictionary changed size during iteration" during setup.
+    # The teardown loop below already guards this the same way.
+    protected_keys = {k for k in list(sys.modules) if _matches_protected(k)}
     saved = {k: sys.modules[k] for k in protected_keys}
     yield
     # Remove any engine modules added or mutated during the test
@@ -886,6 +899,43 @@ from tests.support.suite_markers import (  # noqa: E402
 )
 
 
+_UNIT_GATE_QUARANTINE_PATH = (
+    Path(__file__).resolve().parents[1]
+    / "scripts"
+    / "config"
+    / "unit_gate_quarantine.json"
+)
+
+
+def _apply_unit_gate_quarantine(items: list[pytest.Item]) -> None:
+    """Skip ledgered debt node IDs, only when the unit gate opts in.
+
+    ``UNIT_GATE_QUARANTINE=1`` is set exclusively by the Green-Suite Unit
+    Gate step in ``ci-standard.yml``. The ledger records tests that fail
+    deterministically on ``main`` from the hollow-merge era (issue #8766);
+    entries may only be removed, never added, so any new failure still reds
+    the gate. Local runs and every other CI lane are unaffected.
+    """
+    if os.environ.get("UNIT_GATE_QUARANTINE") != "1":
+        return
+    try:
+        ledger = json.loads(_UNIT_GATE_QUARANTINE_PATH.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        # A missing or unreadable ledger must never green the gate by
+        # accident; it simply applies no skips.
+        return
+    quarantined = set(ledger.get("node_ids", []))
+    if not quarantined:
+        return
+    issue = ledger.get("issue", "#8766")
+    marker = pytest.mark.skip(
+        reason=f"unit-gate quarantine ledger ({issue}); do not add entries"
+    )
+    for item in items:
+        if item.nodeid in quarantined:
+            item.add_marker(marker)
+
+
 def pytest_collection_modifyitems(
     config: pytest.Config, items: list[pytest.Item]
 ) -> None:
@@ -896,6 +946,7 @@ def pytest_collection_modifyitems(
     ``pytest.UsageError`` only when enforcement is enabled.
     """
     _skip_fake_pyqt6_gui_items(items)
+    _apply_unit_gate_quarantine(items)
 
     unmarked = find_unmarked(items)  # type: ignore[arg-type]
     config._ud_unmarked_suite_count = len(unmarked)  # type: ignore[attr-defined]

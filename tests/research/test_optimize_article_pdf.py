@@ -8,7 +8,9 @@ import pytest
 
 fitz = pytest.importorskip("fitz")
 
-from scripts.research.proximal_distal_energy.optimize_article_pdf import optimize_pdf
+from scripts.research.proximal_distal_energy import optimize_article_pdf
+
+optimize_pdf = optimize_article_pdf.optimize_pdf
 
 pytestmark = pytest.mark.unit
 
@@ -36,7 +38,10 @@ def test_optimizer_preserves_pages_uri_links_and_outline(tmp_path: Path) -> None
     assert result["pages"] == 2
     assert result["uri_links"] == 1
     assert result["outline_entries"] == 2
+    assert result["fast_web_access"] == 1
     assert output.is_file()
+    with fitz.open(output) as optimized:
+        assert optimized.is_fast_webaccess
 
 
 def test_optimizer_rejects_nonpositive_limit(tmp_path: Path) -> None:
@@ -59,3 +64,43 @@ def test_optimizer_honors_an_explicit_release_limit(tmp_path: Path) -> None:
 
     with pytest.raises(RuntimeError, match="limit is 1 bytes"):
         optimize_pdf(source, max_bytes=1)
+
+
+def test_optimizer_failure_preserves_destination_and_removes_staging(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source = tmp_path / "source.pdf"
+    output = tmp_path / "output.pdf"
+    document = fitz.open()
+    document.new_page().insert_text((72, 72), "Evidence")
+    document.save(source)
+    document.close()
+    output.write_bytes(b"prior publication")
+
+    class BrokenPikePdf:
+        class ObjectStreamMode:
+            generate = object()
+
+        class Document:
+            def __enter__(self) -> BrokenPikePdf.Document:
+                return self
+
+            def __exit__(self, *_args: object) -> None:
+                return None
+
+            def save(self, path: Path, **_options: object) -> None:
+                Path(path).write_bytes(b"partial publication")
+                raise RuntimeError("planted linearization failure")
+
+        @staticmethod
+        def open(_path: Path) -> BrokenPikePdf.Document:
+            return BrokenPikePdf.Document()
+
+    monkeypatch.setattr(optimize_article_pdf, "_load_pikepdf", lambda: BrokenPikePdf)
+
+    with pytest.raises(RuntimeError, match="planted linearization failure"):
+        optimize_pdf(source, output)
+
+    assert output.read_bytes() == b"prior publication"
+    assert not output.with_suffix(".pdf.compacted.tmp").exists()
+    assert not output.with_suffix(".pdf.optimized.tmp").exists()

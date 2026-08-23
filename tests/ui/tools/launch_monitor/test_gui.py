@@ -167,3 +167,106 @@ def test_import_mapping_dialog_captures_direction_and_measurement_status(
         assert mapping.measurement_status == "measured"
     finally:
         dialog.deleteLater()
+
+
+def _write_synthetic_corpus(root: Path) -> Path:
+    """Write a two-source synthetic Parquet corpus under a checkout root."""
+    pytest.importorskip("pyarrow")
+    dataset = root / "data" / "authority" / "database" / "shot_corpus_parquet"
+    rows = pd.DataFrame(
+        {
+            "monitor": ["TrackMan", "FlightScope Mevo+"],
+            "file": ["a.csv", "b.csv"],
+            "row_index": [0, 0],
+            "club": ["Driver", "7 Iron"],
+            "club_speed_mph": [100.0, 80.0],
+            "ball_speed_mph": [150.0, 110.0],
+            "smash_factor": [1.5, 1.375],
+            "launch_angle_deg": [12.0, 18.0],
+            "launch_direction_deg": [1.0, -0.5],
+            "spin_rate_rpm": [2700.0, 6500.0],
+            "back_spin_rpm": [2600.0, 6400.0],
+            "side_spin_rpm": [300.0, -200.0],
+            "spin_axis_deg": [4.0, -2.0],
+            "attack_angle_deg": [-1.2, -4.0],
+            "club_path_deg": [0.5, 1.5],
+            "face_angle_deg": [0.2, 0.8],
+            "carry_yd": [250.0, 165.0],
+            "total_yd": [270.0, 172.0],
+            "apex_native": [95.0, 28.0],
+            "descent_angle_deg": [38.0, 45.0],
+            "native_json": ["{}", "{}"],
+        }
+    )
+    for source_id, group in (
+        ("synthetic_trackman", rows.iloc[:1]),
+        ("synthetic_mevo", rows.iloc[1:]),
+    ):
+        partition = dataset / f"source_id={source_id}"
+        partition.mkdir(parents=True)
+        group.to_parquet(partition / "part-0.parquet", index=False)
+    (root / "data" / "authority" / "AUTHORITY_MANIFEST.json").write_text(
+        "{}", encoding="utf-8"
+    )
+    return root
+
+
+def test_load_private_corpus_adds_one_session_per_source(
+    widget,  # noqa: ANN001
+    tmp_path: Path,
+) -> None:
+    root = _write_synthetic_corpus(tmp_path / "checkout")
+
+    added = widget.load_private_corpus_sessions(root)
+
+    assert added == 2
+    assert {session.session_id for session in widget.project.sessions} == {
+        "synthetic_trackman",
+        "synthetic_mevo",
+    }
+    assert len(widget.analysis_frame) == 2
+    assert widget.is_dirty()
+    manifests = {
+        session.session_id: session.manifest for session in widget.project.sessions
+    }
+    assert manifests["synthetic_trackman"].profile_id == "private_corpus"
+    assert manifests["synthetic_trackman"].vendor == "TrackMan"
+    assert manifests["synthetic_trackman"].source_path == "corpus://synthetic_trackman"
+
+
+def test_load_private_corpus_is_repeatable_without_duplicates(
+    widget,  # noqa: ANN001
+    tmp_path: Path,
+) -> None:
+    root = _write_synthetic_corpus(tmp_path / "checkout")
+
+    assert widget.load_private_corpus_sessions(root) == 2
+    assert widget.load_private_corpus_sessions(root) == 0
+    assert len(widget.project.sessions) == 2
+
+
+def test_load_private_corpus_fails_closed_without_authority(
+    widget,  # noqa: ANN001
+    tmp_path: Path,
+) -> None:
+    with pytest.raises(FileNotFoundError):
+        widget.load_private_corpus_sessions(tmp_path / "absent")
+    assert widget.project.sessions == []
+
+
+def test_sessions_tab_exposes_a_corpus_load_action(widget) -> None:  # noqa: ANN001
+    assert widget.load_corpus_button.text() == "Load Private Corpus"
+    assert "LAUNCH_MONITOR_DATA_ROOT" in widget.load_corpus_button.toolTip()
+
+
+def test_window_file_menu_offers_the_corpus_load_action(qapp) -> None:  # noqa: ANN001
+    from src.tools.launch_monitor_analytics.gui import LaunchMonitorAnalyticsWindow
+
+    window = LaunchMonitorAnalyticsWindow()
+    try:
+        menu_bar = window.menuBar()
+        file_menu = menu_bar.actions()[0].menu()
+        labels = [action.text() for action in file_menu.actions()]
+        assert "Load &Private Corpus" in labels
+    finally:
+        window.deleteLater()

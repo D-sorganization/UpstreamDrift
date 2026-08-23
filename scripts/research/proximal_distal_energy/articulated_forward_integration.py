@@ -19,10 +19,10 @@ from scripts.research.proximal_distal_energy.articulated_forward_contract import
 )
 from scripts.research.proximal_distal_energy.articulated_inertia_cross_engine import (
     build_pinocchio_articulated_model,
+    require_robotics_pinocchio,
 )
 from scripts.research.proximal_distal_energy.spatial_full_body import (
     SpatialModel,
-    mujoco_mass_matrix_and_bias,
 )
 
 FloatArray = NDArray[np.float64]
@@ -60,20 +60,44 @@ def native_dynamics_operator(
     engine: str, model: SpatialModel
 ) -> Callable[[FloatArray, FloatArray], tuple[FloatArray, FloatArray]]:
     if engine == "mujoco":
-        return lambda q, qd: mujoco_mass_matrix_and_bias(model, q, qd)
+        import mujoco
+        from scripts.research.proximal_distal_energy.spatial_full_body import (
+            _compiled_mujoco_model,
+            _mujoco_xml,
+            _populate_mujoco_full_mass_matrix,
+        )
+
+        mj_model = _compiled_mujoco_model(model.canonical_hash, _mujoco_xml(model))
+        data = mujoco.MjData(mj_model)
+        matrix = np.empty((model.nq, model.nq), dtype=np.float64)
+
+        def evaluate_mujoco(
+            q: FloatArray, qd: FloatArray
+        ) -> tuple[FloatArray, FloatArray]:
+            data.qpos[:] = q
+            data.qvel[:] = qd
+            mujoco.mj_forward(mj_model, data)
+            _populate_mujoco_full_mass_matrix(mujoco, mj_model, data, matrix)
+            return matrix.copy(), np.asarray(data.qfrc_bias, dtype=np.float64).copy()
+
+        return evaluate_mujoco
+
     if engine != "pinocchio":
         raise ValueError("engine must be 'mujoco' or 'pinocchio'")
     try:
         import pinocchio as pin
     except ImportError as error:  # pragma: no cover - native runtime gate
-        raise RuntimeError("robotics Pinocchio is required") from error
+        raise RuntimeError(
+            "robotics Pinocchio >= 2.6 is required; install the 'pin' package"
+        ) from error
+    require_robotics_pinocchio(pin)
     native = build_pinocchio_articulated_model(pin, model)
-    data = native.createData()
+    data_pin = native.createData()
 
     def evaluate(q: FloatArray, qd: FloatArray) -> tuple[FloatArray, FloatArray]:
-        matrix = np.asarray(pin.crba(native, data, q)).copy()
+        matrix = np.asarray(pin.crba(native, data_pin, q)).copy()
         bias = np.asarray(
-            pin.nonLinearEffects(native, data, q, qd)  # type: ignore[attr-defined]
+            pin.nonLinearEffects(native, data_pin, q, qd)  # type: ignore[attr-defined]
         ).copy()
         return matrix, bias
 

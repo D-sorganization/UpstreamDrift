@@ -34,7 +34,7 @@ together, set the env var before launching the launcher (or Pose
 Studio directly):
 
 ```bash
-POSE_STUDIO_PUBLISH_REALTIME=1 python -m src.launchers.unified_launcher
+POSE_STUDIO_PUBLISH_REALTIME=1 python launch_upstream_drift.py --classic
 ```
 
 Open Pose Studio in a tab and the Pose Subscriber demo in a dock; drag

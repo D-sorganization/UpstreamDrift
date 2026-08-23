@@ -26,6 +26,7 @@ from typing import Any
 from src.launchers.launcher_provider_compatibility import is_engine_runtime_available
 from src.shared.python.config.model_pack_manifest import LauncherPresentationMetadata
 from src.shared.python.config.model_registry import ModelConfig, ModelRegistry
+from src.shared.python.config.tile_target_resolution import module_string_to_relpath
 from src.shared.python.config.tools_vendor_authority import (
     inspect_tools_vendor_authority,
 )
@@ -37,9 +38,43 @@ logger = get_logger(__name__)
 CONFIG_DIR = Path(__file__).parent
 MANIFEST_PATH = CONFIG_DIR / "launcher_manifest.json"
 ASSETS_DIR = Path(__file__).parent.parent.parent / "assets" / "logos"
+# The PyQt desktop launcher keeps its tile artwork under src/launchers/;
+# models.yaml logo values like "assets/foo.png" are relative to that dir.
+PYQT_ASSETS_ROOT = Path(__file__).parent.parent / "launchers"
 REGISTRY_PATH = CONFIG_DIR / "models.yaml"
 REPO_ROOT = CONFIG_DIR.parents[1]
 _DEFAULT_PROVIDER_LOGO = "golf_logo.svg"
+# The desktop launcher keeps legacy PNG artwork under src/launchers/assets;
+# the web catalog serves SVG-only logos from assets/logos. Registry-surfaced
+# tiles translate their desktop artwork to the SVG equivalent for the web.
+_WEB_LOGO_BY_DESKTOP_PNG = {
+    "golf_logo.png": "golf_logo.svg",
+    "mujoco.png": "mujoco_humanoid.svg",
+    "drake.png": "drake.svg",
+    "pinocchio.png": "pinocchio.svg",
+    "opensim.png": "opensim.svg",
+    "myosim.png": "myosim.svg",
+    "putting_green_modern.png": "putting_green.svg",
+    "c3d_viewer_modern.png": "c3d_icon.svg",
+    "data_explorer_modern.png": "data_explorer.svg",
+    "video_analyzer_modern.png": "video_analyzer.svg",
+    "matlab_logo.png": "matlab_logo.svg",
+    "project_map.png": "project_map.svg",
+    "urdf_icon.png": "urdf_icon.svg",
+    "bunkershot_icon.png": "bunkershot3d.svg",
+    "training_controller.png": "project_map.svg",
+    "openpose.png": "video_analyzer.svg",
+    "mediapipe.png": "video_analyzer.svg",
+}
+
+
+def _web_logo(logo: str) -> str:
+    """Return an SVG logo for the web catalog, translating desktop PNGs."""
+    if logo.endswith(".svg"):
+        return logo
+    return _WEB_LOGO_BY_DESKTOP_PNG.get(Path(logo).name, _DEFAULT_PROVIDER_LOGO)
+
+
 _ENGINE_LOGOS = {
     "drake": "drake.svg",
     "mujoco": "mujoco_humanoid.svg",
@@ -83,6 +118,19 @@ def _has_provider_metadata(model: ModelConfig) -> bool:
     return bool(model.source_root)
 
 
+def _normalize_launch_path(path: str) -> str:
+    """Normalize a manifest ``path`` field to a repo-relative file path.
+
+    Legacy manifests stored dotted Python module strings (e.g.
+    ``src.tools.simulation_backends_launcher.__main__``) in the filesystem
+    ``path`` field, which launch handlers treat as a file and fail to find
+    (issue #8860). Dotted module strings are resolved to their ``.py`` file;
+    real file paths pass through unchanged.
+    """
+    as_module = module_string_to_relpath(path)
+    return as_module if as_module is not None else path
+
+
 def _legacy_launcher_metadata(model: ModelConfig) -> LauncherPresentationMetadata:
     """Provide a migration bridge for models without explicit launcher metadata."""
     if model.engine_type:
@@ -106,16 +154,30 @@ def _provider_status(
     repo_root: Path,
     *,
     check_runtime: bool = True,
-) -> str:
-    """Return an availability-aware status without exposing resolved paths."""
+) -> tuple[str, str | None]:
+    """Return an availability-aware (status, detail) without resolved paths.
+
+    Postcondition:
+        When the status is ``provider_unavailable`` because the pinned Tools
+        vendor authority failed, the detail names the concrete reason (e.g.
+        ``"unavailable: Tools pin stale (expected X, found Y)"``) so the
+        degradation is explicit to the user, never silent (issue #8852).
+    """
     if model.provider == "tools":
-        if not inspect_tools_vendor_authority(repo_root).available:
-            return "provider_unavailable"
+        authority = inspect_tools_vendor_authority(repo_root)
+        if not authority.available:
+            detail = f"unavailable: {authority.reason or 'Tools authority failed'}"
+            logger.warning(
+                "Launcher tile '%s' degraded to provider_unavailable: %s",
+                model.id,
+                detail,
+            )
+            return "provider_unavailable", detail
     elif isinstance(model.source_root, str) and not Path(model.source_root).exists():
-        return "provider_unavailable"
+        return "provider_unavailable", None
     if check_runtime and not is_engine_runtime_available(model.engine_type):
-        return "runtime_unavailable"
-    return status
+        return "runtime_unavailable", None
+    return status, None
 
 
 def _build_provider_tile(
@@ -123,7 +185,7 @@ def _build_provider_tile(
 ) -> LauncherTile:
     """Adapt a provider-backed model registry entry into a launcher tile."""
     metadata = model.launcher or _legacy_launcher_metadata(model)
-    status = _provider_status(model, metadata.status, repo_root)
+    status, status_detail = _provider_status(model, metadata.status, repo_root)
 
     return LauncherTile(
         id=model.id,
@@ -132,8 +194,9 @@ def _build_provider_tile(
         category=metadata.category,
         type=model.type,
         path=model.path,
-        logo=metadata.logo,
+        logo=_web_logo(metadata.logo),
         status=status,
+        status_detail=status_detail,
         capabilities=model.capabilities,
         order=model.order,
         engine_type=model.engine_type,
@@ -164,12 +227,14 @@ def _with_native_pyqt6_semantics(
     if model is None or model.launcher is None:
         return tile
 
+    status, status_detail = _provider_status(
+        model, model.launcher.status, repo_root, check_runtime=False
+    )
     return replace(
         tile,
         category=model.launcher.category,
-        status=_provider_status(
-            model, model.launcher.status, repo_root, check_runtime=False
-        ),
+        status=status,
+        status_detail=status_detail,
         type=model.type,
         path=model.path,
         engine_type=model.engine_type,
@@ -300,6 +365,7 @@ class LauncherTile:
     path: str
     logo: str
     status: str
+    status_detail: str | None = None
     capabilities: tuple[str, ...] = ()
     tags: tuple[str, ...] = ()
     order: int = 99
@@ -361,9 +427,10 @@ class LauncherTile:
             description=data["description"],
             category=data["category"],
             type=data["type"],
-            path=data["path"],
+            path=_normalize_launch_path(data["path"]),
             logo=data["logo"],
             status=data.get("status", "unknown"),
+            status_detail=data.get("status_detail"),
             capabilities=tuple(data.get("capabilities", [])),
             tags=tuple(data.get("tags", [])),
             order=data.get("order", 99),
@@ -403,6 +470,8 @@ class LauncherTile:
             "capabilities": list(self.capabilities),
             "order": self.order,
         }
+        if self.status_detail:
+            result["status_detail"] = self.status_detail
         if self.engine_type:
             result["engine_type"] = self.engine_type
         if self.provider:
@@ -438,6 +507,12 @@ class LauncherTile:
         basename_direct = ASSETS_DIR / Path(self.logo).name
         if basename_direct.exists():
             return basename_direct
+        # models.yaml tiles declare logos relative to the PyQt launcher
+        # assets dir (src/launchers/assets/...); resolve those too so
+        # registry-surfaced tiles keep their desktop artwork on the web.
+        pyqt_direct = PYQT_ASSETS_ROOT / self.logo
+        if pyqt_direct.exists():
+            return pyqt_direct
         if self.source_root:
             sr_candidate = Path(self.source_root) / self.logo
             if sr_candidate.exists():
@@ -573,8 +648,12 @@ class LauncherManifest:
 
         provider_tiles: list[LauncherTile] = []
 
+        # Every registry model surfaces as a tile, not just provider-backed
+        # ones: gating on provider metadata structurally excluded repo-local
+        # tools (sidekick, pose_subscriber_demo, ...) from the web catalog
+        # while the desktop launcher showed them (issue #8853).
         for model in registry.get_all_models():
-            if model.id in existing_ids or not _has_provider_metadata(model):
+            if model.id in existing_ids:
                 continue
             provider_tiles.append(_build_provider_tile(model, repo_root=repo_root))
 

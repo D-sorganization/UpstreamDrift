@@ -123,7 +123,7 @@ REVIEW_SPECS: dict[str, dict[str, Any]] = {
         "reviewed_as_representation_only",
         "supported_for_coordinate_representation_only",
         ("PD-CLAIM-197",),
-        "Dynamic cross-engine force, constraint, and energy agreement on common cases.",
+        "Dynamic inertia-and-bias transport, force, constraint, and energy agreement under shared contact and integration on common cases.",
     ),
     "drake_opensim_myosuite_human_validation": _spec(
         "reviewed_as_unexecuted",
@@ -245,6 +245,18 @@ REVIEW_SPECS: dict[str, dict[str, Any]] = {
         "native_articulated_inertia_operators_agree_at_declared_closed_states",
         ("PD-CLAIM-274", "PD-CLAIM-275", "PD-CLAIM-276"),
         "Apply bilateral compliant contact to the qualified articulated tree and repeat horizon, adverse-load, contact-loss, refinement, power, and energy controls.",
+    ),
+    "articulated_manufactured_solution": _spec(
+        "reviewed_as_independent_synthetic_numerical_control",
+        "operator_conservation_and_first_order_controls_qualified",
+        tuple(f"PD-CLAIM-{number}" for number in range(297, 302)),
+        "Repeat across additional states and integrators, then retain governed human-data boundaries for any biomechanical inference.",
+    ),
+    "native_constraint_formulation_discrepancy": _spec(
+        "reviewed_as_synthetic_formulation_discrepancy_control",
+        "native_constraint_and_integrator_executed_with_nonzero_discrepancy",
+        ("PD-CLAIM-302", "PD-CLAIM-303", "PD-CLAIM-304"),
+        "Repeat with calibrated distributed grip contact, additional states, independent native formulations, and governed human data before physical or biomechanical inference.",
     ),
     "subject_scaled_articulated_contact_projection": _spec(
         "reviewed_as_same_state_articulated_contact_projection_result",

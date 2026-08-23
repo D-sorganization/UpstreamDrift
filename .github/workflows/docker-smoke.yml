@@ -92,6 +92,12 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c
 
+      - name: Fetch pinned Tools packages
+        id: pinned-tools
+        uses: ./.github/actions/fetch-pinned-tools
+        with:
+          emit-source-provenance: "true"
+
       - name: Prepare local BuildKit cache (profile=${{ matrix.profile }})
         run: |
           CACHE_BASE="${{ runner.tool_cache }}/buildx-cache/upstream-drift/smoke-${{ matrix.profile }}"
@@ -99,12 +105,14 @@ jobs:
           mkdir -p "${CACHE_BASE}"
 
       - name: Build modular image (profile=${{ matrix.profile }})
-        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a
         with:
           context: .
           file: ./Dockerfile.modular
           build-args: |
             PROFILE=${{ matrix.profile }}
+            TOOLS_GITLINK_SHA=${{ steps.pinned-tools.outputs.gitlink-sha }}
+            TOOLS_SOURCE_SHA256=${{ steps.pinned-tools.outputs.source-sha256 }}
           load: true
           tags: upstream-drift-smoke:${{ matrix.profile }}
           cache-from: type=local,src=${{ runner.tool_cache }}/buildx-cache/upstream-drift/smoke-${{ matrix.profile }}

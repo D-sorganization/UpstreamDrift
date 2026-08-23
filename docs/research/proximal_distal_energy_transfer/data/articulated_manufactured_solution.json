@@ -1,0 +1,71 @@
+{
+  "schema_version": "1.0.0",
+  "study_id": "articulated-manufactured-solution-independent-v1",
+  "classification": "synthetic_numerical_verification_not_human_evidence",
+  "model": {
+    "canonical_sha256": "672f983841884df9d41c0eb814a1fda4da65bb960029620169c84b00dffca1d9",
+    "coordinate_count": 20,
+    "profile": "f-1.55",
+    "closed_state_index": [0, 6]
+  },
+  "engines": {
+    "analytical": "lagrange_christoffel_finite_difference_mass_gradient",
+    "mujoco": "3.8.0",
+    "pinocchio": "3.8.0"
+  },
+  "design": {
+    "duration_s": 0.01,
+    "time_steps_s": [0.002, 0.001, 0.0005],
+    "registered_richardson_order_interval": [0.9, 1.1],
+    "inverse_dynamics_relative_tolerance": 0.05,
+    "conservation_relative_tolerance": 0.02,
+    "conservation_scope": "gravity_free_zero_torque_free_floating_club_subtree",
+    "killswitch": "add_10_nm_to_mujoco_inverse_and_require_gate_failure"
+  },
+  "free_body": {
+    "all_gates_pass": true,
+    "independent_engine_difference_detected": true,
+    "inverse_dynamics_relative_error": {
+      "lagrange_mujoco": 3.085729133305138e-11,
+      "lagrange_pinocchio": 3.0707995316495e-11,
+      "mujoco_pinocchio": 3.5400086402543974e-13,
+      "maximum": 3.085729133305138e-11
+    },
+    "integration_step_error_rad": {
+      "0.0005": 1.5338080207677462e-5,
+      "0.001": 3.0691137526489554e-5,
+      "0.002": 6.142840443981723e-5
+    },
+    "richardson_orders": [1.0010837924036449, 1.0007041993085717],
+    "gravity_free_zero_torque_relative_drift": {
+      "linear_momentum": 1.0080231065762152e-6,
+      "angular_momentum": 1.5118397415440685e-6,
+      "kinetic_energy": 8.665719958278473e-7
+    }
+  },
+  "constrained_motion": {
+    "all_gates_pass": true,
+    "independent_engine_difference_detected": true,
+    "position_residual_m": 0.0,
+    "velocity_residual_m_s": 0.0,
+    "virtual_power_residual_w": 0.0,
+    "multiplier_relative_residual": 3.3868738942039334e-13,
+    "cross_engine_multiplier_relative_residual": 3.254307615576398e-13,
+    "equilibrium_relative_residual": 5.510304586773343e-13
+  },
+  "all_gates_pass": true,
+  "limitations": [
+    "The trajectories are manufactured and are not measured golf swings.",
+    "The conservation rollout isolates the free club subtree because the pelvis tree is world-supported.",
+    "Agreement verifies the declared model and operators, not anatomy or coaching strategy."
+  ],
+  "source_sha256": {
+    "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "8eed52fe4ebbc55fcf753f4703330dd6d768281b0babfbb2adca074b862fc36d",
+    "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
+    "scripts/research/proximal_distal_energy/articulated_manufactured_solution.py": "bbe4de3fa99d66c9f694d2aa1a85decb8dedf269d59c82e64bf2c617c1daac07",
+    "scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py": "1df4b9c5b0c9550aa051f1b7d28b6b54702f56398d87bc07904ed93a03997119",
+    "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py": "26e8f8237a008eac7286236c9eb765e7694c81d10bc0852c23d937ee7ae90973",
+    "scripts/research/proximal_distal_energy/spatial_full_body.py": "862fdc4b176cbcc8d4d139a00be745f3d8a37c0f81cd899e55a03707893f8e6a",
+    "tests/research/test_articulated_manufactured_solution.py": "e5e1f4892444f40ca1c7a4ff3e46555897cda4b7808261ab66912f32bdb4ee9c"
+  }
+}

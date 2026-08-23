@@ -25,6 +25,13 @@ partition, a complete Pareto set, and an adversarial gap register. It preserves
 the distinction between exact contact-power closure and the declared numerical
 work--energy residual of the projected forward integrator.
 
+The interactive rotating-base companion is consumed from immutable Tools merge
+`1664d806df8a2c7b184d2d3fbcea93b714caaee5`. Cross-repository qualification
+checks the provider's source-study and catalog digests, all 18 registered runs,
+all five adverse exclusions, and the nonanatomical, no-human-validation, and
+noncoaching boundaries. This qualifies reproducible transport into the reviewer
+interfaces; it does not add empirical evidence or promote the model tier.
+
 Run:
 
 ```bash
@@ -35,9 +42,27 @@ python -m scripts.research.proximal_distal_energy.qualify_open_release validate
 `validate` fails on a missing file, changed bytes, unsafe path, or record
 mismatch. Regeneration is an explicit `write` action after all scientific and
 visual gates pass; validation never silently updates expected hashes.
-The final lossless compaction gate preserves page, URI-link, and outline
-counts. It applies no arbitrary manuscript-size ceiling; repository CI instead
-checks PDF identity and GitHub's 100,000,000-byte hard file boundary.
+The final lossless compaction and web-linearization gate preserves page,
+URI-link, and outline counts. The publication-quality gate then binds the PDF
+to an exact source revision and release-manifest digest, renders every page,
+validates navigation and metadata, and reports font and tagged-structure
+posture. It applies no arbitrary manuscript-size ceiling; repository CI instead
+checks PDF identity and GitHub's 100,000,000-byte hard file boundary. See
+[`PUBLICATION_QUALITY.md`](PUBLICATION_QUALITY.md) for the normative profile and
+cross-repository publication contract.
+
+The current 239-page candidate passes the computational publication profile,
+renders without page errors, exposes extractable text on every page, contains
+247 outline entries and 194 valid external links, and is linearized for fast
+web access. Its 1,870,344 bytes have SHA-256
+`be85b7b62bba060a26ce3fea8355aa8b01dcf8c1b1ccf09304450898a4e5e78b`.
+All 239 rendered pages were inspected in the complete ordered contact-sheet
+set, with the claim-adjudication pages additionally inspected at full
+resolution. It does
+not pass the archival profile: the PDF remains untagged and retains 112 Type 3
+and two unembedded font resources. No archival-accessibility claim is made
+until those findings are closed and the full document is visually reinspected
+after the remediation.
 
 ## Claim Status
 
@@ -62,6 +87,8 @@ checks PDF identity and GitHub's 100,000,000-byte hard file boundary.
   declared tiers; full dynamic-state and trajectory parity across all five
   engines remains untested.
 - Human experimental predictions remain untested.
+- Computational publication readiness does not promote an untested human,
+  equipment-calibration, or coaching claim.
 
 ## License and Source Boundaries
 

@@ -57,7 +57,7 @@ class Sphere(GeometricPrimitive):
         """Vectorised support mapping (see base class)."""
         directions = _as_direction_batch(directions)
         # Bolt optimization: np.einsum avoids intermediate allocations, significantly faster than np.linalg.norm(..., axis=1)
-        norms = np.sqrt(np.einsum('...i,...i->...', directions, directions))[..., None]
+        norms = np.sqrt(np.einsum("...i,...i->...", directions, directions))[..., None]
         unit = np.divide(
             directions, norms, out=np.zeros_like(directions), where=norms >= 1e-10
         )
@@ -70,6 +70,22 @@ def _as_direction_batch(directions: np.ndarray) -> np.ndarray:
     if directions.ndim != 2 or directions.shape[1] != 3:
         raise ValueError("directions must have shape (n, 3)")
     return directions
+
+
+def _unit_direction_batch(directions: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Normalise a direction batch, flagging near-zero rows as degenerate.
+
+    Returns ``(unit, degenerate)``: ``unit`` holds unit-length rows (zeros
+    where degenerate) and ``degenerate`` is the 1-D mask of near-zero inputs.
+    """
+    directions = _as_direction_batch(directions)
+    # Bolt optimization: np.einsum avoids intermediate allocations, significantly faster than np.linalg.norm(..., axis=1)
+    norms = np.sqrt(np.einsum("...i,...i->...", directions, directions))[..., None]
+    degenerate = (norms < 1e-10).ravel()
+    unit = np.divide(
+        directions, norms, out=np.zeros_like(directions), where=norms >= 1e-10
+    )
+    return unit, degenerate
 
 
 @dataclass
@@ -256,13 +272,7 @@ class Capsule(GeometricPrimitive):
 
     def compute_support_batch(self, directions: np.ndarray) -> np.ndarray:
         """Vectorised support mapping (see base class)."""
-        directions = _as_direction_batch(directions)
-        # Bolt optimization: np.einsum avoids intermediate allocations, significantly faster than np.linalg.norm(..., axis=1)
-        norms = np.sqrt(np.einsum('...i,...i->...', directions, directions))[..., None]
-        degenerate = (norms < 1e-10).ravel()
-        unit = np.divide(
-            directions, norms, out=np.zeros_like(directions), where=norms >= 1e-10
-        )
+        unit, degenerate = _unit_direction_batch(directions)
         toward_b = unit @ (self.point_b - self.point_a) >= 0
         base = np.where(toward_b[:, None], self.point_b, self.point_a)
         result = base + self.radius * unit
@@ -384,13 +394,7 @@ class Cylinder(GeometricPrimitive):
 
     def compute_support_batch(self, directions: np.ndarray) -> np.ndarray:
         """Vectorised support mapping (see base class)."""
-        directions = _as_direction_batch(directions)
-        # Bolt optimization: np.einsum avoids intermediate allocations, significantly faster than np.linalg.norm(..., axis=1)
-        norms = np.sqrt(np.einsum('...i,...i->...', directions, directions))[..., None]
-        degenerate = (norms < 1e-10).ravel()
-        unit = np.divide(
-            directions, norms, out=np.zeros_like(directions), where=norms >= 1e-10
-        )
+        unit, degenerate = _unit_direction_batch(directions)
 
         along = unit @ self.axis
         d_perp = unit - along[:, None] * self.axis
@@ -398,7 +402,7 @@ class Cylinder(GeometricPrimitive):
         axis_support = self.center + (sign * self.half_height)[:, None] * self.axis
 
         # Bolt optimization: np.einsum avoids intermediate allocations, significantly faster than np.linalg.norm(..., axis=1)
-        perp_norm = np.sqrt(np.einsum('...i,...i->...', d_perp, d_perp))[..., None]
+        perp_norm = np.sqrt(np.einsum("...i,...i->...", d_perp, d_perp))[..., None]
         radial = np.divide(
             self.radius * d_perp,
             perp_norm,

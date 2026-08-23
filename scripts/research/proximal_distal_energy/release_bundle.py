@@ -14,10 +14,33 @@ _EXCLUDED = frozenset(
         "CHECKSUMS.sha256",
     }
 )
+_CANONICAL_TEXT_SUFFIXES = frozenset(
+    {".bib", ".cff", ".csv", ".json", ".md", ".py", ".qmd", ".svg"}
+)
 
 
-def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+def canonical_artifact_bytes(path: Path) -> bytes:
+    """Return platform-stable bytes for a release artifact.
+
+    Git normalizes the declared text formats to LF in repository objects, but
+    an existing Windows worktree can retain CRLF bytes after attribute changes.
+    Hashing the canonical representation keeps release qualification identical
+    across clean POSIX and Windows checkouts without altering binary evidence.
+    """
+    content = path.read_bytes()
+    if path.suffix.lower() in _CANONICAL_TEXT_SUFFIXES:
+        return content.replace(b"\r\n", b"\n")
+    return content
+
+
+def artifact_sha256(path: Path) -> str:
+    """Return the SHA-256 digest of the canonical artifact representation."""
+    return hashlib.sha256(canonical_artifact_bytes(path)).hexdigest()
+
+
+def artifact_size(path: Path) -> int:
+    """Return the byte length of the canonical artifact representation."""
+    return len(canonical_artifact_bytes(path))
 
 
 def _artifact_paths(root: Path) -> tuple[Path, ...]:
@@ -59,6 +82,9 @@ _RELEASE_METADATA: dict[str, Any] = {
         ),
         "external_source_review": (
             "offline_url_complete_work_and_claim_adjudication_embedded_in_artifacts"
+        ),
+        "publication_quality": (
+            "runtime_revision_and_manifest_digest_bound_every_page_pdf_inspection"
         ),
     },
     "presets": {
@@ -109,6 +135,10 @@ _RELEASE_METADATA: dict[str, Any] = {
         "articulated_inertia_cross_engine": {
             "command": "python -m scripts.research.proximal_distal_energy.run_articulated_inertia_cross_engine",
             "tier": "subject_scaled_closed_state_articulated_common_state_dynamics",
+        },
+        "articulated_native_constraint_discrepancy": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_articulated_native_constraint_discrepancy",
+            "tier": "native_equality_integrator_versus_projected_contact_formulation_discrepancy",
         },
         "articulated_contact_projection": {
             "command": "python -m scripts.research.proximal_distal_energy.run_articulated_contact_projection",
@@ -263,13 +293,19 @@ _RELEASE_METADATA: dict[str, Any] = {
             "reduced_tree_closed_contact_screen_and_short_forward_initialization_passed"
         ),
         "closed_state_forward_initialization": (
-            "supported_for_234_mappings_and_54_short_cross_engine_cases"
+            "supported_for_234_mappings_and_54_short_inertia_bias_transport_cases"
         ),
         "closed_state_forward_validity_horizon": (
             "no_failure_observed_through_registered_50_ms_reduced_model_interval"
         ),
         "subject_scaled_articulated_inertia": (
             "native_common_state_mass_bias_and_inverse_dynamics_qualified"
+        ),
+        "articulated_manufactured_solution": (
+            "independent_numerical_controls_qualified"
+        ),
+        "native_constraint_formulation_discrepancy": (
+            "native_branch_executed_nonzero_discrepancy_retained"
         ),
         "subject_scaled_articulated_contact_projection": (
             "same_state_bilateral_contact_projection_and_initial_acceleration_qualified"
@@ -312,8 +348,8 @@ def build_release_manifest(root: str | Path) -> dict[str, Any]:
     root_path = Path(root).resolve()
     artifacts = {
         path.relative_to(root_path).as_posix(): {
-            "sha256": _sha256(path),
-            "bytes": path.stat().st_size,
+            "sha256": artifact_sha256(path),
+            "bytes": artifact_size(path),
         }
         for path in _artifact_paths(root_path)
     }
@@ -341,9 +377,9 @@ def validate_release_manifest(
         if not isinstance(expected, dict):
             mismatches.append(f"invalid record: {relative}")
             continue
-        if _sha256(path) != expected.get("sha256"):
+        if artifact_sha256(path) != expected.get("sha256"):
             mismatches.append(f"hash mismatch: {relative}")
-        if path.stat().st_size != expected.get("bytes"):
+        if artifact_size(path) != expected.get("bytes"):
             mismatches.append(f"size mismatch: {relative}")
     if mismatches:
         raise ValueError(

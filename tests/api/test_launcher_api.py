@@ -166,7 +166,7 @@ class TestLauncherParityRequirements:
         "opensim_golf",
         "myosim_suite",
         "putting_green",
-        "matlab_unified",
+        "matlab_suite",
         "motion_capture",
         "model_explorer",
         "video_analyzer",
@@ -312,6 +312,7 @@ class TestNewTiles:
             "external",
             "ready",
             "gui_ready",
+            "provider_unavailable",
         }, f"Video Analyzer status '{tile['status']}' is not valid"
 
     def test_video_analyzer_has_capabilities(self, client: TestClient) -> None:

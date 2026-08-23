@@ -62,10 +62,22 @@ class TestOpenAIAdapter:
         client_mock = mock_openai_adapter._get_client()
         mock_response = Mock()
         mock_response.choices = [Mock(message=Mock(content="Hello", tool_calls=None))]
+        # `usage` must carry real ints: the adapter feeds it through
+        # `_normalize_token_counts`, which sums input + output (issue #2763).
+        # A bare Mock leaves auto-created attributes there and the sum raises
+        # `TypeError: unsupported operand type(s) for +: 'Mock' and 'Mock'`.
+        mock_response.usage = Mock(
+            prompt_tokens=11, completion_tokens=7, total_tokens=18
+        )
         client_mock.chat.completions.create.return_value = mock_response
 
         response = mock_openai_adapter.send_message("Hi", context, [])
         assert response.content == "Hello"
+        assert response.usage == {
+            "input_tokens": 11,
+            "output_tokens": 7,
+            "total_tokens": 18,
+        }
 
         # Verify call args
         call_kwargs = client_mock.chat.completions.create.call_args.kwargs

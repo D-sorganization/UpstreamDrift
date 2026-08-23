@@ -41,7 +41,7 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
     | sh -s -- -y --profile minimal --default-toolchain 1.94.0 && \
     rustc --version && cargo --version
 
-RUN pip install --upgrade pip==26.1.2 && pip install maturin==1.13.3
+RUN pip install --upgrade pip==26.2.1 && pip install maturin==1.13.3
 
 # Cargo needs the git CLI to fetch the tools-core git dependency reliably.
 ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
@@ -66,7 +66,7 @@ RUN mkdir -p /wheels && \
 
 # Core API + physics stack from lockfile
 COPY requirements.lock /tmp/requirements.lock
-RUN pip install --upgrade pip==26.1.2 && \
+RUN pip install --upgrade pip==26.2.1 && \
     pip install -r /tmp/requirements.lock
 
 # Auth and server extensions - pinned versions (to be added to requirements.lock)
@@ -110,6 +110,13 @@ RUN pip install \
 RUN pip install --no-deps /wheels/*.whl && \
     python -c "import upstream_physics, ai_backend; print('Rust wheels installed:', upstream_physics.__name__, ai_backend.__name__)"
 
+# Reassert scanner-fixed transitive tooling after every dependency layer.
+# Trivy/pip-audit gate GHSA-6v7p-g79w-8964, CVE-2025-47273, and
+# PYSEC-2026-3447 at the final image.
+RUN pip install --upgrade --no-cache-dir \
+    "msgpack==1.2.1" \
+    "setuptools==83.0.0"
+
 # Audit the *resolved* environment inside the image (issue #7159 D2). The
 # Dockerfile pins ~36 lines that can drift from requirements.lock, so a manual
 # edit could otherwise bake a CVE into the runtime image without the CI lane
@@ -142,7 +149,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Keep the base interpreter's bundled pip aligned with the venv so image
 # scanners do not report the runtime layer's global site-packages as stale.
-RUN python -m pip install --upgrade --no-cache-dir pip==26.1.2
+RUN python -m pip install --upgrade --no-cache-dir pip==26.2.1 && \
+    python -m pip install --upgrade --no-cache-dir setuptools==83.0.0
 
 # MuJoCo headless rendering + health check
 # X11/XCB/PyQt6 libs removed — not needed in a headless API server
@@ -172,6 +180,12 @@ RUN groupadd -g ${GROUP_ID} ${USER_NAME} && \
 
 # Copy only the venv — no conda overhead
 COPY --from=builder /opt/venv /opt/venv
+
+# The production runtime does not install packages. Remove both pip copies so
+# pip's embedded third-party SBOM and vendored build code cannot survive into
+# the deployed image; installed runtime packages and setuptools remain intact.
+RUN /opt/venv/bin/python -m pip uninstall -y pip && \
+    /usr/local/bin/python -m pip uninstall -y pip
 
 # /workspace is the project root; "from src.xxx" imports resolve here
 ENV PATH="/opt/venv/bin:$PATH" \
@@ -230,6 +244,10 @@ ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 FROM runtime AS training
 
 USER root
+
+# Training is an explicit build workbench, so restore the audited builder venv
+# rather than shipping an installer in the production runtime target.
+COPY --from=builder /opt/venv /opt/venv
 
 # PyTorch cu124 wheels bundle CUDA runtime libs; host driver provides libcuda via nvidia-container-toolkit
 # Pinned versions for reproducible builds

@@ -27,12 +27,15 @@ FloatArray = NDArray[np.float64]
 
 @dataclass(frozen=True, slots=True)
 class DistributedGripConfig:
-    """Geometry and total constitutive properties for two distributed grips."""
+    """Geometry, constitutive properties, and friction for two distributed grips."""
 
     station_count_per_hand: int = 3
     station_width_m: float = 0.03
     total_stiffness_n_m: float = 1800.0
     total_damping_n_s_m: float = 18.0
+    tangential_damping_n_s_m: float = 18.0
+    friction_coefficient: float = 0.0
+    slip_velocity_tolerance_m_s: float = 1.0e-4
     slack_distance_m: float = 0.0
     closure_zero_tolerance_m: float = 1.0e-8
 
@@ -44,10 +47,24 @@ class DistributedGripConfig:
             raise ValueError("station_width_m must be finite and nonnegative")
         if count > 1 and self.station_width_m <= 0.0:
             raise ValueError("multi-station grips require positive station_width_m")
-        for name in ("total_stiffness_n_m", "total_damping_n_s_m"):
+        for name in (
+            "total_stiffness_n_m",
+            "total_damping_n_s_m",
+            "tangential_damping_n_s_m",
+        ):
             value = getattr(self, name)
             if not np.isfinite(value) or value <= 0.0:
                 raise ValueError(f"{name} must be finite and positive")
+        if (
+            not np.isfinite(self.friction_coefficient)
+            or self.friction_coefficient < 0.0
+        ):
+            raise ValueError("friction_coefficient must be finite and nonnegative")
+        if (
+            not np.isfinite(self.slip_velocity_tolerance_m_s)
+            or self.slip_velocity_tolerance_m_s <= 0.0
+        ):
+            raise ValueError("slip_velocity_tolerance_m_s must be finite and positive")
         if not np.isfinite(self.slack_distance_m) or self.slack_distance_m < 0.0:
             raise ValueError("slack_distance_m must be finite and nonnegative")
         if (
@@ -88,7 +105,7 @@ class DistributedGripConfig:
 
 @dataclass(frozen=True, slots=True)
 class DistributedGripSnapshot:
-    """Generalized load and complete per-station passive ledger."""
+    """Generalized load and complete per-station passive and friction ledger."""
 
     generalized_contact_force: FloatArray
     force_on_club_n: FloatArray
@@ -106,6 +123,16 @@ class DistributedGripSnapshot:
     storage_power_w: float
     dissipation_power_w: float
     strain_energy_j: float
+    normal_force_on_club_n: FloatArray | None = None
+    tangential_force_on_club_n: FloatArray | None = None
+    slipping_station: NDArray[np.bool_] | None = None
+    normal_power_w: float = 0.0
+    tangential_power_w: float = 0.0
+    normal_dissipation_power_w: float = 0.0
+    tangential_dissipation_power_w: float = 0.0
+    maximum_tangential_force_n: float = 0.0
+    maximum_sliding_speed_m_s: float = 0.0
+    coulomb_limit_utilization: float = 0.0
 
 
 def distributed_contact_kinematics(
@@ -224,6 +251,175 @@ def evaluate_distributed_grip(
     )
 
 
+def _compute_station_friction(
+    disp: FloatArray,
+    rel_velocity: FloatArray,
+    f_norm: FloatArray,
+    active: bool,
+    config: DistributedGripConfig,
+    station_c_t: float,
+) -> tuple[FloatArray, float, float, float, bool]:
+    f_tan = np.zeros(3)
+    f_norm_mag = float(np.linalg.norm(f_norm))
+    v_tan_mag = 0.0
+    utilization = 0.0
+    is_slipping = False
+    tan_diss = 0.0
+
+    if active and f_norm_mag > 0.0:
+        dist = float(np.linalg.norm(disp))
+        normal_dir = disp / dist if dist > 0.0 else np.zeros(3)
+        v_n_scalar = float(normal_dir @ rel_velocity)
+        v_tan = rel_velocity - v_n_scalar * normal_dir
+        v_tan_mag = float(np.linalg.norm(v_tan))
+
+        if config.friction_coefficient > 0.0 and v_tan_mag > 0.0:
+            t_dir = v_tan / v_tan_mag
+            f_tan_trial = station_c_t * v_tan_mag
+            f_tan_cone = config.friction_coefficient * f_norm_mag
+            if f_tan_cone > 0.0:
+                utilization = min(1.0, f_tan_trial / f_tan_cone)
+            if f_tan_trial >= f_tan_cone:
+                f_tan_mag = f_tan_cone
+                is_slipping = True
+            else:
+                f_tan_mag = f_tan_trial
+                if v_tan_mag > config.slip_velocity_tolerance_m_s:
+                    is_slipping = True
+            f_tan = f_tan_mag * t_dir
+            tan_diss = -float(f_tan @ v_tan)
+
+    return f_tan, v_tan_mag, utilization, tan_diss, is_slipping
+
+
+@dataclass(slots=True)
+class _KinematicsBuffers:
+    forces: FloatArray
+    normal_forces: FloatArray
+    tangential_forces: FloatArray
+    active: NDArray[np.bool_]
+    slipping: NDArray[np.bool_]
+    extensions: FloatArray
+    tangential_norms: FloatArray
+    sliding_speeds: FloatArray
+    coulomb_utilization: FloatArray
+    generalized: FloatArray
+    physical_power: float = 0.0
+    storage: float = 0.0
+    dissipation: float = 0.0
+    strain: float = 0.0
+    normal_power: float = 0.0
+    tangential_power: float = 0.0
+    normal_dissipation: float = 0.0
+    tangential_dissipation: float = 0.0
+    action_residual: float = 0.0
+
+
+def _build_distributed_snapshot(
+    grip: FloatArray,
+    velocity: FloatArray,
+    buf: _KinematicsBuffers,
+) -> DistributedGripSnapshot:
+    norms = np.linalg.norm(buf.forces, axis=2)
+    total_norm = float(np.sum(norms))
+    midpoint = np.mean(grip.reshape(-1, 3), axis=0)
+    couple = np.sum(np.cross(grip - midpoint, buf.forces), axis=(0, 1))
+    coincident_couple = np.sum(np.cross(np.zeros_like(grip), buf.forces), axis=(0, 1))
+    reversed_couple = np.sum(np.cross(-(grip - midpoint), buf.forces), axis=(0, 1))
+    net_force = np.sum(buf.forces, axis=(0, 1))
+    return DistributedGripSnapshot(
+        generalized_contact_force=buf.generalized,
+        force_on_club_n=buf.forces,
+        active_station=buf.active,
+        net_club_force_n=net_force,
+        force_couple_vector_nm=couple,
+        maximum_station_force_n=float(np.max(norms)),
+        maximum_extension_m=float(np.max(buf.extensions)),
+        active_station_count=int(np.count_nonzero(buf.active)),
+        load_concentration=(float(np.max(norms)) / total_norm if total_norm else 0.0),
+        action_reaction_residual_n=buf.action_residual,
+        coincident_couple_residual_nm=float(np.linalg.norm(coincident_couple)),
+        reversed_couple_sign_residual_nm=float(
+            np.linalg.norm(reversed_couple + couple)
+        ),
+        virtual_power_residual_w=float(
+            abs(buf.generalized @ velocity - buf.physical_power)
+        ),
+        storage_power_w=float(buf.storage),
+        dissipation_power_w=float(buf.dissipation),
+        strain_energy_j=float(buf.strain),
+        normal_force_on_club_n=buf.normal_forces,
+        tangential_force_on_club_n=buf.tangential_forces,
+        slipping_station=buf.slipping,
+        normal_power_w=float(buf.normal_power),
+        tangential_power_w=float(buf.tangential_power),
+        normal_dissipation_power_w=float(buf.normal_dissipation),
+        tangential_dissipation_power_w=float(buf.tangential_dissipation),
+        maximum_tangential_force_n=float(np.max(buf.tangential_norms)),
+        maximum_sliding_speed_m_s=float(np.max(buf.sliding_speeds)),
+        coulomb_limit_utilization=float(np.max(buf.coulomb_utilization)),
+    )
+
+
+def _evaluate_all_stations(
+    hand: FloatArray,
+    hand_jac: FloatArray,
+    grip: FloatArray,
+    grip_jac: FloatArray,
+    velocity: FloatArray,
+    references: FloatArray,
+    config: DistributedGripConfig,
+    buf: _KinematicsBuffers,
+) -> None:
+    law = config.station_law
+    station_c_t = (
+        config.tangential_damping_n_s_m / config.station_count_per_hand
+        if config.station_count_per_hand > 0
+        else 0.0
+    )
+    for h_idx in range(2):
+        for s_idx in range(config.station_count_per_hand):
+            v_h = hand_jac[h_idx, s_idx] @ velocity
+            v_g = grip_jac[h_idx, s_idx] @ velocity
+            v_rel = v_h - v_g
+            disp = hand[h_idx, s_idx] - grip[h_idx, s_idx]
+
+            snap = evaluate_attachment_law(
+                displacement_m=disp,
+                relative_velocity_m_s=v_rel,
+                config=law,
+                reference_length_m=references[h_idx, s_idx],
+            )
+            f_norm = snap.force_on_club_n
+            buf.normal_forces[h_idx, s_idx] = f_norm
+            buf.active[h_idx, s_idx] = snap.active
+            buf.extensions[h_idx, s_idx] = snap.extension_m
+            buf.storage += snap.storage_power_w
+            normal_diss = snap.dissipation_power_w
+            buf.normal_dissipation += normal_diss
+            buf.normal_power += float(snap.interface_power_w)
+            buf.strain += snap.strain_energy_j
+
+            f_tan, v_tan_mag, util, tan_diss, is_slip = _compute_station_friction(
+                disp, v_rel, f_norm, snap.active, config, station_c_t
+            )
+            buf.sliding_speeds[h_idx, s_idx] = v_tan_mag
+            buf.coulomb_utilization[h_idx, s_idx] = util
+            buf.slipping[h_idx, s_idx] = is_slip
+            buf.tangential_dissipation += tan_diss
+            buf.tangential_power += tan_diss
+            buf.tangential_forces[h_idx, s_idx] = f_tan
+            buf.tangential_norms[h_idx, s_idx] = float(np.linalg.norm(f_tan))
+
+            f_total = f_norm + f_tan
+            buf.forces[h_idx, s_idx] = f_total
+            buf.generalized += (
+                grip_jac[h_idx, s_idx].T @ f_total - hand_jac[h_idx, s_idx].T @ f_total
+            )
+            buf.physical_power += float(f_total @ v_g - f_total @ v_h)
+            buf.dissipation += normal_diss + (-float(f_tan @ v_rel))
+
+
 def evaluate_distributed_grip_kinematics(
     hand: FloatArray,
     hand_jac: FloatArray,
@@ -235,7 +431,6 @@ def evaluate_distributed_grip_kinematics(
     config: DistributedGripConfig,
 ) -> DistributedGripSnapshot:
     """Evaluate the fiber law from declared points and common-coordinate Jacobians."""
-
     hand = np.asarray(hand, dtype=float)
     grip = np.asarray(grip, dtype=float)
     hand_jac = np.asarray(hand_jac, dtype=float)
@@ -252,65 +447,24 @@ def evaluate_distributed_grip_kinematics(
     if any(np.any(~np.isfinite(value)) for value in arrays):
         raise ValueError("contact kinematics and velocity must be finite")
 
-    forces = np.zeros_like(hand)
-    active = np.zeros(references.shape, dtype=bool)
-    generalized = np.zeros(velocity.size)
-    physical_power = storage = dissipation = strain = 0.0
-    extensions = np.zeros(references.shape)
-    action_residual = 0.0
-    law = config.station_law
-    for hand_index in range(2):
-        for station_index in range(config.station_count_per_hand):
-            hand_velocity = hand_jac[hand_index, station_index] @ velocity
-            grip_velocity = grip_jac[hand_index, station_index] @ velocity
-            snapshot = evaluate_attachment_law(
-                displacement_m=hand[hand_index, station_index]
-                - grip[hand_index, station_index],
-                relative_velocity_m_s=hand_velocity - grip_velocity,
-                config=law,
-                reference_length_m=references[hand_index, station_index],
-            )
-            force = snapshot.force_on_club_n
-            forces[hand_index, station_index] = force
-            active[hand_index, station_index] = snapshot.active
-            extensions[hand_index, station_index] = snapshot.extension_m
-            generalized += grip_jac[hand_index, station_index].T @ force
-            generalized += hand_jac[hand_index, station_index].T @ (-force)
-            physical_power += float(force @ grip_velocity - force @ hand_velocity)
-            storage += snapshot.storage_power_w
-            dissipation += snapshot.dissipation_power_w
-            strain += snapshot.strain_energy_j
-            action_residual = max(
-                action_residual,
-                float(np.linalg.norm(force + snapshot.force_on_hand_n)),
-            )
-    norms = np.linalg.norm(forces, axis=2)
-    total_norm = float(np.sum(norms))
-    midpoint = np.mean(grip.reshape(-1, 3), axis=0)
-    couple = np.sum(np.cross(grip - midpoint, forces), axis=(0, 1))
-    coincident_couple = np.sum(np.cross(np.zeros_like(grip), forces), axis=(0, 1))
-    reversed_couple = np.sum(np.cross(-(grip - midpoint), forces), axis=(0, 1))
-    net_force = np.sum(forces, axis=(0, 1))
-    return DistributedGripSnapshot(
-        generalized_contact_force=generalized,
-        force_on_club_n=forces,
-        active_station=active,
-        net_club_force_n=net_force,
-        force_couple_vector_nm=couple,
-        maximum_station_force_n=float(np.max(norms)),
-        maximum_extension_m=float(np.max(extensions)),
-        active_station_count=int(np.count_nonzero(active)),
-        load_concentration=(float(np.max(norms)) / total_norm if total_norm else 0.0),
-        action_reaction_residual_n=action_residual,
-        coincident_couple_residual_nm=float(np.linalg.norm(coincident_couple)),
-        reversed_couple_sign_residual_nm=float(
-            np.linalg.norm(reversed_couple + couple)
-        ),
-        virtual_power_residual_w=float(abs(generalized @ velocity - physical_power)),
-        storage_power_w=float(storage),
-        dissipation_power_w=float(dissipation),
-        strain_energy_j=float(strain),
+    buf = _KinematicsBuffers(
+        forces=np.zeros_like(hand),
+        normal_forces=np.zeros_like(hand),
+        tangential_forces=np.zeros_like(hand),
+        active=np.zeros(references.shape, dtype=bool),
+        slipping=np.zeros(references.shape, dtype=bool),
+        extensions=np.zeros(references.shape),
+        tangential_norms=np.zeros(references.shape),
+        sliding_speeds=np.zeros(references.shape),
+        coulomb_utilization=np.zeros(references.shape),
+        generalized=np.zeros(velocity.size),
     )
+
+    _evaluate_all_stations(
+        hand, hand_jac, grip, grip_jac, velocity, references, config, buf
+    )
+
+    return _build_distributed_snapshot(grip, velocity, buf)
 
 
 __all__ = [

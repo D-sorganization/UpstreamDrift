@@ -192,7 +192,7 @@
       }
     },
     {
-      "id": "matlab_unified",
+      "id": "matlab_suite",
       "name": "Matlab Models",
       "description": "Access 2D/3D Simscape models and Analysis Tools",
       "category": "external",
@@ -212,7 +212,7 @@
       "description": "Preview multi-source motion-capture targets (C3D, .mat, body markers, club/ball) on a shared timegrid before driving a physics-engine model.",
       "category": "motion_matching",
       "type": "special_app",
-      "path": "src.tools.starting_pose_matcher.__main__",
+      "path": "src/tools/starting_pose_matcher/__main__.py",
       "logo": "motion_target_preview.svg",
       "status": "utility",
       "capabilities": ["c3d", "mocap", "club", "body", "preview"],
@@ -394,7 +394,7 @@
       }
     },
     {
-      "id": "cross_engine",
+      "id": "cross_engine_dashboard",
       "name": "Cross-Engine Dashboard",
       "description": "Compare simulation results across MuJoCo, Drake, Pinocchio with perturbation and robustness analysis",
       "category": "simulation",
@@ -931,6 +931,13 @@
       "category": "tool",
       "type": "special_app",
       "path": "src/data_processing/data_processor/launch_pyqt6.py",
+      "provider": "tools",
+      "working_dir": ".",
+      "python_paths": [
+        "src",
+        "src/shared/python",
+        "src/data_processing/data_processor/python"
+      ],
       "web_route": "/tools/calculators",
       "logo": "data_explorer.svg",
       "status": "external",
@@ -946,14 +953,15 @@
       "description": "Programmatic P&ID Generator from the Tools repo - create ISA-5.1 piping diagrams",
       "category": "tool",
       "type": "special_app",
-      "path": "src/tools/pid_generator/__main__.py",
+      "path": "src/shared/python/programmatic_pid/cli.py",
       "web_route": "/docs/pid-generator",
       "logo": "data_explorer.svg",
-      "status": "external",
+      "status": "experimental",
       "capabilities": ["pid_generation", "isa_5_1", "diagrams"],
       "order": 44,
       "web": {
-        "mode": "native-window"
+        "mode": "unavailable",
+        "reason": "CLI tool (generate-pid); no GUI or web page yet"
       }
     },
     {
@@ -986,7 +994,7 @@
       "description": "Legacy alias for the motion-target preview tile. Hidden by default; kept for one release so saved layouts continue to resolve.",
       "category": "tool",
       "type": "special_app",
-      "path": "src.tools.starting_pose_matcher.__main__",
+      "path": "src/tools/starting_pose_matcher/__main__.py",
       "logo": "motion_target_preview.svg",
       "status": "utility",
       "hidden": true,
@@ -1004,7 +1012,7 @@
       "description": "Compare ODE, MuJoCo (CPU) and MuJoCo Warp (GPU) backends: edit the golf double-pendulum model, run rollouts and parameter sweeps, cross-validate dynamics, and export HDF5 traces.",
       "category": "simulation",
       "type": "special_app",
-      "path": "src.tools.simulation_backends_launcher.__main__",
+      "path": "src/tools/simulation_backends_launcher/__main__.py",
       "logo": "golf_logo.svg",
       "status": "gui_ready",
       "capabilities": [

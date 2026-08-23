@@ -27,8 +27,15 @@ _SOURCE_EXTENSION_PARENT: Path | None = None
 
 SIDEKICK_API_READY_TIMEOUT_SEC: float = 45.0
 SIDEKICK_API_READY_RETRY_MS: int = 500
+# Startup retries back off exponentially from SIDEKICK_API_READY_RETRY_MS up
+# to this ceiling so a slow API start does not mean 2 Hz probing for 45 s
+# (issue #8939).
+SIDEKICK_API_READY_RETRY_MAX_MS: int = 5_000
 SIDEKICK_API_RESTART_DELAY_MS: int = 1_000
-SIDEKICK_API_HEALTHCHECK_MS: int = 3_000
+SIDEKICK_API_HEALTHCHECK_MS: int = 10_000
+# Once the API is declared offline, keep probing at this slow cadence so a
+# late-starting API can still recover, without a hot polling loop.
+SIDEKICK_API_OFFLINE_RETRY_MS: int = 30_000
 SIDEKICK_API_MAX_RESTARTS: int = 2
 
 
@@ -128,6 +135,8 @@ class SidekickSidebarManager:
         if readiness.ready:
             launcher._sidekick_api_wait_started_at = None
             launcher._sidekick_api_restart_count = 0
+            launcher._sidekick_api_retry_interval_ms = SIDEKICK_API_READY_RETRY_MS
+            launcher._sidekick_api_failure_reported = False
             if not getattr(launcher, "_sidekick_api_was_ready", False):
                 logger.info("Sidekick API is ready: %s", readiness.url)
             launcher._sidekick_api_was_ready = True
@@ -146,13 +155,22 @@ class SidekickSidebarManager:
         process = getattr(launcher, "background_api_process", None)
         process_running = process is not None and process.poll() is None
         if elapsed < SIDEKICK_API_READY_TIMEOUT_SEC and process_running:
+            interval_ms = getattr(
+                launcher,
+                "_sidekick_api_retry_interval_ms",
+                SIDEKICK_API_READY_RETRY_MS,
+            )
             logger.info(
                 "Waiting for Sidekick Chat API readiness: %s",
                 readiness_detail_for_log(readiness),
             )
             schedule_once(
-                SIDEKICK_API_READY_RETRY_MS,
+                interval_ms,
                 launcher._monitor_sidekick_api_readiness,
+            )
+            # Exponential backoff toward the ceiling for the next attempt.
+            launcher._sidekick_api_retry_interval_ms = min(
+                interval_ms * 2, SIDEKICK_API_READY_RETRY_MAX_MS
             )
             return
 
@@ -178,7 +196,24 @@ class SidekickSidebarManager:
             )
             return
 
-        launcher._report_sidekick_api_failure(readiness)
+        self._enter_sidekick_offline_state(readiness, schedule_once)
+
+    def _enter_sidekick_offline_state(self, readiness: Any, schedule_once: Any) -> None:
+        """Report the offline API once, then keep retrying at a slow cadence.
+
+        Replaces the previous silent give-up: the failure toast fires exactly
+        once per outage, and probes continue every
+        ``SIDEKICK_API_OFFLINE_RETRY_MS`` so a late API start still recovers
+        (issue #8939).
+        """
+        launcher = self.launcher
+        if not getattr(launcher, "_sidekick_api_failure_reported", False):
+            launcher._sidekick_api_failure_reported = True
+            launcher._report_sidekick_api_failure(readiness)
+        schedule_once(
+            SIDEKICK_API_OFFLINE_RETRY_MS,
+            launcher._monitor_sidekick_api_readiness,
+        )
 
     def _report_sidekick_api_failure(self, readiness: Any) -> None:
         """Surface terminal API failure while leaving local tools available."""
@@ -194,9 +229,11 @@ class SidekickSidebarManager:
                 if launcher._sidekick_runtime_error
                 else ""
             )
+            retry_seconds = SIDEKICK_API_OFFLINE_RETRY_MS // 1_000
             show_toast(
                 "Sidekick tools are available, but Chat could not connect to "
-                f"its local API at {readiness.url}.{configuration_detail}",
+                f"its local API at {readiness.url}.{configuration_detail} "
+                f"Retrying every {retry_seconds}s in the background.",
                 "warning",
             )
 

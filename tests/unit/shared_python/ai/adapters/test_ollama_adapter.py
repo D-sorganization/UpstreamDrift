@@ -224,8 +224,12 @@ def test_ollama_adapter_send_message_success(mock_get_client, adapter) -> None:
     resp = adapter.send_message("hi", ConversationContext(), [])
 
     assert resp.content == "Hello!"
-    assert resp.usage["prompt_tokens"] == 50
-    assert resp.usage["completion_tokens"] == 20
+    # `_normalize_token_counts` maps every provider's usage keys onto the
+    # canonical input/output/total triple so callers never branch on provider
+    # (issue #2763). Ollama reports prompt_eval_count / eval_count.
+    assert resp.usage["input_tokens"] == 50
+    assert resp.usage["output_tokens"] == 20
+    assert resp.usage["total_tokens"] == 70
     assert resp.finish_reason == "stop"
 
 

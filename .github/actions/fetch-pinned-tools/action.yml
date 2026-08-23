@@ -8,6 +8,18 @@ description: >-
   submodules are large model repositories), and relying on leftover submodule
   content from other workflows in a reused runner workspace breaks whenever a
   workspace is recreated from scratch.
+inputs:
+  emit-source-provenance:
+    description: Compute the required package-root digest for isolated builds
+    required: false
+    default: "false"
+outputs:
+  gitlink-sha:
+    description: Exact Tools revision declared by the superproject gitlink
+    value: ${{ steps.pin.outputs.sha }}
+  source-sha256:
+    description: Path-and-content digest of the required Tools package roots
+    value: ${{ steps.provenance.outputs.sha256 }}
 runs:
   using: composite
   steps:
@@ -38,3 +50,11 @@ runs:
       run: |
         actual_tools_sha=$(git -C vendor/ud-tools rev-parse HEAD)
         test "$actual_tools_sha" = "${{ steps.pin.outputs.sha }}"
+    - name: Digest pinned Tools sources
+      id: provenance
+      if: inputs.emit-source-provenance == 'true'
+      shell: bash
+      run: |
+        tools_digest=$(python3 scripts/packaging/pinned_tools_provenance.py \
+          --root vendor/ud-tools)
+        echo "sha256=$tools_digest" >> "$GITHUB_OUTPUT"

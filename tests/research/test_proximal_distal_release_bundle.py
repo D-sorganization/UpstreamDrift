@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -30,6 +31,7 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         "closed_state_forward_bridge",
         "forward_contact_validity_horizon",
         "articulated_inertia_cross_engine",
+        "articulated_native_constraint_discrepancy",
         "articulated_contact_projection",
         "articulated_forward_contact",
         "articulated_slack_atlas",
@@ -134,6 +136,9 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
     assert manifest["integrity_authorities"]["external_source_review"].startswith(
         "offline_url_complete"
     )
+    assert manifest["integrity_authorities"]["publication_quality"].startswith(
+        "runtime_revision_and_manifest_digest_bound"
+    )
     assert not any(
         path.endswith("claim_evidence_manifest.json") for path in manifest["artifacts"]
     )
@@ -143,6 +148,9 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
     assert any(
         path.endswith("fig_shoulder_velocity_strategy_pareto.pdf")
         for path in manifest["artifacts"]
+    )
+    assert any(
+        path.endswith("publication_quality.py") for path in manifest["artifacts"]
     )
 
 
@@ -162,6 +170,25 @@ def test_validator_fails_closed_on_tampered_file(tmp_path: Path) -> None:
     manifest["artifacts"] = {str(copied): manifest["artifacts"][first]}
     with pytest.raises(ValueError, match="release manifest validation failed"):
         validate_release_manifest(ROOT, manifest)
+
+
+def test_validator_normalizes_checked_out_text_line_endings(tmp_path: Path) -> None:
+    """A release manifest must validate identically on Windows and POSIX."""
+    artifact = tmp_path / "paper.md"
+    artifact.write_bytes(b"first\r\nsecond\r\n")
+    canonical = b"first\nsecond\n"
+    manifest = {
+        "artifacts": {
+            "paper.md": {
+                "sha256": hashlib.sha256(canonical).hexdigest(),
+                "bytes": len(canonical),
+            }
+        }
+    }
+
+    report = validate_release_manifest(tmp_path, manifest)
+
+    assert report == {"valid": True, "artifact_count": 1, "mismatches": []}
 
 
 def test_checksum_file_is_sorted_and_covers_every_artifact() -> None:

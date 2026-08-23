@@ -21,7 +21,9 @@ from ..data_io.common_utils import (
 )
 from ..data_io.path_utils import get_src_root
 from .engine_availability import EngineStatus as RuntimeEngineStatus
+from .engine_availability import get_engine_error as get_runtime_engine_error
 from .engine_availability import get_engine_status as get_runtime_engine_status
+from .engine_availability import is_dependency_present
 from .engine_registry import (
     EngineRegistration,
     EngineStatus,
@@ -244,18 +246,26 @@ class EngineManager(ContractChecker):
 
     @staticmethod
     def _runtime_ready(engine_type: EngineType) -> bool:
-        """Return True when an engine's runtime dependency is importable.
+        """Return True when an engine's runtime dependency appears installed.
 
         DbC: ``EngineStatus.AVAILABLE`` for a runtime-backed engine means both
         adapter/source presence *and* runtime dependency readiness (#6880,
         #6884). Engines with no importable runtime dependency
         (:func:`runtime_dependency_name` returns ``None``) are always
         considered runtime-ready and remain gated on source presence alone.
+
+        Performance contract (#8934): this is a metadata-only presence probe
+        (``importlib.util.find_spec``) — it must NEVER import the runtime
+        package. Really importing pydrake.all/jaxsim/etc. costs 8-25 s and
+        >1 GB RSS at every launcher and API start. The real import (with its
+        richer broken-install diagnostics) is deferred to
+        :meth:`_ensure_runtime_importable`, invoked from :meth:`_load_engine`
+        only when an engine is actually selected.
         """
         dependency = runtime_dependency_name(engine_type)
         if dependency is None:
             return True
-        return get_runtime_engine_status(dependency) == RuntimeEngineStatus.AVAILABLE
+        return is_dependency_present(dependency)
 
     def _discover_engines(self) -> None:
         """Discover available engines by checking directories and runtime deps.
@@ -301,11 +311,36 @@ class EngineManager(ContractChecker):
                 discovered_path,
             )
 
+    def _ensure_runtime_importable(self, engine_type: EngineType) -> None:
+        """Deep-probe (really import) an engine's runtime dependency.
+
+        Discovery only checks package *presence* (#8934); the real import —
+        which surfaces broken installs, DLL errors, and mocked modules — runs
+        here, on the actual launch path, where its cost is justified.
+
+        Raises:
+            EngineLaunchError: if the runtime dependency fails to import.
+        """
+        dependency = runtime_dependency_name(engine_type)
+        if dependency is None:
+            return
+        status = get_runtime_engine_status(dependency)
+        if status != RuntimeEngineStatus.AVAILABLE:
+            self.engine_status[engine_type] = EngineStatus.ERROR
+            error = get_runtime_engine_error(dependency)
+            raise EngineLaunchError(
+                engine_type.value,
+                reason=(
+                    f"runtime dependency '{dependency}' is {status.value}: {error}"
+                ),
+            )
+
     def _load_engine(self, engine_type: EngineType) -> None:
         """Load a specific engine."""
         if engine_type is None:
             raise ValueError("engine_type must be provided")
         logger.info("engine_loading_started engine=%s", engine_type.value)
+        self._ensure_runtime_importable(engine_type)
         self.engine_status[engine_type] = EngineStatus.LOADING
         self.active_physics_engine = None
 

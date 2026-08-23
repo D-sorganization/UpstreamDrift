@@ -54,6 +54,7 @@ from bunkershot3d.ball import (
 )
 from bunkershot3d.geometry import (
     DeliveredGeometry,
+    StationCamber,
     WedgeGeometry,
     deliver_wedge,
 )
@@ -94,9 +95,10 @@ from .bridge import (
     SoleLoadMap,
     build_head,
     entry_kinematics,
+    sole_load_field,
     sole_load_map,
-    sole_load_trace,
     strike_trace,
+    validity_band,
 )
 from .design import (
     FIRMNESS_RANGE_KG_PER_CM2,
@@ -106,15 +108,22 @@ from .design import (
     WedgeDesign,
     WorkbenchInputError,
 )
+from .field import ContactPatch, SoleLoadField, contact_patch
+from .shot3d import ShotScene, shot_scene
+from .traces import ShotTraces, shot_traces
 
 __all__ = [
     "ATTACK_ANGLE_SWEEP_DEG",
     "COMPARISON_SEED",
     "CarryEstimate",
+    "ContactPatch",
     "DesignEvaluation",
     "HeadBuild",
     "PlayabilityOutcome",
     "ShotOutcome",
+    "ShotScene",
+    "ShotTraces",
+    "SoleLoadField",
     "SoleLoadMap",
     "WorkbenchComparison",
     "WorkbenchModel",
@@ -220,6 +229,28 @@ def _measured_divot(divot: DivotMetrics | None) -> DivotMetrics:
 
 
 @dataclass(frozen=True)
+class _ShotViews:
+    """The five drawable products of one shot, each optional.
+
+    Bundled so :meth:`WorkbenchModel._reduce` receives one value rather than
+    five positional results whose order a reader has to keep straight.
+
+    Attributes:
+        field: The per-element sole load field (#8705).
+        sole_load: That field binned to the 12x12 bounce-utilisation map.
+        patch: The engaged element set through the shot (#8707).
+        scene: The 3-D scene of the head through the sand (#8706).
+        traces: The scalar traces and the validity band (#8708).
+    """
+
+    field: SoleLoadField | None
+    sole_load: SoleLoadMap | None
+    patch: ContactPatch | None
+    scene: ShotScene | None
+    traces: ShotTraces | None
+
+
+@dataclass(frozen=True)
 class ShotOutcome:
     """One shot: its verdict first, its numbers only if there are any.
 
@@ -241,7 +272,17 @@ class ShotOutcome:
         loads: Peak/mean head loads, when the trace supports them.
         divot: Divot geometry, when the sole entered and left the sand.
         dig_skid: The dig-versus-skid discriminator.
-        sole_load: The bounce-utilisation map.
+        sole_load: The bounce-utilisation map: the strike binned onto a
+            12x12 sole grid and summed over time.
+        sole_field: The same load *before* either reduction -- per element,
+            per sample, with the depth-linear and inertial terms separated
+            (issue #8705).
+        contact_patch: The engaged element set followed through the shot
+            (issue #8707).
+        scene: The 3-D scene -- pose, free surface and swept divot section --
+            for the animated view (issue #8706).
+        traces: The scalar traces and the per-sample validity band, on the
+            same time axis as the scene and the field (issue #8708).
         carry_m: Carry from the splash and flight models.
         carry_verdict: The validity statement the carry may be quoted under.
             Present whenever ``carry_m`` is, and absent whenever it is not.
@@ -265,6 +306,10 @@ class ShotOutcome:
     divot: DivotMetrics | None = None
     dig_skid: DigSkidResult | None = None
     sole_load: SoleLoadMap | None = None
+    sole_field: SoleLoadField | None = None
+    contact_patch: ContactPatch | None = None
+    scene: ShotScene | None = None
+    traces: ShotTraces | None = None
     carry_m: float | None = None
     carry_verdict: ValidityVerdict | None = None
     unavailable: tuple[str, ...] = ()
@@ -295,12 +340,17 @@ class ShotOutcome:
             self.impulse_n_s,
             self.max_depth_m,
             self.carry_m,
+            self.sole_field,
+            self.contact_patch,
+            self.scene,
+            self.traces,
         )
         if any(value is not None for value in numbers):
             raise ValueError(
-                "a refused shot must not carry a force, a depth or a carry: "
-                "3D-RFT declined this query, and reporting a number beside a "
-                "REFUSED verdict is exactly what ADR-0032 forbids"
+                "a refused shot must not carry a force, a depth, a carry, a "
+                "load field or a 3-D scene: 3D-RFT declined this query, and "
+                "animating a head through sand beside a REFUSED verdict is "
+                "exactly what ADR-0032 forbids"
             )
 
     @property
@@ -378,6 +428,11 @@ class DesignEvaluation:
             width and bounce, so the declared area in :attr:`geometry` is
             fitted to what the sole admits; carrying the realised value here
             is what lets the report state both (issue #8698).
+        camber_stations: The lofter's per-station camber account, heel to
+            toe. Carried because :attr:`effective_camber_area_m2` alone
+            cannot answer whether the sole was substituted: it is the
+            *declared* width's number, and the relieved heel and toe
+            stations have their own, narrower bands.
     """
 
     design: WedgeDesign
@@ -386,11 +441,31 @@ class DesignEvaluation:
     shot: ShotOutcome
     playability: PlayabilityOutcome
     effective_camber_area_m2: float
+    camber_stations: tuple[StationCamber, ...]
 
     @property
-    def camber_was_clamped(self) -> bool:
-        """Whether the declared camber area had to be substituted."""
+    def aggregate_camber_was_clamped(self) -> bool:
+        """Whether the *declared* camber area itself had to be substituted.
+
+        Narrowly scoped, and ``False`` on the shipped presets even when
+        stations were refitted; see :attr:`any_camber_was_clamped`.
+        """
         return self.effective_camber_area_m2 != self.geometry.sole_camber_area_m2
+
+    @property
+    def clamped_camber_stations(self) -> tuple[StationCamber, ...]:
+        """Every spanwise station refitted to its own constructible band."""
+        return tuple(station for station in self.camber_stations if station.was_clamped)
+
+    @property
+    def any_camber_was_clamped(self) -> bool:
+        """Whether any camber substitution occurred, aggregate or per station.
+
+        Cannot read ``False`` while :attr:`clamped_camber_stations` holds
+        anything, which is the property that stops a one-boolean caller being
+        told a substituted sole was built as declared (issue #8698).
+        """
+        return self.aggregate_camber_was_clamped or bool(self.clamped_camber_stations)
 
     @property
     def verdict(self) -> ValidityVerdict:
@@ -527,6 +602,43 @@ class WorkbenchModel:
             dynamic_terms_active=bool(swing.dynamic_terms_active),
         )
 
+    def shot_result(
+        self, geometry: WedgeGeometry, sand: SandState, swing: SwingSetup
+    ) -> ShotResult:
+        """Run one shot and return the **record**, before any reduction.
+
+        :meth:`run_shot` reduces the record to designer metrics and throws
+        the poses away. The cross-tier check of issue #8713 needs them
+        back: F1 has no instantaneous answer, so each of its probes is a
+        march to a pose F0 recorded, and a re-derived pose would be a
+        comparison of two different shots.
+
+        Args:
+            geometry: The resolved design vector.
+            sand: The sand state.
+            swing: The delivery.
+
+        Returns:
+            The whole strike.
+
+        Raises:
+            OutOfEnvelopeError: If the solver refuses any step. Unlike
+                :meth:`run_shot` this does not translate the refusal into
+                an outcome, because there is no outcome here to carry it.
+        """
+        build = self.head_build(geometry)
+        return simulate_shot(
+            self.solver(sand, swing),
+            build.elements_body,
+            head_mass_kg=geometry.head_mass_kg,
+            kinematics=entry_kinematics(build, swing),
+            settings=ShotSettings(
+                time_step_s=self._settings.time_step_s,
+                max_time_s=self._settings.max_time_s,
+            ),
+            sole_reference_body_m=build.sole_reference_body_m,
+        )
+
     def run_shot(
         self, geometry: WedgeGeometry, sand: SandState, swing: SwingSetup
     ) -> ShotOutcome:
@@ -544,19 +656,8 @@ class WorkbenchModel:
         solver = self.solver(sand, swing)
         delivered = deliver_wedge(geometry, swing.delivery())
         kinematics = entry_kinematics(build, swing)
-        settings = ShotSettings(
-            time_step_s=self._settings.time_step_s,
-            max_time_s=self._settings.max_time_s,
-        )
         try:
-            result = simulate_shot(
-                solver,
-                build.elements_body,
-                head_mass_kg=geometry.head_mass_kg,
-                kinematics=kinematics,
-                settings=settings,
-                sole_reference_body_m=build.sole_reference_body_m,
-            )
+            result = self.shot_result(geometry, sand, swing)
         except OutOfEnvelopeError as refusal:
             verdict = refusal.verdict
             require(
@@ -608,11 +709,7 @@ class WorkbenchModel:
             "dig-vs-skid",
             missing,
         )
-        sole_load = _try(
-            lambda: self._sole_map(solver, build, result, kinematics),
-            "bounce utilisation",
-            missing,
-        )
+        views = self._views(build, solver, result, kinematics, missing)
         carry = _try(
             lambda: self.carry_estimate(
                 geometry, swing, _sand_delivery(result, _measured_divot(divot), sand)
@@ -640,10 +737,84 @@ class WorkbenchModel:
             loads=loads,
             divot=divot,
             dig_skid=skid,
-            sole_load=sole_load,
+            sole_load=views.sole_load,
+            sole_field=views.field,
+            contact_patch=views.patch,
+            scene=views.scene,
+            traces=views.traces,
             carry_m=None if carry is None else carry.carry_m,
             carry_verdict=None if carry is None else carry.verdict,
             unavailable=tuple(missing),
+        )
+
+    def _views(
+        self,
+        build: HeadBuild,
+        solver: DRFTSolver,
+        result: ShotResult,
+        kinematics: HeadKinematics,
+        missing: list[str],
+    ) -> _ShotViews:
+        """Assemble everything the workbench draws from one completed shot.
+
+        Grouped here rather than inline in :meth:`_reduce` because these five
+        are one story -- the per-element load and everything derived from it,
+        the 3-D scene, and the traces beside it -- and because each is
+        individually optional: a shot too short for an impulse still has a
+        verdict worth reporting.
+
+        Args:
+            build: The lofted head.
+            solver: The solver the shot was run with.
+            result: The shot trace.
+            kinematics: The entry pose, supplying the constant orientation.
+            missing: Reasons collected in place, one per view that could not
+                be built.
+
+        Returns:
+            The views, each ``None`` where it could not be built.
+        """
+        # One replay of the recorded poses feeds all three load views: the
+        # per-element field (#8705), the patch series (#8707) and the binned
+        # map the workbench already reported. Re-deriving the element
+        # response is the expensive half, so it happens once.
+        field = _try(
+            lambda: sole_load_field(solver, build, result, kinematics.orientation),
+            "per-element sole load",
+            missing,
+        )
+        patch = _try(
+            lambda: None if field is None else contact_patch(field),
+            "contact patch",
+            missing,
+        )
+        # The band is a second replay, and a much cheaper one: it judges the
+        # envelope per sample without integrating any force, which is the
+        # half of a solve a verdict does not depend on (#8708).
+        band = _try(
+            lambda: validity_band(solver, build, result, kinematics.orientation),
+            "validity band",
+            missing,
+        )
+        return _ShotViews(
+            field=field,
+            sole_load=_try(
+                lambda: self._sole_map(field), "bounce utilisation", missing
+            ),
+            patch=patch,
+            # The 3-D scene needs no solving at all: the pose is the pose the
+            # march recorded and the divot is accumulated from where the
+            # head's own sole points went (#8706).
+            scene=_try(lambda: shot_scene(build, result), "3-D shot scene", missing),
+            traces=_try(
+                lambda: (
+                    None
+                    if patch is None or band is None
+                    else shot_traces(result, patch, band)
+                ),
+                "scalar traces",
+                missing,
+            ),
         )
 
     def _divot(
@@ -676,17 +847,19 @@ class WorkbenchModel:
             bulk_density_kg_m3=sand.bulk_density_kg_m3,
         )
 
-    def _sole_map(
-        self,
-        solver: DRFTSolver,
-        build: HeadBuild,
-        result: ShotResult,
-        kinematics: HeadKinematics,
-    ) -> SoleLoadMap | None:
-        """Replay the trace and resolve the bounce utilisation."""
-        load = sole_load_trace(solver, build, result, kinematics.orientation)
-        if load is None:
+    def _sole_map(self, field: SoleLoadField | None) -> SoleLoadMap | None:
+        """Bin an already-replayed load field into the utilisation map.
+
+        Args:
+            field: The per-element load field, or ``None`` when the trace was
+                too short to replay.
+
+        Returns:
+            The binned map, or ``None``.
+        """
+        if field is None:
             return None
+        load = field.load_trace()
         return sole_load_map(load, bounce_utilisation(load))
 
     # ------------------------------------------------------------ ball flight
@@ -898,14 +1071,16 @@ class WorkbenchModel:
                 window=None, unavailable_reason="the playability sweep was not run"
             )
         )
+        # Free: the build is cached, and run_shot has already made it.
+        build = self.head_build(geometry)
         return DesignEvaluation(
             design=design,
             geometry=geometry,
             sand=state,
             shot=shot,
             playability=window,
-            # Free: the build is cached, and run_shot has already made it.
-            effective_camber_area_m2=self.head_build(geometry).effective_camber_area_m2,
+            effective_camber_area_m2=build.effective_camber_area_m2,
+            camber_stations=build.camber_stations,
         )
 
     def compare(

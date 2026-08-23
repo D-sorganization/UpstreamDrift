@@ -68,7 +68,9 @@ def test_cross_engine_dashboard_tile_exists() -> None:
     """
     tiles = _load_manifest_tiles()
     ids = [t["id"] for t in tiles]
-    assert "cross_engine" in ids, f"Tile 'cross_engine' not found. Present tiles: {ids}"
+    assert "cross_engine_dashboard" in ids, (
+        f"Tile 'cross_engine_dashboard' not found. Present tiles: {ids}"
+    )
 
 
 def test_cross_engine_dashboard_category_is_simulation() -> None:
@@ -77,8 +79,8 @@ def test_cross_engine_dashboard_category_is_simulation() -> None:
     Fixes #5510.
     """
     tiles = _load_manifest_tiles()
-    tile = next((t for t in tiles if t["id"] == "cross_engine"), None)
-    assert tile is not None, "Tile 'cross_engine' not found in manifest"
+    tile = next((t for t in tiles if t["id"] == "cross_engine_dashboard"), None)
+    assert tile is not None, "Tile 'cross_engine_dashboard' not found in manifest"
     assert tile["category"] == "simulation", (
         f"Expected category 'simulation', got '{tile['category']}'"
     )

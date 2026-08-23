@@ -22,11 +22,34 @@ def reset_mocks() -> None:
 
 @pytest.fixture(autouse=True)
 def patch_has_gemini() -> Generator[None, None, None]:
-    with patch("src.shared.python.ai.adapters.gemini_adapter.HAS_GEMINI", True):
+    """Force the legacy `configure()` + `GenerativeModel` SDK path.
+
+    `sys.modules["google.generativeai"]` above is a bare `MagicMock`, which
+    auto-creates *any* attribute asked of it - including `Client`. The
+    adapter's `from google.generativeai import Client` therefore succeeds
+    under test and `HAS_GEMINI_CLIENT` comes out True, so every test below
+    silently exercised the per-instance Client path while asserting against
+    `configure` / `GenerativeModel` mocks that were never touched.
+
+    The real `google-generativeai` package exposes no `Client`, so the legacy
+    path is what runs in production. Pinning the flags here makes the tests
+    exercise the path they claim to, rather than one the mock invented.
+    `test_modern_client_path_is_preferred_when_available` covers the other
+    branch explicitly.
+    """
+    with (
+        patch("src.shared.python.ai.adapters.gemini_adapter.HAS_GEMINI", True),
+        patch("src.shared.python.ai.adapters.gemini_adapter.HAS_GEMINI_CLIENT", False),
+        patch("src.shared.python.ai.adapters.gemini_adapter._GenaiClient", None),
+    ):
         yield
 
 
 from src.shared.python.ai.adapters.gemini_adapter import GeminiAdapter  # noqa: E402
+from src.shared.python.ai.exceptions import (  # noqa: E402
+    AIConnectionError,
+    AIProviderError,
+)
 from src.shared.python.ai.types import (  # noqa: E402
     ConversationContext,
     Message,
@@ -175,7 +198,13 @@ def test_gemini_adapter_send_message_success() -> None:
 
 
 def test_send_message_error() -> None:
-    """Test send_message error trap."""
+    """A transport failure raises a typed error, never model content.
+
+    Issue #3179: returning `AgentResponse(content=f"Error: {e}")` made a failed
+    request indistinguishable from a model that answered with the word
+    "Error", so callers rendered transport failures into the chat transcript.
+    The adapter now raises from the `AIProviderError` hierarchy instead.
+    """
     sys.modules["google.generativeai"].configure.reset_mock()
     adapter = GeminiAdapter("sk")
 
@@ -185,9 +214,14 @@ def test_send_message_error() -> None:
     mock_model_inst = sys.modules["google.generativeai"].GenerativeModel.return_value
     mock_model_inst.start_chat.return_value = mock_chat
 
-    resp = adapter.send_message("Greetings", ConversationContext(), [])
+    with pytest.raises(AIConnectionError) as excinfo:
+        adapter.send_message("Greetings", ConversationContext(), [])
 
-    assert "Error: Connection refused" in resp.content
+    # The raised error carries the provider-level classification; the original
+    # transport exception is preserved as its cause rather than being
+    # flattened into a string.
+    assert excinfo.value.provider == "gemini"
+    assert excinfo.value.__cause__ is mock_chat.send_message.side_effect
 
 
 def test_gemini_adapter_stream_response() -> None:
@@ -209,13 +243,23 @@ def test_gemini_adapter_stream_response() -> None:
 
     chunks = list(adapter.stream_response("test", ConversationContext(), []))
 
-    assert len(chunks) == 2
+    # Two content chunks plus the terminator. Issue #2763 makes "every stream
+    # ends with exactly one is_final=True chunk" a contract, so consumers can
+    # detect completion without inspecting the generator.
+    assert len(chunks) == 3
     assert chunks[0].content == "Hel"
     assert chunks[1].content == "lo"
+    assert [c.is_final for c in chunks] == [False, False, True]
+    assert chunks[-1].content == ""
 
 
 def test_stream_error() -> None:
-    """Test streaming chunk iterator handles generic exceptions safely."""
+    """A streaming failure raises a typed error rather than yielding it.
+
+    Same contract as `test_send_message_error` (issue #3179): the consumer of
+    the generator observes an `AIProviderError`, consistent with the
+    synchronous path, instead of a chunk whose content is an error string.
+    """
     sys.modules["google.generativeai"].configure.reset_mock()
     adapter = GeminiAdapter("sk")
 
@@ -225,7 +269,35 @@ def test_stream_error() -> None:
     mock_model_inst = sys.modules["google.generativeai"].GenerativeModel.return_value
     mock_model_inst.start_chat.return_value = mock_chat
 
-    chunks = list(adapter.stream_response("test", ConversationContext(), []))
+    with pytest.raises(AIProviderError) as excinfo:
+        list(adapter.stream_response("test", ConversationContext(), []))
 
-    assert len(chunks) == 1
-    assert "Broken pipe" in chunks[0].content
+    assert "Broken pipe" in str(excinfo.value)
+
+
+@pytest.mark.unit
+def test_modern_client_path_is_preferred_when_available() -> None:
+    """SDK 0.5+ builds the model through a per-instance `Client`.
+
+    The legacy path calls the module-global `genai.configure(api_key=...)`,
+    so two adapters holding different keys clobber each other (issue #2756).
+    When the SDK offers a `Client`, the adapter must use it and must not touch
+    the global configure at all. The autouse fixture pins the legacy branch,
+    so this is the one test that opts back into the modern one.
+    """
+    fake_client_cls = MagicMock()
+    with (
+        patch("src.shared.python.ai.adapters.gemini_adapter.HAS_GEMINI_CLIENT", True),
+        patch(
+            "src.shared.python.ai.adapters.gemini_adapter._GenaiClient",
+            fake_client_cls,
+        ),
+    ):
+        sys.modules["google.generativeai"].configure.reset_mock()
+        adapter = GeminiAdapter("sk-modern", "gemini-test-model")
+
+    fake_client_cls.assert_called_once_with(api_key="sk-modern")
+    fake_client_cls.return_value.models.get.assert_called_once_with("gemini-test-model")
+    assert adapter._model is fake_client_cls.return_value.models.get.return_value
+    # The global configure footgun must stay untouched on this path.
+    sys.modules["google.generativeai"].configure.assert_not_called()

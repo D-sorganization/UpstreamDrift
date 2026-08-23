@@ -18,16 +18,49 @@ Hatch configuration (pyproject.toml)::
     # force_ui_build = true  # uncomment to rebuild even when dist/ exists
 """
 
+import importlib.util
 import logging
 import re
 import subprocess
 import sys
+from collections.abc import Callable
 from os import environ
 from pathlib import Path
 
 from hatchling.builders.hooks.plugin.interface import BuildHookInterface
 
 logger = logging.getLogger(__name__)
+
+
+def _load_tools_source_digest() -> Callable[[Path], str]:
+    """Load the adjacent helper without assuming the source root is importable.
+
+    PEP 517 loads custom hooks by file path in an isolated backend process. The
+    repository root is therefore not guaranteed to be on ``sys.path`` even
+    though the helper is present in both the checkout and source distribution.
+    """
+
+    helper = (
+        Path(__file__).resolve().parent
+        / "scripts"
+        / "packaging"
+        / "pinned_tools_provenance.py"
+    )
+    spec = importlib.util.spec_from_file_location(
+        "_upstreamdrift_pinned_tools_provenance",
+        helper,
+    )
+    if spec is None or spec.loader is None:
+        raise RuntimeError("Pinned Tools provenance helper cannot be loaded")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    digest = getattr(module, "compute_tools_source_sha256", None)
+    if not callable(digest):
+        raise RuntimeError("Pinned Tools provenance helper is invalid")
+    return digest
+
+
+compute_tools_source_sha256 = _load_tools_source_digest()
 
 _TOOLS_DIRECTORY_DESTINATIONS = {
     "shared": "shared",
@@ -184,6 +217,8 @@ class UIBuildHook(BuildHookInterface):
             TypeError,
             AttributeError,
         ):
+            if self._validate_container_tools_provenance():
+                return True
             message = "Pinned Tools checkout git metadata unavailable"
             if version != "editable" or _env_flag("CI"):
                 raise RuntimeError(message) from None
@@ -209,6 +244,34 @@ class UIBuildHook(BuildHookInterface):
         )
         if dirty_result.stdout.strip():
             raise RuntimeError("Pinned Tools package sources are not clean")
+        return True
+
+    def _validate_container_tools_provenance(self) -> bool:
+        """Validate a content-bound pin when Docker excludes Git metadata.
+
+        Returns ``False`` when no container attestation was supplied. If either
+        attestation field is present, both must be valid and the declared
+        source digest must match the exact package roots copied into the build.
+        """
+
+        declared_pin = environ.get("UPSTREAMDRIFT_TOOLS_GITLINK_SHA")
+        declared_digest = environ.get("UPSTREAMDRIFT_TOOLS_SOURCE_SHA256")
+        if declared_pin is None and declared_digest is None:
+            return False
+        if declared_pin is None or declared_digest is None:
+            raise RuntimeError("Pinned Tools container provenance is incomplete")
+        try:
+            self._validated_git_sha(declared_pin)
+            expected_digest = self._validated_git_sha(declared_digest)
+            observed_digest = compute_tools_source_sha256(
+                self._canonical_tools_src_root.parent
+            )
+        except (OSError, TypeError, ValueError) as error:
+            raise RuntimeError(
+                "Pinned Tools container provenance is invalid"
+            ) from error
+        if observed_digest != expected_digest:
+            raise RuntimeError("Pinned Tools container source digest does not match")
         return True
 
     def _extension_owners(self) -> dict[Path, str]:

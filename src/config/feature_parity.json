@@ -4,12 +4,12 @@
   "features": {
     "launcher.tile_grid": {
       "title": "Launcher tile grid from shared manifest",
-      "pyqt": "src/launchers/unified_launcher.py",
+      "pyqt": "src/launchers/embedded_tool_bootstrap.py",
       "api": "src/api/routes/launcher.py",
       "web": "ui/src/pages/Dashboard.tsx",
       "status": "parity",
       "tiles": [],
-      "notes": "Both shells render tiles from src/config/launcher_manifest.json via the shared loader."
+      "notes": "src/config/models.yaml is the canonical registry for both shells: the PyQt launcher reads it via ModelRegistry, and the web/API surface reads the same registry through LauncherManifest.load(), which overlays web metadata from launcher_manifest.json. tests/config/test_launcher_registry_parity.py enforces the ID parity."
     },
     "engines.load_and_simulate": {
       "title": "Engine load/probe + basic simulation loop",
@@ -150,7 +150,7 @@
       "api": "src/api/routes/cross_engine.py",
       "web": "ui/src/pages/CrossEngineDashboard.tsx",
       "status": "parity",
-      "tiles": ["cross_engine", "perturbation_analysis"]
+      "tiles": ["cross_engine_dashboard", "perturbation_analysis"]
     },
     "simulation.shot_tracer": {
       "title": "Shot Tracer / ball-flight visualization",
@@ -200,7 +200,7 @@
     },
     "launcher.tile_web_reachability": {
       "title": "Manifest tile web-reachability contract (route / native-window / unavailable)",
-      "pyqt": "src/launchers/unified_launcher.py",
+      "pyqt": "src/launchers/embedded_tool_bootstrap.py",
       "api": null,
       "web": "ui/src/pages/Dashboard.tsx",
       "status": "gap",
@@ -266,14 +266,14 @@
       "notes": "The PyQt6 workbench and versioned API share one flexible-analysis contract. React/Vite parity in the authoritative Tools Rate of Closure app is tracked cross-repository in Tools #4205 under epic #8364."
     },
     "tools.bunkershot3d_workbench": {
-      "title": "BunkerShot3D designer workbench (W2 sole parameters, W3 sand condition, F0 dynamic-RFT shot, W7 metrics, playability window, bounce utilisation, A/B comparison, validity verdict)",
+      "title": "BunkerShot3D designer workbench (W2 sole parameters, W3 sand condition, F0 dynamic-RFT shot, W7 metrics, playability window, bounce utilisation, animated sole load field, 3-D shot animation through the ADR-0027 viewport, linked scalar traces with a validity band, F1 sand-field cross-sections, A/B comparison, validity verdict)",
       "pyqt": "src/tools/bunker_shot_gui/gui.py",
       "api": null,
       "web": null,
       "status": "gap",
       "issue": 8607,
       "tiles": ["bunkershot3d"],
-      "notes": "Moved out of engines.load_and_simulate by #8618: the tile is a club-design workbench, not an engine load/simulate surface, and the two launcher tiles (bunkershot3d -> a notebook script, bunker_shot -> the GUI) were reconciled into this one entry point. The computation lives in src/tools/bunker_shot_gui/model.py, which imports no GUI toolkit and is the layer a React port would consume; no API route or web page exists yet."
+      "notes": "Moved out of engines.load_and_simulate by #8618: the tile is a club-design workbench, not an engine load/simulate surface, and the two launcher tiles (bunkershot3d -> a notebook script, bunker_shot -> the GUI) were reconciled into this one entry point. The computation lives in src/tools/bunker_shot_gui/model.py, which imports no GUI toolkit and is the layer a React port would consume; no API route or web page exists yet. The visualization suite (epic #8699) keeps that split: shot3d.py and traces.py compute, render3d.py and render_traces.py draw headlessly through matplotlib, and viewport_widgets.py only wires them to a canvas. A React port would consume shot3d.viewport_payload, which is the backend-neutral ADR-0027 ViewportOverlayPayload and carries the envelope status and fidelity tier in its metadata so any renderer can stamp its own frames. The F1 sand cut (#8710, #8711) keeps the same split and adds one constraint a port must honour: the field carries its fidelity tier and validity status as data covered by a SHA-256 over the provenance and the arrays together, so any client that renders a field must read the standing out of the file rather than out of its filename, and must refuse a field whose digest does not match."
     },
     "analysis.analysis_tools_api": {
       "title": "Analysis Tools REST endpoints (swing metrics, biomechanics)",
@@ -332,7 +332,7 @@
       "status": "exempt",
       "reason": "Requires a local MATLAB installation; desktop-only candidate pending #7460.",
       "pending_decision": true,
-      "tiles": ["matlab_unified"]
+      "tiles": ["matlab_suite"]
     },
     "tools.pose_editing": {
       "title": "Pose Studio interactive pose editing",

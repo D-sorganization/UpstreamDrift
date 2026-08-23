@@ -233,6 +233,26 @@ def main() -> None:
             if "specific gaps" in text or "spatial body" in text:
                 return ("PD-CLAIM-132", "PD-CLAIM-214")
             return ("PD-CLAIM-208", "PD-CLAIM-214")
+        if name == "_ch08b_momentum_transfer_questions.qmd":
+            if "typed experimental program" in text:
+                return ("PD-CLAIM-253", "PD-CLAIM-285")
+            if "next articulated atlas crosses" in text:
+                return ("PD-CLAIM-286", "PD-CLAIM-287", "PD-CLAIM-288")
+            if "following articulated shaft atlas" in text:
+                return ("PD-CLAIM-290", "PD-CLAIM-291", "PD-CLAIM-292")
+            raise ValueError(f"Unhandled momentum-question candidate: {text[:120]}")
+        if name == "_ch06c_spatial_cross_formulation.qmd":
+            if "right-censored synthetic result" in text:
+                return (
+                    "PD-CLAIM-262",
+                    "PD-CLAIM-264",
+                    "PD-CLAIM-270",
+                    "PD-CLAIM-282",
+                    "PD-CLAIM-285",
+                )
+            if "loading-only damper" in text:
+                return ("PD-CLAIM-283",)
+            raise ValueError(f"Unhandled spatial-cross candidate: {text[:120]}")
         if name == "_ch09_conclusions.qmd":
             if "early wrist drive" in text:
                 return ("PD-CLAIM-208", "PD-CLAIM-211", "PD-CLAIM-212")
@@ -302,6 +322,24 @@ def main() -> None:
         )
 
     registry["candidate_reviews"].extend(reviews)
+    by_id = {
+        candidate["candidate_id"]: candidate for candidate in inventory["candidates"]
+    }
+    regenerated_claim_ids = {claim["claim_id"] for claim in new_claims}
+    for claim in registry["claims"]:
+        if claim["claim_id"] not in regenerated_claim_ids:
+            continue
+        candidate_ids = [
+            review["candidate_id"]
+            for review in registry["candidate_reviews"]
+            if claim["claim_id"] in review.get("claim_ids", [])
+            and review["candidate_id"] in by_id
+        ]
+        claim["candidate_ids"] = list(dict.fromkeys(candidate_ids))
+        claim["source_locations"] = [
+            f"{by_id[candidate_id]['source_path']}:{by_id[candidate_id]['line_start']}"
+            for candidate_id in claim["candidate_ids"]
+        ]
     for claim in registry["claims"]:
         extra = [
             r["candidate_id"] for r in reviews if claim["claim_id"] in r["claim_ids"]
@@ -310,10 +348,6 @@ def main() -> None:
             claim["candidate_ids"] = list(
                 dict.fromkeys([*claim.get("candidate_ids", []), *extra])
             )
-            by_id = {
-                candidate["candidate_id"]: candidate
-                for candidate in inventory["candidates"]
-            }
             claim["source_locations"] = list(
                 dict.fromkeys(
                     [
@@ -354,9 +388,47 @@ def main() -> None:
     for claim in registry["claims"]:
         if claim["claim_id"] in evidence_by_claim:
             claim["evidence_artifacts"] = evidence_by_claim[claim["claim_id"]]
+    claims_by_id = {claim["claim_id"]: claim for claim in registry["claims"]}
+    reviews_by_id = {
+        review["candidate_id"]: review for review in registry["candidate_reviews"]
+    }
+    for review in registry["candidate_reviews"]:
+        if review["disposition"] != "material_claims_mapped":
+            review["claim_ids"] = []
+    for claim in registry["claims"]:
+        retained_ids = [
+            candidate_id
+            for candidate_id in claim.get("candidate_ids", [])
+            if reviews_by_id[candidate_id]["disposition"] == "material_claims_mapped"
+        ]
+        claim["candidate_ids"] = list(dict.fromkeys(retained_ids))
+        claim["source_locations"] = [
+            f"{by_id[candidate_id]['source_path']}:{by_id[candidate_id]['line_start']}"
+            for candidate_id in claim["candidate_ids"]
+        ]
+    for review in registry["candidate_reviews"]:
+        candidate_id = review["candidate_id"]
+        if candidate_id not in by_id:
+            continue
+        location = (
+            f"{by_id[candidate_id]['source_path']}:{by_id[candidate_id]['line_start']}"
+        )
+        for claim_id in review.get("claim_ids", []):
+            claim = claims_by_id[claim_id]
+            if candidate_id not in claim["candidate_ids"]:
+                claim["candidate_ids"].append(candidate_id)
+                claim["source_locations"].append(location)
+    for claim in registry["claims"]:
+        for candidate_id in claim.get("candidate_ids", []):
+            review = reviews_by_id[candidate_id]
+            review["claim_ids"] = list(
+                dict.fromkeys([*review.get("claim_ids", []), claim["claim_id"]])
+            )
+    for review in registry["candidate_reviews"]:
+        review["claim_ids"] = list(dict.fromkeys(review.get("claim_ids", [])))
     registry["paper"]["source_digest"] = inventory["source_digest"]
     registry["audit_scope"]["current_scope"] = (
-        "The complete 925-candidate paper inventory is adjudicated. Repeated methods, "
+        f"The complete {inventory['candidate_count']}-candidate paper inventory is adjudicated. Repeated methods, "
         "summary, limitation, provenance, and model-tier passages inherit the primary "
         "claim boundaries; editorial anchors are explicitly classified as nonclaims."
     )

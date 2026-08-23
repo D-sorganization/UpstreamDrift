@@ -657,13 +657,17 @@ fn read_event_times(data: &[u8], dims: &[usize], endian: Endian) -> Vec<f32> {
 }
 
 fn read_f32_values(data: &[u8], endian: Endian) -> Vec<f32> {
-    data.chunks_exact(4)
+    data.as_chunks::<4>()
+        .0
+        .iter()
         .map(|chunk| endian.read_f32(chunk))
         .collect()
 }
 
 fn read_i16_values(data: &[u8], endian: Endian) -> Vec<i16> {
-    data.chunks_exact(2)
+    data.as_chunks::<2>()
+        .0
+        .iter()
         .map(|chunk| endian.read_i16(chunk))
         .collect()
 }

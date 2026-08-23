@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -10,6 +11,7 @@ import pytest
 from scripts.research.proximal_distal_energy.articulated_inertia_cross_engine import (
     ArticulatedInertiaConfig,
     finite_difference_kinematics,
+    require_robotics_pinocchio,
 )
 from scripts.research.proximal_distal_energy.register_articulated_inertia_claims import (
     _reconcile,
@@ -19,6 +21,9 @@ ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = ROOT / "docs/research/proximal_distal_energy_transfer/data"
 
 
+pytestmark = pytest.mark.scientific
+
+
 def test_configuration_fails_closed() -> None:
     with pytest.raises(ValueError, match="mass_matrix_relative_tolerance"):
         ArticulatedInertiaConfig(mass_matrix_relative_tolerance=0.0)
@@ -26,6 +31,18 @@ def test_configuration_fails_closed() -> None:
         ArticulatedInertiaConfig(inverse_dynamics_relative_tolerance=np.inf)
     with pytest.raises(ValueError, match="minimum_eigenvalue_tolerance"):
         ArticulatedInertiaConfig(minimum_eigenvalue_tolerance=-1.0)
+
+
+def test_robotics_pinocchio_contract_rejects_name_collision_and_old_version() -> None:
+    impostor = SimpleNamespace(__version__="0.1")
+    with pytest.raises(RuntimeError, match="robotics Pinocchio.*2.6"):
+        require_robotics_pinocchio(impostor)
+
+
+def test_robotics_pinocchio_contract_requires_native_dynamics_api() -> None:
+    incomplete = SimpleNamespace(__version__="3.8.0")
+    with pytest.raises(RuntimeError, match="missing required robotics API"):
+        require_robotics_pinocchio(incomplete)
 
 
 def test_finite_difference_kinematics_recovers_quadratic_interior() -> None:
@@ -82,6 +99,30 @@ def test_committed_articulated_inertia_arrays_are_finite() -> None:
         for key in arrays.files:
             if arrays[key].dtype.kind in "fc":
                 assert np.all(np.isfinite(arrays[key])), key
+
+
+@pytest.mark.parametrize(
+    "artifact",
+    (
+        "articulated_contact_projection.json",
+        "articulated_distributed_grip_atlas.json",
+        "articulated_forward_contact.json",
+        "articulated_ground_atlas.json",
+        "articulated_inertia_cross_engine.json",
+        "articulated_shaft_atlas.json",
+        "articulated_slack_atlas.json",
+    ),
+)
+def test_committed_cross_engine_artifacts_identify_robotics_pinocchio(
+    artifact: str,
+) -> None:
+    record = json.loads((DATA_DIR / artifact).read_text(encoding="utf-8"))
+    versions = record.get("engines", record.get("design", {}).get("engine_versions"))
+    pinocchio = versions["pinocchio"]
+    version = pinocchio["version"] if isinstance(pinocchio, dict) else pinocchio
+    major, minor, *_ = (int(part) for part in version.split("."))
+
+    assert (major, minor) >= (2, 6), artifact
 
 
 def test_claim_registration_prunes_superseded_candidate_reviews() -> None:

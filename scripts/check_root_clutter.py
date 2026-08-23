@@ -12,6 +12,9 @@ ALLOWLIST = frozenset(
         "LICENSE",
         "CHANGELOG.md",
         "CONTRIBUTING.md",
+        # Fleet agent-handoff policy (Repository_Management#1390) puts the
+        # current-state handoff document at the repo root.
+        "AGENT_HANDOFF.md",
         "CLAUDE.md",
         "SECURITY.md",
         "SPEC.md",

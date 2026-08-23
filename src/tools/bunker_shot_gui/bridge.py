@@ -36,13 +36,14 @@ from dataclasses import dataclass
 from functools import lru_cache
 
 import numpy as np
-from numpy.typing import NDArray
+from numpy.typing import ArrayLike, NDArray
 from scipy.spatial.transform import Rotation
 
 from bunkershot3d.geometry import (
     CamberFit,
     LoftedWedge,
     MassProperties,
+    StationCamber,
     WedgeGeometry,
     compute_mass_properties,
     loft_wedge,
@@ -61,20 +62,34 @@ from bunkershot3d.solvers import (
     ShotResult,
     SurfaceElements,
 )
+from bunkershot3d.solvers.mpm.solver import PlaneStrainMPMSolver
+from bunkershot3d.solvers.mpm.verification import cross_check_against_f0
 from src.shared.python.core.contracts import require
 
+from .agreement import DECLARED_AGREEMENT_BAND
+from .crosstier import CrossTierComparison, CrossTierProbe
 from .design import SwingSetup
+from .field import SoleLoadField
+from .traces import ValidityBand
 
 __all__ = [
     "MAP_BINS",
     "HeadBuild",
     "SoleLoadMap",
+    "CrossTierInputs",
+    "CrossTierSettings",
+    "ProbeSite",
     "build_head",
+    "compare_tiers",
     "delivery_rotation",
     "entry_kinematics",
+    "free_surface_height_m",
+    "probe_frames",
+    "sole_load_field",
     "sole_load_map",
     "sole_load_trace",
     "strike_trace",
+    "validity_band",
 ]
 
 MAP_BINS = 12
@@ -82,6 +97,9 @@ MAP_BINS = 12
 
 _SOLE_NORMAL_CEILING = 0.0
 """An element belongs to the sole when its outward normal points downward."""
+
+_SURFACE_TOLERANCE_M = 1e-9
+"""Slack on recovering one fixed free surface from a whole trace."""
 
 
 @dataclass(frozen=True)
@@ -118,9 +136,24 @@ class HeadBuild:
         return self.loft.effective_camber_area_m2
 
     @property
-    def camber_was_clamped(self) -> bool:
-        """Whether the declared camber area had to be substituted."""
-        return self.loft.camber_was_clamped
+    def aggregate_camber_was_clamped(self) -> bool:
+        """Whether the *declared* camber area itself had to be substituted.
+
+        Narrowly scoped, and so ``False`` on the shipped presets even when
+        stations were refitted; see
+        :attr:`~bunkershot3d.geometry.LoftedWedge.aggregate_camber_was_clamped`.
+        """
+        return self.loft.aggregate_camber_was_clamped
+
+    @property
+    def any_camber_was_clamped(self) -> bool:
+        """Whether any camber substitution occurred, aggregate or per station."""
+        return self.loft.any_camber_was_clamped
+
+    @property
+    def camber_stations(self) -> tuple[StationCamber, ...]:
+        """The per-station camber account, heel to toe."""
+        return self.loft.stations
 
     @property
     def head_model(self) -> HeadModel:
@@ -290,18 +323,25 @@ def strike_trace(result: ShotResult) -> StrikeTrace | None:
     return StrikeTrace.from_shot(result)
 
 
-def sole_load_trace(
+def sole_load_field(
     solver: DRFTSolver,
     build: HeadBuild,
     result: ShotResult,
     orientation: NDArray[np.float64],
-) -> SoleLoadTrace | None:
-    """Replay the trace to recover the compressive load on each sole element.
+) -> SoleLoadField | None:
+    """Replay the trace to recover each sole element's load, term by term.
 
     ``simulate_shot`` records the resultant, not the distribution, so the
     per-element response is re-derived from the recorded poses. The head does
     not rotate during the shot, so replaying the recorded position at the
     recorded velocity reproduces the states the march actually solved.
+
+    The two 3D-RFT tractions are projected **separately** and kept signed
+    (issue #8705). The clamp that makes the load compressive is applied once,
+    to their sum, in :meth:`~.field.SoleLoadField.component_force_N`: sand
+    cannot pull on a sole, but one term can point outward on a steeply raked
+    element while the resultant is still compressive, so clamping the terms
+    individually would invent load the solver never produced.
 
     Args:
         solver: The solver the shot was run with.
@@ -310,7 +350,7 @@ def sole_load_trace(
         orientation: The constant body-to-world rotation.
 
     Returns:
-        The per-element sole loading, or ``None`` when the trace is too short
+        The per-element load field, or ``None`` when the trace is too short
         for an impulse.
     """
     if result.n_steps < 2:
@@ -319,7 +359,9 @@ def sole_load_trace(
     sole_index = np.flatnonzero(build.sole_mask)
     slot = np.full(build.elements_body.n_elements, -1, dtype=np.int64)
     slot[sole_index] = np.arange(sole_index.size)
-    loads = np.zeros((result.n_steps, sole_index.size), dtype=np.float64)
+    shape = (result.n_steps, sole_index.size)
+    depth_load = np.zeros(shape, dtype=np.float64)
+    inertial_load = np.zeros(shape, dtype=np.float64)
     for step in range(result.n_steps):
         position = result.positions_m[step]
         world = oriented.translated(position)
@@ -334,23 +376,146 @@ def sole_load_trace(
         if not keep.any():
             continue
         active = response.index[keep]
-        traction = (
-            response.depth_traction_pa[keep] + response.inertial_traction_pa[keep]
+        normals = world.normals[active]
+        areas = world.areas_m2[active]
+        # The inward projection of each traction: positive is compression.
+        depth_load[step, slot[active]] = (
+            -np.einsum("ij,ij->i", response.depth_traction_pa[keep], normals) * areas
         )
-        # Compression only: the projection onto the inward normal. Sand cannot
-        # pull on a sole, and the depth term's tangential part can point
-        # outward on a steeply raked element without meaning tension.
-        normal_load = (
-            np.maximum(-np.einsum("ij,ij->i", traction, world.normals[active]), 0.0)
-            * world.areas_m2[active]
+        inertial_load[step, slot[active]] = (
+            -np.einsum("ij,ij->i", response.inertial_traction_pa[keep], normals) * areas
         )
-        loads[step, slot[active]] = normal_load
-    return SoleLoadTrace(
+    return SoleLoadField(
         time_s=result.times_s,
         element_centroid_body_m=build.elements_body.centroids_m[sole_index],
         element_area_m2=build.elements_body.areas_m2[sole_index],
-        element_normal_force_N=loads,
+        depth_normal_force_N=depth_load,
+        inertial_normal_force_N=inertial_load,
+        verdict=result.verdict,
+        fidelity_tier=result.fidelity_tier,
     )
+
+
+def free_surface_height_m(result: ShotResult) -> float:
+    """Recover the free surface the solver marched this shot against.
+
+    ``sole_depth = free_surface - z(sole reference)`` by definition, so the
+    surface is fixed by the trace and does not have to be carried alongside
+    it. Recovering it is what stops a drawn surface and the solver's own
+    depths drifting apart -- and it means a caller that only has a
+    ``ShotResult`` still knows where the sand was.
+
+    Args:
+        result: The shot trace.
+
+    Returns:
+        World ``z`` of the undisturbed free surface [m].
+
+    Raises:
+        ValueError: If the trace is empty, or the recovered height is not
+            constant. The march runs against one fixed surface, so a spread
+            means the recorded poses and the recorded depths describe
+            different shots, and a surface drawn from their average would be
+            wrong everywhere.
+    """
+    if result.n_steps == 0:
+        raise ValueError("an empty trace fixes no free surface")
+    reference_z = (
+        np.einsum("tij,j->ti", result.orientations, result.sole_reference_body_m)
+        + result.positions_m
+    )[:, 2]
+    heights = np.asarray(result.sole_depths_m, dtype=np.float64) + reference_z
+    spread = float(heights.max() - heights.min())
+    if spread > _SURFACE_TOLERANCE_M:
+        raise ValueError(
+            "the free surface recovered from the trace is not constant "
+            f"(spread {spread:.3g} m): the recorded poses and the recorded sole "
+            "depths do not describe the same shot"
+        )
+    return float(heights.mean())
+
+
+def validity_band(
+    solver: DRFTSolver,
+    build: HeadBuild,
+    result: ShotResult,
+    orientation: NDArray[np.float64],
+) -> ValidityBand | None:
+    """Recover the envelope verdict at every sample of a shot (issue #8708).
+
+    ``simulate_shot`` evaluates the envelope at every step and then keeps
+    only ``worst_of`` those verdicts, so the per-sample statuses exist inside
+    the solver and are gone before the workbench sees them. A single badge is
+    what remains, and a badge cannot say that a shot was inside the stated
+    limits during the free-flight lead-in and outside them from the moment
+    the sole engaged -- which is the transition that matters, because that is
+    when the numbers stop meaning what they appear to mean.
+
+    They are recovered by asking the same solver the same question, through
+    its public :meth:`~bunkershot3d.solvers.drft.DRFTSolver.envelope`, which
+    judges a state without integrating any force. That is deliberately not a
+    second ``solve``: the polynomial is the expensive half and none of it
+    changes a verdict.
+
+    The one input ``envelope`` does not take is the share of active area
+    whose orientation had to be clamped into the fitted domain. That quantity
+    attaches :attr:`~bunkershot3d.solvers.Caveat.UPWARD_FACING_LEADING_EDGE`
+    and never moves a status, so the reconstructed statuses are the statuses
+    the march recorded -- pinned in ``test_shot_traces`` against
+    ``ShotResult.verdict`` rather than left as a claim here.
+
+    Args:
+        solver: The solver the shot was run with.
+        build: The lofted head.
+        result: The shot trace.
+        orientation: The constant body-to-world rotation, as for
+            :func:`sole_load_field`.
+
+    Returns:
+        The band, or ``None`` when the trace is too short to be a band.
+    """
+    if result.n_steps < 2:
+        return None
+    oriented = build.elements_body.transformed(rotation=orientation)
+    surface_m = free_surface_height_m(result)
+    statuses = []
+    for step in range(result.n_steps):
+        position = result.positions_m[step]
+        state = IntrusionState(
+            oriented.translated(position),
+            result.velocities_m_s[step],
+            reference_point_m=position,
+            free_surface_height_m=surface_m,
+        )
+        statuses.append(solver.envelope(state).status)
+    return ValidityBand(time_s=result.times_s, statuses=tuple(statuses))
+
+
+def sole_load_trace(
+    solver: DRFTSolver,
+    build: HeadBuild,
+    result: ShotResult,
+    orientation: NDArray[np.float64],
+) -> SoleLoadTrace | None:
+    """Return the compressive per-element sole load the W7 metrics consume.
+
+    A thin reduction of :func:`sole_load_field`, kept so a caller that only
+    wants the bounce-utilisation input does not have to know the field exists.
+    The number is unchanged by the term split: the clamped sum of the two
+    tractions is what this function has always returned.
+
+    Args:
+        solver: The solver the shot was run with.
+        build: The lofted head.
+        result: The shot trace.
+        orientation: The constant body-to-world rotation.
+
+    Returns:
+        The per-element sole loading, or ``None`` when the trace is too short
+        for an impulse.
+    """
+    field = sole_load_field(solver, build, result, orientation)
+    return None if field is None else field.load_trace()
 
 
 def sole_load_map(load: SoleLoadTrace, utilisation: BounceUtilisation) -> SoleLoadMap:
@@ -389,3 +554,316 @@ def _bin_edges(stations: NDArray[np.float64], n_bins: int) -> NDArray[np.float64
     if high <= low:
         high = low + 1.0
     return np.linspace(low, high, n_bins + 1, dtype=np.float64)
+
+
+def probe_frames(result: ShotResult, n_probes: int) -> tuple[int, ...]:
+    """Choose which samples of an F0 record to hand to F1.
+
+    Only **engaged** samples are candidates. A probe taken during the
+    free-flight lead-in would hand both tiers a query with no contact, and
+    two zeroes are not an agreement -- they are a wasted march, and F1's
+    march is the expensive half of this comparison by three orders of
+    magnitude.
+
+    The sample at which F0's own force peaked is always included, because
+    that is the moment the shot-level agreement is quoted at and the moment
+    a designer looks for.
+
+    Args:
+        result: The F0 record.
+        n_probes: How many samples to probe. Clamped to the number of
+            engaged samples available.
+
+    Returns:
+        Sample indices, ascending and unique.
+
+    Raises:
+        ValueError: If ``n_probes`` is not positive, or if the record has
+            no engaged sample at all -- a shot that never touched the sand
+            has nothing to cross-check.
+    """
+    if int(n_probes) < 1:
+        raise ValueError(f"n_probes must be positive, got {n_probes!r}")
+    engaged = np.flatnonzero(np.asarray(result.active_areas_m2) > 0.0)
+    if engaged.size == 0:
+        raise ValueError(
+            "this record has no engaged sample, so there is nothing for the "
+            "field tier to be compared against; the head never reached the sand"
+        )
+    wanted = min(int(n_probes), int(engaged.size))
+    chosen = engaged[np.linspace(0, engaged.size - 1, wanted).round().astype(int)]
+    peak = int(np.argmax(np.linalg.norm(result.forces_n, axis=1)))
+    if peak in set(engaged.tolist()):
+        chosen = np.append(chosen, peak)
+    return tuple(int(frame) for frame in np.unique(chosen))
+
+
+def _state_at(
+    build: HeadBuild,
+    result: ShotResult,
+    kinematics: HeadKinematics,
+    frame: int,
+    *,
+    surface_m: float,
+    speed_m_s: float | None = None,
+) -> IntrusionState:
+    """Rebuild the query ``simulate_shot`` solved at one sample.
+
+    The head does not rotate during the shot, so the recorded position and
+    velocity reproduce the state the march actually solved -- the same
+    replay :func:`sole_load_field` and :func:`validity_band` already use, so
+    all three views describe one shot rather than three re-derivations of
+    it.
+
+    Args:
+        build: The lofted head.
+        result: The F0 record.
+        kinematics: The entry pose, supplying the constant orientation and
+            the angular velocity the march carried.
+        frame: Which sample.
+        surface_m: The free surface the march ran against.
+        speed_m_s: Rescale the recorded velocity to this speed, keeping its
+            direction. Used by the declared speed sweep; ``None`` leaves
+            the recorded velocity untouched.
+
+    Returns:
+        The query, given to both tiers unchanged.
+
+    Raises:
+        ValueError: If a rescale is asked for at a sample with no velocity
+            to take a direction from.
+    """
+    oriented = build.elements_body.transformed(rotation=kinematics.orientation)
+    position = result.positions_m[frame]
+    velocity = np.asarray(result.velocities_m_s[frame], dtype=np.float64)
+    if speed_m_s is not None:
+        recorded = float(np.linalg.norm(velocity))
+        if recorded <= 0.0:
+            raise ValueError(
+                f"sample {frame} has no velocity, so there is no direction to "
+                "rescale for the declared speed sweep"
+            )
+        velocity = velocity * (float(speed_m_s) / recorded)
+    return IntrusionState(
+        oriented.translated(position),
+        velocity,
+        angular_velocity_rad_s=kinematics.angular_velocity_rad_s,
+        reference_point_m=position,
+        free_surface_height_m=surface_m,
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class ProbeSite:
+    """One sample of an F0 record, and the assumptions a probe there rests on.
+
+    Bundled because the alternative is nine positional facts travelling
+    together to two functions: the sample they came from, the two F0
+    quantities read off it, and the two declared constants both tiers'
+    divot masses are formed at. A caller that can pass those in the wrong
+    order can silently draw one sample's F1 answer at another sample's
+    moment.
+
+    Attributes:
+        frame: Index into the F0 record.
+        time_s: The moment [s].
+        f0_divot_section_area_m2: F0's swept-envelope section there [m^2].
+        f0_sole_depth_m: F0's sole depth there [m].
+        declared_width_m: The out-of-plane width **both** divot masses are
+            formed at.
+        bulk_density_kg_m3: The bed's bulk density, for the same masses.
+    """
+
+    frame: int
+    time_s: float
+    f0_divot_section_area_m2: float
+    f0_sole_depth_m: float
+    declared_width_m: float
+    bulk_density_kg_m3: float
+
+
+@dataclass(frozen=True)
+class CrossTierInputs:
+    """One F0 record and everything needed to put F1 beside it.
+
+    Attributes:
+        build: The lofted head.
+        result: The F0 record.
+        kinematics: The entry pose, for the constant orientation.
+        f0_divot_section_area_m2: ``(T,)`` F0's swept-envelope section per
+            sample [m^2]. Normally
+            :attr:`~.shot3d.DivotSection.section_area_m2` off the scene the
+            3-D view is drawn from, passed in rather than recomputed so the
+            comparison and that view cannot disagree about one divot.
+        band: F0's per-sample validity band, inherited unchanged.
+        head_mass_kg: The head, for the derived speed-lost integral.
+        bulk_density_kg_m3: The bed's bulk density, for both divot masses.
+    """
+
+    build: HeadBuild
+    result: ShotResult
+    kinematics: HeadKinematics
+    f0_divot_section_area_m2: ArrayLike
+    band: ValidityBand
+    head_mass_kg: float
+    bulk_density_kg_m3: float
+
+
+@dataclass(frozen=True, slots=True)
+class CrossTierSettings:
+    """How much of an F0 record to probe, and against what band.
+
+    Attributes:
+        n_probes: How many engaged samples to probe.
+        sweep_speeds_m_s: Speeds for a declared sweep at the deepest
+            recorded pose. Supply these when the crossover matters: a
+            greenside shot does not decelerate through the inertial-share
+            crossing, so the shot probes alone can only report which side
+            of it the whole record sits on. Note that a *slow* probe is the
+            expensive one, not the fast one: the approach is a fixed
+            distance and the CFL step is set by the elastic wave speed, so
+            the step count goes as ``(c_p + v) / v`` and a 4 m/s probe
+            costs order thirty times a 25 m/s one.
+        agreement_band: Half-width of the agreement band on ``|ln ratio|``.
+    """
+
+    n_probes: int = 4
+    sweep_speeds_m_s: tuple[float, ...] = ()
+    agreement_band: float = DECLARED_AGREEMENT_BAND
+
+
+def _probe(
+    f0_solver: DRFTSolver,
+    f1_solver: PlaneStrainMPMSolver,
+    state: IntrusionState,
+    site: ProbeSite,
+) -> CrossTierProbe:
+    """Run one instant through both tiers and wrap the result.
+
+    Args:
+        f0_solver: The F0 solver.
+        f1_solver: The F1 solver.
+        state: The query, given to both tiers unchanged.
+        site: Where in the record it came from, and under what assumptions.
+
+    Returns:
+        The paired probe.
+    """
+    return CrossTierProbe(
+        frame=site.frame,
+        time_s=site.time_s,
+        check=cross_check_against_f0(state, f0_solver, f1_solver),
+        f0_divot_section_area_m2=site.f0_divot_section_area_m2,
+        f0_sole_depth_m=site.f0_sole_depth_m,
+        declared_width_m=site.declared_width_m,
+        bulk_density_kg_m3=site.bulk_density_kg_m3,
+    )
+
+
+def _site(
+    inputs: CrossTierInputs,
+    frame: int,
+    *,
+    section_area: NDArray[np.float64],
+    depths: NDArray[np.float64],
+    declared_width_m: float,
+) -> ProbeSite:
+    """Read one sample's F0 quantities off the record."""
+    return ProbeSite(
+        frame=frame,
+        time_s=float(inputs.result.times_s[frame]),
+        f0_divot_section_area_m2=float(section_area[frame]),
+        f0_sole_depth_m=float(depths[frame]),
+        declared_width_m=declared_width_m,
+        bulk_density_kg_m3=float(inputs.bulk_density_kg_m3),
+    )
+
+
+def compare_tiers(
+    *,
+    f0_solver: DRFTSolver,
+    f1_solver: PlaneStrainMPMSolver,
+    inputs: CrossTierInputs,
+    settings: CrossTierSettings | None = None,
+) -> CrossTierComparison:
+    """Run F1 at chosen instants of an F0 record and assemble the comparison.
+
+    Expensive by construction, and the cost is where the honesty is: F1 has
+    no instantaneous answer, so each probe is a whole march from clear of
+    the bed to the queried pose. Four probes of a greenside shot cost of
+    order ten minutes at the resolution the workbench uses, which is why
+    this is not on its per-shot path.
+
+    Both solvers should be built with a permissive refusal policy. A bunker
+    shot is far outside either tier's stated envelope, and a strict policy
+    would refuse before producing anything to compare -- which is a correct
+    refusal and a useless comparison.
+
+    Args:
+        f0_solver: The F0 solver the record was produced with.
+        f1_solver: The F1 solver, carrying its declared effective width.
+        inputs: The record and the constants it is read under.
+        settings: How much to probe; the defaults if omitted.
+
+    Returns:
+        The comparison.
+
+    Raises:
+        ValueError: If the record has no engaged sample, or if the divot
+            section does not describe the same record.
+    """
+    chosen = CrossTierSettings() if settings is None else settings
+    result = inputs.result
+    section_area = np.asarray(
+        inputs.f0_divot_section_area_m2, dtype=np.float64
+    ).reshape(-1)
+    if section_area.size != result.n_steps:
+        raise ValueError(
+            "the divot section describes a different record: "
+            f"{section_area.size} samples against {result.n_steps}"
+        )
+    surface_m = free_surface_height_m(result)
+    depths = np.maximum(np.asarray(result.sole_depths_m, dtype=np.float64), 0.0)
+    width = f1_solver.effective_width_m
+
+    def _at(frame: int, speed_m_s: float | None = None) -> CrossTierProbe:
+        return _probe(
+            f0_solver,
+            f1_solver,
+            _state_at(
+                inputs.build,
+                result,
+                inputs.kinematics,
+                frame,
+                surface_m=surface_m,
+                speed_m_s=speed_m_s,
+            ),
+            _site(
+                inputs,
+                frame,
+                section_area=section_area,
+                depths=depths,
+                declared_width_m=width,
+            ),
+        )
+
+    deepest = int(np.argmax(depths))
+    return CrossTierComparison(
+        shot_probes=tuple(
+            _at(frame) for frame in probe_frames(result, chosen.n_probes)
+        ),
+        time_s=np.asarray(result.times_s, dtype=np.float64),
+        f0_force_n=np.asarray(result.forces_n, dtype=np.float64),
+        f0_sole_depth_m=depths,
+        f0_velocity_m_s=np.asarray(result.velocities_m_s, dtype=np.float64),
+        f0_divot_section_area_m2=section_area,
+        band=inputs.band,
+        head_mass_kg=float(inputs.head_mass_kg),
+        declared_width_m=width,
+        bulk_density_kg_m3=float(inputs.bulk_density_kg_m3),
+        f1_cell_size_m=float(f1_solver.cell_size_m),
+        sweep_probes=tuple(
+            _at(deepest, float(speed)) for speed in chosen.sweep_speeds_m_s
+        ),
+        agreement_band=chosen.agreement_band,
+    )

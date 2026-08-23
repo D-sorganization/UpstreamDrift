@@ -5,11 +5,13 @@ Docker integration tests for Golf Modeling Suite launcher.
 Tests Docker container setup, PYTHONPATH configuration, and module accessibility.
 """
 
+import re
 import subprocess
 import unittest
 from unittest.mock import MagicMock, Mock
 
 import pytest
+from packaging.version import Version
 from src.shared.python.data_io.path_utils import get_repo_root, get_src_root
 
 # Docker launch command tests are broken after the launcher refactoring to
@@ -214,7 +216,7 @@ class TestContainerEnvironment(unittest.TestCase):
         )
         self.assertIn("python -m venv /opt/venv", content)
         self.assertIn(
-            "python -m pip install --upgrade --no-cache-dir pip==26.1.2", content
+            "python -m pip install --upgrade --no-cache-dir pip==26.2.1", content
         )
         self.assertIn("pip install -r /tmp/requirements.lock", content)
 
@@ -235,17 +237,59 @@ class TestContainerEnvironment(unittest.TestCase):
         # matplotlib is installed directly in the image for shared-code imports.
         self.assertIn('"matplotlib==3.10.8"', content)
 
+    @pytest.mark.unit
     def test_container_security_pins_clear_trivy_findings(self) -> None:
         """Docker runtime pins must stay at or above the Trivy fixed versions."""
         dockerfile_path = get_repo_root() / "Dockerfile"
         content = dockerfile_path.read_text()
         requirements_lock = (get_repo_root() / "requirements.lock").read_text()
 
-        self.assertIn("pip install --upgrade pip==26.1.2", content)
-        self.assertIn("pyjwt==2.13.0", requirements_lock.lower())
-        self.assertIn("cryptography==46.0.7", requirements_lock.lower())
+        self.assertIn("pip install --upgrade pip==26.2.1", content)
+        for dockerfile_name in (
+            "Dockerfile",
+            "Dockerfile.modular",
+            "Dockerfile.heavy_test",
+        ):
+            dockerfile = (get_repo_root() / dockerfile_name).read_text()
+            self.assertIn(
+                "msgpack==1.2.1",
+                dockerfile,
+                f"{dockerfile_name} must pin the Trivy-fixed msgpack release",
+            )
+            self.assertIn(
+                "setuptools==83.0.0",
+                dockerfile,
+                f"{dockerfile_name} must pin the Trivy-fixed setuptools release",
+            )
+        runtime_strip = (
+            "RUN /opt/venv/bin/python -m pip uninstall -y pip && \\\n"
+            "    /usr/local/bin/python -m pip uninstall -y pip"
+        )
+        for dockerfile_name in ("Dockerfile", "Dockerfile.modular"):
+            dockerfile = (get_repo_root() / dockerfile_name).read_text()
+            copy_index = dockerfile.index("COPY --from=builder /opt/venv /opt/venv")
+            strip_index = dockerfile.index(runtime_strip)
+            runtime_user_index = dockerfile.index("USER ${USER_NAME}", strip_index)
+            self.assertLess(copy_index, strip_index)
+            self.assertLess(strip_index, runtime_user_index)
+        self.assertIn(
+            "RUN /usr/local/bin/python -m pip uninstall -y pip",
+            (get_repo_root() / "Dockerfile.heavy_test").read_text(),
+        )
+        training_index = content.index("FROM runtime AS training")
+        self.assertIn(
+            "COPY --from=builder /opt/venv /opt/venv",
+            content[training_index:],
+        )
+        locked_versions = dict(
+            re.findall(r"(?m)^([a-z0-9-]+)==([^\s]+)", requirements_lock.lower())
+        )
+        self.assertGreaterEqual(Version(locked_versions["pyjwt"]), Version("2.13.0"))
+        self.assertGreaterEqual(
+            Version(locked_versions["cryptography"]), Version("46.0.7")
+        )
         self.assertIn("apt-get update && apt-get upgrade -y", content)
-        self.assertIn("idna==3.15", requirements_lock)
+        self.assertGreaterEqual(Version(locked_versions["idna"]), Version("3.15"))
 
 
 class TestModuleAccessibility(unittest.TestCase):

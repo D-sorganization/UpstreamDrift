@@ -72,6 +72,7 @@ models:
     description: "MATLAB / Simscape models, dataset generators, and tooling"
     type: "matlab_suite"
     path: "virtual/matlab_suite"
+    engine_type: "matlab"
     launcher:
       category: "physics_engine"
       logo: "assets/matlab_logo.png"
@@ -109,6 +110,9 @@ models:
     description: "MuJoCo simulation models repository folder"
     type: "shared_repo"
     path: "MuJoCo_Models"
+    capabilities:
+      - "model_repository"
+      - "mujoco"
     launcher:
       category: "simulation"
       logo: "assets/mujoco.png"
@@ -119,6 +123,9 @@ models:
     description: "Drake simulation models repository folder"
     type: "shared_repo"
     path: "Drake_Models"
+    capabilities:
+      - "model_repository"
+      - "drake"
     launcher:
       category: "simulation"
       logo: "assets/drake.png"
@@ -129,6 +136,9 @@ models:
     description: "Pinocchio simulation models repository folder"
     type: "shared_repo"
     path: "Pinocchio_Models"
+    capabilities:
+      - "model_repository"
+      - "pinocchio"
     launcher:
       category: "simulation"
       logo: "assets/pinocchio.png"
@@ -139,6 +149,9 @@ models:
     description: "OpenSim simulation models repository folder"
     type: "shared_repo"
     path: "OpenSim_Models"
+    capabilities:
+      - "model_repository"
+      - "opensim"
     launcher:
       category: "simulation"
       logo: "assets/opensim.png"
@@ -214,6 +227,10 @@ models:
     description: "3D Driving Range and Golf Course Hole visualization"
     type: "special_app"
     path: "src/tools/golf_environment/gui.py"
+    capabilities:
+      - "driving_range"
+      - "course_visualization"
+      - "3d_environment"
     launcher:
       category: "simulation"
       logo: "assets/putting_green_modern.png"
@@ -228,6 +245,10 @@ models:
     description: "End-to-end swing dynamics → impact → aerodynamic ball flight pipeline"
     type: "special_app"
     path: "src/tools/swing_flight_pipeline/gui.py"
+    capabilities:
+      - "swing_dynamics"
+      - "impact_model"
+      - "ball_flight"
     launcher:
       category: "simulation"
       logo: "assets/golf_logo.png"
@@ -239,6 +260,11 @@ models:
     description: "Aerodynamic ball flight simulator with drag, Magnus, and wind models"
     type: "special_app"
     path: "src/tools/ball_flight_gui/gui.py"
+    capabilities:
+      - "ball_flight"
+      - "aerodynamics"
+      - "magnus"
+      - "wind_models"
     launcher:
       category: "simulation"
       logo: "assets/golf_logo.png"
@@ -253,6 +279,9 @@ models:
     hidden: true
     hidden_reason: "Legacy alias retained so saved layouts continue to resolve; use putting_green for new launcher entries."
     hidden_owner: "@launcher"
+    capabilities:
+      - "surface_modeling"
+      - "ball_physics"
     launcher:
       category: "simulation"
       logo: "assets/putting_green_modern.png"
@@ -307,6 +336,10 @@ models:
     description: "Visualise and analyse optical mocap data (.c3d)"
     type: "special_app"
     path: "src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/c3d_viewer.py"
+    capabilities:
+      - "c3d"
+      - "mocap_visualization"
+      - "marker_analysis"
     launcher:
       category: "motion_capture"
       logo: "assets/c3d_viewer_modern.png"
@@ -350,6 +383,10 @@ models:
     description: "High-accuracy body pose estimation (Academic License)"
     type: "special_app"
     path: "src/shared/python/pose_estimation/openpose_gui.py"
+    capabilities:
+      - "pose_estimation"
+      - "openpose"
+      - "video_processing"
     launcher:
       category: "motion_capture"
       logo: "assets/openpose.png"
@@ -360,6 +397,10 @@ models:
     description: "Fast pose estimation via Google MediaPipe (Apache 2.0)"
     type: "special_app"
     path: "src/shared/python/pose_estimation/mediapipe_gui.py"
+    capabilities:
+      - "pose_estimation"
+      - "mediapipe"
+      - "video_processing"
     launcher:
       category: "motion_capture"
       logo: "assets/mediapipe.png"
@@ -465,6 +506,10 @@ models:
     description: "AI assistant chat panel — embed as a dock or tab"
     type: "special_app"
     path: "src/tools/sidekick/_embed_adapter.py"
+    capabilities:
+      - "ai_assistant"
+      - "chat"
+      - "workspace"
     launcher:
       category: "tool"
       logo: "assets/sidekick.svg"
@@ -476,6 +521,10 @@ models:
     description: "Schedule, monitor, and manage model-training jobs across engines."
     type: "special_app"
     path: "src/tools/training_controller/__main__.py"
+    capabilities:
+      - "training_jobs"
+      - "scheduling"
+      - "monitoring"
     launcher:
       category: "tool"
       logo: "assets/training_controller.png"
@@ -487,6 +536,10 @@ models:
     description: "Validate canonical-core units, model dimensions, and calibration before a run."
     type: "special_app"
     path: "src/tools/config_setup_wizard/_embed_adapter.py"
+    capabilities:
+      - "configuration"
+      - "unit_validation"
+      - "calibration"
     launcher:
       category: "tool"
       logo: "assets/project_map.png"
@@ -502,6 +555,10 @@ models:
     description: "Live mirror of Pose Studio's canonical pose via the realtime IPC layer"
     type: "special_app"
     path: "src/tools/pose_subscriber_demo/__main__.py"
+    capabilities:
+      - "realtime"
+      - "pubsub"
+      - "pose_mirror"
     launcher:
       category: "motion_matching"
       logo: "assets/data_explorer_modern.png"
@@ -523,6 +580,10 @@ models:
     description: "Research library for managing publications, LaTeX references, and documents"
     type: "special_app"
     path: "virtual/library"
+    capabilities:
+      - "research_library"
+      - "references"
+      - "documents"
     launcher:
       category: "documentation"
       logo: "assets/project_map.png"
@@ -537,6 +598,10 @@ models:
     description: "Standardized human gait model across engines"
     type: "biomech_exercise"
     exercise: "gait"
+    capabilities:
+      - "biomechanics"
+      - "exercise_preset"
+      - "gait"
     launcher:
       category: "biomechanics"
       logo: "biomechanics.svg"
@@ -548,6 +613,10 @@ models:
     description: "Standardized sit-to-stand motion model"
     type: "biomech_exercise"
     exercise: "sit_to_stand"
+    capabilities:
+      - "biomechanics"
+      - "exercise_preset"
+      - "sit_to_stand"
     launcher:
       category: "biomechanics"
       logo: "biomechanics.svg"
@@ -609,6 +678,130 @@ models:
       web_route: "/tools/canonical-core/comparison"
 
   # =============================================================================
+  # REGISTRY/MANIFEST UNIFICATION (issue #8853) — tiles that previously
+  # existed only in launcher_manifest.json but have real, launchable
+  # targets in this repository. models.yaml is the canonical native
+  # registry; the manifest overlays web-only metadata.
+  # =============================================================================
+
+  - id: "simulation_backends"
+    name: "Simulation Backends"
+    description: "Compare ODE, MuJoCo (CPU) and MuJoCo Warp (GPU) backends with rollouts, sweeps, and HDF5 export"
+    type: "special_app"
+    path: "src/tools/simulation_backends_launcher/__main__.py"
+    capabilities:
+      - "backend_selection"
+      - "rollout"
+      - "parameter_sweep"
+      - "cross_validation"
+      - "hdf5_export"
+    launcher:
+      category: "simulation"
+      logo: "golf_logo.svg"
+      status: "ready"
+      default_launch: "tab"
+
+  - id: "motion_capture"
+    name: "Motion Capture"
+    description: "FreeMoCap sidecar: markerless motion capture recording and processing"
+    type: "special_app"
+    path: "src/tools/freemocap_sidecar/run_freemocap.py"
+    capabilities:
+      - "markerless_mocap"
+      - "freemocap"
+      - "recording"
+    launcher:
+      category: "motion_capture"
+      logo: "c3d_icon.svg"
+      status: "beta"
+      default_launch: "tab"
+
+  - id: "biomech_exercise"
+    name: "Exercise Dashboard"
+    description: "Biomechanics exercise workflows with injury risk and joint stress analysis"
+    type: "special_app"
+    path: "src/launchers/exercise_dashboard.py"
+    capabilities:
+      - "injury_risk"
+      - "joint_stress"
+      - "exercise_presets"
+    launcher:
+      category: "biomechanics"
+      logo: "exercise_dashboard.svg"
+      status: "ready"
+      default_launch: "tab"
+
+  - id: "swing_optimizer"
+    name: "Swing Optimizer"
+    description: "Trajectory optimization with constraint solving and cost functions"
+    type: "special_app"
+    path: "src/shared/python/optimization/swing_optimizer.py"
+    launcher:
+      category: "simulation"
+      logo: "swing_optimizer.svg"
+      status: "experimental"
+      default_launch: "tab"
+
+  - id: "injury_analysis"
+    name: "Injury Risk Analysis"
+    description: "Joint stress, spinal load, and swing modification analysis for injury prevention"
+    type: "special_app"
+    path: "src/shared/python/injury/injury_risk.py"
+    launcher:
+      category: "biomechanics"
+      logo: "injury_analysis.svg"
+      status: "experimental"
+      default_launch: "tab"
+
+  - id: "drake_dashboard"
+    name: "Drake Dashboard"
+    description: "Interactive Drake simulation dashboard"
+    type: "special_app"
+    path: "src/launchers/drake_dashboard.py"
+    engine_type: "drake"
+    capabilities:
+      - "rigid_body"
+      - "dashboard"
+      - "recorder"
+    launcher:
+      category: "physics_engine"
+      logo: "drake.svg"
+      status: "experimental"
+      default_launch: "tab"
+
+  - id: "mujoco_dashboard"
+    name: "MuJoCo Dashboard"
+    description: "Interactive MuJoCo simulation dashboard"
+    type: "special_app"
+    path: "src/launchers/mujoco_dashboard.py"
+    engine_type: "mujoco"
+    capabilities:
+      - "rigid_body"
+      - "dashboard"
+      - "recorder"
+    launcher:
+      category: "physics_engine"
+      logo: "mujoco_humanoid.svg"
+      status: "experimental"
+      default_launch: "tab"
+
+  - id: "pinocchio_dashboard"
+    name: "Pinocchio Dashboard"
+    description: "Interactive Pinocchio simulation dashboard"
+    type: "special_app"
+    path: "src/launchers/pinocchio_dashboard.py"
+    engine_type: "pinocchio"
+    capabilities:
+      - "rigid_body"
+      - "dashboard"
+      - "recorder"
+    launcher:
+      category: "physics_engine"
+      logo: "pinocchio.svg"
+      status: "experimental"
+      default_launch: "tab"
+
+  # =============================================================================
   # PHYSICS-INFORMED NEURAL NETWORKS
   # =============================================================================
 
@@ -617,6 +810,9 @@ models:
     description: "Pinocchio inverse dynamics only — no ML"
     type: "physics_informed"
     mode: "pure_rigid"
+    capabilities:
+      - "physics_informed"
+      - "inverse_dynamics"
     launcher:
       category: "biomechanics"
       logo: "pinocchio.svg"
@@ -627,6 +823,10 @@ models:
     description: "Rigid body + JAX residual torque MLP"
     type: "physics_informed"
     mode: "pinn_hybrid"
+    capabilities:
+      - "physics_informed"
+      - "residual_learning"
+      - "inverse_dynamics"
     launcher:
       category: "biomechanics"
       logo: "pinocchio.svg"

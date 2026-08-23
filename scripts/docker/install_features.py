@@ -40,11 +40,13 @@ don't pull PyYAML into the builder.
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import os
 import shlex
 import subprocess
 import sys
 from pathlib import Path
+from types import ModuleType
 
 # ---------------------------------------------------------------------------
 # Minimal YAML loader.
@@ -153,19 +155,55 @@ def _resolve_profile_features(profiles: dict, name: str) -> list[str]:
 # Feature → install command via the registry.
 #
 # We import the registry directly so the *single* source of truth lives in
-# Python. To avoid running the registry's import-time DbC validator
-# (which would also import probes that need numpy etc.) we read the
-# features module in isolation by adding the repo to sys.path.
+# Python. To avoid running the registry's import-time DbC validator (which
+# would also import probes that need numpy etc.) we read the features module
+# in genuine isolation: loaded from its file, with no parent package.
+#
+# `from src.shared.python.feature_registry.features import ...` does not
+# achieve that, because importing a submodule executes every parent package's
+# `__init__` first. `Dockerfile.modular`'s builder stage deliberately copies
+# only `src/shared/python/__init__.py`, `engine_core/` and
+# `feature_registry/` so that resolving a profile does not invalidate the
+# layer cache on every source change - so any eager import that `__init__`
+# happens to grow, for a package outside that slice, breaks every modular
+# image build with `ImportError: cannot import name X from partially
+# initialized module`. That is exactly what happened here.
+#
+# Loading the file directly is safe: `features.py` imports only `dataclasses`
+# and `typing`, and it is what the paragraph above always claimed to do.
 # ---------------------------------------------------------------------------
+
+_FEATURES_RELATIVE_PATH = Path("src/shared/python/feature_registry/features.py")
+
+
+def _load_features_module(repo_root: Path) -> ModuleType:
+    """Load ``features.py`` from disk without importing its parent packages."""
+    features_path = repo_root / _FEATURES_RELATIVE_PATH
+    if not features_path.is_file():
+        raise SystemExit(f"[install_features] missing registry: {features_path}")
+
+    spec = importlib.util.spec_from_file_location(
+        "_install_features_registry", features_path
+    )
+    if spec is None or spec.loader is None:
+        raise SystemExit(f"[install_features] cannot load registry: {features_path}")
+
+    module = importlib.util.module_from_spec(spec)
+    # `@dataclass` resolves `cls.__module__` through `sys.modules` while the
+    # class body is being processed, so the module has to be registered
+    # *before* it is executed, not after.
+    sys.modules[spec.name] = module
+    try:
+        spec.loader.exec_module(module)
+    except Exception:
+        sys.modules.pop(spec.name, None)
+        raise
+    return module
 
 
 def _feature_install_argv(feature_name: str, repo_root: Path) -> list[list[str]]:
     """Return one or more argv lists describing how to install a feature."""
-    sys.path.insert(0, str(repo_root))
-    try:
-        from src.shared.python.feature_registry.features import get_feature
-    finally:
-        sys.path.pop(0)
+    get_feature = _load_features_module(repo_root).get_feature
 
     feature = get_feature(feature_name)
 

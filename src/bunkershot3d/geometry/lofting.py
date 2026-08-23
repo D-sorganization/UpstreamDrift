@@ -125,8 +125,24 @@ class LoftedWedge:
     :func:`build_wedge_mesh` returns only the mesh, so a caller that declared
     a camber area had no way to learn that a different one was built.  This
     is the object that closes that gap: :attr:`effective_camber_area_m2` is
-    the number a design study should log next to the declared one, and
-    :attr:`camber_was_clamped` is the flag that says they differ.
+    the number a design study should log next to the declared one.
+
+    **Substitution happens at two scopes, and they do not imply each other.**
+    The *aggregate* scope is the declared camber against the band the declared
+    (unrelieved) sole width admits.  The *station* scope is each spanwise
+    section's relief-scaled request against the band its own narrowed width
+    admits.  A declaration can sit comfortably inside the aggregate band while
+    heel and toe stations - which are narrower, and so admit a narrower band -
+    are refitted.  The shipped ``sm9_58_m`` preset is exactly that case: 42.00
+    mm^2 declared, 42.00 mm^2 effective, inside a (38.70, 42.44) mm^2 band,
+    and three of its seventeen stations refitted anyway.
+
+    So there is no single "was it clamped" answer, and this class refuses to
+    pretend there is.  Read :attr:`any_camber_was_clamped` for "did the lofter
+    build something other than what was asked for, anywhere", which is what a
+    caller checking one boolean almost always means.  Read
+    :attr:`aggregate_camber_was_clamped` only for the narrow declared-versus-
+    effective question, and :attr:`clamped_stations` for the detail.
 
     Attributes:
         mesh: The verified watertight head.
@@ -152,13 +168,41 @@ class LoftedWedge:
         return self.geometry.sole_camber_area_m2
 
     @property
-    def camber_was_clamped(self) -> bool:
-        """Whether the declared camber area was substituted."""
+    def aggregate_camber_was_clamped(self) -> bool:
+        """Whether the *declared* camber area itself was substituted.
+
+        Scoped deliberately narrowly: this compares
+        :attr:`effective_camber_area_m2` against
+        :attr:`declared_camber_area_m2` at the declared sole width, and says
+        nothing about the relieved stations.  It can be ``False`` while
+        :attr:`clamped_stations` is non-empty.
+
+        Use this only when the declared number is the subject - reporting
+        "you asked for X and got Y", for instance.  For "was anything
+        substituted at all", use :attr:`any_camber_was_clamped`.
+        """
         return self.effective_camber_area_m2 != self.declared_camber_area_m2
 
     @property
-    def camber_substitution_m2(self) -> float:
-        """Effective minus declared; zero when nothing was substituted."""
+    def any_camber_was_clamped(self) -> bool:
+        """Whether *any* camber substitution occurred, at any scope.
+
+        True when the declared area was substituted, or when any spanwise
+        station was refitted to its own constructible band.  This is the
+        honest answer to "is the sole I got the sole I asked for", and it is
+        the flag a caller should reach for by default: it cannot read
+        ``False`` while :attr:`clamped_stations` holds anything.
+        """
+        return self.aggregate_camber_was_clamped or bool(self.clamped_stations)
+
+    @property
+    def aggregate_camber_substitution_m2(self) -> float:
+        """Effective minus declared; zero when the declaration was honoured.
+
+        Aggregate-scoped, matching :attr:`aggregate_camber_was_clamped` - a
+        station's own substitution is
+        :attr:`StationCamber.camber_substitution_m2`.
+        """
         return self.effective_camber_area_m2 - self.declared_camber_area_m2
 
     @property

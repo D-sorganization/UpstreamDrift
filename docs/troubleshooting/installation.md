@@ -292,7 +292,7 @@ pip install -e .
 export GOLF_USE_MOCK_ENGINE=1
 
 # Run launcher in light mode
-python launchers/golf_suite_launcher.py --mock
+python launch_upstream_drift.py --classic
 ```
 
 ---

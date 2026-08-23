@@ -191,6 +191,27 @@ export interface ActuatorUpdateRequest {
 }
 
 /**
+ * Caller-supplied lineage and identity assertions.
+ */
+export interface AnalysisContextV2 {
+  authority?: DatasetAuthorityV2 | null;
+  player_identity?: PlayerIdentityV2;
+  session_identity?: SessionIdentityV2;
+  order_evidence?: OrderEvidenceV2;
+  transformations: TransformRecordV2[];
+  sources: SourceFileReferenceV2[];
+  source_units?: Record<string, string>;
+}
+
+export interface AnalysisLineageV2 {
+  dataset_fingerprint_sha256: string;
+  authority?: DatasetAuthorityV2 | null;
+  transformations: TransformRecordV2[];
+  sources: SourceFileReferenceV2[];
+  backing_records: BackingRecordV2[];
+}
+
+/**
  * Response model for aggregated analysis metrics. Provides statistical summary of simulation metrics over time. See issue #1203
  */
 export interface AnalysisMetricsSummary {
@@ -263,6 +284,16 @@ export interface AnalyzePayload {
 }
 
 /**
+ * V2 request with explicit dataset, transformation, and identity context.
+ */
+export interface AnalyzePayloadV2 {
+  records: Record<string, unknown>[];
+  analysis: FlexibleAnalysisPayload;
+  context?: AnalysisContextV2;
+  model_provenance: ModelProvenanceV2[];
+}
+
+/**
  * Appearance preferences for the web shell.
  */
 export interface AppearanceSettings {
@@ -273,11 +304,58 @@ export interface AppearanceSettings {
 }
 
 /**
+ * One descriptive association or a typed unavailable state.
+ */
+export interface AssociationEstimateV1 {
+  state: "available" | "unavailable";
+  reason_code?: "insufficient_samples" | "insufficient_groups" | "constant_x" | "constant_y" | "constant_both" | null;
+  sample_count: number;
+  group_count: number;
+  pearson_r?: number | null;
+  spearman_r?: number | null;
+  slope?: number | null;
+  intercept?: number | null;
+  r_squared?: number | null;
+  ci_lower?: number | null;
+  ci_upper?: number | null;
+}
+
+export interface AvailabilityV1 {
+  state: "available" | "unavailable";
+  reason_code?: string | null;
+  message?: string | null;
+  observed_count: number;
+  required_count: number;
+}
+
+export interface AvailabilityV2 {
+  result_path: string;
+  state: "available" | "unavailable";
+  reason_code?: string | null;
+  message?: string | null;
+  observed_count?: number | null;
+  required_count?: number | null;
+}
+
+/**
+ * Stable reference to exactly one input record without copying values.
+ */
+export interface BackingRecordV2 {
+  record_sha256: string;
+  shot_id?: string | null;
+  session_id?: string | null;
+  source_row?: number | string | null;
+  source_id?: string | null;
+  unlinked_reason?: "no_source_reference_declared" | "session_not_linked_to_source_reference" | null;
+}
+
+/**
  * Trajectory and summary metrics for a single flight model.
  */
 export interface BallFlightModelResult {
   model_name: string;
   model_key: FlightModelType;
+  coefficients: Record<string, number>;
   trajectory: BallFlightTrajectorySample[];
   summary: BallFlightSummary;
 }
@@ -316,6 +394,7 @@ export interface BallFlightSimulationRequest {
 export interface BallFlightSimulationResponse {
   model_name: string;
   model_key: FlightModelType;
+  coefficients: Record<string, number>;
   trajectory: BallFlightTrajectorySample[];
   summary: BallFlightSummary;
   results: BallFlightModelResult[];
@@ -339,6 +418,15 @@ export interface BallFlightTrajectorySample {
   time_s: number;
   position_m: number[];
   velocity_mps: number[];
+}
+
+export interface BaselineProvenanceV1 {
+  baseline_id: string;
+  version: string;
+  source_url: string;
+  license: string;
+  table_sha256: string;
+  contract_version: string;
 }
 
 /**
@@ -583,6 +671,20 @@ export interface CharacterBuilderRequest {
   build_type: string;
 }
 
+export interface ClaimsV2 {
+  vendor_comparison: "descriptive" | "matched_agreement";
+  device_emulation: boolean;
+  device_certification: boolean;
+  causal_inference: boolean;
+}
+
+export interface ConfidenceIntervalV1 {
+  lower: number;
+  upper: number;
+  level: number;
+  method: string;
+}
+
 /**
  * Request body for deterministic contraction-rate estimation.
  */
@@ -645,6 +747,73 @@ export interface CounterfactualRequest {
   run_post_hoc: boolean;
 }
 
+export interface CourseStateColumnsV1 {
+  lie_column: string;
+  context_column: string;
+  target_column: string;
+  distance_column: string;
+  distance_unit: "yd" | "m";
+}
+
+export interface CourseStateValueV1 {
+  lie: string;
+  context: string;
+  target: string;
+  distance_yards: number;
+}
+
+/**
+ * Row and player exclusions used by a selected-pair analysis.
+ */
+export interface CovariationMissingnessV1 {
+  input_row_count: number;
+  pairwise_complete_row_count: number;
+  missing_by_variable: Record<string, number>;
+  non_numeric_by_variable: Record<string, number>;
+  non_finite_by_variable: Record<string, number>;
+  excluded_by_reason: Record<string, number>;
+  eligible_player_count: number;
+  excluded_player_count_by_reason: Record<string, number>;
+  policy: "pairwise";
+}
+
+/**
+ * One deterministically ranked pair from an exploratory scan.
+ */
+export interface CovariationPairRankV1 {
+  rank: number;
+  state: "available" | "unavailable";
+  reason_code?: "insufficient_eligible_players" | null;
+  x_column: string;
+  y_column: string;
+  x_unit: MetricUnitsV2;
+  y_unit: MetricUnitsV2;
+  random_effect_r?: number | null;
+  fixed_effect_r?: number | null;
+  within_player_r?: number | null;
+  between_player_r?: number | null;
+  contributor_count: number;
+  total_sample_count: number;
+  input_row_count: number;
+  pairwise_complete_row_count: number;
+  excluded_row_count: number;
+  i_squared_pct?: number | null;
+  direction_consistency?: number | null;
+}
+
+/**
+ * Named uncertainty methods and their scientific limits.
+ */
+export interface CovariationUncertaintyV1 {
+  confidence_level: number;
+  per_player_interval: "fisher-z";
+  pooled_interval: "fisher-z-unclustered";
+  within_player_interval: "unavailable-clustered";
+  fixed_effect_method: "inverse-variance-fisher-z";
+  random_effect_method: "dersimonian-laird-fisher-z";
+  assumptions: string[];
+}
+
 /**
  * Request to create a terrain environment.
  */
@@ -684,6 +853,8 @@ export interface CrossEngineStudyRequest {
   /** Engine names to compare; each must be a recognised engine. */
   engines?: string[];
   config: CrossEnginePerturbationConfig;
+  /** When false, the study fails instead of silently running a 2-DOF stub for a requested engine whose real backend is unavailable (#8817). Either way the result declares each engine's backend ('real' or 'stub_2dof') and lists 'stubbed_engines'. */
+  allow_stub_substitution: boolean;
 }
 
 /**
@@ -698,6 +869,17 @@ export interface DataExportRequest {
   include_time_series: boolean;
   /** Optional time range [start, end] in seconds */
   time_range?: number[] | null;
+}
+
+/**
+ * Commit-addressable authority for the analyzed dataset.
+ */
+export interface DatasetAuthorityV2 {
+  dataset_id: string;
+  repository?: string | null;
+  commit?: string | null;
+  dataset_path?: string | null;
+  manifest_sha256?: string | null;
 }
 
 /**
@@ -794,6 +976,42 @@ export interface DatasetInfo {
 }
 
 /**
+ * A private-data job request containing no inline observations.
+ */
+export interface DatasetJobRequestV1 {
+  contract_version: "launch-monitor-dataset-job/1.0.0";
+  dataset: DatasetReferenceV1;
+  operation: DatasetOperationV1;
+}
+
+/**
+ * Bounded page of aggregate or source-backing records, never shot rows.
+ */
+export interface DatasetJobResultPageV1 {
+  contract_version: "launch-monitor-dataset-job/1.0.0";
+  job_id: string;
+  offset: number;
+  limit: number;
+  total_items: number;
+  next_offset?: number | null;
+  items: Record<string, unknown>[];
+}
+
+/**
+ * Data-free state and aggregate counts for one server-side job.
+ */
+export interface DatasetJobStatusV1 {
+  contract_version: "launch-monitor-dataset-job/1.0.0";
+  job_id: string;
+  status: "queued" | "running" | "completed" | "unavailable" | "failed";
+  submitted_at_utc: string;
+  completed_at_utc?: string | null;
+  input_row_count: number;
+  result_item_count: number;
+  unavailable?: DatasetUnavailableStateV1 | null;
+}
+
+/**
  * Response listing available datasets. ``total`` reports the number of entries returned in this (paginated) page, preserving the historical field semantics. ``offset``/``limit`` echo the pagination window and ``truncated`` flags when the on-disk scan hit the hard cap and more files may exist beyond the returned page (#7740 H).
  */
 export interface DatasetListResponse {
@@ -806,6 +1024,16 @@ export interface DatasetListResponse {
 }
 
 /**
+ * Allow-listed aggregate operation; arbitrary query text is forbidden.
+ */
+export interface DatasetOperationV1 {
+  kind: "source_summary" | "metric_summary" | "correlation";
+  metrics: string[];
+  group_by?: "source_id" | "monitor" | "club" | null;
+  minimum_group_rows: number;
+}
+
+/**
  * Response with a preview of dataset contents.
  */
 export interface DatasetPreviewResponse {
@@ -814,6 +1042,18 @@ export interface DatasetPreviewResponse {
   rows: Record<string, unknown>[];
   total_rows: number;
   format: string;
+}
+
+/**
+ * Content-addressed reference to one authorized authority checkout.
+ */
+export interface DatasetReferenceV1 {
+  root_id: string;
+  repository: string;
+  commit: string;
+  manifest_sha256: string;
+  content_sha256: string;
+  expected_row_count: number;
 }
 
 /**
@@ -839,7 +1079,16 @@ export interface DatasetStatsResponse {
 }
 
 /**
- * Request body for generalized-force drift-control ratio analysis.
+ * Data-free reason that an immutable reference cannot be used.
+ */
+export interface DatasetUnavailableStateV1 {
+  code: "root_not_authorized" | "authority_unavailable" | "repository_mismatch" | "commit_mismatch" | "manifest_mismatch" | "content_mismatch" | "row_count_mismatch" | "backing_manifest_mismatch" | "dependency_unavailable" | "operation_unavailable" | "internal_execution_error";
+  message: string;
+  retryable: boolean;
+}
+
+/**
+ * Request body for realized drift-to-input ratio analysis.
  */
 export interface DriftControlRatioRequest {
   drift_generalized_force: number[][];
@@ -934,6 +1183,53 @@ export interface EnvironmentPreset {
   width_m: number;
   /** Length in meters */
   length_m: number;
+}
+
+export interface EstimateSummaryV1 {
+  count: number;
+  mean?: number | null;
+  standard_deviation?: number | null;
+  standard_error?: number | null;
+  confidence_interval?: ConfidenceIntervalV1 | null;
+}
+
+export interface ExcludedRowV1 {
+  source_index: number;
+  shot_id?: string | null;
+  reason_code: "missing_course_state" | "invalid_distance" | "outside_baseline";
+  message: string;
+}
+
+export interface ExclusionSummaryV1 {
+  input_row_count: number;
+  included_row_count: number;
+  total_excluded: number;
+  by_reason: Record<string, number>;
+}
+
+/**
+ * Hash-verified expected-strokes benchmark and publication metadata.
+ */
+export interface ExpectedStrokesBaselineV2 {
+  contract_version: "launch-monitor-strokes-gained-baseline/2.0.0";
+  baseline_id: string;
+  version: string;
+  source_url: string;
+  license: string;
+  table_sha256: string;
+  states: ExpectedStrokesStateV2[];
+}
+
+/**
+ * One benchmark point for an explicit target-aware course state.
+ */
+export interface ExpectedStrokesStateV2 {
+  lie: string;
+  context: string;
+  target: string;
+  distance_yards: number;
+  expected_strokes: number;
+  standard_error?: number | null;
 }
 
 /**
@@ -1115,6 +1411,21 @@ export interface GreenReadingResponse {
   slopes: number[][];
 }
 
+export interface GroupSummaryV1 {
+  dimension: "player" | "session" | "club";
+  group_value: string;
+  estimate: EstimateSummaryV1;
+  trust_level: "explicit_user_attested" | "pseudonymous_stable" | "verified_external";
+  evidence: string;
+}
+
+export interface GroupingDimensionV1 {
+  dimension: "player" | "session" | "club";
+  column: string;
+  trust_level: "explicit_user_attested" | "pseudonymous_stable" | "verified_external";
+  evidence: string;
+}
+
 export interface HTTPValidationError {
   detail?: ValidationError[];
 }
@@ -1147,6 +1458,12 @@ export interface InstallRequest {
 export interface InstallResponse {
   install: Record<string, unknown>;
   post_install_report?: FeatureReportModel | null;
+}
+
+export interface InterpolationV1 {
+  lower_distance_yards: number;
+  upper_distance_yards: number;
+  fraction: number;
 }
 
 /**
@@ -1194,6 +1511,27 @@ export interface JointInfoResponse {
   velocity_limit: number;
   /** Currently applied torque */
   current_torque: number;
+}
+
+/**
+ * Complete OpenAPI-compatible v2 result envelope.
+ */
+export interface LaunchMonitorAnalysisResultV2 {
+  contract_version: "2.0.0";
+  status: "available" | "partial" | "unavailable";
+  analysis: Record<string, unknown> | null;
+  units: Record<string, MetricUnitsV2>;
+  lineage: AnalysisLineageV2;
+  missingness: MissingnessV2;
+  availability: AvailabilityV2[];
+  uncertainty: UncertaintyV2;
+  player_identity: PlayerIdentityV2;
+  session_identity?: SessionIdentityV2;
+  order_evidence?: OrderEvidenceV2;
+  vendor_provenance: VendorProvenanceV2[];
+  model_provenance: ModelProvenanceV2[];
+  claims?: ClaimsV2;
+  warnings: string[];
 }
 
 /**
@@ -1285,6 +1623,105 @@ export interface LoginResponse {
   user: UserResponse;
 }
 
+export interface LongitudinalClaimsV1 {
+  association_scope: "descriptive_directional";
+  primary_unit: "player_session_stratum";
+  shot_level_inference: boolean;
+  causal_improvement: boolean;
+  confounder_control_is_causal: boolean;
+}
+
+export interface LongitudinalDesignV1 {
+  primary_unit: "player_session_stratum";
+  session_aggregate: "mean" | "median";
+  strata: string[];
+  confounders: string[];
+  pooled_terms: string[];
+}
+
+export interface LongitudinalDimensionV1 {
+  order_column: string;
+  order_unit: string;
+  group_column?: string | null;
+  group_dimension?: "player" | "session" | "club" | null;
+  trust_level: "explicit_user_attested" | "pseudonymous_stable" | "verified_external";
+  evidence: string;
+  min_samples: number;
+}
+
+export interface LongitudinalMissingnessV1 {
+  input_row_count: number;
+  included_shot_count: number;
+  session_cell_count: number;
+  excluded_by_reason: Record<string, number>;
+}
+
+export interface LongitudinalPlayerAssociationV1 {
+  player_id: string;
+  session_count: number;
+  estimate_per_order_unit?: number | null;
+  direction: "increasing" | "decreasing" | "flat" | "unavailable";
+  state: "available" | "unavailable";
+  reason_code?: string | null;
+}
+
+/**
+ * Bounded rows plus attested identity, order, and session-unit design.
+ */
+export interface LongitudinalSessionPayloadV1 {
+  records: Record<string, unknown>[];
+  request: LongitudinalSessionRequestV1;
+  context: AnalysisContextV2;
+}
+
+/**
+ * Scientific choices for session-unit directional association.
+ */
+export interface LongitudinalSessionRequestV1 {
+  metric: string;
+  direction: "higher_is_better" | "lower_is_better" | "descriptive_only";
+  session_aggregate: "mean" | "median";
+  strata: string[];
+  confounders: string[];
+  minimum_sessions_per_player: number;
+  minimum_player_clusters: number;
+  confidence_level: number;
+}
+
+/**
+ * Evidence-bearing result that never labels association as improvement.
+ */
+export interface LongitudinalSessionResultV1 {
+  contract_version: "launch-monitor-longitudinal-session/1.0.0";
+  status: "available" | "partial" | "unavailable";
+  request: LongitudinalSessionRequestV1;
+  design: LongitudinalDesignV1;
+  session_aggregates: SessionAggregateV1[];
+  player_associations: LongitudinalPlayerAssociationV1[];
+  pooled_association: PooledAssociationV1 | null;
+  availability: AvailabilityV2[];
+  missingness: LongitudinalMissingnessV1;
+  lineage: AnalysisLineageV2;
+  player_identity: PlayerIdentityV2;
+  session_identity: SessionIdentityV2;
+  order_evidence: OrderEvidenceV2;
+  claims?: LongitudinalClaimsV1;
+  warnings: string[];
+}
+
+export interface LongitudinalSummaryV1 {
+  group_dimension: "player" | "session" | "club" | "all";
+  group_value: string;
+  sample_count: number;
+  slope: number;
+  intercept: number;
+  r_squared: number;
+  p_value: number;
+  slope_unit: string;
+  trust_level: "explicit_user_attested" | "pseudonymous_stable" | "verified_external";
+  evidence: string;
+}
+
 /**
  * Request model for distance measurement between bodies. See issue #1179
  */
@@ -1321,6 +1758,40 @@ export interface MeasurementToolsResponse {
   joint_angles: JointAngleDisplay[];
   /** Distance measurements */
   measurements?: MeasurementResult[];
+}
+
+/**
+ * Fixed/random Fisher-z synthesis with heterogeneity diagnostics.
+ */
+export interface MetaAnalysisSummaryV1 {
+  state: "available" | "unavailable";
+  reason_code?: "insufficient_eligible_players" | null;
+  contributor_count: number;
+  total_sample_count: number;
+  fixed_effect_r?: number | null;
+  fixed_ci_lower?: number | null;
+  fixed_ci_upper?: number | null;
+  random_effect_r?: number | null;
+  random_ci_lower?: number | null;
+  random_ci_upper?: number | null;
+  tau_squared?: number | null;
+  q_statistic?: number | null;
+  i_squared_pct?: number | null;
+}
+
+export interface MetricUnitsV2 {
+  canonical_unit: string;
+  display_unit: string;
+  authority: "canonical_registry" | "source_declared" | "unknown";
+}
+
+export interface MissingnessV2 {
+  input_row_count: number;
+  complete_row_count: number;
+  missing_by_variable: Record<string, number>;
+  non_numeric_by_variable: Record<string, number>;
+  excluded_by_reason: Record<string, number>;
+  policy: "pairwise" | "listwise" | "fail";
 }
 
 /**
@@ -1385,6 +1856,14 @@ export interface ModelListResponse {
   models: Record<string, string>[];
 }
 
+export interface ModelProvenanceV2 {
+  model_id: string;
+  version: string;
+  code_commit?: string | null;
+  configuration_sha256?: string | null;
+  relationship_to_vendor: "independent_physics" | "vendor_comparable_surrogate" | "vendor_reported_output" | "unknown";
+}
+
 /**
  * Toast notification preferences.
  */
@@ -1393,6 +1872,65 @@ export interface NotificationSettings {
   toast_duration_ms: number;
   /** 'all' shows every toast, 'errors' only errors/warnings, 'silent' suppresses all toasts. */
   verbosity: "all" | "errors" | "silent";
+}
+
+/**
+ * Evidence defining chronological or ordinal order for longitudinal work.
+ */
+export interface OrderEvidenceV2 {
+  trust_level: "not_provided" | "explicit_user_attested" | "source_reported" | "verified_external" | "untrusted_inferred";
+  order_column?: string | null;
+  order_kind?: "timestamp" | "ordinal" | "source_sequence" | null;
+  unit?: string | null;
+  evidence?: string | null;
+}
+
+export interface OutcomeProxyClaimsV1 {
+  is_strokes_gained: false;
+  source_backed: false;
+  causal_inference: false;
+}
+
+/**
+ * Bounded records and explicitly non-SG outcome-proxy request.
+ */
+export interface OutcomeProxyPayloadV1 {
+  records: Record<string, unknown>[];
+  request: OutcomeProxyRequestV1;
+}
+
+export interface OutcomeProxyRequestV1 {
+  carry_column: string;
+  lateral_column: string;
+  carry_unit: "yd" | "m";
+  lateral_unit: "yd" | "m";
+  target_distance_yards: number;
+  shot_id_column?: string | null;
+  confidence_level: number;
+  min_samples: number;
+}
+
+export interface OutcomeProxyResultV1 {
+  contract_version: "launch-monitor-outcome-proxy/1.0.0";
+  status: "available" | "partial" | "unavailable";
+  metric_name: "expected_proximity_dispersion_proxy";
+  unit: "yd";
+  value_summary: EstimateSummaryV1;
+  row_results: OutcomeProxyRowV1[];
+  exclusions: ExclusionSummaryV1;
+  formula: string;
+  units: Record<string, string>;
+  claims?: OutcomeProxyClaimsV1;
+  limitations: string[];
+}
+
+export interface OutcomeProxyRowV1 {
+  source_index: number;
+  shot_id?: string | null;
+  carry_yards: number;
+  lateral_yards: number;
+  target_distance_yards: number;
+  radial_error_yards: number;
 }
 
 /**
@@ -1417,6 +1955,110 @@ export interface PlaybackResponse {
 }
 
 /**
+ * A player-level estimate and normalized meta-analysis weights.
+ */
+export interface PlayerAssociationV1 {
+  player_id: string;
+  estimate: AssociationEstimateV1;
+  fixed_weight?: number | null;
+  random_weight?: number | null;
+}
+
+/**
+ * Bounded records, selected pair, and explicit evidence context.
+ */
+export interface PlayerCovariationPayloadV1 {
+  records: Record<string, unknown>[];
+  request: PlayerCovariationRequestV1;
+  context?: AnalysisContextV2;
+}
+
+/**
+ * Select one variable pair and the player-level inference rules.
+ */
+export interface PlayerCovariationRequestV1 {
+  x_column: string;
+  y_column: string;
+  player_column: string;
+  min_samples: number;
+  confidence_level: number;
+}
+
+/**
+ * Evidence-bearing result for one selected variable pair.
+ */
+export interface PlayerCovariationResultV1 {
+  contract_version: "launch-monitor-player-covariation/1.0.0";
+  analysis_kind: "selected_pair";
+  status: "available" | "partial" | "unavailable";
+  request: PlayerCovariationRequestV1;
+  pooled: AssociationEstimateV1;
+  within_player: AssociationEstimateV1;
+  between_player: AssociationEstimateV1;
+  per_player: PlayerAssociationV1[];
+  meta_analysis: MetaAnalysisSummaryV1;
+  missingness: CovariationMissingnessV1;
+  units: Record<string, MetricUnitsV2>;
+  lineage: AnalysisLineageV2;
+  availability: AvailabilityV2[];
+  uncertainty: CovariationUncertaintyV1;
+  player_identity: PlayerIdentityV2;
+  vendor_provenance: VendorProvenanceV2[];
+  claims?: ClaimsV2;
+  definitions: Record<string, string>;
+  warnings: string[];
+}
+
+/**
+ * Bounded records and a bounded exploratory pair-scan request.
+ */
+export interface PlayerCovariationScanPayloadV1 {
+  records: Record<string, unknown>[];
+  request: PlayerCovariationScanRequestV1;
+  context?: AnalysisContextV2;
+}
+
+/**
+ * Select a bounded exploratory all-pairs scan.
+ */
+export interface PlayerCovariationScanRequestV1 {
+  player_column: string;
+  numeric_columns: string[];
+  min_samples: number;
+  confidence_level: number;
+}
+
+/**
+ * Evidence-bearing deterministic exploratory pair ranking.
+ */
+export interface PlayerCovariationScanResultV1 {
+  contract_version: "launch-monitor-player-covariation/1.0.0";
+  analysis_kind: "pair_scan";
+  status: "available" | "partial" | "unavailable";
+  request: PlayerCovariationScanRequestV1;
+  pair_count: number;
+  available_pair_count: number;
+  unavailable_pair_count: number;
+  ranking: CovariationPairRankV1[];
+  lineage: AnalysisLineageV2;
+  player_identity: PlayerIdentityV2;
+  vendor_provenance: VendorProvenanceV2[];
+  claims?: ClaimsV2;
+  warnings: string[];
+  method_description: string;
+}
+
+/**
+ * Declared identity evidence; identity is never inferred from layout.
+ */
+export interface PlayerIdentityV2 {
+  trust_level: "not_provided" | "explicit_user_attested" | "pseudonymous_stable" | "verified_external" | "untrusted_inferred";
+  /** Explicit player identifier column; session, club, source, file, and row-position fields are forbidden. */
+  identifier_column?: string | null;
+  evidence?: string | null;
+}
+
+/**
  * One enumerable plot type served by the analysis API.
  */
 export interface PlotTypeInfo {
@@ -1431,6 +2073,19 @@ export interface PlotTypeInfo {
  */
 export interface PlotTypesResponse {
   plot_types: PlotTypeInfo[];
+}
+
+export interface PooledAssociationV1 {
+  method: "player_fixed_effects_ols_clustered_by_player";
+  estimate_per_order_unit: number;
+  standard_error: number;
+  confidence_interval_low: number;
+  confidence_interval_high: number;
+  p_value: number;
+  confidence_level: number;
+  cluster_count: number;
+  session_cell_count: number;
+  uncertainty_state: "available";
 }
 
 /**
@@ -1634,6 +2289,26 @@ export interface ScatterAnalysisResponse {
   make_percentage: number;
 }
 
+export interface SessionAggregateV1 {
+  player_id: string;
+  session_id: string;
+  order_value: number;
+  order_unit: string;
+  stratum: Record<string, string>;
+  shot_count: number;
+  metric_value: number;
+  confounder_values: Record<string, number>;
+}
+
+/**
+ * Evidence for repeated-observation session boundaries, never a player ID.
+ */
+export interface SessionIdentityV2 {
+  trust_level: "not_provided" | "explicit_user_attested" | "source_reported" | "verified_external" | "untrusted_inferred";
+  identifier_column?: string | null;
+  evidence?: string | null;
+}
+
 /**
  * Request to change the active theme.
  */
@@ -1722,6 +2397,17 @@ export interface SkeletonFrame {
 }
 
 /**
+ * Content-addressed source and the sessions it backs.
+ */
+export interface SourceFileReferenceV2 {
+  source_id: string;
+  file_sha256: string;
+  session_ids: string[];
+  source_uri?: string | null;
+  rights_status: "public_redistributable" | "restricted_internal" | "permission_required" | "unknown";
+}
+
+/**
  * Request model for simulation speed control. Preconditions: - speed_factor must be in [0.1, 10.0] See issue #1202
  */
 export interface SpeedControlRequest {
@@ -1737,6 +2423,81 @@ export interface SpeedControlResponse {
   speed_factor: number;
   /** Status message */
   status: string;
+}
+
+export interface StrokesGainedAnalysisResultV1 {
+  contract_version: "launch-monitor-strokes-gained-analysis/1.0.0";
+  status: "available" | "partial" | "unavailable";
+  metric_name: "source_backed_strokes_gained";
+  unit: "strokes";
+  value_summary: EstimateSummaryV1;
+  baseline: BaselineProvenanceV1;
+  formula: string;
+  units: Record<string, string>;
+  availability: AvailabilityV1;
+  uncertainty: StrokesGainedUncertaintyV1;
+  row_results: StrokesGainedRowV1[];
+  excluded_rows: ExcludedRowV1[];
+  exclusions: ExclusionSummaryV1;
+  group_summaries: GroupSummaryV1[];
+  longitudinal_summaries: LongitudinalSummaryV1[];
+  analysis_context: AnalysisContextV2;
+  dataset_fingerprint_sha256: string;
+  claims?: StrokesGainedClaimsV1;
+  warnings: string[];
+  limitations: string[];
+}
+
+export interface StrokesGainedClaimsV1 {
+  is_strokes_gained: true;
+  source_backed: true;
+  device_emulation: false;
+  device_certification: false;
+  causal_inference: false;
+}
+
+/**
+ * Bounded records, verified benchmark, and governed SG request.
+ */
+export interface StrokesGainedPayloadV1 {
+  records: Record<string, unknown>[];
+  baseline: ExpectedStrokesBaselineV2;
+  request: StrokesGainedRequestV1;
+  context?: AnalysisContextV2;
+}
+
+export interface StrokesGainedRequestV1 {
+  start: CourseStateColumnsV1;
+  finish: CourseStateColumnsV1;
+  shot_id_column?: string | null;
+  confidence_level: number;
+  min_samples: number;
+  summaries: GroupingDimensionV1[];
+  longitudinal?: LongitudinalDimensionV1 | null;
+}
+
+export interface StrokesGainedRowV1 {
+  source_index: number;
+  shot_id?: string | null;
+  input_record_sha256: string;
+  start: CourseStateValueV1;
+  finish: CourseStateValueV1;
+  expected_start: number;
+  expected_finish: number;
+  benchmark_standard_error?: number | null;
+  strokes_gained: number;
+  start_interpolation: InterpolationV1;
+  finish_interpolation: InterpolationV1;
+  groups?: Record<string, string>;
+  longitudinal_order?: number | null;
+}
+
+export interface StrokesGainedUncertaintyV1 {
+  sampling_method: string;
+  confidence_level: number;
+  benchmark_method: string;
+  benchmark_standard_error_mean?: number | null;
+  assumptions: string[];
 }
 
 /**
@@ -1858,6 +2619,15 @@ export interface TrajectoryRecordResponse {
 }
 
 /**
+ * Versioned transformation applied before analysis.
+ */
+export interface TransformRecordV2 {
+  transform_id: string;
+  version: string;
+  parameters_sha256: string;
+}
+
+/**
  * Descriptor for a single URDF joint. See issue #1201
  */
 export interface URDFJointDescriptor {
@@ -1935,6 +2705,14 @@ export interface URDFTreeNode {
   properties?: Record<string, unknown>;
 }
 
+export interface UncertaintyV2 {
+  confidence_level: number;
+  correlation_interval: string;
+  regression_interval: string;
+  multiplicity_adjustment: string;
+  assumptions: string[];
+}
+
 /**
  * Usage quota item schema.
  */
@@ -1993,6 +2771,16 @@ export interface ValidationError {
   loc: (string | number)[];
   msg: string;
   type: string;
+  input?: unknown;
+  ctx?: Record<string, unknown>;
+}
+
+export interface VendorProvenanceV2 {
+  vendor: string;
+  models: string[];
+  software_versions: string[];
+  row_count: number;
+  metric_statuses: Record<string, string[]>;
 }
 
 /**

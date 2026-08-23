@@ -27,10 +27,8 @@ _OPTIONAL_DEPENDENCY_MODULES = frozenset(
 _PREEXISTING_MODULE_SCOPE_PATCH_ALLOWLIST = frozenset(
     {
         ("tests/integration/test_physics_interfaces.py", 20),
-        ("tests/unit/engines/physics_engines/mujoco/test_docker_examples.py", 11),
         ("tests/unit/shared_python/test_plotting_coverage.py", 25),
         ("tests/unit/test_drake_wrapper.py", 88),
-        ("tests/unit/test_golf_suite_launcher.py", 185),
         ("tests/unit/test_openpose_estimator.py", 17),
         ("tests/unit/test_opensim_physics_engine.py", 40),
         ("tests/unit/test_shot_tracer.py", 20),

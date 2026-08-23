@@ -13,14 +13,39 @@ import argparse
 from collections import Counter
 import hashlib
 import json
+import os
 import re
 from pathlib import Path
+import subprocess
 from typing import Any
 from urllib.parse import urlparse
 
 SCHEMA_VERSION = "proximal-distal-claim-audit-v2"
 ADJUDICATION_OUTCOMES = frozenset(
     {"supported", "contradicted", "inconclusive", "untested"}
+)
+SUPPORTED_SCOPE_RISK_TOKENS = (
+    "human_validation",
+    "human_data",
+    "reimplementation_open",
+    "hypothesis",
+)
+SUPPORTED_SCOPE_BOUNDARY_TOKENS = (
+    "model",
+    "declared",
+    "boundary",
+    "withhold",
+    "human",
+    "only",
+    "within",
+    "prospective",
+    "not",
+    "open",
+    "condition",
+    "separate",
+    "no longer",
+    "removed",
+    "counterevidence",
 )
 INCLUDE_PATTERN = re.compile(r"^\s*\{\{<\s*include\s+([^ >]+)\s*>\}\}\s*$")
 DISPLAY_MATH_FENCE_PATTERN = re.compile(r"^\$\$(?:\s*\{[^}]*\})?\s*$")
@@ -260,7 +285,89 @@ def _require_list(record: dict[str, Any], field: str, claim_id: str) -> None:
         raise ValueError(f"{claim_id}: {field} must be a non-empty list")
 
 
-def _validate_source_location(location: str, claim_id: str, root: Path) -> None:
+def _repository_file_index(root: Path) -> set[Path] | None:
+    """Index working-tree files once, avoiding thousands of slow mount stats."""
+    try:
+        staged = subprocess.run(
+            ["git", "-C", str(root), "ls-files", "--stage", "-z"],
+            check=True,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+        ).stdout
+        untracked = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(root),
+                "ls-files",
+                "--others",
+                "--exclude-standard",
+                "-z",
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+        ).stdout
+        deleted = subprocess.run(
+            ["git", "-C", str(root), "ls-files", "--deleted", "-z"],
+            check=True,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+        ).stdout
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        return None
+    deleted_paths = {item for item in deleted.split("\0") if item}
+    regular_paths: set[Path] = set()
+    for record in staged.split("\0"):
+        if not record:
+            continue
+        metadata, separator, path_text = record.partition("\t")
+        mode = metadata.partition(" ")[0]
+        if separator and mode.startswith("100") and path_text not in deleted_paths:
+            regular_paths.add(Path(os.path.abspath(root / path_text)))
+    for path_text in untracked.split("\0"):
+        if not path_text:
+            continue
+        resolved = (root / path_text).resolve()
+        if resolved.is_relative_to(root) and resolved.is_file():
+            regular_paths.add(resolved)
+    return regular_paths
+
+
+def _contained_path(
+    root: Path, relative_path: Path, repository_files: set[Path] | None
+) -> Path:
+    if repository_files is None:
+        return (root / relative_path).resolve()
+    return Path(os.path.abspath(root / relative_path))
+
+
+def _validate_supported_scope(record: dict[str, Any], claim_id: str) -> None:
+    if record["adjudication_outcome"] != "supported":
+        return
+    detailed_status = " ".join(
+        (record["audit_status"], record["published_status"], record["classification"])
+    ).lower()
+    if not any(token in detailed_status for token in SUPPORTED_SCOPE_RISK_TOKENS):
+        return
+    adjudication = record["adjudication"].lower()
+    if not any(token in adjudication for token in SUPPORTED_SCOPE_BOUNDARY_TOKENS):
+        raise ValueError(
+            f"{claim_id}: supported outcome requires an explicitly narrower scope "
+            "when human validation, reimplementation, or hypothesis work is open"
+        )
+
+
+def _validate_source_location(
+    location: str,
+    claim_id: str,
+    root: Path,
+    line_count_cache: dict[Path, int],
+    repository_files: set[Path] | None,
+) -> None:
     """Resolve a repository-relative ``path:line`` locator or fail closed."""
     if not isinstance(location, str) or not location.strip():
         raise ValueError(f"{claim_id}: source_locations entries must be non-empty")
@@ -274,22 +381,37 @@ def _validate_source_location(location: str, claim_id: str, root: Path) -> None:
         raise ValueError(
             f"{claim_id}: source location must be repository-relative: {location!r}"
         )
-    resolved = (root / source_path).resolve()
+    resolved = _contained_path(root, source_path, repository_files)
     if not resolved.is_relative_to(root):
         raise ValueError(
             f"{claim_id}: source location escapes repository root: {location!r}"
         )
-    if not resolved.is_file():
-        raise ValueError(f"{claim_id}: missing source location file: {location!r}")
     line_number = int(line_text)
-    line_count = len(resolved.read_text(encoding="utf-8").splitlines())
+    line_count = line_count_cache.get(resolved)
+    if line_count is None:
+        exists = (
+            resolved in repository_files
+            if repository_files is not None
+            else resolved.is_file()
+        )
+        if not exists:
+            raise ValueError(f"{claim_id}: missing source location file: {location!r}")
+        line_count = len(resolved.read_text(encoding="utf-8").splitlines())
+        line_count_cache[resolved] = line_count
     if line_number < 1 or line_number > line_count:
         raise ValueError(
             f"{claim_id}: source location line is out of range: {location!r}"
         )
 
 
-def _validate_evidence_locator(artifact: str, claim_id: str, root: Path) -> str:
+def _validate_evidence_locator(
+    artifact: str,
+    claim_id: str,
+    root: Path,
+    text_cache: dict[Path, str],
+    bibliography_key_cache: dict[Path, set[str]],
+    repository_files: set[Path] | None,
+) -> str:
     """Validate an evidence locator and return its mechanical locator type."""
     if not isinstance(artifact, str) or not artifact.strip():
         raise ValueError(
@@ -308,17 +430,28 @@ def _validate_evidence_locator(artifact: str, claim_id: str, root: Path) -> str:
             f"{claim_id}: local evidence artifact must be repository-relative: "
             f"{artifact!r}"
         )
-    resolved_artifact = (root / artifact_path).resolve()
+    resolved_artifact = _contained_path(root, artifact_path, repository_files)
     if not resolved_artifact.is_relative_to(root):
         raise ValueError(
             f"{claim_id}: local evidence artifact escapes repository root: {artifact!r}"
         )
-    if not resolved_artifact.is_file():
+    exists = (
+        resolved_artifact in repository_files
+        if repository_files is not None
+        else resolved_artifact.is_file()
+    )
+    if not exists:
         raise ValueError(f"{claim_id}: missing local evidence artifact: {artifact!r}")
     if separator:
-        text = resolved_artifact.read_text(encoding="utf-8")
+        text = text_cache.get(resolved_artifact)
+        if text is None:
+            text = resolved_artifact.read_text(encoding="utf-8")
+            text_cache[resolved_artifact] = text
         if resolved_artifact.suffix.lower() == ".bib":
-            keys = set(re.findall(r"@\w+\s*\{\s*([^,\s]+)", text))
+            keys = bibliography_key_cache.get(resolved_artifact)
+            if keys is None:
+                keys = set(re.findall(r"@\w+\s*\{\s*([^,\s]+)", text))
+                bibliography_key_cache[resolved_artifact] = keys
             if fragment not in keys:
                 raise ValueError(
                     f"{claim_id}: missing bibliography key in evidence artifact: "
@@ -337,20 +470,10 @@ def _validate_evidence_locator(artifact: str, claim_id: str, root: Path) -> str:
     return "local_file"
 
 
-def validate_registry(
-    registry_path: Path,
-    *,
-    repository_root: Path | None = None,
-    check_release_manifest: bool = True,
-) -> dict[str, Any]:
-    """Validate claim contracts and reconcile the public release claims."""
-    root = (repository_root or _repository_root()).resolve()
-    registry = json.loads(registry_path.read_text(encoding="utf-8"))
-    if registry.get("schema_version") != SCHEMA_VERSION:
-        raise ValueError(
-            f"Unsupported claim-audit schema: {registry.get('schema_version')!r}"
-        )
-
+def _validate_claim_records(
+    registry: dict[str, Any], root: Path, repository_files: set[Path] | None
+) -> tuple[list[dict[str, Any]], list[Any], Counter[str], Counter[str]]:
+    """Validate atomic claim fields, source locations, and evidence locators."""
     claims = registry.get("claims")
     if not isinstance(claims, list):
         raise ValueError("claims must be a list")
@@ -378,6 +501,10 @@ def validate_registry(
     )
     evidence_locator_types: Counter[str] = Counter()
     adjudication_outcomes: Counter[str] = Counter()
+    source_line_counts: dict[Path, int] = {}
+    evidence_texts: dict[Path, str] = {}
+    bibliography_keys_by_path: dict[Path, set[str]] = {}
+    validated_evidence_locators: dict[str, str] = {}
     for record in claims:
         claim_id = record.get("claim_id", "<missing claim_id>")
         for field in required_text:
@@ -392,13 +519,29 @@ def validate_registry(
                 f"{sorted(ADJUDICATION_OUTCOMES)}"
             )
         adjudication_outcomes[outcome] += 1
+        _validate_supported_scope(record, claim_id)
         for location in record["source_locations"]:
-            _validate_source_location(location, claim_id, root)
+            _validate_source_location(
+                location, claim_id, root, source_line_counts, repository_files
+            )
         for artifact in record["evidence_artifacts"]:
-            evidence_locator_types[
-                _validate_evidence_locator(artifact, claim_id, root)
-            ] += 1
+            locator_type = validated_evidence_locators.get(artifact)
+            if locator_type is None:
+                locator_type = _validate_evidence_locator(
+                    artifact,
+                    claim_id,
+                    root,
+                    evidence_texts,
+                    bibliography_keys_by_path,
+                    repository_files,
+                )
+                validated_evidence_locators[artifact] = locator_type
+            evidence_locator_types[locator_type] += 1
+    return claims, claim_ids, adjudication_outcomes, evidence_locator_types
 
+
+def _validate_paper_inventory(registry: dict[str, Any], root: Path) -> dict[str, Any]:
+    """Validate the source snapshot and bibliography closure."""
     paper = registry.get("paper", {})
     source = root / paper.get("source", "")
     inventory = build_candidate_inventory(source, repository_root=root)
@@ -425,7 +568,13 @@ def validate_registry(
             raise ValueError(
                 f"Paper citations missing from references.bib: {missing_citations}"
             )
+    return inventory
 
+
+def _validate_release_inventory(
+    registry: dict[str, Any], root: Path, *, check_release_manifest: bool
+) -> tuple[list[Any], str, list[str]]:
+    """Validate release-level claim states and optional manifest parity."""
     release_inventory = registry.get("release_claim_inventory", [])
     release_keys = [item.get("release_claim_key") for item in release_inventory]
     if len(release_keys) != len(set(release_keys)):
@@ -465,8 +614,16 @@ def validate_registry(
         raise ValueError(
             "Declared release review completion does not match release claim states"
         )
+    return release_keys, release_review_completion, open_release_keys
 
-    completion = registry.get("audit_scope", {}).get("completion_status")
+
+def _validate_candidate_reviews(
+    registry: dict[str, Any],
+    inventory: dict[str, Any],
+    claims: list[dict[str, Any]],
+    claim_ids: list[Any],
+) -> tuple[list[Any], set[str]]:
+    """Validate candidate coverage, mappings, and reciprocal claim links."""
     candidate_ids = {item["candidate_id"] for item in inventory["candidates"]}
     claim_id_set = set(claim_ids)
     reviews = registry.get("candidate_reviews")
@@ -522,6 +679,7 @@ def validate_registry(
                 )
 
     unadjudicated = candidate_ids - set(review_ids)
+    completion = registry.get("audit_scope", {}).get("completion_status")
     if completion == "complete" and unadjudicated:
         raise ValueError(
             "Audit cannot be complete while paper candidates remain unadjudicated"
@@ -530,19 +688,47 @@ def validate_registry(
         review["disposition"] == "requires_split" for review in reviews
     ):
         raise ValueError("Audit cannot be complete while candidates require splitting")
+    return review_ids, unadjudicated
+
+
+def validate_registry(
+    registry_path: Path,
+    *,
+    repository_root: Path | None = None,
+    check_release_manifest: bool = True,
+) -> dict[str, Any]:
+    """Validate claim contracts and reconcile the public release claims."""
+    root = (repository_root or _repository_root()).resolve()
+    registry = json.loads(registry_path.read_text(encoding="utf-8"))
+    if registry.get("schema_version") != SCHEMA_VERSION:
+        raise ValueError(
+            f"Unsupported claim-audit schema: {registry.get('schema_version')!r}"
+        )
+    repository_files = _repository_file_index(root)
+    claims, claim_ids, outcomes, locator_types = _validate_claim_records(
+        registry, root, repository_files
+    )
+    inventory = _validate_paper_inventory(registry, root)
+    release_keys, release_completion, open_release_keys = _validate_release_inventory(
+        registry, root, check_release_manifest=check_release_manifest
+    )
+    review_ids, unadjudicated = _validate_candidate_reviews(
+        registry, inventory, claims, claim_ids
+    )
+    completion = registry.get("audit_scope", {}).get("completion_status")
     return {
         "completion_status": completion,
-        "candidate_count": len(candidate_ids),
+        "candidate_count": len(inventory["candidates"]),
         "unadjudicated_candidate_count": len(unadjudicated),
         "registered_claim_count": len(claims),
         "reviewed_candidate_count": len(review_ids),
         "release_claim_count": len(release_keys),
-        "release_review_completion_status": release_review_completion,
+        "release_review_completion_status": release_completion,
         "open_release_claim_count": len(open_release_keys),
         "open_release_claim_keys": open_release_keys,
         "source_digest": inventory["source_digest"],
-        "adjudication_outcome_counts": dict(sorted(adjudication_outcomes.items())),
-        "evidence_locator_type_counts": dict(sorted(evidence_locator_types.items())),
+        "adjudication_outcome_counts": dict(sorted(outcomes.items())),
+        "evidence_locator_type_counts": dict(sorted(locator_types.items())),
     }
 
 

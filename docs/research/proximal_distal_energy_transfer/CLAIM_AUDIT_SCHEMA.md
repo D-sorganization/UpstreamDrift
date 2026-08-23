@@ -19,6 +19,11 @@ The machine-readable authorities are:
   claim-specific scientific qualification and availability snapshot for every
   external reference.
 
+The evidence manifest canonicalizes CRLF to LF for valid UTF-8 evidence before
+computing its SHA-256 digest and byte count; binary evidence remains byte-exact.
+This keeps the same committed text portable across Windows and Linux checkouts
+without weakening binary artifact identity.
+
 ## Candidate Inventory
 
 `python -m scripts.research.proximal_distal_energy.claim_audit inventory`
@@ -127,6 +132,33 @@ The audit keeps these classes separate:
    development, but never independent confirmation.
 6. **Hypothesis or interpretation:** retained only with a measurable prediction,
    alternative explanation, and prospective falsifier.
+
+## Reviewer-Facing Qualification Axes
+
+The generated adjudication summary reports four axes independently of the
+normalized finding outcome:
+
+- `evidence_tiers` distinguishes project derivations and executable artifacts
+  from externally reviewed empirical, methodological, modeling, and synthesis
+  works. A claim can occupy more than one tier.
+- `source_independence` is an exact one-category partition computed from the
+  canonical-work review: project only, one independent supporting work,
+  multiple independent supporting works, author-overlap support, unclear
+  independence, or external context only. Mirrors of one work remain one
+  source.
+- `model_tiers` identifies the declared analytical, planar, two-hand,
+  compliant-shaft, finite-base, spatial, articulated, uncertainty/control,
+  human/external, or cross-tier surfaces. These labels are nonexclusive.
+- `unresolved_replication_classes` preserves open reimplementation,
+  reanalysis, external-validation, systematic-review, prospective-experiment,
+  and governed-human-data boundaries. These labels are also nonexclusive.
+
+The generated claim-family table flags families supported only by
+project-authored material or concentrated in one independent work. None of
+these axes promotes a claim's outcome. Full row-level records are committed as
+`data/claim_adjudication_summary.json` and
+`data/claim_adjudication_summary.csv`; the compact generated Quarto table is
+included in the paper.
 
 ## Completion Rule
 

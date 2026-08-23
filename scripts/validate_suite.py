@@ -81,30 +81,24 @@ def validate_launchers() -> bool:
     logger.info("Validating launchers...")
 
     try:
-        # Test GUI launcher
+        # Test classic GUI launcher
 
-        from launchers.unified_launcher import UnifiedLauncher
+        from src.launchers.upstream_drift_launcher import main as classic_main
 
-        _ = UnifiedLauncher
+        _ = classic_main
 
-        logger.info("  ✅ GUI launcher imports successfully")
+        logger.info("  ✅ Classic GUI launcher imports successfully")
 
-        # Test local launcher
-
-        from launchers.golf_suite_launcher import main
-
-        _ = main
-
-        logger.info("  ✅ Local launcher imports successfully")
-
-        # Test main launcher
+        # Test canonical launcher
 
         spec = importlib.util.spec_from_file_location(
-            "launch_golf_suite", SUITE_ROOT / "launch_golf_suite.py"
+            "launch_upstream_drift", _PROJECT_ROOT / "launch_upstream_drift.py"
         )
 
         if spec is None or spec.loader is None:
-            raise ImportError("Could not load spec or loader for launch_golf_suite.py")
+            raise ImportError(
+                "Could not load spec or loader for launch_upstream_drift.py"
+            )
 
         launch_module = importlib.util.module_from_spec(spec)
 

@@ -1,35 +1,16 @@
-"""Tests for unified launcher status output."""
+"""Tombstone: the module this file tested was removed.
 
-from __future__ import annotations
+The dead launcher shells (``src/launchers/unified_launcher.py``,
+``src/launchers/golf_suite_launcher.py``, ``src/launchers/model_registry.py``)
+were quarantined and deleted in #8831/#8859 (landed via PR #8976) because they
+shadowed the canonical launcher/registry. This tombstone preserves the test
+path so the deleted-test gate stays honest; it is slated for post-merge
+cleanup.
+"""
 
-import logging
+import pytest
 
-from src.launchers.unified_launcher import UnifiedLauncher
-
-
-class _FakeEngineType:
-    def __init__(self, value: str) -> None:
-        self.value = value
-
-
-class _FakeEngineManager:
-    def get_available_engines(self) -> list[_FakeEngineType]:
-        return [_FakeEngineType("mujoco"), _FakeEngineType("drake")]
-
-
-def test_show_status_logs_available_engines(monkeypatch, caplog) -> None:
-    """show_status should log available engines and paths."""
-    monkeypatch.setattr(
-        "src.shared.python.engine_core.engine_manager.EngineManager",
-        _FakeEngineManager,
-    )
-
-    caplog.set_level(logging.INFO)
-
-    launcher = UnifiedLauncher.__new__(UnifiedLauncher)
-    launcher.show_status()
-
-    messages = [record.message for record in caplog.records]
-    assert any("Available engines" in message for message in messages)
-    assert any("mujoco" in message for message in messages)
-    assert any("drake" in message for message in messages)
+pytest.skip(
+    "target module removed in #8831 — tombstone pending post-merge cleanup",
+    allow_module_level=True,
+)

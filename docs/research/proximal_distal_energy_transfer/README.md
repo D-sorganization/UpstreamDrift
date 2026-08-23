@@ -1,5 +1,15 @@
 # Proximal-to-Distal Energy Transfer in the Golf Swing
 
+::: {.callout-note title="Canonical Publication"}
+The canonical text, multi-chapter web publication, and compiled PDF for this research live in the **AffineDrift** repository:
+
+- 📖 **Web Monograph**: [`https://affinedrift.com/articles/proximal_distal_energy_transfer/index.html`](https://affinedrift.com/articles/proximal_distal_energy_transfer/index.html)
+- 📄 **Official PDF**: [`https://affinedrift.com/articles/proximal_distal_energy_transfer/proximal_distal_energy_transfer.pdf`](https://affinedrift.com/articles/proximal_distal_energy_transfer/proximal_distal_energy_transfer.pdf)
+- 🔬 **Interactive Workbench**: [`https://affinedrift.com/articles/proximal-distal-model-workbench.html`](https://affinedrift.com/articles/proximal-distal-model-workbench.html)
+
+This directory in UpstreamDrift houses the authoritative computational simulation engines, evidence ledgers (`data/`), claim audit registers, and release verification bundles.
+:::
+
 The latest adversarial extension separates transmission-pathway identity,
 nominal speed, lower-tail performance, dispersion, contact loading, task-null
 variability, and model-conditional perturbation rejection. Start with
@@ -46,7 +56,7 @@ calibrated equipment, passive transfer, delivery benefit, slack benefit, or
 human strategy. A preregistered validity-horizon extension now advances all 54
 profile/span/phase states through 4, 10, 25, and 50 ms under nominal conditions
 and nine one-factor adverse or null branches. All 2,160 horizon cases pass the
-declared cross-engine and work--energy gates; no failure is observed through 50
+declared inertia-and-bias transport and work--energy gates; no failure is observed through 50
 ms. This is a right-censored reduced-model result, not a full delivery or
 anatomical validation. A native articulated-inertia gate now rebuilds the
 subject-scaled 20-coordinate tree independently in MuJoCo and robotics
@@ -130,6 +140,15 @@ comprehensive open modeling program are tracked in
 [#8557](https://github.com/D-sorganization/UpstreamDrift/issues/8557), with the
 durable execution contract in
 [`COMPREHENSIVE_RESEARCH_PROGRAM.md`](COMPREHENSIVE_RESEARCH_PROGRAM.md).
+The current normalized authority covers 303 material claims: 283 are supported
+only at their declared estimands and boundaries, five are inconclusive, 15 are
+untested, and none is classified as contradicted. That zero does not imply that
+all mechanisms survived adverse tests: accurately reported null, mixed, and
+adverse results can themselves be supported claims. The complete row-level
+[reviewer JSON](data/claim_adjudication_summary.json) and
+[reviewer CSV](data/claim_adjudication_summary.csv) expose evidence tier,
+source independence, model tier, unresolved replication, falsifier, and
+claim-family concentration without promoting model evidence to human evidence.
 The MT-E07 measurement program now includes both the exact bilateral-wrench
 rank audit and a trajectory-level synthetic point-force qualification under
 noise, normalized cross-talk, calibration residual, and contact-center
@@ -203,33 +222,37 @@ the finding-by-finding record in
 
 ## Layout
 
-| Path                                                                                                 | What it is                                                                        |
-| ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| [`proximal_distal_energy_transfer.qmd`](proximal_distal_energy_transfer.qmd)                         | Master Quarto document (front matter + chapter includes)                          |
-| [`chapters/`](chapters/)                                                                             | Chapter source files (`_ch01`–`_ch09`, `_appendices`)                             |
-| [`HAND_PATH_ATTRIBUTION_CONTRACT.md`](HAND_PATH_ATTRIBUTION_CONTRACT.md)                             | Canonical source, terminology, and estimand contract for hand-path attribution    |
-| [`TERMINOLOGY_AND_CONVENTIONS.md`](TERMINOLOGY_AND_CONVENTIONS.md)                                   | Normative scientific vocabulary, frame, wrench, power, and evidence-status rules  |
-| [`ADVANCED_EXPANSION_REVIEW.md`](ADVANCED_EXPANSION_REVIEW.md)                                       | Completed review, implemented expansion, and falsifiable next-model roadmap       |
-| [`EVIDENCE_SCHEMA_V2.md`](EVIDENCE_SCHEMA_V2.md)                                                     | Falsifiable prediction and named spatial-interface evidence contract              |
-| [`CLAIM_AUDIT_SCHEMA.md`](CLAIM_AUDIT_SCHEMA.md)                                                     | Atomic claim, candidate-inventory, source, alternative, and adjudication contract |
-| [`data/claim_evidence_manifest.json`](data/claim_evidence_manifest.json)                             | Claim-complete local hashes and external-support URL inventory                    |
-| [`data/external_source_review.json`](data/external_source_review.json)                               | Work-deduplicated source, correction, claim-fit, and link-availability review     |
-| [`COMPREHENSIVE_RESEARCH_PROGRAM.md`](COMPREHENSIVE_RESEARCH_PROGRAM.md)                             | Biomechanics, nonlinear-control, model-ladder, data, and validation roadmap       |
-| [`MOMENTUM_TRANSFER_QUESTION_PROGRAM.md`](MOMENTUM_TRANSFER_QUESTION_PROGRAM.md)                     | Drift, geometry, timing, robustness, proximal-velocity, and typed-slack questions |
-| [`data/momentum_transfer_experiment_registry.json`](data/momentum_transfer_experiment_registry.json) | Frozen interventions, controls, outcomes, uncertainty, falsifiers, and data needs |
-| [`MODEL_COMPLETION_FALSIFICATION_MATRIX.md`](MODEL_COMPLETION_FALSIFICATION_MATRIX.md)               | Claim, alternative-explanation, model-discrepancy, and falsifier register         |
-| [`EXPERIMENTAL_FALSIFICATION_PROTOCOL.md`](EXPERIMENTAL_FALSIFICATION_PROTOCOL.md)                   | Frozen human-data acquisition, split, analysis, and inference-boundary protocol   |
-| [`REVIEWER_WORKBENCH.md`](REVIEWER_WORKBENCH.md)                                                     | Claim-first figure, evidence, and download index by model tier                    |
-| [`COMPANION_WORKBENCH.md`](COMPANION_WORKBENCH.md)                                                   | Interactive PyQt6 and React/Tauri model guide, experiments, and evidence boundary |
-| [`ADVERSARIAL_REVIEW_ADJUDICATION.md`](ADVERSARIAL_REVIEW_ADJUDICATION.md)                           | Verified disposition and remediation record for the independent technical review  |
-| [`DATA_DICTIONARY.md`](DATA_DICTIONARY.md)                                                           | Artifact and recurring-field definitions with interpretation boundaries           |
-| [`release_manifest.json`](release_manifest.json)                                                     | Hash-pinned presets, claim status, artifacts, and open release gates              |
-| [`references.bib`](references.bib)                                                                   | Linked bibliography plus a clearly labeled project-originated presentation source |
-| [`figures/`](figures/)                                                                               | Figures generated from the recorded analyses (PDF and SVG)                        |
-| [`data/`](data/)                                                                                     | Recorded experiment outputs with provenance (JSON + NPZ)                          |
-| [`proximal_distal_energy_transfer.tex`](proximal_distal_energy_transfer.tex)                         | LaTeX generated from the Quarto source (`keep-tex: true`)                         |
-| [`sources/wscg_2024/`](sources/wscg_2024/)                                                           | Hash-registered WSCG presentation sources and interpretation boundaries           |
-| [`proximal_distal_energy_transfer.pdf`](proximal_distal_energy_transfer.pdf)                         | Rendered scientific PDF                                                           |
+| Path                                                                                                 | What it is                                                                                     |
+| ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| [`proximal_distal_energy_transfer.qmd`](proximal_distal_energy_transfer.qmd)                         | Master Quarto document (front matter + chapter includes)                                       |
+| [`chapters/`](chapters/)                                                                             | Chapter source files (`_ch01`–`_ch09`, `_appendices`)                                          |
+| [`HAND_PATH_ATTRIBUTION_CONTRACT.md`](HAND_PATH_ATTRIBUTION_CONTRACT.md)                             | Canonical source, terminology, and estimand contract for hand-path attribution                 |
+| [`TERMINOLOGY_AND_CONVENTIONS.md`](TERMINOLOGY_AND_CONVENTIONS.md)                                   | Normative scientific vocabulary, frame, wrench, power, and evidence-status rules               |
+| [`ADVANCED_EXPANSION_REVIEW.md`](ADVANCED_EXPANSION_REVIEW.md)                                       | Completed review, implemented expansion, and falsifiable next-model roadmap                    |
+| [`EVIDENCE_SCHEMA_V2.md`](EVIDENCE_SCHEMA_V2.md)                                                     | Falsifiable prediction and named spatial-interface evidence contract                           |
+| [`CLAIM_AUDIT_SCHEMA.md`](CLAIM_AUDIT_SCHEMA.md)                                                     | Atomic claim, candidate-inventory, source, alternative, and adjudication contract              |
+| [`data/claim_adjudication_summary.json`](data/claim_adjudication_summary.json)                       | Complete normalized outcomes, qualification axes, and claim-family concentration               |
+| [`data/claim_adjudication_summary.csv`](data/claim_adjudication_summary.csv)                         | Accessible one-row-per-claim reviewer export                                                   |
+| [`data/claim_evidence_manifest.json`](data/claim_evidence_manifest.json)                             | Claim-complete local hashes and external-support URL inventory                                 |
+| [`data/external_source_review.json`](data/external_source_review.json)                               | Work-deduplicated source, correction, claim-fit, and link-availability review                  |
+| [`COMPREHENSIVE_RESEARCH_PROGRAM.md`](COMPREHENSIVE_RESEARCH_PROGRAM.md)                             | Biomechanics, nonlinear-control, model-ladder, data, and validation roadmap                    |
+| [`MOMENTUM_TRANSFER_QUESTION_PROGRAM.md`](MOMENTUM_TRANSFER_QUESTION_PROGRAM.md)                     | Drift, geometry, timing, robustness, proximal-velocity, and typed-slack questions              |
+| [`data/momentum_transfer_experiment_registry.json`](data/momentum_transfer_experiment_registry.json) | Frozen interventions, controls, outcomes, uncertainty, falsifiers, and data needs              |
+| [`MODEL_COMPLETION_FALSIFICATION_MATRIX.md`](MODEL_COMPLETION_FALSIFICATION_MATRIX.md)               | Claim, alternative-explanation, model-discrepancy, and falsifier register                      |
+| [`EXPERIMENTAL_FALSIFICATION_PROTOCOL.md`](EXPERIMENTAL_FALSIFICATION_PROTOCOL.md)                   | Frozen human-data acquisition, split, analysis, and inference-boundary protocol                |
+| [`MEASURED_TRAJECTORY_ACQUISITION.md`](MEASURED_TRAJECTORY_ACQUISITION.md)                           | Fail-closed measured-trajectory authority, manifest, digest, frame, event, and loader contract |
+| [`REVIEWER_WORKBENCH.md`](REVIEWER_WORKBENCH.md)                                                     | Claim-first figure, evidence, and download index by model tier                                 |
+| [`COMPANION_WORKBENCH.md`](COMPANION_WORKBENCH.md)                                                   | Interactive PyQt6 and React/Tauri model guide, experiments, and evidence boundary              |
+| [`PUBLICATION_QUALITY.md`](PUBLICATION_QUALITY.md)                                                   | PDF quality profiles, source authority, protected publication, and handoff                     |
+| [`ADVERSARIAL_REVIEW_ADJUDICATION.md`](ADVERSARIAL_REVIEW_ADJUDICATION.md)                           | Verified disposition and remediation record for the independent technical review               |
+| [`DATA_DICTIONARY.md`](DATA_DICTIONARY.md)                                                           | Artifact and recurring-field definitions with interpretation boundaries                        |
+| [`release_manifest.json`](release_manifest.json)                                                     | Hash-pinned presets, claim status, artifacts, and open release gates                           |
+| [`references.bib`](references.bib)                                                                   | Linked bibliography plus a clearly labeled project-originated presentation source              |
+| [`figures/`](figures/)                                                                               | Figures generated from the recorded analyses (PDF and SVG)                                     |
+| [`data/`](data/)                                                                                     | Recorded experiment outputs with provenance (JSON + NPZ)                                       |
+| [`proximal_distal_energy_transfer.tex`](proximal_distal_energy_transfer.tex)                         | LaTeX generated from the Quarto source (`keep-tex: true`)                                      |
+| [`sources/wscg_2024/`](sources/wscg_2024/)                                                           | Hash-registered WSCG presentation sources and interpretation boundaries                        |
+| [`proximal_distal_energy_transfer.pdf`](proximal_distal_energy_transfer.pdf)                         | Rendered scientific PDF                                                                        |
 
 ## Reproducing Everything
 
@@ -260,6 +283,10 @@ python3 -m scripts.research.proximal_distal_energy.make_forward_contact_validity
 python3 -m scripts.research.proximal_distal_energy.run_articulated_inertia_cross_engine
 python3 -m scripts.research.proximal_distal_energy.make_articulated_inertia_cross_engine_figure
 python3 scripts/research/proximal_distal_energy/register_articulated_inertia_claims.py
+python3 -m scripts.research.proximal_distal_energy.run_articulated_manufactured_solution
+python3 -m scripts.research.proximal_distal_energy.run_articulated_native_constraint_discrepancy
+python3 -m scripts.research.proximal_distal_energy.make_articulated_native_constraint_discrepancy_figure
+python3 scripts/research/proximal_distal_energy/register_articulated_native_constraint_discrepancy_claims.py
 python3 -m scripts.research.proximal_distal_energy.run_articulated_contact_projection
 python3 -m scripts.research.proximal_distal_energy.make_articulated_contact_projection_figure
 python3 scripts/research/proximal_distal_energy/register_articulated_contact_projection_claims.py
@@ -286,6 +313,10 @@ python3 -m scripts.research.proximal_distal_energy.run_uncertainty_control_study
 python3 -m scripts.research.proximal_distal_energy.run_timing_viability_study
 python3 -m scripts.research.proximal_distal_energy.run_typed_slack_dynamic_study
 python3 -m scripts.research.proximal_distal_energy.run_experimental_protocol_dry_run
+python3 -m scripts.research.proximal_distal_energy.measured_trajectory_source_registry validate
+python3 -m scripts.research.proximal_distal_energy.measured_trajectory_metric_registration validate
+# governed measured-trajectory ingestion contracts (no human dataset is currently admitted)
+python3 -m pytest tests/research/test_measured_trajectory_ingestion.py -q
 python3 -m scripts.research.proximal_distal_energy.run_advanced_biological_bridge
 python3 -m scripts.research.proximal_distal_energy.claim_audit inventory
 python3 -m scripts.research.proximal_distal_energy.register_closed_state_forward_bridge_claims
@@ -319,16 +350,24 @@ python3 -m scripts.research.proximal_distal_energy.make_uncertainty_control_figu
 python3 -m scripts.research.proximal_distal_energy.run_bilateral_wrench_identifiability_study
 python3 -m scripts.research.proximal_distal_energy.run_bilateral_wrench_sensor_qualification
 # document
+python3 -m pip install -e '.[publication]'
 cd docs/research/proximal_distal_energy_transfer
 quarto render proximal_distal_energy_transfer.qmd --to pdf
 cd ../../..
 python3 -m scripts.research.proximal_distal_energy.optimize_article_pdf
+python3 -m scripts.research.proximal_distal_energy.qualify_open_release validate \
+  --source-revision "$(git rev-parse HEAD)" \
+  --publication-profile computational
 ```
 
 Requires Quarto + a LaTeX distribution (TeX Live with `lmodern`), and
 Python 3.11+ with `numpy`, `matplotlib`, `pydantic`, `simpleeval`,
-`pandas`, and `pymupdf`. The final command performs lossless PDF object/stream
-compaction and fails if the page, URI-link, or outline contract changes.
+`pandas`, `pymupdf`, and `pikepdf`. The optimizer performs lossless PDF
+object/stream compaction plus web linearization and fails if the page,
+URI-link, or outline contract changes. The final validation binds the PDF to
+the exact source revision and release-manifest digest, renders every page, and
+reports the separate computational and archival publication profiles described
+in [`PUBLICATION_QUALITY.md`](PUBLICATION_QUALITY.md).
 Experiments are deterministic. The open-chain studies use fixed-step RK4; the
 forward constrained two-hand study uses velocity Verlet with mass-metric
 position and velocity projection. Parameters and numerical contracts are
