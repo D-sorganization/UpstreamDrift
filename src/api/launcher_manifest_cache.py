@@ -102,4 +102,7 @@ async def get_cached_manifest_async(
     def _load() -> LauncherManifest:
         return get_cached_manifest(loader=loader)
 
-    return await anyio.to_thread.run_sync(_load)
+    manifest: object = await anyio.to_thread.run_sync(_load)
+    if not isinstance(manifest, LauncherManifest):
+        raise TypeError("manifest loader returned an invalid result")
+    return manifest
