@@ -21,6 +21,7 @@ under the 1200-line budget enforced by
 
 from __future__ import annotations
 
+import copy
 import logging
 from pathlib import Path
 from typing import Any
@@ -118,6 +119,7 @@ class MainWidget(_RenderMixin, _BuildersMixin, _SessionMixin, QWidget):
         # Data
         self.df: pd.DataFrame | None = None
         self.events = MocapEvents()
+        self._events_original = copy.deepcopy(self.events)
         self._xlsx_path: str | None = None
 
         here = Path(__file__).parent
@@ -782,11 +784,27 @@ class MainWidget(_RenderMixin, _BuildersMixin, _SessionMixin, QWidget):
     def _clear_event_overrides(self) -> None:
         if not self.event_overrides:
             return
-        # Re-read events from the xlsx to undo overrides
-        if self._xlsx_path:
+        count = len(self.event_overrides)
+        reply = QMessageBox.question(
+            self,
+            "Clear Event Overrides",
+            f"Discard {count} manual event override{'s' if count != 1 else ''}?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if reply != QMessageBox.StandardButton.Yes:
+            return
+        # Unconditionally restore original events snapshot
+        if hasattr(self, "_events_original") and self._events_original is not None:
+            self.events = copy.deepcopy(self._events_original)
+        elif self._xlsx_path:
             self.events = read_event_header(
                 self._xlsx_path, self.sheet_combo.currentText()
             )
+            self._events_original = copy.deepcopy(self.events)
+        else:
+            self.events = MocapEvents()
+            self._events_original = copy.deepcopy(self.events)
         self.event_overrides = {}
         self.lbl_event_info.setText(self._events_summary())
         self._redraw()
@@ -955,6 +973,7 @@ class MainWidget(_RenderMixin, _BuildersMixin, _SessionMixin, QWidget):
         self.df = df
         self._xlsx_path = path
         self.events = read_event_header(path, sheet)
+        self._events_original = copy.deepcopy(self.events)
         # Re-apply any event-override that survived from the previous load
         for ev, sample in list(self.event_overrides.items()):
             setattr(self.events, f"{ev}_sample", float(sample))
