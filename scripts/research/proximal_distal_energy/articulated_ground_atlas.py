@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import asdict, dataclass, fields
 import hashlib
@@ -16,6 +17,14 @@ from numpy.typing import NDArray
 from scripts.research.proximal_distal_energy.articulated_distributed_grip import (
     DistributedGripConfig,
 )
+from scripts.research.proximal_distal_energy.articulated_atlas_authority import (
+    ArticulatedAtlasAuthority,
+    load_default_atlas_authority,
+)
+from scripts.research.proximal_distal_energy.articulated_atlas_runtime_authority import (
+    AtlasStateSelection,
+    resolve_atlas_states,
+)
 from scripts.research.proximal_distal_energy.articulated_ground import (
     ArticulatedGroundConfig,
 )
@@ -24,15 +33,8 @@ from scripts.research.proximal_distal_energy.articulated_ground_forward import (
     GroundIntegrationCase,
     integrate_articulated_ground,
 )
-from scripts.research.proximal_distal_energy.articulated_inertia_cross_engine import (
-    finite_difference_kinematics,
-)
 from scripts.research.proximal_distal_energy.articulated_shaft import (
     ArticulatedShaftConfig,
-)
-from scripts.research.proximal_distal_energy.subject_scaled_spatial_geometry import (
-    build_subject_scaled_model,
-    default_synthetic_profiles,
 )
 
 FloatArray = NDArray[np.float64]
@@ -45,6 +47,9 @@ VELOCITY_FACTORS = (1.0, -1.0)
 SOURCE_PATHS = (
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+    "docs/research/proximal_distal_energy_transfer/data/articulated_structural_authority_nominal.json",
+    "docs/research/proximal_distal_energy_transfer/data/articulated_structural_authority_nominal.npz",
+    "scripts/research/proximal_distal_energy/articulated_atlas_authority.py",
     "scripts/research/proximal_distal_energy/articulated_distributed_grip.py",
     "scripts/research/proximal_distal_energy/articulated_ground.py",
     "scripts/research/proximal_distal_energy/articulated_ground_forward.py",
@@ -145,14 +150,6 @@ class ArticulatedGroundAtlasConfig:
             raise ValueError(f"{name} must contain unique in-range integers")
 
 
-@dataclass(frozen=True, slots=True)
-class _Authority:
-    time_s: FloatArray
-    profile_index: NDArray[np.int_]
-    grip_span_m: FloatArray
-    solution_q: FloatArray
-
-
 @dataclass(slots=True)
 class _Buffers:
     peak_grip_force: FloatArray
@@ -184,18 +181,22 @@ class _Buffers:
     active_set_parity: NDArray[np.bool_]
 
 
-def _load_authority() -> _Authority:
-    with np.load(DATA / "subject_scaled_closed_contact.npz") as source:
-        authority = _Authority(
-            time_s=np.asarray(source["time_s"], dtype=float),
-            profile_index=np.asarray(source["case_profile_index"], dtype=int),
-            grip_span_m=np.asarray(source["case_grip_span_m"], dtype=float),
-            solution_q=np.asarray(source["solution_q"], dtype=float),
-        )
-        feasible = np.asarray(source["feasible"], dtype=bool)
-    if authority.solution_q.shape != (18, 13, 20) or not np.all(feasible):
-        raise RuntimeError("the closed-state authority is incomplete or infeasible")
-    return authority
+def _load_authority() -> ArticulatedAtlasAuthority:
+    return load_default_atlas_authority()
+
+
+def _resolve_states(
+    authority: ArticulatedAtlasAuthority,
+    config: ArticulatedGroundAtlasConfig,
+) -> AtlasStateSelection:
+    selection = resolve_atlas_states(
+        authority,
+        config.case_indices,
+        config.sample_indices,
+    )
+    if not selection.feasible_states:
+        raise RuntimeError("registered ground atlas contains no feasible states")
+    return selection
 
 
 def _buffers(shape: tuple[int, ...], nq: int) -> _Buffers:
@@ -237,7 +238,7 @@ def _buffers(shape: tuple[int, ...], nq: int) -> _Buffers:
 
 
 def _execution_digest(
-    authority: _Authority,
+    authority: ArticulatedAtlasAuthority,
     config: ArticulatedGroundAtlasConfig,
 ) -> str:
     """Bind branch checkpoints to scientific design, authority, and source code."""
@@ -261,6 +262,13 @@ def _execution_digest(
         digest.update(str(contiguous.dtype).encode("ascii"))
         digest.update(np.asarray(contiguous.shape, dtype=np.int64).tobytes())
         digest.update(contiguous.tobytes())
+    digest.update(
+        json.dumps(
+            authority.provenance_record(),
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+    )
     for path in SOURCE_PATHS:
         digest.update(path.encode("utf-8"))
         digest.update(hashlib.sha256((ROOT / path).read_bytes()).digest())
@@ -549,7 +557,7 @@ def _run_pair(
 
 
 def _run_branch(
-    authority: _Authority,
+    authority: ArticulatedAtlasAuthority,
     config: ArticulatedGroundAtlasConfig,
     state: tuple[int, int],
     kind: BranchKind,
@@ -558,13 +566,8 @@ def _run_branch(
     """Run one pathway or killswitch branch across signed/refined cells."""
 
     case_index, sample = state
-    profiles = default_synthetic_profiles()
-    model, metadata = build_subject_scaled_model(
-        profiles[authority.profile_index[case_index]]
-    )
-    velocity, _ = finite_difference_kinematics(
-        authority.solution_q[case_index], authority.time_s
-    )
+    resolved = authority.resolve_state(case_index, sample)
+    model, metadata = resolved.model, resolved.model_metadata
     grip = DistributedGripConfig(
         station_count_per_hand=config.station_count_per_hand,
         station_width_m=config.station_width_m,
@@ -587,9 +590,9 @@ def _run_branch(
     for velocity_slot, factor in enumerate(VELOCITY_FACTORS):
         for step_slot, step_s in enumerate(config.forward.time_steps_s):
             base = {
-                "q": authority.solution_q[case_index, sample],
-                "qd": velocity[sample],
-                "grip_span_m": float(authority.grip_span_m[case_index]),
+                "q": resolved.q,
+                "qd": resolved.qd,
+                "grip_span_m": resolved.grip_span_m,
                 "hand_contact_local_x_m": float(metadata["hand_contact_local_x_m"]),
                 "time_step_s": step_s,
                 "initial_club_displacement_m": config.initial_club_displacement_m,
@@ -616,7 +619,7 @@ def _run_branch(
 
 def _branch_job(
     payload: tuple[
-        _Authority,
+        ArticulatedAtlasAuthority,
         ArticulatedGroundAtlasConfig,
         int,
         tuple[int, int],
@@ -716,7 +719,7 @@ def _gates(
 
 
 def _arrays(
-    authority: _Authority,
+    authority: ArticulatedAtlasAuthority,
     states: tuple[tuple[int, int], ...],
     primary: _Buffers,
     controls: _Buffers,
@@ -759,14 +762,14 @@ def _result_record(
         "all_registered_gates_passed": all_passed,
         "maximum_normalized_work_energy_residual": float(
             max(
-                np.max(primary.normalized_energy_residual),
-                np.max(controls.normalized_energy_residual),
+                float(np.max(primary.normalized_energy_residual)),
+                float(np.max(controls.normalized_energy_residual)),
             )
         ),
         "maximum_trajectory_relative_error": float(
             max(
-                np.max(primary.trajectory_parity),
-                np.max(controls.trajectory_parity),
+                float(np.max(primary.trajectory_parity)),
+                float(np.max(controls.trajectory_parity)),
             )
         ),
         "maximum_ground_force_n": float(np.max(primary.peak_ground_force)),
@@ -802,13 +805,15 @@ def _result_record(
 
 
 def _record(
-    states: tuple[tuple[int, int], ...],
+    authority: ArticulatedAtlasAuthority,
+    selection: AtlasStateSelection,
     primary: _Buffers,
     controls: _Buffers,
     config: ArticulatedGroundAtlasConfig,
     gates: dict[str, Any],
     versions: dict[str, str],
 ) -> dict[str, Any]:
+    states = selection.feasible_states
     all_passed = bool(
         np.all(gates["primary_numerical"])
         and np.all(gates["control_numerical"])
@@ -822,6 +827,9 @@ def _record(
         "study_id": "finite-ground-free-moment-falsification-atlas",
         "design": {
             "engine_versions": versions,
+            "planned_state_count": len(selection.planned_states),
+            "feasible_state_count": len(states),
+            "retained_failures": [dict(row) for row in selection.retained_failures],
             "state_count": len(states),
             "ground_activations": list(config.ground_activations),
             "controls": list(config.control_names),
@@ -842,6 +850,7 @@ def _record(
             "center_of_pressure_reversal": "reference-transport invariance is contract-tested because center of pressure does not enter generalized force",
         },
         "configuration": asdict(config),
+        "state_authority": authority.provenance_record(),
         "results": _result_record(primary, controls, gates, all_passed),
         "limitations": {
             "calibration_status": "synthetic_reference_not_human_or_force_plate_calibrated",
@@ -860,21 +869,19 @@ def _record(
 def run_articulated_ground_atlas(
     config: ArticulatedGroundAtlasConfig = ArticulatedGroundAtlasConfig(),
     *,
+    authority: ArticulatedAtlasAuthority | None = None,
     state_checkpoint_dir: Path | None = None,
 ) -> tuple[dict[str, Any], dict[str, NDArray[Any]]]:
     """Run the registered primary and falsification-control trajectories."""
 
+    authority = authority if authority is not None else _load_authority()
+    selection = _resolve_states(authority, config)
     try:
         import mujoco
         import pinocchio as pin
     except ImportError as error:  # pragma: no cover
         raise RuntimeError("MuJoCo and robotics Pinocchio are required") from error
-    authority = _load_authority()
-    states = tuple(
-        (case, sample)
-        for case in config.case_indices
-        for sample in config.sample_indices
-    )
+    states = selection.feasible_states
     tail = (2, len(config.forward.time_steps_s), 2, len(config.horizons_s))
     primary = _buffers((len(states), len(config.ground_activations), *tail), 20)
     controls = _buffers((len(states), len(config.control_names), *tail), 20)
@@ -926,6 +933,7 @@ def run_articulated_ground_atlas(
         else:
             jobs.append((authority, config, state_slot, state, kind, branch_slot))
     executor = None
+    results: Iterator[tuple[int, tuple[int, int], BranchKind, int, _Buffers]]
     if not jobs:
         results = iter(())
     elif config.worker_count == 1:
@@ -974,7 +982,10 @@ def run_articulated_ground_atlas(
         "mujoco": str(mujoco.__version__),
         "pinocchio": str(pin.__version__),  # type: ignore[attr-defined]
     }
-    return _record(states, primary, controls, config, gates, versions), arrays
+    return (
+        _record(authority, selection, primary, controls, config, gates, versions),
+        arrays,
+    )
 
 
 __all__ = ["ArticulatedGroundAtlasConfig", "run_articulated_ground_atlas"]

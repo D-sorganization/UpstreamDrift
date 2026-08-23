@@ -73,7 +73,7 @@ def resolve_atlas_states(
     )
     feasible = governed.feasible_states(case_indices, sample_indices)
     feasible_set = set(feasible)
-    retained = tuple(
+    retained_rows: list[dict[str, int | str]] = [
         {
             "case_index": case_index,
             "phase_index": sample_index,
@@ -81,7 +81,8 @@ def resolve_atlas_states(
         }
         for case_index, sample_index in planned
         if (case_index, sample_index) not in feasible_set
-    )
+    ]
+    retained = tuple(retained_rows)
     if len(planned) != len(feasible) + len(retained):
         raise RuntimeError("planned authority states were not fully accounted for")
     return AtlasStateSelection(

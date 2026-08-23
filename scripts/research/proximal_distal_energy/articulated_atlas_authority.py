@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, replace
 import hashlib
 import json
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -12,7 +13,11 @@ from numpy.typing import NDArray
 
 from scripts.research.proximal_distal_energy.articulated_scaled_authority import (
     ScaledAuthority,
+    load_scaled_authority,
     validate_scaled_authority,
+)
+from scripts.research.proximal_distal_energy.articulated_inertia_cross_engine import (
+    finite_difference_kinematics,
 )
 from scripts.research.proximal_distal_energy.spatial_full_body import SpatialModel
 from scripts.research.proximal_distal_energy.subject_scaled_spatial_geometry import (
@@ -24,6 +29,10 @@ from scripts.research.proximal_distal_energy.subject_scaled_spatial_geometry imp
 FloatArray = NDArray[np.float64]
 BoolArray = NDArray[np.bool_]
 IntArray = NDArray[np.int64]
+ROOT = Path(__file__).resolve().parents[3]
+DATA = ROOT / "docs/research/proximal_distal_energy_transfer/data"
+DEFAULT_RECORD = DATA / "articulated_structural_authority_nominal.json"
+DEFAULT_ARRAYS = DATA / "articulated_structural_authority_nominal.npz"
 
 
 def _scientific_float(value: float) -> str:
@@ -82,6 +91,31 @@ def scientific_model_sha256(model: SpatialModel) -> str:
     }
     raw = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
     return hashlib.sha256(raw).hexdigest()
+
+
+@dataclass(frozen=True, slots=True)
+class ArticulatedAtlasState:
+    """One feasible phase bound to its corner-consistent spatial model."""
+
+    case_index: int
+    phase_index: int
+    model: SpatialModel
+    model_metadata: dict[str, Any]
+    q: FloatArray
+    qd: FloatArray
+    grip_span_m: float
+    authority_sha256: str
+    model_sha256: str
+
+    def __post_init__(self) -> None:
+        if self.q.shape != (20,) or self.qd.shape != (20,):
+            raise ValueError("atlas state coordinates must each have shape (20,)")
+        if not np.all(np.isfinite(self.q)) or not np.all(np.isfinite(self.qd)):
+            raise ValueError("atlas state coordinates must be finite")
+        if not np.isfinite(self.grip_span_m) or self.grip_span_m <= 0.0:
+            raise ValueError("atlas state grip span must be finite and positive")
+        if len(self.authority_sha256) != 64 or len(self.model_sha256) != 64:
+            raise ValueError("atlas state identities must be SHA-256 digests")
 
 
 @dataclass(frozen=True, slots=True)
@@ -258,6 +292,31 @@ class ArticulatedAtlasAuthority:
         self._require_selected_case(case_index)
         return build_subject_scaled_model(self.profile_for_case(case_index))
 
+    def resolve_state(
+        self,
+        case_index: int,
+        phase_index: int,
+    ) -> ArticulatedAtlasState:
+        """Resolve one feasible state and validate its structural model bind."""
+
+        self.require_state_feasible(case_index, phase_index)
+        model, metadata = self.build_case_model(case_index)
+        model_digest = self.validate_case_model(case_index, model, metadata)
+        velocity, _ = finite_difference_kinematics(
+            self.solution_q[case_index], self.time_s
+        )
+        return ArticulatedAtlasState(
+            case_index=case_index,
+            phase_index=phase_index,
+            model=model,
+            model_metadata=metadata,
+            q=np.asarray(self.solution_q[case_index, phase_index], dtype=float),
+            qd=np.asarray(velocity[phase_index], dtype=float),
+            grip_span_m=float(self.grip_span_m[case_index]),
+            authority_sha256=self.authority_sha256,
+            model_sha256=model_digest,
+        )
+
     def validate_case_model(
         self,
         case_index: int,
@@ -280,4 +339,16 @@ class ArticulatedAtlasAuthority:
             raise ValueError("case_index must be a selected case")
 
 
-__all__ = ["ArticulatedAtlasAuthority", "scientific_model_sha256"]
+def load_default_atlas_authority() -> ArticulatedAtlasAuthority:
+    """Load the governed nominal structural authority for headline atlases."""
+
+    scaled = load_scaled_authority(DEFAULT_RECORD, DEFAULT_ARRAYS)
+    return ArticulatedAtlasAuthority.from_scaled(scaled)
+
+
+__all__ = [
+    "ArticulatedAtlasAuthority",
+    "ArticulatedAtlasState",
+    "load_default_atlas_authority",
+    "scientific_model_sha256",
+]

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import asdict, dataclass, fields
 import hashlib
@@ -16,8 +17,13 @@ from numpy.typing import NDArray
 from scripts.research.proximal_distal_energy.articulated_distributed_grip import (
     DistributedGripConfig,
 )
-from scripts.research.proximal_distal_energy.articulated_inertia_cross_engine import (
-    finite_difference_kinematics,
+from scripts.research.proximal_distal_energy.articulated_atlas_authority import (
+    ArticulatedAtlasAuthority,
+    load_default_atlas_authority,
+)
+from scripts.research.proximal_distal_energy.articulated_atlas_runtime_authority import (
+    AtlasStateSelection,
+    resolve_atlas_states,
 )
 from scripts.research.proximal_distal_energy.articulated_shaft import (
     ArticulatedShaftConfig,
@@ -29,10 +35,6 @@ from scripts.research.proximal_distal_energy.articulated_shaft_forward import (
     ShaftIntegrationCase,
     integrate_articulated_shaft,
 )
-from scripts.research.proximal_distal_energy.subject_scaled_spatial_geometry import (
-    build_subject_scaled_model,
-    default_synthetic_profiles,
-)
 
 FloatArray = NDArray[np.float64]
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -41,7 +43,10 @@ ACTIVATIONS = ("rigid", "bending", "torsion", "coupled")
 SOURCE_PATHS = (
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+    "docs/research/proximal_distal_energy_transfer/data/articulated_structural_authority_nominal.json",
+    "docs/research/proximal_distal_energy_transfer/data/articulated_structural_authority_nominal.npz",
     "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json",
+    "scripts/research/proximal_distal_energy/articulated_atlas_authority.py",
     "scripts/research/proximal_distal_energy/articulated_distributed_grip.py",
     "scripts/research/proximal_distal_energy/articulated_distributed_forward.py",
     "scripts/research/proximal_distal_energy/articulated_shaft.py",
@@ -126,14 +131,6 @@ class ArticulatedShaftAtlasConfig:
             raise ValueError(f"{name} must contain unique in-range integers")
 
 
-@dataclass(frozen=True, slots=True)
-class _Authority:
-    time_s: FloatArray
-    profile_index: NDArray[np.int_]
-    grip_span_m: FloatArray
-    solution_q: FloatArray
-
-
 @dataclass(slots=True)
 class _Buffers:
     peak_force: FloatArray
@@ -157,18 +154,22 @@ class _Buffers:
     active_set_parity: NDArray[np.bool_]
 
 
-def _load_authority() -> _Authority:
-    with np.load(DATA_DIR / "subject_scaled_closed_contact.npz") as source:
-        result = _Authority(
-            time_s=np.asarray(source["time_s"], dtype=float),
-            profile_index=np.asarray(source["case_profile_index"], dtype=int),
-            grip_span_m=np.asarray(source["case_grip_span_m"], dtype=float),
-            solution_q=np.asarray(source["solution_q"], dtype=float),
-        )
-        feasible = np.asarray(source["feasible"], dtype=bool)
-    if result.solution_q.shape != (18, 13, 20) or not np.all(feasible):
-        raise RuntimeError("the closed-state authority is incomplete or infeasible")
-    return result
+def _load_authority() -> ArticulatedAtlasAuthority:
+    return load_default_atlas_authority()
+
+
+def _resolve_states(
+    authority: ArticulatedAtlasAuthority,
+    config: ArticulatedShaftAtlasConfig,
+) -> AtlasStateSelection:
+    selection = resolve_atlas_states(
+        authority,
+        config.case_indices,
+        config.sample_indices,
+    )
+    if not selection.feasible_states:
+        raise RuntimeError("registered shaft atlas contains no feasible states")
+    return selection
 
 
 def _buffers(shape: tuple[int, ...], nq: int) -> _Buffers:
@@ -335,20 +336,15 @@ def _record_pair(
 
 
 def _run_state(
-    authority: _Authority,
+    authority: ArticulatedAtlasAuthority,
     buffers: _Buffers,
     config: ArticulatedShaftAtlasConfig,
     state_slot: int,
     state: tuple[int, int],
 ) -> ArticulatedShaftProperties:
     case_index, sample = state
-    profiles = default_synthetic_profiles()
-    model, metadata = build_subject_scaled_model(
-        profiles[authority.profile_index[case_index]]
-    )
-    velocity, _ = finite_difference_kinematics(
-        authority.solution_q[case_index], authority.time_s
-    )
+    resolved = authority.resolve_state(case_index, sample)
+    model, metadata = resolved.model, resolved.model_metadata
     grip = DistributedGripConfig(
         station_count_per_hand=config.station_count_per_hand,
         station_width_m=config.station_width_m,
@@ -359,9 +355,9 @@ def _run_state(
         for velocity_slot, factor in enumerate((1.0, -1.0)):
             for step_slot, step in enumerate(config.forward.time_steps_s):
                 base = {
-                    "q": authority.solution_q[case_index, sample],
-                    "qd": velocity[sample],
-                    "grip_span_m": float(authority.grip_span_m[case_index]),
+                    "q": resolved.q,
+                    "qd": resolved.qd,
+                    "grip_span_m": resolved.grip_span_m,
                     "hand_contact_local_x_m": float(metadata["hand_contact_local_x_m"]),
                     "time_step_s": step,
                     "initial_club_displacement_m": config.initial_displacement_m,
@@ -393,7 +389,12 @@ def _run_state(
 
 
 def _run_state_job(
-    payload: tuple[_Authority, ArticulatedShaftAtlasConfig, int, tuple[int, int]],
+    payload: tuple[
+        ArticulatedAtlasAuthority,
+        ArticulatedShaftAtlasConfig,
+        int,
+        tuple[int, int],
+    ],
 ) -> tuple[int, _Buffers, ArticulatedShaftProperties]:
     authority, config, state_slot, state = payload
     shape = (
@@ -417,7 +418,7 @@ def _merge_state(target: _Buffers, state_slot: int, source: _Buffers) -> None:
 
 
 def _excluded_step_probe(
-    authority: _Authority,
+    authority: ArticulatedAtlasAuthority,
     config: ArticulatedShaftAtlasConfig,
     *,
     state: tuple[int, int],
@@ -427,13 +428,8 @@ def _excluded_step_probe(
     """Confirm that one excluded coarse torsion branch fails closed."""
 
     case_index, sample = state
-    profiles = default_synthetic_profiles()
-    model, metadata = build_subject_scaled_model(
-        profiles[authority.profile_index[case_index]]
-    )
-    velocity, _ = finite_difference_kinematics(
-        authority.solution_q[case_index], authority.time_s
-    )
+    resolved = authority.resolve_state(case_index, sample)
+    model, metadata = resolved.model, resolved.model_metadata
     grip = DistributedGripConfig(
         station_count_per_hand=config.station_count_per_hand,
         station_width_m=config.station_width_m,
@@ -441,9 +437,9 @@ def _excluded_step_probe(
         total_damping_n_s_m=config.total_damping_n_s_m,
     )
     case = ShaftIntegrationCase(
-        q=authority.solution_q[case_index, sample],
-        qd=velocity[sample],
-        grip_span_m=float(authority.grip_span_m[case_index]),
+        q=resolved.q,
+        qd=resolved.qd,
+        grip_span_m=resolved.grip_span_m,
         hand_contact_local_x_m=float(metadata["hand_contact_local_x_m"]),
         time_step_s=step_s,
         initial_club_displacement_m=config.initial_displacement_m,
@@ -485,7 +481,7 @@ def _excluded_step_probe(
 
 
 def _excluded_step_probes(
-    authority: _Authority, config: ArticulatedShaftAtlasConfig
+    authority: ArticulatedAtlasAuthority, config: ArticulatedShaftAtlasConfig
 ) -> list[dict[str, Any]]:
     return [
         _excluded_step_probe(
@@ -613,7 +609,7 @@ def _gates(
 
 
 def _arrays(
-    authority: _Authority,
+    authority: ArticulatedAtlasAuthority,
     states: tuple[tuple[int, int], ...],
     buffers: _Buffers,
     config: ArticulatedShaftAtlasConfig,
@@ -730,7 +726,8 @@ def _result_record(
 
 
 def _record(
-    states: tuple[tuple[int, int], ...],
+    authority: ArticulatedAtlasAuthority,
+    selection: AtlasStateSelection,
     buffers: _Buffers,
     config: ArticulatedShaftAtlasConfig,
     properties: ArticulatedShaftProperties,
@@ -739,6 +736,7 @@ def _record(
     versions: dict[str, str],
     coarse_probes: list[dict[str, Any]],
 ) -> dict[str, Any]:
+    states = selection.feasible_states
     all_passed = bool(
         np.all(gates["numerical"])
         and np.all(gates["parity"])
@@ -756,6 +754,9 @@ def _record(
         "study_id": "distributed-grip-articulated-shaft-bending-torsion",
         "design": {
             "engine_versions": versions,
+            "planned_state_count": len(selection.planned_states),
+            "feasible_state_count": len(states),
+            "retained_failures": [dict(row) for row in selection.retained_failures],
             "state_count": len(states),
             "activations": list(config.activations),
             "velocity_branch_count": 2,
@@ -773,6 +774,7 @@ def _record(
             "load_work_match": "post-registered coupled-versus-rigid cells within the declared symmetric relative tolerance",
         },
         "configuration": asdict(config),
+        "state_authority": authority.provenance_record(),
         "excluded_coarse_step_probes": coarse_probes,
         "structural_authority": _structural_record(properties, beam_record, gates),
         "results": _result_record(buffers, gates, all_passed),
@@ -793,21 +795,20 @@ def _record(
 
 def run_articulated_shaft_atlas(
     config: ArticulatedShaftAtlasConfig = ArticulatedShaftAtlasConfig(),
+    *,
+    authority: ArticulatedAtlasAuthority | None = None,
 ) -> tuple[dict[str, Any], dict[str, NDArray[Any]]]:
     """Run the registered state, shaft, sign, step, engine, and horizon atlas."""
 
+    authority = authority if authority is not None else _load_authority()
+    selection = _resolve_states(authority, config)
     try:
         import mujoco
         import pinocchio as pin
     except ImportError as error:  # pragma: no cover - native runtime gate
         raise RuntimeError("MuJoCo and robotics Pinocchio are required") from error
-    authority = _load_authority()
     coarse_probes = _excluded_step_probes(authority, config)
-    states = tuple(
-        (case, sample)
-        for case in config.case_indices
-        for sample in config.sample_indices
-    )
+    states = selection.feasible_states
     shape = (
         len(states),
         len(config.activations),
@@ -822,6 +823,7 @@ def run_articulated_shaft_atlas(
         (authority, config, state_slot, state)
         for state_slot, state in enumerate(states)
     )
+    results: Iterator[tuple[int, _Buffers, ArticulatedShaftProperties]]
     if config.worker_count == 1:
         results = map(_run_state_job, jobs)
         executor = None
@@ -856,7 +858,8 @@ def run_articulated_shaft_atlas(
     }
     return (
         _record(
-            states,
+            authority,
+            selection,
             buffers,
             config,
             properties,

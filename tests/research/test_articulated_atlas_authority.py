@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+import json
 from pathlib import Path
 
 import numpy as np
@@ -10,7 +11,11 @@ import pytest
 
 from scripts.research.proximal_distal_energy.articulated_atlas_authority import (
     ArticulatedAtlasAuthority,
+    load_default_atlas_authority,
     scientific_model_sha256,
+)
+from scripts.research.proximal_distal_energy.articulated_inertia_cross_engine import (
+    finite_difference_kinematics,
 )
 from scripts.research.proximal_distal_energy.articulated_scaled_authority import (
     load_scaled_authority,
@@ -145,3 +150,59 @@ def test_scientific_model_digest_ignores_last_bit_but_not_material_drift(
 
     assert scientific_model_sha256(last_bit_model) == scientific_model_sha256(model)
     assert scientific_model_sha256(material_model) != scientific_model_sha256(model)
+
+
+def test_default_atlas_authority_uses_governed_structural_nominal() -> None:
+    authority = load_default_atlas_authority()
+    campaign = json.loads(
+        (DATA / "articulated_structural_authority_campaign.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    nominal = campaign["corners"][0]
+
+    assert nominal["corner_id"] == "nominal"
+    assert authority.authority_sha256 == nominal["authority_sha256"]
+    assert authority.selected_failures() == ()
+    assert authority.provenance_record()["scales"] == {
+        "height": 1.0,
+        "body_mass": 1.0,
+        "joint_limit": 1.0,
+    }
+
+
+def test_resolved_state_uses_corner_model_and_phase_derivative() -> None:
+    scaled = load_scaled_authority(
+        DATA / "articulated_structural_authority_height_scale_high.json",
+        DATA / "articulated_structural_authority_height_scale_high.npz",
+    )
+    authority = ArticulatedAtlasAuthority.from_scaled(scaled)
+    state = authority.resolve_state(8, 6)
+    expected_velocity, _ = finite_difference_kinematics(
+        authority.solution_q[8], authority.time_s
+    )
+
+    assert state.case_index == 8
+    assert state.phase_index == 6
+    assert state.authority_sha256 == authority.authority_sha256
+    assert state.model_metadata["profile"]["height_m"] == pytest.approx(
+        default_synthetic_profiles()[int(authority.profile_index[8])].height_m * 1.10
+    )
+    np.testing.assert_array_equal(state.q, authority.solution_q[8, 6])
+    np.testing.assert_allclose(state.qd, expected_velocity[6], rtol=0.0, atol=0.0)
+    assert state.grip_span_m == pytest.approx(authority.grip_span_m[8])
+
+
+def test_resolved_state_rejects_retained_infeasible_phase() -> None:
+    scaled = load_scaled_authority(
+        DATA / "articulated_structural_authority_height_scale_low.json",
+        DATA / "articulated_structural_authority_height_scale_low.npz",
+    )
+    authority = ArticulatedAtlasAuthority.from_scaled(scaled)
+    failure = authority.selected_failures()[0]
+
+    with pytest.raises(RuntimeError, match="selected authority state is infeasible"):
+        authority.resolve_state(
+            int(failure["case_index"]),
+            int(failure["phase_index"]),
+        )
