@@ -216,13 +216,23 @@ scientific contract.
 
 ## Completed Candidate Census and Ongoing Release Review
 
-The narrative census adjudicates all 1,022 paper candidates against 281 atomic
+The narrative census adjudicates all 1,100 paper candidates against 303 atomic
 claim contracts; no candidate remains unreviewed. That completion status
 applies to candidate coverage, not to scientific closure of every release
-claim. All 33 public release claims now have deterministic review dispositions
+claim. All 42 public release claims now have deterministic review dispositions
 and explicit remaining scientific gates. Repeated methods,
 summary, limitation, and release passages point back to their primary claim
 instead of acquiring stronger authority through repetition.
+
+The machine-readable reviewer summary preserves each explicit adjudication and
+reports evidence tier, independent-work count, model tier, unresolved
+replication class, and claim-family source concentration. Of the 303 atomic
+claims, 283 are supported only at their declared estimands, five are
+inconclusive, and 15 are untested. The zero contradicted count does not imply
+that every proposed mechanism survived: supported claims may accurately report
+null, adverse, or contradictory model results. Likewise, externally cited
+human observations remain literature evidence rather than governed local
+participant validation.
 
 The bilateral-wrench extension adds a sensor-level falsifiability result. Two
 separated three-axis point forces map to net club wrench with rank five and one
@@ -317,8 +327,8 @@ map, and preserves #8556 as an external human-data acquisition gate. Future
 milestones must create new claim records and falsifiers before new conclusions
 enter summaries or conclusions.
 
-The separate claim-evidence integrity manifest covers all 1,875 evidence
-references. It hash-pins 239 distinct repository artifacts and inventories 78
+The separate claim-evidence integrity manifest covers all 2,130 evidence
+references. It hash-pins 319 distinct repository artifacts and inventories 78
 external URLs. Hash agreement establishes content identity, not independence
 or correctness; URL inventory establishes traceability, not availability or
 scientific validity.
