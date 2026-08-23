@@ -6,37 +6,17 @@ Last updated: 2026-08-22
 
 PR #8793 merged the PDF quality contract at `6e28baef54a0`: UpstreamDrift is authoritative, AffineDrift is its pinned publisher, and Tools/Sidekick only link. The web-linearized 231-page candidate passes full-page inspection; missing tags, 110 Type 3 resources, and two unembedded resources block archival release. Phase 0 landed in UpstreamDrift #8791, AffineDrift #3884, and Tools #4586. AffineDrift #3880/#3887/#3888 provide the immutable monograph projection, release pin, and verifier. #8789 owns Docker/quarantine/baseline; #8556, equipment calibration, and archival/PID release remain open. Details: `docs/research/proximal_distal_energy_transfer/PUBLICATION_QUALITY.md`.
 
-## Read This First — How Merging Works Now
+## Protected Delivery Rules
 
-Three workflows used to publish `quality-gate`; the first could satisfy
-protection while the real aggregate failed. #8747 fixed this; #8754 is closed.
-
-- The **only** required check is `quality-gate`, published by the aggregate in
-  `ci-standard.yml`; LoD/docs publish `lod-quality-gate`/`docs-quality-gate`.
-  **Never rename another job to `quality-gate`** — that recreates the collision.
-- If your run sits in `action_required`, wait: `approve-same-repo-runs.yml`
-  approves same-repository runs every five minutes (fork PRs keep the manual
-  gate). Do not disable it — branch updates come from a bot GitHub treats as a
-  first-time contributor forever.
-- `repo-structure-gates` is **sequential/fail-fast**. Run the battery below;
-  `check_architecture_budget.py` limits changed production functions to 100 lines.
-
-### Two Debt Ledgers — Remove-Only Ratchets
-
-`unit_gate_quarantine.json` (520 node IDs, #8766) applies through
-`_apply_unit_gate_quarantine` only when CI sets `UNIT_GATE_QUARANTINE=1`.
-`dry_duplication_quarantine.json` (#8763) tracks duplicate fingerprints.
-**Entries may only be removed, never added**.
-PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
-
-### Traps That Cost Real Time
-
-- **Committed evidence hash-pins its sources.** Fourteen `tests/research/` files
-  are frozen by `source_sha256` maps; edit only with `qualify_open_release write`.
-- **Phantom Guard Scope Rules:** Conventional commit prefix for PR titles
-  touching only `scripts/research/`, `docs/research/`, and `tests/research/`
-  must use `test:`, `docs:`, or `chore:` rather than `feat:` (which requires
-  diffs touching `src/`, `rust_core/`, or `api/`).
+- The only required check is the `ci-standard.yml` aggregate `quality-gate`;
+  LoD/docs publish distinct gates. Never reuse the protected name.
+- Same-repository `action_required` runs are approved automatically every five
+  minutes; fork runs retain manual review. `repo-structure-gates` is sequential
+  and fail-fast, and changed production functions are limited to 100 lines.
+- `unit_gate_quarantine.json` (#8766) and `dry_duplication_quarantine.json`
+  (#8763) are remove-only ledgers. Never add entries.
+- Research evidence hash-pins sources. Regenerate it only through governed
+  writers. Research/docs/test-only PR titles use `test:`, `docs:`, or `chore:`.
 
 ## Program Authority & Physics Epics State
 
@@ -78,26 +58,22 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
   - #8752 is **OPEN** on `research/8752-articulated-uncertainty`. The v2
     40-sample closed-state/LHS study is finite and energy-closed but every row
     retains partial opening. The 19-corner headline campaign is incomplete. At
-    2026-08-22 00:23 PDT it retained 23 terminal pathway evaluations across 11
-    fully accounted corners; `ground_translation_stiffness_scale-low` was active
-    with 25/72 atomic branch checkpoints (776 checkpoint files overall). Nominal
-    remains shaft 126/384 and ground 0/384. Three adverse pathways are retained
-    failures rather than filtered results. The independent
-    `articulated_headline_record_audit` rejects torn JSON,
-    schema/design/config/source drift, nonprefix corners, invalid pathway
-    states, and premature completion. It validates the current snapshot as
-    `partial` with `release_evidence: false`, source-set digest
-    `a64f02a92a300afe9e1f8070dd4ddca9e48add2b2fee22a337a4df5c37b25e57`,
-    and record digest
-    `069d942a2a04ba1a7960e628d44d49e88b12ca1780722fb977ace03d538181ba`.
-    All 72 nominal branch checkpoints retain exact trajectory/force/ground-force
-    parity and restart equivalence.
-    The completion-only headline evidence test stays untracked until data
-    finish. Branch `fix/8752-atomic-campaign-checkpoint`, forked from exact
-    campaign commit `8c537b660`, adds atomic replacement for the top-level JSON
-    and a manufactured replacement-interruption test. Integrate that commit only
-    after the live campaign finishes; changing campaign sources sooner would
-    intentionally trigger the source-drift gate.
+    2026-08-22 21:26 PDT it retained 33 terminal pathway evaluations across 16
+    fully accounted corners; `ground_free_moment_stiffness_scale-high` was
+    active. Parent PID `18404` remained alive. Nominal remains shaft 126/384 and
+    ground 0/384. Adverse pathways remain failures rather than being filtered.
+    `articulated_headline_record_audit` validates the snapshot as partial and
+    rejects torn JSON, registration/source drift, invalid pathway states, and
+    premature completion. The completion-only evidence test stays untracked.
+    `fix/8752-atomic-campaign-checkpoint` at `9f850a67f` adds atomic top-level
+    JSON replacement and an interruption test. Branch
+    `research/8752-uncertainty-reviewer-table` in worktree
+    `UpstreamDrift-worktrees/8752-reviewer-table-v2` adds a deterministic,
+    fail-closed CSV projection with one row per corner--pathway pair, retained
+    failures and not-affected rows, canonical-record/source-set hashes, and an
+    explicit summary-not-trajectory scope label. Twenty focused tests, Ruff,
+    and scoped mypy pass; partial input writes nothing. Integrate both follow-ups
+    only after campaign completion, then generate the CSV from governed JSON.
   - #8800 is **OPEN** and blocks #8752. Its governed generator regenerates all
     13 phase states for cases 0/8/9/17; nominal is 52/52 feasible and reproduces
     committed states within 1e-8 rad. JSON/NPZ evidence rejects source/content
