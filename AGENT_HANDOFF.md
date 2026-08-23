@@ -83,8 +83,9 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     17 corner records and 16 fully accounted corners. The active
     `ground_free_moment_stiffness_scale-high` corner retained 49/72 branches;
     1,160 atomic checkpoint files (12,343,744 bytes) exist overall, with no torn
-    `.tmp` file. PID `18404` and all campaign workers are absent. No restart has
-    been authorized yet. Nominal remains shaft 126/384 and ground 0/384. Three
+    `.tmp` file. PID `18404` and its workstation workers are absent. A qualified
+    eight-worker continuation started on ControlTower at 2026-08-23 09:28 PDT.
+    Nominal remains shaft 126/384 and ground 0/384. Three
     adverse pathways are retained failures rather than filtered results. The independent
     `articulated_headline_record_audit` rejects torn JSON,
     schema/design/config/source drift, nonprefix corners, invalid pathway
@@ -101,17 +102,31 @@ PR #8768 cleared main's ruff, bandit, XML security, and frontend lock debt.
     restart can reuse the checkpoints without changing the registered study.
     All 72 nominal branch checkpoints retain exact trajectory/force/ground-force
     parity and restart equivalence.
-    ControlTower is reachable and has a Ryzen 9 5950X (16 cores/32 threads),
-    approximately 128 GB RAM, and ample free memory, but it is not ready to run
-    this campaign yet: its existing UpstreamDrift checkout is dirty and stale,
-    the campaign commit is not fetched, and the inspected Windows Python
-    environments lack Pinocchio. The RTX 3090 does not accelerate this
-    CPU/NumPy/MuJoCo/Pinocchio workload. A safe migration requires a dedicated
-    clean worktree, exact environment/source/data hashes, a SHA-256 checkpoint
-    transfer manifest, and a one-branch cross-machine replay canary before any
-    resumed production branch. Start with eight workers and monitor host/runner
-    load before considering twelve. Do not mutate the dirty primary checkout or
-    launch a campaign until that qualification plan is approved.
+    ControlTower has a Ryzen 9 5950X (16 cores/32 threads), approximately 128 GB
+    RAM, and ample free memory. Its dirty/stale primary checkout was not mutated.
+    The continuation uses detached exact HEAD
+    `13146cdcece879e7156e06e2dca6626c1a54e045` at
+    `C:\Users\diete\Repositories\UpstreamDrift-worktrees\goal-8752-uncertainty`.
+    Transfer manifest SHA-256
+    `af88d9a25fb7a13033d729b73fe0da8cbf4eedced376e8acfc2feee939fcf2d5`
+    verified all 1,162 transferred files; archive SHA-256 is
+    `685393a555cc2dde6033e7d7a16a9d96153693fc055d2097e853eabcfdc55ab2`.
+    A one-branch replay of completed corner
+    `ground_free_moment_stiffness_scale-low` deliberately omitted and
+    regenerated `state-00-control-00.npz`. It passed every registered model gate,
+    exact metadata/dtype/shape and discrete-field comparisons, and the documented
+    cross-CPU numerical criterion (`rtol=2e-8`, `atol=1e-9`). The exact original
+    Ubuntu 22.04/Python 3.10.12 GCC, NumPy 2.2.4, SciPy 1.15.2, MuJoCo 3.8.0,
+    and Pinocchio 3.8.0 runtime is containerized as
+    `upstreamdrift-8752:ubuntu22`; the image manifest is
+    `sha256:4be08c2d04e94b827137429167a2d78c027d93a2718b699dea90b34b29b003f6`.
+    CPU-dependent differences were bounded by `1.38e-8` absolute and preserved
+    all decision classifications. Production container
+    `upstreamdrift-8752-campaign` (`7a348593a10e...`) is capped at eight CPUs and
+    96 GB RAM with `on-failure:3`; runtime status and logs are in
+    `C:\Users\diete\Campaigns\UpstreamDrift-8752\status.json` and `logs\campaign.log`.
+    The RTX 3090 does not accelerate this CPU/NumPy/MuJoCo/Pinocchio workload.
+    Do not start a duplicate container or mutate the dirty primary checkout.
     The completion-only headline evidence test stays untracked until data
     finish. Branch `fix/8752-atomic-campaign-checkpoint`, forked from exact
     campaign commit `8c537b660`, adds atomic replacement for the top-level JSON
@@ -161,9 +176,9 @@ Native MuJoCo and robotics Pinocchio independently qualify the 20-coordinate rig
 
 ## Immediate Next Steps
 
-1. Obtain restart-location approval for #8752, qualify the selected host as
-   described above, then resume from the 1,160 validated atomic checkpoints.
-   Complete #8752 and its blocking structural propagation issue #8800.
+1. Monitor the single qualified ControlTower continuation for checkpoint growth,
+   host load, terminal status, and complete JSON. Do not create a duplicate run.
+   Then complete #8752 and its blocking structural propagation issue #8800.
 2. Continue #8789's remaining Docker/quarantine/baseline work without overlap.
 3. Burn down #8766 without widening its registered contract.
 
