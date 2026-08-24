@@ -48,7 +48,9 @@ def test_clear_overrides_without_xlsx_restores_original_state_when_confirmed(
         {"time": [0.0, 0.01, 0.02, 0.03, 0.04], "club_X": [0.1, 0.2, 0.3, 0.4, 0.5]}
     )
     widget._xlsx_path = None
-    original_events = MocapEvents(A_sample=1.0, T_sample=2.0, I_sample=3.0, F_sample=4.0)
+    original_events = MocapEvents(
+        A_sample=1.0, T_sample=2.0, I_sample=3.0, F_sample=4.0
+    )
     widget._events_original = original_events
     widget.events = MocapEvents(A_sample=1.0, T_sample=2.0, I_sample=3.0, F_sample=4.0)
     original_t_sample = widget.events.T_sample
