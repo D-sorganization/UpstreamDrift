@@ -23,6 +23,11 @@ from .canonical_trial_executor import (
     execute_batched_variation,
     execute_serial_variation,
 )
+from .canonical_trial_campaign import (
+    CanonicalVariationCampaignResult,
+    execute_batched_variation_campaign,
+    execute_serial_variation_campaign,
+)
 from .double_pendulum_trial_adapter import (
     DoublePendulumTrialAdapter,
     DoublePendulumTrialConfig,
@@ -84,6 +89,9 @@ __all__ = [
     "TrialEvidenceCollector",
     "execute_batched_variation",
     "execute_serial_variation",
+    "CanonicalVariationCampaignResult",
+    "execute_batched_variation_campaign",
+    "execute_serial_variation_campaign",
     "DoublePendulumTrialAdapter",
     "DoublePendulumTrialConfig",
     "DoublePendulumTrialResult",
