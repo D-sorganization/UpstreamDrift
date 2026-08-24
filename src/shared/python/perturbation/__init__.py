@@ -5,6 +5,13 @@ analysis on engine dynamics.
 """
 
 from .config import PerturbationAnalyzer, PerturbationConfig, PerturbationSummary
+from .articulated_mujoco_trial_adapter import (
+    ArticulatedMujocoTrialAdapter,
+    ArticulatedMujocoTrialConfig,
+    ArticulatedMujocoTrialResult,
+    MujocoVariationBinding,
+    NamedJointTorque,
+)
 from .cross_engine_trial_parity import (
     CrossEngineCompatibilityError,
     CrossEngineParityMetrics,
@@ -44,6 +51,11 @@ __all__ = [
     "PerturbationAnalyzer",
     "PerturbationConfig",
     "PerturbationSummary",
+    "ArticulatedMujocoTrialAdapter",
+    "ArticulatedMujocoTrialConfig",
+    "ArticulatedMujocoTrialResult",
+    "MujocoVariationBinding",
+    "NamedJointTorque",
     "generate_noise",
     "compute_robustness_score",
     "MetricStatistics",
