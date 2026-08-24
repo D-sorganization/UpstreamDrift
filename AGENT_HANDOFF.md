@@ -51,8 +51,8 @@ Last updated: 2026-08-24
 - Local focused gates pass: 20 bridge tests, 55 final claim/release/PDF tests,
   Ruff, title capitalization, file-size budget, all-page rendering, and exact
   release qualification. The branch is rebased onto remote main
-  `76bf6ab1d`; rerun changed gates, push, open the full PR, and shepherd
-  protected CI plus human review.
+  `76bf6ab1d`; PR #9032 is open. Shepherd its exact head through protected CI
+  and human review, then verify its merge commit on remote main.
 
 ## ControlTower #8800 Recovery Boundary
 
