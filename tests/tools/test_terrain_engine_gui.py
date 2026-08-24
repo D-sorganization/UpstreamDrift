@@ -8,6 +8,9 @@ import sys
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PyQt6.QtWidgets import QApplication
+import pytest
+
+pytestmark = [pytest.mark.unit, pytest.mark.ui]
 
 from src.shared.python.physics.terrain_presets import (
     ENVIRONMENT_PRESETS,
