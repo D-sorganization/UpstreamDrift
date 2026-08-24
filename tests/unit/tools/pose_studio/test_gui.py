@@ -3,6 +3,9 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import numpy as np
+import pytest
+
+pytestmark = [pytest.mark.unit, pytest.mark.ui]
 
 from src.tools.pose_studio.gui import MainWidget, PoseStudioWindow, _EmbedAdapter, main
 from src.tools.pose_studio.core import EngineStatus
