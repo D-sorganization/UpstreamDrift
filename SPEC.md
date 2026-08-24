@@ -4360,3 +4360,5 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Vectorized batch swing optimizer effort sum-of-squares computation across environments via `np.einsum("nij,nij->n", controls, controls)` in `src/shared/python/optimization/batch_swing_optimizer.py` (#8958). (spec-exempt: micro-optimization)
 
 - (spec-exempt: micro-optimization) Replaced `np.sum(condition)` and `np.sum(np.isnan(arr))` with `np.count_nonzero` in python analytics and motion matching codebase for faster array evaluation.
+
+- Starting pose matcher: `on_clear_overrides_clicked` prompts for confirmation and unconditionally restores original mocap events state on confirm (#8889).
