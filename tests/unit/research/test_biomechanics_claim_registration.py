@@ -11,6 +11,8 @@ import pytest
 from scripts.research.proximal_distal_energy.register_biomechanics_evidence_bridge_claims import (
     CHAPTER,
     CLAIM_ID,
+    SUMMARY_CHAPTER,
+    SUMMARY_RATIONALE,
     register_claims,
 )
 
@@ -26,10 +28,8 @@ def _load(name: str) -> dict:
 def test_registration_is_complete_reciprocal_and_idempotent() -> None:
     registry = _load("claim_audit_registry.json")
     inventory = _load("claim_candidate_inventory.json")
-    sources = _load("biomechanics_source_register.json")
-
-    once = register_claims(copy.deepcopy(registry), inventory, sources)
-    twice = register_claims(copy.deepcopy(once), inventory, sources)
+    once = register_claims(copy.deepcopy(registry), inventory)
+    twice = register_claims(copy.deepcopy(once), inventory)
 
     assert once == twice
     claim = next(item for item in once["claims"] if item["claim_id"] == CLAIM_ID)
@@ -38,13 +38,26 @@ def test_registration_is_complete_reciprocal_and_idempotent() -> None:
     assert all(
         CLAIM_ID in reviews[item]["claim_ids"] for item in claim["candidate_ids"]
     )
+    assert not any(
+        artifact.startswith("http") for artifact in claim["evidence_artifacts"]
+    )
+    summary_candidates = {
+        item["candidate_id"]
+        for item in inventory["candidates"]
+        if item["source_path"] == SUMMARY_CHAPTER
+    }
+    assert len(summary_candidates) == 22
+    assert summary_candidates == {
+        candidate_id
+        for candidate_id, review in reviews.items()
+        if review["rationale"] == SUMMARY_RATIONALE
+    }
     assert once["paper"]["source_digest"] == inventory["source_digest"]
 
 
 def test_registration_fails_closed_when_generated_candidate_count_changes() -> None:
     registry = _load("claim_audit_registry.json")
     inventory = _load("claim_candidate_inventory.json")
-    sources = _load("biomechanics_source_register.json")
     removed = False
     retained = []
     for candidate in inventory["candidates"]:
@@ -55,4 +68,4 @@ def test_registration_fails_closed_when_generated_candidate_count_changes() -> N
     inventory["candidates"] = retained
 
     with pytest.raises(ValueError, match="candidate count changed"):
-        register_claims(registry, inventory, sources)
+        register_claims(registry, inventory)

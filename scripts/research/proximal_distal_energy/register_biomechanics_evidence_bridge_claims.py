@@ -10,18 +10,24 @@ ROOT = Path(__file__).resolve().parents[3]
 ARTICLE = ROOT / "docs/research/proximal_distal_energy_transfer"
 REGISTRY = ARTICLE / "data/claim_audit_registry.json"
 INVENTORY = ARTICLE / "data/claim_candidate_inventory.json"
-SOURCE_REGISTER = ARTICLE / "data/biomechanics_source_register.json"
 CHAPTER = (
     "docs/research/proximal_distal_energy_transfer/chapters/"
     "_biomechanics_evidence_bridge.qmd"
 )
+SUMMARY_CHAPTER = (
+    "docs/research/proximal_distal_energy_transfer/chapters/"
+    "_claim_adjudication_summary.qmd"
+)
 CLAIM_ID = "PD-CLAIM-305"
+SUMMARY_RATIONALE = (
+    "Generated reviewer projection of existing claim outcomes and qualification "
+    "axes; it introduces no new scientific estimand."
+)
 
 
 def register_claims(
     registry: dict[str, Any],
     inventory: dict[str, Any],
-    source_register: dict[str, Any],
 ) -> dict[str, Any]:
     """Return an idempotently adjudicated registry for the generated chapter."""
     candidates = [
@@ -42,6 +48,16 @@ def register_claims(
             "reviewer-surface navigation candidate is missing or ambiguous"
         )
     material = [item for item in candidates if item not in navigation]
+    summary_candidates = [
+        item
+        for item in inventory["candidates"]
+        if item["source_path"] == SUMMARY_CHAPTER
+    ]
+    if len(summary_candidates) != 22:
+        raise ValueError(
+            "claim-summary candidate count changed; review the generated "
+            f"projection before registration: {len(summary_candidates)}"
+        )
     candidate_ids = {item["candidate_id"] for item in candidates}
     material_ids = [item["candidate_id"] for item in material]
 
@@ -53,8 +69,8 @@ def register_claims(
         for review in registry["candidate_reviews"]
         if review["candidate_id"] not in candidate_ids
         and CLAIM_ID not in review["claim_ids"]
+        and review.get("rationale") != SUMMARY_RATIONALE
     ]
-    source_urls = [source["stable_url"] for source in source_register["sources"]]
     registry["claims"].append(
         {
             "claim_id": CLAIM_ID,
@@ -86,7 +102,6 @@ def register_claims(
                 "tests/unit/research/test_biomechanics_source_register.py",
                 "tests/unit/research/test_biomechanics_evidence_bridge.py",
                 "tests/unit/research/test_biomechanics_evidence_surfaces.py",
-                *source_urls,
             ],
             "model_domain": (
                 "Source qualification, model-to-measurement mapping, prospective "
@@ -150,6 +165,17 @@ def register_claims(
             "last_verified_on": "2026-08-24",
         }
     )
+    registry["candidate_reviews"].extend(
+        {
+            "candidate_id": item["candidate_id"],
+            "disposition": "editorial_or_navigation",
+            "claim_ids": [],
+            "rationale": SUMMARY_RATIONALE,
+            "reviewer": "Codex technical audit",
+            "last_verified_on": "2026-08-24",
+        }
+        for item in summary_candidates
+    )
     registry["paper"]["source_digest"] = inventory["source_digest"]
     registry["audit_scope"]["completion_status"] = "complete"
     return registry
@@ -158,8 +184,7 @@ def register_claims(
 def main() -> None:
     registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
     inventory = json.loads(INVENTORY.read_text(encoding="utf-8"))
-    source_register = json.loads(SOURCE_REGISTER.read_text(encoding="utf-8"))
-    result = register_claims(registry, inventory, source_register)
+    result = register_claims(registry, inventory)
     REGISTRY.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
 
 

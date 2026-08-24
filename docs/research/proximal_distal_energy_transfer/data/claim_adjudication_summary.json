@@ -1,7 +1,7 @@
 {
   "schema_version": "proximal-distal-claim-adjudication-summary-v2",
   "source_registry": "claim_audit_registry.json",
-  "paper_source_digest": "2efd609eb60e7a9d70e347f9e25aec80770b4190efa1acc58fe0a4954756c6e8",
+  "paper_source_digest": "1847a46b26000da3d02ecce6c5f09d24b4ac3ea76a8d1aa8aae171b7e7217904",
   "claim_count": 304,
   "outcome_counts": {
     "inconclusive": 5,
@@ -11,7 +11,7 @@
   "evidence_qualification_counts": {
     "abstract_or_record_only": 12,
     "declared_internal_review": 2,
-    "external_source_registered": 55,
+    "external_source_registered": 54,
     "governed_human_validation_open": 6,
     "hypothesis_or_prospective_protocol": 12,
     "independent_followup_open": 24,
@@ -11752,7 +11752,6 @@
       "published_status": "supported_as_audit_and_protocol_contract",
       "audit_status": "sources_claims_digests_and_generated_surfaces_checked",
       "evidence_qualifications": [
-        "external_source_registered",
         "governed_human_validation_open",
         "project_executable_or_data"
       ],
@@ -11811,23 +11810,7 @@
         "scripts/research/proximal_distal_energy/biomechanics_evidence_surfaces.py",
         "tests/unit/research/test_biomechanics_source_register.py",
         "tests/unit/research/test_biomechanics_evidence_bridge.py",
-        "tests/unit/research/test_biomechanics_evidence_surfaces.py",
-        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7374515/",
-        "https://pubmed.ncbi.nlm.nih.gov/7726345/",
-        "https://pubmed.ncbi.nlm.nih.gov/37983261/",
-        "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0141028",
-        "https://pmc.ncbi.nlm.nih.gov/articles/PMC5436583/",
-        "https://pubmed.ncbi.nlm.nih.gov/7810601/",
-        "https://pubmed.ncbi.nlm.nih.gov/27510960/",
-        "https://pubmed.ncbi.nlm.nih.gov/38015732/",
-        "https://pubmed.ncbi.nlm.nih.gov/31042142/",
-        "https://pubmed.ncbi.nlm.nih.gov/24627665/",
-        "https://pubmed.ncbi.nlm.nih.gov/15712503/",
-        "https://pubmed.ncbi.nlm.nih.gov/22900407/",
-        "https://doi.org/10.1007/s40279-015-0429-1",
-        "https://pmc.ncbi.nlm.nih.gov/articles/PMC9227529/",
-        "https://pubmed.ncbi.nlm.nih.gov/22900400/",
-        "https://pmc.ncbi.nlm.nih.gov/articles/PMC6195298/"
+        "tests/unit/research/test_biomechanics_evidence_surfaces.py"
       ],
       "model_domain": "Source qualification, model-to-measurement mapping, prospective falsification, identifiability, and transportability governance.",
       "uncertainty_boundary": "The register is not a systematic review, population estimate, calibrated apparatus result, participant outcome, or evidence that every qualifying dataset has been located.",
