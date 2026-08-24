@@ -9,6 +9,7 @@ import pytest
 
 from src.shared.python import perturbation
 from src.shared.python.perturbation.canonical_trial_executor import (
+    execute_batched_variation,
     execute_serial_variation,
 )
 from src.shared.python.perturbation.trial_evidence import (
@@ -27,6 +28,7 @@ _ENGINE_REVISION = "c" * 40
 
 def test_serial_executor_is_exposed_by_public_perturbation_package() -> None:
     assert perturbation.execute_serial_variation is execute_serial_variation
+    assert perturbation.execute_batched_variation is execute_batched_variation
 
 
 def _trace() -> TrialTrace:
@@ -216,4 +218,63 @@ def test_serial_executor_rejects_collector_identity_drift() -> None:
             _Gateway(np.array([[1.0]])),
             lambda _row: "no impact",
             WrongIndexCollector(),
+        )
+
+
+def test_batched_executor_is_row_equivalent_to_serial_execution() -> None:
+    plan = SimpleNamespace(n_runs=2, seed=17)
+    samples = np.array([[1.0], [2.0]])
+    gateway = _Gateway(samples)
+    collector = _Collector()
+
+    serial = execute_serial_variation(
+        plan,
+        gateway,
+        lambda row: (
+            "no impact"
+            if row[0] == 1.0
+            else (_ for _ in ()).throw(RuntimeError("solver rejected state"))
+        ),
+        collector,
+    )
+
+    def batch_runner(rows: np.ndarray) -> tuple[object, ...]:
+        assert rows.flags.writeable is False
+        return ("no impact", RuntimeError("solver rejected state"))
+
+    batched = execute_batched_variation(plan, gateway, batch_runner, collector)
+
+    assert [(row.trial_index, row.outcome) for row in serial] == [
+        (row.trial_index, row.outcome) for row in batched
+    ]
+    assert [row.sampled_inputs for row in serial] == [
+        row.sampled_inputs for row in batched
+    ]
+    assert [row.failure_reason for row in serial] == [
+        row.failure_reason for row in batched
+    ]
+
+
+def test_batched_executor_rejects_missing_or_extra_results() -> None:
+    plan = SimpleNamespace(n_runs=2, seed=17)
+    gateway = _Gateway(np.array([[1.0], [2.0]]))
+
+    with pytest.raises(ValueError, match="one result per sample"):
+        execute_batched_variation(
+            plan,
+            gateway,
+            lambda _rows: ("no impact",),
+            _Collector(),
+        )
+
+
+def test_batched_executor_does_not_relabel_programming_error_results() -> None:
+    plan = SimpleNamespace(n_runs=1, seed=17)
+
+    with pytest.raises(TypeError, match="adapter contract bug"):
+        execute_batched_variation(
+            plan,
+            _Gateway(np.array([[1.0]])),
+            lambda _rows: (TypeError("adapter contract bug"),),
+            _Collector(),
         )

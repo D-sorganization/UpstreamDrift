@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from typing import Protocol
 
 import numpy as np
@@ -11,6 +11,7 @@ from .trial_evidence import CanonicalTrialEvidence
 
 RECOVERABLE_TRIAL_ERRORS = (ValueError, RuntimeError, FloatingPointError)
 TrialRunner = Callable[[np.ndarray], object]
+BatchTrialRunner = Callable[[np.ndarray], object]
 
 
 class VariationSampler(Protocol):
@@ -94,6 +95,28 @@ def _validate_collected_record(
     return record
 
 
+def _readonly_row(samples: np.ndarray, trial_index: int) -> np.ndarray:
+    row = np.array(samples[trial_index], copy=True)
+    row.flags.writeable = False
+    return row
+
+
+def _collect_result(
+    collector: TrialEvidenceCollector,
+    trial_index: int,
+    plan_seed: int,
+    row: np.ndarray,
+    result: object,
+) -> CanonicalTrialEvidence:
+    if isinstance(result, RECOVERABLE_TRIAL_ERRORS):
+        record = collector.collect_failure(trial_index, plan_seed, row, result)
+    elif isinstance(result, Exception):
+        raise result
+    else:
+        record = collector.collect_success(trial_index, plan_seed, row, result)
+    return _validate_collected_record(record, trial_index, plan_seed)
+
+
 def execute_serial_variation(
     plan: object,
     gateway: VariationSampler,
@@ -112,22 +135,55 @@ def execute_serial_variation(
     samples = _sample_matrix(gateway.sample_inputs(plan), n_runs)
     records: list[CanonicalTrialEvidence] = []
     for trial_index in range(n_runs):
-        row = np.array(samples[trial_index], copy=True)
-        row.flags.writeable = False
+        row = _readonly_row(samples, trial_index)
         try:
             result = runner(row)
         except RECOVERABLE_TRIAL_ERRORS as exc:
-            record = collector.collect_failure(trial_index, plan_seed, row, exc)
-        else:
-            record = collector.collect_success(trial_index, plan_seed, row, result)
-        records.append(_validate_collected_record(record, trial_index, plan_seed))
+            result = exc
+        records.append(_collect_result(collector, trial_index, plan_seed, row, result))
     return tuple(records)
+
+
+def execute_batched_variation(
+    plan: object,
+    gateway: VariationSampler,
+    batch_runner: BatchTrialRunner,
+    collector: TrialEvidenceCollector,
+) -> tuple[CanonicalTrialEvidence, ...]:
+    """Execute one injected batch and retain one ordered record per sample.
+
+    The batch adapter returns one raw result or declared exception per input
+    row. Whole-batch exceptions propagate because truthful per-row attribution
+    is then unavailable.
+    """
+
+    _validate_dependencies(gateway, batch_runner, collector)
+    n_runs, plan_seed = _plan_execution_identity(plan)
+    samples = _sample_matrix(gateway.sample_inputs(plan), n_runs)
+    raw_results = batch_runner(samples)
+    if isinstance(raw_results, (str, bytes)) or not isinstance(raw_results, Iterable):
+        raise ValueError("batch runner must return one result per sample")
+    results: tuple[object, ...] = tuple(raw_results)
+    if len(results) != n_runs:
+        raise ValueError("batch runner must return one result per sample")
+    return tuple(
+        _collect_result(
+            collector,
+            trial_index,
+            plan_seed,
+            _readonly_row(samples, trial_index),
+            result,
+        )
+        for trial_index, result in enumerate(results)
+    )
 
 
 __all__ = [
     "RECOVERABLE_TRIAL_ERRORS",
+    "BatchTrialRunner",
     "TrialEvidenceCollector",
     "TrialRunner",
     "VariationSampler",
+    "execute_batched_variation",
     "execute_serial_variation",
 ]

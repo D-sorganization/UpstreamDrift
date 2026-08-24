@@ -96,9 +96,10 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   worktree at `UpstreamDrift-worktrees/8358-tools-variation-adapter-prep`
   contains local commits `7e7da8512` (canonical schema gateway) and
   `a55653858` (typed hit, no-impact, failure, and partial-trace evidence). The
-  next uncommitted slice executes every deterministic Tools sample serially,
-  injects engine/evidence adapters, preserves row order, and converts only
-  declared numerical failures into trial evidence; nine focused tests pass.
+  current local work executes every deterministic Tools sample through injected
+  serial or batched engine/evidence adapters, preserve row order, and convert
+  only declared numerical failures into trial evidence. Thirty-one combined
+  focused tests pass, including serial/batched row-equivalence controls.
   Do not push until #9022 merges; then transplant the commits onto refreshed
   `origin/main`, repin Tools, and continue batched and cross-engine parity.
 - Tools #4142 remains open until immutable UpstreamDrift consumption and
