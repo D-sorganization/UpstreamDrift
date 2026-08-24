@@ -41,6 +41,12 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   The run has two model workers, a hard two-CPU cap, 56 GB memory, 112 GB
   memory-plus-swap, and `on-failure:3`. Initial inspection showed running,
   no OOM/restart, about 259 MiB resident memory, and the expected two-CPU load.
+- The latest read-only Tailscale/SSH inspection on 2026-08-23 showed the
+  container still running with zero restarts, no OOM, 199.28% CPU, 270.6 MiB
+  resident memory, 97 PIDs, and 39 durable checkpoint files. The governed
+  campaign status remained `running`, with no terminal result or retained
+  execution failure yet. Do not treat checkpoint count as scientific progress
+  or release evidence; it only establishes durable operational advancement.
 - `launch-manifest.json`, atomic checkpoints, campaign status, figures, output,
   separate stdout/stderr logs, and an atomic terminal `exit-code.txt` live in
   the campaign root. They persist if SSH, Codex, or DeskComputer disconnects.
@@ -97,10 +103,14 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 
 ## Cross-Repository Path
 
-- Tools remote `main` contains trusted-candidate provenance repair at
-  `1214008e9dbf06b583ef44a4c821dc0567efdf8b`. Trusted React and PyQt
-  candidates still require source-pinned baseline approval and a passing
-  post-main comparator before Tools visual work is complete.
+- Tools PR #4662 merged source-pinned React and PyQt visual baselines at
+  `9604773d7576a330602821f88dd964503b698ae0`. Trusted post-main run
+  `32689177846` passed lifecycle, accessibility, performance, candidate
+  retention, all PyQt renders, and the visual comparator. Tools PR #4663 then
+  merged release-runtime portability at
+  `eebdddf8c6e366722be40c25278cf34a0392f256`; post-main Release Automation run
+  `32690255930` passed the formerly failing Analyse Commits stage and remained
+  in downstream validation at the latest handoff update.
 - Tools #4142 remains open for R10--R15 qualification and immutable
   UpstreamDrift consumption. Tools #4430 is complete.
 - AffineDrift #3930 remains downstream of a qualified UpstreamDrift release.
@@ -132,8 +142,9 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
    and clean-checkout gates; render and inspect every page.
 4. Open and shepherd the protected UpstreamDrift PR with human review. After
    merge, verify the squash commit on remote `main` and post-main evidence.
-5. Publish the revision-pinned AffineDrift projection and finish the Tools
-   source-pinned visual baseline/consumer qualification through protected PRs.
+5. Confirm terminal status of Tools Release Automation run `32690255930`, then
+   publish the revision-pinned AffineDrift projection and finish Tools consumer
+   qualification through protected PRs.
 
 Passing shared gates does not close a scientific child whose narrower evidence
 or governed external-data requirement remains incomplete.
