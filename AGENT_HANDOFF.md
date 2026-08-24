@@ -1,6 +1,6 @@
 # Agent Handoff — UpstreamDrift
 
-Last updated: 2026-08-23
+Last updated: 2026-08-24
 
 This file records current operational state, not history. Git and GitHub retain
 history. Epic #8557 is the single proximal-to-distal completion authority.
@@ -12,42 +12,39 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   projection. Tools owns reusable consumers; do not copy its solver or UI
   implementations into this repository or `vendor/ud-tools`.
 - UpstreamDrift remote `main` is
-  `9e220712025564caf0ac5201a0ddcf69dd98299e`, the protected squash merge of
-  PR #9018. Issue #8724 is closed with exact-head CI, optional-stack CI, and
-  remote-main ancestry verified.
+  `228b9a5df130ac46954dd2c9431d795525003c58`. The normalized-claim authority
+  from PR #9018 remains an ancestor; issue #8724 is closed.
 - The current computational publication is 239 pages with SHA-256
   `be85b7b62bba060a26ce3fea8355aa8b01dcf8c1b1ccf09304450898a4e5e78b`,
   194 URI links, and 247 outline entries. All pages render and were inspected.
   Archival qualification remains false because the PDF is untagged and retains
   Type 3 and unembedded font resources.
 
-## Active Articulated Uncertainty Campaign (#8752)
+## Active Structural Campaign and Recovery Boundary (#8800)
 
-- ControlTower worktree:
-  `C:\Users\diete\Repositories\UpstreamDrift-worktrees\goal-8752-uncertainty`,
-  running the exact scientific launch revision
-  `13146cdcece879e7156e06e2dca6626c1a54e045`.
-- Container `upstreamdrift-8752-campaign` uses eight workers within a reversible
-  four-core CPU cap. Its workspace and campaign records are bind-mounted from
-  the ControlTower C: drive, and restart policy is `on-failure`. Do not start a
-  duplicate or modify its frozen source.
-- At 13:34 PDT, 18 of 19 registered corners were terminal and retained,
-  including declared failed-retained outcomes. The final
-  `ground_free_moment_damping_scale-high` corner had atomically completed
-  branch 38/72 of its ground atlas. `status.json` remained `running`.
-- Status and logs:
-  `C:\Users\diete\Campaigns\UpstreamDrift-8752`. Remote inspection uses the
-  pinned Tailscale SSH route into `ControlTower-SSD`; a separate Codex session
-  on ControlTower is unnecessary. Loss of this task or Tailscale connectivity
-  does not stop the container.
-- Runtime: Ubuntu 22.04, Python 3.10.12, NumPy 2.2.4, SciPy 1.15.2, MuJoCo
-  3.8.0, and Pinocchio 3.8.0. The cross-CPU canary preserves registered
-  discrete decisions and gates at `rtol=2e-8`, `atol=1e-9`.
-- At terminal status, audit every expected branch, retained failure, and
-  digest. Then integrate `fix/8752-atomic-campaign-checkpoint`. The constitutive
-  subcampaign precedes execution of #8800; #8800 still blocks final closure of
-  #8752 and #8668. Regenerate claims, figures, paper, and release only after
-  both authorities pass.
+- ControlTower prepared clean source commit
+  `1bd4d57da7bd257b76b42b3cc19524b283b5f748`, image
+  `sha256:b40d91fe2326c5fae288e4a853377fb164aa0a6ba1de62cb28aba15d65500a1e`,
+  plan file SHA-256
+  `2bddb125492e907acc827e1dbf4cb43b9724e73087679cbf4113bcf96824b120`,
+  and plan-contract SHA-256
+  `c5cfba35ecafa96054ef8cc872f2e91a9f7855db0b93cfa491f9b18ee3db80f4`.
+- The campaign used two workers and two CPUs. Shaft is complete at 48/48
+  atomic checkpoints; ground has 45/48. The 93 checkpoint files and completed
+  shaft artifacts remain on the ControlTower C: drive under
+  `C:\Users\diete\Campaigns\UpstreamDrift-8800-1bd4d57da`.
+- Status remains `running`, has no retained execution failures, and explicitly
+  reports `release_evidence=false`. Partial checkpoints are resume evidence,
+  not scientific release evidence.
+- WSL cannot currently mount
+  `F:\WSL\ControlTower-SSD\ext4.vhdx`; Windows reported the file corrupted and
+  unreadable (`0x80070570`). Both WSL distributions are stopped. Tailscale SSH
+  to ControlTower remains available.
+- Do not retry WSL, run CHKDSK, repair or mount the VHDX, restart Windows
+  services, create a replacement campaign, or alter frozen source or plans
+  without an explicit recovery and recoverability decision. Preserve the VHDX
+  and C: checkpoints. After recovery, verify identities and resume only the
+  three missing ground branches before complete-set and digest qualification.
 
 ## Normalized Claim Adjudication (#8724)
 
@@ -85,13 +82,16 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 
 ## Other Active Dependencies
 
-- The current constitutive subcampaign is the active #8752 slice. #8800 then
-  propagates height, body-mass, and joint-limit bounds through both headline
-  atlases and blocks the final #8752/#8668 audit.
+- #8800 propagates height, body-mass, and joint-limit bounds through both
+  headline atlases and blocks the final #8752/#8668 audit.
 - #8443, #8448, #8449, #8450, #8595, #8668, #8684, and #8796 remain open.
   Verify each issue's exact acceptance evidence before changing state.
-- Tools #4142 remains open for requirement-level R10–R15 qualification and
-  immutable UpstreamDrift consumption. Tools #4430 is complete.
+- Tools PR #4669 is open at exact head
+  `36f4b1add2bc72cea87bd9f87d36b232db76d50b` with squash auto-merge requested;
+  do not pin it before protected merge. Its final suite exposed an
+  UpstreamDrift provider-mode test isolation defect, corrected on branch
+  `docs/8800-controltower-recovery`. Tools #4142 remains open until immutable
+  UpstreamDrift consumption and R10–R15 qualification are complete.
 - AffineDrift #3930 remains downstream of the qualified UpstreamDrift release;
   do not project a moving or partial campaign.
 - #8963 architecture debt remains separate from the frozen campaign source.
