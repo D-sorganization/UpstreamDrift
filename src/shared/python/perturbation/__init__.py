@@ -5,6 +5,10 @@ analysis on engine dynamics.
 """
 
 from .config import PerturbationAnalyzer, PerturbationConfig, PerturbationSummary
+from .canonical_trial_executor import (
+    TrialEvidenceCollector,
+    execute_serial_variation,
+)
 from .noise import generate_noise
 from .robustness_score import compute_robustness_score
 from .statistics import MetricStatistics, compute_metric_statistics
@@ -43,4 +47,6 @@ __all__ = [
     "ImpactObservation",
     "SampledInput",
     "TrialTrace",
+    "TrialEvidenceCollector",
+    "execute_serial_variation",
 ]
