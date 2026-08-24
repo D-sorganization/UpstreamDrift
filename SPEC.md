@@ -3743,6 +3743,9 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   `np.linalg.norm` with `math.hypot` and `math.sqrt(np.dot)` in fixed-size hot
   paths.
 
+## Change 2026-08-23
+- Optimized `q_statistic` calculation in `player_covariation_core.py` using `np.vdot` to avoid intermediate array allocations.
+
 ## Change 2026-06-18
 
 - Replaced `np.linalg.norm(..., axis=2)` with `np.sqrt(np.einsum('...i,...i->...', ...))` in chain_forces.py and test_swingset_chain_models.py for improved performance.
