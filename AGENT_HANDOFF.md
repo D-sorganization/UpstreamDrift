@@ -109,8 +109,8 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   retention, all PyQt renders, and the visual comparator. Tools PR #4663 then
   merged release-runtime portability at
   `eebdddf8c6e366722be40c25278cf34a0392f256`; post-main Release Automation run
-  `32690255930` passed the formerly failing Analyse Commits stage and remained
-  in downstream validation at the latest handoff update.
+  `32690255930` passed analysis, validation, and version-bump stages and opened
+  ordinary protected release PR #4664. Do not bypass or silently merge it.
 - Tools #4142 remains open for R10--R15 qualification and immutable
   UpstreamDrift consumption. Tools #4430 is complete.
 - AffineDrift #3930 remains downstream of a qualified UpstreamDrift release.
@@ -142,9 +142,9 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
    and clean-checkout gates; render and inspect every page.
 4. Open and shepherd the protected UpstreamDrift PR with human review. After
    merge, verify the squash commit on remote `main` and post-main evidence.
-5. Confirm terminal status of Tools Release Automation run `32690255930`, then
-   publish the revision-pinned AffineDrift projection and finish Tools consumer
-   qualification through protected PRs.
+5. Qualify Tools release PR #4664 without bypass, reconcile its conflicting
+   `main` versus GAAI `staging` branch rules, then publish the revision-pinned
+   AffineDrift projection and finish Tools consumer qualification.
 
 Passing shared gates does not close a scientific child whose narrower evidence
 or governed external-data requirement remains incomplete.
