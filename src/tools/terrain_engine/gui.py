@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import os
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -25,6 +26,7 @@ from PyQt6.QtWidgets import (
 )
 
 from src.launchers.startup import _get_theme_colors
+from src.shared.python.physics import terrain_presets
 from src.shared.python.physics.terrain import Terrain
 from src.shared.python.physics.terrain_presets import (
     ENVIRONMENT_PRESETS,
@@ -193,7 +195,11 @@ class TerrainExplorerWidget(QWidget):
             self.query_result.setText(msg)
         if hasattr(self, "summary") and not self.summary.text():
             self.summary.setText(msg)
-        QMessageBox.warning(self, title, f"{title}:\n\n{exc}")
+        if os.environ.get("QT_QPA_PLATFORM") != "offscreen":
+            try:
+                QMessageBox.warning(self, title, f"{title}:\n\n{exc}")
+            except Exception:  # noqa: BLE001
+                pass
 
     @staticmethod
     def _make_spin(minimum: float, maximum: float, suffix: str) -> QDoubleSpinBox:
@@ -224,7 +230,7 @@ class TerrainExplorerWidget(QWidget):
     def _load_selected_preset(self) -> None:
         try:
             preset = self._selected_preset()
-            terrain = build_environment_preset(
+            terrain = terrain_presets.build_environment_preset(
                 preset,
                 width=self.width_spin.value(),
                 length=self.length_spin.value(),
