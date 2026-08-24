@@ -157,15 +157,17 @@ def _shaft_execution_result(
     gates = shaft._gates(buffers, config, properties, beam_record)
     arrays = shaft._arrays(authority, states, buffers, config, gates)
     record = shaft._record(
-        authority,
-        selection,
-        buffers,
-        config,
-        properties,
-        beam_record,
-        gates,
-        _versions(),
-        coarse_probes,
+        shaft._RecordContext(
+            authority=authority,
+            selection=selection,
+            buffers=buffers,
+            config=config,
+            properties=properties,
+            beam_record=beam_record,
+            gates=gates,
+            versions=_versions(),
+            coarse_probes=coarse_probes,
+        )
     )
     record["checkpoint_audit"] = audit
     return StructuralAtlasExecution(record, arrays, audit)

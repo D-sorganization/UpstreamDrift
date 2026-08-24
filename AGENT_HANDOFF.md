@@ -101,16 +101,26 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   assertions. All seven authorities, the plan, and the 313-claim evidence
   manifest were regenerated and locally validated at execution commit
   `8a20df8fe340c4c8b9e65ca5e575bbbcabce0f96`.
-- The qualified campaign is running independently on ControlTower in container
-  `upstreamdrift-8800-8a20df8fe` from a clean, read-only detached worktree at
-  that exact commit. The Linux plan validator and real native checkpoint restart
-  test passed before launch. Four workers are bounded by four CPUs and 56 GB;
-  restart policy is `on-failure:3`. Host-persistent state is under
-  `C:\Users\diete\Campaigns\UpstreamDrift-8800-8a20df8fe`; the first nominal
-  shaft checkpoint was observed after launch. Do not start a duplicate run.
-- This is execution infrastructure, not a scientific result. No #8800 campaign
-  has run, no headline estimate has propagated, and no paper or release claim
-  may be promoted until all 14 atlas paths and common-support controls pass.
+- The exact-commit campaign in container `upstreamdrift-8800-8a20df8fe`
+  completed all 48 nominal shaft branch checkpoints, then failed retained during
+  record assembly because the checkpoint adapter called the refactored
+  single-context shaft record contract with nine positional arguments. Docker
+  exhausted its three declared retries and exited 1 without OOM. The status,
+  logs, and source-bound checkpoints remain under
+  `C:\Users\diete\Campaigns\UpstreamDrift-8800-8a20df8fe`; no result, figure,
+  or release evidence was emitted.
+- The active worktree now constructs the exact `shaft._RecordContext` and has a
+  regression that rejects variadic mocks masking future interface drift. The
+  governed propagation plan was regenerated because its source/test digests
+  changed. Consequently, the 48 historical checkpoints are retained failure
+  evidence but cannot be relabeled or resumed under the corrected plan. Commit,
+  push, validate in Linux, and prepare a uniquely named clean detached worktree
+  before any relaunch. Do not restart the failed container or start a corrected
+  run until the worker/CPU plan is explicitly selected.
+- This is execution infrastructure, not a scientific result. One incomplete
+  #8800 attempt has run, but no complete atlas path or headline estimate has
+  propagated, and no paper or release claim may be promoted until all 14 paths
+  and common-support controls pass.
 
 ## Normalized Claim Adjudication (#8724)
 

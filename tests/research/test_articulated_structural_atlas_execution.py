@@ -79,6 +79,7 @@ def test_shaft_execution_resumes_without_recomputing_valid_checkpoints(
     authority = _authority()
     config = shaft.ArticulatedShaftAtlasConfig(worker_count=1)
     calls: list[tuple[int, int]] = []
+    record_contexts: list[shaft._RecordContext] = []
     _native_modules(monkeypatch)
 
     def fake_job(payload):
@@ -98,7 +99,12 @@ def test_shaft_execution_resumes_without_recomputing_valid_checkpoints(
     monkeypatch.setattr(shaft, "_excluded_step_probes", lambda *_: [])
     monkeypatch.setattr(shaft, "_gates", lambda *_: {})
     monkeypatch.setattr(shaft, "_arrays", lambda *args: {"complete": np.ones(1)})
-    monkeypatch.setattr(shaft, "_record", lambda *args: {"pathway": "shaft"})
+
+    def fake_record(context: shaft._RecordContext) -> dict[str, str]:
+        record_contexts.append(context)
+        return {"pathway": "shaft"}
+
+    monkeypatch.setattr(shaft, "_record", fake_record)
 
     first = execute_structural_shaft_atlas(
         authority,
@@ -110,6 +116,9 @@ def test_shaft_execution_resumes_without_recomputing_valid_checkpoints(
     assert first.checkpoint_audit["status"] == "complete"
     assert first.checkpoint_audit["checkpoint_count"] == 48
     assert first.checkpoint_audit["release_evidence"] is False
+    assert len(record_contexts) == 1
+    assert record_contexts[0].authority is authority
+    assert record_contexts[0].config is config
 
     calls.clear()
     second = execute_structural_shaft_atlas(
@@ -119,6 +128,7 @@ def test_shaft_execution_resumes_without_recomputing_valid_checkpoints(
         config=config,
     )
     assert calls == []
+    assert len(record_contexts) == 2
     assert second.checkpoint_audit == first.checkpoint_audit
     assert second.record["checkpoint_audit"] == first.checkpoint_audit
 
