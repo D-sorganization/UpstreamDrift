@@ -16,6 +16,7 @@ from src.shared.python.perturbation.cross_engine_trial_parity import (
 from src.shared.python.perturbation.trial_evidence import (
     CanonicalTrialEvidence,
     ClosestApproach,
+    ImpactObservation,
     SampledInput,
     TrialTrace,
 )
@@ -102,6 +103,23 @@ def test_declared_marker_tolerance_exposes_non_equivalent_geometry() -> None:
 
     assert metrics.tolerance_equivalent is False
     assert metrics.max_marker_error_m == pytest.approx(2e-5)
+
+
+def test_different_outcomes_are_not_tolerance_equivalent() -> None:
+    candidate = replace(
+        _trial("pinocchio"),
+        outcome="hit",
+        closest_approach=None,
+        impact=ImpactObservation(
+            0.01,
+            (SampledInput("clubhead_speed", 40.0, "m/s"),),
+        ),
+    )
+
+    metrics = compare_cross_engine_trials(_trial("mujoco"), candidate, _tolerances())
+
+    assert metrics.outcome_match is False
+    assert metrics.tolerance_equivalent is False
 
 
 @pytest.mark.parametrize(

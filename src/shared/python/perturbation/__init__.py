@@ -18,6 +18,7 @@ from .cross_engine_trial_parity import (
     CrossEngineTolerances,
     compare_cross_engine_trials,
 )
+from .cross_engine_runner import CanonicalCrossEngineReport
 from .canonical_trial_executor import (
     TrialEvidenceCollector,
     execute_batched_variation,
@@ -98,6 +99,7 @@ __all__ = [
     "DoublePendulumTrialConfig",
     "DoublePendulumTrialResult",
     "CrossEngineCompatibilityError",
+    "CanonicalCrossEngineReport",
     "CrossEngineParityMetrics",
     "CrossEngineTolerances",
     "compare_cross_engine_trials",

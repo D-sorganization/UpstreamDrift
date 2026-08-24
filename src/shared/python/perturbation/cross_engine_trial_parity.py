@@ -156,8 +156,10 @@ def compare_cross_engine_trials(
     marker_error = _max_marker_error(
         reference_trace.markers_m, candidate_trace.markers_m
     )
+    outcome_match = reference.outcome == candidate.outcome
     equivalent = (
-        time_error <= tolerances.time_atol_s
+        outcome_match
+        and time_error <= tolerances.time_atol_s
         and coordinate_error <= 1.0
         and velocity_error <= 1.0
         and marker_error <= tolerances.marker_atol_m
@@ -165,7 +167,7 @@ def compare_cross_engine_trials(
     return CrossEngineParityMetrics(
         reference_engine_id=reference.engine_id,
         candidate_engine_id=candidate.engine_id,
-        outcome_match=reference.outcome == candidate.outcome,
+        outcome_match=outcome_match,
         max_time_error_s=time_error,
         max_coordinate_normalized_error=coordinate_error,
         max_velocity_normalized_error=velocity_error,
