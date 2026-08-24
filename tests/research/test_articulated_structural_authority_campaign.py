@@ -99,6 +99,7 @@ def test_campaign_checkpoints_every_corner_and_retains_failures(
     assert failed["failure_count"] == 1
     assert failed["failure_distribution"] == {"joint_limit_failure": 1}
     assert checkpoint.is_file()
+    assert b"\r\n" not in checkpoint.read_bytes()
 
 
 def test_campaign_rejects_checkpoint_design_drift(tmp_path: Path) -> None:

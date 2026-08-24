@@ -380,7 +380,10 @@ def save_scaled_authority(
     record = _authority_record(authority, arrays_path.name)
     record_path.parent.mkdir(parents=True, exist_ok=True)
     arrays_path.parent.mkdir(parents=True, exist_ok=True)
-    record_path.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+    # Write canonical LF bytes. ``Path.write_text`` performs platform newline
+    # translation on Windows, which makes byte-level provenance hashes differ
+    # from the normalized Git blob consumed by Linux campaign workers.
+    record_path.write_bytes((json.dumps(record, indent=2) + "\n").encode("utf-8"))
     np.savez_compressed(
         arrays_path,
         time_s=authority.time_s,

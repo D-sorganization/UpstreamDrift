@@ -160,7 +160,9 @@ def _campaign_record(
 def _write_checkpoint(path: Path, record: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
-    temporary.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+    # Preserve byte-identical governed evidence across Windows generation and
+    # Linux execution; text-mode writes translate newlines on Windows.
+    temporary.write_bytes((json.dumps(record, indent=2) + "\n").encode("utf-8"))
     temporary.replace(path)
 
 

@@ -144,7 +144,7 @@
       "status": "feasible",
       "failure_count": 0,
       "failure_distribution": {},
-      "authority_sha256": "1e4a6528984174535caac2b34f567e674fda75df740896a6cda2b95f8be5d3c5",
+      "authority_sha256": "3670b4f8ef281a0845c50ecce4547cce0bf6685602a37f67312d6fe0e1982c61",
       "record_artifact": "articulated_structural_authority_nominal.json",
       "array_artifact": "articulated_structural_authority_nominal.npz"
     },
@@ -169,7 +169,7 @@
       "failure_distribution": {
         "ik_nonconvergence": 1
       },
-      "authority_sha256": "58711112d66e2d17f5bf53f90035354900218c8d0c30a9f99db28f5e8748377a",
+      "authority_sha256": "81708f4126f2f13a9bc7b2a3cf87777b95c8dcb3cd2979ba0f06d32352fa0a9b",
       "record_artifact": "articulated_structural_authority_height_scale_low.json",
       "array_artifact": "articulated_structural_authority_height_scale_low.npz"
     },
@@ -192,7 +192,7 @@
       "status": "feasible",
       "failure_count": 0,
       "failure_distribution": {},
-      "authority_sha256": "b3fb03e814f7e04c1626ca05c0d7f11e7e8cee009b806123affbd738bdc543c4",
+      "authority_sha256": "cf878762da807d1087ca66544dbb2fdea5e37632362881e6687c5e5a2eb9e21c",
       "record_artifact": "articulated_structural_authority_height_scale_high.json",
       "array_artifact": "articulated_structural_authority_height_scale_high.npz"
     },
@@ -215,7 +215,7 @@
       "status": "feasible",
       "failure_count": 0,
       "failure_distribution": {},
-      "authority_sha256": "60cd826065611bcc20859f8e9ebad0b94754f5682461dcbdd1243e315a03e47f",
+      "authority_sha256": "6fbc997f23e23d48210f67bf179cff750b350eed2d444ff282bc4af9f195a77e",
       "record_artifact": "articulated_structural_authority_body_mass_scale_low.json",
       "array_artifact": "articulated_structural_authority_body_mass_scale_low.npz"
     },
@@ -238,7 +238,7 @@
       "status": "feasible",
       "failure_count": 0,
       "failure_distribution": {},
-      "authority_sha256": "bb55d0e7ef93518e523bb4962989d2cad9c82fafdddafa661523228e8b7af663",
+      "authority_sha256": "7146937bcab3dfb9fc5149299db1da70c3be77be78f72124d460bb778cd83ea7",
       "record_artifact": "articulated_structural_authority_body_mass_scale_high.json",
       "array_artifact": "articulated_structural_authority_body_mass_scale_high.npz"
     },
@@ -261,7 +261,7 @@
       "status": "feasible",
       "failure_count": 0,
       "failure_distribution": {},
-      "authority_sha256": "362617d723b9db6af09b85ec82073addaa1d4a94f6a1e3a6f19e01e48265185d",
+      "authority_sha256": "56ced7de1c0384972cdf2049b9e9af5a9d7a4fbe12a04e087128564c792f1aad",
       "record_artifact": "articulated_structural_authority_joint_limit_scale_low.json",
       "array_artifact": "articulated_structural_authority_joint_limit_scale_low.npz"
     },
@@ -284,7 +284,7 @@
       "status": "feasible",
       "failure_count": 0,
       "failure_distribution": {},
-      "authority_sha256": "b6db4ca70e617006de567f0df38ad06adfe7d126ad8727b8e580948e9ad874b2",
+      "authority_sha256": "c6d512ed5872af65c82c510461a1da97f6b2a94ab32b4a5b3664a9b11289321b",
       "record_artifact": "articulated_structural_authority_joint_limit_scale_high.json",
       "array_artifact": "articulated_structural_authority_joint_limit_scale_high.npz"
     }
@@ -296,9 +296,9 @@
     "failed_corner_count": 0
   },
   "source_sha256": {
-    "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py": "46e8897b04360ddaf9805809e8903fa4746a782ecd698eaf0b876f0aff023533",
-    "scripts/research/proximal_distal_energy/articulated_scaled_authority.py": "433e967e69df92742bd07f74817afaf40323e42f2877576708721f18f83116cb",
-    "tests/research/test_articulated_structural_authority_campaign.py": "b259f3135f9823ff85455d4c60c6859f663d590a121034ad0171ffcfd65f113c"
+    "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py": "ba6ab4a50e6a2b788b383e77da98733ae43182e9b33a27881b6f6e7b82b03d19",
+    "scripts/research/proximal_distal_energy/articulated_scaled_authority.py": "bfff740ac7acfb99e3e13f6611697ed5201b3a0ae009d500ff6dd3b8730fa288",
+    "tests/research/test_articulated_structural_authority_campaign.py": "97c35e7623340edcff72f4d76ba098dc7f317241ffc8733188d7cdba5a16e1fd"
   },
   "limitations": {
     "bounds": "engineering OAT corners, not participant distributions",

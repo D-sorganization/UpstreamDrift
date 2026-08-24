@@ -71,10 +71,10 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   authority row from being reused when its source map differs. Fifty-two focused
   authority, campaign, plan, checkpoint-contract, and shaft tests pass locally;
   the broader 192-test structural/headline suite also passes.
-  The one real short native-engine checkpoint restart still requires the
-  qualified robotics-Pinocchio environment: DeskComputer currently resolves the
-  unrelated PyPI `pinocchio` package. Run that test on ControlTower before the
-  campaign and do not skip or weaken it.
+  The real short native-engine checkpoint restart passed on ControlTower at
+  commit `f276e779fb1ed28950ae42442ead4f852a3e7c76` in the pinned #8752
+  scientific image. DeskComputer still resolves the unrelated PyPI `pinocchio`
+  package, so native execution qualification remains a ControlTower gate.
 - ControlTower is the approved execution host and is reachable noninteractively
   from DeskComputer over direct Tailscale SSH. On 2026-08-23 it reported an
   Alienware Aurora Ryzen Edition R14 with a 16-core/32-thread Ryzen 9 5950X,
@@ -90,6 +90,18 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   periodic SSH status collection. The current model path is CPU-bound unless a
   separately verified GPU backend is introduced; the RTX 3090 alone does not
   make the existing solver GPU-accelerated.
+- The first #8800 launch attempt exposed two fail-closed portability defects
+  before scientific execution: the #8752 image lacked Matplotlib, and Windows
+  text-mode authority generation hashed CRLF working-tree bytes that Git stored
+  as LF. The failed container log is preserved under
+  `C:\Users\diete\Campaigns\UpstreamDrift-8800-f276e779f\logs`. A derived
+  runtime image pins Matplotlib 3.10.8 at image ID
+  `sha256:b40d91fe2326c5fae288e4a853377fb164aa0a6ba1de62cb28aba15d65500a1e`.
+  Authority and campaign writers now emit canonical LF bytes, with regression
+  assertions. All seven authorities, the plan, and the 313-claim evidence
+  manifest were regenerated and locally validated; push this correction, make
+  a fresh detached ControlTower worktree at the new exact commit, validate the
+  plan inside that image, and only then relaunch the four-worker/four-CPU run.
 - This is execution infrastructure, not a scientific result. No #8800 campaign
   has run, no headline estimate has propagated, and no paper or release claim
   may be promoted until all 14 atlas paths and common-support controls pass.

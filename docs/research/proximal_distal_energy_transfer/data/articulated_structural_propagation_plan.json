@@ -1,9 +1,9 @@
 {
   "schema_version": "articulated-structural-propagation-plan/v1",
   "status": "ready",
-  "authority_campaign_sha256": "3a591e0265cb035ec8c8378fd9f6e45c306fce78c320d301133541e0f3715dd4",
-  "design_sha256": "77764a752c2f20a9fe5ff4403904a2940796e84322546342f7629bab62d85d64",
-  "contract_sha256": "dc56deabee2dde9ece3d1fb8569e45372c03cb3ab798e1041bcf6a999e80e2a5",
+  "authority_campaign_sha256": "148c165695417dc5cc2d9ea32b9ef393249b63036e250b0b50e24626a79bee5d",
+  "design_sha256": "a2527aff88884d286968cb762f945f308e02bffd4eb5d55fbffd93807c84d1d7",
+  "contract_sha256": "0ba2d5c6cffb11f2b3c128e0f9da9e0c74b376968e2b4992a0e6a3b44e42bc43",
   "design": {
     "case_indices": [
       0,
@@ -141,7 +141,7 @@
           "scripts/research/proximal_distal_energy/articulated_structural_checkpoint.py",
           "scripts/research/proximal_distal_energy/articulated_structural_branch_contract.py"
         ],
-        "atlas_source_sha256": "5c8e91e2122d6cbfbec6c6501aa29da904cdc24a6233a24f3544b9df80aae114",
+        "atlas_source_sha256": "0249a19be596686722b30c1251e003e2967656bf0f46343c91a882fb5818e09a",
         "scientific_configuration_sha256": "4b3a56fada938d5e508a1311567342887e1355b71d2d5676f37ae5545ceb41b4"
       },
       "ground": {
@@ -168,7 +168,7 @@
           "scripts/research/proximal_distal_energy/articulated_structural_checkpoint.py",
           "scripts/research/proximal_distal_energy/articulated_structural_branch_contract.py"
         ],
-        "atlas_source_sha256": "67df4096e001e3dad2d5ef83625781c552fa4b6d1fdc13fbaf6b030a5c0fc779",
+        "atlas_source_sha256": "0b4f9b092838e82608268013dc9ae5b8afc5009134383740f797dfda8f8d60da",
         "scientific_configuration_sha256": "e8e04493e1681dfcc0438df8316e1ae84ebca1c0d48a1012d57174939d6c07dc"
       }
     },
@@ -490,7 +490,7 @@
       "expected_ground_headline_cell_count": 384,
       "authority": {
         "schema_version": "articulated-atlas-authority/v1",
-        "authority_sha256": "1e4a6528984174535caac2b34f567e674fda75df740896a6cda2b95f8be5d3c5",
+        "authority_sha256": "3670b4f8ef281a0845c50ecce4547cce0bf6685602a37f67312d6fe0e1982c61",
         "scales": {
           "height": 1.0,
           "body_mass": 1.0,
@@ -577,7 +577,7 @@
       "expected_ground_headline_cell_count": 352,
       "authority": {
         "schema_version": "articulated-atlas-authority/v1",
-        "authority_sha256": "58711112d66e2d17f5bf53f90035354900218c8d0c30a9f99db28f5e8748377a",
+        "authority_sha256": "81708f4126f2f13a9bc7b2a3cf87777b95c8dcb3cd2979ba0f06d32352fa0a9b",
         "scales": {
           "height": 0.9,
           "body_mass": 1.0,
@@ -668,7 +668,7 @@
       "expected_ground_headline_cell_count": 384,
       "authority": {
         "schema_version": "articulated-atlas-authority/v1",
-        "authority_sha256": "b3fb03e814f7e04c1626ca05c0d7f11e7e8cee009b806123affbd738bdc543c4",
+        "authority_sha256": "cf878762da807d1087ca66544dbb2fdea5e37632362881e6687c5e5a2eb9e21c",
         "scales": {
           "height": 1.1,
           "body_mass": 1.0,
@@ -753,7 +753,7 @@
       "expected_ground_headline_cell_count": 384,
       "authority": {
         "schema_version": "articulated-atlas-authority/v1",
-        "authority_sha256": "60cd826065611bcc20859f8e9ebad0b94754f5682461dcbdd1243e315a03e47f",
+        "authority_sha256": "6fbc997f23e23d48210f67bf179cff750b350eed2d444ff282bc4af9f195a77e",
         "scales": {
           "height": 1.0,
           "body_mass": 0.85,
@@ -838,7 +838,7 @@
       "expected_ground_headline_cell_count": 384,
       "authority": {
         "schema_version": "articulated-atlas-authority/v1",
-        "authority_sha256": "bb55d0e7ef93518e523bb4962989d2cad9c82fafdddafa661523228e8b7af663",
+        "authority_sha256": "7146937bcab3dfb9fc5149299db1da70c3be77be78f72124d460bb778cd83ea7",
         "scales": {
           "height": 1.0,
           "body_mass": 1.15,
@@ -923,7 +923,7 @@
       "expected_ground_headline_cell_count": 384,
       "authority": {
         "schema_version": "articulated-atlas-authority/v1",
-        "authority_sha256": "362617d723b9db6af09b85ec82073addaa1d4a94f6a1e3a6f19e01e48265185d",
+        "authority_sha256": "56ced7de1c0384972cdf2049b9e9af5a9d7a4fbe12a04e087128564c792f1aad",
         "scales": {
           "height": 1.0,
           "body_mass": 1.0,
@@ -1008,7 +1008,7 @@
       "expected_ground_headline_cell_count": 384,
       "authority": {
         "schema_version": "articulated-atlas-authority/v1",
-        "authority_sha256": "b6db4ca70e617006de567f0df38ad06adfe7d126ad8727b8e580948e9ad874b2",
+        "authority_sha256": "c6d512ed5872af65c82c510461a1da97f6b2a94ab32b4a5b3664a9b11289321b",
         "scales": {
           "height": 1.0,
           "body_mass": 1.0,
@@ -1035,7 +1035,7 @@
     "scripts/research/proximal_distal_energy/articulated_atlas_runtime_authority.py": "9e6faca111333363107ce1b2c22f4a6b65181287c0c07e2ec98efae249394711",
     "scripts/research/proximal_distal_energy/articulated_structural_atlas_execution.py": "4415a173ee563723e8ab4f1314ecbdef02dc657cf28ffd5c5e485949b6f1a57b",
     "scripts/research/proximal_distal_energy/articulated_structural_campaign.py": "2a2f209bc48267ecd2d5670d025be5bb4aee99bc01e5718f469c43d6c372e7f9",
-    "scripts/research/proximal_distal_energy/articulated_scaled_authority.py": "433e967e69df92742bd07f74817afaf40323e42f2877576708721f18f83116cb",
+    "scripts/research/proximal_distal_energy/articulated_scaled_authority.py": "bfff740ac7acfb99e3e13f6611697ed5201b3a0ae009d500ff6dd3b8730fa288",
     "scripts/research/proximal_distal_energy/articulated_structural_axis_evidence.py": "a3caa27c3313cf14304cde50d0c9fcaaa6a5c19f28b6445cc12ce4cfb8e72086",
     "scripts/research/proximal_distal_energy/articulated_structural_common_support.py": "0516aef8bdc2fc1ffec22fc5452875af9904cd51c056cc6a70bc81b6a4408b06",
     "scripts/research/proximal_distal_energy/articulated_structural_cell_evidence.py": "047c221b0c2a17036c7cec2735bc2c33392a61937539ede0b2318e706150bc65",
@@ -1048,7 +1048,7 @@
     "scripts/research/proximal_distal_energy/articulated_structural_gate_status.py": "d3d8fa2a1421d9f85d97c99657e72995e4b6971fa96a029d7c41edd7308bb748",
     "scripts/research/proximal_distal_energy/articulated_structural_publication.py": "97eefd74745b22dd0321d39004086ec63926467fc777e649f4aaedb5bf7e5229",
     "scripts/research/proximal_distal_energy/articulated_structural_result.py": "9008282795796c9b77a5d55d2abb8fa99864257c185c2b0fe3a5660e4ac1ffcc",
-    "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py": "46e8897b04360ddaf9805809e8903fa4746a782ecd698eaf0b876f0aff023533",
+    "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py": "ba6ab4a50e6a2b788b383e77da98733ae43182e9b33a27881b6f6e7b82b03d19",
     "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": "020cdba459411168ca15e437c38b4a10d62594f43da86cbdec41f7ac9c7d3a31",
     "tests/research/test_articulated_atlas_authority.py": "b4a057b4c4713a59f7993d9e05b33a86ff49026936417cdb60a584ea53c3ebb5",
     "tests/research/test_articulated_structural_axis_evidence.py": "208d26cbafe99881ac337a56ba495e4e5dfd6d4322870866a1cbd8be79e9f0a4",
@@ -1069,7 +1069,7 @@
     "tests/research/test_articulated_structural_propagation_plan.py": "f49036a5b8cb2c96f846f69d6d494544a383595dcabbad8de920f83429d2129a",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "8eed52fe4ebbc55fcf753f4703330dd6d768281b0babfbb2adca074b862fc36d",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
-    "docs/research/proximal_distal_energy_transfer/data/articulated_structural_authority_nominal.json": "a648894e0fbf271e59da30a1647ec8b1397e2ce233a0ec9b3f18525cdc44ba99",
+    "docs/research/proximal_distal_energy_transfer/data/articulated_structural_authority_nominal.json": "5db3ed6b7986a40ced76a1ead4a97c26bc4367064d63d0b03febf2164c044808",
     "docs/research/proximal_distal_energy_transfer/data/articulated_structural_authority_nominal.npz": "eda71fea23c829490a803061250836522799c505c60672e9cb27b4226173d2e6",
     "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json": "f07fc33cc76fb80f395cd10b01a30169b6440cec3854be3894024d435bc0f722",
     "scripts/research/proximal_distal_energy/articulated_distributed_grip.py": "1d25ac5dbbb27d2bf67240c3cab18aa7c0a988f68cbb24fcf305bb5b2b37cca2",

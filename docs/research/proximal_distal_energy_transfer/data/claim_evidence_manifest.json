@@ -4186,7 +4186,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_structural_authority_campaign.json": {
-      "sha256": "0a9376bb66f059f2c1a440c5b254ab9d627fe42256ee01700bf84c15e7dcf53b",
+      "sha256": "148c165695417dc5cc2d9ea32b9ef393249b63036e250b0b50e24626a79bee5d",
       "bytes": 8533,
       "referenced_by": [
         "PD-CLAIM-309",
@@ -4195,7 +4195,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_structural_propagation_plan.json": {
-      "sha256": "850f765956a757198d0dbb847a380f62065318be1d09f04ec1628f24ee06d7d3",
+      "sha256": "39da30449fb90b83ad59093d2861dffdc2e15a3182264ebfb4151cd881ab8561",
       "bytes": 43638,
       "referenced_by": [
         "PD-CLAIM-309",
@@ -5770,8 +5770,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/articulated_scaled_authority.py": {
-      "sha256": "433e967e69df92742bd07f74817afaf40323e42f2877576708721f18f83116cb",
-      "bytes": 20074,
+      "sha256": "bfff740ac7acfb99e3e13f6611697ed5201b3a0ae009d500ff6dd3b8730fa288",
+      "bytes": 20302,
       "referenced_by": [
         "PD-CLAIM-309",
         "PD-CLAIM-310",
@@ -5846,8 +5846,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/articulated_structural_authority_campaign.py": {
-      "sha256": "46e8897b04360ddaf9805809e8903fa4746a782ecd698eaf0b876f0aff023533",
-      "bytes": 9342,
+      "sha256": "ba6ab4a50e6a2b788b383e77da98733ae43182e9b33a27881b6f6e7b82b03d19",
+      "bytes": 9492,
       "referenced_by": [
         "PD-CLAIM-309",
         "PD-CLAIM-310",
@@ -7327,8 +7327,8 @@
       ]
     },
     "tests/research/test_articulated_scaled_authority.py": {
-      "sha256": "cac187334194b7e3230a837a710b3e6c82d5350fc59468e0b48936aaed3a40e2",
-      "bytes": 3868,
+      "sha256": "6af998ecf600ee77363e60a59edd8f7d41c0d7f1b6832611ab044749420678e5",
+      "bytes": 3919,
       "referenced_by": [
         "PD-CLAIM-309",
         "PD-CLAIM-310",
@@ -7384,8 +7384,8 @@
       ]
     },
     "tests/research/test_articulated_structural_authority_campaign.py": {
-      "sha256": "b259f3135f9823ff85455d4c60c6859f663d590a121034ad0171ffcfd65f113c",
-      "bytes": 5252,
+      "sha256": "97c35e7623340edcff72f4d76ba098dc7f317241ffc8733188d7cdba5a16e1fd",
+      "bytes": 5302,
       "referenced_by": [
         "PD-CLAIM-309",
         "PD-CLAIM-310",

@@ -72,6 +72,7 @@ def test_scaled_authority_round_trip_and_tamper_detection(
     assert record["schema_version"] == "articulated-scaled-authority/v1"
     assert record["results"]["selected_feasible_sample_count"] == 13
     assert record["results"]["selected_failure_distribution"] == {"feasible": 13}
+    assert b"\r\n" not in record_path.read_bytes()
     loaded = load_scaled_authority(record_path, arrays_path)
     assert loaded.authority_sha256 == nominal_authority.authority_sha256
     assert np.array_equal(loaded.solution_q, nominal_authority.solution_q)
