@@ -76,6 +76,7 @@ def _assert_from_tools(path: Path) -> None:
             "/_tools_dep/",
             "/vendor/ud-tools/",
             "/repositories/tools/",
+            "/repositories/tools-worktrees/",
             "/tools/",
         )
     ), f"Expected Tools-backed provider path, got: {path}"
@@ -187,3 +188,105 @@ def test_rotating_base_provider_retains_complete_qualified_authority() -> None:
             }
             for run in catalog["runs"]
         )
+
+
+@pytest.mark.integration
+def test_variation_gateway_executes_immutable_tools_contracts(
+    tmp_path: Path,
+) -> None:
+    """Exercise persistence and analysis through the real pinned provider."""
+    with _fresh_provider_import("swing_sim"):
+        variation = importlib.import_module("shared.python.swing_sim.variation")
+        _assert_from_tools(Path(variation.__file__).resolve())
+        gateway_module = importlib.import_module(
+            "src.shared.python.perturbation.tools_variation_adapter"
+        )
+        gateway = gateway_module.load_tools_variation_gateway()
+
+        input_name = f"{variation.CATEGORY_LAUNCH}.ball_speed_mph"
+        plan = variation.VariationPlan(
+            mode="launch",
+            noise=(variation.NoiseSpec(input_name, scale=1.0),),
+            n_runs=4,
+            seed=17,
+        )
+        samples = gateway.sample_inputs(plan)
+        np.testing.assert_array_equal(samples, gateway.sample_inputs(plan))
+
+        outputs = np.column_stack((samples[:, 0], -samples[:, 0]))
+        outputs[1] = np.nan
+        dataset = variation.VariationDataset(
+            plan=plan,
+            input_names=(input_name,),
+            inputs=samples,
+            output_names=("carry_m", "lateral_m"),
+            outputs=outputs,
+            success=np.array((True, False, True, True)),
+        )
+        logical_round_trip = gateway.deserialize_dataset(
+            gateway.serialize_dataset(dataset)
+        )
+        np.testing.assert_array_equal(logical_round_trip.inputs, dataset.inputs)
+        np.testing.assert_allclose(
+            logical_round_trip.outputs,
+            dataset.outputs,
+            equal_nan=True,
+        )
+
+        for suffix, writer, reader in (
+            ("json", gateway.write_dataset_json, gateway.read_dataset_json),
+            (
+                "csv",
+                gateway.write_dataset_csv,
+                lambda path: gateway.read_dataset_csv(path, plan),
+            ),
+            ("h5", gateway.write_dataset_hdf5, gateway.read_dataset_hdf5),
+        ):
+            path = tmp_path / f"variation.{suffix}"
+            writer(dataset, path)
+            restored = reader(path)
+            np.testing.assert_array_equal(restored.inputs, dataset.inputs)
+            np.testing.assert_allclose(
+                restored.outputs,
+                dataset.outputs,
+                equal_nan=True,
+            )
+            np.testing.assert_array_equal(restored.success, dataset.success)
+
+        stats = {item.name: item for item in gateway.summarize_dataset(dataset)}
+        assert stats["carry_m"].n == 3
+        rank = gateway.compute_spearman_attribution(dataset)
+        assert rank[0, 0] == pytest.approx(1.0)
+        assert rank[0, 1] == pytest.approx(-1.0)
+        oat = gateway.build_oat_sensitivity(
+            (input_name,),
+            dataset.output_names,
+            np.array(((2.0, 1.0),)),
+        )
+        np.testing.assert_array_equal(oat.normalized, np.ones((1, 2)))
+
+        positions = np.zeros((4, 3, 1, 3), dtype=float)
+        offsets = np.array((-1.0, 0.0, 1.0, 2.0))
+        positions[:, :, 0, 0] = offsets[:, np.newaxis] * np.array((0.1, 0.2, 1.0))
+        ensemble = variation.EnsemblePositionTraces(
+            variation=dataset,
+            sample_times_s=np.array((0.0, 0.5, 1.0)),
+            coordinate_frame="swing.world",
+            point_ids=("swing.clubhead",),
+            positions_m=positions,
+            sample_valid=np.ones((4, 3), dtype=bool),
+            impact_sample_indices=np.array((2, -1, 2, -1)),
+        )
+        dispersion = gateway.compute_geometry_dispersion(ensemble)
+        np.testing.assert_array_equal(dispersion.count[:, 0], np.full(3, 4))
+        quiet = gateway.find_quiet_zones(
+            dispersion,
+            variation.LowVariabilityCriteria(
+                max_rms_radius_m=0.25,
+                min_samples=2,
+                point_ids=("swing.clubhead",),
+            ),
+        )
+        assert [(interval.start_index, interval.end_index) for interval in quiet] == [
+            (0, 1)
+        ]

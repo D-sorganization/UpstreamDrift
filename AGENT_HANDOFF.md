@@ -87,7 +87,6 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   2026-08-24 after a manual closure lacked a complete campaign, protected PR,
   or remote-main merge.
 - #8443, #8448, #8449, #8450, #8595, #8668, #8684, and #8796 remain open.
-  Verify each issue's exact acceptance evidence before changing state.
 - PR #9022 is merged as current remote-main commit `76bf6ab1d`. Tools PR #4674
   is merged at immutable commit
   `17474249b9267d0e73a779c1d72f231e7b8de39c`; this is the #8358 gitlink and
@@ -99,7 +98,8 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   evidence, serial/batched execution, analytical and articulated MuJoCo
   adapters, fail-closed cross-engine comparison, lossless bundles, and
   canonical scalar, rank/OAT, dispersion, and quiet-zone analysis are present.
-  Architecture budgets pass without exceptions. Complete hit, miss,
+  Architecture and real editable/vendored persistence/analysis gates pass;
+  complete hit, miss,
   numerical-failure, partial-trace, stable-marker, frame/unit, provenance, and
   bilateral shoulder/wrist allocation evidence remains explicit.
 - PR #9026 is open at head `c0cf07722a25e109660a2a20044508fbc8b8b2e3`;
