@@ -3,8 +3,11 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import numpy as np
+import pytest
 
-from src.tools.pose_studio.gui import PoseStudioWindow, main
+pytestmark = [pytest.mark.unit, pytest.mark.ui]
+
+from src.tools.pose_studio.gui import MainWidget, PoseStudioWindow, _EmbedAdapter, main
 from src.tools.pose_studio.core import EngineStatus
 from src.shared.python.pose_interchange.canonical import (
     canonical_zero_pose,
@@ -19,9 +22,26 @@ def test_gui_initialization(mock_qapp) -> None:
     # Test fallback to "drake" if unknown engine is provided
     win = PoseStudioWindow(initial_engine="unknown_engine")
     assert win is not None
+    assert win.main_widget is not None
+    assert win.main_widget._engine_controller.engine_name == "drake"
     assert win._engine_controller.engine_name == "drake"
+    assert win.act_undo is not None
+    assert win.act_redo is not None
 
-    # Check that it doesn't crash on applying initial pose
+
+@patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
+def test_embed_adapter_create_and_edit_pose(mock_qapp) -> None:
+    adapter = _EmbedAdapter()
+    widget = adapter.create_main_widget(parent=None)
+    assert isinstance(widget, MainWidget)
+    assert widget.act_undo is not None
+    assert widget.act_redo is not None
+
+    # Test editing an angle without crash
+    joint = REFERENCE_GOLFER_FIELDS[0]
+    widget._on_angle_edited(joint, 30.0)
+    assert widget._engine_controller.pose.joint_angles_deg[joint] == 30.0
+    assert widget.act_undo.isEnabled()
 
 
 @patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
