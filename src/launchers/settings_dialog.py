@@ -198,10 +198,17 @@ class SettingsWidget(SettingsAuxiliaryTabsMixin, QWidget):
         self._btn_layout_lock.setCheckable(True)
         self._btn_layout_lock.setChecked(False)
         self._btn_layout_lock.setStyleSheet(Styles.BTN_LAYOUT_TOGGLE)
+        self._btn_layout_lock.setToolTip(
+            "Layout is locked. Click to unlock layout for editing."
+        )
+        self._btn_layout_lock.toggled.connect(self._on_layout_lock_toggled)
         inner.addWidget(self._btn_layout_lock)
 
         self._btn_edit_tiles = QPushButton("Edit Tiles (show/hide)")
         self._btn_edit_tiles.setEnabled(False)
+        self._btn_edit_tiles.setToolTip(
+            "Unlock the layout above to edit which tiles are visible"
+        )
         inner.addWidget(self._btn_edit_tiles)
 
         inner.addSpacing(12)
@@ -260,14 +267,15 @@ class SettingsWidget(SettingsAuxiliaryTabsMixin, QWidget):
         # ``View > Edit Layout Mode`` QAction owns the layout-edit state.
         layout_action = getattr(launcher, "_action_layout_mode", None)
         if launcher and layout_action is not None:
-            self._btn_layout_lock.setChecked(layout_action.isChecked())
-            self._btn_edit_tiles.setEnabled(layout_action.isChecked())
+            is_unlocked = layout_action.isChecked()
+            self._btn_layout_lock.setChecked(is_unlocked)
+            self._on_layout_lock_toggled(is_unlocked)
             self._btn_layout_lock.toggled.connect(layout_action.setChecked)
             self._btn_layout_lock.toggled.connect(
                 launcher._toggle_layout_mode_from_menu
             )
+            layout_action.toggled.connect(self._sync_layout_lock_state)
             self._btn_edit_tiles.clicked.connect(launcher.open_layout_manager)
-            self._btn_layout_lock.toggled.connect(self._btn_edit_tiles.setEnabled)
 
             # Sync view mode
             if hasattr(launcher, "layout_manager"):
@@ -687,6 +695,30 @@ class SettingsWidget(SettingsAuxiliaryTabsMixin, QWidget):
 
     def _on_reset_layout(self) -> None:
         self.reset_layout_requested.emit()
+
+    def _on_layout_lock_toggled(self, checked: bool) -> None:
+        """Update layout lock button caption, tooltip, and edit-tiles button when toggled."""
+        self._btn_layout_lock.setText(
+            "Layout: Unlocked" if checked else "Layout: Locked"
+        )
+        self._btn_layout_lock.setToolTip(
+            "Layout editing is unlocked. Click to lock layout."
+            if checked
+            else "Layout is locked. Click to unlock layout for editing."
+        )
+        self._btn_edit_tiles.setEnabled(checked)
+        if checked:
+            self._btn_edit_tiles.setToolTip("Open dialog to show or hide tiles")
+        else:
+            self._btn_edit_tiles.setToolTip(
+                "Unlock the layout above to edit which tiles are visible"
+            )
+
+    def _sync_layout_lock_state(self, checked: bool) -> None:
+        """Sync layout lock button state from external action without feedback loops."""
+        if self._btn_layout_lock.isChecked() != checked:
+            self._btn_layout_lock.setChecked(checked)
+        self._on_layout_lock_toggled(checked)
 
     def _refresh_tier_details(self, profile_name: str) -> None:
         """Show packages and feature list for the selected Docker tier.
