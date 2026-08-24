@@ -21,10 +21,11 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 
 ## Active Headline Structural Campaign (#8800)
 
-- Development worktree `UpstreamDrift-worktrees\8800-headline-structural-propagation`
-  is clean and pushed at `1bd4d57da7bd257b76b42b3cc19524b283b5f748` on
+- The scientific execution source is the clean, pushed commit
+  `1bd4d57da7bd257b76b42b3cc19524b283b5f748` on
   `research/8800-headline-structural-propagation`. It includes the exact
   `shaft._RecordContext` adapter and a regression that rejects variadic mocks.
+  Later handoff-only commits do not change or relabel that frozen source.
 - The governed seven-corner plan contains 84 planned states: 83 feasible plus
   the declared low-height infeasible state. It requires 14 terminal atlas paths,
   with 48 shaft and 72 ground atomic branch packs per applicable corner. The
