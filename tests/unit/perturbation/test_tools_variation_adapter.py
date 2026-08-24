@@ -8,6 +8,9 @@ import pytest
 
 from src.shared.python import perturbation
 from src.shared.python.perturbation.tools_variation_adapter import (
+    EXPECTED_DATASET_HDF5_SCHEMA_ID,
+    EXPECTED_DATASET_HDF5_SCHEMA_VERSION,
+    EXPECTED_DATASET_JSON_SCHEMA_VERSION,
     EXPECTED_EXECUTION_DOCUMENT_SCHEMA_VERSION,
     EXPECTED_PLAN_BINDING_SCHEMA_VERSION,
     EXPECTED_PLAN_SCHEMA_VERSION,
@@ -31,7 +34,18 @@ def _modules() -> dict[str, SimpleNamespace]:
     return {
         "shared.python.swing_sim.variation": SimpleNamespace(
             SCHEMA_VERSION=EXPECTED_PLAN_SCHEMA_VERSION,
+            DATASET_JSON_SCHEMA_VERSION=EXPECTED_DATASET_JSON_SCHEMA_VERSION,
+            DATASET_HDF5_SCHEMA_ID=EXPECTED_DATASET_HDF5_SCHEMA_ID,
+            DATASET_HDF5_SCHEMA_VERSION=EXPECTED_DATASET_HDF5_SCHEMA_VERSION,
             sample_inputs=lambda plan: ("samples", plan),
+            to_json_dict=lambda dataset: ("json-document", dataset),
+            from_json_dict=lambda document: ("dataset", document),
+            write_json=lambda dataset, path: ("write-json", dataset, path),
+            read_json=lambda path: ("read-json", path),
+            write_csv=lambda dataset, path: ("write-csv", dataset, path),
+            read_csv=lambda path, plan: ("read-csv", path, plan),
+            write_hdf5=lambda dataset, path: ("write-hdf5", dataset, path),
+            read_hdf5=lambda path: ("read-hdf5", path),
         ),
         "shared.python.swing_sim.variation.execution_metadata": SimpleNamespace(
             EXECUTION_DOCUMENT_SCHEMA_VERSION=(
@@ -70,6 +84,8 @@ def test_gateway_preserves_tools_records_and_canonical_operations() -> None:
     gateway = ToolsVariationGateway.from_modules(modules)
     plan = object()
     provenance = object()
+    dataset = object()
+    document = {"schema_version": EXPECTED_DATASET_JSON_SCHEMA_VERSION}
 
     assert gateway.sample_inputs(plan) == ("samples", plan)
     assert gateway.load_persisted_plan("{}") == ("resolution", "{}")
@@ -83,7 +99,42 @@ def test_gateway_preserves_tools_records_and_canonical_operations() -> None:
         plan,
         provenance,
     )
+    assert gateway.serialize_dataset(dataset) == ("json-document", dataset)
+    assert gateway.deserialize_dataset(document) == ("dataset", document)
+    assert gateway.write_dataset_json(dataset, "study.json") == (
+        "write-json",
+        dataset,
+        "study.json",
+    )
+    assert gateway.read_dataset_json("study.json") == ("read-json", "study.json")
+    assert gateway.write_dataset_csv(dataset, "study.csv") == (
+        "write-csv",
+        dataset,
+        "study.csv",
+    )
+    assert gateway.read_dataset_csv("study.csv", plan) == (
+        "read-csv",
+        "study.csv",
+        plan,
+    )
+    assert gateway.write_dataset_hdf5(dataset, "study.h5") == (
+        "write-hdf5",
+        dataset,
+        "study.h5",
+    )
+    assert gateway.read_dataset_hdf5("study.h5") == ("read-hdf5", "study.h5")
     assert gateway.capabilities.available is True
+    assert (
+        gateway.capabilities.dataset_json_schema_version
+        == EXPECTED_DATASET_JSON_SCHEMA_VERSION
+    )
+    assert (
+        gateway.capabilities.dataset_hdf5_schema_id == EXPECTED_DATASET_HDF5_SCHEMA_ID
+    )
+    assert (
+        gateway.capabilities.dataset_hdf5_schema_version
+        == EXPECTED_DATASET_HDF5_SCHEMA_VERSION
+    )
     assert gateway.capabilities.failure is None
 
 
@@ -98,6 +149,9 @@ def test_probe_is_import_safe_when_tools_variation_is_absent() -> None:
     assert capability.execution_document_schema_version is None
     assert capability.provenance_schema_version is None
     assert capability.plan_binding_schema_version is None
+    assert capability.dataset_json_schema_version is None
+    assert capability.dataset_hdf5_schema_id is None
+    assert capability.dataset_hdf5_schema_version is None
     assert "No module named" in (capability.failure or "")
     with pytest.raises(ToolsVariationUnavailableError, match="not available"):
         load_tools_variation_gateway(importer=missing_importer)
@@ -121,6 +175,24 @@ def test_probe_is_import_safe_when_tools_variation_is_absent() -> None:
         (
             "shared.python.swing_sim.variation.persisted_plan_io",
             "persisted_plan_loads",
+            None,
+            "callable",
+        ),
+        (
+            "shared.python.swing_sim.variation",
+            "DATASET_HDF5_SCHEMA_VERSION",
+            2,
+            "incompatible",
+        ),
+        (
+            "shared.python.swing_sim.variation",
+            "DATASET_HDF5_SCHEMA_ID",
+            "other/dataset",
+            "incompatible",
+        ),
+        (
+            "shared.python.swing_sim.variation",
+            "write_hdf5",
             None,
             "callable",
         ),
@@ -152,6 +224,16 @@ def test_gateway_validates_public_text_and_plan_boundaries() -> None:
         gateway.load_persisted_plan(b"{}")  # type: ignore[arg-type]
     with pytest.raises(TypeError, match="plan must not be None"):
         gateway.dump_persisted_plan(None)
+    with pytest.raises(TypeError, match="dataset must not be None"):
+        gateway.serialize_dataset(None)
+    with pytest.raises(TypeError, match="document must be a mapping"):
+        gateway.deserialize_dataset([])  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match="path must be text or path-like"):
+        gateway.read_dataset_hdf5(b"study.h5")  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="path must not be empty"):
+        gateway.write_dataset_json(object(), "")
+    with pytest.raises(TypeError, match="plan must not be None"):
+        gateway.read_dataset_csv("study.csv", None)
 
 
 def test_gateway_requires_complete_named_module_mapping() -> None:
