@@ -1,10 +1,10 @@
 """Apply the explicitly reviewed v2 outcome census to the frozen claim snapshot.
 
 This migration deliberately does not infer scientific outcomes from
-``published_status`` or ``audit_status``.  It is locked to the exact paper
-digest and claim count reviewed for issue #8724.  A later paper revision or
-claim split must receive a new explicit outcome review instead of inheriting a
-default.
+``published_status`` or ``audit_status``. It is locked to the exact paper
+digest and claim count reviewed through the #9026 evidence-bridge extension.
+A later paper revision or claim split must receive a new explicit outcome
+review instead of inheriting a default.
 """
 
 from __future__ import annotations
@@ -22,33 +22,33 @@ PRIOR_REVIEWED_SOURCE_DIGEST = (
     "034692d69e1447ea0552c2d5a8f36c05299294c1f23635cd74e6690ad304815b"
 )
 REVIEWED_SOURCE_DIGEST = (
-    "7407e8f00842ecdf95769d65ac7d2fe3f8d495cb0d11d405640e7582e6b8560a"
+    "1847a46b26000da3d02ecce6c5f09d24b4ac3ea76a8d1aa8aae171b7e7217904"
 )
-REVIEWED_CLAIM_COUNT = 303
+REVIEWED_CLAIM_COUNT = 304
 REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
     {
+        "PD-CAND-165a6caf21ef85e2",
+        "PD-CAND-39f42d06f3e621a5",
+        "PD-CAND-47613762b2e46adc",
+        "PD-CAND-4836c76505460f2a",
+        "PD-CAND-76fd7cb2bfe59cbb",
+        "PD-CAND-8bcb732b1326ec45",
         "PD-CAND-9345c1e6be2ef186",
-        "PD-CAND-aeecc7c4cec6b96f",
+        "PD-CAND-9906005bff75ba72",
+        "PD-CAND-a3ffec776426fce8",
         "PD-CAND-ab4689630944a0fe",
         "PD-CAND-aa6efbe9274b5d53",
-        "PD-CAND-87d26eacc282b21c",
-        "PD-CAND-d2f2b5b07b466265",
+        "PD-CAND-b06a3cbe5b2d0e01",
+        "PD-CAND-b5b2526e23b77d70",
         "PD-CAND-bcfcc2b3a9631de1",
-        "PD-CAND-bb48a75174a745ce",
+        "PD-CAND-be8a26a0593eab4f",
+        "PD-CAND-c6f7607002d58a93",
+        "PD-CAND-cd8822807d808531",
+        "PD-CAND-d2f2b5b07b466265",
+        "PD-CAND-f385c12c357c840a",
+        "PD-CAND-f6ba096416890d02",
         "PD-CAND-fdcf5c685afbb41a",
         "PD-CAND-feff7c3d6f4ddc55",
-        "PD-CAND-9519d7e6dfb308ef",
-        "PD-CAND-be8a26a0593eab4f",
-        "PD-CAND-165a6caf21ef85e2",
-        "PD-CAND-f1e25f4b524e7a06",
-        "PD-CAND-cd8822807d808531",
-        "PD-CAND-39f42d06f3e621a5",
-        "PD-CAND-0acfb3375ef769f8",
-        "PD-CAND-9906005bff75ba72",
-        "PD-CAND-b06a3cbe5b2d0e01",
-        "PD-CAND-f5697c26aed70275",
-        "PD-CAND-c6f7607002d58a93",
-        "PD-CAND-b5b2526e23b77d70",
     }
 )
 PRIOR_REVIEWER_PROJECTION_CANDIDATE_IDS = REVIEWER_PROJECTION_CANDIDATE_IDS - {
@@ -62,7 +62,7 @@ PRIOR_REVIEWER_PROJECTION_CANDIDATE_IDS = REVIEWER_PROJECTION_CANDIDATE_IDS - {
 }
 
 # These sets are the exhaustive finding-level review authority for the locked
-# 303-claim snapshot. They are intentionally explicit: no claim can inherit an
+# 304-claim snapshot. They are intentionally explicit: no claim can inherit an
 # outcome merely because it is absent from an exception list.
 SUPPORTED_CLAIM_IDS = frozenset(
     {
@@ -349,6 +349,7 @@ SUPPORTED_CLAIM_IDS = frozenset(
         "PD-CLAIM-302",
         "PD-CLAIM-303",
         "PD-CLAIM-304",
+        "PD-CLAIM-305",
     }
 )
 UNTESTED_CLAIM_IDS = frozenset(

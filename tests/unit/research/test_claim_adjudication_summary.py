@@ -22,10 +22,10 @@ def test_summary_exposes_all_outcomes_and_open_evidence_boundaries() -> None:
 
     summary = build_summary(registry)
 
-    assert summary["claim_count"] == 303
+    assert summary["claim_count"] == 304
     assert summary["outcome_counts"] == {
         "inconclusive": 5,
-        "supported": 283,
+        "supported": 284,
         "untested": 15,
     }
     assert summary["evidence_qualification_counts"]["independent_followup_open"] > 0
@@ -42,7 +42,7 @@ def test_summary_exposes_all_outcomes_and_open_evidence_boundaries() -> None:
         summary["unresolved_replication_counts"]["governed_human_data_unavailable"] > 0
     )
     assert {row["claim_id"] for row in summary["claims"]} == {
-        f"PD-CLAIM-{index:03d}" for index in range(2, 305)
+        f"PD-CLAIM-{index:03d}" for index in range(2, 306)
     }
     rows = {row["claim_id"]: row for row in summary["claims"]}
     assert rows["PD-CLAIM-093"]["source_independence"] == (
@@ -55,7 +55,7 @@ def test_summary_exposes_all_outcomes_and_open_evidence_boundaries() -> None:
     assert all(row["evidence_tiers"] for row in rows.values())
     assert all(row["model_tiers"] for row in rows.values())
     family_rows = summary["claim_family_source_concentration"]
-    assert sum(row["claim_count"] for row in family_rows) == 303
+    assert sum(row["claim_count"] for row in family_rows) == 304
     assert any(
         row["concentration_flag"] == "project_authored_only" for row in family_rows
     )
