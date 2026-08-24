@@ -586,6 +586,7 @@ def test_settings_dialog_tier_details(parent_launcher, qapp) -> None:
     assert html != ""
 
 
+@pytest.mark.unit
 def test_layout_lock_button_toggle_caption_and_tooltip(parent_launcher, qapp) -> None:
     """Issue #8897: Layout lock button caption must reflect locked/unlocked state and update tooltips."""
     dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_LAYOUT)
