@@ -45,7 +45,15 @@ def test_clear_overrides_without_xlsx_restores_original_state_when_confirmed(
     """Issue #8889: Clear overrides without xlsx path must restore original events and ask confirmation."""
     widget = MainWidget()
     widget.df = pd.DataFrame(
-        {"time": [0.0, 0.01, 0.02, 0.03, 0.04], "club_X": [0.1, 0.2, 0.3, 0.4, 0.5]}
+        {
+            "time": [0.0, 0.01, 0.02, 0.03, 0.04],
+            "mid_X": [0.0, 0.0, 0.0, 0.0, 0.0],
+            "mid_Y": [0.0, 0.0, 0.0, 0.0, 0.0],
+            "mid_Z": [0.0, 0.0, 0.0, 0.0, 0.0],
+            "club_X": [0.1, 0.2, 0.3, 0.4, 0.5],
+            "club_Y": [0.0, 0.0, 0.0, 0.0, 0.0],
+            "club_Z": [0.0, 0.0, 0.0, 0.0, 0.0],
+        }
     )
     widget._xlsx_path = None
     original_events = MocapEvents(
