@@ -89,9 +89,9 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 - Tools PR #4669 is open at exact head
   `36f4b1add2bc72cea87bd9f87d36b232db76d50b` with squash auto-merge requested;
   do not pin it before protected merge. Its final suite exposed an
-  UpstreamDrift provider-mode test isolation defect, corrected on branch
-  `docs/8800-controltower-recovery`. Tools #4142 remains open until immutable
-  UpstreamDrift consumption and R10–R15 qualification are complete.
+  UpstreamDrift provider-mode test isolation defect, corrected in protected
+  PR #9022. Tools #4142 remains open until immutable UpstreamDrift consumption
+  and R10–R15 qualification are complete.
 - AffineDrift #3930 remains downstream of the qualified UpstreamDrift release;
   do not project a moving or partial campaign.
 - #8963 architecture debt remains separate from the frozen campaign source.
