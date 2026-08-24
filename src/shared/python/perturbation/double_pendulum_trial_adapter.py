@@ -331,7 +331,8 @@ class DoublePendulumTrialAdapter:
             torque_mapping = _TORQUE_KEYS.get(column.key)
             if torque_mapping is None:
                 continue
-            assert column.time_window_s is not None
+            if column.time_window_s is None:
+                raise ValueError("joint torque offsets require a time window")
             start_s, end_s = column.time_window_s
             active = (times >= start_s) & (times < end_s)
             controls[active, torque_mapping[0]] += float(sampled_value)
@@ -370,7 +371,8 @@ class DoublePendulumTrialAdapter:
         if not isinstance(result, DoublePendulumTrialResult):
             raise TypeError("result must be DoublePendulumTrialResult")
         trace = result.trace
-        assert trace.markers is not None
+        if trace.markers is None:
+            raise ValueError("double-pendulum trial trace must retain markers")
         trial_trace = TrialTrace(
             times_s=trace.t,
             q=trace.q,

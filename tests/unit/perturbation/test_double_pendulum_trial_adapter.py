@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 import numpy as np
 import pytest
@@ -136,6 +136,16 @@ def test_damping_sample_changes_the_actual_ode_trajectory() -> None:
     high = adapter.run(np.array([2.0]))
 
     assert not np.allclose(low.trace.v, high.trace.v)
+
+
+def test_evidence_collection_rejects_a_trace_without_geometry() -> None:
+    plan = _Plan(noise=(_Spec(_SHOULDER_DAMPING),))
+    adapter = _adapter(plan, _config(target_position_m=(20.0, 0.0, 20.0)))
+    result = adapter.run(np.array([0.4]))
+    incomplete = replace(result, trace=replace(result.trace, markers=None))
+
+    with pytest.raises(ValueError, match="must retain markers"):
+        adapter.collect_success(0, plan.seed, np.array([0.4]), incomplete)
 
 
 def test_serial_execution_retains_legitimate_miss_and_domain_failure() -> None:

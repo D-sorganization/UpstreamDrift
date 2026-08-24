@@ -24,7 +24,12 @@ from .trial_evidence import (
 )
 
 BUNDLE_SCHEMA_VERSION = "upstream-tools-variation-bundle/v1"
-_OUTCOMES = ("hit", "no_impact", "numerical_failure", "partial_valid_trace")
+_OUTCOMES: tuple[TrialOutcome, ...] = (
+    "hit",
+    "no_impact",
+    "numerical_failure",
+    "partial_valid_trace",
+)
 _IDENTITY_FIELDS = (
     "seed",
     "plan_sha256",
@@ -418,7 +423,14 @@ def _deserialize_trial(
     )
     trace = _deserialize_trace(raw["trace"], arrays)
     return CanonicalTrialEvidence(
-        **identity,
+        seed=cast(int, identity["seed"]),
+        plan_sha256=cast(str, identity["plan_sha256"]),
+        scenario_sha256=cast(str, identity["scenario_sha256"]),
+        execution_config_sha256=cast(str, identity["execution_config_sha256"]),
+        tools_revision=cast(str, identity["tools_revision"]),
+        engine_id=cast(str, identity["engine_id"]),
+        engine_revision=cast(str, identity["engine_revision"]),
+        model_id=cast(str, identity["model_id"]),
         trial_index=raw["trial_index"],
         sampled_inputs=_deserialize_samples(raw["sampled_inputs"]),
         outcome=cast(TrialOutcome, raw["outcome"]),

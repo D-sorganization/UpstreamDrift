@@ -185,6 +185,24 @@ def test_push_pull_allocation_is_explicit_and_changes_the_real_trajectory() -> N
     assert not np.allclose(positive.trace.q, reversed_drive.trace.q)
 
 
+def test_evidence_collection_rejects_a_trace_without_geometry() -> None:
+    plan = _Plan(noise=(_Spec(_SHOULDER_DAMPING),))
+    binding = MujocoVariationBinding(
+        variable_key=_SHOULDER_DAMPING,
+        unit="N·m·s",
+        kind="joint_damping",
+        target_joint_names=("left_shoulder_swing", "right_shoulder_swing"),
+        allocation_weights=(1.0, 1.0),
+        plan_point_ids=(),
+    )
+    adapter = _adapter(plan, _config(binding))
+    result = adapter.run(np.array([0.4]))
+    incomplete = replace(result, trace=replace(result.trace, markers=None))
+
+    with pytest.raises(ValueError, match="must retain markers"):
+        adapter.collect_success(0, plan.seed, np.array([0.4]), incomplete)
+
+
 def test_hit_requires_actual_source_target_geom_contact() -> None:
     plan = _Plan(noise=(_Spec(_SHOULDER_DAMPING),))
     binding = MujocoVariationBinding(

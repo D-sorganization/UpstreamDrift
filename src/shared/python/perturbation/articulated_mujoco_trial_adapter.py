@@ -334,9 +334,7 @@ class ArticulatedMujocoTrialAdapter:
                 "plan variables and articulated bindings must match exactly"
             )
         columns: list[_Column] = []
-        for raw_spec in raw_noise:
-            key = getattr(raw_spec, "variable_key", None)
-            assert isinstance(key, str)
+        for raw_spec, key in zip(raw_noise, plan_keys, strict=True):
             binding = bindings[key]
             window = getattr(raw_spec, "time_window_s", None)
             points = getattr(raw_spec, "point_ids", None)
@@ -527,7 +525,8 @@ class ArticulatedMujocoTrialAdapter:
         for column, sampled_value in zip(self._columns, row, strict=True):
             if column.kind != "joint_torque_offset":
                 continue
-            assert column.time_window_s is not None
+            if column.time_window_s is None:
+                raise ValueError("joint torque offsets require a time window")
             start_s, end_s = column.time_window_s
             if not start_s <= time_s < end_s:
                 continue
@@ -580,7 +579,8 @@ class ArticulatedMujocoTrialAdapter:
         if not isinstance(result, ArticulatedMujocoTrialResult):
             raise TypeError("result must be ArticulatedMujocoTrialResult")
         trace = result.trace
-        assert trace.markers is not None
+        if trace.markers is None:
+            raise ValueError("articulated trial trace must retain markers")
         trial_trace = TrialTrace(
             times_s=trace.t,
             q=trace.q,
@@ -679,7 +679,8 @@ class ArticulatedMujocoTrialAdapter:
                     f"joint.{coordinate}.angular_velocity", float(rate), "rad/s"
                 )
             )
-        assert trace.markers is not None
+        if trace.markers is None:
+            raise ValueError("impact state requires retained markers")
         marker_index = self._config.marker_body_names.index(
             self._config.source_body_name
         )

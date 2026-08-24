@@ -92,16 +92,16 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   `17474249b9267d0e73a779c1d72f231e7b8de39c`; this is the #8358 gitlink and
   canonical JSON/CSV/HDF5 analysis authority.
 - Active #8358 worktree: `UpstreamDrift-worktrees/8358-tools-variation-adapter`,
-  branch
-  `feat/8358-tools-variation-adapter`. Fifteen coherent implementation commits
+  branch `feat/8358-tools-variation-adapter`. Fifteen coherent commits
   were transplanted onto current remote `main`. The Tools gateway, typed trial
   evidence, serial/batched execution, analytical and articulated MuJoCo
   adapters, fail-closed cross-engine comparison, lossless bundles, and
   canonical scalar, rank/OAT, dispersion, and quiet-zone analysis are present.
-  Architecture and real editable/vendored persistence/analysis gates pass;
-  complete hit, miss,
-  numerical-failure, partial-trace, stable-marker, frame/unit, provenance, and
-  bilateral shoulder/wrist allocation evidence remains explicit.
+  The 222-test serial suite, pinned mypy, Ruff, Bandit, architecture, file-size,
+  title-case, claim-integrity, and 592-artifact release gates pass. Complete
+  outcome, trace, marker, frame/unit, provenance, and bilateral-allocation
+  evidence remains explicit. Use a worktree-local pytest `--basetemp`; the
+  ambient Windows `pytest-current` link is denied.
 - PR #9026 is open at head `c0cf07722a25e109660a2a20044508fbc8b8b2e3`;
   standard protected CI passes, while requested human review and three
   auxiliary checks remain. It adds the biomechanics evidence bridge but does
