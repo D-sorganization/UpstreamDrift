@@ -27,6 +27,8 @@ _TOOLS_REVISION = "f9730033fd279ba8b4abe03bab2aadd950400b47"
 _ENGINE_REVISION = "c" * 40
 _SHOULDER_TORQUE = "swing_sim.swing.shoulder_commanded_torque_offset_nm"
 _SHOULDER_DAMPING = "swing_sim.swing.damping_shoulder"
+_WRIST_TORQUE = "swing_sim.swing.wrist_commanded_torque_offset_nm"
+_WRIST_DAMPING = "swing_sim.swing.damping_wrist"
 
 
 @dataclass(frozen=True)
@@ -87,9 +89,7 @@ _COORDINATE_JOINTS = (
 )
 
 
-def _config(
-    binding: MujocoVariationBinding,
-) -> ArticulatedMujocoTrialConfig:
+def _config(*bindings: MujocoVariationBinding) -> ArticulatedMujocoTrialConfig:
     return ArticulatedMujocoTrialConfig(
         model_xml=_upper_body_xml(),
         model_id="bilateral-upper-body-welded-club/v1",
@@ -100,7 +100,7 @@ def _config(
         source_body_name="clubhead",
         target_body_name="ball",
         base_joint_torques=(NamedJointTorque("spine_rotation", 1.0),),
-        bindings=(binding,),
+        bindings=bindings,
         frame_id="mujoco-world:x-forward-y-left-z-up",
         alignment_id="address-state/v1",
     )
@@ -227,6 +227,69 @@ def test_global_damping_binding_changes_both_declared_shoulder_dofs() -> None:
     high = adapter.run(np.array([4.0]))
 
     assert not np.allclose(low.trace.v, high.trace.v)
+
+
+def test_combined_shoulder_wrist_role_allocation_remains_explicit() -> None:
+    plan = _Plan(
+        noise=(
+            _Spec(_SHOULDER_TORQUE, (0.0, 0.01), ("joint.shoulder",)),
+            _Spec(_WRIST_TORQUE, (0.0, 0.01), ("joint.wrist",)),
+            _Spec(_SHOULDER_DAMPING),
+            _Spec(_WRIST_DAMPING),
+        )
+    )
+    bindings = (
+        MujocoVariationBinding(
+            _SHOULDER_TORQUE,
+            "N·m",
+            "joint_torque_offset",
+            ("left_shoulder_swing", "right_shoulder_swing"),
+            (1.0, -1.0),
+            ("joint.shoulder",),
+        ),
+        MujocoVariationBinding(
+            _WRIST_TORQUE,
+            "N·m",
+            "joint_torque_offset",
+            ("left_wrist", "right_wrist"),
+            (-0.5, 0.5),
+            ("joint.wrist",),
+        ),
+        MujocoVariationBinding(
+            _SHOULDER_DAMPING,
+            "N·m·s",
+            "joint_damping",
+            ("left_shoulder_swing", "right_shoulder_swing"),
+            (1.0, 1.0),
+            (),
+        ),
+        MujocoVariationBinding(
+            _WRIST_DAMPING,
+            "N·m·s",
+            "joint_damping",
+            ("left_wrist", "right_wrist"),
+            (1.0, 1.0),
+            (),
+        ),
+    )
+    adapter = _adapter(plan, _config(*bindings))
+
+    result = adapter.run(np.array([6.0, -2.0, 1.5, 0.4]))
+
+    assert result.trace.u is not None
+    np.testing.assert_allclose(
+        result.trace.u[0, [1, 4, 5, 8]],
+        [6.0, 1.0, -6.0, -1.0],
+    )
+    evidence = adapter.collect_success(
+        0, plan.seed, np.array([6.0, -2.0, 1.5, 0.4]), result
+    )
+    assert tuple(value.name for value in evidence.sampled_inputs) == (
+        _SHOULDER_TORQUE,
+        _WRIST_TORQUE,
+        _SHOULDER_DAMPING,
+        _WRIST_DAMPING,
+    )
 
 
 @pytest.mark.parametrize(
