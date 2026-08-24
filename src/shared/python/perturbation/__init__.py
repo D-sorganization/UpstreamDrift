@@ -46,6 +46,12 @@ from .trial_evidence import (
     SampledInput,
     TrialTrace,
 )
+from .trial_evidence_bundle import (
+    TrialEvidenceBundleSummary,
+    load_trial_evidence_bundle,
+    validate_trial_evidence_bundle,
+    write_trial_evidence_bundle,
+)
 
 __all__ = [
     "PerturbationAnalyzer",
@@ -71,6 +77,10 @@ __all__ = [
     "ImpactObservation",
     "SampledInput",
     "TrialTrace",
+    "TrialEvidenceBundleSummary",
+    "load_trial_evidence_bundle",
+    "validate_trial_evidence_bundle",
+    "write_trial_evidence_bundle",
     "TrialEvidenceCollector",
     "execute_batched_variation",
     "execute_serial_variation",
