@@ -9,11 +9,10 @@ from typing import Any
 from src.shared.python.contracts import require
 
 try:
-    import matplotlib.pyplot as plt
     from matplotlib.axes import Axes  # noqa: F401
-    from matplotlib.figure import Figure  # noqa: F401
+    from matplotlib.figure import Figure
 except ImportError:
-    plt = None  # type: ignore[assignment]
+    Figure = None  # type: ignore[misc,assignment]
 
 
 def _plot_moment_arms(
@@ -76,7 +75,7 @@ def plot_grf_and_com_3d(
     Raises:
         ImportError: If matplotlib is not installed.
     """
-    if plt is None:
+    if Figure is None:
         raise ImportError("matplotlib is required for visualization.")
 
     require(len(com_trajectory) > 0, "COM trajectory must not be empty")
@@ -85,7 +84,10 @@ def plot_grf_and_com_3d(
         "force_df and com_trajectory must have matching lengths",
     )
 
-    fig = plt.figure(figsize=(10, 8))
+    # Construct the figure through matplotlib's object-oriented API. Importing
+    # pyplot delegates to an interactive backend and raises when a Linux runner
+    # has no DISPLAY, even though this renderer itself is headless-safe.
+    fig = Figure(figsize=(10, 8))
     ax = fig.add_subplot(111, projection="3d")
 
     # Plot COM trajectory

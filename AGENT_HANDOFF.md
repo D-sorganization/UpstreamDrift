@@ -75,6 +75,17 @@ Last updated: 2026-08-24
   recovery, and one-worker resume. After recovery, verify all 93 checkpoints
   and run only the three missing ground evaluations.
 
+## Headless Visualization Correction
+
+- The optional-stack run on PR #9032 exposed a deterministic Linux failure in
+  `test_plot_grf_and_com_3d`: importing `matplotlib.pyplot` selected an
+  interactive backend and raised `RuntimeError: Invalid DISPLAY variable`.
+- The visualization now constructs `matplotlib.figure.Figure` directly. A
+  regression test rejects any future `pyplot` dependency in this module.
+- Focused verification on 2026-08-24: 3 tests passed with `-n 0`; Ruff check
+  and format checks passed. This correction is local until the runner drain is
+  complete; push it once without creating a redundant rerun beforehand.
+
 ## Dependencies and Open Scientific Gates
 
 - Upstream PR #9022 merged as remote-main commit `76bf6ab1d`; its provider-mode

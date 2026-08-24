@@ -1,16 +1,27 @@
 """Tests for GRF visualization tools."""
 
+import inspect
+
 import numpy as np
 import pandas as pd
 import pytest
 
-from src.shared.python.biomechanics.grf_visualization import plot_grf_and_com_3d
+from src.shared.python.biomechanics import grf_visualization
+
+plot_grf_and_com_3d = grf_visualization.plot_grf_and_com_3d
+
+
+def test_grf_visualization_does_not_select_an_interactive_backend() -> None:
+    """Headless plotting must not import pyplot or inspect DISPLAY."""
+    source = inspect.getsource(grf_visualization)
+
+    assert "matplotlib.pyplot" not in source
 
 
 def test_plot_grf_and_com_3d() -> None:
     """Test that the 3D plot function executes without errors."""
     try:
-        import matplotlib.pyplot as plt
+        import matplotlib  # noqa: F401
     except ImportError:
         pytest.skip("matplotlib not installed")
 
@@ -38,7 +49,7 @@ def test_plot_grf_and_com_3d() -> None:
     assert ax.name == "3d"
 
     # Clean up
-    plt.close(fig)
+    fig.clear()
 
 
 def test_plot_grf_length_mismatch() -> None:
