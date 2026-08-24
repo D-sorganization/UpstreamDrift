@@ -228,7 +228,7 @@ class MainWidget(QtWidgets.QWidget):
         if hasattr(self, "act_redo") and self.act_redo is not None:
             self.act_redo.setEnabled(self._history.can_redo)
 
-    def create_menu_bar(self, parent: QtWidgets.QMainWindow) -> QtGui.QMenuBar:
+    def create_menu_bar(self, parent: QtWidgets.QMainWindow) -> QtWidgets.QMenuBar:
         """Create and return a menu bar for the given parent window.
 
         Args:
@@ -325,6 +325,13 @@ class PoseStudioWindow(QtWidgets.QMainWindow):
         raise AttributeError(
             f"'{type(self).__name__}' object has no attribute '{name}'"
         )
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        """Delegate attribute assignments to the inner MainWidget for backwards compatibility."""
+        if "_main_widget" in self.__dict__ and hasattr(self._main_widget, name):
+            setattr(self._main_widget, name, value)
+        else:
+            super().__setattr__(name, value)
 
 
 class _EmbedAdapter:
