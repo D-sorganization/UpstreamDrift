@@ -94,10 +94,13 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   and human review remain pending. Auto-merge is disabled.
 - #8358 is leased as `proximal-distal-20260824-r15`. An unpublished detached
   worktree at `UpstreamDrift-worktrees/8358-tools-variation-adapter-prep`
-  contains the RED/GREEN canonical schema gateway and eight passing focused
-  tests. Do not push it until #9022 merges; then rebase locally onto refreshed
-  `origin/main`, create a normal feature branch, repin the exact Tools commit,
-  and continue typed trial/provenance and parity work.
+  contains local commit `7e7da8512` for the RED/GREEN canonical schema gateway.
+  The next uncommitted slice adds immutable typed hit, no-impact, numerical-
+  failure, and partial-valid-trace evidence with stable coordinates, marker
+  IDs, frames, units, plan digest, and exact revisions. Its 11 focused tests
+  pass. Do not push until #9022 merges; then transplant the commits onto
+  refreshed `origin/main`, repin the exact Tools commit, and continue collector
+  injection and serial/batched parity work.
 - Tools #4142 remains open until immutable UpstreamDrift consumption and
   requirement-level R10–R15 qualification are complete.
 - AffineDrift #3930 remains downstream of the qualified UpstreamDrift release;

@@ -16,6 +16,13 @@ from .tools_variation_adapter import (
     load_tools_variation_gateway,
     probe_tools_variation,
 )
+from .trial_evidence import (
+    CanonicalTrialEvidence,
+    ClosestApproach,
+    ImpactObservation,
+    SampledInput,
+    TrialTrace,
+)
 
 __all__ = [
     "PerturbationAnalyzer",
@@ -31,4 +38,9 @@ __all__ = [
     "ToolsVariationUnavailableError",
     "load_tools_variation_gateway",
     "probe_tools_variation",
+    "CanonicalTrialEvidence",
+    "ClosestApproach",
+    "ImpactObservation",
+    "SampledInput",
+    "TrialTrace",
 ]
