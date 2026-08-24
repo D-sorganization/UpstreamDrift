@@ -22,6 +22,8 @@ from src.shared.python.perturbation.trial_evidence import (
 pytestmark = pytest.mark.unit
 
 _PLAN_SHA = "a" * 64
+_SCENARIO_SHA = "d" * 64
+_EXECUTION_CONFIG_SHA = "e" * 64
 _TOOLS_REVISION = "b" * 40
 _ENGINE_REVISION = "c" * 40
 
@@ -108,6 +110,8 @@ class _Collector:
             trial_index=trial_index,
             seed=plan_seed,
             plan_sha256=_PLAN_SHA,
+            scenario_sha256=_SCENARIO_SHA,
+            execution_config_sha256=_EXECUTION_CONFIG_SHA,
             tools_revision=_TOOLS_REVISION,
             engine_id="pendulum",
             engine_revision=_ENGINE_REVISION,

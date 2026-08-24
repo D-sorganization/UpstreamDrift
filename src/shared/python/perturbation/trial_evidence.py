@@ -13,7 +13,7 @@ from typing import Literal
 
 import numpy as np
 
-TRIAL_EVIDENCE_SCHEMA_VERSION = "upstream-tools-variation-trial/v1"
+TRIAL_EVIDENCE_SCHEMA_VERSION = "upstream-tools-variation-trial/v2"
 TrialOutcome = Literal["hit", "no_impact", "numerical_failure", "partial_valid_trace"]
 
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
@@ -25,6 +25,12 @@ _OUTCOMES = frozenset({"hit", "no_impact", "numerical_failure", "partial_valid_t
 def _require_stable_id(value: object, name: str) -> str:
     if not isinstance(value, str) or not _STABLE_ID.fullmatch(value):
         raise ValueError(f"{name} must be a stable non-empty identifier")
+    return value
+
+
+def _require_digest(value: object, name: str) -> str:
+    if not isinstance(value, str) or not _SHA256.fullmatch(value):
+        raise ValueError(f"{name} must be a 64-character lowercase digest")
     return value
 
 
@@ -163,6 +169,8 @@ class CanonicalTrialEvidence:
     trial_index: int
     seed: int
     plan_sha256: str
+    scenario_sha256: str
+    execution_config_sha256: str
     tools_revision: str
     engine_id: str
     engine_revision: str
@@ -181,8 +189,12 @@ class CanonicalTrialEvidence:
             raise ValueError("trial_index must be a non-negative integer")
         if type(self.seed) is not int:
             raise TypeError("seed must be an integer")
-        if not _SHA256.fullmatch(self.plan_sha256):
-            raise ValueError("plan_sha256 must be a 64-character lowercase digest")
+        for value, name in (
+            (self.plan_sha256, "plan_sha256"),
+            (self.scenario_sha256, "scenario_sha256"),
+            (self.execution_config_sha256, "execution_config_sha256"),
+        ):
+            _require_digest(value, name)
         for value, name in (
             (self.tools_revision, "tools_revision"),
             (self.engine_revision, "engine_revision"),

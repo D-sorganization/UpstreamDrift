@@ -60,6 +60,11 @@ def _require_trial_identity(
     _require_equal(reference.trial_index, candidate.trial_index, "trial index")
     _require_equal(reference.seed, candidate.seed, "seed")
     _require_equal(reference.plan_sha256, candidate.plan_sha256, "plan digest")
+    _require_equal(
+        reference.scenario_sha256,
+        candidate.scenario_sha256,
+        "scenario digest",
+    )
     _require_equal(reference.tools_revision, candidate.tools_revision, "Tools revision")
     _require_equal(reference.model_id, candidate.model_id, "model identity")
     _require_equal(reference.sampled_inputs, candidate.sampled_inputs, "sampled inputs")

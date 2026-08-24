@@ -55,6 +55,8 @@ def _trial(engine: str, *, marker_offset_m: float = 0.0) -> CanonicalTrialEviden
         trial_index=0,
         seed=71,
         plan_sha256="a" * 64,
+        scenario_sha256="e" * 64,
+        execution_config_sha256=("f" if engine == "mujoco" else "0") * 64,
         tools_revision="b" * 40,
         engine_id=engine,
         engine_revision=("c" if engine == "mujoco" else "d") * 40,
@@ -108,6 +110,10 @@ def test_declared_marker_tolerance_exposes_non_equivalent_geometry() -> None:
         (
             lambda trial: replace(trial, plan_sha256="f" * 64),
             "plan digest",
+        ),
+        (
+            lambda trial: replace(trial, scenario_sha256="1" * 64),
+            "scenario digest",
         ),
         (
             lambda trial: replace(

@@ -21,6 +21,7 @@ from src.shared.python.simulation_backends import GolfModelParams, SimState
 pytestmark = pytest.mark.unit
 
 _PLAN_SHA = "a" * 64
+_SCENARIO_SHA = "d" * 64
 _TOOLS_REVISION = "f9730033fd279ba8b4abe03bab2aadd950400b47"
 _ENGINE_REVISION = "c" * 40
 _SHOULDER_DAMPING = "swing_sim.swing.damping_shoulder"
@@ -76,6 +77,7 @@ def _adapter(
         plan=plan,
         config=config,
         plan_sha256=_PLAN_SHA,
+        scenario_sha256=_SCENARIO_SHA,
         tools_revision=_TOOLS_REVISION,
         engine_revision=_ENGINE_REVISION,
     )
@@ -111,6 +113,8 @@ def test_real_ode_trial_retains_controls_markers_and_hit_evidence() -> None:
 
     evidence = adapter.collect_success(0, plan.seed, np.array([0.4, -2.0]), result)
     assert evidence.outcome == "hit"
+    assert evidence.scenario_sha256 == _SCENARIO_SHA
+    assert len(evidence.execution_config_sha256) == 64
     assert evidence.impact is not None
     assert evidence.impact.time_s == 0.0
     assert evidence.trace is not None

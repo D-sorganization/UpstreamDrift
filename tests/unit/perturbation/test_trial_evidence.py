@@ -17,6 +17,8 @@ from src.shared.python.perturbation.trial_evidence import (
 pytestmark = pytest.mark.unit
 
 _PLAN_SHA = "a" * 64
+_SCENARIO_SHA = "d" * 64
+_EXECUTION_CONFIG_SHA = "e" * 64
 _TOOLS_REVISION = "b" * 40
 _ENGINE_REVISION = "c" * 40
 
@@ -53,6 +55,8 @@ def _common() -> dict[str, object]:
         "trial_index": 4,
         "seed": 123,
         "plan_sha256": _PLAN_SHA,
+        "scenario_sha256": _SCENARIO_SHA,
+        "execution_config_sha256": _EXECUTION_CONFIG_SHA,
         "tools_revision": _TOOLS_REVISION,
         "engine_id": "mujoco",
         "engine_revision": _ENGINE_REVISION,
@@ -177,6 +181,16 @@ def test_trial_rejects_incoherent_outcome_and_provenance() -> None:
     with pytest.raises(ValueError, match="40-character"):
         CanonicalTrialEvidence(
             **{**_common(), "tools_revision": "main"},
+            outcome="no_impact",
+            trace=_trace(),
+            closest_approach=ClosestApproach(
+                0.02, 0.01, "clubhead", "ball-center", False
+            ),
+        )
+
+    with pytest.raises(ValueError, match="scenario_sha256"):
+        CanonicalTrialEvidence(
+            **{**_common(), "scenario_sha256": "scenario-main"},
             outcome="no_impact",
             trace=_trace(),
             closest_approach=ClosestApproach(

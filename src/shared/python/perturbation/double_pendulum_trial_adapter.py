@@ -13,6 +13,8 @@ event rule without rerunning the variation sampler.
 
 from __future__ import annotations
 
+import hashlib
+import json
 import math
 from dataclasses import dataclass
 from typing import Protocol
@@ -28,6 +30,7 @@ from .trial_evidence import (
     ClosestApproach,
     ImpactObservation,
     SampledInput,
+    TrialOutcome,
     TrialTrace,
 )
 
@@ -182,6 +185,7 @@ class DoublePendulumTrialAdapter:
         plan: object,
         config: DoublePendulumTrialConfig,
         plan_sha256: str,
+        scenario_sha256: str,
         tools_revision: str,
         engine_revision: str,
     ) -> None:
@@ -192,6 +196,8 @@ class DoublePendulumTrialAdapter:
         self._config = config
         self._columns = self._validate_columns(plan)
         self._plan_sha256 = plan_sha256
+        self._scenario_sha256 = scenario_sha256
+        self._execution_config_sha256 = self._execution_config_digest()
         self._tools_revision = tools_revision
         self._engine_revision = engine_revision
 
@@ -217,6 +223,40 @@ class DoublePendulumTrialAdapter:
                 self._validate_torque_locus(key, window, points)
             columns.append(_Column(key, _UNITS[key], window, points))
         return tuple(columns)
+
+    def _execution_config_digest(self) -> str:
+        payload = {
+            "schema_version": "double-pendulum-trial-config/v1",
+            "model_params": self._config.model_params.model_dump(mode="json"),
+            "initial_state": {
+                "q": self._config.initial_state.q.tolist(),
+                "v": self._config.initial_state.v.tolist(),
+            },
+            "duration_s": self._config.duration_s,
+            "dt_s": self._config.dt_s,
+            "base_torques_nm": list(self._config.base_torques_nm),
+            "target_position_m": list(self._config.target_position_m),
+            "contact_radius_m": self._config.contact_radius_m,
+            "contact_rule": "minimum-sampled-clubhead-centre-distance/v1",
+            "frame_id": self._config.frame_id,
+            "alignment_id": self._config.alignment_id,
+            "columns": [
+                {
+                    "key": column.key,
+                    "unit": column.unit,
+                    "time_window_s": column.time_window_s,
+                    "point_ids": column.point_ids,
+                }
+                for column in self._columns
+            ],
+        }
+        canonical = json.dumps(
+            payload,
+            ensure_ascii=False,
+            separators=(",", ":"),
+            sort_keys=True,
+        ).encode("utf-8")
+        return hashlib.sha256(canonical).hexdigest()
 
     def _validate_torque_locus(
         self,
@@ -353,7 +393,7 @@ class DoublePendulumTrialAdapter:
             contact_observed=result.contact_observed,
         )
         impact = None
-        outcome = "no_impact"
+        outcome: TrialOutcome = "no_impact"
         if result.contact_observed:
             impact = ImpactObservation(
                 time_s=float(trace.t[closest_index]),
@@ -366,6 +406,8 @@ class DoublePendulumTrialAdapter:
             trial_index=trial_index,
             seed=plan_seed,
             plan_sha256=self._plan_sha256,
+            scenario_sha256=self._scenario_sha256,
+            execution_config_sha256=self._execution_config_sha256,
             tools_revision=self._tools_revision,
             engine_id=self.engine_id,
             engine_revision=self._engine_revision,
@@ -389,6 +431,8 @@ class DoublePendulumTrialAdapter:
             trial_index=trial_index,
             seed=plan_seed,
             plan_sha256=self._plan_sha256,
+            scenario_sha256=self._scenario_sha256,
+            execution_config_sha256=self._execution_config_sha256,
             tools_revision=self._tools_revision,
             engine_id=self.engine_id,
             engine_revision=self._engine_revision,
