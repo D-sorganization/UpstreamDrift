@@ -136,6 +136,12 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
     assert manifest["integrity_authorities"]["external_source_review"].startswith(
         "offline_url_complete"
     )
+    assert manifest["integrity_authorities"]["biomechanics_evidence_bridge"].startswith(
+        "digest_bound_model_to_measurement"
+    )
+    assert manifest["integrity_authorities"]["biomechanics_source_register"].startswith(
+        "independent_original_source"
+    )
     assert manifest["integrity_authorities"]["publication_quality"].startswith(
         "runtime_revision_and_manifest_digest_bound"
     )
@@ -144,6 +150,10 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
     )
     assert any(
         path.endswith("external_source_review.json") for path in manifest["artifacts"]
+    )
+    assert any(
+        path.endswith("biomechanics_evidence_bridge.json")
+        for path in manifest["artifacts"]
     )
     assert any(
         path.endswith("fig_shoulder_velocity_strategy_pareto.pdf")

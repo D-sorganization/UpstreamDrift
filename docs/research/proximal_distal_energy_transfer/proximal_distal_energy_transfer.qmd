@@ -300,6 +300,8 @@ format:
 
 {{< include chapters/_ch06e_experimental_protocol.qmd >}}
 
+{{< include chapters/_biomechanics_evidence_bridge.qmd >}}
+
 {{< include chapters/_ch06f_open_release.qmd >}}
 
 {{< include chapters/_ch07_model_ladder.qmd >}}

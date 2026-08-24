@@ -1,0 +1,717 @@
+{
+  "schema_version": "proximal-distal-biomechanics-source-register/v1",
+  "scope_statement": "This register records independently authored sources that bound the biological and measurement bridge. Inclusion supports only the stated estimand, apparatus, population, and role; it does not establish a golf control mechanism, a universal strategy, or governed participant validation for this project.",
+  "reviewed_on": "2026-08-24",
+  "reviewer": "UpstreamDrift evidence review",
+  "bibliography_sha256": "d7e7e8f0f95b976591f373cf21c2310433885ded2cad021c6708cecd6f20a981",
+  "claim_registry_sha256": "1646a367e000cb1014fdb3d1435bb5378280b58b288ae9e614e4aca5afd2cbc3",
+  "external_source_review_sha256": "77a0088908653948bc9bacf65f9f4942205d9ff3067d6126c38a61889bb9e76d",
+  "sources": [
+    {
+      "source_id": "doi:10.3390/s20133672",
+      "bibliography_key": "koike2020",
+      "title": "Three Dimensional Upper Limb Joint Kinetics of a Golf Swing With Measured Internal Grip Force",
+      "year": 2020,
+      "stable_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7374515/",
+      "identifier": "doi:10.3390/s20133672",
+      "source_role": "primary_human_experiment",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_checked_metadata",
+      "correction_check_method": "Original PMC record and Crossref relation metadata reviewed on 2026-08-24.",
+      "population": "Nine healthy right-handed male professional golfers, mean age 37.8 years, in two fixed-order driver sessions.",
+      "apparatus": "Custom split grip with one internal ATI Nano25 six-axis transducer at 400 Hz and fourteen-camera optical motion capture at 200 Hz.",
+      "estimand": "Internal inter-segment grip wrench plus model-dependent bilateral upper-limb joint forces and torques from closed-chain inverse dynamics.",
+      "uncertainty": "The paper reports regular-versus-instrumented trajectory differences and synchronized sampling; full calibration covariance, participant holdout, and distributed-contact uncertainty are unavailable.",
+      "limitations": [
+        "The one internal transducer does not directly measure two independent external six-axis hand wrenches.",
+        "The customized grip, fixed session order, ten-hertz filtering, small all-male professional sample, and inverse-dynamics assumptions limit transport."
+      ],
+      "linked_claim_ids": ["PD-CLAIM-199", "PD-CLAIM-200", "PD-CLAIM-206"],
+      "coverage_domains": [
+        "glenohumeral",
+        "elbow",
+        "forearm",
+        "wrist",
+        "hand",
+        "bilateral_grip",
+        "equipment_variability"
+      ],
+      "evidence_use": "bounded_support",
+      "raw_data_status": "No qualifying participant-level deposit with the complete synchronized channels was located for project ingestion."
+    },
+    {
+      "source_id": "doi:10.1177/036354659502300104",
+      "bibliography_key": "jobe1995",
+      "title": "Electromyographic Analysis of Scapular Muscles During a Golf Swing",
+      "year": 1995,
+      "stable_url": "https://pubmed.ncbi.nlm.nih.gov/7726345/",
+      "identifier": "doi:10.1177/036354659502300104",
+      "source_role": "primary_human_observation",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_checked_metadata",
+      "correction_check_method": "PubMed record and Crossref relation metadata reviewed on 2026-08-24.",
+      "population": "Fifteen competitive male golfers in the phase-resolved scapular electromyography study cited by the paper.",
+      "apparatus": "Surface electromyography of selected lead- and trail-side scapular muscles during golf swings.",
+      "estimand": "Phase-normalized activation amplitude for the sampled scapular muscles, not scapular force, motion, stiffness, or hand torque.",
+      "uncertainty": "Placement, normalization, cross-talk, timing detector, unmeasured muscles, and electromechanical delay are not available as a project-level covariance model.",
+      "limitations": [
+        "Surface EMG does not identify muscle force, scapular motion, joint moment, or endpoint wrench.",
+        "The small all-male competitive sample and historical acquisition protocol do not establish a universal phase strategy."
+      ],
+      "linked_claim_ids": ["PD-CLAIM-070"],
+      "coverage_domains": ["scapula"],
+      "evidence_use": "bounded_support",
+      "raw_data_status": "No governed participant-level raw EMG and synchronized mechanics deposit was located."
+    },
+    {
+      "source_id": "doi:10.1080/02640414.2023.2285121",
+      "bibliography_key": "robinson2023",
+      "title": "What Differences Exist Between the Lead and Trail Wrist in Extensor Carpi Ulnaris Activity and Golf Swing Joint Kinematics in Sub-Elite Golfers?",
+      "year": 2023,
+      "stable_url": "https://pubmed.ncbi.nlm.nih.gov/37983261/",
+      "identifier": "doi:10.1080/02640414.2023.2285121",
+      "source_role": "primary_human_observation",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_checked_metadata",
+      "correction_check_method": "Publisher, PubMed, and Crossref relation metadata reviewed on 2026-08-24.",
+      "population": "Sub-elite golfers sampled for lead-trail wrist comparison; the source population does not represent all skill, age, sex, handedness, or impairment groups.",
+      "apparatus": "Bilateral extensor carpi ulnaris surface EMG with golf-swing joint kinematics.",
+      "estimand": "Lead-trail differences in one sampled forearm muscle activation and associated joint kinematics.",
+      "uncertainty": "Electrode, normalization, detector, cross-talk, kinematic-model, and participant variation remain distinct and are not a hand-wrench uncertainty model.",
+      "limitations": [
+        "One superficial muscle cannot identify wrist torque, co-contraction, or bilateral grip allocation.",
+        "Observational lead-trail differences do not identify causal preparation, braking, or preload strategy."
+      ],
+      "linked_claim_ids": ["PD-CLAIM-070", "PD-CLAIM-206"],
+      "coverage_domains": ["forearm", "wrist"],
+      "evidence_use": "bounded_support",
+      "raw_data_status": "No governed synchronized EMG, wrench, and motion deposit was located."
+    },
+    {
+      "source_id": "doi:10.1371/journal.pone.0141028",
+      "bibliography_key": "seth2016",
+      "title": "A Biomechanical Model of the Scapulothoracic Joint to Accurately Capture Scapular Kinematics During Shoulder Movements",
+      "year": 2016,
+      "stable_url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0141028",
+      "identifier": "doi:10.1371/journal.pone.0141028",
+      "source_role": "primary_model_or_methods",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_checked_metadata",
+      "correction_check_method": "Original PLOS record and Crossref relation metadata reviewed on 2026-08-24.",
+      "population": "Previously collected non-golf shoulder-task bone-pin kinematics used to evaluate a customizable scapulothoracic model.",
+      "apparatus": "Four-degree-of-freedom scapulothoracic mobilizer evaluated against registered bone-pin marker kinematics for three shoulder tasks.",
+      "estimand": "Scapular marker reconstruction and model-noise behavior, including reported approximately two-millimetre RMS accuracy in the tested tasks.",
+      "uncertainty": "Task, morphology, bone-pin reference, marker noise, model constraint, and transport-to-golf uncertainty remain separate.",
+      "limitations": [
+        "The source validates a shoulder-model formulation in non-golf tasks, not golf scapular dynamics or muscle control.",
+        "Good marker reconstruction does not identify scapulothoracic reaction loads, muscle forces, or bilateral hand allocation."
+      ],
+      "linked_claim_ids": ["PD-CLAIM-267"],
+      "coverage_domains": ["scapula", "glenohumeral"],
+      "evidence_use": "bounded_support",
+      "raw_data_status": "The source reports an open model and analysis resources, but no governed golf participant dataset."
+    },
+    {
+      "source_id": "doi:10.1016/j.jbiomech.2017.02.008",
+      "bibliography_key": "degroote2017",
+      "title": "Contribution of Muscle Short-Range Stiffness to Initial Changes in Joint Kinetics and Kinematics During Perturbations to Standing Balance",
+      "year": 2017,
+      "stable_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5436583/",
+      "identifier": "doi:10.1016/j.jbiomech.2017.02.008",
+      "source_role": "primary_model_or_methods",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_checked_metadata",
+      "correction_check_method": "Original PMC record and Crossref relation metadata reviewed on 2026-08-24.",
+      "population": "Non-golf standing-balance perturbation data and simulation context.",
+      "apparatus": "Musculoskeletal simulation used to isolate short-range muscle-stiffness contributions to early perturbation response.",
+      "estimand": "Model-dependent contribution of short-range stiffness to initial joint kinetics and kinematics.",
+      "uncertainty": "Muscle parameters, activation history, posture, perturbation, model structure, and transport to rapid golf motion are not interchangeable.",
+      "limitations": [
+        "The result is model- and standing-task-dependent rather than direct golf tissue measurement.",
+        "It does not identify wrist, scapular, or hand-wrench stiffness during a swing."
+      ],
+      "linked_claim_ids": ["PD-CLAIM-198"],
+      "coverage_domains": ["muscle_tendon_dynamics"],
+      "evidence_use": "contextual_only",
+      "raw_data_status": "No governed golf activation, tissue, and bilateral-wrench dataset is supplied."
+    },
+    {
+      "source_id": "doi:10.1152/ajpcell.1994.267.6.c1598",
+      "bibliography_key": "luo1994",
+      "title": "Effect of Series Elasticity on Delay in Development of Tension Relative to Stiffness During Muscle Activation",
+      "year": 1994,
+      "stable_url": "https://pubmed.ncbi.nlm.nih.gov/7810601/",
+      "identifier": "doi:10.1152/ajpcell.1994.267.6.C1598",
+      "source_role": "primary_nonhuman_experiment",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_checked_metadata",
+      "correction_check_method": "PubMed and Crossref relation metadata reviewed on 2026-08-24.",
+      "population": "Non-golf experimental muscle preparation; it is not a participant golf study.",
+      "apparatus": "Experimental activation and series-elastic manipulation used to compare tension and stiffness development timing.",
+      "estimand": "Delay between activation-related stiffness and transmitted tension under the source preparation.",
+      "uncertainty": "Preparation, activation, compliance, force, stiffness, and scale do not directly transport to an intact swinging arm.",
+      "limitations": [
+        "The preparation and task are not golf and cannot establish human wrist preload or slack.",
+        "Tension and stiffness timing does not identify net joint moment or endpoint wrench allocation."
+      ],
+      "linked_claim_ids": ["PD-CLAIM-198", "PD-CLAIM-206"],
+      "coverage_domains": ["muscle_tendon_dynamics"],
+      "evidence_use": "contextual_only",
+      "raw_data_status": "No governed intact-human golf dataset is associated with this mechanistic source."
+    },
+    {
+      "source_id": "doi:10.1242/jeb.142604",
+      "bibliography_key": "mayfield2016",
+      "title": "Effects of Series Elastic Compliance on Muscle Force Summation and the Rate of Force Rise",
+      "year": 2016,
+      "stable_url": "https://pubmed.ncbi.nlm.nih.gov/27510960/",
+      "identifier": "doi:10.1242/jeb.142604",
+      "source_role": "primary_nonhuman_experiment",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_checked_metadata",
+      "correction_check_method": "Publisher, PubMed, and Crossref relation metadata reviewed on 2026-08-24.",
+      "population": "Non-golf experimental muscle-tendon preparation rather than an intact golfer sample.",
+      "apparatus": "Controlled series-elastic compliance with force-rise measurements under the source protocol.",
+      "estimand": "Compliance-dependent force summation and rate of force rise.",
+      "uncertainty": "Preparation, compliance, excitation, force calibration, and intact-system transport are outside the present golf dataset.",
+      "limitations": [
+        "The source motivates a compliance mechanism but does not measure golf muscle-tendon dynamics.",
+        "Force-rise effects do not establish a beneficial preparation, slack, or timing strategy."
+      ],
+      "linked_claim_ids": ["PD-CLAIM-198", "PD-CLAIM-206"],
+      "coverage_domains": ["muscle_tendon_dynamics"],
+      "evidence_use": "contextual_only",
+      "raw_data_status": "No governed intact-human golf dataset is associated with this mechanistic source."
+    },
+    {
+      "source_id": "doi:10.1519/jsc.0000000000004554",
+      "bibliography_key": "shaw2023",
+      "title": "Within- and Between-Session Reliability of Golf Swing Variables Using the TrackMan Launch Monitor in Talented Golfers",
+      "year": 2023,
+      "stable_url": "https://pubmed.ncbi.nlm.nih.gov/38015732/",
+      "identifier": "doi:10.1519/JSC.0000000000004554",
+      "source_role": "primary_human_experiment",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_checked_metadata",
+      "correction_check_method": "Publisher, PubMed, and Crossref relation metadata reviewed on 2026-08-24.",
+      "population": "Talented golfers observed within and between sessions; the sample is not a universal device-validation population.",
+      "apparatus": "TrackMan launch monitor under the source's repeated-session golf protocol.",
+      "estimand": "Within- and between-session reliability of selected device-reported golf-swing variables.",
+      "uncertainty": "Reliability, reference-device validity, alignment, firmware, environment, impact location, and shot matching are distinct.",
+      "limitations": [
+        "Reliability in one protocol does not establish accuracy for every metric, firmware, setup, club, or population.",
+        "Launch-monitor outcomes do not identify internal energy-transfer or control mechanisms."
+      ],
+      "linked_claim_ids": ["PD-CLAIM-091"],
+      "coverage_domains": ["equipment_variability"],
+      "evidence_use": "bounded_support",
+      "raw_data_status": "No governed shot-level deposit linked to the required synchronized project modalities was located."
+    },
+    {
+      "source_id": "doi:10.1080/14763141.2019.1586983",
+      "bibliography_key": "han2019",
+      "title": "Effects of the Golfer--Ground Interaction on Clubhead Speed in Skilled Male Golfers",
+      "year": 2019,
+      "stable_url": "https://pubmed.ncbi.nlm.nih.gov/31042142/",
+      "identifier": "doi:10.1080/14763141.2019.1586983",
+      "source_role": "primary_human_observation",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_checked_metadata",
+      "correction_check_method": "PubMed, publisher, and Crossref relation metadata reviewed on 2026-08-24.",
+      "population": "Sixty-three highly skilled male golfers with handicaps no greater than three.",
+      "apparatus": "Golf-swing kinematics and golfer-ground force and moment measurements under the source protocol.",
+      "estimand": "Associations between selected golfer-ground parameters and maximum clubhead speed.",
+      "uncertainty": "Observational association, variable selection, participant, coordinate, filtering, equipment, and unmeasured-confounding uncertainty remain.",
+      "limitations": [
+        "The all-male skilled sample and observational design do not identify a causal ground-transfer strategy.",
+        "Ground wrench does not uniquely identify bilateral hand, joint, or muscle allocation."
+      ],
+      "linked_claim_ids": ["PD-CLAIM-011", "PD-CLAIM-073", "PD-CLAIM-079"],
+      "coverage_domains": ["pelvis", "thorax", "ground_pathway"],
+      "evidence_use": "bounded_support",
+      "raw_data_status": "No qualifying governed participant-level source package was admitted to the project."
+    },
+    {
+      "source_id": "pmid:24627665",
+      "bibliography_key": "nesbit2014",
+      "title": "A Three Dimensional Kinematic and Kinetic Study of the Golf Swing",
+      "year": 2005,
+      "stable_url": "https://pubmed.ncbi.nlm.nih.gov/24627665/",
+      "identifier": "pmid:24627665",
+      "source_role": "primary_human_observation",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_checked_metadata",
+      "correction_check_method": "Original journal and PubMed metadata reviewed on 2026-08-24.",
+      "population": "Eighty-four male and one female amateur golfers spanning skill levels, with detailed comparisons of four subjects.",
+      "apparatus": "Multi-camera motion analysis driving a variable full-body golfer model coupled to a flexible club model.",
+      "estimand": "Model-derived golfer and club kinematics, kinetics, interaction loads, work, power, and deformation with population variation.",
+      "uncertainty": "Motion reconstruction, inertial parameters, flexible-club model, inverse dynamics, participant imbalance, and selected-subject reporting remain model dependent.",
+      "limitations": [
+        "Most mechanical outputs are model-derived rather than directly measured interface or muscle quantities.",
+        "One female participant and heterogeneous amateurs do not support sex-specific or population-wide inference."
+      ],
+      "linked_claim_ids": ["PD-CLAIM-009", "PD-CLAIM-027", "PD-CLAIM-090"],
+      "coverage_domains": [
+        "pelvis",
+        "thorax",
+        "population_variability",
+        "task_variability"
+      ],
+      "evidence_use": "bounded_support",
+      "raw_data_status": "The project has no governed participant-level trajectories and model inputs from this study."
+    },
+    {
+      "source_id": "doi:10.1016/s1440-2440(04)80265-2",
+      "bibliography_key": "fradkin2004",
+      "title": "How Well Does Club Head Speed Correlate With Golf Handicaps?",
+      "year": 2004,
+      "stable_url": "https://pubmed.ncbi.nlm.nih.gov/15712503/",
+      "identifier": "doi:10.1016/S1440-2440(04)80265-2",
+      "source_role": "primary_human_observation",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_checked_metadata",
+      "correction_check_method": "PubMed and Crossref relation metadata reviewed on 2026-08-24.",
+      "population": "Forty-five male golfers aged 18 to 80 years with handicaps from two to twenty-seven.",
+      "apparatus": "Clubhead-speed and handicap assessment under the source's observational protocol.",
+      "estimand": "Sample association between clubhead speed and handicap.",
+      "uncertainty": "Sample selection, age, equipment, repeated-shot, device, handicap, and confounding uncertainty do not identify mechanism.",
+      "limitations": [
+        "The all-male sample and bivariate association do not identify age, skill, or causal transfer effects.",
+        "Handicap and speed do not measure internal work, momentum redistribution, or bilateral control."
+      ],
+      "linked_claim_ids": ["PD-CLAIM-006"],
+      "coverage_domains": ["population_variability"],
+      "evidence_use": "bounded_support",
+      "raw_data_status": "No governed participant-level deposit was located."
+    },
+    {
+      "source_id": "doi:10.1080/14763141.2011.650187",
+      "bibliography_key": "langdown2012",
+      "title": "Movement Variability in the Golf Swing",
+      "year": 2012,
+      "stable_url": "https://pubmed.ncbi.nlm.nih.gov/22900407/",
+      "identifier": "doi:10.1080/14763141.2011.650187",
+      "source_role": "review_or_synthesis",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_checked_metadata",
+      "correction_check_method": "PubMed, publisher, and Crossref relation metadata reviewed on 2026-08-24.",
+      "population": "Golf movement-variability literature rather than one governed participant cohort.",
+      "apparatus": "Synthesis of golf-swing variability concepts, measurements, and tasks across source studies.",
+      "estimand": "Within- and between-player movement variability and its task-dependent interpretation.",
+      "uncertainty": "Study designs, signals, event normalization, skill definitions, equipment, and variability metrics are heterogeneous.",
+      "limitations": [
+        "A synthesis of variability does not provide a project-ready participant distribution or measurement covariance.",
+        "Variability can reflect adaptation, noise, or task redundancy and is not inherently beneficial or adverse."
+      ],
+      "linked_claim_ids": ["PD-CLAIM-012"],
+      "coverage_domains": ["population_variability", "task_variability"],
+      "evidence_use": "contextual_only",
+      "raw_data_status": "Source-level participant data remain distributed across the reviewed literature."
+    },
+    {
+      "source_id": "doi:10.1007/s40279-015-0429-1",
+      "bibliography_key": "cole2016",
+      "title": "The Biomechanics of the Modern Golf Swing: Implications for Lower Back Injuries",
+      "year": 2016,
+      "stable_url": "https://doi.org/10.1007/s40279-015-0429-1",
+      "identifier": "doi:10.1007/s40279-015-0429-1",
+      "source_role": "review_or_synthesis",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_checked_metadata",
+      "correction_check_method": "Publisher and Crossref relation metadata reviewed on 2026-08-24.",
+      "population": "Lower-back injury and modern golf-swing biomechanics literature rather than one prospective cohort.",
+      "apparatus": "Review of swing biomechanics, spinal loading concepts, and injury implications across heterogeneous studies.",
+      "estimand": "Contextual relationship between modern swing mechanics, spinal loading, and lower-back injury hypotheses.",
+      "uncertainty": "Exposure, injury definition, tissue load, individual capacity, study design, and causal attribution vary across sources.",
+      "limitations": [
+        "Review context cannot convert project mechanical proxies into individual tissue load or injury risk.",
+        "Performance and injury objectives require separate outcomes, uncertainty, and governance."
+      ],
+      "linked_claim_ids": ["PD-CLAIM-072", "PD-CLAIM-229"],
+      "coverage_domains": ["injury"],
+      "evidence_use": "contextual_only",
+      "raw_data_status": "No prospective injury-linked project dataset is present."
+    },
+    {
+      "source_id": "doi:10.3390/sports10060091",
+      "bibliography_key": "bourgain2022",
+      "title": "Golf Swing Biomechanics: A Systematic Review and Methodological Recommendations for Kinematics",
+      "year": 2022,
+      "stable_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9227529/",
+      "identifier": "doi:10.3390/sports10060091",
+      "source_role": "systematic_review",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_checked_metadata",
+      "correction_check_method": "Original PMC record and Crossref relation metadata reviewed on 2026-08-24.",
+      "population": "Golf kinematics literature with heterogeneous populations, clubs, tasks, and protocols.",
+      "apparatus": "Systematic review of motion-capture, segment-definition, event, and processing methods used in golf biomechanics.",
+      "estimand": "Methodological comparability and recommended reporting for golf-swing kinematics.",
+      "uncertainty": "Marker sets, coordinate conventions, filtering, events, tasks, clubs, and populations vary across included studies.",
+      "limitations": [
+        "Methodological recommendations do not supply participant-level trajectories or bilateral mechanics.",
+        "Kinematics alone cannot identify energy flow, muscle action, or individual hand allocation."
+      ],
+      "linked_claim_ids": ["PD-CLAIM-007", "PD-CLAIM-050"],
+      "coverage_domains": ["pelvis", "thorax", "task_variability"],
+      "evidence_use": "bounded_support",
+      "raw_data_status": "The review does not provide one governed, synchronized multimodal participant deposit."
+    },
+    {
+      "source_id": "doi:10.1080/14763141.2011.638386",
+      "bibliography_key": "higdon2012",
+      "title": "Effects of Fatigue on Golf Performance",
+      "year": 2012,
+      "stable_url": "https://pubmed.ncbi.nlm.nih.gov/22900400/",
+      "identifier": "doi:10.1080/14763141.2011.638386",
+      "source_role": "primary_human_experiment",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_checked_metadata",
+      "correction_check_method": "PubMed, publisher, and Crossref relation metadata reviewed on 2026-08-24.",
+      "population": "Golfers exposed to the source's golf-specific fatiguing protocol.",
+      "apparatus": "Pre-post body-position, weight-transfer, pelvis and trunk rotation, clubhead-speed, and shot-consistency assessment.",
+      "estimand": "Association of the registered fatigue protocol with swing mechanics, speed, and consistency changes.",
+      "uncertainty": "Fatigue induction, physiological state, repeated shots, learning, device, participant, and model-selection uncertainty remain.",
+      "limitations": [
+        "One fatigue protocol does not reproduce all round, practice, local-muscle, cognitive, or injury-related fatigue states.",
+        "Pre-post associations do not identify the internal transfer mechanism or prescribe a robust strategy."
+      ],
+      "linked_claim_ids": ["PD-CLAIM-089", "PD-CLAIM-206"],
+      "coverage_domains": ["pelvis", "thorax", "fatigue"],
+      "evidence_use": "bounded_support",
+      "raw_data_status": "No governed synchronized fatigue, bilateral-wrench, EMG, shaft, and launch deposit was located."
+    },
+    {
+      "source_id": "doi:10.1371/journal.pone.0205911",
+      "bibliography_key": "deRugy2018",
+      "title": "Muscle Patterns Underlying Voluntary Modulation of Co-Contraction",
+      "year": 2018,
+      "stable_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6195298/",
+      "identifier": "doi:10.1371/journal.pone.0205911",
+      "source_role": "primary_human_experiment",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_checked_metadata",
+      "correction_check_method": "Original PLOS and PMC records plus Crossref relation metadata reviewed on 2026-08-24; this check corrected a previously mismatched bibliography DOI and author list.",
+      "population": "Human participants performing multidirectional isometric hand-force and voluntary co-contraction tasks outside golf.",
+      "apparatus": "Endpoint force measurement, seventeen-muscle surface EMG, virtual targets, and simulated disturbances with null-space analysis.",
+      "estimand": "Muscle-activation components that change co-contraction without changing the estimated endpoint force mapping.",
+      "uncertainty": "EMG-to-force regression, null-space estimation, electrode signals, isometric-task transport, and virtual rather than physical perturbation remain.",
+      "limitations": [
+        "The source demonstrates redundant co-contraction patterns in an isometric non-golf task, not a swing strategy.",
+        "EMG null-space components do not directly measure endpoint stiffness, wrist torque, or bilateral grip wrench."
+      ],
+      "linked_claim_ids": ["PD-CLAIM-047", "PD-CLAIM-206"],
+      "coverage_domains": ["muscle_tendon_dynamics"],
+      "evidence_use": "contextual_only",
+      "raw_data_status": "The open article provides methodological evidence but not a governed golf participant dataset."
+    }
+  ],
+  "coverage": [
+    {
+      "domain_id": "pelvis",
+      "source_ids": [
+        "doi:10.1080/14763141.2019.1586983",
+        "pmid:24627665",
+        "doi:10.3390/sports10060091",
+        "doi:10.1080/14763141.2011.638386"
+      ],
+      "evidence_status": "bounded",
+      "current_answer": "Pelvis pose and velocity are measurable under declared methods, and selected sampled associations and fatigue responses exist; neither peak order nor pelvis motion alone identifies transfer.",
+      "limitations": [
+        "Coordinate, marker, filter, event, population, club, and task definitions vary.",
+        "Pelvis kinematics do not identify ground, joint, muscle, or hand-wrench causality."
+      ],
+      "required_observables": [
+        "pelvis pose and twist",
+        "whole-system external wrench",
+        "participant and task covariates"
+      ],
+      "data_gate": "Governed participant-held-out synchronized motion and external-wrench data with method sensitivity are required for project mechanism tests."
+    },
+    {
+      "domain_id": "thorax",
+      "source_ids": [
+        "doi:10.1080/14763141.2019.1586983",
+        "pmid:24627665",
+        "doi:10.3390/sports10060091",
+        "doi:10.1080/14763141.2011.638386"
+      ],
+      "evidence_status": "bounded",
+      "current_answer": "Thorax kinematics and selected fatigue or performance associations are measurable, but anatomical torso control and causal energy transfer remain unresolved.",
+      "limitations": [
+        "Thorax definitions, marker sets, X-factor methods, and event timing are not invariant.",
+        "The reduced model's proximal coordinate is not an anatomical thorax state."
+      ],
+      "required_observables": [
+        "thorax pose and twist",
+        "pelvis-relative motion",
+        "external and interface mechanics"
+      ],
+      "data_gate": "Use a declared thorax frame, synchronized bilateral mechanics, participant holdout, and adverse coordinate-method controls."
+    },
+    {
+      "domain_id": "scapula",
+      "source_ids": [
+        "doi:10.1177/036354659502300104",
+        "doi:10.1371/journal.pone.0141028"
+      ],
+      "evidence_status": "context_only",
+      "current_answer": "Golf scapular EMG and a non-golf scapulothoracic model motivate explicit scapular states, but neither identifies golf scapular mechanics or wrench allocation.",
+      "limitations": [
+        "Surface EMG is not scapular kinematics, force, or torque.",
+        "Bone-pin model evaluation used non-golf shoulder tasks."
+      ],
+      "required_observables": [
+        "scapular pose relative to thorax",
+        "scapular muscle activation",
+        "glenohumeral and hand mechanics"
+      ],
+      "data_gate": "Acquire validated dynamic scapular tracking with synchronized EMG and bilateral mechanics; preserve soft-tissue and model constraint uncertainty."
+    },
+    {
+      "domain_id": "glenohumeral",
+      "source_ids": [
+        "doi:10.3390/s20133672",
+        "doi:10.1371/journal.pone.0141028"
+      ],
+      "evidence_status": "context_only",
+      "current_answer": "Upper-limb inverse dynamics and a shoulder-model formulation provide bounded methods, while golf glenohumeral load and muscle allocation remain model dependent.",
+      "limitations": [
+        "Ball-joint and scapulothoracic assumptions affect inferred loads.",
+        "Closed-chain mechanics require independent contact information."
+      ],
+      "required_observables": [
+        "humerus and scapula poses",
+        "bilateral hand wrenches",
+        "activation and subject geometry"
+      ],
+      "data_gate": "Qualify subject-scaled shoulder geometry and residuals against synchronized golf motion and bilateral external loads."
+    },
+    {
+      "domain_id": "elbow",
+      "source_ids": ["doi:10.3390/s20133672"],
+      "evidence_status": "bounded",
+      "current_answer": "Golf elbow kinematics and inverse-dynamics loads can be estimated when the internal grip wrench is measured, but muscle and task allocation remain unresolved.",
+      "limitations": [
+        "One study used a custom grip and model-dependent inward inverse dynamics.",
+        "Net elbow load does not identify individual muscle work."
+      ],
+      "required_observables": [
+        "upper-arm and forearm motion",
+        "bilateral hand wrenches",
+        "segment inertial uncertainty"
+      ],
+      "data_gate": "Replicate with independent calibrated bilateral mechanics, subject scaling, participant holdout, and model sensitivity."
+    },
+    {
+      "domain_id": "forearm",
+      "source_ids": [
+        "doi:10.3390/s20133672",
+        "doi:10.1080/02640414.2023.2285121"
+      ],
+      "evidence_status": "bounded",
+      "current_answer": "Forearm motion, inverse-dynamics load, and selected surface activation are observable, while pronation-supination control and muscle force remain unqualified.",
+      "limitations": [
+        "One-muscle EMG and net joint loads are distinct estimands.",
+        "The project articulated model does not yet include calibrated forearm muscle dynamics."
+      ],
+      "required_observables": [
+        "forearm pose and axial rotation",
+        "multi-muscle EMG",
+        "bilateral hand wrenches"
+      ],
+      "data_gate": "Use a declared forearm frame, sufficient marker or imaging observability, synchronized activation, and independent loads."
+    },
+    {
+      "domain_id": "wrist",
+      "source_ids": [
+        "doi:10.3390/s20133672",
+        "doi:10.1080/02640414.2023.2285121"
+      ],
+      "evidence_status": "bounded",
+      "current_answer": "Wrist kinematics, selected muscle activation, and model-dependent net load have human precedent; active versus passive torque and lead-trail allocation remain unidentified.",
+      "limitations": [
+        "Net moment, direct hand moment, force-generated couple, and muscle force are not interchangeable.",
+        "Surface activation does not identify passive tissue or co-contraction."
+      ],
+      "required_observables": [
+        "three-dimensional wrist motion",
+        "bilateral hand wrenches",
+        "forearm and wrist activation",
+        "tissue or impedance proxy"
+      ],
+      "data_gate": "Acquire synchronized bilateral wrenches, motion, multi-muscle activation, and uncertainty-qualified tissue observables."
+    },
+    {
+      "domain_id": "hand",
+      "source_ids": ["doi:10.3390/s20133672"],
+      "evidence_status": "bounded",
+      "current_answer": "Hand segment motion and a measured internal grip wrench have precedent, but distributed contact and each external hand wrench are not directly recovered.",
+      "limitations": [
+        "The custom split grip perturbs geometry and measures one internal section wrench.",
+        "Lumped hand joints omit pressure distribution and moving contact centers."
+      ],
+      "required_observables": [
+        "hand and contact-center motion",
+        "six-axis hand wrenches",
+        "pressure or distributed contact"
+      ],
+      "data_gate": "Qualify a two-hand instrumented grip with contact-center tracking, cross-talk correction, normal-club controls, and participant holdout."
+    },
+    {
+      "domain_id": "bilateral_grip",
+      "source_ids": ["doi:10.3390/s20133672"],
+      "evidence_status": "bounded",
+      "current_answer": "Opposing hand actions and an internal six-axis wrench have been observed, but no located governed dataset supplies synchronized independent bilateral external six-axis hand wrenches.",
+      "limitations": [
+        "One internal wrench is not two complete external hand wrenches.",
+        "Net club motion retains allocation null modes."
+      ],
+      "required_observables": [
+        "lead-hand six-axis wrench",
+        "trail-hand six-axis wrench",
+        "contact-center transforms",
+        "club inertial state"
+      ],
+      "data_gate": "Physical device qualification and governed participant-held-out acquisition remain externally blocked."
+    },
+    {
+      "domain_id": "ground_pathway",
+      "source_ids": ["doi:10.1080/14763141.2019.1586983"],
+      "evidence_status": "bounded",
+      "current_answer": "Golf ground wrenches and selected speed associations are measurable, while causal transfer, biological control, and club-energy attribution require additional synchronized mechanics.",
+      "limitations": [
+        "Association does not establish direction of causality.",
+        "Force or impulse alone is not contact power or internal energy transfer."
+      ],
+      "required_observables": [
+        "bilateral ground wrenches",
+        "whole-body and club kinematics",
+        "center-of-mass closure"
+      ],
+      "data_gate": "Require participant-separated calibration, Newton-Euler closure, frame transport, uncertainty, negative controls, and held-out testing."
+    },
+    {
+      "domain_id": "muscle_tendon_dynamics",
+      "source_ids": [
+        "doi:10.1016/j.jbiomech.2017.02.008",
+        "doi:10.1152/ajpcell.1994.267.6.c1598",
+        "doi:10.1242/jeb.142604",
+        "doi:10.1371/journal.pone.0205911"
+      ],
+      "evidence_status": "context_only",
+      "current_answer": "Independent sources establish plausible stiffness, compliance, activation-history, and co-contraction mechanisms outside golf; their magnitude and role in a swing are unmeasured.",
+      "limitations": [
+        "Preparations and tasks differ materially from a golf swing.",
+        "Muscle redundancy and constitutive uncertainty prevent force identification from motion and EMG alone."
+      ],
+      "required_observables": [
+        "multi-muscle activation",
+        "muscle-tendon kinematics",
+        "external wrenches",
+        "subject-specific musculoskeletal geometry"
+      ],
+      "data_gate": "Synchronized EMG, ultrasound or qualified tissue proxy, bilateral mechanics, calibrated activation dynamics, and participant holdout are required."
+    },
+    {
+      "domain_id": "fatigue",
+      "source_ids": ["doi:10.1080/14763141.2011.638386"],
+      "evidence_status": "bounded",
+      "current_answer": "A golf-specific fatigue protocol has been associated with changes in mechanics, speed, and consistency, but robustness of the proposed transfer mechanisms under fatigue is untested.",
+      "limitations": [
+        "Fatigue state depends on protocol, localization, recovery, skill, and measurement.",
+        "A pre-post study does not identify the internal mechanism of change."
+      ],
+      "required_observables": [
+        "preregistered fatigue manipulation check",
+        "repeated multimodal swing mechanics",
+        "recovery and adverse outcomes"
+      ],
+      "data_gate": "Freeze fatigue and recovery states, retain order and learning controls, and test mechanism parameters and residuals on held-out participants."
+    },
+    {
+      "domain_id": "injury",
+      "source_ids": ["doi:10.1007/s40279-015-0429-1"],
+      "evidence_status": "context_only",
+      "current_answer": "Golf biomechanics literature motivates separate spinal-load and injury questions, but the project has no calibrated tissue-load or prospective injury outcome.",
+      "limitations": [
+        "Mechanical proxies cannot be relabeled as tissue injury risk.",
+        "Individual capacity, exposure, symptoms, impairment, and clinical history are absent."
+      ],
+      "required_observables": [
+        "governed injury and exposure history",
+        "calibrated tissue-load estimates",
+        "symptoms and adverse events"
+      ],
+      "data_gate": "A separately approved prospective safety protocol is required; performance optimization cannot substitute for injury qualification."
+    },
+    {
+      "domain_id": "population_variability",
+      "source_ids": [
+        "pmid:24627665",
+        "doi:10.1016/s1440-2440(04)80265-2",
+        "doi:10.1080/14763141.2011.650187"
+      ],
+      "evidence_status": "bounded",
+      "current_answer": "Large between-golfer variation and bounded age, skill, and speed associations are documented, but the project lacks a representative multimodal population distribution.",
+      "limitations": [
+        "Samples are often male, right-handed, selected by skill, and equipment specific.",
+        "Population association does not establish within-person intervention response."
+      ],
+      "required_observables": [
+        "participant demographics and capacity",
+        "repeated multimodal trials",
+        "predeclared transport strata"
+      ],
+      "data_gate": "Recruit to stated target populations, preserve participant separation, and report subgroup uncertainty without unsupported pooling."
+    },
+    {
+      "domain_id": "equipment_variability",
+      "source_ids": [
+        "doi:10.3390/s20133672",
+        "doi:10.1519/jsc.0000000000004554"
+      ],
+      "evidence_status": "context_only",
+      "current_answer": "Instrumented-grip perturbation and launch-monitor reliability have bounded precedents, while shaft, grip, club, device, and firmware transport are unqualified for the proposed mechanisms.",
+      "limitations": [
+        "Instrumented equipment can alter mass, inertia, feel, contact, and motion.",
+        "Reliability does not establish device accuracy or mechanism validity."
+      ],
+      "required_observables": [
+        "club mass and inertia",
+        "shaft and grip calibration",
+        "device and firmware metadata",
+        "regular-equipment control"
+      ],
+      "data_gate": "Use calibrated equipment strata, randomized or counterbalanced controls, matched impact, and held-out device and club evaluation."
+    },
+    {
+      "domain_id": "task_variability",
+      "source_ids": [
+        "pmid:24627665",
+        "doi:10.1080/14763141.2011.650187",
+        "doi:10.3390/sports10060091"
+      ],
+      "evidence_status": "context_only",
+      "current_answer": "Golf motion and variability depend on club, intent, target, shot type, and analysis method; no one task defines a universal optimal transfer strategy.",
+      "limitations": [
+        "Speed, carry, accuracy, load, robustness, and partial-shot objectives are not equivalent.",
+        "Event and coordinate methods can change the apparent sequence."
+      ],
+      "required_observables": [
+        "shot intent and target",
+        "club and ball",
+        "multi-objective delivery outcomes",
+        "task-specific events"
+      ],
+      "data_gate": "Preregister task families and acceptable-shot criteria, then evaluate mechanism and strategy claims separately on held-out tasks."
+    }
+  ],
+  "summary": {
+    "source_count": 16,
+    "independent_source_count": 16,
+    "coverage_domain_count": 16,
+    "source_bounded_domain_count": 10,
+    "context_only_domain_count": 6,
+    "source_gap_domain_count": 0
+  }
+}

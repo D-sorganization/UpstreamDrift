@@ -83,6 +83,12 @@ _RELEASE_METADATA: dict[str, Any] = {
         "external_source_review": (
             "offline_url_complete_work_and_claim_adjudication_embedded_in_artifacts"
         ),
+        "biomechanics_evidence_bridge": (
+            "digest_bound_model_to_measurement_identifiability_and_data_gate_authority"
+        ),
+        "biomechanics_source_register": (
+            "independent_original_source_metadata_coverage_and_transport_boundary"
+        ),
         "publication_quality": (
             "runtime_revision_and_manifest_digest_bound_every_page_pdf_inspection"
         ),

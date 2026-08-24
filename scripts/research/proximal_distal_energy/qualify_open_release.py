@@ -8,6 +8,17 @@ import json
 from pathlib import Path
 import subprocess
 
+from .biomechanics_evidence_bridge import (
+    BRIDGE_REL as BIOMECHANICS_EVIDENCE_BRIDGE_REL,
+    validate_biomechanics_evidence_bridge,
+)
+from .biomechanics_source_register import (
+    SOURCE_REGISTER_REL as BIOMECHANICS_SOURCE_REGISTER_REL,
+    validate_biomechanics_source_register,
+)
+from .biomechanics_evidence_surfaces import (
+    validate_biomechanics_evidence_surfaces,
+)
 from .claim_evidence_integrity import (
     MANIFEST_REL as CLAIM_EVIDENCE_MANIFEST_REL,
     build_claim_evidence_manifest,
@@ -105,6 +116,17 @@ def main() -> None:
             (ROOT / EXTERNAL_SOURCE_REVIEW_REL).read_text(encoding="utf-8")
         )
         validate_external_source_review(ROOT, external_review, claim_manifest)
+        biomechanics_bridge = json.loads(
+            (ROOT / BIOMECHANICS_EVIDENCE_BRIDGE_REL).read_text(encoding="utf-8")
+        )
+        validate_biomechanics_evidence_bridge(
+            ROOT, biomechanics_bridge, external_review
+        )
+        biomechanics_sources = json.loads(
+            (ROOT / BIOMECHANICS_SOURCE_REGISTER_REL).read_text(encoding="utf-8")
+        )
+        validate_biomechanics_source_register(ROOT, biomechanics_sources)
+        validate_biomechanics_evidence_surfaces(ROOT)
         manifest = build_release_manifest(ROOT)
         manifest_payload = json.dumps(manifest, indent=2) + "\n"
         publication_report = _publication_report(
@@ -142,6 +164,21 @@ def main() -> None:
         )
         result["external_sources"] = validate_external_source_review(
             ROOT, external_review, claim_manifest
+        )
+        biomechanics_bridge = json.loads(
+            (ROOT / BIOMECHANICS_EVIDENCE_BRIDGE_REL).read_text(encoding="utf-8")
+        )
+        result["biomechanics_evidence_bridge"] = validate_biomechanics_evidence_bridge(
+            ROOT, biomechanics_bridge, external_review
+        )
+        biomechanics_sources = json.loads(
+            (ROOT / BIOMECHANICS_SOURCE_REGISTER_REL).read_text(encoding="utf-8")
+        )
+        result["biomechanics_source_register"] = validate_biomechanics_source_register(
+            ROOT, biomechanics_sources
+        )
+        result["biomechanics_evidence_surfaces"] = (
+            validate_biomechanics_evidence_surfaces(ROOT)
         )
         publication_report = _publication_report(
             manifest_payload,

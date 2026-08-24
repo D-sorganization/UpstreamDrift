@@ -1,0 +1,555 @@
+{
+  "schema_version": "proximal-distal-biomechanics-evidence-bridge/v1",
+  "scope_statement": "This registry maps bounded proximal-distal mechanisms to the measurements required to observe, estimate, or reject them. It does not convert model outputs, literature context, or synthetic traces into human validation.",
+  "measurement_boundary": "Direct observation is reserved for a calibrated sensor observable in its declared frame and units. Derived quantities retain their inverse-problem, filtering, model, synchronization, and allocation dependencies. Missing governed participant data remain unavailable.",
+  "owner": "UpstreamDrift proximal-distal research program",
+  "external_source_review_sha256": "77a0088908653948bc9bacf65f9f4942205d9ff3067d6126c38a61889bb9e76d",
+  "claim_registry_sha256": "1646a367e000cb1014fdb3d1435bb5378280b58b288ae9e614e4aca5afd2cbc3",
+  "source_register_sha256": "f76898543ad34eeafbbe61137bcc77238411b898463002e2e8cad6ac14928ddf",
+  "human_validation_status": "externally_blocked",
+  "modalities": [
+    {
+      "modality_id": "optical_motion_capture",
+      "source_status": "registered",
+      "source_ids": [
+        "pmid:24627665",
+        "doi:10.1055/s-2008-1038732",
+        "doi:10.1371/journal.pone.0295152"
+      ],
+      "observables": [
+        "time-indexed marker positions",
+        "calibrated club and segment poses",
+        "derived linear and angular velocities"
+      ],
+      "frame_authority": "A laboratory frame and every segment frame must be declared, with handedness, rotation representation, marker-to-segment calibration, and club-face convention preserved in the dataset manifest.",
+      "unit_authority": "SI length, time, angle, linear velocity, and angular velocity units are required at ingestion; normalized swing time is an additional coordinate rather than a replacement for seconds.",
+      "calibration_requirement": "Static or functional segment calibration, camera calibration residuals, marker reconstruction residuals, club rigid-body residuals, and filtering choices must be retained per session.",
+      "synchronization_requirement": "Hardware or independently verified common-clock synchronization to every wrench, EMG, shaft, ultrasound, and launch stream is required; event alignment alone is insufficient.",
+      "event_definition": "Address, takeaway, backswing top, downswing start, release-related states, impact, and follow-through events require algorithm, coordinate, search interval, ambiguity flag, and uncertainty in seconds.",
+      "processing_method": "Retain raw trajectories; preregister gap filling, rigid-body reconstruction, coordinate construction, filtering, differentiation, event detection, and all sensitivity variants.",
+      "missingness_rule": "No interpolated interval may cross an unqualified duration or impact discontinuity; trial- and channel-level missingness, reconstruction failure, and exclusion reasons remain explicit.",
+      "uncertainty_sources": [
+        "marker placement and soft-tissue artifact",
+        "occlusion and reconstruction error",
+        "filter and differentiation sensitivity",
+        "segment coordinate and joint-center definitions"
+      ],
+      "uncertainty_propagation": "Repeat primary estimands across registered marker, joint-center, coordinate-method, cutoff-frequency, event-time, and differentiation perturbations with participant-level resampling.",
+      "directly_observed": [
+        "calibrated marker image-derived positions",
+        "rigid-cluster pose estimates under the declared reconstruction"
+      ],
+      "not_identifiable": [
+        "individual hand forces or moments",
+        "muscle force or activation",
+        "causal energy-transfer strategy"
+      ],
+      "data_gate": "A governed participant-separated motion dataset must retain raw trajectories, calibration, event definitions, missing-data flags, and synchronized sensor timestamps."
+    },
+    {
+      "modality_id": "force_plates",
+      "source_status": "registered",
+      "source_ids": [
+        "doi:10.1007/s40279-025-02391-3",
+        "doi:10.1080/14763141.2019.1586983",
+        "pmid:24149910"
+      ],
+      "observables": [
+        "bilateral or plate-resolved ground force",
+        "ground moment",
+        "center of pressure when vertical-force validity conditions hold"
+      ],
+      "frame_authority": "Each six-axis ground wrench must be transported to a declared point in a declared laboratory frame before aggregation; plate assignment and foot contacts must be retained.",
+      "unit_authority": "Forces are newtons, moments are newton-metres, center of pressure is metres, impulse is newton-seconds, and power requires a compatible same-point twist.",
+      "calibration_requirement": "Zero, bias, cross-talk, coordinate transform, support-surface height, saturation, and center-of-pressure validity thresholds must be verified before participant analysis.",
+      "synchronization_requirement": "Force-plate samples must share or be mapped to the motion-capture clock with measured offset and drift uncertainty.",
+      "event_definition": "Force windows use the independently registered motion events plus foot-contact and valid-vertical-force states; center-of-pressure is unavailable below the registered force threshold.",
+      "processing_method": "Retain raw channels; preregister zero correction, calibration matrix, filtering, wrench transport, center-of-pressure calculation, impulse integration, and whole-system closure.",
+      "missingness_rule": "Foot bridging, saturation, invalid center-of-pressure, incomplete plate contact, and absent synchronized kinematics are typed exclusions rather than imputed valid wrench data.",
+      "uncertainty_sources": [
+        "plate cross-talk and zero drift",
+        "foot bridging or contact reassignment",
+        "reference-point transport",
+        "filtering and integration drift"
+      ],
+      "uncertainty_propagation": "Propagate bias, calibration, reference-point, force-threshold, event-window, filter, and integration perturbations through impulse, moment, power, and Newton-Euler residuals.",
+      "directly_observed": [
+        "calibrated plate reaction wrench",
+        "plate-level impulse under the declared integration window"
+      ],
+      "not_identifiable": [
+        "individual hand wrench allocation",
+        "muscle coordination",
+        "club energy transfer from force magnitude alone"
+      ],
+      "data_gate": "A governed participant-held-out dataset must provide synchronized raw plate channels, plate geometry, transforms, calibration records, and whole-system Newton-Euler closure variables."
+    },
+    {
+      "modality_id": "bilateral_six_axis_grip_wrenches",
+      "source_status": "gap",
+      "source_ids": ["doi:10.1007/bf00198762", "doi:10.3200/jmbr.40.5.446-476"],
+      "observables": [
+        "lead-hand six-axis wrench",
+        "trail-hand six-axis wrench",
+        "common and differential grip modes"
+      ],
+      "frame_authority": "Each hand wrench requires its own sensor frame, measured contact-center transform, club frame, grip-midpoint transport rule, and force-action convention.",
+      "unit_authority": "Forces are newtons, free moments and transported couples are newton-metres, work is joules, and power is watts at compatible contact twists.",
+      "calibration_requirement": "Six-axis calibration, cross-talk matrix, thermal drift, zero history, overload checks, sensor compliance, contact-center tracking, and club inertial calibration are required.",
+      "synchronization_requirement": "Both wrench sensors require a shared hardware clock synchronized to club and body kinematics, shaft sensing, EMG, and impact measurement.",
+      "event_definition": "Grip-wrench phases use the common registered motion and impact events; contact-center changes, grip acquisition, sensor zero, and any overload interval are separate typed events.",
+      "processing_method": "Retain raw bridges and calibration matrices; preregister zero correction, cross-talk correction, frame transport, contact-center model, common/differential decomposition, power, impulse, and work.",
+      "missingness_rule": "Saturation, cable artifact, lost contact-center tracking, invalid zero, or either missing hand channel blocks bilateral allocation; net club motion cannot fill the missing hand wrench.",
+      "uncertainty_sources": [
+        "cross-talk and sensor compliance",
+        "moving or distributed contact centers",
+        "grip preload and zero definition",
+        "wrench transport and frame error"
+      ],
+      "uncertainty_propagation": "Propagate calibration covariance, cross-talk, zero drift, contact-center, frame, synchronization, and sensor-compliance perturbations through allocation, couple, power, and inverse dynamics.",
+      "directly_observed": [
+        "calibrated sensor-frame wrench channels",
+        "measured bilateral common and differential modes after declared transforms"
+      ],
+      "not_identifiable": [
+        "muscle or scapular source of a measured wrench",
+        "distributed pressure from a lumped wrench",
+        "intended control strategy"
+      ],
+      "data_gate": "No qualifying governed golf dataset with synchronized participant-level bilateral six-axis grip wrenches has been located. Acquisition, calibration, governance, and participant-held-out qualification are required before human allocation claims."
+    },
+    {
+      "modality_id": "surface_emg",
+      "source_status": "gap",
+      "source_ids": [],
+      "observables": [
+        "electrode-specific activation envelope",
+        "activation onset and offset under a preregistered detector",
+        "within-muscle normalized amplitude"
+      ],
+      "frame_authority": "Electrode identity, side, anatomical placement, orientation, reference, and synchronized time base must be explicit; EMG has no mechanical wrench frame.",
+      "unit_authority": "Raw voltage and processing units must be retained; normalized amplitude is dimensionless and must name its normalization task and uncertainty.",
+      "calibration_requirement": "Skin preparation, placement verification, amplifier settings, cross-talk assessment, normalization protocol, and preregistered filtering and onset detection are required.",
+      "synchronization_requirement": "Hardware synchronization to motion, bilateral wrench, ultrasound, shaft, and impact streams is required with electromechanical-delay sensitivity retained.",
+      "event_definition": "Activation onset and offset are detector-specific events with threshold, baseline window, persistence rule, phase window, and timing uncertainty; mechanical events remain independently defined.",
+      "processing_method": "Retain raw voltage; preregister artifact rejection, band-pass and notch filtering, rectification, envelope construction, normalization, onset detection, and electromechanical-delay sensitivity.",
+      "missingness_rule": "Detached, saturated, motion-artifact-dominated, or cross-talk-failed channels are unavailable; adjacent muscles, limbs, or model activations cannot replace them.",
+      "uncertainty_sources": [
+        "electrode placement and cross-talk",
+        "normalization-task dependence",
+        "filter and onset-threshold sensitivity",
+        "electromechanical delay and fatigue drift"
+      ],
+      "uncertainty_propagation": "Repeat onset, amplitude, coactivation, and mechanics associations across placement, normalization, filter, detector, electromechanical-delay, and fatigue-state perturbations.",
+      "directly_observed": [
+        "electrode voltage history",
+        "declared processed activation proxy"
+      ],
+      "not_identifiable": [
+        "individual muscle force",
+        "joint or hand torque allocation",
+        "passive tissue force"
+      ],
+      "data_gate": "A source-qualified, governed golf dataset with synchronized raw EMG, placement records, normalization trials, bilateral mechanics, and participant holdout is required."
+    },
+    {
+      "modality_id": "ultrasound",
+      "source_status": "gap",
+      "source_ids": [],
+      "observables": [
+        "muscle fascicle length and orientation",
+        "muscle-tendon junction displacement",
+        "regional tissue deformation"
+      ],
+      "frame_authority": "Probe pose and image coordinates must be registered to anatomy and the motion-capture frame; out-of-plane motion and probe pressure must be reported.",
+      "unit_authority": "Lengths and displacements are metres, angles are radians or explicitly labelled degrees, and time is seconds on the common clock.",
+      "calibration_requirement": "Image scale, probe tracking, anatomical registration, segmentation reliability, probe pressure, and inter-rater or automated-tracking error must be qualified.",
+      "synchronization_requirement": "Frame timestamps must be synchronized to EMG, motion, bilateral wrench, and impact streams with dropped-frame detection.",
+      "event_definition": "Tissue landmarks use the common mechanical events plus probe-validity intervals; out-of-plane loss, dropped frames, and tracking reacquisition are typed events.",
+      "processing_method": "Retain source images and probe poses; preregister segmentation, fascicle or junction tracking, anatomical registration, smoothing, and any constitutive conversion.",
+      "missingness_rule": "Out-of-plane loss, probe slip, excessive pressure, failed segmentation, or inadequate frame rate makes the tissue estimand unavailable rather than model-filled.",
+      "uncertainty_sources": [
+        "out-of-plane fascicle motion",
+        "probe pressure and skin motion",
+        "segmentation and landmark error",
+        "limited field of view and sampling rate"
+      ],
+      "uncertainty_propagation": "Propagate image scale, probe pose, registration, segmentation, out-of-plane, event-time, and constitutive-parameter uncertainty separately from biological between-trial variability.",
+      "directly_observed": [
+        "registered image intensity",
+        "declared image-derived tissue landmarks"
+      ],
+      "not_identifiable": [
+        "muscle force without constitutive assumptions",
+        "whole-muscle stiffness from one imaging plane",
+        "neural control strategy"
+      ],
+      "data_gate": "A source-qualified dynamic golf acquisition must demonstrate tracked probe registration, sufficient sampling, synchronized mechanics, repeatability, and participant-held-out processing."
+    },
+    {
+      "modality_id": "shaft_strain_inertial_sensing",
+      "source_status": "gap",
+      "source_ids": [],
+      "observables": [
+        "shaft bending and torsional strain",
+        "instrumented-club acceleration and angular rate",
+        "calibrated modal deformation and load proxies"
+      ],
+      "frame_authority": "Gauge axes, inertial axes, shaft material coordinates, grip and head reference points, and transforms to the club frame must be declared.",
+      "unit_authority": "Strain is dimensionless, acceleration is metres per second squared, angular rate is radians per second, reconstructed loads use SI units, and modal coordinates retain their normalization.",
+      "calibration_requirement": "Static and dynamic load calibration, temperature compensation, bridge balance, inertial calibration, sensor mass effects, modal calibration, and bandwidth must be qualified.",
+      "synchronization_requirement": "Shaft and inertial samples require a shared or measured common clock with grip wrenches, motion, and impact sensing.",
+      "event_definition": "Structural events include excitation onset, peak load, deformation extrema, zero crossings, impact, saturation, and sensor-ringdown intervals on the common clock.",
+      "processing_method": "Retain raw strain and inertial channels; preregister temperature and zero correction, calibration transform, rigid-motion subtraction, modal or load inversion, filtering, and work-energy reconstruction.",
+      "missingness_rule": "Saturation, bridge imbalance, temperature failure, inadequate bandwidth, unqualified impact ringdown, or lost clock mapping blocks the affected load and energy estimand.",
+      "uncertainty_sources": [
+        "temperature and bridge drift",
+        "gauge placement and cross-axis sensitivity",
+        "modal truncation and load inversion",
+        "sensor mass, bandwidth, and impact saturation"
+      ],
+      "uncertainty_propagation": "Propagate calibration covariance, temperature, gauge pose, rigid-motion subtraction, modal truncation, damping, boundary-condition, timing, and bandwidth perturbations.",
+      "directly_observed": [
+        "calibrated strain-channel voltage",
+        "calibrated inertial sensor channels"
+      ],
+      "not_identifiable": [
+        "distributed shaft state beyond the qualified sensor model",
+        "hand allocation from net shaft load",
+        "unmeasured damping and boundary conditions"
+      ],
+      "data_gate": "A source-qualified instrumented-club dataset and calibration artifact must establish bandwidth, load reconstruction, structural-model validity, synchronization, and participant holdout."
+    },
+    {
+      "modality_id": "launch_monitor",
+      "source_status": "gap",
+      "source_ids": [],
+      "observables": [
+        "clubhead delivery velocity and orientation",
+        "ball launch velocity, direction, and spin",
+        "impact and flight outcome metrics"
+      ],
+      "frame_authority": "Device coordinates, target line, laboratory and club-frame transforms, measurement volume, handedness, and impact event convention must be declared.",
+      "unit_authority": "SI velocity, angle, angular-rate, distance, and time units are canonical; vendor display units and derived proprietary metrics must be mapped and identified.",
+      "calibration_requirement": "Device model and firmware, setup geometry, environmental inputs, alignment, reference-device comparison, missing-shot rules, and uncertainty by metric are required.",
+      "synchronization_requirement": "Impact timestamps and shot identifiers must reconcile one-to-one with motion, wrench, EMG, ultrasound, and instrumented-club records.",
+      "event_definition": "Impact and reported delivery events follow the qualified device definition and are reconciled to an independent impact detector with offset, ambiguity, and shot-match status.",
+      "processing_method": "Retain primary device outputs and flags; preregister unit conversion, coordinate alignment, environmental correction, shot matching, outlier rules, and exclusion of unverifiable proprietary composites.",
+      "missingness_rule": "Unmatched, unreported, low-confidence, out-of-volume, misaligned, or firmware-incompatible shots remain missing and cannot be reconstructed from the simulation outcome.",
+      "uncertainty_sources": [
+        "device and firmware dependence",
+        "alignment and measurement-volume error",
+        "impact detection and shot matching",
+        "proprietary derived metrics and environmental correction"
+      ],
+      "uncertainty_propagation": "Propagate device repeatability, alignment, reference-comparison, environmental, event-time, shot-match, impact-location, and firmware strata through held-out outcomes.",
+      "directly_observed": [
+        "device-reported qualified primary metrics",
+        "shot-level measurement availability and quality flags"
+      ],
+      "not_identifiable": [
+        "mechanism producing a delivery outcome",
+        "human control allocation",
+        "unreported proprietary derivations"
+      ],
+      "data_gate": "A source-qualified validation and governed shot-level dataset must retain device, firmware, setup, raw qualified metrics, uncertainty, synchronization, and participant holdout."
+    }
+  ],
+  "mechanisms": [
+    {
+      "mechanism_id": "segment_kinematic_sequence",
+      "statement": "Declared segment angular-velocity histories and peak order are observable only under a specified coordinate and signal-processing method; peak order alone is not energy flow.",
+      "model_quantity": "Segment poses, angular velocities, peak times, coordinate-method sensitivity, and compatible segment energy or interface-power histories.",
+      "observable_discriminator": "A preregistered participant-held-out comparison must show whether peak-order predictions remain stable across coordinate and filtering variants while same-frame joint power, interface power, and segment-energy histories distinguish transfer from coincident sequencing.",
+      "measurement_requirements": ["optical_motion_capture"],
+      "identifiability": "derived_model_dependent",
+      "competing_explanations": [
+        "coordinate and angular-velocity decomposition choice",
+        "filtering and event normalization",
+        "different task objectives producing similar peak order"
+      ],
+      "falsifier": "The proposed ordering or its claimed association fails under preregistered coordinate methods, participant holdout, or compatible energy and power accounting.",
+      "adverse_case": "A swing exhibits the same peak order with opposite interface-power direction or a different order with equal or better delivery outcome.",
+      "claim_ids": [
+        "PD-CLAIM-007",
+        "PD-CLAIM-009",
+        "PD-CLAIM-027",
+        "PD-CLAIM-090",
+        "PD-CLAIM-020",
+        "PD-CLAIM-050"
+      ],
+      "human_evidence_state": "empirical_context_only"
+    },
+    {
+      "mechanism_id": "ground_wrench_pathway",
+      "statement": "The external ground wrench can be measured, but its contribution to whole-system momentum and its association with club delivery do not by themselves identify internal transfer or control allocation.",
+      "model_quantity": "Transported bilateral ground wrench, impulse, compatible contact power, whole-system Newton-Euler closure, and held-out delivery association.",
+      "observable_discriminator": "Synchronized force plates and whole-body kinematics must distinguish a ground-wrench change that precedes and closes a predicted momentum change from one that merely covaries with size, speed, or a later motion response.",
+      "measurement_requirements": ["force_plates", "optical_motion_capture"],
+      "identifiability": "directly_observed",
+      "competing_explanations": [
+        "ground wrench as a response to rather than cause of motion",
+        "common dependence on golfer size and speed",
+        "zero-work redirection at stationary ideal contact"
+      ],
+      "falsifier": "Transported wrenches fail calibration or Newton-Euler closure, or preregistered held-out associations do not exceed the stated null and uncertainty bounds.",
+      "adverse_case": "Higher club delivery occurs with lower impulse or with a different wrench timing after participant and equipment effects are controlled.",
+      "claim_ids": [
+        "PD-CLAIM-073",
+        "PD-CLAIM-079",
+        "PD-CLAIM-011",
+        "PD-CLAIM-080"
+      ],
+      "human_evidence_state": "empirical_context_only"
+    },
+    {
+      "mechanism_id": "bilateral_hand_wrench_allocation",
+      "statement": "A net club wrench does not uniquely identify the lead-hand and trail-hand wrench allocation because the bilateral map contains unobservable internal modes.",
+      "model_quantity": "Lead and trail six-axis wrenches, grip-midpoint resultant and couple, allocation null space, cross-talk correction, and contact-center sensitivity.",
+      "observable_discriminator": "Independently calibrated bilateral six-axis wrenches must resolve common and differential modes that produce the same net club wrench and test whether the registered null-space and contact-center predictions survive calibration uncertainty.",
+      "measurement_requirements": [
+        "bilateral_six_axis_grip_wrenches",
+        "optical_motion_capture"
+      ],
+      "identifiability": "structurally_unidentifiable",
+      "competing_explanations": [
+        "different common and differential hand modes producing the same net wrench",
+        "distributed grip contact represented by lumped sensors",
+        "wrist, arm, and scapular actions sharing a task-equivalent wrench"
+      ],
+      "falsifier": "An independently calibrated bilateral dataset contradicts the predicted wrench-map rank, null mode, or registered allocation uncertainty.",
+      "adverse_case": "Task-equivalent measured allocations reverse the modeled load or robustness ranking without changing net club delivery.",
+      "claim_ids": [
+        "PD-CLAIM-068",
+        "PD-CLAIM-075",
+        "PD-CLAIM-199",
+        "PD-CLAIM-200",
+        "PD-CLAIM-255"
+      ],
+      "human_evidence_state": "externally_blocked"
+    },
+    {
+      "mechanism_id": "muscle_activation_timing",
+      "statement": "Activation timing can contextualize neural drive but cannot identify individual muscle force, net joint torque, or hand-wrench allocation without additional dynamics and measurements.",
+      "model_quantity": "Preregistered activation onset, amplitude, coactivation proxies, electromechanical delay sensitivity, and association with bilateral mechanics.",
+      "observable_discriminator": "Raw synchronized EMG must improve held-out prediction of measured bilateral wrench or impedance-related response beyond kinematics and timing alone, across electrode, normalization, detector, and electromechanical-delay sensitivities.",
+      "measurement_requirements": [
+        "surface_emg",
+        "optical_motion_capture",
+        "bilateral_six_axis_grip_wrenches"
+      ],
+      "identifiability": "practically_unqualified",
+      "competing_explanations": [
+        "cross-talk or normalization artifacts",
+        "activation producing stiffness rather than net task torque",
+        "unmeasured deep-muscle and passive-tissue contributions"
+      ],
+      "falsifier": "The claimed activation sequence is not repeatable across placements and detectors or does not predict held-out mechanical observables beyond uncertainty.",
+      "adverse_case": "Similar bilateral wrenches arise from materially different EMG patterns, or the same EMG pattern accompanies opposite wrench allocation.",
+      "claim_ids": ["PD-CLAIM-070", "PD-CLAIM-198", "PD-CLAIM-206"],
+      "human_evidence_state": "externally_blocked"
+    },
+    {
+      "mechanism_id": "muscle_tendon_force_and_stiffness",
+      "statement": "Muscle-tendon force, stiffness, and elastic work are not directly identified by joint motion or surface EMG and require a declared constitutive and musculoskeletal inverse problem.",
+      "model_quantity": "Fascicle and tendon kinematics, muscle-tendon force bounds, activation dynamics, passive properties, stiffness sensitivity, and residual joint-moment closure.",
+      "observable_discriminator": "Synchronized tissue imaging, EMG, motion, and external wrenches must rule out admissible activation and passive-tissue countermodels by closing held-out joint moments and measured fascicle or tendon trajectories within registered uncertainty.",
+      "measurement_requirements": [
+        "ultrasound",
+        "surface_emg",
+        "optical_motion_capture",
+        "bilateral_six_axis_grip_wrenches"
+      ],
+      "identifiability": "structurally_unidentifiable",
+      "competing_explanations": [
+        "muscle redundancy",
+        "passive tissue and co-contraction",
+        "subject-specific moment arms and tendon compliance"
+      ],
+      "falsifier": "No admissible calibrated parameter set closes measured motion and external wrenches, or the claimed force pattern is not robust across feasible activation solutions.",
+      "adverse_case": "Different feasible muscle-force solutions reproduce the same joint and hand mechanics while reversing the proposed energetic attribution.",
+      "claim_ids": ["PD-CLAIM-044", "PD-CLAIM-047", "PD-CLAIM-198"],
+      "human_evidence_state": "externally_blocked"
+    },
+    {
+      "mechanism_id": "shaft_load_storage_recoil",
+      "statement": "Shaft deformation can store and return elastic energy, but delivery benefit depends on calibrated structure, excitation, damping, boundary conditions, and phase rather than a universal recoil advantage.",
+      "model_quantity": "Modal deformation, strain-derived load, elastic energy, damping loss, grip and head power, rigid-shaft counterfactual, and model-order sensitivity.",
+      "observable_discriminator": "Calibrated strain and inertial histories must be predicted better by the flexible model than by a rigid-shaft countermodel and must show phase-consistent stored and returned energy without violating measured grip, head, or damping power closure.",
+      "measurement_requirements": [
+        "shaft_strain_inertial_sensing",
+        "optical_motion_capture",
+        "bilateral_six_axis_grip_wrenches"
+      ],
+      "identifiability": "practically_unqualified",
+      "competing_explanations": [
+        "rigid-body motion leaking into inferred deformation",
+        "unmodeled grip and head compliance",
+        "phase-dependent load redistribution without net delivery gain"
+      ],
+      "falsifier": "A calibrated flexible model fails held-out strain and inertial traces or does not outperform a rigid countermodel under preregistered uncertainty and refinement gates.",
+      "adverse_case": "Matched-load flexible and rigid cases show opposite speed effects across plausible stiffness, damping, or timing conditions.",
+      "claim_ids": [
+        "PD-CLAIM-224",
+        "PD-CLAIM-229",
+        "PD-CLAIM-289",
+        "PD-CLAIM-292"
+      ],
+      "human_evidence_state": "model_only"
+    },
+    {
+      "mechanism_id": "launch_outcome",
+      "statement": "Club and ball delivery outcomes are endpoints, not measurements of the internal mechanism that produced them, and require device-specific qualification before cross-study comparison.",
+      "model_quantity": "Impact club velocity and orientation, ball launch and spin, shot-matching quality, uncertainty, and participant-held-out outcome distributions.",
+      "observable_discriminator": "A device-qualified held-out comparison must determine whether the proposed internal mechanism improves prediction of delivery and launch beyond impact location, equipment, participant, and device countermodels.",
+      "measurement_requirements": ["launch_monitor", "optical_motion_capture"],
+      "identifiability": "unavailable",
+      "competing_explanations": [
+        "impact location and equipment properties",
+        "device and firmware differences",
+        "multiple control histories producing equivalent delivery"
+      ],
+      "falsifier": "The proposed model fails preregistered held-out delivery distributions or its effect is smaller than device, impact, and participant uncertainty.",
+      "adverse_case": "A mechanically different strategy produces an equivalent or better qualified delivery outcome with lower load or variability.",
+      "claim_ids": ["PD-CLAIM-006", "PD-CLAIM-091", "PD-CLAIM-223"],
+      "human_evidence_state": "externally_blocked"
+    },
+    {
+      "mechanism_id": "passive_late_negative_torque_origin",
+      "statement": "A late negative net club couple or generalized torque does not identify passive tissue action, active wrist braking, or separated-hand force origin without bilateral wrenches and compatible anatomical dynamics.",
+      "model_quantity": "Net club couple, direct wrist moment, force-generated grip couple, zero-command counterfactual, compatible power, activation context, and allocation uncertainty.",
+      "observable_discriminator": "Synchronized bilateral wrenches, club and body kinematics, shaft loads, and activation context must separate a force-generated couple, an active wrist-braking moment, a compliant recoil contribution, and a motion-dependent interaction term at the same late-downswing events.",
+      "measurement_requirements": [
+        "bilateral_six_axis_grip_wrenches",
+        "optical_motion_capture",
+        "surface_emg",
+        "shaft_strain_inertial_sensing"
+      ],
+      "identifiability": "structurally_unidentifiable",
+      "competing_explanations": [
+        "active negative wrist torque",
+        "separated-hand force couple",
+        "shaft and grip compliance",
+        "motion-dependent interaction and constraint reactions"
+      ],
+      "falsifier": "Measured bilateral wrenches, shaft loads, and inverse-dynamics closure reject the registered sign, timing, persistence, or allocation predictions across participant-held-out trials.",
+      "adverse_case": "Negative net couple occurs without the predicted differential hand mode, or the predicted differential mode occurs without favorable club-energy transfer.",
+      "claim_ids": [
+        "PD-CLAIM-060",
+        "PD-CLAIM-070",
+        "PD-CLAIM-097",
+        "PD-CLAIM-199",
+        "PD-CLAIM-089"
+      ],
+      "human_evidence_state": "externally_blocked"
+    },
+    {
+      "mechanism_id": "slack_preload_state",
+      "statement": "Slack and preload must be defined through a measurable transmission law; kinematic lag, low activation, and zero transmitted torque are not interchangeable observations.",
+      "model_quantity": "Contact active set, dead-zone occupancy, grip preload, transmission stiffness and damping, torque-error impulse, reattachment timing, and adverse perturbation response.",
+      "observable_discriminator": "A calibrated transmission experiment must distinguish a true dead-zone or contact-state transition from compliant yielding and impedance change using preload, force-displacement hysteresis, reattachment timing, and held-out perturbation response.",
+      "measurement_requirements": [
+        "bilateral_six_axis_grip_wrenches",
+        "surface_emg",
+        "shaft_strain_inertial_sensing",
+        "optical_motion_capture"
+      ],
+      "identifiability": "practically_unqualified",
+      "competing_explanations": [
+        "intentional compliant yielding rather than slack",
+        "sensor threshold and contact-model artifacts",
+        "co-contraction changing impedance without changing net wrench"
+      ],
+      "falsifier": "A calibrated transmission model cannot distinguish the declared states above sensor uncertainty or the predicted preload advantage disappears under held-out perturbations and fatigue.",
+      "adverse_case": "A controlled low-preload state improves delivery robustness or load without increasing timing sensitivity, or persistent preload increases adverse load.",
+      "claim_ids": [
+        "PD-CLAIM-203",
+        "PD-CLAIM-204",
+        "PD-CLAIM-205",
+        "PD-CLAIM-206"
+      ],
+      "human_evidence_state": "model_only"
+    }
+  ],
+  "transportability": [
+    {
+      "dimension_id": "anthropometry",
+      "current_coverage": "bounded_context",
+      "limitation": "Subject-scaled models and synthetic anthropometric designs test geometry sensitivity but do not estimate a human population distribution or validate segment inertial parameters for this task.",
+      "data_gate": "Retain participant stature, mass, segment calibration, grip span, club fit, and anthropometric-model uncertainty; freeze training-only strata and evaluate held-out calibration and mechanism effects.",
+      "claim_ids": ["PD-CLAIM-216", "PD-CLAIM-260"]
+    },
+    {
+      "dimension_id": "sex",
+      "current_coverage": "unqualified",
+      "limitation": "Female and male anthropometric design profiles are engineering inputs, while much of the cited golf evidence uses male samples; no sex-stratified mechanism or allocation result is established.",
+      "data_gate": "Recruit and retain sex and relevant anthropometric strata without treating sex as a mechanical surrogate; preregister interaction estimates and suppress unsupported subgroup inference.",
+      "claim_ids": ["PD-CLAIM-260"]
+    },
+    {
+      "dimension_id": "age",
+      "current_coverage": "bounded_context",
+      "limitation": "An age-diverse observational speed-handicap sample does not identify how age modifies bilateral allocation, tissue dynamics, fatigue, or the proposed transfer mechanisms.",
+      "data_gate": "Retain age continuously, define age-range transport targets prospectively, measure relevant capacity and recovery covariates, and evaluate participant-held-out calibration and interactions.",
+      "claim_ids": ["PD-CLAIM-006"]
+    },
+    {
+      "dimension_id": "skill",
+      "current_coverage": "bounded_context",
+      "limitation": "Skilled and comparison samples support bounded descriptive differences, but gross sequencing and selected associations do not identify a transferable causal strategy.",
+      "data_gate": "Define skill independently of the tested outcome, preserve continuous handicap and experience, stratify participant holdout, and test whether mechanisms add prediction beyond baseline delivery and capacity.",
+      "claim_ids": ["PD-CLAIM-012", "PD-CLAIM-021"]
+    },
+    {
+      "dimension_id": "injury",
+      "current_coverage": "unqualified",
+      "limitation": "The model outputs mechanical proxies and explicitly withholds injury and tissue-loading conclusions; no governed injury history or prospective adverse outcome is linked to the transfer results.",
+      "data_gate": "Collect governed injury history, symptoms, exposure, clinical constraints, tissue-load uncertainty, and adverse events under an approved protocol; performance cannot stand in for safety.",
+      "claim_ids": ["PD-CLAIM-072", "PD-CLAIM-229"]
+    },
+    {
+      "dimension_id": "handedness",
+      "current_coverage": "unqualified",
+      "limitation": "Most cited golf samples and the registered sign conventions are right-handed; relabeling lead and trail sides does not establish mirrored anatomy, coordination, or sensor equivalence.",
+      "data_gate": "Retain biological side, playing handedness, grip style, and mirrored frame transforms; qualify sensor calibration and predictions separately before pooling or mirroring.",
+      "claim_ids": ["PD-CLAIM-068", "PD-CLAIM-091"]
+    },
+    {
+      "dimension_id": "impairment",
+      "current_coverage": "unqualified",
+      "limitation": "The articulated and scapular surrogates are not calibrated to impairment, range restriction, pain, neurological status, or compensatory motion.",
+      "data_gate": "Define each target impairment clinically, retain range and functional constraints, validate subject-specific geometry and sensor observability, and use a separately governed held-out analysis.",
+      "claim_ids": ["PD-CLAIM-267"]
+    },
+    {
+      "dimension_id": "club",
+      "current_coverage": "bounded_context",
+      "limitation": "Driver, iron, rigid, modal, and synthetic shaft cases use non-equivalent equipment and objectives; no universal equipment effect or calibrated shaft benefit is established.",
+      "data_gate": "Retain club make, head, shaft, length, mass, inertia, stiffness, damping, grip, ball, impact location, calibration, and participant-club assignment; test held-out equipment strata.",
+      "claim_ids": ["PD-CLAIM-014", "PD-CLAIM-292"]
+    },
+    {
+      "dimension_id": "task",
+      "current_coverage": "bounded_context",
+      "limitation": "Maximum speed, carry, accuracy, load, robustness, partial swings, clubs, and impact definitions are distinct tasks; an optimum under one objective cannot be promoted to another.",
+      "data_gate": "Preregister shot intent, target, club, outcome vector, constraints, impact definition, acceptable-shot criteria, fatigue state, and multi-objective comparison before estimating a strategy effect.",
+      "claim_ids": ["PD-CLAIM-034", "PD-CLAIM-223"]
+    }
+  ],
+  "summary": {
+    "modality_count": 7,
+    "source_registered_modality_count": 2,
+    "source_gap_modality_count": 5,
+    "mechanism_count": 9,
+    "linked_claim_count": 41,
+    "transportability_dimension_count": 9,
+    "identifiability_counts": {
+      "derived_model_dependent": 1,
+      "directly_observed": 1,
+      "practically_unqualified": 3,
+      "structurally_unidentifiable": 3,
+      "unavailable": 1
+    },
+    "human_validation_status": "externally_blocked"
+  }
+}

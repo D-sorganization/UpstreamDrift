@@ -10,6 +10,7 @@ modality coverage, provenance, participant splits, and inference boundaries.
 The committed input is synthetic and the result is explicitly
 `synthetic_dry_run_only`; all human predictions remain untested.
 
+
 ## Registered Measurements
 
 H1--H3 require synchronized full-body kinematics, bilateral hand wrenches,
