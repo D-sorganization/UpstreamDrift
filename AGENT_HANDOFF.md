@@ -91,8 +91,8 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   is merged at immutable commit
   `17474249b9267d0e73a779c1d72f231e7b8de39c`; this is the #8358 gitlink and
   canonical JSON/CSV/HDF5 analysis authority.
-- Active #8358 worktree: `UpstreamDrift-worktrees/8358-tools-variation-adapter`,
-  branch `feat/8358-tools-variation-adapter`. Fifteen coherent commits
+- Active #8358 PR #9039 uses `UpstreamDrift-worktrees/8358-tools-variation-adapter`
+  on branch `feat/8358-tools-variation-adapter`. Fifteen coherent commits
   were transplanted onto current remote `main`. The Tools gateway, typed trial
   evidence, serial/batched execution, analytical and articulated MuJoCo
   adapters, fail-closed cross-engine comparison, lossless bundles, and
