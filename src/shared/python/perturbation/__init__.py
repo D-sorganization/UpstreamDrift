@@ -16,6 +16,11 @@ from .canonical_trial_executor import (
     execute_batched_variation,
     execute_serial_variation,
 )
+from .double_pendulum_trial_adapter import (
+    DoublePendulumTrialAdapter,
+    DoublePendulumTrialConfig,
+    DoublePendulumTrialResult,
+)
 from .noise import generate_noise
 from .robustness_score import compute_robustness_score
 from .statistics import MetricStatistics, compute_metric_statistics
@@ -57,6 +62,9 @@ __all__ = [
     "TrialEvidenceCollector",
     "execute_batched_variation",
     "execute_serial_variation",
+    "DoublePendulumTrialAdapter",
+    "DoublePendulumTrialConfig",
+    "DoublePendulumTrialResult",
     "CrossEngineCompatibilityError",
     "CrossEngineParityMetrics",
     "CrossEngineTolerances",
