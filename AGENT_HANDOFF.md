@@ -39,14 +39,17 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 - Launch occurred at `2026-08-24T03:46:19Z` in image
   `sha256:b40d91fe2326c5fae288e4a853377fb164aa0a6ba1de62cb28aba15d65500a1e`.
   The run has two model workers, a hard two-CPU cap, 56 GB memory, 112 GB
-  memory-plus-swap, and `on-failure:3`. Initial inspection showed running,
-  no OOM/restart, about 259 MiB resident memory, and the expected two-CPU load.
+  memory-plus-swap, and `on-failure:3`.
 - The latest read-only Tailscale/SSH inspection on 2026-08-23 showed the
-  container still running with zero restarts, no OOM, 199.28% CPU, 270.6 MiB
-  resident memory, 97 PIDs, and 39 durable checkpoint files. The governed
-  campaign status remained `running`, with no terminal result or retained
-  execution failure yet. Do not treat checkpoint count as scientific progress
-  or release evidence; it only establishes durable operational advancement.
+  container still running with zero restarts, no OOM, 200.37% CPU, 334.6 MiB
+  resident memory, 97 PIDs, and 51 durable checkpoints: all 48 nominal shaft
+  packs plus three nominal ground packs. Nominal shaft passed its registered
+  pathway gates with 126/384 matched cells, 0.00779836 maximum work-energy
+  residual, 4.38e-13 trajectory relative error, 1.19e-9 force relative error,
+  and no failed numerical/parity/deflection/twist cells. Record SHA-256 is
+  `736749b5ec85bc8b20a23bf52d725c57d0521c4afa5d83a1ea94b8db859e9216`.
+  This remains preliminary pathway evidence; promote nothing until all 14 paths
+  and final audits pass.
 - `launch-manifest.json`, atomic checkpoints, campaign status, figures, output,
   separate stdout/stderr logs, and an atomic terminal `exit-code.txt` live in
   the campaign root. They persist if SSH, Codex, or DeskComputer disconnects.
@@ -55,6 +58,8 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   block points host-key storage at `NUL`; every command must explicitly use
   `-o StrictHostKeyChecking=yes` and
   `-o UserKnownHostsFile=C:/Users/diete/.ssh/known_hosts`. Do not weaken trust.
+- Heartbeat `complete-proximal-distal-structural-campaign` monitors every 15
+  minutes; ControlTower does not require an interactive Codex session.
 - The Windows Docker client points to inactive TCP port 2375. Operate Docker
   through WSL distribution `ControlTower-SSD`, where `dockerd` is active. Do not
   alter the Docker service, runner services, or fleet topology for this campaign.
@@ -103,14 +108,10 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 
 ## Cross-Repository Path
 
-- Tools PR #4662 merged source-pinned React and PyQt visual baselines at
-  `9604773d7576a330602821f88dd964503b698ae0`. Trusted post-main run
-  `32689177846` passed lifecycle, accessibility, performance, candidate
-  retention, all PyQt renders, and the visual comparator. Tools PR #4663 then
-  merged release-runtime portability at
-  `eebdddf8c6e366722be40c25278cf34a0392f256`; post-main Release Automation run
-  `32690255930` passed analysis, validation, and version-bump stages and opened
-  ordinary protected release PR #4664. Do not bypass or silently merge it.
+- Tools visual baseline PR #4662 merged at `9604773d`; its trusted post-main run
+  `32689177846` passed. Release-runtime PR #4663 merged at `eebdddf8`; post-main
+  run `32690255930` passed and opened release PR #4664. Exact-head CI run
+  `32691175348` passed; do not bypass or silently merge that release PR.
 - Tools #4142 remains open for R10--R15 qualification and immutable
   UpstreamDrift consumption. Tools #4430 is complete.
 - AffineDrift #3930 remains downstream of a qualified UpstreamDrift release.
@@ -144,7 +145,5 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
    merge, verify the squash commit on remote `main` and post-main evidence.
 5. Qualify Tools release PR #4664 without bypass, reconcile its conflicting
    `main` versus GAAI `staging` branch rules, then publish the revision-pinned
-   AffineDrift projection and finish Tools consumer qualification.
-
-Passing shared gates does not close a scientific child whose narrower evidence
-or governed external-data requirement remains incomplete.
+   AffineDrift projection, and finish Tools consumer qualification. Shared gates
+   do not close children with narrower evidence or external-data requirements.
