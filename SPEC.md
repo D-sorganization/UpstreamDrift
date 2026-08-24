@@ -3744,6 +3744,7 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   paths.
 
 ## Change 2026-08-23
+
 - Optimized `q_statistic` calculation in `player_covariation_core.py` using `np.vdot` to avoid intermediate array allocations.
 
 ## Change 2026-06-18
@@ -4334,6 +4335,28 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   numerical-formulation evidence. It shall not establish anatomy, tissue
   mechanics, equipment calibration, human transfer, or coaching strategy.
 
+### F-8557.29: Canonical Ensemble Variation Consumer Boundary
+
+- UpstreamDrift shall consume plan sampling, execution-document metadata,
+  producer provenance, and persisted-plan bindings only through the public
+  Tools variation modules pinned to an immutable protected `main` commit.
+- Capability discovery shall validate the exact supported plan, execution-
+  document, provenance, and plan-binding schema versions. Missing Tools shall
+  remain an actionable optional capability; available but incompatible schemas
+  shall fail closed and shall not silently fall back to local algorithms.
+- The consumer shall return canonical Tools plans, samples, metadata, and
+  persisted-plan resolutions without wrapping, relabeling, or inventing
+  provenance. UpstreamDrift remains responsible only for engine-specific
+  parameter mapping, execution, stable-marker traces, typed trial outcomes,
+  and cross-engine orchestration.
+- Subsequent trial evidence shall retain hit, no-impact, numerical-failure,
+  and partial-valid-trace outcomes, with explicit engine, model, frame, units,
+  stable marker IDs, seed, plan, and source-revision identity. Misses shall
+  never receive fabricated impact or shot coordinates.
+- Serial and batched execution, editable and vendored Tools providers,
+  pendulum and non-pendulum adapters, and cross-engine topology/frame/unit
+  rejection shall pass deterministic parity tests before R15 is promoted.
+
 - Use `np.vdot` instead of `np.sum(x**2)` and `np.sqrt(np.einsum("ij,ij->i", x, x))` instead of `np.linalg.norm(x, axis=1)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
 - Use `np.einsum('ij,ij->j', x, x)` instead of `np.sum(x * x, axis=0)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
 - (spec-exempt: micro-optimization) Replaced `.iterrows()` with `.to_dict('records')` in `data_processor_widget.py`, `kaggle_validation.py`, and `launch_monitor_analytics/widgets.py` to optimize UI and validation performance.
@@ -4360,6 +4383,5 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Vectorized batch swing optimizer effort sum-of-squares computation across environments via `np.einsum("nij,nij->n", controls, controls)` in `src/shared/python/optimization/batch_swing_optimizer.py` (#8958). (spec-exempt: micro-optimization)
 
 - (spec-exempt: micro-optimization) Replaced `np.sum(condition)` and `np.sum(np.isnan(arr))` with `np.count_nonzero` in python analytics and motion matching codebase for faster array evaluation.
-
 - Starting pose matcher: `on_clear_overrides_clicked` prompts for confirmation and unconditionally restores original mocap events state on confirm (#8889).
 - Pose studio actions: initialize undo/redo QActions on MainWidget and guard action refresh against uninitialized state (#8879).

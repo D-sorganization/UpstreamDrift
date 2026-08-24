@@ -86,12 +86,20 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   headline atlases and blocks the final #8752/#8668 audit.
 - #8443, #8448, #8449, #8450, #8595, #8668, #8684, and #8796 remain open.
   Verify each issue's exact acceptance evidence before changing state.
-- Tools PR #4669 is open at exact head
-  `36f4b1add2bc72cea87bd9f87d36b232db76d50b` with squash auto-merge requested;
-  do not pin it before protected merge. Its final suite exposed an
-  UpstreamDrift provider-mode test isolation defect, corrected in protected
-  PR #9022. Tools #4142 remains open until immutable UpstreamDrift consumption
-  and R10–R15 qualification are complete.
+- Tools PR #4669 is squash-merged and verified on remote `main` at immutable
+  commit `f9730033fd279ba8b4abe03bab2aadd950400b47`. Its downstream run exposed
+  an UpstreamDrift provider-mode test-isolation defect; protected PR #9022 at
+  exact head `a00e29228c382950015c5eb29c0bd24f8bc2ab08` corrects it and records the
+  frozen campaign boundary. Substantive checks pass; runner-dependent checks
+  and human review remain pending. Auto-merge is disabled.
+- #8358 is leased as `proximal-distal-20260824-r15`. An unpublished detached
+  worktree at `UpstreamDrift-worktrees/8358-tools-variation-adapter-prep`
+  contains the RED/GREEN canonical schema gateway and eight passing focused
+  tests. Do not push it until #9022 merges; then rebase locally onto refreshed
+  `origin/main`, create a normal feature branch, repin the exact Tools commit,
+  and continue typed trial/provenance and parity work.
+- Tools #4142 remains open until immutable UpstreamDrift consumption and
+  requirement-level R10–R15 qualification are complete.
 - AffineDrift #3930 remains downstream of the qualified UpstreamDrift release;
   do not project a moving or partial campaign.
 - #8963 architecture debt remains separate from the frozen campaign source.

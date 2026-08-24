@@ -8,6 +8,14 @@ from .config import PerturbationAnalyzer, PerturbationConfig, PerturbationSummar
 from .noise import generate_noise
 from .robustness_score import compute_robustness_score
 from .statistics import MetricStatistics, compute_metric_statistics
+from .tools_variation_adapter import (
+    ToolsVariationCapabilities,
+    ToolsVariationCompatibilityError,
+    ToolsVariationGateway,
+    ToolsVariationUnavailableError,
+    load_tools_variation_gateway,
+    probe_tools_variation,
+)
 
 __all__ = [
     "PerturbationAnalyzer",
@@ -17,4 +25,10 @@ __all__ = [
     "compute_robustness_score",
     "MetricStatistics",
     "compute_metric_statistics",
+    "ToolsVariationCapabilities",
+    "ToolsVariationCompatibilityError",
+    "ToolsVariationGateway",
+    "ToolsVariationUnavailableError",
+    "load_tools_variation_gateway",
+    "probe_tools_variation",
 ]
