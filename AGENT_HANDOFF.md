@@ -94,12 +94,11 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   and human review remain pending. Auto-merge is disabled.
 - #8358 is leased as `proximal-distal-20260824-r15`. An unpublished detached
   worktree at `UpstreamDrift-worktrees/8358-tools-variation-adapter-prep`
-  contains local commits `7e7da8512` (canonical schema gateway) and
-  `a55653858` (typed hit, no-impact, failure, and partial-trace evidence). The
-  current local work executes every deterministic Tools sample through injected
-  serial or batched engine/evidence adapters, preserve row order, and convert
-  only declared numerical failures into trial evidence. Thirty-one combined
-  focused tests pass, including serial/batched row-equivalence controls.
+  contains local commits `7e7da8512` (schema gateway), `a55653858` (typed trial
+  evidence), `9fc62a96c` (serial execution), and `02219d237` (batched parity).
+  The next uncommitted slice rejects plan, input, topology, marker, frame,
+  alignment, unit, shape, and tolerance drift before cross-engine ranking.
+  Forty combined focused tests pass.
   Do not push until #9022 merges; then transplant the commits onto refreshed
   `origin/main`, repin Tools, and continue batched and cross-engine parity.
 - Tools #4142 remains open until immutable UpstreamDrift consumption and

@@ -5,6 +5,12 @@ analysis on engine dynamics.
 """
 
 from .config import PerturbationAnalyzer, PerturbationConfig, PerturbationSummary
+from .cross_engine_trial_parity import (
+    CrossEngineCompatibilityError,
+    CrossEngineParityMetrics,
+    CrossEngineTolerances,
+    compare_cross_engine_trials,
+)
 from .canonical_trial_executor import (
     TrialEvidenceCollector,
     execute_batched_variation,
@@ -51,4 +57,8 @@ __all__ = [
     "TrialEvidenceCollector",
     "execute_batched_variation",
     "execute_serial_variation",
+    "CrossEngineCompatibilityError",
+    "CrossEngineParityMetrics",
+    "CrossEngineTolerances",
+    "compare_cross_engine_trials",
 ]
