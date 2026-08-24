@@ -179,6 +179,11 @@ class ToolsVariationGateway:
         dataset_csv_reader: Callable[..., object],
         dataset_hdf5_writer: Callable[..., object],
         dataset_hdf5_reader: Callable[..., object],
+        dataset_summarizer: Callable[..., object],
+        spearman_analyzer: Callable[..., object],
+        oat_builder: Callable[..., object],
+        geometry_analyzer: Callable[..., object],
+        quiet_zone_finder: Callable[..., object],
     ) -> None:
         for value, name in (
             (sampler, "sampler"),
@@ -193,6 +198,11 @@ class ToolsVariationGateway:
             (dataset_csv_reader, "dataset_csv_reader"),
             (dataset_hdf5_writer, "dataset_hdf5_writer"),
             (dataset_hdf5_reader, "dataset_hdf5_reader"),
+            (dataset_summarizer, "dataset_summarizer"),
+            (spearman_analyzer, "spearman_analyzer"),
+            (oat_builder, "oat_builder"),
+            (geometry_analyzer, "geometry_analyzer"),
+            (quiet_zone_finder, "quiet_zone_finder"),
         ):
             if not callable(value):
                 raise TypeError(f"{name} must be callable")
@@ -208,6 +218,11 @@ class ToolsVariationGateway:
         self._dataset_csv_reader = dataset_csv_reader
         self._dataset_hdf5_writer = dataset_hdf5_writer
         self._dataset_hdf5_reader = dataset_hdf5_reader
+        self._dataset_summarizer = dataset_summarizer
+        self._spearman_analyzer = spearman_analyzer
+        self._oat_builder = oat_builder
+        self._geometry_analyzer = geometry_analyzer
+        self._quiet_zone_finder = quiet_zone_finder
         self._capabilities = _available_capabilities()
 
     @classmethod
@@ -259,6 +274,15 @@ class ToolsVariationGateway:
             dataset_csv_reader=_required_callable(root, "read_csv"),
             dataset_hdf5_writer=_required_callable(root, "write_hdf5"),
             dataset_hdf5_reader=_required_callable(root, "read_hdf5"),
+            dataset_summarizer=_required_callable(root, "summary_stats"),
+            spearman_analyzer=_required_callable(root, "spearman_matrix"),
+            oat_builder=_required_callable(
+                root, "sensitivity_from_standard_deviations"
+            ),
+            geometry_analyzer=_required_callable(root, "compute_position_dispersion"),
+            quiet_zone_finder=_required_callable(
+                root, "find_low_variability_intervals"
+            ),
         )
 
     @property
@@ -355,6 +379,53 @@ class ToolsVariationGateway:
     def read_dataset_hdf5(self, path: object) -> object:
         """Read one version-qualified, content-checked HDF5 dataset."""
         return self._dataset_hdf5_reader(self._validated_path(path))
+
+    def summarize_dataset(self, dataset: object) -> object:
+        """Delegate scalar dispersion summaries to the Tools authority."""
+        return self._dataset_summarizer(self._validated_dataset(dataset))
+
+    def compute_spearman_attribution(self, dataset: object) -> object:
+        """Delegate noncausal rank attribution to the Tools authority."""
+        return self._spearman_analyzer(self._validated_dataset(dataset))
+
+    @staticmethod
+    def _validated_axis(values: tuple[str, ...], label: str) -> tuple[str, ...]:
+        if not isinstance(values, tuple):
+            raise TypeError(f"{label} must be a tuple")
+        if not values:
+            raise ValueError(f"{label} must not be empty")
+        if any(not isinstance(value, str) or not value for value in values):
+            raise ValueError(f"{label} must contain non-empty strings")
+        if len(set(values)) != len(values):
+            raise ValueError(f"{label} must be unique")
+        return values
+
+    def build_oat_sensitivity(
+        self,
+        input_keys: tuple[str, ...],
+        output_names: tuple[str, ...],
+        standard_deviations: object,
+    ) -> object:
+        """Build an availability-aware OAT result using Tools mathematics."""
+        inputs = self._validated_axis(input_keys, "input keys")
+        outputs = self._validated_axis(output_names, "output names")
+        if standard_deviations is None:
+            raise TypeError("standard deviations must not be None")
+        return self._oat_builder(inputs, outputs, standard_deviations)
+
+    def compute_geometry_dispersion(self, ensemble: object) -> object:
+        """Delegate common-grid point dispersion to the Tools authority."""
+        if ensemble is None:
+            raise TypeError("ensemble must not be None")
+        return self._geometry_analyzer(ensemble)
+
+    def find_quiet_zones(self, dispersion: object, criteria: object) -> object:
+        """Delegate explicit-threshold quiet-zone detection to Tools."""
+        if dispersion is None:
+            raise TypeError("dispersion must not be None")
+        if criteria is None:
+            raise TypeError("criteria must not be None")
+        return self._quiet_zone_finder(dispersion, criteria)
 
 
 def _validate_importer(importer: Importer) -> None:

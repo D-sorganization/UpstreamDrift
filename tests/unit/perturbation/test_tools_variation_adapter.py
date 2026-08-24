@@ -46,6 +46,20 @@ def _modules() -> dict[str, SimpleNamespace]:
             read_csv=lambda path, plan: ("read-csv", path, plan),
             write_hdf5=lambda dataset, path: ("write-hdf5", dataset, path),
             read_hdf5=lambda path: ("read-hdf5", path),
+            summary_stats=lambda dataset: ("summary", dataset),
+            spearman_matrix=lambda dataset: ("spearman", dataset),
+            sensitivity_from_standard_deviations=lambda inputs, outputs, matrix: (
+                "oat",
+                inputs,
+                outputs,
+                matrix,
+            ),
+            compute_position_dispersion=lambda ensemble: ("dispersion", ensemble),
+            find_low_variability_intervals=lambda dispersion, criteria: (
+                "quiet-zones",
+                dispersion,
+                criteria,
+            ),
         ),
         "shared.python.swing_sim.variation.execution_metadata": SimpleNamespace(
             EXECUTION_DOCUMENT_SCHEMA_VERSION=(
@@ -85,6 +99,10 @@ def test_gateway_preserves_tools_records_and_canonical_operations() -> None:
     plan = object()
     provenance = object()
     dataset = object()
+    ensemble = object()
+    dispersion = object()
+    criteria = object()
+    matrix = object()
     document = {"schema_version": EXPECTED_DATASET_JSON_SCHEMA_VERSION}
 
     assert gateway.sample_inputs(plan) == ("samples", plan)
@@ -123,6 +141,23 @@ def test_gateway_preserves_tools_records_and_canonical_operations() -> None:
         "study.h5",
     )
     assert gateway.read_dataset_hdf5("study.h5") == ("read-hdf5", "study.h5")
+    assert gateway.summarize_dataset(dataset) == ("summary", dataset)
+    assert gateway.compute_spearman_attribution(dataset) == ("spearman", dataset)
+    assert gateway.build_oat_sensitivity(("input",), ("output",), matrix) == (
+        "oat",
+        ("input",),
+        ("output",),
+        matrix,
+    )
+    assert gateway.compute_geometry_dispersion(ensemble) == (
+        "dispersion",
+        ensemble,
+    )
+    assert gateway.find_quiet_zones(dispersion, criteria) == (
+        "quiet-zones",
+        dispersion,
+        criteria,
+    )
     assert gateway.capabilities.available is True
     assert (
         gateway.capabilities.dataset_json_schema_version
@@ -196,6 +231,12 @@ def test_probe_is_import_safe_when_tools_variation_is_absent() -> None:
             None,
             "callable",
         ),
+        (
+            "shared.python.swing_sim.variation",
+            "compute_position_dispersion",
+            None,
+            "callable",
+        ),
     ],
 )
 def test_gateway_rejects_incompatible_or_malformed_tools_modules(
@@ -226,6 +267,18 @@ def test_gateway_validates_public_text_and_plan_boundaries() -> None:
         gateway.dump_persisted_plan(None)
     with pytest.raises(TypeError, match="dataset must not be None"):
         gateway.serialize_dataset(None)
+    with pytest.raises(TypeError, match="dataset must not be None"):
+        gateway.compute_spearman_attribution(None)
+    with pytest.raises(TypeError, match="ensemble must not be None"):
+        gateway.compute_geometry_dispersion(None)
+    with pytest.raises(TypeError, match="dispersion must not be None"):
+        gateway.find_quiet_zones(None, object())
+    with pytest.raises(TypeError, match="criteria must not be None"):
+        gateway.find_quiet_zones(object(), None)
+    with pytest.raises(ValueError, match="input keys must not be empty"):
+        gateway.build_oat_sensitivity((), ("output",), object())
+    with pytest.raises(ValueError, match="output names must not be empty"):
+        gateway.build_oat_sensitivity(("input",), (), object())
     with pytest.raises(TypeError, match="document must be a mapping"):
         gateway.deserialize_dataset([])  # type: ignore[arg-type]
     with pytest.raises(TypeError, match="path must be text or path-like"):

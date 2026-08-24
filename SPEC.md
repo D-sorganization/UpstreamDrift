@@ -4338,15 +4338,18 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 ### F-8557.29: Canonical Ensemble Variation Consumer Boundary
 
 - UpstreamDrift shall consume plan sampling, execution-document metadata,
-  producer provenance, and persisted-plan bindings only through the public
+  producer provenance, persisted-plan and dataset bindings, scalar summaries,
+  noncausal rank attribution, one-at-a-time sensitivity normalization, common-
+  grid geometry dispersion, and quiet-zone detection only through the public
   Tools variation modules pinned to an immutable protected `main` commit.
 - Capability discovery shall validate the exact supported plan, execution-
   document, provenance, and plan-binding schema versions. Missing Tools shall
   remain an actionable optional capability; available but incompatible schemas
   shall fail closed and shall not silently fall back to local algorithms.
-- The consumer shall return canonical Tools plans, samples, metadata, and
-  persisted-plan resolutions without wrapping, relabeling, or inventing
-  provenance. UpstreamDrift remains responsible only for engine-specific
+- The consumer shall return canonical Tools plans, samples, datasets, metadata,
+  persisted-plan resolutions, and analysis records without wrapping,
+  relabeling, copying numerical algorithms, or inventing provenance.
+  UpstreamDrift remains responsible only for engine-specific
   parameter mapping, execution, stable-marker traces, typed trial outcomes,
   and cross-engine orchestration.
 - Subsequent trial evidence shall retain hit, no-impact, numerical-failure,
