@@ -145,8 +145,8 @@ def validate_theta(
 
     # --- 3. Finiteness check -------------------------------------------
     if not np.all(np.isfinite(arr)):
-        n_nan = int(np.sum(np.isnan(arr)))
-        n_inf = int(np.sum(np.isinf(arr)))
+        n_nan = int(np.count_nonzero(np.isnan(arr)))
+        n_inf = int(np.count_nonzero(np.isinf(arr)))
         raise ValueError(
             f"{name} contains non-finite entries (NaN={n_nan}, Inf={n_inf}); "
             "spec §2.2 requires np.all(np.isfinite(theta))"

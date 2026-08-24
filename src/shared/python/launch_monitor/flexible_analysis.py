@@ -307,7 +307,7 @@ def _regression(
             else float("nan")
         ),
         jarque_bera_p_value=float(jarque.pvalue),
-        influential_count=int(np.sum(cooks > 4.0 / count)),
+        influential_count=int(np.count_nonzero(cooks > 4.0 / count)),
     )
     return RegressionEstimate(count, r_squared, adjusted, coefficients, diagnostics)
 
