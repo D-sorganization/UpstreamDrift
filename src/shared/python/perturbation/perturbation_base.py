@@ -34,6 +34,7 @@ import math
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
+from collections.abc import Callable
 from typing import Any
 
 import numpy as np
@@ -41,6 +42,12 @@ import numpy as np
 from src.shared.python.perturbation.config import (
     PerturbationConfig,
     PerturbationSummary,
+    TrialFailure,
+)
+from src.shared.python.perturbation.canonical_trial_executor import (
+    TrialEvidenceCollector,
+    VariationSampler,
+    execute_serial_variation,
 )
 from src.shared.python.perturbation.noise import generate_noise
 from src.shared.python.perturbation.robustness_score import compute_robustness_score
@@ -48,6 +55,7 @@ from src.shared.python.perturbation.statistics import (
     MetricStatistics,
     compute_metric_statistics,
 )
+from src.shared.python.perturbation.trial_evidence import CanonicalTrialEvidence
 
 logger = logging.getLogger(__name__)
 
@@ -106,6 +114,42 @@ class ComparisonReport:
     pvalues: dict[str, float] = field(default_factory=dict)
 
 
+@dataclass(frozen=True)
+class CanonicalPerturbationBatch:
+    """Canonical trial evidence plus a transient legacy compatibility view.
+
+    ``records`` is the durable, provenance-bound authority. ``engine_results``
+    and ``errors`` retain the exact in-process engine returns for host adapters
+    and diagnostics; they are intentionally not persistence contracts. The
+    legacy summary is a compatibility projection over only complete hit and
+    no-impact trials and must not replace the canonical outcome records.
+    """
+
+    records: tuple[CanonicalTrialEvidence, ...]
+    engine_results: tuple[object | None, ...]
+    errors: tuple[Exception | None, ...]
+    legacy_summary: PerturbationSummary
+
+    def __post_init__(self) -> None:
+        n_records = len(self.records)
+        if n_records == 0:
+            raise ValueError("canonical batch must contain at least one trial")
+        if len(self.engine_results) != n_records or len(self.errors) != n_records:
+            raise ValueError("canonical batch collections must have equal lengths")
+        if any(
+            record.trial_index != trial_index
+            for trial_index, record in enumerate(self.records)
+        ):
+            raise ValueError("canonical batch records must be contiguous and ordered")
+        if any(
+            error is not None and not isinstance(error, Exception)
+            for error in self.errors
+        ):
+            raise TypeError("canonical batch errors must be exceptions or None")
+        if self.legacy_summary.config.n_trials != n_records:
+            raise ValueError("legacy summary trial count must match canonical records")
+
+
 # ---------------------------------------------------------------------------
 # Lightweight protocol for sim-result objects
 # ---------------------------------------------------------------------------
@@ -128,6 +172,47 @@ class SimResultProtocol:
     ``n_steps`` : int
         ``len(t)``
     """
+
+
+class _RetainingTrialCollector:
+    """Delegate evidence mapping while retaining declared execution errors."""
+
+    def __init__(
+        self,
+        delegate: TrialEvidenceCollector,
+        errors: dict[int, Exception],
+    ) -> None:
+        self._delegate = delegate
+        self._errors = errors
+
+    def collect_success(
+        self,
+        trial_index: int,
+        plan_seed: int,
+        sampled_row: np.ndarray,
+        result: object,
+    ) -> CanonicalTrialEvidence:
+        return self._delegate.collect_success(
+            trial_index,
+            plan_seed,
+            sampled_row,
+            result,
+        )
+
+    def collect_failure(
+        self,
+        trial_index: int,
+        plan_seed: int,
+        sampled_row: np.ndarray,
+        error: Exception,
+    ) -> CanonicalTrialEvidence:
+        self._errors[trial_index] = error
+        return self._delegate.collect_failure(
+            trial_index,
+            plan_seed,
+            sampled_row,
+            error,
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -320,6 +405,98 @@ class PerturbationAnalyzerBase(ABC):
             "motion_duration": motion_duration,
         }
 
+    def run_canonical_batch(
+        self,
+        *,
+        plan: object,
+        gateway: VariationSampler,
+        collector: TrialEvidenceCollector,
+        row_to_coeffs: Callable[[np.ndarray], list[list[float]]],
+        compatibility_config: PerturbationConfig,
+    ) -> CanonicalPerturbationBatch:
+        """Execute a Tools-owned plan without disguising it as legacy noise.
+
+        The caller injects the engine-specific mapping from one canonical
+        sampled row to this analyzer's coefficient representation and the
+        engine-specific evidence collector. Canonical records retain the plan
+        and outcome authority. The returned ``PerturbationSummary`` exists only
+        for legacy consumers and is computed from complete hit/no-impact rows.
+
+        Design by Contract
+        ------------------
+        Pre: ``compatibility_config`` has the same trial count and seed as the
+             canonical plan; no sampling provenance is inferred.
+        Post: one ordered canonical record, transient engine-result slot, and
+              error slot are retained for every sampled row.
+        """
+        n_runs = getattr(plan, "n_runs", None)
+        plan_seed = getattr(plan, "seed", None)
+        if type(n_runs) is not int or n_runs <= 0:
+            raise ValueError("plan n_runs must be a positive integer")
+        if type(plan_seed) is not int:
+            raise ValueError("plan seed must be an integer")
+        if compatibility_config.n_trials != n_runs:
+            raise ValueError("compatibility_config n_trials must match plan n_runs")
+        if compatibility_config.seed != plan_seed:
+            raise ValueError("compatibility_config seed must match plan seed")
+        if not callable(row_to_coeffs):
+            raise TypeError("row_to_coeffs must be callable")
+
+        t_start = time.monotonic()
+        raw_results: dict[int, object] = {}
+        errors: dict[int, Exception] = {}
+        metric_rows: dict[int, dict[str, float | np.ndarray]] = {}
+        next_trial_index = 0
+
+        def run_row(sampled_row: np.ndarray) -> object:
+            nonlocal next_trial_index
+            trial_index = next_trial_index
+            next_trial_index += 1
+            result = self._simulate(row_to_coeffs(sampled_row))
+            raw_results[trial_index] = result
+            metric_rows[trial_index] = self.extract_metrics(result)
+            return result
+
+        retaining_collector = _RetainingTrialCollector(collector, errors)
+        records = execute_serial_variation(
+            plan,
+            gateway,
+            run_row,
+            retaining_collector,
+        )
+        complete_indices = tuple(
+            record.trial_index
+            for record in records
+            if record.outcome in {"hit", "no_impact"}
+        )
+        summary = _summarize_metric_rows(
+            engine_name=self.ENGINE_NAME,
+            config=compatibility_config,
+            metric_rows=tuple(metric_rows[index] for index in complete_indices),
+            execution_time_sec=time.monotonic() - t_start,
+            failures=tuple(
+                TrialFailure(
+                    trial_index=record.trial_index,
+                    seed=record.seed,
+                    stage="canonical_execution",
+                    error_type=(
+                        type(errors[record.trial_index]).__name__
+                        if record.trial_index in errors
+                        else record.outcome
+                    ),
+                    message=record.failure_reason or record.outcome,
+                )
+                for record in records
+                if record.outcome not in {"hit", "no_impact"}
+            ),
+        )
+        return CanonicalPerturbationBatch(
+            records=records,
+            engine_results=tuple(raw_results.get(index) for index in range(n_runs)),
+            errors=tuple(errors.get(index) for index in range(n_runs)),
+            legacy_summary=summary,
+        )
+
     def run_batch(self, config: PerturbationConfig) -> PerturbationSummary:
         """Run Monte Carlo perturbation analysis.
 
@@ -337,9 +514,7 @@ class PerturbationAnalyzerBase(ABC):
         t_start = time.monotonic()
         base_seed = config.seed if config.seed is not None else 0
 
-        scalar_metric_names = [m for m in MANDATORY_METRICS if m not in _ARRAY_METRICS]
-        metric_lists: dict[str, list[float]] = {m: [] for m in scalar_metric_names}
-        n_success = 0
+        metric_rows: list[dict[str, float | np.ndarray]] = []
 
         for i in range(config.n_trials):
             perturbed = _perturb_coeffs(
@@ -352,44 +527,15 @@ class PerturbationAnalyzerBase(ABC):
             try:
                 sim = self._simulate(perturbed)
                 metrics = self.extract_metrics(sim)
-                for m in scalar_metric_names:
-                    v = metrics[m]
-                    if isinstance(v, np.ndarray):
-                        v = float(math.hypot(*v.flatten()))
-                    metric_lists[m].append(float(v))
-                n_success += 1
+                metric_rows.append(metrics)
             except (ValueError, RuntimeError):
                 logger.debug("Trial %d failed", i, exc_info=True)
 
-        success_rate = n_success / config.n_trials if config.n_trials > 0 else 0.0
-
-        if n_success == 0:
-            logger.warning("All trials failed — returning zero-robustness summary")
-            return PerturbationSummary(
-                engine_name=self.ENGINE_NAME,
-                config=config,
-                robustness_score=0.0,
-                metrics={},
-                success_rate=0.0,
-                execution_time_sec=time.monotonic() - t_start,
-            )
-
-        metric_stats: dict[str, MetricStatistics] = {}
-        for m, values in metric_lists.items():
-            if values:
-                metric_stats[m] = compute_metric_statistics(np.array(values))
-
-        cv_values = _compute_cv_values(metric_stats)
-        cv_weighted = float(np.mean(cv_values)) if cv_values else 0.0
-        rs = compute_robustness_score(cv_weighted)
-
-        return PerturbationSummary(
+        return _summarize_metric_rows(
             engine_name=self.ENGINE_NAME,
             config=config,
-            robustness_score=rs,
-            metrics=metric_stats,
-            success_rate=success_rate,
             execution_time_sec=time.monotonic() - t_start,
+            metric_rows=tuple(metric_rows),
         )
 
     def compare_profiles(
@@ -437,7 +583,7 @@ class PerturbationAnalyzerBase(ABC):
                         v = float(math.hypot(*v.flatten()))
                     values.append(float(v))
                 except (ValueError, RuntimeError):
-                    pass
+                    continue
             return np.array(values) if values else np.array([0.0])
 
         metric_comparisons: dict[str, Any] = {}
@@ -493,6 +639,65 @@ class PerturbationAnalyzerBase(ABC):
 # ---------------------------------------------------------------------------
 # Private helpers
 # ---------------------------------------------------------------------------
+
+
+def _summarize_metric_rows(
+    *,
+    engine_name: str,
+    config: PerturbationConfig,
+    metric_rows: tuple[dict[str, float | np.ndarray], ...],
+    execution_time_sec: float,
+    failures: tuple[TrialFailure, ...] = (),
+) -> PerturbationSummary:
+    """Project successful raw metrics into the established summary type."""
+    n_success = len(metric_rows)
+    success_rate = n_success / config.n_trials
+    if n_success == 0:
+        logger.warning("All trials failed — returning zero-robustness summary")
+        return PerturbationSummary(
+            engine_name=engine_name,
+            config=config,
+            robustness_score=0.0,
+            metrics={},
+            success_rate=0.0,
+            execution_time_sec=execution_time_sec,
+            failures=list(failures),
+        )
+
+    scalar_metric_names = tuple(
+        metric for metric in MANDATORY_METRICS if metric not in _ARRAY_METRICS
+    )
+    metric_lists: dict[str, list[float]] = {
+        metric: [] for metric in scalar_metric_names
+    }
+    for row in metric_rows:
+        missing = set(MANDATORY_METRICS).difference(row)
+        if missing:
+            raise ValueError(
+                f"metric row is missing mandatory metrics: {sorted(missing)}"
+            )
+        for metric in scalar_metric_names:
+            value = row[metric]
+            if isinstance(value, np.ndarray):
+                value = float(math.hypot(*value.flatten()))
+            metric_lists[metric].append(float(value))
+
+    metric_stats: dict[str, MetricStatistics] = {
+        metric: compute_metric_statistics(np.array(values))
+        for metric, values in metric_lists.items()
+        if values
+    }
+    cv_values = _compute_cv_values(metric_stats)
+    cv_weighted = float(np.mean(cv_values)) if cv_values else 0.0
+    return PerturbationSummary(
+        engine_name=engine_name,
+        config=config,
+        robustness_score=compute_robustness_score(cv_weighted),
+        metrics=metric_stats,
+        success_rate=success_rate,
+        execution_time_sec=execution_time_sec,
+        failures=list(failures),
+    )
 
 
 def _perturb_coeffs(

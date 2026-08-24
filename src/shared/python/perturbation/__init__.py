@@ -34,6 +34,7 @@ from .double_pendulum_trial_adapter import (
     DoublePendulumTrialResult,
 )
 from .noise import generate_noise
+from .perturbation_base import CanonicalPerturbationBatch
 from .robustness_score import compute_robustness_score
 from .statistics import MetricStatistics, compute_metric_statistics
 from .tools_variation_adapter import (
@@ -62,6 +63,7 @@ __all__ = [
     "PerturbationAnalyzer",
     "PerturbationConfig",
     "PerturbationSummary",
+    "CanonicalPerturbationBatch",
     "ArticulatedMujocoTrialAdapter",
     "ArticulatedMujocoTrialConfig",
     "ArticulatedMujocoTrialResult",
