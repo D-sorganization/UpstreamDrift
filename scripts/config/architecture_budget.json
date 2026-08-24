@@ -404,6 +404,15 @@
       "issue": 9000,
       "reason": "Bolt micro-optimization touched file causing pre-existing function-lines budget to trigger. Decomposition needed later.",
       "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/shared/python/launch_monitor/flexible_analysis.py",
+      "symbol": "analyze_variables",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9014,
+      "reason": "Issue #9014: pre-existing function exceeds budget due to logic layout; PR only optimizes array summation via count_nonzero.",
+      "expires_on": "2026-10-31"
     }
   ]
 }
