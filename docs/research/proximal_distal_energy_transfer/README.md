@@ -330,6 +330,8 @@ python3 -m scripts.research.proximal_distal_energy.external_source_review valida
 python3 -m scripts.research.proximal_distal_energy.biomechanics_source_register validate
 python3 -m scripts.research.proximal_distal_energy.biomechanics_evidence_bridge validate
 python3 -m scripts.research.proximal_distal_energy.biomechanics_evidence_surfaces validate
+python3 -m scripts.research.proximal_distal_energy.register_biomechanics_evidence_bridge_claims
+python3 -m scripts.research.proximal_distal_energy.claim_adjudication_summary validate
 python3 -m scripts.research.proximal_distal_energy.momentum_question_readiness validate
 python3 -m scripts.research.proximal_distal_energy.qualify_open_release validate
 # robustness analyses

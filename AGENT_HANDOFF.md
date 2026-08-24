@@ -100,6 +100,10 @@ Last updated: 2026-08-24
 
 ```powershell
 python3 -m pytest -n 0 -q tests/unit/research/test_biomechanics_source_register.py tests/unit/research/test_biomechanics_evidence_bridge.py tests/unit/research/test_biomechanics_evidence_surfaces.py tests/unit/research/test_biomechanics_claim_registration.py
+python3 -m scripts.research.proximal_distal_energy.biomechanics_source_register validate
+python3 -m scripts.research.proximal_distal_energy.biomechanics_evidence_bridge validate
+python3 -m scripts.research.proximal_distal_energy.biomechanics_evidence_surfaces validate
+python3 -m scripts.research.proximal_distal_energy.claim_adjudication_summary validate
 python3 -m scripts.research.proximal_distal_energy.claim_audit validate
 python3 -m scripts.research.proximal_distal_energy.claim_evidence_integrity validate
 python3 -m scripts.research.proximal_distal_energy.external_source_review validate

@@ -29,6 +29,16 @@ def _identifier(value: str) -> str:
     return f"`{_cell(value)}`"
 
 
+def _display_name(value: str) -> str:
+    return (
+        value.replace("_", " ")
+        .title()
+        .replace(" And ", " and ")
+        .replace("Emg", "EMG")
+        .replace("Six Axis", "Six-Axis")
+    )
+
+
 def _table(headers: list[str], rows: list[list[Any]]) -> str:
     normalized_rows = [[_cell(value) for value in row] for row in rows]
     widths = [
@@ -174,6 +184,55 @@ def _coverage_table(register: dict[str, Any]) -> str:
     )
 
 
+def _paper_measurement_records(bridge: dict[str, Any]) -> str:
+    return "\n\n".join(
+        f"#### {_display_name(record['modality_id'])} {{.unnumbered}}\n\n"
+        f"**Registry ID:** {_identifier(record['modality_id'])}. "
+        f"**Source status:** {record['source_status']}. "
+        f"**Directly observed:** {_cell(record['directly_observed'])}. "
+        f"**Not identifiable:** {_cell(record['not_identifiable'])}. "
+        f"**Processing authority:** {_cell(record['processing_method'])} "
+        f"**Data gate:** {_cell(record['data_gate'])}"
+        for record in bridge["modalities"]
+    )
+
+
+def _paper_mechanism_records(bridge: dict[str, Any]) -> str:
+    return "\n\n".join(
+        f"#### {_display_name(record['mechanism_id'])} {{.unnumbered}}\n\n"
+        f"**Registry ID:** {_identifier(record['mechanism_id'])}. "
+        f"**Identifiability:** {record['identifiability']}. "
+        f"**Human evidence:** {record['human_evidence_state']}. "
+        f"**Required measurements:** "
+        f"{_cell(record['measurement_requirements'])}."
+        for record in bridge["mechanisms"]
+    )
+
+
+def _paper_discrimination_records(bridge: dict[str, Any]) -> str:
+    return "\n\n".join(
+        f"#### {_display_name(record['mechanism_id'])} {{.unnumbered}}\n\n"
+        f"**Registry ID:** {_identifier(record['mechanism_id'])}. "
+        f"**Observable discriminator:** "
+        f"{_cell(record['observable_discriminator'])} **Competing explanations:** "
+        f"{_cell(record['competing_explanations'])}. **Falsifier:** "
+        f"{_cell(record['falsifier'])} **Adverse case:** "
+        f"{_cell(record['adverse_case'])}"
+        for record in bridge["mechanisms"]
+    )
+
+
+def _paper_transport_records(bridge: dict[str, Any]) -> str:
+    return "\n\n".join(
+        f"#### {_display_name(record['dimension_id'])} {{.unnumbered}}\n\n"
+        f"**Registry ID:** {_identifier(record['dimension_id'])}. "
+        f"**Current coverage:** {record['current_coverage']}. "
+        f"**Limitation:** {_cell(record['limitation'])} "
+        f"**Data gate:** {_cell(record['data_gate'])}"
+        for record in bridge["transportability"]
+    )
+
+
 def render_reviewer_surface(bridge: dict[str, Any], register: dict[str, Any]) -> str:
     """Render the complete reviewer-facing source and measurement surface."""
     sections = [
@@ -243,19 +302,19 @@ def render_paper_fragment(bridge: dict[str, Any], register: dict[str, Any]) -> s
         "",
         "### Measurement Validity Boundary",
         "",
-        _measurement_table(bridge),
+        _paper_measurement_records(bridge),
         "",
         "### Falsifiable Mechanism Map",
         "",
-        _mechanism_table(bridge),
+        _paper_mechanism_records(bridge),
         "",
         "### Observable Discriminators and Countermodels",
         "",
-        _mechanism_discrimination_table(bridge),
+        _paper_discrimination_records(bridge),
         "",
         "### Population, Equipment, and Task Transport",
         "",
-        _transport_table(bridge),
+        _paper_transport_records(bridge),
         "",
         "The source register contains "
         f"{register['summary']['source_count']} independently authored works across "

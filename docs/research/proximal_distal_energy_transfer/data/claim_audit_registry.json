@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-audit-v2",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "7407e8f00842ecdf95769d65ac7d2fe3f8d495cb0d11d405640e7582e6b8560a",
+    "source_digest": "2efd609eb60e7a9d70e347f9e25aec80770b4190efa1acc58fe0a4954756c6e8",
     "baseline_commit": "a4b53e39b"
   },
   "audit_scope": {
@@ -11299,6 +11299,374 @@
       "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-efea83c374c87d58",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-f851d68f11ebd6a0",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-c9e54ffa1da38588",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-23c37c533de3c7a1",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-e47226c7077fad50",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-211204ea119fefdd",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-40368aa3f36cb9b8",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-2c20e464e4e0844e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-b70f621af1422843",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-a14fdc39a16afa85",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-bb0485d29eb101c5",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-98d409aefb816f24",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-9ee8749ad99b15d0",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-9e824c828815b9a1",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-faf42fe238f63e0e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-8861ee08da1fbd36",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-1ffc2dc042eba886",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-65764d3c4db49459",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-6beeb236b15bca6c",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-5a0436885fb4801a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-862ff8fa4019cf92",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-66da9af3e10fcd4c",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-dccc09b18f3a77d4",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-ea115e14ec1719e4",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-d7f89cca30b0a65d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-e08b27cd48bc283a",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-ed5005d923712ea9",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-b66056a89f56b3b4",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-1307bbb4a7a0d104",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-cf6c24a076addb76",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-1e979ac34abefcea",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-eac6ce7890c4904c",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-25b18a67cd814a25",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-caa6481b348302ff",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-0680cf82d3286d68",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-838348ace582f69c",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-305"
+      ],
+      "rationale": "Generated measurement, identifiability, falsification, or transport record mapped to the bounded evidence-bridge authority.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
+    },
+    {
+      "candidate_id": "PD-CAND-fd5af7be4d109005",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Links readers to generated authorities without a scientific proposition.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
     }
   ],
   "claims": [
@@ -25668,6 +26036,137 @@
       "model_domain": "Provider-pinned PyQt/React exploration and hash-pinned static evidence bundle.",
       "uncertainty_boundary": "Interface availability and checksums do not validate physical claims or substitute for governed human data.",
       "falsifier": "Interactive output is promoted as publication authority, provider identity drifts, or bundle validation permits artifact drift."
+    },
+    {
+      "claim_id": "PD-CLAIM-305",
+      "candidate_ids": [
+        "PD-CAND-efea83c374c87d58",
+        "PD-CAND-f851d68f11ebd6a0",
+        "PD-CAND-c9e54ffa1da38588",
+        "PD-CAND-23c37c533de3c7a1",
+        "PD-CAND-e47226c7077fad50",
+        "PD-CAND-211204ea119fefdd",
+        "PD-CAND-40368aa3f36cb9b8",
+        "PD-CAND-2c20e464e4e0844e",
+        "PD-CAND-b70f621af1422843",
+        "PD-CAND-a14fdc39a16afa85",
+        "PD-CAND-bb0485d29eb101c5",
+        "PD-CAND-98d409aefb816f24",
+        "PD-CAND-9ee8749ad99b15d0",
+        "PD-CAND-9e824c828815b9a1",
+        "PD-CAND-faf42fe238f63e0e",
+        "PD-CAND-8861ee08da1fbd36",
+        "PD-CAND-1ffc2dc042eba886",
+        "PD-CAND-65764d3c4db49459",
+        "PD-CAND-6beeb236b15bca6c",
+        "PD-CAND-5a0436885fb4801a",
+        "PD-CAND-862ff8fa4019cf92",
+        "PD-CAND-66da9af3e10fcd4c",
+        "PD-CAND-dccc09b18f3a77d4",
+        "PD-CAND-ea115e14ec1719e4",
+        "PD-CAND-d7f89cca30b0a65d",
+        "PD-CAND-e08b27cd48bc283a",
+        "PD-CAND-ed5005d923712ea9",
+        "PD-CAND-b66056a89f56b3b4",
+        "PD-CAND-1307bbb4a7a0d104",
+        "PD-CAND-cf6c24a076addb76",
+        "PD-CAND-1e979ac34abefcea",
+        "PD-CAND-eac6ce7890c4904c",
+        "PD-CAND-25b18a67cd814a25",
+        "PD-CAND-caa6481b348302ff",
+        "PD-CAND-0680cf82d3286d68",
+        "PD-CAND-838348ace582f69c"
+      ],
+      "statement": "The versioned biomechanics evidence bridge records sixteen independently authored works across sixteen domains and maps seven measurement modalities to nine mechanisms, nine transportability dimensions, observable discriminators, countermodels, and fail-closed data gates; it retains human validation as externally blocked and bilateral hand-wrench allocation as structurally unidentified without independent bilateral measurements.",
+      "classification": "governed_source_and_measurement_authority",
+      "published_status": "supported_as_audit_and_protocol_contract",
+      "audit_status": "sources_claims_digests_and_generated_surfaces_checked",
+      "adjudication_outcome": "supported",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:3",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:11",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:15",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:19",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:23",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:27",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:31",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:35",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:41",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:45",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:49",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:53",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:57",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:61",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:65",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:69",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:73",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:79",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:83",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:87",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:91",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:95",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:99",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:103",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:107",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:111",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:117",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:121",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:125",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:129",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:133",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:137",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:141",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:145",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:149",
+        "docs/research/proximal_distal_energy_transfer/chapters/_biomechanics_evidence_bridge.qmd:151"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/biomechanics_source_register.json",
+        "docs/research/proximal_distal_energy_transfer/data/biomechanics_evidence_bridge.json",
+        "docs/research/proximal_distal_energy_transfer/BIOMECHANICS_EVIDENCE_BRIDGE.md",
+        "scripts/research/proximal_distal_energy/biomechanics_source_register.py",
+        "scripts/research/proximal_distal_energy/biomechanics_evidence_bridge.py",
+        "scripts/research/proximal_distal_energy/biomechanics_evidence_surfaces.py",
+        "tests/unit/research/test_biomechanics_source_register.py",
+        "tests/unit/research/test_biomechanics_evidence_bridge.py",
+        "tests/unit/research/test_biomechanics_evidence_surfaces.py",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7374515/",
+        "https://pubmed.ncbi.nlm.nih.gov/7726345/",
+        "https://pubmed.ncbi.nlm.nih.gov/37983261/",
+        "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0141028",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC5436583/",
+        "https://pubmed.ncbi.nlm.nih.gov/7810601/",
+        "https://pubmed.ncbi.nlm.nih.gov/27510960/",
+        "https://pubmed.ncbi.nlm.nih.gov/38015732/",
+        "https://pubmed.ncbi.nlm.nih.gov/31042142/",
+        "https://pubmed.ncbi.nlm.nih.gov/24627665/",
+        "https://pubmed.ncbi.nlm.nih.gov/15712503/",
+        "https://pubmed.ncbi.nlm.nih.gov/22900407/",
+        "https://doi.org/10.1007/s40279-015-0429-1",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC9227529/",
+        "https://pubmed.ncbi.nlm.nih.gov/22900400/",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC6195298/"
+      ],
+      "model_domain": "Source qualification, model-to-measurement mapping, prospective falsification, identifiability, and transportability governance.",
+      "uncertainty_boundary": "The register is not a systematic review, population estimate, calibrated apparatus result, participant outcome, or evidence that every qualifying dataset has been located.",
+      "competing_explanations": [
+        "unlocated or inaccessible participant datasets",
+        "apparatus-specific measurement validity",
+        "alternative inverse problems and constitutive assumptions",
+        "population, equipment, and task transport failure"
+      ],
+      "negative_controls": [
+        "unknown-field rejection",
+        "stale-digest rejection",
+        "project-authored source exclusion",
+        "missing-modality rejection",
+        "source-to-claim reciprocity rejection",
+        "bilateral-allocation identifiability killswitch"
+      ],
+      "falsifier": "Any registered source, digest, modality, claim link, generated surface, or identifiability rule fails validation, or governed participant evidence contradicts the declared measurement and transport boundaries.",
+      "adjudication": "The paper presents the generated records as an inspectable measurement and falsification contract, not as new human data or proof of a preferred technique.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-24"
     }
   ]
 }
