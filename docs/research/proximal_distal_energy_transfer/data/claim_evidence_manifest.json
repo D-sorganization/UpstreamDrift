@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-evidence-integrity-v2",
   "registry": {
     "path": "docs/research/proximal_distal_energy_transfer/data/claim_audit_registry.json",
-    "sha256": "b5ede10674856b47964ca2f50eed132f9bbb3edaf02f5ef1df52c67a586cb1e6"
+    "sha256": "c6a43ccd289acdfe3677105a06d2414add918244cf8153aa39ae8f136990d54f"
   },
   "scope": {
     "local_artifact_semantics": "content_integrity_not_independent_validation",
@@ -12,9 +12,9 @@
   },
   "summary": {
     "claim_count": 304,
-    "evidence_reference_count": 2155,
+    "evidence_reference_count": 2139,
     "local_artifact_count": 328,
-    "external_url_count": 92
+    "external_url_count": 78
   },
   "claims": {
     "PD-CLAIM-002": {
@@ -3684,24 +3684,7 @@
         "tests/unit/research/test_biomechanics_evidence_bridge.py",
         "tests/unit/research/test_biomechanics_evidence_surfaces.py"
       ],
-      "external_references": [
-        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7374515/",
-        "https://pubmed.ncbi.nlm.nih.gov/7726345/",
-        "https://pubmed.ncbi.nlm.nih.gov/37983261/",
-        "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0141028",
-        "https://pmc.ncbi.nlm.nih.gov/articles/PMC5436583/",
-        "https://pubmed.ncbi.nlm.nih.gov/7810601/",
-        "https://pubmed.ncbi.nlm.nih.gov/27510960/",
-        "https://pubmed.ncbi.nlm.nih.gov/38015732/",
-        "https://pubmed.ncbi.nlm.nih.gov/31042142/",
-        "https://pubmed.ncbi.nlm.nih.gov/24627665/",
-        "https://pubmed.ncbi.nlm.nih.gov/15712503/",
-        "https://pubmed.ncbi.nlm.nih.gov/22900407/",
-        "https://doi.org/10.1007/s40279-015-0429-1",
-        "https://pmc.ncbi.nlm.nih.gov/articles/PMC9227529/",
-        "https://pubmed.ncbi.nlm.nih.gov/22900400/",
-        "https://pmc.ncbi.nlm.nih.gov/articles/PMC6195298/"
-      ]
+      "external_references": []
     }
   },
   "local_artifacts": {
@@ -4078,14 +4061,14 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/biomechanics_evidence_bridge.json": {
-      "sha256": "8546a4a9a8cd34a98a1d9266428091f7a7b49c0eee5af8b18bac7037960dae6d",
+      "sha256": "5eba08d1e2ccfb445256eac4dac6aa05ddc0cfea0218f87e8e513594af66615e",
       "bytes": 40110,
       "referenced_by": [
         "PD-CLAIM-305"
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/biomechanics_source_register.json": {
-      "sha256": "68846040d86b96bea96870ddadef12174e26c920ac6954881fc3e83d143b1a50",
+      "sha256": "21e79c80430fb98194cbc5206a74719302825cd75ac5faaab4e593f941c6ec52",
       "bytes": 42642,
       "referenced_by": [
         "PD-CLAIM-305"
@@ -5406,8 +5389,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "620b59f0267e25724680cf2ac2d521ddb0d7af874761b4dc4d1555a3b5db63ef",
-      "bytes": 133593,
+      "sha256": "3b440734f1b3ded96fed98bd1f304a5aaa3bec4411bfa8e04440f0a6deec452a",
+      "bytes": 135424,
       "referenced_by": [
         "PD-CLAIM-241"
       ]
@@ -5695,8 +5678,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/biomechanics_evidence_surfaces.py": {
-      "sha256": "47254a608782353daf94f759321c04304287e348324d1d4e25bd905cec4c6f11",
-      "bytes": 12834,
+      "sha256": "5282b94f6aee24b93f1d5e564972cd51de288b1f106f9be69febf5ac3a59fd21",
+      "bytes": 12869,
       "referenced_by": [
         "PD-CLAIM-305"
       ]
@@ -7745,13 +7728,6 @@
         "PD-CLAIM-034"
       ]
     },
-    "https://doi.org/10.1007/s40279-015-0429-1": {
-      "scheme": "https",
-      "host": "doi.org",
-      "referenced_by": [
-        "PD-CLAIM-305"
-      ]
-    },
     "https://doi.org/10.1016/0021-9290(80)90172-4": {
       "scheme": "https",
       "host": "doi.org",
@@ -8039,13 +8015,6 @@
         "PD-CLAIM-023"
       ]
     },
-    "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0141028": {
-      "scheme": "https",
-      "host": "journals.plos.org",
-      "referenced_by": [
-        "PD-CLAIM-305"
-      ]
-    },
     "https://journals.sagepub.com/doi/10.1260/174795407789705497": {
       "scheme": "https",
       "host": "journals.sagepub.com",
@@ -8102,34 +8071,6 @@
         "PD-CLAIM-009"
       ]
     },
-    "https://pmc.ncbi.nlm.nih.gov/articles/PMC5436583/": {
-      "scheme": "https",
-      "host": "pmc.ncbi.nlm.nih.gov",
-      "referenced_by": [
-        "PD-CLAIM-305"
-      ]
-    },
-    "https://pmc.ncbi.nlm.nih.gov/articles/PMC6195298/": {
-      "scheme": "https",
-      "host": "pmc.ncbi.nlm.nih.gov",
-      "referenced_by": [
-        "PD-CLAIM-305"
-      ]
-    },
-    "https://pmc.ncbi.nlm.nih.gov/articles/PMC7374515/": {
-      "scheme": "https",
-      "host": "pmc.ncbi.nlm.nih.gov",
-      "referenced_by": [
-        "PD-CLAIM-305"
-      ]
-    },
-    "https://pmc.ncbi.nlm.nih.gov/articles/PMC9227529/": {
-      "scheme": "https",
-      "host": "pmc.ncbi.nlm.nih.gov",
-      "referenced_by": [
-        "PD-CLAIM-305"
-      ]
-    },
     "https://pubmed.ncbi.nlm.nih.gov/10824641/": {
       "scheme": "https",
       "host": "pubmed.ncbi.nlm.nih.gov",
@@ -8149,8 +8090,7 @@
       "scheme": "https",
       "host": "pubmed.ncbi.nlm.nih.gov",
       "referenced_by": [
-        "PD-CLAIM-006",
-        "PD-CLAIM-305"
+        "PD-CLAIM-006"
       ]
     },
     "https://pubmed.ncbi.nlm.nih.gov/17454544/": {
@@ -8176,32 +8116,11 @@
         "PD-CLAIM-043"
       ]
     },
-    "https://pubmed.ncbi.nlm.nih.gov/22900400/": {
-      "scheme": "https",
-      "host": "pubmed.ncbi.nlm.nih.gov",
-      "referenced_by": [
-        "PD-CLAIM-305"
-      ]
-    },
-    "https://pubmed.ncbi.nlm.nih.gov/22900407/": {
-      "scheme": "https",
-      "host": "pubmed.ncbi.nlm.nih.gov",
-      "referenced_by": [
-        "PD-CLAIM-305"
-      ]
-    },
     "https://pubmed.ncbi.nlm.nih.gov/24149910/": {
       "scheme": "https",
       "host": "pubmed.ncbi.nlm.nih.gov",
       "referenced_by": [
         "PD-CLAIM-074"
-      ]
-    },
-    "https://pubmed.ncbi.nlm.nih.gov/24627665/": {
-      "scheme": "https",
-      "host": "pubmed.ncbi.nlm.nih.gov",
-      "referenced_by": [
-        "PD-CLAIM-305"
       ]
     },
     "https://pubmed.ncbi.nlm.nih.gov/25435779/": {
@@ -8218,13 +8137,6 @@
         "PD-CLAIM-047"
       ]
     },
-    "https://pubmed.ncbi.nlm.nih.gov/27510960/": {
-      "scheme": "https",
-      "host": "pubmed.ncbi.nlm.nih.gov",
-      "referenced_by": [
-        "PD-CLAIM-305"
-      ]
-    },
     "https://pubmed.ncbi.nlm.nih.gov/27515436/": {
       "scheme": "https",
       "host": "pubmed.ncbi.nlm.nih.gov",
@@ -8237,8 +8149,7 @@
       "host": "pubmed.ncbi.nlm.nih.gov",
       "referenced_by": [
         "PD-CLAIM-011",
-        "PD-CLAIM-074",
-        "PD-CLAIM-305"
+        "PD-CLAIM-074"
       ]
     },
     "https://pubmed.ncbi.nlm.nih.gov/31741482/": {
@@ -8251,40 +8162,12 @@
         "PD-CLAIM-050"
       ]
     },
-    "https://pubmed.ncbi.nlm.nih.gov/37983261/": {
-      "scheme": "https",
-      "host": "pubmed.ncbi.nlm.nih.gov",
-      "referenced_by": [
-        "PD-CLAIM-305"
-      ]
-    },
-    "https://pubmed.ncbi.nlm.nih.gov/38015732/": {
-      "scheme": "https",
-      "host": "pubmed.ncbi.nlm.nih.gov",
-      "referenced_by": [
-        "PD-CLAIM-305"
-      ]
-    },
     "https://pubmed.ncbi.nlm.nih.gov/41653371/": {
       "scheme": "https",
       "host": "pubmed.ncbi.nlm.nih.gov",
       "referenced_by": [
         "PD-CLAIM-074",
         "PD-CLAIM-079"
-      ]
-    },
-    "https://pubmed.ncbi.nlm.nih.gov/7726345/": {
-      "scheme": "https",
-      "host": "pubmed.ncbi.nlm.nih.gov",
-      "referenced_by": [
-        "PD-CLAIM-305"
-      ]
-    },
-    "https://pubmed.ncbi.nlm.nih.gov/7810601/": {
-      "scheme": "https",
-      "host": "pubmed.ncbi.nlm.nih.gov",
-      "referenced_by": [
-        "PD-CLAIM-305"
       ]
     },
     "https://pubmed.ncbi.nlm.nih.gov/8505347/": {

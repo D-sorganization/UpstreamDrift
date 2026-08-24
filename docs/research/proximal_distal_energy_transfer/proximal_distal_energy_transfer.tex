@@ -498,7 +498,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, breakable, rightrule=.15mm, bottomrule=.15mm, colback=white, leftrule=.75mm, opacityback=0, arc=.35mm, opacitybacktitle=0.6, coltitle=black, toptitle=1mm, titlerule=0mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, left=2mm, toprule=.15mm, bottomtitle=1mm]
+\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, toptitle=1mm, opacityback=0, breakable, arc=.35mm, coltitle=black, colbacktitle=quarto-callout-note-color!10!white, colback=white, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, titlerule=0mm, rightrule=.15mm, bottomrule=.15mm, toprule=.15mm, left=2mm, opacitybacktitle=0.6]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -9285,6 +9285,502 @@ records, frozen participant split, and analysis-release authorization
 pass the same validator. The protocol removes analytical discretion; it
 does not remove the need for measurements.
 
+\section{Biomechanics Evidence and Measurement
+Bridge}\label{sec-biomechanics-evidence-bridge}
+
+A model quantity is not promoted to a biological observation merely
+because a sensor or inverse problem could be associated with it. The
+registered bridge separates calibrated primary observables, derived
+model-dependent quantities, structural non-identifiability, practical
+qualification gaps, and unavailable measurements. The current human
+validation state is \textbf{externally blocked}.
+
+The complete generated reviewer surface is
+\href{../BIOMECHANICS_EVIDENCE_BRIDGE.md}{\texttt{BIOMECHANICS\_EVIDENCE\_BRIDGE.md}};
+the underlying authorities are
+\href{../data/biomechanics_evidence_bridge.json}{\texttt{biomechanics\_evidence\_bridge.json}}
+and
+\href{../data/biomechanics_source_register.json}{\texttt{biomechanics\_source\_register.json}}.
+
+\subsection{Measurement Validity
+Boundary}\label{measurement-validity-boundary}
+
+\subsubsection*{Optical Motion Capture}\label{optical-motion-capture}
+\addcontentsline{toc}{subsubsection}{Optical Motion Capture}
+
+\textbf{Registry ID:} \texttt{optical\_motion\_capture}. \textbf{Source
+status:} registered. \textbf{Directly observed:} calibrated marker
+image-derived positions; rigid-cluster pose estimates under the declared
+reconstruction. \textbf{Not identifiable:} individual hand forces or
+moments; muscle force or activation; causal energy-transfer strategy.
+\textbf{Processing authority:} Retain raw trajectories; preregister gap
+filling, rigid-body reconstruction, coordinate construction, filtering,
+differentiation, event detection, and all sensitivity variants.
+\textbf{Data gate:} A governed participant-separated motion dataset must
+retain raw trajectories, calibration, event definitions, missing-data
+flags, and synchronized sensor timestamps.
+
+\subsubsection*{Force Plates}\label{force-plates}
+\addcontentsline{toc}{subsubsection}{Force Plates}
+
+\textbf{Registry ID:} \texttt{force\_plates}. \textbf{Source status:}
+registered. \textbf{Directly observed:} calibrated plate reaction
+wrench; plate-level impulse under the declared integration window.
+\textbf{Not identifiable:} individual hand wrench allocation; muscle
+coordination; club energy transfer from force magnitude alone.
+\textbf{Processing authority:} Retain raw channels; preregister zero
+correction, calibration matrix, filtering, wrench transport,
+center-of-pressure calculation, impulse integration, and whole-system
+closure. \textbf{Data gate:} A governed participant-held-out dataset
+must provide synchronized raw plate channels, plate geometry,
+transforms, calibration records, and whole-system Newton-Euler closure
+variables.
+
+\subsubsection*{Bilateral Six-Axis Grip
+Wrenches}\label{bilateral-six-axis-grip-wrenches}
+\addcontentsline{toc}{subsubsection}{Bilateral Six-Axis Grip Wrenches}
+
+\textbf{Registry ID:} \texttt{bilateral\_six\_axis\_grip\_wrenches}.
+\textbf{Source status:} gap. \textbf{Directly observed:} calibrated
+sensor-frame wrench channels; measured bilateral common and differential
+modes after declared transforms. \textbf{Not identifiable:} muscle or
+scapular source of a measured wrench; distributed pressure from a lumped
+wrench; intended control strategy. \textbf{Processing authority:} Retain
+raw bridges and calibration matrices; preregister zero correction,
+cross-talk correction, frame transport, contact-center model,
+common/differential decomposition, power, impulse, and work.
+\textbf{Data gate:} No qualifying governed golf dataset with
+synchronized participant-level bilateral six-axis grip wrenches has been
+located. Acquisition, calibration, governance, and participant-held-out
+qualification are required before human allocation claims.
+
+\subsubsection*{Surface EMG}\label{surface-emg}
+\addcontentsline{toc}{subsubsection}{Surface EMG}
+
+\textbf{Registry ID:} \texttt{surface\_emg}. \textbf{Source status:}
+gap. \textbf{Directly observed:} electrode voltage history; declared
+processed activation proxy. \textbf{Not identifiable:} individual muscle
+force; joint or hand torque allocation; passive tissue force.
+\textbf{Processing authority:} Retain raw voltage; preregister artifact
+rejection, band-pass and notch filtering, rectification, envelope
+construction, normalization, onset detection, and
+electromechanical-delay sensitivity. \textbf{Data gate:} A
+source-qualified, governed golf dataset with synchronized raw EMG,
+placement records, normalization trials, bilateral mechanics, and
+participant holdout is required.
+
+\subsubsection*{Ultrasound}\label{ultrasound}
+\addcontentsline{toc}{subsubsection}{Ultrasound}
+
+\textbf{Registry ID:} \texttt{ultrasound}. \textbf{Source status:} gap.
+\textbf{Directly observed:} registered image intensity; declared
+image-derived tissue landmarks. \textbf{Not identifiable:} muscle force
+without constitutive assumptions; whole-muscle stiffness from one
+imaging plane; neural control strategy. \textbf{Processing authority:}
+Retain source images and probe poses; preregister segmentation, fascicle
+or junction tracking, anatomical registration, smoothing, and any
+constitutive conversion. \textbf{Data gate:} A source-qualified dynamic
+golf acquisition must demonstrate tracked probe registration, sufficient
+sampling, synchronized mechanics, repeatability, and
+participant-held-out processing.
+
+\subsubsection*{Shaft Strain Inertial
+Sensing}\label{shaft-strain-inertial-sensing}
+\addcontentsline{toc}{subsubsection}{Shaft Strain Inertial Sensing}
+
+\textbf{Registry ID:} \texttt{shaft\_strain\_inertial\_sensing}.
+\textbf{Source status:} gap. \textbf{Directly observed:} calibrated
+strain-channel voltage; calibrated inertial sensor channels. \textbf{Not
+identifiable:} distributed shaft state beyond the qualified sensor
+model; hand allocation from net shaft load; unmeasured damping and
+boundary conditions. \textbf{Processing authority:} Retain raw strain
+and inertial channels; preregister temperature and zero correction,
+calibration transform, rigid-motion subtraction, modal or load
+inversion, filtering, and work-energy reconstruction. \textbf{Data
+gate:} A source-qualified instrumented-club dataset and calibration
+artifact must establish bandwidth, load reconstruction, structural-model
+validity, synchronization, and participant holdout.
+
+\subsubsection*{Launch Monitor}\label{launch-monitor}
+\addcontentsline{toc}{subsubsection}{Launch Monitor}
+
+\textbf{Registry ID:} \texttt{launch\_monitor}. \textbf{Source status:}
+gap. \textbf{Directly observed:} device-reported qualified primary
+metrics; shot-level measurement availability and quality flags.
+\textbf{Not identifiable:} mechanism producing a delivery outcome; human
+control allocation; unreported proprietary derivations.
+\textbf{Processing authority:} Retain primary device outputs and flags;
+preregister unit conversion, coordinate alignment, environmental
+correction, shot matching, outlier rules, and exclusion of unverifiable
+proprietary composites. \textbf{Data gate:} A source-qualified
+validation and governed shot-level dataset must retain device, firmware,
+setup, raw qualified metrics, uncertainty, synchronization, and
+participant holdout.
+
+\subsection{Falsifiable Mechanism Map}\label{falsifiable-mechanism-map}
+
+\subsubsection*{Segment Kinematic
+Sequence}\label{segment-kinematic-sequence}
+\addcontentsline{toc}{subsubsection}{Segment Kinematic Sequence}
+
+\textbf{Registry ID:} \texttt{segment\_kinematic\_sequence}.
+\textbf{Identifiability:} derived\_model\_dependent. \textbf{Human
+evidence:} empirical\_context\_only. \textbf{Required measurements:}
+optical\_motion\_capture.
+
+\subsubsection*{Ground Wrench Pathway}\label{ground-wrench-pathway}
+\addcontentsline{toc}{subsubsection}{Ground Wrench Pathway}
+
+\textbf{Registry ID:} \texttt{ground\_wrench\_pathway}.
+\textbf{Identifiability:} directly\_observed. \textbf{Human evidence:}
+empirical\_context\_only. \textbf{Required measurements:} force\_plates;
+optical\_motion\_capture.
+
+\subsubsection*{Bilateral Hand Wrench
+Allocation}\label{bilateral-hand-wrench-allocation}
+\addcontentsline{toc}{subsubsection}{Bilateral Hand Wrench Allocation}
+
+\textbf{Registry ID:} \texttt{bilateral\_hand\_wrench\_allocation}.
+\textbf{Identifiability:} structurally\_unidentifiable. \textbf{Human
+evidence:} externally\_blocked. \textbf{Required measurements:}
+bilateral\_six\_axis\_grip\_wrenches; optical\_motion\_capture.
+
+\subsubsection*{Muscle Activation
+Timing}\label{muscle-activation-timing}
+\addcontentsline{toc}{subsubsection}{Muscle Activation Timing}
+
+\textbf{Registry ID:} \texttt{muscle\_activation\_timing}.
+\textbf{Identifiability:} practically\_unqualified. \textbf{Human
+evidence:} externally\_blocked. \textbf{Required measurements:}
+surface\_emg; optical\_motion\_capture;
+bilateral\_six\_axis\_grip\_wrenches.
+
+\subsubsection*{Muscle Tendon Force and
+Stiffness}\label{muscle-tendon-force-and-stiffness}
+\addcontentsline{toc}{subsubsection}{Muscle Tendon Force and Stiffness}
+
+\textbf{Registry ID:} \texttt{muscle\_tendon\_force\_and\_stiffness}.
+\textbf{Identifiability:} structurally\_unidentifiable. \textbf{Human
+evidence:} externally\_blocked. \textbf{Required measurements:}
+ultrasound; surface\_emg; optical\_motion\_capture;
+bilateral\_six\_axis\_grip\_wrenches.
+
+\subsubsection*{Shaft Load Storage
+Recoil}\label{shaft-load-storage-recoil}
+\addcontentsline{toc}{subsubsection}{Shaft Load Storage Recoil}
+
+\textbf{Registry ID:} \texttt{shaft\_load\_storage\_recoil}.
+\textbf{Identifiability:} practically\_unqualified. \textbf{Human
+evidence:} model\_only. \textbf{Required measurements:}
+shaft\_strain\_inertial\_sensing; optical\_motion\_capture;
+bilateral\_six\_axis\_grip\_wrenches.
+
+\subsubsection*{Launch Outcome}\label{launch-outcome}
+\addcontentsline{toc}{subsubsection}{Launch Outcome}
+
+\textbf{Registry ID:} \texttt{launch\_outcome}.
+\textbf{Identifiability:} unavailable. \textbf{Human evidence:}
+externally\_blocked. \textbf{Required measurements:} launch\_monitor;
+optical\_motion\_capture.
+
+\subsubsection*{Passive Late Negative Torque
+Origin}\label{passive-late-negative-torque-origin}
+\addcontentsline{toc}{subsubsection}{Passive Late Negative Torque
+Origin}
+
+\textbf{Registry ID:} \texttt{passive\_late\_negative\_torque\_origin}.
+\textbf{Identifiability:} structurally\_unidentifiable. \textbf{Human
+evidence:} externally\_blocked. \textbf{Required measurements:}
+bilateral\_six\_axis\_grip\_wrenches; optical\_motion\_capture;
+surface\_emg; shaft\_strain\_inertial\_sensing.
+
+\subsubsection*{Slack Preload State}\label{slack-preload-state}
+\addcontentsline{toc}{subsubsection}{Slack Preload State}
+
+\textbf{Registry ID:} \texttt{slack\_preload\_state}.
+\textbf{Identifiability:} practically\_unqualified. \textbf{Human
+evidence:} model\_only. \textbf{Required measurements:}
+bilateral\_six\_axis\_grip\_wrenches; surface\_emg;
+shaft\_strain\_inertial\_sensing; optical\_motion\_capture.
+
+\subsection{Observable Discriminators and
+Countermodels}\label{observable-discriminators-and-countermodels}
+
+\subsubsection*{Segment Kinematic
+Sequence}\label{segment-kinematic-sequence-1}
+\addcontentsline{toc}{subsubsection}{Segment Kinematic Sequence}
+
+\textbf{Registry ID:} \texttt{segment\_kinematic\_sequence}.
+\textbf{Observable discriminator:} A preregistered participant-held-out
+comparison must show whether peak-order predictions remain stable across
+coordinate and filtering variants while same-frame joint power,
+interface power, and segment-energy histories distinguish transfer from
+coincident sequencing. \textbf{Competing explanations:} coordinate and
+angular-velocity decomposition choice; filtering and event
+normalization; different task objectives producing similar peak order.
+\textbf{Falsifier:} The proposed ordering or its claimed association
+fails under preregistered coordinate methods, participant holdout, or
+compatible energy and power accounting. \textbf{Adverse case:} A swing
+exhibits the same peak order with opposite interface-power direction or
+a different order with equal or better delivery outcome.
+
+\subsubsection*{Ground Wrench Pathway}\label{ground-wrench-pathway-1}
+\addcontentsline{toc}{subsubsection}{Ground Wrench Pathway}
+
+\textbf{Registry ID:} \texttt{ground\_wrench\_pathway}.
+\textbf{Observable discriminator:} Synchronized force plates and
+whole-body kinematics must distinguish a ground-wrench change that
+precedes and closes a predicted momentum change from one that merely
+covaries with size, speed, or a later motion response. \textbf{Competing
+explanations:} ground wrench as a response to rather than cause of
+motion; common dependence on golfer size and speed; zero-work
+redirection at stationary ideal contact. \textbf{Falsifier:} Transported
+wrenches fail calibration or Newton-Euler closure, or preregistered
+held-out associations do not exceed the stated null and uncertainty
+bounds. \textbf{Adverse case:} Higher club delivery occurs with lower
+impulse or with a different wrench timing after participant and
+equipment effects are controlled.
+
+\subsubsection*{Bilateral Hand Wrench
+Allocation}\label{bilateral-hand-wrench-allocation-1}
+\addcontentsline{toc}{subsubsection}{Bilateral Hand Wrench Allocation}
+
+\textbf{Registry ID:} \texttt{bilateral\_hand\_wrench\_allocation}.
+\textbf{Observable discriminator:} Independently calibrated bilateral
+six-axis wrenches must resolve common and differential modes that
+produce the same net club wrench and test whether the registered
+null-space and contact-center predictions survive calibration
+uncertainty. \textbf{Competing explanations:} different common and
+differential hand modes producing the same net wrench; distributed grip
+contact represented by lumped sensors; wrist, arm, and scapular actions
+sharing a task-equivalent wrench. \textbf{Falsifier:} An independently
+calibrated bilateral dataset contradicts the predicted wrench-map rank,
+null mode, or registered allocation uncertainty. \textbf{Adverse case:}
+Task-equivalent measured allocations reverse the modeled load or
+robustness ranking without changing net club delivery.
+
+\subsubsection*{Muscle Activation
+Timing}\label{muscle-activation-timing-1}
+\addcontentsline{toc}{subsubsection}{Muscle Activation Timing}
+
+\textbf{Registry ID:} \texttt{muscle\_activation\_timing}.
+\textbf{Observable discriminator:} Raw synchronized EMG must improve
+held-out prediction of measured bilateral wrench or impedance-related
+response beyond kinematics and timing alone, across electrode,
+normalization, detector, and electromechanical-delay sensitivities.
+\textbf{Competing explanations:} cross-talk or normalization artifacts;
+activation producing stiffness rather than net task torque; unmeasured
+deep-muscle and passive-tissue contributions. \textbf{Falsifier:} The
+claimed activation sequence is not repeatable across placements and
+detectors or does not predict held-out mechanical observables beyond
+uncertainty. \textbf{Adverse case:} Similar bilateral wrenches arise
+from materially different EMG patterns, or the same EMG pattern
+accompanies opposite wrench allocation.
+
+\subsubsection*{Muscle Tendon Force and
+Stiffness}\label{muscle-tendon-force-and-stiffness-1}
+\addcontentsline{toc}{subsubsection}{Muscle Tendon Force and Stiffness}
+
+\textbf{Registry ID:} \texttt{muscle\_tendon\_force\_and\_stiffness}.
+\textbf{Observable discriminator:} Synchronized tissue imaging, EMG,
+motion, and external wrenches must rule out admissible activation and
+passive-tissue countermodels by closing held-out joint moments and
+measured fascicle or tendon trajectories within registered uncertainty.
+\textbf{Competing explanations:} muscle redundancy; passive tissue and
+co-contraction; subject-specific moment arms and tendon compliance.
+\textbf{Falsifier:} No admissible calibrated parameter set closes
+measured motion and external wrenches, or the claimed force pattern is
+not robust across feasible activation solutions. \textbf{Adverse case:}
+Different feasible muscle-force solutions reproduce the same joint and
+hand mechanics while reversing the proposed energetic attribution.
+
+\subsubsection*{Shaft Load Storage
+Recoil}\label{shaft-load-storage-recoil-1}
+\addcontentsline{toc}{subsubsection}{Shaft Load Storage Recoil}
+
+\textbf{Registry ID:} \texttt{shaft\_load\_storage\_recoil}.
+\textbf{Observable discriminator:} Calibrated strain and inertial
+histories must be predicted better by the flexible model than by a
+rigid-shaft countermodel and must show phase-consistent stored and
+returned energy without violating measured grip, head, or damping power
+closure. \textbf{Competing explanations:} rigid-body motion leaking into
+inferred deformation; unmodeled grip and head compliance;
+phase-dependent load redistribution without net delivery gain.
+\textbf{Falsifier:} A calibrated flexible model fails held-out strain
+and inertial traces or does not outperform a rigid countermodel under
+preregistered uncertainty and refinement gates. \textbf{Adverse case:}
+Matched-load flexible and rigid cases show opposite speed effects across
+plausible stiffness, damping, or timing conditions.
+
+\subsubsection*{Launch Outcome}\label{launch-outcome-1}
+\addcontentsline{toc}{subsubsection}{Launch Outcome}
+
+\textbf{Registry ID:} \texttt{launch\_outcome}. \textbf{Observable
+discriminator:} A device-qualified held-out comparison must determine
+whether the proposed internal mechanism improves prediction of delivery
+and launch beyond impact location, equipment, participant, and device
+countermodels. \textbf{Competing explanations:} impact location and
+equipment properties; device and firmware differences; multiple control
+histories producing equivalent delivery. \textbf{Falsifier:} The
+proposed model fails preregistered held-out delivery distributions or
+its effect is smaller than device, impact, and participant uncertainty.
+\textbf{Adverse case:} A mechanically different strategy produces an
+equivalent or better qualified delivery outcome with lower load or
+variability.
+
+\subsubsection*{Passive Late Negative Torque
+Origin}\label{passive-late-negative-torque-origin-1}
+\addcontentsline{toc}{subsubsection}{Passive Late Negative Torque
+Origin}
+
+\textbf{Registry ID:} \texttt{passive\_late\_negative\_torque\_origin}.
+\textbf{Observable discriminator:} Synchronized bilateral wrenches, club
+and body kinematics, shaft loads, and activation context must separate a
+force-generated couple, an active wrist-braking moment, a compliant
+recoil contribution, and a motion-dependent interaction term at the same
+late-downswing events. \textbf{Competing explanations:} active negative
+wrist torque; separated-hand force couple; shaft and grip compliance;
+motion-dependent interaction and constraint reactions.
+\textbf{Falsifier:} Measured bilateral wrenches, shaft loads, and
+inverse-dynamics closure reject the registered sign, timing,
+persistence, or allocation predictions across participant-held-out
+trials. \textbf{Adverse case:} Negative net couple occurs without the
+predicted differential hand mode, or the predicted differential mode
+occurs without favorable club-energy transfer.
+
+\subsubsection*{Slack Preload State}\label{slack-preload-state-1}
+\addcontentsline{toc}{subsubsection}{Slack Preload State}
+
+\textbf{Registry ID:} \texttt{slack\_preload\_state}. \textbf{Observable
+discriminator:} A calibrated transmission experiment must distinguish a
+true dead-zone or contact-state transition from compliant yielding and
+impedance change using preload, force-displacement hysteresis,
+reattachment timing, and held-out perturbation response.
+\textbf{Competing explanations:} intentional compliant yielding rather
+than slack; sensor threshold and contact-model artifacts; co-contraction
+changing impedance without changing net wrench. \textbf{Falsifier:} A
+calibrated transmission model cannot distinguish the declared states
+above sensor uncertainty or the predicted preload advantage disappears
+under held-out perturbations and fatigue. \textbf{Adverse case:} A
+controlled low-preload state improves delivery robustness or load
+without increasing timing sensitivity, or persistent preload increases
+adverse load.
+
+\subsection{Population, Equipment, and Task
+Transport}\label{population-equipment-and-task-transport}
+
+\subsubsection*{Anthropometry}\label{anthropometry}
+\addcontentsline{toc}{subsubsection}{Anthropometry}
+
+\textbf{Registry ID:} \texttt{anthropometry}. \textbf{Current coverage:}
+bounded\_context. \textbf{Limitation:} Subject-scaled models and
+synthetic anthropometric designs test geometry sensitivity but do not
+estimate a human population distribution or validate segment inertial
+parameters for this task. \textbf{Data gate:} Retain participant
+stature, mass, segment calibration, grip span, club fit, and
+anthropometric-model uncertainty; freeze training-only strata and
+evaluate held-out calibration and mechanism effects.
+
+\subsubsection*{Sex}\label{sex}
+\addcontentsline{toc}{subsubsection}{Sex}
+
+\textbf{Registry ID:} \texttt{sex}. \textbf{Current coverage:}
+unqualified. \textbf{Limitation:} Female and male anthropometric design
+profiles are engineering inputs, while much of the cited golf evidence
+uses male samples; no sex-stratified mechanism or allocation result is
+established. \textbf{Data gate:} Recruit and retain sex and relevant
+anthropometric strata without treating sex as a mechanical surrogate;
+preregister interaction estimates and suppress unsupported subgroup
+inference.
+
+\subsubsection*{Age}\label{age}
+\addcontentsline{toc}{subsubsection}{Age}
+
+\textbf{Registry ID:} \texttt{age}. \textbf{Current coverage:}
+bounded\_context. \textbf{Limitation:} An age-diverse observational
+speed-handicap sample does not identify how age modifies bilateral
+allocation, tissue dynamics, fatigue, or the proposed transfer
+mechanisms. \textbf{Data gate:} Retain age continuously, define
+age-range transport targets prospectively, measure relevant capacity and
+recovery covariates, and evaluate participant-held-out calibration and
+interactions.
+
+\subsubsection*{Skill}\label{skill}
+\addcontentsline{toc}{subsubsection}{Skill}
+
+\textbf{Registry ID:} \texttt{skill}. \textbf{Current coverage:}
+bounded\_context. \textbf{Limitation:} Skilled and comparison samples
+support bounded descriptive differences, but gross sequencing and
+selected associations do not identify a transferable causal strategy.
+\textbf{Data gate:} Define skill independently of the tested outcome,
+preserve continuous handicap and experience, stratify participant
+holdout, and test whether mechanisms add prediction beyond baseline
+delivery and capacity.
+
+\subsubsection*{Injury}\label{injury}
+\addcontentsline{toc}{subsubsection}{Injury}
+
+\textbf{Registry ID:} \texttt{injury}. \textbf{Current coverage:}
+unqualified. \textbf{Limitation:} The model outputs mechanical proxies
+and explicitly withholds injury and tissue-loading conclusions; no
+governed injury history or prospective adverse outcome is linked to the
+transfer results. \textbf{Data gate:} Collect governed injury history,
+symptoms, exposure, clinical constraints, tissue-load uncertainty, and
+adverse events under an approved protocol; performance cannot stand in
+for safety.
+
+\subsubsection*{Handedness}\label{handedness}
+\addcontentsline{toc}{subsubsection}{Handedness}
+
+\textbf{Registry ID:} \texttt{handedness}. \textbf{Current coverage:}
+unqualified. \textbf{Limitation:} Most cited golf samples and the
+registered sign conventions are right-handed; relabeling lead and trail
+sides does not establish mirrored anatomy, coordination, or sensor
+equivalence. \textbf{Data gate:} Retain biological side, playing
+handedness, grip style, and mirrored frame transforms; qualify sensor
+calibration and predictions separately before pooling or mirroring.
+
+\subsubsection*{Impairment}\label{impairment}
+\addcontentsline{toc}{subsubsection}{Impairment}
+
+\textbf{Registry ID:} \texttt{impairment}. \textbf{Current coverage:}
+unqualified. \textbf{Limitation:} The articulated and scapular
+surrogates are not calibrated to impairment, range restriction, pain,
+neurological status, or compensatory motion. \textbf{Data gate:} Define
+each target impairment clinically, retain range and functional
+constraints, validate subject-specific geometry and sensor
+observability, and use a separately governed held-out analysis.
+
+\subsubsection*{Club}\label{club}
+\addcontentsline{toc}{subsubsection}{Club}
+
+\textbf{Registry ID:} \texttt{club}. \textbf{Current coverage:}
+bounded\_context. \textbf{Limitation:} Driver, iron, rigid, modal, and
+synthetic shaft cases use non-equivalent equipment and objectives; no
+universal equipment effect or calibrated shaft benefit is established.
+\textbf{Data gate:} Retain club make, head, shaft, length, mass,
+inertia, stiffness, damping, grip, ball, impact location, calibration,
+and participant-club assignment; test held-out equipment strata.
+
+\subsubsection*{Task}\label{task}
+\addcontentsline{toc}{subsubsection}{Task}
+
+\textbf{Registry ID:} \texttt{task}. \textbf{Current coverage:}
+bounded\_context. \textbf{Limitation:} Maximum speed, carry, accuracy,
+load, robustness, partial swings, clubs, and impact definitions are
+distinct tasks; an optimum under one objective cannot be promoted to
+another. \textbf{Data gate:} Preregister shot intent, target, club,
+outcome vector, constraints, impact definition, acceptable-shot
+criteria, fatigue state, and multi-objective comparison before
+estimating a strategy effect.
+
+The source register contains 16 independently authored works across 16
+domains. Source coverage does not remove the externally blocked data
+gates: no located governed dataset supplies the complete synchronized
+bilateral six-axis hand wrenches, motion, ground, activation, tissue,
+shaft, and launch signals required to identify the proposed human
+mechanisms.
+
 \chapter{Open-Resource Release and Reviewer
 Qualification}\label{sec-open-release}
 
@@ -10665,9 +11161,9 @@ to a globally predictive manifold or a neural-control dimension.
 Impedance}\label{biological-realization-and-impedance}
 
 Coactivation can increase endpoint stiffness and attenuate an imposed
-disturbance (\citeproc{ref-deRugy2018}{Rugy, Loeb, and Carroll 2018}),
-but excessive co-contraction can also be energetically inefficient and
-does not guarantee stability when the source is internal or feedback is
+disturbance (\citeproc{ref-deRugy2018}{Borzelli et al. 2018}), but
+excessive co-contraction can also be energetically inefficient and does
+not guarantee stability when the source is internal or feedback is
 delayed (\citeproc{ref-latash2015stability}{Latash and Huang 2015}). The
 reduced muscle bridge in Section~\ref{sec-frames-biology-engines}
 demonstrates redundancy and preparation history; it does not identify
@@ -12738,7 +13234,7 @@ and
 \section{Normalized Claim
 Adjudication}\label{normalized-claim-adjudication}
 
-The current census contains 303 material claims. The normalized outcome
+The current census contains 304 material claims. The normalized outcome
 applies only to each claim's declared estimand, model domain, and
 uncertainty boundary. A \texttt{supported} model-conditional claim is
 not thereby independently replicated, empirically validated, or
@@ -12767,7 +13263,7 @@ Normalized Outcome & Claim Count \\
 \bottomrule\noalign{}
 \endlastfoot
 \texttt{inconclusive} & 5 \\
-\texttt{supported} & 283 \\
+\texttt{supported} & 284 \\
 \texttt{untested} & 15 \\
 \end{longtable}
 
@@ -12793,8 +13289,8 @@ Evidence Tier & Claim Count \\
 \texttt{external\_methods\_or\_measurement} & 10 \\
 \texttt{external\_modeling\_or\_simulation} & 15 \\
 \texttt{external\_review\_or\_synthesis} & 10 \\
-\texttt{project\_derivation\_or\_document} & 88 \\
-\texttt{project\_executable\_or\_generated} & 253 \\
+\texttt{project\_derivation\_or\_document} & 89 \\
+\texttt{project\_executable\_or\_generated} & 254 \\
 \texttt{prospective\_or\_unexecuted} & 15 \\
 \end{longtable}
 
@@ -12815,7 +13311,7 @@ Source Independence & Claim Count \\
 \bottomrule\noalign{}
 \endlastfoot
 \texttt{multiple\_independent\_external\_support} & 20 \\
-\texttt{project\_only} & 249 \\
+\texttt{project\_only} & 250 \\
 \texttt{single\_independent\_external\_support} & 34 \\
 \end{longtable}
 
@@ -12837,7 +13333,7 @@ Model Tier & Claim Count \\
 \texttt{articulated\_spatial} & 32 \\
 \texttt{compliant\_shaft} & 66 \\
 \texttt{cross\_tier\_synthesis} & 63 \\
-\texttt{declared\_model\_tier\_unclassified} & 12 \\
+\texttt{declared\_model\_tier\_unclassified} & 13 \\
 \texttt{finite\_ground\_or\_base} & 16 \\
 \texttt{human\_or\_external\_evidence} & 46 \\
 \texttt{planar\_reduced} & 128 \\
@@ -12867,7 +13363,7 @@ Replication Class & Claim Count \\
 \texttt{governed\_human\_data\_unavailable} & 11 \\
 \texttt{independent\_reimplementation\_open} & 12 \\
 \texttt{mixed\_or\_insufficient\_evidence} & 5 \\
-\texttt{none\_declared} & 259 \\
+\texttt{none\_declared} & 260 \\
 \texttt{prospective\_experiment\_open} & 15 \\
 \texttt{statistical\_reanalysis\_or\_replication\_open} & 9 \\
 \texttt{systematic\_review\_open} & 2 \\
@@ -12912,6 +13408,7 @@ Flag
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
+biomechanics evidence bridge & 1 & 1 / 0 / 0 & project authored only \\
 ch01 introduction & 3 & 0 / 2 / 1 & mixed independence \\
 ch02 mechanics & 30 & 2 / 17 / 11 & mixed independence \\
 ch03 evidence & 13 & 1 / 10 / 2 & mixed independence \\
@@ -13310,6 +13807,12 @@ Betzler, Nils F., Stuart A. Monk, Eric S. Wallace, and Steve R. Otto.
 2012. {``Effects of Golf Shaft Stiffness on Strain, Clubhead
 Presentation and Wrist Kinematics.''} \emph{Sports Biomechanics} 11 (2):
 223--38. \url{https://doi.org/10.1080/14763141.2012.681796}.
+
+\bibitem[\citeproctext]{ref-deRugy2018}
+Borzelli, Daniele, Benedetta Cesqui, Denise J. Berger, Etienne Burdet,
+and Andrea d'Avella. 2018. {``Muscle Patterns Underlying Voluntary
+Modulation of Co-Contraction.''} \emph{PLoS ONE} 13 (10): e0205911.
+\url{https://doi.org/10.1371/journal.pone.0205911}.
 
 \bibitem[\citeproctext]{ref-bourgain2022}
 Bourgain, Maxime, Philippe Rouch, Olivier Rouillon, Patricia Thoreux,
@@ -13739,12 +14242,6 @@ Between the Lead and Trail Wrist in Extensor Carpi Ulnaris Activity and
 Golf Swing Joint Kinematics in Sub-Elite Golfers?''} \emph{Journal of
 Sports Sciences} 41 (17): 1596--1604.
 \url{https://doi.org/10.1080/02640414.2023.2285121}.
-
-\bibitem[\citeproctext]{ref-deRugy2018}
-Rugy, Aymar de, Gerald E. Loeb, and Timothy J. Carroll. 2018. {``Muscle
-Patterns Underlying Voluntary Modulation of Co-Contraction.''}
-\emph{PLoS ONE} 13 (10): e0205538.
-\url{https://doi.org/10.1371/journal.pone.0205538}.
 
 \bibitem[\citeproctext]{ref-seth2016}
 Seth, Ajay, Ricardo Matias, Antonio P. Veloso, and Scott L. Delp. 2016.
