@@ -442,6 +442,85 @@ class CrossEnginePerturbationRunner:
             total_time_sec=total_time,
         )
 
+    def _run_canonical_batches(
+        self,
+        *,
+        plan: object,
+        gateway: VariationSampler,
+        collectors: Mapping[str, TrialEvidenceCollector],
+        row_to_coeffs: Mapping[str, Callable[[np.ndarray], list[list[float]]]],
+        compatibility_config: PerturbationConfig,
+    ) -> tuple[dict[str, CanonicalPerturbationBatch], list[str]]:
+        batches: dict[str, CanonicalPerturbationBatch] = {}
+        failed_engines: list[str] = []
+        for engine_name in self._engines:
+            try:
+                analyzer = self._get_or_load_analyzer(engine_name)
+                batch = analyzer.run_canonical_batch(
+                    plan=plan,
+                    gateway=gateway,
+                    collector=collectors[engine_name],
+                    row_to_coeffs=row_to_coeffs[engine_name],
+                    compatibility_config=compatibility_config,
+                )
+                _validate_canonical_batch_engine(engine_name, batch)
+                batches[engine_name] = batch
+            except CrossEngineCompatibilityError:
+                raise
+            except (ValueError, RuntimeError, FloatingPointError, ImportError):
+                logger.warning(
+                    "Canonical engine '%s' failed",
+                    engine_name,
+                    exc_info=True,
+                )
+                failed_engines.append(engine_name)
+        return batches, failed_engines
+
+    def _compare_canonical_batches(
+        self,
+        *,
+        reference_engine: str,
+        batches: Mapping[str, CanonicalPerturbationBatch],
+        tolerances: CrossEngineTolerances,
+        initially_qualified: bool,
+    ) -> tuple[
+        dict[str, tuple[CrossEngineParityMetrics, ...]],
+        dict[str, tuple[int, ...]],
+        bool,
+    ]:
+        parity_metrics: dict[str, tuple[CrossEngineParityMetrics, ...]] = {}
+        non_comparable: dict[str, tuple[int, ...]] = {}
+        qualified = initially_qualified
+        reference_batch = batches.get(reference_engine)
+        if reference_batch is None:
+            return parity_metrics, non_comparable, False
+        for engine_name in self._engines:
+            if engine_name == reference_engine or engine_name not in batches:
+                continue
+            metrics: list[CrossEngineParityMetrics] = []
+            skipped: list[int] = []
+            for reference, candidate in zip(
+                reference_batch.records,
+                batches[engine_name].records,
+                strict=True,
+            ):
+                if not _has_complete_trace(reference) or not _has_complete_trace(
+                    candidate
+                ):
+                    skipped.append(reference.trial_index)
+                    qualified = False
+                    continue
+                comparison = compare_cross_engine_trials(
+                    reference,
+                    candidate,
+                    tolerances,
+                )
+                metrics.append(comparison)
+                qualified = qualified and comparison.tolerance_equivalent
+            parity_metrics[engine_name] = tuple(metrics)
+            non_comparable[engine_name] = tuple(skipped)
+        return parity_metrics, non_comparable, qualified
+
     def run_canonical_all(
         self,
         *,
@@ -478,67 +557,25 @@ class CrossEnginePerturbationRunner:
             raise TypeError("tolerances must be CrossEngineTolerances")
 
         t_wall_start = time.monotonic()
-        batches: dict[str, CanonicalPerturbationBatch] = {}
-        failed_engines: list[str] = []
-        for engine_name in self._engines:
-            try:
-                analyzer = self._get_or_load_analyzer(engine_name)
-                batch = analyzer.run_canonical_batch(
-                    plan=plan,
-                    gateway=gateway,
-                    collector=collectors[engine_name],
-                    row_to_coeffs=row_to_coeffs[engine_name],
-                    compatibility_config=compatibility_config,
-                )
-                _validate_canonical_batch_engine(engine_name, batch)
-                batches[engine_name] = batch
-            except CrossEngineCompatibilityError:
-                raise
-            except (ValueError, RuntimeError, FloatingPointError, ImportError):
-                logger.warning(
-                    "Canonical engine '%s' failed",
-                    engine_name,
-                    exc_info=True,
-                )
-                failed_engines.append(engine_name)
-
-        parity_metrics: dict[str, tuple[CrossEngineParityMetrics, ...]] = {}
-        non_comparable: dict[str, tuple[int, ...]] = {}
-        qualified = (
+        batches, failed_engines = self._run_canonical_batches(
+            plan=plan,
+            gateway=gateway,
+            collectors=collectors,
+            row_to_coeffs=row_to_coeffs,
+            compatibility_config=compatibility_config,
+        )
+        initially_qualified = (
             not failed_engines
             and reference_engine in batches
             and len(batches) == len(self._engines)
             and len(batches) >= 2
         )
-        reference_batch = batches.get(reference_engine)
-        if reference_batch is not None:
-            for engine_name in self._engines:
-                if engine_name == reference_engine or engine_name not in batches:
-                    continue
-                candidate_batch = batches[engine_name]
-                metrics: list[CrossEngineParityMetrics] = []
-                skipped: list[int] = []
-                for reference, candidate in zip(
-                    reference_batch.records,
-                    candidate_batch.records,
-                    strict=True,
-                ):
-                    if not _has_complete_trace(reference) or not _has_complete_trace(
-                        candidate
-                    ):
-                        skipped.append(reference.trial_index)
-                        qualified = False
-                        continue
-                    comparison = compare_cross_engine_trials(
-                        reference,
-                        candidate,
-                        tolerances,
-                    )
-                    metrics.append(comparison)
-                    if not comparison.tolerance_equivalent:
-                        qualified = False
-                parity_metrics[engine_name] = tuple(metrics)
-                non_comparable[engine_name] = tuple(skipped)
+        parity_metrics, non_comparable, qualified = self._compare_canonical_batches(
+            reference_engine=reference_engine,
+            batches=batches,
+            tolerances=tolerances,
+            initially_qualified=initially_qualified,
+        )
 
         summaries = {
             engine_name: batch.legacy_summary for engine_name, batch in batches.items()

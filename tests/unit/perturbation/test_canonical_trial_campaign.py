@@ -71,7 +71,7 @@ def _adapter(plan: _Plan) -> DoublePendulumTrialAdapter:
         config=config,
         plan_sha256="a" * 64,
         scenario_sha256="d" * 64,
-        tools_revision="f9730033fd279ba8b4abe03bab2aadd950400b47",
+        tools_revision="17474249b9267d0e73a779c1d72f231e7b8de39c",
         engine_revision="c" * 40,
     )
 

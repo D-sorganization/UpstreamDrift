@@ -87,6 +87,34 @@ class ToolsVariationCapabilities:
             raise ValueError("unavailable capabilities require one failure description")
 
 
+@dataclass(frozen=True)
+class _ToolsVariationOperations:
+    """Validated callable surface imported from the canonical Tools façade."""
+
+    sampler: Callable[..., object]
+    plan_loader: Callable[..., object]
+    plan_dumper: Callable[..., object]
+    metadata_factory: Callable[..., object]
+    dataset_serializer: Callable[..., object]
+    dataset_deserializer: Callable[..., object]
+    dataset_json_writer: Callable[..., object]
+    dataset_json_reader: Callable[..., object]
+    dataset_csv_writer: Callable[..., object]
+    dataset_csv_reader: Callable[..., object]
+    dataset_hdf5_writer: Callable[..., object]
+    dataset_hdf5_reader: Callable[..., object]
+    dataset_summarizer: Callable[..., object]
+    spearman_analyzer: Callable[..., object]
+    oat_builder: Callable[..., object]
+    geometry_analyzer: Callable[..., object]
+    quiet_zone_finder: Callable[..., object]
+
+    def __post_init__(self) -> None:
+        for name, value in vars(self).items():
+            if not callable(value):
+                raise TypeError(f"{name} must be callable")
+
+
 def _required_module(modules: Mapping[str, object], name: str) -> object:
     module = modules.get(name, _MISSING)
     if module is _MISSING:
@@ -164,65 +192,26 @@ def _unavailable_capabilities(failure: str) -> ToolsVariationCapabilities:
 class ToolsVariationGateway:
     """Thin consumer of canonical Tools plan and persistence operations."""
 
-    def __init__(
-        self,
-        *,
-        sampler: Callable[..., object],
-        plan_loader: Callable[..., object],
-        plan_dumper: Callable[..., object],
-        metadata_factory: Callable[..., object],
-        dataset_serializer: Callable[..., object],
-        dataset_deserializer: Callable[..., object],
-        dataset_json_writer: Callable[..., object],
-        dataset_json_reader: Callable[..., object],
-        dataset_csv_writer: Callable[..., object],
-        dataset_csv_reader: Callable[..., object],
-        dataset_hdf5_writer: Callable[..., object],
-        dataset_hdf5_reader: Callable[..., object],
-        dataset_summarizer: Callable[..., object],
-        spearman_analyzer: Callable[..., object],
-        oat_builder: Callable[..., object],
-        geometry_analyzer: Callable[..., object],
-        quiet_zone_finder: Callable[..., object],
-    ) -> None:
-        for value, name in (
-            (sampler, "sampler"),
-            (plan_loader, "plan_loader"),
-            (plan_dumper, "plan_dumper"),
-            (metadata_factory, "metadata_factory"),
-            (dataset_serializer, "dataset_serializer"),
-            (dataset_deserializer, "dataset_deserializer"),
-            (dataset_json_writer, "dataset_json_writer"),
-            (dataset_json_reader, "dataset_json_reader"),
-            (dataset_csv_writer, "dataset_csv_writer"),
-            (dataset_csv_reader, "dataset_csv_reader"),
-            (dataset_hdf5_writer, "dataset_hdf5_writer"),
-            (dataset_hdf5_reader, "dataset_hdf5_reader"),
-            (dataset_summarizer, "dataset_summarizer"),
-            (spearman_analyzer, "spearman_analyzer"),
-            (oat_builder, "oat_builder"),
-            (geometry_analyzer, "geometry_analyzer"),
-            (quiet_zone_finder, "quiet_zone_finder"),
-        ):
-            if not callable(value):
-                raise TypeError(f"{name} must be callable")
-        self._sampler = sampler
-        self._plan_loader = plan_loader
-        self._plan_dumper = plan_dumper
-        self._metadata_factory = metadata_factory
-        self._dataset_serializer = dataset_serializer
-        self._dataset_deserializer = dataset_deserializer
-        self._dataset_json_writer = dataset_json_writer
-        self._dataset_json_reader = dataset_json_reader
-        self._dataset_csv_writer = dataset_csv_writer
-        self._dataset_csv_reader = dataset_csv_reader
-        self._dataset_hdf5_writer = dataset_hdf5_writer
-        self._dataset_hdf5_reader = dataset_hdf5_reader
-        self._dataset_summarizer = dataset_summarizer
-        self._spearman_analyzer = spearman_analyzer
-        self._oat_builder = oat_builder
-        self._geometry_analyzer = geometry_analyzer
-        self._quiet_zone_finder = quiet_zone_finder
+    def __init__(self, operations: _ToolsVariationOperations) -> None:
+        if not isinstance(operations, _ToolsVariationOperations):
+            raise TypeError("operations must be _ToolsVariationOperations")
+        self._sampler = operations.sampler
+        self._plan_loader = operations.plan_loader
+        self._plan_dumper = operations.plan_dumper
+        self._metadata_factory = operations.metadata_factory
+        self._dataset_serializer = operations.dataset_serializer
+        self._dataset_deserializer = operations.dataset_deserializer
+        self._dataset_json_writer = operations.dataset_json_writer
+        self._dataset_json_reader = operations.dataset_json_reader
+        self._dataset_csv_writer = operations.dataset_csv_writer
+        self._dataset_csv_reader = operations.dataset_csv_reader
+        self._dataset_hdf5_writer = operations.dataset_hdf5_writer
+        self._dataset_hdf5_reader = operations.dataset_hdf5_reader
+        self._dataset_summarizer = operations.dataset_summarizer
+        self._spearman_analyzer = operations.spearman_analyzer
+        self._oat_builder = operations.oat_builder
+        self._geometry_analyzer = operations.geometry_analyzer
+        self._quiet_zone_finder = operations.quiet_zone_finder
         self._capabilities = _available_capabilities()
 
     @classmethod
@@ -262,27 +251,33 @@ class ToolsVariationGateway:
             EXPECTED_PLAN_BINDING_SCHEMA_VERSION,
         )
         return cls(
-            sampler=_required_callable(root, "sample_inputs"),
-            plan_loader=_required_callable(persistence, "persisted_plan_loads"),
-            plan_dumper=_required_callable(persistence, "persisted_plan_dumps"),
-            metadata_factory=_required_callable(metadata, "make_execution_metadata"),
-            dataset_serializer=_required_callable(root, "to_json_dict"),
-            dataset_deserializer=_required_callable(root, "from_json_dict"),
-            dataset_json_writer=_required_callable(root, "write_json"),
-            dataset_json_reader=_required_callable(root, "read_json"),
-            dataset_csv_writer=_required_callable(root, "write_csv"),
-            dataset_csv_reader=_required_callable(root, "read_csv"),
-            dataset_hdf5_writer=_required_callable(root, "write_hdf5"),
-            dataset_hdf5_reader=_required_callable(root, "read_hdf5"),
-            dataset_summarizer=_required_callable(root, "summary_stats"),
-            spearman_analyzer=_required_callable(root, "spearman_matrix"),
-            oat_builder=_required_callable(
-                root, "sensitivity_from_standard_deviations"
-            ),
-            geometry_analyzer=_required_callable(root, "compute_position_dispersion"),
-            quiet_zone_finder=_required_callable(
-                root, "find_low_variability_intervals"
-            ),
+            _ToolsVariationOperations(
+                sampler=_required_callable(root, "sample_inputs"),
+                plan_loader=_required_callable(persistence, "persisted_plan_loads"),
+                plan_dumper=_required_callable(persistence, "persisted_plan_dumps"),
+                metadata_factory=_required_callable(
+                    metadata, "make_execution_metadata"
+                ),
+                dataset_serializer=_required_callable(root, "to_json_dict"),
+                dataset_deserializer=_required_callable(root, "from_json_dict"),
+                dataset_json_writer=_required_callable(root, "write_json"),
+                dataset_json_reader=_required_callable(root, "read_json"),
+                dataset_csv_writer=_required_callable(root, "write_csv"),
+                dataset_csv_reader=_required_callable(root, "read_csv"),
+                dataset_hdf5_writer=_required_callable(root, "write_hdf5"),
+                dataset_hdf5_reader=_required_callable(root, "read_hdf5"),
+                dataset_summarizer=_required_callable(root, "summary_stats"),
+                spearman_analyzer=_required_callable(root, "spearman_matrix"),
+                oat_builder=_required_callable(
+                    root, "sensitivity_from_standard_deviations"
+                ),
+                geometry_analyzer=_required_callable(
+                    root, "compute_position_dispersion"
+                ),
+                quiet_zone_finder=_required_callable(
+                    root, "find_low_variability_intervals"
+                ),
+            )
         )
 
     @property

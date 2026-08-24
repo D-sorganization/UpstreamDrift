@@ -12,7 +12,7 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   projection. Tools owns reusable consumers; do not copy its solver or UI
   implementations into this repository or `vendor/ud-tools`.
 - UpstreamDrift remote `main` is
-  `228b9a5df130ac46954dd2c9431d795525003c58`. The normalized-claim authority
+  `76bf6ab1d1d524f172846052e227fa16aea75185`. The normalized-claim authority
   from PR #9018 remains an ancestor; issue #8724 is closed.
 - The current computational publication is 239 pages with SHA-256
   `be85b7b62bba060a26ce3fea8355aa8b01dcf8c1b1ccf09304450898a4e5e78b`,
@@ -33,9 +33,9 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   atomic checkpoints; ground has 45/48. The 93 checkpoint files and completed
   shaft artifacts remain on the ControlTower C: drive under
   `C:\Users\diete\Campaigns\UpstreamDrift-8800-1bd4d57da`.
-- Status remains `running`, has no retained execution failures, and explicitly
-  reports `release_evidence=false`. Partial checkpoints are resume evidence,
-  not scientific release evidence.
+- The persisted status saying `running` is stale; no campaign process is
+  running and `release_evidence=false`. Partial checkpoints are resume
+  evidence, not scientific release evidence.
 - WSL cannot currently mount
   `F:\WSL\ControlTower-SSD\ext4.vhdx`; Windows reported the file corrupted and
   unreadable (`0x80070570`). Both WSL distributions are stopped. Tailscale SSH
@@ -83,24 +83,29 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 ## Other Active Dependencies
 
 - #8800 propagates height, body-mass, and joint-limit bounds through both
-  headline atlases and blocks the final #8752/#8668 audit.
+  headline atlases and blocks the final #8752/#8668 audit. It was reopened on
+  2026-08-24 after a manual closure lacked a complete campaign, protected PR,
+  or remote-main merge.
 - #8443, #8448, #8449, #8450, #8595, #8668, #8684, and #8796 remain open.
   Verify each issue's exact acceptance evidence before changing state.
-- Tools PR #4669 is squash-merged and verified on remote `main` at immutable
-  commit `f9730033fd279ba8b4abe03bab2aadd950400b47`. Its downstream run exposed
-  an UpstreamDrift provider-mode test-isolation defect; protected PR #9022 at
-  exact head `a00e29228c382950015c5eb29c0bd24f8bc2ab08` corrects it and records the
-  frozen campaign boundary. Substantive checks pass; runner-dependent checks
-  and human review remain pending. Auto-merge is disabled.
-- #8358 is leased as `proximal-distal-20260824-r15`. An unpublished detached
-  worktree at `UpstreamDrift-worktrees/8358-tools-variation-adapter-prep`
-  contains local commits `7e7da8512` (schema gateway), `a55653858` (typed trial
-  evidence), `9fc62a96c` (serial execution), and `02219d237` (batched parity).
-  The next uncommitted slice rejects plan, input, topology, marker, frame,
-  alignment, unit, shape, and tolerance drift before cross-engine ranking.
-  Forty combined focused tests pass.
-  Do not push until #9022 merges; then transplant the commits onto refreshed
-  `origin/main`, repin Tools, and continue batched and cross-engine parity.
+- PR #9022 is merged as current remote-main commit `76bf6ab1d`. Tools PR #4674
+  is merged at immutable commit
+  `17474249b9267d0e73a779c1d72f231e7b8de39c`; this is the #8358 gitlink and
+  canonical JSON/CSV/HDF5 analysis authority.
+- Active #8358 worktree: `UpstreamDrift-worktrees/8358-tools-variation-adapter`,
+  branch
+  `feat/8358-tools-variation-adapter`. Fifteen coherent implementation commits
+  were transplanted onto current remote `main`. The Tools gateway, typed trial
+  evidence, serial/batched execution, analytical and articulated MuJoCo
+  adapters, fail-closed cross-engine comparison, lossless bundles, and
+  canonical scalar, rank/OAT, dispersion, and quiet-zone analysis are present.
+  Architecture budgets pass without exceptions. Complete hit, miss,
+  numerical-failure, partial-trace, stable-marker, frame/unit, provenance, and
+  bilateral shoulder/wrist allocation evidence remains explicit.
+- PR #9026 is open at head `c0cf07722a25e109660a2a20044508fbc8b8b2e3`;
+  standard protected CI passes, while requested human review and three
+  auxiliary checks remain. It adds the biomechanics evidence bridge but does
+  not change the governed human-data boundary.
 - Tools #4142 remains open until immutable UpstreamDrift consumption and
   requirement-level R10–R15 qualification are complete.
 - AffineDrift #3930 remains downstream of the qualified UpstreamDrift release;
@@ -134,6 +139,8 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 python -m scripts.research.proximal_distal_energy.claim_audit validate
 python -m scripts.research.proximal_distal_energy.claim_evidence_integrity validate
 python -m scripts.research.proximal_distal_energy.qualify_open_release validate
+python -m pytest -n 0 -q tests/unit/perturbation tests/shared_contracts/test_tools_vendoring.py tests/launchers/test_tools_vendor_authority.py
+python scripts/ci/check_architecture_budget.py
 python scripts/check_document_title_case.py --changed-from origin/main
 python scripts/ci/check_file_size_budget.py
 ```

@@ -22,7 +22,7 @@ pytestmark = pytest.mark.unit
 
 _PLAN_SHA = "a" * 64
 _SCENARIO_SHA = "d" * 64
-_TOOLS_REVISION = "f9730033fd279ba8b4abe03bab2aadd950400b47"
+_TOOLS_REVISION = "17474249b9267d0e73a779c1d72f231e7b8de39c"
 _ENGINE_REVISION = "c" * 40
 _SHOULDER_DAMPING = "swing_sim.swing.damping_shoulder"
 _WRIST_TORQUE = "swing_sim.swing.wrist_commanded_torque_offset_nm"
