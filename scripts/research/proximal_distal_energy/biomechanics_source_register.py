@@ -170,6 +170,58 @@ def _validate_source(
     return source_id, domains
 
 
+def _validate_coverage(
+    records: Any, source_domains: dict[str, set[str]]
+) -> dict[str, str]:
+    if not isinstance(records, list):
+        raise ValueError("coverage must be a list")
+    coverage_states: dict[str, str] = {}
+    for record in records:
+        if not isinstance(record, dict):
+            raise ValueError("each coverage record must be an object")
+        domain_id = _require_text(record, "domain_id", "coverage")
+        if set(record) != {
+            "domain_id",
+            "source_ids",
+            "evidence_status",
+            "current_answer",
+            "limitations",
+            "required_observables",
+            "data_gate",
+        }:
+            raise ValueError(f"{domain_id}: coverage fields are incomplete or unknown")
+        if domain_id in coverage_states:
+            raise ValueError(f"duplicate coverage domain: {domain_id}")
+        state = record.get("evidence_status")
+        if state not in COVERAGE_STATES:
+            raise ValueError(f"{domain_id}: invalid evidence_status")
+        coverage_states[domain_id] = state
+        source_ids = set(
+            _require_text_list(
+                record, "source_ids", domain_id, allow_empty=state == "gap"
+            )
+        )
+        unknown_sources = sorted(source_ids - set(source_domains))
+        if unknown_sources:
+            raise ValueError(f"{domain_id}: unknown source_ids: {unknown_sources}")
+        incoherent = sorted(
+            source_id
+            for source_id in source_ids
+            if domain_id not in source_domains[source_id]
+        )
+        if incoherent:
+            raise ValueError(
+                f"{domain_id}: source coverage is not reciprocal: {incoherent}"
+            )
+        for field in ("current_answer", "data_gate"):
+            _require_text(record, field, domain_id)
+        _require_text_list(record, "limitations", domain_id)
+        _require_text_list(record, "required_observables", domain_id)
+    if set(coverage_states) != REQUIRED_DOMAINS:
+        raise ValueError("coverage domains are incomplete or stale")
+    return coverage_states
+
+
 def validate_biomechanics_source_register(
     root: str | Path, register: dict[str, Any]
 ) -> dict[str, Any]:
@@ -222,52 +274,7 @@ def validate_biomechanics_source_register(
         source_domains[source_id] = domains
 
     coverage = register.get("coverage")
-    if not isinstance(coverage, list):
-        raise ValueError("coverage must be a list")
-    coverage_states: dict[str, str] = {}
-    for record in coverage:
-        if not isinstance(record, dict):
-            raise ValueError("each coverage record must be an object")
-        domain_id = _require_text(record, "domain_id", "coverage")
-        if set(record) != {
-            "domain_id",
-            "source_ids",
-            "evidence_status",
-            "current_answer",
-            "limitations",
-            "required_observables",
-            "data_gate",
-        }:
-            raise ValueError(f"{domain_id}: coverage fields are incomplete or unknown")
-        if domain_id in coverage_states:
-            raise ValueError(f"duplicate coverage domain: {domain_id}")
-        state = record.get("evidence_status")
-        if state not in COVERAGE_STATES:
-            raise ValueError(f"{domain_id}: invalid evidence_status")
-        coverage_states[domain_id] = state
-        source_ids = set(
-            _require_text_list(
-                record, "source_ids", domain_id, allow_empty=state == "gap"
-            )
-        )
-        unknown_sources = sorted(source_ids - set(source_domains))
-        if unknown_sources:
-            raise ValueError(f"{domain_id}: unknown source_ids: {unknown_sources}")
-        incoherent = sorted(
-            source_id
-            for source_id in source_ids
-            if domain_id not in source_domains[source_id]
-        )
-        if incoherent:
-            raise ValueError(
-                f"{domain_id}: source coverage is not reciprocal: {incoherent}"
-            )
-        for field in ("current_answer", "data_gate"):
-            _require_text(record, field, domain_id)
-        _require_text_list(record, "limitations", domain_id)
-        _require_text_list(record, "required_observables", domain_id)
-    if set(coverage_states) != REQUIRED_DOMAINS:
-        raise ValueError("coverage domains are incomplete or stale")
+    coverage_states = _validate_coverage(coverage, source_domains)
 
     state_counts = Counter(coverage_states.values())
     expected_summary = {

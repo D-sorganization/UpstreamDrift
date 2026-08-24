@@ -5389,7 +5389,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "57e808fe8f3aeede6b0369ef2c4e3e79d3267b419dd1be04ab595b4eaf64c5a6",
+      "sha256": "b4acf779f25f09c2d70166b094df2af59044e13106a72aca91e0c1678679d9aa",
       "bytes": 135424,
       "referenced_by": [
         "PD-CLAIM-241"
@@ -5671,8 +5671,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/biomechanics_evidence_bridge.py": {
-      "sha256": "25ddd059c8c97cc5daf5c31ae7e267201bd187e040390890195ac9ec7056c2c9",
-      "bytes": 15030,
+      "sha256": "56323f14a5f8b569fda7c5c84056ce96deaf2eec0df1988fe8ec9afc6675c893",
+      "bytes": 15532,
       "referenced_by": [
         "PD-CLAIM-305"
       ]
@@ -5685,8 +5685,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/biomechanics_source_register.py": {
-      "sha256": "8dc8f51ae9fb327d66e05185adbe601411d4dd01aeb255a4bf80d27a42c6699a",
-      "bytes": 11122,
+      "sha256": "3049fffe75e487be7fa439a8b5d6f367e4ee18aeb7f7a6457de85235085884cc",
+      "bytes": 11315,
       "referenced_by": [
         "PD-CLAIM-305"
       ]

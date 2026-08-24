@@ -264,6 +264,44 @@ def _validate_transportability(records: Any, claim_ids: set[str]) -> set[str]:
     return seen
 
 
+def _validate_modalities(
+    records: Any, known_sources: dict[str, dict[str, Any]]
+) -> dict[str, str]:
+    if not isinstance(records, list):
+        raise ValueError("modalities must be a list")
+    modality_states: dict[str, str] = {}
+    for modality in records:
+        if not isinstance(modality, dict):
+            raise ValueError("each modality must be an object")
+        modality_id, source_status = _validate_modality(modality, known_sources)
+        if modality_id in modality_states:
+            raise ValueError(f"duplicate modality_id: {modality_id}")
+        modality_states[modality_id] = source_status
+    if set(modality_states) != REQUIRED_MODALITIES:
+        raise ValueError("required modality coverage is incomplete or stale")
+    return modality_states
+
+
+def _validate_mechanisms(
+    records: Any, modality_ids: set[str], claim_ids: set[str]
+) -> tuple[list[dict[str, Any]], Counter[str], set[str]]:
+    if not isinstance(records, list) or len(records) < 8:
+        raise ValueError("at least eight mechanisms are required")
+    mechanism_ids: set[str] = set()
+    identifiability_counts: Counter[str] = Counter()
+    linked_claim_ids: set[str] = set()
+    for mechanism in records:
+        if not isinstance(mechanism, dict):
+            raise ValueError("each mechanism must be an object")
+        mechanism_id = _validate_mechanism(mechanism, modality_ids, claim_ids)
+        if mechanism_id in mechanism_ids:
+            raise ValueError(f"duplicate mechanism_id: {mechanism_id}")
+        mechanism_ids.add(mechanism_id)
+        identifiability_counts[mechanism["identifiability"]] += 1
+        linked_claim_ids.update(mechanism["claim_ids"])
+    return records, identifiability_counts, linked_claim_ids
+
+
 def validate_biomechanics_evidence_bridge(
     root: str | Path,
     bridge: dict[str, Any],
@@ -310,38 +348,15 @@ def validate_biomechanics_evidence_bridge(
     }
 
     modalities = bridge.get("modalities")
-    if not isinstance(modalities, list):
-        raise ValueError("modalities must be a list")
-    modality_states: dict[str, str] = {}
-    for modality in modalities:
-        if not isinstance(modality, dict):
-            raise ValueError("each modality must be an object")
-        modality_id, source_status = _validate_modality(modality, known_sources)
-        if modality_id in modality_states:
-            raise ValueError(f"duplicate modality_id: {modality_id}")
-        modality_states[modality_id] = source_status
-    if set(modality_states) != REQUIRED_MODALITIES:
-        raise ValueError("required modality coverage is incomplete or stale")
+    modality_states = _validate_modalities(modalities, known_sources)
 
     transportability_dimensions = _validate_transportability(
         bridge.get("transportability"), claim_ids
     )
 
-    mechanisms = bridge.get("mechanisms")
-    if not isinstance(mechanisms, list) or len(mechanisms) < 8:
-        raise ValueError("at least eight mechanisms are required")
-    mechanism_ids: set[str] = set()
-    identifiability_counts: Counter[str] = Counter()
-    linked_claim_ids: set[str] = set()
-    for mechanism in mechanisms:
-        if not isinstance(mechanism, dict):
-            raise ValueError("each mechanism must be an object")
-        mechanism_id = _validate_mechanism(mechanism, set(modality_states), claim_ids)
-        if mechanism_id in mechanism_ids:
-            raise ValueError(f"duplicate mechanism_id: {mechanism_id}")
-        mechanism_ids.add(mechanism_id)
-        identifiability_counts[mechanism["identifiability"]] += 1
-        linked_claim_ids.update(mechanism["claim_ids"])
+    mechanisms, identifiability_counts, linked_claim_ids = _validate_mechanisms(
+        bridge.get("mechanisms"), set(modality_states), claim_ids
+    )
     for record in bridge["transportability"]:
         linked_claim_ids.update(record["claim_ids"])
 

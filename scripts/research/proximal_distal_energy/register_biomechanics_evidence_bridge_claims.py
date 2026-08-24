@@ -25,11 +25,9 @@ SUMMARY_RATIONALE = (
 )
 
 
-def register_claims(
-    registry: dict[str, Any],
+def _partition_candidates(
     inventory: dict[str, Any],
-) -> dict[str, Any]:
-    """Return an idempotently adjudicated registry for the generated chapter."""
+) -> tuple[list[dict[str, Any]], dict[str, Any], list[dict[str, Any]]]:
     candidates = [
         item for item in inventory["candidates"] if item["source_path"] == CHAPTER
     ]
@@ -58,90 +56,85 @@ def register_claims(
             "claim-summary candidate count changed; review the generated "
             f"projection before registration: {len(summary_candidates)}"
         )
-    candidate_ids = {item["candidate_id"] for item in candidates}
-    material_ids = [item["candidate_id"] for item in material]
+    return material, navigation[0], summary_candidates
 
-    registry["claims"] = [
-        claim for claim in registry["claims"] if claim["claim_id"] != CLAIM_ID
-    ]
-    registry["candidate_reviews"] = [
-        review
-        for review in registry["candidate_reviews"]
-        if review["candidate_id"] not in candidate_ids
-        and CLAIM_ID not in review["claim_ids"]
-        and review.get("rationale") != SUMMARY_RATIONALE
-    ]
-    registry["claims"].append(
-        {
-            "claim_id": CLAIM_ID,
-            "candidate_ids": material_ids,
-            "statement": (
-                "The versioned biomechanics evidence bridge records sixteen "
-                "independently authored works across sixteen domains and maps "
-                "seven measurement modalities to nine mechanisms, nine "
-                "transportability dimensions, observable discriminators, "
-                "countermodels, and fail-closed data gates; it retains human "
-                "validation as externally blocked and bilateral hand-wrench "
-                "allocation as structurally unidentified without independent "
-                "bilateral measurements."
-            ),
-            "classification": "governed_source_and_measurement_authority",
-            "published_status": "supported_as_audit_and_protocol_contract",
-            "audit_status": "sources_claims_digests_and_generated_surfaces_checked",
-            "adjudication_outcome": "supported",
-            "source_locations": [
-                f"{CHAPTER}:{item['line_start']}" for item in material
-            ],
-            "evidence_artifacts": [
-                "docs/research/proximal_distal_energy_transfer/data/biomechanics_source_register.json",
-                "docs/research/proximal_distal_energy_transfer/data/biomechanics_evidence_bridge.json",
-                "docs/research/proximal_distal_energy_transfer/BIOMECHANICS_EVIDENCE_BRIDGE.md",
-                "scripts/research/proximal_distal_energy/biomechanics_source_register.py",
-                "scripts/research/proximal_distal_energy/biomechanics_evidence_bridge.py",
-                "scripts/research/proximal_distal_energy/biomechanics_evidence_surfaces.py",
-                "tests/unit/research/test_biomechanics_source_register.py",
-                "tests/unit/research/test_biomechanics_evidence_bridge.py",
-                "tests/unit/research/test_biomechanics_evidence_surfaces.py",
-            ],
-            "model_domain": (
-                "Source qualification, model-to-measurement mapping, prospective "
-                "falsification, identifiability, and transportability governance."
-            ),
-            "uncertainty_boundary": (
-                "The register is not a systematic review, population estimate, "
-                "calibrated apparatus result, participant outcome, or evidence "
-                "that every qualifying dataset has been located."
-            ),
-            "competing_explanations": [
-                "unlocated or inaccessible participant datasets",
-                "apparatus-specific measurement validity",
-                "alternative inverse problems and constitutive assumptions",
-                "population, equipment, and task transport failure",
-            ],
-            "negative_controls": [
-                "unknown-field rejection",
-                "stale-digest rejection",
-                "project-authored source exclusion",
-                "missing-modality rejection",
-                "source-to-claim reciprocity rejection",
-                "bilateral-allocation identifiability killswitch",
-            ],
-            "falsifier": (
-                "Any registered source, digest, modality, claim link, generated "
-                "surface, or identifiability rule fails validation, or governed "
-                "participant evidence contradicts the declared measurement and "
-                "transport boundaries."
-            ),
-            "adjudication": (
-                "The paper presents the generated records as an inspectable "
-                "measurement and falsification contract, not as new human data "
-                "or proof of a preferred technique."
-            ),
-            "reviewer": "Codex technical audit",
-            "last_verified_on": "2026-08-24",
-        }
-    )
-    registry["candidate_reviews"].extend(
+
+def _claim_record(material: list[dict[str, Any]]) -> dict[str, Any]:
+    material_ids = [item["candidate_id"] for item in material]
+    return {
+        "claim_id": CLAIM_ID,
+        "candidate_ids": material_ids,
+        "statement": (
+            "The versioned biomechanics evidence bridge records sixteen "
+            "independently authored works across sixteen domains and maps "
+            "seven measurement modalities to nine mechanisms, nine "
+            "transportability dimensions, observable discriminators, "
+            "countermodels, and fail-closed data gates; it retains human "
+            "validation as externally blocked and bilateral hand-wrench "
+            "allocation as structurally unidentified without independent "
+            "bilateral measurements."
+        ),
+        "classification": "governed_source_and_measurement_authority",
+        "published_status": "supported_as_audit_and_protocol_contract",
+        "audit_status": "sources_claims_digests_and_generated_surfaces_checked",
+        "adjudication_outcome": "supported",
+        "source_locations": [f"{CHAPTER}:{item['line_start']}" for item in material],
+        "evidence_artifacts": [
+            "docs/research/proximal_distal_energy_transfer/data/biomechanics_source_register.json",
+            "docs/research/proximal_distal_energy_transfer/data/biomechanics_evidence_bridge.json",
+            "docs/research/proximal_distal_energy_transfer/BIOMECHANICS_EVIDENCE_BRIDGE.md",
+            "scripts/research/proximal_distal_energy/biomechanics_source_register.py",
+            "scripts/research/proximal_distal_energy/biomechanics_evidence_bridge.py",
+            "scripts/research/proximal_distal_energy/biomechanics_evidence_surfaces.py",
+            "tests/unit/research/test_biomechanics_source_register.py",
+            "tests/unit/research/test_biomechanics_evidence_bridge.py",
+            "tests/unit/research/test_biomechanics_evidence_surfaces.py",
+        ],
+        "model_domain": (
+            "Source qualification, model-to-measurement mapping, prospective "
+            "falsification, identifiability, and transportability governance."
+        ),
+        "uncertainty_boundary": (
+            "The register is not a systematic review, population estimate, "
+            "calibrated apparatus result, participant outcome, or evidence "
+            "that every qualifying dataset has been located."
+        ),
+        "competing_explanations": [
+            "unlocated or inaccessible participant datasets",
+            "apparatus-specific measurement validity",
+            "alternative inverse problems and constitutive assumptions",
+            "population, equipment, and task transport failure",
+        ],
+        "negative_controls": [
+            "unknown-field rejection",
+            "stale-digest rejection",
+            "project-authored source exclusion",
+            "missing-modality rejection",
+            "source-to-claim reciprocity rejection",
+            "bilateral-allocation identifiability killswitch",
+        ],
+        "falsifier": (
+            "Any registered source, digest, modality, claim link, generated "
+            "surface, or identifiability rule fails validation, or governed "
+            "participant evidence contradicts the declared measurement and "
+            "transport boundaries."
+        ),
+        "adjudication": (
+            "The paper presents the generated records as an inspectable "
+            "measurement and falsification contract, not as new human data "
+            "or proof of a preferred technique."
+        ),
+        "reviewer": "Codex technical audit",
+        "last_verified_on": "2026-08-24",
+    }
+
+
+def _candidate_reviews(
+    material: list[dict[str, Any]],
+    navigation: dict[str, Any],
+    summary_candidates: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    reviews = [
         {
             "candidate_id": item["candidate_id"],
             "disposition": "material_claims_mapped",
@@ -154,10 +147,10 @@ def register_claims(
             "last_verified_on": "2026-08-24",
         }
         for item in material
-    )
-    registry["candidate_reviews"].append(
+    ]
+    reviews.append(
         {
-            "candidate_id": navigation[0]["candidate_id"],
+            "candidate_id": navigation["candidate_id"],
             "disposition": "editorial_or_navigation",
             "claim_ids": [],
             "rationale": "Links readers to generated authorities without a scientific proposition.",
@@ -165,7 +158,7 @@ def register_claims(
             "last_verified_on": "2026-08-24",
         }
     )
-    registry["candidate_reviews"].extend(
+    reviews.extend(
         {
             "candidate_id": item["candidate_id"],
             "disposition": "editorial_or_navigation",
@@ -175,6 +168,31 @@ def register_claims(
             "last_verified_on": "2026-08-24",
         }
         for item in summary_candidates
+    )
+    return reviews
+
+
+def register_claims(
+    registry: dict[str, Any],
+    inventory: dict[str, Any],
+) -> dict[str, Any]:
+    """Return an idempotently adjudicated registry for the generated chapter."""
+    material, navigation, summary_candidates = _partition_candidates(inventory)
+    candidate_ids = {item["candidate_id"] for item in [*material, navigation]}
+
+    registry["claims"] = [
+        claim for claim in registry["claims"] if claim["claim_id"] != CLAIM_ID
+    ]
+    registry["candidate_reviews"] = [
+        review
+        for review in registry["candidate_reviews"]
+        if review["candidate_id"] not in candidate_ids
+        and CLAIM_ID not in review["claim_ids"]
+        and review.get("rationale") != SUMMARY_RATIONALE
+    ]
+    registry["claims"].append(_claim_record(material))
+    registry["candidate_reviews"].extend(
+        _candidate_reviews(material, navigation, summary_candidates)
     )
     registry["paper"]["source_digest"] = inventory["source_digest"]
     registry["audit_scope"]["completion_status"] = "complete"
