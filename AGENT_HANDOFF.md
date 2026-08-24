@@ -99,9 +99,15 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   `sha256:b40d91fe2326c5fae288e4a853377fb164aa0a6ba1de62cb28aba15d65500a1e`.
   Authority and campaign writers now emit canonical LF bytes, with regression
   assertions. All seven authorities, the plan, and the 313-claim evidence
-  manifest were regenerated and locally validated; push this correction, make
-  a fresh detached ControlTower worktree at the new exact commit, validate the
-  plan inside that image, and only then relaunch the four-worker/four-CPU run.
+  manifest were regenerated and locally validated at execution commit
+  `8a20df8fe340c4c8b9e65ca5e575bbbcabce0f96`.
+- The qualified campaign is running independently on ControlTower in container
+  `upstreamdrift-8800-8a20df8fe` from a clean, read-only detached worktree at
+  that exact commit. The Linux plan validator and real native checkpoint restart
+  test passed before launch. Four workers are bounded by four CPUs and 56 GB;
+  restart policy is `on-failure:3`. Host-persistent state is under
+  `C:\Users\diete\Campaigns\UpstreamDrift-8800-8a20df8fe`; the first nominal
+  shaft checkpoint was observed after launch. Do not start a duplicate run.
 - This is execution infrastructure, not a scientific result. No #8800 campaign
   has run, no headline estimate has propagated, and no paper or release claim
   may be promoted until all 14 atlas paths and common-support controls pass.
