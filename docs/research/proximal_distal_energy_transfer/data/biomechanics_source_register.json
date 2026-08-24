@@ -3,7 +3,7 @@
   "scope_statement": "This register records independently authored sources that bound the biological and measurement bridge. Inclusion supports only the stated estimand, apparatus, population, and role; it does not establish a golf control mechanism, a universal strategy, or governed participant validation for this project.",
   "reviewed_on": "2026-08-24",
   "reviewer": "UpstreamDrift evidence review",
-  "bibliography_sha256": "a02f45eb1308e42510aab9d8ab24b692115083919156862cbcc3b7ce9a1034e3",
+  "bibliography_sha256": "13e59319e76f79b86264c75a4ce9f7381443c40d9f0efc260cabb5c371e9e944",
   "claim_registry_sha256": "c6a43ccd289acdfe3677105a06d2414add918244cf8153aa39ae8f136990d54f",
   "external_source_review_sha256": "77a0088908653948bc9bacf65f9f4942205d9ff3067d6126c38a61889bb9e76d",
   "sources": [

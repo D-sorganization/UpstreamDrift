@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import re
 from collections import Counter
 from pathlib import Path
 from typing import Any
+
+from scripts.research.proximal_distal_energy.release_bundle import artifact_sha256
 
 ARTICLE_REL = Path("docs/research/proximal_distal_energy_transfer")
 SOURCE_REGISTER_REL = ARTICLE_REL / "data/biomechanics_source_register.json"
@@ -56,7 +57,7 @@ def _repository_root() -> Path:
 
 
 def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    return artifact_sha256(path)
 
 
 def _require_text(record: dict[str, Any], field: str, record_id: str) -> str:

@@ -48,9 +48,11 @@ Last updated: 2026-08-24
 - A bibliography defect was corrected: `deRugy2018` now identifies Borzelli et
   al., DOI `10.1371/journal.pone.0205911`, rather than unrelated DOI
   `10.1371/journal.pone.0205538`. Higdon et al. fatigue metadata was added.
-- Local focused gates pass: 20 bridge tests, 55 final claim/release/PDF tests,
+- Local focused gates pass: 21 bridge tests, 55 final claim/release/PDF tests,
   Ruff, title capitalization, file-size budget, all-page rendering, and exact
-  release qualification. The branch is rebased onto remote main
+  release qualification. Source-register digests reuse canonical release bytes,
+  with a line-ending regression test preventing Windows/Linux drift. The branch
+  is rebased onto remote main
   `76bf6ab1d`; PR #9032 is open. Shepherd its exact head through protected CI
   and human review, then verify its merge commit on remote main.
 

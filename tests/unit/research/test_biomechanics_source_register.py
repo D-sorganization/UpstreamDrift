@@ -8,9 +8,13 @@ from pathlib import Path
 import pytest
 
 from scripts.research.proximal_distal_energy.biomechanics_source_register import (
+    BIBLIOGRAPHY_REL,
+    CLAIM_REGISTRY_REL,
+    EXTERNAL_REVIEW_REL,
     SOURCE_REGISTER_REL,
     validate_biomechanics_source_register,
 )
+from scripts.research.proximal_distal_energy.release_bundle import artifact_sha256
 
 ROOT = Path(__file__).resolve().parents[3]
 pytestmark = pytest.mark.unit
@@ -60,3 +64,23 @@ def test_source_register_summary_is_recomputed() -> None:
 
     with pytest.raises(ValueError, match="summary is stale"):
         validate_biomechanics_source_register(ROOT, register)
+
+
+def test_source_register_digest_is_stable_across_text_line_endings(
+    tmp_path: Path,
+) -> None:
+    register = _register()
+    for relative_path in (CLAIM_REGISTRY_REL, EXTERNAL_REVIEW_REL):
+        destination = tmp_path / relative_path
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes((ROOT / relative_path).read_bytes())
+
+    bibliography_path = tmp_path / BIBLIOGRAPHY_REL
+    bibliography_path.parent.mkdir(parents=True, exist_ok=True)
+    bibliography_text = (ROOT / BIBLIOGRAPHY_REL).read_text(encoding="utf-8")
+    bibliography_path.write_bytes(bibliography_text.replace("\n", "\r\n").encode())
+    register["bibliography_sha256"] = artifact_sha256(bibliography_path)
+
+    report = validate_biomechanics_source_register(tmp_path, register)
+
+    assert report["valid"] is True
