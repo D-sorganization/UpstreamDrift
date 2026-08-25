@@ -146,7 +146,9 @@ class CanonicalPerturbationBatch:
             for error in self.errors
         ):
             raise TypeError("canonical batch errors must be exceptions or None")
-        if self.legacy_summary.config.n_trials != n_records:
+        legacy_summary = self.legacy_summary
+        legacy_config = legacy_summary.config
+        if legacy_config.n_trials != n_records:
             raise ValueError("legacy summary trial count must match canonical records")
 
 

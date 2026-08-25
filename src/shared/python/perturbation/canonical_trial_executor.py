@@ -7,6 +7,7 @@ from typing import Protocol
 
 import numpy as np
 
+from .trial_adapter_contracts import require_plan_execution_identity
 from .trial_evidence import CanonicalTrialEvidence
 
 RECOVERABLE_TRIAL_ERRORS = (ValueError, RuntimeError, FloatingPointError)
@@ -44,16 +45,6 @@ class TrialEvidenceCollector(Protocol):
     ) -> CanonicalTrialEvidence:
         """Map one declared numerical failure without fabricating outputs."""
         ...
-
-
-def _plan_execution_identity(plan: object) -> tuple[int, int]:
-    n_runs = getattr(plan, "n_runs", None)
-    seed = getattr(plan, "seed", None)
-    if type(n_runs) is not int or n_runs <= 0:
-        raise ValueError("plan n_runs must be a positive integer")
-    if type(seed) is not int:
-        raise ValueError("plan seed must be an integer")
-    return n_runs, seed
 
 
 def _sample_matrix(value: object, n_runs: int) -> np.ndarray:
@@ -131,7 +122,7 @@ def execute_serial_variation(
     """
 
     _validate_dependencies(gateway, runner, collector)
-    n_runs, plan_seed = _plan_execution_identity(plan)
+    n_runs, plan_seed = require_plan_execution_identity(plan)
     samples = _sample_matrix(gateway.sample_inputs(plan), n_runs)
     records: list[CanonicalTrialEvidence] = []
     for trial_index in range(n_runs):
@@ -158,7 +149,7 @@ def execute_batched_variation(
     """
 
     _validate_dependencies(gateway, batch_runner, collector)
-    n_runs, plan_seed = _plan_execution_identity(plan)
+    n_runs, plan_seed = require_plan_execution_identity(plan)
     samples = _sample_matrix(gateway.sample_inputs(plan), n_runs)
     raw_results = batch_runner(samples)
     if isinstance(raw_results, (str, bytes)) or not isinstance(raw_results, Iterable):

@@ -48,6 +48,9 @@ from src.shared.python.perturbation.cross_engine_trial_parity import (
 from src.shared.python.perturbation.perturbation_base import (
     CanonicalPerturbationBatch,
 )
+from src.shared.python.perturbation.trial_adapter_contracts import (
+    require_plan_execution_identity,
+)
 from src.shared.python.perturbation.trial_evidence import CanonicalTrialEvidence
 
 logger = logging.getLogger(__name__)
@@ -662,12 +665,7 @@ def _validate_plan_projection(
     plan: object,
     compatibility_config: PerturbationConfig,
 ) -> None:
-    n_runs = getattr(plan, "n_runs", None)
-    seed = getattr(plan, "seed", None)
-    if type(n_runs) is not int or n_runs <= 0:
-        raise ValueError("plan n_runs must be a positive integer")
-    if type(seed) is not int:
-        raise ValueError("plan seed must be an integer")
+    n_runs, seed = require_plan_execution_identity(plan)
     if compatibility_config.n_trials != n_runs:
         raise ValueError("compatibility_config n_trials must match plan n_runs")
     if compatibility_config.seed != seed:

@@ -1,7 +1,7 @@
 {
   "schema_version": "proximal-distal-claim-audit-v2",
   "paper_source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-  "source_digest": "7407e8f00842ecdf95769d65ac7d2fe3f8d495cb0d11d405640e7582e6b8560a",
+  "source_digest": "ea406841c4a500dcab41d3b4ed1d7763ee0a2f9cf559d15041faa4036b31dfe7",
   "source_count": 36,
   "candidate_count": 1100,
   "candidates": [
@@ -17588,12 +17588,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-bb48a75174a745ce",
+      "candidate_id": "PD-CAND-b2e277593764ee20",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_claim_adjudication_summary.qmd",
       "line_start": 26,
       "line_end": 33,
-      "text": "| `bibliographic_record` | 3 | | `external_empirical_human` | 34 | | `external_methods_or_measurement` | 10 | | `external_modeling_or_simulation` | 15 | | `external_review_or_synthesis` | 10 | | `project_derivation_or_document` | 88 | | `project_executable_or_generated` | 253 | | `prospective_or_unexecuted` | 15 |",
-      "text_sha256": "83cc0d1084fa8f70c0c0f3d3f367ac2d24b58005fd4d97dde8dfd275d29b0ac2",
+      "text": "| `bibliographic_record` | 3 | | `external_empirical_human` | 34 | | `external_methods_or_measurement` | 10 | | `external_modeling_or_simulation` | 15 | | `external_review_or_synthesis` | 10 | | `project_derivation_or_document` | 88 | | `project_executable_or_generated` | 274 | | `prospective_or_unexecuted` | 15 |",
+      "text_sha256": "37aa15cafc7cb1b8a7249f463c1c82a97683dde1f57dacdf82a04f4bd3656d90",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": false,

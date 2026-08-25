@@ -11,6 +11,7 @@ import pytest
 from scripts.research.proximal_distal_energy.claim_audit import (
     build_candidate_inventory,
     validate_registry,
+    write_candidate_inventory,
 )
 from scripts.research.proximal_distal_energy.migrate_claim_adjudication_v2 import (
     PRE_ADJUDICATION_SOURCE_DIGEST,
@@ -35,6 +36,19 @@ def _copy_reviewed_snapshot(root: Path, target_root: Path) -> Path:
     for source in (source_article / "chapters").glob("*.qmd"):
         shutil.copy2(source, target_chapters / source.name)
     return target_data
+
+
+@pytest.mark.unit
+def test_candidate_inventory_writer_preserves_scientific_unicode(
+    tmp_path: Path,
+) -> None:
+    output = tmp_path / "inventory.json"
+
+    write_candidate_inventory(output, {"statement": "P→D — 30°"})
+
+    rendered = output.read_text(encoding="utf-8")
+    assert '"statement": "P→D — 30°"' in rendered
+    assert "\\u2192" not in rendered
 
 
 def _minimal_registry(tmp_path: Path, source_location: str) -> Path:

@@ -35,6 +35,15 @@ from .trial_evidence import (
     TrialOutcome,
     TrialTrace,
 )
+from .trial_adapter_contracts import (
+    collect_trial_evidence,
+    collect_trial_failure,
+    make_trial_evidence_identity,
+    require_fixed_step_horizon,
+    require_localized_time_window,
+    require_trace_index,
+    require_trial_result_geometry,
+)
 
 BindingKind = Literal["joint_torque_offset", "joint_damping"]
 
@@ -135,15 +144,7 @@ class ArticulatedMujocoTrialConfig:
             (self.alignment_id, "alignment_id"),
         ):
             _require_name(value, name)
-        duration = float(self.duration_s)
-        dt = float(self.dt_s)
-        if not math.isfinite(duration) or duration <= 0.0:
-            raise ValueError("duration_s must be positive and finite")
-        if not math.isfinite(dt) or dt <= 0.0:
-            raise ValueError("dt_s must be positive and finite")
-        steps = duration / dt
-        if not math.isclose(steps, round(steps), rel_tol=0.0, abs_tol=1e-12):
-            raise ValueError("duration_s must contain an integer number of steps")
+        require_fixed_step_horizon(self.duration_s, self.dt_s)
         _require_unique_names(self.coordinate_joint_names, "coordinate_joint_names")
         _require_unique_names(self.marker_body_names, "marker_body_names")
         if self.source_body_name not in self.marker_body_names:
@@ -176,7 +177,7 @@ class ArticulatedMujocoTrialConfig:
     @property
     def horizon(self) -> int:
         """Return the exact fixed-step horizon."""
-        return round(self.duration_s / self.dt_s)
+        return require_fixed_step_horizon(self.duration_s, self.dt_s)
 
 
 @dataclass(frozen=True)
@@ -191,17 +192,15 @@ class ArticulatedMujocoTrialResult:
     def __post_init__(self) -> None:
         if not isinstance(self.trace, Trace):
             raise TypeError("trace must be a simulation_backends Trace")
-        if type(self.closest_sample_index) is not int or not (
-            0 <= self.closest_sample_index < self.trace.t.size
-        ):
-            raise ValueError("closest_sample_index must identify a trace sample")
-        if not math.isfinite(self.closest_distance_m) or self.closest_distance_m < 0.0:
-            raise ValueError("closest_distance_m must be finite and non-negative")
-        if self.first_contact_index is not None and (
-            type(self.first_contact_index) is not int
-            or not 0 <= self.first_contact_index < self.trace.t.size
-        ):
-            raise ValueError("first_contact_index must identify a trace sample")
+        require_trial_result_geometry(
+            self.trace, self.closest_sample_index, self.closest_distance_m
+        )
+        require_trace_index(
+            self.trace,
+            self.first_contact_index,
+            "first_contact_index",
+            allow_none=True,
+        )
 
     @property
     def contact_observed(self) -> bool:
@@ -255,11 +254,15 @@ class ArticulatedMujocoTrialAdapter:
         self._topology = self._resolve_topology(model)
         self._columns = self._validate_columns(plan)
         self._validate_control_topology()
-        self._plan_sha256 = plan_sha256
-        self._scenario_sha256 = scenario_sha256
-        self._execution_config_sha256 = self._execution_config_digest()
-        self._tools_revision = tools_revision
-        self._engine_revision = engine_revision
+        self._identity = make_trial_evidence_identity(
+            plan_sha256=plan_sha256,
+            scenario_sha256=scenario_sha256,
+            execution_config_sha256=self._execution_config_digest(),
+            tools_revision=tools_revision,
+            engine_id=self.engine_id,
+            engine_revision=engine_revision,
+            model_id=self.model_id,
+        )
 
     @property
     def model_id(self) -> str:
@@ -267,8 +270,11 @@ class ArticulatedMujocoTrialAdapter:
         return self._config.model_id
 
     def _compile_model(self) -> Any:
+        mujoco = self._mujoco
+        model_type = mujoco.MjModel
+        model_xml = self._config.model_xml
         try:
-            model = self._mujoco.MjModel.from_xml_string(self._config.model_xml)
+            model = model_type.from_xml_string(model_xml)
         except Exception as error:  # noqa: BLE001 - normalize optional C-extension error
             raise ValueError("model_xml is not a valid MuJoCo model") from error
         model.opt.timestep = self._config.dt_s
@@ -280,11 +286,14 @@ class ArticulatedMujocoTrialAdapter:
         return model
 
     def _resolve_topology(self, model: Any) -> _ModelTopology:
+        mujoco = self._mujoco
+        object_type = mujoco.mjtObj
+        joint_type = mujoco.mjtJoint
         joint_ids = tuple(
-            self._name_to_id(model, self._mujoco.mjtObj.mjOBJ_JOINT, name, "joint")
+            self._name_to_id(model, object_type.mjOBJ_JOINT, name, "joint")
             for name in self._config.coordinate_joint_names
         )
-        hinge_type = int(self._mujoco.mjtJoint.mjJNT_HINGE)
+        hinge_type = int(joint_type.mjJNT_HINGE)
         if any(int(model.jnt_type[joint_id]) != hinge_type for joint_id in joint_ids):
             raise ValueError("coordinate joints must be scalar hinge joints")
         qpos_addresses = tuple(
@@ -292,7 +301,7 @@ class ArticulatedMujocoTrialAdapter:
         )
         dof_addresses = tuple(int(model.jnt_dofadr[joint_id]) for joint_id in joint_ids)
         marker_ids = tuple(
-            self._name_to_id(model, self._mujoco.mjtObj.mjOBJ_BODY, name, "body")
+            self._name_to_id(model, object_type.mjOBJ_BODY, name, "body")
             for name in self._config.marker_body_names
         )
         joint_index = {
@@ -305,10 +314,10 @@ class ArticulatedMujocoTrialAdapter:
             joint_index_by_name=joint_index,
             marker_body_ids=marker_ids,
             source_body_id=marker_ids[
-                self._config.marker_body_names.index(self._config.source_body_name)
+                self._marker_index(self._config.source_body_name)
             ],
             target_body_id=marker_ids[
-                self._config.marker_body_names.index(self._config.target_body_name)
+                self._marker_index(self._config.target_body_name)
             ],
         )
 
@@ -317,6 +326,10 @@ class ArticulatedMujocoTrialAdapter:
         if identifier < 0:
             raise ValueError(f"{label} {name!r} was not found in model topology")
         return identifier
+
+    def _marker_index(self, marker_name: str) -> int:
+        marker_names = self._config.marker_body_names
+        return marker_names.index(marker_name)
 
     def _validate_columns(self, plan: object) -> tuple[_Column, ...]:
         raw_noise = getattr(plan, "noise", None)
@@ -366,19 +379,7 @@ class ArticulatedMujocoTrialAdapter:
         points: tuple[str, ...],
         declared_points: tuple[str, ...],
     ) -> None:
-        if not isinstance(window, tuple) or len(window) != 2:
-            raise ValueError("localized torque requires one half-open time window")
-        if not all(isinstance(value, (int, float)) for value in window):
-            raise ValueError("localized torque time window must be finite")
-        start_s, end_s = (float(value) for value in window)
-        if not math.isfinite(start_s) or not math.isfinite(end_s):
-            raise ValueError("localized torque time window must be finite")
-        if start_s < 0.0 or start_s >= end_s:
-            raise ValueError(
-                "localized torque time window must satisfy 0 <= start < end"
-            )
-        if end_s > self._config.duration_s:
-            raise ValueError("localized torque time window exceeds trial duration")
+        require_localized_time_window(window, self._config.duration_s)
         if not declared_points or points != declared_points:
             raise ValueError("localized torque point does not match its binding")
 
@@ -393,11 +394,10 @@ class ArticulatedMujocoTrialAdapter:
                 raise ValueError(f"joint {name!r} was not found in coordinate topology")
 
     def _execution_config_digest(self) -> str:
+        model_xml = self._config.model_xml
         payload = {
             "schema_version": "articulated-mujoco-trial-config/v1",
-            "model_xml_sha256": hashlib.sha256(
-                self._config.model_xml.encode("utf-8")
-            ).hexdigest(),
+            "model_xml_sha256": hashlib.sha256(model_xml.encode("utf-8")).hexdigest(),
             "model_id": self._config.model_id,
             "duration_s": self._config.duration_s,
             "dt_s": self._config.dt_s,
@@ -479,12 +479,8 @@ class ArticulatedMujocoTrialAdapter:
             },
             markers=markers,
         )
-        source_index = self._config.marker_body_names.index(
-            self._config.source_body_name
-        )
-        target_index = self._config.marker_body_names.index(
-            self._config.target_body_name
-        )
+        source_index = self._marker_index(self._config.source_body_name)
+        target_index = self._marker_index(self._config.target_body_name)
         offsets = markers[:, source_index] - markers[:, target_index]
         distances = np.sqrt(np.einsum("ij,ij->i", offsets, offsets))
         closest_index = int(np.argmin(distances))
@@ -613,17 +609,12 @@ class ArticulatedMujocoTrialAdapter:
                 time_s=float(trace.t[result.first_contact_index]),
                 state=self._impact_state(trace, result.first_contact_index),
             )
-        return CanonicalTrialEvidence(
+        return collect_trial_evidence(
+            identity=self._identity,
             trial_index=trial_index,
             seed=plan_seed,
-            plan_sha256=self._plan_sha256,
-            scenario_sha256=self._scenario_sha256,
-            execution_config_sha256=self._execution_config_sha256,
-            tools_revision=self._tools_revision,
-            engine_id=self.engine_id,
-            engine_revision=self._engine_revision,
-            model_id=self.model_id,
-            sampled_inputs=self._sampled_inputs(sampled_row),
+            sampled_row=sampled_row,
+            columns=self._columns,
             outcome=outcome,
             trace=trial_trace,
             impact=impact,
@@ -638,29 +629,13 @@ class ArticulatedMujocoTrialAdapter:
         error: Exception,
     ) -> CanonicalTrialEvidence:
         """Retain a declared articulated domain or numerical failure."""
-        return CanonicalTrialEvidence(
-            trial_index=trial_index,
-            seed=plan_seed,
-            plan_sha256=self._plan_sha256,
-            scenario_sha256=self._scenario_sha256,
-            execution_config_sha256=self._execution_config_sha256,
-            tools_revision=self._tools_revision,
-            engine_id=self.engine_id,
-            engine_revision=self._engine_revision,
-            model_id=self.model_id,
-            sampled_inputs=self._sampled_inputs(sampled_row),
-            outcome="numerical_failure",
-            trace=None,
-            failure_reason=f"{type(error).__name__}: {error}",
-        )
-
-    def _sampled_inputs(self, sampled_row: np.ndarray) -> tuple[SampledInput, ...]:
-        row = np.asarray(sampled_row, dtype=float).reshape(-1)
-        if row.shape != (len(self._columns),):
-            raise ValueError("sampled row does not match plan columns")
-        return tuple(
-            SampledInput(column.key, float(value), column.unit)
-            for column, value in zip(self._columns, row, strict=True)
+        return collect_trial_failure(
+            self._identity,
+            trial_index,
+            plan_seed,
+            sampled_row,
+            self._columns,
+            error,
         )
 
     def _impact_state(self, trace: Trace, index: int) -> tuple[SampledInput, ...]:
@@ -681,14 +656,13 @@ class ArticulatedMujocoTrialAdapter:
             )
         if trace.markers is None:
             raise ValueError("impact state requires retained markers")
-        marker_index = self._config.marker_body_names.index(
-            self._config.source_body_name
-        )
+        marker_index = self._marker_index(self._config.source_body_name)
+        time_values = trace.t
         if index == 0:
             velocity = (
                 trace.markers[1, marker_index] - trace.markers[0, marker_index]
             ) / self._config.dt_s
-        elif index == trace.t.size - 1:
+        elif index == time_values.size - 1:
             velocity = (
                 trace.markers[-1, marker_index] - trace.markers[-2, marker_index]
             ) / self._config.dt_s

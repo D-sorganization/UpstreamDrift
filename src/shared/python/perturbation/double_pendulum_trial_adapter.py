@@ -33,6 +33,14 @@ from .trial_evidence import (
     TrialOutcome,
     TrialTrace,
 )
+from .trial_adapter_contracts import (
+    collect_trial_evidence,
+    collect_trial_failure,
+    make_trial_evidence_identity,
+    require_fixed_step_horizon,
+    require_localized_time_window,
+    require_trial_result_geometry,
+)
 
 SHOULDER_DAMPING_KEY = "swing_sim.swing.damping_shoulder"
 WRIST_DAMPING_KEY = "swing_sim.swing.damping_wrist"
@@ -111,15 +119,7 @@ class DoublePendulumTrialConfig:
         v.flags.writeable = False
         object.__setattr__(self, "initial_state", SimState(q=q, v=v, time=0.0))
 
-        duration = float(self.duration_s)
-        dt = float(self.dt_s)
-        if not math.isfinite(duration) or duration <= 0.0:
-            raise ValueError("duration_s must be positive and finite")
-        if not math.isfinite(dt) or dt <= 0.0:
-            raise ValueError("dt_s must be positive and finite")
-        steps = duration / dt
-        if not math.isclose(steps, round(steps), rel_tol=0.0, abs_tol=1e-12):
-            raise ValueError("duration_s must contain an integer number of steps")
+        require_fixed_step_horizon(self.duration_s, self.dt_s)
 
         torques = np.asarray(self.base_torques_nm, dtype=float)
         if torques.shape != (2,) or not np.isfinite(torques).all():
@@ -140,7 +140,7 @@ class DoublePendulumTrialConfig:
     @property
     def horizon(self) -> int:
         """Return the exact number of fixed integration steps."""
-        return round(self.duration_s / self.dt_s)
+        return require_fixed_step_horizon(self.duration_s, self.dt_s)
 
 
 @dataclass(frozen=True)
@@ -155,12 +155,9 @@ class DoublePendulumTrialResult:
     def __post_init__(self) -> None:
         if not isinstance(self.trace, Trace):
             raise TypeError("trace must be a simulation_backends Trace")
-        if type(self.closest_sample_index) is not int or not (
-            0 <= self.closest_sample_index < self.trace.t.size
-        ):
-            raise ValueError("closest_sample_index must identify a trace sample")
-        if not math.isfinite(self.closest_distance_m) or self.closest_distance_m < 0.0:
-            raise ValueError("closest_distance_m must be finite and non-negative")
+        require_trial_result_geometry(
+            self.trace, self.closest_sample_index, self.closest_distance_m
+        )
         if type(self.contact_observed) is not bool:
             raise TypeError("contact_observed must be bool")
 
@@ -195,11 +192,15 @@ class DoublePendulumTrialAdapter:
             raise ValueError("double-pendulum execution requires a swing plan")
         self._config = config
         self._columns = self._validate_columns(plan)
-        self._plan_sha256 = plan_sha256
-        self._scenario_sha256 = scenario_sha256
-        self._execution_config_sha256 = self._execution_config_digest()
-        self._tools_revision = tools_revision
-        self._engine_revision = engine_revision
+        self._identity = make_trial_evidence_identity(
+            plan_sha256,
+            scenario_sha256,
+            self._execution_config_digest(),
+            tools_revision,
+            self.engine_id,
+            engine_revision,
+            self.model_id,
+        )
 
     def _validate_columns(self, plan: object) -> tuple[_Column, ...]:
         raw_noise = getattr(plan, "noise", None)
@@ -225,9 +226,10 @@ class DoublePendulumTrialAdapter:
         return tuple(columns)
 
     def _execution_config_digest(self) -> str:
+        model_params = self._config.model_params
         payload = {
             "schema_version": "double-pendulum-trial-config/v1",
-            "model_params": self._config.model_params.model_dump(mode="json"),
+            "model_params": model_params.model_dump(mode="json"),
             "initial_state": {
                 "q": self._config.initial_state.q.tolist(),
                 "v": self._config.initial_state.v.tolist(),
@@ -264,20 +266,7 @@ class DoublePendulumTrialAdapter:
         window: object,
         points: tuple[str, ...],
     ) -> None:
-        if not isinstance(window, tuple) or len(window) != 2:
-            raise ValueError("localized torque requires one half-open time window")
-        start, end = window
-        if not all(isinstance(value, (int, float)) for value in window):
-            raise ValueError("localized torque time window must be finite")
-        start_s, end_s = float(start), float(end)
-        if not math.isfinite(start_s) or not math.isfinite(end_s):
-            raise ValueError("localized torque time window must be finite")
-        if start_s < 0.0 or start_s >= end_s:
-            raise ValueError(
-                "localized torque time window must satisfy 0 <= start < end"
-            )
-        if end_s > self._config.duration_s:
-            raise ValueError("localized torque time window exceeds trial duration")
+        require_localized_time_window(window, self._config.duration_s)
         expected_point = _TORQUE_KEYS[key][1]
         if points != (expected_point,):
             raise ValueError(
@@ -316,7 +305,8 @@ class DoublePendulumTrialAdapter:
         )
 
     def _parameters_for(self, row: np.ndarray) -> GolfModelParams:
-        values = self._config.model_params.model_dump()
+        model_params = self._config.model_params
+        values = model_params.model_dump()
         for column, sampled_value in zip(self._columns, row, strict=True):
             field = _DAMPING_KEYS.get(column.key)
             if field is not None:
@@ -404,19 +394,14 @@ class DoublePendulumTrialAdapter:
                 ),
             )
             outcome = "hit"
-        return CanonicalTrialEvidence(
-            trial_index=trial_index,
-            seed=plan_seed,
-            plan_sha256=self._plan_sha256,
-            scenario_sha256=self._scenario_sha256,
-            execution_config_sha256=self._execution_config_sha256,
-            tools_revision=self._tools_revision,
-            engine_id=self.engine_id,
-            engine_revision=self._engine_revision,
-            model_id=self.model_id,
-            sampled_inputs=self._sampled_inputs(sampled_row),
-            outcome=outcome,
-            trace=trial_trace,
+        return collect_trial_evidence(
+            self._identity,
+            trial_index,
+            plan_seed,
+            sampled_row,
+            self._columns,
+            outcome,
+            trial_trace,
             impact=impact,
             closest_approach=closest,
         )
@@ -429,29 +414,13 @@ class DoublePendulumTrialAdapter:
         error: Exception,
     ) -> CanonicalTrialEvidence:
         """Retain a declared domain/numerical failure without outputs."""
-        return CanonicalTrialEvidence(
-            trial_index=trial_index,
-            seed=plan_seed,
-            plan_sha256=self._plan_sha256,
-            scenario_sha256=self._scenario_sha256,
-            execution_config_sha256=self._execution_config_sha256,
-            tools_revision=self._tools_revision,
-            engine_id=self.engine_id,
-            engine_revision=self._engine_revision,
-            model_id=self.model_id,
-            sampled_inputs=self._sampled_inputs(sampled_row),
-            outcome="numerical_failure",
-            trace=None,
-            failure_reason=f"{type(error).__name__}: {error}",
-        )
-
-    def _sampled_inputs(self, sampled_row: np.ndarray) -> tuple[SampledInput, ...]:
-        row = np.asarray(sampled_row, dtype=float).reshape(-1)
-        if row.shape != (len(self._columns),):
-            raise ValueError("sampled row does not match plan columns")
-        return tuple(
-            SampledInput(column.key, float(value), column.unit)
-            for column, value in zip(self._columns, row, strict=True)
+        return collect_trial_failure(
+            self._identity,
+            trial_index,
+            plan_seed,
+            sampled_row,
+            self._columns,
+            error,
         )
 
     @staticmethod
