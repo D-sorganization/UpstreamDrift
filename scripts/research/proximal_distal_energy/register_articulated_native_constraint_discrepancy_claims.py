@@ -198,6 +198,61 @@ def _find_forward(candidates: list[dict[str, Any]], prefix: str) -> dict[str, An
     return matches[0]
 
 
+def _canonicalize_candidate_location_pairs(
+    registry: dict[str, Any], candidates: list[dict[str, Any]]
+) -> None:
+    """Restore the parallel claim arrays from candidate identity authority."""
+
+    by_id = {candidate["candidate_id"]: candidate for candidate in candidates}
+    by_location = {
+        f"{candidate['source_path']}:{candidate['line_start']}": candidate
+        for candidate in candidates
+    }
+    if len(by_id) != len(candidates) or len(by_location) != len(candidates):
+        raise ValueError("candidate inventory identities and locations must be unique")
+    reviews = {
+        review["candidate_id"]: review for review in registry["candidate_reviews"]
+    }
+    for claim in registry["claims"]:
+        candidate_ids = list(claim.get("candidate_ids", []))
+        source_locations = list(claim.get("source_locations", []))
+        if len(candidate_ids) != len(set(candidate_ids)):
+            raise ValueError(f"{claim['claim_id']} repeats a candidate identity")
+        if len(source_locations) < len(candidate_ids):
+            raise ValueError(f"{claim['claim_id']} has an unpaired candidate identity")
+        deficit = len(source_locations) - len(candidate_ids)
+        extras: list[str] = []
+        for location in source_locations:
+            candidate = by_location.get(location)
+            if candidate is None:
+                continue
+            candidate_id = candidate["candidate_id"]
+            if candidate_id not in candidate_ids and candidate_id not in extras:
+                extras.append(candidate_id)
+        if len(extras) > deficit:
+            raise ValueError(f"{claim['claim_id']} location-only evidence is ambiguous")
+        canonical_ids = [*candidate_ids, *extras]
+        for candidate_id in extras:
+            if candidate_id not in reviews:
+                raise ValueError(f"missing candidate review for {candidate_id}")
+            claim_ids = reviews[candidate_id].setdefault("claim_ids", [])
+            if claim["claim_id"] not in claim_ids:
+                claim_ids.append(claim["claim_id"])
+        try:
+            canonical_locations = [
+                f"{by_id[candidate_id]['source_path']}:"
+                f"{by_id[candidate_id]['line_start']}"
+                for candidate_id in canonical_ids
+            ]
+        except KeyError as error:
+            raise ValueError(
+                f"{claim['claim_id']} references an unknown candidate identity"
+            ) from error
+        claim["candidate_ids"] = canonical_ids
+        claim["source_locations"] = canonical_locations
+    registry["candidate_reviews"] = list(reviews.values())
+
+
 def _reconcile_forward_transport_claims(
     registry: dict[str, Any], candidates: list[dict[str, Any]]
 ) -> None:
@@ -291,14 +346,20 @@ def _reconcile_synthesis_candidates(
         location = f"{candidate['source_path']}:{candidate['line_start']}"
         for claim_id in claim_ids:
             claim = claims[claim_id]
-            claim["candidate_ids"] = list(
-                dict.fromkeys(
-                    [*claim.get("candidate_ids", []), candidate["candidate_id"]]
-                )
-            )
-            claim["source_locations"] = list(
-                dict.fromkeys([*claim.get("source_locations", []), location])
-            )
+            candidate_ids = list(claim.get("candidate_ids", []))
+            source_locations = list(claim.get("source_locations", []))
+            if len(candidate_ids) != len(source_locations):
+                raise ValueError(f"{claim_id} candidate/location pairs are misaligned")
+            candidate_id = candidate["candidate_id"]
+            if candidate_ids.count(candidate_id) > 1:
+                raise ValueError(f"{claim_id} repeats candidate {candidate_id}")
+            if candidate_id in candidate_ids:
+                source_locations[candidate_ids.index(candidate_id)] = location
+            else:
+                candidate_ids.append(candidate_id)
+                source_locations.append(location)
+            claim["candidate_ids"] = candidate_ids
+            claim["source_locations"] = source_locations
             claim["last_verified_on"] = DATE
     registry["candidate_reviews"] = list(reviews.values())
 
@@ -436,6 +497,7 @@ def _reconcile(
     claims: list[dict[str, Any]],
     selected: dict[str, dict[str, Any]],
 ) -> None:
+    _canonicalize_candidate_location_pairs(registry, inventory["candidates"])
     registry["claims"] = [
         claim for claim in registry["claims"] if claim["claim_id"] not in CLAIM_IDS
     ] + claims

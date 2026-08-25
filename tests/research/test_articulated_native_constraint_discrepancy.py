@@ -39,9 +39,19 @@ def test_native_claim_registration_is_idempotent() -> None:
     reviews = {
         review["candidate_id"]: review for review in registry["candidate_reviews"]
     }
+    candidates = {
+        candidate["candidate_id"]: candidate for candidate in inventory["candidates"]
+    }
     for claim in registry["claims"]:
-        for candidate_id in claim["candidate_ids"]:
+        assert len(claim["candidate_ids"]) == len(claim["source_locations"])
+        for candidate_id, source_location in zip(
+            claim["candidate_ids"], claim["source_locations"], strict=True
+        ):
             assert claim["claim_id"] in reviews[candidate_id]["claim_ids"]
+            candidate = candidates[candidate_id]
+            assert source_location == (
+                f"{candidate['source_path']}:{candidate['line_start']}"
+            )
 
 
 def test_native_constraint_configuration_fails_closed() -> None:

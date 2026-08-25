@@ -122,18 +122,18 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   host's unqualified Pinocchio module. The two 56-test affected/release suites
   and 38 governance tests pass. Qualification covers 653 artifacts, 410
   literals, 2,333 references, 78 URLs, and 239 PDF pages.
-- Ruff check/format, PR-delta title case, tracked-file budget, SPEC paths,
-  workflow governance, document catalog, and document-size gates pass. One
-  owned exception through 2026-09-30 retains the 51,523-byte spatial locator
-  chapter until post-#8752 migration; the 51,200-byte default remains.
+- Candidate/location reconciliation now restores canonical parallel arrays and
+  repeated registration is idempotent. Ruff, title case, tracked-file budget,
+  SPEC, workflow, document catalog, and document-size gates pass. The spatial
+  locator keeps its owned size exception through 2026-09-30.
 - Computational qualification remains true and archival qualification false.
   Seven #8752 orchestration/API exceptions expire under #8963 on 2026-09-30.
 
 ## Immediate Next Actions
 
-1. Run the protected pre-push gate, commit the consolidated CI correction, and
-   push once. Then shepherd PR #9046 through protected CI and human review
-   without bypasses or redundant reruns.
+1. Commit and push the candidate/location correction once, then shepherd PR
+   #9046 through protected CI and human review without bypasses or redundant
+   reruns.
 2. After merge, verify the merge commit is on remote `main`, update this handoff,
    then make an explicit #8800 recovery-versus-fresh-execution decision. Keep
    #8752 open until #8800 produces the registered evidence or is explicitly
