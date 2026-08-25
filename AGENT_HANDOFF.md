@@ -118,6 +118,10 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   violations. They are registered as narrow exceptions expiring 2026-09-30
   under open decomposition issue #8963; acceptance requires byte-equivalent
   evidence, registry, and plan hashes before removing them.
+- The first protected pre-push attempt passed Ruff, title case, mypy, Bandit,
+  and unit tests, then correctly stopped because Prettier rewrote the generated
+  Simscape `.leaderboard_meta.json`. Its committed bytes are retained and the
+  exact generated path is now excluded from formatter mutation.
 
 ## Immediate Next Actions
 
