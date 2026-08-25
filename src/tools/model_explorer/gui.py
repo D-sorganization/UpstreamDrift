@@ -222,19 +222,9 @@ class MainWidget(QWidget):
         )
 
         if file_path:
-            try:
-                self._load_urdf_file(Path(file_path))
+            if self.load_model(file_path):
                 self.status_bar.showMessage(f"Opened: {file_path}")
                 logger.info(f"URDF opened from: {file_path}")
-            except (
-                FileNotFoundError,
-                OSError,
-                RuntimeError,
-                TypeError,
-                ValueError,
-            ) as e:
-                logger.error(f"Error opening URDF: {e}")
-                QMessageBox.critical(self, "Error", f"Failed to open URDF: {e}")
 
     def load_from_library(self) -> None:  # noqa: C901
         """Load a URDF model from the bundled library."""
@@ -254,14 +244,15 @@ class MainWidget(QWidget):
 
                 if category == "golf_clubs":
                     urdf_path = library.generate_golf_club_urdf(model_key)
-                    if urdf_path:
-                        self._load_urdf_file(urdf_path)
+                    if urdf_path and self.load_model(urdf_path):
                         self.status_bar.showMessage(f"Loaded golf club: {model_key}")
                 elif category == "human":
                     urdf_path = library.get_human_model(model_key)
                     if urdf_path and urdf_path.exists():
-                        self._load_urdf_file(urdf_path)
-                        self.status_bar.showMessage(f"Loaded human model: {model_key}")
+                        if self.load_model(urdf_path):
+                            self.status_bar.showMessage(
+                                f"Loaded human model: {model_key}"
+                            )
                     else:
                         QMessageBox.information(
                             self,
@@ -288,10 +279,10 @@ class MainWidget(QWidget):
 
                             path = _project_root / raw_path
                         if path.exists():
-                            self._load_urdf_file(path)
-                            self.status_bar.showMessage(
-                                f"Loaded {category} model: {model_info['name']}"
-                            )
+                            if self.load_model(path):
+                                self.status_bar.showMessage(
+                                    f"Loaded {category} model: {model_info['name']}"
+                                )
                         else:
                             QMessageBox.warning(
                                 self, "Error", f"File not found: {path}"
@@ -319,19 +310,28 @@ class MainWidget(QWidget):
     def _on_library_model_selected(self, category: str, model_key: str) -> None:
         logger.info(f"Model selected from library: {category}/{model_key}")
 
-    def _load_urdf_file(self, file_path: Path) -> None:
-        """Load URDF file content and refresh the viewport."""
+    def load_model(self, file_path: str | Path) -> bool:
+        """Load URDF or OSIM model file content and refresh the viewport.
+
+        Args:
+            file_path: Path to the model file to load.
+
+        Returns:
+            True if model loading and rendering succeed, False otherwise.
+        """
+        path = Path(file_path)
         try:
-            if file_path.suffix.lower() == ".osim":
+            if path.suffix.lower() == ".osim":
                 from .osim_loader import OsimLoader
 
-                urdf_content = OsimLoader().to_urdf(file_path)
+                urdf_content = OsimLoader().to_urdf(path)
             else:
-                urdf_content = file_path.read_text(encoding="utf-8")
-            self.visualization_widget.update_visualization(urdf_content, str(file_path))
-            self.current_file_path = file_path
+                urdf_content = path.read_text(encoding="utf-8")
+            self.visualization_widget.update_visualization(urdf_content, str(path))
+            self.current_file_path = path
             self._update_window_title()
-            logger.info(f"URDF loaded: {file_path}")
+            logger.info(f"URDF loaded: {path}")
+            return True
         except (RuntimeError, TypeError, ValueError, OSError) as e:
             logger.exception("Error loading URDF file: %s", e)
             from PyQt6.QtWidgets import QMessageBox
@@ -339,8 +339,13 @@ class MainWidget(QWidget):
             QMessageBox.warning(
                 self,
                 "Model Load Error",
-                f"Failed to load model file '{file_path.name}':\n\n{e}",
+                f"Failed to load model file '{path.name}':\n\n{e}",
             )
+            return False
+
+    def _load_urdf_file(self, file_path: str | Path) -> bool:
+        """Backwards-compatible alias for load_model."""
+        return self.load_model(file_path)
 
     def save_urdf(self) -> None:
         if self.current_file_path:
@@ -490,10 +495,10 @@ class MainWidget(QWidget):
                 library = ModelLibrary()
                 urdf_path = library.get_human_model(str(default_model))
                 if urdf_path and urdf_path.exists():
-                    self._load_urdf_file(urdf_path)
-                    self.status_bar.showMessage(
-                        f"Loaded default model: {default_model}"
-                    )
+                    if self.load_model(urdf_path):
+                        self.status_bar.showMessage(
+                            f"Loaded default model: {default_model}"
+                        )
                 else:
                     logger.warning(f"Default model {default_model} not found")
         except ImportError as e:
