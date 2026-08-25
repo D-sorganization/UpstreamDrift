@@ -25,6 +25,7 @@ from scripts.research.proximal_distal_energy.subject_scaled_spatial_geometry imp
 pytestmark = pytest.mark.scientific
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = REPO_ROOT / "docs/research/proximal_distal_energy_transfer/data"
+CLUB_DOF_ROUNDOFF_ATOL_RAD = 8.0 * np.finfo(np.float64).eps
 
 
 def _representative_model():
@@ -69,8 +70,11 @@ def test_solver_closes_both_contacts_without_moving_the_club() -> None:
     assert solution.joint_limits_satisfied
     assert solution.collision_free
     assert np.max(solution.hand_to_grip_distance_m) <= 5.0e-4
-    np.testing.assert_array_equal(
-        solution.q[model.club_dof_indices], q_reference[model.club_dof_indices]
+    np.testing.assert_allclose(
+        solution.q[model.club_dof_indices],
+        q_reference[model.club_dof_indices],
+        rtol=0.0,
+        atol=CLUB_DOF_ROUNDOFF_ATOL_RAD,
     )
     assert solution.minimum_joint_limit_margin_rad > 0.05
     assert solution.minimum_collision_clearance_m >= 0.0
@@ -134,11 +138,13 @@ def test_committed_closed_contact_evidence_and_figure_are_current() -> None:
             )
             for time_index, sample_time in enumerate(arrays["time_s"]):
                 q_reference, _, _ = prescribed_state(model, float(sample_time))
-                np.testing.assert_array_equal(
+                np.testing.assert_allclose(
                     arrays["solution_q"][
                         case_index, time_index, model.club_dof_indices
                     ],
                     q_reference[model.club_dof_indices],
+                    rtol=0.0,
+                    atol=CLUB_DOF_ROUNDOFF_ATOL_RAD,
                 )
     for relative, expected in record["source_sha256"].items():
         assert (

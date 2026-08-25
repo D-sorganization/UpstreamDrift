@@ -1,6 +1,6 @@
 # Agent Handoff — UpstreamDrift
 
-Last updated: 2026-08-24
+Last updated: 2026-08-25
 
 This file records current operational state, not history. Git and GitHub retain
 history. Epic #8557 is the single proximal-to-distal completion authority.
@@ -106,35 +106,34 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 
 ## Current Validation
 
-- The complete changed scientific surface (38 files) passes serially; one native
-  restart test skips locally because robotics Pinocchio is not installed.
-- A separate 76-test propagation-plan/checkpoint subset passes. The focused
-  #8752, claim-summary, and numeric-registration set passes 45 tests.
-- Ruff check and format pass for all 70 Python files in the PR diff. Title-case,
-  changed-file whitespace, and tracked-file size-budget checks pass.
-- Claim audit, numeric audit, release review, evidence integrity, external-source
-  review, momentum readiness, and computational open-release qualification pass.
-- Computational qualification rendered all 239 PDF pages. Archival qualification
-  intentionally remains false.
-- The architecture gate exposed seven pre-existing #8752 orchestration/API
-  violations. They are registered as narrow exceptions expiring 2026-09-30
-  under open decomposition issue #8963; acceptance requires byte-equivalent
-  evidence, registry, and plan hashes before removing them.
-- The first protected pre-push attempt passed Ruff, title case, mypy, Bandit,
-  and unit tests, then correctly stopped because Prettier rewrote the generated
-  Simscape `.leaderboard_meta.json`. Its committed bytes are retained and the
-  exact generated path is now excluded from formatter mutation.
-- CI Standard on PR #9046 passed architecture, size, SPEC, DRY, error-handling,
-  and suppression gates, then exposed 18 net-new unmarked scientific tests in
-  three #8752 modules. Those modules now declare `pytest.mark.scientific`; the
-  resulting source-identity change was propagated through the deterministic
-  structural plan and release manifests. All 37 focused tests pass; the marker
-  baseline shrank by 38 entries to 19,769 and the ratchet reports no drift.
+- PR #9046 head `2b7a70135469f720a5005da766e4d6fee544936f` remains open,
+  mergeable, human-review gated, and without auto-merge. Its first protected
+  wave passed publication, architecture, size, DRY, security, dependency, Rust,
+  and document gates; the correction addresses every remaining CI failure.
+- The local correction fetches the registered campaign source commit explicitly
+  for shallow CI, makes result tampering non-no-op, and limits locked club
+  coordinates to eight binary64 epsilons with zero relative tolerance. Claim
+  migration locks the 1,126-candidate, 313-claim digest and claims 305--314.
+- Numeric scaffolding now retains protected-review pointers and custom reported
+  boundaries only when claim ID, literal ID, and statement digest match;
+  statement drift forces fresh scaffolding. Registered numeric documents remain
+  byte-authoritative instead of being rerouted to semantically weaker values.
+- The 56-test affected-model/claim suite, separate 56-test release/evidence/PDF
+  suite, and 38 governance tests pass serially. Qualification validates 653
+  artifacts, 410 literals, 2,333 references, 78 URLs, and 239 PDF pages.
+- Ruff check/format, PR-delta title case, tracked-file budget, SPEC paths,
+  workflow governance, document catalog, and document-size gates pass. One
+  owned exception through 2026-09-30 retains the 51,523-byte spatial locator
+  chapter until post-#8752 migration; the 51,200-byte default remains.
+- Computational qualification remains 239 rendered pages and archival
+  qualification remains intentionally false. The seven pre-existing #8752
+  orchestration/API exceptions still expire 2026-09-30 under issue #8963.
 
 ## Immediate Next Actions
 
-1. Push the suite-marker correction, then shepherd PR #9046 through protected
-   CI and human review without bypasses or redundant reruns.
+1. Run the protected pre-push gate, commit the consolidated CI correction, and
+   push once. Then shepherd PR #9046 through protected CI and human review
+   without bypasses or redundant reruns.
 2. After merge, verify the merge commit is on remote `main`, update this handoff,
    then make an explicit #8800 recovery-versus-fresh-execution decision. Keep
    #8752 open until #8800 produces the registered evidence or is explicitly

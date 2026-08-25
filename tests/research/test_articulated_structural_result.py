@@ -188,7 +188,7 @@ def test_result_write_is_atomic_exact_and_tamper_evident(tmp_path) -> None:
     assert not output.with_suffix(".json.tmp").exists()
     assert validate_structural_propagation_result(output, "c" * 64) == record
     tampered = json.loads(output.read_text(encoding="utf-8"))
-    tampered["corners"][0]["matched_cell_count"] = 1
+    tampered["corners"][0]["matched_cell_count"] += 1
     output.write_text(json.dumps(tampered, indent=2) + "\n", encoding="utf-8")
     with pytest.raises(RuntimeError, match="does not reproduce"):
         validate_structural_propagation_result(output, "c" * 64)

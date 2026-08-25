@@ -1439,6 +1439,12 @@ jobs:
             fi
           fi
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Fetch registered headline-campaign source revision
+        shell: bash
+        run: |
+          source_revision=$(python3 -c 'import json; print(json.load(open("docs/research/proximal_distal_energy_transfer/data/articulated_headline_execution_provenance.json"))["source_revision"])')
+          git fetch --no-tags --depth=1 origin "$source_revision"
+          git cat-file -e "$source_revision^{commit}"
       - name: Fetch pinned Tools packages
         uses: ./.github/actions/fetch-pinned-tools
       - name: Check for core test relevant changes

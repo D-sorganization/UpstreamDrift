@@ -12,6 +12,7 @@ from scripts.research.proximal_distal_energy.scaffold_numeric_claim_contracts im
     REPORTED_PATH,
     _has_semantic_pointer_match,
     _pointer_matches_declared_quantity,
+    _retain_reviewed_entry,
     _scale_is_semantically_valid,
     build_scaffold,
 )
@@ -25,6 +26,41 @@ def test_scaffold_reproduces_registered_documents() -> None:
 
     assert contracts == json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
     assert reported == json.loads(REPORTED_PATH.read_text(encoding="utf-8"))
+
+
+def test_reviewed_reported_entry_requires_exact_statement_and_reindexes() -> None:
+    claim = {"claim_id": "PD-CLAIM-TEST"}
+    literal = {"literal_id": "5#1"}
+    entry = {
+        "literal_id": "5#1",
+        "artifact": str(REPORTED_PATH),
+        "json_pointer": "/claims/PD-CLAIM-TEST/4/value",
+    }
+    record = {"literal_id": "5#1", "value": 5.0}
+    authority = {("PD-CLAIM-TEST", "reviewed-digest", "5#1"): (entry, record)}
+    reported: dict[str, list[dict[str, object]]] = {}
+
+    assert (
+        _retain_reviewed_entry(
+            claim=claim,
+            statement_sha256="changed-digest",
+            literal=literal,
+            authority=authority,
+            reported=reported,
+        )
+        is None
+    )
+    retained = _retain_reviewed_entry(
+        claim=claim,
+        statement_sha256="reviewed-digest",
+        literal=literal,
+        authority=authority,
+        reported=reported,
+    )
+
+    assert retained is not None
+    assert retained["json_pointer"] == "/claims/PD-CLAIM-TEST/0/value"
+    assert reported == {"PD-CLAIM-TEST": [record]}
 
 
 def test_delivery_event_context_matches_time_pointer() -> None:

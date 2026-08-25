@@ -3,18 +3,18 @@
 ## Current Scientific Audit State (2026-08-24)
 
 Epic #8557 has completed the current narrative-candidate adjudication contract:
-1,100 reviewed candidates and 303 atomic claims. Issue #8724 adds an exhaustive,
-snapshot-locked four-way outcome authority: 283 supported at their declared
+1,126 reviewed candidates and 313 atomic claims. Issue #8724 adds an exhaustive,
+snapshot-locked four-way outcome authority: 293 supported at their declared
 estimands and boundaries, five inconclusive, 15 untested, and none contradicted.
 The absence of a contradicted row does not erase adverse or null results that
 the paper reports accurately. This status is not scientific closure: all 42
 public release claims have a traceable review disposition, and
 each retains its applicable open
 model, equipment, anatomy, archival, or governed-human scientific boundary. The
-issue #8918 numeric authority binds all 380 numeric literals across 124 of the
-303 claims to reviewed statement digests, JSON Pointers, transforms, evidence
-scopes, and tolerances. It distinguishes 172 semantically matched local JSON
-values, 144 registered claim values that have not been independently
+issue #8918 numeric authority binds all 410 numeric literals across 132 of the
+313 claims to reviewed statement digests, JSON Pointers, transforms, evidence
+scopes, and tolerances. It distinguishes 200 semantically matched local JSON
+values, 146 registered claim values that have not been independently
 recomputed, 57 externally reported values, and seven protocol or notation
 values. Representative planar, spatial, articulated-shaft, and finite-ground
 headlines are independently recomputed from committed raw arrays, while the
@@ -108,11 +108,18 @@ implementation performs a mass-whitened rank-revealing SVD, reducing the full
 tolerance. Every committed cross-engine artifact must identify a qualified
 robotics Pinocchio version. The distributed atlas and registered claim must be
 regenerated with two genuine engines before #8751 can close.
-Issue #8752 also remains open. Its first manufactured and Latin-hypercube screen
-does not yet run through both production engine adapters, include a deliberately
-perturbed failure case, refine every uncertainty corner, or propagate uncertainty
-through the registered shaft and ground headline estimands. Neither preliminary
-study supports human, anatomical, equipment, or coaching inference.
+Issue #8752 also remains open. Its terminal 19-corner, one-at-a-time engineering
+campaign completed at source revision `13146cdcece879e7156e06e2dca6626c1a54e045`
+and retained every registered pathway outcome and failure. Nine completed
+nonnominal shaft corners span 80--182 matched cells versus nominal 126/384;
+both grip-damping shaft corners remain retained failures. All 18 completed
+ground corners remain 0/384, with high grip damping retained as a failure.
+These results diagnose sensitivity of the comparability set, not outcome
+effects, probabilities, parameter interactions, equipment calibration, human
+mechanisms, or coaching strategy. Issue #8800 still blocks #8752 completion:
+the obsolete structural-propagation run stopped at 93/830 checkpoints under a
+different source and plan, so its 737 absent branches cannot be relabeled or
+resumed as current release evidence.
 Issues #8703 and #8704 (epic #8699) withdraw two BunkerShot3D outputs from
 quotable status. The `dig_vs_skid` verdict returned `MARGINAL` at all 77 demo
 design points with slope ratios spanning 0.9987--1.0000: the shipped 10 mm
@@ -547,8 +554,8 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.583                                            |
-| **Last Spec Update**    | 2026-08-22                                         |
+| **Spec Version**        | 1.0.585                                            |
+| **Last Spec Update**    | 2026-08-25                                         |
 
 ## 2. Purpose & Mission
 
@@ -578,6 +585,21 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ## 4. Architecture Overview
 
 ### Recent Spec Updates
+
+- **2026-08-25** - Reconciled #8752's terminal articulated uncertainty
+  campaign with the 313-claim publication authority. The protected record now
+  retains all 19 one-at-a-time corners, both shaft grip-damping failures, the
+  ground high-damping failure, and the explicit prohibition on interpreting
+  matched-set movement as an outcome effect or human strategy. Claim migration
+  is locked to 1,126 reviewed candidates and 313 explicitly adjudicated claims;
+  numeric scaffolding preserves protected-review pointers only while the exact
+  statement digest matches. Scientific tests fetch the registered campaign
+  source revision explicitly in shallow CI checkouts, tamper tests make a real
+  mutation, and locked club coordinates use a roundoff-only absolute tolerance.
+  The canonical spatial claim-locator chapter has an owned document-size
+  exception through 2026-09-30 so decomposition can migrate locators after the
+  terminal projection rather than invalidating them during reconciliation.
+  Issue #8800 remains the structural-propagation completion blocker.
 
 - **2026-08-22** - Made the modular Docker build boundary independently
   verifiable for issue #8996. Reusable pinned-Tools setup emits the exact
@@ -3235,6 +3257,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-25 | 1.0.585 | Reconciled #8752's terminal articulated uncertainty evidence with the 313-claim paper. The 19-corner campaign and retained failures remain source-revision bound; matched-set movement is explicitly non-promotional. Claim migration now recognizes the exact 1,126-candidate, 313-claim reviewed snapshot and all ten supported terminal claims. Numeric scaffolding preserves protected-review local pointers and custom reported-value boundaries only for unchanged statement digests. Shallow CI checkouts fetch the registered campaign revision before scientific tests, the structural-result tamper test performs a non-no-op mutation, and locked club coordinates allow only eight binary64 epsilons of platform roundoff. The spatial claim-locator chapter retains an owned size exception through 2026-09-30 pending post-#8752 locator migration. #8800 remains open because obsolete 93/830 checkpoints do not satisfy the current source and plan. |
 | 2026-08-24 | 1.0.584 | Kept the Pendulum Simulator module version probe independent of GUI initialization. Runtime imports of diagnostics and `MainWindow` now occur only on docked or standalone GUI launch, so `python -m shared.python.pendulum_simulator --version` does not transitively load MuJoCo/OpenGL on headless systems. A subprocess regression deliberately blocks `gui.main_window` and requires the version command to succeed; normal launcher behavior remains covered on Python 3.11 and 3.13. |
 | 2026-08-24 | 1.0.583 | Added the #8358 immutable Tools variation-consumer boundary. UpstreamDrift now delegates deterministic sampling, canonical JSON/CSV/HDF5 persistence, scalar and noncausal rank/OAT summaries, common-grid dispersion, and quiet-zone mathematics to protected Tools commit `17474249b9267d0e73a779c1d72f231e7b8de39c`. Host-owned adapters retain complete typed hit, no-impact, numerical-failure, and partial-trace rows across serial and batched execution; analytical double-pendulum and articulated MuJoCo mappings preserve stable marker, frame, unit, plan, seed, model, source, and bilateral shoulder/wrist allocation evidence. Cross-engine ranking fails closed on semantic or tolerance mismatch, and current architecture budgets pass without exceptions. This is reusable model evidence, not participant or coaching validation. |
 | 2026-08-24 | 1.0.582 | Added issue #8918's executable numeric-claim authority. All 380 numeric literals across 124 of the 303 material claims are bound to exact statement digests, JSON Pointers, transforms, scopes, and tolerances. The audit distinguishes 172 local JSON values, 144 registered values not independently recomputed, 57 externally reported values, and seven protocol or notation values. Representative planar, spatial, articulated-shaft, and finite-ground headlines are recomputed from committed raw arrays; a cross-engine control must remain close but nonidentical. Claim integrity and the 600-artifact computational release fail closed on numeric drift without promoting pointer agreement to physical or human validation. |

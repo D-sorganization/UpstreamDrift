@@ -46,7 +46,7 @@ REVIEWED_POINTER_OVERRIDES = {
         ),
         "json_pointer": "/rows/66/horizon_s",
         "scale": 1000.0,
-    }
+    },
 }
 
 
@@ -113,9 +113,60 @@ def _override_entry(
         "evidence_scope": "local_json_value",
         "scale": override["scale"],
         "offset": 0.0,
-        "atol": tolerance,
+        "atol": override.get("atol", tolerance),
         "rtol": 0.0,
     }
+
+
+def _reviewed_numeric_authority() -> dict[
+    tuple[str, str, str], tuple[dict[str, Any], dict[str, Any] | None]
+]:
+    """Load protected-review entries keyed by claim, statement, and literal."""
+
+    if not CONTRACT_PATH.is_file() or not REPORTED_PATH.is_file():
+        return {}
+    contracts = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
+    reported = json.loads(REPORTED_PATH.read_text(encoding="utf-8"))
+    authority = {}
+    for contract in contracts.get("claims", []):
+        claim_id = str(contract.get("claim_id", ""))
+        statement_sha256 = str(contract.get("statement_sha256", ""))
+        for entry in contract.get("numeric_evidence", []):
+            retained = dict(entry)
+            record = None
+            if retained.get("artifact") == REPORTED_REL:
+                parts = str(retained.get("json_pointer", "")).strip("/").split("/")
+                if len(parts) != 4 or parts[:2] != ["claims", claim_id]:
+                    raise ValueError(
+                        f"{claim_id}: reviewed reported pointer is invalid"
+                    )
+                record = dict(reported["claims"][claim_id][int(parts[2])])
+            key = (claim_id, statement_sha256, str(retained.get("literal_id", "")))
+            authority[key] = (retained, record)
+    return authority
+
+
+def _retain_reviewed_entry(
+    *,
+    claim: dict[str, Any],
+    statement_sha256: str,
+    literal: dict[str, Any],
+    authority: dict[tuple[str, str, str], tuple[dict[str, Any], dict[str, Any] | None]],
+    reported: dict[str, list[dict[str, Any]]],
+) -> dict[str, Any] | None:
+    key = (claim["claim_id"], statement_sha256, str(literal["literal_id"]))
+    reviewed = authority.get(key)
+    if reviewed is None:
+        return None
+    entry, record = reviewed
+    retained = dict(entry)
+    if record is not None:
+        records = reported.setdefault(claim["claim_id"], [])
+        records.append(dict(record))
+        retained["json_pointer"] = (
+            f"/claims/{claim['claim_id']}/{len(records) - 1}/value"
+        )
+    return retained
 
 
 def _local_numeric_entry(
@@ -240,8 +291,12 @@ def _build_claim_contract(
     claim: dict[str, Any],
     root: Path,
     reported: dict[str, list[dict[str, Any]]],
+    reviewed_authority: dict[
+        tuple[str, str, str], tuple[dict[str, Any], dict[str, Any] | None]
+    ],
 ) -> dict[str, Any] | None:
     statement = claim["statement"]
+    statement_sha256 = statement_digest(statement)
     literals = extract_numeric_literals(statement)
     literal_matches = list(NUMERIC_LITERAL_PATTERN.finditer(statement))
     if len(literals) != len(literal_matches):
@@ -253,7 +308,15 @@ def _build_claim_contract(
     entries: list[dict[str, Any]] = []
     for literal, literal_match in zip(literals, literal_matches, strict=True):
         tolerance = _rounding_tolerance(str(literal["text"]))
-        entry = _override_entry(claim["claim_id"], literal, tolerance)
+        entry = _retain_reviewed_entry(
+            claim=claim,
+            statement_sha256=statement_sha256,
+            literal=literal,
+            authority=reviewed_authority,
+            reported=reported,
+        )
+        if entry is None:
+            entry = _override_entry(claim["claim_id"], literal, tolerance)
         if entry is None:
             entry = _local_numeric_entry(
                 literal=literal,
@@ -274,7 +337,7 @@ def _build_claim_contract(
         entries.append(entry)
     contract: dict[str, Any] = {
         "claim_id": claim["claim_id"],
-        "statement_sha256": statement_digest(statement),
+        "statement_sha256": statement_sha256,
         "numeric_evidence": entries,
     }
     comparison = _comparison_contract(claim["claim_id"])
@@ -285,10 +348,11 @@ def _build_claim_contract(
 
 def build_scaffold(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
     registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
+    reviewed_authority = _reviewed_numeric_authority()
     contracts: list[dict[str, Any]] = []
     reported: dict[str, list[dict[str, Any]]] = {}
     for claim in registry["claims"]:
-        contract = _build_claim_contract(claim, root, reported)
+        contract = _build_claim_contract(claim, root, reported, reviewed_authority)
         if contract is not None:
             contracts.append(contract)
     contract_document = {

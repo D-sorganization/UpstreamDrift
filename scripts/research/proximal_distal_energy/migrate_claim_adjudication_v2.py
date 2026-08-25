@@ -1,10 +1,10 @@
 """Apply the explicitly reviewed v2 outcome census to the frozen claim snapshot.
 
 This migration deliberately does not infer scientific outcomes from
-``published_status`` or ``audit_status``.  It is locked to the exact paper
-digest and claim count reviewed for issue #8724.  A later paper revision or
-claim split must receive a new explicit outcome review instead of inheriting a
-default.
+``published_status`` or ``audit_status``. It is locked to the exact paper
+digest and claim count reviewed through the #8752 terminal reconciliation. A
+later paper revision or claim split must receive a new explicit outcome review
+instead of inheriting a default.
 """
 
 from __future__ import annotations
@@ -22,10 +22,10 @@ PRIOR_REVIEWED_SOURCE_DIGEST = (
     "7407e8f00842ecdf95769d65ac7d2fe3f8d495cb0d11d405640e7582e6b8560a"
 )
 REVIEWED_SOURCE_DIGEST = (
-    "ea406841c4a500dcab41d3b4ed1d7763ee0a2f9cf559d15041faa4036b31dfe7"
+    "80550dfc977b9519256e99c8e74bc4a93fb043bc57588466a6e7e60cc1cf7ea7"
 )
-REVIEWED_CLAIM_COUNT = 303
-REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
+REVIEWED_CLAIM_COUNT = 313
+LEGACY_REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
     {
         "PD-CAND-9345c1e6be2ef186",
         "PD-CAND-aeecc7c4cec6b96f",
@@ -51,8 +51,17 @@ REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
         "PD-CAND-b5b2526e23b77d70",
     }
 )
+REVIEWER_PROJECTION_CANDIDATE_IDS = LEGACY_REVIEWER_PROJECTION_CANDIDATE_IDS - {
+    "PD-CAND-0acfb3375ef769f8",
+    "PD-CAND-87d26eacc282b21c",
+    "PD-CAND-9519d7e6dfb308ef",
+    "PD-CAND-aeecc7c4cec6b96f",
+    "PD-CAND-b2e277593764ee20",
+    "PD-CAND-f1e25f4b524e7a06",
+    "PD-CAND-f5697c26aed70275",
+}
 PRIOR_REVIEWER_PROJECTION_CANDIDATE_IDS = (
-    REVIEWER_PROJECTION_CANDIDATE_IDS - {"PD-CAND-b2e277593764ee20"}
+    LEGACY_REVIEWER_PROJECTION_CANDIDATE_IDS - {"PD-CAND-b2e277593764ee20"}
 ) | {"PD-CAND-bb48a75174a745ce"}
 
 # These sets are the exhaustive finding-level review authority for the locked
@@ -343,6 +352,16 @@ SUPPORTED_CLAIM_IDS = frozenset(
         "PD-CLAIM-302",
         "PD-CLAIM-303",
         "PD-CLAIM-304",
+        "PD-CLAIM-305",
+        "PD-CLAIM-306",
+        "PD-CLAIM-307",
+        "PD-CLAIM-308",
+        "PD-CLAIM-309",
+        "PD-CLAIM-310",
+        "PD-CLAIM-311",
+        "PD-CLAIM-312",
+        "PD-CLAIM-313",
+        "PD-CLAIM-314",
     }
 )
 UNTESTED_CLAIM_IDS = frozenset(
@@ -414,7 +433,7 @@ def _reconcile_reviewer_projection(
     registry["candidate_reviews"] = list(reviews.values())
     registry["paper"]["source_digest"] = REVIEWED_SOURCE_DIGEST
     registry["audit_scope"]["current_scope"] = (
-        "The complete 1100-candidate paper inventory is adjudicated. Repeated "
+        "The complete 1126-candidate paper inventory is adjudicated. Repeated "
         "methods, summary, limitation, provenance, and model-tier passages inherit "
         "the primary claim boundaries; generated reviewer tables and editorial "
         "anchors are explicitly classified as nonclaims."

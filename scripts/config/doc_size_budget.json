@@ -24,6 +24,12 @@
       "owner": "@docs-team",
       "reason": "Expanded functional test matrix tracked by consolidation commit #8129; split or archive after the backlog recovery window.",
       "expires_on": "2026-09-30"
+    },
+    {
+      "path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd",
+      "owner": "@research",
+      "reason": "Canonical claim-locator source is 323 bytes over the default budget; defer decomposition until the terminal #8752 claim projection is merged and immutable locators can be migrated deliberately.",
+      "expires_on": "2026-09-30"
     }
   ]
 }
