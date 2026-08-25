@@ -1,0 +1,1163 @@
+{
+  "inference_boundary": "This contract does not establish a human movement mechanism, participant validity, controller optimality, or coaching strategy; it registers model topology, implemented evidence, and explicit unavailable states.",
+  "issue": "https://github.com/D-sorganization/UpstreamDrift/issues/9027",
+  "numerical_tolerances": {
+    "constraint_residual_absolute": 1e-8,
+    "event_time_absolute_s": 1e-6,
+    "rank_relative": 1e-10
+  },
+  "schema_version": "proximal-distal-hybrid-system/v1",
+  "tiers": [
+    {
+      "actuator_dynamics": [
+        {
+          "actuator_id": "ideal_joint_torque",
+          "availability": "implemented",
+          "delay_s": 0.0,
+          "differential_law": "generalized torque equals the registered command without an actuator state",
+          "reason": "",
+          "saturation": "bounded by the experiment manifest",
+          "state_block_ids": []
+        }
+      ],
+      "algebraic_constraints": [
+        {
+          "availability": "implemented",
+          "constraint_id": "fixed_hub",
+          "expression": "hub position and orientation are constant",
+          "kind": "holonomic_equality",
+          "reason": "",
+          "residual_unit": "m"
+        }
+      ],
+      "authority_status": "implemented",
+      "comparison_blockers": [
+        "No anatomical arms, bilateral contact allocation, shaft bending, ground contact, or physiological actuator dynamics are represented."
+      ],
+      "comparison_eligibility": "eligible_for_declared_diagnostic_only",
+      "controls": [
+        {
+          "actuator_id": "ideal_joint_torque",
+          "availability": "implemented",
+          "bounds": [-250.0, 250.0],
+          "control_id": "joint_torque_command",
+          "reason": "",
+          "unit": "N*m",
+          "variable": "tau_shoulder,tau_wrist"
+        }
+      ],
+      "falsifiers": [
+        "Reject an analytical attribution if the reconstructed equation of motion or work-energy ledger exceeds its registered residual tolerance.",
+        "Reject transport to a higher tier when a matched-state countermodel reverses the claimed sign or ordering."
+      ],
+      "guards": [
+        {
+          "availability": "implemented",
+          "direction": "increasing_time",
+          "guard_id": "delivery_window_end",
+          "reason": "",
+          "source_mode": "preimpact_swing",
+          "surface": "t - t_delivery = 0",
+          "target_mode": "terminal_observation",
+          "uncertainty_id": "delivery_time_uncertainty"
+        }
+      ],
+      "impacts": [
+        {
+          "availability": "not_applicable",
+          "energy_accounting": "terminal preimpact state only",
+          "guard_id": null,
+          "impact_id": "club_ball_impact",
+          "impulse_law": "outside this model tier",
+          "reason": "The analytical attribution ends before club-ball impact."
+        }
+      ],
+      "limitations": [
+        "Pointwise force and drift decomposition is not forward persistence.",
+        "A fixed hub and two generalized torques cannot identify biological effort or bilateral hand forces."
+      ],
+      "modes": [
+        {
+          "availability": "implemented",
+          "contact_state": "not represented",
+          "invariant": "t < t_delivery",
+          "mode_id": "preimpact_swing",
+          "reason": ""
+        },
+        {
+          "availability": "implemented",
+          "contact_state": "not represented",
+          "invariant": "t >= t_delivery",
+          "mode_id": "terminal_observation",
+          "reason": ""
+        }
+      ],
+      "observables": [
+        {
+          "availability": "implemented",
+          "frame": "planar_inertial_frame",
+          "observable_id": "clubhead_speed",
+          "quantity": "terminal clubhead linear speed",
+          "reason": "",
+          "unit": "m/s"
+        },
+        {
+          "availability": "implemented",
+          "frame": "generalized_coordinate_basis",
+          "observable_id": "interaction_power",
+          "quantity": "signed interaction-force power",
+          "reason": "",
+          "unit": "W"
+        }
+      ],
+      "resets": [
+        {
+          "availability": "implemented",
+          "energy_accounting": "no impulse; terminal observation copies the pre-guard state",
+          "guard_id": "delivery_window_end",
+          "reason": "",
+          "reset_id": "terminal_identity_reset",
+          "state_map": "x_plus = x_minus"
+        }
+      ],
+      "source_paths": [
+        "scripts/research/proximal_distal_energy/double_pendulum_attribution.py",
+        "scripts/research/proximal_distal_energy/swing_model.py"
+      ],
+      "state_blocks": [
+        {
+          "availability": "implemented",
+          "block_id": "link_configuration",
+          "frame": "planar_inertial_frame",
+          "reason": "",
+          "unit": "rad",
+          "variables": ["theta_proximal", "theta_distal"]
+        },
+        {
+          "availability": "implemented",
+          "block_id": "link_velocity",
+          "frame": "planar_inertial_frame",
+          "reason": "",
+          "unit": "rad/s",
+          "variables": ["omega_proximal", "omega_distal"]
+        }
+      ],
+      "tier_id": "analytical_double_pendulum",
+      "title": "Analytical Double Pendulum",
+      "uncertain_event_surfaces": [
+        {
+          "availability": "implemented",
+          "bounds": [-0.002, 0.002],
+          "distribution_status": "engineering_bound_not_population_estimate",
+          "guard_id": "delivery_window_end",
+          "parameterization": "additive delivery-time offset",
+          "reason": "",
+          "uncertainty_id": "delivery_time_uncertainty"
+        }
+      ]
+    },
+    {
+      "actuator_dynamics": [
+        {
+          "actuator_id": "bilateral_ideal_torque",
+          "availability": "implemented",
+          "delay_s": 0.0,
+          "differential_law": "shoulder and wrist commands enter the constrained equations directly",
+          "reason": "",
+          "saturation": "registered per-joint command bounds",
+          "state_block_ids": []
+        }
+      ],
+      "algebraic_constraints": [
+        {
+          "availability": "implemented",
+          "constraint_id": "two_hand_closure",
+          "expression": "lead and trail hand attachment points coincide with their club grip points",
+          "kind": "holonomic_equality",
+          "reason": "",
+          "residual_unit": "m"
+        }
+      ],
+      "authority_status": "implemented",
+      "comparison_blockers": [
+        "The planar rigid-grip closure does not identify internal bilateral allocation from the net club wrench.",
+        "Contact opening, anatomical scapular motion, and physiological activation are not calibrated."
+      ],
+      "comparison_eligibility": "eligible_for_declared_forward_comparison",
+      "controls": [
+        {
+          "actuator_id": "bilateral_ideal_torque",
+          "availability": "implemented",
+          "bounds": [-300.0, 300.0],
+          "control_id": "arm_wrist_torque_allocation",
+          "reason": "",
+          "unit": "N*m",
+          "variable": "lead_arm,trail_arm,lead_wrist,trail_wrist commands"
+        }
+      ],
+      "falsifiers": [
+        "Reject a contact-force mechanism if same-state zero-command and moment-arm reversal controls do not preserve the registered sign changes.",
+        "Reject bilateral allocation inference from kinematics alone because the constraint map has an internal-force null space."
+      ],
+      "guards": [
+        {
+          "availability": "partial",
+          "direction": "opening",
+          "guard_id": "rigid_closure_loss",
+          "reason": "The rigid-closure reference diagnoses separation but does not execute a calibrated unilateral contact transition.",
+          "source_mode": "closed_two_hand_contact",
+          "surface": "minimum signed grip separation = 0",
+          "target_mode": "open_contact_unexecuted",
+          "uncertainty_id": "closure_threshold_uncertainty"
+        }
+      ],
+      "impacts": [
+        {
+          "availability": "not_applicable",
+          "energy_accounting": "preimpact delivery only",
+          "guard_id": null,
+          "impact_id": "club_ball_impact",
+          "impulse_law": "outside this model tier",
+          "reason": "The two-arm study terminates before club-ball impact."
+        }
+      ],
+      "limitations": [
+        "Constraint reactions are model-resolved interface loads, not measured hand forces.",
+        "A negative net club couple does not identify which anatomical actuator produced it."
+      ],
+      "modes": [
+        {
+          "availability": "implemented",
+          "contact_state": "bilateral rigid closure",
+          "invariant": "closure residual remains inside tolerance",
+          "mode_id": "closed_two_hand_contact",
+          "reason": ""
+        },
+        {
+          "availability": "unavailable",
+          "contact_state": "open",
+          "invariant": "signed separation is positive",
+          "mode_id": "open_contact_unexecuted",
+          "reason": "No calibrated unilateral open-contact evolution is implemented in this tier."
+        }
+      ],
+      "observables": [
+        {
+          "availability": "implemented",
+          "frame": "club_grip_frame",
+          "observable_id": "bilateral_contact_wrench",
+          "quantity": "lead and trail constraint reactions",
+          "reason": "",
+          "unit": "N,N*m"
+        },
+        {
+          "availability": "implemented",
+          "frame": "club_center_of_mass_frame",
+          "observable_id": "net_club_couple",
+          "quantity": "signed force-generated club couple",
+          "reason": "",
+          "unit": "N*m"
+        }
+      ],
+      "resets": [
+        {
+          "availability": "unavailable",
+          "energy_accounting": "must retain separation work and any contact impulse",
+          "guard_id": "rigid_closure_loss",
+          "reason": "The rigid reference cannot reset into an uncalibrated open-contact law.",
+          "reset_id": "closure_to_open_reset",
+          "state_map": "unavailable"
+        }
+      ],
+      "source_paths": [
+        "scripts/research/proximal_distal_energy/forward_two_arm.py",
+        "scripts/research/proximal_distal_energy/two_arm_closed_loop.py"
+      ],
+      "state_blocks": [
+        {
+          "availability": "implemented",
+          "block_id": "arm_club_configuration",
+          "frame": "planar_inertial_frame",
+          "reason": "",
+          "unit": "rad",
+          "variables": ["lead_arm_angle", "trail_arm_angle", "club_angle"]
+        },
+        {
+          "availability": "implemented",
+          "block_id": "arm_club_velocity",
+          "frame": "planar_inertial_frame",
+          "reason": "",
+          "unit": "rad/s",
+          "variables": ["lead_arm_rate", "trail_arm_rate", "club_rate"]
+        }
+      ],
+      "tier_id": "forward_two_arm_planar",
+      "title": "Forward Two-Arm Constrained Planar Model",
+      "uncertain_event_surfaces": [
+        {
+          "availability": "partial",
+          "bounds": [-0.001, 0.001],
+          "distribution_status": "numerical_threshold_bound_not_measured_contact_uncertainty",
+          "guard_id": "rigid_closure_loss",
+          "parameterization": "additive signed-separation threshold",
+          "reason": "No measured grip-clearance distribution is available.",
+          "uncertainty_id": "closure_threshold_uncertainty"
+        }
+      ]
+    },
+    {
+      "actuator_dynamics": [
+        {
+          "actuator_id": "delayed_bounded_drive",
+          "availability": "implemented",
+          "delay_s": 0.012,
+          "differential_law": "first-order command activation with rate and torque-velocity limits",
+          "reason": "",
+          "saturation": "registered rate, magnitude, and torque-velocity bounds",
+          "state_block_ids": ["drive_activation"]
+        }
+      ],
+      "algebraic_constraints": [
+        {
+          "availability": "implemented",
+          "constraint_id": "moving_base_grip_attachment",
+          "expression": "bilateral grip compatibility with base translation and club torsion",
+          "kind": "holonomic_equality_with_compliance_state",
+          "reason": "",
+          "residual_unit": "m"
+        }
+      ],
+      "authority_status": "implemented",
+      "comparison_blockers": [
+        "Grip and shaft parameters are engineering surrogates rather than calibrated equipment or participant properties.",
+        "The base and club remain planar and the shaft uses lumped modes."
+      ],
+      "comparison_eligibility": "eligible_for_declared_forward_comparison",
+      "controls": [
+        {
+          "actuator_id": "delayed_bounded_drive",
+          "availability": "implemented",
+          "bounds": [-350.0, 350.0],
+          "control_id": "base_arm_wrist_drive",
+          "reason": "",
+          "unit": "N,N*m",
+          "variable": "base force and arm-wrist drive commands"
+        }
+      ],
+      "falsifiers": [
+        "Reject a compliant-transfer claim if refinement, work-energy closure, reversal, or zero-drive controls fail.",
+        "Reject robustness transport if the sign or ordering disappears across registered stiffness, damping, preload, delay, and load corners."
+      ],
+      "guards": [
+        {
+          "availability": "implemented",
+          "direction": "opening_or_reattachment",
+          "guard_id": "slack_contact_transition",
+          "reason": "",
+          "source_mode": "attached_compliant_contact",
+          "surface": "signed extension minus dead-zone threshold = 0",
+          "target_mode": "open_compliant_contact",
+          "uncertainty_id": "slack_threshold_uncertainty"
+        }
+      ],
+      "impacts": [
+        {
+          "availability": "not_applicable",
+          "energy_accounting": "preimpact compliant work and storage ledger",
+          "guard_id": null,
+          "impact_id": "club_ball_impact",
+          "impulse_law": "outside the registered delivery horizon",
+          "reason": "Impact is intentionally separated from the compliant delivery estimand."
+        }
+      ],
+      "limitations": [
+        "The activation state is a command surrogate, not a muscle-tendon state.",
+        "A lumped shaft mode cannot qualify distributed high-frequency bending or torsion."
+      ],
+      "modes": [
+        {
+          "availability": "implemented",
+          "contact_state": "bilateral compliant attachment",
+          "invariant": "signed extension remains at or above the attached threshold",
+          "mode_id": "attached_compliant_contact",
+          "reason": ""
+        },
+        {
+          "availability": "implemented",
+          "contact_state": "open dead zone",
+          "invariant": "signed extension remains below the attached threshold",
+          "mode_id": "open_compliant_contact",
+          "reason": ""
+        }
+      ],
+      "observables": [
+        {
+          "availability": "implemented",
+          "frame": "club_material_frame",
+          "observable_id": "shaft_storage_and_recoil",
+          "quantity": "modal elastic energy and signed recoil power",
+          "reason": "",
+          "unit": "J,W"
+        },
+        {
+          "availability": "implemented",
+          "frame": "base_inertial_frame",
+          "observable_id": "base_club_transfer",
+          "quantity": "base, grip, and club work channels",
+          "reason": "",
+          "unit": "J"
+        }
+      ],
+      "resets": [
+        {
+          "availability": "implemented",
+          "energy_accounting": "state is continuous; stored contact energy follows the declared dead-zone law",
+          "guard_id": "slack_contact_transition",
+          "reason": "",
+          "reset_id": "continuous_contact_mode_reset",
+          "state_map": "x_plus = x_minus with mode-dependent force law"
+        }
+      ],
+      "source_paths": [
+        "scripts/research/proximal_distal_energy/moving_base_flexible_club.py",
+        "scripts/research/proximal_distal_energy/moving_base_modal_shaft.py",
+        "scripts/research/proximal_distal_energy/typed_slack_dynamic.py"
+      ],
+      "state_blocks": [
+        {
+          "availability": "implemented",
+          "block_id": "base_arm_club_state",
+          "frame": "planar_inertial_frame",
+          "reason": "",
+          "unit": "mixed_SI",
+          "variables": [
+            "base_position",
+            "base_velocity",
+            "joint_angles",
+            "joint_rates",
+            "shaft_mode",
+            "shaft_mode_rate"
+          ]
+        },
+        {
+          "availability": "implemented",
+          "block_id": "drive_activation",
+          "frame": "actuator_coordinate_frame",
+          "reason": "",
+          "unit": "dimensionless",
+          "variables": ["normalized_drive_activation"]
+        }
+      ],
+      "tier_id": "moving_base_compliant_club",
+      "title": "Moving Base With Compliant Grip and Club",
+      "uncertain_event_surfaces": [
+        {
+          "availability": "implemented",
+          "bounds": [0.0, 0.004],
+          "distribution_status": "engineering_range_not_population_estimate",
+          "guard_id": "slack_contact_transition",
+          "parameterization": "dead-zone threshold in signed extension",
+          "reason": "",
+          "uncertainty_id": "slack_threshold_uncertainty"
+        }
+      ]
+    },
+    {
+      "actuator_dynamics": [
+        {
+          "actuator_id": "articulated_generalized_drive",
+          "availability": "partial",
+          "delay_s": 0.0,
+          "differential_law": "bounded generalized drive applied to the articulated tree",
+          "reason": "The drive is not a subject-specific muscle or neural controller.",
+          "saturation": "broad engineering joint limits and registered drive bounds",
+          "state_block_ids": []
+        }
+      ],
+      "algebraic_constraints": [
+        {
+          "availability": "implemented",
+          "constraint_id": "articulated_bilateral_closure",
+          "expression": "spatial lead and trail grip points close on the club with registered residuals",
+          "kind": "spatial_holonomic_equality",
+          "reason": "",
+          "residual_unit": "m"
+        },
+        {
+          "availability": "partial",
+          "constraint_id": "ground_support",
+          "expression": "reduced support force and free-moment compatibility",
+          "kind": "synthetic_bilateral_support",
+          "reason": "Calibrated unilateral foot contact and force-plate authority are unavailable.",
+          "residual_unit": "N,N*m"
+        }
+      ],
+      "authority_status": "partial",
+      "comparison_blockers": [
+        "The executed spatial models use reduced or synthetic contact rather than calibrated hands and unilateral feet.",
+        "The frozen structural propagation campaign and governed participant validation are incomplete."
+      ],
+      "comparison_eligibility": "eligible_for_declared_diagnostic_only",
+      "controls": [
+        {
+          "actuator_id": "articulated_generalized_drive",
+          "availability": "partial",
+          "bounds": [-500.0, 500.0],
+          "control_id": "articulated_joint_drive",
+          "reason": "Bounds are engineering envelopes, not subject-specific strength limits.",
+          "unit": "N*m",
+          "variable": "registered articulated generalized torques"
+        }
+      ],
+      "falsifiers": [
+        "Reject a spatial mechanism if native-engine inertia, bias, constraint, power, or energy observables disagree outside registered tolerances.",
+        "Reject transport across structure when retained failures or a registered corner reverses the finding."
+      ],
+      "guards": [
+        {
+          "availability": "partial",
+          "direction": "opening_or_reattachment",
+          "guard_id": "articulated_contact_transition",
+          "reason": "The transition is executed only for the registered synthetic contact laws.",
+          "source_mode": "articulated_attached_contact",
+          "surface": "minimum signed grip or support gap = 0",
+          "target_mode": "articulated_open_contact",
+          "uncertainty_id": "articulated_contact_surface_uncertainty"
+        }
+      ],
+      "impacts": [
+        {
+          "availability": "not_applicable",
+          "energy_accounting": "preimpact articulated work-energy ledger",
+          "guard_id": null,
+          "impact_id": "club_ball_impact",
+          "impulse_law": "not coupled in the registered articulated studies",
+          "reason": "Articulated delivery and impact remain separately qualified tiers."
+        }
+      ],
+      "limitations": [
+        "Constraint rank does not identify bilateral internal forces or biological co-contraction.",
+        "Reduced scapular, grip, shaft, and ground laws do not establish human anatomy or loading."
+      ],
+      "modes": [
+        {
+          "availability": "implemented",
+          "contact_state": "registered bilateral grip and reduced ground attachment",
+          "invariant": "all registered signed gaps remain closed",
+          "mode_id": "articulated_attached_contact",
+          "reason": ""
+        },
+        {
+          "availability": "partial",
+          "contact_state": "one or more synthetic contacts open",
+          "invariant": "at least one registered signed gap is positive",
+          "mode_id": "articulated_open_contact",
+          "reason": "Only bounded right-censored synthetic opening and reattachment probes are executed."
+        }
+      ],
+      "observables": [
+        {
+          "availability": "implemented",
+          "frame": "canonical_spatial_body_and_club_frames",
+          "observable_id": "spatial_wrench_power_energy",
+          "quantity": "bilateral wrenches, transported moments, power, work, and energy residual",
+          "reason": "",
+          "unit": "mixed_SI"
+        },
+        {
+          "availability": "partial",
+          "frame": "canonical_ground_frame",
+          "observable_id": "ground_free_moment",
+          "quantity": "support force, intrinsic free moment, and transported moment",
+          "reason": "Synthetic reduced support is not force-plate validation.",
+          "unit": "N,N*m"
+        }
+      ],
+      "resets": [
+        {
+          "availability": "partial",
+          "energy_accounting": "continuous compliant state with typed attachment mode and retained contact work",
+          "guard_id": "articulated_contact_transition",
+          "reason": "No calibrated distributed hand or unilateral foot impact reset is available.",
+          "reset_id": "articulated_contact_reset",
+          "state_map": "continuous state with mode-dependent synthetic contact law"
+        }
+      ],
+      "source_paths": [
+        "scripts/research/proximal_distal_energy/articulated_ground_forward.py",
+        "scripts/research/proximal_distal_energy/articulated_slack_forward.py",
+        "scripts/research/proximal_distal_energy/spatial_forward_study.py"
+      ],
+      "state_blocks": [
+        {
+          "availability": "implemented",
+          "block_id": "articulated_configuration_velocity",
+          "frame": "canonical_spatial_model_frame",
+          "reason": "",
+          "unit": "mixed_SI",
+          "variables": ["q", "v"]
+        },
+        {
+          "availability": "partial",
+          "block_id": "distributed_contact_and_shaft_state",
+          "frame": "grip_club_ground_material_frames",
+          "reason": "Distributed parameters remain synthetic and incompletely propagated across structural corners.",
+          "unit": "mixed_SI",
+          "variables": [
+            "grip_fiber_state",
+            "shaft_modal_state",
+            "support_state"
+          ]
+        }
+      ],
+      "tier_id": "articulated_spatial_whole_body",
+      "title": "Articulated Spatial Whole-Body Model",
+      "uncertain_event_surfaces": [
+        {
+          "availability": "partial",
+          "bounds": [-0.002, 0.002],
+          "distribution_status": "structural_engineering_bound_not_calibrated_measurement_error",
+          "guard_id": "articulated_contact_transition",
+          "parameterization": "additive signed-gap and contact-threshold perturbation",
+          "reason": "Measured contact geometry and pressure uncertainty are unavailable.",
+          "uncertainty_id": "articulated_contact_surface_uncertainty"
+        }
+      ]
+    },
+    {
+      "actuator_dynamics": [
+        {
+          "actuator_id": "activation_compliance_surrogate",
+          "availability": "partial",
+          "delay_s": 0.03,
+          "differential_law": "first-order activation and unilateral Kelvin-Voigt transmission surrogate",
+          "reason": "No subject-specific muscle paths, tendon slack lengths, force-length-velocity surfaces, or EMG calibration are represented.",
+          "saturation": "registered engineering activation and capacity bounds",
+          "state_block_ids": ["activation_and_compliance_state"]
+        }
+      ],
+      "algebraic_constraints": [
+        {
+          "availability": "partial",
+          "constraint_id": "moment_redundancy_map",
+          "expression": "joint moment equals moment-arm matrix times actuator force",
+          "kind": "underdetermined_linear_map",
+          "reason": "The executed bridge is a surrogate redundancy audit, not a subject-specific musculoskeletal model.",
+          "residual_unit": "N*m"
+        }
+      ],
+      "authority_status": "partial",
+      "comparison_blockers": [
+        "No subject-specific muscle geometry, tendon parameters, activation measurements, or physiological capacity calibration are available.",
+        "Net moments and kinematics cannot identify muscle force or co-contraction."
+      ],
+      "comparison_eligibility": "eligible_for_declared_diagnostic_only",
+      "controls": [
+        {
+          "actuator_id": "activation_compliance_surrogate",
+          "availability": "partial",
+          "bounds": [0.0, 1.0],
+          "control_id": "normalized_excitation",
+          "reason": "Excitation is a synthetic command channel, not measured neural drive.",
+          "unit": "dimensionless",
+          "variable": "normalized actuator excitation"
+        }
+      ],
+      "falsifiers": [
+        "Reject a claimed actuator allocation if an alternative null-space force pattern explains the same joint moments and observables.",
+        "Reject physiological transport if held-out EMG, ultrasound, wrench, or force observations disagree with the calibrated model."
+      ],
+      "guards": [
+        {
+          "availability": "partial",
+          "direction": "slack_to_taut_or_taut_to_slack",
+          "guard_id": "series_element_transition",
+          "reason": "The executed transition is a unilateral engineering surrogate, not identified tendon behavior.",
+          "source_mode": "surrogate_series_taut",
+          "surface": "series-element extension = 0",
+          "target_mode": "surrogate_series_slack",
+          "uncertainty_id": "series_slack_uncertainty"
+        }
+      ],
+      "impacts": [
+        {
+          "availability": "unavailable",
+          "energy_accounting": "would require muscle-tendon, joint, contact, shaft, and ball impulse accounting",
+          "guard_id": null,
+          "impact_id": "neuromusculoskeletal_impact",
+          "impulse_law": "unavailable",
+          "reason": "No neuromusculoskeletal forward model is coupled through club-ball impact."
+        }
+      ],
+      "limitations": [
+        "The bridge tests non-identifiability and surrogate transmission only.",
+        "Additional internal force can change stiffness, energy demand, and tissue load without changing the observed net moment."
+      ],
+      "modes": [
+        {
+          "availability": "partial",
+          "contact_state": "surrogate series element taut",
+          "invariant": "series extension is nonnegative",
+          "mode_id": "surrogate_series_taut",
+          "reason": "No subject-specific tendon state is represented."
+        },
+        {
+          "availability": "partial",
+          "contact_state": "surrogate series element slack",
+          "invariant": "series extension is negative",
+          "mode_id": "surrogate_series_slack",
+          "reason": "No subject-specific tendon state is represented."
+        }
+      ],
+      "observables": [
+        {
+          "availability": "partial",
+          "frame": "generalized_joint_basis",
+          "observable_id": "activation_force_moment_surrogates",
+          "quantity": "activation, internal-force nullity, joint moment, and transmission output",
+          "reason": "These are synthetic surrogate outputs, not participant observations.",
+          "unit": "mixed_SI"
+        }
+      ],
+      "resets": [
+        {
+          "availability": "partial",
+          "energy_accounting": "continuous surrogate state with unilateral stored-energy law",
+          "guard_id": "series_element_transition",
+          "reason": "The reset has not been calibrated to subject-specific tendon or tissue behavior.",
+          "reset_id": "series_mode_reset",
+          "state_map": "continuous activation and extension with mode-dependent force law"
+        }
+      ],
+      "source_paths": [
+        "scripts/research/proximal_distal_energy/advanced_biological_bridge.py",
+        "scripts/research/proximal_distal_energy/uncertainty_control.py"
+      ],
+      "state_blocks": [
+        {
+          "availability": "partial",
+          "block_id": "activation_and_compliance_state",
+          "frame": "surrogate_actuator_coordinates",
+          "reason": "The states are command-level surrogates rather than anatomical muscle-tendon states.",
+          "unit": "mixed_SI",
+          "variables": [
+            "activation",
+            "series_extension",
+            "series_extension_rate"
+          ]
+        }
+      ],
+      "tier_id": "neuromusculoskeletal",
+      "title": "Neuromusculoskeletal Model",
+      "uncertain_event_surfaces": [
+        {
+          "availability": "partial",
+          "bounds": [0.0, 0.01],
+          "distribution_status": "engineering_range_not_subject_identified",
+          "guard_id": "series_element_transition",
+          "parameterization": "series slack-length perturbation",
+          "reason": "No participant-specific slack-length posterior is available.",
+          "uncertainty_id": "series_slack_uncertainty"
+        }
+      ]
+    },
+    {
+      "actuator_dynamics": [
+        {
+          "actuator_id": "preimpact_state_input",
+          "availability": "not_applicable",
+          "delay_s": null,
+          "differential_law": "impact and flight consume a qualified preimpact state rather than a control command",
+          "reason": "This tier has no active human or club actuator after impact initialization.",
+          "saturation": "input contract bounds only",
+          "state_block_ids": []
+        }
+      ],
+      "algebraic_constraints": [
+        {
+          "availability": "implemented",
+          "constraint_id": "impact_impulse_momentum",
+          "expression": "normal and tangential impulse satisfy the selected impact model and friction bounds",
+          "kind": "impulsive_contact_constraint",
+          "reason": "",
+          "residual_unit": "N*s"
+        }
+      ],
+      "authority_status": "partial",
+      "comparison_blockers": [
+        "The impact and flight packages are not yet bound to every articulated delivery tier under one qualified experiment manifest.",
+        "Equipment and aerodynamic parameters require measured uncertainty and held-out launch-monitor validation."
+      ],
+      "comparison_eligibility": "eligible_for_declared_diagnostic_only",
+      "controls": [
+        {
+          "actuator_id": null,
+          "availability": "not_applicable",
+          "bounds": null,
+          "control_id": "postimpact_control",
+          "reason": "Ballistic flight has no commanded input in the registered package.",
+          "unit": "not_applicable",
+          "variable": "none"
+        }
+      ],
+      "falsifiers": [
+        "Reject coupling if impact impulse-momentum, energy-loss, or frame/unit contracts fail.",
+        "Reject flight transport if held-out launch-monitor trajectories fall outside registered uncertainty and discrepancy bounds."
+      ],
+      "guards": [
+        {
+          "availability": "implemented",
+          "direction": "closing_contact",
+          "guard_id": "club_ball_contact_onset",
+          "reason": "",
+          "source_mode": "preimpact_free_motion",
+          "surface": "signed club-face to ball separation = 0",
+          "target_mode": "postimpact_ballistic_flight",
+          "uncertainty_id": "impact_surface_uncertainty"
+        }
+      ],
+      "impacts": [
+        {
+          "availability": "implemented",
+          "energy_accounting": "pre/post translational and rotational energy with declared dissipative loss",
+          "guard_id": "club_ball_contact_onset",
+          "impact_id": "qualified_club_ball_impact",
+          "impulse_law": "selected compliant or impulse impact model with friction and restitution inputs",
+          "reason": ""
+        }
+      ],
+      "limitations": [
+        "A valid impact model does not validate the upstream swing mechanism that supplied its initial state.",
+        "Ball-flight agreement cannot identify bilateral hand forces or proximal-distal energy pathways."
+      ],
+      "modes": [
+        {
+          "availability": "implemented",
+          "contact_state": "club and ball separated",
+          "invariant": "signed face-ball separation is positive before closing",
+          "mode_id": "preimpact_free_motion",
+          "reason": ""
+        },
+        {
+          "availability": "implemented",
+          "contact_state": "ball separated after resolved impact",
+          "invariant": "ball follows the declared aerodynamic state equations",
+          "mode_id": "postimpact_ballistic_flight",
+          "reason": ""
+        }
+      ],
+      "observables": [
+        {
+          "availability": "implemented",
+          "frame": "impact_and_flight_frames",
+          "observable_id": "impact_launch_and_flight",
+          "quantity": "impulse, launch state, trajectory, landing, and dispersion outputs",
+          "reason": "",
+          "unit": "mixed_SI"
+        }
+      ],
+      "resets": [
+        {
+          "availability": "implemented",
+          "energy_accounting": "declared impulse and dissipative energy change map preimpact club-ball state to launch state",
+          "guard_id": "club_ball_contact_onset",
+          "reason": "",
+          "reset_id": "impact_launch_reset",
+          "state_map": "qualified impact solver maps preimpact state to ball launch and postimpact club state"
+        }
+      ],
+      "source_paths": [
+        "src/shared/python/physics/ball_flight_physics.py",
+        "src/shared/python/physics/impact_model/solver.py",
+        "src/shared/python/physics/swing_ball_flight_pipeline.py"
+      ],
+      "state_blocks": [
+        {
+          "availability": "implemented",
+          "block_id": "club_ball_preimpact_state",
+          "frame": "impact_frame",
+          "reason": "",
+          "unit": "mixed_SI",
+          "variables": ["club_pose", "club_twist", "ball_pose", "ball_twist"]
+        },
+        {
+          "availability": "implemented",
+          "block_id": "ball_flight_state",
+          "frame": "flight_frame",
+          "reason": "",
+          "unit": "mixed_SI",
+          "variables": ["ball_position", "ball_velocity", "ball_spin"]
+        }
+      ],
+      "tier_id": "impact_and_ball_flight",
+      "title": "Club-Ball Impact and Ball Flight",
+      "uncertain_event_surfaces": [
+        {
+          "availability": "partial",
+          "bounds": [-0.003, 0.003],
+          "distribution_status": "equipment_and_registration_bound_not_participant_posterior",
+          "guard_id": "club_ball_contact_onset",
+          "parameterization": "face-ball contact location and timing offset",
+          "reason": "Measured equipment and registration uncertainty are not yet propagated from all upstream tiers.",
+          "uncertainty_id": "impact_surface_uncertainty"
+        }
+      ]
+    },
+    {
+      "actuator_dynamics": [
+        {
+          "actuator_id": "participant_specific_actuator",
+          "availability": "unavailable",
+          "delay_s": null,
+          "differential_law": "unavailable",
+          "reason": "No governed participant-calibrated actuator posterior exists.",
+          "saturation": "unavailable",
+          "state_block_ids": []
+        }
+      ],
+      "algebraic_constraints": [
+        {
+          "availability": "unavailable",
+          "constraint_id": "participant_specific_contact",
+          "expression": "unavailable",
+          "kind": "unavailable",
+          "reason": "No governed participant-specific bilateral hand and foot contact calibration exists.",
+          "residual_unit": "mixed_SI"
+        }
+      ],
+      "authority_status": "unavailable",
+      "comparison_blockers": [
+        "No governed synchronized participant dataset supports calibration, posterior predictive checks, or participant-held-out evaluation."
+      ],
+      "comparison_eligibility": "unavailable",
+      "controls": [
+        {
+          "actuator_id": "participant_specific_actuator",
+          "availability": "unavailable",
+          "bounds": null,
+          "control_id": "participant_specific_control",
+          "reason": "No participant-specific actuator or policy has been identified.",
+          "unit": "mixed_SI",
+          "variable": "unavailable"
+        }
+      ],
+      "falsifiers": [
+        "Reject a digital twin if posterior predictive checks or participant-held-out outcomes fail the preregistered discrepancy bounds."
+      ],
+      "guards": [
+        {
+          "availability": "unavailable",
+          "direction": "unavailable",
+          "guard_id": "participant_event_transition",
+          "reason": "Participant-specific event surfaces have not been identified.",
+          "source_mode": "participant_preimpact_unavailable",
+          "surface": "unavailable",
+          "target_mode": "participant_delivery_unavailable",
+          "uncertainty_id": "participant_event_uncertainty"
+        }
+      ],
+      "impacts": [
+        {
+          "availability": "unavailable",
+          "energy_accounting": "unavailable",
+          "guard_id": "participant_event_transition",
+          "impact_id": "participant_specific_impact",
+          "impulse_law": "unavailable",
+          "reason": "No participant-specific impact parameter posterior exists."
+        }
+      ],
+      "limitations": [
+        "Simulation traces and motion-only datasets cannot substitute for participant-calibrated bilateral wrench and physiological evidence."
+      ],
+      "modes": [
+        {
+          "availability": "unavailable",
+          "contact_state": "unavailable",
+          "invariant": "unavailable",
+          "mode_id": "participant_preimpact_unavailable",
+          "reason": "No participant-calibrated hybrid state authority exists."
+        },
+        {
+          "availability": "unavailable",
+          "contact_state": "unavailable",
+          "invariant": "unavailable",
+          "mode_id": "participant_delivery_unavailable",
+          "reason": "No participant-calibrated hybrid state authority exists."
+        }
+      ],
+      "observables": [
+        {
+          "availability": "unavailable",
+          "frame": "participant_registered_frame",
+          "observable_id": "participant_predictive_outcomes",
+          "quantity": "held-out kinematics, kinetics, activation, impact, and ball outcomes",
+          "reason": "No qualifying governed participant dataset is registered.",
+          "unit": "mixed_SI"
+        }
+      ],
+      "resets": [
+        {
+          "availability": "unavailable",
+          "energy_accounting": "unavailable",
+          "guard_id": "participant_event_transition",
+          "reason": "No participant-specific reset law is identified.",
+          "reset_id": "participant_event_reset",
+          "state_map": "unavailable"
+        }
+      ],
+      "source_paths": [],
+      "state_blocks": [
+        {
+          "availability": "unavailable",
+          "block_id": "participant_latent_state",
+          "frame": "participant_registered_frame",
+          "reason": "No governed participant-calibrated state posterior exists.",
+          "unit": "mixed_SI",
+          "variables": ["unavailable_participant_state"]
+        }
+      ],
+      "tier_id": "participant_calibrated_digital_twin",
+      "title": "Participant-Calibrated Digital Twin",
+      "uncertain_event_surfaces": [
+        {
+          "availability": "unavailable",
+          "bounds": null,
+          "distribution_status": "unavailable",
+          "guard_id": "participant_event_transition",
+          "parameterization": "unavailable",
+          "reason": "No participant event-time or registration posterior exists.",
+          "uncertainty_id": "participant_event_uncertainty"
+        }
+      ]
+    },
+    {
+      "actuator_dynamics": [
+        {
+          "actuator_id": "human_actuator_observation",
+          "availability": "unavailable",
+          "delay_s": null,
+          "differential_law": "not inferred from observations alone",
+          "reason": "No governed synchronized human activation and bilateral-wrench dataset is available.",
+          "saturation": "unavailable",
+          "state_block_ids": []
+        }
+      ],
+      "algebraic_constraints": [
+        {
+          "availability": "unavailable",
+          "constraint_id": "measured_closed_chain_balance",
+          "expression": "unavailable",
+          "kind": "measured_inverse_dynamics_constraint",
+          "reason": "Required synchronized bilateral wrench, force-plate, motion, and uncertainty streams are absent.",
+          "residual_unit": "mixed_SI"
+        }
+      ],
+      "authority_status": "unavailable",
+      "comparison_blockers": [
+        "No qualifying governed human dataset contains synchronized bilateral six-axis grip wrenches with the required motion, ground, shaft, activation, and outcome streams."
+      ],
+      "comparison_eligibility": "unavailable",
+      "controls": [
+        {
+          "actuator_id": "human_actuator_observation",
+          "availability": "unavailable",
+          "bounds": null,
+          "control_id": "human_intervention_assignment",
+          "reason": "No preregistered governed intervention has been executed.",
+          "unit": "not_applicable",
+          "variable": "unavailable"
+        }
+      ],
+      "falsifiers": [
+        "Reject a promoted mechanism when participant-held-out bilateral wrench, power, event, or outcome observations contradict its preregistered prediction.",
+        "Retain null and adverse human results without substituting synthetic traces or post-hoc estimands."
+      ],
+      "guards": [
+        {
+          "availability": "unavailable",
+          "direction": "unavailable",
+          "guard_id": "measured_event_transition",
+          "reason": "No governed measured event authority is registered.",
+          "source_mode": "measured_swing_unavailable",
+          "surface": "unavailable",
+          "target_mode": "measured_outcome_unavailable",
+          "uncertainty_id": "measured_event_uncertainty"
+        }
+      ],
+      "impacts": [
+        {
+          "availability": "unavailable",
+          "energy_accounting": "unavailable",
+          "guard_id": "measured_event_transition",
+          "impact_id": "measured_club_ball_impact",
+          "impulse_law": "observed rather than assumed after qualification",
+          "reason": "No governed synchronized impact and launch authority is registered."
+        }
+      ],
+      "limitations": [
+        "Human validation is not executed; synthetic evidence and published aggregate curves are not substitutes.",
+        "Kinematic sequence alone cannot identify energy transfer, bilateral internal force, joint work, or control strategy."
+      ],
+      "modes": [
+        {
+          "availability": "unavailable",
+          "contact_state": "unavailable",
+          "invariant": "unavailable",
+          "mode_id": "measured_swing_unavailable",
+          "reason": "No governed synchronized human record is registered."
+        },
+        {
+          "availability": "unavailable",
+          "contact_state": "unavailable",
+          "invariant": "unavailable",
+          "mode_id": "measured_outcome_unavailable",
+          "reason": "No governed synchronized human record is registered."
+        }
+      ],
+      "observables": [
+        {
+          "availability": "unavailable",
+          "frame": "governed_measurement_frames",
+          "observable_id": "human_falsification_observables",
+          "quantity": "bilateral grip wrenches, motion, ground reaction, shaft state, EMG, impact, and launch outcomes",
+          "reason": "The required governed synchronized dataset is unavailable.",
+          "unit": "mixed_SI"
+        }
+      ],
+      "resets": [
+        {
+          "availability": "unavailable",
+          "energy_accounting": "unavailable",
+          "guard_id": "measured_event_transition",
+          "reason": "No measured hybrid reset authority is registered.",
+          "reset_id": "measured_event_reset",
+          "state_map": "unavailable"
+        }
+      ],
+      "source_paths": [],
+      "state_blocks": [
+        {
+          "availability": "unavailable",
+          "block_id": "governed_human_state",
+          "frame": "governed_measurement_frames",
+          "reason": "No qualifying synchronized governed human dataset is available.",
+          "unit": "mixed_SI",
+          "variables": ["unavailable_human_state"]
+        }
+      ],
+      "tier_id": "governed_human_validation",
+      "title": "Governed Human Validation",
+      "uncertain_event_surfaces": [
+        {
+          "availability": "unavailable",
+          "bounds": null,
+          "distribution_status": "unavailable",
+          "guard_id": "measured_event_transition",
+          "parameterization": "event and synchronization uncertainty from governed measurements",
+          "reason": "No qualifying measured event and synchronization record exists.",
+          "uncertainty_id": "measured_event_uncertainty"
+        }
+      ]
+    }
+  ]
+}

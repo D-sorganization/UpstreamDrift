@@ -1,6 +1,6 @@
 # Agent Handoff — UpstreamDrift
 
-Last updated: 2026-08-24
+Last updated: 2026-08-25
 
 This file records current operational state, not history. Git and GitHub retain
 history. Epic #8557 is the single proximal-to-distal completion authority.
@@ -12,7 +12,7 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   projection. Tools owns reusable consumers; do not copy its solver or UI
   implementations into this repository or `vendor/ud-tools`.
 - UpstreamDrift remote `main` is
-  `c6fc49a7c63549fa6b60afb43594d3c76a226d50`. The normalized-claim authority
+  `eb7076466152cbacd40a7f4d3fb9d92255d4ae43`. The normalized-claim authority
   from PR #9018 remains an ancestor; issue #8724 is closed.
 - The current computational publication is 239 pages with SHA-256
   `be85b7b62bba060a26ce3fea8355aa8b01dcf8c1b1ccf09304450898a4e5e78b`,
@@ -64,8 +64,8 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   evidence tier, source independence, model tier, unresolved replication, and
   claim-family source concentration. Model evidence is never promoted to human
   validation.
-- Deterministic release evidence covers 2,130 evidence references, 319 local
-  artifacts, 78 external URLs, and a 592-artifact release bundle. The merged
+- Deterministic release evidence covers 2,232 evidence references, 321 local
+  artifacts, 78 external URLs, and a 605-artifact release bundle. The merged
   head passed 63 focused tests plus standard, optional-stack, publication,
   security, title-case, file-size, architecture, Ruff, MyPy, and Bandit gates.
 
@@ -89,26 +89,26 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   2026-08-24 after a manual closure lacked a complete campaign, protected PR,
   or remote-main merge.
 - #8443, #8448, #8449, #8450, #8595, #8668, #8684, and #8796 remain open.
-- PR #9022 is merged as current remote-main commit `76bf6ab1d`. Tools PR #4674
+- PR #9039 is merged as current remote-main commit `eb7076466`. Tools PR #4674
   is merged at immutable commit
   `17474249b9267d0e73a779c1d72f231e7b8de39c`; this is the #8358 gitlink and
   canonical JSON/CSV/HDF5 analysis authority.
-- Active #8358 PR #9039 is on `feat/8358-tools-variation-adapter`, updated to
-  current `main`. Its Tools gateway, typed trial evidence, serial/batched
-  execution, analytical and articulated MuJoCo adapters, fail-closed
-  cross-engine comparison, lossless bundles, and canonical scalar, rank/OAT,
-  dispersion, and quiet-zone analysis are present. Protected head `1bdc73c60`
-  exposed a headless `--version` GUI-import failure after 11,922 other tests
-  passed; the current candidate defers GUI/diagnostics imports until launch and
-  adds a forced-import-block regression. All five launcher tests pass on Python
-  3.11 and 3.13; a new protected run is pending. Keep #8358 open because its
+- #8358's immutable Tools gateway, typed outcomes, serial/batched execution,
+  analytical and articulated adapters, lossless bundles, scalar/rank/OAT,
+  dispersion, and quiet-zone analysis are merged. Keep #8358 open because its
   broader UI, localized-perturbation, and presentation criteria remain unaudited.
+- #9027 is leased to Codex for its first bounded slice. The local
+  `research/9027-hybrid-system-contract` branch adds an executable eight-tier
+  hybrid topology authority; controller comparisons and diagnostic reports
+  remain future protected slices and no campaign or human analysis was run.
 - PR #9032 is open at `5edacb13c`; Standard CI passes, but optional-stack has
   a headless `DISPLAY` failure and human review remains absent.
-- Tools #4142 remains open until immutable UpstreamDrift consumption and
-  requirement-level R10–R15 qualification are complete.
-- AffineDrift #3930 remains downstream of the qualified UpstreamDrift release;
-  do not project a moving or partial campaign.
+- Tools #4142 remains open. PR #4685 is recovered on current Tools `main` at
+  `6bcd19d59`, retains the 21-verified/10-partial R10--R15 ledger and existing
+  auto-merge request, and is waiting on protected checks and human review.
+- AffineDrift PR #3942 is fully green at `093a6e907`, awaits human review, and
+  remains downstream of the qualified UpstreamDrift release; do not project a
+  moving or partial campaign.
 - #8963 architecture debt remains separate from the frozen campaign source.
   Do not merge or regenerate source-bound spatial evidence until campaign
   integration removes the source-lock conflict.
@@ -137,7 +137,9 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 ```powershell
 python -m scripts.research.proximal_distal_energy.claim_audit validate
 python -m scripts.research.proximal_distal_energy.claim_evidence_integrity validate
+python -m scripts.research.proximal_distal_energy.hybrid_system_contract validate
 python -m scripts.research.proximal_distal_energy.qualify_open_release validate
+python -m pytest -q tests/research/test_hybrid_system_contract.py
 python -m pytest -n 0 -q tests/unit/perturbation tests/shared_contracts/test_tools_vendoring.py tests/launchers/test_tools_vendor_authority.py
 python scripts/ci/check_architecture_budget.py
 python scripts/check_document_title_case.py --changed-from origin/main
