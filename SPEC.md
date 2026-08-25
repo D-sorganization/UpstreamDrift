@@ -2,6 +2,11 @@
 
 ## Current Scientific Audit State (2026-08-24)
 
+**Spec Version:** 1.0.1
+
+## Changelog
+- 1.0.1: ⚡ Bolt: Optimize Morris selection argmax by avoiding np.linalg.norm in `src/bunkershot3d/study/morris.py`
+
 Epic #8557 has completed the current narrative-candidate adjudication contract:
 1,100 reviewed candidates and 303 atomic claims. Issue #8724 adds an exhaustive,
 snapshot-locked four-way outcome authority: 283 supported at their declared
